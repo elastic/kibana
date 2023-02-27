@@ -15,13 +15,16 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { isEmpty, mapValues } from 'lodash';
-import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
-import { registerApmRuleTypes } from './routes/alerts/register_apm_rule_types';
+import {
+  registerApmRuleTypes,
+  apmRuleTypeAlertFieldMap,
+  APM_RULE_TYPE_ALERT_CONTEXT,
+} from './routes/alerts/register_apm_rule_types';
 import { registerFleetPolicyCallbacks } from './routes/fleet/register_fleet_policy_callbacks';
 import { createApmTelemetry } from './lib/apm_telemetry';
 import { APMEventClient } from './lib/helpers/create_es_client/create_apm_event_client';
@@ -46,14 +49,6 @@ import {
 } from './types';
 import { registerRoutes } from './routes/apm_routes/register_apm_server_routes';
 import { getGlobalApmServerRouteRepository } from './routes/apm_routes/get_global_apm_server_route_repository';
-import {
-  PROCESSOR_EVENT,
-  SERVICE_ENVIRONMENT,
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-  AGENT_NAME,
-  SERVICE_LANGUAGE_NAME,
-} from '../common/es_fields/apm';
 import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 import { scheduleSourceMapMigration } from './routes/source_maps/schedule_source_map_migration';
@@ -119,47 +114,13 @@ export class APMPlugin
     const { ruleDataService } = plugins.ruleRegistry;
     const ruleDataClient = ruleDataService.initializeIndex({
       feature: APM_SERVER_FEATURE_ID,
-      registrationContext: 'observability.apm',
+      registrationContext: APM_RULE_TYPE_ALERT_CONTEXT,
       dataset: Dataset.alerts,
       componentTemplateRefs: [],
       componentTemplates: [
         {
           name: 'mappings',
-          mappings: mappingFromFieldMap(
-            {
-              ...experimentalRuleFieldMap,
-              [SERVICE_NAME]: {
-                type: 'keyword',
-                required: false,
-              },
-              [SERVICE_ENVIRONMENT]: {
-                type: 'keyword',
-                required: false,
-              },
-              [TRANSACTION_TYPE]: {
-                type: 'keyword',
-                required: false,
-              },
-              [PROCESSOR_EVENT]: {
-                type: 'keyword',
-                required: false,
-              },
-              [AGENT_NAME]: {
-                type: 'keyword',
-                required: false,
-              },
-              [SERVICE_LANGUAGE_NAME]: {
-                type: 'keyword',
-                required: false,
-              },
-              labels: {
-                type: 'object',
-                dynamic: true,
-                required: false,
-              },
-            },
-            'strict'
-          ),
+          mappings: mappingFromFieldMap(apmRuleTypeAlertFieldMap, 'strict'),
         },
       ],
     });

@@ -30,24 +30,36 @@ describe('createResourceInstallationHelper', () => {
     jest.clearAllMocks();
   });
 
-  test(`should not call init function if readyToInitialize is false`, () => {
+  test(`should not call init function if readyToInitialize is false`, async () => {
     const helper = createResourceInstallationHelper(initFn);
 
     // Add two contexts that need to be initialized but don't call helper.setReadyToInitialize()
-    helper.add({ context: 'test1', fieldMap: { field: { type: 'keyword', required: false } } });
-    helper.add({ context: 'test2', fieldMap: { field: { type: 'keyword', required: false } } });
+    helper.add({
+      context: 'test1',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
+    helper.add({
+      context: 'test2',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
 
     expect(logger.info).not.toHaveBeenCalled();
-    const initializedContexts = helper.getInitializedContexts();
-    expect([...initializedContexts.keys()].length).toEqual(0);
+    expect(await helper.getInitializedContext('test1')).toBe(false);
+    expect(await helper.getInitializedContext('test2')).toBe(false);
   });
 
   test(`should call init function if readyToInitialize is set to true`, async () => {
     const helper = createResourceInstallationHelper(initFn);
 
     // Add two contexts that need to be initialized and then call helper.setReadyToInitialize()
-    helper.add({ context: 'test1', fieldMap: { field: { type: 'keyword', required: false } } });
-    helper.add({ context: 'test2', fieldMap: { field: { type: 'keyword', required: false } } });
+    helper.add({
+      context: 'test1',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
+    helper.add({
+      context: 'test2',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
 
     helper.setReadyToInitialize();
 
@@ -55,19 +67,22 @@ describe('createResourceInstallationHelper', () => {
     await new Promise((r) => setTimeout(r, 10));
 
     expect(logger.info).toHaveBeenCalledTimes(2);
-    const initializedContexts = helper.getInitializedContexts();
-    expect([...initializedContexts.keys()].length).toEqual(2);
-
-    expect(await initializedContexts.get('test1')).toEqual(true);
-    expect(await initializedContexts.get('test2')).toEqual(true);
+    expect(await helper.getInitializedContext('test1')).toBe(true);
+    expect(await helper.getInitializedContext('test2')).toBe(true);
   });
 
   test(`should install resources for contexts added after readyToInitialize is called`, async () => {
     const helper = createResourceInstallationHelper(initFnWithDelay);
 
     // Add two contexts that need to be initialized
-    helper.add({ context: 'test1', fieldMap: { field: { type: 'keyword', required: false } } });
-    helper.add({ context: 'test2', fieldMap: { field: { type: 'keyword', required: false } } });
+    helper.add({
+      context: 'test1',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
+    helper.add({
+      context: 'test2',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
 
     // Start processing the queued contexts
     helper.setReadyToInitialize();
@@ -76,18 +91,18 @@ describe('createResourceInstallationHelper', () => {
     await new Promise((r) => setTimeout(r, 10));
 
     // Add another context to process
-    helper.add({ context: 'test3', fieldMap: { field: { type: 'keyword', required: false } } });
+    helper.add({
+      context: 'test3',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
 
     // 3 contexts with delay will take 150
     await new Promise((r) => setTimeout(r, 10));
 
     expect(logger.info).toHaveBeenCalledTimes(3);
-    const initializedContexts = helper.getInitializedContexts();
-    expect([...initializedContexts.keys()].length).toEqual(3);
-
-    expect(await initializedContexts.get('test1')).toEqual(true);
-    expect(await initializedContexts.get('test2')).toEqual(true);
-    expect(await initializedContexts.get('test3')).toEqual(true);
+    expect(await helper.getInitializedContext('test1')).toBe(true);
+    expect(await helper.getInitializedContext('test2')).toBe(true);
+    expect(await helper.getInitializedContext('test3')).toBe(true);
   });
 
   test(`should install resources for contexts added after initial processing loop has run`, async () => {
@@ -100,20 +115,18 @@ describe('createResourceInstallationHelper', () => {
     await new Promise((r) => setTimeout(r, 10));
 
     expect(logger.info).not.toHaveBeenCalled();
-    let initializedContexts = helper.getInitializedContexts();
-    expect([...initializedContexts.keys()].length).toEqual(0);
 
     // Add a context to process
-    helper.add({ context: 'test1', fieldMap: { field: { type: 'keyword', required: false } } });
+    helper.add({
+      context: 'test1',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
 
     // for the setImmediate
     await new Promise((r) => setTimeout(r, 10));
 
     expect(logger.info).toHaveBeenCalledTimes(1);
-    initializedContexts = helper.getInitializedContexts();
-    expect([...initializedContexts.keys()].length).toEqual(1);
-
-    expect(await initializedContexts.get('test1')).toEqual(true);
+    expect(await helper.getInitializedContext('test1')).toBe(true);
   });
 
   test(`should gracefully handle errors during initialization and set initialized flag to false`, async () => {
@@ -125,13 +138,14 @@ describe('createResourceInstallationHelper', () => {
     await new Promise((r) => setTimeout(r, 10));
 
     // Add a context to process
-    helper.add({ context: 'test1', fieldMap: { field: { type: 'keyword', required: false } } });
+    helper.add({
+      context: 'test1',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
 
     // for the setImmediate
     await new Promise((r) => setTimeout(r, 10));
 
-    const initializedContexts = helper.getInitializedContexts();
-    expect([...initializedContexts.keys()].length).toEqual(1);
-    expect(await initializedContexts.get('test1')).toEqual(false);
+    expect(await helper.getInitializedContext('test1')).toBe(false);
   });
 });

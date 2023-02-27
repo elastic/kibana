@@ -10,7 +10,7 @@ import { IRuleTypeAlerts } from '../types';
 export interface ResourceInstallationHelper {
   add: (context: IRuleTypeAlerts, timeoutMs?: number) => void;
   setReadyToInitialize: (timeoutMs?: number) => void;
-  getInitializedContexts: () => Map<string, Promise<boolean>>;
+  getInitializedContext: (context: string) => Promise<boolean>;
 }
 
 /**
@@ -74,8 +74,12 @@ export function createResourceInstallationHelper(
       readyToInitialize = true;
       startInitialization(timeoutMs);
     },
-    getInitializedContexts: () => {
-      return initializedContexts;
+    getInitializedContext: async (context: string): Promise<boolean> => {
+      if (initializedContexts.has(context)) {
+        return initializedContexts.get(context)!;
+      }
+
+      return Promise.resolve(false);
     },
   };
 }

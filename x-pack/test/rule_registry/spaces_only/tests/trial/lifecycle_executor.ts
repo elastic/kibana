@@ -74,7 +74,10 @@ export default function createLifecycleExecutorApiTest({ getService }: FtrProvid
         isWriteEnabled: true,
         isWriterCacheEnabled: false,
         disabledRegistrationContexts: [] as string[],
-        areFrameworkAlertsEnabled: false,
+        frameworkAlerts: {
+          enabled: () => false,
+          isContextInitialized: async () => false,
+        },
         pluginStop$,
       });
 

@@ -81,19 +81,21 @@ interface GetIndexTemplatePutBodyOpts {
   context?: string;
   useLegacyAlerts?: boolean;
   useEcs?: boolean;
+  secondaryAlias?: string;
 }
 const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
   const context = opts ? opts.context : undefined;
   const useLegacyAlerts = opts ? opts.useLegacyAlerts : undefined;
   const useEcs = opts ? opts.useEcs : undefined;
+  const secondaryAlias = opts ? opts.secondaryAlias : undefined;
   return {
-    name: `.alerts-${context ? context : 'test'}-default-template`,
+    name: `.alerts-${context ? context : 'test'}.alerts-default-index-template`,
     body: {
-      index_patterns: [`.alerts-${context ? context : 'test'}-default-*`],
+      index_patterns: [`.internal.alerts-${context ? context : 'test'}.alerts-default-*`],
       composed_of: [
-        `.alerts-${context ? context : 'test'}-mappings`,
-        ...(useLegacyAlerts ? ['.alerts-legacy-alert-mappings'] : []),
         ...(useEcs ? ['.alerts-ecs-mappings'] : []),
+        `.alerts-${context ? `${context}.alerts` : 'test.alerts'}-mappings`,
+        ...(useLegacyAlerts ? ['.alerts-legacy-alert-mappings'] : []),
         '.alerts-framework-mappings',
       ],
       template: {
@@ -102,16 +104,32 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
           hidden: true,
           'index.lifecycle': {
             name: '.alerts-ilm-policy',
-            rollover_alias: `.alerts-${context ? context : 'test'}-default`,
+            rollover_alias: `.alerts-${context ? context : 'test'}.alerts-default`,
           },
           'index.mapping.total_fields.limit': 2500,
         },
         mappings: {
           dynamic: false,
+          _meta: {
+            kibana: { version: '8.8.0' },
+            managed: true,
+            namespace: 'default',
+          },
         },
+        ...(secondaryAlias
+          ? {
+              aliases: {
+                [`${secondaryAlias}-default`]: {
+                  is_write_index: false,
+                },
+              },
+            }
+          : {}),
       },
       _meta: {
+        kibana: { version: '8.8.0' },
         managed: true,
+        namespace: 'default',
       },
     },
   };
@@ -119,12 +137,12 @@ const getIndexTemplatePutBody = (opts?: GetIndexTemplatePutBodyOpts) => {
 
 const TestRegistrationContext: IRuleTypeAlerts = {
   context: 'test',
-  fieldMap: { field: { type: 'keyword', required: false } },
+  mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
 };
 
 const AnotherRegistrationContext: IRuleTypeAlerts = {
   context: 'another',
-  fieldMap: { field: { type: 'keyword', required: false } },
+  mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
 };
 
 describe('Alerts Service', () => {
@@ -152,6 +170,7 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
+        kibanaVersion: '8.8.0',
       });
 
       alertsService.initialize();
@@ -175,6 +194,7 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
+        kibanaVersion: '8.8.0',
       });
 
       alertsService.initialize();
@@ -196,6 +216,7 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
+        kibanaVersion: '8.8.0',
       });
 
       alertsService.initialize();
@@ -274,6 +295,7 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
+        kibanaVersion: '8.8.0',
       });
 
       alertsService.initialize();
@@ -307,6 +329,7 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
+        kibanaVersion: '8.8.0',
       });
 
       // pre-register contexts so they get installed right after initialization
@@ -334,9 +357,9 @@ describe('Alerts Service', () => {
       const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
       expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
       const componentTemplate4 = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
-      expect(componentTemplate4.name).toEqual('.alerts-another-mappings');
+      expect(componentTemplate4.name).toEqual('.alerts-another.alerts-mappings');
       const componentTemplate5 = clusterClient.cluster.putComponentTemplate.mock.calls[4][0];
-      expect(componentTemplate5.name).toEqual('.alerts-test-mappings');
+      expect(componentTemplate5.name).toEqual('.alerts-test.alerts-mappings');
 
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenNthCalledWith(
@@ -350,30 +373,32 @@ describe('Alerts Service', () => {
 
       expect(clusterClient.indices.getAlias).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.getAlias).toHaveBeenNthCalledWith(1, {
-        index: '.alerts-another-default-*',
+        index: '.internal.alerts-another.alerts-default-*',
+        name: '.alerts-another.alerts-*',
       });
       expect(clusterClient.indices.getAlias).toHaveBeenNthCalledWith(2, {
-        index: '.alerts-test-default-*',
+        index: '.internal.alerts-test.alerts-default-*',
+        name: '.alerts-test.alerts-*',
       });
       expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
       expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(4);
       expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(4);
       expect(clusterClient.indices.create).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.create).toHaveBeenNthCalledWith(1, {
-        index: '.alerts-another-default-000001',
+        index: '.internal.alerts-another.alerts-default-000001',
         body: {
           aliases: {
-            '.alerts-another-default': {
+            '.alerts-another.alerts-default': {
               is_write_index: true,
             },
           },
         },
       });
       expect(clusterClient.indices.create).toHaveBeenNthCalledWith(2, {
-        index: '.alerts-test-default-000001',
+        index: '.internal.alerts-test.alerts-default-000001',
         body: {
           aliases: {
-            '.alerts-test-default': {
+            '.alerts-test.alerts-default': {
               is_write_index: true,
             },
           },
@@ -389,6 +414,7 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
+        kibanaVersion: '8.8.0',
       });
 
       alertsService.initialize();
@@ -413,22 +439,23 @@ describe('Alerts Service', () => {
       const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
       expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
       const componentTemplate4 = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
-      expect(componentTemplate4.name).toEqual('.alerts-test-mappings');
+      expect(componentTemplate4.name).toEqual('.alerts-test.alerts-mappings');
 
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
         getIndexTemplatePutBody()
       );
       expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
-        index: '.alerts-test-default-*',
+        index: '.internal.alerts-test.alerts-default-*',
+        name: '.alerts-test.alerts-*',
       });
       expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.create).toHaveBeenCalledWith({
-        index: '.alerts-test-default-000001',
+        index: '.internal.alerts-test.alerts-default-000001',
         body: {
           aliases: {
-            '.alerts-test-default': {
+            '.alerts-test.alerts-default': {
               is_write_index: true,
             },
           },
@@ -453,22 +480,23 @@ describe('Alerts Service', () => {
       const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
       expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
       const componentTemplate4 = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
-      expect(componentTemplate4.name).toEqual('.alerts-test-mappings');
+      expect(componentTemplate4.name).toEqual('.alerts-test.alerts-mappings');
 
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
         getIndexTemplatePutBody({ useLegacyAlerts: true })
       );
       expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
-        index: '.alerts-test-default-*',
+        index: '.internal.alerts-test.alerts-default-*',
+        name: '.alerts-test.alerts-*',
       });
       expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.create).toHaveBeenCalledWith({
-        index: '.alerts-test-default-000001',
+        index: '.internal.alerts-test.alerts-default-000001',
         body: {
           aliases: {
-            '.alerts-test-default': {
+            '.alerts-test.alerts-default': {
               is_write_index: true,
             },
           },
@@ -493,22 +521,64 @@ describe('Alerts Service', () => {
       const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
       expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
       const componentTemplate4 = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
-      expect(componentTemplate4.name).toEqual('.alerts-test-mappings');
+      expect(componentTemplate4.name).toEqual('.alerts-test.alerts-mappings');
 
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
         getIndexTemplatePutBody({ useEcs: true })
       );
       expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
-        index: '.alerts-test-default-*',
+        index: '.internal.alerts-test.alerts-default-*',
+        name: '.alerts-test.alerts-*',
       });
       expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.create).toHaveBeenCalledWith({
-        index: '.alerts-test-default-000001',
+        index: '.internal.alerts-test.alerts-default-000001',
         body: {
           aliases: {
-            '.alerts-test-default': {
+            '.alerts-test.alerts-default': {
+              is_write_index: true,
+            },
+          },
+        },
+      });
+    });
+
+    test('should correctly install resources for context when secondaryAlias is defined', async () => {
+      alertsService.register({ ...TestRegistrationContext, secondaryAlias: 'another.alias' });
+      await new Promise((r) => setTimeout(r, 50));
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+        true
+      );
+
+      expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
+
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+      const componentTemplate1 = clusterClient.cluster.putComponentTemplate.mock.calls[0][0];
+      expect(componentTemplate1.name).toEqual('.alerts-framework-mappings');
+      const componentTemplate2 = clusterClient.cluster.putComponentTemplate.mock.calls[1][0];
+      expect(componentTemplate2.name).toEqual('.alerts-legacy-alert-mappings');
+      const componentTemplate3 = clusterClient.cluster.putComponentTemplate.mock.calls[2][0];
+      expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
+      const componentTemplate4 = clusterClient.cluster.putComponentTemplate.mock.calls[3][0];
+      expect(componentTemplate4.name).toEqual('.alerts-test.alerts-mappings');
+
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        getIndexTemplatePutBody({ secondaryAlias: 'another.alias' })
+      );
+      expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
+        index: '.internal.alerts-test.alerts-default-*',
+        name: '.alerts-test.alerts-*',
+      });
+      expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
+      expect(clusterClient.indices.create).toHaveBeenCalledWith({
+        index: '.internal.alerts-test.alerts-default-000001',
+        body: {
+          aliases: {
+            '.alerts-test.alerts-default': {
               is_write_index: true,
             },
           },
@@ -519,7 +589,7 @@ describe('Alerts Service', () => {
     test('should not install component template for context if fieldMap is empty', async () => {
       alertsService.register({
         context: 'empty',
-        fieldMap: {},
+        mappings: { fieldMap: {} },
       });
       await new Promise((r) => setTimeout(r, 50));
       expect(await alertsService.isContextInitialized('empty')).toEqual(true);
@@ -535,9 +605,9 @@ describe('Alerts Service', () => {
       expect(componentTemplate3.name).toEqual('.alerts-ecs-mappings');
 
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith({
-        name: `.alerts-empty-default-template`,
+        name: `.alerts-empty.alerts-default-index-template`,
         body: {
-          index_patterns: [`.alerts-empty-default-*`],
+          index_patterns: [`.internal.alerts-empty.alerts-default-*`],
           composed_of: ['.alerts-framework-mappings'],
           template: {
             settings: {
@@ -545,30 +615,38 @@ describe('Alerts Service', () => {
               hidden: true,
               'index.lifecycle': {
                 name: '.alerts-ilm-policy',
-                rollover_alias: `.alerts-empty-default`,
+                rollover_alias: `.alerts-empty.alerts-default`,
               },
               'index.mapping.total_fields.limit': 2500,
             },
             mappings: {
+              _meta: {
+                kibana: { version: '8.8.0' },
+                managed: true,
+                namespace: 'default',
+              },
               dynamic: false,
             },
           },
           _meta: {
+            kibana: { version: '8.8.0' },
             managed: true,
+            namespace: 'default',
           },
         },
       });
       expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
-        index: '.alerts-empty-default-*',
+        index: '.internal.alerts-empty.alerts-default-*',
+        name: '.alerts-empty.alerts-*',
       });
       expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
       expect(clusterClient.indices.create).toHaveBeenCalledWith({
-        index: '.alerts-empty-default-000001',
+        index: '.internal.alerts-empty.alerts-default-000001',
         body: {
           aliases: {
-            '.alerts-empty-default': {
+            '.alerts-empty.alerts-default': {
               is_write_index: true,
             },
           },
@@ -591,10 +669,23 @@ describe('Alerts Service', () => {
       expect(() => {
         alertsService.register({
           ...TestRegistrationContext,
-          fieldMap: { anotherField: { type: 'keyword', required: false } },
+          mappings: { fieldMap: { anotherField: { type: 'keyword', required: false } } },
         });
       }).toThrowErrorMatchingInlineSnapshot(
-        `"test has already been registered with a different mapping"`
+        `"test has already been registered with different options"`
+      );
+    });
+
+    test('should throw error if context already exists and has been registered with a different options', async () => {
+      alertsService.register(TestRegistrationContext);
+      await new Promise((r) => setTimeout(r, 50));
+      expect(() => {
+        alertsService.register({
+          ...TestRegistrationContext,
+          useEcs: true,
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"test has already been registered with different options"`
       );
     });
 
@@ -608,7 +699,7 @@ describe('Alerts Service', () => {
       );
 
       expect(logger.error).toHaveBeenCalledWith(
-        `Failed to simulate index template mappings for .alerts-test-default-template; not applying mappings - fail`
+        `Failed to simulate index template mappings for .alerts-test.alerts-default-index-template; not applying mappings - fail`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -640,7 +731,7 @@ describe('Alerts Service', () => {
 
       expect(logger.error).toHaveBeenCalledWith(
         new Error(
-          `No mappings would be generated for .alerts-test-default-template, possibly due to failed/misconfigured bootstrapping`
+          `No mappings would be generated for .alerts-test.alerts-default-index-template, possibly due to failed/misconfigured bootstrapping`
         )
       );
 
@@ -665,7 +756,7 @@ describe('Alerts Service', () => {
       );
 
       expect(logger.error).toHaveBeenCalledWith(
-        `Error installing index template .alerts-test-default-template - fail`
+        `Error installing index template .alerts-test.alerts-default-index-template - fail`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -689,7 +780,7 @@ describe('Alerts Service', () => {
       );
 
       expect(logger.error).toHaveBeenCalledWith(
-        `Error fetching concrete indices for .alerts-test-default-* pattern - fail`
+        `Error fetching concrete indices for .internal.alerts-test.alerts-default-* pattern - fail`
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -815,9 +906,9 @@ describe('Alerts Service', () => {
 
     test('should log error and set initialized to false if concrete indices exist but none are write index', async () => {
       clusterClient.indices.getAlias.mockImplementationOnce(async () => ({
-        '.alerts-test-default-0001': {
+        '.internal.alerts-test.alerts-default-0001': {
           aliases: {
-            '.alerts-test-default': {
+            '.alerts-test.alerts-default': {
               is_write_index: false,
               is_hidden: true,
             },
@@ -837,7 +928,7 @@ describe('Alerts Service', () => {
 
       expect(logger.error).toHaveBeenCalledWith(
         new Error(
-          `Indices matching pattern .alerts-test-default-* exist but none are set as the write index for alias .alerts-test-default`
+          `Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default`
         )
       );
 
@@ -854,9 +945,9 @@ describe('Alerts Service', () => {
 
     test('does not create new index if concrete write index exists', async () => {
       clusterClient.indices.getAlias.mockImplementationOnce(async () => ({
-        '.alerts-test-default-0001': {
+        '.internal.alerts-test.alerts-default-0001': {
           aliases: {
-            '.alerts-test-default': {
+            '.alerts-test.alerts-default': {
               is_write_index: true,
               is_hidden: true,
             },
@@ -918,8 +1009,8 @@ describe('Alerts Service', () => {
       };
       clusterClient.indices.create.mockRejectedValueOnce(error);
       clusterClient.indices.get.mockImplementationOnce(async () => ({
-        '.alerts-test-default-000001': {
-          aliases: { '.alerts-test-default': { is_write_index: true } },
+        '.internal.alerts-test.alerts-default-000001': {
+          aliases: { '.alerts-test.alerts-default': { is_write_index: true } },
         },
       }));
 
@@ -954,8 +1045,8 @@ describe('Alerts Service', () => {
       };
       clusterClient.indices.create.mockRejectedValueOnce(error);
       clusterClient.indices.get.mockImplementationOnce(async () => ({
-        '.alerts-test-default-000001': {
-          aliases: { '.alerts-test-default': { is_write_index: false } },
+        '.internal.alerts-test.alerts-default-000001': {
+          aliases: { '.alerts-test.alerts-default': { is_write_index: false } },
         },
       }));
 
@@ -990,6 +1081,7 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
+        kibanaVersion: '8.8.0',
       });
 
       alertsService.initialize();
@@ -1007,6 +1099,7 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
+        kibanaVersion: '8.8.0',
       });
 
       alertsService.initialize();
@@ -1024,6 +1117,7 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
+        kibanaVersion: '8.8.0',
       });
 
       alertsService.initialize();
@@ -1047,6 +1141,7 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
+        kibanaVersion: '8.8.0',
       });
 
       alertsService.initialize();
@@ -1070,6 +1165,7 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
+        kibanaVersion: '8.8.0',
       });
 
       alertsService.initialize();
@@ -1093,6 +1189,7 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
+        kibanaVersion: '8.8.0',
       });
 
       alertsService.initialize();
@@ -1118,6 +1215,7 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
+        kibanaVersion: '8.8.0',
       });
 
       alertsService.initialize(10);
@@ -1133,6 +1231,7 @@ describe('Alerts Service', () => {
         logger,
         elasticsearchClientPromise: Promise.resolve(clusterClient),
         pluginStop$,
+        kibanaVersion: '8.8.0',
       });
 
       alertsService.initialize();

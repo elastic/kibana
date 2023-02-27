@@ -52,6 +52,7 @@ import {
   FIRED_ACTIONS_ID,
   WARNING_ACTIONS,
 } from './inventory_metric_threshold_executor';
+import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 
 const condition = schema.object({
   threshold: schema.arrayOf(schema.number()),
@@ -154,5 +155,6 @@ export async function registerMetricInventoryThresholdRuleType(
       ],
     },
     getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
+    alerts: MetricsRulesTypeAlertDefinition,
   });
 }

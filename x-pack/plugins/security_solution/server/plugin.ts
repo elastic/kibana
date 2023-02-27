@@ -23,7 +23,6 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
@@ -71,7 +70,6 @@ import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
 import { PolicyWatcher } from './endpoint/lib/policy/license_watch';
 import { migrateArtifactsToFleet } from './endpoint/lib/artifacts/migrate_artifacts_to_fleet';
-import aadFieldConversion from './lib/detection_engine/routes/index/signal_aad_mapping.json';
 import previewPolicy from './lib/detection_engine/routes/index/preview_policy.json';
 import { createRuleExecutionLogService } from './lib/detection_engine/rule_monitoring';
 import { getKibanaPrivilegesFeaturePrivileges, getCasesKibanaFeature } from './features';
@@ -106,6 +104,7 @@ import { setIsElasticCloudDeployment } from './lib/telemetry/helpers';
 import { artifactService } from './lib/telemetry/artifact';
 import { endpointFieldsProvider } from './search_strategy/endpoint_fields';
 import { ENDPOINT_FIELDS_SEARCH_STRATEGY } from '../common/endpoint/constants';
+import { getAliasesFieldMap } from './lib/detection_engine/rule_types/utils';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -216,15 +215,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       version: pluginContext.env.packageInfo.version,
     };
 
-    const aliasesFieldMap: FieldMap = {};
-    Object.entries(aadFieldConversion).forEach(([key, value]) => {
-      aliasesFieldMap[key] = {
-        type: 'alias',
-        required: false,
-        path: value,
-      };
-    });
-
     const ruleDataServiceOptions = {
       feature: SERVER_APP_ID,
       registrationContext: 'security',
@@ -234,7 +224,12 @@ export class Plugin implements ISecuritySolutionPlugin {
         {
           name: 'mappings',
           mappings: mappingFromFieldMap(
-            { ...technicalRuleFieldMap, ...alertsFieldMap, ...rulesFieldMap, ...aliasesFieldMap },
+            {
+              ...technicalRuleFieldMap,
+              ...alertsFieldMap,
+              ...rulesFieldMap,
+              ...getAliasesFieldMap(),
+            },
             false
           ),
         },

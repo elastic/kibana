@@ -111,9 +111,9 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
     });
 
     it('should install context specific alerts as data resources on startup', async () => {
-      const componentTemplateName = '.alerts-test.always-firing-mappings';
-      const indexTemplateName = '.alerts-test.always-firing-default-template';
-      const indexName = '.alerts-test.always-firing-default-000001';
+      const componentTemplateName = '.alerts-test.always-firing.alerts-mappings';
+      const indexTemplateName = '.alerts-test.always-firing.alerts-default-index-template';
+      const indexName = '.internal.alerts-test.always-firing.alerts-default-000001';
       const contextSpecificMappings = {
         instance_params_value: {
           type: 'boolean',
@@ -139,16 +139,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
         dynamic: 'strict',
         properties: contextSpecificMappings,
       });
-      expect(contextComponentTemplate.component_template.template.settings).to.eql({
-        index: {
-          number_of_shards: 1,
-          mapping: {
-            total_fields: {
-              limit: 1500,
-            },
-          },
-        },
-      });
+      expect(contextComponentTemplate.component_template.template.settings).to.eql({});
 
       const { index_templates: indexTemplates } = await es.indices.getIndexTemplate({
         name: indexTemplateName,
@@ -157,20 +148,25 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
       const contextIndexTemplate = indexTemplates[0];
       expect(contextIndexTemplate.name).to.eql(indexTemplateName);
       expect(contextIndexTemplate.index_template.index_patterns).to.eql([
-        '.alerts-test.always-firing-default-*',
+        '.internal.alerts-test.always-firing.alerts-default-*',
       ]);
       expect(contextIndexTemplate.index_template.composed_of).to.eql([
-        '.alerts-test.always-firing-mappings',
+        '.alerts-test.always-firing.alerts-mappings',
         '.alerts-framework-mappings',
       ]);
-      expect(contextIndexTemplate.index_template.template!.mappings).to.eql({
-        dynamic: false,
-      });
+      expect(contextIndexTemplate.index_template.template!.mappings?.dynamic).to.eql(false);
+      expect(contextIndexTemplate.index_template.template!.mappings?._meta?.managed).to.eql(true);
+      expect(contextIndexTemplate.index_template.template!.mappings?._meta?.namespace).to.eql(
+        'default'
+      );
+      expect(
+        contextIndexTemplate.index_template.template!.mappings?._meta?.kibana?.version
+      ).to.be.a('string');
       expect(contextIndexTemplate.index_template.template!.settings).to.eql({
         index: {
           lifecycle: {
             name: '.alerts-ilm-policy',
-            rollover_alias: '.alerts-test.always-firing-default',
+            rollover_alias: '.alerts-test.always-firing.alerts-default',
           },
           mapping: {
             total_fields: {
@@ -187,22 +183,22 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
       });
 
       expect(contextIndex[indexName].aliases).to.eql({
-        '.alerts-test.always-firing-default': {
+        '.alerts-test.always-firing.alerts-default': {
           is_write_index: true,
         },
       });
-
-      expect(contextIndex[indexName].mappings).to.eql({
-        dynamic: 'false',
-        properties: {
-          ...contextSpecificMappings,
-          ...frameworkMappings.properties,
-        },
+      expect(contextIndex[indexName].mappings?._meta?.managed).to.eql(true);
+      expect(contextIndex[indexName].mappings?._meta?.namespace).to.eql('default');
+      expect(contextIndex[indexName].mappings?._meta?.kibana?.version).to.be.a('string');
+      expect(contextIndex[indexName].mappings?.dynamic).to.eql('false');
+      expect(contextIndex[indexName].mappings?.properties).to.eql({
+        ...contextSpecificMappings,
+        ...frameworkMappings.properties,
       });
 
       expect(contextIndex[indexName].settings?.index?.lifecycle).to.eql({
         name: '.alerts-ilm-policy',
-        rollover_alias: '.alerts-test.always-firing-default',
+        rollover_alias: '.alerts-test.always-firing.alerts-default',
       });
 
       expect(contextIndex[indexName].settings?.index?.mapping).to.eql({
@@ -215,7 +211,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
       expect(contextIndex[indexName].settings?.index?.number_of_shards).to.eql(1);
       expect(contextIndex[indexName].settings?.index?.auto_expand_replicas).to.eql('0-1');
       expect(contextIndex[indexName].settings?.index?.provided_name).to.eql(
-        '.alerts-test.always-firing-default-000001'
+        '.internal.alerts-test.always-firing.alerts-default-000001'
       );
     });
   });

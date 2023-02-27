@@ -42,6 +42,7 @@ import {
   WARNING_ACTIONS,
   NO_DATA_ACTIONS,
 } from './metric_threshold_executor';
+import { MetricsRulesTypeAlertDefinition } from '../register_rule_types';
 
 type MetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS | typeof NO_DATA_ACTIONS
@@ -192,5 +193,6 @@ export async function registerMetricThresholdRuleType(
     },
     producer: 'infrastructure',
     getSummarizedAlerts: libs.metricsRules.createGetSummarizedAlerts(),
+    alerts: MetricsRulesTypeAlertDefinition,
   });
 }

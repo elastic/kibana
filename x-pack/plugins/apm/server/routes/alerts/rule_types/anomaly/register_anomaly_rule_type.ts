@@ -45,7 +45,10 @@ import { asMutableArray } from '../../../../../common/utils/as_mutable_array';
 import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
 import { getMLJobs } from '../../../service_map/get_service_anomalies';
 import { apmActionVariables } from '../../action_variables';
-import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import {
+  ApmRuleTypeAlertDefinition,
+  RegisterRuleDependencies,
+} from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
 import { anomalyParamsSchema } from '../../../../../common/rules/schema';
 
@@ -322,6 +325,7 @@ export function registerAnomalyRuleType({
 
         return { state: {} };
       },
+      alerts: ApmRuleTypeAlertDefinition,
     })
   );
 }

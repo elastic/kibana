@@ -30,10 +30,15 @@ export type {
   RuleParamsAndRefs,
   GetSummarizedAlertsFnOpts,
   ExecutorType,
+  IRuleTypeAlerts,
 } from './types';
 export { RuleNotifyWhen } from '../common';
 export { DEFAULT_MAX_EPHEMERAL_ACTIONS_PER_ALERT } from './config';
-export type { PluginSetupContract, PluginStartContract } from './plugin';
+export type {
+  PluginSetupContract,
+  PluginStartContract,
+  PublicFrameworkAlertsService,
+} from './plugin';
 export type {
   FindResult,
   BulkEditOperation,
