@@ -72,7 +72,7 @@ export const buildStateSubscribe =
       savedSearchDataView = nextDataView;
     }
 
-    savedSearchState.update(savedSearchDataView, nextState);
+    savedSearchState.update({ nextDataView: savedSearchDataView, nextState });
 
     if (dataViewChanged && dataState.initialFetchStatus === FetchStatus.UNINITIALIZED) {
       // stop execution if given data view has changed, and it's not configured to initially start a search in Discover
@@ -86,6 +86,6 @@ export const buildStateSubscribe =
       docTableSortChanged
     ) {
       addLog('[appstate] subscribe triggers data fetching');
-      dataState.refetch$.next(undefined);
+      dataState.fetch();
     }
   };
