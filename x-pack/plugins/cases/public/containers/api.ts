@@ -51,7 +51,6 @@ import {
   CASE_TAGS_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
-  MAX_DOCS_PER_PAGE,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -161,13 +160,16 @@ export const findCaseUserActions = async (
   params: {
     type: CaseUserActionTypeWithAll;
     sortOrder: 'asc' | 'desc';
+    page: number;
+    perPage: number;
   },
   signal: AbortSignal
 ): Promise<FindCaseUserActions> => {
   const query = {
     types: params.type !== 'all' ? [params.type] : [],
     sortOrder: params.sortOrder ?? 'asc',
-    perPage: MAX_DOCS_PER_PAGE,
+    page: params.page ?? 1,
+    perPage: params.perPage,
   };
 
   const response = await KibanaServices.get().http.fetch<UserActionFindResponse>(

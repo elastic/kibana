@@ -29,6 +29,8 @@ describe('UseFindCaseUserActions', () => {
   const params = {
     type: filterActionType,
     sortOrder,
+    page: 1,
+    perPage: 10,
   };
 
   let appMockRender: AppMockRenderer;
@@ -67,7 +69,13 @@ describe('UseFindCaseUserActions', () => {
     const spy = jest.spyOn(api, 'findCaseUserActions').mockRejectedValue(initialData);
 
     const { waitForNextUpdate } = renderHook(
-      () => useFindCaseUserActions(basicCase.id, { type: 'user', sortOrder: 'desc' }),
+      () =>
+        useFindCaseUserActions(basicCase.id, {
+          type: 'user',
+          sortOrder: 'desc',
+          page: 1,
+          perPage: 5,
+        }),
       { wrapper: appMockRender.AppWrapper }
     );
 
@@ -75,7 +83,7 @@ describe('UseFindCaseUserActions', () => {
 
     expect(spy).toHaveBeenCalledWith(
       basicCase.id,
-      { type: 'user', sortOrder: 'desc' },
+      { type: 'user', sortOrder: 'desc', page: 1, perPage: 5 },
       expect.any(AbortSignal)
     );
   });
@@ -94,7 +102,7 @@ describe('UseFindCaseUserActions', () => {
 
     expect(spy).toHaveBeenCalledWith(
       basicCase.id,
-      { type: filterActionType, sortOrder },
+      { type: filterActionType, sortOrder, page: 1, perPAge: 10 },
       expect.any(AbortSignal)
     );
     expect(addError).toHaveBeenCalled();
