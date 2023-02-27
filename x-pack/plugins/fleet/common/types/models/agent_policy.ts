@@ -134,6 +134,8 @@ export interface FullAgentPolicyFleetConfig {
     verification_mode?: string;
     certificate_authorities?: string[];
     renegotiation?: string;
+    certificate?: string;
+    key?: string;
   };
 }
 

@@ -6,12 +6,7 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import type {
-  GroupingQueryArgs,
-  GroupingQuery,
-  SubAggregation,
-  TermsOrCardinalityAggregation,
-} from './types';
+import type { GroupingQueryArgs, GroupingQuery, NamedAggregation } from './types';
 /** The maximum number of items to render */
 export const DEFAULT_STACK_BY_FIELD0_SIZE = 10;
 export const DEFAULT_STACK_BY_FIELD1_SIZE = 10;
@@ -27,8 +22,8 @@ const getOptionalSubAggregation = ({
   stackByMultipleFields1Size: number;
   stackByMultipleFields1From?: number;
   stackByMultipleFields1Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
-  additionalStatsAggregationsFields1: TermsOrCardinalityAggregation[];
-}): SubAggregation | {} =>
+  additionalStatsAggregationsFields1: NamedAggregation[];
+}): NamedAggregation | {} =>
   stackByMultipleFields1 != null && !isEmpty(stackByMultipleFields1)
     ? {
         stackByMultipleFields1: {
