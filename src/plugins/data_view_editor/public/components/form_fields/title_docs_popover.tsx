@@ -27,7 +27,7 @@ export const TitleDocsPopover: React.FC = () => {
       onClick={() => setIsOpen((prev) => !prev)}
       iconType="documentation"
       data-test-subj="indexPatternDocsButton"
-      aria-label={i18n.translate('dataViewEditor.titleDocsPopover.ariaLabel', {
+      aria-label={i18n.translate('indexPatternEditor.titleDocsPopover.ariaLabel', {
         defaultMessage: 'Index pattern examples',
       })}
     />
@@ -42,7 +42,7 @@ export const TitleDocsPopover: React.FC = () => {
       closePopover={() => setIsOpen(false)}
     >
       <EuiPopoverTitle paddingSize="s">
-        {i18n.translate('dataViewEditor.titleDocsPopover.title', {
+        {i18n.translate('indexPatternEditor.titleDocsPopover.title', {
           defaultMessage: 'Index pattern',
         })}
       </EuiPopoverTitle>
@@ -58,7 +58,7 @@ export const TitleDocsPopover: React.FC = () => {
         <EuiText size="s" data-test-subj="indexPatternDocsPopoverContent">
           <p>
             <FormattedMessage
-              id="dataViewEditor.titleDocsPopover.startTypingDescription"
+              id="indexPatternEditor.titleDocsPopover.startTypingDescription"
               defaultMessage="Start typing in the Index pattern field, and Kibana looks for the names of indices, data streams, and aliases that match your input."
             />
           </p>
@@ -66,13 +66,13 @@ export const TitleDocsPopover: React.FC = () => {
             <li>
               <p>
                 <FormattedMessage
-                  id="dataViewEditor.titleDocsPopover.useWildcardDescription"
+                  id="indexPatternEditor.titleDocsPopover.useWildcardDescription"
                   defaultMessage="To match multiple sources, use a wildcard (*)."
                 />
               </p>
               <p>
                 <FormattedMessage
-                  id="dataViewEditor.titleDocsPopover.useWildcardExample"
+                  id="indexPatternEditor.titleDocsPopover.useWildcardExample"
                   defaultMessage="{pattern} matches {index1}, {index2}, and so on."
                   values={{
                     pattern: <EuiCode>filebeat-*</EuiCode>,
@@ -85,13 +85,13 @@ export const TitleDocsPopover: React.FC = () => {
             <li>
               <p>
                 <FormattedMessage
-                  id="dataViewEditor.titleDocsPopover.useCommasDescription"
+                  id="indexPatternEditor.titleDocsPopover.useCommasDescription"
                   defaultMessage="To match multiple single sources, enter their names, separated by a comma. Do not include a space after the comma."
                 />
               </p>
               <p>
                 <FormattedMessage
-                  id="dataViewEditor.titleDocsPopover.useCommasExample"
+                  id="indexPatternEditor.titleDocsPopover.useCommasExample"
                   defaultMessage="{pattern} matches two indices"
                   values={{
                     pattern: <EuiCode>filebeat-a,filebeat-b</EuiCode>,
@@ -102,13 +102,13 @@ export const TitleDocsPopover: React.FC = () => {
             <li>
               <p>
                 <FormattedMessage
-                  id="dataViewEditor.titleDocsPopover.useMinusDescription"
+                  id="indexPatternEditor.titleDocsPopover.useMinusDescription"
                   defaultMessage="To exclude a source, use a minus sign (-)."
                 />
               </p>
               <p>
                 <FormattedMessage
-                  id="dataViewEditor.titleDocsPopover.useMinusExample"
+                  id="indexPatternEditor.titleDocsPopover.useMinusExample"
                   defaultMessage="For example, {pattern}."
                   values={{
                     pattern: <EuiCode>-test3</EuiCode>,
