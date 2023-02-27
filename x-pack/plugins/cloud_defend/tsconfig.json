@@ -3,7 +3,13 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "../../../typings/**/*",
+    "server/**/*.json",
+    "public/**/*.json"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -24,5 +30,7 @@
     "@kbn/securitysolution-es-utils",
     "@kbn/es-types"
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*"
+  ]
 }
