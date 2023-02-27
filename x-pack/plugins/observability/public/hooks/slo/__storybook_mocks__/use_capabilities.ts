@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { telemetrySavedObjectMigrations } from './telemetry_saved_object_migrations';
+export function useCapabilities() {
+  return {
+    hasReadCapabilities: true,
+    hasWriteCapabilities: true,
+  };
+}

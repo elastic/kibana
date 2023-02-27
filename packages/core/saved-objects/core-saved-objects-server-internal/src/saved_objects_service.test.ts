@@ -419,6 +419,7 @@ describe('SavedObjectsService', () => {
       startDeps.node = nodeServiceMock.createInternalStartContract({
         ui: true,
         backgroundTasks: true,
+        migrator: false,
       });
       await soService.start(startDeps);
 
@@ -444,6 +445,7 @@ describe('SavedObjectsService', () => {
       startDeps.node = nodeServiceMock.createInternalStartContract({
         ui: true,
         backgroundTasks: false,
+        migrator: false,
       });
       await soService.start(startDeps);
 
@@ -469,6 +471,7 @@ describe('SavedObjectsService', () => {
       startDeps.node = nodeServiceMock.createInternalStartContract({
         ui: false,
         backgroundTasks: true,
+        migrator: false,
       });
       await soService.start(startDeps);
 
