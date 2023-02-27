@@ -203,6 +203,7 @@ export class Plugin
       const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
 
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
+
       return renderApp({
         core: coreStart,
         config,

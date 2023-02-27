@@ -98,17 +98,17 @@ describe('SavedObjectsFinder', () => {
     },
   } as any as SavedObjectsTaggingApi;
 
-  it('should call saved object client on startup', async () => {
+  it('should call API on startup', async () => {
     const core = coreMock.createStart();
-    (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ savedObjects: [doc] })
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [doc] })
     );
     core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
         services={{
-          savedObjects: core.savedObjects,
+          http: core.http,
           uiSettings: core.uiSettings,
           savedObjectsManagement,
           savedObjectsTagging,
@@ -119,29 +119,31 @@ describe('SavedObjectsFinder', () => {
 
     wrapper.instance().componentDidMount!();
     await nextTick();
-    expect(core.savedObjects.client.find).toHaveBeenCalledWith({
-      type: ['search'],
-      fields: ['title', 'name'],
-      search: undefined,
-      hasReference: undefined,
-      page: 1,
-      perPage: 10,
-      searchFields: ['title^3', 'description', 'name'],
-      defaultSearchOperator: 'AND',
+    expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
+      query: {
+        type: ['search'],
+        fields: ['title', 'name'],
+        search: undefined,
+        hasReference: undefined,
+        page: 1,
+        perPage: 10,
+        searchFields: ['title^3', 'description', 'name'],
+        defaultSearchOperator: 'AND',
+      },
     });
   });
 
   it('should list initial items', async () => {
     const core = coreMock.createStart();
-    (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ savedObjects: [doc] })
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [doc] })
     );
     core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
         services={{
-          savedObjects: core.savedObjects,
+          http: core.http,
           uiSettings: core.uiSettings,
           savedObjectsManagement,
           savedObjectsTagging,
@@ -163,15 +165,15 @@ describe('SavedObjectsFinder', () => {
   it('should call onChoose on item click', async () => {
     const chooseStub = sinon.stub();
     const core = coreMock.createStart();
-    (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ savedObjects: [doc] })
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [doc] })
     );
     core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = mount(
       <SavedObjectFinder
         services={{
-          savedObjects: core.savedObjects,
+          http: core.http,
           uiSettings: core.uiSettings,
           savedObjectsManagement,
           savedObjectsTagging,
@@ -193,15 +195,15 @@ describe('SavedObjectsFinder', () => {
   describe('sorting', () => {
     it('should list items by type ascending', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc3, doc2] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc3, doc2] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -224,15 +226,15 @@ describe('SavedObjectsFinder', () => {
 
     it('should list items by type descending', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc3, doc2] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc3, doc2] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -259,15 +261,15 @@ describe('SavedObjectsFinder', () => {
 
     it('should list items by title ascending', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc2] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc2] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -286,15 +288,15 @@ describe('SavedObjectsFinder', () => {
 
     it('should list items by title descending', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc2] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc2] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -316,15 +318,15 @@ describe('SavedObjectsFinder', () => {
 
     it('should list items by tag ascending', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc3, doc2] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc3, doc2] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -347,15 +349,15 @@ describe('SavedObjectsFinder', () => {
 
     it('should list items by tag descending', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc3, doc2] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc3, doc2] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -383,15 +385,15 @@ describe('SavedObjectsFinder', () => {
 
   it('should not show the saved objects which get filtered by showSavedObject', async () => {
     const core = coreMock.createStart();
-    (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ savedObjects: [doc, doc2] })
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [doc, doc2] })
     );
     core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
         services={{
-          savedObjects: core.savedObjects,
+          http: core.http,
           uiSettings: core.uiSettings,
           savedObjectsManagement,
           savedObjectsTagging,
@@ -417,15 +419,15 @@ describe('SavedObjectsFinder', () => {
   describe('search', () => {
     it('should request filtered list on search input', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc2] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc2] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -439,27 +441,29 @@ describe('SavedObjectsFinder', () => {
       wrapper
         .find('[data-test-subj="savedObjectFinderSearchInput"] input')
         .simulate('keyup', { key: 'Enter', target: { value: 'abc' } });
-      expect(core.savedObjects.client.find).toHaveBeenCalledWith({
-        type: ['search'],
-        fields: ['title', 'name'],
-        search: 'abc*',
-        hasReference: undefined,
-        page: 1,
-        perPage: 10,
-        searchFields: ['title^3', 'description', 'name'],
-        defaultSearchOperator: 'AND',
+      expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
+        query: {
+          type: ['search'],
+          fields: ['title', 'name'],
+          search: 'abc*',
+          hasReference: undefined,
+          page: 1,
+          perPage: 10,
+          searchFields: ['title^3', 'description', 'name'],
+          defaultSearchOperator: 'AND',
+        },
       });
     });
 
     it('should include additional fields in search if listed in meta data', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as jest.Mock).mockResolvedValue({ savedObjects: [] });
+      (core.http.get as jest.Mock).mockResolvedValue({ saved_objects: [] });
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -486,29 +490,31 @@ describe('SavedObjectsFinder', () => {
       wrapper
         .find('[data-test-subj="savedObjectFinderSearchInput"] input')
         .simulate('keyup', { key: 'Enter', target: { value: 'abc' } });
-      expect(core.savedObjects.client.find).toHaveBeenCalledWith({
-        type: ['type1', 'type2'],
-        fields: ['title', 'name', 'field1', 'field2', 'field3'],
-        search: 'abc*',
-        hasReference: undefined,
-        page: 1,
-        perPage: 10,
-        searchFields: ['title^3', 'description'],
-        defaultSearchOperator: 'AND',
+      expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
+        query: {
+          type: ['type1', 'type2'],
+          fields: ['title', 'name', 'field1', 'field2', 'field3'],
+          search: 'abc*',
+          hasReference: undefined,
+          page: 1,
+          perPage: 10,
+          searchFields: ['title^3', 'description'],
+          defaultSearchOperator: 'AND',
+        },
       });
     });
 
     it('should respect response order on search input', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc2] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc2] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -530,15 +536,15 @@ describe('SavedObjectsFinder', () => {
 
   it('should request multiple saved object types at once', async () => {
     const core = coreMock.createStart();
-    (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ savedObjects: [doc, doc2] })
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [doc, doc2] })
     );
     core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = shallow(
       <SavedObjectFinder
         services={{
-          savedObjects: core.savedObjects,
+          http: core.http,
           uiSettings: core.uiSettings,
           savedObjectsManagement,
           savedObjectsTagging,
@@ -560,23 +566,25 @@ describe('SavedObjectsFinder', () => {
 
     wrapper.instance().componentDidMount!();
 
-    expect(core.savedObjects.client.find).toHaveBeenCalledWith({
-      type: ['search', 'vis'],
-      fields: ['title', 'name'],
-      search: undefined,
-      page: 1,
-      perPage: 10,
-      searchFields: ['title^3', 'description'],
-      defaultSearchOperator: 'AND',
+    expect(core.http.get).toHaveBeenCalledWith('/internal/saved-objects-finder/find', {
+      query: {
+        type: ['search', 'vis'],
+        fields: ['title', 'name'],
+        search: undefined,
+        page: 1,
+        perPage: 10,
+        searchFields: ['title^3', 'description'],
+        defaultSearchOperator: 'AND',
+      },
     });
   });
 
   describe('filter', () => {
     it('should render filter buttons if enabled', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({
-          savedObjects: [doc, doc2, doc3],
+          saved_objects: [doc, doc2, doc3],
         })
       );
       core.uiSettings.get.mockImplementation(() => 10);
@@ -584,7 +592,7 @@ describe('SavedObjectsFinder', () => {
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -603,9 +611,9 @@ describe('SavedObjectsFinder', () => {
 
     it('should not render filter buttons if disabled', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({
-          savedObjects: [doc, doc2, doc3],
+          saved_objects: [doc, doc2, doc3],
         })
       );
       core.uiSettings.get.mockImplementation(() => 10);
@@ -613,7 +621,7 @@ describe('SavedObjectsFinder', () => {
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -630,9 +638,9 @@ describe('SavedObjectsFinder', () => {
 
     it('should not render types filter button if there is only one type in the metadata list', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({
-          savedObjects: [doc, doc2],
+          saved_objects: [doc, doc2],
         })
       );
       core.uiSettings.get.mockImplementation(() => 10);
@@ -640,7 +648,7 @@ describe('SavedObjectsFinder', () => {
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -658,9 +666,9 @@ describe('SavedObjectsFinder', () => {
 
     it('should not render tags filter button if savedObjectsTagging is undefined', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({
-          savedObjects: [doc, doc2, doc3],
+          saved_objects: [doc, doc2, doc3],
         })
       );
       core.uiSettings.get.mockImplementation(() => 10);
@@ -668,7 +676,7 @@ describe('SavedObjectsFinder', () => {
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging: undefined,
@@ -686,9 +694,9 @@ describe('SavedObjectsFinder', () => {
 
     it('should apply types filter if selected', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({
-          savedObjects: [doc, doc2, doc3],
+          saved_objects: [doc, doc2, doc3],
         })
       );
       core.uiSettings.get.mockImplementation(() => 10);
@@ -696,7 +704,7 @@ describe('SavedObjectsFinder', () => {
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -711,34 +719,38 @@ describe('SavedObjectsFinder', () => {
       const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
       const search = table.prop('search') as EuiSearchBarProps;
       search.onChange?.({ query: Query.parse('type:(vis)'), queryText: '', error: null });
-      expect(core.savedObjects.client.find).toHaveBeenLastCalledWith({
-        type: ['vis'],
-        fields: ['title', 'name'],
-        search: undefined,
-        hasReference: undefined,
-        page: 1,
-        perPage: 10,
-        searchFields: ['title^3', 'description'],
-        defaultSearchOperator: 'AND',
+      expect(core.http.get).toHaveBeenLastCalledWith('/internal/saved-objects-finder/find', {
+        query: {
+          type: ['vis'],
+          fields: ['title', 'name'],
+          search: undefined,
+          hasReference: undefined,
+          page: 1,
+          perPage: 10,
+          searchFields: ['title^3', 'description'],
+          defaultSearchOperator: 'AND',
+        },
       });
       search.onChange?.({ query: Query.parse('type:(search or vis)'), queryText: '', error: null });
-      expect(core.savedObjects.client.find).toHaveBeenLastCalledWith({
-        type: ['search', 'vis'],
-        fields: ['title', 'name'],
-        search: undefined,
-        hasReference: undefined,
-        page: 1,
-        perPage: 10,
-        searchFields: ['title^3', 'description'],
-        defaultSearchOperator: 'AND',
+      expect(core.http.get).toHaveBeenLastCalledWith('/internal/saved-objects-finder/find', {
+        query: {
+          type: ['search', 'vis'],
+          fields: ['title', 'name'],
+          search: undefined,
+          hasReference: undefined,
+          page: 1,
+          perPage: 10,
+          searchFields: ['title^3', 'description'],
+          defaultSearchOperator: 'AND',
+        },
       });
     });
 
     it('should apply tags filter if selected', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
         Promise.resolve({
-          savedObjects: [doc, doc2, doc3],
+          saved_objects: [doc, doc2, doc3],
         })
       );
       core.uiSettings.get.mockImplementation(() => 10);
@@ -746,7 +758,7 @@ describe('SavedObjectsFinder', () => {
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -761,34 +773,38 @@ describe('SavedObjectsFinder', () => {
       const table = wrapper.find<EuiInMemoryTable<any>>(EuiInMemoryTable);
       const search = table.prop('search') as EuiSearchBarProps;
       search.onChange?.({ query: Query.parse('tag:(tag1)'), queryText: '', error: null });
-      expect(core.savedObjects.client.find).toHaveBeenLastCalledWith({
-        type: ['search', 'vis'],
-        fields: ['title', 'name'],
-        search: undefined,
-        hasReference: ['tag1'],
-        page: 1,
-        perPage: 10,
-        searchFields: ['title^3', 'description'],
-        defaultSearchOperator: 'AND',
+      expect(core.http.get).toHaveBeenLastCalledWith('/internal/saved-objects-finder/find', {
+        query: {
+          type: ['search', 'vis'],
+          fields: ['title', 'name'],
+          search: undefined,
+          hasReference: JSON.stringify(['tag1']),
+          page: 1,
+          perPage: 10,
+          searchFields: ['title^3', 'description'],
+          defaultSearchOperator: 'AND',
+        },
       });
       search.onChange?.({ query: Query.parse('tag:(tag1 or tag2)'), queryText: '', error: null });
-      expect(core.savedObjects.client.find).toHaveBeenLastCalledWith({
-        type: ['search', 'vis'],
-        fields: ['title', 'name'],
-        search: undefined,
-        hasReference: ['tag1', 'tag2'],
-        page: 1,
-        perPage: 10,
-        searchFields: ['title^3', 'description'],
-        defaultSearchOperator: 'AND',
+      expect(core.http.get).toHaveBeenLastCalledWith('/internal/saved-objects-finder/find', {
+        query: {
+          type: ['search', 'vis'],
+          fields: ['title', 'name'],
+          search: undefined,
+          hasReference: JSON.stringify(['tag1', 'tag2']),
+          page: 1,
+          perPage: 10,
+          searchFields: ['title^3', 'description'],
+          defaultSearchOperator: 'AND',
+        },
       });
     });
   });
 
   it('should display no items message if there are no items', async () => {
     const core = coreMock.createStart();
-    (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ savedObjects: [] })
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [] })
     );
     core.uiSettings.get.mockImplementation(() => 10);
 
@@ -796,7 +812,7 @@ describe('SavedObjectsFinder', () => {
     const wrapper = mount(
       <SavedObjectFinder
         services={{
-          savedObjects: core.savedObjects,
+          http: core.http,
           uiSettings: core.uiSettings,
           savedObjectsManagement,
           savedObjectsTagging,
@@ -823,15 +839,15 @@ describe('SavedObjectsFinder', () => {
 
     it('should show a table pagination with initial per page', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: longItemList })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: longItemList })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -852,15 +868,15 @@ describe('SavedObjectsFinder', () => {
 
     it('should allow switching the page size', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: longItemList })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: longItemList })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -887,15 +903,15 @@ describe('SavedObjectsFinder', () => {
 
     it('should switch page correctly', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: longItemList })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: longItemList })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -925,15 +941,15 @@ describe('SavedObjectsFinder', () => {
 
     it('should show an ordinary pagination for fixed page sizes', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: longItemList })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: longItemList })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -954,15 +970,15 @@ describe('SavedObjectsFinder', () => {
 
     it('should switch page correctly for fixed page sizes', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: longItemList })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: longItemList })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -994,13 +1010,13 @@ describe('SavedObjectsFinder', () => {
   describe('loading state', () => {
     it('should display a loading indicator during initial loading', () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as jest.Mock).mockResolvedValue({ savedObjects: [] });
+      (core.http.get as jest.Mock).mockResolvedValue({ saved_objects: [] });
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -1014,15 +1030,15 @@ describe('SavedObjectsFinder', () => {
 
     it('should hide the loading indicator if data is shown', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -1045,15 +1061,15 @@ describe('SavedObjectsFinder', () => {
 
     it('should show the loading indicator if there are already items and the search is updated', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -1076,15 +1092,15 @@ describe('SavedObjectsFinder', () => {
 
   it('should render with children', async () => {
     const core = coreMock.createStart();
-    (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-      Promise.resolve({ savedObjects: [doc, doc2] })
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [doc, doc2] })
     );
     core.uiSettings.get.mockImplementation(() => 10);
 
     const wrapper = mount(
       <SavedObjectFinder
         services={{
-          savedObjects: core.savedObjects,
+          http: core.http,
           uiSettings: core.uiSettings,
           savedObjectsManagement,
           savedObjectsTagging,
@@ -1111,15 +1127,15 @@ describe('SavedObjectsFinder', () => {
   describe('columns', () => {
     it('should show all columns', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc2, doc3] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc2, doc3] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -1139,15 +1155,15 @@ describe('SavedObjectsFinder', () => {
 
     it('should hide the type column if there is only one type in the metadata list', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc2] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc2] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging,
@@ -1167,15 +1183,15 @@ describe('SavedObjectsFinder', () => {
 
     it('should hide the tags column if savedObjectsTagging is undefined', async () => {
       const core = coreMock.createStart();
-      (core.savedObjects.client.find as any as jest.SpyInstance).mockImplementation(() =>
-        Promise.resolve({ savedObjects: [doc, doc2, doc3] })
+      (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+        Promise.resolve({ saved_objects: [doc, doc2, doc3] })
       );
       core.uiSettings.get.mockImplementation(() => 10);
 
       const wrapper = mount(
         <SavedObjectFinder
           services={{
-            savedObjects: core.savedObjects,
+            http: core.http,
             uiSettings: core.uiSettings,
             savedObjectsManagement,
             savedObjectsTagging: undefined,

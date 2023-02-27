@@ -235,6 +235,7 @@ export type UntypedRuleType = RuleType<
 >;
 
 export interface RawRuleAction extends SavedObjectAttributes {
+  uuid: string;
   group: string;
   actionRef: string;
   actionTypeId: string;
