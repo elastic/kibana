@@ -7,7 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-const AUDIT_LOG_DATA_STREAM = 'logs-fleet.audit_logs-generic';
+const AUDIT_LOG_DATA_STREAM = 'logs-fleet.audit_logs-default';
 
 export interface AuditLogDocument {
   '@timestamp': string;
