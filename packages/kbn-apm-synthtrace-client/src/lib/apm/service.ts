@@ -20,9 +20,11 @@ export class Service extends Entity<ApmFields> {
   }
 }
 
-export function service(
-  options: { name: string; environment: string; agentName: string } & Partial<ApmFields>
-): Service {
+export function service(options: {
+  name: string;
+  environment: string;
+  agentName: string;
+}): Service {
   const { name, environment, agentName, ...rest } = options;
 
   return new Service({
