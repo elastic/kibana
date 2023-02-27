@@ -47,7 +47,7 @@ export interface DataSource {
 import type { PortableDashboard } from '@kbn/dashboard/common';
 
 export interface WeatherDashboard {
-  /** A unqiue ID for this weather dashboard */
+  /** A unique ID for this weather dashboard */
   id: string;
   /** Definition of a dashboard imported from the `dashboard` plugin */
   dashboard: PortableDashboard;
@@ -223,7 +223,7 @@ import type { DataSource } from '../data_source/v2';
 export * from './v1';
 
 export interface WeatherDashboard {
-  /** A unqiue ID for this weather dashboard */
+  /** A unique ID for this weather dashboard */
   id: string;
   /** Definition of a dashboard imported from the `dashboard` plugin */
   dashboard: PortableDashboard;
@@ -383,7 +383,7 @@ Normalize our domain objects by only holding a reference to `DataSource` in `Wea
 
   // common/weather_dashboard/v3.ts
   export interface WeatherDashboard {
-    /** A unqiue ID for this weather dashboard */
+    /** A unique ID for this weather dashboard */
     id: string;
     /** Definition of a dashboard imported from the `dashboard` plugin */
     dashboard: PortableDashboard;
