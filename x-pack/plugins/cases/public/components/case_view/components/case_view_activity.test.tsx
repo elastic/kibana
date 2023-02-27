@@ -111,7 +111,10 @@ const usePostPushToServiceMock = usePostPushToService as jest.Mock;
 const useGetCaseConnectorsMock = useGetCaseConnectors as jest.Mock;
 const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 
-describe('Case View Page activity tab', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/151979
+// FLAKY: https://github.com/elastic/kibana/issues/151980
+// FLAKY: https://github.com/elastic/kibana/issues/151981
+describe.skip('Case View Page activity tab', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
 
   beforeAll(() => {
