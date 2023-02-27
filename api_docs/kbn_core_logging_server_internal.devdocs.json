@@ -199,7 +199,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<Readonly<{} & { name: string; level: \"error\" | \"off\" | \"all\" | \"debug\" | \"info\" | \"warn\" | \"trace\" | \"fatal\"; appenders: string[]; }>[]>; }>"
+          "<Readonly<{} & { name: string; level: \"error\" | \"all\" | \"off\" | \"debug\" | \"info\" | \"warn\" | \"trace\" | \"fatal\"; appenders: string[]; }>[]>; }>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
         "deprecated": false,
@@ -247,7 +247,7 @@
             "section": "def-common.Type",
             "text": "Type"
           },
-          "<\"error\" | \"off\" | \"all\" | \"debug\" | \"info\" | \"warn\" | \"trace\" | \"fatal\">; }>"
+          "<\"error\" | \"all\" | \"off\" | \"debug\" | \"info\" | \"warn\" | \"trace\" | \"fatal\">; }>"
         ],
         "path": "packages/core/logging/core-logging-server-internal/src/logging_config.ts",
         "deprecated": false,
