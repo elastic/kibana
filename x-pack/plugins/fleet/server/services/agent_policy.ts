@@ -139,6 +139,7 @@ class AgentPolicyService {
       esClient,
       username: user?.username ?? 'system',
       resourceType: 'AGENT_POLICY',
+      resourceIds: [id],
       operation: 'UPDATE',
     });
 
@@ -227,6 +228,7 @@ class AgentPolicyService {
     await recordAuditLog({
       esClient,
       resourceType: 'AGENT_POLICY',
+      resourceIds: [newSo.id],
       operation: 'CREATE',
       username: options?.user?.username ?? 'system',
     });
@@ -730,6 +732,7 @@ class AgentPolicyService {
     await recordAuditLog({
       esClient,
       resourceType: 'AGENT_POLICY',
+      resourceIds: [id],
       operation: 'DELETE',
       username: options?.user?.username ?? 'system',
     });

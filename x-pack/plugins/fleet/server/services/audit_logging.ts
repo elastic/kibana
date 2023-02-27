@@ -13,6 +13,7 @@ export interface AuditLogDocument {
   '@timestamp': string;
   username: string;
   resource_type: string;
+  resource_ids: string[];
   operation: 'CREATE' | 'UPDATE' | 'DELETE';
 }
 
@@ -23,17 +24,20 @@ export async function recordAuditLog({
   esClient,
   username,
   resourceType,
+  resourceIds,
   operation,
 }: {
   esClient: ElasticsearchClient;
   username: string;
   resourceType: string;
+  resourceIds: string[];
   operation: AuditLogDocument['operation'];
 }) {
   const document: AuditLogDocument = {
     '@timestamp': new Date().toISOString(),
     username,
     resource_type: resourceType,
+    resource_ids: resourceIds,
     operation,
   };
 
