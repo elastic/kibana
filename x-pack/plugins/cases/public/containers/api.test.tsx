@@ -15,7 +15,6 @@ import {
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   SECURITY_SOLUTION_OWNER,
-  MAX_DOCS_PER_PAGE,
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
 } from '../../common/constants';
 
@@ -469,7 +468,7 @@ describe('Cases API', () => {
   describe('findCaseUserActions', () => {
     const findCaseUserActionsSnake = {
       page: 1,
-      perPage: 1000,
+      perPage: 10,
       total: 20,
       userActions: [...caseUserActionsWithRegisteredAttachmentsSnake],
     };
@@ -478,6 +477,8 @@ describe('Cases API', () => {
     const params = {
       type: filterActionType,
       sortOrder,
+      page: 1,
+      perPage: 10,
     };
 
     beforeEach(() => {
@@ -493,7 +494,8 @@ describe('Cases API', () => {
         query: {
           types: [],
           sortOrder: 'asc',
-          perPage: MAX_DOCS_PER_PAGE,
+          page: 1,
+          perPage: 10,
         },
       });
     });
@@ -501,7 +503,7 @@ describe('Cases API', () => {
     it('should be called with action type user action and desc sort order', async () => {
       await findCaseUserActions(
         basicCase.id,
-        { type: 'action', sortOrder: 'desc' },
+        { type: 'action', sortOrder: 'desc', page: 2, perPage: 15 },
         abortCtrl.signal
       );
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
@@ -510,7 +512,8 @@ describe('Cases API', () => {
         query: {
           types: ['action'],
           sortOrder: 'desc',
-          perPage: MAX_DOCS_PER_PAGE,
+          page: 2,
+          perPage: 15,
         },
       });
     });
@@ -523,7 +526,8 @@ describe('Cases API', () => {
         query: {
           types: ['user'],
           sortOrder: 'asc',
-          perPage: MAX_DOCS_PER_PAGE,
+          page: 1,
+          perPage: 10,
         },
       });
     });

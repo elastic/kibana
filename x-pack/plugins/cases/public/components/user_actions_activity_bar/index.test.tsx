@@ -22,6 +22,8 @@ describe('UserActionsActivityBar ', () => {
   const params: UserActivityParams = {
     type: 'all',
     sortOrder: 'asc',
+    page: 1,
+    perPage: 10,
   };
 
   beforeEach(() => {

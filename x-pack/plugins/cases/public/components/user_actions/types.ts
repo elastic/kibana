@@ -15,6 +15,7 @@ import type {
   CaseUserActions,
   Comment,
   UseFetchAlertData,
+  CaseUserActionsStats,
 } from '../../containers/types';
 import type { AddCommentRefObject } from '../add_comment';
 import type { UserActionMarkdownRefObject } from './markdown_form';
@@ -24,23 +25,30 @@ import type { OnUpdateFields } from '../case_view/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import type { CurrentUserProfile } from '../types';
-import type { UserActivityFilter } from '../user_actions_activity_bar/types';
+import type { UserActivityParams } from '../user_actions_activity_bar/types';
 
 export interface UserActionTreeProps {
   caseConnectors: CaseConnectors;
-  caseUserActions: CaseUserActions[];
   userProfiles: Map<string, UserProfileWithAvatar>;
   currentUserProfile: CurrentUserProfile;
   data: Case;
   getRuleDetailsHref?: RuleDetailsNavigation['href'];
   actionsNavigation?: ActionsNavigation;
-  isLoadingUserActions: boolean;
   onRuleDetailsClick?: RuleDetailsNavigation['onClick'];
   onShowAlertDetails: (alertId: string, index: string) => void;
   onUpdateField: ({ key, value, onSuccess, onError }: OnUpdateFields) => void;
   statusActionButton: JSX.Element | null;
   useFetchAlertData: UseFetchAlertData;
-  filterOptions: UserActivityFilter;
+  userActivityQueryParams: UserActivityParams;
+  userActionsStats: CaseUserActionsStats | undefined;
+}
+
+export interface AddCommentMarkdown {
+  username: React.ReactNode;
+  'data-test-subj': string;
+  timelineAvatar: React.ReactNode | null | undefined;
+  className: string;
+  children: React.ReactNode;
 }
 
 type UnsupportedUserActionTypes = typeof UNSUPPORTED_ACTION_TYPES[number];
