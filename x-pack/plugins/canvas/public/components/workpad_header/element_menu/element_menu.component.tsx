@@ -9,8 +9,8 @@ import { sortBy } from 'lodash';
 import React, { FunctionComponent, useState } from 'react';
 import PropTypes from 'prop-types';
 import { EuiContextMenu, EuiIcon, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { ToolbarPopover } from '@kbn/shared-ux-button-toolbar';
 import { i18n } from '@kbn/i18n';
-import { PrimaryActionPopover } from '@kbn/presentation-util-plugin/public';
 import { getId } from '../../../lib/get_id';
 import { CONTEXT_MENU_TOP_BORDER_CLASSNAME } from '../../../../common/lib';
 import { ElementSpec } from '../../../../types';
@@ -203,7 +203,8 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
 
   return (
     <>
-      <PrimaryActionPopover
+      <ToolbarPopover
+        type="primary"
         panelPaddingSize="none"
         label={strings.getElementMenuButtonLabel()}
         iconType="plusInCircle"
@@ -215,7 +216,7 @@ export const ElementMenu: FunctionComponent<Props> = ({ elements, addElement }) 
             panels={flattenPanelTree(getPanelTree(closePopover))}
           />
         )}
-      </PrimaryActionPopover>
+      </ToolbarPopover>
       {isAssetModalVisible ? <AssetManager onClose={hideAssetModal} /> : null}
       {isSavedElementsModalVisible ? <SavedElementsModal onClose={hideSavedElementsModal} /> : null}
     </>
