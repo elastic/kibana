@@ -129,6 +129,7 @@ export const PrivateLocationsTable = ({
   const renderToolRight = () => {
     return [
       <EuiButton
+        key="addPrivateLocationButton"
         fill
         data-test-subj={'addPrivateLocationButton'}
         isLoading={loading}
