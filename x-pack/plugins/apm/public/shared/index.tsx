@@ -24,6 +24,7 @@ export function APMTransactionOverviewEmbeddable(props: {
   serviceName: string;
   start: string;
   end: string;
+  offset: string;
   url?: string;
   core: CoreSetup;
   coreStart: CoreStart;

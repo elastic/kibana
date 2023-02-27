@@ -130,7 +130,7 @@ export const WaterfallFlyout = ({
           {!!isUrlTraced && (
             <>
               <EuiSpacer size="m" />
-              <ApmTransactions url={url} />
+              <ApmTransactions url={url} offset="1w" />
             </>
           )}
         </EuiFlyoutBody>

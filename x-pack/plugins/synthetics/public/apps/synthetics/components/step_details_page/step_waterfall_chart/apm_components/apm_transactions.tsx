@@ -15,7 +15,7 @@ import { useSelectedMonitor } from '../../../monitor_details/hooks/use_selected_
 import { useJourneySteps } from '../../../monitor_details/hooks/use_journey_steps';
 import { useSyntheticsSettingsContext } from '../../../../contexts';
 
-export const ApmTransactions = ({ url }: { url?: string }) => {
+export const ApmTransactions = ({ url, offset = '1d' }: { url?: string; offset?: string }) => {
   const { core, plugins, appMountParameters } = useSyntheticsSettingsContext();
   const { data } = useJourneySteps();
   // By default, we want to show the last 15 minutes of data
@@ -50,6 +50,7 @@ export const ApmTransactions = ({ url }: { url?: string }) => {
       url={url}
       start={gte}
       end={lt}
+      offset={offset}
       serviceName={serviceName}
       core={core}
       coreStart={coreStart}

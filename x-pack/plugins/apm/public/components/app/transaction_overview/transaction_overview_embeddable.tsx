@@ -24,18 +24,21 @@ function Embeddable({
   serviceName,
   start,
   end,
+  offset,
   url,
 }: {
   serviceName: string;
   start: string;
   end: string;
+  offset: string;
   url?: string;
 }) {
   const environment = 'ENVIRONMENT_ALL';
   const transactionType = 'request';
-  const offset = '1d';
   const comparisonEnabled = true;
-  const kuery = url ? `url.full: "${url}"` : '';
+
+  const urlWithoutProtocol = url ? url.replace(/(^\w+:|^)/, '') : '';
+  const kuery = url ? `url.full.text: "${urlWithoutProtocol}"` : '';
 
   return (
     <EuiPanel hasBorder={true}>
@@ -63,6 +66,7 @@ export default function ({
   serviceName,
   start,
   end,
+  offset,
   url,
   core,
   coreStart,
@@ -74,6 +78,7 @@ export default function ({
   serviceName: string;
   start: string;
   end: string;
+  offset: string;
   url?: string;
   core: CoreSetup;
   coreStart: CoreStart;
@@ -104,6 +109,7 @@ export default function ({
             start={start}
             end={end}
             url={url}
+            offset={offset}
           />
         </InspectorContextProvider>
       </TimeRangeIdContextProvider>
