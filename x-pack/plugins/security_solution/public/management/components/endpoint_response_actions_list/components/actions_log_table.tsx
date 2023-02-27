@@ -55,7 +55,6 @@ interface ActionsLogTableProps {
   onChange: ({
     page: _page,
   }: CriteriaWithPagination<ActionListApiResponse['data'][number]>) => void;
-  // pageSize: number;
   queryParams: EndpointActionListRequestQuery;
   showHostNames: boolean;
   totalItemCount: number;

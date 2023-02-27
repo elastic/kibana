@@ -54,15 +54,15 @@ const ACCORDION_BUTTON_TEXT = Object.freeze({
   },
 });
 interface ExecuteActionOutputProps {
-  content: string;
+  content?: string;
   initialIsOpen?: boolean;
-  isTruncated: boolean;
+  isTruncated?: boolean;
   textSize?: 's' | 'xs';
   type: 'error' | 'output';
 }
 
 const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
-  ({ content, initialIsOpen = false, isTruncated, textSize, type }) => {
+  ({ content, initialIsOpen = false, isTruncated = false, textSize, type }) => {
     const id = useGeneratedHtmlId({
       prefix: 'executeActionOutputAccordions',
       suffix: type,
@@ -144,33 +144,27 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
       );
     }
 
-    if (!executeOutputContent) {
-      return null;
-    }
-
     if (error) {
       return <FormattedError error={error} data-test-subj={`${dataTestSubj}-apiError`} />;
     }
 
     return (
-      executeOutputContent && (
-        <EuiFlexItem data-test-subj={dataTestSubj}>
-          <ExecutionActionOutputAccordion
-            content={executeOutputContent.stdout}
-            isTruncated={executeOutputContent.stdoutTruncated}
-            initialIsOpen
-            textSize={textSize}
-            type="output"
-          />
-          <EuiSpacer size="m" />
-          <ExecutionActionOutputAccordion
-            content={executeOutputContent.stderr}
-            isTruncated={executeOutputContent.stderrTruncated}
-            textSize={textSize}
-            type="error"
-          />
-        </EuiFlexItem>
-      )
+      <EuiFlexItem data-test-subj={dataTestSubj}>
+        <ExecutionActionOutputAccordion
+          content={executeOutputContent?.stdout}
+          isTruncated={executeOutputContent?.stdoutTruncated}
+          initialIsOpen
+          textSize={textSize}
+          type="output"
+        />
+        <EuiSpacer size="m" />
+        <ExecutionActionOutputAccordion
+          content={executeOutputContent?.stderr}
+          isTruncated={executeOutputContent?.stderrTruncated}
+          textSize={textSize}
+          type="error"
+        />
+      </EuiFlexItem>
     );
   }
 );
