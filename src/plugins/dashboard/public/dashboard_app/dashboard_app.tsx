@@ -8,7 +8,7 @@
 
 import { History } from 'history';
 import useMount from 'react-use/lib/useMount';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { createRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
@@ -38,6 +38,8 @@ import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_val
 import DashboardContainerRenderer from '../dashboard_container/dashboard_container_renderer';
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
+import { css } from '@emotion/react';
+import { useResizeObserver } from '@elastic/eui';
 
 export interface DashboardAppProps {
   history: History;
@@ -183,6 +185,8 @@ export function DashboardApp({
     return () => stopWatchingAppStateInUrl();
   }, [dashboardContainer, kbnUrlStateStorage]);
 
+  const [topNavHeight, setTopNavHeight] = useState(0);
+
   return (
     <div className={'dshAppWrapper'}>
       {showNoDataPage && (
@@ -192,16 +196,29 @@ export function DashboardApp({
         <>
           {DashboardReduxWrapper && (
             <DashboardReduxWrapper>
-              <DashboardTopNav redirectTo={redirectTo} embedSettings={embedSettings} />
+              <DashboardTopNav
+                onHeightChange={setTopNavHeight}
+                redirectTo={redirectTo}
+                embedSettings={embedSettings}
+              />
             </DashboardReduxWrapper>
           )}
 
           {getLegacyConflictWarning?.()}
-          <DashboardContainerRenderer
-            savedObjectId={savedDashboardId}
-            getCreationOptions={getCreationOptions}
-            onDashboardContainerLoaded={(container) => setDashboardContainer(container)}
-          />
+          <div
+            css={css`
+              display: flex;
+              flex: 1;
+              flex-direction: column;
+              padding-top: ${topNavHeight}px;
+            `}
+          >
+            <DashboardContainerRenderer
+              savedObjectId={savedDashboardId}
+              getCreationOptions={getCreationOptions}
+              onDashboardContainerLoaded={(container) => setDashboardContainer(container)}
+            />
+          </div>
         </>
       )}
     </div>

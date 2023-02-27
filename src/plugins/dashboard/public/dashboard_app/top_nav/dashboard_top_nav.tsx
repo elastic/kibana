@@ -7,7 +7,7 @@
  */
 
 import UseUnmount from 'react-use/lib/useUnmount';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { createRef, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   withSuspense,
@@ -17,7 +17,7 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-import { EuiHorizontalRule, useEuiBackgroundColor } from '@elastic/eui';
+import { EuiHorizontalRule, useEuiBackgroundColor, useResizeObserver } from '@elastic/eui';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -37,13 +37,19 @@ import { css } from '@emotion/react';
 export interface DashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
+  onHeightChange: (height: number) => void;
 }
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 
-export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavProps) {
+export function DashboardTopNav({
+  embedSettings,
+  redirectTo,
+  onHeightChange,
+}: DashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
+  const [currentHeight, setCurrentHeight] = useState(0);
 
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
@@ -214,8 +220,19 @@ export function DashboardTopNav({ embedSettings, redirectTo }: DashboardTopNavPr
     dashboardContainer.clearOverlays();
   });
 
+  const resizeRef = useRef<HTMLDivElement>(null);
+  const dimensions = useResizeObserver(resizeRef.current);
+
+  useEffect(() => {
+    if (dimensions.height !== currentHeight) {
+      onHeightChange(dimensions.height);
+      setCurrentHeight(dimensions.height);
+    }
+  }, [dimensions, currentHeight, onHeightChange]);
+
   return (
     <div
+      ref={resizeRef}
       css={css`
         position: fixed;
         z-index: 1001;
