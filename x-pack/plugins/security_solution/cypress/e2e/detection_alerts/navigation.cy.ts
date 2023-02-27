@@ -26,10 +26,10 @@ describe('Alert Details Page Navigation', () => {
   describe('navigating to alert details page', () => {
     let rule: CustomRule;
     before(() => {
-      rule = getNewRule();
+      rule = getNewRule({ id: 'rule1' });
       cleanKibana();
       login();
-      createCustomRuleEnabled(rule, 'rule1');
+      createCustomRuleEnabled(rule);
     });
 
     describe('context menu', () => {

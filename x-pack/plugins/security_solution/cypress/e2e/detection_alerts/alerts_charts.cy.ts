@@ -26,11 +26,11 @@ import { TIMELINE_DATA_PROVIDERS_CONTAINER } from '../../screens/timeline';
 import { closeTimelineUsingCloseButton } from '../../tasks/security_main';
 
 describe('Histogram legend hover actions', { testIsolation: false }, () => {
-  const ruleConfigs = getNewRule();
+  const ruleConfigs = getNewRule({ id: 'new custom rule' });
   before(() => {
     cleanKibana();
     login();
-    createCustomRuleEnabled(ruleConfigs, 'new custom rule');
+    createCustomRuleEnabled(ruleConfigs);
     visit(ALERTS_URL);
     selectAlertsHistogram();
   });

@@ -59,7 +59,7 @@ describe.skip('Detections : Page Filters', () => {
   before(() => {
     cleanKibana();
     login();
-    createCustomRuleEnabled(getNewRule(), 'custom_rule_filters');
+    createCustomRuleEnabled(getNewRule({ id: 'custom_rule_filters' }));
   });
 
   beforeEach(() => {

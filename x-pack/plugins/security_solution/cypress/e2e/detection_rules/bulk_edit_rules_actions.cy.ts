@@ -93,15 +93,7 @@ describe('Detection rules, bulk edit of rule actions', () => {
         },
       ];
 
-      createCustomRuleEnabled(
-        {
-          ...getNewRule(),
-          name: ruleNameToAssert,
-        },
-        '1',
-        500,
-        actions
-      );
+      createCustomRuleEnabled(getNewRule({ id: '1', name: ruleNameToAssert }), 500, actions);
     });
 
     createEventCorrelationRule(getEqlRule({ id: '2' }));

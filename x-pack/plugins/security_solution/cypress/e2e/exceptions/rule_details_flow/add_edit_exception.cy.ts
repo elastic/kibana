@@ -251,8 +251,8 @@ describe('Add/edit exception from rule details', () => {
     beforeEach(() => {
       deleteAlertsAndRules();
       createCustomRuleEnabled(
-        {
-          ...getNewRule(),
+        getNewRule({
+          id: 'rule_testing',
           customQuery: 'agent.name:*',
           dataSource: { index: ['exceptions*'], type: 'indexPatterns' },
           runsEvery: {
@@ -260,8 +260,7 @@ describe('Add/edit exception from rule details', () => {
             timeType: 'Seconds',
             type: 's',
           },
-        },
-        'rule_testing'
+        })
       );
       visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
       goToRuleDetails();

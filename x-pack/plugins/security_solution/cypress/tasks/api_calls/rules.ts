@@ -256,7 +256,6 @@ export const createCustomIndicatorRule = (rule: ThreatIndicatorRule) => {
 
 export const createCustomRuleEnabled = (
   rule: CustomRule,
-  ruleId = '1',
   maxSignals = 500,
   actions?: RuleActionArray
 ) => {
@@ -269,7 +268,7 @@ export const createCustomRuleEnabled = (
       method: 'POST',
       url: 'api/detection_engine/rules',
       body: {
-        rule_id: ruleId,
+        rule_id: rule.id ?? '1',
         risk_score: riskScore,
         description: rule.description,
         interval,

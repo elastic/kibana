@@ -45,7 +45,7 @@ describe('Enrichment', () => {
     beforeEach(() => {
       esArchiverLoad('risk_hosts');
       deleteAlertsAndRules();
-      createCustomRuleEnabled(getNewRule(), 'rule1');
+      createCustomRuleEnabled(getNewRule({ id: 'rule1' }));
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
     });

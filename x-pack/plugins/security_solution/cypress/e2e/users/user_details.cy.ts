@@ -28,7 +28,7 @@ describe('user details flyout', () => {
 
   it('shows user detail flyout from alert table', () => {
     visitWithoutDateRange(ALERTS_URL);
-    createCustomRuleEnabled({ ...getNewRule(), customQuery: 'user.name:*' });
+    createCustomRuleEnabled(getNewRule({ customQuery: 'user.name:*' }));
     refreshPage();
     waitForAlertsToPopulate();
 
