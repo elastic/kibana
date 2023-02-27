@@ -144,7 +144,7 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
  * of an endpoint etc.
  * @experimental
  */
-export interface AddVersionOpts<P, Q, B, Method extends RouteMethod = RouteMethod> {
+export interface AddVersionOpts<P, Q, B> {
   /**
    * Version to assign to this route
    * @experimental
