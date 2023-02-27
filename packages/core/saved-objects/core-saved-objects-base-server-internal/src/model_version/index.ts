@@ -13,3 +13,4 @@ export {
   modelVersionToVirtualVersion,
   virtualVersionToModelVersion,
 } from './conversion';
+export { buildVersionMap, getLatestModelVersion, type ModelVersionMap } from './version_map';

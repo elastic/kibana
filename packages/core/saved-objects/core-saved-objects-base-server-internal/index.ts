@@ -45,4 +45,7 @@ export {
   isVirtualModelVersion,
   virtualVersionToModelVersion,
   modelVersionToVirtualVersion,
+  buildVersionMap,
+  getLatestModelVersion,
+  type ModelVersionMap,
 } from './src/model_version';
