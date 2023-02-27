@@ -55,7 +55,7 @@ describe('importRuleActionConnectors', () => {
     const res = await importRuleActionConnectors({
       actionConnectors,
       actionsClient,
-      actionsImporter: actionsImporter2() as never,
+      actionsImporter: actionsImporter2(),
       rules,
       overwrite: false,
     });
@@ -91,7 +91,7 @@ describe('importRuleActionConnectors', () => {
     const res = await importRuleActionConnectors({
       actionConnectors,
       actionsClient,
-      actionsImporter: actionsImporter() as never,
+      actionsImporter: actionsImporter(),
       rules,
       overwrite: false,
     });
@@ -140,7 +140,7 @@ describe('importRuleActionConnectors', () => {
     const res = await importRuleActionConnectors({
       actionConnectors,
       actionsClient,
-      actionsImporter: actionsImporter() as never,
+      actionsImporter: actionsImporter(),
       rules: ruleWith2Connectors,
       overwrite: false,
     });
@@ -159,7 +159,7 @@ describe('importRuleActionConnectors', () => {
     const res = await importRuleActionConnectors({
       actionConnectors: [],
       actionsClient,
-      actionsImporter: actionsImporter() as never,
+      actionsImporter: actionsImporter(),
       rules,
       overwrite: false,
     });
@@ -186,7 +186,7 @@ describe('importRuleActionConnectors', () => {
     const res = await importRuleActionConnectors({
       actionConnectors: [],
       actionsClient,
-      actionsImporter: actionsImporter() as never,
+      actionsImporter: actionsImporter(),
       rules: [
         {
           ...getImportRulesSchemaMock(),
@@ -231,7 +231,7 @@ describe('importRuleActionConnectors', () => {
     const res = await importRuleActionConnectors({
       actionConnectors: [],
       actionsClient,
-      actionsImporter: actionsImporter() as never,
+      actionsImporter: actionsImporter(),
       rules: [
         {
           ...getImportRulesSchemaMock(),
@@ -286,12 +286,12 @@ describe('importRuleActionConnectors', () => {
       }),
     });
     const actionsImporter2 = core.savedObjects.getImporter;
-    const actionsImporter2Import = actionsImporter2().import;
+    const actionsImporter2Importer = actionsImporter2();
 
     const res = await importRuleActionConnectors({
       actionConnectors,
       actionsClient,
-      actionsImporter: actionsImporter2Import as never,
+      actionsImporter: actionsImporter2Importer,
       rules: rulesWithoutActions,
       overwrite: false,
     });
@@ -302,7 +302,7 @@ describe('importRuleActionConnectors', () => {
       errors: [],
       warnings: [],
     });
-    expect(actionsImporter2Import).not.toBeCalled();
+    expect(actionsImporter2Importer.import).not.toBeCalled();
   });
 
   it('should skip importing the action-connectors if all connectors have been imported/created before', async () => {
@@ -317,12 +317,12 @@ describe('importRuleActionConnectors', () => {
       },
     ]);
     const actionsImporter2 = core.savedObjects.getImporter;
-    const actionsImporter2Import = actionsImporter2().import;
+    const actionsImporter2Importer = actionsImporter2();
 
     const res = await importRuleActionConnectors({
       actionConnectors,
       actionsClient,
-      actionsImporter: actionsImporter2Import as never,
+      actionsImporter: actionsImporter2Importer,
       rules,
       overwrite: false,
     });
@@ -333,7 +333,7 @@ describe('importRuleActionConnectors', () => {
       errors: [],
       warnings: [],
     });
-    expect(actionsImporter2Import).not.toBeCalled();
+    expect(actionsImporter2Importer.import).not.toBeCalled();
   });
 
   it('should not skip importing the action-connectors if all connectors have been imported/created before when overwrite is true', async () => {
@@ -361,7 +361,7 @@ describe('importRuleActionConnectors', () => {
     const res = await importRuleActionConnectors({
       actionConnectors,
       actionsClient,
-      actionsImporter: actionsImporter() as never,
+      actionsImporter: actionsImporter(),
       rules,
       overwrite: true,
     });
@@ -399,7 +399,7 @@ describe('importRuleActionConnectors', () => {
     const res = await importRuleActionConnectors({
       actionConnectors,
       actionsClient,
-      actionsImporter: actionsImporter() as never,
+      actionsImporter: actionsImporter(),
       rules,
       overwrite: false,
     });
@@ -509,7 +509,7 @@ describe('importRuleActionConnectors', () => {
     const res = await importRuleActionConnectors({
       actionConnectors: actionConnectorsWithIndex,
       actionsClient,
-      actionsImporter: actionsImporter() as never,
+      actionsImporter: actionsImporter(),
       rules: multipleRules,
       overwrite: false,
     });
