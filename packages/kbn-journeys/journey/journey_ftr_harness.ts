@@ -371,7 +371,6 @@ export class JourneyFtrHarness {
         )
       ),
       kibanaServer: this.kibanaServer,
-      esArchiver: this.esArchiver,
       es: this.es,
       retry: this.retry,
     });

@@ -10,7 +10,7 @@ import expect from '@kbn/expect';
 
 export const journey = new Journey({
   beforeSteps: async ({ kibanaServer, retry }) => {
-    retry.try(async () => {
+    await retry.try(async () => {
       const response = await kibanaServer.request({
         path: '/internal/cloud_security_posture/status?check=init',
         method: 'GET',

@@ -17,7 +17,6 @@ import {
   KibanaServer,
   Es,
   RetryService,
-  EsArchiver,
 } from '@kbn/ftr-common-functional-services';
 
 import { Auth } from '../services/auth';
@@ -34,7 +33,6 @@ export interface BaseStepCtx {
   inputDelays: InputDelays;
   kbnUrl: KibanaUrl;
   kibanaServer: KibanaServer;
-  esArchiver: EsArchiver;
   es: Es;
   retry: RetryService;
 }
