@@ -606,6 +606,144 @@ exports[`IndicesList should show a warning for the matches 1`] = `
 </div>
 `;
 
+exports[`IndicesList should show checkbox when not an exact match 1`] = `
+<div>
+  <EuiTable
+    responsive={false}
+    tableLayout="auto"
+  >
+    <EuiTableBody>
+      <EuiTableRow
+        key="0"
+      >
+        <EuiTableRowCell>
+          <EuiFlexGroup
+            alignItems="center"
+            direction="row"
+            gutterSize="s"
+            responsive={false}
+          >
+            <EuiFlexItem
+              grow={false}
+            >
+              <EuiIcon
+                type="check"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <span>
+                <strong>
+                  logs
+                </strong>
+                tash
+              </span>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="1"
+      >
+        <EuiTableRowCell>
+          <EuiCheckbox
+            checked={false}
+            compressed={false}
+            data-test-subj="indexCheckbox-some_logs"
+            disabled={false}
+            id="some_logs"
+            indeterminate={false}
+            label={
+              <span>
+                some_
+                <strong>
+                  logs
+                </strong>
+                
+              </span>
+            }
+            onChange={[Function]}
+          />
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+    </EuiTableBody>
+  </EuiTable>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiPopover
+        anchorPosition="downCenter"
+        button={
+          <EuiButtonEmpty
+            color="text"
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="indexPatternEditor.pagingLabel"
+              values={
+                Object {
+                  "perPage": 10,
+                }
+              }
+            />
+          </EuiButtonEmpty>
+        }
+        closePopover={[Function]}
+        display="inline-block"
+        hasArrow={true}
+        id="customizablePagination"
+        isOpen={false}
+        ownFocus={true}
+        panelPaddingSize="none"
+      >
+        <EuiContextMenuPanel
+          items={
+            Array [
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                5
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                10
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                20
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                50
+              </EuiContextMenuItem>,
+            ]
+          }
+        />
+      </EuiPopover>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
 exports[`IndicesList updating props should render all new indices 1`] = `
 <div>
   <EuiTable

@@ -35,6 +35,7 @@ export interface IndicesListProps {
   indices: MatchedItem[];
   query: string;
   hasWarnings: boolean;
+  isExactMatch: (indexName: string) => boolean;
   onUpdateTitle: (title: string) => void;
 }
 
@@ -197,24 +198,40 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     const preStr = indexName.substring(0, queryIdx);
     const postStr = indexName.substr(queryIdx + queryWithoutWildcard.length);
 
+    const label = (
+      <span>
+        {preStr}
+        <strong>{queryWithoutWildcard}</strong>
+        {postStr}
+      </span>
+    );
+
+    const { hasWarnings, isExactMatch } = this.props;
+
+    if (hasWarnings || isExactMatch(indexName)) {
+      return (
+        <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={hasWarnings ? 'magnifyWithExclamation' : 'check'} />
+          </EuiFlexItem>
+          <EuiFlexItem>{label}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+    }
+
     return (
-      <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={this.props.hasWarnings ? 'magnifyWithExclamation' : 'check'} />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <span>
-            {preStr}
-            <strong>{queryWithoutWildcard}</strong>
-            {postStr}
-          </span>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiCheckbox
+        id={indexName}
+        label={label}
+        checked={false}
+        data-test-subj={`indexCheckbox-${indexName}`}
+        onChange={() => this.onClick(indexName, query)}
+      />
     );
   }
 
   render() {
-    const { indices, query, hasWarnings, onUpdateTitle, ...rest } = this.props;
+    const { indices, query, isExactMatch, hasWarnings, onUpdateTitle, ...rest } = this.props;
 
     const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);
     const rows = paginatedIndices.map((index, key) => {

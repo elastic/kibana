@@ -19,11 +19,17 @@ const indices = [
   { name: 'es', tags: [] },
 ] as unknown as MatchedItem[];
 
+const similarIndices = [
+  { name: 'logstash', tags: [] },
+  { name: 'some_logs', tags: [] },
+] as unknown as MatchedItem[];
+
 describe('IndicesList', () => {
   const commonProps: Omit<IndicesListProps, 'query'> = {
     indices,
     hasWarnings: false,
     onUpdateTitle: jest.fn(),
+    isExactMatch: jest.fn(() => false),
   };
 
   afterEach(() => {
@@ -60,13 +66,40 @@ describe('IndicesList', () => {
   });
 
   it('should highlight the query in the matches', () => {
-    const component = shallow(<IndicesList {...commonProps} query="ki" />);
+    const component = shallow(
+      <IndicesList
+        {...commonProps}
+        query="ki"
+        isExactMatch={(indexName) => indexName === 'kibana'}
+      />
+    );
+
+    expect(component).toMatchSnapshot();
+  });
+
+  it('should show checkbox when not an exact match', () => {
+    const component = shallow(
+      <IndicesList
+        {...commonProps}
+        indices={similarIndices}
+        hasWarnings={false}
+        query="logs"
+        isExactMatch={(indexName) => indexName === 'logstash'}
+      />
+    );
 
     expect(component).toMatchSnapshot();
   });
 
   it('should show a warning for the matches', () => {
-    const component = shallow(<IndicesList {...commonProps} hasWarnings={true} query="ki" />);
+    const component = shallow(
+      <IndicesList
+        {...commonProps}
+        hasWarnings={true}
+        query="ki"
+        isExactMatch={(indexName) => indexName === 'kibana'}
+      />
+    );
 
     expect(component).toMatchSnapshot();
   });

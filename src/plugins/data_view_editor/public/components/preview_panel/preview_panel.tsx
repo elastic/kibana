@@ -38,7 +38,7 @@ const viewModeButtons = [
   },
 ];
 
-interface Props {
+export interface Props {
   type: INDEX_PATTERN_TYPE;
   allowHidden: boolean;
   title: string;
@@ -78,18 +78,20 @@ export const PreviewPanel = ({
     currentViewMode = ViewMode.allIndices;
   }
 
-  const indicesListContent =
-    matched.visibleIndices.length || matched.allIndices.length ? (
-      <IndicesList
-        data-test-subj="createIndexPatternStep1IndicesList"
-        query={title}
-        indices={currentlyVisibleIndices}
-        onUpdateTitle={onUpdateTitleAndViewMode}
-        hasWarnings={title.length > 0 && matched.exactMatchedIndices.length === 0}
-      />
-    ) : (
-      <></>
-    );
+  const indicesListContent = currentlyVisibleIndices.length ? (
+    <IndicesList
+      data-test-subj="createIndexPatternStep1IndicesList"
+      query={title}
+      indices={currentlyVisibleIndices}
+      onUpdateTitle={onUpdateTitleAndViewMode}
+      hasWarnings={title.length > 0 && matched.exactMatchedIndices.length === 0}
+      isExactMatch={(indexName) =>
+        title.length > 0 && matched.exactMatchedIndices.some((index) => index.name === indexName)
+      }
+    />
+  ) : (
+    <></>
+  );
 
   return (
     <>
@@ -100,7 +102,7 @@ export const PreviewPanel = ({
         query={title}
       />
       <EuiSpacer size="m" />
-      {Boolean(title) && (
+      {Boolean(title) && currentlyVisibleIndices.length > 0 && (
         <EuiButtonGroup
           isFullWidth
           legend={i18n.translate('indexPatternEditor.previewPanel.viewModeGroup.legend', {
