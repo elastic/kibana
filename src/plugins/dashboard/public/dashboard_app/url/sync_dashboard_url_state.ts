@@ -37,7 +37,8 @@ export const isPanelVersionTooOld = (panels: SavedDashboardPanel[]) => {
   return false;
 };
 
-function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | undefined; {
+function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | undefined;
+{
   if (!appStateInUrl.panels) {
     return undefined;
   }
