@@ -29,6 +29,8 @@ get:
               - page
               - perPage
               - total
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-enrollment-api-keys-deprecated
   parameters: []
   deprecated: true
@@ -49,6 +51,8 @@ post:
                 type: string
                 enum:
                   - created
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: create-enrollment-api-keys-deprecated
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

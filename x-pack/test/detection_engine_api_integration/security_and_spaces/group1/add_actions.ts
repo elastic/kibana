@@ -11,7 +11,7 @@ import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   removeServerGeneratedProperties,
   getWebHookAction,
@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should be able to create a new webhook action and attach it to a rule', async () => {
@@ -57,7 +57,10 @@ export default ({ getService }: FtrProviderContext) => {
         const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
         const bodyToCompare = removeServerGeneratedProperties(rule);
         expect(bodyToCompare).to.eql(
-          getSimpleRuleOutputWithWebHookAction(`${bodyToCompare?.actions?.[0].id}`)
+          getSimpleRuleOutputWithWebHookAction(
+            `${bodyToCompare?.actions?.[0].id}`,
+            `${bodyToCompare?.actions?.[0].uuid}`
+          )
         );
       });
 
