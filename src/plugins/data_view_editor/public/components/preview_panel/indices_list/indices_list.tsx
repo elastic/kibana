@@ -164,6 +164,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
         id={indexName}
         label={indexName}
         checked={false}
+        data-test-subj={`indexCheckbox-${indexName}`}
         onChange={() => this.onClick(indexName, query)}
       />
     );

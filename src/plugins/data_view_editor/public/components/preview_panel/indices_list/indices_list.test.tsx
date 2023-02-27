@@ -9,6 +9,8 @@
 import React from 'react';
 import { IndicesList, IndicesListProps, PER_PAGE_STORAGE_KEY } from './indices_list';
 import { shallow } from 'enzyme';
+import { findTestSubject } from '@elastic/eui/lib/test';
+import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { MatchedItem } from '@kbn/data-views-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
@@ -18,15 +20,16 @@ const indices = [
 ] as unknown as MatchedItem[];
 
 describe('IndicesList', () => {
-  afterEach(() => {
-    new Storage(localStorage).remove(PER_PAGE_STORAGE_KEY);
-  });
-
   const commonProps: Omit<IndicesListProps, 'query'> = {
     indices,
     hasWarnings: false,
     onUpdateTitle: jest.fn(),
   };
+
+  afterEach(() => {
+    new Storage(localStorage).remove(PER_PAGE_STORAGE_KEY);
+    (commonProps.onUpdateTitle as jest.Mock).mockClear();
+  });
 
   it('should render normally', () => {
     const component = shallow(<IndicesList {...commonProps} query="" />);
@@ -66,6 +69,18 @@ describe('IndicesList', () => {
     const component = shallow(<IndicesList {...commonProps} hasWarnings={true} query="ki" />);
 
     expect(component).toMatchSnapshot();
+  });
+
+  it('should call a callback onn index selection', () => {
+    const component = mountWithIntl(<IndicesList {...commonProps} query="" />);
+    const indexToSelect = indices[1].name;
+    findTestSubject(component, `indexCheckbox-${indexToSelect}`).simulate('change', {
+      target: {
+        value: true,
+      },
+    });
+
+    expect(commonProps.onUpdateTitle).toHaveBeenCalledWith(indexToSelect);
   });
 
   describe('updating props', () => {
