@@ -38,11 +38,11 @@ describe('migrateRawDocs', () => {
     expect(result).toEqual([
       {
         _id: 'a:b',
-        _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+        _source: { type: 'a', a: { name: 'HOI!' }, typeMigrationVersion: '', references: [] },
       },
       {
         _id: 'c:d',
-        _source: { type: 'c', c: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+        _source: { type: 'c', c: { name: 'HOI!' }, typeMigrationVersion: '', references: [] },
       },
     ]);
 
@@ -50,14 +50,14 @@ describe('migrateRawDocs', () => {
       id: 'b',
       type: 'a',
       attributes: { name: 'AAA' },
-      migrationVersion: {},
+      typeMigrationVersion: '',
       references: [],
     };
     const obj2 = {
       id: 'd',
       type: 'c',
       attributes: { name: 'DDD' },
-      migrationVersion: {},
+      typeMigrationVersion: '',
       references: [],
     };
     expect(transform).toHaveBeenCalledTimes(2);
@@ -99,7 +99,7 @@ describe('migrateRawDocs', () => {
     expect(result).toEqual([
       {
         _id: 'a:b',
-        _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+        _source: { type: 'a', a: { name: 'HOI!' }, typeMigrationVersion: '', references: [] },
       },
       {
         _id: 'foo:bar',
@@ -111,7 +111,7 @@ describe('migrateRawDocs', () => {
       id: 'b',
       type: 'a',
       attributes: { name: 'AAA' },
-      migrationVersion: {},
+      typeMigrationVersion: '',
       references: [],
     };
     expect(transform).toHaveBeenCalledTimes(1);
@@ -152,11 +152,11 @@ describe('migrateRawDocsSafely', () => {
     expect(result.right.processedDocs).toEqual([
       {
         _id: 'a:b',
-        _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+        _source: { type: 'a', a: { name: 'HOI!' }, typeMigrationVersion: '', references: [] },
       },
       {
         _id: 'c:d',
-        _source: { type: 'c', c: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+        _source: { type: 'c', c: { name: 'HOI!' }, typeMigrationVersion: '', references: [] },
       },
     ]);
 
@@ -164,14 +164,14 @@ describe('migrateRawDocsSafely', () => {
       id: 'b',
       type: 'a',
       attributes: { name: 'AAA' },
-      migrationVersion: {},
+      typeMigrationVersion: '',
       references: [],
     };
     const obj2 = {
       id: 'd',
       type: 'c',
       attributes: { name: 'DDD' },
-      migrationVersion: {},
+      typeMigrationVersion: '',
       references: [],
     };
     expect(transform).toHaveBeenCalledTimes(2);
@@ -220,7 +220,7 @@ describe('migrateRawDocsSafely', () => {
     expect(result.right.processedDocs).toEqual([
       {
         _id: 'a:b',
-        _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+        _source: { type: 'a', a: { name: 'HOI!' }, typeMigrationVersion: '', references: [] },
       },
       {
         _id: 'foo:bar',
@@ -232,7 +232,7 @@ describe('migrateRawDocsSafely', () => {
       id: 'b',
       type: 'a',
       attributes: { name: 'AAA' },
-      migrationVersion: {},
+      typeMigrationVersion: '',
       references: [],
     };
     expect(transform).toHaveBeenCalledTimes(1);

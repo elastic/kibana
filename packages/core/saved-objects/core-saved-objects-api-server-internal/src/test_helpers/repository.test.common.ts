@@ -627,8 +627,8 @@ export const expectCreateResult = (obj: {
   namespaces?: string[];
 }) => ({
   ...obj,
-  migrationVersion: { [obj.type]: '1.1.1' },
   coreMigrationVersion: expect.any(String),
+  typeMigrationVersion: '1.1.1',
   version: mockVersion,
   namespaces: obj.namespaces ?? [obj.namespace ?? 'default'],
   ...mockTimestampFieldsWithCreated,

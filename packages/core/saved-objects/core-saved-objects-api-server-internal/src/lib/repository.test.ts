@@ -8,6 +8,7 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
+import { omit } from 'lodash';
 import {
   pointInTimeFinderMock,
   mockCollectMultiNamespaceReferences,
@@ -932,18 +933,20 @@ describe('SavedObjectsRepository', () => {
         expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(1, {
           ...response.items[0].create,
           _source: {
-            ...response.items[0].create._source,
+            ...omit(response.items[0].create._source, 'migrationVersion'),
             namespaces: response.items[0].create._source.namespaces,
             coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: '1.1.1',
           },
           _id: expect.stringMatching(/^myspace:config:[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}$/),
         });
         expect(serializer.rawToSavedObject).toHaveBeenNthCalledWith(2, {
           ...response.items[1].create,
           _source: {
-            ...response.items[1].create._source,
+            ...omit(response.items[1].create._source, 'migrationVersion'),
             namespaces: response.items[1].create._source.namespaces,
             coreMigrationVersion: expect.any(String),
+            typeMigrationVersion: '1.1.1',
           },
         });
 
@@ -2948,8 +2951,8 @@ describe('SavedObjectsRepository', () => {
           attributes,
           references,
           namespaces: [namespace ?? 'default'],
-          migrationVersion: { [MULTI_NAMESPACE_TYPE]: '1.1.1' },
           coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '1.1.1',
         });
       });
     });
@@ -3536,6 +3539,7 @@ describe('SavedObjectsRepository', () => {
                 'references',
                 'migrationVersion',
                 'coreMigrationVersion',
+                'typeMigrationVersion',
                 'updated_at',
                 'created_at',
                 'originId',
