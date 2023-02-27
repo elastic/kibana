@@ -59,7 +59,11 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
   onSelectEventHandler,
   showButtonTitle = false,
 }) => {
+  const [isShowAllPressed, setIsShowAllPressed] = useState(false);
+  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
+
   const { euiTheme } = useEuiTheme();
+
   const messageVariablesObject: Record<string, ActionVariable> | undefined =
     messageVariables?.reduce((acc, variable) => {
       return {
@@ -68,20 +72,26 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       };
     }, {});
 
-  const [isVariablesPopoverOpen, setIsVariablesPopoverOpen] = useState<boolean>(false);
-
-  const options = useMemo(
-    () =>
-      messageVariables?.map((variable) => ({
-        label: variable.name,
-        ...(variable.deprecated ? { disabled: true } : {}),
-        data: {
-          secondaryContent: variable.description,
-        },
-        'data-test-subj': `${variable.name}-selectableOption`,
-      })),
-    [messageVariables]
-  );
+  const shownOptions = useMemo(() => {
+    return isShowAllPressed
+      ? messageVariables?.map((variable) => ({
+          label: variable.name,
+          ...(variable.deprecated ? { disabled: true } : {}),
+          data: {
+            secondaryContent: variable.description,
+          },
+          'data-test-subj': `${variable.name}-selectableOption`,
+        }))
+      : messageVariables
+          ?.filter((variable) => !variable.deprecated)
+          .map((variable) => ({
+            label: variable.name,
+            data: {
+              secondaryContent: variable.description,
+            },
+            'data-test-subj': `${variable.name}-selectableOption`,
+          }));
+  }, [isShowAllPressed, messageVariables]);
 
   const addVariableButtonTitle = buttonTitle
     ? buttonTitle
@@ -157,17 +167,16 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       isOpen={isVariablesPopoverOpen}
       closePopover={() => setIsVariablesPopoverOpen(false)}
       panelPaddingSize="s"
-      anchorPosition="upLeft"
+      anchorPosition="upRight"
     >
       <EuiSelectable
         searchable
         height={300}
         data-test-subj={'messageVariablesSelectableList'}
         isLoading={false}
-        options={options}
-        style={{ width: 350 }}
+        options={shownOptions}
         listProps={{
-          rowHeight: 60,
+          rowHeight: 90,
           showIcons: false,
           paddingSize: 'none',
           textWrap: 'wrap',
@@ -191,7 +200,9 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
             {search}
             <EuiSpacer size="xs" />
             {list}
-            <EuiPopoverFooter style={{ paddingTop: 0, paddingBottom: 0 }}>
+            <EuiPopoverFooter
+              style={{ paddingTop: 0, paddingBottom: 0, minWidth: 300, maxWidth: 300 }}
+            >
               <EuiFlexGroup
                 gutterSize="s"
                 alignItems="center"
@@ -200,17 +211,21 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
                 wrap={true}
               >
                 <EuiFlexItem grow={false}>
-                  <EuiText color="grey" size="s">
-                    Depricated variables were hidden
+                  <EuiText color="grey" size="xs">
+                    {isShowAllPressed
+                      ? 'Depricated variables are shown'
+                      : 'Depricated variables were hidden'}
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
                     data-test-subj={'showDepricatedVariablesButton'}
-                    size="s"
-                    onClick={() => {}}
+                    size="xs"
+                    onClick={() =>
+                      isShowAllPressed ? setIsShowAllPressed(false) : setIsShowAllPressed(true)
+                    }
                   >
-                    Show all
+                    {isShowAllPressed ? 'Hide' : 'Show all'}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>

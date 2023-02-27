@@ -130,7 +130,6 @@ export const RuleTagFilter = (props: RuleTagFilterProps) => {
           emptyMessage={emptyMessage}
           errorMessage={errorMessage}
           onChange={onChangeInternal}
-          style={{ width: 400 }}
         >
           {(list, search) => (
             <>
