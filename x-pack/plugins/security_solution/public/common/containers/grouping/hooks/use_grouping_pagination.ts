@@ -7,6 +7,7 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useMemo } from 'react';
+import { tableDefaults } from '../../../store/data_table/defaults';
 import { groupActions, groupSelectors } from '../../../store/grouping';
 import type { State } from '../../../store';
 import { defaultGroup } from '../../../store/grouping/defaults';
@@ -45,6 +46,7 @@ export const useGroupingPagination = ({ groupingId }: UseGroupingPaginationArgs)
       pageSize: itemsPerPage,
       onChangeItemsPerPage: setGroupsItemsPerPage,
       onChangePage: setGroupsActivePage,
+      itemsPerPageOptions: tableDefaults.itemsPerPageOptions,
     }),
     [activePage, itemsPerPage, setGroupsActivePage, setGroupsItemsPerPage]
   );

@@ -13,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { getAlertsGroupingTable, getGroupedTables } from '@kbn/securitysolution-alerts_grouping';
 import { useGetGroupingSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { defaultGroup } from '../../../common/store/grouping/defaults';
@@ -24,7 +25,7 @@ import type {
   GroupingTableAggregation,
   RawBucket,
 } from '../../../common/components/grouping';
-import { GroupingContainer, isNoneGroup } from '../../../common/components/grouping';
+import { isNoneGroup } from '../../../common/components/grouping';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { TableIdLiteral } from '../../../../common/types';
@@ -57,17 +58,17 @@ const ALERTS_GROUPING_ID = 'alerts-grouping';
 interface OwnProps {
   currentAlertStatusFilterValue?: Status;
   defaultFilters?: Filter[];
-  globalQuery: Query;
-  globalFilters: Filter[];
   from: string;
+  globalFilters: Filter[];
+  globalQuery: Query;
   hasIndexMaintenance: boolean;
   hasIndexWrite: boolean;
   loading: boolean;
+  renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
   runtimeMappings: MappingRuntimeFields;
   signalIndexName: string | null;
   tableId: TableIdLiteral;
   to: string;
-  renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -236,30 +237,25 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
 
   const groupedAlerts = useMemo(
     () =>
-      isNoneGroup(selectedGroup) ? (
-        renderChildComponent([])
-      ) : (
-        <GroupingContainer
-          badgeMetricStats={(fieldBucket: RawBucket) =>
-            getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket)
-          }
-          customMetricStats={(fieldBucket: RawBucket) =>
-            getSelectedGroupCustomMetrics(selectedGroup, fieldBucket)
-          }
-          data={alertsGroupsData?.aggregations ?? {}}
-          groupPanelRenderer={(fieldBucket: RawBucket) =>
-            getSelectedGroupButtonContent(selectedGroup, fieldBucket)
-          }
-          groupsSelector={groupsSelector}
-          inspectButton={inspect}
-          isLoading={loading || isLoadingGroups}
-          pagination={pagination}
-          renderChildComponent={renderChildComponent}
-          selectedGroup={selectedGroup}
-          takeActionItems={getTakeActionItems}
-          unit={defaultUnit}
-        />
-      ),
+      isNoneGroup(selectedGroup)
+        ? renderChildComponent([])
+        : getGroupedTables({
+            badgeMetricStats: (fieldBucket: RawBucket) =>
+              getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket),
+            customMetricStats: (fieldBucket: RawBucket) =>
+              getSelectedGroupCustomMetrics(selectedGroup, fieldBucket),
+            data: alertsGroupsData?.aggregations ?? {},
+            groupPanelRenderer: (fieldBucket: RawBucket) =>
+              getSelectedGroupButtonContent(selectedGroup, fieldBucket),
+            groupsSelector,
+            inspectButton: inspect,
+            isLoading: loading || isLoadingGroups,
+            pagination,
+            renderChildComponent,
+            selectedGroup,
+            takeActionItems: getTakeActionItems,
+            unit: defaultUnit,
+          }),
     [
       alertsGroupsData?.aggregations,
       getTakeActionItems,
@@ -273,11 +269,18 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     ]
   );
 
+  const GroupTable = getAlertsGroupingTable({ hi: 'steph' });
+
   if (isEmpty(selectedPatterns)) {
     return null;
   }
 
-  return groupedAlerts;
+  return (
+    <>
+      {GroupTable}
+      {groupedAlerts}
+    </>
+  );
 };
 
 export const GroupedAlertsTable = React.memo(GroupedAlertsTableComponent);

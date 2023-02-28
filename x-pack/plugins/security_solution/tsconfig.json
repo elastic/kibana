@@ -54,6 +54,7 @@
     "@kbn/timelines-plugin",
     "@kbn/es-query",
     "@kbn/utility-types",
+    "@kbn/securitysolution-alerts-grouping",
     "@kbn/securitysolution-list-utils",
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/securitysolution-io-ts-alerting-types",

@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -14,19 +15,17 @@ import {
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
-import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
-import { createGroupFilter } from '../accordion_panel/helpers';
-import { tableDefaults } from '../../../store/data_table/defaults';
-import { defaultUnit } from '../../toolbar/unit';
-import type { BadgeMetric, CustomMetric } from '../accordion_panel';
-import { GroupPanel } from '../accordion_panel';
-import { GroupStats } from '../accordion_panel/group_stats';
-import { EmptyGroupingComponent } from '../empty_resuls_panel';
-import { GroupingStyledContainer, GroupsUnitCount } from '../styles';
-import { GROUPS_UNIT } from '../translations';
-import type { GroupingTableAggregation, RawBucket } from '../types';
+import { defaultUnit, firstNonNullValue } from '../helpers';
+import { createGroupFilter } from './accordion_panel/helpers';
+import type { BadgeMetric, CustomMetric } from './accordion_panel';
+import { GroupPanel } from './accordion_panel';
+import { GroupStats } from './accordion_panel/group_stats';
+import { EmptyGroupingComponent } from './empty_resuls_panel';
+import { GroupingStyledContainer, GroupsUnitCount } from './styles';
+import { GROUPS_UNIT } from './translations';
+import type { GroupingTableAggregation, RawBucket } from './types';
 
-export interface GroupingContainerProps {
+export interface GroupedTablesProps {
   badgeMetricStats?: (fieldBucket: RawBucket) => BadgeMetric[];
   customMetricStats?: (fieldBucket: RawBucket) => CustomMetric[];
   data: GroupingTableAggregation &
@@ -48,6 +47,7 @@ export interface GroupingContainerProps {
     pageSize: number;
     onChangeItemsPerPage: (itemsPerPageNumber: number) => void;
     onChangePage: (pageNumber: number) => void;
+    itemsPerPageOptions: number[];
   };
   renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
   selectedGroup: string;
@@ -55,7 +55,7 @@ export interface GroupingContainerProps {
   unit?: (n: number) => string;
 }
 
-const GroupingContainerComponent = ({
+const GroupedTablesComponent = ({
   badgeMetricStats,
   customMetricStats,
   data,
@@ -68,7 +68,7 @@ const GroupingContainerComponent = ({
   selectedGroup,
   takeActionItems,
   unit = defaultUnit,
-}: GroupingContainerProps) => {
+}: GroupedTablesProps) => {
   const [trigger, setTrigger] = useState<
     Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket }>
   >({});
@@ -179,7 +179,7 @@ const GroupingContainerComponent = ({
               activePage={pagination.pageIndex}
               data-test-subj="grouping-table-pagination"
               itemsPerPage={pagination.pageSize}
-              itemsPerPageOptions={tableDefaults.itemsPerPageOptions}
+              itemsPerPageOptions={pagination.itemsPerPageOptions}
               onChangeItemsPerPage={pagination.onChangeItemsPerPage}
               onChangePage={pagination.onChangePage}
               pageCount={pageCount}
@@ -199,4 +199,4 @@ const GroupingContainerComponent = ({
   );
 };
 
-export const GroupingContainer = React.memo(GroupingContainerComponent);
+export const GroupedTables = React.memo(GroupedTablesComponent);

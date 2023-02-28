@@ -10,4 +10,17 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
   roots: ['<rootDir>/packages/kbn-securitysolution-alerts-grouping'],
+  coverageReporters: ['text', 'html'],
+  collectCoverageFrom: [
+    '<rootDir>/packages/kbn-securitysolution-alerts-grouping/**/*.{ts,tsx}',
+    '!<rootDir>/packages/kbn-securitysolution-alerts-grouping/**/*.test',
+    '!<rootDir>/packages/kbn-securitysolution-alerts-grouping/**/types/*',
+    '!<rootDir>/packages/kbn-securitysolution-alerts-grouping/**/*.type',
+    '!<rootDir>/packages/kbn-securitysolution-alerts-grouping/**/*.styles',
+    '!<rootDir>/packages/kbn-securitysolution-alerts-grouping/**/mocks/*',
+    '!<rootDir>/packages/kbn-securitysolution-alerts-grouping/**/*.config',
+    '!<rootDir>/packages/kbn-securitysolution-alerts-grouping/**/translations',
+    '!<rootDir>/packages/kbn-securitysolution-alerts-grouping/**/types/*',
+  ],
+  setupFilesAfterEnv: ['<rootDir>/packages/kbn-securitysolution-alerts-grouping/setup_test.ts'],
 };
