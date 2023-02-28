@@ -423,6 +423,7 @@ export class JobsListView extends Component {
                     alignItems: 'center',
                     minHeight: '60px',
                   }}
+                  gutterSize="none"
                 >
                   <EuiFlexItem grow={false}>
                     <MultiJobActions
