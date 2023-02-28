@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
@@ -31,7 +31,8 @@ export function useTransactionBreakdown({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const { transactionType, serviceName } = useApmServiceContext();
+  const { transactionType, serviceName, transactionTypeStatus } =
+    useApmServiceContext();
 
   const {
     data = { timeseries: undefined },
@@ -39,6 +40,10 @@ export function useTransactionBreakdown({
     status,
   } = useFetcher(
     (callApmApi) => {
+      if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
+        return Promise.resolve({ timeseries: undefined });
+      }
+
       if (serviceName && start && end && transactionType) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
@@ -65,6 +70,7 @@ export function useTransactionBreakdown({
       start,
       end,
       transactionType,
+      transactionTypeStatus,
       transactionName,
     ]
   );
