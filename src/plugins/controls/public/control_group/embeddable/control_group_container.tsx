@@ -16,7 +16,7 @@ import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/e
 import { OverlayRef } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { ReduxEmbeddablePackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
+import { ReduxToolsPackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 
 import {
   ControlGroupInput,
@@ -99,7 +99,7 @@ export class ControlGroupContainer extends Container<
   public onControlRemoved$: Subject<string>;
 
   constructor(
-    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    reduxToolsPackage: ReduxToolsPackage,
     initialInput: ControlGroupInput,
     parent?: Container,
     settings?: ControlGroupSettings
@@ -117,7 +117,7 @@ export class ControlGroupContainer extends Container<
     this.onControlRemoved$ = new Subject<string>();
 
     // build redux embeddable tools
-    const reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+    const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
       ControlGroupReduxState,
       typeof controlGroupReducers
     >({

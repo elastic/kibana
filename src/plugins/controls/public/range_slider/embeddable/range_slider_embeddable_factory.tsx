@@ -9,7 +9,7 @@
 import deepEqual from 'fast-deep-equal';
 
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
-import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import {
@@ -44,7 +44,7 @@ export class RangeSliderEmbeddableFactory
   public isEditable = () => Promise.resolve(false);
 
   public async create(initialInput: RangeSliderEmbeddableInput, parent?: IContainer) {
-    const reduxEmbeddablePackage = await lazyLoadReduxEmbeddablePackage();
+    const reduxEmbeddablePackage = await lazyLoadReduxToolsPackage();
     const { RangeSliderEmbeddable } = await import('./range_slider_embeddable');
 
     return Promise.resolve(

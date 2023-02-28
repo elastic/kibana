@@ -10,7 +10,7 @@ import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { Subject, Subscription } from 'rxjs';
 
-import { ReduxEmbeddablePackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
+import { ReduxToolsPackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 import {
   ViewMode,
   Container,
@@ -116,7 +116,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   constructor(
     initialInput: DashboardContainerInput,
-    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    reduxToolsPackage: ReduxToolsPackage,
     initialLastSavedInput?: DashboardContainerInput,
     dashboardCreationStartTime?: number,
     parent?: Container,
@@ -152,7 +152,7 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
     const diffingMiddleware = startDiffingDashboardState.bind(this)(creationOptions);
 
     // build redux embeddable tools
-    const reduxTools = reduxEmbeddablePackage.createTools<
+    const reduxTools = reduxToolsPackage.createReduxEmbeddableTools<
       DashboardReduxState,
       typeof dashboardContainerReducers
     >({

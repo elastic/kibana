@@ -26,7 +26,7 @@ import { i18n } from '@kbn/i18n';
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
 import {
   ControlInput,
@@ -103,7 +103,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
   private cleanupStateTools: () => void;
 
   constructor(
-    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    reduxToolsPackage: ReduxToolsPackage,
     input: OptionsListEmbeddableInput,
     output: ControlOutput,
     parent?: IContainer
@@ -118,7 +118,7 @@ export class OptionsListEmbeddable extends Embeddable<OptionsListEmbeddableInput
     this.loadMoreSubject = new Subject<number>();
 
     // build redux embeddable tools
-    const reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+    const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
       OptionsListReduxState,
       typeof optionsListReducers
     >({

@@ -16,6 +16,7 @@ export {
   type AddDataControlProps,
   type AddOptionsListControlProps,
   type ControlGroupInputBuilder,
+  controlGroupInputBuilder,
 } from './external_api/control_group_input_builder';
 
 export type { ControlGroupAPI, AwaitingControlGroupAPI } from './external_api/control_group_api';

@@ -40,12 +40,13 @@ export {
 } from './components';
 
 export {
-  lazyLoadReduxEmbeddablePackage,
+  lazyLoadReduxToolsPackage,
   cleanFiltersForSerialize,
   type ReduxEmbeddableState,
   type ReduxEmbeddableTools,
-  type ReduxEmbeddablePackage,
-} from './redux_embeddables';
+  type ReduxTools,
+  type ReduxToolsPackage,
+} from './redux_tools';
 
 export { createReduxTools } from './redux_tools/create_redux_tools';
 

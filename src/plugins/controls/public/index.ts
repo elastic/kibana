@@ -42,6 +42,7 @@ export {
   type ControlGroupAPI,
   type AwaitingControlGroupAPI,
   type ControlGroupOutput,
+  controlGroupInputBuilder,
 } from './control_group';
 
 export {

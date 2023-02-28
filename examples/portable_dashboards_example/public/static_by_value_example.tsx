@@ -11,12 +11,9 @@ import React from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import type { DashboardPanelMap } from '@kbn/dashboard-plugin/common';
-import { LazyDashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
-import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 
 import panelsJson from './static_by_value_example_panels.json';
-
-const DashboardContainerRenderer = withSuspense(LazyDashboardContainerRenderer);
 
 export const StaticByValueExample = () => {
   return (
@@ -29,7 +26,7 @@ export const StaticByValueExample = () => {
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
-        <DashboardContainerRenderer
+        <DashboardRenderer
           getCreationOptions={async () => {
             return {
               initialInput: {
@@ -38,9 +35,6 @@ export const StaticByValueExample = () => {
                 panels: panelsJson as DashboardPanelMap,
               },
             };
-          }}
-          onDashboardContainerLoaded={(container) => {
-            return; // this example is static, so don't need to do anything with the dashboard container
           }}
         />
       </EuiPanel>

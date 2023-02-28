@@ -15,7 +15,7 @@ import {
 } from '@kbn/controls-plugin/common';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import { lazyLoadReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { type ControlGroupContainer, ControlGroupOutput } from '@kbn/controls-plugin/public';
 
 import { DashboardContainerInput } from '../../../../common';
@@ -84,7 +84,7 @@ export const createDashboard = async (
   // Lazy load required systems and Dashboard saved object.
   // --------------------------------------------------------------------------------------
 
-  const reduxEmbeddablePackagePromise = lazyLoadReduxEmbeddablePackage();
+  const reduxEmbeddablePackagePromise = lazyLoadReduxToolsPackage();
   const defaultDataViewAssignmentPromise = dataViews.getDefaultDataView();
   const dashboardSavedObjectPromise = savedObjectId
     ? loadDashboardStateFromSavedObject({ id: savedObjectId })

@@ -55,3 +55,11 @@ export interface ReduxToolsReducers<ReduxStateType extends unknown> {
    */
   [key: string]: CaseReducer<ReduxStateType, PayloadAction<any>>;
 }
+
+/**
+ * The package type is lazily exported from presentation_util and should contain all methods needed to use the redux embeddable tools.
+ */
+export interface ReduxToolsPackage {
+  createReduxTools: typeof import('./create_redux_tools')['createReduxTools'];
+  createReduxEmbeddableTools: typeof import('./redux_embeddables/create_redux_embeddable_tools')['createReduxEmbeddableTools'];
+}

@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
 import {
   ControlInput,
@@ -103,7 +103,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
   private cleanupStateTools: () => void;
 
   constructor(
-    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    reduxToolsPackage: ReduxToolsPackage,
     input: RangeSliderEmbeddableInput,
     output: ControlOutput,
     parent?: IContainer
@@ -113,7 +113,7 @@ export class RangeSliderEmbeddable extends Embeddable<RangeSliderEmbeddableInput
     // Destructure controls services
     ({ data: this.dataService, dataViews: this.dataViewsService } = pluginServices.getServices());
 
-    const reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+    const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
       RangeSliderReduxState,
       typeof rangeSliderReducers
     >({

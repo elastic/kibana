@@ -10,7 +10,7 @@ import _ from 'lodash';
 import { debounceTime, first, map } from 'rxjs/operators';
 import moment from 'moment-timezone';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
-import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
+import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import React, { createContext, useContext } from 'react';
@@ -79,7 +79,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
   private readonly waitForControlOutputConsumersToLoad$;
 
   constructor(
-    reduxEmbeddablePackage: ReduxEmbeddablePackage,
+    reduxToolsPackage: ReduxToolsPackage,
     input: TimeSliderControlEmbeddableInput,
     output: ControlOutput,
     parent?: IContainer
@@ -102,7 +102,7 @@ export class TimeSliderControlEmbeddable extends Embeddable<
       timeRangeBounds[TO_INDEX],
       this.getTimezone()
     );
-    const reduxEmbeddableTools = reduxEmbeddablePackage.createTools<
+    const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
       TimeSliderReduxState,
       typeof timeSliderReducers
     >({
