@@ -49,8 +49,7 @@ export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
     }
 
     // Actual `installed_version` is buried in SO, root `version` is latest package version available
-    // SO should be available as PackageListItem should be InstalledRegistry<RegistrySearchResult>
-    const installedPackageVersion = fleetPackage.savedObject?.attributes?.install_version;
+    const installedPackageVersion = fleetPackage.savedObject.attributes.install_version;
     const latestPackageVersion = fleetPackage.version;
 
     // Policy templates correspond to package's integrations.

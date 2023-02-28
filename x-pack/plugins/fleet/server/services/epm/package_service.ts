@@ -59,11 +59,15 @@ export interface PackageClient {
     packageVersion: string
   ): Promise<{ packageInfo: ArchivePackage; paths: string[] }>;
 
-  getPackages(
-    excludeInstallStatus?: false,
-    category?: CategoryId,
-    prerelease?: false
-  ): Promise<PackageList>;
+  getPackages({
+    excludeInstallStatus,
+    category,
+    prerelease,
+  }: {
+    excludeInstallStatus?: false;
+    category?: CategoryId;
+    prerelease?: false;
+  }): Promise<PackageList>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,
@@ -146,11 +150,15 @@ class PackageClientImpl implements PackageClient {
     return getPackage(packageName, packageVersion, options);
   }
 
-  public async getPackages(
-    excludeInstallStatus?: false,
-    category?: CategoryId,
-    prerelease?: false
-  ) {
+  public async getPackages({
+    excludeInstallStatus,
+    category,
+    prerelease,
+  }: {
+    excludeInstallStatus?: false;
+    category?: CategoryId;
+    prerelease?: false;
+  }) {
     await this.#runPreflight();
     return getPackages({
       savedObjectsClient: this.internalSoClient,
