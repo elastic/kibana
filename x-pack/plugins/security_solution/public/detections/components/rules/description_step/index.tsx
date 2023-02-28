@@ -6,7 +6,6 @@
  */
 
 import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
 
@@ -14,6 +13,7 @@ import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-a
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
+import { isEmpty, chunk, get, pick, isNumber } from 'lodash/fp';
 import { buildRelatedIntegrationsDescription } from '../related_integrations/integrations_description';
 import type {
   RelatedIntegrationArray,
@@ -54,6 +54,7 @@ import { THREAT_QUERY_LABEL } from './translations';
 import { filterEmptyThreats } from '../../../../detection_engine/rule_creation_ui/pages/rule_creation/helpers';
 import { useLicense } from '../../../../common/hooks/use_license';
 import type { LicenseService } from '../../../../../common/license';
+import type { UpdateMachineLearningJob } from '../ml_jobs_description/admin/ml_admin_jobs_description';
 
 const DescriptionListContainer = styled(EuiDescriptionList)`
   &.euiDescriptionList--column .euiDescriptionList__title {
@@ -70,7 +71,7 @@ interface StepRuleDescriptionProps<T> {
   data: unknown;
   indexPatterns?: DataViewBase;
   schema: FormSchema<T>;
-  jobInstallationDisabled?: boolean;
+  updateMachineLearningJob?: UpdateMachineLearningJob;
 }
 
 export const StepRuleDescriptionComponent = <T,>({
@@ -78,7 +79,7 @@ export const StepRuleDescriptionComponent = <T,>({
   columns = 'multi',
   indexPatterns,
   schema,
-  jobInstallationDisabled,
+  updateMachineLearningJob,
 }: StepRuleDescriptionProps<T>) => {
   const kibana = useKibana();
   const license = useLicense();
@@ -92,7 +93,7 @@ export const StepRuleDescriptionComponent = <T,>({
         buildMlJobsDescription(
           get(key, data) as string[],
           (get(key, schema) as { label: string }).label,
-          !!jobInstallationDisabled
+          updateMachineLearningJob
         ),
       ];
     }

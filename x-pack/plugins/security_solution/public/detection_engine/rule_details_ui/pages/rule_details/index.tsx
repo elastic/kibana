@@ -22,7 +22,6 @@ import { i18n as i18nTranslate } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { noop, omit } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Switch, useParams } from 'react-router-dom';
 import type { ConnectedProps } from 'react-redux';
@@ -32,6 +31,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { isEqual, noop, omit } from 'lodash/fp';
 
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
@@ -57,6 +57,7 @@ import {
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
 import type { Rule } from '../../../rule_management/logic';
+import { patchRule } from '../../../rule_management/logic';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
 import { StepAboutRuleToggleDetails } from '../../../../detections/components/rules/step_about_rule_details';
@@ -136,6 +137,7 @@ import { EditRuleSettingButtonLink } from '../../../../detections/pages/detectio
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { useBulkDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/use_bulk_duplicate_confirmation';
 import { BulkActionDuplicateExceptionsConfirmation } from '../../../rule_management_ui/components/rules_table/bulk_actions/bulk_duplicate_exceptions_confirmation';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -185,6 +187,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     timelines: timelinesUi,
     spaces: spacesApi,
   } = useKibana().services;
+  const { addError } = useAppToasts();
 
   const dispatch = useDispatch();
   const containerElement = useRef<HTMLDivElement | null>(null);
@@ -245,11 +248,41 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const [rule, setRule] = useState<Rule | null>(null);
   const isLoading = ruleLoading && rule == null;
 
-  const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
-  const startMlJobsIfNeeded = useCallback(
-    () => startMlJobs(rule?.machine_learning_job_id),
-    [rule, startMlJobs]
+  const updateMachineLearningJobId = useCallback(
+    async (newJobIds: string[]) => {
+      if (!rule) return null;
+
+      const jobIds = rule.machine_learning_job_id;
+
+      if (!isEqual(jobIds, newJobIds)) {
+        setRule((currentRule) =>
+          currentRule ? { ...currentRule, machine_learning_job_id: newJobIds } : currentRule
+        );
+
+        return patchRule({
+          ruleProperties: {
+            rule_id: rule.rule_id,
+            machine_learning_job_id: newJobIds,
+          },
+        }).catch((e) => {
+          addError(e, { title: i18n.UPDATE_MACHINE_LEARNING_JOB_ERROR });
+          return e;
+        });
+      }
+    },
+    [addError, setRule, rule]
   );
+
+  const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
+  const startMlJobsIfNeeded = useCallback(async () => {
+    const newJobIds = await startMlJobs(rule?.machine_learning_job_id);
+
+    if (newJobIds) {
+      await updateMachineLearningJobId(newJobIds);
+    }
+
+    return newJobIds;
+  }, [rule, startMlJobs, updateMachineLearningJobId]);
 
   const ruleDetailTabs = useMemo(
     (): Record<RuleDetailTabs, NavTab> => ({
@@ -568,6 +601,18 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     );
   }, [lastExecutionStatus, lastExecutionDate, lastExecutionMessage, ruleLoading]);
 
+  const handleOnChangeMachineLearningJobs = useCallback(
+    async (originalJobId: string, updatedJobId: string) => {
+      const jobIds = rule?.machine_learning_job_id;
+      const newJobIds = jobIds?.map((id) => (id === originalJobId ? updatedJobId : id));
+
+      if (newJobIds) {
+        await updateMachineLearningJobId(newJobIds);
+      }
+    },
+    [rule?.machine_learning_job_id, updateMachineLearningJobId]
+  );
+
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
       if (!x) {
@@ -784,6 +829,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             kibanaDataViews={dataViewOptions}
                             indicesConfig={indicesConfig}
                             threatIndicesConfig={threatIndicesConfig}
+                            updateMachineLearningJob={handleOnChangeMachineLearningJobs}
                           />
                         )}
                       </StepPanel>

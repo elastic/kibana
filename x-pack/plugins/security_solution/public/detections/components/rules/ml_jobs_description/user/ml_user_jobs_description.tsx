@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import { EuiLoadingSpinner } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { memo } from 'react';
-
+import { matchJobId } from '../../../../../common/components/ml/anomaly/helpers';
+import * as i18n from '../translations';
 import { useInstalledSecurityJobs } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
+import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 
 import { MlUserJobDescription } from './ml_user_job_description';
 
@@ -18,19 +21,31 @@ interface MlUserJobsDescriptionProps {
 }
 
 const MlUserJobsDescriptionComponent: FC<MlUserJobsDescriptionProps> = ({ jobIds, readOnly }) => {
-  const { isMlUser, jobs } = useInstalledSecurityJobs();
+  const spaceId = useSpaceId();
+  const { isMlUser, jobs, loading } = useInstalledSecurityJobs();
 
-  if (!isMlUser) {
+  if (!isMlUser || loading) {
     return null;
   }
 
-  const relevantJobs = jobs.filter((job) => jobIds.includes(job.id));
+  if (loading) {
+    return <EuiLoadingSpinner size="m" />;
+  }
+
+  const relevantJobs = jobIds.map((jobId) => ({
+    job: jobs.find((job) => matchJobId(job.id, jobId, spaceId)),
+    jobId,
+  }));
 
   return (
     <>
-      {relevantJobs.map((job) => (
-        <MlUserJobDescription key={job.id} job={job} readOnly={readOnly} />
-      ))}
+      {relevantJobs.map(({ job, jobId }) =>
+        job ? (
+          <MlUserJobDescription key={job.id} job={job} readOnly={readOnly} />
+        ) : (
+          <span>{i18n.JOB_NOT_FOUND}</span>
+        )
+      )}
     </>
   );
 };

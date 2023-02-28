@@ -37,7 +37,7 @@ const useEnableDataFeedMock = (useEnableDataFeed as jest.Mock).mockReturnValue({
 describe('MlAdminJobDescription', () => {
   it('should enable datafeed and call refreshJob when enabling job', async () => {
     const refreshJobSpy = jest.fn();
-    const enableDatafeedSpy = jest.fn();
+    const enableDatafeedSpy = jest.fn().mockReturnValue({});
     useEnableDataFeedMock.mockReturnValueOnce({
       enableDatafeed: enableDatafeedSpy,
     });

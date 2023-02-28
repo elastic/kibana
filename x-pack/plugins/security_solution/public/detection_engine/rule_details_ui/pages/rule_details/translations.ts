@@ -69,3 +69,10 @@ export const DELETED_RULE = i18n.translate(
     defaultMessage: 'Deleted rule',
   }
 );
+
+export const UPDATE_MACHINE_LEARNING_JOB_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.updateMachineLearningJobError',
+  {
+    defaultMessage: 'Error updating machine learning job',
+  }
+);

@@ -29,7 +29,7 @@ const useSecurityJobsMock = useSecurityJobs as jest.Mock;
 describe('MlAdminJobsDescription', () => {
   it('should render null if admin permissions absent', () => {
     useSecurityJobsMock.mockReturnValueOnce({ jobs: [], isMlAdmin: false });
-    const { container } = render(<MlAdminJobsDescription jobIds={['mock-1']} readOnly={false} />);
+    const { container } = render(<MlAdminJobsDescription jobIds={['mock-1']} />);
 
     expect(container.firstChild).toBeNull();
   });
@@ -39,7 +39,7 @@ describe('MlAdminJobsDescription', () => {
       jobs: [{ id: 'mock-1' }, { id: 'mock-2' }, { id: 'mock-3' }],
       isMlAdmin: true,
     });
-    render(<MlAdminJobsDescription jobIds={['mock-1', 'mock-2', 'mock-4']} readOnly={false} />);
+    render(<MlAdminJobsDescription jobIds={['mock-1', 'mock-2', 'mock-4']} />);
     const expectedJobs = screen.getAllByTestId('adminMock');
 
     expect(expectedJobs).toHaveLength(2);

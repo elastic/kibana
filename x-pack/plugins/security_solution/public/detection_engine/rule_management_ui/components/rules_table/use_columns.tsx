@@ -52,7 +52,7 @@ interface ColumnsProps {
   hasCRUDPermissions: boolean;
   isLoadingJobs: boolean;
   mlJobs: SecurityJob[];
-  startMlJobs: (jobIds: string[] | undefined) => Promise<string[] | undefined>;
+  startMlJobs: (rule: Rule) => Promise<string[] | undefined>;
 }
 
 interface ActionColumnsProps {
@@ -89,7 +89,7 @@ const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): Ta
           <RuleSwitch
             id={rule.id}
             enabled={rule.enabled}
-            startMlJobsIfNeeded={() => startMlJobs(rule.machine_learning_job_id)}
+            startMlJobsIfNeeded={() => startMlJobs(rule)}
             isDisabled={
               !canEditRuleWithActions(rule, hasActionsPrivileges) ||
               !hasCRUDPermissions ||

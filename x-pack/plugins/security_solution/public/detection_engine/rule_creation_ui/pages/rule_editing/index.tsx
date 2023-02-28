@@ -19,9 +19,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { noop } from 'lodash';
 
-import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { RulePreview } from '../../../../detections/components/rules/rule_preview';
 import type { RuleUpdateProps } from '../../../../../common/detection_engine/rule_schema';
 import { useRule, useUpdateRule } from '../../../rule_management/logic';
@@ -98,7 +98,9 @@ const EditRulePageComponent: FC = () => {
   const { navigateToApp } = useKibana().services.application;
 
   const { detailName: ruleId } = useParams<{ detailName: string }>();
+  // HERE aqui que eu vou
   const { data: rule, isLoading: ruleLoading } = useRule(ruleId);
+
   const loading = ruleLoading || userInfoLoading || listsConfigLoading;
 
   const { isSavedQueryLoading, savedQueryBar, savedQuery } = useGetSavedQuery(rule?.saved_id, {
@@ -237,6 +239,7 @@ const EditRulePageComponent: FC = () => {
                   onRuleDataChange={onDataChange}
                   onPreviewDisabledStateChange={setIsPreviewDisabled}
                   defaultSavedQuery={savedQuery}
+                  // updateMachineLearningJob={updateMachineLearningJob}
                 />
               )}
               <EuiSpacer />
@@ -322,20 +325,20 @@ const EditRulePageComponent: FC = () => {
       rule?.immutable,
       rule?.type,
       loading,
-      defineStep.data,
-      isLoading,
       isSavedQueryLoading,
       defineStepDataWithSavedQuery,
+      isLoading,
       setFormHook,
       dataViewOptions,
       indicesConfig,
       threatIndicesConfig,
       onDataChange,
+      savedQuery,
       aboutStep.data,
+      defineStep.data,
       scheduleStep.data,
       actionsStep.data,
       actionMessageParams,
-      savedQuery,
     ]
   );
 

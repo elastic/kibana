@@ -22,13 +22,13 @@ import React, { memo, useCallback, useState, useEffect, useMemo } from 'react';
 
 import styled from 'styled-components';
 import { i18n as i18nCore } from '@kbn/i18n';
-import { isEqual, isEmpty, omit } from 'lodash';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import usePrevious from 'react-use/lib/usePrevious';
 
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { isEqual, isEmpty, omit } from 'lodash';
 import { useSetFieldValueWithCallback } from '../../../../common/utils/use_set_field_value_cb';
 import { useRuleFromTimeline } from '../../../containers/detection_engine/rules/use_rule_from_timeline';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -90,6 +90,7 @@ import { GroupByFields } from '../group_by_fields';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { minimumLicenseForSuppression } from '../../../../../common/detection_engine/rule_schema';
 import { DurationInput } from '../duration_input';
+import type { UpdateMachineLearningJob } from '../ml_jobs_description/admin/ml_admin_jobs_description';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -103,7 +104,7 @@ interface StepDefineRuleProps extends RuleStepProps {
   onRuleDataChange?: (data: DefineStepRule) => void;
   onPreviewDisabledStateChange?: (isDisabled: boolean) => void;
   defaultSavedQuery?: SavedQuery;
-  jobInstallationDisabled?: boolean;
+  updateMachineLearningJob?: UpdateMachineLearningJob;
 }
 
 export const MyLabelButton = styled(EuiButtonEmpty)`
@@ -141,7 +142,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   onRuleDataChange,
   onPreviewDisabledStateChange,
   defaultSavedQuery,
-  jobInstallationDisabled,
+  updateMachineLearningJob,
 }) => {
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -783,7 +784,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         indexPatterns={indexPattern}
         schema={filterRuleFieldsForType(schema, ruleType)}
         data={filterRuleFieldsForType(dataForDescription, ruleType)}
-        jobInstallationDisabled={jobInstallationDisabled}
+        updateMachineLearningJob={updateMachineLearningJob}
       />
     </StepContentWrapper>
   ) : (

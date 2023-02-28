@@ -13,28 +13,43 @@ import type { SecurityJob } from '../../../../../common/components/ml_popover/ty
 import { JobSwitch } from '../../../../../common/components/ml_popover/jobs_table/job_switch';
 
 import { MlJobItem } from '../ml_job_item';
+import type { UpdateMachineLearningJob } from './ml_admin_jobs_description';
 
 interface MlAdminJobDescriptionProps {
   job: SecurityJob;
+  ruleJobId: string;
   loading: boolean;
   refreshJob: (job: SecurityJob) => void;
   readOnly: boolean;
+  onUpdateJobId?: UpdateMachineLearningJob;
 }
 
 const MlAdminJobDescriptionComponent: FC<MlAdminJobDescriptionProps> = ({
   job,
+  ruleJobId,
   loading,
   refreshJob,
   readOnly,
+  onUpdateJobId,
 }) => {
   const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
 
   const handleJobStateChange = useCallback(
     async (_, latestTimestampMs: number, enable: boolean) => {
-      await enableDatafeed(job, latestTimestampMs, enable);
+      const { enabledJobId } = await enableDatafeed(job, latestTimestampMs, enable);
+
+      /**
+       * There are 2 circumstances where enabledJobId is different than ruleJobId
+       * 1. When the job gets installed (it receives the space prefix)
+       * 2. When the job is installed but the rule has a reference to the module id (without prefix)
+       */
+      if (onUpdateJobId && enabledJobId !== ruleJobId) {
+        await onUpdateJobId(ruleJobId, enabledJobId);
+      }
+
       refreshJob(job);
     },
-    [enableDatafeed, job, refreshJob]
+    [enableDatafeed, job, ruleJobId, onUpdateJobId, refreshJob]
   );
 
   const switchComponent = useMemo(

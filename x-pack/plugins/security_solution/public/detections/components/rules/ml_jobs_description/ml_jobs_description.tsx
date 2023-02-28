@@ -12,26 +12,32 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { hasMlAdminPermissions } from '../../../../../common/machine_learning/has_ml_admin_permissions';
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 
+import type { UpdateMachineLearningJob } from './admin/ml_admin_jobs_description';
 import { MlAdminJobsDescription } from './admin/ml_admin_jobs_description';
 import { MlUserJobsDescription } from './user/ml_user_jobs_description';
 
 interface MlJobsDescriptionProps {
   jobIds: string[];
-  readOnly: boolean;
+  updateMachineLearningJob?: UpdateMachineLearningJob;
 }
 
-const MlJobsDescriptionComponent: FC<MlJobsDescriptionProps> = ({ jobIds, readOnly }) => {
+const MlJobsDescriptionComponent: FC<MlJobsDescriptionProps> = ({
+  jobIds,
+  updateMachineLearningJob,
+}) => {
   const mlCapabilities = useMlCapabilities();
 
   const isMlUser = hasMlUserPermissions(mlCapabilities);
   const isMlAdmin = hasMlAdminPermissions(mlCapabilities);
 
   if (isMlAdmin) {
-    return <MlAdminJobsDescription jobIds={jobIds} readOnly={readOnly} />;
+    return (
+      <MlAdminJobsDescription jobIds={jobIds} updateMachineLearningJob={updateMachineLearningJob} />
+    );
   }
 
   if (isMlUser) {
-    return <MlUserJobsDescription jobIds={jobIds} readOnly={readOnly} />;
+    return <MlUserJobsDescription jobIds={jobIds} readOnly={!updateMachineLearningJob} />;
   }
 
   return null;

@@ -7,12 +7,15 @@
 import React from 'react';
 import type { ListItems } from './types';
 import { MlJobsDescription } from '../ml_jobs_description';
+import type { UpdateMachineLearningJob } from '../ml_jobs_description/admin/ml_admin_jobs_description';
 
 export const buildMlJobsDescription = (
   jobIds: string[],
   label: string,
-  readOnly: boolean
+  updateMachineLearningJob?: UpdateMachineLearningJob
 ): ListItems => ({
   title: label,
-  description: <MlJobsDescription jobIds={jobIds} readOnly={readOnly} />,
+  description: (
+    <MlJobsDescription jobIds={jobIds} updateMachineLearningJob={updateMachineLearningJob} />
+  ),
 });

@@ -33,3 +33,14 @@ export const ML_ADMIN_REQUIRED = i18n.translate(
     defaultMessage: 'ML Admin Permissions required to perform this action',
   }
 );
+
+export const JOB_NOT_FOUND = (jobId: number) =>
+  i18n.translate(
+    'xpack.securitySolution.detectionEngine.ruleDescription.mlAdminPermissionsRequiredDescription',
+    {
+      defaultMessage: 'Job {id} not found',
+      values: {
+        id: jobId,
+      },
+    }
+  );

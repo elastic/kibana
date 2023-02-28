@@ -1133,3 +1133,10 @@ export const SAVED_QUERY_LOAD_ERROR_TOAST = i18n.translate(
     defaultMessage: 'Failed to load the saved query',
   }
 );
+
+export const UPDATE_MACHINE_LEARNING_JOB_ERROR = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.updateMachineLearningJobError',
+  {
+    defaultMessage: 'Error updating machine learning job',
+  }
+);

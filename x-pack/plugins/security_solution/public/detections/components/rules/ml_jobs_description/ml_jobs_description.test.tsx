@@ -26,14 +26,14 @@ const hasMlUserPermissionsMock = hasMlUserPermissions as jest.Mock;
 
 describe('MlUserJobDescription', () => {
   it('should render null if no ML permissions available', () => {
-    const { container } = render(<MlJobsDescription jobIds={[]} readOnly={false} />);
+    const { container } = render(<MlJobsDescription jobIds={[]} />);
 
     expect(container.firstChild).toBeNull();
   });
 
   it('should render user jobs component if ML permissions is for user only', () => {
     hasMlUserPermissionsMock.mockReturnValueOnce(true);
-    render(<MlJobsDescription jobIds={[]} readOnly={false} />);
+    render(<MlJobsDescription jobIds={[]} />);
 
     expect(screen.getByTestId('userJobs')).toBeInTheDocument();
     expect(screen.queryByTestId('adminJobs')).not.toBeInTheDocument();
@@ -41,7 +41,7 @@ describe('MlUserJobDescription', () => {
 
   it('should render admin jobs component if ML permissions is for admin', () => {
     (hasMlAdminPermissions as jest.Mock).mockReturnValueOnce(true);
-    render(<MlJobsDescription jobIds={[]} readOnly={false} />);
+    render(<MlJobsDescription jobIds={[]} />);
 
     expect(screen.getByTestId('adminJobs')).toBeInTheDocument();
     expect(screen.queryByTestId('userJobs')).not.toBeInTheDocument();

@@ -13,11 +13,13 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useRef } from 'react';
+import { isEqual } from 'lodash/fp';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useValueChanged } from '../../../../common/hooks/use_value_changed';
 import { PrePackagedRulesPrompt } from '../../../../detections/components/rules/pre_packaged_rules/load_empty_prompt';
 import type { Rule } from '../../../rule_management/logic';
+import { patchRule } from '../../../rule_management/logic';
 import * as i18n from '../../../../detections/pages/detection_engine/rules/translations';
 import type { EuiBasicTableOnChange } from '../../../../detections/pages/detection_engine/rules/types';
 import { BulkActionDryRunConfirmation } from './bulk_actions/bulk_action_dry_run_confirmation';
@@ -41,6 +43,7 @@ import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
 import type { FindRulesSortField } from '../../../../../common/detection_engine/rule_management';
 import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/use_upgrade_security_packages';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 
 const INITIAL_SORT_FIELD = 'enabled';
 
@@ -153,19 +156,51 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     [setPage, setPerPage, setSortingOptions]
   );
 
+  const { addError } = useAppToasts();
   const { loading: isLoadingJobs, jobs: mlJobs, startMlJobs } = useStartMlJobs();
+
+  const updateMachineLearningJobId = useCallback(
+    async (rule: Rule, newJobIds: string[]) => {
+      if (!isEqual(rule.machine_learning_job_id, newJobIds)) {
+        return patchRule({
+          ruleProperties: {
+            rule_id: rule.rule_id,
+            machine_learning_job_id: newJobIds,
+          },
+        }).catch((e) => {
+          addError(e, { title: i18n.UPDATE_MACHINE_LEARNING_JOB_ERROR });
+          return e;
+        });
+      }
+    },
+    [addError]
+  );
+
+  const startMlJobsAndUpdateRule = useCallback(
+    async (rule: Rule) => {
+      const newJobIds = await startMlJobs(rule.machine_learning_job_id);
+
+      if (newJobIds) {
+        await updateMachineLearningJobId(rule, newJobIds);
+      }
+
+      return newJobIds;
+    },
+    [startMlJobs, updateMachineLearningJobId]
+  );
+
   const rulesColumns = useRulesColumns({
     hasCRUDPermissions: hasPermissions,
     isLoadingJobs,
     mlJobs,
-    startMlJobs,
+    startMlJobs: startMlJobsAndUpdateRule,
     showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
   });
   const monitoringColumns = useMonitoringColumns({
     hasCRUDPermissions: hasPermissions,
     isLoadingJobs,
     mlJobs,
-    startMlJobs,
+    startMlJobs: startMlJobsAndUpdateRule,
     showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
   });
 

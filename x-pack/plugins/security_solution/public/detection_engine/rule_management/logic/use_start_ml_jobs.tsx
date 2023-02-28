@@ -11,6 +11,8 @@ import type { SecurityJob } from '../../../common/components/ml_popover/types';
 import { isJobStarted } from '../../../../common/machine_learning/helpers';
 import { useSecurityJobs } from '../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useEnableDataFeed } from '../../../common/components/ml_popover/hooks/use_enable_data_feed';
+import { matchJobId } from '../../../common/components/ml/anomaly/helpers';
+import { useSpaceId } from '../../../common/hooks/use_space_id';
 
 export interface ReturnUseStartMlJobs {
   loading: boolean;
@@ -23,6 +25,7 @@ export const useStartMlJobs = (): ReturnUseStartMlJobs => {
   const { enableDatafeed, isLoading: isLoadingEnableDataFeed } = useEnableDataFeed();
   const { loading: isLoadingJobs, jobs: mlJobs, refetch: refetchJobs } = useSecurityJobs();
   const [isStartingJobs, setIsStartingJobs] = useState(false);
+  const spaceId = useSpaceId();
   const startMlJobs = useCallback(
     async (jobIds: string[] | undefined) => {
       if (isLoadingJobs || isLoadingEnableDataFeed) {
@@ -35,9 +38,18 @@ export const useStartMlJobs = (): ReturnUseStartMlJobs => {
 
       // The error handling happens inside `enableDatafeed`, so no need to do try/catch here
       setIsStartingJobs(true);
-      const ruleJobs = mlJobs.filter((job) => jobIds.includes(job.id));
+
+      const ruleJobs = jobIds.map((ruleJobId) => ({
+        job: mlJobs.find((job) => matchJobId(job.id, ruleJobId, spaceId)),
+        ruleJobId,
+      }));
+
       const enabledJobIds = await Promise.all(
-        ruleJobs.map(async (job) => {
+        ruleJobs.map(async ({ job, ruleJobId }) => {
+          if (!job) {
+            return ruleJobId;
+          }
+
           if (isJobStarted(job.jobState, job.datafeedState)) {
             return job.id;
           }
@@ -51,7 +63,7 @@ export const useStartMlJobs = (): ReturnUseStartMlJobs => {
       setIsStartingJobs(false);
       return enabledJobIds;
     },
-    [enableDatafeed, isLoadingEnableDataFeed, isLoadingJobs, mlJobs, refetchJobs]
+    [enableDatafeed, isLoadingEnableDataFeed, isLoadingJobs, mlJobs, refetchJobs, spaceId]
   );
 
   return {

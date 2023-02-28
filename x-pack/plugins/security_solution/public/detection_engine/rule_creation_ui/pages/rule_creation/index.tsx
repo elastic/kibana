@@ -301,7 +301,10 @@ const CreateRulePageComponent: React.FC = () => {
 
             const createdRule = await createRule(
               formatRule<RuleCreateProps>(
-                { ...defineStep.data, machineLearningJobId: createdJobIds ?? [] },
+                {
+                  ...defineStep.data,
+                  machineLearningJobId: createdJobIds ?? defineStep.data.machineLearningJobId,
+                },
                 aboutStep.data,
                 scheduleStep.data,
                 actionsStep.data
@@ -318,7 +321,7 @@ const CreateRulePageComponent: React.FC = () => {
         }
       }
     },
-    [updateCurrentDataState, goToStep, createRule, navigateToApp, startMlJobs, addSuccess]
+    [updateCurrentDataState, goToStep, createRule, addSuccess, navigateToApp, startMlJobs]
   );
 
   const getAccordionType = useCallback(
@@ -447,7 +450,6 @@ const CreateRulePageComponent: React.FC = () => {
                             onSubmit={() => submitStep(RuleStep.defineRule)}
                             kibanaDataViews={dataViewOptions}
                             descriptionColumns="singleSplit"
-                            jobInstallationDisabled
                             // We need a key to make this component remount when edit/view mode is toggled
                             // https://github.com/elastic/kibana/pull/132834#discussion_r881705566
                             key={isShouldRerenderStep(RuleStep.defineRule, activeStep)}
