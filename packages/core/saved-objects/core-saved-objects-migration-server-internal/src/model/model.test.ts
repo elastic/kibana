@@ -13,7 +13,7 @@ import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal'
 import type {
   BaseState,
   CalculateExcludeFiltersState,
-  CheckCompatibleMappingsState,
+  UpdateSourceMappingsState,
   CheckTargetMappingsState,
   CheckUnknownDocumentsState,
   CheckVersionIndexReadyActions,
@@ -1299,12 +1299,12 @@ describe('migrations v2 model', () => {
             sourceIndexMappings: actualMappings,
           };
 
-          test('WAIT_FOR_YELLOW_SOURCE -> CHECK_COMPATIBLE_MAPPINGS', () => {
+          test('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS', () => {
             const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
             const newState = model(changedMappingsState, res);
 
             expect(newState).toMatchObject({
-              controlState: 'CHECK_COMPATIBLE_MAPPINGS',
+              controlState: 'UPDATE_SOURCE_MAPPINGS',
               sourceIndex: Option.some('.kibana_7.11.0_001'),
               sourceIndexMappings: actualMappings,
             });
@@ -1330,10 +1330,10 @@ describe('migrations v2 model', () => {
       });
     });
 
-    describe('CHECK_COMPATIBLE_MAPPINGS', () => {
-      const checkCompatibleMappingsState: CheckCompatibleMappingsState = {
+    describe('UPDATE_SOURCE_MAPPINGS', () => {
+      const checkCompatibleMappingsState: UpdateSourceMappingsState = {
         ...baseState,
-        controlState: 'CHECK_COMPATIBLE_MAPPINGS',
+        controlState: 'UPDATE_SOURCE_MAPPINGS',
         sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
         sourceIndexMappings: baseState.targetIndexMappings,
         aliases: {
@@ -1343,8 +1343,8 @@ describe('migrations v2 model', () => {
       };
 
       describe('if action succeeds', () => {
-        test('CHECK_COMPATIBLE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
-          const res: ResponseType<'CHECK_COMPATIBLE_MAPPINGS'> = Either.right(
+        test('UPDATE_SOURCE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS'> = Either.right(
             'update_mappings_succeeded' as const
           );
           const newState = model(checkCompatibleMappingsState, res);
@@ -1358,8 +1358,8 @@ describe('migrations v2 model', () => {
       });
 
       describe('if action fails', () => {
-        test('CHECK_COMPATIBLE_MAPPINGS -> CHECK_UNKNOWN_DOCUMENTS', () => {
-          const res: ResponseType<'CHECK_COMPATIBLE_MAPPINGS'> = Either.left({
+        test('UPDATE_SOURCE_MAPPINGS -> CHECK_UNKNOWN_DOCUMENTS', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS'> = Either.left({
             type: 'incompatible_mapping_exception',
           });
           const newState = model(checkCompatibleMappingsState, res);

@@ -11,7 +11,7 @@ import { omit } from 'lodash';
 import type {
   AllActionStates,
   CalculateExcludeFiltersState,
-  CheckCompatibleMappingsState,
+  UpdateSourceMappingsState,
   CheckTargetMappingsState,
   CheckUnknownDocumentsState,
   CleanupUnknownAndExcluded,
@@ -72,7 +72,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
-    CHECK_COMPATIBLE_MAPPINGS: (state: CheckCompatibleMappingsState) =>
+    UPDATE_SOURCE_MAPPINGS: (state: UpdateSourceMappingsState) =>
       Actions.updateMappings({
         client,
         index: state.sourceIndex.value, // attempt to update source mappings in-place

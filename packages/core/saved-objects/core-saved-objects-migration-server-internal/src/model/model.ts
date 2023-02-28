@@ -445,7 +445,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         return {
           ...stateP,
-          controlState: 'CHECK_COMPATIBLE_MAPPINGS',
+          controlState: 'UPDATE_SOURCE_MAPPINGS',
         };
       }
     } else if (Either.isLeft(res)) {
@@ -464,7 +464,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       return throwBadResponse(stateP, res);
     }
-  } else if (stateP.controlState === 'CHECK_COMPATIBLE_MAPPINGS') {
+  } else if (stateP.controlState === 'UPDATE_SOURCE_MAPPINGS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {

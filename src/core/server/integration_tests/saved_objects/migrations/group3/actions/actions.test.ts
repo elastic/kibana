@@ -1536,7 +1536,9 @@ describe('migration actions', () => {
       expect(res).toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
-          "left": "incompatible_mapping_exception",
+          "left": Object {
+            "type": "incompatible_mapping_exception",
+          },
         }
       `);
     });
