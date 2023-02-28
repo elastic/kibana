@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import React from 'react';
+
 import { OverviewItem } from './overview_item';
 
 export interface Props {

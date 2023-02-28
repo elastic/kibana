@@ -32,7 +32,7 @@ export function SloDetails({ slo }: Props) {
   }));
 
   return (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
         <Overview slo={slo} />
       </EuiFlexItem>
@@ -45,9 +45,6 @@ export function SloDetails({ slo }: Props) {
           isLoading={historicalSummaryLoading}
           slo={slo}
         />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <pre data-test-subj="sloDetails">{JSON.stringify(slo, null, 2)}</pre>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
