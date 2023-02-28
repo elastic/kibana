@@ -83,6 +83,7 @@ packages/kbn-config-mocks @elastic/kibana-core
 packages/kbn-config-schema @elastic/kibana-core
 src/plugins/console @elastic/platform-deployment-management
 packages/content-management/content_editor @elastic/appex-sharedux
+examples/content_management_examples @elastic/appex-sharedux
 src/plugins/content_management @elastic/appex-sharedux
 packages/content-management/table_list @elastic/appex-sharedux
 examples/controls_example @elastic/kibana-presentation
@@ -337,6 +338,7 @@ x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin 
 src/plugins/event_annotation @elastic/kibana-visualizations
 x-pack/test/plugin_api_integration/plugins/event_log @elastic/response-ops
 x-pack/plugins/event_log @elastic/response-ops
+packages/kbn-expandable-flyout @elastic/security-threat-hunting-investigations
 packages/kbn-expect @elastic/kibana-operations
 x-pack/examples/exploratory_view_example @elastic/uptime
 src/plugins/expression_error @elastic/kibana-presentation
