@@ -94,7 +94,7 @@ describe('Cases connectors', () => {
 
     cy.wait('@createConnector').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
-      
+
       verifyNewConnectorSelected(snConnector);
 
       cy.get(TOASTER).should('have.text', "Created 'New connector'");
