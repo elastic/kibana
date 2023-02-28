@@ -18,8 +18,8 @@ import { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { wrapErrorIfNeeded } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
+import { EndpointRuleAlertGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/endpoint_rule_alert_generator';
 import { FtrService } from '../../../functional/ftr_provider_context';
-import { EndpointRuleAlertGenerator } from './endpoint_rule_alert_generator';
 import { getAlertsIndexMappings } from './alerts_security_index_mappings';
 import { ELASTIC_SECURITY_RULE_ID } from '../../../detection_engine_api_integration/utils/prebuilt_rules/create_prebuilt_rule_saved_objects';
 

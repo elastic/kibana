@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { BaseDataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/base_data_generator';
-// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { mergeWith } from 'lodash';
-import { EndpointMetadataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/endpoint_metadata_generator';
-import { HostMetadata } from '@kbn/security-solution-plugin/common/endpoint/types';
-import { DeepPartial } from 'utility-types';
+import type { DeepPartial } from 'utility-types';
+import { BaseDataGenerator } from './base_data_generator';
+import { EndpointMetadataGenerator } from './endpoint_metadata_generator';
+import type { HostMetadata } from '../types';
 
 const mergeAndReplaceArrays = <T, S>(destinationObj: T, srcObj: S): T => {
   const customizer = (objValue: T[keyof T], srcValue: S[keyof S]) => {
@@ -27,6 +26,7 @@ type EndpointRuleAlert = Pick<
   HostMetadata,
   'Endpoint' | 'agent' | 'elastic' | 'host' | 'data_stream'
 > & {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 };
 
