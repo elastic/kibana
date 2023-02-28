@@ -314,7 +314,9 @@ export const createLifecycleExecutor =
           [ALERT_WORKFLOW_STATUS]: alertData?.fields[ALERT_WORKFLOW_STATUS] ?? 'open',
           [EVENT_KIND]: 'signal',
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
-          [TAGS]: options.rule.tags,
+          [TAGS]: Array.from(
+            new Set([...(currentAlertData?.tags ?? []), ...(options.rule.tags ?? [])])
+          ),
           [VERSION]: ruleDataClient.kibanaVersion,
           [ALERT_FLAPPING]: flapping,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
