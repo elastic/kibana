@@ -8,18 +8,14 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Control, UseFormWatch } from 'react-hook-form';
-import type { CreateSLOInput } from '@kbn/slo-schema';
+import { useFormContext } from 'react-hook-form';
+import { CreateSLOInput } from '@kbn/slo-schema';
 
 import { IndexSelection } from './index_selection';
 import { QueryBuilder } from './query_builder';
 
-export interface Props {
-  control: Control<CreateSLOInput>;
-  watch: UseFormWatch<CreateSLOInput>;
-}
-
-export function CustomKqlIndicatorTypeForm({ control, watch }: Props) {
+export function CustomKqlIndicatorTypeForm() {
+  const { control, watch } = useFormContext<CreateSLOInput>();
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>

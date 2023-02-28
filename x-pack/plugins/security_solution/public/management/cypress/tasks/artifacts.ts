@@ -6,6 +6,10 @@
  */
 
 import { PACKAGE_POLICY_API_ROOT } from '@kbn/fleet-plugin/common';
+import type {
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_ARTIFACT_LISTS,
@@ -13,8 +17,9 @@ import {
   EXCEPTION_LIST_ITEM_URL,
   EXCEPTION_LIST_URL,
 } from '@kbn/securitysolution-list-constants';
+import { request } from './common';
 
-export const API_HEADER = { 'kbn-xsrf': 'kibana' };
+export const API_HEADER = { 'kbn-xsrf': 'kibana' }; // todo: remove?
 
 export const removeAllArtifacts = () => {
   for (const listId of ENDPOINT_ARTIFACT_LIST_IDS) {
@@ -23,10 +28,9 @@ export const removeAllArtifacts = () => {
 };
 
 export const removeExceptionsList = (listId: string) => {
-  cy.request({
+  request({
     method: 'DELETE',
     url: `${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`,
-    headers: API_HEADER,
     failOnStatusCode: false,
   }).then(({ status }) => {
     expect(status).to.be.oneOf([200, 404]); // should either be success or not found
@@ -42,10 +46,9 @@ const ENDPOINT_ARTIFACT_LIST_TYPES = {
 };
 
 export const createArtifactList = (listId: string) => {
-  cy.request({
+  request<ExceptionListSchema>({
     method: 'POST',
     url: EXCEPTION_LIST_URL,
-    headers: API_HEADER,
     body: {
       name: listId,
       description: 'This is a test list',
@@ -61,11 +64,9 @@ export const createArtifactList = (listId: string) => {
 };
 
 export const createPerPolicyArtifact = (name: string, body: object, policyId?: 'all' | string) => {
-  cy.request({
+  request<ExceptionListItemSchema>({
     method: 'POST',
     url: EXCEPTION_LIST_ITEM_URL,
-
-    headers: API_HEADER,
     body: {
       name,
       description: '',

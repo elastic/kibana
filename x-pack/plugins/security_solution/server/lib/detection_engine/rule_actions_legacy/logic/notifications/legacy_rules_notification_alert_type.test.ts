@@ -20,7 +20,7 @@ import {
   sampleDocSearchResultsNoSortIdNoVersion,
   sampleDocSearchResultsWithSortId,
   sampleEmptyDocSearchResults,
-} from '../../../signals/__mocks__/es_results';
+} from '../../../rule_types/__mocks__/es_results';
 import { DEFAULT_RULE_NOTIFICATION_QUERY_SIZE } from '../../../../../../common/constants';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 

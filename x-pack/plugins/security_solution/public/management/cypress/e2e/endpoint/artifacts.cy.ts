@@ -66,26 +66,26 @@ describe('Artifact pages', () => {
       it(`should update Endpoint Policy on Endpoint when adding ${testData.artifactName}`, () => {
         cy.visit(APP_ENDPOINTS_PATH);
 
-        cy.getBySel('policyListRevNo')
+        cy.getByTestSubj('policyListRevNo')
           .eq(0)
           .invoke('text')
           .then(parseRevNumber)
           .then((initialRevisionNumber) => {
             cy.visit(`/app/security/administration/${testData.urlPath}`);
 
-            cy.getBySel(`${testData.pagePrefix}-emptyState-addButton`).click();
+            cy.getByTestSubj(`${testData.pagePrefix}-emptyState-addButton`).click();
             performUserActions(testData.create.formActions);
-            cy.getBySel(`${testData.pagePrefix}-flyout-submitButton`).click();
+            cy.getByTestSubj(`${testData.pagePrefix}-flyout-submitButton`).click();
 
             //   Check new artifact is in the list
             for (const checkResult of testData.create.checkResults) {
-              cy.getBySel(checkResult.selector).should('have.text', checkResult.value);
+              cy.getByTestSubj(checkResult.selector).should('have.text', checkResult.value);
             }
 
             cy.visit(APP_ENDPOINTS_PATH);
 
             // depends on the 10s auto refresh
-            cy.getBySel('policyListRevNo')
+            cy.getByTestSubj('policyListRevNo')
               .eq(0)
               .should(($div) => {
                 const revisionNumber = parseRevNumber($div.text());
