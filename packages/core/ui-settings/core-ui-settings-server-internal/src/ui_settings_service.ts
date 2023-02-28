@@ -37,7 +37,6 @@ import { uiSettingsType, uiSettingsGlobalType } from './saved_objects';
 import { registerRoutes } from './routes';
 import { getCoreSettings } from './settings';
 import { UiSettingsDefaultsClient } from './clients/ui_settings_defaults_client';
-import type { UiSettingsServiceOptions } from './types';
 
 export interface SetupDeps {
   http: InternalHttpServiceSetup;
@@ -130,31 +129,19 @@ export class UiSettingsService
     scope: UiSettingsScope
   ): (savedObjectsClient: SavedObjectsClientContract) => ClientType<T> {
     const { version, buildNum } = this.coreContext.env.packageInfo;
-
     return (savedObjectsClient: SavedObjectsClientContract): ClientType<T> => {
-      const commonOptions = {
+      const isNamespaceScope = scope === 'namespace';
+      const options = {
+        type: (isNamespaceScope ? 'config' : 'config-global') as 'config' | 'config-global',
         id: version,
         buildNum,
-        log: this.log,
         savedObjectsClient,
+        defaults: isNamespaceScope
+          ? mapToObject(this.uiSettingsDefaults)
+          : mapToObject(this.uiSettingsGlobalDefaults),
+        overrides: isNamespaceScope ? this.overrides : {},
+        log: this.log,
       };
-
-      let options: UiSettingsServiceOptions;
-      if (scope === 'namespace') {
-        options = {
-          ...commonOptions,
-          type: 'config',
-          defaults: mapToObject(this.uiSettingsDefaults),
-          overrides: this.overrides,
-        };
-      } else {
-        options = {
-          ...commonOptions,
-          type: 'config-global',
-          defaults: mapToObject(this.uiSettingsGlobalDefaults),
-          overrides: {},
-        };
-      }
 
       return UiSettingsClientFactory.create(options) as ClientType<T>;
     };
