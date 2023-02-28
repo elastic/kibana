@@ -34,7 +34,13 @@ export interface UnifiedHistogramState {
    * The current selected columns
    */
   columns: string[] | undefined;
+  /**
+   * The current Lens suggestion
+   */
   currentSuggestion: Suggestion | undefined;
+  /**
+   * The suggested Lens visualizations
+   */
   allSuggestions: Suggestion[] | undefined;
   /**
    * Whether or not the chart is hidden

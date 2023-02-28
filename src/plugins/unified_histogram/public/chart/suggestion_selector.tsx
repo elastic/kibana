@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
 
 export interface SuggestionSelectorProps {
-  suggestions?: Suggestion[];
+  suggestions: Suggestion[];
   activeSuggestion?: Suggestion;
   onSuggestionChange?: (sug: Suggestion | undefined) => void;
 }
@@ -30,14 +30,12 @@ export const SuggestionSelector = ({
   activeSuggestion,
   onSuggestionChange,
 }: SuggestionSelectorProps) => {
-  const suggestionOptions = suggestions
-    ?.map((sug) => {
-      return {
-        label: sug.title,
-        value: sug.title,
-      };
-    })
-    .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
+  const suggestionOptions = suggestions.map((sug) => {
+    return {
+      label: sug.title,
+      value: sug.title,
+    };
+  });
 
   const selectedSuggestion = activeSuggestion
     ? [
@@ -51,7 +49,7 @@ export const SuggestionSelector = ({
   const onSelectionChange = useCallback(
     (newOptions) => {
       const suggestion = newOptions.length
-        ? suggestions?.find((current) => current.title === newOptions[0].value)
+        ? suggestions.find((current) => current.title === newOptions[0].value)
         : undefined;
 
       onSuggestionChange?.(suggestion);
@@ -59,10 +57,10 @@ export const SuggestionSelector = ({
     [onSuggestionChange, suggestions]
   );
 
-  const [fieldPopoverDisabled, setFieldPopoverDisabled] = useState(false);
-  const disableFieldPopover = useCallback(() => setFieldPopoverDisabled(true), []);
+  const [suggestionsPopoverDisabled, setSuggestionaPopoverDisabled] = useState(false);
+  const disableFieldPopover = useCallback(() => setSuggestionaPopoverDisabled(true), []);
   const enableFieldPopover = useCallback(
-    () => setTimeout(() => setFieldPopoverDisabled(false)),
+    () => setTimeout(() => setSuggestionaPopoverDisabled(false)),
     []
   );
 
@@ -75,7 +73,7 @@ export const SuggestionSelector = ({
   return (
     <EuiToolTip
       position="top"
-      content={fieldPopoverDisabled ? undefined : activeSuggestion?.title}
+      content={suggestionsPopoverDisabled ? undefined : activeSuggestion?.title}
       anchorProps={{ css: suggestionComboCss }}
     >
       <EuiComboBox
@@ -95,7 +93,7 @@ export const SuggestionSelector = ({
         onFocus={disableFieldPopover}
         onBlur={enableFieldPopover}
         renderOption={(option) => {
-          const suggestion = suggestions?.find((s) => {
+          const suggestion = suggestions.find((s) => {
             return s.title === option.label;
           });
           return (

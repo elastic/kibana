@@ -8,11 +8,13 @@
 
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import { Suggestion } from '@kbn/lens-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
 import { act } from 'react-test-renderer';
 import { UnifiedHistogramFetchStatus } from '../../types';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
+import { allSuggestionsMock, currentSuggestionMock } from '../../__mocks__/suggestions';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import {
   createStateService,
@@ -53,6 +55,8 @@ describe('useStateProps', () => {
     jest.spyOn(stateService, 'setRequestParams');
     jest.spyOn(stateService, 'setLensRequestAdapter');
     jest.spyOn(stateService, 'setTotalHits');
+    jest.spyOn(stateService, 'setCurrentSuggestion');
+    jest.spyOn(stateService, 'setAllSuggestions');
     return stateService;
   };
 
@@ -140,6 +144,40 @@ describe('useStateProps', () => {
         },
       }
     `);
+  });
+
+  it('should return the correct props when a text based language is used with Lens suggestions', () => {
+    const stateService = getStateService({
+      initialState: {
+        ...initialState,
+        query: { sql: 'SELECT * FROM index' },
+        currentSuggestion: currentSuggestionMock,
+        allSuggestions: allSuggestionsMock,
+      },
+    });
+    const { result } = renderHook(() => useStateProps(stateService));
+    expect(result.current.allSuggestions).toBe(allSuggestionsMock);
+    expect(result.current.currentSuggestion).toBe(currentSuggestionMock);
+    expect(result.current.chart).toStrictEqual({ hidden: false, timeInterval: 'auto' });
+  });
+
+  it('should return the suggestions if text based languages', async () => {
+    const stateService = getStateService({
+      initialState: {
+        ...initialState,
+        query: { sql: 'SELECT * FROM index' },
+        columns: ['Dest', 'AvgTicketPrice'],
+      },
+    });
+
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useStateProps(stateService, unifiedHistogramServicesMock)
+    );
+    await waitForNextUpdate();
+    expect(stateService.setCurrentSuggestion).toHaveBeenCalledWith(currentSuggestionMock);
+    expect(stateService.setAllSuggestions).toHaveBeenCalledWith(allSuggestionsMock);
+    expect(result.current.allSuggestions).toStrictEqual(allSuggestionsMock);
+    expect(result.current.currentSuggestion).toStrictEqual(currentSuggestionMock);
   });
 
   it('should return the correct props when a rollup data view is used', () => {
@@ -234,6 +272,7 @@ describe('useStateProps', () => {
       onChartHiddenChange,
       onChartLoad,
       onBreakdownFieldChange,
+      onSuggestionChange,
     } = result.current;
     act(() => {
       onTopPanelHeightChange(200);
@@ -263,6 +302,11 @@ describe('useStateProps', () => {
       onBreakdownFieldChange({ name: 'field' } as DataViewField);
     });
     expect(stateService.setBreakdownField).toHaveBeenLastCalledWith('field');
+
+    act(() => {
+      onSuggestionChange({ title: 'Stacked Bar' } as Suggestion);
+    });
+    expect(stateService.setCurrentSuggestion).toHaveBeenLastCalledWith({ title: 'Stacked Bar' });
   });
 
   it('should clear lensRequestAdapter when chart is hidden', () => {

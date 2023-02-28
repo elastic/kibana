@@ -236,4 +236,35 @@ describe('useTimeRange', () => {
       </EuiFlexGroup>
     `);
   });
+
+  it('should render time range display and no interval for text based languages', () => {
+    const { result } = renderHook(() =>
+      useTimeRange({
+        uiSettings,
+        bucketInterval,
+        timeRange,
+        timeInterval,
+        isPlainRecord: true,
+      })
+    );
+    expect(result.current.timeRangeDisplay).toMatchInlineSnapshot(`
+      <EuiText
+        css={
+          Object {
+            "map": undefined,
+            "name": "1vgo99t",
+            "next": undefined,
+            "styles": "
+          padding: 0 8px 0 8px;
+        ",
+            "toString": [Function],
+          }
+        }
+        size="xs"
+        textAlign="center"
+      >
+        2022-11-17T00:00:00.000Z - 2022-11-17T12:00:00.000Z 
+      </EuiText>
+    `);
+  });
 });

@@ -102,6 +102,7 @@ const fetchTotalHits = async ({
 
   // Either the chart is visible, in which case Lens will make the request,
   // or there is no hits context, which means the total hits should be hidden
+  // or is a text based language, where the hits are not fetched from the searchSource
   if (chartVisible || !hits || isPlainRecord) {
     return;
   }

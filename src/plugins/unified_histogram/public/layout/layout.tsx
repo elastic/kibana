@@ -52,8 +52,17 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    * The selected columns
    */
   columns?: string[];
+  /**
+   * The current Lens suggestion
+   */
   currentSuggestion?: Suggestion;
+  /**
+   * The suggested Lens visualizations
+   */
   allSuggestions?: Suggestion[];
+  /**
+   * Flag that indicates that a text based language is used
+   */
   isPlainRecord?: boolean;
   /**
    * The current time range
