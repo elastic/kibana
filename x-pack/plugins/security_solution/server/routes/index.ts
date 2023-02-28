@@ -75,6 +75,7 @@ import {
   getSecuritySolutionDashboardsRoute,
   getSecuritySolutionTagsRoute,
 } from '../lib/dashboards/routes';
+import { riskScoringRoute } from '../lib/risk_engine/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -170,5 +171,9 @@ export const initRoutes = (
   if (previewTelemetryUrlEnabled) {
     // telemetry preview endpoint for e2e integration tests only at the moment.
     telemetryDetectionRulesPreviewRoute(router, logger, previewTelemetryReceiver, telemetrySender);
+  }
+
+  if (config.experimentalFeatures.riskScoringRouteEnabled) {
+    riskScoringRoute(router, logger);
   }
 };
