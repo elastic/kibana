@@ -14,6 +14,7 @@ import {
   AttributesTypeUser,
   AttributesTypeAlerts,
   CaseStatuses,
+  CommentRequestExternalReferenceSOType,
 } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -23,6 +24,7 @@ import {
   postCommentAlertReq,
   getPostCaseRequest,
   getFilesAttachmentReq,
+  fileAttachmentMetadata,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -159,6 +161,24 @@ export default ({ getService }: FtrProviderContext): void => {
           owner: 'securitySolutionFixture',
         });
       });
+
+      describe('files', () => {
+        it('should create a file attachment', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          const caseWithAttachments = await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq(),
+          });
+
+          const fileAttachment =
+            caseWithAttachments.comments![0] as CommentRequestExternalReferenceSOType;
+
+          expect(caseWithAttachments.totalComment).to.be(1);
+          expect(fileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
+        });
+      });
     });
 
     describe('unhappy path', () => {
@@ -170,10 +190,8 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: getFilesAttachmentReq({
             externalReferenceMetadata: {
-              name: 'test_file',
-              extension: 'png',
-              mimeType: 'image/png',
-              createdAt: '2023-02-27T20:26:54.345Z',
+              // intentionally structuring the data in a way that is invalid (aka flattening the files object)
+              ...fileAttachmentMetadata.file,
             },
           }),
           expectedHttpCode: 400,

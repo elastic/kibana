@@ -206,3 +206,8 @@ export const LOCAL_STORAGE_KEYS = {
   casesQueryParams: 'cases.list.queryParams',
   casesFilterOptions: 'cases.list.filterOptions',
 };
+
+/**
+ * Files
+ */
+export const MAX_FILES_PER_CASE = 100;

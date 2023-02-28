@@ -13,6 +13,7 @@ import {
   BulkCreateCommentRequest,
   CaseResponse,
   CaseStatuses,
+  CommentRequestExternalReferenceSOType,
   CommentType,
 } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
@@ -23,6 +24,8 @@ import {
   postCommentAlertReq,
   getPostCaseRequest,
   getFilesAttachmentReq,
+  fileAttachmentMetadata,
+  postExternalReferenceSOReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -148,27 +151,133 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
       });
+
+      describe('files', () => {
+        it('should bulk create multiple file attachments', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          const caseWithAttachments = await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [getFilesAttachmentReq(), getFilesAttachmentReq()],
+          });
+
+          const firstFileAttachment =
+            caseWithAttachments.comments![0] as CommentRequestExternalReferenceSOType;
+          const secondFileAttachment =
+            caseWithAttachments.comments![1] as CommentRequestExternalReferenceSOType;
+
+          expect(caseWithAttachments.totalComment).to.be(2);
+          expect(firstFileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
+          expect(secondFileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
+        });
+
+        it('should bulk create 100 file attachments', async () => {
+          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: fileRequests,
+          });
+        });
+
+        it('should bulk create 100 file attachments when there is another attachment type already associated with the case', async () => {
+          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [postExternalReferenceSOReq],
+          });
+
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: fileRequests,
+          });
+        });
+
+        it('should bulk create 100 file attachments when there is another attachment type in the request', async () => {
+          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [postExternalReferenceSOReq, ...fileRequests],
+          });
+        });
+      });
     });
 
     describe('errors', () => {
-      it('400s when attaching a file with metadata that is missing the file field', async () => {
-        const postedCase = await createCase(supertest, getPostCaseRequest());
+      describe('files', () => {
+        it('400s when attaching a file with metadata that is missing the file field', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
 
-        await bulkCreateAttachments({
-          supertest,
-          caseId: postedCase.id,
-          params: [
-            postCommentUserReq,
-            getFilesAttachmentReq({
-              externalReferenceMetadata: {
-                name: 'test_file',
-                extension: 'png',
-                mimeType: 'image/png',
-                createdAt: '2023-02-27T20:26:54.345Z',
-              },
-            }),
-          ],
-          expectedHttpCode: 400,
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [
+              postCommentUserReq,
+              getFilesAttachmentReq({
+                externalReferenceMetadata: {
+                  // intentionally structure the data in a way that is invalid
+                  ...fileAttachmentMetadata.file,
+                },
+              }),
+            ],
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when attempting to add more than 100 files to a case', async () => {
+          const fileRequests = [...Array(101).keys()].map(() => getFilesAttachmentReq());
+          const postedCase = await createCase(supertest, postCaseReq);
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: fileRequests,
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when attempting to add an alert to a case that already has 100 files', async () => {
+          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: fileRequests,
+          });
+
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [getFilesAttachmentReq()],
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('400s when the case already has alerts and the sum of existing and new alerts exceed 1k', async () => {
+          const fileRequests = [...Array(51).keys()].map(() => getFilesAttachmentReq());
+          const postedCase = await createCase(supertest, postCaseReq);
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: fileRequests,
+          });
+
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: fileRequests,
+            expectedHttpCode: 400,
+          });
         });
       });
 
