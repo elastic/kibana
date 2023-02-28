@@ -16,8 +16,6 @@ import { CustomFieldPanel } from './custom_field_panel';
 import * as i18n from '../translations';
 import { StyledContextMenu, StyledEuiButtonEmpty } from '../styles';
 
-const none = i18n.NONE;
-
 interface GroupSelectorProps {
   fields: FieldSpec[];
   groupSelected: string;
@@ -50,14 +48,19 @@ const GroupsSelectorComponent = ({
               {i18n.SELECT_FIELD.toUpperCase()}
             </EuiFlexItem>
             <EuiFlexItem grow={false} component="span">
-              <EuiBetaBadge label={i18n.BETA} size="s" tooltipContent={i18n.BETA_TOOL_TIP} />
+              <EuiBetaBadge
+                label={i18n.BETA}
+                size="s"
+                tooltipContent={i18n.BETA_TOOL_TIP}
+                tooltipPosition="left"
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
         items: [
           {
             'data-test-subj': 'panel-none',
-            name: none,
+            name: i18n.NONE,
             icon: groupSelected === 'none' ? 'check' : 'empty',
             onClick: () => onGroupChange('none'),
           },
@@ -110,12 +113,16 @@ const GroupsSelectorComponent = ({
         iconType="arrowDown"
         onClick={onButtonClick}
         title={
-          groupSelected !== 'none' && selectedOption.length > 0 ? selectedOption[0].label : none
+          groupSelected !== 'none' && selectedOption.length > 0
+            ? selectedOption[0].label
+            : i18n.NONE
         }
         size="xs"
       >
         {`${title}: ${
-          groupSelected !== 'none' && selectedOption.length > 0 ? selectedOption[0].label : none
+          groupSelected !== 'none' && selectedOption.length > 0
+            ? selectedOption[0].label
+            : i18n.NONE
         }`}
       </StyledEuiButtonEmpty>
     ),
