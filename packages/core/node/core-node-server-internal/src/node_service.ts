@@ -14,13 +14,15 @@ import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import type { NodeRoles } from '@kbn/core-node-server';
 import type { Logger } from '@kbn/logging';
 import {
-  NodeConfigType,
-  NODE_WILDCARD_CHAR,
-  NODE_ACCEPTED_ROLES,
+  type NodeConfigType,
+  type NodeRolesConfig,
+  NODE_ALL_ROLES,
   NODE_CONFIG_PATH,
+  NODE_WILDCARD_CHAR,
+  NODE_DEFAULT_ROLES,
 } from './node_config';
 
-const DEFAULT_ROLES = NODE_ACCEPTED_ROLES;
+const DEFAULT_ROLES = [...NODE_DEFAULT_ROLES];
 const containsWildcard = (roles: string[]) => roles.includes(NODE_WILDCARD_CHAR);
 
 /**
@@ -66,8 +68,9 @@ export class NodeService {
     loggingSystem.setGlobalContext({ service: { node: { roles } } });
     this.log.info(`Kibana process configured with roles: [${roles.join(', ')}]`);
 
-    this.roles = NODE_ACCEPTED_ROLES.reduce((acc, curr) => {
-      return { ...acc, [camelCase(curr)]: roles.includes(curr) };
+    // We assume the combination of node roles has been validated and avoid doing additional checks here.
+    this.roles = NODE_ALL_ROLES.reduce((acc, curr) => {
+      return { ...acc, [camelCase(curr)]: (roles as string[]).includes(curr) };
     }, {} as NodeRoles);
 
     return {
@@ -86,7 +89,7 @@ export class NodeService {
     // nothing to do here yet
   }
 
-  private async getNodeRoles(): Promise<string[]> {
+  private async getNodeRoles(): Promise<NodeRolesConfig> {
     const { roles } = await firstValueFrom(
       this.configService.atPath<NodeConfigType>(NODE_CONFIG_PATH)
     );
