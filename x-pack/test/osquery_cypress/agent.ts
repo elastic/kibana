@@ -77,22 +77,6 @@ export class AgentManager extends Manager {
 
     this.agentContainerId = (await execa('docker', dockerArgs)).stdout;
 
-    // Wait til we see the agent is online
-    let done = false;
-    let retries = 0;
-    while (!done) {
-      await new Promise((r) => setTimeout(r, 5000));
-      const { data: agents } = await axios.get(
-        `${this.params.kibanaUrl}/api/fleet/agents`,
-        this.requestOptions
-      );
-      done = agents.items[0]?.status === 'online';
-      if (++retries > 12) {
-        this.log.error('Giving up on enrolling the agent after a minute');
-        throw new Error('Agent timed out while coming online');
-      }
-    }
-
     return { policyId: policy.policy_id as string };
   }
 
