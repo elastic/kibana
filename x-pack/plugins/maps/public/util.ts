@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import fetch from 'node-fetch';
 import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { FONTS_API_PATH } from '../common/constants';
@@ -60,9 +61,37 @@ async function getEMSClient(): Promise<EMSClient> {
   return emsClient;
 }
 
-export function getGlyphUrl(): string {
+let canAccessEmsFontsPromise: Promise<boolean> | null = null;
+async function canAccessEmsFonts(): Promise<boolean> {
+  if (!canAccessEmsFontsPromise) {
+    canAccessEmsFontsPromise = new Promise(async (resolve) => {
+      const emsSettings = getEMSSettings();
+      if (!emsSettings!.isEMSEnabled()) {
+        resolve(false);
+      }
+
+      const emsFontUrlTemplate = emsSettings!.getEMSFontLibraryUrl();
+      try {
+        const emsFontUrl = emsFontUrlTemplate.replace('{fontstack}', 'Open Sans').replace('{range}', '0-255');
+        const resp = await fetch(emsFontUrl, {
+          method: 'HEAD',
+        });
+        if (resp.status >= 400) {
+          throw new Error(`status: ${resp.status}`);
+        }
+        resolve(true);
+      } catch (error) {
+        console.warn(`Unable to access fonts from Elastic Maps Service (EMS). Set kibana.yml 'map.includeElasticMapsService: false' to avoid unnecessary EMS requests.`);
+        resolve(false);
+      }
+    });
+  }
+  return canAccessEmsFontsPromise;
+}
+
+export async function getGlyphUrl(): Promise<string> {
   const emsSettings = getEMSSettings();
-  if (!emsSettings!.isEMSEnabled()) {
+  if (!emsSettings!.isEMSEnabled() || !(await canAccessEmsFonts())) {
     return getHttp().basePath.prepend(`/${FONTS_API_PATH}/{fontstack}/{range}`);
   }
 
