@@ -21,7 +21,7 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
         <div>
           {slo.summary.status === 'NO_DATA' && (
             <EuiBadge color="default">
-              {i18n.translate('xpack.observability.slo.slo.state.noData', {
+              {i18n.translate('xpack.observability.slo.sloStatusBadge.noData', {
                 defaultMessage: 'No data',
               })}
             </EuiBadge>
@@ -29,7 +29,7 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
 
           {slo.summary.status === 'HEALTHY' && (
             <EuiBadge color="success">
-              {i18n.translate('xpack.observability.slo.slo.state.healthy', {
+              {i18n.translate('xpack.observability.slo.sloStatusBadge.healthy', {
                 defaultMessage: 'Healthy',
               })}
             </EuiBadge>
@@ -37,7 +37,7 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
 
           {slo.summary.status === 'DEGRADING' && (
             <EuiBadge color="warning">
-              {i18n.translate('xpack.observability.slo.slo.state.degrading', {
+              {i18n.translate('xpack.observability.slo.sloStatusBadge.degrading', {
                 defaultMessage: 'Degrading',
               })}
             </EuiBadge>
@@ -45,7 +45,7 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
 
           {slo.summary.status === 'VIOLATED' && (
             <EuiBadge color="danger">
-              {i18n.translate('xpack.observability.slo.slo.state.violated', {
+              {i18n.translate('xpack.observability.slo.sloStatusBadge.violated', {
                 defaultMessage: 'Violated',
               })}
             </EuiBadge>
@@ -56,7 +56,7 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
         <EuiFlexItem grow={false}>
           <div>
             <EuiBadge color="default">
-              {i18n.translate('xpack.observability.slo.slo.state.forecasted', {
+              {i18n.translate('xpack.observability.slo.sloStatusBadge.forecasted', {
                 defaultMessage: 'Forecasted',
               })}
             </EuiBadge>
