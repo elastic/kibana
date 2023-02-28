@@ -149,11 +149,15 @@ export class DashboardAddPanelService extends FtrService {
     await this.flyout.ensureClosed('dashboardAddPanel');
   }
 
+  async filterEmbeddableNames(name: string) {
+    await this.savedObjectsFinder.filterEmbeddableNames(name);
+  }
+
   async addEveryVisualization(filter: string) {
     this.log.debug('DashboardAddPanel.addEveryVisualization');
     await this.ensureAddPanelIsShowing();
     if (filter) {
-      await this.savedObjectsFinder.filterEmbeddableNames(filter.replace('-', ' '));
+      await this.filterEmbeddableNames(filter.replace('-', ' '));
     }
     await this.savedObjectsFinder.waitForFilter('Visualization', 'search');
     let morePages = true;
@@ -171,7 +175,7 @@ export class DashboardAddPanelService extends FtrService {
     await this.ensureAddPanelIsShowing();
     const searchList = [];
     if (filter) {
-      await this.savedObjectsFinder.filterEmbeddableNames(filter.replace('-', ' '));
+      await this.filterEmbeddableNames(filter.replace('-', ' '));
     }
     await this.savedObjectsFinder.waitForFilter('Saved search', 'visualization');
     let morePages = true;
