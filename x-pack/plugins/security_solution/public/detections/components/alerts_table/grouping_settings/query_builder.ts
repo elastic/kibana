@@ -7,8 +7,8 @@
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { BoolQuery } from '@kbn/es-query';
-import type { NamedAggregation } from '../../../../common/components/grouping';
-import { getGroupingQuery } from '../../../../common/components/grouping';
+import type { NamedAggregation } from '@kbn/securitysolution-alerts_grouping';
+import { getGroupingQuery } from '@kbn/securitysolution-alerts_grouping';
 
 const getGroupFields = (groupValue: string) => {
   if (groupValue === 'kibana.alert.rule.name') {

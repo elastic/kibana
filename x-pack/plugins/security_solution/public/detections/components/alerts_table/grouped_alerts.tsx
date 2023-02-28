@@ -13,19 +13,18 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { getAlertsGroupingTable, getGroupedTables } from '@kbn/securitysolution-alerts_grouping';
+import type {
+  GroupingFieldTotalAggregation,
+  GroupingTableAggregation,
+  RawBucket,
+} from '@kbn/securitysolution-alerts_grouping';
+import { getGroupedTables, isNoneGroup } from '@kbn/securitysolution-alerts_grouping';
 import { useGetGroupingSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { defaultGroup } from '../../../common/store/grouping/defaults';
 import { groupSelectors } from '../../../common/store/grouping';
 import { InspectButton } from '../../../common/components/inspect';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
-import type {
-  GroupingFieldTotalAggregation,
-  GroupingTableAggregation,
-  RawBucket,
-} from '../../../common/components/grouping';
-import { isNoneGroup } from '../../../common/components/grouping';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { TableIdLiteral } from '../../../../common/types';
@@ -269,18 +268,11 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     ]
   );
 
-  const GroupTable = getAlertsGroupingTable({ hi: 'steph' });
-
   if (isEmpty(selectedPatterns)) {
     return null;
   }
 
-  return (
-    <>
-      {GroupTable}
-      {groupedAlerts}
-    </>
-  );
+  return groupedAlerts;
 };
 
 export const GroupedAlertsTable = React.memo(GroupedAlertsTableComponent);

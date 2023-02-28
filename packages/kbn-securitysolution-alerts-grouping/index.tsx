@@ -7,14 +7,17 @@
  */
 
 import React from 'react';
-import { GroupsSelector, GroupSelectorProps, isNoneGroup } from './src/components';
+import { getGroupingQuery } from './src/containers/query';
+import {
+  GroupsSelector,
+  GroupSelectorProps,
+  isNoneGroup,
+  GroupingTableAggregation,
+  GroupingFieldTotalAggregation,
+  RawBucket,
+  NamedAggregation,
+} from './src/components';
 import { GroupedTables, GroupedTablesProps } from './src/components/grouped_tables';
-interface AlertsGroupingProps {
-  hi: string;
-}
-export const getAlertsGroupingTable = (
-  props: AlertsGroupingProps
-): React.ReactElement<AlertsGroupingProps> => <div>{`hi ${props.hi}`}</div>;
 
 export const getGroupedTables = (
   props: GroupedTablesProps
@@ -24,4 +27,11 @@ export const getGroupSelector = (
   props: GroupSelectorProps
 ): React.ReactElement<GroupSelectorProps> => <GroupsSelector {...props} />;
 
-export { isNoneGroup };
+export { isNoneGroup, getGroupingQuery };
+
+export type {
+  GroupingTableAggregation,
+  GroupingFieldTotalAggregation,
+  NamedAggregation,
+  RawBucket,
+};
