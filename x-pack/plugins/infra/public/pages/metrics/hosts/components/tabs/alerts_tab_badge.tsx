@@ -36,9 +36,12 @@ export const AlertsTabBadge = () => {
     );
   }
 
-  return (
+  const shouldRenderBadge =
+    typeof alertsCount?.activeAlertCount === 'number' && alertsCount.activeAlertCount > 0;
+
+  return shouldRenderBadge ? (
     <EuiNotificationBadge className="eui-alignCenter" size="m">
       {alertsCount?.activeAlertCount}
     </EuiNotificationBadge>
-  );
+  ) : null;
 };
