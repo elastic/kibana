@@ -7,6 +7,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_PATTERN,
@@ -16,10 +17,18 @@ import {
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_PATTERN,
   LATEST_FINDINGS_INDEX_TEMPLATE_NAME,
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  LATEST_VULNERABILITIES_INDEX_PATTERN,
+  LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME,
+  VULNERABILITIES_INDEX_NAME,
 } from '../../common/constants';
 import { createPipelineIfNotExists } from './create_processor';
 import { benchmarkScoreMapping } from './benchmark_score_mapping';
-import { latestFindingsPipelineIngestConfig, scorePipelineIngestConfig } from './ingest_pipelines';
+import {
+  latestFindingsPipelineIngestConfig,
+  latestVulnerabilitiesPipelineIngestConfig,
+  scorePipelineIngestConfig,
+} from './ingest_pipelines';
 
 // TODO: Add integration tests
 
@@ -27,10 +36,12 @@ export const initializeCspIndices = async (esClient: ElasticsearchClient, logger
   await Promise.all([
     createPipelineIfNotExists(esClient, scorePipelineIngestConfig, logger),
     createPipelineIfNotExists(esClient, latestFindingsPipelineIngestConfig, logger),
+    createPipelineIfNotExists(esClient, latestVulnerabilitiesPipelineIngestConfig, logger),
   ]);
 
   return Promise.all([
     createLatestFindingsIndex(esClient, logger),
+    createLatestVulnerabilitiesIndex(esClient, logger),
     createBenchmarkScoreIndex(esClient, logger),
   ]);
 };
@@ -135,6 +146,64 @@ const createLatestFindingsIndex = async (esClient: ElasticsearchClient, logger: 
   } catch (e) {
     logger.error(
       `Failed to upsert index template [Template: ${LATEST_FINDINGS_INDEX_TEMPLATE_NAME}]`
+    );
+    logger.error(e);
+  }
+};
+
+const createLatestVulnerabilitiesIndex = async (esClient: ElasticsearchClient, logger: Logger) => {
+  try {
+    // Deletes old assets from previous versions as part of upgrade process
+    const INDEX_TEMPLATE_V830 = 'cloud_security_posture.vulnerabilities_latest';
+    await deleteIndexTemplateSafe(esClient, logger, INDEX_TEMPLATE_V830);
+
+    // We want that our latest findings index template would be identical to the findings index template
+    const vulnerabilitiesIndexTemplateResponse = await esClient.indices.getIndexTemplate({
+      name: VULNERABILITIES_INDEX_NAME,
+    });
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    const { template, composed_of, _meta } =
+      vulnerabilitiesIndexTemplateResponse.index_templates[0].index_template;
+
+    // We always want to keep the index template updated
+    await esClient.indices.putIndexTemplate({
+      name: LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME,
+      index_patterns: LATEST_VULNERABILITIES_INDEX_PATTERN,
+      priority: 500,
+      template: {
+        mappings: template?.mappings,
+        settings: {
+          ...template?.settings,
+          default_pipeline: latestVulnerabilitiesPipelineIngestConfig.id,
+          lifecycle: {
+            name: '',
+          },
+        },
+        aliases: template?.aliases,
+      },
+      _meta,
+      composed_of,
+    });
+
+    const result = await createIndexSafe(esClient, logger, LATEST_VULNERABILITIES_INDEX_DEFAULT_NS);
+
+    if (result === 'already-exists') {
+      // Make sure mappings are up-to-date
+      const simulateResponse = await esClient.indices.simulateTemplate({
+        name: LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME,
+      });
+
+      await updateIndexSafe(
+        esClient,
+        logger,
+        LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+        simulateResponse.template.mappings
+      );
+    }
+  } catch (e) {
+    logger.error(
+      `Failed to upsert index template [Template: ${LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME}]`
     );
     logger.error(e);
   }
