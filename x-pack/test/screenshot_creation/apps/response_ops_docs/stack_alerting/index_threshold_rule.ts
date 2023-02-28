@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const comboBox = getService('comboBox');
   const commonScreenshots = getService('commonScreenshots');
   const find = getService('find');
   const retry = getService('retry');
@@ -63,6 +64,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1024
       );
       await testSubjects.click('closePopover');
+
+      await testSubjects.click('whenExpression');
+      await testSubjects.click('whenExpressionSelect');
+      await retry.try(async () => {
+        const aggTypeOptions = await find.allByCssSelector('#aggTypeField option');
+        expect(aggTypeOptions[2]).not.to.be(undefined);
+        await aggTypeOptions[2].click();
+      });
+      await testSubjects.click('ofExpressionPopover');
+      const ofComboBox = await find.byCssSelector('#ofField');
+      await ofComboBox.click();
+      await commonScreenshots.takeScreenshot(
+        'rule-types-index-threshold-example-aggregation',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+      await ofComboBox.type('bytes');
+      const ofOptionsString = await comboBox.getOptionsList('availablefieldsOptionsComboBox');
+      const ofOptions = ofOptionsString.trim().split('\n');
+      expect(ofOptions.length > 0).to.be(true);
+      await comboBox.set('availablefieldsOptionsComboBox', ofOptions[0]);
+
       const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
       await flyOutCancelButton.click();
     });
