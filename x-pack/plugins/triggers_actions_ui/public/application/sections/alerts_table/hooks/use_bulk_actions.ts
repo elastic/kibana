@@ -25,8 +25,8 @@ interface BulkActionsProps {
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   alerts: Alerts;
   casesService?: CasesService;
-  casesFeatureId: string;
   useBulkActionsConfig?: UseBulkActionsRegistry;
+  refresh: () => void;
 }
 
 export interface UseBulkActions {
@@ -38,11 +38,11 @@ export interface UseBulkActions {
   clearSelection: () => void;
 }
 
-type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesService' | 'casesFeatureId'>;
+type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesService' | 'refresh'>;
 
 export const useBulkAddToCaseActions = ({
   casesService,
-  casesFeatureId,
+  refresh,
 }: UseBulkAddToCaseActionsProps): BulkActionsConfig[] => {
   const userCasesPermissions = casesService?.helpers.canUseCases();
 
@@ -64,7 +64,9 @@ export const useBulkAddToCaseActions = ({
             disabledLabel: ADD_TO_CASE_DISABLED,
             onClick: (items?: any[]) => {
               const caseAttachments = items ? casesService.helpers.groupAlertsByRule(items) : [];
-              createCaseFlyout.open({ attachments: caseAttachments });
+              createCaseFlyout.open({
+                attachments: caseAttachments,
+              });
             },
           },
           {
@@ -75,7 +77,9 @@ export const useBulkAddToCaseActions = ({
             'data-test-subj': 'attach-existing-case',
             onClick: (items?: any[]) => {
               const caseAttachments = items ? casesService.helpers.groupAlertsByRule(items) : [];
-              selectCaseModal.open({ attachments: caseAttachments });
+              selectCaseModal.open({
+                attachments: caseAttachments,
+              });
             },
           },
         ]
@@ -92,13 +96,13 @@ export const useBulkAddToCaseActions = ({
 export function useBulkActions({
   alerts,
   casesService,
-  casesFeatureId,
   query,
+  refresh,
   useBulkActionsConfig = () => [],
 }: BulkActionsProps): UseBulkActions {
   const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
   const configBulkActions = useBulkActionsConfig(query);
-  const caseBulkActions = useBulkAddToCaseActions({ casesService, casesFeatureId });
+  const caseBulkActions = useBulkAddToCaseActions({ casesService, refresh });
 
   const bulkActions = [...configBulkActions, ...caseBulkActions];
 

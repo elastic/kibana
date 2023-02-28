@@ -95,9 +95,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
   } = useBulkActions({
     alerts,
     casesService: props.casesService,
-    casesFeatureId: props.alertsTableConfiguration.cases?.featureId ?? '',
     query: props.query,
     useBulkActionsConfig: props.alertsTableConfiguration.useBulkActions,
+    refresh: alertsRefresh,
   });
 
   const refresh = useCallback(() => {
