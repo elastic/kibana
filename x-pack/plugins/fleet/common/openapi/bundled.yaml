@@ -1301,7 +1301,7 @@ paths:
         name: agentId
         in: path
         required: true
-    put:
+    post:
       summary: Agent - Reassign
       tags: []
       responses:
@@ -1327,6 +1327,33 @@ paths:
                   type: string
               required:
                 - policy_id
+    put:
+      summary: Agent - Reassign
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: reassign-agent-deprecated
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                policy_id:
+                  type: string
+              required:
+                - policy_id
+      deprecated: true
   /agents/{agentId}/unenroll:
     parameters:
       - schema:
