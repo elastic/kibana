@@ -119,7 +119,7 @@
               "Should the telemetry payloads be sent from the server or the browser?"
             ],
             "signature": [
-              "\"server\" | \"browser\""
+              "\"browser\" | \"server\""
             ],
             "path": "src/plugins/telemetry/public/plugin.ts",
             "deprecated": false,
