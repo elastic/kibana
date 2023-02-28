@@ -56,10 +56,7 @@ journey('Exploratory view', async ({ page, params }) => {
   });
 
   step('Open exploratory view with monitor duration', async () => {
-    await Promise.all([
-      page.waitForNavigation(TIMEOUT_60_SEC),
-      page.click('text=Explore data', TIMEOUT_60_SEC),
-    ]);
+    await page.waitForNavigation(TIMEOUT_60_SEC);
 
     await waitForLoadingToFinish({ page });
     await page.click('text=browser', TIMEOUT_60_SEC);
