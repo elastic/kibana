@@ -553,6 +553,7 @@ describe('bulkEdit()', () => {
                   group: 'default',
                   params: {},
                   uuid: '111',
+                  alertsFilter: null,
                 },
                 {
                   actionRef: '',
@@ -561,6 +562,7 @@ describe('bulkEdit()', () => {
                   group: 'default',
                   params: {},
                   uuid: '100',
+                  alertsFilter: null,
                 },
                 {
                   actionRef: '',
@@ -569,6 +571,7 @@ describe('bulkEdit()', () => {
                   group: 'default',
                   params: {},
                   uuid: '101',
+                  alertsFilter: null,
                 },
               ],
               apiKey: null,

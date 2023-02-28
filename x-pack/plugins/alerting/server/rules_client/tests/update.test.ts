@@ -351,6 +351,7 @@ describe('update()', () => {
           Object {
             "actionRef": "action_0",
             "actionTypeId": "test",
+            "alertsFilter": null,
             "group": "default",
             "params": Object {
               "foo": true,
@@ -360,6 +361,7 @@ describe('update()', () => {
           Object {
             "actionRef": "action_1",
             "actionTypeId": "test",
+            "alertsFilter": null,
             "group": "default",
             "params": Object {
               "foo": true,
@@ -369,6 +371,7 @@ describe('update()', () => {
           Object {
             "actionRef": "action_2",
             "actionTypeId": "test2",
+            "alertsFilter": null,
             "group": "default",
             "params": Object {
               "foo": true,
@@ -590,6 +593,7 @@ describe('update()', () => {
             group: 'default',
             actionRef: 'action_0',
             actionTypeId: 'test',
+            alertsFilter: null,
             params: {
               foo: true,
             },
@@ -599,6 +603,7 @@ describe('update()', () => {
             group: 'default',
             actionRef: 'preconfigured:preconfigured',
             actionTypeId: 'test',
+            alertsFilter: null,
             params: {
               foo: true,
             },
@@ -608,6 +613,7 @@ describe('update()', () => {
             group: 'custom',
             actionRef: 'preconfigured:preconfigured',
             actionTypeId: 'test',
+            alertsFilter: null,
             params: {
               foo: true,
             },
@@ -793,6 +799,7 @@ describe('update()', () => {
           {
             actionRef: 'action_0',
             actionTypeId: 'test',
+            alertsFilter: null,
             group: 'default',
             params: { foo: true },
             uuid: '106',
@@ -966,6 +973,7 @@ describe('update()', () => {
           Object {
             "actionRef": "action_0",
             "actionTypeId": "test",
+            "alertsFilter": null,
             "group": "default",
             "params": Object {
               "foo": true,
@@ -1115,6 +1123,7 @@ describe('update()', () => {
           Object {
             "actionRef": "action_0",
             "actionTypeId": "test",
+            "alertsFilter": null,
             "group": "default",
             "params": Object {
               "foo": true,
@@ -2129,6 +2138,7 @@ describe('update()', () => {
             group: 'default',
             actionRef: 'action_0',
             actionTypeId: '.slack',
+            alertsFilter: null,
             params: {
               foo: true,
             },
@@ -2666,6 +2676,7 @@ describe('update()', () => {
           {
             actionRef: 'action_0',
             actionTypeId: 'test',
+            alertsFilter: null,
             frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
             group: 'default',
             params: { foo: true },
@@ -2674,6 +2685,7 @@ describe('update()', () => {
           {
             actionRef: '',
             actionTypeId: '',
+            alertsFilter: null,
             frequency: { notifyWhen: 'onActiveAlert', summary: false, throttle: null },
             group: 'default',
             params: { foo: true },

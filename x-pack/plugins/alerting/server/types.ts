@@ -50,6 +50,7 @@ import {
   IntervalSchedule,
   RuleLastRun,
   SanitizedRule,
+  AlertsFilter,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -143,6 +144,7 @@ export interface GetSummarizedAlertsFnOpts {
   ruleId: string;
   spaceId: string;
   excludedAlertInstanceIds: string[];
+  alertsFilter?: AlertsFilter | null;
 }
 
 // TODO - add type for these alerts when we determine which alerts-as-data
@@ -246,6 +248,17 @@ export interface RawRuleAction extends SavedObjectAttributes {
     summary: boolean;
     notifyWhen: RuleNotifyWhenType;
     throttle: string | null;
+  };
+  alertsFilter?: null | {
+    timeFrame: null | {
+      days: Array<0 | 1 | 2 | 3 | 4 | 5 | 6>;
+      hours: {
+        start: string;
+        end: string;
+      };
+    };
+    filterKql: string | null;
+    filter: string;
   };
 }
 

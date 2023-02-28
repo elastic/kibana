@@ -407,6 +407,7 @@ describe('create()', () => {
           Object {
             "actionRef": "action_0",
             "actionTypeId": "test",
+            "alertsFilter": null,
             "group": "default",
             "params": Object {
               "foo": true,
@@ -627,6 +628,7 @@ describe('create()', () => {
           Object {
             "actionRef": "action_0",
             "actionTypeId": "test",
+            "alertsFilter": null,
             "group": "default",
             "params": Object {
               "foo": true,
@@ -1059,6 +1061,7 @@ describe('create()', () => {
             group: 'default',
             actionRef: 'action_0',
             actionTypeId: 'test',
+            alertsFilter: null,
             params: {
               foo: true,
             },
@@ -1068,6 +1071,7 @@ describe('create()', () => {
             group: 'default',
             actionRef: 'preconfigured:preconfigured',
             actionTypeId: 'test',
+            alertsFilter: null,
             params: {
               foo: true,
             },
@@ -1077,6 +1081,7 @@ describe('create()', () => {
             group: 'default',
             actionRef: 'action_2',
             actionTypeId: 'test2',
+            alertsFilter: null,
             params: {
               foo: true,
             },
@@ -1287,6 +1292,7 @@ describe('create()', () => {
           {
             actionRef: 'action_0',
             actionTypeId: 'test',
+            alertsFilter: null,
             group: 'default',
             params: { foo: true },
             uuid: '112',
@@ -1466,6 +1472,7 @@ describe('create()', () => {
           {
             actionRef: 'action_0',
             actionTypeId: 'test',
+            alertsFilter: null,
             group: 'default',
             params: { foo: true },
             uuid: '113',
@@ -1634,6 +1641,7 @@ describe('create()', () => {
           {
             actionRef: 'action_0',
             group: 'default',
+            alertsFilter: null,
             actionTypeId: 'test',
             params: { foo: true },
             uuid: '115',
@@ -1771,6 +1779,7 @@ describe('create()', () => {
             actionRef: 'action_0',
             group: 'default',
             actionTypeId: 'test',
+            alertsFilter: null,
             params: { foo: true },
             uuid: '116',
           },
@@ -1907,6 +1916,7 @@ describe('create()', () => {
             actionRef: 'action_0',
             group: 'default',
             actionTypeId: 'test',
+            alertsFilter: null,
             params: { foo: true },
             uuid: '117',
           },
@@ -2071,6 +2081,7 @@ describe('create()', () => {
             },
             actionRef: 'action_0',
             actionTypeId: 'test',
+            alertsFilter: null,
             uuid: '118',
           },
         ],
@@ -2437,6 +2448,7 @@ describe('create()', () => {
             actionRef: 'action_0',
             group: 'default',
             actionTypeId: 'test',
+            alertsFilter: null,
             params: { foo: true },
             uuid: '126',
           },
@@ -2540,6 +2552,7 @@ describe('create()', () => {
         actions: [
           {
             actionRef: 'action_0',
+            alertsFilter: null,
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },

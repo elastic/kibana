@@ -29,7 +29,7 @@ import {
   extractReferences,
   updateMeta,
   getPartialRuleFromRaw,
-  addUuid,
+  formatActions,
 } from '../lib';
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 
@@ -152,7 +152,7 @@ async function updateAlert<Params extends RuleTypeParams>(
   { id, data: initialData, allowMissingConnectorSecrets }: UpdateOptions<Params>,
   { attributes, version }: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
-  const data = { ...initialData, actions: addUuid(initialData.actions) };
+  const data = { ...initialData, actions: formatActions(initialData.actions) };
 
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 

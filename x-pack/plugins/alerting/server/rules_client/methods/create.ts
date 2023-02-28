@@ -15,7 +15,7 @@ import { RawRule, SanitizedRule, RuleTypeParams, Rule } from '../../types';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { validateRuleTypeParams, getRuleNotifyWhenType, getDefaultMonitoring } from '../../lib';
 import { getRuleExecutionStatusPending } from '../../lib/rule_execution_status';
-import { createRuleSavedObject, extractReferences, validateActions, addUuid } from '../lib';
+import { createRuleSavedObject, extractReferences, validateActions, formatActions } from '../lib';
 import { generateAPIKeyName, getMappedParams, apiKeyAsAlertAttributes } from '../common';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { NormalizedAlertAction, RulesClientContext } from '../types';
@@ -52,7 +52,7 @@ export async function create<Params extends RuleTypeParams = never>(
   context: RulesClientContext,
   { data: initialData, options, allowMissingConnectorSecrets }: CreateOptions<Params>
 ): Promise<SanitizedRule<Params>> {
-  const data = { ...initialData, actions: addUuid(initialData.actions) };
+  const data = { ...initialData, actions: formatActions(initialData.actions) };
 
   const id = options?.id || SavedObjectsUtils.generateId();
 

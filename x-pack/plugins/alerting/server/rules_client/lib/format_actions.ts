@@ -8,9 +8,18 @@
 import { v4 } from 'uuid';
 import { NormalizedAlertAction, NormalizedAlertActionWithUuid } from '..';
 
-export function addUuid(actions: NormalizedAlertAction[] = []): NormalizedAlertActionWithUuid[] {
-  return actions.map((action) => ({
+export function formatActions(
+  actions: NormalizedAlertAction[] = []
+): NormalizedAlertActionWithUuid[] {
+  return actions.map(({ uuid, alertsFilter, ...action }) => ({
     ...action,
-    uuid: action.uuid || v4(),
+    uuid: uuid || v4(),
+    alertsFilter: alertsFilter
+      ? {
+          ...alertsFilter,
+          timeframe: alertsFilter.timeframe || null,
+          kql: alertsFilter.kql || null,
+        }
+      : null,
   }));
 }

@@ -54,7 +54,13 @@ import {
   API_KEY_GENERATE_CONCURRENCY,
 } from '../common/constants';
 import { getMappedParams } from '../common/mapped_params_utils';
-import { getAlertFromRaw, extractReferences, validateActions, updateMeta, addUuid } from '../lib';
+import {
+  getAlertFromRaw,
+  extractReferences,
+  validateActions,
+  updateMeta,
+  formatActions,
+} from '../lib';
 import {
   NormalizedAlertAction,
   BulkOperationError,
@@ -547,7 +553,7 @@ async function getUpdatedAttributesFromOperations(
       case 'actions': {
         const updatedOperation = {
           ...operation,
-          value: addUuid(operation.value),
+          value: formatActions(operation.value),
         };
 
         try {

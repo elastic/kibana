@@ -14,7 +14,7 @@ import { ExecuteOptions as EnqueueExecutionOptions } from '@kbn/actions-plugin/s
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import { chunk } from 'lodash';
 import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
-import { parseDuration, RawRule, ThrottledActions } from '../types';
+import { GetSummarizedAlertsFnOpts, parseDuration, RawRule, ThrottledActions } from '../types';
 import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { injectActionParams } from './inject_action_params';
 import { ExecutionHandlerOptions, RuleTaskInstance } from './types';
@@ -523,7 +523,12 @@ export class ExecutionHandler<
     ruleId: string;
     spaceId: string;
   }) {
-    let options;
+    let options: GetSummarizedAlertsFnOpts = {
+      ruleId,
+      spaceId,
+      excludedAlertInstanceIds: this.rule.mutedInstanceIds,
+      alertsFilter: action.alertsFilter,
+    };
 
     if (isSummaryActionOnInterval(action)) {
       const throttleMills = parseDuration(action.frequency!.throttle!);
@@ -532,16 +537,12 @@ export class ExecutionHandler<
       options = {
         start,
         end: new Date(),
-        ruleId,
-        spaceId,
-        excludedAlertInstanceIds: this.rule.mutedInstanceIds,
+        ...options,
       };
     } else {
       options = {
         executionUuid: this.executionId,
-        ruleId,
-        spaceId,
-        excludedAlertInstanceIds: this.rule.mutedInstanceIds,
+        ...options,
       };
     }
 
