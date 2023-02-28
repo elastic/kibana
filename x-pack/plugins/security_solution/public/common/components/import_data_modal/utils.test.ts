@@ -306,7 +306,7 @@ describe('showToasterMessage', () => {
       expect(addSuccess).toHaveBeenNthCalledWith(2, 'Successfully imported 1 connector.');
       expect(addError).not.toHaveBeenCalled();
     });
-    it('should display 1 error message with the 2 invalid connectors even the error array has one message because the "id" was passed', () => {
+    it('should display 1 error message has 2 invalid connectors in the title even when error array has one message but "id" field', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();
 
@@ -354,7 +354,7 @@ describe('showToasterMessage', () => {
       });
       expect(addSuccess).not.toHaveBeenCalled();
     });
-    it('should display 1 error message with the 1 invalid connector when the "id" was passed with 1 id', () => {
+    it('should display 1 error message has 1 invalid connectors in the title even when error array has one message but "id" field', () => {
       const addError = jest.fn();
       const addSuccess = jest.fn();
 
