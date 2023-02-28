@@ -150,15 +150,12 @@ class PackageClientImpl implements PackageClient {
     return getPackage(packageName, packageVersion, options);
   }
 
-  public async getPackages({
-    excludeInstallStatus,
-    category,
-    prerelease,
-  }: {
+  public async getPackages(params?: {
     excludeInstallStatus?: false;
     category?: CategoryId;
     prerelease?: false;
   }) {
+    const { excludeInstallStatus, category, prerelease } = params;
     await this.#runPreflight();
     return getPackages({
       savedObjectsClient: this.internalSoClient,
