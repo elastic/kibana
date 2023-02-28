@@ -32,7 +32,7 @@ const calculateMax = (rows: MetricsAPIRow[]) => {
 
 const calculateAvg = (rows: MetricsAPIRow[]): number => {
   const values = rows.map(getMetricValue).filter(Boolean);
-  return sum(values) / values.length;
+  return sum(values) / Math.max(values.length, 1);
 };
 
 const getLastValue = (rows: MetricsAPIRow[]) => {
