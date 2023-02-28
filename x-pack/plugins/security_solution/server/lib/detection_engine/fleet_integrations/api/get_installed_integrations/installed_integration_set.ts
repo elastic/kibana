@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ArchivePackage, PackageListItem, PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackageListItem, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { capitalize, flatten } from 'lodash';
 import type {
   InstalledIntegration,
@@ -17,9 +17,8 @@ import type {
 } from '../../../../../../common/detection_engine/fleet_integrations';
 
 export interface IInstalledIntegrationSet {
+  addPackage(fleetPackage: PackageListItem): void;
   addPackagePolicy(policy: PackagePolicy): void;
-  addInstalledPackage(installedPackage: PackageListItem): void;
-  addRegistryPackage(registryPackage: ArchivePackage): void;
 
   getPackages(): InstalledPackageArray;
   getIntegrations(): InstalledIntegrationArray;
@@ -33,6 +32,55 @@ interface PackageInfo extends InstalledPackageBasicInfo {
 
 export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
   const packageMap: PackageMap = new Map<string, PackageInfo>([]);
+
+  const addPackage = (fleetPackage: PackageListItem): void => {
+    if (fleetPackage.type !== 'integration') {
+      return;
+    }
+    if (fleetPackage.status !== 'installed') {
+      return;
+    }
+
+    const packageKey = `${fleetPackage.name}`;
+    const existingPackageInfo = packageMap.get(packageKey);
+
+    if (existingPackageInfo != null) {
+      return;
+    }
+
+    // Actual `installed_version` is buried in SO, root `version` is latest package version available
+    // SO should be available as PackageListItem should be InstalledRegistry<RegistrySearchResult>
+    const installedPackageVersion = fleetPackage.savedObject?.attributes?.install_version;
+    const latestPackageVersion = fleetPackage.version;
+
+    // Policy templates correspond to package's integrations.
+    const packagePolicyTemplates = fleetPackage.policy_templates ?? [];
+
+    const packageInfo: PackageInfo = {
+      package_name: fleetPackage.name,
+      package_title: fleetPackage.title,
+      package_version: installedPackageVersion ?? latestPackageVersion,
+
+      integrations: new Map<string, InstalledIntegrationBasicInfo>(
+        packagePolicyTemplates.map((pt) => {
+          const integrationTitle: string =
+            packagePolicyTemplates.length === 1 && pt.name === fleetPackage.name
+              ? fleetPackage.title
+              : pt.title;
+
+          const integrationInfo: InstalledIntegrationBasicInfo = {
+            integration_name: pt.name,
+            integration_title: integrationTitle,
+            is_enabled: false, // There might not be an integration policy, so default false and later update in addPackagePolicy()
+          };
+
+          return [integrationInfo.integration_name, integrationInfo];
+        })
+      ),
+    };
+
+    packageMap.set(packageKey, packageInfo);
+  };
 
   const addPackagePolicy = (policy: PackagePolicy): void => {
     const packageInfo = getPackageInfoFromPolicy(policy);
@@ -53,54 +101,6 @@ export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
     } else {
       integrationsInfo.forEach((integration) => {
         addIntegrationToMap(existingPackageInfo.integrations, integration);
-      });
-    }
-  };
-
-  const addRegistryPackage = (registryPackage: ArchivePackage): void => {
-    const policyTemplates = registryPackage.policy_templates ?? [];
-    const packageKey = `${registryPackage.name}`;
-    const existingPackageInfo = packageMap.get(packageKey);
-
-    if (existingPackageInfo != null) {
-      for (const integration of existingPackageInfo.integrations.values()) {
-        const policyTemplate = policyTemplates.find((t) => t.name === integration.integration_name);
-        if (policyTemplate != null) {
-          integration.integration_title = policyTemplate.title;
-        }
-      }
-    }
-  };
-
-  const addInstalledPackage = (installedPackage: PackageListItem): void => {
-    const packageInfo = {
-      package_name: installedPackage.name,
-      package_title: installedPackage.title,
-      package_version:
-        // Actual `installed_version` is buried in SO, root `version` is latest package version available
-        // SO should be available as PackageListItem should be InstalledRegistry<RegistrySearchResult>
-        // @ts-expect-error Property 'savedObject' does not exist on type 'PackageListItem'
-        installedPackage.savedObject?.attributes?.install_version ?? installedPackage.version,
-    };
-    const integrationsInfo = [
-      {
-        integration_name: installedPackage.name,
-        integration_title: installedPackage.title,
-        is_enabled: false, // There might not be an integration policy, so default false and later update in addPackagePolicy()
-      },
-    ];
-    const packageKey = `${packageInfo.package_name}`;
-    const existingPackageInfo = packageMap.get(packageKey);
-
-    if (existingPackageInfo == null) {
-      const integrationsMap = new Map<string, InstalledIntegrationBasicInfo>();
-      integrationsInfo.forEach((integration) => {
-        addIntegrationToMap(integrationsMap, integration);
-      });
-
-      packageMap.set(packageKey, {
-        ...packageInfo,
-        integrations: integrationsMap,
       });
     }
   };
@@ -140,9 +140,8 @@ export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
   };
 
   return {
+    addPackage,
     addPackagePolicy,
-    addInstalledPackage,
-    addRegistryPackage,
     getPackages,
     getIntegrations,
   };
@@ -166,7 +165,7 @@ const getIntegrationsInfoFromPolicy = (
     const integrationTitle = `${packageInfo.package_title} ${capitalize(integrationName)}`; // e.g. 'AWS Cloudtrail'
     return {
       integration_name: integrationName,
-      integration_title: integrationTitle, // title gets re-initialized later in addRegistryPackage()
+      integration_title: integrationTitle,
       is_enabled: input.enabled,
     };
   });

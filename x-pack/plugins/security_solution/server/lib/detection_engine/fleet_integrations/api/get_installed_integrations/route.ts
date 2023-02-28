@@ -7,16 +7,12 @@
 
 import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { EndpointInternalFleetServicesInterface } from '../../../../../endpoint/services/fleet';
-import { initPromisePool } from '../../../../../utils/promise_pool';
 import { buildSiemResponse } from '../../../routes/utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import type { GetInstalledIntegrationsResponse } from '../../../../../../common/detection_engine/fleet_integrations';
 import { GET_INSTALLED_INTEGRATIONS_URL } from '../../../../../../common/detection_engine/fleet_integrations';
 import { createInstalledIntegrationSet } from './installed_integration_set';
-
-const MAX_CONCURRENT_REQUESTS_TO_PACKAGE_REGISTRY = 5;
 
 /**
  * Returns an array of installed Fleet integrations and their packages.
@@ -38,56 +34,19 @@ export const getInstalledIntegrationsRoute = (
 
       try {
         const ctx = await context.resolve(['core', 'securitySolution']);
-        const fleet: EndpointInternalFleetServicesInterface =
-          ctx.securitySolution.getInternalFleetServices();
+        const fleet = ctx.securitySolution.getInternalFleetServices();
         const set = createInstalledIntegrationSet();
 
-        // Pulls all packages into memory just like the main fleet landing page as no `installed:true` option available
+        // Pulls all packages into memory just like the main fleet landing page
         // No pagination support currently, so cannot batch this call
         const allThePackages = await fleet.packages.getPackages();
-        allThePackages
-          .filter(({ status }) => status === 'installed')
-          .forEach((installedPackage) => set.addInstalledPackage(installedPackage));
+        allThePackages.forEach((fleetPackage) => {
+          set.addPackage(fleetPackage);
+        });
 
         const packagePolicies = await fleet.packagePolicy.list(fleet.internalReadonlySoClient, {});
         packagePolicies.items.forEach((policy) => {
           set.addPackagePolicy(policy);
-        });
-
-        const registryPackages = await initPromisePool({
-          concurrency: MAX_CONCURRENT_REQUESTS_TO_PACKAGE_REGISTRY,
-          items: set.getPackages(),
-          executor: async (packageInfo) => {
-            const registryPackage = await fleet.packages.getPackage(
-              packageInfo.package_name,
-              packageInfo.package_version
-            );
-            return registryPackage;
-          },
-        });
-
-        if (registryPackages.errors.length > 0) {
-          const errors = registryPackages.errors.map(({ error, item }) => {
-            return {
-              error,
-              packageId: `${item.package_name}@${item.package_version}`,
-            };
-          });
-
-          const packages = errors.map((e) => e.packageId).join(', ');
-          logger.error(
-            `Unable to retrieve installed integrations. Error fetching packages from registry: ${packages}.`
-          );
-
-          errors.forEach(({ error, packageId }) => {
-            const logMessage = `Error fetching package info from registry for ${packageId}`;
-            const logReason = error instanceof Error ? error.message : String(error);
-            logger.debug(`${logMessage}. ${logReason}`);
-          });
-        }
-
-        registryPackages.results.forEach(({ result }) => {
-          set.addRegistryPackage(result.packageInfo);
         });
 
         const installedIntegrations = set.getIntegrations();
