@@ -227,7 +227,6 @@ export function PanelHeader({
         getActionContextMenuPanel={getActionContextMenuPanel}
         closeContextMenu={closeContextMenu}
         title={title}
-        index={index}
       />
     </figcaption>
   );

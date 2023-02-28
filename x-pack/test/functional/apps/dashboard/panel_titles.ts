@@ -39,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.dashboard.saveDashboard(DASHBOARD_NAME);
     });
 
-    describe('panel titles - by value', () => {
+    describe('by value', () => {
       const clearUnsavedChanges = async () => {
         await retry.try(async () => {
           // avoid flaky test by surrounding in retry
