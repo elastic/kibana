@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { SanitizedRule, ResolvedSanitizedRule } from '@kbn/alerting-plugin/common';
+import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 
-import type { FindResult, MigrateRules } from '@kbn/alerting-plugin/server';
+import type { MigrateRules } from '@kbn/alerting-plugin/server';
 import { legacyGetBulkRuleActionsSavedObject } from './legacy_get_bulk_rule_actions_saved_object';
 export interface ReadMigrationOptions {
   rules: SanitizedRule[];
