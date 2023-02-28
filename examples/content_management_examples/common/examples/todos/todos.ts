@@ -42,11 +42,9 @@ export const updateOutSchema = todoSchema;
 
 export type TodoDeleteIn = DeleteIn<'todos', { id: string }>;
 export type TodoDeleteOut = void;
-// no schema for delete ?
 
 export type TodoGetIn = GetIn<'todos'>;
 export type TodoGetOut = Todo;
-// no get in schema for get ?
 export const getOutSchema = todoSchema;
 
 export type TodoSearchIn = SearchIn<'todos', { filter?: 'todo' | 'completed' }>;

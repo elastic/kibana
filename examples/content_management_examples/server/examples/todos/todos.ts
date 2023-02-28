@@ -27,6 +27,9 @@ import {
   getOutSchema,
   updateOutSchema,
   searchOutSchema,
+  TodoUpdateIn,
+  TodoSearchIn,
+  TodoCreateIn,
 } from '../../../common/examples/todos';
 
 export const registerTodoContentType = ({
@@ -63,13 +66,10 @@ export const registerTodoContentType = ({
           },
         },
         get: {
-          // TODO: why no get in ?
           out: {
             result: getOutSchema,
           },
         },
-
-        // TODO: why no delete?
       },
     },
     storage: new TodosStorage(),
@@ -94,8 +94,6 @@ class TodosStorage implements ContentStorage {
     });
   }
 
-  // TODO: how to connect this to TodoGetIn?
-  // TODO: hot to connect this to input and output schema?
   async get(ctx: StorageContext, id: string): Promise<TodoGetOut> {
     return this.db.get(id)!;
   }
@@ -104,7 +102,7 @@ class TodosStorage implements ContentStorage {
     return ids.map((id) => this.db.get(id)!);
   }
 
-  async create(ctx: StorageContext, data: Omit<Todo, 'id' | 'completed'>): Promise<TodoCreateOut> {
+  async create(ctx: StorageContext, data: TodoCreateIn['data']): Promise<TodoCreateOut> {
     const todo: Todo = {
       ...data,
       completed: false,
@@ -119,7 +117,7 @@ class TodosStorage implements ContentStorage {
   async update(
     ctx: StorageContext,
     id: string,
-    data: Partial<Omit<Todo, 'id'>>
+    data: TodoUpdateIn['data']
   ): Promise<TodoUpdateOut> {
     const content = this.db.get(id);
     if (!content) {
@@ -140,10 +138,7 @@ class TodosStorage implements ContentStorage {
     this.db.delete(id);
   }
 
-  async search(
-    ctx: StorageContext,
-    query: { filter?: 'completed' | 'todo' }
-  ): Promise<TodoSearchOut> {
+  async search(ctx: StorageContext, query: TodoSearchIn['query']): Promise<TodoSearchOut> {
     const hits = Array.from(this.db.values());
     if (query.filter === 'todo') return { hits: hits.filter((t) => !t.completed) };
     if (query.filter === 'completed') return { hits: hits.filter((t) => t.completed) };
