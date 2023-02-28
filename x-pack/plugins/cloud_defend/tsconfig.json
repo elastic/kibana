@@ -6,8 +6,10 @@
   "include": [
     "common/**/*",
     "public/**/*",
+    "server/**/*",
     "../../../typings/**/*",
-    "public/**/*.json"
+    "public/**/*.json",
+    "server/**/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
