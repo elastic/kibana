@@ -13,8 +13,9 @@ import {
   SetupDependencies,
   StartDependencies,
 } from './types';
-import type { ContentClient } from './content_client';
-import type { ContentTypeRegistry } from './registry';
+import { ContentClient } from './content_client';
+import { ContentTypeRegistry } from './registry';
+import { RpcClient } from './rpc_client';
 
 export class ContentManagementPlugin
   implements
@@ -26,20 +27,17 @@ export class ContentManagementPlugin
     >
 {
   public setup(core: CoreSetup, deps: SetupDependencies) {
-    // don't actually expose the client and the registry until it is used to avoid increasing bundle size
     return {
       registry: {} as ContentTypeRegistry,
     };
   }
 
   public start(core: CoreStart, deps: StartDependencies) {
-    // don't actually expose the client and the registry until it is used to avoid increasing bundle size
-    // const rpcClient = new RpcClient(core.http);
-    // const contentTypeRegistry = new ContentTypeRegistry();
-    // const contentClient = new ContentClient(
-    //   (contentType) => contentTypeRegistry.get(contentType)?.crud() ?? rpcClient
-    // );
-    // return { client: contentClient, registry: contentTypeRegistry };
-    return { client: {} as ContentClient, registry: {} as ContentTypeRegistry };
+    const rpcClient = new RpcClient(core.http);
+    const contentTypeRegistry = new ContentTypeRegistry();
+    const contentClient = new ContentClient(
+      (contentType) => contentTypeRegistry.get(contentType)?.crud ?? rpcClient
+    );
+    return { client: contentClient, registry: contentTypeRegistry };
   }
 }

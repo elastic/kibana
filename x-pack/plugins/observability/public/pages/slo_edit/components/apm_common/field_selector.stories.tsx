@@ -15,7 +15,7 @@ import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../constants';
 
 export default {
   component: Component,
-  title: 'app/SLO/EditPage/Common/FieldSelector',
+  title: 'app/SLO/EditPage/ApmCommon/FieldSelector',
   decorators: [KibanaReactStorybookDecorator],
 };
 
