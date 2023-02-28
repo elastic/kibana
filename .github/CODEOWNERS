@@ -19,6 +19,7 @@ x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
 packages/kbn-alerts @elastic/security-solution
+packages/kbn-alerts-as-data-utils @elastic/response-ops
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 packages/kbn-alerts-ui-shared @elastic/response-ops
 packages/kbn-ambient-common-types @elastic/kibana-operations
@@ -336,6 +337,7 @@ x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin 
 src/plugins/event_annotation @elastic/kibana-visualizations
 x-pack/test/plugin_api_integration/plugins/event_log @elastic/response-ops
 x-pack/plugins/event_log @elastic/response-ops
+packages/kbn-expandable-flyout @elastic/security-threat-hunting-investigations
 packages/kbn-expect @elastic/kibana-operations
 x-pack/examples/exploratory_view_example @elastic/uptime
 src/plugins/expression_error @elastic/kibana-presentation
@@ -1041,7 +1043,6 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/plugins/security_solution/server/lib/detection_engine/migrations @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_preview @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_types @elastic/security-detections-response-alerts
-/x-pack/plugins/security_solution/server/lib/detection_engine/signals @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/index @elastic/security-detections-response-alerts
 /x-pack/plugins/security_solution/server/lib/detection_engine/routes/signals @elastic/security-detections-response-alerts
 

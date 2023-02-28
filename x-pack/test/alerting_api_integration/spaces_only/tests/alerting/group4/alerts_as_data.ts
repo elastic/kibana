@@ -5,20 +5,24 @@
  * 2.0.
  */
 
-import { alertFieldMap } from '@kbn/alerting-plugin/common/alert_schema';
-import { mappingFromFieldMap } from '@kbn/alerting-plugin/common/alert_schema/field_maps/mapping_from_field_map';
+import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
 export default function createAlertsAsDataTest({ getService }: FtrProviderContext) {
   const es = getService('es');
-  const commonFrameworkMappings = mappingFromFieldMap(alertFieldMap, 'strict');
+  const frameworkMappings = mappingFromFieldMap(alertFieldMap, 'strict');
+  const legacyAlertMappings = mappingFromFieldMap(legacyAlertFieldMap, 'strict');
+  const ecsMappings = mappingFromFieldMap(ecsFieldMap, 'strict');
 
   describe('alerts as data', () => {
     it('should install common alerts as data resources on startup', async () => {
       const ilmPolicyName = '.alerts-ilm-policy';
-      const componentTemplateName = 'alerts-common-component-template';
+      const frameworkComponentTemplateName = '.alerts-framework-mappings';
+      const legacyComponentTemplateName = '.alerts-legacy-alert-mappings';
+      const ecsComponentTemplateName = '.alerts-ecs-mappings';
 
       const commonIlmPolicy = await es.ilm.getLifecycle({
         name: ilmPolicyName,
@@ -41,23 +45,65 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
         },
       });
 
-      const { component_templates: componentTemplates } = await es.cluster.getComponentTemplate({
-        name: componentTemplateName,
+      const { component_templates: componentTemplates1 } = await es.cluster.getComponentTemplate({
+        name: frameworkComponentTemplateName,
       });
 
-      expect(componentTemplates.length).to.eql(1);
-      const commonComponentTemplate = componentTemplates[0];
+      expect(componentTemplates1.length).to.eql(1);
+      const frameworkComponentTemplate = componentTemplates1[0];
 
-      expect(commonComponentTemplate.name).to.eql(componentTemplateName);
-      expect(commonComponentTemplate.component_template.template.mappings).to.eql(
-        commonFrameworkMappings
+      expect(frameworkComponentTemplate.name).to.eql(frameworkComponentTemplateName);
+      expect(frameworkComponentTemplate.component_template.template.mappings).to.eql(
+        frameworkMappings
       );
-      expect(commonComponentTemplate.component_template.template.settings).to.eql({
+      expect(frameworkComponentTemplate.component_template.template.settings).to.eql({
         index: {
           number_of_shards: 1,
           mapping: {
             total_fields: {
-              limit: 100,
+              limit: 1500,
+            },
+          },
+        },
+      });
+
+      const { component_templates: componentTemplates2 } = await es.cluster.getComponentTemplate({
+        name: legacyComponentTemplateName,
+      });
+
+      expect(componentTemplates2.length).to.eql(1);
+      const legacyComponentTemplate = componentTemplates2[0];
+
+      expect(legacyComponentTemplate.name).to.eql(legacyComponentTemplateName);
+      expect(legacyComponentTemplate.component_template.template.mappings).to.eql(
+        legacyAlertMappings
+      );
+      expect(legacyComponentTemplate.component_template.template.settings).to.eql({
+        index: {
+          number_of_shards: 1,
+          mapping: {
+            total_fields: {
+              limit: 1500,
+            },
+          },
+        },
+      });
+
+      const { component_templates: componentTemplates3 } = await es.cluster.getComponentTemplate({
+        name: ecsComponentTemplateName,
+      });
+
+      expect(componentTemplates3.length).to.eql(1);
+      const ecsComponentTemplate = componentTemplates3[0];
+
+      expect(ecsComponentTemplate.name).to.eql(ecsComponentTemplateName);
+      expect(ecsComponentTemplate.component_template.template.mappings).to.eql(ecsMappings);
+      expect(ecsComponentTemplate.component_template.template.settings).to.eql({
+        index: {
+          number_of_shards: 1,
+          mapping: {
+            total_fields: {
+              limit: 2500,
             },
           },
         },
@@ -65,7 +111,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
     });
 
     it('should install context specific alerts as data resources on startup', async () => {
-      const componentTemplateName = 'alerts-test.always-firing-component-template';
+      const componentTemplateName = '.alerts-test.always-firing-mappings';
       const indexTemplateName = '.alerts-test.always-firing-default-template';
       const indexName = '.alerts-test.always-firing-default-000001';
       const contextSpecificMappings = {
@@ -98,7 +144,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
           number_of_shards: 1,
           mapping: {
             total_fields: {
-              limit: 100,
+              limit: 1500,
             },
           },
         },
@@ -114,8 +160,8 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
         '.alerts-test.always-firing-default-*',
       ]);
       expect(contextIndexTemplate.index_template.composed_of).to.eql([
-        'alerts-common-component-template',
-        'alerts-test.always-firing-component-template',
+        '.alerts-test.always-firing-mappings',
+        '.alerts-framework-mappings',
       ]);
       expect(contextIndexTemplate.index_template.template!.mappings).to.eql({
         dynamic: false,
@@ -150,7 +196,7 @@ export default function createAlertsAsDataTest({ getService }: FtrProviderContex
         dynamic: 'false',
         properties: {
           ...contextSpecificMappings,
-          ...commonFrameworkMappings.properties,
+          ...frameworkMappings.properties,
         },
       });
 

@@ -78,6 +78,7 @@ export function createPluginInitializerContext({
       roles: {
         backgroundTasks: nodeInfo.roles.backgroundTasks,
         ui: nodeInfo.roles.ui,
+        migrator: nodeInfo.roles.migrator,
       },
     },
 
