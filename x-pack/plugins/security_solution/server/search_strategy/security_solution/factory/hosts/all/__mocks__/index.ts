@@ -722,6 +722,7 @@ export const mockDeps = {
       ...allowedExperimentalValues,
     },
     service: {} as EndpointAppContextService,
+    getStartServices: jest.fn(),
   } as EndpointAppContext,
   request: {} as KibanaRequest,
 };

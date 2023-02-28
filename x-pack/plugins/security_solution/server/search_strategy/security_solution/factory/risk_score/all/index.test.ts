@@ -83,6 +83,7 @@ const mockDeps = {
     experimentalFeatures: {
       ...allowedExperimentalValues,
     },
+    getStartServices: jest.fn(),
     service: {} as EndpointAppContextService,
   } as EndpointAppContext,
   request: {} as KibanaRequest,

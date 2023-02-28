@@ -179,6 +179,7 @@ describe('test policy response handler', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        getStartServices: jest.fn(),
         experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
@@ -212,6 +213,7 @@ describe('test policy response handler', () => {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
+        getStartServices: jest.fn(),
         experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
       });
 
