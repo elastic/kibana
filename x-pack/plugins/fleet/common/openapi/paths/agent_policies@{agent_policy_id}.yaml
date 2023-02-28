@@ -46,6 +46,6 @@ put:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/new_agent_policy.yaml
+          $ref: ../components/schemas/agent_policy_update_request.yaml
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

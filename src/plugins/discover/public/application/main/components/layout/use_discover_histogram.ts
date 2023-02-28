@@ -134,7 +134,7 @@ export const useDiscoverHistogram = ({
       };
 
       if (!isEqual(oldState, newState)) {
-        stateContainer.setAppState(newState);
+        stateContainer.appState.update(newState);
       }
     });
 
