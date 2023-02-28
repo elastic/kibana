@@ -77,7 +77,7 @@ export const ALL = i18n.translate('xpack.synthetics.monitorManagement.priviledge
 export const NEED_PRIVATE_LOCATIONS_PERMISSION = (
   <FormattedMessage
     id="xpack.synthetics.monitorManagement.privateLocations.needFleetPermission"
-    defaultMessage="You are not authorized to manage private locations. It requires the {all} Kibana privilege for Fleet, and the {all} privilege for Integrations."
+    defaultMessage="You are not authorized to manage private locations. It requires the {all} Kibana privilege for both Fleet and Integrations."
     values={{
       all: <EuiCode>{`"${ALL}"`}</EuiCode>,
     }}
@@ -88,7 +88,7 @@ export const CANNOT_SAVE_INTEGRATION_LABEL = i18n.translate(
   'xpack.synthetics.monitorManagement.cannotSaveIntegration',
   {
     defaultMessage:
-      'You are not authorized to manage private locations. It requires the "All" Kibana privilege for Fleet, and the "All" Kibana for Integrations.',
+      'You are not authorized to manage private locations. It requires the "All" Kibana privilege for both Fleet and Integrations.',
   }
 );
 
