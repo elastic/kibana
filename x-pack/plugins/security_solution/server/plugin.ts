@@ -21,10 +21,10 @@ import type { Logger } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
-import type { FieldMap } from '@kbn/rule-registry-plugin/common/field_map';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import { technicalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/technical_rule_field_map';
-import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
@@ -220,6 +220,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     Object.entries(aadFieldConversion).forEach(([key, value]) => {
       aliasesFieldMap[key] = {
         type: 'alias',
+        required: false,
         path: value,
       };
     });
@@ -509,6 +510,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
+      messageSigningService: plugins.fleet?.messageSigningService,
     });
 
     this.telemetryReceiver.start(

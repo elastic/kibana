@@ -583,7 +583,7 @@ export class DataViewsService {
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         this.onNotification(
-          { title: err.message, color: 'danger', iconType: 'alert' },
+          { title: err.message, color: 'danger', iconType: 'error' },
           `refreshFields:${dataView.getIndexPattern()}`
         );
       }
@@ -637,7 +637,7 @@ export class DataViewsService {
       if (err instanceof DataViewMissingIndices) {
         if (displayErrors) {
           this.onNotification(
-            { title: err.message, color: 'danger', iconType: 'alert' },
+            { title: err.message, color: 'danger', iconType: 'error' },
             `refreshFieldSpecMap:${title}`
           );
         }
@@ -807,7 +807,7 @@ export class DataViewsService {
             {
               title: err.message,
               color: 'danger',
-              iconType: 'alert',
+              iconType: 'error',
             },
             `initFromSavedObject:${spec.title}`
           );
