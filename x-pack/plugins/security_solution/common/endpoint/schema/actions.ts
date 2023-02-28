@@ -131,26 +131,6 @@ export const EndpointActionListRequestSchema = {
         schema.string({ minLength: 1 }),
       ])
     ),
-    withOutputs: schema.maybe(
-      schema.oneOf([
-        schema.arrayOf(schema.string({ minLength: 1 }), {
-          minSize: 1,
-          validate: (actionIds) => {
-            if (actionIds.map((v) => v.trim()).some((v) => !v.length)) {
-              return 'actionIds cannot contain empty strings';
-            }
-          },
-        }),
-        schema.string({
-          minLength: 1,
-          validate: (actionId) => {
-            if (!actionId.trim().length) {
-              return 'actionId cannot be an empty string';
-            }
-          },
-        }),
-      ])
-    ),
   }),
 };
 

@@ -118,7 +118,6 @@ describe('Action List Handler', () => {
 
     it('should correctly format the request when calling `getActionListByStatus`', async () => {
       await actionListHandler({
-        withOutputs: 'actionX',
         agentIds: 'agentX',
         commands: 'running-processes',
         statuses: 'failed',
@@ -126,7 +125,6 @@ describe('Action List Handler', () => {
       });
       expect(mockGetActionListByStatus).toBeCalledWith(
         expect.objectContaining({
-          withOutputs: ['actionX'],
           elasticAgentIds: ['agentX'],
           commands: ['running-processes'],
           statuses: ['failed'],

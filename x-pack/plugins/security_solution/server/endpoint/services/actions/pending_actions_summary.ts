@@ -8,10 +8,7 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getActionList } from '..';
 import type { EndpointMetadataService } from '../metadata';
-import type {
-  ActionListApiResponse,
-  EndpointPendingActions,
-} from '../../../../common/endpoint/types';
+import type { ActionDetails, EndpointPendingActions } from '../../../../common/endpoint/types';
 import { ACTIONS_SEARCH_PAGE_SIZE } from './constants';
 
 const PENDING_ACTION_RESPONSE_MAX_LAPSED_TIME = 300000; // 300k ms === 5 minutes
@@ -37,21 +34,19 @@ export const getPendingActionsSummary = async (
   });
 
   // Store a map of `agent_id => array of actions`
-  const unExpiredByAgentId: Record<string, ActionListApiResponse['data']> =
-    unExpiredActionList.reduce<Record<string, ActionListApiResponse['data']>>(
-      (byAgentMap, action) => {
-        for (const agent of action.agents) {
-          if (!byAgentMap[agent]) {
-            byAgentMap[agent] = [];
-          }
+  const unExpiredByAgentId: Record<string, ActionDetails[]> = unExpiredActionList.reduce<
+    Record<string, ActionDetails[]>
+  >((byAgentMap, action) => {
+    for (const agent of action.agents) {
+      if (!byAgentMap[agent]) {
+        byAgentMap[agent] = [];
+      }
 
-          byAgentMap[agent].push(action);
-        }
+      byAgentMap[agent].push(action);
+    }
 
-        return byAgentMap;
-      },
-      {}
-    );
+    return byAgentMap;
+  }, {});
 
   const pending: EndpointPendingActions[] = [];
 

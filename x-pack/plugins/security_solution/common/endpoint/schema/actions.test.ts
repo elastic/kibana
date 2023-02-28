@@ -233,61 +233,6 @@ describe('actions schemas', () => {
         });
       }).not.toThrow();
     });
-
-    it('should not work with only spaces for a string in `withOutputs` list', () => {
-      expect(() => {
-        EndpointActionListRequestSchema.query.validate({
-          startDate: 'now-1d', // yesterday
-          endDate: 'now', // today
-          statuses: ['failed', 'pending', 'successful'],
-          withOutputs: '  ',
-        });
-      }).toThrow();
-    });
-
-    it('should not work with empty string in `withOutputs` list', () => {
-      expect(() => {
-        EndpointActionListRequestSchema.query.validate({
-          startDate: 'now-1d', // yesterday
-          endDate: 'now', // today
-          statuses: ['failed', 'pending', 'successful'],
-          withOutputs: '',
-        });
-      }).toThrow();
-    });
-
-    it('should not work with empty strings in `withOutputs` list', () => {
-      expect(() => {
-        EndpointActionListRequestSchema.query.validate({
-          startDate: 'now-1d', // yesterday
-          endDate: 'now', // today
-          statuses: ['failed', 'pending', 'successful'],
-          withOutputs: ['action-id-1', '  ', 'action-id-2'],
-        });
-      }).toThrow();
-    });
-
-    it('should work with a single action id in `withOutputs` list', () => {
-      expect(() => {
-        EndpointActionListRequestSchema.query.validate({
-          startDate: 'now-1d', // yesterday
-          endDate: 'now', // today
-          statuses: ['failed', 'pending', 'successful'],
-          withOutputs: 'action-id-1',
-        });
-      }).not.toThrow();
-    });
-
-    it('should work with multiple `withOutputs` filter', () => {
-      expect(() => {
-        EndpointActionListRequestSchema.query.validate({
-          startDate: 'now-1d', // yesterday
-          endDate: 'now', // today
-          statuses: ['failed', 'pending', 'successful'],
-          withOutputs: ['action-id-1', 'action-id-2'],
-        });
-      }).not.toThrow();
-    });
   });
 
   describe('NoParametersRequestSchema', () => {
