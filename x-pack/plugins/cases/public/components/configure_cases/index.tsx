@@ -98,12 +98,12 @@ export const ConfigureCases: React.FC = React.memo(() => {
     async (createdConnector) => {
       const caseConnector = normalizeActionConnector(createdConnector);
 
-      onConnectorUpdated(createdConnector);
-      setConnector(caseConnector);
-      persistCaseConfigure({
+      await persistCaseConfigure({
         connector: caseConnector,
         closureType,
       });
+      onConnectorUpdated(createdConnector);
+      setConnector(caseConnector);
     },
     [onConnectorUpdated, closureType, setConnector, persistCaseConfigure]
   );
