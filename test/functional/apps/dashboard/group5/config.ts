@@ -14,8 +14,5 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
-    layout: {
-      fixedHeaderHeight: 96 + 105, // 96 for Kibana navigation bar + 105 for dashboard top nav bar
-    },
   };
 }

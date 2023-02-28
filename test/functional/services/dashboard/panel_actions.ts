@@ -22,10 +22,13 @@ const SAVE_TO_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-saveToLibrary';
 const UNLINK_FROM_LIBRARY_TEST_SUBJ = 'embeddablePanelAction-unlinkFromLibrary';
 const CONVERT_TO_LENS_TEST_SUBJ = 'embeddablePanelAction-ACTION_EDIT_IN_LENS';
 
+const DASHBOARD_TOP_OFFSET = 96 + 105; // 96 for Kibana navigation bar + 105 for dashboard top nav bar (in edit mode)
+
 export class DashboardPanelActionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
-  private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly inspector = this.ctx.getService('inspector');
+  private readonly testSubjects = this.ctx.getService('testSubjects');
+
   private readonly header = this.ctx.getPageObject('header');
   private readonly common = this.ctx.getPageObject('common');
   private readonly dashboard = this.ctx.getPageObject('dashboard');
@@ -43,9 +46,12 @@ export class DashboardPanelActionsService extends FtrService {
 
   async toggleContextMenu(parent?: WebElementWrapper) {
     this.log.debug(`toggleContextMenu(${parent})`);
-    await (parent ? parent.moveMouseTo() : this.testSubjects.moveMouseTo('dashboardPanelTitle'));
+    await (parent
+      ? parent.moveMouseTo({ topOffset: DASHBOARD_TOP_OFFSET })
+      : this.testSubjects.moveMouseTo('dashboardPanelTitle'));
+
     const toggleMenuItem = await this.findContextMenu(parent);
-    await toggleMenuItem.click();
+    await toggleMenuItem.click(DASHBOARD_TOP_OFFSET);
   }
 
   async expectContextMenuToBeOpen() {
