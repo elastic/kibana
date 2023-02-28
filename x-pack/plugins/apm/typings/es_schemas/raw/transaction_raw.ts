@@ -64,10 +64,8 @@ export interface TransactionRaw extends APMBaseDoc {
       };
     };
     synthetic?: {
-      monitor?: {
-        id: string;
-        check_group: string;
-      };
+      'monitor.id'?: string;
+      'monitor.check_group'?: string;
     };
   };
 

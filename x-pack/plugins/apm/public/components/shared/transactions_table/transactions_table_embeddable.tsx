@@ -11,7 +11,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiTitle,
-  EuiBasicTableColumn,
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +30,7 @@ import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { txGroupsDroppedBucketName } from '../links/apm/transaction_detail_link';
 import { OverviewTableContainer } from '../overview_table_container';
 import { isTimeComparison } from '../time_comparison/get_comparison_options';
-import { getColumns, ServiceTransactionGroupItem } from './get_columns';
+import { getColumns } from './get_columns';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -257,8 +256,10 @@ export function TransactionsTableEmbeddable({
   });
   // Only take columns with name: 'name', 'latency', 'impact' if url is present
   const selectiveColumns = url
-    ? columns.filter((c: EuiBasicTableColumn<ServiceTransactionGroupItem>) =>
-        ['name', 'latency', 'impact'].includes(c.name as string)
+    ? columns.filter((c) =>
+        ['name', 'latency', 'impact'].includes(
+          (c as unknown as { field: string }).field
+        )
       )
     : columns;
 

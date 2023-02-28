@@ -69,14 +69,13 @@ export const getSections = ({
     )}`,
   });
 
-  const tracedSyntheticsMonitor =
-    transaction.transaction.synthetics?.monitor ??
-    transaction.transaction.synthetic?.monitor; // Due to mismatched mapping in APM Data repo
+  const tracedSynthetics =
+    transaction.transaction.synthetic ?? transaction.transaction.synthetics; // Due to mismatched mapping in APM Data repo
+  const syntheticsMonitorId = tracedSynthetics?.['monitor.id'];
+  const syntheticsCheckGroup = tracedSynthetics?.['monitor.check_group'];
 
   const syntheticsLink = url.format({
-    pathname: `${basePath.get()}/app/synthetics/monitor/${
-      tracedSyntheticsMonitor?.id
-    }/test-run/${tracedSyntheticsMonitor?.check_group}/step/1`,
+    pathname: `${basePath.get()}/app/synthetics/monitor/${syntheticsMonitorId}/test-run/${syntheticsCheckGroup}/step/1`,
     search: ``,
   });
 
@@ -198,7 +197,7 @@ export const getSections = ({
         { defaultMessage: 'View test run in Synthetics' }
       ),
       href: syntheticsLink,
-      condition: !!tracedSyntheticsMonitor,
+      condition: !!syntheticsMonitorId || !!syntheticsCheckGroup,
     },
   ];
 
