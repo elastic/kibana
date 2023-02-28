@@ -6,12 +6,18 @@
  * Side Public License, v 1.
  */
 import React, { useState, memo } from 'react';
+import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { DataTableRecord } from '../types';
 import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
 import './saved_search_grid.scss';
 import { DiscoverGridFlyout } from '../components/discover_grid/discover_grid_flyout';
+
+const containerStyles = css`
+  width: 100%;
+  position: relative;
+`;
 
 export interface DiscoverGridEmbeddableProps extends DiscoverGridProps {
   totalHitCount: number;
@@ -24,7 +30,7 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
 
   return (
     <EuiFlexGroup
-      style={{ width: '100%', position: 'relative' }}
+      css={containerStyles}
       direction="column"
       gutterSize="xs"
       responsive={false}

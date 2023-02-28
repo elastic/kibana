@@ -7,6 +7,7 @@
  */
 
 import React, { memo, useCallback, useMemo, useRef } from 'react';
+import { css } from '@emotion/react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText } from '@elastic/eui';
@@ -19,6 +20,11 @@ import {
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { TotalDocuments } from '../../application/main/components/total_documents/total_documents';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+
+const containerStyles = css`
+  width: 100%;
+  position: relative;
+`;
 
 export interface DocTableEmbeddableProps extends DocTableProps {
   totalHitCount: number;
@@ -101,12 +107,7 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   );
 
   return (
-    <EuiFlexGroup
-      style={{ width: '100%', position: 'relative' }}
-      direction="column"
-      gutterSize="xs"
-      responsive={false}
-    >
+    <EuiFlexGroup css={containerStyles} direction="column" gutterSize="xs" responsive={false}>
       {props.isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
