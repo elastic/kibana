@@ -22,12 +22,6 @@ const scriptedFieldA = { script: scriptA };
 const scriptedFieldB = { script: scriptB };
 const scriptedFieldC = { script: scriptC };
 
-/*
-const runtimeFieldA = { runtimeField: { script: { source: scriptA } } };
-const runtimeFieldB = { runtimeField: { script: { source: scriptB } } };
-const runtimeFieldC = { runtimeField: { script: { source: scriptC } } };
-*/
-
 const runtimeFieldA = { script: { source: scriptA } };
 const runtimeFieldB = { script: { source: scriptB } };
 const runtimeFieldC = { script: { source: scriptC } };
