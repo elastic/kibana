@@ -85,7 +85,7 @@ export class DashboardAddPanelService extends FtrService {
       const embeddableListBody = await itemList.findByTagName('tbody');
       const embeddableRows = await embeddableListBody.findAllByCssSelector('tr');
       for (let i = 0; i < embeddableRows.length; i++) {
-        const { name, button } = await this.getRowAtIndex(embeddableRows, i);
+        const { name, button } = await this.savedObjectsFinder.getRowAtIndex(embeddableRows, i);
         if (embeddableList.includes(name)) {
           // already added this one
           continue;

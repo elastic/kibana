@@ -58,7 +58,7 @@ export class SavedObjectsFinderService extends FtrService {
     await this.waitForListLoading();
   }
 
-  private async getRowAtIndex(rows: WebElementWrapper[], rowIndex: number) {
+  public async getRowAtIndex(rows: WebElementWrapper[], rowIndex: number) {
     const cell = await rows[rowIndex].findByTestSubject('savedObjectFinderTitle');
     const button = await cell.findByTagName('button');
     const name = await button.getVisibleText();
