@@ -1,6 +1,7 @@
 get:
   summary: Agents - Current Bulk Upgrades
-  tags: []
+  tags:
+    - agents
   responses:
     '200':
       description: OK

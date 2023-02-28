@@ -1,6 +1,7 @@
-
 get:
   summary: Agent policy - Download
+  tags:
+    - agent-policies
   operationId: agent-policy-download
   responses:
     '200':

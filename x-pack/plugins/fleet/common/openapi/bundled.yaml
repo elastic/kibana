@@ -13,10 +13,44 @@ servers:
   - url: http://localhost:5601/api/fleet
     description: local
 paths:
+  /health_check:
+    post:
+      summary: Fleet Server Health Check
+      tags:
+        - fleet-internals
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  name:
+                    type: string
+                  status:
+                    type: string
+                  host:
+                    type: string
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: fleet-server-health-check
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                host:
+                  type: string
   /setup:
     post:
       summary: Setup
-      tags: []
+      tags:
+        - fleet-internals
       responses:
         '200':
           description: OK
@@ -41,7 +75,8 @@ paths:
   /settings:
     get:
       summary: Settings
-      tags: []
+      tags:
+        - fleet-internals
       responses:
         '200':
           description: OK
@@ -80,42 +115,11 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: update-settings
-  /health_check:
-    post:
-      summary: Fleet Server Health Check
-      tags: []
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  name:
-                    type: string
-                  status:
-                    type: string
-                  host:
-                    type: string
-        '400':
-          $ref: '#/components/responses/error'
-      operationId: fleet-server-health-check
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                host:
-                  type: string
   /service-tokens:
     post:
       summary: Generate service tokens
-      tags: []
+      tags:
+        - service-tokens
       responses:
         '200':
           description: OK
@@ -137,7 +141,8 @@ paths:
   /service_tokens:
     post:
       summary: Generate service tokens
-      tags: []
+      tags:
+        - service-tokens
       responses:
         '200':
           description: OK
@@ -158,7 +163,8 @@ paths:
   /epm/verification_key_id:
     get:
       summary: Get package signature verification key ID
-      tags: []
+      tags:
+        - epm packages
       responses:
         '200':
           description: OK
@@ -183,26 +189,12 @@ paths:
         '400':
           $ref: '#/components/responses/error'
       operationId: packages-get-verification-key-id
-    parameters:
-      - schema:
-          type: string
-        name: pkgName
-        in: path
-        required: true
-      - schema:
-          type: string
-        name: pkgVersion
-        in: path
-        required: true
-      - schema:
-          type: string
-        name: filePath
-        in: path
-        required: true
+    parameters: []
   /epm/categories:
     get:
       summary: Package categories
-      tags: []
+      tags:
+        - epm
       responses:
         '200':
           description: OK
@@ -221,7 +213,7 @@ paths:
           default: false
         description: >-
           Whether to include prerelease packages in categories count (e.g. beta,
-          rc, preview) 
+          rc, preview)
       - in: query
         name: experimental
         deprecated: true
@@ -236,7 +228,8 @@ paths:
   /epm/packages/limited:
     get:
       summary: Packages - Get limited list
-      tags: []
+      tags:
+        - epm packages
       responses:
         '200':
           description: OK
@@ -256,7 +249,8 @@ paths:
   /epm/packages:
     get:
       summary: Packages - List
-      tags: []
+      tags:
+        - epm packages
       responses:
         '200':
           description: OK
@@ -286,7 +280,7 @@ paths:
             default: false
           description: >-
             Whether to return prerelease versions of packages (e.g. beta, rc,
-            preview) 
+            preview)
         - in: query
           name: experimental
           deprecated: true
@@ -299,7 +293,8 @@ paths:
             type: string
     post:
       summary: Packages - Install by upload
-      tags: []
+      tags:
+        - epm packages
       responses:
         '200':
           description: OK
@@ -352,7 +347,8 @@ paths:
   /epm/packages/_bulk:
     post:
       summary: Packages - Bulk install
-      tags: []
+      tags:
+        - epm packages
       responses:
         '200':
           description: OK
@@ -371,7 +367,7 @@ paths:
             default: false
           description: >-
             Whether to return prerelease versions of packages (e.g. beta, rc,
-            preview) 
+            preview)
       requestBody:
         content:
           application/json:
@@ -391,7 +387,8 @@ paths:
   /epm/packages/{pkgkey}:
     get:
       summary: Packages - Info
-      tags: []
+      tags:
+        - epm packages
       responses:
         '200':
           description: OK
@@ -434,11 +431,12 @@ paths:
             default: false
           description: >-
             Whether to return prerelease versions of packages (e.g. beta, rc,
-            preview) 
+            preview)
       deprecated: true
     post:
       summary: Packages - Install
-      tags: []
+      tags:
+        - epm packages
       responses:
         '200':
           description: OK
@@ -532,7 +530,8 @@ paths:
   /epm/packages/{pkgName}/{pkgVersion}:
     get:
       summary: Packages - Info
-      tags: []
+      tags:
+        - epm packages
       responses:
         '200':
           description: OK
@@ -600,10 +599,11 @@ paths:
           default: false
         description: >-
           Whether to return prerelease versions of packages (e.g. beta, rc,
-          preview) 
+          preview)
     post:
       summary: Packages - Install
-      tags: []
+      tags:
+        - epm packages
       responses:
         '200':
           description: OK
@@ -655,7 +655,8 @@ paths:
                   type: boolean
     put:
       summary: Packages - Update
-      tags: []
+      tags:
+        - epm packages
       responses:
         '200':
           description: OK
@@ -694,7 +695,8 @@ paths:
                   type: boolean
     delete:
       summary: Packages - Delete
-      tags: []
+      tags:
+        - epm packages
       responses:
         '200':
           description: OK
@@ -735,7 +737,8 @@ paths:
   /epm/packages/{pkgName}/{pkgVersion}/{filePath}:
     get:
       summary: Packages - Get file from registry
-      tags: []
+      tags:
+        - epm
       responses:
         '200':
           description: OK
@@ -772,7 +775,8 @@ paths:
   /epm/packages/{pkgName}/stats:
     get:
       summary: Get stats for a package
-      tags: []
+      tags:
+        - epm packages
       responses:
         '200':
           description: OK
@@ -799,7 +803,8 @@ paths:
   /agents/setup:
     get:
       summary: Agents setup - Info
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -841,8 +846,9 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
   /agent-status:
     get:
-      summary: Agents - Summary stats
-      tags: []
+      summary: Agents - Status summary
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -888,8 +894,9 @@ paths:
       deprecated: true
   /agent_status:
     get:
-      summary: Agents - Summary stats
-      tags: []
+      summary: Agents - Status summary
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -949,7 +956,8 @@ paths:
   /agent_status/data:
     get:
       summary: Agents - Get incoming data
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -981,7 +989,8 @@ paths:
   /agents:
     get:
       summary: Agents - List
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -1011,7 +1020,8 @@ paths:
   /agents/bulk_upgrade:
     post:
       summary: Agents - Bulk Upgrade
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -1044,6 +1054,8 @@ paths:
   /agents/action_status:
     get:
       summary: Agents - Action status
+      tags:
+        - agents actions
       parameters:
         - $ref: '#/components/parameters/page_size'
         - $ref: '#/components/parameters/page_index'
@@ -1117,7 +1129,8 @@ paths:
         required: true
     get:
       summary: Agent - Info
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -1137,7 +1150,8 @@ paths:
         - $ref: '#/components/parameters/with_metrics'
     put:
       summary: Agent - Update
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -1170,7 +1184,8 @@ paths:
                     type: string
     delete:
       summary: Agent - Delete
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -1199,7 +1214,8 @@ paths:
         required: true
     post:
       summary: Agent - Actions
-      tags: []
+      tags:
+        - agents actions
       responses:
         '200':
           description: OK
@@ -1244,7 +1260,8 @@ paths:
         required: true
     post:
       summary: Agent - Cancel Action
-      tags: []
+      tags:
+        - agents actions
       responses:
         '200':
           description: OK
@@ -1274,7 +1291,8 @@ paths:
         required: true
     get:
       summary: Get agent upload file
-      tags: []
+      tags:
+        - agents uploads
       responses:
         '200':
           description: OK
@@ -1303,7 +1321,8 @@ paths:
         required: true
     post:
       summary: Agent - Reassign
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -1329,7 +1348,8 @@ paths:
                 - policy_id
     put:
       summary: Agent - Reassign
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -1363,7 +1383,8 @@ paths:
         required: true
     post:
       summary: Agent - Unenroll
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -1408,7 +1429,8 @@ paths:
         required: true
     post:
       summary: Agent - Upgrade
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -1436,7 +1458,8 @@ paths:
         required: true
     get:
       summary: List agent uploads
-      tags: []
+      tags:
+        - agents uploads
       responses:
         '200':
           description: OK
@@ -1458,7 +1481,8 @@ paths:
   /agents/bulk_reassign:
     post:
       summary: Agents - Bulk reassign
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -1500,7 +1524,8 @@ paths:
   /agents/bulk_unenroll:
     post:
       summary: Agents - Bulk unenroll
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -1547,7 +1572,8 @@ paths:
   /agents/bulk_update_agent_tags:
     post:
       summary: Agents - Bulk update tags
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -1600,6 +1626,8 @@ paths:
   /agents/tags:
     get:
       summary: Agent Tags - List
+      tags:
+        - agents
       description: List all agent tags
       responses:
         '200':
@@ -1620,7 +1648,8 @@ paths:
         required: true
     post:
       summary: Agent - Request Diagnostics
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -1639,7 +1668,8 @@ paths:
   /agents/bulk_request_diagnostics:
     post:
       summary: Agent - Bulk Request Diagnostics
-      tags: []
+      tags:
+        - agents
       responses:
         '200':
           description: OK
@@ -1678,7 +1708,8 @@ paths:
   /agent_policies:
     get:
       summary: Agent policies - List
-      tags: []
+      tags:
+        - agent-policies
       responses:
         '200':
           description: OK
@@ -1728,7 +1759,8 @@ paths:
       description: ''
     post:
       summary: Agent policy - Create
-      tags: []
+      tags:
+        - agent-policies
       responses:
         '200':
           description: OK
@@ -1759,7 +1791,8 @@ paths:
         required: true
     get:
       summary: Agent policy - Info
-      tags: []
+      tags:
+        - agent-policies
       responses:
         '200':
           description: OK
@@ -1779,7 +1812,8 @@ paths:
       parameters: []
     put:
       summary: Agent policy - Update
-      tags: []
+      tags:
+        - agent-policies
       responses:
         '200':
           description: OK
@@ -1811,6 +1845,8 @@ paths:
         required: true
     post:
       summary: Agent policy - copy one policy
+      tags:
+        - agent-policies
       operationId: agent-policy-copy
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
@@ -1844,6 +1880,8 @@ paths:
   /agent_policies/{agentPolicyId}/full:
     get:
       summary: Agent policy - Get full policy
+      tags:
+        - agent-policies
       operationId: agent-policy-full
       responses:
         '200':
@@ -1883,6 +1921,8 @@ paths:
   /agent_policies/{agentPolicyId}/download:
     get:
       summary: Agent policy - Download
+      tags:
+        - agent-policies
       operationId: agent-policy-download
       responses:
         '200':
@@ -1920,7 +1960,8 @@ paths:
   /agent_policies/_bulk_get:
     post:
       summary: Agent policies - Bulk Get
-      tags: []
+      tags:
+        - agent-policies
       requestBody:
         content:
           application/json:
@@ -1961,6 +2002,8 @@ paths:
   /agent_policies/delete:
     post:
       summary: Agent policy - Delete
+      tags:
+        - agent-policies
       operationId: delete-agent-policy
       responses:
         '200':
@@ -1995,7 +2038,8 @@ paths:
   /data_streams:
     get:
       summary: Data streams - List
-      tags: []
+      tags:
+        - data-streams
       responses:
         '200':
           description: OK
@@ -2015,7 +2059,8 @@ paths:
   /enrollment-api-keys:
     get:
       summary: Enrollment API Keys - List
-      tags: []
+      tags:
+        - enrollment-api-keys
       responses:
         '200':
           description: OK
@@ -2051,7 +2096,8 @@ paths:
       deprecated: true
     post:
       summary: Enrollment API Key - Create
-      tags: []
+      tags:
+        - enrollment-api-keys
       responses:
         '200':
           description: OK
@@ -2081,7 +2127,8 @@ paths:
         required: true
     get:
       summary: Enrollment API Key - Info
-      tags: []
+      tags:
+        - enrollment-api-keys
       responses:
         '200':
           description: OK
@@ -2100,7 +2147,8 @@ paths:
       deprecated: true
     delete:
       summary: Enrollment API Key - Delete
-      tags: []
+      tags:
+        - enrollment-api-keys
       responses:
         '200':
           description: OK
@@ -2124,7 +2172,8 @@ paths:
   /enrollment_api_keys:
     get:
       summary: Enrollment API Keys - List
-      tags: []
+      tags:
+        - enrollment-api-keys
       responses:
         '200':
           description: OK
@@ -2159,7 +2208,8 @@ paths:
       parameters: []
     post:
       summary: Enrollment API Key - Create
-      tags: []
+      tags:
+        - enrollment-api-keys
       responses:
         '200':
           description: OK
@@ -2188,7 +2238,8 @@ paths:
         required: true
     get:
       summary: Enrollment API Key - Info
-      tags: []
+      tags:
+        - enrollment-api-keys
       responses:
         '200':
           description: OK
@@ -2206,7 +2257,8 @@ paths:
       operationId: get-enrollment-api-key
     delete:
       summary: Enrollment API Key - Delete
-      tags: []
+      tags:
+        - enrollment-api-keys
       responses:
         '200':
           description: OK
@@ -2229,7 +2281,8 @@ paths:
   /package_policies:
     get:
       summary: Package policies - List
-      tags: []
+      tags:
+        - package-policies
       responses:
         '200':
           description: OK
@@ -2258,6 +2311,8 @@ paths:
     parameters: []
     post:
       summary: Package policy - Create
+      tags:
+        - package-policies
       operationId: create-package-policy
       responses:
         '200':
@@ -2286,7 +2341,8 @@ paths:
   /package_policies/_bulk_get:
     post:
       summary: Package policies - Bulk Get
-      tags: []
+      tags:
+        - package-policies
       requestBody:
         content:
           application/json:
@@ -2324,6 +2380,8 @@ paths:
   /package_policies/delete:
     post:
       summary: Package policy - Delete
+      tags:
+        - package-policies
       operationId: post-delete-package-policy
       requestBody:
         content:
@@ -2365,6 +2423,8 @@ paths:
   /package_policies/upgrade:
     post:
       summary: Package policy - Upgrade
+      tags:
+        - package-policies
       operationId: upgrade-package-policy
       requestBody:
         content:
@@ -2402,6 +2462,8 @@ paths:
   /package_policies/upgrade/dryrun:
     post:
       summary: Package policy - Upgrade Dry run
+      tags:
+        - package-policies
       operationId: upgrade-package-policy-dry-run
       requestBody:
         content:
@@ -2440,7 +2502,8 @@ paths:
   /package_policies/{packagePolicyId}:
     get:
       summary: Package policy - Info
-      tags: []
+      tags:
+        - package-policies
       responses:
         '200':
           description: OK
@@ -2464,6 +2527,8 @@ paths:
         required: true
     put:
       summary: Package policy - Update
+      tags:
+        - package-policies
       operationId: update-package-policy
       requestBody:
         content:
@@ -2491,7 +2556,8 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
     delete:
       summary: Package policy - Delete
-      tags: []
+      tags:
+        - package-policies
       operationId: delete-package-policy
       responses:
         '200':
@@ -2515,7 +2581,8 @@ paths:
   /outputs:
     get:
       summary: Outputs
-      tags: []
+      tags:
+        - outputs
       responses:
         '200':
           description: OK
@@ -2540,7 +2607,8 @@ paths:
     post:
       summary: Outputs
       description: Create a new output
-      tags: []
+      tags:
+        - outputs
       responses:
         '200':
           description: OK
@@ -2586,7 +2654,8 @@ paths:
   /outputs/{outputId}:
     get:
       summary: Output - Info
-      tags: []
+      tags:
+        - outputs
       responses:
         '200':
           description: OK
@@ -2629,6 +2698,8 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
       summary: Output - Update
+      tags:
+        - outputs
       operationId: update-output
       requestBody:
         content:
@@ -2675,10 +2746,31 @@ paths:
           $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
+  /logstash_api_keys:
+    post:
+      summary: Generate Logstash API key
+      tags:
+        - outputs
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  api_key:
+                    type: string
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: generate-logstash-api-key
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
   /agent_download_sources:
     get:
       summary: Agent Download Sources
-      tags: []
+      tags:
+        - agent-binary-download-sources
       responses:
         '200':
           description: OK
@@ -2738,7 +2830,8 @@ paths:
   /agent_download_sources/{sourceId}:
     get:
       summary: Agent Download Sources - Info
-      tags: []
+      tags:
+        - agent-binary-download-sources
       responses:
         '200':
           description: OK
@@ -2814,30 +2907,12 @@ paths:
           $ref: '#/components/responses/error'
       parameters:
         - $ref: '#/components/parameters/kbn_xsrf'
-  /logstash_api_keys:
-    post:
-      summary: Generate Logstash API key
-      tags: []
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  api_key:
-                    type: string
-        '400':
-          $ref: '#/components/responses/error'
-      operationId: generate-logstash-api-key
-      parameters:
-        - $ref: '#/components/parameters/kbn_xsrf'
   /fleet_server_hosts:
     get:
       summary: Fleet Server Hosts - List
       description: Return a list of Fleet server hosts
-      tags: []
+      tags:
+        - fleet-server-hosts
       responses:
         '200':
           description: OK
@@ -2862,7 +2937,8 @@ paths:
     post:
       summary: Fleet Server Hosts - Create
       description: Create a new Fleet Server Host
-      tags: []
+      tags:
+        - fleet-server-hosts
       responses:
         '200':
           description: OK
@@ -2898,7 +2974,8 @@ paths:
   /fleet_server_hosts/{itemId}:
     get:
       summary: Fleet Server Hosts - Info
-      tags: []
+      tags:
+        - fleet-server-hosts
       responses:
         '200':
           description: OK
@@ -2941,6 +3018,8 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
       summary: Fleet Server Hosts - Update
+      tags:
+        - fleet-server-hosts
       operationId: update-fleet-server-hosts
       requestBody:
         content:
@@ -2976,7 +3055,8 @@ paths:
     get:
       summary: Fleet Proxies - List
       description: Return a list of Proxies
-      tags: []
+      tags:
+        - proxies
       responses:
         '200':
           description: OK
@@ -3001,7 +3081,8 @@ paths:
     post:
       summary: Fleet Proxies - Create
       description: Create a new Fleet Server Host
-      tags: []
+      tags:
+        - proxies
       responses:
         '200':
           description: OK
@@ -3041,7 +3122,8 @@ paths:
   /proxies/{itemId}:
     get:
       summary: Fleet Proxies - Info
-      tags: []
+      tags:
+        - proxies
       responses:
         '200':
           description: OK
@@ -3065,6 +3147,8 @@ paths:
         required: true
     delete:
       summary: Fleet Proxies - Delete
+      tags:
+        - proxies
       operationId: delete-fleet-proxies
       responses:
         '200':
@@ -3084,6 +3168,8 @@ paths:
         - $ref: '#/components/parameters/kbn_xsrf'
     put:
       summary: Fleet Proxies - Update
+      tags:
+        - proxies
       operationId: update-fleet-proxies
       requestBody:
         content:
@@ -3122,7 +3208,8 @@ paths:
   /kubernetes:
     get:
       summary: Get K8s Full Agent Manifest
-      tags: []
+      tags:
+        - kubernetes
       responses:
         '200':
           description: OK
@@ -3230,6 +3317,20 @@ components:
       required: false
       schema:
         type: boolean
+  responses:
+    error:
+      description: Generic Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              statusCode:
+                type: number
+              error:
+                type: string
+              message:
+                type: string
   schemas:
     fleet_setup_response:
       title: Fleet Setup response
@@ -4612,19 +4713,5 @@ components:
       required:
         - name
         - url
-  responses:
-    error:
-      description: Generic Error
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              statusCode:
-                type: number
-              error:
-                type: string
-              message:
-                type: string
 security:
   - basicAuth: []

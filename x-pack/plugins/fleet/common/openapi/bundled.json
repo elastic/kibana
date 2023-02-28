@@ -20,10 +20,67 @@
     }
   ],
   "paths": {
+    "/health_check": {
+      "post": {
+        "summary": "Fleet Server Health Check",
+        "tags": [
+          "fleet-internals"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "host": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "fleet-server-health-check",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "host": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/setup": {
       "post": {
         "summary": "Setup",
-        "tags": [],
+        "tags": [
+          "fleet-internals"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -65,7 +122,9 @@
     "/settings": {
       "get": {
         "summary": "Settings",
-        "tags": [],
+        "tags": [
+          "fleet-internals"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -128,63 +187,12 @@
         "operationId": "update-settings"
       }
     },
-    "/health_check": {
-      "post": {
-        "summary": "Fleet Server Health Check",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string"
-                    },
-                    "host": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "operationId": "fleet-server-health-check",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "host": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/service-tokens": {
       "post": {
         "summary": "Generate service tokens",
-        "tags": [],
+        "tags": [
+          "service-tokens"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -220,7 +228,9 @@
     "/service_tokens": {
       "post": {
         "summary": "Generate service tokens",
-        "tags": [],
+        "tags": [
+          "service-tokens"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -255,7 +265,9 @@
     "/epm/verification_key_id": {
       "get": {
         "summary": "Get package signature verification key ID",
-        "tags": [],
+        "tags": [
+          "epm packages"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -291,37 +303,14 @@
         },
         "operationId": "packages-get-verification-key-id"
       },
-      "parameters": [
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "pkgName",
-          "in": "path",
-          "required": true
-        },
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "pkgVersion",
-          "in": "path",
-          "required": true
-        },
-        {
-          "schema": {
-            "type": "string"
-          },
-          "name": "filePath",
-          "in": "path",
-          "required": true
-        }
-      ]
+      "parameters": []
     },
     "/epm/categories": {
       "get": {
         "summary": "Package categories",
-        "tags": [],
+        "tags": [
+          "epm"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -347,7 +336,7 @@
             "type": "boolean",
             "default": false
           },
-          "description": "Whether to include prerelease packages in categories count (e.g. beta, rc, preview) "
+          "description": "Whether to include prerelease packages in categories count (e.g. beta, rc, preview)"
         },
         {
           "in": "query",
@@ -371,7 +360,9 @@
     "/epm/packages/limited": {
       "get": {
         "summary": "Packages - Get limited list",
-        "tags": [],
+        "tags": [
+          "epm packages"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -402,7 +393,9 @@
     "/epm/packages": {
       "get": {
         "summary": "Packages - List",
-        "tags": [],
+        "tags": [
+          "epm packages"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -436,7 +429,7 @@
               "type": "boolean",
               "default": false
             },
-            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview)"
           },
           {
             "in": "query",
@@ -458,7 +451,9 @@
       },
       "post": {
         "summary": "Packages - Install by upload",
-        "tags": [],
+        "tags": [
+          "epm packages"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -545,7 +540,9 @@
     "/epm/packages/_bulk": {
       "post": {
         "summary": "Packages - Bulk install",
-        "tags": [],
+        "tags": [
+          "epm packages"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -570,7 +567,7 @@
               "type": "boolean",
               "default": false
             },
-            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview)"
           }
         ],
         "requestBody": {
@@ -603,7 +600,9 @@
     "/epm/packages/{pkgkey}": {
       "get": {
         "summary": "Packages - Info",
-        "tags": [],
+        "tags": [
+          "epm packages"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -670,14 +669,16 @@
               "type": "boolean",
               "default": false
             },
-            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview)"
           }
         ],
         "deprecated": true
       },
       "post": {
         "summary": "Packages - Install",
-        "tags": [],
+        "tags": [
+          "epm packages"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -836,7 +837,9 @@
     "/epm/packages/{pkgName}/{pkgVersion}": {
       "get": {
         "summary": "Packages - Info",
-        "tags": [],
+        "tags": [
+          "epm packages"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -940,12 +943,14 @@
             "type": "boolean",
             "default": false
           },
-          "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+          "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview)"
         }
       ],
       "post": {
         "summary": "Packages - Install",
-        "tags": [],
+        "tags": [
+          "epm packages"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1031,7 +1036,9 @@
       },
       "put": {
         "summary": "Packages - Update",
-        "tags": [],
+        "tags": [
+          "epm packages"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1096,7 +1103,9 @@
       },
       "delete": {
         "summary": "Packages - Delete",
-        "tags": [],
+        "tags": [
+          "epm packages"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1167,7 +1176,9 @@
     "/epm/packages/{pkgName}/{pkgVersion}/{filePath}": {
       "get": {
         "summary": "Packages - Get file from registry",
-        "tags": [],
+        "tags": [
+          "epm"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1226,7 +1237,9 @@
     "/epm/packages/{pkgName}/stats": {
       "get": {
         "summary": "Get stats for a package",
-        "tags": [],
+        "tags": [
+          "epm packages"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1271,7 +1284,9 @@
     "/agents/setup": {
       "get": {
         "summary": "Agents setup - Info",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1342,8 +1357,10 @@
     },
     "/agent-status": {
       "get": {
-        "summary": "Agents - Summary stats",
-        "tags": [],
+        "summary": "Agents - Status summary",
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1411,8 +1428,10 @@
     },
     "/agent_status": {
       "get": {
-        "summary": "Agents - Summary stats",
-        "tags": [],
+        "summary": "Agents - Status summary",
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1500,7 +1519,9 @@
     "/agent_status/data": {
       "get": {
         "summary": "Agents - Get incoming data",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1551,7 +1572,9 @@
     "/agents": {
       "get": {
         "summary": "Agents - List",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1612,7 +1635,9 @@
     "/agents/bulk_upgrade": {
       "post": {
         "summary": "Agents - Bulk Upgrade",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1664,6 +1689,9 @@
     "/agents/action_status": {
       "get": {
         "summary": "Agents - Action status",
+        "tags": [
+          "agents actions"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/page_size"
@@ -1775,7 +1803,9 @@
       ],
       "get": {
         "summary": "Agent - Info",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1808,7 +1838,9 @@
       },
       "put": {
         "summary": "Agent - Update",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1862,7 +1894,9 @@
       },
       "delete": {
         "summary": "Agent - Delete",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1910,7 +1944,9 @@
       ],
       "post": {
         "summary": "Agent - Actions",
-        "tags": [],
+        "tags": [
+          "agents actions"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1984,7 +2020,9 @@
       ],
       "post": {
         "summary": "Agent - Cancel Action",
-        "tags": [],
+        "tags": [
+          "agents actions"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2034,7 +2072,9 @@
       ],
       "get": {
         "summary": "Get agent upload file",
-        "tags": [],
+        "tags": [
+          "agents uploads"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2080,7 +2120,9 @@
       ],
       "post": {
         "summary": "Agent - Reassign",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2123,7 +2165,9 @@
       },
       "put": {
         "summary": "Agent - Reassign",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2179,7 +2223,9 @@
       ],
       "post": {
         "summary": "Agent - Unenroll",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2254,7 +2300,9 @@
       ],
       "post": {
         "summary": "Agent - Upgrade",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2301,7 +2349,9 @@
       ],
       "get": {
         "summary": "List agent uploads",
-        "tags": [],
+        "tags": [
+          "agents uploads"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2336,7 +2386,9 @@
     "/agents/bulk_reassign": {
       "post": {
         "summary": "Agents - Bulk reassign",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2406,7 +2458,9 @@
     "/agents/bulk_unenroll": {
       "post": {
         "summary": "Agents - Bulk unenroll",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2483,7 +2537,9 @@
     "/agents/bulk_update_agent_tags": {
       "post": {
         "summary": "Agents - Bulk update tags",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2571,6 +2627,9 @@
     "/agents/tags": {
       "get": {
         "summary": "Agent Tags - List",
+        "tags": [
+          "agents"
+        ],
         "description": "List all agent tags",
         "responses": {
           "200": {
@@ -2603,7 +2662,9 @@
       ],
       "post": {
         "summary": "Agent - Request Diagnostics",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2635,7 +2696,9 @@
     "/agents/bulk_request_diagnostics": {
       "post": {
         "summary": "Agent - Bulk Request Diagnostics",
-        "tags": [],
+        "tags": [
+          "agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2702,7 +2765,9 @@
     "/agent_policies": {
       "get": {
         "summary": "Agent policies - List",
-        "tags": [],
+        "tags": [
+          "agent-policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2773,7 +2838,9 @@
       },
       "post": {
         "summary": "Agent policy - Create",
-        "tags": [],
+        "tags": [
+          "agent-policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2825,7 +2892,9 @@
       ],
       "get": {
         "summary": "Agent policy - Info",
-        "tags": [],
+        "tags": [
+          "agent-policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2855,7 +2924,9 @@
       },
       "put": {
         "summary": "Agent policy - Update",
-        "tags": [],
+        "tags": [
+          "agent-policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2909,6 +2980,9 @@
       ],
       "post": {
         "summary": "Agent policy - copy one policy",
+        "tags": [
+          "agent-policies"
+        ],
         "operationId": "agent-policy-copy",
         "parameters": [
           {
@@ -2964,6 +3038,9 @@
     "/agent_policies/{agentPolicyId}/full": {
       "get": {
         "summary": "Agent policy - Get full policy",
+        "tags": [
+          "agent-policies"
+        ],
         "operationId": "agent-policy-full",
         "responses": {
           "200": {
@@ -3031,6 +3108,9 @@
     "/agent_policies/{agentPolicyId}/download": {
       "get": {
         "summary": "Agent policy - Download",
+        "tags": [
+          "agent-policies"
+        ],
         "operationId": "agent-policy-download",
         "responses": {
           "200": {
@@ -3091,7 +3171,9 @@
     "/agent_policies/_bulk_get": {
       "post": {
         "summary": "Agent policies - Bulk Get",
-        "tags": [],
+        "tags": [
+          "agent-policies"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3154,6 +3236,9 @@
     "/agent_policies/delete": {
       "post": {
         "summary": "Agent policy - Delete",
+        "tags": [
+          "agent-policies"
+        ],
         "operationId": "delete-agent-policy",
         "responses": {
           "200": {
@@ -3210,7 +3295,9 @@
     "/data_streams": {
       "get": {
         "summary": "Data streams - List",
-        "tags": [],
+        "tags": [
+          "data-streams"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3241,7 +3328,9 @@
     "/enrollment-api-keys": {
       "get": {
         "summary": "Enrollment API Keys - List",
-        "tags": [],
+        "tags": [
+          "enrollment-api-keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3293,7 +3382,9 @@
       },
       "post": {
         "summary": "Enrollment API Key - Create",
-        "tags": [],
+        "tags": [
+          "enrollment-api-keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3342,7 +3433,9 @@
       ],
       "get": {
         "summary": "Enrollment API Key - Info",
-        "tags": [],
+        "tags": [
+          "enrollment-api-keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3371,7 +3464,9 @@
       },
       "delete": {
         "summary": "Enrollment API Key - Delete",
-        "tags": [],
+        "tags": [
+          "enrollment-api-keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3410,7 +3505,9 @@
     "/enrollment_api_keys": {
       "get": {
         "summary": "Enrollment API Keys - List",
-        "tags": [],
+        "tags": [
+          "enrollment-api-keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3461,7 +3558,9 @@
       },
       "post": {
         "summary": "Enrollment API Key - Create",
-        "tags": [],
+        "tags": [
+          "enrollment-api-keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3509,7 +3608,9 @@
       ],
       "get": {
         "summary": "Enrollment API Key - Info",
-        "tags": [],
+        "tags": [
+          "enrollment-api-keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3537,7 +3638,9 @@
       },
       "delete": {
         "summary": "Enrollment API Key - Delete",
-        "tags": [],
+        "tags": [
+          "enrollment-api-keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3575,7 +3678,9 @@
     "/package_policies": {
       "get": {
         "summary": "Package policies - List",
-        "tags": [],
+        "tags": [
+          "package-policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3618,6 +3723,9 @@
       "parameters": [],
       "post": {
         "summary": "Package policy - Create",
+        "tags": [
+          "package-policies"
+        ],
         "operationId": "create-package-policy",
         "responses": {
           "200": {
@@ -3662,7 +3770,9 @@
     "/package_policies/_bulk_get": {
       "post": {
         "summary": "Package policies - Bulk Get",
-        "tags": [],
+        "tags": [
+          "package-policies"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3721,6 +3831,9 @@
     "/package_policies/delete": {
       "post": {
         "summary": "Package policy - Delete",
+        "tags": [
+          "package-policies"
+        ],
         "operationId": "post-delete-package-policy",
         "requestBody": {
           "content": {
@@ -3788,6 +3901,9 @@
     "/package_policies/upgrade": {
       "post": {
         "summary": "Package policy - Upgrade",
+        "tags": [
+          "package-policies"
+        ],
         "operationId": "upgrade-package-policy",
         "requestBody": {
           "content": {
@@ -3847,6 +3963,9 @@
     "/package_policies/upgrade/dryrun": {
       "post": {
         "summary": "Package policy - Upgrade Dry run",
+        "tags": [
+          "package-policies"
+        ],
         "operationId": "upgrade-package-policy-dry-run",
         "requestBody": {
           "content": {
@@ -3908,7 +4027,9 @@
     "/package_policies/{packagePolicyId}": {
       "get": {
         "summary": "Package policy - Info",
-        "tags": [],
+        "tags": [
+          "package-policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3946,6 +4067,9 @@
       ],
       "put": {
         "summary": "Package policy - Update",
+        "tags": [
+          "package-policies"
+        ],
         "operationId": "update-package-policy",
         "requestBody": {
           "content": {
@@ -3991,7 +4115,9 @@
       },
       "delete": {
         "summary": "Package policy - Delete",
-        "tags": [],
+        "tags": [
+          "package-policies"
+        ],
         "operationId": "delete-package-policy",
         "responses": {
           "200": {
@@ -4030,7 +4156,9 @@
     "/outputs": {
       "get": {
         "summary": "Outputs",
-        "tags": [],
+        "tags": [
+          "outputs"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4068,7 +4196,9 @@
       "post": {
         "summary": "Outputs",
         "description": "Create a new output",
-        "tags": [],
+        "tags": [
+          "outputs"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4140,7 +4270,9 @@
     "/outputs/{outputId}": {
       "get": {
         "summary": "Output - Info",
-        "tags": [],
+        "tags": [
+          "outputs"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4210,6 +4342,9 @@
       },
       "put": {
         "summary": "Output - Update",
+        "tags": [
+          "outputs"
+        ],
         "operationId": "update-output",
         "requestBody": {
           "content": {
@@ -4286,10 +4421,46 @@
         ]
       }
     },
+    "/logstash_api_keys": {
+      "post": {
+        "summary": "Generate Logstash API key",
+        "tags": [
+          "outputs"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "api_key": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "generate-logstash-api-key",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
     "/agent_download_sources": {
       "get": {
         "summary": "Agent Download Sources",
-        "tags": [],
+        "tags": [
+          "agent-binary-download-sources"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4382,7 +4553,9 @@
     "/agent_download_sources/{sourceId}": {
       "get": {
         "summary": "Agent Download Sources - Info",
-        "tags": [],
+        "tags": [
+          "agent-binary-download-sources"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4508,43 +4681,13 @@
         ]
       }
     },
-    "/logstash_api_keys": {
-      "post": {
-        "summary": "Generate Logstash API key",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "api_key": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/components/responses/error"
-          }
-        },
-        "operationId": "generate-logstash-api-key",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          }
-        ]
-      }
-    },
     "/fleet_server_hosts": {
       "get": {
         "summary": "Fleet Server Hosts - List",
         "description": "Return a list of Fleet server hosts",
-        "tags": [],
+        "tags": [
+          "fleet-server-hosts"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4582,7 +4725,9 @@
       "post": {
         "summary": "Fleet Server Hosts - Create",
         "description": "Create a new Fleet Server Host",
-        "tags": [],
+        "tags": [
+          "fleet-server-hosts"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4639,7 +4784,9 @@
     "/fleet_server_hosts/{itemId}": {
       "get": {
         "summary": "Fleet Server Hosts - Info",
-        "tags": [],
+        "tags": [
+          "fleet-server-hosts"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4709,6 +4856,9 @@
       },
       "put": {
         "summary": "Fleet Server Hosts - Update",
+        "tags": [
+          "fleet-server-hosts"
+        ],
         "operationId": "update-fleet-server-hosts",
         "requestBody": {
           "content": {
@@ -4767,7 +4917,9 @@
       "get": {
         "summary": "Fleet Proxies - List",
         "description": "Return a list of Proxies",
-        "tags": [],
+        "tags": [
+          "proxies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4805,7 +4957,9 @@
       "post": {
         "summary": "Fleet Proxies - Create",
         "description": "Create a new Fleet Server Host",
-        "tags": [],
+        "tags": [
+          "proxies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4868,7 +5022,9 @@
     "/proxies/{itemId}": {
       "get": {
         "summary": "Fleet Proxies - Info",
-        "tags": [],
+        "tags": [
+          "proxies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4906,6 +5062,9 @@
       ],
       "delete": {
         "summary": "Fleet Proxies - Delete",
+        "tags": [
+          "proxies"
+        ],
         "operationId": "delete-fleet-proxies",
         "responses": {
           "200": {
@@ -4938,6 +5097,9 @@
       },
       "put": {
         "summary": "Fleet Proxies - Update",
+        "tags": [
+          "proxies"
+        ],
         "operationId": "update-fleet-proxies",
         "requestBody": {
           "content": {
@@ -5001,7 +5163,9 @@
     "/kubernetes": {
       "get": {
         "summary": "Get K8s Full Agent Manifest",
-        "tags": [],
+        "tags": [
+          "kubernetes"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -5151,6 +5315,29 @@
         "required": false,
         "schema": {
           "type": "boolean"
+        }
+      }
+    },
+    "responses": {
+      "error": {
+        "description": "Generic Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "statusCode": {
+                  "type": "number"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -7150,29 +7337,6 @@
           "name",
           "url"
         ]
-      }
-    },
-    "responses": {
-      "error": {
-        "description": "Generic Error",
-        "content": {
-          "application/json": {
-            "schema": {
-              "type": "object",
-              "properties": {
-                "statusCode": {
-                  "type": "number"
-                },
-                "error": {
-                  "type": "string"
-                },
-                "message": {
-                  "type": "string"
-                }
-              }
-            }
-          }
-        }
       }
     }
   },

@@ -6,7 +6,9 @@ parameters:
     required: true
 post:
   summary: Agent - Actions
-  tags: []
+  tags:
+    - agents
+      actions
   responses:
     '200':
       description: OK
@@ -35,5 +37,5 @@ post:
         schema:
           type: object
           properties:
-              action:
-                $ref: ../components/schemas/agent_action.yaml
+            action:
+              $ref: ../components/schemas/agent_action.yaml

@@ -1,7 +1,8 @@
 get:
   summary: Fleet Server Hosts - List
   description: Return a list of Fleet server hosts
-  tags: []
+  tags:
+    - fleet-server-hosts
   responses:
     '200':
       description: OK
@@ -26,7 +27,8 @@ get:
 post:
   summary: Fleet Server Hosts - Create
   description: 'Create a new Fleet Server Host'
-  tags: []
+  tags:
+    - fleet-server-hosts
   responses:
     '200':
       description: OK

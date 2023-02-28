@@ -1,6 +1,7 @@
 post:
   summary: Generate Logstash API key
-  tags: []
+  tags:
+    - outputs
   responses:
     '200':
       description: OK

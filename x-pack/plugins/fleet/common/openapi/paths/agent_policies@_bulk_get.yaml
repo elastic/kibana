@@ -1,6 +1,7 @@
 post:
   summary: Agent policies - Bulk Get
-  tags: []
+  tags:
+    - agent-policies
   requestBody:
     content:
       application/json:

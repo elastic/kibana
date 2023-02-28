@@ -1,6 +1,7 @@
-
 get:
   summary: Agent policy - Get full policy
+  tags:
+    - agent-policies
   operationId: agent-policy-full
   responses:
     '200':

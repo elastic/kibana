@@ -1,5 +1,7 @@
 get:
   summary: Agent Tags - List
+  tags:
+    - agents
   description: List all agent tags
   responses:
     '200':

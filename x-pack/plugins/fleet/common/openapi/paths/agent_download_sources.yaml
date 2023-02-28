@@ -1,6 +1,7 @@
 get:
   summary: Agent Download Sources
-  tags: []
+  tags:
+    - agent-binary-download-sources
   responses:
     '200':
       description: OK

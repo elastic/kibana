@@ -11,7 +11,9 @@ parameters:
     required: true
 post:
   summary: Agent - Cancel Action
-  tags: []
+  tags:
+    - agents
+      actions
   responses:
     '200':
       description: OK

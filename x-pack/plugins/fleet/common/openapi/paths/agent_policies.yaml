@@ -1,6 +1,7 @@
 get:
   summary: Agent policies - List
-  tags: []
+  tags:
+    - agent-policies
   responses:
     '200':
       description: OK
@@ -45,7 +46,8 @@ get:
   description: ''
 post:
   summary: Agent policy - Create
-  tags: []
+  tags:
+    - agent-policies
   responses:
     '200':
       description: OK

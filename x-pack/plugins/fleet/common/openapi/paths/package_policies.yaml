@@ -1,6 +1,7 @@
 get:
   summary: Package policies - List
-  tags: []
+  tags:
+    - package-policies
   responses:
     '200':
       description: OK
@@ -29,6 +30,8 @@ get:
 parameters: []
 post:
   summary: Package policy - Create
+  tags:
+    - package-policies
   operationId: create-package-policy
   responses:
     '200':

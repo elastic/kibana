@@ -1,6 +1,7 @@
 get:
   summary: Fleet Proxies - Info
-  tags: []
+  tags:
+    - proxies
   responses:
     '200':
       description: OK
@@ -24,6 +25,8 @@ parameters:
     required: true
 delete:
   summary: Fleet Proxies - Delete
+  tags:
+    - proxies
   operationId: delete-fleet-proxies
   responses:
     '200':
@@ -43,6 +46,8 @@ delete:
     - $ref: ../components/headers/kbn_xsrf.yaml
 put:
   summary: Fleet Proxies - Update
+  tags:
+    - proxies
   operationId: update-fleet-proxies
   requestBody:
     content:

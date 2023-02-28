@@ -6,7 +6,8 @@ parameters:
     required: true
 get:
   summary: Agent - Info
-  tags: []
+  tags:
+    - agents
   responses:
     '200':
       description: OK
@@ -26,7 +27,8 @@ get:
     - $ref: ../components/parameters/with_metrics.yaml
 put:
   summary: Agent - Update
-  tags: []
+  tags:
+    - agents
   responses:
     '200':
       description: OK
@@ -59,7 +61,8 @@ put:
                 type: string
 delete:
   summary: Agent - Delete
-  tags: []
+  tags:
+    - agents
   responses:
     '200':
       description: OK

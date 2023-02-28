@@ -1,6 +1,8 @@
 get:
   summary: Get stats for a package
-  tags: []
+  tags:
+    - epm
+      packages
   responses:
     '200':
       description: OK

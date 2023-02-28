@@ -6,7 +6,8 @@ parameters:
     required: true
 get:
   summary: Enrollment API Key - Info
-  tags: []
+  tags:
+    - enrollment-api-keys
   responses:
     '200':
       description: OK
@@ -25,7 +26,8 @@ get:
   deprecated: true
 delete:
   summary: Enrollment API Key - Delete
-  tags: []
+  tags:
+    - enrollment-api-keys
   responses:
     '200':
       description: OK

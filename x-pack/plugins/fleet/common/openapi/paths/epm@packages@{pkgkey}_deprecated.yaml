@@ -1,6 +1,8 @@
 get:
   summary: Packages - Info
-  tags: []
+  tags:
+    - epm
+      packages
   responses:
     '200':
       description: OK
@@ -36,17 +38,19 @@ get:
       name: pkgkey
       in: path
       required: true
-    - in: query 
+    - in: query
       name: prerelease
       schema:
         type: boolean
         default: false
       description: >-
-        Whether to return prerelease versions of packages (e.g. beta, rc, preview) 
+        Whether to return prerelease versions of packages (e.g. beta, rc, preview)
   deprecated: true
 post:
   summary: Packages - Install
-  tags: []
+  tags:
+    - epm
+      packages
   responses:
     '200':
       description: OK

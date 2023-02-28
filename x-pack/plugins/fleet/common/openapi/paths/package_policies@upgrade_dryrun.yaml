@@ -1,5 +1,7 @@
 post:
   summary: Package policy - Upgrade Dry run
+  tags:
+    - package-policies
   operationId: upgrade-package-policy-dry-run
   requestBody:
     content:

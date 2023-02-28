@@ -6,7 +6,8 @@ parameters:
     required: true
 post:
   summary: Agent - Upgrade
-  tags: []
+  tags:
+    - agents
   responses:
     '200':
       description: OK

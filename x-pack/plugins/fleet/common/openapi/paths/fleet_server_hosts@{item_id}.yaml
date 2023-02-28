@@ -1,6 +1,7 @@
 get:
   summary: Fleet Server Hosts - Info
-  tags: []
+  tags:
+    - fleet-server-hosts
   responses:
     '200':
       description: OK
@@ -43,6 +44,8 @@ delete:
     - $ref: ../components/headers/kbn_xsrf.yaml
 put:
   summary: Fleet Server Hosts - Update
+  tags:
+    - fleet-server-hosts
   operationId: update-fleet-server-hosts
   requestBody:
     content:

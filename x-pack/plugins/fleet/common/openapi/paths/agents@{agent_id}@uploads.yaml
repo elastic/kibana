@@ -6,7 +6,9 @@ parameters:
     required: true
 get:
   summary: List agent uploads
-  tags: []
+  tags:
+    - agents
+      uploads
   responses:
     '200':
       description: OK

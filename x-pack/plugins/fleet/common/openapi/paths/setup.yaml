@@ -1,6 +1,7 @@
 post:
   summary: Setup
-  tags: []
+  tags:
+    - fleet-internals
   responses:
     '200':
       description: OK

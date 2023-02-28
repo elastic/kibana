@@ -1,7 +1,8 @@
 get:
   summary: Fleet Proxies - List
   description: Return a list of Proxies
-  tags: []
+  tags:
+    - proxies
   responses:
     '200':
       description: OK
@@ -26,7 +27,8 @@ get:
 post:
   summary: Fleet Proxies - Create
   description: 'Create a new Fleet Server Host'
-  tags: []
+  tags:
+    - proxies
   responses:
     '200':
       description: OK

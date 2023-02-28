@@ -11,7 +11,9 @@ parameters:
     required: true
 get:
   summary: Get agent upload file
-  tags: []
+  tags:
+    - agents
+      uploads
   responses:
     '200':
       description: OK

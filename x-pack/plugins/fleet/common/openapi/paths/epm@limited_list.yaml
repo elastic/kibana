@@ -1,6 +1,8 @@
 get:
   summary: Packages - Get limited list
-  tags: []
+  tags:
+    - epm
+      packages
   responses:
     '200':
       description: OK

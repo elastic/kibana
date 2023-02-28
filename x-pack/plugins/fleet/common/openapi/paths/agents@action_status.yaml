@@ -1,8 +1,11 @@
 get:
   summary: Agents - Action status
+  tags:
+    - agents
+      actions
   parameters:
-  - $ref: ../components/parameters/page_size.yaml
-  - $ref: ../components/parameters/page_index.yaml
+    - $ref: ../components/parameters/page_size.yaml
+    - $ref: ../components/parameters/page_index.yaml
   responses:
     '200':
       description: OK
@@ -33,7 +36,7 @@ get:
                     nbAgentsAck:
                       type: number
                     nbAgentsFailed:
-                      type: number  
+                      type: number
                     version:
                       type: string
                     startTime:
@@ -49,7 +52,7 @@ get:
                     newPolicyId:
                       type: string
                     creationTime:
-                      type: string          
+                      type: string
                   required:
                     - actionId
                     - complete

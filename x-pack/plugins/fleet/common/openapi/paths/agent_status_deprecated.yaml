@@ -1,6 +1,7 @@
 get:
-  summary: Agents - Summary stats
-  tags: []
+  summary: Agents - Status summary
+  tags:
+    - agents
   responses:
     '200':
       description: OK

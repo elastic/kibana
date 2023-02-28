@@ -1,6 +1,7 @@
 get:
   summary: Output - Info
-  tags: []
+  tags:
+    - outputs
   responses:
     '200':
       description: OK
@@ -33,7 +34,7 @@ delete:
           schema:
             type: object
             properties:
-              id: 
+              id:
                 type: string
             required:
               - id
@@ -43,6 +44,8 @@ delete:
     - $ref: ../components/headers/kbn_xsrf.yaml
 put:
   summary: Output - Update
+  tags:
+    - outputs
   operationId: update-output
   requestBody:
     content:
@@ -54,14 +57,14 @@ put:
               type: string
             type:
               type: string
-              enum: ["elasticsearch"]            
+              enum: ['elasticsearch']
             is_default:
               type: boolean
             is_default_monitoring:
               type: boolean
             hosts:
               type: array
-              items: 
+              items:
                 type: string
             ca_sha256:
               type: string

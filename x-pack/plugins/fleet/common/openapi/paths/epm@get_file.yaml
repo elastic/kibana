@@ -1,6 +1,7 @@
 get:
   summary: Packages - Get file from registry
-  tags: []
+  tags:
+    - epm
   responses:
     '200':
       description: OK

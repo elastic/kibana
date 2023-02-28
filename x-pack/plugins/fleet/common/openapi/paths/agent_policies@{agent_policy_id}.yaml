@@ -6,7 +6,8 @@ parameters:
     required: true
 get:
   summary: Agent policy - Info
-  tags: []
+  tags:
+    - agent-policies
   responses:
     '200':
       description: OK
@@ -26,7 +27,8 @@ get:
   parameters: []
 put:
   summary: Agent policy - Update
-  tags: []
+  tags:
+    - agent-policies
   responses:
     '200':
       description: OK

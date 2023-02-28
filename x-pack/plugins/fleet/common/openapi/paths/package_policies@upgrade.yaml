@@ -1,5 +1,7 @@
 post:
   summary: Package policy - Upgrade
+  tags:
+    - package-policies
   operationId: upgrade-package-policy
   requestBody:
     content:

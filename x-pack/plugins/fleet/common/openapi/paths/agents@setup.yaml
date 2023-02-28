@@ -1,6 +1,7 @@
 get:
   summary: Agents setup - Info
-  tags: []
+  tags:
+    - agents
   responses:
     '200':
       description: OK

@@ -1,6 +1,7 @@
 post:
   summary: Package policies - Bulk Get
-  tags: []
+  tags:
+    - package-policies
   requestBody:
     content:
       application/json:

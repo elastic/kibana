@@ -1,6 +1,7 @@
 get:
   summary: Package policy - Info
-  tags: []
+  tags:
+    - package-policies
   responses:
     '200':
       description: OK
@@ -24,6 +25,8 @@ parameters:
     required: true
 put:
   summary: Package policy - Update
+  tags:
+    - package-policies
   operationId: update-package-policy
   requestBody:
     content:
@@ -51,7 +54,8 @@ put:
     - $ref: ../components/headers/kbn_xsrf.yaml
 delete:
   summary: Package policy - Delete
-  tags: []
+  tags:
+    - package-policies
   operationId: delete-package-policy
   responses:
     '200':
