@@ -89,6 +89,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({
             name: 'A slack action',
             connector_type_id: '.slack',
+            config: { type: 'webhook' },
             secrets: {
               webhookUrl: slackSimulatorURL,
             },
@@ -102,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
           is_missing_secrets: false,
           name: 'A slack action',
           connector_type_id: '.slack',
-          config: {},
+          config: { type: 'webhook' },
         });
 
         expect(typeof createdAction.id).to.be('string');
@@ -118,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
           is_missing_secrets: false,
           name: 'A slack action',
           connector_type_id: '.slack',
-          config: {},
+          config: { type: 'webhook' },
         });
       });
 

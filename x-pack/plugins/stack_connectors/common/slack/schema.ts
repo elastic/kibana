@@ -30,12 +30,13 @@ export const ExecutorGetChannelsParamsSchema = schema.object({
   subActionParams: schema.object({}),
 });
 
+export const PostMessageSubActionParamsSchema = schema.object({
+  channels: schema.arrayOf(schema.string()),
+  text: schema.string(),
+});
 export const ExecutorPostMessageParamsSchema = schema.object({
   subAction: schema.literal('postMessage'),
-  subActionParams: schema.object({
-    channels: schema.arrayOf(schema.string()),
-    text: schema.string(),
-  }),
+  subActionParams: PostMessageSubActionParamsSchema,
 });
 
 export const WebhookParamsSchema = schema.object({
