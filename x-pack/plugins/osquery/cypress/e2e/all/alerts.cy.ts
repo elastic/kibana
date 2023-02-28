@@ -74,7 +74,7 @@ describe('Alert Event Details', () => {
     toggleRuleOffAndOn(RULE_NAME);
   });
 
-  it.only('adds response actions with osquery with proper validation and form values', () => {
+  it('adds response actions with osquery with proper validation and form values', () => {
     cy.visit('/app/security/rules');
     cy.contains(RULE_NAME).click();
     cy.contains('Edit rule settings').click({ force: true });
