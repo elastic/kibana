@@ -18,6 +18,7 @@ import { useCasesTitleBreadcrumbs } from '../use_breadcrumbs';
 import { WhitePageWrapperNoBorder } from '../wrappers';
 import { CaseViewActivity } from './components/case_view_activity';
 import { CaseViewAlerts } from './components/case_view_alerts';
+import { CaseViewAttachments } from './components/case_view_attachments';
 import { CaseViewMetrics } from './metrics';
 import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
@@ -139,6 +140,9 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
             )}
             {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
               <CaseViewAlerts caseData={caseData} />
+            )}
+            {activeTabId === CASE_VIEW_PAGE_TABS.FILES && (
+              <CaseViewAttachments caseData={caseData} />
             )}
           </EuiFlexGroup>
         </WhitePageWrapperNoBorder>

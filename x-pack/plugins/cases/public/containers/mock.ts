@@ -18,6 +18,7 @@ import type {
   FindCaseUserActions,
   CaseUsers,
   CaseUserActionsStats,
+  Attachment,
 } from '../../common/ui/types';
 import type {
   CaseConnector,
@@ -238,6 +239,12 @@ export const basicCase: Case = {
   },
   // damaged_raccoon uid
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
+};
+
+export const basicAttachment: Attachment = {
+  fileName: 'my-super-cool-screenshot',
+  fileType: 'png',
+  dateAdded: basicCreatedAt,
 };
 
 export const caseWithAlerts = {
