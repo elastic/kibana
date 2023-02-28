@@ -64,29 +64,41 @@ async function getEMSClient(): Promise<EMSClient> {
 let canAccessEmsFontsPromise: Promise<boolean> | null = null;
 async function canAccessEmsFonts(): Promise<boolean> {
   if (!canAccessEmsFontsPromise) {
-    canAccessEmsFontsPromise = new Promise(async (resolve) => {
-      const emsSettings = getEMSSettings();
-      if (!emsSettings!.isEMSEnabled()) {
-        resolve(false);
-      }
-
-      const emsFontUrlTemplate = emsSettings!.getEMSFontLibraryUrl();
+    canAccessEmsFontsPromise = new Promise(async (resolve, reject) => {
       try {
-        const emsFontUrl = emsFontUrlTemplate.replace('{fontstack}', 'Open Sans').replace('{range}', '0-255');
-        const resp = await fetch(emsFontUrl, {
-          method: 'HEAD',
-        });
-        if (resp.status >= 400) {
-          throw new Error(`status: ${resp.status}`);
+        const emsSettings = getEMSSettings();
+        if (!emsSettings!.isEMSEnabled()) {
+          resolve(false);
         }
-        resolve(true);
+        const emsFontUrlTemplate = emsSettings!.getEMSFontLibraryUrl();
+        try {
+          const emsFontUrl = emsFontUrlTemplate
+            .replace('{fontstack}', 'Open Sans')
+            .replace('{range}', '0-255');
+          const resp = await fetch(emsFontUrl, {
+            method: 'HEAD',
+          });
+          if (resp.status >= 400) {
+            throw new Error(`status: ${resp.status}`);
+          }
+          resolve(true);
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `Unable to access fonts from Elastic Maps Service (EMS). Set kibana.yml 'map.includeElasticMapsService: false' to avoid unnecessary EMS requests.`
+          );
+          resolve(false);
+        }
       } catch (error) {
-        console.warn(`Unable to access fonts from Elastic Maps Service (EMS). Set kibana.yml 'map.includeElasticMapsService: false' to avoid unnecessary EMS requests.`);
-        resolve(false);
+        reject(error);
       }
     });
   }
   return canAccessEmsFontsPromise;
+}
+// test only function to reset singlton for different test cases.
+export function clearCanAccessEmsFontsPromise() {
+  canAccessEmsFontsPromise = null;
 }
 
 export async function getGlyphUrl(): Promise<string> {

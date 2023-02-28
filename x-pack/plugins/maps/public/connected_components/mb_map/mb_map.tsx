@@ -155,50 +155,51 @@ export class MbMap extends Component<Props, State> {
 
   async _createMbMapInstance(initialView: MapCenterAndZoom | null): Promise<MapboxMap> {
     this._reportUsage();
-    return new Promise(async (resolve) => {
-      const mbStyle = {
-        version: 8 as 8,
-        sources: {},
-        layers: [],
-        glyphs: await getGlyphUrl(),
-      };
-
-      const options: MapOptions = {
-        attributionControl: false,
-        container: this._containerRef!,
-        style: mbStyle,
-        preserveDrawingBuffer: getPreserveDrawingBuffer(),
-        maxZoom: this.props.settings.maxZoom,
-        minZoom: this.props.settings.minZoom,
-      };
-      if (initialView) {
-        options.zoom = initialView.zoom;
-        options.center = {
-          lng: initialView.lon,
-          lat: initialView.lat,
+    return new Promise(async (resolve, reject) => {
+      try {
+        const mbStyle = {
+          version: 8 as 8,
+          sources: {},
+          layers: [],
+          glyphs: await getGlyphUrl(),
         };
-      } else {
-        options.bounds = [-170, -60, 170, 75];
-      }
-      const mbMap = new maplibregl.Map(options);
-      mbMap.dragRotate.disable();
-      mbMap.touchZoomRotate.disableRotation();
-
-      let emptyImage: HTMLImageElement;
-      mbMap.on('styleimagemissing', (e: unknown) => {
-        if (emptyImage) {
-          // @ts-expect-error
-          mbMap.addImage(e.id, emptyImage);
+        const options: MapOptions = {
+          attributionControl: false,
+          container: this._containerRef!,
+          style: mbStyle,
+          preserveDrawingBuffer: getPreserveDrawingBuffer(),
+          maxZoom: this.props.settings.maxZoom,
+          minZoom: this.props.settings.minZoom,
+        };
+        if (initialView) {
+          options.zoom = initialView.zoom;
+          options.center = {
+            lng: initialView.lon,
+            lat: initialView.lat,
+          };
+        } else {
+          options.bounds = [-170, -60, 170, 75];
         }
-      });
-      mbMap.on('load', () => {
-        emptyImage = new Image();
-
-        emptyImage.src =
-          'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
-        emptyImage.crossOrigin = 'anonymous';
-        resolve(mbMap);
-      });
+        const mbMap = new maplibregl.Map(options);
+        mbMap.dragRotate.disable();
+        mbMap.touchZoomRotate.disableRotation();
+        let emptyImage: HTMLImageElement;
+        mbMap.on('styleimagemissing', (e: unknown) => {
+          if (emptyImage) {
+            // @ts-expect-error
+            mbMap.addImage(e.id, emptyImage);
+          }
+        });
+        mbMap.on('load', () => {
+          emptyImage = new Image();
+          emptyImage.src =
+            'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVQYV2NgAAIAAAUAAarVyFEAAAAASUVORK5CYII=';
+          emptyImage.crossOrigin = 'anonymous';
+          resolve(mbMap);
+        });
+      } catch (error) {
+        reject(error);
+      }
     });
   }
 
