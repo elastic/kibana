@@ -7,12 +7,12 @@
 
 import React from 'react';
 
-import { EuiText, EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 export interface PageIntroductionProps {
   actions?: React.ReactNode | React.ReactNode[];
   description: React.ReactNode | string;
-  links?: { href: string; text: string } | Array<{ href: string; text: string }>;
+  links?: React.ReactNode | React.ReactNode[];
   title?: string | React.ReactNode;
 }
 
@@ -46,17 +46,7 @@ export const PageIntroduction: React.FC<PageIntroductionProps> = ({
               <EuiSpacer size="s" />
               <EuiFlexItem>
                 <EuiText size="s">
-                  {Array.isArray(links) ? (
-                    links.map((link, index) => (
-                      <EuiLink href={link.href} target="_blank" external key={index + '-'}>
-                        {link.text}
-                      </EuiLink>
-                    ))
-                  ) : (
-                    <EuiLink href={links.href} target="_blank" external>
-                      {links.text}
-                    </EuiLink>
-                  )}
+                  {Array.isArray(links) ? links.map((link) => link) : links}
                 </EuiText>
               </EuiFlexItem>
             </>

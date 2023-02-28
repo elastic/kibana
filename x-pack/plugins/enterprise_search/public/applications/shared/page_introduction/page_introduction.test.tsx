@@ -61,7 +61,11 @@ describe('PageIntroduction component', () => {
       <PageIntroduction
         description="some description"
         title="some title"
-        links={{ href: 'testlink', text: 'test link to nowhere' }}
+        links={
+          <EuiLink href="testlink" external>
+            test link to nowhere
+          </EuiLink>
+        }
       />
     );
     const links = wrapper.find(EuiLink);
@@ -77,8 +81,12 @@ describe('PageIntroduction component', () => {
         description="some description"
         title="some title"
         links={[
-          { href: 'testlink', text: 'test link to nowhere' },
-          { href: 'testlink2', text: 'test link to nowhere2' },
+          <EuiLink href="testlink" external>
+            test link to nowhere
+          </EuiLink>,
+          <EuiLink href="testlink2" external>
+            test link to nowhere2
+          </EuiLink>,
         ]}
       />
     );

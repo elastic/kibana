@@ -13,6 +13,7 @@ import {
   EuiButton,
   EuiConfirmModal,
   EuiEmptyPrompt,
+  EuiLink,
   EuiFlexGroup,
   EuiSpacer,
   EuiText,
@@ -98,17 +99,16 @@ export const ExtractionRules: React.FC = () => {
               />
             </p>
           }
-          links={[
-            {
-              href: docLinks.crawlerExtractionRules,
-              text: i18n.translate(
+          links={
+            <EuiLink href={docLinks.crawlerExtractionRules} external>
+              {i18n.translate(
                 'xpack.enterpriseSearch.content.crawler.extractionRules.learnMoreLink',
                 {
                   defaultMessage: 'Learn more about content extraction rules.',
                 }
-              ),
-            },
-          ]}
+              )}
+            </EuiLink>
+          }
           actions={
             extractionRules.length === 0
               ? []

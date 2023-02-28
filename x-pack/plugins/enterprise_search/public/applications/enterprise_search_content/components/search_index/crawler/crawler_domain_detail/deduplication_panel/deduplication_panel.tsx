@@ -16,6 +16,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPopover,
   EuiSelectable,
   EuiSpacer,
@@ -91,17 +92,13 @@ export const DeduplicationPanel: React.FC = () => {
             />
           </p>
         }
-        links={[
-          {
-            href: docLinks.crawlerManaging,
-            text: i18n.translate(
-              'xpack.enterpriseSearch.crawler.deduplicationPanel.learnMoreMessage',
-              {
-                defaultMessage: 'Learn more about content hashing',
-              }
-            ),
-          },
-        ]}
+        links={
+          <EuiLink href={docLinks.crawlerManaging} external>
+            {i18n.translate('xpack.enterpriseSearch.crawler.deduplicationPanel.learnMoreMessage', {
+              defaultMessage: 'Learn more about content hashing',
+            })}
+          </EuiLink>
+        }
       />
       <EuiSpacer />
       <EuiSwitch
