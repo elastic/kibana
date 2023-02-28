@@ -281,7 +281,10 @@ export const createPureLogStreamQueryStateMachine = (
         updateTimeContextFromTimeRangeUpdate,
         updateTimeContextFromRefreshIntervalUpdate,
         refreshTime: send({ type: 'UPDATE_TIME_RANGE', timeRange: DEFAULT_REFRESH_TIME_RANGE }),
-        expandPageEnd: send((context) => ({ type: 'UPDATE_TIME_RANGE', timeRange: { to: context.timeRange.to } })),
+        expandPageEnd: send((context) => ({
+          type: 'UPDATE_TIME_RANGE',
+          timeRange: { to: context.timeRange.to },
+        })),
         updateTimeContextFromUrl,
       },
       guards: {
