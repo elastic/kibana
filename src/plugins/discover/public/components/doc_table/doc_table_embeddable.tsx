@@ -9,7 +9,7 @@
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiText } from '@elastic/eui';
 import { SAMPLE_SIZE_SETTING } from '../../../common';
 import { usePager } from '../../hooks/use_pager';
 import {
@@ -101,7 +101,13 @@ export const DocTableEmbeddable = (props: DocTableEmbeddableProps) => {
   );
 
   return (
-    <EuiFlexGroup style={{ width: '100%' }} direction="column" gutterSize="xs" responsive={false}>
+    <EuiFlexGroup
+      style={{ width: '100%', position: 'relative' }}
+      direction="column"
+      gutterSize="xs"
+      responsive={false}
+    >
+      {props.isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
           justifyContent="flexEnd"

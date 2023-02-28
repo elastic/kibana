@@ -204,6 +204,11 @@ export class SavedSearchEmbeddable
       error: undefined,
     });
 
+    if (this.node) {
+      // to show a loading indicator we need to rerender here
+      this.render(this.node);
+    }
+
     const parentContext = this.input.executionContext;
     const child: KibanaExecutionContext = {
       type: this.type,

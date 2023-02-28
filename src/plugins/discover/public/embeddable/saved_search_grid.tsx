@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import React, { useState, memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import { DataTableRecord } from '../types';
 import { DiscoverGrid, DiscoverGridProps } from '../components/discover_grid/discover_grid';
 import { TotalDocuments } from '../application/main/components/total_documents/total_documents';
@@ -24,12 +24,13 @@ export function DiscoverGridEmbeddable(props: DiscoverGridEmbeddableProps) {
 
   return (
     <EuiFlexGroup
-      style={{ width: '100%' }}
+      style={{ width: '100%', position: 'relative' }}
       direction="column"
       gutterSize="xs"
       responsive={false}
       data-test-subj="embeddedSavedSearchDocTable"
     >
+      {props.isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
       {props.totalHitCount !== 0 && (
         <EuiFlexItem grow={false} style={{ alignSelf: 'flex-end' }}>
           <TotalDocuments totalHitCount={props.totalHitCount} />
