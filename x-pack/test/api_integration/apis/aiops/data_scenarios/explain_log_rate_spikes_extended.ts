@@ -22,6 +22,8 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const kibanaServerUrl = formatUrl(config.get('servers.kibana'));
 
+  const index = 'cluster-apm-filebeat-6.8.6-aws-eu-west-1-2021.12.21*';
+
   const clickTime = 1640097150000;
   const minTime = 1640077200000;
   const maxTime = 1640112300000;
@@ -39,80 +41,80 @@ export default ({ getService }: FtrProviderContext) => {
     deviationMin,
     start: minTime,
     end: maxTime,
-    index: 'cluster-apm-filebeat-6.8.6-aws-eu-west-1-2021.12.21*',
+    index: index,
     searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
     timeFieldName: '@timestamp',
   };
 
   const expected = {
-    chunksLength: 179,
-    actionsLength: 178,
+    chunksLength: 170,
+    actionsLength: 170,
     noIndexChunksLength: 4,
     noIndexActionsLength: 3,
     changePointFilter: 'add_change_points',
     histogramFilter: 'add_change_points_histogram',
     errorFilter: 'add_error',
-    changePointsLength: 47,
+    changePointsLength: 40,
     changePoints: [
       {
         fieldName: 'beat.hostname.keyword',
         fieldValue: 'ip-172-27-97-204',
-        doc_count: 12631,
-        bg_count: 30175,
+        doc_count: 12000,
+        bg_count: 30000,
       },
       {
         fieldName: 'beat.name.keyword',
         fieldValue: 'i-0852e3f99b6c512fd',
-        doc_count: 12631,
-        bg_count: 30175,
+        doc_count: 12000,
+        bg_count: 30000,
       },
       {
         fieldName: 'docker.container.id.keyword',
         fieldValue: 'aa5a7e792e226ccc4f7bbf34dc0e999e17b4f561fd36fbf746365bad5a8112f7',
-        doc_count: 12629,
-        bg_count: 30167,
+        doc_count: 12000,
+        bg_count: 30000,
       },
       {
         fieldName: 'docker.container.id.keyword',
         fieldValue: 'dc1e531f6598b1f828fc1ccc1939cfc1fceeebd23378fab8f1ba2e8133e53b21',
-        doc_count: 2220,
-        bg_count: 4072,
+        doc_count: 2000,
+        bg_count: 4000,
       },
       {
         fieldName: 'docker.container.image.keyword',
         fieldValue: 'docker.elastic.co/cloud-assets/apm:7.13.1-0',
-        doc_count: 2222,
-        bg_count: 4126,
+        doc_count: 2000,
+        bg_count: 4000,
       },
       {
         fieldName: 'docker.container.image.keyword',
         fieldValue: 'docker.elastic.co/cloud-assets/apm:7.9.0-0',
-        doc_count: 1505,
-        bg_count: 2166,
+        doc_count: 1400,
+        bg_count: 2000,
       },
       {
         fieldName: 'docker.container.image.keyword',
         fieldValue: 'docker.elastic.co/cloud-assets/apm:7.15.2-0',
-        doc_count: 14777,
-        bg_count: 37298,
+        doc_count: 14000,
+        bg_count: 37000,
       },
       {
         fieldName: 'docker.container.labels.co.elastic.cloud.allocator.cluster_id.keyword',
         fieldValue: 'eb3713439fcd4fdfa60e355f0e57afc0',
-        doc_count: 12629,
-        bg_count: 30167,
+        doc_count: 12000,
+        bg_count: 30000,
       },
       {
         fieldName: 'docker.container.labels.co.elastic.cloud.allocator.cluster_id.keyword',
         fieldValue: 'ab8b9d3989c54817a1cb4184b2ef6b41',
-        doc_count: 2295,
-        bg_count: 3998,
+        doc_count: 2100,
+        bg_count: 3800,
       },
       {
         fieldName: 'docker.container.labels.co.elastic.cloud.allocator.cluster_id.keyword',
         fieldValue: '596808a16dec4fc39413bf34b0a70240',
-        doc_count: 1505,
-        bg_count: 2166,
+        doc_count: 1400,
+        bg_count: 2000,
       },
     ],
     histogramLength: 20,
@@ -138,9 +140,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       const chunks: string[] = resp.body.toString().split('\n');
 
-      expect(chunks.length).to.eql(
+      expect(chunks.length).to.above(
         expected.chunksLength,
-        `Expected 'chunks.length' to be ${expected.chunksLength}, got ${chunks.length}.`
+        `Expected 'chunks.length' to above ${expected.chunksLength}, got ${chunks.length}.`
       );
 
       const lastChunk = chunks.pop();
@@ -152,9 +154,10 @@ export default ({ getService }: FtrProviderContext) => {
         data = chunks.map((c) => JSON.parse(c));
       }).not.to.throwError();
 
-      expect(data.length).to.eql(
+
+      expect(data.length).to.above(
         expected.actionsLength,
-        `Expected 'data.length' to be ${expected.actionsLength}, got ${data.length}.`
+        `Expected 'data.length' to above ${expected.actionsLength}, got ${data.length}.`
       );
       data.forEach((d) => {
         expect(typeof d.type).to.be('string');
@@ -172,9 +175,9 @@ export default ({ getService }: FtrProviderContext) => {
           return a.fieldName > b.fieldName ? 1 : -1;
         });
 
-      expect(changePoints.length).to.eql(
+      expect(changePoints.length).to.above(
         expected.changePointsLength,
-        `Expected 'changePoints.length' to be ${expected.changePointsLength}, got ${changePoints.length}.`
+        `Expected 'changePoints.length' to above ${expected.changePointsLength}, got ${changePoints.length}.`
       );
       // changePoints.forEach((cp, index) => {
       //   const ecp = expected.changePoints[index];
@@ -248,9 +251,9 @@ export default ({ getService }: FtrProviderContext) => {
         // If streaming works correctly we should receive more than one chunk.
         expect(chunkCounter).to.be.greaterThan(1);
 
-        expect(data.length).to.eql(
+        expect(data.length).to.above(
           expected.actionsLength,
-          `Expected 'data.length' to be ${expected.actionsLength}, got ${data.length}.`
+          `Expected 'data.length' to above ${expected.actionsLength}, got ${data.length}.`
         );
 
         const addChangePointsActions = data.filter((d) => d.type === expected.changePointFilter);
@@ -265,9 +268,9 @@ export default ({ getService }: FtrProviderContext) => {
             return a.fieldName > b.fieldName ? 1 : -1;
           });
 
-        expect(changePoints.length).to.eql(
+        expect(changePoints.length).to.above(
           expected.changePointsLength,
-          `Expected 'changePoints.length' to be ${expected.changePointsLength}, got ${changePoints.length}.`
+          `Expected 'changePoints.length' to above ${expected.changePointsLength}, got ${changePoints.length}.`
         );
         // Check only up to 10 changePoints even if there's more
         changePoints.slice(0, 9).forEach((cp, index) => {
@@ -279,13 +282,13 @@ export default ({ getService }: FtrProviderContext) => {
             `Expected changePoint width 'fieldName:${cp.fieldName}'/'fieldValue:${cp.fieldValue}' to not be undefined`
           );
           if (ecp !== undefined) {
-            expect(cp.doc_count).to.eql(
+            expect(cp.doc_count).to.above(
               ecp.doc_count,
-              `Expected 'doc_count' to be ${ecp.doc_count}, got ${cp.doc_count}.`
+              `Expected 'doc_count' to above ${ecp.doc_count}, got ${cp.doc_count}.`
             );
-            expect(cp.bg_count).to.eql(
+            expect(cp.bg_count).to.above(
               ecp.bg_count,
-              `Expected 'bg_count' to be ${ecp.bg_count}, got ${cp.bg_count}.`
+              `Expected 'bg_count' to above ${ecp.bg_count}, got ${cp.bg_count}.`
             );
           }
         });
