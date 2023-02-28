@@ -31,4 +31,6 @@ export interface MigratorContext {
   readonly serializer: ISavedObjectsSerializer;
   /** The SO type registry to use for the migration */
   readonly typeRegistry: ISavedObjectTypeRegistry;
+  /** List of types that are no longer registered */
+  readonly deletedTypes: string[];
 }

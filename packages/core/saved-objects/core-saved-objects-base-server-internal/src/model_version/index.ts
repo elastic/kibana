@@ -13,7 +13,11 @@ export {
   modelVersionToVirtualVersion,
   virtualVersionToModelVersion,
 } from './conversion';
-export { buildVersionMap, getLatestModelVersion, type ModelVersionMap } from './version_map';
+export {
+  getModelVersionMapForTypes,
+  getLatestModelVersion,
+  type ModelVersionMap,
+} from './version_map';
 export {
   compareModelVersions,
   type CompareModelVersionMapParams,
@@ -21,3 +25,4 @@ export {
   type CompareModelVersionDetails,
   type CompareModelVersionResult,
 } from './version_compare';
+export { getModelVersionsFromMappings } from './model_version_from_mappings';

@@ -24,16 +24,15 @@ describe('Action: init', () => {
   });
 
   beforeEach(() => {
-    context = createContextMock();
+    context = createContextMock({ indexPrefix: '.kibana' });
   });
 
-  test('INIT -> DONE because its not implemented yet', () => {
+  test('INIT -> WAIT_FOR_YELLOW_INDEX when index is found', () => {
     const state = createState();
     const res: StateActionResponse<'INIT'> = Either.right({
-      '.kibana_8.7.0_001': {
+      '.kibana_1': {
         aliases: {
           '.kibana': {},
-          '.kibana_8.7.0': {},
         },
         mappings: { properties: {} },
         settings: {},
@@ -42,7 +41,34 @@ describe('Action: init', () => {
 
     const newState = init(state, res, context);
 
-    expect(newState.controlState).toEqual('DONE');
+    expect(newState).toEqual(
+      expect.objectContaining({
+        controlState: 'WAIT_FOR_YELLOW_INDEX',
+        currentIndex: '.kibana_1',
+        previousMappings: { properties: {} },
+      })
+    );
+  });
+
+  test('INIT -> CREATE_TARGET_INDEX because its not implemented yet', () => {
+    const state = createState();
+    const res: StateActionResponse<'INIT'> = Either.right({
+      '.foo_1': {
+        aliases: {
+          '.some_alias': {},
+        },
+        mappings: { properties: {} },
+        settings: {},
+      },
+    });
+
+    const newState = init(state, res, context);
+
+    expect(newState).toEqual(
+      expect.objectContaining({
+        controlState: 'CREATE_TARGET_INDEX',
+      })
+    );
   });
 
   test('INIT -> INIT when cluster routing allocation is incompatible', () => {

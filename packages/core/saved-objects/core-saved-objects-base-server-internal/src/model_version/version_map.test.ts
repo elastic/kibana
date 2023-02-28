@@ -7,7 +7,7 @@
  */
 
 import type { SavedObjectsType, SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
-import { buildVersionMap, getLatestModelVersion } from './version_map';
+import { getModelVersionMapForTypes, getLatestModelVersion } from './version_map';
 
 describe('ModelVersion map utilities', () => {
   const buildType = (parts: Partial<SavedObjectsType> = {}): SavedObjectsType => ({
@@ -85,10 +85,10 @@ describe('ModelVersion map utilities', () => {
     });
   });
 
-  describe('buildVersionMap', () => {
+  describe('getModelVersionMapForTypes', () => {
     it('returns a map with the latest version of the provided types', () => {
       expect(
-        buildVersionMap([
+        getModelVersionMapForTypes([
           buildType({
             name: 'foo',
             modelVersions: {

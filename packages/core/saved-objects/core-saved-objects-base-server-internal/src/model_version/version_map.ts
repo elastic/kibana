@@ -25,7 +25,7 @@ export const getLatestModelVersion = (type: SavedObjectsType): number => {
 /**
  * Build a version map for the given types.
  */
-export const buildVersionMap = (types: SavedObjectsType[]): ModelVersionMap => {
+export const getModelVersionMapForTypes = (types: SavedObjectsType[]): ModelVersionMap => {
   return types.reduce<ModelVersionMap>((versionMap, type) => {
     versionMap[type.name] = getLatestModelVersion(type);
     return versionMap;

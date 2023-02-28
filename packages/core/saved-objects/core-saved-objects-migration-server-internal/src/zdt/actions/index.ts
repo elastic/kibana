@@ -10,11 +10,14 @@ import type {
   IncompatibleClusterRoutingAllocation,
   RetryableEsClientError,
   WaitForTaskCompletionTimeout,
+  IndexNotYellowTimeout,
+  IndexNotGreenTimeout,
   IndexNotFound,
 } from '../../actions';
 
 export {
   initAction as init,
+  waitForIndexStatus,
   type InitActionParams,
   type IncompatibleClusterRoutingAllocation,
   type RetryableEsClientError,
@@ -27,6 +30,8 @@ export interface ActionErrorTypeMap {
   incompatible_cluster_routing_allocation: IncompatibleClusterRoutingAllocation;
   retryable_es_client_error: RetryableEsClientError;
   index_not_found_exception: IndexNotFound;
+  index_not_green_timeout: IndexNotGreenTimeout;
+  index_not_yellow_timeout: IndexNotYellowTimeout;
 }
 
 /** Type guard for narrowing the type of a left */

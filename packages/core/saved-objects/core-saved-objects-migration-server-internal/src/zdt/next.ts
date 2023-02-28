@@ -6,7 +6,16 @@
  * Side Public License, v 1.
  */
 
-import type { AllActionStates, InitState, State } from './state';
+import type {
+  AllActionStates,
+  State,
+  InitState,
+  WaitForYellowIndexState,
+  CreateTargetIndexState,
+  UpdateIndexMappingsState,
+  UpdateIndexMappingsWaitForTaskState,
+  UpdateOrCreateAliasesState,
+} from './state';
 import type { MigratorContext } from './context';
 import * as Actions from './actions';
 
@@ -22,10 +31,24 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
 
+// TODO: remove when done
+const NOT_IMPLEMENTED = () => Promise.resolve({} as any);
+
 export const nextActionMap = (context: MigratorContext) => {
   return {
     INIT: (state: InitState) =>
       Actions.init({ client: context.elasticsearchClient, indices: [context.indexPrefix] }),
+    WAIT_FOR_YELLOW_INDEX: (state: WaitForYellowIndexState) =>
+      Actions.waitForIndexStatus({
+        client: context.elasticsearchClient,
+        index: state.currentIndex,
+        status: 'yellow',
+      }),
+    CREATE_TARGET_INDEX: (state: CreateTargetIndexState) => NOT_IMPLEMENTED,
+    UPDATE_INDEX_MAPPINGS: (state: UpdateIndexMappingsState) => NOT_IMPLEMENTED,
+    UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: (state: UpdateIndexMappingsWaitForTaskState) =>
+      NOT_IMPLEMENTED,
+    UPDATE_OR_CREATE_ALIASES: (state: UpdateOrCreateAliasesState) => () => NOT_IMPLEMENTED,
   };
 };
 
@@ -33,13 +56,7 @@ export const next = (context: MigratorContext) => {
   const map = nextActionMap(context);
 
   return (state: State) => {
-    const delay = <F extends (...args: any) => any>(fn: F): (() => ReturnType<F>) => {
-      return () => {
-        return state.retryDelay > 0
-          ? new Promise((resolve) => setTimeout(resolve, state.retryDelay)).then(fn)
-          : fn();
-      };
-    };
+    const delay = createDelayFn(state);
 
     if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
       // Return null if we're in one of the terminating states
@@ -56,3 +73,13 @@ export const next = (context: MigratorContext) => {
     }
   };
 };
+
+const createDelayFn =
+  (state: State) =>
+  <F extends (...args: any) => any>(fn: F): (() => ReturnType<F>) => {
+    return () => {
+      return state.retryDelay > 0
+        ? new Promise((resolve) => setTimeout(resolve, state.retryDelay)).then(fn)
+        : fn();
+    };
+  };

@@ -9,11 +9,15 @@
 import * as Either from 'fp-ts/lib/Either';
 import { delayRetryState } from '../../../model/retry_state';
 import { throwBadResponse } from '../../../model/helpers';
+import type { MigrationLog } from '../../../types';
 import { isTypeof } from '../../actions';
-import type { State } from '../../state';
+import { getCurrentIndex, checkVersionCompatibility } from '../../utils';
 import type { ModelStage } from '../types';
 
-export const init: ModelStage<'INIT', 'DONE' | 'FATAL'> = (state, res, context): State => {
+export const init: ModelStage<
+  'INIT',
+  'CREATE_TARGET_INDEX' | 'UPDATE_INDEX_MAPPINGS' | 'UPDATE_OR_CREATE_ALIASES' | 'FATAL'
+> = (state, res, context) => {
   if (Either.isLeft(res)) {
     const left = res.left;
     if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
@@ -24,9 +28,72 @@ export const init: ModelStage<'INIT', 'DONE' | 'FATAL'> = (state, res, context):
     }
   }
 
-  // nothing implemented yet, just going to 'DONE'
-  return {
-    ...state,
-    controlState: 'DONE',
-  };
+  const logs: MigrationLog[] = [...state.logs];
+
+  const indices = res.right;
+  const currentIndex = getCurrentIndex(indices, context.indexPrefix);
+
+  // No indices were found, likely because it is the first time Kibana boots.
+  // In that case, we just create the index.
+  if (!currentIndex) {
+    return {
+      ...state,
+      logs,
+      controlState: 'CREATE_TARGET_INDEX',
+    };
+  }
+
+  // Index was found. This is the standard scenario, we check the model versions
+  // compatibility before going further.
+  const currentMappings = indices[currentIndex].mappings;
+  const types = context.types.map((type) => context.typeRegistry.getType(type)!);
+  const versionCheck = checkVersionCompatibility({
+    mappings: currentMappings,
+    types,
+    source: 'mappingVersions',
+    deletedTypes: context.deletedTypes,
+  });
+
+  switch (versionCheck.status) {
+    // app version is greater than the index mapping version.
+    // scenario of an upgrade: we need to update the mappings
+    case 'greater':
+      return {
+        ...state,
+        logs,
+        currentIndex,
+        previousMappings: currentMappings,
+        controlState: 'UPDATE_INDEX_MAPPINGS',
+      };
+    // app version and index mapping version are the same.
+    // either application upgrade without model change, or a simple reboot on the same version.
+    // In that case we jump directly to alias update
+    case 'equal':
+      return {
+        ...state,
+        logs,
+        currentIndex,
+        previousMappings: currentMappings,
+        controlState: 'UPDATE_OR_CREATE_ALIASES',
+      };
+    // app version is lower than the index mapping version.
+    // likely a rollback scenario - unsupported for the initial implementation
+    case 'lesser':
+      return {
+        ...state,
+        logs,
+        reason: 'Downgrading model version is currently unsupported',
+        controlState: 'FATAL',
+      };
+    // conflicts: version for some types are greater, some are lower
+    // shouldn't occur in any normal scenario - cannot recover
+    case 'conflict':
+    default:
+      return {
+        ...state,
+        logs,
+        reason: 'Model version conflict: inconsistent higher/lower versions',
+        controlState: 'FATAL',
+      };
+  }
 };

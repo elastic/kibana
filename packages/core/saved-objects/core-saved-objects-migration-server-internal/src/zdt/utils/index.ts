@@ -7,3 +7,5 @@
  */
 
 export { buildMigratorConfigs, type MigratorConfig } from './get_migrator_configs';
+export { getCurrentIndex } from './get_current_index';
+export { checkVersionCompatibility } from './check_version_compatibility';

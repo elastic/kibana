@@ -9,6 +9,11 @@
 export type {
   BaseState,
   InitState,
+  CreateTargetIndexState,
+  WaitForYellowIndexState,
+  UpdateIndexMappingsState,
+  UpdateIndexMappingsWaitForTaskState,
+  UpdateOrCreateAliasesState,
   DoneState,
   FatalState,
   State,

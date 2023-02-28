@@ -36,7 +36,11 @@ export { removeWriteBlock } from './remove_write_block';
 export type { CloneIndexResponse, CloneIndexParams } from './clone_index';
 export { cloneIndex } from './clone_index';
 
-export type { WaitForIndexStatusParams, IndexNotYellowTimeout } from './wait_for_index_status';
+export type {
+  WaitForIndexStatusParams,
+  IndexNotYellowTimeout,
+  IndexNotGreenTimeout,
+} from './wait_for_index_status';
 import {
   type IndexNotGreenTimeout,
   type IndexNotYellowTimeout,

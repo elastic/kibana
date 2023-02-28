@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { MigrationLog } from '../../types';
 import type { ControlState } from '../../state_action_machine';
 
@@ -15,8 +16,35 @@ export interface BaseState extends ControlState {
   readonly logs: MigrationLog[];
 }
 
+/** Initial state before any action is performed */
 export interface InitState extends BaseState {
   readonly controlState: 'INIT';
+}
+
+export interface PostInitState extends BaseState {
+  currentIndex: string;
+  previousMappings: IndexMapping;
+}
+
+export interface CreateTargetIndexState extends BaseState {
+  readonly controlState: 'CREATE_TARGET_INDEX';
+}
+
+export interface WaitForYellowIndexState extends PostInitState {
+  readonly controlState: 'WAIT_FOR_YELLOW_INDEX';
+}
+
+export interface UpdateIndexMappingsState extends PostInitState {
+  readonly controlState: 'UPDATE_INDEX_MAPPINGS';
+}
+
+export interface UpdateIndexMappingsWaitForTaskState extends PostInitState {
+  readonly controlState: 'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK';
+  readonly updateTargetMappingsTaskId: string;
+}
+
+export interface UpdateOrCreateAliasesState extends PostInitState {
+  readonly controlState: 'UPDATE_OR_CREATE_ALIASES';
 }
 
 /** Migration completed successfully */
@@ -31,7 +59,15 @@ export interface FatalState extends BaseState {
   readonly reason: string;
 }
 
-export type State = InitState | DoneState | FatalState;
+export type State =
+  | InitState
+  | DoneState
+  | FatalState
+  | CreateTargetIndexState
+  | UpdateIndexMappingsState
+  | UpdateIndexMappingsWaitForTaskState
+  | UpdateOrCreateAliasesState
+  | WaitForYellowIndexState;
 
 export type AllControlStates = State['controlState'];
 
@@ -44,6 +80,11 @@ export interface ControlStateMap {
   INIT: InitState;
   FATAL: FatalState;
   DONE: DoneState;
+  CREATE_TARGET_INDEX: CreateTargetIndexState;
+  UPDATE_INDEX_MAPPINGS: UpdateIndexMappingsState;
+  UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: UpdateIndexMappingsWaitForTaskState;
+  UPDATE_OR_CREATE_ALIASES: UpdateOrCreateAliasesState;
+  WAIT_FOR_YELLOW_INDEX: WaitForYellowIndexState;
 }
 
 /**

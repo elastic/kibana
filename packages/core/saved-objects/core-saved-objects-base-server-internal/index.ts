@@ -45,7 +45,7 @@ export {
   isVirtualModelVersion,
   virtualVersionToModelVersion,
   modelVersionToVirtualVersion,
-  buildVersionMap,
+  getModelVersionMapForTypes,
   getLatestModelVersion,
   type ModelVersionMap,
   compareModelVersions,
@@ -53,4 +53,5 @@ export {
   type CompareModelVersionStatus,
   type CompareModelVersionDetails,
   type CompareModelVersionResult,
+  getModelVersionsFromMappings,
 } from './src/model_version';

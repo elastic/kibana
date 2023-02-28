@@ -8,6 +8,7 @@
 
 import type { MigratorContext } from './types';
 import type { MigrateIndexOptions } from '../migrate_index';
+import { REMOVED_TYPES } from '../../core';
 
 export type CreateContextOps = Omit<MigrateIndexOptions, 'logger'>;
 
@@ -31,5 +32,6 @@ export const createContext = ({
     serializer,
     maxRetryAttempts: migrationConfig.retryAttempts,
     migrationDocLinks: docLinks.links.kibanaUpgradeSavedObjects,
+    deletedTypes: REMOVED_TYPES,
   };
 };

@@ -57,8 +57,20 @@ export interface IndexMapping {
 
 /** @internal */
 export interface IndexMappingMeta {
-  // A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
-  // with each key being a root-level mapping property, and each value being
-  // the md5 hash of that mapping's value when the index was created.
+  /**
+   * A dictionary of key -> md5 hash (e.g. 'dashboard': '24234qdfa3aefa3wa')
+   * with each key being a root-level mapping property, and each value being
+   * the md5 hash of that mapping's value when the index was created.
+   *
+   * @remark: Only defined for the v2 migration algorithm.
+   */
   migrationMappingPropertyHashes?: { [k: string]: string };
+  /**
+   * TODO: doc
+   */
+  mappingVersions?: { [k: string]: number };
+  /**
+   * TODO: doc
+   */
+  docVersions?: { [k: string]: number };
 }

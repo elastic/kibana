@@ -32,6 +32,7 @@ export const createContextMock = (
     migrationDocLinks: docLinksServiceMock.createSetupContract().links.kibanaUpgradeSavedObjects,
     typeRegistry,
     serializer: serializerMock.create(),
+    deletedTypes: ['deleted-type'],
     ...parts,
   };
 };
