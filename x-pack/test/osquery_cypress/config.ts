@@ -39,6 +39,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--csp.strict=false',
         // define custom kibana server args here
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
+        `--xpack.fleet.agents.fleet_server.hosts=["https://host.docker.internal:8220"]`,
         `--xpack.fleet.agents.elasticsearch.host=http://host.docker.internal:${kibanaCommonTestsConfig.get(
           'servers.elasticsearch.port'
         )}`,
