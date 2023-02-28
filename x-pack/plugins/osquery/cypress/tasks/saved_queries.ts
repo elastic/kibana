@@ -73,7 +73,7 @@ export const getSavedQueriesComplexTest = (savedQueryId: string, savedQueryDescr
 
       // visit Status results
       cy.react('EuiTab', { props: { id: 'status' } }).click();
-      cy.react('EuiTableRow').should('have.lengthOf', 1);
+      cy.react('EuiTableRow').should('have.lengthOf', 2);
 
       // save new query
       cy.contains('Exit full screen').should('not.exist');
