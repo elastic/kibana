@@ -95,10 +95,9 @@ export class JsonSchemaService {
    * @param path
    * @param method
    */
-  public async extractSchema(path: SupportedPath, method: string) {
-    const fileContent = JSON.parse(
-      Fs.readFileSync(Path.resolve(__dirname, 'openapi_source.json'), 'utf8')
-    );
+  public async extractSchema(path: SupportedPath, method: string, schema?: object) {
+    const fileContent =
+      schema ?? JSON.parse(Fs.readFileSync(Path.resolve(__dirname, 'openapi_source.json'), 'utf8'));
 
     const definition = fileContent.paths[path][method];
 
@@ -125,7 +124,7 @@ export class JsonSchemaService {
 
     supportedEndpoints.forEach((e) => {
       // need to extract schema in order to keep required components
-      this.extractSchema(e.path, e.method);
+      this.extractSchema(e.path, e.method, schema);
     });
 
     for (const pathName in schema.paths) {
