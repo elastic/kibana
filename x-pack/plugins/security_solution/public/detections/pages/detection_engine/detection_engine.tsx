@@ -358,7 +358,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     ]
   );
 
-  const renderGroupedAlertTable = useCallback(
+  const renderAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
       return (
         <AlertsTableComponent
@@ -455,17 +455,19 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer size="l" />
             </Display>
             <GroupedAlertsTable
-              tableId={TableId.alertsOnAlertsPage}
-              loading={isAlertTableLoading}
-              hasIndexWrite={hasIndexWrite ?? false}
-              hasIndexMaintenance={hasIndexMaintenance ?? false}
-              from={from}
-              defaultFilters={alertsTableDefaultFilters}
-              signalIndexName={signalIndexName}
-              runtimeMappings={runtimeMappings}
-              to={to}
               currentAlertStatusFilterValue={filterGroup}
-              renderChildComponent={renderGroupedAlertTable}
+              defaultFilters={alertsTableDefaultFilters}
+              from={from}
+              globalFilters={filters}
+              globalQuery={query}
+              hasIndexMaintenance={hasIndexMaintenance ?? false}
+              hasIndexWrite={hasIndexWrite ?? false}
+              loading={isAlertTableLoading}
+              renderChildComponent={renderAlertTable}
+              runtimeMappings={runtimeMappings}
+              signalIndexName={signalIndexName}
+              tableId={TableId.alertsOnAlertsPage}
+              to={to}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>

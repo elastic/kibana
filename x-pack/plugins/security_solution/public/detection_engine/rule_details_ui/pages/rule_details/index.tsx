@@ -840,17 +840,19 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <GroupedAlertsTable
-                        tableId={TableId.alertsOnRuleDetailsPage}
-                        defaultFilters={alertMergedFilters}
-                        hasIndexWrite={hasIndexWrite ?? false}
-                        hasIndexMaintenance={hasIndexMaintenance ?? false}
-                        from={from}
-                        loading={loading}
-                        to={to}
-                        signalIndexName={signalIndexName}
-                        runtimeMappings={runtimeMappings}
                         currentAlertStatusFilterValue={filterGroup}
+                        defaultFilters={alertMergedFilters}
+                        from={from}
+                        globalFilters={filters}
+                        globalQuery={query}
+                        hasIndexMaintenance={hasIndexMaintenance ?? false}
+                        hasIndexWrite={hasIndexWrite ?? false}
+                        loading={loading}
                         renderChildComponent={renderGroupedAlertTable}
+                        runtimeMappings={runtimeMappings}
+                        signalIndexName={signalIndexName}
+                        tableId={TableId.alertsOnRuleDetailsPage}
+                        to={to}
                       />
                     )}
                   </>

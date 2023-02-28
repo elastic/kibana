@@ -4841,6 +4841,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/securitysolution-alerts_grouping@link:packages/kbn-securitysolution-alerts-grouping":
+  version "0.0.0"
+  uid ""
+
 "@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
   version "0.0.0"
   uid ""
