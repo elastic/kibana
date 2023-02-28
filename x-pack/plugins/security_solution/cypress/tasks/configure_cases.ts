@@ -39,6 +39,10 @@ export const openAddNewConnectorOption = () => {
   });
 };
 
+export const verifyNewConnectorSelected = (connector: Connector) => {
+  cy.get(CONNECTORS_DROPDOWN).should('have.text', connector.connectorName);
+};
+
 export const selectLastConnectorCreated = (id: string) => {
   cy.get(CONNECTORS_DROPDOWN).click({ force: true });
   cy.get(CONNECTOR(id)).click();
