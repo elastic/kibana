@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
@@ -55,9 +55,12 @@ export function getExploratoryViewEmbeddable(
   };
 
   return (props: ExploratoryEmbeddableProps) => {
-    if (!services.data.search.session.getSessionId()) {
-      services.data.search.session.start();
-    }
+    useEffect(() => {
+      if (!services.data.search.session.getSessionId()) {
+        services.data.search.session.start();
+      }
+    }, []);
+
     const { dataTypesIndexPatterns, attributes, customHeight } = props;
 
     if (!dataViewsService || !lens || !attributes || attributes?.length === 0) {

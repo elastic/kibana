@@ -71,7 +71,7 @@ export class File<M = unknown> implements IFile {
   }
 
   private upload(content: Readable): Observable<{ size: number }> {
-    return defer(() => this.fileClient.upload(this.id, content));
+    return defer(() => this.fileClient.upload(this.metadata, content));
   }
 
   public async uploadContent(
