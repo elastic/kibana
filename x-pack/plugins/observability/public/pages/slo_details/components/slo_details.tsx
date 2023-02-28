@@ -35,7 +35,7 @@ export function SloDetails({ slo }: Props) {
         <ErrorBudgetChartPanel
           data={errorBudgetBurnDownData}
           isLoading={historicalSummaryLoading}
-          summary={slo.summary}
+          slo={slo}
         />
       </EuiFlexItem>
       <EuiFlexItem>
