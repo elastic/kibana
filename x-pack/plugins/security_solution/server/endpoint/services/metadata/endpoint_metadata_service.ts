@@ -431,6 +431,7 @@ export class EndpointMetadataService {
         // the agent object
         const agent: typeof _agent = {
           ..._agent,
+          policy_revision: _agent.policy_revision ?? _agent.policy_revision_idx ?? 0,
           status: doc?.fields?.status?.[0] as AgentStatus,
         };
         hosts.push(

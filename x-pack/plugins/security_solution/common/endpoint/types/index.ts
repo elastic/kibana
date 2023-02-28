@@ -556,7 +556,7 @@ export type UnitedAgentMetadata = Immutable<{
   };
   united: {
     endpoint: HostMetadata;
-    agent: Agent;
+    agent: Agent & { policy_revision_idx?: number };
   };
 }>;
 
