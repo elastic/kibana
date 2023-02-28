@@ -25,7 +25,8 @@
       "security",
       "guidedOnboarding",
       "share",
-      "spaces"
+      "spaces",
+      "files"
     ],
     "optionalPlugins": [
       "discover",
