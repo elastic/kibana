@@ -7,8 +7,9 @@
  */
 
 import * as React from 'react';
-import { Todos } from './todos';
-import { ContentClientProvider, ContentClient } from '../../public/content_client';
+import { ContentClientProvider, ContentClient } from '@kbn/content-management-plugin/public';
+
+import { Todos } from '../todos';
 import { TodosClient } from './todos_client';
 
 export default {
