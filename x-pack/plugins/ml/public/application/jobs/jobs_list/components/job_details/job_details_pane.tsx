@@ -33,15 +33,18 @@ interface Section {
 // fix for the annotation label being hidden inside the bounds of the chart container
 
 const SectionItem: FC<{ item: Item }> = ({ item }) => {
+  const { euiTheme } = useEuiTheme();
+  const fontSize = euiTheme.size.m;
+
   return (
     <EuiTableRow>
       {item[0] !== '' && (
         <EuiTableRowCell>
-          <span css={{ fontSize: '12px', fontWeight: 'bold' }}>{item[0]}</span>
+          <span css={{ fontSize, fontWeight: 'bold' }}>{item[0]}</span>
         </EuiTableRowCell>
       )}
       <EuiTableRowCell>
-        <span css={{ fontSize: '12px' }}>{item[1]}</span>
+        <span css={{ fontSize }}>{item[1]}</span>
       </EuiTableRowCell>
     </EuiTableRow>
   );
@@ -55,7 +58,7 @@ const Section: FC<{ section: Section }> = ({ section }) => {
 
   const cssOverride = css({
     overflow: 'auto',
-    padding: '5px 15px',
+    padding: `${euiTheme.size.xs} ${euiTheme.size.m}`,
     backgroundColor: euiTheme.colors.lightestShade,
     border: `1px solid ${euiTheme.colors.lightShade}`,
     borderRadius: euiTheme.border.radius.medium,

@@ -42,7 +42,7 @@ export const StatsBar: FC<StatsBarProps> = ({ stats, dataTestSub }) => {
   const statsList = Object.keys(stats).map((k) => stats[k as StatsKey]);
   return (
     <div
-      css={{ height: '42px', padding: '14px', backgroundColor: euiTheme.colors.lightestShade }}
+      css={{ padding: euiTheme.size.m, backgroundColor: euiTheme.colors.lightestShade }}
       data-test-subj={dataTestSub}
     >
       {statsList
