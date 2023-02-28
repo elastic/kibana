@@ -66,6 +66,8 @@ export class CsvGenerator {
           index: indexPatternTitle,
           keep_alive: duration,
           ignore_unavailable: true,
+          // @ts-ignore
+          ignore_throttled: settings.includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
         },
         {
           requestTimeout: duration,
@@ -91,7 +93,7 @@ export class CsvGenerator {
     settings: CsvExportSettings,
     searchAfter?: estypes.SortResults
   ) {
-    const { scroll: scrollSettings, includeFrozen } = settings;
+    const { scroll: scrollSettings } = settings;
     searchSource.setField('size', scrollSettings.size);
 
     if (searchAfter) {
@@ -112,7 +114,6 @@ export class CsvGenerator {
     const searchParams = {
       params: {
         body: searchBody,
-        ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
       },
     };
 
