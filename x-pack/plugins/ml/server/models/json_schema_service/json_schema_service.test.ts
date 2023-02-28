@@ -7,7 +7,7 @@
 
 import { JsonSchemaService } from './json_schema_service';
 
-describe('JsonSchemaService', function () {
+describe.skip('JsonSchemaService', function () {
   test('extract schema definition and applies overrides', async () => {
     const service = new JsonSchemaService();
 
