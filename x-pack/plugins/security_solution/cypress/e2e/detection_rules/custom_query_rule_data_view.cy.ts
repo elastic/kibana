@@ -113,7 +113,7 @@ describe('Custom query rules', () => {
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
       cy.get(ABOUT_DETAILS).within(() => {
-        getDetails(SEVERITY_DETAILS).should('have.text', rule.severity);
+        getDetails(SEVERITY_DETAILS).should('have.text', 'High');
         getDetails(RISK_SCORE_DETAILS).should('have.text', rule.risk_score);
         getDetails(REFERENCE_URLS_DETAILS).should((details) => {
           expect(removeExternalLinkText(details.text())).equal(expectedUrls);

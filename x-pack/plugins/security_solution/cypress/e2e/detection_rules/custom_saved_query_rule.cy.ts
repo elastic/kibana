@@ -101,7 +101,12 @@ describe('Custom saved_query rules', () => {
     context('Non existent saved query', () => {
       const FAILED_TO_LOAD_ERROR = 'Failed to load the saved query';
       beforeEach(() => {
-        createRule({ ...getNewRule(), saved_id: 'non-existent' });
+        createRule({
+          ...getNewRule(),
+          type: 'saved_query',
+          saved_id: 'non-existent',
+          query: undefined,
+        });
         cy.visit(SECURITY_DETECTIONS_RULES_URL);
       });
       it('Shows error toast on details page when saved query can not be loaded', function () {
@@ -147,7 +152,12 @@ describe('Custom saved_query rules', () => {
         const expectedCustomTestQuery = 'random test query';
         createSavedQuery(savedQueryName, savedQueryQuery).then((response) => {
           cy.log(JSON.stringify(response.body, null, 2));
-          createRule({ ...getNewRule(), saved_id: response.body.id });
+          createRule({
+            ...getNewRule(),
+            type: 'saved_query',
+            saved_id: response.body.id,
+            query: undefined,
+          });
         });
 
         cy.visit(SECURITY_DETECTIONS_RULES_URL);
@@ -174,7 +184,12 @@ describe('Custom saved_query rules', () => {
 
       it('Allows to update saved_query rule with non-existent query by adding custom query', () => {
         const expectedCustomTestQuery = 'random test query';
-        createRule({ ...getNewRule(), saved_id: 'non-existent' });
+        createRule({
+          ...getNewRule(),
+          type: 'saved_query',
+          saved_id: 'non-existent',
+          query: undefined,
+        });
 
         cy.visit(SECURITY_DETECTIONS_RULES_URL);
 
@@ -197,7 +212,12 @@ describe('Custom saved_query rules', () => {
 
       it('Allows to update saved_query rule with non-existent query by selecting another saved query', () => {
         createSavedQuery(savedQueryName, savedQueryQuery);
-        createRule({ ...getNewRule(), saved_id: 'non-existent' });
+        createRule({
+          ...getNewRule(),
+          type: 'saved_query',
+          saved_id: 'non-existent',
+          query: undefined,
+        });
 
         cy.visit(SECURITY_DETECTIONS_RULES_URL);
 

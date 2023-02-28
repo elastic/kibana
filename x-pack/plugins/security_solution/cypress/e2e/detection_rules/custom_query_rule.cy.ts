@@ -430,7 +430,7 @@ describe('Custom query rules', () => {
         cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', getEditedRule().description);
         cy.get(ABOUT_DETAILS).within(() => {
           getDetails(SEVERITY_DETAILS).should('have.text', getEditedRule().severity);
-          getDetails(RISK_SCORE_DETAILS).should('have.text', getEditedRule().risk_score);
+          getDetails(RISK_SCORE_DETAILS).should('have.text', `${getEditedRule().risk_score}`);
           getDetails(TAGS_DETAILS).should('have.text', expectedEditedtags);
         });
         cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
