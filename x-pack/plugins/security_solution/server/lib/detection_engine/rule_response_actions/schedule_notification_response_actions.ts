@@ -47,7 +47,7 @@ export const scheduleNotificationResponseActions = (
       osqueryResponseAction(responseAction, osqueryCreateAction, { alerts, alertIds, agents });
     }
     if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.ENDPOINT && endpointAppContext) {
-      endpointResponseAction(responseAction, endpointAppContext, { alerts });
+      endpointResponseAction(responseAction, endpointAppContext, { alerts, alertIds, agents });
     }
   });
 };
