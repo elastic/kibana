@@ -121,6 +121,18 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   xsrfRequired?: Method extends 'get' ? never : boolean;
 
   /**
+   * Defines access permission for a route
+   * - public. The route is public, declared stable and intended for external access.
+   *           In the future, may require an incomming request to contain a specified header.
+   * - internal. The route is internal and intended for internal access only.
+   *
+   * If not declared, infers access from route path:
+   * - access =`internal` for '/internal' route path prefix
+   * - access = `public` for '/api' route path prefix
+   */
+  access?: 'public' | 'internal';
+
+  /**
    * Additional metadata tag strings to attach to the route.
    */
   tags?: readonly string[];

@@ -524,7 +524,9 @@ export class HttpServer {
 
     const kibanaRouteOptions: KibanaRouteOptions = {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
+      access: route.options.access ?? (route.path.startsWith('/internal') ? 'internal' : 'public'),
     };
+    this.log.debug(`kibanaRouteOptions [${kibanaRouteOptions.access}] for path [${route.path}]`);
 
     this.server!.route({
       handler: route.handler,

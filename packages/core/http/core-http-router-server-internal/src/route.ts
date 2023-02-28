@@ -6,8 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type { RouteMethod, SafeRouteMethod } from '@kbn/core-http-server';
+import type { RouteConfigOptions, RouteMethod, SafeRouteMethod } from '@kbn/core-http-server';
 
 export function isSafeMethod(method: RouteMethod): method is SafeRouteMethod {
   return method === 'get' || method === 'options';
+}
+
+export function isPublicRoute(options: RouteConfigOptions<RouteMethod>) {
+  return options.access === 'public';
 }
