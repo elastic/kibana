@@ -17,6 +17,7 @@ import type { MigratorContext } from '../context';
 
 export type MockedMigratorContext = Omit<MigratorContext, 'elasticsearchClient'> & {
   elasticsearchClient: ElasticsearchClientMock;
+  typeRegistry: SavedObjectTypeRegistry;
 };
 
 export const createContextMock = (

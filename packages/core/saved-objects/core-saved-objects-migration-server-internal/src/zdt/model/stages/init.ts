@@ -54,6 +54,11 @@ export const init: ModelStage<
     deletedTypes: context.deletedTypes,
   });
 
+  logs.push({
+    level: 'info',
+    message: `Mappings model version check result: ${versionCheck.status}`,
+  });
+
   switch (versionCheck.status) {
     // app version is greater than the index mapping version.
     // scenario of an upgrade: we need to update the mappings
