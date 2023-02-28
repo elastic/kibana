@@ -53,8 +53,8 @@ export class RX implements ILensVisualization {
     const dataLayer = this.formula.insertOrReplaceFormulaColumn(
       'y_network_in_bytes',
       {
-        formula: 'average(host.network.ingress.bytes) * 8',
-        timeScale: 's',
+        formula:
+          "average(host.network.ingress.bytes) * 8 / (max(metricset.period, kql='host.network.ingress.bytes: *') / 1000)",
         format: {
           id: 'bits',
           params: {

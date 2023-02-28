@@ -53,8 +53,8 @@ export class TX implements ILensVisualization {
     const dataLayer = this.formula.insertOrReplaceFormulaColumn(
       'y_network_out_bytes',
       {
-        formula: 'average(host.network.egress.bytes) * 8',
-        timeScale: 's',
+        formula:
+          "average(host.network.egress.bytes) * 8 / (max(metricset.period, kql='host.network.egress.bytes: *') / 1000)",
         format: {
           id: 'bits',
           params: {
