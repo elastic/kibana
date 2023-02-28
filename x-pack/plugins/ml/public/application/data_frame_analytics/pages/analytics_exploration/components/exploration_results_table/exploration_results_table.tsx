@@ -54,6 +54,7 @@ export const ExplorationResultsTable: FC<Props> = React.memo(
         <ExpandableSectionResults
           indexData={classificationData}
           indexPattern={indexPattern}
+          resultsField={jobConfig?.dest.results_field}
           jobConfig={jobConfig}
           needsDestIndexPattern={needsDestIndexPattern}
           searchQuery={searchQuery}
