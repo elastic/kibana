@@ -105,7 +105,7 @@ export class DashboardAddPanelService extends FtrService {
 
   async addEveryEmbeddableOnCurrentPage() {
     this.log.debug('addEveryEmbeddableOnCurrentPage');
-    const itemList = await this.testSubjects.find('savedObjectsFinder-table');
+    const itemList = await this.testSubjects.find('savedObjectsFinderTable');
     const embeddableList: string[] = [];
     await this.retry.try(async () => {
       const embeddableListBody = await itemList.findByTagName('tbody');
@@ -193,7 +193,7 @@ export class DashboardAddPanelService extends FtrService {
       await this.filterEmbeddableNames(filter.replace('-', ' '));
     }
     await this.toggleFilter('Visualization');
-    const itemList = await this.testSubjects.find('savedObjectsFinder-table');
+    const itemList = await this.testSubjects.find('savedObjectsFinderTable');
     await this.retry.try(async () => {
       const embeddableListBody = await itemList.findByTagName('tbody');
       const embeddableRows = await embeddableListBody.findAllByCssSelector('tr');

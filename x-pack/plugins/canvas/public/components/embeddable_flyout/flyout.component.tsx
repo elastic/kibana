@@ -9,7 +9,7 @@ import React, { FC, useCallback } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutBody, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectFinderUi, SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
+import { SavedObjectFinder, SavedObjectMetaData } from '@kbn/saved-objects-finder-plugin/public';
 import { useEmbeddablesService, usePlatformService } from '../../services';
 
 const strings = {
@@ -77,7 +77,7 @@ export const AddEmbeddableFlyout: FC<Props> = ({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <SavedObjectFinderUi
+        <SavedObjectFinder
           onChoose={onAddPanel}
           savedObjectMetaData={availableSavedObjects}
           showFilter={true}

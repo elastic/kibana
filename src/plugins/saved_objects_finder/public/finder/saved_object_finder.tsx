@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient, HttpStart } from '@kbn/core/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { LISTING_LIMIT_SETTING } from '@kbn/saved-objects-plugin/public';
-import { SavedObjectCommon, FindQueryHTTP, FindResponseHTTP } from '../../common';
+import { SavedObjectCommon, FindQueryHTTP, FindResponseHTTP, FinderAttributes } from '../../common';
 
 export interface SavedObjectMetaData<T = unknown> {
   type: string;
@@ -39,12 +39,6 @@ export interface SavedObjectMetaData<T = unknown> {
   getSavedObjectSubType?(savedObject: SavedObjectCommon<T>): string;
   includeFields?: string[];
   defaultSearchField?: string;
-}
-
-interface FinderAttributes {
-  title?: string;
-  name?: string;
-  type: string;
 }
 
 interface SavedObjectFinderItem extends SavedObjectCommon {
@@ -123,15 +117,6 @@ export class SavedObjectFinderUi extends React.Component<
     }, []);
 
     const perPage = uiSettings.get(LISTING_LIMIT_SETTING);
-    const params: FindQueryHTTP = {
-      type: Object.keys(metaDataMap),
-      fields: [...new Set(fields)],
-      page: 1,
-      perPage,
-      searchFields: ['title^3', 'description', ...additionalSearchFields],
-      defaultSearchOperator: 'AND',
-    };
-
     const { queryText, visibleTypes, selectedTags } = savedObjectsManagement.parseQuery(
       query,
       Object.values(metaDataMap).map((metadata) => ({
@@ -145,9 +130,16 @@ export class SavedObjectFinderUi extends React.Component<
       selectedTags,
       taggingApi: this.props.services.savedObjectsTagging,
     });
-    params.type = visibleTypes ?? Object.keys(metaDataMap);
-    params.search = queryText ? `${queryText}*` : undefined;
-    params.hasReference = hasReference ? JSON.stringify(hasReference) : undefined;
+    const params: FindQueryHTTP = {
+      type: visibleTypes ?? Object.keys(metaDataMap),
+      search: queryText ? `${queryText}*` : undefined,
+      fields: [...new Set(fields)],
+      page: 1,
+      perPage,
+      searchFields: ['title^3', 'description', ...additionalSearchFields],
+      defaultSearchOperator: 'AND',
+      hasReference: hasReference ? JSON.stringify(hasReference) : undefined,
+    };
 
     const response = (await http.get('/internal/saved-objects-finder/find', {
       query: params as Record<string, any>,
@@ -371,7 +363,7 @@ export class SavedObjectFinderUi extends React.Component<
         itemId="id"
         items={this.state.items}
         columns={columns}
-        data-test-subj="savedObjectsFinder-table"
+        data-test-subj="savedObjectsFinderTable"
         message={this.props.noItemsMessage}
         search={search}
         pagination={pagination}

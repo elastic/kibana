@@ -35,7 +35,7 @@ export const getSavedObjectFinder = (
   savedObjectsTagging?: SavedObjectsTaggingApi
 ) => {
   return (props: SavedObjectFinderProps) => (
-    <SavedObjectFinderUi
+    <SavedObjectFinder
       {...props}
       services={{ uiSettings, http, savedObjectsManagement, savedObjectsTagging }}
     />
