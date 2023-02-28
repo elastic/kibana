@@ -90,6 +90,7 @@ export const ListsDetailViewComponent: FC = () => {
           onExportList={onModalOpen}
           onDeleteList={handleDelete}
           onManageRules={onManageRules}
+          dataTestSubj="exceptionListManagement"
         />
 
         <AutoDownload blob={exportedList} name={`${listId}.ndjson`} onDownload={handleOnDownload} />
