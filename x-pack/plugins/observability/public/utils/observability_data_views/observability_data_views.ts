@@ -32,6 +32,7 @@ const appFieldFormats: Record<AppDataType, FieldFormat[] | null> = {
   infra_metrics: infraMetricsFieldFormats,
   ux: rumFieldFormats,
   apm: apmFieldFormats,
+  uptime: syntheticsFieldFormats,
   synthetics: syntheticsFieldFormats,
   mobile: apmFieldFormats,
   alerts: null,
@@ -42,6 +43,7 @@ const appRuntimeFields: Record<AppDataType, Array<{ name: string; field: Runtime
   infra_metrics: null,
   ux: null,
   apm: null,
+  uptime: syntheticsRuntimeFields,
   synthetics: syntheticsRuntimeFields,
   mobile: null,
   alerts: null,
@@ -53,6 +55,7 @@ function getFieldFormatsForApp(app: AppDataType) {
 
 export const dataViewList: Record<AppDataType, string> = {
   synthetics: 'synthetics_static_index_pattern_id',
+  uptime: 'uptime_static_index_pattern_id',
   apm: 'apm_static_index_pattern_id',
   ux: 'rum_static_index_pattern_id',
   infra_logs: 'infra_logs_static_index_pattern_id',
@@ -74,6 +77,11 @@ const getAppDataViewId = (app: AppDataType, indices: string) => {
 
 export async function getDataTypeIndices(dataType: AppDataType) {
   switch (dataType) {
+    case 'synthetics':
+      return {
+        hasData: true,
+        indices: 'synthetics-*',
+      };
     case 'mobile':
     case 'ux':
     case 'apm':

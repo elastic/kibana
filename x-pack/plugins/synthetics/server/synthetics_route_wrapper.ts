@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
+import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { isTestUser, UptimeEsClient } from './legacy_uptime/lib/lib';
 import { syntheticsServiceApiKey } from './legacy_uptime/lib/saved_objects/service_api_key';
 import { SyntheticsRouteWrapper, SyntheticsStreamingRouteHandler } from './legacy_uptime/routes';
@@ -29,13 +30,11 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
     // specifically needed for the synthetics service api key generation
     server.authSavedObjectsClient = savedObjectsClient;
 
-    const uptimeEsClient = new UptimeEsClient(
-      savedObjectsClient,
-      esClient.asCurrentUser,
-      false,
-      coreContext.uiSettings,
-      request
-    );
+    const uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient.asCurrentUser, {
+      request,
+      isDev: false,
+      uiSettings: coreContext.uiSettings,
+    });
 
     server.uptimeEsClient = uptimeEsClient;
 
@@ -62,35 +61,43 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
     // specifically needed for the synthetics service api key generation
     server.authSavedObjectsClient = savedObjectsClient;
 
-    const uptimeEsClient = new UptimeEsClient(
-      savedObjectsClient,
-      esClient.asCurrentUser,
-      Boolean(server.isDev) && !isTestUser(server),
+    const uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient.asCurrentUser, {
+      request,
       uiSettings,
-      request
-    );
+      isDev: Boolean(server.isDev) && !isTestUser(server),
+      heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+    });
 
     server.uptimeEsClient = uptimeEsClient;
 
-    const res = await uptimeRoute.handler({
-      uptimeEsClient,
-      savedObjectsClient,
-      context,
-      request,
-      response,
-      server,
-      syntheticsMonitorClient,
-    });
+    try {
+      const res = await uptimeRoute.handler({
+        uptimeEsClient,
+        savedObjectsClient,
+        context,
+        request,
+        response,
+        server,
+        syntheticsMonitorClient,
+      });
+      if (res instanceof KibanaResponse) {
+        return res;
+      }
 
-    if (res instanceof KibanaResponse) {
-      return res;
+      return response.ok({
+        body: {
+          ...res,
+          ...(await uptimeEsClient.getInspectData(uptimeRoute.path)),
+        },
+      });
+    } catch (e) {
+      if (e.statusCode === 403) {
+        return response.unauthorized({
+          body: {
+            message: e.message,
+          },
+        });
+      }
     }
-
-    return response.ok({
-      body: {
-        ...res,
-        ...uptimeEsClient.getInspectData(uptimeRoute.path),
-      },
-    });
   },
 });
