@@ -29927,7 +29927,6 @@
     "xpack.securitySolution.lists.valueListsForm.keywordsRadioLabel": "关键字",
     "xpack.securitySolution.lists.valueListsForm.listTypesRadioLabel": "值列表类型",
     "xpack.securitySolution.lists.valueListsForm.textRadioLabel": "文本",
-    "xpack.securitySolution.lists.valueListsImportButton": "导入列表",
     "xpack.securitySolution.lists.valueListsImportSuccess": "值列表“{fileName}”已导入",
     "xpack.securitySolution.lists.valueListsImportSuccessTitle": "值列表已导入",
     "xpack.securitySolution.lists.valueListsTable.actionsColumn": "操作",
