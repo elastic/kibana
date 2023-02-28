@@ -87,8 +87,11 @@ export function useMonitorErrors(monitorIdArg?: string) {
         },
       },
     },
-    [lastRefresh, monitorId, monitorIdArg, dateRangeStart, dateRangeEnd],
-    { name: 'getMonitorErrors', isRequestReady: Boolean(selectedLocation?.label) }
+    [lastRefresh, monitorId, monitorIdArg, dateRangeStart, dateRangeEnd, selectedLocation?.label],
+    {
+      name: `getMonitorErrors/${dateRangeStart}/${dateRangeEnd}`,
+      isRequestReady: Boolean(selectedLocation?.label),
+    }
   );
 
   return useMemo(() => {

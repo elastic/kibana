@@ -5,8 +5,24 @@
  * 2.0.
  */
 import React from 'react';
+import { EuiLoadingContent } from '@elastic/eui';
+import moment from 'moment';
 import { MonitorFailedTests } from '../../monitor_details/monitor_errors/failed_tests';
 
-export const ErrorTimeline = () => {
-  return <MonitorFailedTests time={{ from: 'now-1h', to: 'now' }} />;
+export const ErrorTimeline = ({
+  startedAt,
+  endsAt,
+}: {
+  startedAt?: string;
+  endsAt?: string | null;
+}) => {
+  if (!startedAt) {
+    return <EuiLoadingContent lines={3} />;
+  }
+  return (
+    <MonitorFailedTests
+      time={{ from: moment(startedAt).subtract(10, 'minutes').toISOString(), to: endsAt ?? 'now' }}
+      allowBrushing={false}
+    />
+  );
 };

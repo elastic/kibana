@@ -17,3 +17,5 @@ export const ErrorStateCodec = t.type({
   down: t.number,
   status: t.string,
 });
+
+export type ErrorState = t.TypeOf<typeof ErrorStateCodec>;

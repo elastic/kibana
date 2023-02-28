@@ -43,7 +43,10 @@ export function ErrorDetailsPage() {
   return (
     <div>
       <PanelWithTitle title={TIMELINE_LABEL}>
-        <ErrorTimeline />
+        <ErrorTimeline
+          startedAt={lastTestRun?.state?.started_at}
+          endsAt={lastTestRun?.state?.ends}
+        />
       </PanelWithTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m">
@@ -71,13 +74,19 @@ export function ErrorDetailsPage() {
           </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1} style={{ height: 'fit-content' }}>
-          <PanelWithTitle>
-            {data?.details?.journey && failedStep && (
-              <StepImage ping={data?.details?.journey} step={failedStep} isFailed={isFailedStep} />
-            )}
-          </PanelWithTitle>
+          {data?.details?.journey && failedStep && (
+            <>
+              <PanelWithTitle>
+                <StepImage
+                  ping={data?.details?.journey}
+                  step={failedStep}
+                  isFailed={isFailedStep}
+                />
+              </PanelWithTitle>
+              <EuiSpacer size="m" />
+            </>
+          )}
 
-          <EuiSpacer size="m" />
           <StepDurationPanel doBreakdown={false} />
           <EuiSpacer size="m" />
           <MonitorDetailsPanelContainer />
