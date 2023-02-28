@@ -10,14 +10,14 @@ import { LIVE_QUERY_EDITOR } from '../screens/live_query';
 export const DEFAULT_QUERY = 'select * from processes;';
 export const BIG_QUERY = 'select * from processes, users limit 110;';
 
-export const selectAllAgents = (expectedAgentsCount = 1) => {
+export const selectAllAgents = () => {
   cy.react('AgentsTable').find('input').should('not.be.disabled');
   cy.react('AgentsTable EuiComboBox', {
     props: { placeholder: 'Select agents or groups to query' },
   }).click();
   cy.react('EuiFilterSelectItem').contains('All agents').should('exist');
   cy.react('AgentsTable EuiComboBox').type('{downArrow}{enter}{esc}');
-  cy.contains(`${expectedAgentsCount} agent selected.`);
+  cy.contains('2 agents selected.');
 };
 
 export const clearInputQuery = () =>
