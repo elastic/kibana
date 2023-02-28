@@ -36,7 +36,7 @@ const actionsClient = actionsClientMock.create();
 actionsClient.getAll.mockResolvedValue([]);
 const core = coreMock.createRequestHandlerContext();
 
-describe('checkRuleExceptionReferences', () => {
+describe('importRuleActionConnectors', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -178,6 +178,7 @@ describe('checkRuleExceptionReferences', () => {
               '1 connector is missing. Connector id missing is: cabc78e0-9031-11ed-b076-53cc4d57aaf1',
             status_code: 404,
           },
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1',
           rule_id: 'rule-1',
         },
       ],
@@ -224,6 +225,7 @@ describe('checkRuleExceptionReferences', () => {
             status_code: 404,
           },
           rule_id: 'rule-1',
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1,cabc78e0-9031-11ed-b076-53cc4d57aaf2',
         },
       ],
       warnings: [],
@@ -274,6 +276,7 @@ describe('checkRuleExceptionReferences', () => {
             status_code: 404,
           },
           rule_id: 'rule-1,rule-2',
+          id: 'cabc78e0-9031-11ed-b076-53cc4d57aaf1,cabc78e0-9031-11ed-b076-53cc4d57aaf2',
         },
       ],
       warnings: [],
