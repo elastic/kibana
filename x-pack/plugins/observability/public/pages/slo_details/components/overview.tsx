@@ -29,7 +29,7 @@ export function Overview({ slo }: Props) {
           subtitle={i18n.translate(
             'xpack.observability.slo.sloDetails.overview.observedValueSubtitle',
             {
-              defaultMessage: '{value} (target is {objective})',
+              defaultMessage: '{value} (objective is {objective})',
               values: {
                 value: `${toHighPrecisionPercentage(slo.summary.sliValue)}%`,
                 objective: `${toHighPrecisionPercentage(slo.objective.target)}%`,

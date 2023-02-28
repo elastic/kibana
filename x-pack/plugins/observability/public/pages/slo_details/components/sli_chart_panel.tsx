@@ -45,7 +45,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart">
+        <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiStat
               titleColor={isSloFailed ? 'danger' : 'success'}
@@ -58,7 +58,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
               reverse
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiStat
               title={`${toHighPrecisionPercentage(slo.objective.target)}%`}
               titleSize="s"

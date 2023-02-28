@@ -45,8 +45,8 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
           </EuiFlexItem>
         </EuiFlexGroup>
 
-        <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart">
-          <EuiFlexItem>
+        <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
+          <EuiFlexItem grow={false}>
             <EuiStat
               titleColor={isSloFailed ? 'danger' : 'success'}
               title={`${toHighPrecisionPercentage(slo.summary.errorBudget.remaining)}%`}
