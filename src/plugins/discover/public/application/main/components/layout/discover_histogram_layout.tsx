@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { RefObject, useCallback } from 'react';
+import React, { RefObject } from 'react';
 import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public';
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
@@ -50,11 +50,6 @@ export const DiscoverHistogramLayout = ({
     searchSessionId,
     ...commonProps,
   });
-  const resetSavedSearch = useCallback(() => {
-    savedSearchState.reset(savedSearchState.getId());
-  }, [savedSearchState]);
-  // Initialized when the first search has been requested or
-  // when in text-based mode since search sessions are not supported
   if (!searchSessionId && !isPlainRecord) {
     return null;
   }
@@ -65,7 +60,7 @@ export const DiscoverHistogramLayout = ({
       resizeRef={resizeRef}
       appendHitsCounter={
         savedSearchState.getId() ? (
-          <ResetSearchButton resetSavedSearch={resetSavedSearch} />
+          <ResetSearchButton resetSavedSearch={savedSearchState.undo} />
         ) : undefined
       }
       css={histogramLayoutCss}
