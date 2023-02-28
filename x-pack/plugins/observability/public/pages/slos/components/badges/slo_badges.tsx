@@ -52,12 +52,12 @@ export function SloBadges({ slo, activeAlerts }: Props) {
             color="danger"
             onClick={handleClick}
             onClickAriaLabel={i18n.translate(
-              'xpack.observability.slos.slo.activeAlertsBadge.ariaLabel',
+              'xpack.observability.slo.slo.activeAlertsBadge.ariaLabel',
               { defaultMessage: 'active alerts badge' }
             )}
             data-test-subj="o11ySlosPageSloActiveAlertsBadge"
           >
-            {i18n.translate('xpack.observability.slos.slo.activeAlertsBadge.label', {
+            {i18n.translate('xpack.observability.slo.slo.activeAlertsBadge.label', {
               defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
               values: { count: activeAlerts.count },
             })}

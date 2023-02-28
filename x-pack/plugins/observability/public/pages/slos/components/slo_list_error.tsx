@@ -16,14 +16,14 @@ export function SloListError() {
       color="danger"
       title={
         <h2>
-          {i18n.translate('xpack.observability.slos.list.errorTitle', {
+          {i18n.translate('xpack.observability.slo.list.errorTitle', {
             defaultMessage: 'Unable to load SLOs',
           })}
         </h2>
       }
       body={
         <p>
-          {i18n.translate('xpack.observability.slos.list.errorMessage', {
+          {i18n.translate('xpack.observability.slo.list.errorMessage', {
             defaultMessage:
               'There was an error loading the SLOs. Contact your administrator for help.',
           })}

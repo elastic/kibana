@@ -28,7 +28,7 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h2>
-                {i18n.translate('xpack.observability.slos.sloDetails.errorBudgetChartPanel.title', {
+                {i18n.translate('xpack.observability.slo.sloDetails.errorBudgetChartPanel.title', {
                   defaultMessage: 'Error budget burn down',
                 })}
               </h2>
@@ -36,10 +36,10 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
-              {i18n.translate(
-                'xpack.observability.slos.sloDetails.errorBudgetChartPanel.duration',
-                { defaultMessage: 'Last {duration}', values: { duration: slo.timeWindow.duration } }
-              )}
+              {i18n.translate('xpack.observability.slo.sloDetails.errorBudgetChartPanel.duration', {
+                defaultMessage: 'Last {duration}',
+                values: { duration: slo.timeWindow.duration },
+              })}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -51,7 +51,7 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
               title={`${Math.trunc(slo.summary.errorBudget.remaining * 100000) / 1000}%`}
               titleSize="s"
               description={i18n.translate(
-                'xpack.observability.slos.sloDetails.errorBudgetChartPanel.remaining',
+                'xpack.observability.slo.sloDetails.errorBudgetChartPanel.remaining',
                 { defaultMessage: 'Remaining' }
               )}
               reverse
@@ -62,7 +62,7 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
         <EuiFlexItem>
           <WideChart
             chart="area"
-            id={i18n.translate('xpack.observability.slos.sloDetails.errorBudgetChartPanel.title', {
+            id={i18n.translate('xpack.observability.slo.sloDetails.errorBudgetChartPanel.title', {
               defaultMessage: 'Error budget remaining',
             })}
             state={isSloFailed ? 'error' : 'success'}

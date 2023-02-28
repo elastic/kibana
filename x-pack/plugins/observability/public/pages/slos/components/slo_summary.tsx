@@ -38,7 +38,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
         <EuiFlexGroup direction="row" responsive={false} gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false} style={{ width: 120 }}>
             <EuiStat
-              description={i18n.translate('xpack.observability.slos.slo.stats.objective', {
+              description={i18n.translate('xpack.observability.slo.slo.stats.objective', {
                 defaultMessage: '{objective} target',
                 values: { objective: asPercentWithTwoDecimals(slo.objective.target, 1) },
               })}
@@ -68,7 +68,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
         <EuiFlexGroup direction="row" responsive={false} gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false} style={{ width: 180 }}>
             <EuiStat
-              description={i18n.translate('xpack.observability.slos.slo.stats.budgetRemaining', {
+              description={i18n.translate('xpack.observability.slo.slo.stats.budgetRemaining', {
                 defaultMessage: 'Budget remaining',
               })}
               title={asPercentWithTwoDecimals(slo.summary.errorBudget.remaining, 1)}

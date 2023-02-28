@@ -28,7 +28,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h2>
-                {i18n.translate('xpack.observability.slos.sloDetails.sliHistoryChartPanel.title', {
+                {i18n.translate('xpack.observability.slo.sloDetails.sliHistoryChartPanel.title', {
                   defaultMessage: 'Historical SLI',
                 })}
               </h2>
@@ -36,7 +36,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.observability.slos.sloDetails.sliHistoryChartPanel.duration', {
+              {i18n.translate('xpack.observability.slo.sloDetails.sliHistoryChartPanel.duration', {
                 defaultMessage: 'Last {duration}',
                 values: { duration: slo.timeWindow.duration },
               })}
@@ -51,7 +51,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
               title={`${Math.trunc(slo.summary.sliValue * 100000) / 1000}%`}
               titleSize="s"
               description={i18n.translate(
-                'xpack.observability.slos.sloDetails.sliHistoryChartPanel.current',
+                'xpack.observability.slo.sloDetails.sliHistoryChartPanel.current',
                 { defaultMessage: 'Observed value' }
               )}
               reverse
@@ -62,7 +62,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
               title={`${slo.objective.target * 100}%`}
               titleSize="s"
               description={i18n.translate(
-                'xpack.observability.slos.sloDetails.sliHistoryChartPanel.objective',
+                'xpack.observability.slo.sloDetails.sliHistoryChartPanel.objective',
                 { defaultMessage: 'Objective' }
               )}
               reverse
@@ -73,7 +73,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
         <EuiFlexItem>
           <WideChart
             chart="line"
-            id={i18n.translate('xpack.observability.slos.sloDetails.sliHistoryChartPanel.title', {
+            id={i18n.translate('xpack.observability.slo.sloDetails.sliHistoryChartPanel.title', {
               defaultMessage: 'SLI value',
             })}
             state={isSloFailed ? 'error' : 'success'}
