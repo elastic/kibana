@@ -6,31 +6,25 @@
  */
 
 import { recurse } from 'cypress-recurse';
+import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
+import type { MetadataListResponse } from '../../../../../common/endpoint/types';
 import { APP_ENDPOINTS_PATH } from '../../../../../common/constants';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
-import { API_HEADER, removeAllArtifacts } from '../../tasks/artifacts';
+import { removeAllArtifacts } from '../../tasks/artifacts';
 import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
 import { login } from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
+import { request } from '../../tasks/common';
+import { yieldEndpointPolicyRevision } from '../../tasks/fleet';
 
-const yieldEndpointPolicyRevision = (): Cypress.Chainable<number> =>
-  cy
-    .request({
-      method: 'GET',
-      url: '/api/fleet/package_policies?kuery=ingest-package-policies.package.name%3A%20endpoint',
-      headers: API_HEADER,
-    })
-    .then(({ body }) => {
-      return body.items?.[0]?.revision ?? -1;
-    });
-
-const yieldInstalledEndpointRevision = (): Cypress.Chainable<number> =>
-  cy
-    .request({ method: 'GET', url: '/api/endpoint/metadata', headers: API_HEADER })
-    .then(({ body }) => {
-      expect(body.data.length).is.lte(1); // during update it can be temporary zero
-      return body.data?.[0]?.policy_info?.endpoint?.revision ?? -1;
-    });
+const yieldAppliedEndpointRevision = (): Cypress.Chainable<number> =>
+  request<MetadataListResponse>({
+    method: 'GET',
+    url: HOST_METADATA_LIST_ROUTE,
+  }).then(({ body }) => {
+    expect(body.data.length).is.lte(1); // during update it can be temporary zero
+    return Number(body.data?.[0]?.metadata.Endpoint.policy.applied.endpoint_policy_version) ?? -1;
+  });
 
 const parseRevNumber = (revString: string) => Number(revString.match(/\d+/)?.[0]);
 
@@ -49,7 +43,7 @@ describe('Artifact pages', () => {
         revision === actualEndpointPolicyRevision;
 
       // need to wait until revision is bumped to ensure test success
-      recurse(yieldInstalledEndpointRevision, hasReachedActualRevision, { delay: 1500 });
+      recurse(yieldAppliedEndpointRevision, hasReachedActualRevision, { delay: 1500 });
     });
   });
 

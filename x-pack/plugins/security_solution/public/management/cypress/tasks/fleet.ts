@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import type { Agent, GetAgentsResponse, GetInfoResponse } from '@kbn/fleet-plugin/common';
-import { agentRouteService, epmRouteService } from '@kbn/fleet-plugin/common';
+import type {
+  Agent,
+  GetAgentsResponse,
+  GetInfoResponse,
+  GetPackagePoliciesResponse,
+} from '@kbn/fleet-plugin/common';
+import {
+  agentRouteService,
+  epmRouteService,
+  packagePolicyRouteService,
+} from '@kbn/fleet-plugin/common';
 import type { PutAgentReassignResponse } from '@kbn/fleet-plugin/common/types';
 import { request } from './common';
 
@@ -35,4 +44,15 @@ export const reassignAgentPolicy = (
     body: {
       policy_id: agentPolicyId,
     },
+  });
+
+export const yieldEndpointPolicyRevision = (): Cypress.Chainable<number> =>
+  request<GetPackagePoliciesResponse>({
+    method: 'GET',
+    url: packagePolicyRouteService.getListPath(),
+    qs: {
+      kuery: 'ingest-package-policies.package.name: endpoint',
+    },
+  }).then(({ body }) => {
+    return body.items?.[0]?.revision ?? -1;
   });
