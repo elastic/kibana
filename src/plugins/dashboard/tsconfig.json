@@ -53,6 +53,7 @@
     "@kbn/core-execution-context-common",
     "@kbn/core-custom-branding-browser",
     "@kbn/shared-ux-router",
+    "@kbn/shared-ux-button-toolbar",
   ],
   "exclude": [
     "target/**/*",
