@@ -169,9 +169,9 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
       <EuiFlexGroup responsive={false}>
         <EuiFlexItem>
           <FormRow
-            name="theme"
+            name="data.userSettings.darkMode"
             label={
-              <FormLabel for="theme">
+              <FormLabel for="data.userSettings.darkMode">
                 <FormattedMessage
                   id="xpack.security.accountManagement.userProfile.userSettings.theme"
                   defaultMessage="Theme"
@@ -214,11 +214,10 @@ function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfi
                   id: '',
                   label: (
                     <FormattedMessage
-                      id="xpack.security.accountManagement.userProfile.spacesDefaultModeButton"
-                      defaultMessage="Space Default"
+                      id="xpack.security.accountManagement.userProfile.defaultModeButton"
+                      defaultMessage="Default"
                     />
                   ),
-                  iconType: 'spaces',
                 },
               ]}
               onChange={(id: string) => formik.setFieldValue('data.userSettings.darkMode', id)}
