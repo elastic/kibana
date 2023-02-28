@@ -67,15 +67,7 @@ export const createSavedObjects = async <T>({
     new Map<string, SavedObject<T>>()
   );
 
-  // Namespace to use as the target namespace for the legacy URLs we create when in compatibility mode. If the namespace
-  // is specified explicitly we should use it instead of the namespace the saved objects client is scoped to. In certain
-  // scenarios (e.g. copying to a default space) both current namespace and namespace from the parameter aren't defined.
-  const legacyUrlTargetNamespace = SavedObjectsUtils.namespaceIdToString(
-    namespace ?? savedObjectsClient.getCurrentNamespace(namespace)
-  );
-
   // filter out the 'version' field of each object, if it exists, and set the originId appropriately
-  const legacyAliases = new Map<string, SavedObjectsBulkCreateObject>();
   const objectsToCreate = filteredObjects.map(({ version, originId, ...object }) => {
     // use the import ID map to ensure that each reference is being created with the correct ID
     const references = object.references?.map((reference) => {
@@ -90,29 +82,6 @@ export const createSavedObjects = async <T>({
     // the created object if it did not have one (or is omitted if specified)
     const importStateValue = importStateMap.get(`${object.type}:${object.id}`);
     if (importStateValue?.destinationId) {
-      originId = originId ?? object.id;
-
-      // In compatibility mode we generate legacy URL aliases for all objects that have to change ID during import and
-      // origin ID is maintained.
-      const requiresLegacyUrlAlias =
-        compatibilityMode &&
-        originId !== importStateValue.destinationId &&
-        !importStateValue.omitOriginId &&
-        !legacyAliases.has(originId);
-      if (requiresLegacyUrlAlias) {
-        legacyAliases.set(originId, {
-          id: `${legacyUrlTargetNamespace}:${object.type}:${originId}`,
-          type: LEGACY_URL_ALIAS_TYPE,
-          attributes: {
-            sourceId: originId,
-            targetNamespace: legacyUrlTargetNamespace,
-            targetType: object.type,
-            targetId: importStateValue.destinationId,
-            purpose: 'savedObjectImport',
-          },
-        });
-      }
-
       objectIdMap.set(`${object.type}:${importStateValue.destinationId}`, object);
       return {
         ...object,
@@ -122,37 +91,68 @@ export const createSavedObjects = async <T>({
         // When omitOriginId is true, we are trying to create a brand new object without setting the originId at all.
         // Semantically, setting `originId: undefined` is used to clear out an existing object's originId when overwriting it
         // (and if you attempt to do that on a non-multi-namespace object type, it will result in a 400 Bad Request error).
-        ...(!importStateValue.omitOriginId && { originId }),
+        ...(!importStateValue.omitOriginId && { originId: originId ?? object.id }),
       };
     }
     return { ...object, ...(references && { references }), ...(originId && { originId }) };
   });
 
   const resolvableErrors = ['conflict', 'ambiguous_conflict', 'missing_references'];
-  let expectedResults = objectsToCreate;
+  let expectedResults: Array<SavedObject<T>> = objectsToCreate;
   if (!accumulatedErrors.some(({ error: { type } }) => resolvableErrors.includes(type))) {
-    const bulkCreateResponse = await savedObjectsClient.bulkCreate(
-      [...objectsToCreate, ...Array.from(legacyAliases.values())],
-      { namespace, overwrite, refresh }
-    );
+    const bulkCreateResponse = await savedObjectsClient.bulkCreate(objectsToCreate, {
+      namespace,
+      overwrite,
+      refresh,
+    });
     expectedResults = bulkCreateResponse.saved_objects;
   }
 
-  // remap results to reflect the object IDs that were submitted for import
-  // this ensures that consumers understand the results
-  const remappedResults = expectedResults.flatMap<CreatedObject<T>>((result) => {
-    // Only keep `error` results for the legacy URL aliases to report errors.
-    if (result.type === LEGACY_URL_ALIAS_TYPE) {
-      return result.error ? [result] : [];
-    }
+  // Namespace to use as the target namespace for the legacy URLs we create when in compatibility mode. If the namespace
+  // is specified explicitly we should use it instead of the namespace the saved objects client is scoped to. In certain
+  // scenarios (e.g. copying to a default space) both current namespace and namespace from the parameter aren't defined.
+  const legacyUrlTargetNamespace = SavedObjectsUtils.namespaceIdToString(
+    namespace ?? savedObjectsClient.getCurrentNamespace()
+  );
 
+  // Remap results to reflect the object IDs that were submitted for import this ensures that consumers understand the
+  // results, and collect legacy URL aliases if in compatibility mode.
+  const remappedResults: Array<CreatedObject<T>> = [];
+  const legacyUrlAliases: SavedObjectsBulkCreateObject[] = [];
+  for (const result of expectedResults) {
     const { id } = objectIdMap.get(`${result.type}:${result.id}`)!;
     // also, include a `destinationId` field if the object create attempt was made with a different ID
-    return [{ ...result, id, ...(id !== result.id && { destinationId: result.id }) }];
-  });
+    remappedResults.push({ ...result, id, ...(id !== result.id && { destinationId: result.id }) });
+
+    // Indicates that the object has changed ID at some point with the original ID retained as the origin ID, so that
+    // legacy URL alias is required to retrieve the object using its original ID.
+    const objectRequiresLegacyUrlAlias = result.originId && result.originId !== result.id;
+
+    // In compatibility mode we generate legacy URL aliases for all objects that require them and that were
+    // successfully imported.
+    if (compatibilityMode && objectRequiresLegacyUrlAlias && !result.error) {
+      legacyUrlAliases.push({
+        id: `${legacyUrlTargetNamespace}:${result.type}:${result.originId}`,
+        type: LEGACY_URL_ALIAS_TYPE,
+        attributes: {
+          sourceId: result.originId,
+          targetNamespace: legacyUrlTargetNamespace,
+          targetType: result.type,
+          targetId: result.id,
+          purpose: 'savedObjectImport',
+        },
+      });
+    }
+  }
+
+  const legacyUrlAliasResults =
+    legacyUrlAliases.length > 0
+      ? (await savedObjectsClient.bulkCreate(legacyUrlAliases, { namespace, overwrite, refresh }))
+          .saved_objects
+      : [];
 
   return {
     createdObjects: remappedResults.filter((obj) => !obj.error),
-    errors: extractErrors(remappedResults, objects),
+    errors: extractErrors(remappedResults, legacyUrlAliasResults, objects),
   };
 };

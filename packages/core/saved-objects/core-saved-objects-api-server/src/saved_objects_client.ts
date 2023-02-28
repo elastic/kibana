@@ -414,8 +414,7 @@ export interface SavedObjectsClientContract {
   ): Promise<SavedObjectsUpdateObjectsSpacesResponse>;
 
   /**
-   * Returns namespace associated with the client, if any. Otherwise, normalizes the specified namespace so that
-   * `'default'` can be used interchangeably with `undefined`.
+   * Returns namespace associated with the client, if any.
    */
-  getCurrentNamespace(namespace?: string): string | undefined;
+  getCurrentNamespace(): string | undefined;
 }

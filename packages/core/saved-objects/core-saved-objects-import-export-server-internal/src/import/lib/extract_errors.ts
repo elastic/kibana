@@ -8,17 +8,13 @@
 
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import type { CreatedObject, SavedObject } from '@kbn/core-saved-objects-server';
-import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
-
-function isLegacyUrlAlias(
-  savedObject: CreatedObject<unknown>
-): savedObject is CreatedObject<{ sourceId: string; targetType: string; targetId: string }> {
-  return savedObject.type === LEGACY_URL_ALIAS_TYPE;
-}
 
 export function extractErrors(
   // TODO: define saved object type
   savedObjectResults: Array<CreatedObject<unknown>>,
+  legacyUrlAliasResults: Array<
+    CreatedObject<{ sourceId: string; targetType: string; targetId: string }>
+  >,
   savedObjectsToImport: Array<SavedObject<any>>
 ) {
   const errors: SavedObjectsImportFailure[] = [];
@@ -27,41 +23,52 @@ export function extractErrors(
     originalSavedObjectsMap.set(`${savedObject.type}:${savedObject.id}`, savedObject);
   }
   for (const savedObject of savedObjectResults) {
-    if (!savedObject.error) {
-      continue;
-    }
-
-    const originalSavedObject = isLegacyUrlAlias(savedObject)
-      ? originalSavedObjectsMap.get(
-          `${savedObject.attributes.targetType}:${savedObject.attributes.sourceId}`
-        ) ??
-        originalSavedObjectsMap.get(
-          `${savedObject.attributes.targetType}:${savedObject.attributes.targetId}`
-        )
-      : originalSavedObjectsMap.get(`${savedObject.type}:${savedObject.id}`);
-    const title = originalSavedObject?.attributes?.title;
-    const { destinationId } = savedObject;
-    if (savedObject.error.statusCode === 409) {
+    if (savedObject.error) {
+      const originalSavedObject = originalSavedObjectsMap.get(
+        `${savedObject.type}:${savedObject.id}`
+      );
+      const title = originalSavedObject?.attributes?.title;
+      const { destinationId } = savedObject;
+      if (savedObject.error.statusCode === 409) {
+        errors.push({
+          id: savedObject.id,
+          type: savedObject.type,
+          meta: { title },
+          error: {
+            type: 'conflict',
+            ...(destinationId && { destinationId }),
+          },
+        });
+        continue;
+      }
       errors.push({
         id: savedObject.id,
         type: savedObject.type,
         meta: { title },
         error: {
-          type: 'conflict',
-          ...(destinationId && { destinationId }),
+          ...savedObject.error,
+          type: 'unknown',
         },
       });
+    }
+  }
+
+  for (const legacyUrlAlias of legacyUrlAliasResults) {
+    if (!legacyUrlAlias.error) {
       continue;
     }
+
+    // TODO: what type of info would be useful?
     errors.push({
-      id: savedObject.id,
-      type: savedObject.type,
-      meta: { title },
+      id: legacyUrlAlias.attributes.sourceId,
+      type: legacyUrlAlias.type,
       error: {
-        ...savedObject.error,
+        ...legacyUrlAlias.error,
         type: 'unknown',
+        destinationId: legacyUrlAlias.attributes.targetId,
       },
     });
   }
+
   return errors;
 }
