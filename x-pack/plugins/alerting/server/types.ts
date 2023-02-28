@@ -250,14 +250,14 @@ export interface RawRuleAction extends SavedObjectAttributes {
     throttle: string | null;
   };
   alertsFilter?: null | {
-    timeFrame: null | {
+    timeframe: null | {
       days: Array<0 | 1 | 2 | 3 | 4 | 5 | 6>;
       hours: {
         start: string;
         end: string;
       };
     };
-    filterKql: string | null;
+    kql: string | null;
     filter: string;
   };
 }
