@@ -66,6 +66,7 @@ export function WideChart({ chart, data, id, loading, state }: Props) {
       />
       <Axis
         id="left"
+        ticks={4}
         position={Position.Left}
         tickFormat={(d) => `${toHighPrecisionPercentage(d)}%`}
       />
