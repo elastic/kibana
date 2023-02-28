@@ -52,7 +52,7 @@ export function ActionMenuContent(): React.ReactElement {
       reportType: 'kpi-over-time',
       allSeries: [
         {
-          dataType: 'synthetics',
+          dataType: 'uptime',
           seriesType: 'area',
           selectedMetricField: 'monitor.duration.us',
           time: { from: dateRangeStart, to: dateRangeEnd },

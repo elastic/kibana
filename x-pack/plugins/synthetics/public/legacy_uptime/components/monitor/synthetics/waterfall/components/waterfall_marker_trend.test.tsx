@@ -98,7 +98,7 @@ describe('<WaterfallMarkerTrend />', () => {
           selectedMetricField: 'field',
           time: { to: '2021-12-03T14:35:41.072Z', from: '2021-12-03T13:47:41.072Z' },
           seriesType: 'area',
-          dataType: 'synthetics',
+          dataType: 'uptime',
           reportDefinitions: {
             'monitor.name': [null],
             'synthetics.step.name.keyword': ['test-name'],

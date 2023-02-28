@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
+import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
 import { isTestUser, UptimeEsClient } from './legacy_uptime/lib/lib';
 import { syntheticsServiceApiKey } from './legacy_uptime/lib/saved_objects/service_api_key';
@@ -92,12 +93,17 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       });
     } catch (e) {
       if (e.statusCode === 403) {
-        return response.unauthorized({
-          body: {
-            message: e.message,
-          },
-        });
+        const privileges = await checkIndicesReadPrivileges(uptimeEsClient);
+        if (!privileges.has_all_requested) {
+          return response.forbidden({
+            body: {
+              message:
+                'MissingIndicesPrivileges: You do not have permission to read from the synthetics-* indices. Please contact your administrator.',
+            },
+          });
+        }
       }
+      throw e;
     }
   },
 });

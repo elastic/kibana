@@ -8,6 +8,7 @@
 import React, { useContext } from 'react';
 import useIntersection from 'react-use/lib/useIntersection';
 
+import { getScreenshotUrl } from './journey_screenshot_dialog';
 import { SyntheticsSettingsContext } from '../../../contexts';
 
 import { useRetrieveStepImage } from '../monitor_test_result/use_retrieve_step_image';
@@ -40,7 +41,7 @@ export const JourneyStepScreenshotContainer = ({
   const { basePath } = useContext(SyntheticsSettingsContext);
 
   const imgPath = checkGroup
-    ? `${basePath}/internal/uptime/journey/screenshot/${checkGroup}/${initialStepNumber}`
+    ? getScreenshotUrl({ basePath, checkGroup, stepNumber: initialStepNumber })
     : '';
 
   const intersection = useIntersection(intersectionRef, {

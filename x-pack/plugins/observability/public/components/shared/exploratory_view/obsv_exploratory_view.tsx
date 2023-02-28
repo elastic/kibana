@@ -89,6 +89,12 @@ export const obsvReportConfigMap = {
     getSyntheticsSingleMetricConfig,
     getSyntheticsHeatmapConfig,
   ],
+  [DataTypes.UPTIME]: [
+    getSyntheticsKPIConfig,
+    getSyntheticsDistributionConfig,
+    getSyntheticsSingleMetricConfig,
+    getSyntheticsHeatmapConfig,
+  ],
   [DataTypes.MOBILE]: [
     getMobileKPIConfig,
     getMobileKPIDistributionConfig,
