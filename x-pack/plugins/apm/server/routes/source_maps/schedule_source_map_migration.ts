@@ -44,7 +44,6 @@ export async function scheduleSourceMapMigration({
       description: `Migrates fleet source map artifacts to "${APM_SOURCE_MAP_INDEX}" index`,
       timeout: '1h',
       maxAttempts: 5,
-      maxConcurrency: 1,
       createTaskRunner() {
         const taskState: TaskState = { isAborted: false };
 
