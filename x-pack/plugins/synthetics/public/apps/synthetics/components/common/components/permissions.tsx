@@ -12,8 +12,8 @@ import { i18n } from '@kbn/i18n';
 
 export const FleetPermissionsCallout = () => {
   return (
-    <EuiCallOut title={NEED_PERMISSIONS} color="warning" iconType="help">
-      <p>{NEED_FLEET_READ_AGENT_POLICIES_PERMISSION}</p>
+    <EuiCallOut title={NEED_PERMISSIONS_PRIVATE_LOCATIONS} color="warning" iconType="help">
+      <p>{NEED_PRIVATE_LOCATIONS_PERMISSION}</p>
     </EuiCallOut>
   );
 };
@@ -63,10 +63,10 @@ function getRestrictionReasonLabel(
     : undefined;
 }
 
-export const NEED_PERMISSIONS = i18n.translate(
-  'xpack.synthetics.monitorManagement.needPermissions',
+export const NEED_PERMISSIONS_PRIVATE_LOCATIONS = i18n.translate(
+  'xpack.synthetics.monitorManagement.privateLocations.needPermissions',
   {
-    defaultMessage: 'Need permissions',
+    defaultMessage: "You're missing some Kibana privileges to manage private locations",
   }
 );
 
@@ -74,9 +74,9 @@ export const ALL = i18n.translate('xpack.synthetics.monitorManagement.priviledge
   defaultMessage: 'All',
 });
 
-export const NEED_FLEET_READ_AGENT_POLICIES_PERMISSION = (
+export const NEED_PRIVATE_LOCATIONS_PERMISSION = (
   <FormattedMessage
-    id="xpack.synthetics.monitorManagement.needFleetPermission"
+    id="xpack.synthetics.monitorManagement.privateLocations.needFleetPermission"
     defaultMessage="You are not authorized to manage private locations. It requires the {all} Kibana privilege for Fleet, and the {all} privilege for Integrations."
     values={{
       all: <EuiCode>{`"${ALL}"`}</EuiCode>,
