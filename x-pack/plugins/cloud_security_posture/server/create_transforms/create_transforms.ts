@@ -9,6 +9,7 @@ import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typ
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import { latestFindingsTransform } from './latest_findings_transform';
+import { latestVulnerabilitiesTransform } from './latest_vulnerabilities_transforms';
 
 // TODO: Move transforms to integration package
 export const initializeCspTransforms = async (
@@ -19,6 +20,7 @@ export const initializeCspTransforms = async (
   const LATEST_TRANSFORM_V830 = 'cloud_security_posture.findings_latest-default-0.0.1';
   await deleteTransformSafe(esClient, logger, LATEST_TRANSFORM_V830);
   await initializeTransform(esClient, latestFindingsTransform, logger);
+  await initializeTransform(esClient, latestVulnerabilitiesTransform, logger);
 };
 
 export const initializeTransform = async (
