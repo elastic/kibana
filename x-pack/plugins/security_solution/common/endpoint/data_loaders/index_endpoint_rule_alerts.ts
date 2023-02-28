@@ -19,14 +19,14 @@ import { wrapErrorIfNeeded } from './utils';
 import { DEFAULT_ALERTS_INDEX } from '../../constants';
 import { EndpointRuleAlertGenerator } from '../data_generators/endpoint_rule_alert_generator';
 
-interface IndexEndpointRuleAlertsOptions {
+export interface IndexEndpointRuleAlertsOptions {
   esClient: Client;
   endpointAgentId: string;
   count?: number;
   log?: ToolingLog;
 }
 
-interface IndexedEndpointRuleAlerts {
+export interface IndexedEndpointRuleAlerts {
   alerts: estypes.WriteResponseBase[];
   cleanup: () => Promise<void>;
 }
