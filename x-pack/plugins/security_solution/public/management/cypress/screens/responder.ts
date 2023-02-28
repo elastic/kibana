@@ -30,7 +30,7 @@ export const openResponderActionLogFlyout = (): void => {
     .should('exist');
 };
 
-export const ensureResponderActionLogFlyoutClosed = (): void => {
+export const closeResponderActionLogFlyout = (): void => {
   ensureOnResponder()
     .findByTestSubj(TEST_SUBJ.actionLogFlyout)
     .then((flyout) => {

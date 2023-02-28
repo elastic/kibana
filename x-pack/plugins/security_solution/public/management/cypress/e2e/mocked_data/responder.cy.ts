@@ -5,14 +5,16 @@
  * 2.0.
  */
 
+import type { IndexedCase } from '../../../../../common/endpoint/data_loaders/index_case';
 import {
   closeResponder,
-  ensureResponderActionLogFlyoutClosed,
+  closeResponderActionLogFlyout,
   openResponderActionLogDatePickerQuickMenu,
   openResponderActionLogFlyout,
 } from '../../screens/responder';
 import { login } from '../../tasks/login';
 import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '../../../../../../../test/security_solution_ftr/page_objects/helpers/super_date_picker';
+import { indexNewCase } from '../../tasks/index_new_case';
 
 describe('When accessing Endpoint Response Console', () => {
   const performResponderSanityChecks = () => {
@@ -23,7 +25,7 @@ describe('When accessing Endpoint Response Console', () => {
     // (this is especially important for when Responder is displayed from a Timeline)
     openResponderActionLogDatePickerQuickMenu();
     cy.getByTestSubj(DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP['Last 1 year']);
-    ensureResponderActionLogFlyoutClosed();
+    closeResponderActionLogFlyout();
 
     // Close responder
     closeResponder();
@@ -34,15 +36,26 @@ describe('When accessing Endpoint Response Console', () => {
   });
 
   describe('from Cases', () => {
+    let caseData: IndexedCase;
+
     before(() => {
-      // TODO: Create new case
-      // TODO: Add an alert to the case
+      indexNewCase().then((indexCase) => {
+        caseData = indexCase;
+      });
+
+      // TODO: create an alert
+
+      // TODO: Add alert to the case
+
       // TODO: go to the case
+
       // TODO: open alert in case
     });
 
     after(() => {
-      // TODO: cleanup
+      if (caseData) {
+        caseData.cleanup();
+      }
     });
 
     it('should display responder option in take action menu', () => {
