@@ -8,7 +8,6 @@
 import type { Logger } from '@kbn/logging';
 import type { PublicContract } from '@kbn/utility-types';
 import { getOrElse } from 'fp-ts/lib/Either';
-import * as rt from 'io-ts';
 import { v4 } from 'uuid';
 import { difference } from 'lodash';
 import {
@@ -20,6 +19,11 @@ import {
   RuleTypeState,
 } from '@kbn/alerting-plugin/server';
 import { isFlapping } from '@kbn/alerting-plugin/server/lib';
+import { wrappedStateRt, WrappedLifecycleRuleState } from '@kbn/alerting-state-types';
+export type {
+  TrackedLifecycleAlertState,
+  WrappedLifecycleRuleState,
+} from '@kbn/alerting-state-types';
 import { ParsedExperimentalFields } from '../../common/parse_experimental_fields';
 import { ParsedTechnicalFields } from '../../common/parse_technical_fields';
 import {
@@ -96,44 +100,6 @@ export type LifecycleRuleExecutor<
     LifecycleAlertServices<InstanceState, InstanceContext, ActionGroupIds>
   >
 ) => Promise<{ state: State }>;
-
-const trackedAlertStateRt = rt.type({
-  alertId: rt.string,
-  alertUuid: rt.string,
-  started: rt.string,
-  // an array used to track changes in alert state, the order is based on the rule executions
-  // true - alert has changed from active/recovered
-  // false - alert is new or the status has remained either active or recovered
-  flappingHistory: rt.array(rt.boolean),
-  // flapping flag that indicates whether the alert is flapping
-  flapping: rt.boolean,
-  pendingRecoveredCount: rt.number,
-});
-
-export type TrackedLifecycleAlertState = rt.TypeOf<typeof trackedAlertStateRt>;
-
-const alertTypeStateRt = <State extends RuleTypeState>() =>
-  rt.record(rt.string, rt.unknown) as rt.Type<State, State, unknown>;
-
-const wrappedStateRt = <State extends RuleTypeState>() =>
-  rt.type({
-    wrapped: alertTypeStateRt<State>(),
-    // tracks the active alerts
-    trackedAlerts: rt.record(rt.string, trackedAlertStateRt),
-    // tracks the recovered alerts
-    trackedAlertsRecovered: rt.record(rt.string, trackedAlertStateRt),
-  });
-
-/**
- * This is redefined instead of derived from above `wrappedStateRt` because
- * there's no easy way to instantiate generic values such as the runtime type
- * factory function.
- */
-export type WrappedLifecycleRuleState<State extends RuleTypeState> = RuleTypeState & {
-  wrapped: State;
-  trackedAlerts: Record<string, TrackedLifecycleAlertState>;
-  trackedAlertsRecovered: Record<string, TrackedLifecycleAlertState>;
-};
 
 export const createLifecycleExecutor =
   (logger: Logger, ruleDataClient: PublicContract<IRuleDataClient>) =>

@@ -133,6 +133,7 @@
     "@kbn/alerting-example-plugin": "link:x-pack/examples/alerting_example",
     "@kbn/alerting-fixture-plugin": "link:x-pack/test/functional_with_es_ssl/plugins/alerts",
     "@kbn/alerting-plugin": "link:x-pack/plugins/alerting",
+    "@kbn/alerting-state-types": "link:packages/kbn-alerting-state-types",
     "@kbn/alerts": "link:packages/kbn-alerts",
     "@kbn/alerts-restricted-fixtures-plugin": "link:x-pack/test/alerting_api_integration/common/plugins/alerts_restricted",
     "@kbn/alerts-ui-shared": "link:packages/kbn-alerts-ui-shared",

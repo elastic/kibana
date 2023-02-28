@@ -30,6 +30,8 @@
       "@kbn/alerting-fixture-plugin/*": ["x-pack/test/functional_with_es_ssl/plugins/alerts/*"],
       "@kbn/alerting-plugin": ["x-pack/plugins/alerting"],
       "@kbn/alerting-plugin/*": ["x-pack/plugins/alerting/*"],
+      "@kbn/alerting-state-types": ["packages/kbn-alerting-state-types"],
+      "@kbn/alerting-state-types/*": ["packages/kbn-alerting-state-types/*"],
       "@kbn/alerts": ["packages/kbn-alerts"],
       "@kbn/alerts/*": ["packages/kbn-alerts/*"],
       "@kbn/alerts-restricted-fixtures-plugin": ["x-pack/test/alerting_api_integration/common/plugins/alerts_restricted"],
