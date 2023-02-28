@@ -10,7 +10,13 @@ import React, { useState, useMemo } from 'react';
 import { useValues } from 'kea';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { SearchProvider, SearchBox, Results } from '@elastic/react-search-ui';
+import {
+  PagingInfo,
+  Results,
+  ResultsPerPage,
+  SearchBox,
+  SearchProvider,
+} from '@elastic/react-search-ui';
 import { SearchDriverOptions } from '@elastic/search-ui';
 import EnginesAPIConnector, {
   Transporter,
@@ -32,7 +38,14 @@ import { DocumentProvider } from './document_context';
 import { DocumentFlyout } from './document_flyout';
 import { EngineSearchPreviewLogic } from './engine_search_preview_logic';
 
-import { InputView, ResultView, ResultsView } from './search_ui_components';
+import {
+  InputView,
+  PagingInfoView,
+  RESULTS_PER_PAGE_OPTIONS,
+  ResultView,
+  ResultsPerPageView,
+  ResultsView,
+} from './search_ui_components';
 
 class InternalEngineTransporter implements Transporter {
   constructor(
@@ -123,8 +136,12 @@ export const EngineSearchPreview: React.FC = () => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiFlexGroup>
-            <EuiFlexItem grow={false} css={{ minWidth: '240px' }} />
+            <EuiFlexItem grow={false} css={{ minWidth: '240px' }}>
+              <ResultsPerPage view={ResultsPerPageView} options={RESULTS_PER_PAGE_OPTIONS} />
+            </EuiFlexItem>
             <EuiFlexItem>
+              <PagingInfo view={PagingInfoView} />
+              <EuiSpacer size="m" />
               <Results view={ResultsView} resultView={ResultView} />
             </EuiFlexItem>
           </EuiFlexGroup>
