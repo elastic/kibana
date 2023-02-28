@@ -157,8 +157,6 @@ jest.mock('./timeline_actions/use_bulk_add_to_case_actions', () => ({
   useBulkAddToCaseActions: jest.fn(() => []),
 }));
 
-const mockTrack = jest.spyOn(telemetry, 'track');
-
 const sourcererDataView = {
   indicesExist: true,
   loading: false,
