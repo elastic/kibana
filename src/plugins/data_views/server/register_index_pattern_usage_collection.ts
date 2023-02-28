@@ -98,8 +98,8 @@ export async function getIndexPatternTelemetry(savedObjectsService: SavedObjects
     results.indexPatternsCount = total;
 
     savedObjects.forEach((obj) => {
-      const fields = JSON.parse(obj.attributes.fields) || [];
-      const runtimeFieldsMap = obj.attributes.runtimeFieldMap
+      const fields = obj.attributes?.fields ? JSON.parse(obj.attributes.fields) || [] : [];
+      const runtimeFieldsMap = obj.attributes?.runtimeFieldMap
         ? JSON.parse(obj.attributes.runtimeFieldMap) || {}
         : {};
       const scriptedFields: FieldSpec[] = fields.filter((fld: FieldSpec) => !!fld.script);
