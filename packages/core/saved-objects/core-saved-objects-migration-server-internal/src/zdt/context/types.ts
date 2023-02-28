@@ -17,6 +17,7 @@ import type { DocLinks } from '@kbn/doc-links';
  * The set of static, precomputed values and services used by the ZDT migration
  */
 export interface MigratorContext {
+  readonly kibanaVersion: string;
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
   readonly indexPrefix: string;
   /** Name of the types that are living in the index */

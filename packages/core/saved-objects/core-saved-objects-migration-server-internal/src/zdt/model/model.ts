@@ -32,14 +32,24 @@ export const model = (
   switch (current.controlState) {
     // TODO: unimplemented
     case 'WAIT_FOR_YELLOW_INDEX':
-    case 'CREATE_TARGET_INDEX':
     case 'UPDATE_INDEX_MAPPINGS':
     case 'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK':
-    case 'UPDATE_OR_CREATE_ALIASES':
       return current;
     // END TODO
     case 'INIT':
       return Stages.init(current, response as StateActionResponse<'INIT'>, context);
+    case 'CREATE_TARGET_INDEX':
+      return Stages.createTargetIndex(
+        current,
+        response as StateActionResponse<'CREATE_TARGET_INDEX'>,
+        context
+      );
+    case 'UPDATE_ALIASES':
+      return Stages.updateAliases(
+        current,
+        response as StateActionResponse<'UPDATE_ALIASES'>,
+        context
+      );
     case 'DONE':
     case 'FATAL':
       // The state-action machine will never call the model in the terminating states

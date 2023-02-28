@@ -7,3 +7,5 @@
  */
 
 export { init } from './init';
+export { createTargetIndex } from './create_target_index';
+export { updateAliases } from './update_aliases';

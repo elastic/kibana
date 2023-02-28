@@ -9,6 +9,7 @@
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { MigrationLog } from '../../types';
 import type { ControlState } from '../../state_action_machine';
+import type { AliasAction } from '../../actions';
 
 export interface BaseState extends ControlState {
   readonly retryCount: number;
@@ -23,6 +24,8 @@ export interface InitState extends BaseState {
 
 export interface PostInitState extends BaseState {
   readonly currentIndex: string;
+  readonly aliases: string[];
+  readonly aliasActions: AliasAction[];
   readonly previousMappings: IndexMapping;
 }
 
@@ -45,8 +48,8 @@ export interface UpdateIndexMappingsWaitForTaskState extends PostInitState {
   readonly updateTargetMappingsTaskId: string;
 }
 
-export interface UpdateOrCreateAliasesState extends PostInitState {
-  readonly controlState: 'UPDATE_OR_CREATE_ALIASES';
+export interface UpdateAliasesState extends PostInitState {
+  readonly controlState: 'UPDATE_ALIASES';
 }
 
 /** Migration completed successfully */
@@ -68,7 +71,7 @@ export type State =
   | CreateTargetIndexState
   | UpdateIndexMappingsState
   | UpdateIndexMappingsWaitForTaskState
-  | UpdateOrCreateAliasesState
+  | UpdateAliasesState
   | WaitForYellowIndexState;
 
 export type AllControlStates = State['controlState'];
@@ -85,7 +88,7 @@ export interface ControlStateMap {
   CREATE_TARGET_INDEX: CreateTargetIndexState;
   UPDATE_INDEX_MAPPINGS: UpdateIndexMappingsState;
   UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: UpdateIndexMappingsWaitForTaskState;
-  UPDATE_OR_CREATE_ALIASES: UpdateOrCreateAliasesState;
+  UPDATE_ALIASES: UpdateAliasesState;
   WAIT_FOR_YELLOW_INDEX: WaitForYellowIndexState;
 }
 

@@ -14,7 +14,7 @@ import type {
   CreateTargetIndexState,
   UpdateIndexMappingsState,
   UpdateIndexMappingsWaitForTaskState,
-  UpdateOrCreateAliasesState,
+  UpdateAliasesState,
 } from './state';
 import type { MigratorContext } from './context';
 import * as Actions from './actions';
@@ -50,7 +50,11 @@ export const nextActionMap = (context: MigratorContext) => {
     UPDATE_INDEX_MAPPINGS: (state: UpdateIndexMappingsState) => NOT_IMPLEMENTED,
     UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: (state: UpdateIndexMappingsWaitForTaskState) =>
       NOT_IMPLEMENTED,
-    UPDATE_OR_CREATE_ALIASES: (state: UpdateOrCreateAliasesState) => () => NOT_IMPLEMENTED,
+    UPDATE_ALIASES: (state: UpdateAliasesState) =>
+      Actions.updateAliases({
+        client: context.elasticsearchClient,
+        aliasActions: state.aliasActions,
+      }),
     WAIT_FOR_YELLOW_INDEX: (state: WaitForYellowIndexState) =>
       Actions.waitForIndexStatus({
         client: context.elasticsearchClient,

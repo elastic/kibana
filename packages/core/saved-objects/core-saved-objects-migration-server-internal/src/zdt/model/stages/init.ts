@@ -11,12 +11,17 @@ import { delayRetryState } from '../../../model/retry_state';
 import { throwBadResponse } from '../../../model/helpers';
 import type { MigrationLog } from '../../../types';
 import { isTypeof } from '../../actions';
-import { getCurrentIndex, checkVersionCompatibility, buildIndexMappings } from '../../utils';
+import {
+  getCurrentIndex,
+  checkVersionCompatibility,
+  buildIndexMappings,
+  getAliasActions,
+} from '../../utils';
 import type { ModelStage } from '../types';
 
 export const init: ModelStage<
   'INIT',
-  'CREATE_TARGET_INDEX' | 'UPDATE_INDEX_MAPPINGS' | 'UPDATE_OR_CREATE_ALIASES' | 'FATAL'
+  'CREATE_TARGET_INDEX' | 'UPDATE_INDEX_MAPPINGS' | 'UPDATE_ALIASES' | 'FATAL'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     const left = res.left;
@@ -55,6 +60,13 @@ export const init: ModelStage<
     source: 'mappingVersions',
     deletedTypes: context.deletedTypes,
   });
+  const aliases = Object.keys(indices[currentIndex].aliases);
+  const aliasActions = getAliasActions({
+    existingAliases: aliases,
+    currentIndex,
+    indexPrefix: context.indexPrefix,
+    kibanaVersion: context.kibanaVersion,
+  });
 
   logs.push({
     level: 'info',
@@ -69,6 +81,8 @@ export const init: ModelStage<
         ...state,
         logs,
         currentIndex,
+        aliases,
+        aliasActions,
         previousMappings: currentMappings,
         controlState: 'UPDATE_INDEX_MAPPINGS',
       };
@@ -80,8 +94,10 @@ export const init: ModelStage<
         ...state,
         logs,
         currentIndex,
+        aliases,
+        aliasActions,
         previousMappings: currentMappings,
-        controlState: 'UPDATE_OR_CREATE_ALIASES',
+        controlState: 'UPDATE_ALIASES',
       };
     // app version is lower than the index mapping version.
     // likely a rollback scenario - unsupported for the initial implementation

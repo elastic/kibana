@@ -180,7 +180,7 @@ describe('Action: init', () => {
   });
 
   describe('when checkVersionCompatibility returns `equal`', () => {
-    it('forwards to UPDATE_OR_CREATE_ALIASES', () => {
+    it('forwards to UPDATE_ALIASES', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
@@ -193,7 +193,7 @@ describe('Action: init', () => {
 
       expect(newState).toEqual(
         expect.objectContaining({
-          controlState: 'UPDATE_OR_CREATE_ALIASES',
+          controlState: 'UPDATE_ALIASES',
           currentIndex,
           previousMappings: fetchIndexResponse[currentIndex].mappings,
         })

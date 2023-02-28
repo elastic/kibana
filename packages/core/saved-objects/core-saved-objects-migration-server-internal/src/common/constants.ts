@@ -6,8 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { buildMigratorConfigs, type MigratorConfig } from './get_migrator_configs';
-export { getCurrentIndex } from './get_current_index';
-export { checkVersionCompatibility } from './check_version_compatibility';
-export { buildIndexMappings, buildIndexMeta } from './build_index_mappings';
-export { getAliasActions } from './get_alias_actions';
+export const CLUSTER_SHARD_LIMIT_EXCEEDED_REASON = `[cluster_shard_limit_exceeded] Upgrading Kibana requires adding a small number of new shards. Ensure that Kibana is able to add 10 more shards by increasing the cluster.max_shards_per_node setting, or removing indices to clear up resources.`;

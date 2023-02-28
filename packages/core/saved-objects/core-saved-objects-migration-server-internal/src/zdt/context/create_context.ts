@@ -16,6 +16,7 @@ export type CreateContextOps = Omit<MigrateIndexOptions, 'logger'>;
  * Create the context object that will be used for this index migration.
  */
 export const createContext = ({
+  kibanaVersion,
   types,
   docLinks,
   migrationConfig,
@@ -25,6 +26,7 @@ export const createContext = ({
   serializer,
 }: CreateContextOps): MigratorContext => {
   return {
+    kibanaVersion,
     indexPrefix,
     types,
     elasticsearchClient,

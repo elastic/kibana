@@ -26,6 +26,7 @@ export const createContextMock = (
   const typeRegistry = new SavedObjectTypeRegistry();
 
   return {
+    kibanaVersion: '8.7.0',
     indexPrefix: '.kibana',
     types: ['foo', 'bar'],
     elasticsearchClient: elasticsearchClientMock.createElasticsearchClient(),
