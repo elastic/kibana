@@ -5,10 +5,13 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const commonScreenshots = getService('commonScreenshots');
+  const find = getService('find');
+  const retry = getService('retry');
   const rules = getService('rules');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'header']);
@@ -31,6 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
+
       await testSubjects.click('.index-threshold-SelectOption');
       await commonScreenshots.takeScreenshot(
         'rule-types-index-threshold-conditions',
@@ -38,6 +42,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
+
+      await testSubjects.scrollIntoView('selectIndexExpression');
+      await testSubjects.click('selectIndexExpression');
+      const indexComboBox = await find.byCssSelector('#indexSelectSearchBox');
+      await indexComboBox.click();
+      await indexComboBox.type('kibana_sample_data_logs ');
+      const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
+      await filterSelectItem.click();
+      await testSubjects.click('thresholdAlertTimeFieldSelect');
+      await retry.try(async () => {
+        const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
+        expect(fieldOptions[1]).not.to.be(undefined);
+        await fieldOptions[1].click();
+      });
+      await commonScreenshots.takeScreenshot(
+        'rule-types-index-threshold-example-index',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+      await testSubjects.click('closePopover');
       const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
       await flyOutCancelButton.click();
     });
