@@ -64,7 +64,7 @@ export const DeduplicationPanel: React.FC = () => {
             </h2>
           </EuiTitle>
         }
-        actions={[
+        actions={
           <EuiButton
             data-telemetry-id="entSearchContent-crawler-domainDetail-deduplication-reset"
             color="warning"
@@ -79,8 +79,8 @@ export const DeduplicationPanel: React.FC = () => {
                 defaultMessage: 'Reset to defaults',
               }
             )}
-          </EuiButton>,
-        ]}
+          </EuiButton>
+        }
         description={
           <p>
             <FormattedMessage

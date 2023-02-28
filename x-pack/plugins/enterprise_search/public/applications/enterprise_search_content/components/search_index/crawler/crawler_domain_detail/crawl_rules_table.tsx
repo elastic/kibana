@@ -40,7 +40,7 @@ export interface CrawlRulesTableProps {
   description?: React.ReactNode;
   domainId: string;
   indexName: string;
-  title: React.ReactNode;
+  title?: React.ReactNode;
 }
 
 export const getReadableCrawlerRule = (rule: CrawlerRules) => {
@@ -251,7 +251,7 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
         updateCrawlRules(newCrawlRules as CrawlRule[]);
         clearFlashMessages();
       }}
-      title={title}
+      title={title || ''}
       uneditableItems={defaultCrawlRule ? [defaultCrawlRule] : undefined}
       canRemoveLastItem
     />

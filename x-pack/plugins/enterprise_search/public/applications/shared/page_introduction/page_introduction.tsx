@@ -10,17 +10,17 @@ import React from 'react';
 import { EuiText, EuiLink, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 
 export interface PageIntroductionProps {
-  actions?: React.ReactNode[];
+  actions?: React.ReactNode | React.ReactNode[];
   description: React.ReactNode | string;
-  links?: Array<{ href: string; text: string }>;
-  title: string | React.ReactNode;
+  links?: { href: string; text: string } | Array<{ href: string; text: string }>;
+  title?: string | React.ReactNode;
 }
 
 export const PageIntroduction: React.FC<PageIntroductionProps> = ({
   actions,
   description,
   links,
-  title,
+  title = '',
 }) => {
   return (
     <EuiFlexGroup direction="row" gutterSize="m">
@@ -46,11 +46,13 @@ export const PageIntroduction: React.FC<PageIntroductionProps> = ({
               <EuiSpacer size="s" />
               <EuiFlexItem>
                 <EuiText size="s">
-                  {links.map((link) => (
-                    <EuiLink href={link.href} target="_blank" external>
-                      {link.text}
-                    </EuiLink>
-                  ))}
+                  {Array.isArray(links)
+                    ? links.map((link, index) => (
+                        <EuiLink href={link.href} target="_blank" external key={index + '-'}>
+                          {link.text}
+                        </EuiLink>
+                      ))
+                    : links}
                 </EuiText>
               </EuiFlexItem>
             </>
@@ -59,9 +61,13 @@ export const PageIntroduction: React.FC<PageIntroductionProps> = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="s">
-          {actions?.map((action) => (
-            <EuiFlexItem grow={false}>{action}</EuiFlexItem>
-          ))}
+          {Array.isArray(actions)
+            ? actions?.map((action, index) => (
+                <EuiFlexItem grow={false} key={index}>
+                  {action}
+                </EuiFlexItem>
+              ))
+            : actions}
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>
