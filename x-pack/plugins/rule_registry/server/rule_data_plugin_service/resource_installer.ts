@@ -102,8 +102,8 @@ export class ResourceInstaller {
       try {
         // We can install them in parallel
         await Promise.all([
-          // Install ILM policy only if framework alerts are not enabled
-          // If framework alerts are enabled, the alerting framework will install this ILM policy
+          // Install ILM policy and ECS component template only if framework alerts are not enabled
+          // If framework alerts are enabled, the alerting framework will install these
           ...(frameworkAlerts.enabled()
             ? []
             : [

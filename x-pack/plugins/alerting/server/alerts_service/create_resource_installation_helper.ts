@@ -11,8 +11,15 @@ import { IRuleTypeAlerts } from '../types';
 export interface ResourceInstallationHelper {
   add: (context: IRuleTypeAlerts, timeoutMs?: number) => void;
   setReadyToInitialize: (timeoutMs?: number) => void;
-  getInitializedContext: (context: string) => Promise<boolean>;
+  getInitializedContext: (
+    initPromise: Promise<void>,
+    context: string,
+    delayMs?: number
+  ) => Promise<boolean>;
 }
+
+const MAX_GET_CONTEXT_RETRIES = 10;
+const CONTEXT_RETRY_DELAY_MS = 10000; // wait 10 seconds before retries
 
 /**
  * Helper function that queues up resources to initialize until we are
@@ -31,6 +38,7 @@ export function createResourceInstallationHelper(
 ): ResourceInstallationHelper {
   let readyToInitialize = false;
   let isInitializing: boolean = false;
+  const registeredContexts: string[] = [];
   const contextsToInitialize: IRuleTypeAlerts[] = [];
   const initializedContexts: Map<string, Promise<boolean>> = new Map();
 
@@ -69,6 +77,7 @@ export function createResourceInstallationHelper(
   return {
     add: (context: IRuleTypeAlerts, timeoutMs?: number) => {
       contextsToInitialize.push(context);
+      registeredContexts.push(context.context);
       if (!isInitializing) {
         startInitialization(timeoutMs);
       }
@@ -77,12 +86,40 @@ export function createResourceInstallationHelper(
       readyToInitialize = true;
       startInitialization(timeoutMs);
     },
-    getInitializedContext: async (context: string): Promise<boolean> => {
-      if (initializedContexts.has(context)) {
-        return initializedContexts.get(context)!;
+    getInitializedContext: async (
+      initPromise: Promise<void>,
+      context: string,
+      delayMs: number = CONTEXT_RETRY_DELAY_MS
+    ): Promise<boolean> => {
+      const validContext = !!registeredContexts.find((c) => c === context);
+      if (validContext) {
+        // If there are existing rules, they will start running before we
+        // even have a chance to kick off the context initialization process.
+        // This is because task manager starts before alerting and starts running
+        // tasks before all plugins are done setting up.
+        // Since we know the context is valid, we will delay for a bit to allow
+        // the alerting plugin setup to catch up. This will increase the execution
+        // time of the rule the first time that it runs after startup.
+
+        // Wait for common resources to finish installing
+        await initPromise;
+
+        let numRetries = 0;
+        while (numRetries++ < MAX_GET_CONTEXT_RETRIES) {
+          if (initializedContexts.has(context)) {
+            return initializedContexts.get(context)!;
+          } else {
+            logger.debug(
+              `Delaying and retrying getInitializedContext for context ${context} - try # ${numRetries}`
+            );
+            await delay(delayMs);
+          }
+        }
       }
 
       return Promise.resolve(false);
     },
   };
 }
+
+const delay = (delayInMs: number) => new Promise((resolve) => setTimeout(resolve, delayInMs));

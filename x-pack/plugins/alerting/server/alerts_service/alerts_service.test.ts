@@ -339,12 +339,12 @@ describe('Alerts Service', () => {
       await new Promise((r) => setTimeout(r, 50));
 
       expect(alertsService.isInitialized()).toEqual(true);
-      expect(await alertsService.isContextInitialized(TestRegistrationContext.context)).toEqual(
+      expect(await alertsService.isContextInitialized(TestRegistrationContext.context, 1)).toEqual(
         true
       );
-      expect(await alertsService.isContextInitialized(AnotherRegistrationContext.context)).toEqual(
-        true
-      );
+      expect(
+        await alertsService.isContextInitialized(AnotherRegistrationContext.context, 1)
+      ).toEqual(true);
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
       // 1x for framework component template, 1x for legacy alert, 1x for ecs, 2x for context specific

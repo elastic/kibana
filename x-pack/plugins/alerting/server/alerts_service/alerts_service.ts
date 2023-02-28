@@ -93,6 +93,7 @@ export class AlertsService implements IAlertsService {
   private initialized: boolean;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private registeredContexts: Map<string, IRuleTypeAlerts> = new Map();
+  private commonInitPromise: Promise<void> = Promise.resolve();
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
@@ -106,8 +107,12 @@ export class AlertsService implements IAlertsService {
     return this.initialized;
   }
 
-  public async isContextInitialized(context: string): Promise<boolean> {
-    return this.resourceInitializationHelper.getInitializedContext(context);
+  public async isContextInitialized(context: string, timeoutMs?: number): Promise<boolean> {
+    return this.resourceInitializationHelper.getInitializedContext(
+      this.commonInitPromise,
+      context,
+      timeoutMs
+    );
   }
 
   public initialize(timeoutMs?: number) {
@@ -118,52 +123,7 @@ export class AlertsService implements IAlertsService {
 
     // Use setImmediate to execute async fns as soon as possible
     setImmediate(async () => {
-      try {
-        const esClient = await this.options.elasticsearchClientPromise;
-
-        // Common initialization installs ILM policy and shared component template
-        const initFns = [
-          () => this.createOrUpdateIlmPolicy(esClient),
-          () =>
-            this.createOrUpdateComponentTemplate(
-              esClient,
-              getComponentTemplate({ fieldMap: alertFieldMap, includeSettings: true })
-            ),
-          () =>
-            this.createOrUpdateComponentTemplate(
-              esClient,
-              getComponentTemplate({
-                fieldMap: legacyAlertFieldMap,
-                name: LEGACY_ALERT_CONTEXT,
-                includeSettings: true,
-              })
-            ),
-          () =>
-            this.createOrUpdateComponentTemplate(
-              esClient,
-              getComponentTemplate({
-                fieldMap: ecsFieldMap,
-                name: ECS_CONTEXT,
-                includeSettings: true,
-              })
-            ),
-        ];
-
-        for (const fn of initFns) {
-          await this.installWithTimeout(async () => await fn(), timeoutMs);
-        }
-
-        this.initialized = true;
-      } catch (err) {
-        this.options.logger.error(
-          `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted.`
-        );
-        this.initialized = false;
-      }
-
-      if (this.initialized) {
-        this.resourceInitializationHelper.setReadyToInitialize(timeoutMs);
-      }
+      this.commonInitPromise = this.initializeCommon(timeoutMs);
     });
   }
 
@@ -182,6 +142,55 @@ export class AlertsService implements IAlertsService {
     this.options.logger.info(`Registering resources for context "${context}".`);
     this.registeredContexts.set(context, opts);
     this.resourceInitializationHelper.add(opts, timeoutMs);
+  }
+
+  private async initializeCommon(timeoutMs?: number) {
+    try {
+      const esClient = await this.options.elasticsearchClientPromise;
+
+      // Common initialization installs ILM policy and shared component template
+      const initFns = [
+        () => this.createOrUpdateIlmPolicy(esClient),
+        () =>
+          this.createOrUpdateComponentTemplate(
+            esClient,
+            getComponentTemplate({ fieldMap: alertFieldMap, includeSettings: true })
+          ),
+        () =>
+          this.createOrUpdateComponentTemplate(
+            esClient,
+            getComponentTemplate({
+              fieldMap: legacyAlertFieldMap,
+              name: LEGACY_ALERT_CONTEXT,
+              includeSettings: true,
+            })
+          ),
+        () =>
+          this.createOrUpdateComponentTemplate(
+            esClient,
+            getComponentTemplate({
+              fieldMap: ecsFieldMap,
+              name: ECS_CONTEXT,
+              includeSettings: true,
+            })
+          ),
+      ];
+
+      for (const fn of initFns) {
+        await this.installWithTimeout(async () => await fn(), timeoutMs);
+      }
+
+      this.initialized = true;
+    } catch (err) {
+      this.options.logger.error(
+        `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted.`
+      );
+      this.initialized = false;
+    }
+
+    if (this.initialized) {
+      this.resourceInitializationHelper.setReadyToInitialize(timeoutMs);
+    }
   }
 
   private async initializeContext(

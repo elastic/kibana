@@ -9,6 +9,9 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { IRuleTypeAlerts } from '../types';
 import { createResourceInstallationHelper } from './create_resource_installation_helper';
 
+const TEST_CONTEXT_RETRY_DELAY_MS = 1;
+const commonInitPromise: Promise<void> = Promise.resolve();
+
 const logger: ReturnType<typeof loggingSystemMock['createLogger']> =
   loggingSystemMock.createLogger();
 
@@ -44,8 +47,12 @@ describe('createResourceInstallationHelper', () => {
     });
 
     expect(logger.info).not.toHaveBeenCalled();
-    expect(await helper.getInitializedContext('test1')).toBe(false);
-    expect(await helper.getInitializedContext('test2')).toBe(false);
+    expect(
+      await helper.getInitializedContext(commonInitPromise, 'test1', TEST_CONTEXT_RETRY_DELAY_MS)
+    ).toBe(false);
+    expect(
+      await helper.getInitializedContext(commonInitPromise, 'test2', TEST_CONTEXT_RETRY_DELAY_MS)
+    ).toBe(false);
   });
 
   test(`should call init function if readyToInitialize is set to true`, async () => {
@@ -67,8 +74,12 @@ describe('createResourceInstallationHelper', () => {
     await new Promise((r) => setTimeout(r, 10));
 
     expect(logger.info).toHaveBeenCalledTimes(2);
-    expect(await helper.getInitializedContext('test1')).toBe(true);
-    expect(await helper.getInitializedContext('test2')).toBe(true);
+    expect(
+      await helper.getInitializedContext(commonInitPromise, 'test1', TEST_CONTEXT_RETRY_DELAY_MS)
+    ).toBe(true);
+    expect(
+      await helper.getInitializedContext(commonInitPromise, 'test2', TEST_CONTEXT_RETRY_DELAY_MS)
+    ).toBe(true);
   });
 
   test(`should install resources for contexts added after readyToInitialize is called`, async () => {
@@ -100,9 +111,15 @@ describe('createResourceInstallationHelper', () => {
     await new Promise((r) => setTimeout(r, 10));
 
     expect(logger.info).toHaveBeenCalledTimes(3);
-    expect(await helper.getInitializedContext('test1')).toBe(true);
-    expect(await helper.getInitializedContext('test2')).toBe(true);
-    expect(await helper.getInitializedContext('test3')).toBe(true);
+    expect(
+      await helper.getInitializedContext(commonInitPromise, 'test1', TEST_CONTEXT_RETRY_DELAY_MS)
+    ).toBe(true);
+    expect(
+      await helper.getInitializedContext(commonInitPromise, 'test2', TEST_CONTEXT_RETRY_DELAY_MS)
+    ).toBe(true);
+    expect(
+      await helper.getInitializedContext(commonInitPromise, 'test3', TEST_CONTEXT_RETRY_DELAY_MS)
+    ).toBe(true);
   });
 
   test(`should install resources for contexts added after initial processing loop has run`, async () => {
@@ -126,7 +143,9 @@ describe('createResourceInstallationHelper', () => {
     await new Promise((r) => setTimeout(r, 10));
 
     expect(logger.info).toHaveBeenCalledTimes(1);
-    expect(await helper.getInitializedContext('test1')).toBe(true);
+    expect(
+      await helper.getInitializedContext(commonInitPromise, 'test1', TEST_CONTEXT_RETRY_DELAY_MS)
+    ).toBe(true);
   });
 
   test(`should gracefully handle errors during initialization and set initialized flag to false`, async () => {
@@ -147,6 +166,65 @@ describe('createResourceInstallationHelper', () => {
     await new Promise((r) => setTimeout(r, 10));
 
     expect(logger.error).toHaveBeenCalledWith(`Error initializing context test1 - fail`);
-    expect(await helper.getInitializedContext('test1')).toBe(false);
+    expect(
+      await helper.getInitializedContext(commonInitPromise, 'test1', TEST_CONTEXT_RETRY_DELAY_MS)
+    ).toBe(false);
+  });
+
+  test(`should correctly return context initialized = false for invalid context`, async () => {
+    const helper = createResourceInstallationHelper(logger, initFn);
+
+    // Add two contexts that need to be initialized but don't call helper.setReadyToInitialize()
+    helper.add({
+      context: 'test1',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
+    helper.add({
+      context: 'test2',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
+
+    helper.setReadyToInitialize();
+
+    // for the setImmediate
+    await new Promise((r) => setTimeout(r, 10));
+
+    expect(logger.info).toHaveBeenCalledTimes(2);
+    expect(
+      await helper.getInitializedContext(commonInitPromise, 'invalid', TEST_CONTEXT_RETRY_DELAY_MS)
+    ).toBe(false);
+  });
+
+  test(`test should correct return context initialized = true when context requested before initialization has started`, async () => {
+    const helper = createResourceInstallationHelper(logger, initFn);
+
+    // Add two contexts that need to be initialized but don't call helper.setReadyToInitialize()
+    helper.add({
+      context: 'test1',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
+    helper.add({
+      context: 'test2',
+      mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
+    });
+
+    // delay kicking off context specific initialization
+    setTimeout(() => {
+      helper.setReadyToInitialize();
+    }, 10);
+
+    expect(
+      await helper.getInitializedContext(commonInitPromise, 'test1', TEST_CONTEXT_RETRY_DELAY_MS)
+    ).toBe(true);
+    expect(
+      await helper.getInitializedContext(commonInitPromise, 'test2', TEST_CONTEXT_RETRY_DELAY_MS)
+    ).toBe(true);
+
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Delaying and retrying getInitializedContext for context test1 - try # 1`
+    );
+    expect(logger.debug).toHaveBeenCalledWith(
+      `Delaying and retrying getInitializedContext for context test1 - try # 2`
+    );
   });
 });
