@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'contentManagement';
+import { ContentManagementExamplesPlugin } from './plugin';
 
-export const API_ENDPOINT = '/api/content_management/rpc';
+export function plugin() {
+  return new ContentManagementExamplesPlugin();
+}

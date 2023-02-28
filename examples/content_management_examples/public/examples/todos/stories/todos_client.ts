@@ -7,28 +7,32 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { CrudClient } from '../../public/crud_client';
-import type { CreateIn, DeleteIn, GetIn, SearchIn, UpdateIn } from '../../common';
+import type { CrudClient } from '@kbn/content-management-plugin/public';
+import type {
+  TodoCreateIn,
+  TodoUpdateIn,
+  TodoDeleteIn,
+  TodoGetIn,
+  TodoSearchIn,
+  TodoUpdateOut,
+  TodoCreateOut,
+  TodoSearchOut,
+  TodoDeleteOut,
+  Todo,
+  TodoGetOut,
+} from '../../../../common/examples/todos';
 
-export interface Todo {
-  id: string;
-  title: string;
-  completed: boolean;
-}
-
-export type TodoCreateIn = CreateIn<'todos', { title: string }>;
-export type TodoUpdateIn = UpdateIn<'todos', Partial<Omit<Todo, 'id'>>>;
-export type TodoDeleteIn = DeleteIn<'todos', { id: string }>;
-export type TodoGetIn = GetIn<'todos'>;
-export type TodoSearchIn = SearchIn<'todos', { filter?: 'todo' | 'completed' }>;
-
+/**
+ * This client is used in the storybook examples to simulate a server-side registry client
+ * and to show how a content type can have a custom client-side CRUD client without using the server-side registry
+ */
 export class TodosClient implements CrudClient {
   private todos: Todo[] = [
     { id: uuidv4(), title: 'Learn Elasticsearch', completed: true },
     { id: uuidv4(), title: 'Learn Kibana', completed: false },
   ];
 
-  async create(input: TodoCreateIn): Promise<Todo> {
+  async create(input: TodoCreateIn): Promise<TodoCreateOut> {
     const todo = {
       id: uuidv4(),
       title: input.data.title,
@@ -38,22 +42,22 @@ export class TodosClient implements CrudClient {
     return todo;
   }
 
-  async delete(input: TodoDeleteIn): Promise<void> {
+  async delete(input: TodoDeleteIn): Promise<TodoDeleteOut> {
     this.todos = this.todos.filter((todo) => todo.id !== input.id);
   }
 
-  async get(input: TodoGetIn): Promise<Todo> {
+  async get(input: TodoGetIn): Promise<TodoGetOut> {
     return this.todos.find((todo) => todo.id === input.id)!;
   }
 
-  async search(input: TodoSearchIn): Promise<{ hits: Todo[] }> {
+  async search(input: TodoSearchIn): Promise<TodoSearchOut> {
     const filter = input.query.filter;
     if (filter === 'todo') return { hits: this.todos.filter((t) => !t.completed) };
     if (filter === 'completed') return { hits: this.todos.filter((t) => t.completed) };
     return { hits: [...this.todos] };
   }
 
-  async update(input: TodoUpdateIn): Promise<Todo> {
+  async update(input: TodoUpdateIn): Promise<TodoUpdateOut> {
     const idToUpdate = input.id;
     const todoToUpdate = this.todos.find((todo) => todo.id === idToUpdate)!;
     if (todoToUpdate) {

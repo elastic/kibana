@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'contentManagement';
+import { PluginFunctionalProviderContext } from '../../plugin_functional/services';
 
-export const API_ENDPOINT = '/api/content_management/rpc';
+// eslint-disable-next-line import/no-default-export
+export default function ({ loadTestFile }: PluginFunctionalProviderContext) {
+  describe('content management examples', function () {
+    loadTestFile(require.resolve('./todo_app'));
+  });
+}

@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'contentManagement';
-
-export const API_ENDPOINT = '/api/content_management/rpc';
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/examples/content_management_examples'],
+};

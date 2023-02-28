@@ -6,6 +6,15 @@
  * Side Public License, v 1.
  */
 
-export const PLUGIN_ID = 'contentManagement';
+import type {
+  ContentManagementServerSetup,
+  ContentManagementServerStart,
+} from '@kbn/content-management-plugin/server';
 
-export const API_ENDPOINT = '/api/content_management/rpc';
+export interface SetupDeps {
+  contentManagement: ContentManagementServerSetup;
+}
+
+export interface StartDeps {
+  contentManagement: ContentManagementServerStart;
+}

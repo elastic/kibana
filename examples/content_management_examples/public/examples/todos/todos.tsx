@@ -7,22 +7,32 @@
  */
 import React from 'react';
 import { EuiButtonGroup, EuiButtonIcon, EuiCheckbox, EuiFieldText, EuiSpacer } from '@elastic/eui';
-
 import {
   useCreateContentMutation,
   useDeleteContentMutation,
   useSearchContentQuery,
   useUpdateContentMutation,
-  // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-} from '../../public/content_client';
-import type { Todo, TodoCreateIn, TodoDeleteIn, TodoSearchIn, TodoUpdateIn } from './todos_client';
+} from '@kbn/content-management-plugin/public';
 
-const useCreateTodoMutation = () => useCreateContentMutation<TodoCreateIn, Todo>();
-const useDeleteTodoMutation = () => useDeleteContentMutation<TodoDeleteIn, void>();
-const useUpdateTodoMutation = () => useUpdateContentMutation<TodoUpdateIn, Todo>();
+import {
+  TODO_CONTENT_ID,
+  Todo,
+  TodoCreateIn,
+  TodoDeleteIn,
+  TodoSearchIn,
+  TodoUpdateIn,
+  TodoUpdateOut,
+  TodoCreateOut,
+  TodoSearchOut,
+  TodoDeleteOut,
+} from '../../../common/examples/todos';
+
+const useCreateTodoMutation = () => useCreateContentMutation<TodoCreateIn, TodoCreateOut>();
+const useDeleteTodoMutation = () => useDeleteContentMutation<TodoDeleteIn, TodoDeleteOut>();
+const useUpdateTodoMutation = () => useUpdateContentMutation<TodoUpdateIn, TodoUpdateOut>();
 const useSearchTodosQuery = ({ filter }: { filter: TodoSearchIn['query']['filter'] }) =>
-  useSearchContentQuery<TodoSearchIn, { hits: Todo[] }>({
-    contentTypeId: 'todos',
+  useSearchContentQuery<TodoSearchIn, TodoSearchOut>({
+    contentTypeId: TODO_CONTENT_ID,
     query: { filter },
   });
 
@@ -70,14 +80,17 @@ export const Todos = () => {
       <ul>
         {data.hits.map((todo: Todo) => (
           <React.Fragment key={todo.id}>
-            <li style={{ display: 'flex', alignItems: 'center' }}>
+            <li
+              style={{ display: 'flex', alignItems: 'center' }}
+              data-test-subj={`todoItem todoItem-${todo.id}`}
+            >
               <EuiCheckbox
                 id={todo.id + ''}
                 key={todo.id}
                 checked={todo.completed}
                 onChange={(e) => {
                   updateTodoMutation.mutate({
-                    contentTypeId: 'todos',
+                    contentTypeId: TODO_CONTENT_ID,
                     id: todo.id,
                     data: {
                       completed: e.target.checked,
@@ -85,7 +98,7 @@ export const Todos = () => {
                   });
                 }}
                 label={todo.title}
-                data-test-subj={`todoCheckbox-${todo.id}`}
+                data-test-subj={`todoCheckbox todoCheckbox-${todo.id}`}
               />
 
               <EuiButtonIcon
@@ -95,7 +108,7 @@ export const Todos = () => {
                 aria-label="Delete"
                 color="danger"
                 onClick={() => {
-                  deleteTodoMutation.mutate({ contentTypeId: 'todos', id: todo.id });
+                  deleteTodoMutation.mutate({ contentTypeId: TODO_CONTENT_ID, id: todo.id });
                 }}
               />
             </li>
@@ -112,7 +125,7 @@ export const Todos = () => {
           if (!inputRef || !inputRef.value) return;
 
           createTodoMutation.mutate({
-            contentTypeId: 'todos',
+            contentTypeId: TODO_CONTENT_ID,
             data: {
               title: inputRef.value,
             },
