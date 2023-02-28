@@ -6,7 +6,7 @@
  */
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { UntypedNormalizedRuleType } from '../rule_type_registry';
-import { AlertInstanceContext, RecoveredActionGroup } from '../types';
+import { AlertInstanceContext, RecoveredActionGroup, RuleNotifyWhen } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
 import { Alert } from '../alert/alert';
@@ -208,6 +208,10 @@ describe('Legacy Alerts Client', () => {
         '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
         '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
       },
+      currentActiveAlerts: {
+        '1': new Alert<AlertInstanceContext, AlertInstanceContext>('1', testAlert1),
+        '2': new Alert<AlertInstanceContext, AlertInstanceContext>('2', testAlert2),
+      },
       currentRecoveredAlerts: {},
       recoveredAlerts: {},
     });
@@ -231,6 +235,7 @@ describe('Legacy Alerts Client', () => {
       ruleRunMetricsStore,
       shouldLogAndScheduleActionsForAlerts: true,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      notifyWhen: RuleNotifyWhen.CHANGE,
     });
 
     expect(processAlerts).toHaveBeenCalledWith({
@@ -268,6 +273,7 @@ describe('Legacy Alerts Client', () => {
         lookBackWindow: 20,
         statusChangeThreshold: 4,
       },
+      RuleNotifyWhen.CHANGE,
       'default',
       {},
       {

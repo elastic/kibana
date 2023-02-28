@@ -67,12 +67,9 @@ const GroupingContainerComponent = ({
 
   const groupsNumber = data?.groupsNumber?.value ?? 0;
   const unitCountText = useMemo(() => {
-    const count =
-      data?.alertsCount?.buckets && data?.alertsCount?.buckets.length > 0
-        ? data?.alertsCount?.buckets[0].doc_count ?? 0
-        : 0;
+    const count = data?.alertsCount?.value ?? 0;
     return `${count.toLocaleString()} ${unit && unit(count)}`;
-  }, [data?.alertsCount?.buckets, unit]);
+  }, [data?.alertsCount?.value, unit]);
 
   const unitGroupsCountText = useMemo(
     () => `${groupsNumber.toLocaleString()} ${GROUPS_UNIT(groupsNumber)}`,
