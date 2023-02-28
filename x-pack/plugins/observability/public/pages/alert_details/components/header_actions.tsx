@@ -26,7 +26,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
   const {
     http,
     cases: {
-      hooks: { getUseCasesAddToExistingCaseModal },
+      hooks: { useCasesAddToExistingCaseModal },
     },
     triggersActionsUi: { getEditAlertFlyout, getRuleSnoozeModal },
   } = useKibana<ObservabilityAppServices>().services;
@@ -40,7 +40,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
   const [ruleConditionsFlyoutOpen, setRuleConditionsFlyoutOpen] = useState<boolean>(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
 
-  const selectCaseModal = getUseCasesAddToExistingCaseModal();
+  const selectCaseModal = useCasesAddToExistingCaseModal();
 
   const handleTogglePopover = () => setIsPopoverOpen(!isPopoverOpen);
   const handleClosePopover = () => setIsPopoverOpen(false);

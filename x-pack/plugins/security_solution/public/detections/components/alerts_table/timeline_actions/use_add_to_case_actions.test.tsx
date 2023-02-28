@@ -70,8 +70,8 @@ describe('useAddToCaseActions', () => {
       services: {
         cases: {
           hooks: {
-            getUseCasesAddToNewCaseFlyout: addToNewCase,
-            getUseCasesAddToExistingCaseModal: () => null,
+            useCasesAddToNewCaseFlyout: addToNewCase,
+            useCasesAddToExistingCaseModal: () => null,
           },
           helpers: {
             getRuleIdFromEvent: () => null,
@@ -102,7 +102,7 @@ describe('useAddToCaseActions', () => {
     );
     expect(result.current.addToCaseActionItems.length).toEqual(0);
   });
-  it('should call getUseCasesAddToNewCaseFlyout with attachments only when step is not active', () => {
+  it('should call useCasesAddToNewCaseFlyout with attachments only when step is not active', () => {
     const { result } = renderHook(() => useAddToCaseActions(defaultProps), {
       wrapper: TestProviders,
     });
@@ -113,7 +113,7 @@ describe('useAddToCaseActions', () => {
       attachments: [{ alertId: '123', index: '', rule: null, type: 'alert' }],
     });
   });
-  it('should call getUseCasesAddToNewCaseFlyout with tour step with step is active and increment step', () => {
+  it('should call useCasesAddToNewCaseFlyout with tour step with step is active and increment step', () => {
     const incrementStep = jest.fn();
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: AlertsCasesTourSteps.addAlertToCase,
@@ -132,7 +132,7 @@ describe('useAddToCaseActions', () => {
     });
     expect(incrementStep).toHaveBeenCalled();
   });
-  it('should prefill getUseCasesAddToNewCaseFlyout with tour step when step is active', () => {
+  it('should prefill useCasesAddToNewCaseFlyout with tour step when step is active', () => {
     (useTourContext as jest.Mock).mockReturnValue({
       activeStep: AlertsCasesTourSteps.addAlertToCase,
       incrementStep: () => null,
@@ -143,7 +143,7 @@ describe('useAddToCaseActions', () => {
     });
     expect(addToNewCase.mock.calls[0][0].initialValue).toEqual(sampleCase);
   });
-  it('should not prefill getUseCasesAddToNewCaseFlyout with tour step when step is not active', () => {
+  it('should not prefill useCasesAddToNewCaseFlyout with tour step when step is not active', () => {
     renderHook(() => useAddToCaseActions(defaultProps), {
       wrapper: TestProviders,
     });

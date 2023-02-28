@@ -132,8 +132,8 @@ export interface CasesUiStart {
     getRecentCases: (props: GetRecentCasesProps) => ReactElement<GetRecentCasesProps>;
   };
   hooks: {
-    getUseCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
-    getUseCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
+    useCasesAddToNewCaseFlyout: UseCasesAddToNewCaseFlyout;
+    useCasesAddToExistingCaseModal: UseCasesAddToExistingCaseModal;
   };
   helpers: {
     /**

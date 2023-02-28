@@ -35,7 +35,7 @@ export const useBulkGetCases = (caseIds: string[]) => {
   } = useKibana().services;
 
   return useQuery(
-    triggersActionsUiQueriesKeys.casesBulkGet(),
+    triggersActionsUiQueriesKeys.casesBulkGet(caseIds),
     () => {
       const abortCtrlRef = new AbortController();
       return bulkGetCases(http, { ids: caseIds, fields: caseFields }, abortCtrlRef.signal);

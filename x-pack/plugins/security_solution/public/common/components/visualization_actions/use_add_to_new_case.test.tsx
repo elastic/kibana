@@ -32,7 +32,7 @@ jest.mock('../../lib/kibana', () => {
         ...mockedUseKibana.services,
         cases: {
           hooks: {
-            getUseCasesAddToNewCaseFlyout: mockGetUseCasesAddToNewCaseFlyout,
+            useCasesAddToNewCaseFlyout: mockGetUseCasesAddToNewCaseFlyout,
           },
         },
       },
@@ -49,7 +49,7 @@ describe('useAddToNewCase', () => {
     (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
   });
 
-  it('getUseCasesAddToNewCaseFlyout with attachments', () => {
+  it('useCasesAddToNewCaseFlyout with attachments', () => {
     const { result } = renderHook(() =>
       useAddToNewCase({
         lensAttributes: kpiHostMetricLensAttributes,

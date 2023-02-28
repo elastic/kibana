@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useContext, useEffect, useMemo } from 'react';
+import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Alerts,
@@ -38,16 +38,23 @@ export interface UseBulkActions {
   clearSelection: () => void;
 }
 
-type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesService' | 'refresh'>;
+type UseBulkAddToCaseActionsProps = Pick<BulkActionsProps, 'casesService' | 'refresh'> &
+  Pick<UseBulkActions, 'clearSelection'>;
 
 export const useBulkAddToCaseActions = ({
   casesService,
   refresh,
+  clearSelection,
 }: UseBulkAddToCaseActionsProps): BulkActionsConfig[] => {
   const userCasesPermissions = casesService?.helpers.canUseCases();
 
-  const createCaseFlyout = casesService?.hooks.getUseCasesAddToNewCaseFlyout();
-  const selectCaseModal = casesService?.hooks.getUseCasesAddToExistingCaseModal();
+  const onSuccess = useCallback(() => {
+    refresh();
+    clearSelection();
+  }, [clearSelection, refresh]);
+
+  const createCaseFlyout = casesService?.hooks.useCasesAddToNewCaseFlyout({ onSuccess });
+  const selectCaseModal = casesService?.hooks.useCasesAddToExistingCaseModal({ onSuccess });
 
   return useMemo(() => {
     return casesService &&
@@ -102,7 +109,11 @@ export function useBulkActions({
 }: BulkActionsProps): UseBulkActions {
   const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
   const configBulkActions = useBulkActionsConfig(query);
-  const caseBulkActions = useBulkAddToCaseActions({ casesService, refresh });
+
+  const clearSelection = () => {
+    updateBulkActionsState({ action: BulkActionsVerbs.clear });
+  };
+  const caseBulkActions = useBulkAddToCaseActions({ casesService, refresh, clearSelection });
 
   const bulkActions = [...configBulkActions, ...caseBulkActions];
 
@@ -114,10 +125,6 @@ export function useBulkActions({
 
   const setIsBulkActionsLoading = (isLoading: boolean = true) => {
     updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
-  };
-
-  const clearSelection = () => {
-    updateBulkActionsState({ action: BulkActionsVerbs.clear });
   };
 
   return {

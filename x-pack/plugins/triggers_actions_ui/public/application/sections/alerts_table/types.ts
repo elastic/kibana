@@ -42,8 +42,8 @@ export interface CasesService {
     getCasesContext: () => React.FC<any>;
   };
   hooks: {
-    getUseCasesAddToNewCaseFlyout: CaseHooks;
-    getUseCasesAddToExistingCaseModal: CaseHooks;
+    useCasesAddToNewCaseFlyout: CaseHooks;
+    useCasesAddToExistingCaseModal: CaseHooks;
   };
   helpers: {
     groupAlertsByRule: (items?: any[]) => any[];

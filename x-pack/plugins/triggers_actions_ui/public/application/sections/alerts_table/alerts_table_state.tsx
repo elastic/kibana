@@ -236,7 +236,7 @@ const AlertsTableStateWithQueryProvider = ({
 
   const caseIds = useMemo(() => getCaseIdsFromAlerts(alerts), [alerts]);
 
-  const { data: cases, isLoading: isLoadingCases } = useBulkGetCases(Array.from(caseIds.values()));
+  const { data: cases, isFetching: isLoadingCases } = useBulkGetCases(Array.from(caseIds.values()));
 
   const onPageChange = useCallback((_pagination: RuleRegistrySearchRequestPagination) => {
     setPagination(_pagination);

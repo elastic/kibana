@@ -23,7 +23,12 @@ export const getRowActions = (
   config: ConfigSchema
 ) => {
   return () => ({
-    renderCustomActionsRow: ({ alert, setFlyoutAlert, id }: RenderCustomActionsRowArgs) => {
+    renderCustomActionsRow: ({
+      alert,
+      setFlyoutAlert,
+      id,
+      refresh,
+    }: RenderCustomActionsRowArgs) => {
       return (
         <ObservabilityActions
           data={buildData(alert)}
@@ -33,6 +38,7 @@ export const getRowActions = (
           observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
           setFlyoutAlert={setFlyoutAlert}
           config={config}
+          refresh={refresh}
         />
       );
     },

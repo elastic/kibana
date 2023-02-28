@@ -69,7 +69,7 @@ export interface CreateCaseFormFieldsProps {
 }
 export interface CreateCaseFormProps extends Pick<Partial<CreateCaseFormFieldsProps>, 'withSteps'> {
   onCancel: () => void;
-  onSuccess: (theCase: Case) => Promise<void>;
+  onSuccess: (theCase: Case) => void;
   afterCaseCreated?: (
     theCase: Case,
     createAttachments: UseCreateAttachments['createAttachments']
@@ -208,7 +208,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
         onConfirmationCallback: handleOnConfirmationCallback,
       });
 
-    const handleOnSuccess = (theCase: Case): Promise<void> => {
+    const handleOnSuccess = (theCase: Case): void => {
       removeItemFromSessionStorage(draftStorageKey);
       return onSuccess(theCase);
     };

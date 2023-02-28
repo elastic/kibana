@@ -130,14 +130,14 @@ export class CasesUiPlugin
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
           }),
-        // @deprecated Please use the hook getUseCasesAddToNewCaseFlyout
+        // @deprecated Please use the hook useCasesAddToNewCaseFlyout
         getCreateCaseFlyout: (props) =>
           getCreateCaseFlyoutLazy({
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
           }),
-        // @deprecated Please use the hook getUseCasesAddToExistingCaseModal
+        // @deprecated Please use the hook useCasesAddToExistingCaseModal
         getAllCasesSelectorModal: (props) =>
           getAllCasesSelectorModalLazy({
             ...props,
@@ -146,8 +146,8 @@ export class CasesUiPlugin
           }),
       },
       hooks: {
-        getUseCasesAddToNewCaseFlyout: useCasesAddToNewCaseFlyout,
-        getUseCasesAddToExistingCaseModal: useCasesAddToExistingCaseModal,
+        useCasesAddToNewCaseFlyout,
+        useCasesAddToExistingCaseModal,
       },
       helpers: {
         canUseCases: canUseCases(core.application.capabilities),

@@ -41,6 +41,7 @@ export interface ObservabilityActionsProps {
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
   id?: string;
   config: ConfigSchema;
+  refresh: () => void;
 }
 
 export function ObservabilityActions({
@@ -51,6 +52,7 @@ export function ObservabilityActions({
   observabilityRuleTypeRegistry,
   config,
   setFlyoutAlert,
+  refresh,
 }: ObservabilityActionsProps) {
   const dataFieldEs = data.reduce((acc, d) => ({ ...acc, [d.field]: d.value }), {});
   const [openActionsPopoverId, setActionsPopover] = useState(null);
@@ -82,6 +84,7 @@ export function ObservabilityActions({
     pageId !== ALERT_DETAILS_PAGE_ID && alertId
       ? http.basePath.prepend(paths.observability.alertDetails(alertId))
       : null;
+
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
     return ecsData?._id
       ? [
@@ -95,9 +98,12 @@ export function ObservabilityActions({
       : [];
   }, [ecsData, cases.helpers, data]);
 
-  const createCaseFlyout = cases.hooks.getUseCasesAddToNewCaseFlyout();
+  const onSuccess = useCallback(() => {
+    refresh();
+  }, [refresh]);
 
-  const selectCaseModal = cases.hooks.getUseCasesAddToExistingCaseModal();
+  const createCaseFlyout = cases.hooks.useCasesAddToNewCaseFlyout({ onSuccess });
+  const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal({ onSuccess });
 
   const handleAddToNewCaseClick = useCallback(() => {
     createCaseFlyout.open({ attachments: caseAttachments });
