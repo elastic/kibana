@@ -39,7 +39,7 @@ Note: The plugin was previously named Ingest Manager, it's possible that some va
 These are some additional recommendations to the steps detailed in the [Kibana Developer Guide](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env).
 
 1. Create a `config/kibana.dev.yml` file by copying the existing `config/kibana.yml` file.
-2. It can be useful to set a base path for Kibana. To do this, add the following to your `kibana.dev.yml`:
+2. It is recommended to explicitly set a base path for Kibana (refer to [Considerations for basepath](https://www.elastic.co/guide/en/kibana/current/development-basepath.html) for details). To do this, add the following to your `kibana.dev.yml`:
   ```yml
   server.basePath: /<yourPath>
   ```
@@ -71,6 +71,8 @@ To avoid losing all your data when you restart Elasticsearch, you can provide a 
 ```
 -E path.data=/tmp/es-data
 ```
+
+Refer to the [Running Elasticsearch during development](https://www.elastic.co/guide/en/kibana/current/running-elasticsearch.html) page of the guide for other options.
 
 ### Running Fleet Server Locally in a Container
 
