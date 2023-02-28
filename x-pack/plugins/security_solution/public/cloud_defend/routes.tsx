@@ -11,7 +11,6 @@ import type {
   CloudDefendSecuritySolutionContext,
 } from '@kbn/cloud-defend-plugin/public';
 import { CLOUD_DEFEND_BASE_PATH } from '@kbn/cloud-defend-plugin/public';
-import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { SecurityPageName, SecuritySubPluginRoutes } from '../app/types';
 import { useKibana } from '../common/lib/kibana';
 import { SecuritySolutionPageWrapper } from '../common/components/page_wrapper';
@@ -35,11 +34,9 @@ const CloudDefend = () => {
 
   return (
     <PluginTemplateWrapper>
-      <TrackApplicationView viewId="cloud_defend">
-        <SecuritySolutionPageWrapper noPadding noTimeline>
-          <CloudDefendRouter securitySolutionContext={cloudDefendSecuritySolutionContext} />
-        </SecuritySolutionPageWrapper>
-      </TrackApplicationView>
+      <SecuritySolutionPageWrapper noPadding noTimeline>
+        <CloudDefendRouter securitySolutionContext={cloudDefendSecuritySolutionContext} />
+      </SecuritySolutionPageWrapper>
     </PluginTemplateWrapper>
   );
 };

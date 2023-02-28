@@ -16,12 +16,6 @@ const commonLinkProperties: Partial<LinkItem> = {
   capabilities: [`${SERVER_APP_ID}.show`],
 };
 
-export const rootLinks: LinkItem = {
-  ...getSecuritySolutionLink<SecurityPageName>('policies'),
-  globalNavPosition: 3,
-  ...commonLinkProperties,
-};
-
 export const manageLinks: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('policies'),
   description: i18n.translate('xpack.securitySolution.appLinks.cloudDefendPoliciesDescription', {
