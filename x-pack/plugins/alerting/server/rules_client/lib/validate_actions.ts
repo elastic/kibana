@@ -135,6 +135,23 @@ export async function validateActions(
     );
   }
 
+  const actionWithoutQueryAndTimeframe = actions.filter((action) => {
+    return !!(action.alertsFilter && !action.alertsFilter.query && !action.alertsFilter.timeframe);
+  });
+
+  if (actionWithoutQueryAndTimeframe.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidAlertsFilter', {
+        defaultMessage: `Action's alertsFilter  must have either "query" or "timeframe" : {groups}`,
+        values: {
+          groups: actionWithoutQueryAndTimeframe
+            .map((a) => `${a.group} (${a.frequency?.throttle})`)
+            .join(', '),
+        },
+      })
+    );
+  }
+
   // Finalize and throw any errors present
   if (errors.length) {
     throw Boom.badRequest(

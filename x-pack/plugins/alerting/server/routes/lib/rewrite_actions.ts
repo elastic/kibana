@@ -40,8 +40,10 @@ export const rewriteActionsRes = (actions?: RuleAction[]) => {
     ...action,
     connector_type_id: actionTypeId,
     ...(frequency ? { frequency: rewriteFrequency(frequency) } : {}),
-    ...(alertsFilter && {
-      alerts_filter: alertsFilter,
-    }),
+    ...(alertsFilter
+      ? {
+          alerts_filter: alertsFilter,
+        }
+      : {}),
   }));
 };

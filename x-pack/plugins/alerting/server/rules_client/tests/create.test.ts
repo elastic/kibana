@@ -407,7 +407,6 @@ describe('create()', () => {
           Object {
             "actionRef": "action_0",
             "actionTypeId": "test",
-            "alertsFilter": null,
             "group": "default",
             "params": Object {
               "foo": true,
@@ -628,7 +627,6 @@ describe('create()', () => {
           Object {
             "actionRef": "action_0",
             "actionTypeId": "test",
-            "alertsFilter": null,
             "group": "default",
             "params": Object {
               "foo": true,
@@ -1061,7 +1059,6 @@ describe('create()', () => {
             group: 'default',
             actionRef: 'action_0',
             actionTypeId: 'test',
-            alertsFilter: null,
             params: {
               foo: true,
             },
@@ -1071,7 +1068,6 @@ describe('create()', () => {
             group: 'default',
             actionRef: 'preconfigured:preconfigured',
             actionTypeId: 'test',
-            alertsFilter: null,
             params: {
               foo: true,
             },
@@ -1081,7 +1077,6 @@ describe('create()', () => {
             group: 'default',
             actionRef: 'action_2',
             actionTypeId: 'test2',
-            alertsFilter: null,
             params: {
               foo: true,
             },
@@ -1292,7 +1287,6 @@ describe('create()', () => {
           {
             actionRef: 'action_0',
             actionTypeId: 'test',
-            alertsFilter: null,
             group: 'default',
             params: { foo: true },
             uuid: '112',
@@ -1472,7 +1466,6 @@ describe('create()', () => {
           {
             actionRef: 'action_0',
             actionTypeId: 'test',
-            alertsFilter: null,
             group: 'default',
             params: { foo: true },
             uuid: '113',
@@ -1641,7 +1634,6 @@ describe('create()', () => {
           {
             actionRef: 'action_0',
             group: 'default',
-            alertsFilter: null,
             actionTypeId: 'test',
             params: { foo: true },
             uuid: '115',
@@ -1779,7 +1771,6 @@ describe('create()', () => {
             actionRef: 'action_0',
             group: 'default',
             actionTypeId: 'test',
-            alertsFilter: null,
             params: { foo: true },
             uuid: '116',
           },
@@ -1916,7 +1907,6 @@ describe('create()', () => {
             actionRef: 'action_0',
             group: 'default',
             actionTypeId: 'test',
-            alertsFilter: null,
             params: { foo: true },
             uuid: '117',
           },
@@ -2081,7 +2071,6 @@ describe('create()', () => {
             },
             actionRef: 'action_0',
             actionTypeId: 'test',
-            alertsFilter: null,
             uuid: '118',
           },
         ],
@@ -2448,7 +2437,6 @@ describe('create()', () => {
             actionRef: 'action_0',
             group: 'default',
             actionTypeId: 'test',
-            alertsFilter: null,
             params: { foo: true },
             uuid: '126',
           },
@@ -2552,7 +2540,6 @@ describe('create()', () => {
         actions: [
           {
             actionRef: 'action_0',
-            alertsFilter: null,
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
@@ -3206,5 +3193,58 @@ describe('create()', () => {
         "updatedAt": 2019-02-12T21:01:22.479Z,
       }
     `);
+  });
+
+  test('throws error when some actions have alertsFilter but neither timeframe nor query', async () => {
+    rulesClient = new RulesClient({
+      ...rulesClientParams,
+      minimumScheduleInterval: { value: '1m', enforce: true },
+    });
+    ruleTypeRegistry.get.mockImplementation(() => ({
+      id: '123',
+      name: 'Test',
+      actionGroups: [
+        { id: 'default', name: 'Default' },
+        { id: 'group2', name: 'Action Group 2' },
+        { id: 'group3', name: 'Action Group 3' },
+      ],
+      recoveryActionGroup: RecoveredActionGroup,
+      defaultActionGroupId: 'default',
+      minimumLicenseRequired: 'basic',
+      isExportable: true,
+      async executor() {
+        return { state: {} };
+      },
+      producer: 'alerts',
+      useSavedObjectReferences: {
+        extractReferences: jest.fn(),
+        injectReferences: jest.fn(),
+      },
+    }));
+
+    const data = getMockData({
+      notifyWhen: undefined,
+      throttle: undefined,
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          params: {
+            foo: true,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '10h',
+          },
+          alertsFilter: {},
+        },
+      ],
+    });
+    await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to validate actions due to the following error: Action's alertsFilter  must have either \\"query\\" or \\"timeframe\\" : default (10h)"`
+    );
+    expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
+    expect(taskManager.schedule).not.toHaveBeenCalled();
   });
 });

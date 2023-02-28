@@ -70,7 +70,6 @@ export const createGetSummarizedAlertsFn =
       ? ruleDataClient.getReader({ namespace: spaceId })
       : ruleDataClient.getReader();
 
-    // add filter here
     if (queryByExecutionUuid) {
       return await getAlertsByExecutionUuid({
         ruleDataClientReader,
@@ -550,20 +549,21 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
     filter.push(JSON.parse(alertsFilter.query.dsl));
   }
   if (alertsFilter.timeframe) {
-    filter.push({
-      script: {
+    filter.push(
+      {
         script: {
-          source: "params.days.contains(doc['kibana.alert.start'].value.dayOfWeek.getValue())",
-          params: {
-            days: alertsFilter.timeframe.days,
+          script: {
+            source: "params.days.contains(doc['kibana.alert.start'].value.dayOfWeek.getValue())",
+            params: {
+              days: alertsFilter.timeframe.days,
+            },
           },
         },
       },
-    });
-    filter.push({
-      script: {
+      {
         script: {
-          source: `
+          script: {
+            source: `
               def alertsTime = LocalTime.of(doc['kibana.alert.start'].value.getHour(), doc['kibana.alert.start'].value.getMinute());
               def start = LocalTime.parse(params.start);
               def end = LocalTime.parse(params.end);
@@ -574,13 +574,14 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
                   return false;
               }
            `,
-          params: {
-            start: alertsFilter.timeframe.hours.start,
-            end: alertsFilter.timeframe.hours.end,
+            params: {
+              start: alertsFilter.timeframe.hours.start,
+              end: alertsFilter.timeframe.hours.end,
+            },
           },
         },
-      },
-    });
+      }
+    );
   }
   return filter;
 };

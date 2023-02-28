@@ -52,6 +52,16 @@ describe('createRuleRoute', () => {
           foo: true,
         },
         uuid: '123-456',
+        alertsFilter: {
+          query: {
+            kql: 'name:test',
+            dsl: '{"must": {"term": { "name": "test" }}}',
+          },
+          timeframe: {
+            days: [1],
+            hours: { start: '08:00', end: '17:00' },
+          },
+        },
       },
     ],
     enabled: true,
@@ -79,6 +89,7 @@ describe('createRuleRoute', () => {
         group: mockedAlert.actions[0].group,
         id: mockedAlert.actions[0].id,
         params: mockedAlert.actions[0].params,
+        alerts_filter: mockedAlert.actions[0].alertsFilter,
       },
     ],
   };
@@ -144,6 +155,21 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "alertsFilter": Object {
+                  "query": Object {
+                    "dsl": "{\\"must\\": {\\"term\\": { \\"name\\": \\"test\\" }}}",
+                    "kql": "name:test",
+                  },
+                  "timeframe": Object {
+                    "days": Array [
+                      1,
+                    ],
+                    "hours": Object {
+                      "end": "17:00",
+                      "start": "08:00",
+                    },
+                  },
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -225,6 +251,21 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "alertsFilter": Object {
+                  "query": Object {
+                    "dsl": "{\\"must\\": {\\"term\\": { \\"name\\": \\"test\\" }}}",
+                    "kql": "name:test",
+                  },
+                  "timeframe": Object {
+                    "days": Array [
+                      1,
+                    ],
+                    "hours": Object {
+                      "end": "17:00",
+                      "start": "08:00",
+                    },
+                  },
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -307,6 +348,21 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "alertsFilter": Object {
+                  "query": Object {
+                    "dsl": "{\\"must\\": {\\"term\\": { \\"name\\": \\"test\\" }}}",
+                    "kql": "name:test",
+                  },
+                  "timeframe": Object {
+                    "days": Array [
+                      1,
+                    ],
+                    "hours": Object {
+                      "end": "17:00",
+                      "start": "08:00",
+                    },
+                  },
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {
@@ -389,6 +445,21 @@ describe('createRuleRoute', () => {
           "data": Object {
             "actions": Array [
               Object {
+                "alertsFilter": Object {
+                  "query": Object {
+                    "dsl": "{\\"must\\": {\\"term\\": { \\"name\\": \\"test\\" }}}",
+                    "kql": "name:test",
+                  },
+                  "timeframe": Object {
+                    "days": Array [
+                      1,
+                    ],
+                    "hours": Object {
+                      "end": "17:00",
+                      "start": "08:00",
+                    },
+                  },
+                },
                 "group": "default",
                 "id": "2",
                 "params": Object {

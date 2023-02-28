@@ -249,19 +249,7 @@ export interface RawRuleAction extends SavedObjectAttributes {
     notifyWhen: RuleNotifyWhenType;
     throttle: string | null;
   };
-  alertsFilter?: null | {
-    query: null | {
-      kql: string;
-      dsl: string;
-    };
-    timeframe: null | {
-      days: Array<0 | 1 | 2 | 3 | 4 | 5 | 6>;
-      hours: {
-        start: string;
-        end: string;
-      };
-    };
-  };
+  alertsFilter?: AlertsFilter;
 }
 
 export interface RuleMeta extends SavedObjectAttributes {

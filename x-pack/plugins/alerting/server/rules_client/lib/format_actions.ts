@@ -14,12 +14,14 @@ export function formatActions(
   return actions.map(({ uuid, alertsFilter, ...action }) => ({
     ...action,
     uuid: uuid || v4(),
-    alertsFilter: alertsFilter
+    ...(alertsFilter
       ? {
-          ...alertsFilter,
-          timeframe: alertsFilter.timeframe || null,
-          query: alertsFilter.query || null,
+          alertsFilter: {
+            ...alertsFilter,
+            timeframe: alertsFilter.timeframe || null,
+            query: alertsFilter.query || null,
+          },
         }
-      : null,
+      : {}),
   }));
 }

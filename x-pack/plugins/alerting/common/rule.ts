@@ -76,7 +76,7 @@ export interface RuleExecutionStatus {
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
-export interface AlertsFilter {
+export interface AlertsFilter extends SavedObjectAttributes {
   query: null | {
     kql: string;
     dsl: string;
@@ -101,7 +101,7 @@ export interface RuleAction {
     notifyWhen: RuleNotifyWhenType;
     throttle: string | null;
   };
-  alertsFilter?: null | AlertsFilter;
+  alertsFilter?: AlertsFilter;
 }
 
 export interface RuleAggregations {
