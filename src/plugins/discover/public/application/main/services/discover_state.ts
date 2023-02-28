@@ -265,7 +265,7 @@ export function getDiscoverStateContainer({
     addLog('🧭 [discoverState] onOpenSavedSearch', newSavedSearchId);
     const currentSavedSearch = savedSearchContainer.get();
     if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
-      addLog("🧭 [discoverState] onOpenSavedSearch just reset since id didn't change");
+      addLog("🧭 [discoverState] undo changes since saved search didn't change");
       await savedSearchContainer.undo();
     } else {
       addLog('🧭 [discoverState] onOpenSavedSearch open view URL');

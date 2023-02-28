@@ -45,13 +45,14 @@ export interface SavedSearchContainer {
   get: () => SavedSearch;
   getId: () => string | undefined;
   getTitle: () => string;
+  getPersisted$: () => BehaviorSubject<SavedSearch>;
+  getVolatile$: () => BehaviorSubject<SavedSearch>;
   hasChanged$: BehaviorSubject<boolean>;
   isPersisted: () => boolean;
   load: (id: string, params: LoadParams) => Promise<SavedSearch>;
   new: (initialDataView: DataView, appState?: AppState) => Promise<SavedSearch>;
   persist: PersistFunction;
   reset: (id?: string) => Promise<SavedSearch | undefined>;
-  resetUrl: (id: SavedSearch) => Promise<SavedSearch | undefined>;
   set: (savedSearch: SavedSearch) => SavedSearch;
   undo: () => void;
   update: (params: UpdateParams) => SavedSearch;
@@ -83,6 +84,8 @@ export function getSavedSearchContainer({
   const get = () => {
     return savedSearchVolatile$.getValue();
   };
+  const getPersisted$ = () => savedSearchPersisted$;
+  const getVolatile$ = () => savedSearchVolatile$;
   const getTitle = () => {
     return savedSearchVolatile$.getValue().title ?? '';
   };
@@ -111,10 +114,9 @@ export function getSavedSearchContainer({
   };
 
   const resetUrl = async (nextSavedSearch: SavedSearch) => {
-    addLog('🔎 [resetUrl] ' + nextSavedSearch);
-
+    addLog('🔎 [resetUrl] ', nextSavedSearch);
     await set(nextSavedSearch);
-    const newAppState = getDefaultAppState(savedSearch, services);
+    const newAppState = getDefaultAppState(nextSavedSearch, services);
     await appStateContainer.replaceUrlState(newAppState);
     return nextSavedSearch;
   };
@@ -129,7 +131,7 @@ export function getSavedSearchContainer({
       savedObjectsTagging: services.savedObjectsTagging,
     });
     nextSavedSearch.searchSource.setField('index', dataView);
-    const newAppState = getDefaultAppState(savedSearch, services);
+    const newAppState = getDefaultAppState(nextSavedSearch, services);
     const nextSavedSearchToSet = updateSavedSearch(
       {
         savedSearch: { ...nextSavedSearch },
@@ -235,13 +237,14 @@ export function getSavedSearchContainer({
     get,
     getId,
     getTitle,
+    getPersisted$,
+    getVolatile$,
     hasChanged$,
     isPersisted,
     load,
     new: newSavedSearch,
     persist,
     reset,
-    resetUrl,
     set,
     undo,
     update,

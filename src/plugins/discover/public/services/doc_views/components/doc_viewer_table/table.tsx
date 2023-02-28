@@ -404,7 +404,7 @@ export const DocViewerTable = ({
         </EuiSelectableMessage>
       ) : (
         <EuiFlexItem grow={false}>
-          <EuiTable responsive={false}>
+          <EuiTable responsive={false} compressed={true}>
             <EuiTableHeader>{headers}</EuiTableHeader>
             <EuiTableBody>{rowElements}</EuiTableBody>
           </EuiTable>

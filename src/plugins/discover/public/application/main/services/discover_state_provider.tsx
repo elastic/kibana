@@ -6,19 +6,42 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useContext } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { InternalStateProvider } from './discover_internal_state_container';
 import { DiscoverAppStateProvider } from './discover_app_state_container';
 import { DiscoverStateContainer } from './discover_state';
 
 function createStateHelpers() {
   const context = React.createContext<DiscoverStateContainer | null>(null);
+  const useContainer = () => useContext(context);
+  const useSavedSearch = () => {
+    const container = useContainer();
+    return useObservable<SavedSearch>(
+      container!.savedSearchState.getVolatile$(),
+      container!.savedSearchState.getVolatile$().getValue()
+    );
+  };
+  const useSavedSearchPersisted = () => {
+    const container = useContainer();
+    return useObservable<SavedSearch>(
+      container!.savedSearchState.getPersisted$(),
+      container!.savedSearchState.getVolatile$().getValue()
+    );
+  };
   return {
     Provider: context.Provider,
+    useSavedSearch,
+    useSavedSearchPersisted,
   };
 }
 
-export const { Provider: DiscoverStateProvider } = createStateHelpers();
+export const {
+  Provider: DiscoverStateProvider,
+  useSavedSearchPersisted,
+  useSavedSearch,
+} = createStateHelpers();
 
 export const DiscoverMainProvider = ({
   value,

@@ -15,7 +15,7 @@ import { useDiscoverState } from './hooks/use_discover_state';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
-import { DiscoverMainProvider } from './services/discover_state_provider';
+import { useSavedSearchPersisted } from './services/discover_state_provider';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -28,7 +28,7 @@ export interface DiscoverMainProps {
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
   const { stateContainer } = props;
-  const savedSearch = stateContainer.savedSearchState.get();
+  const savedSearch = useSavedSearchPersisted();
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
   const usedHistory = useHistory();
@@ -60,16 +60,16 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   useUrl({ history: usedHistory, stateContainer });
 
   /**
-   * SavedSearch depended initializing
+   * SavedSearch dependend on initializing
    */
   useEffect(() => {
     const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-    setBreadcrumbsTitle(savedSearch, chrome);
+    setBreadcrumbsTitle(savedSearch.title, chrome);
     return () => {
-      data.search.session.clear();
+      // data.search.session.clear();
     };
-  }, [savedSearch, chrome, data]);
+  }, [savedSearch.id, savedSearch.title, chrome, data]);
 
   /**
    * Initializing syncing with state and help menu
@@ -81,17 +81,15 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 
   return (
-    <DiscoverMainProvider value={stateContainer}>
-      <DiscoverLayoutMemoized
-        inspectorAdapters={inspectorAdapters}
-        onChangeDataView={onChangeDataView}
-        onUpdateQuery={onUpdateQuery}
-        navigateTo={navigateTo}
-        stateContainer={stateContainer}
-        persistDataView={persistDataView}
-        searchSessionManager={searchSessionManager}
-        updateDataViewList={updateDataViewList}
-      />
-    </DiscoverMainProvider>
+    <DiscoverLayoutMemoized
+      inspectorAdapters={inspectorAdapters}
+      onChangeDataView={onChangeDataView}
+      onUpdateQuery={onUpdateQuery}
+      navigateTo={navigateTo}
+      stateContainer={stateContainer}
+      persistDataView={persistDataView}
+      searchSessionManager={searchSessionManager}
+      updateDataViewList={updateDataViewList}
+    />
   );
 }

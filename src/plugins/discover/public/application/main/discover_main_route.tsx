@@ -27,6 +27,7 @@ import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { getScopedHistory, getUrlTracker } from '../../kibana_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
+import { DiscoverMainProvider } from './services/discover_state_provider';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -234,5 +235,9 @@ export function DiscoverMainRoute(props: Props) {
     return <LoadingIndicator type={hasCustomBranding ? 'spinner' : 'elastic'} />;
   }
 
-  return <DiscoverMainAppMemoized stateContainer={stateContainer} />;
+  return (
+    <DiscoverMainProvider value={stateContainer}>
+      <DiscoverMainAppMemoized stateContainer={stateContainer} />
+    </DiscoverMainProvider>
+  );
 }

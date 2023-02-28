@@ -8,7 +8,6 @@
 
 import { ChromeStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
 export function getRootBreadcrumbs(breadcrumb?: string) {
   return [
@@ -34,18 +33,18 @@ export function getSavedSearchBreadcrumbs(id: string) {
  * Helper function to set the Discover's breadcrumb
  * if there's an active savedSearch, its title is appended
  */
-export function setBreadcrumbsTitle(savedSearch: SavedSearch, chrome: ChromeStart) {
+export function setBreadcrumbsTitle(title: string | undefined, chrome: ChromeStart) {
   const discoverBreadcrumbsTitle = i18n.translate('discover.discoverBreadcrumbTitle', {
     defaultMessage: 'Discover',
   });
 
-  if (savedSearch.id && savedSearch.title) {
+  if (title) {
     chrome.setBreadcrumbs([
       {
         text: discoverBreadcrumbsTitle,
         href: '#/',
       },
-      { text: savedSearch.title },
+      { text: title },
     ]);
   } else {
     chrome.setBreadcrumbs([

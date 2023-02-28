@@ -48,7 +48,7 @@ async function saveDataSource({
           navigateTo(`/view/${encodeURIComponent(id)}`);
         } else {
           // Update defaults so that "reload saved query" functions correctly
-          state.savedSearchState.resetUrl(savedSearch);
+          state.savedSearchState.undo();
         }
       }
     }
