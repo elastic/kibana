@@ -9,14 +9,14 @@ import type { FileJSON, FileKind } from '@kbn/files-plugin/common';
 import type { FilesSetup } from '@kbn/files-plugin/server';
 import {
   APP_ID,
-  constructHttpOperationTag,
+  constructFilesHttpOperationTag,
   MAX_FILE_SIZE,
   OBSERVABILITY_OWNER,
   SECURITY_SOLUTION_OWNER,
 } from '../../common/constants';
 import type { Owner } from '../../common/constants/types';
-import { Operation } from '../../common/constants/types';
-import { ALLOWED_MIME_TYPES, IMAGE_MIME_TYPES } from './mime_types';
+import { HttpApiTagOperation } from '../../common/constants/types';
+import { ALLOWED_MIME_TYPES, IMAGE_MIME_TYPES } from '../../common/constants/mime_types';
 
 const buildFileKind = (owner: Owner): FileKind => {
   return {
@@ -29,20 +29,20 @@ const buildFileKind = (owner: Owner): FileKind => {
 
 const fileKindHttpTags = (owner: Owner) => {
   return {
-    create: buildTag(owner, Operation.Create),
-    delete: buildTag(owner, Operation.Delete),
-    download: buildTag(owner, Operation.Read),
-    getById: buildTag(owner, Operation.Read),
-    list: buildTag(owner, Operation.Read),
-    update: buildTag(owner, Operation.Update),
+    create: buildTag(owner, HttpApiTagOperation.Create),
+    delete: buildTag(owner, HttpApiTagOperation.Delete),
+    download: buildTag(owner, HttpApiTagOperation.Read),
+    getById: buildTag(owner, HttpApiTagOperation.Read),
+    list: buildTag(owner, HttpApiTagOperation.Read),
+    update: buildTag(owner, HttpApiTagOperation.Update),
   };
 };
 
 const access = 'access:';
 
-const buildTag = (owner: Owner, operation: Operation) => {
+const buildTag = (owner: Owner, operation: HttpApiTagOperation) => {
   return {
-    tags: [`${access}${constructHttpOperationTag(owner, operation)}`],
+    tags: [`${access}${constructFilesHttpOperationTag(owner, operation)}`],
   };
 };
 

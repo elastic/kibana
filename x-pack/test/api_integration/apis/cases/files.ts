@@ -122,7 +122,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ];
 
         for (const scenario of testScenarios) {
-          it('should fail to delete a case', async () => {
+          it('should fail to delete a file', async () => {
             await deleteFileFailure(scenario);
           });
         }

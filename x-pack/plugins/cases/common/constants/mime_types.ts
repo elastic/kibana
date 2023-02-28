@@ -30,6 +30,7 @@ const imageMimeTypes = [
   'image/hsj2',
   'image/jls',
   'image/jp2',
+  'image/jpeg',
   'image/jph',
   'image/jphc',
   'image/jpm',

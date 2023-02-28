@@ -7,17 +7,17 @@
 
 import {
   BULK_GET_USER_PROFILES_API_TAG,
-  constructHttpOperationTag,
+  constructFilesHttpOperationTag,
   SUGGEST_USER_PROFILES_API_TAG,
 } from '../constants';
-import { Operation } from '../constants/types';
+import { HttpApiTagOperation } from '../constants/types';
 import type { Owner } from '../constants/types';
 
 export const getApiTags = (owner: Owner) => {
-  const create = constructHttpOperationTag(owner, Operation.Create);
-  const update = constructHttpOperationTag(owner, Operation.Update);
-  const deleteTag = constructHttpOperationTag(owner, Operation.Delete);
-  const read = constructHttpOperationTag(owner, Operation.Read);
+  const create = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Create);
+  const update = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Update);
+  const deleteTag = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Delete);
+  const read = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Read);
 
   return {
     all: [
