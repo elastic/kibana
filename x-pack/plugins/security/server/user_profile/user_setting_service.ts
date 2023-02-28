@@ -11,6 +11,11 @@ import type { Logger } from '@kbn/logging';
 import type { UserProfileGetCurrentParams, UserProfileServiceStart } from './user_profile_service';
 
 export interface UserSettingServiceStart {
+  /**
+   * Returns the currently signed-in user's settings from their User Profile
+   *
+   * @param request
+   */
   getCurrentUserProfileSettings(request: KibanaRequest): Promise<Record<string, string>>;
 }
 

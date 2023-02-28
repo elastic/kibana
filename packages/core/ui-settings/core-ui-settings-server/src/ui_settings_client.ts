@@ -60,8 +60,8 @@ export interface IUiSettingsClient {
 }
 
 /**
- * A server side client that extends the IUiSettingsClient to include a method of retrieving UserProfile
- * specific settings
+ * A server side client that extends the IUiSettingsClient to include a method for retrieving user settings from
+ * a UserProfile
  *
  * @public
  */

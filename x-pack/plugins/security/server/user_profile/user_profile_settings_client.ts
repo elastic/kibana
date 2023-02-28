@@ -23,7 +23,7 @@ export class UserProfileSettingsClient implements UserProfileSettingsClientContr
   /**
    * Returns the current user's user profile settings
    *
-   * @param request
+   * @param request the KibanaRequest that is required to get the current user and their settings
    */
   async get(request: KibanaRequest): Promise<Record<string, string>> {
     return await this.userSettingsServiceStart.getCurrentUserProfileSettings(request);

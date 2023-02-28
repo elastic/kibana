@@ -89,7 +89,7 @@ export interface UiSettingsServiceStart {
    * Creates an IUserUiSettingsClient (which extends IUiSettingsClient so that settings in the user's
    * profile can be retrieved.
    *
-   * @param savedObjectsClient This client is not currently used by the underlying UserClient, but is included so that
+   * @param savedObjectsClient This client is not currently used by the underlying client, but is included so that
    * future user specific settings/migrations will be able to be created in SO, if necessary, rather than UserProfiles
    * @param request A KibanaRequest that is used to get the UserProfileSettings
    */
@@ -101,7 +101,7 @@ export interface UiSettingsServiceStart {
   /**
    * This provides a way for downstream plugins to provide the UiSettingsService with a way to create UserProfileSettingsClients
    *
-   * @example The SecurityPlugin currently utilizes this on start to provide the necessary services
+   * @example The SecurityPlugin currently utilizes this on start
    *
    * the UserProfilesClientContract
    * @param userProfileSettingsClientFactoryProvider
