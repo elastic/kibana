@@ -20,7 +20,7 @@ import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 
 import { useKibana } from '../../../utils/kibana_react';
 
-interface Data {
+export interface Data {
   key: number;
   value: number | undefined;
 }

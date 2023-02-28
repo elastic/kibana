@@ -9,10 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from 
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { WideChart } from './wide_chart';
+
+import { Data, WideChart } from './wide_chart';
 
 export interface Props {
-  data: Array<{ key: number; value: number | undefined }>;
+  data: Data[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
 }
