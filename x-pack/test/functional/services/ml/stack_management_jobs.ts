@@ -326,7 +326,7 @@ export function MachineLearningStackManagementJobsProvider({
     },
 
     async getDownload(filePath: string) {
-      return retry.tryForTime(5000, async () => {
+      return retry.tryForTime(60 * 1000, async () => {
         expect(fs.existsSync(filePath)).to.be(true);
         return fs.readFileSync(filePath).toString();
       });
