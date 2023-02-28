@@ -55,7 +55,7 @@ const mapErrorMessageToUserMessage = (
   const actionIds: Set<string> = new Set(
     concatenatedActionIds && [...concatenatedActionIds.split(',')]
   );
-  return { mappedErrors, numberOfAction: actionIds.size };
+  return { mappedErrors, numberOfActions: actionIds.size };
 };
 
 export const showToasterMessage = ({
@@ -106,13 +106,13 @@ export const showToasterMessage = ({
       importResponse.action_connectors_errors != null &&
       importResponse.action_connectors_errors.length > 0
     ) {
-      const { mappedErrors: userErrorMessages, numberOfAction } = mapErrorMessageToUserMessage(
+      const { mappedErrors: userErrorMessages, numberOfActions } = mapErrorMessageToUserMessage(
         importResponse.action_connectors_errors
       );
       const connectorError = formatError(errorMessageDetailed, importResponse, userErrorMessages);
 
       return addError(connectorError, {
-        title: i18n.IMPORT_CONNECTORS_FAILED(numberOfAction || userErrorMessages.length),
+        title: i18n.IMPORT_CONNECTORS_FAILED(numberOfActions || userErrorMessages.length),
       });
     }
     const ruleError = formatError(errorMessageDetailed, importResponse, importResponse.errors);
