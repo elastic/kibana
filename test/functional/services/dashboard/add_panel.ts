@@ -5,9 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import expect from '@kbn/expect';
 import { FtrService } from '../../ftr_provider_context';
-import { WebElementWrapper } from '../lib/web_element_wrapper';
 
 export class DashboardAddPanelService extends FtrService {
   private readonly log = this.ctx.getService('log');
@@ -151,27 +149,13 @@ export class DashboardAddPanelService extends FtrService {
     await this.flyout.ensureClosed('dashboardAddPanel');
   }
 
-  async getRowAtIndex(rows: WebElementWrapper[], rowIndex: number) {
-    const cell = await rows[rowIndex].findByTestSubject('savedObjectFinderTitle');
-    const button = await cell.findByTagName('button');
-    const name = await button.getVisibleText();
-    return { button, name };
-  }
-
   async addEveryVisualization(filter: string) {
     this.log.debug('DashboardAddPanel.addEveryVisualization');
     await this.ensureAddPanelIsShowing();
     if (filter) {
       await this.savedObjectsFinder.filterEmbeddableNames(filter.replace('-', ' '));
     }
-    await this.savedObjectsFinder.toggleFilter('Visualization');
-    const itemList = await this.testSubjects.find('savedObjectsFinderTable');
-    await this.retry.try(async () => {
-      const embeddableListBody = await itemList.findByTagName('tbody');
-      const embeddableRows = await embeddableListBody.findAllByCssSelector('tr');
-      const { name } = await this.getRowAtIndex(embeddableRows, 0);
-      expect(name.includes('search')).to.be(false);
-    });
+    await this.savedObjectsFinder.waitForFilter('Visualization', 'search');
     let morePages = true;
     const vizList: string[][] = [];
     while (morePages) {
@@ -189,7 +173,7 @@ export class DashboardAddPanelService extends FtrService {
     if (filter) {
       await this.savedObjectsFinder.filterEmbeddableNames(filter.replace('-', ' '));
     }
-    await this.savedObjectsFinder.toggleFilter('Saved search');
+    await this.savedObjectsFinder.waitForFilter('Saved search', 'visualization');
     let morePages = true;
     while (morePages) {
       searchList.push(await this.addEveryEmbeddableOnCurrentPage());
