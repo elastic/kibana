@@ -26,7 +26,7 @@ export const PageIntroduction: React.FC<PageIntroductionProps> = ({
     <EuiFlexGroup direction="row" gutterSize="m">
       <EuiFlexItem>
         <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>
+          <EuiFlexItem data-test-subj="pageIntroductionTitleContainer">
             {typeof title === 'string' ? (
               <EuiTitle size="xs" data-test-subj="inlineEditableTableTitle">
                 <h3>{title}</h3>
@@ -46,13 +46,17 @@ export const PageIntroduction: React.FC<PageIntroductionProps> = ({
               <EuiSpacer size="s" />
               <EuiFlexItem>
                 <EuiText size="s">
-                  {Array.isArray(links)
-                    ? links.map((link, index) => (
-                        <EuiLink href={link.href} target="_blank" external key={index + '-'}>
-                          {link.text}
-                        </EuiLink>
-                      ))
-                    : links}
+                  {Array.isArray(links) ? (
+                    links.map((link, index) => (
+                      <EuiLink href={link.href} target="_blank" external key={index + '-'}>
+                        {link.text}
+                      </EuiLink>
+                    ))
+                  ) : (
+                    <EuiLink href={links.href} target="_blank" external>
+                      {links.text}
+                    </EuiLink>
+                  )}
                 </EuiText>
               </EuiFlexItem>
             </>
