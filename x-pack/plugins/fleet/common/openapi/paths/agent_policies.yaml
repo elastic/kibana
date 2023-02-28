@@ -40,7 +40,7 @@ get:
         type: boolean
       in: query
       name: noAgentCount
-      description: When set to true, do not count how many agents are in the agent policy, this can improve performance if you are searching over a large number of agent policies. The "agents" property will always be 0 if set to true. 
+      description: When set to true, do not count how many agents are in the agent policy, this can improve performance if you are searching over a large number of agent policies. The "agents" property will always be 0 if set to true.
 
   description: ''
 post:
@@ -63,7 +63,7 @@ post:
     content:
       application/json:
         schema:
-          $ref: ../components/schemas/new_agent_policy.yaml
+          $ref: ../components/schemas/agent_policy_create_request.yaml
   security: []
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
