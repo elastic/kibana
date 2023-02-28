@@ -156,7 +156,6 @@ export const takeOsqueryActionWithParams = () => {
   cy.contains('Advanced').click();
   typeInECSFieldInput('tags{downArrow}{enter}');
   cy.getBySel('osqueryColumnValueSelect').type('platform_like{downArrow}{enter}');
-  cy.wait(1000);
   submitQuery();
   cy.getBySel('dataGridHeader').within(() => {
     cy.contains('tags');

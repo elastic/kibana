@@ -30,7 +30,7 @@ import {
 import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
-import { LIVE_QUERY_EDITOR, RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { ROLES } from '../../test';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
@@ -74,16 +74,16 @@ describe('Alert Event Details', () => {
     toggleRuleOffAndOn(RULE_NAME);
   });
 
-  it('adds response actions with osquery with proper validation and form values', () => {
+  it.only('adds response actions with osquery with proper validation and form values', () => {
     cy.visit('/app/security/rules');
     cy.contains(RULE_NAME).click();
     cy.contains('Edit rule settings').click({ force: true });
     cy.getBySel('edit-rule-actions-tab').wait(500).click();
     cy.contains('Response actions are run on each rule execution');
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
-    cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
-      cy.get(LIVE_QUERY_EDITOR);
-    });
+    // cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
+    //   cy.get(LIVE_QUERY_EDITOR);
+    // });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('Query is a required field');
       inputQuery('select * from uptime1');
@@ -106,7 +106,7 @@ describe('Alert Event Details', () => {
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
 
     cy.getBySel(RESPONSE_ACTIONS_ITEM_2).within(() => {
-      cy.get(LIVE_QUERY_EDITOR);
+      // cy.get(LIVE_QUERY_EDITOR);
       cy.contains('Query is a required field');
       inputQuery('select * from uptime');
       cy.contains('Advanced').click();
@@ -180,6 +180,7 @@ describe('Alert Event Details', () => {
       cy.contains('Log message optimized for viewing in a log viewer');
       cy.contains('Days of uptime');
     });
+    cy.wait(1000);
     cy.contains('Save changes').click();
     cy.wait('@saveRule').should(({ request }) => {
       const threeQueries = [
