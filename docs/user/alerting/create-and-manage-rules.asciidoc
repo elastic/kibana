@@ -79,21 +79,21 @@ Each connector enables different action properties. For example, an email connec
 [[alerting-concepts-suppressing-duplicate-notifications]]
 [TIP]
 ==============================================
-If you are not using alert summaries, actions are triggered per alert and a rule can end up generating a large number of actions. Take the following example where a rule is monitoring three servers every minute for CPU usage > 0.9, and the rule is set to notify `On check intervals`:
+If you are not using alert summaries, actions are triggered per alert and a rule can end up generating a large number of actions. Take the following example where a rule is monitoring three servers every minute for CPU usage > 0.9, and the action frequency is `On check intervals`:
 
 * Minute 1: server X123 > 0.9. _One email_ is sent for server X123.
 * Minute 2: X123 and Y456 > 0.9. _Two emails_ are sent, one for X123 and one for Y456.
 * Minute 3: X123, Y456, Z789 > 0.9. _Three emails_ are sent, one for each of X123, Y456, Z789.
 
 In this example, three emails are sent for server X123 in the span of 3 minutes for the same rule. Often, it's desirable to suppress these re-notifications. If
-you set the rule notify setting to `On custom action intervals` with an interval of 5 minutes, you reduce noise by getting emails only every 5 minutes for
+you set the action frequency to `On custom action intervals` with an interval of 5 minutes, you reduce noise by getting emails only every 5 minutes for
 servers that continue to exceed the threshold:
 
-* Minute 1: server X123 > 0.9. _One email_ is sent for server X123.
-* Minute 2: X123 and Y456 > 0.9. _One email_ is sent for Y456.
-* Minute 3: X123, Y456, Z789 > 0.9. _One email_ is sent for Z789.
+* Minute 1: server X123 > 0.9. _One email_ will be sent for server X123.
+* Minute 2: X123 and Y456 > 0.9. _One email_ will be sent for Y456.
+* Minute 3: X123, Y456, Z789 > 0.9. _One email_ will be sent for Z789.
 
-To get notified only once when a server exceeds the threshold, you can set the rule notify setting to `On status changes`.
+To get notified only once when a server exceeds the threshold, you can set the action frequency to `On status changes`. Alternatively, if the rule type supports alert summaries, consider using them to reduce the volume of notifications.
 ==============================================
 
 [float]
