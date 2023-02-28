@@ -18,6 +18,7 @@ x-pack/test/alerting_api_integration/common/plugins/alerts @elastic/response-ops
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/plugins/alerting @elastic/response-ops
+packages/kbn-alerting-state-types @elastic/response-ops
 packages/kbn-alerts @elastic/security-solution
 x-pack/test/alerting_api_integration/common/plugins/alerts_restricted @elastic/response-ops
 packages/kbn-alerts-ui-shared @elastic/response-ops
