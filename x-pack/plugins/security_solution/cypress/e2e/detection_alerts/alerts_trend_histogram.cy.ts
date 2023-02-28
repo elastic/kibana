@@ -5,29 +5,14 @@
  * 2.0.
  */
 
-import { ROLES } from '../../../common/test';
 import { getNewRule } from '../../objects/rule';
-import {
-  ALERTS_COUNT,
-  TAKE_ACTION_POPOVER_BTN,
-  ALERT_COUNT_TABLE_FIRST_ROW_COUNT,
-  ALERTS_TREND_SIGNAL_RULE_NAME_PANEL,
-  SELECTED_ALERTS,
-  ALERTS_LEGEND,
-} from '../../screens/alerts';
+import { ALERTS_COUNT } from '../../screens/alerts';
 
 import {
   selectNumberOfAlerts,
   waitForAlerts,
   markAcknowledgedFirstAlert,
   goToAcknowledgedAlerts,
-  clearGroupByTopInput,
-  closeAlerts,
-  closeFirstAlert,
-  goToClosedAlerts,
-  goToOpenedAlerts,
-  openAlerts,
-  openFirstAlert,
   selectTrendAnalysis,
 } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
