@@ -25,17 +25,18 @@ import { Title } from './components/title';
 import { paths } from '../../config';
 import type { SloDetailsPathParams } from './types';
 import type { ObservabilityAppServices } from '../../application/types';
+import { HeaderControl } from './components/header_control';
 
 export function SloDetailsPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana<ObservabilityAppServices>().services;
-
   const { ObservabilityPageTemplate, config } = usePluginContext();
-  const { sloId } = useParams<SloDetailsPathParams>();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
+
+  const { sloId } = useParams<SloDetailsPathParams>();
   const { isLoading, slo } = useFetchSloDetails(sloId);
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
@@ -52,7 +53,7 @@ export function SloDetailsPage() {
     <ObservabilityPageTemplate
       pageHeader={{
         pageTitle: <Title isLoading={isLoading} slo={slo} />,
-        rightSideItems: [],
+        rightSideItems: [<HeaderControl isLoading={isLoading} slo={slo} />],
         bottomBorder: false,
       }}
       data-test-subj="sloDetailsPage"
