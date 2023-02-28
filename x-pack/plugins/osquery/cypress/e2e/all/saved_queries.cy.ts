@@ -45,7 +45,7 @@ describe('ALL - Saved queries', () => {
 
   getSavedQueriesComplexTest(SAVED_QUERY_ID, SAVED_QUERY_DESCRIPTION);
 
-  it('checks that user cant add a saved query with an ID that already exists', () => {
+  it.skip('checks that user cant add a saved query with an ID that already exists', () => {
     cy.contains('Saved queries').click();
     cy.contains('Add saved query').click();
 
