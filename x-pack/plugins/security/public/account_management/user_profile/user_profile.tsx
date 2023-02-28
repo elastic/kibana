@@ -20,7 +20,6 @@ import {
   EuiIconTip,
   EuiPageTemplate_Deprecated as EuiPageTemplate,
   EuiSpacer,
-  EuiSwitch,
   EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
@@ -139,6 +138,95 @@ function UserDetailsEditor({ user }: { user: AuthenticatedUser }) {
       >
         <FormField type="email" name="user.email" fullWidth />
       </FormRow>
+    </EuiDescribedFormGroup>
+  );
+}
+
+function UserSettingsEditor({ formik }: { formik: ReturnType<typeof useUserProfileForm> }) {
+  if (!formik.values.data) {
+    return null;
+  }
+
+  return (
+    <EuiDescribedFormGroup
+      fullWidth
+      fieldFlexItemProps={{ style: { alignSelf: 'flex-start' } }}
+      title={
+        <h2>
+          <FormattedMessage
+            id="xpack.security.accountManagement.userProfile.userSettingsTitle"
+            defaultMessage="User Settings"
+          />
+        </h2>
+      }
+      description={
+        <FormattedMessage
+          id="xpack.security.accountManagement.userProfile.avatarGroupDescription"
+          defaultMessage="Choose your desired theme for Kibana"
+        />
+      }
+    >
+      <EuiFlexGroup responsive={false}>
+        <EuiFlexItem>
+          <FormRow
+            name="theme"
+            label={
+              <FormLabel for="theme">
+                <FormattedMessage
+                  id="xpack.security.accountManagement.userProfile.userSettings.theme"
+                  defaultMessage="Theme"
+                />
+              </FormLabel>
+            }
+            fullWidth
+          >
+            <EuiButtonGroup
+              legend={i18n.translate(
+                'xpack.security.accountManagement.userProfile.userSettings.themeGroupDescription',
+                {
+                  defaultMessage: 'Kibana Theme',
+                }
+              )}
+              buttonSize="m"
+              idSelected={formik.values.data.userSettings.darkMode}
+              options={[
+                {
+                  id: 'dark',
+                  label: (
+                    <FormattedMessage
+                      id="xpack.security.accountManagement.userProfile.darkModeButton"
+                      defaultMessage="Dark Mode"
+                    />
+                  ),
+                  iconType: 'moon',
+                },
+                {
+                  id: 'light',
+                  label: (
+                    <FormattedMessage
+                      id="xpack.security.accountManagement.userProfile.lightModeButton"
+                      defaultMessage="Light Mode"
+                    />
+                  ),
+                  iconType: 'sun',
+                },
+                {
+                  id: '',
+                  label: (
+                    <FormattedMessage
+                      id="xpack.security.accountManagement.userProfile.spacesDefaultModeButton"
+                      defaultMessage="Space Default"
+                    />
+                  ),
+                  iconType: 'spaces',
+                },
+              ]}
+              onChange={(id: string) => formik.setFieldValue('data.userSettings.darkMode', id)}
+              isFullWidth
+            />
+          </FormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiDescribedFormGroup>
   );
 }
@@ -443,10 +531,8 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
   const formChanges = useFormChanges();
   const titleId = useGeneratedHtmlId();
   const [showChangePasswordForm, setShowChangePasswordForm] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(data?.userSettings?.darkMode === 'dark');
 
   const canChangeDetails = canUserChangeDetails(user, services.application.capabilities);
-  const { userProfiles } = useSecurityApiClients();
 
   const isCloudUser = user.elastic_cloud_user;
 
@@ -571,23 +657,13 @@ export const UserProfile: FunctionComponent<UserProfileProps> = ({ user, data })
             >
               <Form aria-labelledby={titleId}>
                 <UserDetailsEditor user={user} />
+                {isCloudUser ? null : <UserSettingsEditor formik={formik} />}
                 {isCloudUser ? null : <UserAvatarEditor user={user} formik={formik} />}
                 <UserPasswordEditor
                   user={user}
                   onShowPasswordForm={() => setShowChangePasswordForm(true)}
                 />
               </Form>
-              <EuiSpacer />
-              <EuiSwitch
-                label="Dark mode"
-                checked={isDarkMode}
-                data-test-subj={'userProfileDarkModeSwitch'}
-                onChange={(e) => {
-                  const mode = e.target.checked ? 'dark' : 'light';
-                  setIsDarkMode(e.target.checked);
-                  userProfiles.setUserSettings({ darkMode: mode });
-                }}
-              />
             </EuiPageTemplate>
           </Breadcrumb>
         </FormChangesProvider>
@@ -621,6 +697,7 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
   });
 
   const [validateOnBlurOrChange, setValidateOnBlurOrChange] = useState(false);
+
   const formik = useFormik<UserProfileFormValues>({
     onSubmit: async (values) => {
       const submitActions = [];
