@@ -250,6 +250,10 @@ export interface RawRuleAction extends SavedObjectAttributes {
     throttle: string | null;
   };
   alertsFilter?: null | {
+    query: null | {
+      kql: string;
+      dsl: string;
+    };
     timeframe: null | {
       days: Array<0 | 1 | 2 | 3 | 4 | 5 | 6>;
       hours: {
@@ -257,8 +261,6 @@ export interface RawRuleAction extends SavedObjectAttributes {
         end: string;
       };
     };
-    kql: string | null;
-    filter: string;
   };
 }
 

@@ -77,6 +77,10 @@ export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
 export interface AlertsFilter {
+  query: null | {
+    kql: string;
+    dsl: string;
+  };
   timeframe: null | {
     days: Array<0 | 1 | 2 | 3 | 4 | 5 | 6>;
     hours: {
@@ -84,8 +88,6 @@ export interface AlertsFilter {
       end: string;
     };
   };
-  kql: null | string;
-  filter: string;
 }
 
 export interface RuleAction {

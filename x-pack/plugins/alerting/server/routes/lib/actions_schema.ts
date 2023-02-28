@@ -28,7 +28,12 @@ export const actionsSchema = schema.arrayOf(
     alerts_filter: schema.maybe(
       schema.nullable(
         schema.object({
-          kql: schema.nullable(schema.string()),
+          query: schema.nullable(
+            schema.object({
+              kql: schema.string(),
+              dsl: schema.string(),
+            })
+          ),
           timeframe: schema.nullable(
             schema.object({
               days: schema.arrayOf(
@@ -48,7 +53,6 @@ export const actionsSchema = schema.arrayOf(
               }),
             })
           ),
-          filter: schema.string(),
         })
       )
     ),

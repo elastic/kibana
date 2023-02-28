@@ -18,7 +18,7 @@ export function formatActions(
       ? {
           ...alertsFilter,
           timeframe: alertsFilter.timeframe || null,
-          kql: alertsFilter.kql || null,
+          query: alertsFilter.query || null,
         }
       : null,
   }));

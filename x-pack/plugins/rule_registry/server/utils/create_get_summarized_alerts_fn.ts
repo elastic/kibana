@@ -546,8 +546,8 @@ const getQueryByTimeRange = (
 const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryContainer[] => {
   const filter: QueryDslQueryContainer[] = [];
 
-  if (alertsFilter.filter) {
-    filter.push(JSON.parse(alertsFilter.filter));
+  if (alertsFilter.query) {
+    filter.push(JSON.parse(alertsFilter.query.dsl));
   }
   if (alertsFilter.timeframe) {
     filter.push({
