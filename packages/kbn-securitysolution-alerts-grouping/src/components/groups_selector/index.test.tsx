@@ -1,12 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import { TestProviders } from '../../../mock';
 import { GroupsSelector } from '..';
 import React from 'react';
 
@@ -69,19 +69,11 @@ describe('group selector', () => {
     jest.clearAllMocks();
   });
   it('Sets the selected group from the groupSelected prop', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <GroupsSelector {...testProps} />
-      </TestProviders>
-    );
+    const { getByTestId } = render(<GroupsSelector {...testProps} />);
     expect(getByTestId('group-selector-dropdown').textContent).toBe('Group alerts by: Rule name');
   });
   it('Presents correct option when group selector dropdown is clicked', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <GroupsSelector {...testProps} />
-      </TestProviders>
-    );
+    const { getByTestId } = render(<GroupsSelector {...testProps} />);
     fireEvent.click(getByTestId('group-selector-dropdown'));
     [
       ...testProps.options,
@@ -92,11 +84,7 @@ describe('group selector', () => {
     });
   });
   it('Presents fields dropdown when custom field option is selected', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <GroupsSelector {...testProps} />
-      </TestProviders>
-    );
+    const { getByTestId } = render(<GroupsSelector {...testProps} />);
     fireEvent.click(getByTestId('group-selector-dropdown'));
     fireEvent.click(getByTestId('panel-none'));
     expect(onGroupChange).toHaveBeenCalled();

@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { getGroupingQuery } from './src/containers/query';
+import type { NamedAggregation } from './src/containers/query/types';
 import {
   GroupsSelector,
   GroupSelectorProps,
@@ -15,7 +16,6 @@ import {
   GroupingTableAggregation,
   GroupingFieldTotalAggregation,
   RawBucket,
-  NamedAggregation,
 } from './src/components';
 import { GroupedTables, GroupedTablesProps } from './src/components/grouped_tables';
 
