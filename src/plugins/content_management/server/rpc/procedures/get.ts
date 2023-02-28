@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { rpcSchemas } from '../../../common';
+import { rpcSchemas } from '../../../common/schemas';
 import type { GetIn } from '../../../common';
 import type { ContentCrud, StorageContext } from '../../core';
 import { validate } from '../../utils';
