@@ -43,7 +43,7 @@ export const NoConnectorRecord: React.FC = () => {
             {i18n.translate(
               'xpack.enterpriseSearch.content.searchIndex.noCrawlerConnectorFound.title',
               {
-                defaultMessage: "This index's connector record has been removed",
+                defaultMessage: "This index's connector configuration has been removed",
               }
             )}
           </h2>
@@ -54,7 +54,7 @@ export const NoConnectorRecord: React.FC = () => {
               'xpack.enterpriseSearch.content.searchIndex.noCrawlerConnectorFound.description',
               {
                 defaultMessage:
-                  'We could not find a connector document for this crawler index. The record should be recreated, or the index should be deleted.',
+                  'We could not find a connector configuration for this crawler index. The record should be recreated, or the index should be deleted.',
               }
             )}
           </p>
