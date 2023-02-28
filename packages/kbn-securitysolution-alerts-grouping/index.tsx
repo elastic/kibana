@@ -7,17 +7,20 @@
  */
 
 import React from 'react';
-import { getGroupingQuery } from './src/containers/query';
-import type { NamedAggregation } from './src/containers/query/types';
 import {
-  GroupsSelector,
   GroupSelectorProps,
-  isNoneGroup,
-  GroupingTableAggregation,
-  GroupingFieldTotalAggregation,
+  GroupedTables,
+  GroupedTablesProps,
+  GroupsSelector,
   RawBucket,
-} from './src/components';
-import { GroupedTables, GroupedTablesProps } from './src/components/grouped_tables';
+  getGroupingQuery,
+  isNoneGroup,
+} from './src';
+import type {
+  NamedAggregation,
+  GroupingFieldTotalAggregation,
+  GroupingTableAggregation,
+} from './src';
 
 export const getGroupedTables = (
   props: GroupedTablesProps
