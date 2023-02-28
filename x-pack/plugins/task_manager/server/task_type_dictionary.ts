@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/core/server';
 import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
+import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
 /**
  * Types that are no longer registered and will be marked as unregistered
@@ -129,12 +130,25 @@ export class TaskTypeDictionary {
       throw new Error(`Task ${removed} has been removed from registration!`);
     }
 
+    for (const taskType of Object.keys(taskDefinitions)) {
+      if (
+        taskDefinitions[taskType].maxConcurrency !== undefined &&
+        !CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE.includes(taskType)
+      ) {
+        // maxConcurrency is designed to limit how many tasks of the same type a single Kibana
+        // instance should run at a time. Meaning if you have 8 Kibanas running, you will still
+        // see up to 8 tasks running at a time but one per Kibana instance. This is helpful for
+        // reporting purposes but not for many other cases and are better off not setting this value.
+        throw new Error(`maxConcurrency setting isn't allowed for task type: ${taskType}`);
+      }
+    }
+
     try {
       for (const definition of sanitizeTaskDefinitions(taskDefinitions)) {
         this.definitions.set(definition.type, definition);
       }
     } catch (e) {
-      this.logger.error('Could not sanitize task definitions');
+      this.logger.error(`Could not sanitize task definitions: ${e.message}`);
     }
   }
 }

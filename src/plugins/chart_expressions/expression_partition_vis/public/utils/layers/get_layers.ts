@@ -12,7 +12,7 @@ import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
 import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
-import { sortPredicateByType } from './sort_predicate';
+import { sortPredicateByType, sortPredicateSaveSourceOrder } from './sort_predicate';
 import { byDataColorPaletteMap, getColor } from './get_color';
 import { getNodeLabel } from './get_node_labels';
 
@@ -52,7 +52,7 @@ export const getLayers = (
     );
   }
 
-  const sortPredicate = sortPredicateByType(chartType, visParams, visData, columns);
+  const sortPredicateForType = sortPredicateByType(chartType, visParams, visData, columns);
   return columns.map((col, layerIndex) => {
     return {
       groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? EMPTY_SLICE : col.name),
@@ -62,7 +62,9 @@ export const getLayers = (
         layerIndex === 0 && chartType === ChartTypes.MOSAIC
           ? { ...fillLabel, minFontSize: 14, maxFontSize: 14, clipText: true }
           : fillLabel,
-      sortPredicate,
+      sortPredicate: col.meta?.sourceParams?.consolidatedMetricsColumn
+        ? sortPredicateSaveSourceOrder()
+        : sortPredicateForType,
       shape: {
         fillColor: (d) =>
           getColor(
