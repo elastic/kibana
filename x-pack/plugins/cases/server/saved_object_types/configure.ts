@@ -15,70 +15,16 @@ export const caseConfigureSavedObjectType: SavedObjectsType = {
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
+    dynamic: false,
     properties: {
       created_at: {
         type: 'date',
-      },
-      created_by: {
-        properties: {
-          email: {
-            type: 'keyword',
-          },
-          username: {
-            type: 'keyword',
-          },
-          full_name: {
-            type: 'keyword',
-          },
-          profile_uid: {
-            type: 'keyword',
-          },
-        },
-      },
-      connector: {
-        properties: {
-          name: {
-            type: 'text',
-          },
-          type: {
-            type: 'keyword',
-          },
-          fields: {
-            properties: {
-              key: {
-                type: 'text',
-              },
-              value: {
-                type: 'text',
-              },
-            },
-          },
-        },
       },
       closure_type: {
         type: 'keyword',
       },
       owner: {
         type: 'keyword',
-      },
-      updated_at: {
-        type: 'date',
-      },
-      updated_by: {
-        properties: {
-          email: {
-            type: 'keyword',
-          },
-          username: {
-            type: 'keyword',
-          },
-          full_name: {
-            type: 'keyword',
-          },
-          profile_uid: {
-            type: 'keyword',
-          },
-        },
       },
     },
   },

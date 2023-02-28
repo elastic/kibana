@@ -10,10 +10,7 @@ import { ComponentStory } from '@storybook/react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import {
-  SloEditFormObjectivesTimeslices as Component,
-  Props,
-} from './slo_edit_form_objectives_timeslices';
+import { SloEditFormObjectivesTimeslices as Component } from './slo_edit_form_objectives_timeslices';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
 
 export default {
@@ -22,11 +19,11 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props: Props) => {
+const Template: ComponentStory<typeof Component> = () => {
   const methods = useForm({ defaultValues: SLO_EDIT_FORM_DEFAULT_VALUES });
   return (
     <FormProvider {...methods}>
-      <Component {...props} control={methods.control} />
+      <Component />
     </FormProvider>
   );
 };
