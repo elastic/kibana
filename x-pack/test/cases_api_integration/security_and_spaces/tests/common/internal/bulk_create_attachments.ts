@@ -22,6 +22,7 @@ import {
   postCommentUserReq,
   postCommentAlertReq,
   getPostCaseRequest,
+  getFilesAttachmentReq,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -150,6 +151,27 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('errors', () => {
+      it('400s when attaching a file with metadata that is missing the file field', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest());
+
+        await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params: [
+            postCommentUserReq,
+            getFilesAttachmentReq({
+              externalReferenceMetadata: {
+                name: 'test_file',
+                extension: 'png',
+                mimeType: 'image/png',
+                createdAt: '2023-02-27T20:26:54.345Z',
+              },
+            }),
+          ],
+          expectedHttpCode: 400,
+        });
+      });
+
       it('400s when attempting to create a comment with a different owner than the case', async () => {
         const postedCase = await createCase(
           supertest,

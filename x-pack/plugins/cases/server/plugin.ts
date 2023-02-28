@@ -56,6 +56,7 @@ import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/p
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import { UserProfileService } from './services';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
+import { registerInternalAttachments } from './internal_attachments';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
@@ -103,6 +104,8 @@ export class CasePlugin {
         core
       )}] and plugins [${Object.keys(plugins)}]`
     );
+
+    registerInternalAttachments(this.externalReferenceAttachmentTypeRegistry);
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;

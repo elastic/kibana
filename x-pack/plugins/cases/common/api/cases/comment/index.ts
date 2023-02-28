@@ -6,10 +6,12 @@
  */
 
 import * as rt from 'io-ts';
-import { jsonValueRt } from '../runtime_types';
-import { SavedObjectFindOptionsRt } from '../saved_object';
+import { jsonValueRt } from '../../runtime_types';
+import { SavedObjectFindOptionsRt } from '../../saved_object';
 
-import { UserRt } from '../user';
+import { UserRt } from '../../user';
+
+export * from './files';
 
 export const CommentAttributesBasicRt = rt.type({
   created_at: rt.string,
