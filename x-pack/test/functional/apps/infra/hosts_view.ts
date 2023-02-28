@@ -36,7 +36,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     kibanaServer.uiSettings.update({ [enableInfrastructureHostsView]: value });
 
   const loginWithReadOnlyUser = async () => {
-    await security.role.create('global_hosts_read_privileges_role', {
+    const roleCreation = security.role.create('global_hosts_read_privileges_role', {
       elasticsearch: {
         indices: [{ names: ['metricbeat-*'], privileges: ['read', 'view_index_metadata'] }],
       },
@@ -51,13 +51,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ],
     });
 
-    await security.user.create('global_hosts_read_privileges_user', {
+    const userCreation = security.user.create('global_hosts_read_privileges_user', {
       password: 'global_hosts_read_privileges_user-password',
       roles: ['global_hosts_read_privileges_role'],
       full_name: 'test user',
     });
 
-    await pageObjects.security.forceLogout();
+    const logout = pageObjects.security.forceLogout();
+
+    await Promise.all([roleCreation, userCreation, logout]);
 
     await pageObjects.security.login(
       'global_hosts_read_privileges_user',
@@ -68,13 +70,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
-  const logoutAndDeleteReadOnlyUser = async () => {
-    await pageObjects.security.forceLogout();
-    await Promise.all([
+  const logoutAndDeleteReadOnlyUser = () =>
+    Promise.all([
+      pageObjects.security.forceLogout(),
       security.role.delete('global_hosts_read_privileges_role'),
       security.user.delete('global_hosts_read_privileges_user'),
     ]);
-  };
 
   const enableHostView = () => pageObjects.infraHostsView.clickEnableHostViewButton();
 
@@ -152,13 +153,16 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     describe('#Page Content', () => {
       before(async () => {
         await setHostViewEnabled(true);
-        await pageObjects.security.forceLogout();
         await loginWithReadOnlyUser();
         await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
         await pageObjects.timePicker.setAbsoluteRange(
           START_DATE.format(timepickerFormat),
           END_DATE.format(timepickerFormat)
         );
+      });
+
+      after(async () => {
+        await logoutAndDeleteReadOnlyUser();
       });
 
       it('should render the correct page title', async () => {
