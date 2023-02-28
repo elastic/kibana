@@ -28,15 +28,15 @@ export const formatTestDuration = (duration = 0, isMilli = false) => {
 
   if (secs >= 60) {
     return i18n.translate('xpack.synthetics.errorDetails.errorDuration.minutes', {
-      defaultMessage: '{value} minutes',
-      values: { value: Math.floor(secs / 60) },
+      defaultMessage: '{value} mins',
+      values: { value: parseFloat((secs / 60).toFixed(1)) },
     });
   }
 
   if (secs >= 1) {
     return i18n.translate('xpack.synthetics.errorDetails.errorDuration.seconds', {
-      defaultMessage: '{value} seconds',
-      values: { value: secs.toFixed(0) },
+      defaultMessage: '{value} sec',
+      values: { value: parseFloat(secs.toFixed(1)) },
     });
   }
 
