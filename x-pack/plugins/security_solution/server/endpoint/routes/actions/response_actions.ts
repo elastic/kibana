@@ -238,7 +238,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     } catch (error) {
       return res.customError({
         statusCode: 500,
-        body: error,
+        body: { message: error },
       });
     }
   };

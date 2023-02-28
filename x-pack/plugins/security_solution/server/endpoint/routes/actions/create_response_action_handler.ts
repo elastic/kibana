@@ -138,10 +138,10 @@ export const createResponseActionHandler = async (
         { meta: true }
       );
       if (logsEndpointActionsResult.statusCode !== 201) {
-        throw new Error(logsEndpointActionsResult.body.result);
+        return Promise.reject(logsEndpointActionsResult.body.result);
       }
     } catch (e) {
-      throw new Error(e);
+      return Promise.reject(e);
     }
   }
 
@@ -175,7 +175,7 @@ export const createResponseActionHandler = async (
     );
 
     if (fleetActionIndexResult.statusCode !== 201) {
-      throw new Error(fleetActionIndexResult.body.result);
+      return Promise.reject(fleetActionIndexResult.body.result);
     }
   } catch (e) {
     // create entry in .logs-endpoint.action.responses-default data stream
@@ -196,7 +196,7 @@ export const createResponseActionHandler = async (
         logger,
       });
     }
-    throw new Error(e);
+    return Promise.reject(e);
   }
 
   // Update all cases with a comment
