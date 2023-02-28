@@ -9,6 +9,7 @@ import { RawRule, SanitizedRule, RuleTypeParams, SanitizedRuleWithLegacyId } fro
 import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getAlertFromRaw } from '../lib/get_alert_from_raw';
+import { migrateRulesHook } from '../lib';
 import { RulesClientContext } from '../types';
 
 export interface GetParams {
@@ -51,7 +52,7 @@ export async function get<Params extends RuleTypeParams = never>(
       savedObject: { type: 'alert', id },
     })
   );
-  return getAlertFromRaw<Params>(
+  const rule = getAlertFromRaw<Params>(
     context,
     result.id,
     result.attributes.alertTypeId,
@@ -61,4 +62,8 @@ export async function get<Params extends RuleTypeParams = never>(
     excludeFromPublicApi,
     includeSnoozeData
   );
+
+  const [migratedRule] = await migrateRulesHook({ rules: [rule] }, context);
+
+  return migratedRule;
 }

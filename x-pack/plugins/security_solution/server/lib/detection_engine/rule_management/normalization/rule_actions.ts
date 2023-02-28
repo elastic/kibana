@@ -92,6 +92,14 @@ function transformFromFirstActionThrottle(rule: RuleAlertType) {
 }
 
 /**
+ * Security solution throttle can't be empty
+ * If it is, it will be set as no_actions
+ */
+export const getSecurityRuleThrottle = (throttle: string | undefined | null): string => {
+  return throttle || NOTIFICATION_THROTTLE_NO_ACTIONS;
+};
+
+/**
  * Given a set of actions from an "alerting" Saved Object (SO) this will transform it into a "security_solution" alert action.
  * If this detects any legacy rule actions it will transform it. If both are sent in which is not typical but possible due to
  * the split nature of the API's this will prefer the usage of the non-legacy version. Eventually the "legacyRuleActions" should

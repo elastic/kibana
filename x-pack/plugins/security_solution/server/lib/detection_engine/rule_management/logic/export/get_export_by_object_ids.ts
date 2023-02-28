@@ -20,8 +20,6 @@ import { findRules } from '../search/find_rules';
 import { getRuleExceptionsForExport } from './get_export_rule_exceptions';
 import { getRuleActionConnectorsForExport } from './get_export_rule_action_connectors';
 
-// eslint-disable-next-line no-restricted-imports
-import { legacyGetBulkRuleActionsSavedObject } from '../../../rule_actions_legacy';
 import { internalRuleToAPIResponse } from '../../normalization/rule_converters';
 import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
 
@@ -119,12 +117,6 @@ export const getRulesFromObjects = async (
     sortField: undefined,
     sortOrder: undefined,
   });
-  const alertIds = rules.data.map((rule) => rule.id);
-  const legacyActions = await legacyGetBulkRuleActionsSavedObject({
-    alertIds,
-    savedObjectsClient,
-    logger,
-  });
 
   const alertsAndErrors = objects.map(({ rule_id: ruleId }) => {
     const matchingRule = rules.data.find((rule) => rule.params.ruleId === ruleId);
@@ -133,7 +125,7 @@ export const getRulesFromObjects = async (
       isAlertType(matchingRule) &&
       matchingRule.params.immutable !== true
     ) {
-      const rule = internalRuleToAPIResponse(matchingRule, legacyActions[matchingRule.id]);
+      const rule = internalRuleToAPIResponse(matchingRule);
 
       // Fields containing runtime information shouldn't be exported. It causes import failures.
       delete rule.execution_summary;

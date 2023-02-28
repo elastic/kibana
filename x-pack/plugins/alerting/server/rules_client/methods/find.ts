@@ -27,6 +27,7 @@ import {
 import { alertingAuthorizationFilterOpts } from '../common/constants';
 import { getAlertFromRaw } from '../lib/get_alert_from_raw';
 import type { IndexType, RulesClientContext } from '../types';
+import { migrateRulesHook } from '../lib';
 
 export interface FindParams {
   options?: FindOptions;
@@ -174,6 +175,6 @@ export async function find<Params extends RuleTypeParams = never>(
     page,
     perPage,
     total,
-    data: authorizedData,
+    data: await migrateRulesHook({ rules: authorizedData }, context),
   };
 }

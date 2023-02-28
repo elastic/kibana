@@ -21,9 +21,6 @@ import { buildSiemResponse } from '../../../../routes/utils';
 import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
 import { transformFindAlerts } from '../../../utils/utils';
 
-// eslint-disable-next-line no-restricted-imports
-import { legacyGetBulkRuleActionsSavedObject } from '../../../../rule_actions_legacy';
-
 export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.get(
     {
@@ -63,13 +60,13 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
 
         const ruleIds = rules.data.map((rule) => rule.id);
 
-        const ruleActions = await legacyGetBulkRuleActionsSavedObject({
-          alertIds: ruleIds,
-          savedObjectsClient,
-          logger,
-        });
+        // const ruleActions = await legacyGetBulkRuleActionsSavedObject({
+        //   alertIds: ruleIds,
+        //   savedObjectsClient,
+        //   logger,
+        // });
 
-        const transformed = transformFindAlerts(rules, ruleActions);
+        const transformed = transformFindAlerts(rules, {});
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
         } else {

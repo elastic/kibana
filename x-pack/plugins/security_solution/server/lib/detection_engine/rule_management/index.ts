@@ -18,3 +18,5 @@ export {
   typeSpecificCamelToSnake,
   convertCreateAPIToInternalSchema,
 } from './normalization/rule_converters';
+
+export { transformActions, transformFromAlertThrottle } from './normalization/rule_actions';

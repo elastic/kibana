@@ -24,7 +24,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
-import { RulesClient } from './rules_client';
+import { RulesClient, RulesClientContext } from './rules_client';
 import { RulesSettingsClient, RulesSettingsFlappingClient } from './rules_settings_client';
 export * from '../common';
 import {
@@ -136,6 +136,13 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
+export type MigrateRules = (
+  options: {
+    rules: SanitizedRule[];
+  },
+  context: RulesClientContext
+) => Promise<SanitizedRule[]>;
+
 export interface GetSummarizedAlertsFnOpts {
   start?: Date;
   end?: Date;
@@ -226,6 +233,7 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
+  migrateRules?: MigrateRules;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,
