@@ -40,7 +40,6 @@ describe('createAlertFactory()', () => {
       },
       state: {},
       context: {},
-      scheduledExecutionOptions: undefined,
       id: '1',
     });
     // @ts-expect-error
@@ -72,7 +71,6 @@ describe('createAlertFactory()', () => {
       },
       state: { foo: true },
       context: {},
-      scheduledExecutionOptions: undefined,
       id: '1',
     });
   });
@@ -94,7 +92,6 @@ describe('createAlertFactory()', () => {
         },
         state: {},
         context: {},
-        scheduledExecutionOptions: undefined,
         id: '1',
       },
     });
