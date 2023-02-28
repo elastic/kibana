@@ -20,6 +20,12 @@ export interface UpdateMappingsParams {
   index: string;
   mappings: IndexMapping;
 }
+
+/** @internal */
+export interface IncompatibleMappingException {
+  type: 'incompatible_mapping_exception';
+}
+
 /**
  * Updates an index's mappings and runs an pickupUpdatedMappings task so that the mapping
  * changes are "picked up". Returns a taskId to track progress.
@@ -29,7 +35,7 @@ export const updateMappings = ({
   index,
   mappings,
 }: UpdateMappingsParams): TaskEither.TaskEither<
-  RetryableEsClientError | 'incompatible_mapping_exception',
+  RetryableEsClientError | IncompatibleMappingException,
   'update_mappings_succeeded'
 > => {
   return () => {
@@ -41,9 +47,15 @@ export const updateMappings = ({
       })
       .then(() => Either.right('update_mappings_succeeded' as const))
       .catch((res) => {
+        const errorType = res?.body?.error?.type;
         // ES throws this exact error when attempting to make incompatible updates to the mappigns
-        if (res?.statusCode === 400 && res?.body?.error?.type === 'illegal_argument_exception') {
-          return Either.left('incompatible_mapping_exception');
+        if (
+          res?.statusCode === 400 &&
+          (errorType === 'illegal_argument_exception' ||
+            errorType === 'strict_dynamic_mapping_exception' ||
+            errorType === 'mapper_parsing_exception')
+        ) {
+          return Either.left({ type: 'incompatible_mapping_exception' });
         }
         return catchRetryableEsClientErrors(res);
       });
