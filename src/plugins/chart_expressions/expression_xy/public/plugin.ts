@@ -83,7 +83,7 @@ export class ExpressionXyPlugin {
       const paletteService = await palettes.getPalettes();
 
       const { theme: kibanaTheme } = coreStart;
-      const eventAnnotationService = await eventAnnotation.getService();
+      const eventAnnotationService = await eventAnnotation.getService(coreStart);
       const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
 
       return {

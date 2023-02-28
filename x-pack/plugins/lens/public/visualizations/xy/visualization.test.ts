@@ -80,13 +80,15 @@ function exampleState(): XYState {
 const paletteServiceMock = chartPluginMock.createPaletteRegistry();
 const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
+const core = coreMock.createStart();
+
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
   fieldFormats: fieldFormatsMock,
   useLegacyTimeAxis: false,
   kibanaTheme: themeServiceMock.createStartContract(),
   eventAnnotationService: eventAnnotationServiceMock,
-  core: coreMock.createStart(),
+  core,
   storage: {} as IStorageWrapper,
   data: dataPluginMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
@@ -3021,7 +3023,7 @@ describe('xy_visualization', () => {
         },
         setState
       )!;
-      action.execute();
+      action.execute(null);
 
       expect(setState).toHaveBeenCalledWith(
         expect.objectContaining({

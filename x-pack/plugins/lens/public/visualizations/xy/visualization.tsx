@@ -102,6 +102,7 @@ import { DimensionTrigger } from '../../shared_components/dimension_trigger';
 import { defaultAnnotationLabel } from './annotations/helpers';
 import { onDropForVisualization } from '../../editor_frame_service/editor_frame/config_panel/buttons/drop_targets_utils';
 import { createAnnotationActions } from './annotations/actions';
+import { AddLayerButton } from './add_layer';
 
 const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
@@ -201,10 +202,11 @@ export const getXyVisualization = ({
     };
   },
 
+  // how to implement this for saved object annotations?
   getPersistableState(state) {
     return extractReferences(state);
   },
-
+  // how to implement this for saved object annotations?
   fromPersistableState(state, references, initialContext) {
     return injectReferences(state, references, initialContext);
   },
@@ -256,12 +258,14 @@ export const getXyVisualization = ({
     ];
   },
 
-  getSupportedActionsForLayer(layerId, state, setState) {
+  getSupportedActionsForLayer(layerId, state, setState, isSaveable) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
     const actions = [];
     if (isAnnotationsLayer(layer)) {
-      actions.push(...createAnnotationActions({ state, layerIndex, layer, setState }));
+      actions.push(
+        ...createAnnotationActions({ state, layerIndex, layer, setState, core, isSaveable })
+      );
     }
     return actions;
   },
@@ -656,7 +660,9 @@ export const getXyVisualization = ({
       domElement
     );
   },
-
+  getAddLayerButtonComponent: (props) => {
+    return <AddLayerButton {...props} eventAnnotationService={eventAnnotationService} />;
+  },
   toExpression: (state, layers, attributes, datasourceExpressionsByLayers = {}) =>
     toExpression(
       state,

@@ -50,7 +50,7 @@ import {
 } from '../../../state_management';
 import { onDropForVisualization, shouldRemoveSource } from './buttons/drop_targets_utils';
 import { getSharedActions } from './layer_actions/layer_actions';
-import { FlyoutContainer } from './flyout_container';
+import { FlyoutContainer } from '../../../shared_components/flyout_container';
 
 // hide the random sampling settings from the UI
 const DISPLAY_RANDOM_SAMPLING_SETTINGS = false;
@@ -122,6 +122,8 @@ export function LayerPanel(
     core,
   } = props;
 
+  const isSaveable = useLensSelector((state) => state.lens.isSaveable);
+
   const datasourceStates = useLensSelector(selectDatasourceStates);
   const isFullscreen = useLensSelector(selectIsFullscreenDatasource);
   const dateRange = useLensSelector(selectResolvedDateRange);
@@ -132,6 +134,7 @@ export function LayerPanel(
 
   const panelRef = useRef<HTMLDivElement | null>(null);
   const settingsPanelRef = useRef<HTMLDivElement | null>(null);
+
   const registerLayerRef = useCallback(
     (el) => registerNewLayerRef(layerId, el),
     [layerId, registerNewLayerRef]
@@ -325,11 +328,20 @@ export function LayerPanel(
   const compatibleActions = useMemo<LayerAction[]>(
     () =>
       [
-        ...(activeVisualization.getSupportedActionsForLayer?.(
-          layerId,
-          visualizationState,
-          updateVisualization
-        ) || []),
+        ...(activeVisualization
+          .getSupportedActionsForLayer?.(
+            layerId,
+            visualizationState,
+            updateVisualization,
+            isSaveable
+          )
+          .map((action) => ({
+            ...action,
+            execute: () => {
+              action.execute(layerActionsFlyoutRef.current);
+            },
+          })) || []),
+
         ...getSharedActions({
           layerId,
           activeVisualization,
@@ -366,8 +378,10 @@ export function LayerPanel(
       props.framePublicAPI,
       updateVisualization,
       visualizationState,
+      isSaveable,
     ]
   );
+  const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
 
   return (
     <>
@@ -391,7 +405,12 @@ export function LayerPanel(
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <LayerActions actions={compatibleActions} layerIndex={layerIndex} />
+                <LayerActions
+                  actions={compatibleActions}
+                  layerIndex={layerIndex}
+                  mountingPoint={layerActionsFlyoutRef.current}
+                />
+                <div ref={layerActionsFlyoutRef} />
               </EuiFlexItem>
             </EuiFlexGroup>
             {(layerDatasource || activeVisualization.renderLayerPanel) && <EuiSpacer size="s" />}

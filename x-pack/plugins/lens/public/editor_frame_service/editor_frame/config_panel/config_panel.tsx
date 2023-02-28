@@ -33,7 +33,6 @@ import {
   useLensSelector,
   selectVisualization,
 } from '../../../state_management';
-import { AddLayerButton } from './add_layer';
 import { getRemoveOperation } from '../../../utils';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
@@ -314,14 +313,14 @@ export function LayerPanels(
           )
         );
       })}
-      {!hideAddLayerButton && (
-        <AddLayerButton
-          visualization={activeVisualization}
-          visualizationState={visualization.state}
-          layersMeta={props.framePublicAPI}
-          onAddLayerClick={(layerType) => addLayer(layerType)}
-        />
-      )}
+      {!hideAddLayerButton &&
+        activeVisualization.getAddLayerButtonComponent &&
+        activeVisualization.getAddLayerButtonComponent({
+          visualization: activeVisualization,
+          visualizationState: visualization.state,
+          layersMeta: props.framePublicAPI,
+          onAddLayerClick: addLayer,
+        })}
     </EuiForm>
   );
 }

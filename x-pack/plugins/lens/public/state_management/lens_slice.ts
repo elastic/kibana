@@ -10,6 +10,7 @@ import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
 import { Query } from '@kbn/es-query';
 import { History } from 'history';
+import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { LensEmbeddableInput } from '..';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import type {
@@ -24,7 +25,6 @@ import type { DataViewsState, LensAppState, LensStoreDeps, VisualizationState } 
 import type { Datasource, Visualization } from '../types';
 import { generateId } from '../id_generator';
 import type { LayerType } from '../../common/types';
-import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/add_layer';
 import { getVisualizeFieldSuggestions } from '../editor_frame_service/editor_frame/suggestion_helpers';
 import type { FramePublicAPI, LensEditContextMapping, LensEditEvent } from '../types';
 import { selectDataViews, selectFramePublicAPI } from './selectors';
@@ -161,6 +161,7 @@ export const switchVisualization = createAction<{
 }>('lens/switchVisualization');
 export const rollbackSuggestion = createAction<void>('lens/rollbackSuggestion');
 export const setToggleFullscreen = createAction<void>('lens/setToggleFullscreen');
+export const setIsLoadLibraryVisible = createAction<boolean>('lens/setIsLoadLibraryVisible');
 export const submitSuggestion = createAction<void>('lens/submitSuggestion');
 export const switchDatasource = createAction<{
   newDatasourceId: string;
@@ -254,6 +255,7 @@ export const lensActions = {
   switchVisualization,
   rollbackSuggestion,
   setToggleFullscreen,
+  setIsLoadLibraryVisible,
   submitSuggestion,
   switchDatasource,
   switchAndCleanDatasource,
@@ -1115,7 +1117,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
       const activeDatasource = datasourceMap[state.activeDatasourceId];
       const activeVisualization = visualizationMap[state.visualization.activeId];
-      const layerType = getLayerType(activeVisualization, state.visualization.state, layerId);
+      const layerType =
+        activeVisualization.getLayerType(layerId, state.visualization.state) || LayerTypes.DATA;
       const { activeDatasourceState, activeVisualizationState } = addInitialValueIfAvailable({
         datasourceState: state.datasourceStates[state.activeDatasourceId].state,
         visualizationState: state.visualization.state,

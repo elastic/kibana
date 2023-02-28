@@ -614,7 +614,7 @@ export interface DatasourceDataPanelProps<T = unknown> {
 export interface LayerAction {
   displayName: string;
   description?: string;
-  execute: () => void | Promise<void>;
+  execute: (mountingPoint: HTMLDivElement | null | undefined) => void | Promise<void>;
   icon: IconType;
   color?: EuiButtonIconProps['color'];
   isCompatible: boolean;
@@ -1106,7 +1106,8 @@ export interface Visualization<T = unknown, P = unknown> {
   getSupportedActionsForLayer?: (
     layerId: string,
     state: T,
-    setState: StateSetter<T>
+    setState: StateSetter<T>,
+    isSaveable?: boolean
   ) => LayerAction[];
 
   /** returns the type string of the given layer */
@@ -1228,6 +1229,12 @@ export interface Visualization<T = unknown, P = unknown> {
     columnId: string;
     label: string;
     hideTooltip?: boolean;
+  }) => JSX.Element | null;
+  getAddLayerButtonComponent?: (props: {
+    visualization: Visualization;
+    visualizationState: T;
+    onAddLayerClick: (layerType: LayerType) => void;
+    layersMeta: Pick<FramePublicAPI, 'datasourceLayers' | 'activeData'>;
   }) => JSX.Element | null;
   /**
    * Creates map of columns ids and unique lables. Used only for noDatasource layers

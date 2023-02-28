@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { CoreStart } from '@kbn/core/public';
+// import { EventAnnotationGroupConfig } from '../../common';
 import { EventAnnotationServiceType } from './types';
 
 export class EventAnnotationService {
   private eventAnnotationService?: EventAnnotationServiceType;
-  public async getService() {
+  public async getService(core: CoreStart) {
     if (!this.eventAnnotationService) {
       const { getEventAnnotationService } = await import('./service');
-      this.eventAnnotationService = getEventAnnotationService();
+      this.eventAnnotationService = getEventAnnotationService(core);
     }
     return this.eventAnnotationService;
   }
