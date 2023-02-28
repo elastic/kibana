@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { navigateTo } from './navigation';
 import { DEFAULT_POLICY } from '../screens/fleet';
 import {
   ADD_POLICY_BTN,
@@ -27,6 +28,48 @@ export const addIntegration = (agentPolicy = DEFAULT_POLICY) => {
   // sometimes agent is assigned to default policy, sometimes not
   closeModalIfVisible();
 };
+
+export const addCustomIntegration = (integrationName: string, policyName: string) => {
+  cy.getBySel(ADD_POLICY_BTN).click();
+  cy.getBySel(DATA_COLLECTION_SETUP_STEP).find('.euiLoadingSpinner').should('not.exist');
+  cy.getBySel('packagePolicyNameInput').type(`{selectall}{backspace}${integrationName}`);
+  cy.getBySel('createAgentPolicyNameField').type(`{selectall}{backspace}${policyName}`);
+  cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
+  // No agent is enrolled with this policy, close "Add agent" modal
+  cy.getBySel('confirmModalCancelButton').click();
+};
+
+export const policyContainsIntegration = (integrationName: string, policyName: string) => {
+  cy.visit('app/fleet/policies');
+  cy.contains(policyName).click();
+  integrationExistsWithinPolicyDetails(integrationName);
+};
+
+export const integrationExistsWithinPolicyDetails = (integrationName: string) => {
+  cy.contains('Actions').click();
+  cy.contains('View policy').click();
+  cy.contains(`name: ${integrationName}`);
+};
+
+export const cleanupPolicy = (policyName: string) => {
+  cy.visit('app/fleet/policies');
+  cy.contains(policyName).click();
+  cy.get('[name="Settings"]').click();
+  cy.getBySel('agentPolicyForm.downloadSource.deleteBtn').click();
+  closeModalIfVisible();
+  cy.contains(`Deleted agent policy '${policyName}'`);
+};
+
+export const cleanupPack = (packName: string) => {
+  navigateTo('app/osquery/packs');
+  cy.contains(packName).click();
+  cy.contains('Edit').click();
+  cy.contains('Delete pack').click();
+  closeModalIfVisible();
+};
+
+export const generateRandomStringName = (length: number) =>
+  Array.from({ length }, () => Math.random().toString(36).substring(2));
 
 export function closeModalIfVisible() {
   cy.get('body').then(($body) => {
