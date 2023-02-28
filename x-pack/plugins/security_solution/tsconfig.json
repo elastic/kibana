@@ -17,6 +17,7 @@
   "exclude": [
     "target/**/*",
     "**/cypress/**",
+    "public/management/cypress_endpoint.config.ts",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -140,6 +141,8 @@
     "@kbn/securitysolution-ecs",
     "@kbn/cell-actions",
     "@kbn/shared-ux-router",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/expandable-flyout",
     "@kbn/core-lifecycle-server-mocks",
   ]
 }

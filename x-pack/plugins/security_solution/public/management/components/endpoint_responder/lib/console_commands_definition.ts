@@ -88,7 +88,7 @@ const capabilitiesAndPrivilegesValidator = (command: Command): true | string => 
   return true;
 };
 
-const HELP_GROUPS = Object.freeze({
+export const HELP_GROUPS = Object.freeze({
   responseActions: {
     position: 0,
     label: i18n.translate('xpack.securitySolution.endpointConsoleCommands.groups.responseActions', {
