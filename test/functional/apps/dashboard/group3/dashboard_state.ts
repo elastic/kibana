@@ -338,9 +338,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                     embeddableConfig: {
                       ...(panel.embeddableConfig ?? {}),
                       vis: {
-                        ...((panel.embeddableConfig.vis as object) ?? {}),
+                        ...((panel.embeddableConfig?.vis as object) ?? {}),
                         colors: {
-                          ...((panel.embeddableConfig.vis as { colors: object }).colors ?? {}),
+                          ...((panel.embeddableConfig?.vis as { colors: object })?.colors ?? {}),
                           ['80000']: 'FFFFFF',
                         },
                       },
@@ -384,7 +384,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                     embeddableConfig: {
                       ...(panel.embeddableConfig ?? {}),
                       vis: {
-                        ...((panel.embeddableConfig.vis as object) ?? {}),
+                        ...((panel.embeddableConfig?.vis as object) ?? {}),
                         colors: {},
                       },
                     },
