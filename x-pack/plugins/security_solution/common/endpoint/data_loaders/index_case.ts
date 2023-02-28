@@ -24,10 +24,10 @@ export interface IndexedCase {
  */
 export const indexCase = async (
   kbnClient: KbnClient,
-  name: string = 'Malware investigation'
+  newCase: Partial<CasePostRequest> = {}
 ): Promise<IndexedCase> => {
   const newCaseReq: CasePostRequest = {
-    title: name,
+    title: 'Malware Investigation',
     tags: [],
     severity: CaseSeverity.LOW,
     description: 'foo',
@@ -42,6 +42,7 @@ export const indexCase = async (
       syncAlerts: true,
     },
     owner: 'securitySolution',
+    ...newCase,
   };
 
   const createdCase = (
