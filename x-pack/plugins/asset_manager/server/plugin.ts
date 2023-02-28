@@ -6,11 +6,13 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Plugin, CoreSetup, RequestHandlerContext } from '@kbn/core/server';
+import { Plugin, CoreSetup, RequestHandlerContext, CoreStart } from '@kbn/core/server';
 import { debug } from '../common/debug_log';
 import { AssetFilters } from '../common/types_api';
 import { ASSET_MANAGER_API_BASE } from './constants';
 import { getAssets } from './lib/get_assets';
+import { maybeCreateTemplate } from './lib/maybe_create_index_template';
+import assetsTemplate from './templates/assets-template.json';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
 
@@ -47,8 +49,8 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
         const esClient = await getEsClientFromContext(context);
 
         try {
-          const assets = await getAssets({ esClient, filters });
-          return res.ok({ body: { assets } });
+          const results = await getAssets({ esClient, filters });
+          return res.ok({ body: { results } });
         } catch (error: unknown) {
           debug('error looking up asset records', error);
           return res.customError({ statusCode: 500 });
@@ -59,7 +61,13 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
     return {};
   }
 
-  public start() {}
+  public async start(core: CoreStart) {
+    // create assets-* index template if it doeesn't already exist
+    await maybeCreateTemplate({
+      esClient: core.elasticsearch.client.asInternalUser,
+      template: assetsTemplate,
+    });
+  }
 
   public stop() {}
 }
