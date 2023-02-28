@@ -17,7 +17,7 @@ export interface Props {
   slo: SLOWithSummaryResponse;
 }
 
-export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
+export function SliChartPanel({ data, isLoading, slo }: Props) {
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
 
   return (
@@ -27,31 +27,42 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
           <EuiFlexItem>
             <EuiTitle size="xs">
               <h2>
-                {i18n.translate('xpack.observability.slos.sloDetails.errorBudgetChartPanel.title', {
-                  defaultMessage: 'Error budget burn down',
+                {i18n.translate('xpack.observability.slos.sloDetails.sliHistoryChartPanel.title', {
+                  defaultMessage: 'Historical SLI',
                 })}
               </h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
-              {i18n.translate(
-                'xpack.observability.slos.sloDetails.errorBudgetChartPanel.duration',
-                { defaultMessage: 'Last {duration}', values: { duration: slo.timeWindow.duration } }
-              )}
+              {i18n.translate('xpack.observability.slos.sloDetails.sliHistoryChartPanel.duration', {
+                defaultMessage: 'Last {duration}',
+                values: { duration: slo.timeWindow.duration },
+              })}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
 
         <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart">
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiStat
               titleColor={isSloFailed ? 'danger' : 'success'}
-              title={`${Math.trunc(slo.summary.errorBudget.remaining * 100000) / 1000}%`}
+              title={`${Math.trunc(slo.summary.sliValue * 100000) / 1000}%`}
               titleSize="s"
               description={i18n.translate(
-                'xpack.observability.slos.sloDetails.errorBudgetChartPanel.remaining',
-                { defaultMessage: 'Remaining' }
+                'xpack.observability.slos.sloDetails.sliHistoryChartPanel.current',
+                { defaultMessage: 'Observed value' }
+              )}
+              reverse
+            />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiStat
+              title={`${slo.objective.target * 100}%`}
+              titleSize="s"
+              description={i18n.translate(
+                'xpack.observability.slos.sloDetails.sliHistoryChartPanel.objective',
+                { defaultMessage: 'Objective' }
               )}
               reverse
             />
@@ -60,9 +71,9 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
 
         <EuiFlexItem>
           <WideChart
-            chart="area"
-            id={i18n.translate('xpack.observability.slos.sloDetails.errorBudgetChartPanel.title', {
-              defaultMessage: 'Error budget remaining',
+            chart="line"
+            id={i18n.translate('xpack.observability.slos.sloDetails.sliHistoryChartPanel.title', {
+              defaultMessage: 'SLI value',
             })}
             state={isSloFailed ? 'error' : 'success'}
             data={data}

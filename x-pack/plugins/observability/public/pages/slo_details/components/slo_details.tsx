@@ -12,6 +12,7 @@ import React from 'react';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
 import { Overview as Overview } from './overview';
+import { SliChartPanel } from './sli_chart_panel';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -25,11 +26,18 @@ export function SloDetails({ slo }: Props) {
     key: new Date(data.date).getTime(),
     value: data.status === 'NO_DATA' ? undefined : data.errorBudget.remaining,
   }));
+  const historicalSliData = (sloHistoricalSummaryResponse[slo.id] ?? []).map((data) => ({
+    key: new Date(data.date).getTime(),
+    value: data.status === 'NO_DATA' ? undefined : data.sliValue,
+  }));
 
   return (
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <Overview slo={slo} />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <SliChartPanel data={historicalSliData} isLoading={historicalSummaryLoading} slo={slo} />
       </EuiFlexItem>
       <EuiFlexItem>
         <ErrorBudgetChartPanel
