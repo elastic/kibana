@@ -370,6 +370,7 @@
     "@kbn/event-annotation-plugin": "link:src/plugins/event_annotation",
     "@kbn/event-log-fixture-plugin": "link:x-pack/test/plugin_api_integration/plugins/event_log",
     "@kbn/event-log-plugin": "link:x-pack/plugins/event_log",
+    "@kbn/expandable-flyout": "link:packages/kbn-expandable-flyout",
     "@kbn/exploratory-view-example-plugin": "link:x-pack/examples/exploratory_view_example",
     "@kbn/expression-error-plugin": "link:src/plugins/expression_error",
     "@kbn/expression-gauge-plugin": "link:src/plugins/chart_expressions/expression_gauge",

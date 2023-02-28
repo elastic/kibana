@@ -142,5 +142,6 @@
     "@kbn/cell-actions",
     "@kbn/shared-ux-router",
     "@kbn/alerts-as-data-utils",
+    "@kbn/expandable-flyout",
   ]
 }
