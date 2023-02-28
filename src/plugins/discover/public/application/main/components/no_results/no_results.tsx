@@ -7,13 +7,14 @@
  */
 
 import React, { Fragment } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { NoResultsSuggestions } from './no_results_suggestions';
 import './_no_results.scss';
+import { ErrorCallout } from '../../../../components/common/error_callout';
 
 export interface DiscoverNoResultsProps {
   isTimeBased?: boolean;
@@ -46,28 +47,13 @@ export function DiscoverNoResults({
     </EuiFlexItem>
   ) : (
     <EuiFlexItem grow={true} className="dscNoResults">
-      <EuiCallOut
-        title={
-          <FormattedMessage
-            id="discover.noResults.searchExamples.noResultsErrorTitle"
-            defaultMessage="Unable to retrieve search results"
-          />
-        }
-        color="danger"
-        iconType="warning"
+      <ErrorCallout
+        title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
+          defaultMessage: 'Unable to retrieve search results',
+        })}
+        error={error}
         data-test-subj="discoverNoResultsError"
-      >
-        <EuiButton
-          size="s"
-          color="danger"
-          onClick={() => (data ? data.search.showError(error) : void 0)}
-        >
-          <FormattedMessage
-            id="discover.showErrorMessageAgain"
-            defaultMessage="Show error message"
-          />
-        </EuiButton>
-      </EuiCallOut>
+      />
     </EuiFlexItem>
   );
 

@@ -23,6 +23,7 @@ const createStartContractMock = () => {
   const startContract: MockedKeys<NotificationsStart> = {
     // we have to suppress type errors until decide how to mock es6 class
     toasts: toastsServiceMock.createStartContract(),
+    showErrorDialog: jest.fn(),
   };
   return startContract;
 };
