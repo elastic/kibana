@@ -50,7 +50,6 @@ export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
 
     // Actual `installed_version` is buried in SO, root `version` is latest package version available
     const installedPackageVersion = fleetPackage.savedObject.attributes.install_version;
-    const latestPackageVersion = fleetPackage.version;
 
     // Policy templates correspond to package's integrations.
     const packagePolicyTemplates = fleetPackage.policy_templates ?? [];
@@ -58,7 +57,7 @@ export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
     const packageInfo: PackageInfo = {
       package_name: fleetPackage.name,
       package_title: fleetPackage.title,
-      package_version: installedPackageVersion ?? latestPackageVersion,
+      package_version: installedPackageVersion,
 
       integrations: new Map<string, InstalledIntegrationBasicInfo>(
         packagePolicyTemplates.map((pt) => {
