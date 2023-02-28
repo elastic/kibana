@@ -34,10 +34,7 @@ const runtimeFieldC = { script: { source: scriptC } };
 
 let returnedSavedObjects = [
   {
-    attributes: {
-      fields: '[]',
-      runtimeFieldMap: JSON.stringify({}),
-    },
+    attributes: {},
   },
 ];
 
