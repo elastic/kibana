@@ -51,10 +51,12 @@ export function DiscoverMainRoute(props: Props) {
     http: { basePath },
     dataViewEditor,
   } = services;
+  const { id } = useParams<DiscoverLandingParams>();
   const stateContainer = useSingleton<DiscoverStateContainer>(() =>
     getDiscoverStateContainer({
       history,
       services,
+      savedSearchId: id,
     })
   );
   const [error, setError] = useState<Error>();
@@ -63,7 +65,7 @@ export function DiscoverMainRoute(props: Props) {
   const [hasUserDataView, setHasUserDataView] = useState(false);
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const hasCustomBranding = useObservable(core.customBranding.hasCustomBranding$, false);
-  const { id } = useParams<DiscoverLandingParams>();
+
 
   /**
    * Get location state of scoped history only on initial load

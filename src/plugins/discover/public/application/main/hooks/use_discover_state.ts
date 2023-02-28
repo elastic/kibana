@@ -101,7 +101,7 @@ export function useDiscoverState({
   );
 
   useEffect(() => {
-    const unsubscribe = stateContainer.initializeAndSync();
+    const unsubscribe = stateContainer.actions.initializeAndSync();
     return () => unsubscribe();
   }, [stateContainer]);
 
@@ -120,7 +120,7 @@ export function useDiscoverState({
    */
   useEffect(() => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
-      stateContainer.pauseAutoRefreshInterval();
+      stateContainer.actions.pauseAutoRefreshInterval();
     }
   }, [dataView, stateContainer]);
 
@@ -130,7 +130,6 @@ export function useDiscoverState({
     onUpdateQuery,
     stateContainer,
     persistDataView,
-    searchSessionManager,
     updateDataViewList,
   };
 }

@@ -13,6 +13,8 @@ post:
                 type: string
               value:
                 type: string
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: generate-service-token-deprecated
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

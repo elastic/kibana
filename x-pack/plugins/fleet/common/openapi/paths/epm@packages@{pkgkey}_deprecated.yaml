@@ -25,6 +25,8 @@ get:
                 required:
                   - status
                   - savedObject
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-package-deprecated
   security:
     - basicAuth: []
@@ -69,6 +71,8 @@ post:
                     - type
             required:
               - response
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: install-package-deprecated
   description: ''
   parameters:
@@ -114,6 +118,8 @@ delete:
                     - type
             required:
               - response
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: delete-package-deprecated
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml

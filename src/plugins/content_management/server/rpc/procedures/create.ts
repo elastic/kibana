@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { rpcSchemas } from '../../../common';
+import { rpcSchemas } from '../../../common/schemas';
 import type { CreateIn } from '../../../common';
 import type { StorageContext, ContentCrud } from '../../core';
 import type { ProcedureDefinition } from '../rpc_service';
@@ -20,7 +20,7 @@ export const create: ProcedureDefinition<Context, CreateIn<string>> = {
     const { create: schemas } = contentDefinition.schemas.content;
 
     // Validate data to be stored
-    if (schemas.in.data) {
+    if (schemas?.in?.data) {
       const error = validate(input.data, schemas.in.data);
       if (error) {
         // TODO: Improve error handling
@@ -28,7 +28,7 @@ export const create: ProcedureDefinition<Context, CreateIn<string>> = {
       }
     } else {
       // TODO: Improve error handling
-      throw new Error('Schema missing for rpc call [create.in.data].');
+      throw new Error('Schema missing for rpc procedure [create.in.data].');
     }
 
     // Validate the possible options

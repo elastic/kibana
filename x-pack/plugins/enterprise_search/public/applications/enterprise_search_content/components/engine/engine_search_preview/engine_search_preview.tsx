@@ -5,24 +5,19 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 
 import { useValues } from 'kea';
 
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiButton,
-  EuiFieldSearch,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-} from '@elastic/eui';
-import { SearchProvider, SearchBox, Results } from '@elastic/react-search-ui';
-import { ResultsViewProps, ResultViewProps, InputViewProps } from '@elastic/react-search-ui-views';
-import { SearchDriverOptions, SearchResult } from '@elastic/search-ui';
+  PagingInfo,
+  Results,
+  ResultsPerPage,
+  SearchBox,
+  SearchProvider,
+} from '@elastic/react-search-ui';
+import { SearchDriverOptions } from '@elastic/search-ui';
 import EnginesAPIConnector, {
   Transporter,
   SearchRequest,
@@ -30,7 +25,9 @@ import EnginesAPIConnector, {
 } from '@elastic/search-ui-engines-connector';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../../shared/doc_links';
 import { HttpLogic } from '../../../../shared/http';
 import { EngineViewTabs } from '../../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_template';
@@ -38,10 +35,26 @@ import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_t
 import { EngineIndicesLogic } from '../engine_indices_logic';
 import { EngineViewLogic } from '../engine_view_logic';
 
+import { APICallFlyout, APICallData } from './api_call_flyout';
+import { DocumentProvider } from './document_context';
+import { DocumentFlyout } from './document_flyout';
 import { EngineSearchPreviewLogic } from './engine_search_preview_logic';
 
+import {
+  InputView,
+  PagingInfoView,
+  RESULTS_PER_PAGE_OPTIONS,
+  ResultView,
+  ResultsPerPageView,
+  ResultsView,
+} from './search_ui_components';
+
 class InternalEngineTransporter implements Transporter {
-  constructor(private http: HttpSetup, private engineName: string) {}
+  constructor(
+    private http: HttpSetup,
+    private engineName: string,
+    private setLastAPICall: (apiCallData: APICallData) => void
+  ) {}
 
   async performRequest(request: SearchRequest) {
     const url = `/internal/enterprise_search/engines/${this.engineName}/search`;
@@ -49,6 +62,8 @@ class InternalEngineTransporter implements Transporter {
     const response = await this.http.post<SearchResponse>(url, {
       body: JSON.stringify(request),
     });
+
+    this.setLastAPICall({ request, response });
 
     const withUniqueIds = {
       ...response,
@@ -65,102 +80,30 @@ class InternalEngineTransporter implements Transporter {
   }
 }
 
-const ResultsView: React.FC<ResultsViewProps> = ({ children }) => {
-  return <EuiFlexGroup direction="column">{children}</EuiFlexGroup>;
-};
-
-const ResultView: React.FC<ResultViewProps> = ({ result }) => {
-  const fields = Object.entries(result)
-    .filter(([key]) => !key.startsWith('_') && key !== 'id')
-    .map(([key, value]) => {
-      return {
-        name: key,
-        value: value.raw,
-      };
-    });
-
-  const {
-    _meta: {
-      id: encodedId,
-      rawHit: { _index: index },
-    },
-  } = result;
-
-  const [, id] = JSON.parse(atob(encodedId));
-
-  const columns: Array<EuiBasicTableColumn<SearchResult>> = [
-    {
-      field: 'name',
-      name: 'name',
-      render: (name: string) => {
-        return <code>&quot;{name}&quot;</code>;
-      },
-      truncateText: true,
-      width: '20%',
-    },
-    {
-      field: 'value',
-      name: 'value',
-      render: (value: string) => value,
-    },
-  ];
-
-  return (
-    <EuiPanel paddingSize="m">
-      <EuiFlexGroup direction="column">
-        <EuiFlexGroup justifyContent="spaceBetween">
-          <code>ID: {id}</code>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center">
-              <code>from</code>
-              <EuiBadge color="hollow">{index}</EuiBadge>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiBasicTable items={fields} columns={columns} />
-      </EuiFlexGroup>
-    </EuiPanel>
-  );
-};
-
-const InputView: React.FC<InputViewProps> = ({ getInputProps }) => {
-  return (
-    <EuiFlexGroup gutterSize="s">
-      <EuiFieldSearch
-        fullWidth
-        placeholder="search"
-        {...getInputProps({})}
-        isClearable
-        aria-label="Search Input"
-      />
-      <EuiButton type="submit" color="primary" fill>
-        Search
-      </EuiButton>
-    </EuiFlexGroup>
-  );
-};
-
 export const EngineSearchPreview: React.FC = () => {
   const { http } = useValues(HttpLogic);
+  const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
+  const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null);
   const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
   const { resultFields, searchableFields } = useValues(EngineSearchPreviewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
 
+  const config: SearchDriverOptions = useMemo(() => {
+    const transporter = new InternalEngineTransporter(http, engineName, setLastAPICall);
+    const connector = new EnginesAPIConnector(transporter);
+
+    return {
+      alwaysSearchOnInitialLoad: true,
+      apiConnector: connector,
+      hasA11yNotifications: true,
+      searchQuery: {
+        result_fields: resultFields,
+        search_fields: searchableFields,
+      },
+    };
+  }, [http, engineName, setLastAPICall]);
+
   if (!engineData) return null;
-
-  const transporter = new InternalEngineTransporter(http, engineName);
-
-  const connector = new EnginesAPIConnector(transporter);
-
-  const config: SearchDriverOptions = {
-    alwaysSearchOnInitialLoad: true,
-    apiConnector: connector,
-    hasA11yNotifications: true,
-    searchQuery: {
-      result_fields: resultFields,
-      search_fields: searchableFields,
-    },
-  };
 
   return (
     <EnterpriseSearchEnginesPageTemplate
@@ -171,24 +114,56 @@ export const EngineSearchPreview: React.FC = () => {
         pageTitle: i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.pageTitle', {
           defaultMessage: 'Search Preview',
         }),
-        rightSideItems: [],
+        rightSideItems: [
+          <>
+            <EuiButton
+              color="primary"
+              iconType="eye"
+              onClick={() => setShowAPICallFlyout(true)}
+              isLoading={lastAPICall == null}
+            >
+              View this API call
+            </EuiButton>
+          </>,
+        ],
       }}
       engineName={engineName}
     >
-      <SearchProvider config={config}>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <SearchBox inputView={InputView} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem grow={false} css={{ minWidth: '240px' }} />
-          <EuiFlexItem>
-            <Results view={ResultsView} resultView={ResultView} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </SearchProvider>
+      <DocumentProvider>
+        <SearchProvider config={config}>
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <SearchBox inputView={InputView} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false} css={{ minWidth: '240px' }}>
+              <ResultsPerPage view={ResultsPerPageView} options={RESULTS_PER_PAGE_OPTIONS} />
+              <EuiSpacer size="m" />
+              <EuiLink href={docLinks.enterpriseSearchEngines} target="_blank">
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.engine.searchPreview.improveResultsLink"
+                  defaultMessage="Improve these results"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <PagingInfo view={PagingInfoView} />
+              <EuiSpacer size="m" />
+              <Results view={ResultsView} resultView={ResultView} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </SearchProvider>
+        <DocumentFlyout />
+        {showAPICallFlyout && lastAPICall && (
+          <APICallFlyout
+            onClose={() => setShowAPICallFlyout(false)}
+            lastAPICall={lastAPICall}
+            engineName={engineName}
+          />
+        )}
+      </DocumentProvider>
     </EnterpriseSearchEnginesPageTemplate>
   );
 };

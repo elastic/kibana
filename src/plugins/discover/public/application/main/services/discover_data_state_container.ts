@@ -148,6 +148,7 @@ export function getDataStateContainer({
    * By refetch$.next('reset') rows and fieldcounts are reset to allow e.g. editing of runtime fields
    * to be processed correctly
    */
+  console.log(getSavedSearch());
   const refetch$ = new Subject<DataRefetchMsg>();
   const shouldSearchOnPageLoad =
     uiSettings.get<boolean>(SEARCH_ON_PAGE_LOAD_SETTING) ||

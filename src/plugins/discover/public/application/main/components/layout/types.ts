@@ -9,7 +9,6 @@
 import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import type { DiscoverSearchSessionManager } from '../../services/discover_search_session';
 import type { InspectorAdapters } from '../../hooks/use_inspector';
 
 export interface DiscoverLayoutProps {
@@ -22,6 +21,5 @@ export interface DiscoverLayoutProps {
   ) => void;
   stateContainer: DiscoverStateContainer;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
-  searchSessionManager: DiscoverSearchSessionManager;
   updateDataViewList: (newAdHocDataViews: DataView[]) => void;
 }

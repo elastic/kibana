@@ -15,20 +15,8 @@ export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
+    dynamic: false,
     properties: {
-      mappings: {
-        properties: {
-          source: {
-            type: 'keyword',
-          },
-          target: {
-            type: 'keyword',
-          },
-          action_type: {
-            type: 'keyword',
-          },
-        },
-      },
       owner: {
         type: 'keyword',
       },

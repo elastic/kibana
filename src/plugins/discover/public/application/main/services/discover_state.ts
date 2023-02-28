@@ -52,7 +52,7 @@ interface DiscoverStateContainerParams {
   /**
    * The current savedSearch
    */
-  savedSearch?: SavedSearch;
+  savedSearchId?: string;
   /**
    * core ui settings service
    */
@@ -85,22 +85,14 @@ export interface DiscoverStateContainer {
    **/
   dataState: DataStateContainer;
   /**
-   * Initialize state with filters and query, start state syncing
-   */
-  initializeAndSync: () => () => void;
-  /**
-   * Set app state to with a partial new app state
-   */
-  setAppState: (newState: Partial<AppState>) => void;
-  /**
-   * Pause the auto refresh interval without pushing an entry to history
-   */
-  pauseAutoRefreshInterval: () => Promise<void>;
-  /**
    * functions executed by UI
    */
   actions: {
     onOpenSavedSearch: (savedSearchId: string) => void;
+    /**
+     * Pause the auto refresh interval without pushing an entry to history
+     */
+    pauseAutoRefreshInterval: () => Promise<void>;
     /**
      * Set the currently selected data view
      */
@@ -139,6 +131,17 @@ export interface DiscoverStateContainer {
      */
     updateAdHocDataViewId: () => void;
     /**
+     * Replace the data view of the given id with the given data view
+     * Used when the spec of a data view changed to prevent duplicates
+     * @param id
+     * @param dataView
+     */
+    replaceAdHocDataViewWithId: (id: string, dataView: DataView) => void;
+    /**
+     * Initialize state with filters and query,  start state syncing
+     */
+    initializeAndSync: () => () => void;
+    /**
      * Load a saved search by id
      * @param savedSearchId
      * @param dataViewSpec
@@ -157,10 +160,13 @@ export interface DiscoverStateContainer {
  */
 export function getDiscoverStateContainer({
   history,
-  savedSearch,
+  savedSearchId,
   services,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
-  const initialSavedSearch = savedSearch ?? getEmptySavedSearch(services.data);
+  const initialSavedSearch = getEmptySavedSearch(services.data);
+  if(savedSearchId) {
+    initialSavedSearch.id = savedSearchId;
+  }
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
   const stateStorage = createKbnUrlStateStorage({
@@ -223,6 +229,8 @@ export function getDiscoverStateContainer({
     internalStateContainer.transitions.setAdHocDataViews(dataViews);
   const appendAdHocDataViews = (dataViews: DataView | DataView[]) =>
     internalStateContainer.transitions.appendAdHocDataViews(dataViews);
+  const replaceAdHocDataViewWithId = (id: string, dataView: DataView) =>
+    internalStateContainer.transitions.replaceAdHocDataViewWithId(id, dataView);
   const removeAdHocDataViewById = (id: string) =>
     internalStateContainer.transitions.removeAdHocDataViewById(id);
 
@@ -240,7 +248,6 @@ export function getDiscoverStateContainer({
     );
     return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
   };
-
   /**
    * When saving a saved search with an ad hoc data view, a new id needs to be generated for the data view
    * This is to prevent duplicate ids messing with our system
@@ -322,6 +329,43 @@ export function getDiscoverStateContainer({
     return nextSavedSearch;
   };
 
+  const initializeAndSync = () => {
+    const unsubscribeData = dataStateContainer.subscribe();
+    const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
+      savedSearchContainer.get()
+    );
+
+    const appStateUnsubscribe = appStateContainer.subscribe(
+      buildStateSubscribe({
+        appState: appStateContainer,
+        savedSearchState: savedSearchContainer,
+        dataState: dataStateContainer,
+        loadAndResolveDataView,
+        setDataView,
+      })
+    );
+
+    const filterUnsubscribe = merge(
+      services.data.query.queryString.getUpdates$(),
+      services.filterManager.getFetches$()
+    ).subscribe(async () => {
+      await savedSearchContainer.update({
+        nextDataView: internalStateContainer.getState().dataView,
+        nextState: appStateContainer.getState(),
+        resetSavedSearch: false,
+        filterAndQuery: true,
+      });
+      dataStateContainer.fetch();
+    });
+
+    return () => {
+      unsubscribeData();
+      appStateUnsubscribe();
+      appStateInitAndSyncUnsubscribe();
+      filterUnsubscribe.unsubscribe();
+    };
+  };
+
   return {
     kbnUrlStateStorage: stateStorage,
     appState: appStateContainer,
@@ -329,45 +373,8 @@ export function getDiscoverStateContainer({
     dataState: dataStateContainer,
     savedSearchState: savedSearchContainer,
     searchSessionManager,
-    setAppState: (newPartial: AppState) => appStateContainer.update(newPartial),
-    pauseAutoRefreshInterval,
-    initializeAndSync: () => {
-      const unsubscribeData = dataStateContainer.subscribe();
-      const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync(
-        savedSearchContainer.get()
-      );
-
-      const appStateUnsubscribe = appStateContainer.subscribe(
-        buildStateSubscribe({
-          appState: appStateContainer,
-          savedSearchState: savedSearchContainer,
-          dataState: dataStateContainer,
-          loadAndResolveDataView,
-          setDataView,
-        })
-      );
-
-      const filterUnsubscribe = merge(
-        services.data.query.queryString.getUpdates$(),
-        services.filterManager.getFetches$()
-      ).subscribe(async () => {
-        await savedSearchContainer.update({
-          nextDataView: internalStateContainer.getState().dataView,
-          nextState: appStateContainer.getState(),
-          resetSavedSearch: false,
-          filterAndQuery: true,
-        });
-        dataStateContainer.fetch();
-      });
-
-      return () => {
-        unsubscribeData();
-        appStateUnsubscribe();
-        appStateInitAndSyncUnsubscribe();
-        filterUnsubscribe.unsubscribe();
-      };
-    },
     actions: {
+      pauseAutoRefreshInterval,
       onOpenSavedSearch,
       setDataView,
       loadAndResolveDataView,
@@ -376,8 +383,10 @@ export function getDiscoverStateContainer({
       loadNewSavedSearch,
       setAdHocDataViews,
       appendAdHocDataViews,
+      replaceAdHocDataViewWithId,
       removeAdHocDataViewById,
       updateAdHocDataViewId,
+      initializeAndSync,
     },
   };
 }

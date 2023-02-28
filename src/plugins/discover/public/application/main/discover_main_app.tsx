@@ -47,7 +47,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     onChangeDataView,
     onUpdateQuery,
     persistDataView,
-    searchSessionManager,
     updateDataViewList,
   } = useDiscoverState({
     services,
@@ -88,7 +87,6 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
       navigateTo={navigateTo}
       stateContainer={stateContainer}
       persistDataView={persistDataView}
-      searchSessionManager={searchSessionManager}
       updateDataViewList={updateDataViewList}
     />
   );

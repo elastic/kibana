@@ -88,7 +88,7 @@ const mountComponent = ({
   };
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
   stateContainer.dataState.data$ = savedSearchData$;
-  stateContainer.setAppState({
+  stateContainer.appState.update({
     interval: 'auto',
     hideChart,
     columns: [],
