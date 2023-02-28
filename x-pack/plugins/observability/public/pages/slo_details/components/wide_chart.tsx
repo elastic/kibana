@@ -19,6 +19,7 @@ import React from 'react';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 
 import { useKibana } from '../../../utils/kibana_react';
+import { toHighPrecisionPercentage } from '../helpers/number';
 
 export interface Data {
   key: number;
@@ -66,7 +67,7 @@ export function WideChart({ chart, data, id, loading, state }: Props) {
       <Axis
         id="left"
         position={Position.Left}
-        tickFormat={(d) => `${Math.trunc(d * 100000) / 1000}%`}
+        tickFormat={(d) => `${toHighPrecisionPercentage(d)}%`}
       />
       <ChartComponent
         color={color}

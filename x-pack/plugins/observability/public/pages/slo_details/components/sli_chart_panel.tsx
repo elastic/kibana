@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 
+import { toHighPrecisionPercentage } from '../helpers/number';
 import { Data, WideChart } from './wide_chart';
 
 export interface Props {
@@ -48,7 +49,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
           <EuiFlexItem grow={false}>
             <EuiStat
               titleColor={isSloFailed ? 'danger' : 'success'}
-              title={`${Math.trunc(slo.summary.sliValue * 100000) / 1000}%`}
+              title={`${toHighPrecisionPercentage(slo.summary.sliValue)}%`}
               titleSize="s"
               description={i18n.translate(
                 'xpack.observability.slo.sloDetails.sliHistoryChartPanel.current',
@@ -59,7 +60,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiStat
-              title={`${slo.objective.target * 100}%`}
+              title={`${toHighPrecisionPercentage(slo.objective.target)}%`}
               titleSize="s"
               description={i18n.translate(
                 'xpack.observability.slo.sloDetails.sliHistoryChartPanel.objective',

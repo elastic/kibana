@@ -15,7 +15,7 @@ export interface Props {
 
 export function OverviewItem({ title, subtitle }: Props) {
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
+    <EuiFlexGroup direction="column" gutterSize="xs">
       <EuiFlexItem>
         <EuiText size="xs">
           <strong>{title}</strong>

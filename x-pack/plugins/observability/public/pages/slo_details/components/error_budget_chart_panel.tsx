@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 
+import { toHighPrecisionPercentage } from '../helpers/number';
 import { Data, WideChart } from './wide_chart';
 
 export interface Props {
@@ -48,7 +49,7 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
           <EuiFlexItem>
             <EuiStat
               titleColor={isSloFailed ? 'danger' : 'success'}
-              title={`${Math.trunc(slo.summary.errorBudget.remaining * 100000) / 1000}%`}
+              title={`${toHighPrecisionPercentage(slo.summary.errorBudget.remaining)}%`}
               titleSize="s"
               description={i18n.translate(
                 'xpack.observability.slo.sloDetails.errorBudgetChartPanel.remaining',

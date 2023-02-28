@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import React from 'react';
+import { toHighPrecisionPercentage } from '../helpers/number';
 
 import { OverviewItem } from './overview_item';
 
@@ -30,8 +31,8 @@ export function Overview({ slo }: Props) {
             {
               defaultMessage: '{value} (target is {objective})',
               values: {
-                value: toPercentage(slo.summary.sliValue),
-                objective: toPercentage(slo.objective.target),
+                value: `${toHighPrecisionPercentage(slo.summary.sliValue)}%`,
+                objective: `${toHighPrecisionPercentage(slo.objective.target)}%`,
               },
             }
           )}
@@ -78,10 +79,6 @@ function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): st
       duration: timeWindow.duration,
     },
   });
-}
-
-function toPercentage(value: number): string {
-  return `${Math.trunc(value * 100000) / 1000}%`;
 }
 
 function toIndicatorTypeLabel(indicatorType: SLOWithSummaryResponse['indicator']['type']): string {
