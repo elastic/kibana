@@ -25,11 +25,18 @@ export const dataLoaders = (on: Cypress.PluginEvents, config: Cypress.PluginConf
     indexFleetEndpointPolicy: async ({
       policyName,
       endpointPackageVersion,
+      agentPolicyName,
     }: {
       policyName: string;
       endpointPackageVersion: string;
+      agentPolicyName?: string;
     }) => {
-      return indexFleetEndpointPolicy(kbnClient, policyName, endpointPackageVersion);
+      return indexFleetEndpointPolicy(
+        kbnClient,
+        policyName,
+        endpointPackageVersion,
+        agentPolicyName
+      );
     },
     deleteIndexedFleetEndpointPolicies: async (indexData: IndexedFleetEndpointPolicyResponse) => {
       return deleteIndexedFleetEndpointPolicies(kbnClient, indexData);

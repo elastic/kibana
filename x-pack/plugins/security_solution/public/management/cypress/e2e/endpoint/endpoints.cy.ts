@@ -48,9 +48,12 @@ describe('Endpoints page', () => {
         initialAgentData = agentData;
       });
       getEndpointIntegrationVersion().then((version) => {
+        const policyName = `Reassign ${Math.random().toString(36).substring(2, 7)}`;
+
         cy.task<IndexedFleetEndpointPolicyResponse>('indexFleetEndpointPolicy', {
-          policyName: `Reassign ${Math.random().toString(36).substr(2, 5)}`,
+          policyName,
           endpointPackageVersion: version,
+          agentPolicyName: policyName,
         }).then((data) => {
           response = data;
         });
