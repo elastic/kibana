@@ -33,6 +33,8 @@ post:
                   $ref: ../components/schemas/agent_policy.yaml
             required:
               - items
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: bulk-get-agent-policies
   security: []
   parameters: []

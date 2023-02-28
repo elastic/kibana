@@ -1104,6 +1104,30 @@
               "section": "def-common.UserProfile",
               "text": "UserProfile"
             },
+            "<D>[]>; bulkGet: <D extends ",
+            {
+              "pluginId": "security",
+              "scope": "common",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-common.UserProfileData",
+              "text": "UserProfileData"
+            },
+            ">(params: ",
+            {
+              "pluginId": "security",
+              "scope": "public",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-public.UserProfileBulkGetParams",
+              "text": "UserProfileBulkGetParams"
+            },
+            ") => Promise<",
+            {
+              "pluginId": "security",
+              "scope": "common",
+              "docId": "kibSecurityPluginApi",
+              "section": "def-common.UserProfile",
+              "text": "UserProfile"
+            },
             "<D>[]>; getCurrent: <D extends ",
             {
               "pluginId": "security",
@@ -1128,31 +1152,7 @@
               "section": "def-common.GetUserProfileResponse",
               "text": "GetUserProfileResponse"
             },
-            "<D>>; bulkGet: <D extends ",
-            {
-              "pluginId": "security",
-              "scope": "common",
-              "docId": "kibSecurityPluginApi",
-              "section": "def-common.UserProfileData",
-              "text": "UserProfileData"
-            },
-            ">(params: ",
-            {
-              "pluginId": "security",
-              "scope": "public",
-              "docId": "kibSecurityPluginApi",
-              "section": "def-public.UserProfileBulkGetParams",
-              "text": "UserProfileBulkGetParams"
-            },
-            ") => Promise<",
-            {
-              "pluginId": "security",
-              "scope": "common",
-              "docId": "kibSecurityPluginApi",
-              "section": "def-common.UserProfile",
-              "text": "UserProfile"
-            },
-            "<D>[]>; }"
+            "<D>>; }"
           ],
           "path": "x-pack/plugins/security/public/plugin.tsx",
           "deprecated": false,

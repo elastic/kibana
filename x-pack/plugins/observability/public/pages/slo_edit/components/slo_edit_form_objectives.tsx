@@ -16,18 +16,14 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Control, Controller, UseFormWatch } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { SloEditFormObjectivesTimeslices } from './slo_edit_form_objectives_timeslices';
 import { BUDGETING_METHOD_OPTIONS, TIMEWINDOW_OPTIONS } from '../constants';
 
-export interface Props {
-  control: Control<CreateSLOInput>;
-  watch: UseFormWatch<CreateSLOInput>;
-}
-
-export function SloEditFormObjectives({ control, watch }: Props) {
+export function SloEditFormObjectives() {
+  const { control, watch } = useFormContext<CreateSLOInput>();
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
 
@@ -45,7 +41,7 @@ export function SloEditFormObjectives({ control, watch }: Props) {
             name="budgetingMethod"
             control={control}
             rules={{ required: true }}
-            render={({ field }) => (
+            render={({ field: { ref, ...field } }) => (
               <EuiSelect
                 id={budgetingSelect}
                 data-test-subj="sloFormBudgetingMethodSelect"
@@ -67,7 +63,7 @@ export function SloEditFormObjectives({ control, watch }: Props) {
             name="timeWindow.duration"
             control={control}
             rules={{ required: true }}
-            render={({ field }) => (
+            render={({ field: { ref, ...field } }) => (
               <EuiSelect
                 id={timeWindowSelect}
                 data-test-subj="sloFormTimeWindowDurationSelect"
@@ -94,7 +90,7 @@ export function SloEditFormObjectives({ control, watch }: Props) {
               min: 0.001,
               max: 99.999,
             }}
-            render={({ field }) => (
+            render={({ field: { ref, ...field } }) => (
               <EuiFieldNumber
                 data-test-subj="sloFormObjectiveTargetInput"
                 {...field}
@@ -112,7 +108,7 @@ export function SloEditFormObjectives({ control, watch }: Props) {
       {watch('budgetingMethod') === 'timeslices' ? (
         <>
           <EuiSpacer size="xl" />
-          <SloEditFormObjectivesTimeslices control={control} />
+          <SloEditFormObjectivesTimeslices />
         </>
       ) : null}
     </>

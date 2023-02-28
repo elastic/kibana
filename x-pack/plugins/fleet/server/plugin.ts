@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
@@ -54,14 +54,16 @@ import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 
-import { INTEGRATIONS_PLUGIN_ID } from '../common';
+import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, INTEGRATIONS_PLUGIN_ID } from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
+import type { MessageSigningServiceInterface } from './services/security';
 import {
   getRouteRequiredAuthz,
   makeRouterWithFleetAuthz,
   calculateRouteAuthz,
   getAuthzFromRequest,
+  MessageSigningService,
 } from './services/security';
 
 import {
@@ -116,7 +118,7 @@ export interface FleetSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
 }
@@ -151,6 +153,7 @@ export interface FleetAppContext {
   httpSetup?: HttpServiceSetup;
   telemetryEventsSender: TelemetryEventsSender;
   bulkActionsResolver: BulkActionsResolver;
+  messageSigningService: MessageSigningServiceInterface;
 }
 
 export type FleetSetupContract = void;
@@ -198,6 +201,8 @@ export interface FleetStartContract {
    * @param packageName
    */
   createArtifactsClient: (packageName: string) => FleetArtifactsClient;
+
+  messageSigningService: MessageSigningServiceInterface;
 }
 
 export class FleetPlugin
@@ -248,7 +253,7 @@ export class FleetPlugin
 
     core.status.set(this.fleetStatus$.asObservable());
 
-    registerSavedObjects(core.savedObjects, deps.encryptedSavedObjects);
+    registerSavedObjects(core.savedObjects);
     registerEncryptedSavedObjects(deps.encryptedSavedObjects);
 
     // Register feature
@@ -381,7 +386,7 @@ export class FleetPlugin
             return getInternalSoClient();
           },
           get spaceId() {
-            return deps.spaces.spacesService.getSpaceId(request);
+            return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
           },
 
           get limitedToPackages() {
@@ -422,6 +427,12 @@ export class FleetPlugin
   }
 
   public start(core: CoreStart, plugins: FleetStartDeps): FleetStartContract {
+    const messageSigningService = new MessageSigningService(
+      plugins.encryptedSavedObjects.getClient({
+        includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
+      })
+    );
+
     appContextService.start({
       elasticsearch: core.elasticsearch,
       data: plugins.data,
@@ -444,6 +455,7 @@ export class FleetPlugin
       logger: this.logger,
       telemetryEventsSender: this.telemetryEventsSender,
       bulkActionsResolver: this.bulkActionsResolver!,
+      messageSigningService,
     });
     licenseService.start(plugins.licensing.license$);
 
@@ -530,6 +542,7 @@ export class FleetPlugin
       createArtifactsClient(packageName: string) {
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
+      messageSigningService,
     };
   }
 
