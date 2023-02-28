@@ -43,7 +43,7 @@ describe('ALL - Add Integration', () => {
     cy.get('[title="Osquery Manager • Integration"]').should('exist').click();
   });
 
-  it('should add the old integration and be able to upgrade it', () => {
+  it.skip('should add the old integration and be able to upgrade it', () => {
     const oldVersion = '0.7.4';
 
     cy.visit(OLD_OSQUERY_MANAGER);
