@@ -9,16 +9,16 @@ import type { FC } from 'react';
 import React, { memo } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FLYOUT_HEADER_TITLE } from './test_ids';
-import { ALERT_DETAILS } from '../translations';
+import { HEADER_TITLE } from '../translations';
 
 /**
- * Alert details flyout right section header
+ * Document details flyout right section header
  */
 export const HeaderTitle: FC = memo(() => {
   return (
     <>
       <EuiTitle size="s" data-test-subj={FLYOUT_HEADER_TITLE}>
-        <h4>{ALERT_DETAILS}</h4>
+        <h4>{HEADER_TITLE}</h4>
       </EuiTitle>
       <EuiSpacer size="m" />
     </>

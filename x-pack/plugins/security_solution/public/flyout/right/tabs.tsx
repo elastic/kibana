@@ -21,7 +21,7 @@ export type RightPanelTabsType = Array<{
 }>;
 
 /**
- * Tabs to display in the alert details expandable flyout right section
+ * Tabs to display in the document details expandable flyout right section
  */
 export const tabs: RightPanelTabsType = [
   {

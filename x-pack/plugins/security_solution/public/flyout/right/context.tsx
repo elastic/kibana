@@ -10,11 +10,11 @@ import type { RightPanelProps } from '.';
 
 export interface RightPanelContext {
   /**
-   * Id of the alert (passed from the alerts table row)
+   * Id of the document
    */
   eventId: string;
   /**
-   * Name of the index used in the alerts page
+   * Name of the index used in the parent's page
    */
   indexName: string;
 }

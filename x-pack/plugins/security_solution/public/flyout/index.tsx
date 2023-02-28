@@ -7,15 +7,15 @@
 
 import React from 'react';
 import type { ExpandableFlyoutProps } from '@kbn/expandable-flyout';
-import type { RightPanelProps } from './panels/right';
-import { RightPanel, RightPanelKey } from './panels/right';
-import { RightPanelProvider } from './panels/right/context';
+import type { RightPanelProps } from './right';
+import { RightPanel, RightPanelKey } from './right';
+import { RightPanelProvider } from './right/context';
 
 /**
- * List of all panels that will be used within the alert details expandable flyout.
+ * List of all panels that will be used within the document details expandable flyout.
  * This needs to be passed to the expandable flyout registeredPanels property.
  */
-export const expandableFlyoutAlertsPanels: ExpandableFlyoutProps['registeredPanels'] = [
+export const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels'] = [
   {
     key: RightPanelKey,
     width: 500,

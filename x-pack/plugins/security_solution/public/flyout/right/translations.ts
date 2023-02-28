@@ -7,20 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ALERT_DETAILS = i18n.translate(
-  'xpack.securitySolution.flyout.alertDetails.alertTitleLabel',
-  { defaultMessage: 'Alert details' }
+export const HEADER_TITLE = i18n.translate(
+  'xpack.securitySolution.flyout.documentDetails.titleLabel',
+  { defaultMessage: 'Title' }
 );
 
 export const OVERVIEW_TAB = i18n.translate(
-  'xpack.securitySolution.flyout.alertDetails.overviewTab',
+  'xpack.securitySolution.flyout.documentDetails.overviewTab',
   { defaultMessage: 'Overview' }
 );
 
-export const TABLE_TAB = i18n.translate('xpack.securitySolution.flyout.alertDetails.tableTab', {
+export const TABLE_TAB = i18n.translate('xpack.securitySolution.flyout.documentDetails.tableTab', {
   defaultMessage: 'Table',
 });
 
-export const JSON_TAB = i18n.translate('xpack.securitySolution.flyout.alertDetails.jsonTab', {
+export const JSON_TAB = i18n.translate('xpack.securitySolution.flyout.documentDetails.jsonTab', {
   defaultMessage: 'JSON',
 });

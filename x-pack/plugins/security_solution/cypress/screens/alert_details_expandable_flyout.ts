@@ -9,13 +9,13 @@ import {
   JSON_TAB_TEST_ID,
   OVERVIEW_TAB_TEST_ID,
   TABLE_TAB_TEST_ID,
-} from '../../public/flyout/alerts/panels/right/test_ids';
+} from '../../public/flyout/right/test_ids';
 import {
   JSON_TAB_CONTENT_TEST_ID,
   OVERVIEW_TAB_CONTENT_TEST_ID,
   TABLE_TAB_CONTENT_TEST_ID,
-} from '../../public/flyout/alerts/panels/right/tabs/test_ids';
-import { FLYOUT_HEADER_TITLE } from '../../public/flyout/alerts/panels/right/components/test_ids';
+} from '../../public/flyout/right/tabs/test_ids';
+import { FLYOUT_HEADER_TITLE } from '../../public/flyout/right/components/test_ids';
 
 export const ALERT_DETAILS_FLYOUT_HEADER_TITLE = `[data-test-subj="${FLYOUT_HEADER_TITLE}"]`;
 export const ALERT_DETAILS_FLYOUT_OVERVIEW_TAB = `[data-test-subj="${OVERVIEW_TAB_TEST_ID}"]`;

@@ -22,14 +22,16 @@ export const expandFirstAlertExpandableFlyout = () => {
 /**
  * Open the Overview tab in the alert details expandable flyout right section
  */
-export const openOverviewTab = () => cy.get(ALERT_DETAILS_FLYOUT_OVERVIEW_TAB).click();
+export const openOverviewTab = () =>
+  cy.get(ALERT_DETAILS_FLYOUT_OVERVIEW_TAB).should('be.visible').click();
 
 /**
  * Open the Table tab in the alert details expandable flyout right section
  */
-export const openTableTab = () => cy.get(ALERT_DETAILS_FLYOUT_TABLE_TAB).click();
+export const openTableTab = () =>
+  cy.get(ALERT_DETAILS_FLYOUT_TABLE_TAB).should('be.visible').click();
 
 /**
  * Open the Json tab in the alert details expandable flyout right section
  */
-export const openJsonTab = () => cy.get(ALERT_DETAILS_FLYOUT_JSON_TAB).click();
+export const openJsonTab = () => cy.get(ALERT_DETAILS_FLYOUT_JSON_TAB).should('be.visible').click();

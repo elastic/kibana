@@ -17,10 +17,10 @@ import { tabs } from './tabs';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 
-export const RightPanelKey: RightPanelProps['key'] = 'alert-details-right';
+export const RightPanelKey: RightPanelProps['key'] = 'document-details-right';
 
 export interface RightPanelProps extends FlyoutPanel {
-  key: 'alert-details-right';
+  key: 'document-details-right';
   path?: RightPanelPaths[];
   params?: {
     id: string;
@@ -29,7 +29,7 @@ export interface RightPanelProps extends FlyoutPanel {
 }
 
 /**
- * Panel to be displayed in the alert details expandable flyout right section
+ * Panel to be displayed in the document details expandable flyout right section
  */
 export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
   const { openRightPanel } = useExpandableFlyoutContext();

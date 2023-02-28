@@ -6,7 +6,6 @@
  */
 
 import { EuiFlyoutBody } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { VFC } from 'react';
 import React, { useMemo } from 'react';
 import type { RightPanelPaths } from '.';
@@ -20,7 +19,7 @@ export interface PanelContentProps {
 }
 
 /**
- * Alert details expandable flyout right section, that will display the content
+ * Document details expandable flyout right section, that will display the content
  * of the overview, table and json tabs.
  */
 export const PanelContent: VFC<PanelContentProps> = ({ selectedTabId }) => {
@@ -28,15 +27,7 @@ export const PanelContent: VFC<PanelContentProps> = ({ selectedTabId }) => {
     return tabs.find((tab) => tab.id === selectedTabId)?.content;
   }, [selectedTabId]);
 
-  return (
-    <EuiFlyoutBody
-      css={css`
-        height: calc(100vh - 262px);
-      `}
-    >
-      {selectedTabContent}
-    </EuiFlyoutBody>
-  );
+  return <EuiFlyoutBody>{selectedTabContent}</EuiFlyoutBody>;
 };
 
 PanelContent.displayName = 'PanelContent';

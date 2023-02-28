@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export const OVERVIEW_TAB_TEST_ID = 'securitySolutionAlertDetailsFlyoutOverviewTab';
-export const TABLE_TAB_TEST_ID = 'securitySolutionAlertDetailsFlyoutTableTab';
-export const JSON_TAB_TEST_ID = 'securitySolutionAlertDetailsFlyoutJsonTab';
+export const FLYOUT_HEADER_TITLE = 'securitySolutionDocumentDetailsFlyoutHeaderTitle';

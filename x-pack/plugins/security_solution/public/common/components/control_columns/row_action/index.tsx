@@ -9,7 +9,7 @@ import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { RightPanelKey } from '../../../../flyout/alerts/panels/right';
+import { RightPanelKey } from '../../../../flyout/right';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
