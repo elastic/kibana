@@ -26,7 +26,6 @@ export function incrementRevision<Params extends RuleTypeParams>(
 
   // Diff rule params
   for (const [field, value] of Object.entries(updatedParams)) {
-    // TODO: Should RuleTypes have a way to declare fields that should be revision skipped as well?
     if (!fieldsToExcludeFromRevisionUpdates.has(field)) {
       if (!isEqual(value, get(currentRule.attributes.params, field))) {
         return currentRule.attributes.revision + 1;

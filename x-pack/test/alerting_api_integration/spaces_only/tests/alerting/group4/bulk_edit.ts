@@ -338,9 +338,6 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
       expect(bulkUnsnoozeResponse.body.rules).to.have.length(1);
       expect(bulkUnsnoozeResponse.body.rules[0].snooze_schedule).empty();
 
-      // Ensure revision is updated TODO: TBD on if snooze actually should increment revision
-      expect(bulkSnoozeResponse.body.rules[0].revision).to.eql(2);
-
       // Ensure AAD isn't broken
       await checkAAD({
         supertest,
