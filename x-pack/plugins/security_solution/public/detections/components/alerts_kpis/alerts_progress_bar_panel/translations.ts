@@ -54,13 +54,15 @@ export const SOURCE_LABEL = i18n.translate(
 
 export const DATA_STATISTICS_TITLE = (percent: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.alerts.alertsByGrouping.dataStatsTitle', {
-    defaultMessage: `This field exists in ${percent}% of alerts.`,
+    values: { percent },
+    defaultMessage: `This field exists in {percent} of alerts.`,
   });
 
 export const DATA_STATISTICS_MESSAGE = (groupbySelection: string) =>
   i18n.translate(
     'xpack.securitySolution.detectionEngine.alerts.alertsByGrouping.dataStatsMessage',
     {
-      defaultMessage: `To see alerts without ${groupbySelection} you can filter in by `,
+      values: { groupbySelection },
+      defaultMessage: `To see alerts without {groupbySelection} you can filter in by `,
     }
   );
