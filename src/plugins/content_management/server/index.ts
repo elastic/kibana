@@ -14,3 +14,4 @@ export function plugin(initializerContext: PluginInitializerContext) {
 }
 
 export type { ContentManagementServerSetup, ContentManagementServerStart } from './types';
+export type { ContentStorage, StorageContext } from './core';
