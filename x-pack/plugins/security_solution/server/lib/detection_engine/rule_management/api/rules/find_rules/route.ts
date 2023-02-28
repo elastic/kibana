@@ -46,7 +46,6 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
         const { query } = request;
         const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
         const rulesClient = ctx.alerting.getRulesClient();
-        const savedObjectsClient = ctx.core.savedObjects.client;
 
         const rules = await findRules({
           rulesClient,
@@ -58,15 +57,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
           fields: query.fields,
         });
 
-        const ruleIds = rules.data.map((rule) => rule.id);
-
-        // const ruleActions = await legacyGetBulkRuleActionsSavedObject({
-        //   alertIds: ruleIds,
-        //   savedObjectsClient,
-        //   logger,
-        // });
-
-        const transformed = transformFindAlerts(rules, {});
+        const transformed = transformFindAlerts(rules);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'Internal error transforming' });
         } else {

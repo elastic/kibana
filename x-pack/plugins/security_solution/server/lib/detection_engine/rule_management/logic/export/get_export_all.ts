@@ -30,7 +30,6 @@ export const getExportAll = async (
   actionConnectors: string;
 }> => {
   const ruleAlertTypes = await getNonPackagedRules({ rulesClient });
-  const alertIds = ruleAlertTypes.map((rule) => rule.id);
   const rules = transformAlertsToRules(ruleAlertTypes);
 
   // Gather exceptions
