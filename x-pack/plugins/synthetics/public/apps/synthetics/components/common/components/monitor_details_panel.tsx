@@ -47,6 +47,7 @@ export interface MonitorDetailsPanelProps {
   monitor: EncryptedSyntheticsSavedMonitor | null;
   hideEnabled?: boolean;
   hideLocations?: boolean;
+  hasBorder?: boolean;
 }
 
 export const MonitorDetailsPanel = ({
@@ -56,6 +57,7 @@ export const MonitorDetailsPanel = ({
   configId,
   hideEnabled = false,
   hideLocations = false,
+  hasBorder = true,
 }: MonitorDetailsPanelProps) => {
   const dispatch = useDispatch();
 
@@ -64,7 +66,12 @@ export const MonitorDetailsPanel = ({
   }
 
   return (
-    <PanelWithTitle paddingSize="m" title={MONITOR_DETAILS_LABEL} titleLeftAlign>
+    <PanelWithTitle
+      paddingSize="m"
+      title={MONITOR_DETAILS_LABEL}
+      titleLeftAlign
+      hasBorder={hasBorder}
+    >
       <WrapperStyle>
         <EuiSpacer size="s" />
         <EuiDescriptionList type="column" compressed align="left">
