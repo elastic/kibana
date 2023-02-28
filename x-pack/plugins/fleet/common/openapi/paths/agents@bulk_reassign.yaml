@@ -1,7 +1,7 @@
 post:
-  summary: Agents - Bulk reassign
+  summary: Bulk reassign agents
   tags:
-    - agents
+    - Agents
   responses:
     '200':
       description: OK

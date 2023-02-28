@@ -1,7 +1,7 @@
 get:
-  summary: Package categories
+  summary: List package categories
   tags:
-    - epm
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK

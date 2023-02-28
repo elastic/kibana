@@ -1,8 +1,7 @@
 get:
-  summary: Agents - Action status
+  summary: Get agent action status
   tags:
-    - agents
-      actions
+    - Agent actions
   parameters:
     - $ref: ../components/parameters/page_size.yaml
     - $ref: ../components/parameters/page_index.yaml

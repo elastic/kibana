@@ -1,8 +1,7 @@
 get:
-  summary: Fleet Proxies - List
-  description: Return a list of Proxies
+  summary: List proxies
   tags:
-    - proxies
+    - Proxies
   responses:
     '200':
       description: OK
@@ -25,10 +24,9 @@ get:
       $ref: ../components/responses/error.yaml
   operationId: get-fleet-proxies
 post:
-  summary: Fleet Proxies - Create
-  description: 'Create a new Fleet Server Host'
+  summary: Create proxy
   tags:
-    - proxies
+    - Proxies
   responses:
     '200':
       description: OK

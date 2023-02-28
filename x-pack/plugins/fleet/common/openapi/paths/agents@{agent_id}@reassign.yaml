@@ -5,9 +5,9 @@ parameters:
     in: path
     required: true
 post:
-  summary: Agent - Reassign
+  summary: Reassign agent
   tags:
-    - agents
+    - Agents
   responses:
     '200':
       description: OK
@@ -32,9 +32,9 @@ post:
           required:
             - policy_id
 put:
-  summary: Agent - Reassign
+  summary: Reassign agent
   tags:
-    - agents
+    - Agents
   responses:
     '200':
       description: OK

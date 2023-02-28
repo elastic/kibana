@@ -1,7 +1,7 @@
 post:
-  summary: Agent - Bulk Request Diagnostics
+  summary: Bulk request diagnostics from agents
   tags:
-    - agents
+    - Agents
   responses:
     '200':
       description: OK

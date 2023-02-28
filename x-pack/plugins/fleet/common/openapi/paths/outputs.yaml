@@ -1,7 +1,7 @@
 get:
-  summary: Outputs
+  summary: List outputs
   tags:
-    - outputs
+    - Outputs
   responses:
     '200':
       description: OK
@@ -24,10 +24,9 @@ get:
       $ref: ../components/responses/error.yaml
   operationId: get-outputs
 post:
-  summary: Outputs
-  description: 'Create a new output'
+  summary: Create output
   tags:
-    - outputs
+    - Outputs
   responses:
     '200':
       description: OK

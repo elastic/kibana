@@ -5,9 +5,9 @@ parameters:
     in: path
     required: true
 get:
-  summary: Agent policy - Info
+  summary: Get agent policy by ID
   tags:
-    - agent-policies
+    - Agent policies
   responses:
     '200':
       description: OK
@@ -26,9 +26,9 @@ get:
   description: Get one agent policy
   parameters: []
 put:
-  summary: Agent policy - Update
+  summary: Update agent policy by ID
   tags:
-    - agent-policies
+    - Agent policies
   responses:
     '200':
       description: OK

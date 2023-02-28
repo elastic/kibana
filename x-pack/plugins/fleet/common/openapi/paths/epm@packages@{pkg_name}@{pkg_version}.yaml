@@ -1,8 +1,7 @@
 get:
-  summary: Packages - Info
+  summary: Get package
   tags:
-    - epm
-      packages
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -69,10 +68,9 @@ parameters:
     description: >-
       Whether to return prerelease versions of packages (e.g. beta, rc, preview)
 post:
-  summary: Packages - Install
+  summary: Install package
   tags:
-    - epm
-      packages
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -123,10 +121,9 @@ post:
             ignore_constraints:
               type: boolean
 put:
-  summary: Packages - Update
+  summary: Update package settings
   tags:
-    - epm
-      packages
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -164,10 +161,9 @@ put:
             keepPoliciesUpToDate:
               type: boolean
 delete:
-  summary: Packages - Delete
+  summary: Delete package
   tags:
-    - epm
-      packages
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK

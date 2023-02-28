@@ -1,7 +1,7 @@
 post:
-  summary: Agents - Bulk update tags
+  summary: Bulk update agent tags
   tags:
-    - agents
+    - Agents
   responses:
     '200':
       description: OK

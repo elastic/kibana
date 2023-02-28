@@ -1,8 +1,7 @@
 get:
-  summary: Packages - List
+  summary: List packages
   tags:
-    - epm
-      packages
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -42,10 +41,9 @@ get:
       schema:
         type: string
 post:
-  summary: Packages - Install by upload
+  summary: Install by package by direct upload
   tags:
-    - epm
-      packages
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK

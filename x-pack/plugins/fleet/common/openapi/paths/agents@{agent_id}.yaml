@@ -5,9 +5,9 @@ parameters:
     in: path
     required: true
 get:
-  summary: Agent - Info
+  summary: Get agent by ID
   tags:
-    - agents
+    - Agents
   responses:
     '200':
       description: OK
@@ -26,9 +26,9 @@ get:
   parameters:
     - $ref: ../components/parameters/with_metrics.yaml
 put:
-  summary: Agent - Update
+  summary: Update agent by ID
   tags:
-    - agents
+    - Agents
   responses:
     '200':
       description: OK
@@ -60,9 +60,9 @@ put:
               items:
                 type: string
 delete:
-  summary: Agent - Delete
+  summary: Delete agent by ID
   tags:
-    - agents
+    - Agents
   responses:
     '200':
       description: OK

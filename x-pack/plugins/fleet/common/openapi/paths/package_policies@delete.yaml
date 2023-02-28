@@ -1,7 +1,7 @@
 post:
-  summary: Package policy - Delete
+  summary: Delete package policy
   tags:
-    - package-policies
+    - Package policies
   operationId: post-delete-package-policy
   requestBody:
     content:

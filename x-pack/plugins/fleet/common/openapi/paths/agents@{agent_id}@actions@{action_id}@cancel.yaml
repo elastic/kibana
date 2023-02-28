@@ -10,10 +10,9 @@ parameters:
     in: path
     required: true
 post:
-  summary: Agent - Cancel Action
+  summary: Cancel agent action
   tags:
-    - agents
-      actions
+    - Agent actions
   responses:
     '200':
       description: OK

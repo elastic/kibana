@@ -1,7 +1,7 @@
 get:
-  summary: Agents - Get incoming data
+  summary: Get incoming agent data
   tags:
-    - agents
+    - Agent status
   responses:
     '200':
       description: OK

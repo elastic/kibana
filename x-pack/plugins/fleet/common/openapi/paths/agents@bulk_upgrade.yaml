@@ -1,7 +1,7 @@
 post:
-  summary: Agents - Bulk Upgrade
+  summary: Bulk upgrade agents
   tags:
-    - agents
+    - Agents
   responses:
     '200':
       description: OK

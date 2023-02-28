@@ -1,7 +1,7 @@
 get:
-  summary: Output - Info
+  summary: Get output by ID
   tags:
-    - outputs
+    - Outputs
   responses:
     '200':
       description: OK
@@ -24,7 +24,9 @@ parameters:
     in: path
     required: true
 delete:
-  summary: Output - Delete
+  summary: Delete output by ID
+  tags:
+    - Outputs
   operationId: delete-output
   responses:
     '200':
@@ -43,9 +45,9 @@ delete:
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
 put:
-  summary: Output - Update
+  summary: Update output by ID
   tags:
-    - outputs
+    - Outputs
   operationId: update-output
   requestBody:
     content:

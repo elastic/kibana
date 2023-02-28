@@ -5,9 +5,9 @@ parameters:
     in: path
     required: true
 post:
-  summary: Agent - Unenroll
+  summary: Unenroll agent
   tags:
-    - agents
+    - Agents
   responses:
     '200':
       description: OK

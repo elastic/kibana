@@ -1,8 +1,7 @@
 post:
-  summary: Packages - Bulk install
+  summary: Bulk install packages
   tags:
-    - epm
-      packages
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK

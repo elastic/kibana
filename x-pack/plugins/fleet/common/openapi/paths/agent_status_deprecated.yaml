@@ -1,7 +1,7 @@
 get:
-  summary: Agents - Status summary
+  summary: Get agent status summary
   tags:
-    - agents
+    - Agent status
   responses:
     '200':
       description: OK

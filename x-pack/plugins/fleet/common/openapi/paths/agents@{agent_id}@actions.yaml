@@ -5,10 +5,9 @@ parameters:
     in: path
     required: true
 post:
-  summary: Agent - Actions
+  summary: Create agent action
   tags:
-    - agents
-      actions
+    - Agent actions
   responses:
     '200':
       description: OK

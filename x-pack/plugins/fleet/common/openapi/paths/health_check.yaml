@@ -1,7 +1,7 @@
 post:
-  summary: Fleet Server Health Check
+  summary: Fleet Server health check
   tags:
-    - fleet-internals
+    - Fleet internals
   responses:
     '200':
       description: OK

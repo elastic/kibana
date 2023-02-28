@@ -1,7 +1,7 @@
 post:
-  summary: Agents - Bulk unenroll
+  summary: Bulk unenroll agents
   tags:
-    - agents
+    - Agents
   responses:
     '200':
       description: OK

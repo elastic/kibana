@@ -1,7 +1,7 @@
 get:
-  summary: Data streams - List
+  summary: List data streams
   tags:
-    - data-streams
+    - Data streams
   responses:
     '200':
       description: OK

@@ -1,8 +1,7 @@
 get:
   summary: Get package signature verification key ID
   tags:
-    - epm
-      packages
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK

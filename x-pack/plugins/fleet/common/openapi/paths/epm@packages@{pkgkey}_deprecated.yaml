@@ -1,8 +1,7 @@
 get:
-  summary: Packages - Info
+  summary: Get package
   tags:
-    - epm
-      packages
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -47,10 +46,9 @@ get:
         Whether to return prerelease versions of packages (e.g. beta, rc, preview)
   deprecated: true
 post:
-  summary: Packages - Install
+  summary: Install package
   tags:
-    - epm
-      packages
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -96,8 +94,9 @@ post:
               type: boolean
   deprecated: true
 delete:
-  summary: Packages - Delete
-  tags: []
+  summary: Delete ackage
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK

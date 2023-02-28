@@ -10,10 +10,9 @@ parameters:
     in: path
     required: true
 get:
-  summary: Get agent upload file
+  summary: Get file uploaded by agent
   tags:
-    - agents
-      uploads
+    - Agents
   responses:
     '200':
       description: OK
