@@ -46,9 +46,6 @@ export const registerFindRoute = (
             schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
           ),
           hasReferenceOperator: searchOperatorSchema,
-          fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-            defaultValue: [],
-          }),
         }),
       },
     },
@@ -58,7 +55,6 @@ export const registerFindRoute = (
       const { getClient, typeRegistry } = (await context.core).savedObjects;
 
       const searchTypes = Array.isArray(query.type) ? query.type : [query.type];
-      const includedFields = Array.isArray(query.fields) ? query.fields : [query.fields];
 
       const importAndExportableTypes = searchTypes.filter((type) =>
         typeRegistry.isImportableAndExportable(type)
@@ -90,9 +86,6 @@ export const registerFindRoute = (
         saved_objects: savedObjects.map((so) => {
           const obj = injectMetaAttributes(so, managementService);
           const result = { ...obj, attributes: {} as Record<string, unknown> };
-          for (const field of includedFields) {
-            result.attributes[field] = (obj.attributes as Record<string, unknown>)[field];
-          }
           return result;
         }),
         total: findResponse.total,
