@@ -1359,9 +1359,9 @@ describe('migrations v2 model', () => {
 
       describe('if action fails', () => {
         test('CHECK_COMPATIBLE_MAPPINGS -> CHECK_UNKNOWN_DOCUMENTS', () => {
-          const res: ResponseType<'CHECK_COMPATIBLE_MAPPINGS'> = Either.left(
-            'incompatible_mapping_exception'
-          );
+          const res: ResponseType<'CHECK_COMPATIBLE_MAPPINGS'> = Either.left({
+            type: 'incompatible_mapping_exception',
+          });
           const newState = model(checkCompatibleMappingsState, res);
 
           expect(newState).toMatchObject({
