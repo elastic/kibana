@@ -13,10 +13,10 @@ export class DashboardAddPanelService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly find = this.ctx.getService('find');
   private readonly flyout = this.ctx.getService('flyout');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
+  private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
 
   async clickOpenAddPanel() {
     this.log.debug('DashboardAddPanel.clickOpenAddPanel');
@@ -77,30 +77,6 @@ export class DashboardAddPanelService extends FtrService {
 
   async clickAddNewEmbeddableLink(type: string) {
     await this.testSubjects.click(`createNew-${type}`);
-  }
-
-  async toggleFilterPopover() {
-    this.log.debug('DashboardAddPanel.toggleFilter');
-    const filtersHolder = await this.find.byClassName('euiSearchBar__filtersHolder');
-    const filtersButton = await filtersHolder.findByCssSelector('button');
-    await filtersButton.click();
-  }
-
-  async toggleFilter(type: string) {
-    this.log.debug(`DashboardAddPanel.addToFilter(${type})`);
-    await this.waitForListLoading();
-    await this.toggleFilterPopover();
-    const list = await this.testSubjects.find('euiSelectableList');
-    const listItems = await list.findAllByCssSelector('li');
-    for (let i = 0; i < listItems.length; i++) {
-      const listItem = await listItems[i].findByClassName('euiSelectableListItem__text');
-      const text = await listItem.getVisibleText();
-      if (text.includes(type)) {
-        await listItem.click();
-        await this.toggleFilterPopover();
-        break;
-      }
-    }
   }
 
   async addEveryEmbeddableOnCurrentPage() {
@@ -171,10 +147,6 @@ export class DashboardAddPanelService extends FtrService {
     }
   }
 
-  async waitForListLoading() {
-    await this.testSubjects.waitForDeleted('savedObjectFinderLoadingIndicator');
-  }
-
   async closeAddPanel() {
     await this.flyout.ensureClosed('dashboardAddPanel');
   }
@@ -190,9 +162,9 @@ export class DashboardAddPanelService extends FtrService {
     this.log.debug('DashboardAddPanel.addEveryVisualization');
     await this.ensureAddPanelIsShowing();
     if (filter) {
-      await this.filterEmbeddableNames(filter.replace('-', ' '));
+      await this.savedObjectsFinder.filterEmbeddableNames(filter.replace('-', ' '));
     }
-    await this.toggleFilter('Visualization');
+    await this.savedObjectsFinder.toggleFilter('Visualization');
     const itemList = await this.testSubjects.find('savedObjectsFinderTable');
     await this.retry.try(async () => {
       const embeddableListBody = await itemList.findByTagName('tbody');
@@ -215,9 +187,9 @@ export class DashboardAddPanelService extends FtrService {
     await this.ensureAddPanelIsShowing();
     const searchList = [];
     if (filter) {
-      await this.filterEmbeddableNames(filter.replace('-', ' '));
+      await this.savedObjectsFinder.filterEmbeddableNames(filter.replace('-', ' '));
     }
-    await this.toggleFilter('Saved search');
+    await this.savedObjectsFinder.toggleFilter('Saved search');
     let morePages = true;
     while (morePages) {
       searchList.push(await this.addEveryEmbeddableOnCurrentPage());
@@ -257,25 +229,18 @@ export class DashboardAddPanelService extends FtrService {
       `DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
     );
     await this.ensureAddPanelIsShowing();
-    await this.toggleFilter(embeddableType);
-    await this.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
+    await this.savedObjectsFinder.toggleFilter(embeddableType);
+    await this.savedObjectsFinder.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
     await this.testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
     await this.testSubjects.exists('addObjectToDashboardSuccess');
     await this.closeAddPanel();
     return embeddableName;
   }
 
-  async filterEmbeddableNames(name: string) {
-    // The search input field may be disabled while the table is loading so wait for it
-    await this.waitForListLoading();
-    await this.testSubjects.setValue('savedObjectFinderSearchInput', name);
-    await this.waitForListLoading();
-  }
-
   async panelAddLinkExists(name: string) {
     this.log.debug(`DashboardAddPanel.panelAddLinkExists(${name})`);
     await this.ensureAddPanelIsShowing();
-    await this.filterEmbeddableNames(`"${name}"`);
+    await this.savedObjectsFinder.filterEmbeddableNames(`"${name}"`);
     return await this.testSubjects.exists(`savedObjectTitle${name.split(' ').join('-')}`);
   }
 }
