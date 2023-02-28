@@ -22,7 +22,7 @@ import {
   setSignalStatus,
   getSignalStatusEmptyResponse,
   getQuerySignalIds,
-  deleteAllAlerts,
+  deleteAllRules,
   createRule,
   waitForSignalsToBePresent,
   getSignalsByIds,
@@ -79,13 +79,13 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         beforeEach(async () => {
-          await deleteAllAlerts(supertest, log);
+          await deleteAllRules(supertest, log);
           await createSignalsIndex(supertest, log);
         });
 
         afterEach(async () => {
           await deleteSignalsIndex(supertest, log);
-          await deleteAllAlerts(supertest, log);
+          await deleteAllRules(supertest, log);
         });
 
         it('should be able to execute and get 10 signals', async () => {

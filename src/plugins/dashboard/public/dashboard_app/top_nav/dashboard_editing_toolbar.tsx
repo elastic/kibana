@@ -8,23 +8,21 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import {
-  AddFromLibraryButton,
-  PrimaryActionButton,
-  QuickButtonGroup,
-  QuickButtonProps,
-  SolutionToolbar,
-} from '@kbn/presentation-util-plugin/public';
+import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
+import { IconButton, IconButtonGroup } from '@kbn/shared-ux-button-toolbar';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import React from 'react';
 import { useCallback } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { IconType, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_context';
 import { pluginServices } from '../../services/plugin_services';
-import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
+import {
+  getCreateVisualizationButtonTitle,
+  getQuickCreateButtonGroupLegend,
+} from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
 import { ControlsToolbarButton } from './controls_toolbar_button';
 
@@ -33,7 +31,6 @@ export function DashboardEditingToolbar() {
     usageCollection,
     data: { search },
     notifications: { toasts },
-    settings: { uiSettings },
     embeddable: { getStateTransfer, getEmbeddableFactory },
     visualizations: { get: getVisualization, getAliases: getVisTypeAliases },
   } = pluginServices.getServices();
@@ -42,7 +39,6 @@ export function DashboardEditingToolbar() {
   const { embeddableInstance: dashboardContainer } = useDashboardContainerContext();
 
   const stateTransferService = getStateTransfer();
-  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
 
   const lensAlias = getVisTypeAliases().find(({ name }) => name === 'lens');
   const quickButtonVisTypes: Array<
@@ -120,7 +116,9 @@ export function DashboardEditingToolbar() {
     [trackUiMetric, dashboardContainer, toasts]
   );
 
-  const getVisTypeQuickButton = (quickButtonForType: typeof quickButtonVisTypes[0]) => {
+  const getVisTypeQuickButton = (
+    quickButtonForType: typeof quickButtonVisTypes[0]
+  ): IconButton | undefined => {
     if (quickButtonForType.type === 'vis') {
       const visTypeName = quickButtonForType.visType;
       const visType =
@@ -130,19 +128,17 @@ export function DashboardEditingToolbar() {
       if (visType) {
         if ('aliasPath' in visType) {
           const { name, icon, title } = visType as VisTypeAlias;
-
           return {
+            label: title,
             iconType: icon,
-            createType: title,
             onClick: createNewVisType(visType as VisTypeAlias),
             'data-test-subj': `dashboardQuickButton${name}`,
           };
         } else {
-          const { name, icon, title, titleInWizard } = visType as BaseVisType;
-
+          const { name, icon, title, titleInWizard } = visType as BaseVisType & { icon: IconType };
           return {
+            label: titleInWizard || title,
             iconType: icon,
-            createType: titleInWizard || title,
             onClick: createNewVisType(visType as BaseVisType),
             'data-test-subj': `dashboardQuickButton${name}`,
           };
@@ -151,22 +147,25 @@ export function DashboardEditingToolbar() {
     } else {
       const embeddableType = quickButtonForType.embeddableType;
       const embeddableFactory = getEmbeddableFactory(embeddableType);
-      return {
-        iconType: embeddableFactory?.getIconType(),
-        createType: embeddableFactory?.getDisplayName(),
-        onClick: () => {
-          if (embeddableFactory) {
-            createNewEmbeddable(embeddableFactory);
-          }
-        },
-        'data-test-subj': `dashboardQuickButton${embeddableType}`,
-      };
+      if (embeddableFactory) {
+        return {
+          label: embeddableFactory.getDisplayName(),
+          iconType: embeddableFactory.getIconType(),
+          onClick: () => {
+            if (embeddableFactory) {
+              createNewEmbeddable(embeddableFactory);
+            }
+          },
+          'data-test-subj': `dashboardQuickButton${embeddableType}`,
+        };
+      }
     }
   };
 
-  const quickButtons = quickButtonVisTypes
-    .map(getVisTypeQuickButton)
-    .filter((button) => button) as QuickButtonProps[];
+  const quickButtons: IconButton[] = quickButtonVisTypes.reduce((accumulator, type) => {
+    const button = getVisTypeQuickButton(type);
+    return button ? [...accumulator, button] : accumulator;
+  }, [] as IconButton[]);
 
   const extraButtons = [
     <EditorMenu createNewVisType={createNewVisType} createNewEmbeddable={createNewEmbeddable} />,
@@ -185,21 +184,23 @@ export function DashboardEditingToolbar() {
         padding: 0 ${euiTheme.size.s} ${euiTheme.size.s} ${euiTheme.size.s};
       `}
     >
-      <SolutionToolbar isDarkModeEnabled={IS_DARK_THEME}>
+      <Toolbar>
         {{
-          primaryActionButton: (
-            <PrimaryActionButton
-              isDarkModeEnabled={IS_DARK_THEME}
-              label={getCreateVisualizationButtonTitle()}
-              onClick={createNewVisType(lensAlias)}
+          primaryButton: (
+            <ToolbarButton
+              type="primary"
               iconType="lensApp"
+              onClick={createNewVisType(lensAlias)}
+              label={getCreateVisualizationButtonTitle()}
               data-test-subj="dashboardAddNewPanelButton"
             />
           ),
-          quickButtonGroup: <QuickButtonGroup buttons={quickButtons} />,
+          iconButtonGroup: (
+            <IconButtonGroup buttons={quickButtons} legend={getQuickCreateButtonGroupLegend()} />
+          ),
           extraButtons,
         }}
-      </SolutionToolbar>
+      </Toolbar>
     </div>
   );
 }

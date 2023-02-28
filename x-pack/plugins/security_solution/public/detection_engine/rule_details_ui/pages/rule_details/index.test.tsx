@@ -64,6 +64,9 @@ jest.mock('../../../../common/containers/sourcerer', () => {
       .mockReturnValue({ indexPattern: ['fakeindex'], loading: false }),
   };
 });
+
+jest.mock('../../../../common/hooks/use_data_table_filters');
+
 jest.mock('../../../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
     from: '2020-07-07T08:20:18.966Z',

@@ -78,6 +78,7 @@
     "@kbn/flot-charts",
     "@kbn/shared-ux-router",
     "@kbn/babel-register",
+    "@kbn/shared-ux-button-toolbar",
   ],
   "exclude": [
     "target/**/*",
