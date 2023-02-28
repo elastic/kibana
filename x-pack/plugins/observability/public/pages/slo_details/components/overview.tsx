@@ -16,11 +16,10 @@ export interface Props {
   slo: SLOWithSummaryResponse;
 }
 
-export function Overview(props: Props) {
-  const { slo } = props;
+export function Overview({ slo }: Props) {
   return (
     <EuiPanel paddingSize="none" color="transparent">
-      <EuiFlexGroup direction="row" responsive>
+      <EuiFlexGroup direction="row">
         <OverviewItem
           title={i18n.translate('xpack.observability.slo.sloDetails.overview.observedValueTitle', {
             defaultMessage: 'Observed value',
@@ -28,7 +27,7 @@ export function Overview(props: Props) {
           subtitle={i18n.translate(
             'xpack.observability.slo.sloDetails.overview.observedValueSubtitle',
             {
-              defaultMessage: '{value} ({objective} is target)',
+              defaultMessage: '{value} (target is {objective})',
               values: {
                 value: toPercentage(slo.summary.sliValue),
                 objective: toPercentage(slo.objective.target),
@@ -81,7 +80,7 @@ function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): st
 }
 
 function toPercentage(value: number): string {
-  return `${value * 100}%`;
+  return `${Math.trunc(value * 100000) / 1000}%`;
 }
 
 function toIndicatorTypeLabel(indicatorType: SLOWithSummaryResponse['indicator']['type']): string {
