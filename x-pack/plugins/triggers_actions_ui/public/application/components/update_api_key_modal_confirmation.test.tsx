@@ -77,7 +77,7 @@ describe('Update Api Key', () => {
     expect(onCancel).toHaveBeenCalled();
   });
 
-  it('Updates Api Key', async () => {
+  it('Update an Api Key', async () => {
     apiUpdateApiKeyCall.mockResolvedValue({});
     renderWithProviders(
       <UpdateApiKeyModalConfirmation
@@ -96,6 +96,36 @@ describe('Update Api Key', () => {
     await waitFor(() => {
       expect(setIsLoadingState).toBeCalledTimes(2);
       expect(onUpdated).toHaveBeenCalled();
+    });
+  });
+
+  it('Failed to update an Api Key', async () => {
+    apiUpdateApiKeyCall.mockRejectedValue(500);
+    renderWithProviders(
+      <UpdateApiKeyModalConfirmation
+        onCancel={onCancel}
+        idsToUpdate={['2']}
+        apiUpdateApiKeyCall={apiUpdateApiKeyCall}
+        setIsLoadingState={setIsLoadingState}
+        onUpdated={onUpdated}
+        onSearchPopulate={onSearchPopulate}
+      />
+    );
+
+    fireEvent.click(await screen.findByText('Update'));
+    expect(setIsLoadingState).toBeCalledTimes(1);
+    expect(apiUpdateApiKeyCall).toHaveBeenLastCalledWith(expect.objectContaining({ ids: ['2'] }));
+    await waitFor(() => {
+      expect(setIsLoadingState).toBeCalledTimes(2);
+      expect(addError).toHaveBeenCalled();
+      expect(addError.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          500,
+          Object {
+            "title": "Failed to update the API key",
+          },
+        ]
+      `);
     });
   });
 });
