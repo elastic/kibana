@@ -164,7 +164,7 @@ export function getDiscoverStateContainer({
   services,
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const initialSavedSearch = getEmptySavedSearch(services.data);
-  if(savedSearchId) {
+  if (savedSearchId) {
     initialSavedSearch.id = savedSearchId;
   }
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');

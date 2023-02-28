@@ -66,7 +66,6 @@ export function DiscoverMainRoute(props: Props) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
   const hasCustomBranding = useObservable(core.customBranding.hasCustomBranding$, false);
 
-
   /**
    * Get location state of scoped history only on initial load
    */
