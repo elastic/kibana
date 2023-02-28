@@ -4073,6 +4073,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/expandable-flyout@link:packages/kbn-expandable-flyout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/expect@link:packages/kbn-expect":
   version "0.0.0"
   uid ""
