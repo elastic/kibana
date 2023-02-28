@@ -17,11 +17,11 @@ export const formatTestDuration = (duration = 0, isMilli = false) => {
   const secs = isMilli ? duration / 1e3 : duration / 1e6;
 
   if (secs >= 60) {
-    return `${(secs / 60).toFixed(1)} min`;
+    return `${parseFloat((secs / 60).toFixed(1))} min`;
   }
 
   if (secs >= 1) {
-    return `${secs.toFixed(1)} s`;
+    return `${parseFloat(secs.toFixed(1))} s`;
   }
 
   if (isMilli) {
