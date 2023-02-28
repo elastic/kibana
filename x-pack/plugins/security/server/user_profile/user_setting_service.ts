@@ -14,7 +14,7 @@ export interface UserSettingServiceStart {
   /**
    * Returns the currently signed-in user's settings from their User Profile
    *
-   * @param request
+   * @param request the KibanaRequest that is required to get the current user and their settings
    */
   getCurrentUserProfileSettings(request: KibanaRequest): Promise<Record<string, string>>;
 }
