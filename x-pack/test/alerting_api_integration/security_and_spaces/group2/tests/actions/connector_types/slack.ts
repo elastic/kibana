@@ -130,6 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
           .send({
             name: 'A slack web api action',
             connector_type_id: '.slack',
+            config: { type: 'web_api' },
             secrets: {
               token: 'some token',
             },
@@ -143,7 +144,7 @@ export default ({ getService }: FtrProviderContext) => {
           is_missing_secrets: false,
           name: 'A slack web api action',
           connector_type_id: '.slack',
-          config: {},
+          config: { type: 'web_api' },
         });
 
         expect(typeof createdAction.id).to.be('string');
@@ -159,7 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
           is_missing_secrets: false,
           name: 'A slack web api action',
           connector_type_id: '.slack',
-          config: {},
+          config: { type: 'web_api' },
         });
       });
 
