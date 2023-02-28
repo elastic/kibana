@@ -30,6 +30,7 @@ describe('group by expression', () => {
     expect(wrapper.find('[data-test-subj="overExpressionSelect"]')).toMatchInlineSnapshot(`
       <EuiSelect
         data-test-subj="overExpressionSelect"
+        id="overField"
         onChange={[Function]}
         options={
           Array [

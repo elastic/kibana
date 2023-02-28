@@ -87,6 +87,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(ofOptions.length > 0).to.be(true);
       await comboBox.set('availablefieldsOptionsComboBox', ofOptions[0]);
 
+      await testSubjects.click('groupByExpression');
+      await testSubjects.click('overExpressionSelect');
+      await retry.try(async () => {
+        const groupByOption = await find.allByCssSelector('#overField option');
+        expect(groupByOption[1]).not.to.be(undefined);
+        await groupByOption[1].click();
+      });
+      const groupByTermSize = await testSubjects.find('fieldsNumberSelect');
+      await groupByTermSize.click();
+      await groupByTermSize.clearValue();
+      await groupByTermSize.type('4');
+      const groupByTermField = await testSubjects.find('fieldsExpressionSelect');
+      await groupByTermField.click();
+      await groupByTermField.type('host.keyword');
+      await commonScreenshots.takeScreenshot(
+        'rule-types-index-threshold-example-grouping',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+
       const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
       await flyOutCancelButton.click();
     });

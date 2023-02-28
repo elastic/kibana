@@ -160,6 +160,7 @@ export const GroupByExpression = ({
           <EuiFlexItem grow={false}>
             <EuiSelect
               data-test-subj="overExpressionSelect"
+              id="overField"
               value={groupBy}
               onChange={(e) => {
                 if (groupByTypes[e.target.value].sizeRequired) {
@@ -185,6 +186,7 @@ export const GroupByExpression = ({
               <EuiFlexItem grow={false}>
                 <EuiFormRow isInvalid={errors.termSize.length > 0} error={errors.termSize}>
                   <EuiFieldNumber
+                    data-test-subj="fieldsNumberSelect"
                     css={css`
                       min-width: 50px;
                     `}
