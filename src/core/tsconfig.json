@@ -148,6 +148,7 @@
     "@kbn/core-lifecycle-browser",
     "@kbn/core-custom-branding-browser",
     "@kbn/core-custom-branding-server",
+    "@kbn/core-elasticsearch-client-server-internal",
   ],
   "exclude": [
     "target/**/*",

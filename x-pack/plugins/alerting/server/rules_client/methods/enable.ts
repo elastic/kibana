@@ -6,7 +6,7 @@
  */
 
 import { RawRule, IntervalSchedule } from '../../types';
-import { updateMonitoring, getNextRun } from '../../lib';
+import { resetMonitoringLastRun, getNextRun } from '../../lib';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -84,11 +84,7 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
       ...attributes,
       ...(!existingApiKey && (await createNewAPIKeySet(context, { attributes, username }))),
       ...(attributes.monitoring && {
-        monitoring: updateMonitoring({
-          monitoring: attributes.monitoring,
-          timestamp: now.toISOString(),
-          duration: 0,
-        }),
+        monitoring: resetMonitoringLastRun(attributes.monitoring),
       }),
       nextRun: getNextRun({ interval: schedule.interval }),
       enabled: true,
