@@ -96,8 +96,8 @@ async function canAccessEmsFonts(): Promise<boolean> {
   }
   return canAccessEmsFontsPromise;
 }
-// test only function to reset singlton for different test cases.
-export function clearCanAccessEmsFontsPromise() {
+// test only function to reset singleton for different test cases.
+export function testOnlyClearCanAccessEmsFontsPromise() {
   canAccessEmsFontsPromise = null;
 }
 

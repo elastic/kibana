@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getGlyphUrl, clearCanAccessEmsFontsPromise, makePublicExecutionContext } from './util';
+import {
+  getGlyphUrl,
+  makePublicExecutionContext,
+  testOnlyClearCanAccessEmsFontsPromise,
+} from './util';
 
 describe('getGlyphUrl', () => {
   describe('EMS enabled', () => {
@@ -15,7 +19,7 @@ describe('getGlyphUrl', () => {
           prepend: (path) => `abc${path}`,
         },
       });
-      clearCanAccessEmsFontsPromise();
+      testOnlyClearCanAccessEmsFontsPromise();
     });
 
     describe('offline', () => {
@@ -57,7 +61,7 @@ describe('getGlyphUrl', () => {
         };
       });
 
-      test('should return EMS font template URL', async () => {
+      test('should return EMS fonts template URL', async () => {
         expect(await getGlyphUrl()).toBe(
           'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'
         );
