@@ -22,12 +22,14 @@ export interface InitState extends BaseState {
 }
 
 export interface PostInitState extends BaseState {
-  currentIndex: string;
-  previousMappings: IndexMapping;
+  readonly currentIndex: string;
+  readonly previousMappings: IndexMapping;
 }
 
 export interface CreateTargetIndexState extends BaseState {
   readonly controlState: 'CREATE_TARGET_INDEX';
+  readonly currentIndex: string;
+  readonly indexMappings: IndexMapping;
 }
 
 export interface WaitForYellowIndexState extends PostInitState {

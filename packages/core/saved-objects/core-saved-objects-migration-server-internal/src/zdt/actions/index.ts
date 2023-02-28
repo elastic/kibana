@@ -12,12 +12,14 @@ import type {
   WaitForTaskCompletionTimeout,
   IndexNotYellowTimeout,
   IndexNotGreenTimeout,
+  ClusterShardLimitExceeded,
   IndexNotFound,
 } from '../../actions';
 
 export {
   initAction as init,
   waitForIndexStatus,
+  createIndex,
   type InitActionParams,
   type IncompatibleClusterRoutingAllocation,
   type RetryableEsClientError,
@@ -32,6 +34,7 @@ export interface ActionErrorTypeMap {
   index_not_found_exception: IndexNotFound;
   index_not_green_timeout: IndexNotGreenTimeout;
   index_not_yellow_timeout: IndexNotYellowTimeout;
+  cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
 }
 
 /** Type guard for narrowing the type of a left */

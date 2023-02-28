@@ -11,7 +11,7 @@ import { delayRetryState } from '../../../model/retry_state';
 import { throwBadResponse } from '../../../model/helpers';
 import type { MigrationLog } from '../../../types';
 import { isTypeof } from '../../actions';
-import { getCurrentIndex, checkVersionCompatibility } from '../../utils';
+import { getCurrentIndex, checkVersionCompatibility, buildIndexMappings } from '../../utils';
 import type { ModelStage } from '../types';
 
 export const init: ModelStage<
@@ -28,6 +28,7 @@ export const init: ModelStage<
     }
   }
 
+  const types = context.types.map((type) => context.typeRegistry.getType(type)!);
   const logs: MigrationLog[] = [...state.logs];
 
   const indices = res.right;
@@ -40,13 +41,14 @@ export const init: ModelStage<
       ...state,
       logs,
       controlState: 'CREATE_TARGET_INDEX',
+      currentIndex: `${context.indexPrefix}_1`,
+      indexMappings: buildIndexMappings({ types }),
     };
   }
 
   // Index was found. This is the standard scenario, we check the model versions
   // compatibility before going further.
   const currentMappings = indices[currentIndex].mappings;
-  const types = context.types.map((type) => context.typeRegistry.getType(type)!);
   const versionCheck = checkVersionCompatibility({
     mappings: currentMappings,
     types,

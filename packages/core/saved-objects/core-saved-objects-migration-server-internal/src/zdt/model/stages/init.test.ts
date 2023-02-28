@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { getCurrentIndexMock, checkVersionCompatibilityMock } from './init.test.mocks';
+import {
+  getCurrentIndexMock,
+  checkVersionCompatibilityMock,
+  buildIndexMappingsMock,
+} from './init.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
 import { FetchIndexResponse } from '../../../actions';
 import { createContextMock, MockedMigratorContext } from '../../test_helpers';
@@ -97,6 +101,44 @@ describe('Action: init', () => {
       types: ['foo', 'bar'].map((type) => context.typeRegistry.getType(type)),
       source: 'mappingVersions',
       deletedTypes: context.deletedTypes,
+    });
+  });
+
+  describe('when getCurrentIndex returns undefined', () => {
+    beforeEach(() => {
+      getCurrentIndexMock.mockReturnValue(undefined);
+    });
+
+    it('calls buildIndexMappings with the correct parameters', () => {
+      const state = createState();
+      const fetchIndexResponse = createResponse();
+      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+
+      init(state, res, context);
+
+      expect(buildIndexMappingsMock).toHaveBeenCalledTimes(1);
+      expect(buildIndexMappingsMock).toHaveBeenCalledWith({
+        types: ['foo', 'bar'].map((type) => context.typeRegistry.getType(type)),
+      });
+    });
+
+    it('forwards to CREATE_TARGET_INDEX', () => {
+      const state = createState();
+      const fetchIndexResponse = createResponse();
+      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+
+      const mockMappings = { properties: { someMappings: 'string' } };
+      buildIndexMappingsMock.mockReturnValue(mockMappings);
+
+      const newState = init(state, res, context);
+
+      expect(newState).toEqual(
+        expect.objectContaining({
+          controlState: 'CREATE_TARGET_INDEX',
+          currentIndex: '.kibana_1',
+          indexMappings: mockMappings,
+        })
+      );
     });
   });
 

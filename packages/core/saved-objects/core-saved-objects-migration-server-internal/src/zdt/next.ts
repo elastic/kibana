@@ -37,18 +37,26 @@ const NOT_IMPLEMENTED = () => Promise.resolve({} as any);
 export const nextActionMap = (context: MigratorContext) => {
   return {
     INIT: (state: InitState) =>
-      Actions.init({ client: context.elasticsearchClient, indices: [context.indexPrefix] }),
+      Actions.init({
+        client: context.elasticsearchClient,
+        indices: [`${context.indexPrefix}_*`],
+      }),
+    CREATE_TARGET_INDEX: (state: CreateTargetIndexState) =>
+      Actions.createIndex({
+        client: context.elasticsearchClient,
+        indexName: state.currentIndex,
+        mappings: state.indexMappings,
+      }),
+    UPDATE_INDEX_MAPPINGS: (state: UpdateIndexMappingsState) => NOT_IMPLEMENTED,
+    UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: (state: UpdateIndexMappingsWaitForTaskState) =>
+      NOT_IMPLEMENTED,
+    UPDATE_OR_CREATE_ALIASES: (state: UpdateOrCreateAliasesState) => () => NOT_IMPLEMENTED,
     WAIT_FOR_YELLOW_INDEX: (state: WaitForYellowIndexState) =>
       Actions.waitForIndexStatus({
         client: context.elasticsearchClient,
         index: state.currentIndex,
         status: 'yellow',
       }),
-    CREATE_TARGET_INDEX: (state: CreateTargetIndexState) => NOT_IMPLEMENTED,
-    UPDATE_INDEX_MAPPINGS: (state: UpdateIndexMappingsState) => NOT_IMPLEMENTED,
-    UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: (state: UpdateIndexMappingsWaitForTaskState) =>
-      NOT_IMPLEMENTED,
-    UPDATE_OR_CREATE_ALIASES: (state: UpdateOrCreateAliasesState) => () => NOT_IMPLEMENTED,
   };
 };
 
