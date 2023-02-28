@@ -58,6 +58,12 @@ export interface FileKind extends FileKindBase {
   hooks?: Partial<FileRpcServiceHooks>;
 
   /**
+   * Blob store specific settings that enable configuration of storage
+   * details.
+   */
+  blobStoreSettings?: BlobStorageSettings;
+
+  /**
    * Specify which HTTP routes to create for the file kind.
    *
    * You can always create your own HTTP routes for working with files but
