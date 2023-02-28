@@ -58,7 +58,7 @@ describe('Cases connectors', () => {
     });
 
     cy.intercept('POST', '/api/actions/connector').as('createConnector');
-    cy.intercept('PATCH', `/api/cases/configure/${configureResult.id}`, (req) => {
+    cy.intercept('PATCH', '/api/cases/configure/*', (req) => {
       const connector = req.body.connector;
       req.reply((res) => {
         res.send(200, { ...configureResult, connector });
@@ -94,12 +94,14 @@ describe('Cases connectors', () => {
 
     cy.wait('@createConnector').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
+      
       verifyNewConnectorSelected(snConnector);
 
       cy.get(TOASTER).should('have.text', "Created 'New connector'");
       cy.get(TOASTER).should('have.text', 'Saved external connection settings');
       cy.get(TOASTER).should('not.exist');
 
+      cy.wait('@saveConnector').its('response.statusCode').should('eql', 200);
       cy.get(SERVICE_NOW_MAPPING).first().should('have.text', 'short_description');
     });
   });
