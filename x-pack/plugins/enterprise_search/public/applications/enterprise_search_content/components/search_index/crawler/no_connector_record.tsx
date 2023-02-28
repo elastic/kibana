@@ -81,7 +81,7 @@ export const NoConnectorRecord: React.FC = () => {
             onClick={() => openDeleteModal(indexName)}
           >
             {i18n.translate(
-              'xpack.enterpriseSearch.content.searchIndex.noCrawlerConnectorFound.recreateConnectorRecord',
+              'xpack.enterpriseSearch.content.searchIndex.noCrawlerConnectorFound.deleteIndex',
               {
                 defaultMessage: 'Delete index',
               }
