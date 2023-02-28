@@ -29,10 +29,10 @@ import type { FunctionComponent } from 'react';
 import React, { useRef, useState } from 'react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, ToastInput, ToastOptions } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint, useKibana } from '@kbn/kibana-react-plugin/public';
 import { UserAvatar } from '@kbn/user-profile-components';
 
 import type { AuthenticatedUser, UserProfileAvatarData } from '../../../common';
@@ -738,12 +738,53 @@ export function useUserProfileForm({ user, data }: UserProfileProps) {
         return;
       }
 
+      let isRefreshRequired = false;
+      if (initialValues.data?.userSettings.darkMode !== values.data?.userSettings.darkMode) {
+        isRefreshRequired = true;
+      }
+
       resetInitialValues(values);
-      services.notifications.toasts.addSuccess(
-        i18n.translate('xpack.security.accountManagement.userProfile.submitSuccessTitle', {
+
+      let successToastInput: ToastInput = {
+        title: i18n.translate('xpack.security.accountManagement.userProfile.submitSuccessTitle', {
           defaultMessage: 'Profile updated',
-        })
-      );
+        }),
+      };
+
+      let successToastOptions: ToastOptions = {};
+
+      if (isRefreshRequired) {
+        successToastOptions = {
+          toastLifeTimeMs: 1000 * 60 * 5,
+        };
+
+        successToastInput = {
+          ...successToastInput,
+          text: toMountPoint(
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <p>
+                  {i18n.translate('advancedSettings.form.requiresPageReloadToastDescription', {
+                    defaultMessage:
+                      'One or more settings require you to reload the page to take effect.',
+                  })}
+                </p>
+                <EuiButton
+                  size="s"
+                  onClick={() => window.location.reload()}
+                  data-test-subj="windowReloadButton"
+                >
+                  {i18n.translate('advancedSettings.form.requiresPageReloadToastButtonLabel', {
+                    defaultMessage: 'Reload page',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          ),
+        };
+      }
+
+      services.notifications.toasts.addSuccess(successToastInput, successToastOptions);
     },
     initialValues,
     enableReinitialize: true,
