@@ -33,10 +33,11 @@ export const formatError = (
 const mapErrorMessageToUserMessage = (
   actionConnectorsErrors: Array<ImportRulesResponseError | ImportResponseError>
 ) => {
-  let actionIds: string[] | '' = [];
+  let concatenatedActionIds: string = '';
   const mappedErrors = actionConnectorsErrors.map((connectorError) => {
     const { id, error } = connectorError as ImportResponseError;
-    actionIds = id && [...id.split(',')];
+    concatenatedActionIds =
+      concatenatedActionIds && concatenatedActionIds !== id ? `${concatenatedActionIds},${id}` : id;
     const { status_code: statusCode, message: originalMessage } = error || {};
     let message;
     switch (statusCode) {
@@ -49,11 +50,12 @@ const mapErrorMessageToUserMessage = (
 
         break;
     }
-
     return { ...connectorError, error: { ...error, message } };
   });
-  const numberOfAction = Array.isArray(actionIds) ? actionIds.length : actionIds;
-  return { mappedErrors, numberOfAction };
+  const actionIds: Set<string> = new Set(
+    concatenatedActionIds && [...concatenatedActionIds.split(',')]
+  );
+  return { mappedErrors, numberOfAction: actionIds.size };
 };
 
 export const showToasterMessage = ({
