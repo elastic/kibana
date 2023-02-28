@@ -46,9 +46,6 @@ export const registerFindRoute = (
             schema.oneOf([referenceSchema, schema.arrayOf(referenceSchema)])
           ),
           hasReferenceOperator: searchOperatorSchema,
-          // fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-          //   defaultValue: [],
-          // }),
         }),
       },
     },
