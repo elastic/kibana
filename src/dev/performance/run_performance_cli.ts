@@ -103,7 +103,7 @@ run(
       process.stdout.write(`--- Starting ES\n`);
       await procRunner.run('es', {
         cmd: 'node',
-        args: ['scripts/es', 'snapshot'],
+        args: ['scripts/es', 'snapshot', '--license=trial'],
         cwd: REPO_ROOT,
         wait: /kbn\/es setup complete/,
       });

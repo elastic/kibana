@@ -35,4 +35,6 @@ get:
                     - startTime
             required:
               - items
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: agents-current-upgrades
