@@ -30,7 +30,7 @@ import {
 import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
-import { LIVE_QUERY_EDITOR, RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { ROLES } from '../../test';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
