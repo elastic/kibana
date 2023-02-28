@@ -26,7 +26,7 @@ export const configSchema = schema.object({
 
   /**
    * This is used within the merge strategies:
-   * server/lib/detection_engine/signals/source_fields_merging
+   * server/lib/detection_engine/rule_types/utils/source_fields_merging
    *
    * For determining which strategy for merging "fields" and "_source" together to get
    * runtime fields, constant keywords, etc...
@@ -44,7 +44,7 @@ export const configSchema = schema.object({
 
   /**
    * This is used within the merge strategies:
-   * server/lib/detection_engine/signals/source_fields_merging
+   * server/lib/detection_engine/rule_types/utils/source_fields_merging
    *
    * For determining if we need to ignore particular "fields" and not merge them with "_source" such as
    * runtime fields, constant keywords, etc...
