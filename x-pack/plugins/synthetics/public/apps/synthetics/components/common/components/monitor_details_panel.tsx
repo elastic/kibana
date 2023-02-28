@@ -40,19 +40,23 @@ const DescriptionLabel = euiStyled(EuiDescriptionListDescription)`
   width: 60%;
 `;
 
+export interface MonitorDetailsPanelProps {
+  latestPing?: Ping;
+  loading: boolean;
+  configId: string;
+  monitor: EncryptedSyntheticsSavedMonitor | null;
+  hideEnabled?: boolean;
+  hideLocations?: boolean;
+}
+
 export const MonitorDetailsPanel = ({
   monitor,
   latestPing,
   loading,
   configId,
   hideEnabled = false,
-}: {
-  latestPing?: Ping;
-  loading: boolean;
-  configId: string;
-  monitor: EncryptedSyntheticsSavedMonitor | null;
-  hideEnabled?: boolean;
-}) => {
+  hideLocations = false,
+}: MonitorDetailsPanelProps) => {
   const dispatch = useDispatch();
 
   if (!monitor) {
@@ -116,10 +120,15 @@ export const MonitorDetailsPanel = ({
           </DescriptionLabel>
           <TitleLabel>{FREQUENCY_LABEL}</TitleLabel>
           <DescriptionLabel>{frequencyStr(monitor[ConfigKey.SCHEDULE])}</DescriptionLabel>
-          <TitleLabel>{LOCATIONS_LABEL}</TitleLabel>
-          <DescriptionLabel>
-            <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
-          </DescriptionLabel>
+
+          {!hideLocations && (
+            <>
+              <TitleLabel>{LOCATIONS_LABEL}</TitleLabel>
+              <DescriptionLabel>
+                <LocationsStatus configId={configId} monitorLocations={monitor.locations} />
+              </DescriptionLabel>
+            </>
+          )}
 
           <TitleLabel>{TAGS_LABEL}</TitleLabel>
           <DescriptionLabel>

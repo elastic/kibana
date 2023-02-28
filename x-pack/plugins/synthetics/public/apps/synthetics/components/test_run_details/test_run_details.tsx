@@ -89,7 +89,7 @@ export const TestRunDetails = () => {
           <EuiFlexItem grow={1}>
             <StepDurationPanel legendPosition="bottom" />
             <EuiSpacer size="m" />
-            <MonitorDetailsPanelContainer />
+            <MonitorDetailsPanelContainer hideEnabled hideLocations />
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
