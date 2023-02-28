@@ -123,6 +123,11 @@ export const allowedExperimentalValues = Object.freeze({
    *
    **/
   alertsPageFiltersEnabled: true,
+
+  /**
+   * Enables experimental Entity Analytics HTTP endpoint
+   */
+  riskScoringRouteEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
