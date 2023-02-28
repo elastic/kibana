@@ -32,24 +32,24 @@ export type SlackWebhookSecrets = TypeOf<typeof SlackWebhookSecretsSchema>;
 export type SlackWebApiSecrets = TypeOf<typeof SlackWebApiSecretsSchema>;
 
 export type SlackWebhookExecutorOptions = ConnectorTypeExecutorOptions<
-  {},
+  SlackConfig,
   SlackWebhookSecrets,
   WebhookParams
 >;
 export type SlackWebApiExecutorOptions = ConnectorTypeExecutorOptions<
-  {},
+  SlackConfig,
   SlackWebApiSecrets,
   WebApiParams
 >;
 
 export type SlackExecutorOptions = ConnectorTypeExecutorOptions<
-  {},
+  SlackConfig,
   SlackSecrets,
   WebhookParams | WebApiParams
 >;
 
 export type SlackConnectorType = ConnectorType<
-  {},
+  SlackConfig,
   SlackSecrets,
   WebhookParams | WebApiParams,
   unknown

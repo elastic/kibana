@@ -225,7 +225,7 @@ describe('execute', () => {
       const response = await connectorType.executor({
         actionId: '.slack',
         services,
-        config: {},
+        config: { type: 'webhook' },
         secrets: { webhookUrl: 'http://example.com' },
         params: { message: 'this invocation should succeed' },
         configurationUtilities,
@@ -252,7 +252,7 @@ describe('execute', () => {
       const response = await connectorType.executor({
         actionId: '.slack',
         services,
-        config: {},
+        config: { type: 'webhook' },
         secrets: { webhookUrl: 'http://example.com' },
         params: { message: 'this invocation should succeed' },
         configurationUtilities,
@@ -278,7 +278,7 @@ describe('execute', () => {
       const response = await connectorType.executor({
         actionId: '.slack',
         services,
-        config: {},
+        config: { type: 'webhook' },
         secrets: { webhookUrl: 'http://example.com' },
         params: { message: 'this invocation should succeed' },
         configurationUtilities,
@@ -307,7 +307,7 @@ describe('execute', () => {
         await connectorType.executor({
           actionId: '.slack',
           services,
-          config: {},
+          config: { type: 'webhook' },
           secrets: { webhookUrl: 'http://example.com' },
           params: { message: 'failure: this invocation should fail' },
           configurationUtilities,
@@ -335,7 +335,7 @@ describe('execute', () => {
       await connectorTypeProxy.executor({
         actionId: '.slack',
         services,
-        config: {},
+        config: { type: 'webhook' },
         secrets: { webhookUrl: 'http://example.com' },
         params: { message: 'this invocation should succeed' },
         configurationUtilities: configUtils,
@@ -361,7 +361,7 @@ describe('execute', () => {
       await connectorTypeProxy.executor({
         actionId: '.slack',
         services,
-        config: {},
+        config: { type: 'webhook' },
         secrets: { webhookUrl: 'http://example.com' },
         params: { message: 'this invocation should succeed' },
         configurationUtilities: configUtils,
@@ -387,7 +387,7 @@ describe('execute', () => {
       await connectorTypeProxy.executor({
         actionId: '.slack',
         services,
-        config: {},
+        config: { type: 'webhook' },
         secrets: { webhookUrl: 'http://example.com' },
         params: { message: 'this invocation should succeed' },
         configurationUtilities: configUtils,
@@ -413,7 +413,7 @@ describe('execute', () => {
       await connectorTypeProxy.executor({
         actionId: '.slack',
         services,
-        config: {},
+        config: { type: 'webhook' },
         secrets: { webhookUrl: 'http://example.com' },
         params: { message: 'this invocation should succeed' },
         configurationUtilities: configUtils,
@@ -439,7 +439,7 @@ describe('execute', () => {
       await connectorTypeProxy.executor({
         actionId: '.slack',
         services,
-        config: {},
+        config: { type: 'webhook' },
         secrets: { webhookUrl: 'http://example.com' },
         params: { message: 'this invocation should succeed' },
         configurationUtilities: configUtils,
@@ -492,7 +492,7 @@ describe('execute', () => {
       const response = await connectorType.executor({
         actionId: '.slack',
         services,
-        config: {},
+        config: { type: 'web_api' },
         secrets: { token: 'some token' },
         params: {
           subAction: 'postMessage',
@@ -543,7 +543,7 @@ describe('execute', () => {
       const response = await connectorType.executor({
         actionId: '.slack',
         services,
-        config: {},
+        config: { type: 'web_api' },
         secrets: { token: 'some token' },
         params: {
           subAction: 'getChannels',
@@ -584,7 +584,7 @@ describe('execute', () => {
         connectorType.executor({
           actionId: '.slack',
           services,
-          config: {},
+          config: { type: 'web_api' },
           secrets: { token: 'some token' },
           params: {
             subAction: 'weirdAcrion' as 'postMessage',

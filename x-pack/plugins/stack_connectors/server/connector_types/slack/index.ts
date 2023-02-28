@@ -28,7 +28,11 @@ import type {
   SlackConnectorType,
   WebApiParams,
 } from '../../../common/slack/types';
-import { SlackSecretsSchema, SlackParamsSchema } from '../../../common/slack/schema';
+import {
+  SlackSecretsSchema,
+  SlackParamsSchema,
+  SlackConfigSchema,
+} from '../../../common/slack/schema';
 import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';
 import { api } from './api';
@@ -46,6 +50,9 @@ export function getConnectorType(): SlackConnectorType {
       SecurityConnectorFeatureId,
     ],
     validate: {
+      config: {
+        schema: SlackConfigSchema,
+      },
       secrets: {
         schema: SlackSecretsSchema,
         customValidator: validate.secrets,
@@ -57,7 +64,7 @@ export function getConnectorType(): SlackConnectorType {
     renderParameterTemplates,
     executor: (execOptions: SlackExecutorOptions) => {
       const res =
-        'webhookUrl' in execOptions.secrets
+        execOptions.config.type === 'webhook'
           ? slackWebhookExecutor(execOptions as SlackWebhookExecutorOptions)
           : slackWebApiExecutor(execOptions as SlackWebApiExecutorOptions);
       return res;
