@@ -12,16 +12,23 @@ import type { ThreatArray } from '../../common/detection_engine/rule_schema';
 
 export const formatMitreAttackDescription = (mitre: ThreatArray) => {
   return mitre
-    .map((threat) =>
-      threat.technique
-        ? threat.technique
-            .map((technique) => {
-              return (
-                technique.name + (technique.subtechnique ? technique.subtechnique.join('') : '')
-              );
-            })
-            .join('')
-        : ''
+    .map(
+      (threat) =>
+        `${threat.tactic.name} (${threat.tactic.id})${
+          threat.technique
+            ? threat.technique
+                .map((technique) => {
+                  return `${technique.name} (${technique.id})${
+                    technique.subtechnique
+                      ? technique.subtechnique
+                          .map((subtechnique) => `${subtechnique.name} (${subtechnique.id})`)
+                          .join('')
+                      : ''
+                  }`;
+                })
+                .join('')
+            : ''
+        }`
     )
     .join('');
 };

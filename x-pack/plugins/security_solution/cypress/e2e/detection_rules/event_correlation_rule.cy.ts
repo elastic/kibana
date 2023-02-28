@@ -92,7 +92,7 @@ describe('EQL rules', () => {
 
       cy.get(RULE_NAME).should('have.text', rule.name);
       cy.get(RISK_SCORE).should('have.text', rule.risk_score);
-      cy.get(SEVERITY).should('have.text', rule.severity);
+      cy.get(SEVERITY).should('have.text', 'High');
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
       goToRuleDetails();
@@ -100,7 +100,7 @@ describe('EQL rules', () => {
       cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
       cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
       cy.get(ABOUT_DETAILS).within(() => {
-        getDetails(SEVERITY_DETAILS).should('have.text', rule.severity);
+        getDetails(SEVERITY_DETAILS).should('have.text', 'High');
         getDetails(RISK_SCORE_DETAILS).should('have.text', rule.risk_score);
         getDetails(REFERENCE_URLS_DETAILS).should((details) => {
           expect(removeExternalLinkText(details.text())).equal(expectedUrls);
@@ -135,9 +135,9 @@ describe('EQL rules', () => {
       cy.get(ALERT_DATA_GRID)
         .invoke('text')
         .then((text) => {
-          expect(text).contains(this.rule.name);
-          expect(text).contains(this.rule.severity.toLowerCase());
-          expect(text).contains(this.rule.riskScore);
+          expect(text).contains(rule.name);
+          expect(text).contains(rule.severity);
+          expect(text).contains(rule.risk_score);
         });
     });
   });
@@ -170,8 +170,8 @@ describe('EQL rules', () => {
         .invoke('text')
         .then((text) => {
           cy.log('ALERT_DATA_GRID', text);
-          expect(text).contains(this.rule.name);
-          expect(text).contains(this.rule.severity.toLowerCase());
+          expect(text).contains(rule.name);
+          expect(text).contains(rule.severity);
         });
     });
   });

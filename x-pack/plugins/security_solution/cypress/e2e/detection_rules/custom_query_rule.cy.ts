@@ -36,9 +36,6 @@ import {
   SEVERITY_DROPDOWN,
   TAGS_CLEAR_BUTTON,
   TAGS_FIELD,
-  ALERT_SUPPRESSION_FIELDS,
-  CREATE_AND_ENABLE_BTN,
-  ALERT_SUPPRESSION_DURATION_OPTIONS,
 } from '../../screens/create_new_rule';
 import {
   ADDITIONAL_LOOK_BACK_DETAILS,
@@ -64,8 +61,6 @@ import {
   THREAT_TACTIC,
   THREAT_TECHNIQUE,
   THREAT_SUBTECHNIQUE,
-  SUPPRESS_BY_DETAILS,
-  SUPPRESS_FOR_DETAILS,
 } from '../../screens/rule_details';
 
 import {
@@ -389,7 +384,7 @@ describe('Custom query rules', () => {
         cy.get(RULE_DESCRIPTION_INPUT).should('have.text', existingRule.description);
         cy.get(TAGS_FIELD).should('have.text', existingRule.tags?.join(''));
         cy.get(SEVERITY_DROPDOWN).should('have.text', 'High');
-        cy.get(DEFAULT_RISK_SCORE_INPUT).invoke('val').should('eql', existingRule.risk_score);
+        cy.get(DEFAULT_RISK_SCORE_INPUT).invoke('val').should('eql', `${existingRule.risk_score}`);
 
         goToScheduleStepTab();
 
@@ -429,7 +424,7 @@ describe('Custom query rules', () => {
         cy.get(RULE_NAME_HEADER).should('contain', `${getEditedRule().name}`);
         cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', getEditedRule().description);
         cy.get(ABOUT_DETAILS).within(() => {
-          getDetails(SEVERITY_DETAILS).should('have.text', getEditedRule().severity);
+          getDetails(SEVERITY_DETAILS).should('have.text', 'Medium');
           getDetails(RISK_SCORE_DETAILS).should('have.text', `${getEditedRule().risk_score}`);
           getDetails(TAGS_DETAILS).should('have.text', expectedEditedtags);
         });
@@ -449,55 +444,6 @@ describe('Custom query rules', () => {
             getDetails(RUNS_EVERY_DETAILS).should('have.text', getEditedRule().interval);
           });
         }
-      });
-    });
-  });
-
-  describe('with alert suppression', () => {
-    beforeEach(() => {
-      deleteAlertsAndRules();
-    });
-    it('should allow users to enable suppression per rule execution', () => {
-      visit(RULE_CREATION);
-
-      cy.get(CUSTOM_QUERY_INPUT).first().type('*');
-      cy.get(ALERT_SUPPRESSION_FIELDS).type('host.name');
-      continueWithNextSection();
-      cy.get(RULE_NAME_INPUT).type('Test rule');
-      cy.get(RULE_DESCRIPTION_INPUT).type('Test rule description');
-      continueWithNextSection();
-      continueWithNextSection();
-      cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
-
-      cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails(SUPPRESS_BY_DETAILS).should('have.text', 'host.name');
-        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', 'One rule execution');
-      });
-    });
-
-    it('should allow users to enable suppression per time period', () => {
-      visit(RULE_CREATION);
-
-      cy.get(CUSTOM_QUERY_INPUT).first().type('*');
-      cy.get(ALERT_SUPPRESSION_FIELDS).type('host.name{enter}');
-      // Click out of the combo box drop down to expose the radio buttons
-      cy.get(CUSTOM_QUERY_INPUT).first().click();
-      // Ideally, we wouldn't need force: true here, but the EUI radio button label covers the actual button
-      cy.get(`${ALERT_SUPPRESSION_DURATION_OPTIONS} [id=per-time-period]`).check({ force: true });
-      cy.get(`${ALERT_SUPPRESSION_DURATION_OPTIONS} [data-test-subj=interval]`).type(
-        '{selectall}10'
-      );
-      cy.get(`${ALERT_SUPPRESSION_DURATION_OPTIONS} [data-test-subj=timeType]`).select('h');
-      continueWithNextSection();
-      cy.get(RULE_NAME_INPUT).type('Test rule');
-      cy.get(RULE_DESCRIPTION_INPUT).type('Test rule description');
-      continueWithNextSection();
-      continueWithNextSection();
-      cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
-
-      cy.get(DEFINITION_DETAILS).within(() => {
-        getDetails(SUPPRESS_BY_DETAILS).should('have.text', 'host.name');
-        getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '10h');
       });
     });
   });

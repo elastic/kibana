@@ -81,7 +81,7 @@ describe('Detection rules, machine learning', () => {
 
     cy.get(RULE_NAME).should('have.text', mlRule.name);
     cy.get(RISK_SCORE).should('have.text', mlRule.risk_score);
-    cy.get(SEVERITY).should('have.text', mlRule.severity);
+    cy.get(SEVERITY).should('have.text', 'Critical');
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
@@ -89,7 +89,7 @@ describe('Detection rules, machine learning', () => {
     cy.get(RULE_NAME_HEADER).should('contain', `${mlRule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', mlRule.description);
     cy.get(ABOUT_DETAILS).within(() => {
-      getDetails(SEVERITY_DETAILS).should('have.text', mlRule.severity);
+      getDetails(SEVERITY_DETAILS).should('have.text', 'Critical');
       getDetails(RISK_SCORE_DETAILS).should('have.text', mlRule.risk_score);
       getDetails(REFERENCE_URLS_DETAILS).should((details) => {
         expect(removeExternalLinkText(details.text())).equal(expectedUrls);
