@@ -8,6 +8,7 @@
 import { useFetcher } from '@kbn/observability-plugin/public';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
+import { getServiceLocations } from '../../../../state/service_locations';
 import { setAddingNewPrivateLocation } from '../../../../state/private_locations';
 import {
   addSyntheticsPrivateLocations,
@@ -32,7 +33,7 @@ export const useLocationsAPI = () => {
   }, []);
 
   const { loading: saveLoading } = useFetcher(async () => {
-    if (privateLocations && formData) {
+    if (formData) {
       const result = await addSyntheticsPrivateLocations({
         ...formData,
         id: formData.agentPolicyId,
@@ -40,9 +41,10 @@ export const useLocationsAPI = () => {
       setPrivateLocations(result.locations);
       setFormData(undefined);
       setIsAddingNew(false);
+      dispatch(getServiceLocations());
       return result;
     }
-  }, [formData, privateLocations]);
+  }, [formData]);
 
   const onSubmit = (data: PrivateLocation) => {
     setFormData(data);
@@ -57,9 +59,10 @@ export const useLocationsAPI = () => {
       const result = await deleteSyntheticsPrivateLocations(deleteId);
       setPrivateLocations(result.locations);
       setDeleteId(undefined);
+      dispatch(getServiceLocations());
       return result;
     }
-  }, [deleteId, privateLocations]);
+  }, [deleteId]);
 
   return {
     formData,

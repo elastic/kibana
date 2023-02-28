@@ -5,16 +5,24 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
+import { renderHook, act } from '@testing-library/react-hooks';
 import { WrappedHelper } from '../../../../utils/testing';
-
+import { getServiceLocations } from '../../../../state/service_locations';
+import { setAddingNewPrivateLocation } from '../../../../state/private_locations';
 import { useLocationsAPI } from './use_locations_api';
 import * as locationAPI from '../../../../state/private_locations/api';
+import * as reduxHooks from 'react-redux';
 
 describe('useLocationsAPI', () => {
-  const addAPI = jest.spyOn(locationAPI, 'addSyntheticsPrivateLocations');
-  const deletedAPI = jest.spyOn(locationAPI, 'deleteSyntheticsPrivateLocations');
+  const dispatch = jest.fn();
+  const addAPI = jest.spyOn(locationAPI, 'addSyntheticsPrivateLocations').mockResolvedValue({
+    locations: [],
+  });
+  const deletedAPI = jest.spyOn(locationAPI, 'deleteSyntheticsPrivateLocations').mockResolvedValue({
+    locations: [],
+  });
   const getAPI = jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations');
+  jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(dispatch);
 
   it('returns expected results', () => {
     const { result } = renderHook(() => useLocationsAPI(), {
@@ -71,15 +79,17 @@ describe('useLocationsAPI', () => {
 
     await waitForNextUpdate();
 
-    result.current.onSubmit({
-      id: 'new',
-      agentPolicyId: 'newPolicy',
-      label: 'new',
-      concurrentMonitors: 1,
-      geo: {
-        lat: 0,
-        lon: 0,
-      },
+    act(() => {
+      result.current.onSubmit({
+        id: 'new',
+        agentPolicyId: 'newPolicy',
+        label: 'new',
+        concurrentMonitors: 1,
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
+      });
     });
 
     await waitForNextUpdate();
@@ -94,6 +104,8 @@ describe('useLocationsAPI', () => {
       label: 'new',
       agentPolicyId: 'newPolicy',
     });
+    expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
+    expect(dispatch).toBeCalledWith(getServiceLocations());
   });
 
   it('deletes location on delete', async () => {
@@ -103,10 +115,14 @@ describe('useLocationsAPI', () => {
 
     await waitForNextUpdate();
 
-    result.current.onDelete('Test');
+    act(() => {
+      result.current.onDelete('Test');
+    });
 
     await waitForNextUpdate();
 
     expect(deletedAPI).toHaveBeenLastCalledWith('Test');
+    expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
+    expect(dispatch).toBeCalledWith(getServiceLocations());
   });
 });
