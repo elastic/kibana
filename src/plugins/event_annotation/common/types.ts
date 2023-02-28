@@ -94,8 +94,6 @@ export interface EventAnnotationGroupConfig {
   indexPatternId: string;
   ignoreGlobalFilters?: boolean;
   title?: string;
-  description?: string;
-  tags?: string[];
 }
 
 export type EventAnnotationArgs =

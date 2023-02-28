@@ -9,7 +9,8 @@
     "browser": true,
     "requiredPlugins": [
       "expressions",
-      "data"
+      "data",
+      "savedObjects"
     ],
     "extraPublicDirs": [
       "common"

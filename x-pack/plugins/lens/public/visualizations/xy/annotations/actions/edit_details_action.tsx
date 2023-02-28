@@ -35,7 +35,7 @@ export const EditDetailsFlyout = ({
   groupLabel: string;
   title?: string;
   isNew?: boolean;
-  onConfirm: () => void;
+  onConfirm: (title: string) => void;
 }) => {
   const [newTitle, setNewTitle] = React.useState(title);
   // TODO: debounce title change to set in higher level state to persist when closing the flyout
@@ -67,9 +67,11 @@ export const EditDetailsFlyout = ({
               <EuiFlexItem grow={false}>
                 <EuiButton
                   onClick={() => {
-                    onConfirm();
-                    // todo: notification?
-                    unmountComponentAtNode(domElement);
+                    if (newTitle) {
+                      onConfirm(newTitle);
+                      // todo: notification?
+                      unmountComponentAtNode(domElement);
+                    }
                   }}
                   iconType="plusInCircleFilled"
                   fill

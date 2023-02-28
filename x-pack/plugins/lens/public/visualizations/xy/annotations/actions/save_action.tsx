@@ -6,36 +6,37 @@
  */
 
 import React from 'react';
-import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { render } from 'react-dom';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { ToastsStart } from '@kbn/core-notifications-browser';
+import { MountPoint } from '@kbn/core-mount-utils-browser';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { LayerAction, StateSetter } from '../../../../types';
-import { XYAnnotationLayerConfig, XYState } from '../../types';
+import { ByReferenceXYAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
 import { EditDetailsFlyout } from './edit_details_action';
 
 export const getSaveLayerAction = ({
   state,
   layer,
-  layerIndex,
   setState,
-  core,
+  eventAnnotationService,
   isNew,
-  execute,
+  toasts,
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
-  layerIndex: number;
   setState: StateSetter<XYState, unknown>;
-  core: CoreStart;
+  eventAnnotationService: EventAnnotationServiceType;
   isNew?: boolean;
-  execute: () => void;
+  toasts: ToastsStart;
 }): LayerAction => {
   const displayName = isNew
     ? i18n.translate('xpack.lens.xyChart.annotations.addAnnotationGroupToLibrary', {
         defaultMessage: 'Add to library',
       })
     : i18n.translate('xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary', {
-        defaultMessage: 'Save',
+        defaultMessage: 'Save to library',
       });
   return {
     displayName,
@@ -44,7 +45,6 @@ export const getSaveLayerAction = ({
       { defaultMessage: 'Saves annotation group as separate saved object' }
     ),
     execute: async (domElement) => {
-      console.log('execute', domElement);
       if (domElement && isNew) {
         render(
           <EditDetailsFlyout
@@ -55,15 +55,60 @@ export const getSaveLayerAction = ({
                 defaultMessage: 'Add annotation group to library',
               }
             )}
-            isNew={true}
-            onConfirm={() => {
-              execute();
+            isNew={isNew}
+            onConfirm={async (title) => {
+              // TODO - error handling
+              const { id } = await eventAnnotationService.createAnnotationGroup({
+                ...layer,
+                title,
+              });
+
+              const newLayer: ByReferenceXYAnnotationLayerConfig = {
+                ...layer,
+                annotationGroupId: id,
+                __lastSaved: {
+                  title,
+                  ...layer,
+                },
+              };
+
+              setState({
+                ...state,
+                layers: state.layers.map((existingLayer) =>
+                  existingLayer.layerId === newLayer.layerId ? newLayer : existingLayer
+                ),
+              });
+
+              toasts.addSuccess({
+                title: i18n.translate(
+                  'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastTitle',
+                  {
+                    defaultMessage: 'Saved "{title}"',
+                    values: {
+                      title,
+                    },
+                  }
+                ),
+                text: ((element) =>
+                  render(
+                    <div>
+                      <FormattedMessage
+                        id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
+                        defaultMessage="View or manage in the {link}"
+                        values={{
+                          link: <a href="#">annotation library</a>,
+                        }}
+                      />
+                    </div>,
+                    element
+                  )) as MountPoint,
+              });
             }}
           />,
           domElement
         );
       } else {
-        execute();
+        return eventAnnotationService.createAnnotationGroup(layer).then();
       }
     },
     icon: 'save',

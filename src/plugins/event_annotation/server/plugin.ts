@@ -34,9 +34,7 @@ export class EventAnnotationServerPlugin implements Plugin<object, object> {
     dependencies.expressions.registerFunction(manualRangeEventAnnotation);
     dependencies.expressions.registerFunction(queryPointEventAnnotation);
     dependencies.expressions.registerFunction(eventAnnotationGroup);
-    // dependencies.expressions.registerFunction(
-    //   getFetchEventAnnotations({ getStartServices: core.getStartServices })
-    // );
+
     setupSavedObjects(core);
 
     return {};

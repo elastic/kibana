@@ -21,7 +21,10 @@ import type {
   FillStyle,
   YAxisConfig,
 } from '@kbn/expression-xy-plugin/common';
-import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import {
+  EventAnnotationConfig,
+  EventAnnotationGroupAttributes,
+} from '@kbn/event-annotation-plugin/common';
 import {
   IconChartArea,
   IconChartLine,
@@ -113,7 +116,7 @@ export interface XYReferenceLineLayerConfig {
   layerType: 'referenceLine';
 }
 
-export interface XYAnnotationLayerConfig {
+export interface ByValueXYAnnotationLayerConfig {
   layerId: string;
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
@@ -122,6 +125,23 @@ export interface XYAnnotationLayerConfig {
   simpleView?: boolean;
   ignoreGlobalFilters: boolean;
 }
+
+export type ByReferenceXYAnnotationLayerConfig = ByValueXYAnnotationLayerConfig & {
+  annotationGroupId: string;
+  __lastSaved: ByValueXYAnnotationLayerConfig & {
+    title: EventAnnotationGroupAttributes['title'];
+  };
+};
+
+export type XYAnnotationLayerConfig =
+  | ByReferenceXYAnnotationLayerConfig
+  | ByValueXYAnnotationLayerConfig;
+
+export const isByReferenceXyAnnotationLayer = (
+  layer: ByReferenceXYAnnotationLayerConfig | ByValueXYAnnotationLayerConfig
+): layer is ByReferenceXYAnnotationLayerConfig => {
+  return 'annotationGroupId' in layer;
+};
 
 export type XYLayerConfig =
   | XYDataLayerConfig

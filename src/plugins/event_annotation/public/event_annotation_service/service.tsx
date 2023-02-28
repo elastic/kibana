@@ -15,9 +15,7 @@ import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
 import {
   EventAnnotationConfig,
   EventAnnotationGroupConfig,
-  EventAnnotationGroupAttributes,
   EVENT_ANNOTATION_GROUP_TYPE,
-  EVENT_ANNOTATION_TYPE,
 } from '../../common';
 import { EventAnnotationServiceType } from './types';
 import {
@@ -36,67 +34,67 @@ export function hasIcon(icon: string | undefined): icon is string {
 export function getEventAnnotationService(core: CoreStart): EventAnnotationServiceType {
   const client: SavedObjectsClientContract = core.savedObjects.client;
 
-  const loadAnnotationGroup = async (
-    savedObjectId: string
-  ): Promise<EventAnnotationGroupConfig> => {
-    const groupResponse = await client.resolve<EventAnnotationGroupAttributes>(
-      EVENT_ANNOTATION_GROUP_TYPE,
-      savedObjectId
-    );
+  // const loadAnnotationGroup = async (
+  //   savedObjectId: string
+  // ): Promise<EventAnnotationGroupConfig> => {
+  //   const groupResponse = await client.resolve<EventAnnotationGroupAttributes>(
+  //     EVENT_ANNOTATION_GROUP_TYPE,
+  //     savedObjectId
+  //   );
 
-    if (groupResponse.saved_object.error) {
-      throw groupResponse.saved_object.error;
-    }
+  //   if (groupResponse.saved_object.error) {
+  //     throw groupResponse.saved_object.error;
+  //   }
 
-    const annotations = (
-      await client.find<EventAnnotationConfig>({
-        type: EVENT_ANNOTATION_TYPE,
-        hasReference: {
-          type: EVENT_ANNOTATION_GROUP_TYPE,
-          id: savedObjectId,
-        },
-      })
-    ).savedObjects
-      .filter(({ error }) => !error)
-      .map((annotation) => annotation.attributes);
+  //   const annotations = (
+  //     await client.find<EventAnnotationConfig>({
+  //       type: EVENT_ANNOTATION_TYPE,
+  //       hasReference: {
+  //         type: EVENT_ANNOTATION_GROUP_TYPE,
+  //         id: savedObjectId,
+  //       },
+  //     })
+  //   ).savedObjects
+  //     .filter(({ error }) => !error)
+  //     .map((annotation) => annotation.attributes);
 
-    return {
-      title: groupResponse.saved_object.attributes.title,
-      description: groupResponse.saved_object.attributes.description,
-      tags: groupResponse.saved_object.attributes.tags,
-      ignoreGlobalFilters: groupResponse.saved_object.attributes.ignoreGlobalFilters,
-      indexPatternId: groupResponse.saved_object.references.find(
-        (ref) => ref.type === 'index-pattern'
-      )?.id!,
-      annotations,
-    };
-  };
+  //   return {
+  //     title: groupResponse.saved_object.attributes.title,
+  //     description: groupResponse.saved_object.attributes.description,
+  //     tags: groupResponse.saved_object.attributes.tags,
+  //     ignoreGlobalFilters: groupResponse.saved_object.attributes.ignoreGlobalFilters,
+  //     indexPatternId: groupResponse.saved_object.references.find(
+  //       (ref) => ref.type === 'index-pattern'
+  //     )?.id!,
+  //     annotations,
+  //   };
+  // };
 
-  const deleteAnnotationGroup = async (savedObjectId: string): Promise<void> => {
-    const annotationsSOs = (
-      await client.find({
-        type: EVENT_ANNOTATION_TYPE,
-        hasReference: {
-          type: EVENT_ANNOTATION_GROUP_TYPE,
-          id: savedObjectId,
-        },
-      })
-    ).savedObjects.map((annotation) => ({ id: annotation.id, type: EVENT_ANNOTATION_TYPE }));
-    await client.bulkDelete([
-      { type: EVENT_ANNOTATION_GROUP_TYPE, id: savedObjectId },
-      ...annotationsSOs,
-    ]);
-  };
+  // const deleteAnnotationGroup = async (savedObjectId: string): Promise<void> => {
+  //   const annotationsSOs = (
+  //     await client.find({
+  //       type: EVENT_ANNOTATION_TYPE,
+  //       hasReference: {
+  //         type: EVENT_ANNOTATION_GROUP_TYPE,
+  //         id: savedObjectId,
+  //       },
+  //     })
+  //   ).savedObjects.map((annotation) => ({ id: annotation.id, type: EVENT_ANNOTATION_TYPE }));
+  //   await client.bulkDelete([
+  //     { type: EVENT_ANNOTATION_GROUP_TYPE, id: savedObjectId },
+  //     ...annotationsSOs,
+  //   ]);
+  // };
 
   const createAnnotationGroup = async (
     group: EventAnnotationGroupConfig
   ): Promise<{ id: string }> => {
-    const { title, description, tags, ignoreGlobalFilters, indexPatternId, annotations } = group;
+    const { title, ignoreGlobalFilters, indexPatternId, annotations } = group;
 
     const groupSavedObjectId = (
       await client.create(
         EVENT_ANNOTATION_GROUP_TYPE,
-        { title, description, tags, ignoreGlobalFilters },
+        { title, ignoreGlobalFilters, annotations },
         {
           references: [
             {
@@ -109,80 +107,64 @@ export function getEventAnnotationService(core: CoreStart): EventAnnotationServi
       )
     ).id;
 
-    if (annotations && annotations.length) {
-      await client.bulkCreate(
-        annotations.map((annotation) => ({
-          type: EVENT_ANNOTATION_TYPE,
-          id: annotation.id,
-          attributes: annotation,
-          references: [
-            {
-              type: EVENT_ANNOTATION_GROUP_TYPE,
-              id: groupSavedObjectId,
-              name: `event-annotation_group-ref-${annotation.id}`, // do name have to be unique with id?
-            },
-          ],
-        }))
-      );
-    }
     return { id: groupSavedObjectId };
   };
 
-  const updateAnnotationGroup = async (
-    group: EventAnnotationGroupConfig,
-    savedObjectId: string
-  ): Promise<void> => {
-    const { title, description, tags, ignoreGlobalFilters, indexPatternId } = group;
-    await client.update(
-      EVENT_ANNOTATION_GROUP_TYPE,
-      savedObjectId,
-      { title, description, tags, ignoreGlobalFilters },
-      {
-        references: [
-          {
-            type: 'index-pattern',
-            id: indexPatternId,
-            name: `event-annotation-group_dataView-ref-${indexPatternId}`,
-          },
-        ],
-      }
-    );
-  };
+  // const updateAnnotationGroup = async (
+  //   group: EventAnnotationGroupConfig,
+  //   savedObjectId: string
+  // ): Promise<void> => {
+  //   const { title, description, tags, ignoreGlobalFilters, indexPatternId } = group;
+  //   await client.update(
+  //     EVENT_ANNOTATION_GROUP_TYPE,
+  //     savedObjectId,
+  //     { title, description, tags, ignoreGlobalFilters },
+  //     {
+  //       references: [
+  //         {
+  //           type: 'index-pattern',
+  //           id: indexPatternId,
+  //           name: `event-annotation-group_dataView-ref-${indexPatternId}`,
+  //         },
+  //       ],
+  //     }
+  //   );
+  // };
 
-  const updateAnnotations = async (
-    savedObjectId: string,
-    modifications: { delete?: string[]; upsert?: EventAnnotationConfig[] }
-  ): Promise<void> => {
-    if (modifications.delete && modifications.delete.length > 0) {
-      await client.bulkDelete(
-        modifications.delete.map((id) => ({ type: EVENT_ANNOTATION_TYPE, id }))
-      );
-    }
+  // const updateAnnotations = async (
+  //   savedObjectId: string,
+  //   modifications: { delete?: string[]; upsert?: EventAnnotationConfig[] }
+  // ): Promise<void> => {
+  //   if (modifications.delete && modifications.delete.length > 0) {
+  //     await client.bulkDelete(
+  //       modifications.delete.map((id) => ({ type: EVENT_ANNOTATION_TYPE, id }))
+  //     );
+  //   }
 
-    if (modifications.upsert && modifications.upsert.length > 0) {
-      const annotationsToUpdate = modifications.upsert.map((a) => ({
-        type: EVENT_ANNOTATION_TYPE,
-        attributes: a,
-        id: a.id,
-        overwrite: true,
-        references: [
-          {
-            type: EVENT_ANNOTATION_GROUP_TYPE,
-            id: savedObjectId,
-            name: `event-annotation-group-ref-${a.id}`,
-          },
-        ],
-      }));
-      await client.bulkCreate(annotationsToUpdate);
-    }
-  };
+  //   if (modifications.upsert && modifications.upsert.length > 0) {
+  //     const annotationsToUpdate = modifications.upsert.map((a) => ({
+  //       type: EVENT_ANNOTATION_TYPE,
+  //       attributes: a,
+  //       id: a.id,
+  //       overwrite: true,
+  //       references: [
+  //         {
+  //           type: EVENT_ANNOTATION_GROUP_TYPE,
+  //           id: savedObjectId,
+  //           name: `event-annotation-group-ref-${a.id}`,
+  //         },
+  //       ],
+  //     }));
+  //     await client.bulkCreate(annotationsToUpdate);
+  //   }
+  // };
 
   return {
-    loadAnnotationGroup,
-    updateAnnotations,
-    updateAnnotationGroup,
+    // loadAnnotationGroup,
+    // updateAnnotations,
+    // updateAnnotationGroup,
     createAnnotationGroup,
-    deleteAnnotationGroup,
+    // deleteAnnotationGroup,
     renderEventAnnotationGroupSavedObjectFinder: (props: {
       fixedPageSize: number;
       onChoose: (value: {

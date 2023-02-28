@@ -264,7 +264,15 @@ export const getXyVisualization = ({
     const actions = [];
     if (isAnnotationsLayer(layer)) {
       actions.push(
-        ...createAnnotationActions({ state, layerIndex, layer, setState, core, isSaveable })
+        ...createAnnotationActions({
+          state,
+          layerIndex,
+          layer,
+          setState,
+          core,
+          isSaveable,
+          eventAnnotationService,
+        })
       );
     }
     return actions;
