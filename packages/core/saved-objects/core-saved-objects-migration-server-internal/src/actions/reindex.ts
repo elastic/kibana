@@ -83,7 +83,7 @@ export const reindex =
           )(reindexScript),
         },
         // force a refresh so that we can query the target index
-        refresh: true,
+        refresh: true, // TODO: review stateless elasticsearch impact
         // Create a task and return task id instead of blocking until complete
         wait_for_completion: false,
       })

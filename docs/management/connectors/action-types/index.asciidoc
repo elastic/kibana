@@ -46,7 +46,7 @@ xpack.actions.preconfigured:
     actionTypeId: .index
     config:
       index: .kibana
-      refresh: true <1>
+      refresh: true <1> // TODO: review stateless elasticsearch impact
       executionTimeField: my-field
 --
 <1> By default, the {ref}/docs-refresh.html[refresh] policy is `false`.

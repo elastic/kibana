@@ -143,7 +143,7 @@ export function updateFilesStatus(
       return esClient.updateByQuery(
         {
           index,
-          refresh: true,
+          refresh: true, // TODO: review stateless elasticsearch impact
           query: {
             ids: {
               values: Array.from(fileIds),

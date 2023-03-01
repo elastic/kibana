@@ -209,7 +209,7 @@ export function jobsQueryFactory(reportingCore: ReportingCore): JobsQueryFactory
     async delete(deleteIndex, id) {
       try {
         const { asInternalUser: elasticsearchClient } = await reportingCore.getEsClient();
-        const query = { id, index: deleteIndex, refresh: true };
+        const query = { id, index: deleteIndex, refresh: true }; // TODO: review stateless elasticsearch impact
 
         return await elasticsearchClient.delete(query, { meta: true });
       } catch (error) {

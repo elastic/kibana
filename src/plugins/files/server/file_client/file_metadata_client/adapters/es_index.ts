@@ -71,7 +71,7 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
       index: this.index,
       id,
       document: { file: metadata },
-      refresh: true,
+      refresh: true, // TODO: review stateless elasticsearch impact
     });
     return {
       id: result._id,
@@ -101,7 +101,7 @@ export class EsIndexFilesMetadataClient<M = unknown> implements FileMetadataClie
   }
 
   async update({ id, metadata }: UpdateArgs<M>): Promise<FileDescriptor<M>> {
-    await this.esClient.update({ index: this.index, id, doc: { file: metadata }, refresh: true });
+    await this.esClient.update({ index: this.index, id, doc: { file: metadata }, refresh: true }); // TODO: review stateless elasticsearch impact
     return this.get({ id });
   }
 

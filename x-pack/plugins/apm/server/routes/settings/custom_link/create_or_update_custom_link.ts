@@ -26,7 +26,7 @@ export function createOrUpdateCustomLink({
   internalESClient: APMInternalESClient;
 }) {
   const params: APMIndexDocumentParams<CustomLinkES> = {
-    refresh: true,
+    refresh: true, // TODO: review stateless elasticsearch impact
     index: APM_CUSTOM_LINK_INDEX,
     body: {
       '@timestamp': Date.now(),

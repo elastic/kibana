@@ -33,7 +33,7 @@ const plugin: Cypress.PluginConfig = (on, config) => {
         index,
         query,
         ignore_unavailable: ignoreUnavailable,
-        refresh: true,
+        refresh: true, // TODO: review stateless elasticsearch impact
         conflicts: 'proceed',
       });
     },

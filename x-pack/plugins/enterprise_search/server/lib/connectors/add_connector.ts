@@ -54,7 +54,7 @@ const createConnector = async (
   const result = await client.asCurrentUser.index({
     document,
     index: CONNECTORS_INDEX,
-    refresh: true,
+    refresh: true, // TODO: review stateless elasticsearch impact
   });
   await createIndex(client, document.index_name, language, false);
 

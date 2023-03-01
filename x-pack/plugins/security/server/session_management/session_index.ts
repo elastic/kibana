@@ -374,7 +374,7 @@ export class SessionIndex {
     try {
       const response = await this.options.elasticsearchClient.deleteByQuery({
         index: this.aliasName,
-        refresh: true,
+        refresh: true, // TODO: review stateless elasticsearch impact
         body: { query: deleteQuery },
       });
       return response.deleted as number;

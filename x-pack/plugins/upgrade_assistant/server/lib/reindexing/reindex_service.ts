@@ -241,7 +241,7 @@ export const reindexServiceFactory = (
     }
 
     const startReindexResponse = await esClient.reindex({
-      refresh: true,
+      refresh: true, // TODO: review stateless elasticsearch impact
       wait_for_completion: false,
       body: {
         source: { index: indexName },

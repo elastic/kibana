@@ -93,7 +93,7 @@ export async function updateTagsBatch(
         },
       },
       index: AGENTS_INDEX,
-      refresh: true,
+      refresh: true, // TODO: review stateless elasticsearch impact
       wait_for_completion: true,
       script: {
         source: `

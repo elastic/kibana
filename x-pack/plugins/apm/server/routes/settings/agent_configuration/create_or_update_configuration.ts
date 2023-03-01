@@ -26,7 +26,7 @@ export function createOrUpdateConfiguration({
   internalESClient: APMInternalESClient;
 }) {
   const params: APMIndexDocumentParams<AgentConfiguration> = {
-    refresh: true,
+    refresh: true, // TODO: review stateless elasticsearch impact
     index: APM_AGENT_CONFIGURATION_INDEX,
     body: {
       agent_name: configurationIntake.agent_name,
