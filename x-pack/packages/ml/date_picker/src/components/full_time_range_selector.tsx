@@ -64,6 +64,11 @@ export interface FullTimeRangeSelectorProps {
    * @param value - The time field range response.
    */
   callback?: (value: GetTimeFieldRangeResponse) => void;
+  /**
+   * Optional API path.
+   * @param value - The time field range response.
+   */
+  apiPath?: string;
 }
 
 /**
@@ -83,6 +88,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     query,
     disabled,
     callback,
+    apiPath,
   } = props;
   const {
     http,
@@ -98,7 +104,8 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         toasts,
         http,
         query,
-        frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE
+        frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE,
+        apiPath
       );
       if (typeof callback === 'function') {
         callback(fullTimeRange);
@@ -113,7 +120,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         )
       );
     }
-  }, [callback, dataView, frozenDataPreference, http, query, timefilter, toasts]);
+  }, [callback, dataView, frozenDataPreference, http, query, timefilter, toasts, apiPath]);
 
   const [isPopoverOpen, setPopover] = useState(false);
 
