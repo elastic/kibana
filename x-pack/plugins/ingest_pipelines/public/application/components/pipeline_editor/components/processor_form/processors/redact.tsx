@@ -7,9 +7,12 @@
 
 import React, { FunctionComponent } from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiCode, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import {
   FIELD_TYPES,
+  Field,
   UseField,
   UseArray,
   fieldValidators,
@@ -97,6 +100,36 @@ const fieldsConfig: FieldsConfig = {
       },
     ],
   },
+
+  prefix: {
+    type: FIELD_TYPES.TEXT,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.redactForm.prefixLabel', {
+      defaultMessage: 'Prefix (optional)',
+    }),
+    deserializer: String,
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.redactForm.prefixFieldHelpText"
+        defaultMessage="Start a redacted section with this token. If not specified, defaults to {defaultValue}."
+        values={{ defaultValue: <EuiCode>{'<'}</EuiCode> }}
+      />
+    ),
+  },
+
+  sufix: {
+    type: FIELD_TYPES.TEXT,
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.redactForm.sufixLabel', {
+      defaultMessage: 'Sufix (optional)',
+    }),
+    deserializer: String,
+    helpText: (
+      <FormattedMessage
+        id="xpack.ingestPipelines.pipelineEditor.redactForm.sufixFieldHelpText"
+        defaultMessage="End a redacted section with this token. If not specified, defaults to {defaultValue}."
+        values={{ defaultValue: <EuiCode>{'>'}</EuiCode> }}
+      />
+    ),
+  },
 };
 
 export const Redact: FunctionComponent = () => {
@@ -145,6 +178,19 @@ export const Redact: FunctionComponent = () => {
         }}
         path="fields.pattern_definitions"
       />
+
+      <EuiSpacer size="m" />
+
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <UseField config={fieldsConfig.prefix} component={Field} path="fields.prefix" />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <UseField config={fieldsConfig.sufix} component={Field} path="fields.sufix" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiSpacer size="l" />
 
       <IgnoreMissingField />
     </>
