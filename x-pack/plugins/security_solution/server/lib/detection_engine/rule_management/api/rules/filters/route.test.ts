@@ -14,12 +14,6 @@ import {
 } from '../../../../routes/__mocks__/request_responses';
 import { requestContextMock, serverMock } from '../../../../routes/__mocks__';
 
-const emptyTagAggregationResult = {
-  tags: {
-    buckets: [],
-  },
-};
-
 describe('Rule management filters route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
@@ -36,7 +30,6 @@ describe('Rule management filters route', () => {
 
   describe('status codes', () => {
     test('returns 200', async () => {
-      clients.rulesClient.aggregate.mockResolvedValue(emptyTagAggregationResult);
       const response = await server.inject(
         getRuleManagementFiltersRequest(),
         requestContextMock.convertContext(context)
@@ -48,7 +41,6 @@ describe('Rule management filters route', () => {
       clients.rulesClient.find.mockImplementation(async () => {
         throw new Error('Test error');
       });
-      clients.rulesClient.aggregate.mockResolvedValue(emptyTagAggregationResult);
       const response = await server.inject(
         getRuleManagementFiltersRequest(),
         requestContextMock.convertContext(context)
@@ -65,34 +57,9 @@ describe('Rule management filters route', () => {
     test('1 rule installed, 1 custom rule and 3 tags', async () => {
       clients.rulesClient.find.mockResolvedValue(getFindResultWithSingleHit());
       clients.rulesClient.aggregate.mockResolvedValue({
-        status: {
-          buckets: [],
-        },
-        outcome: {
-          buckets: [],
-        },
-        tags: {
-          buckets: [
-            {
-              key: {
-                tags: 'a',
-              },
-              doc_count: 1,
-            },
-            {
-              key: {
-                tags: 'b',
-              },
-              doc_count: 1,
-            },
-            {
-              key: {
-                tags: 'c',
-              },
-              doc_count: 1,
-            },
-          ],
-        },
+        alertExecutionStatus: {},
+        ruleLastRunOutcome: {},
+        ruleTags: ['a', 'b', 'c'],
       });
       const request = getRuleManagementFiltersRequest();
       const response = await server.inject(request, requestContextMock.convertContext(context));

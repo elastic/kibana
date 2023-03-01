@@ -17,34 +17,9 @@ describe('read_tags', () => {
     test('it should return tags from the aggregation', async () => {
       const rulesClient = rulesClientMock.create();
       rulesClient.aggregate.mockResolvedValue({
-        tags: {
-          buckets: [
-            {
-              key: {
-                tags: 'tag 1',
-              },
-              doc_count: 1,
-            },
-            {
-              key: {
-                tags: 'tag 2',
-              },
-              doc_count: 1,
-            },
-            {
-              key: {
-                tags: 'tag 3',
-              },
-              doc_count: 1,
-            },
-            {
-              key: {
-                tags: 'tag 4',
-              },
-              doc_count: 1,
-            },
-          ],
-        },
+        alertExecutionStatus: {},
+        ruleLastRunOutcome: {},
+        ruleTags: ['tag 1', 'tag 2', 'tag 3', 'tag 4'],
       });
 
       const tags = await readTags({ rulesClient });
