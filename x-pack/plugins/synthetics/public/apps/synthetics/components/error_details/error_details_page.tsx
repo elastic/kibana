@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { TestRunErrorInfo } from '../test_run_details/components/test_run_error_info';
 import { StepDurationPanel } from '../monitor_details/monitor_summary/step_duration_panel';
 import { useFormatTestRunAt } from '../../utils/monitor_test_result/test_time_formats';
 import { LastTestRunComponent } from '../monitor_details/monitor_summary/last_test_run';
@@ -20,7 +21,7 @@ import { FailedTestsList } from './components/failed_tests_list';
 import { ErrorTimeline } from './components/error_timeline';
 import { useErrorDetailsBreadcrumbs } from './hooks/use_error_details_breadcrumbs';
 import { StepImage } from '../step_details_page/step_screenshot/step_image';
-import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel';
+import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel_container';
 
 export function ErrorDetailsPage() {
   const { failedTests, loading } = useErrorFailedTests();
@@ -42,7 +43,7 @@ export function ErrorDetailsPage() {
   return (
     <div>
       <PanelWithTitle title={TIMELINE_LABEL}>
-        <ErrorTimeline />
+        <ErrorTimeline lastTestRun={lastTestRun} />
       </PanelWithTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m">
@@ -64,18 +65,28 @@ export function ErrorDetailsPage() {
             stepsLoading={stepsLoading}
             isErrorDetails={true}
           />
+          <EuiSpacer size="m" />
+          <EuiPanel hasShadow={false} hasBorder>
+            <TestRunErrorInfo journeyDetails={data?.details} showErrorTitle={false} />
+          </EuiPanel>
         </EuiFlexItem>
         <EuiFlexItem grow={1} style={{ height: 'fit-content' }}>
-          <PanelWithTitle>
-            {data?.details?.journey && failedStep && (
-              <StepImage ping={data?.details?.journey} step={failedStep} isFailed={isFailedStep} />
-            )}
-          </PanelWithTitle>
+          {data?.details?.journey && failedStep && (
+            <>
+              <PanelWithTitle>
+                <StepImage
+                  ping={data?.details?.journey}
+                  step={failedStep}
+                  isFailed={isFailedStep}
+                />
+              </PanelWithTitle>
+              <EuiSpacer size="m" />
+            </>
+          )}
 
-          <EuiSpacer size="m" />
           <StepDurationPanel doBreakdown={false} />
           <EuiSpacer size="m" />
-          <MonitorDetailsPanelContainer />
+          <MonitorDetailsPanelContainer hideLocations />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

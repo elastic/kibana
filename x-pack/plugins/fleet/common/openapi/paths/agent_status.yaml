@@ -1,6 +1,7 @@
 get:
-  summary: Agents - Summary stats
-  tags: []
+  summary: Get agent status summary
+  tags:
+    - Agent status
   responses:
     '200':
       description: OK
@@ -29,7 +30,7 @@ get:
               updating:
                 type: integer
               all:
-                type: integer 
+                type: integer
               active:
                 type: integer
             required:
