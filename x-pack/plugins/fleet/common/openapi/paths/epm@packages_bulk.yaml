@@ -1,6 +1,7 @@
 post:
-  summary: Packages - Bulk install
-  tags: []
+  summary: Bulk install packages
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -12,13 +13,13 @@ post:
       $ref: ../components/responses/error.yaml
   operationId: bulk-install-packages
   parameters:
-    - in: query 
+    - in: query
       name: prerelease
       schema:
         type: boolean
         default: false
       description: >-
-        Whether to return prerelease versions of packages (e.g. beta, rc, preview) 
+        Whether to return prerelease versions of packages (e.g. beta, rc, preview)
   requestBody:
     content:
       application/json:
@@ -32,7 +33,6 @@ post:
               description: list of package names to install
             force:
               type: boolean
-              description: force install to ignore package verification errors 
+              description: force install to ignore package verification errors
           required:
             - packages
-

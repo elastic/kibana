@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -13,17 +13,21 @@ import {
   EuiFlexItem,
   EuiFormLabel,
 } from '@elastic/eui';
-import { Control, Controller } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
-import { FieldSelector } from '../common/field_selector';
+import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
+import { FieldSelector } from '../apm_common/field_selector';
+import { QueryBuilder } from '../common/query_builder';
 
-export interface Props {
-  control: Control<CreateSLOInput>;
-}
+export function ApmAvailabilityIndicatorTypeForm() {
+  const { control, setValue, watch } = useFormContext<CreateSLOInput>();
+  const { data: apmIndex } = useFetchApmIndex();
+  useEffect(() => {
+    setValue('indicator.params.index', apmIndex);
+  }, [apmIndex, setValue]);
 
-export function ApmAvailabilityIndicatorTypeForm({ control }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexGroup direction="row" gutterSize="l">
@@ -40,7 +44,6 @@ export function ApmAvailabilityIndicatorTypeForm({ control }: Props) {
           )}
           fieldName="service.name"
           name="indicator.params.service"
-          control={control}
           dataTestSubj="apmAvailabilityServiceSelector"
         />
         <FieldSelector
@@ -58,7 +61,6 @@ export function ApmAvailabilityIndicatorTypeForm({ control }: Props) {
           )}
           fieldName="service.environment"
           name="indicator.params.environment"
-          control={control}
           dataTestSubj="apmAvailabilityEnvironmentSelector"
         />
       </EuiFlexGroup>
@@ -79,7 +81,6 @@ export function ApmAvailabilityIndicatorTypeForm({ control }: Props) {
           )}
           fieldName="transaction.type"
           name="indicator.params.transactionType"
-          control={control}
           dataTestSubj="apmAvailabilityTransactionTypeSelector"
         />
         <FieldSelector
@@ -97,7 +98,6 @@ export function ApmAvailabilityIndicatorTypeForm({ control }: Props) {
           )}
           fieldName="transaction.name"
           name="indicator.params.transactionName"
-          control={control}
           dataTestSubj="apmAvailabilityTransactionNameSelector"
         />
       </EuiFlexGroup>
@@ -131,10 +131,14 @@ export function ApmAvailabilityIndicatorTypeForm({ control }: Props) {
                   }
                 )}
                 isInvalid={!!fieldState.error}
-                options={generateStatusCodeOptions()}
+                options={generateStatusCodeOptions(['2xx', '3xx', '4xx', '5xx'])}
                 selectedOptions={generateStatusCodeOptions(field.value)}
                 onChange={(selected: EuiComboBoxOptionOption[]) => {
-                  field.onChange(selected.map((opts) => opts.value));
+                  if (selected.length) {
+                    return field.onChange(selected.map((opts) => opts.value));
+                  }
+
+                  field.onChange([]);
                 }}
                 isClearable={true}
                 data-test-subj="sloEditApmAvailabilityGoodStatusCodesSelector"
@@ -142,13 +146,29 @@ export function ApmAvailabilityIndicatorTypeForm({ control }: Props) {
             )}
           />
         </EuiFlexItem>
-        <EuiFlexItem />
+        <EuiFlexItem>
+          <QueryBuilder
+            control={control}
+            dataTestSubj="apmLatencyFilterInput"
+            indexPatternString={watch('indicator.params.index')}
+            label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.filter', {
+              defaultMessage: 'Query filter',
+            })}
+            name="indicator.params.filter"
+            placeholder={i18n.translate(
+              'xpack.observability.slos.sloEdit.apmLatency.filter.placeholder',
+              {
+                defaultMessage: 'Custom filter to apply on the index',
+              }
+            )}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>
   );
 }
 
-function generateStatusCodeOptions(codes: string[] = ['2xx', '3xx', '4xx', '5xx']) {
+function generateStatusCodeOptions(codes: string[] = []) {
   return codes.map((code) => ({
     label: code,
     value: code,
