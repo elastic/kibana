@@ -31,6 +31,12 @@ export function useCanUpdatePrivateMonitor(monitor: EncryptedSyntheticsMonitor) 
   return canUpdatePrivateMonitor(monitor, canSaveIntegrations);
 }
 
+export function useCanManagePrivateLocation() {
+  const { canSaveIntegrations, canReadAgentPolicies } = useFleetPermissions();
+
+  return Boolean(canSaveIntegrations && canReadAgentPolicies);
+}
+
 export function canUpdatePrivateMonitor(
   monitor: EncryptedSyntheticsMonitor,
   canSaveIntegrations: boolean
