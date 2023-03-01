@@ -16,10 +16,19 @@ export interface ResponseActionType {
   iconClass: string;
 }
 
+interface EnabledFeatures {
+  endpoint: boolean;
+}
+
 export const getSupportedResponseActions = (
-  actionTypes: ResponseActionType[]
+  actionTypes: ResponseActionType[],
+  enabledFeatures: EnabledFeatures
 ): ResponseActionType[] => {
   return actionTypes.filter((actionType) => {
+    if (!enabledFeatures.endpoint && actionType.id === RESPONSE_ACTION_TYPES.ENDPOINT) {
+      return false;
+    }
+
     return SUPPORTED_RESPONSE_ACTION_TYPES.includes(actionType.id);
   });
 };
@@ -35,5 +44,4 @@ export const responseActionTypes = [
     name: 'Endpoint Security',
     iconClass: 'logoSecurity',
   },
-  // { id: '.endpointSecurity', name: 'endpointSecurity', iconClass: 'logoSecurity' },
 ];
