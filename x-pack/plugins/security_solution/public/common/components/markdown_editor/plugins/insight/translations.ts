@@ -12,7 +12,7 @@ export const LABEL = i18n.translate('xpack.securitySolution.markdown.insight.lab
 });
 
 export const LABEL_TEXT = i18n.translate('xpack.securitySolution.markdown.insight.labelText', {
-  defaultMessage: 'Label',
+  defaultMessage: 'Label for the filter button rendered in the guide.',
 });
 
 export const DESCRIPTION = i18n.translate('xpack.securitySolution.markdown.insight.description', {
@@ -51,7 +51,7 @@ export const RELATIVE_TIMERANGE = i18n.translate(
 export const RELATIVE_TIMERANGE_TEXT = i18n.translate(
   'xpack.securitySolution.markdown.insight.relativeTimerangeText',
   {
-    defaultMessage: 'Select a time range relative to the time of the alert (optional)',
+    defaultMessage: 'Select a time range relative to the time of the alert (optional).',
   }
 );
 
