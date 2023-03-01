@@ -63,6 +63,24 @@ export const supportedSchemas: SupportedSchema[] = [
       name: 'process.name',
     },
   },
+  {
+    name: 'sysmonViaFilebeat',
+    constraints: [
+      {
+        field: 'agent.type',
+        value: 'filebeat',
+      },
+      {
+        field: 'event.dataset',
+        value: 'windows.sysmon_operational',
+      },
+    ],
+    schema: {
+      id: 'process.entity_id',
+      parent: 'process.parent.entity_id',
+      name: 'process.name',
+    },
+  },
 ];
 
 export function getFieldAsString(doc: unknown, field: string): string | undefined {
