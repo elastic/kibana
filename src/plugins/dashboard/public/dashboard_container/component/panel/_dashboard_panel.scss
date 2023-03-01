@@ -25,3 +25,18 @@
     cursor: default;
   }
 }
+
+@keyframes highlightShadow {
+  50% {
+    box-shadow:
+      0 .9px 4px transparentize($euiColorAccent, .70),
+      0 2.6px 8px transparentize($euiColorAccent, .72),
+      0 5.7px 12px transparentize($euiColorAccent, .73),
+      0 15px 15px transparentize($euiColorAccent, .74);
+  }
+}
+
+.dshDashboardGrid__item--highlighted {
+  animation-name: highlightShadow;
+  animation-duration: 5s;
+}

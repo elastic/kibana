@@ -64,8 +64,8 @@ export class ExpandPanelAction implements Action<ExpandPanelActionContext> {
     }
     const newValue = isExpanded(embeddable) ? undefined : embeddable.id;
     (embeddable.parent as DashboardContainer).setExpandedPanelId(newValue);
-    if(!newValue) {
-      console.log("scroll to minimized panel");
+
+    if (!newValue) {
       (embeddable.parent as DashboardContainer).scrollToPanel(embeddable.id);
     }
   }

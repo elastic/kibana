@@ -641,19 +641,28 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
 
   public scrollToPanel = (id: string) => {
     setTimeout(() => {
-      document.getElementById(`panel-${id}`)?.scrollIntoView();
+      document
+        .getElementById(`panel-${id}`)
+        ?.scrollIntoView({ block: 'center', behavior: 'smooth' });
       this.highlightPanel(id);
-    }, 0);
+    }, 500);
   };
 
   public scrollToTop = () => {
     setTimeout(() => {
-      document.getElementsByClassName(`dashboardViewport`)[0]?.scrollTo({ top: 0 });
+      document
+        .getElementsByClassName(`dashboardViewport`)[0]
+        ?.scrollTo({ top: 0, behavior: 'smooth' });
     }, 0);
   };
 
   public highlightPanel = async (id: string) => {
     const panelToHighlight = document.getElementById(`panel-${id}`);
     // do the highlight
+    panelToHighlight?.classList.add('dshDashboardGrid__item--highlighted');
+
+    setTimeout(() => {
+      panelToHighlight?.classList.remove('dshDashboardGrid__item--highlighted');
+    }, 5000);
   };
 }
