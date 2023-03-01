@@ -15,7 +15,6 @@ import {
 } from '../../tasks/navigation';
 import {
   addCustomIntegration,
-  addIntegration,
   cleanupPack,
   cleanupPolicy,
   closeModalIfVisible,
@@ -27,11 +26,8 @@ import {
 import { login } from '../../tasks/login';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { OSQUERY_POLICY } from '../../screens/fleet';
 
 describe('ALL - Add Integration', () => {
-  const integration = 'Osquery Manager';
-
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
   });
