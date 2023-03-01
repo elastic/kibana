@@ -448,119 +448,173 @@ describe('pie_visualization', () => {
       });
     });
 
-    it("doesn't count collapsed columns toward the dimension limits", () => {
-      const colIds = new Array(PartitionChartsMeta.pie.maxBuckets)
-        .fill(undefined)
-        .map((_, i) => String(i + 1));
-
-      const frame = mockFrame();
-      frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
-        colIds.map((id) => ({ columnId: id, fields: [] }));
-
-      const state = getExampleState();
-      state.layers[0].primaryGroups = colIds;
-
-      const getConfig = (_state: PieVisualizationState) =>
-        pieVisualization.getConfiguration({
-          state: _state,
-          frame,
-          layerId: state.layers[0].layerId,
-        });
-
-      expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeFalsy();
-
-      const stateWithCollapsed = cloneDeep(state);
-      stateWithCollapsed.layers[0].collapseFns = { '1': 'sum' };
-
-      expect(findPrimaryGroup(getConfig(stateWithCollapsed))?.supportsMoreColumns).toBeTruthy();
-    });
-
-    it('counts multiple metrics toward the dimension limits when not mosaic', () => {
-      const colIds = new Array(PartitionChartsMeta.pie.maxBuckets - 1)
-        .fill(undefined)
-        .map((_, i) => String(i + 1));
-
-      const frame = mockFrame();
-      frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
-        colIds.map((id) => ({ columnId: id, fields: [] }));
-
-      const state = getExampleState();
-      state.layers[0].primaryGroups = colIds;
-      state.layers[0].allowMultipleMetrics = true;
-
-      const getConfig = (_state: PieVisualizationState) =>
-        pieVisualization.getConfiguration({
-          state: _state,
-          frame,
-          layerId: state.layers[0].layerId,
-        });
-
-      expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeTruthy();
-
-      const stateWithMultipleMetrics = cloneDeep(state);
-      stateWithMultipleMetrics.layers[0].metrics.push('1', '2');
-
-      expect(
-        findPrimaryGroup(getConfig(stateWithMultipleMetrics))?.supportsMoreColumns
-      ).toBeFalsy();
-    });
-
-    it('does NOT count multiple metrics toward the dimension limits when mosaic', () => {
-      const frame = mockFrame();
-      frame.datasourceLayers[LAYER_ID]!.getTableSpec = () => [];
-
-      const state = getExampleState();
-      state.shape = 'mosaic';
-      state.layers[0].primaryGroups = [];
-      state.layers[0].allowMultipleMetrics = false; // always true for mosaic
-
-      const getConfig = (_state: PieVisualizationState) =>
-        pieVisualization.getConfiguration({
-          state: _state,
-          frame,
-          layerId: state.layers[0].layerId,
-        });
-
-      expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeTruthy();
-
-      const stateWithMultipleMetrics = cloneDeep(state);
-      stateWithMultipleMetrics.layers[0].metrics.push('1', '2');
-
-      expect(
-        findPrimaryGroup(getConfig(stateWithMultipleMetrics))?.supportsMoreColumns
-      ).toBeTruthy();
-    });
-
-    it('reports too many metric dimensions if multiple not enabled', () => {
+    it('orders metric accessors by datasource column order', () => {
       const colIds = ['1', '2', '3', '4'];
-
-      const frame = mockFrame();
-      frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
-        colIds.map((id) => ({ columnId: id, fields: [] }));
 
       const state = getExampleState();
       state.layers[0].metrics = colIds;
-      state.layers[0].allowMultipleMetrics = false;
-      expect(
-        findMetricGroup(
-          pieVisualization.getConfiguration({
-            state,
-            frame,
-            layerId: state.layers[0].layerId,
-          })
-        )?.dimensionsTooMany
-      ).toBe(3);
-
       state.layers[0].allowMultipleMetrics = true;
-      expect(
-        findMetricGroup(
+
+      const frame = mockFrame();
+      frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
+        // reverse the column IDs in the datasource
+        colIds.reverse().map((id) => ({ columnId: id, fields: [] }));
+
+      // this is to make sure the accessors get sorted before palette colors are applied
+      const palette = paletteServiceMock.get('default');
+      palette.getCategoricalColor
+        .mockReturnValueOnce('color 1')
+        .mockReturnValueOnce('color 2')
+        .mockReturnValueOnce('color 3')
+        .mockReturnValueOnce('color 4');
+
+      const config = pieVisualization.getConfiguration({
+        state,
+        frame,
+        layerId: state.layers[0].layerId,
+      });
+
+      expect(findMetricGroup(config)?.accessors).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "color": "color 1",
+            "columnId": "4",
+            "triggerIconType": "color",
+          },
+          Object {
+            "color": "color 2",
+            "columnId": "3",
+            "triggerIconType": "color",
+          },
+          Object {
+            "color": "color 3",
+            "columnId": "2",
+            "triggerIconType": "color",
+          },
+          Object {
+            "color": "color 4",
+            "columnId": "1",
+            "triggerIconType": "color",
+          },
+        ]
+      `);
+    });
+
+    describe('dimension limits', () => {
+      it("doesn't count collapsed columns toward the dimension limits", () => {
+        const colIds = new Array(PartitionChartsMeta.pie.maxBuckets)
+          .fill(undefined)
+          .map((_, i) => String(i + 1));
+
+        const frame = mockFrame();
+        frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
+          colIds.map((id) => ({ columnId: id, fields: [] }));
+
+        const state = getExampleState();
+        state.layers[0].primaryGroups = colIds;
+
+        const getConfig = (_state: PieVisualizationState) =>
           pieVisualization.getConfiguration({
-            state,
+            state: _state,
             frame,
             layerId: state.layers[0].layerId,
-          })
-        )?.dimensionsTooMany
-      ).toBe(0);
+          });
+
+        expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeFalsy();
+
+        const stateWithCollapsed = cloneDeep(state);
+        stateWithCollapsed.layers[0].collapseFns = { '1': 'sum' };
+
+        expect(findPrimaryGroup(getConfig(stateWithCollapsed))?.supportsMoreColumns).toBeTruthy();
+      });
+
+      it('counts multiple metrics toward the dimension limits when not mosaic', () => {
+        const colIds = new Array(PartitionChartsMeta.pie.maxBuckets - 1)
+          .fill(undefined)
+          .map((_, i) => String(i + 1));
+
+        const frame = mockFrame();
+        frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
+          colIds.map((id) => ({ columnId: id, fields: [] }));
+
+        const state = getExampleState();
+        state.layers[0].primaryGroups = colIds;
+        state.layers[0].allowMultipleMetrics = true;
+
+        const getConfig = (_state: PieVisualizationState) =>
+          pieVisualization.getConfiguration({
+            state: _state,
+            frame,
+            layerId: state.layers[0].layerId,
+          });
+
+        expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeTruthy();
+
+        const stateWithMultipleMetrics = cloneDeep(state);
+        stateWithMultipleMetrics.layers[0].metrics.push('1', '2');
+
+        expect(
+          findPrimaryGroup(getConfig(stateWithMultipleMetrics))?.supportsMoreColumns
+        ).toBeFalsy();
+      });
+
+      it('does NOT count multiple metrics toward the dimension limits when mosaic', () => {
+        const frame = mockFrame();
+        frame.datasourceLayers[LAYER_ID]!.getTableSpec = () => [];
+
+        const state = getExampleState();
+        state.shape = 'mosaic';
+        state.layers[0].primaryGroups = [];
+        state.layers[0].allowMultipleMetrics = false; // always true for mosaic
+
+        const getConfig = (_state: PieVisualizationState) =>
+          pieVisualization.getConfiguration({
+            state: _state,
+            frame,
+            layerId: state.layers[0].layerId,
+          });
+
+        expect(findPrimaryGroup(getConfig(state))?.supportsMoreColumns).toBeTruthy();
+
+        const stateWithMultipleMetrics = cloneDeep(state);
+        stateWithMultipleMetrics.layers[0].metrics.push('1', '2');
+
+        expect(
+          findPrimaryGroup(getConfig(stateWithMultipleMetrics))?.supportsMoreColumns
+        ).toBeTruthy();
+      });
+
+      it('reports too many metric dimensions if multiple not enabled', () => {
+        const colIds = ['1', '2', '3', '4'];
+
+        const frame = mockFrame();
+        frame.datasourceLayers[LAYER_ID]!.getTableSpec = () =>
+          colIds.map((id) => ({ columnId: id, fields: [] }));
+
+        const state = getExampleState();
+        state.layers[0].metrics = colIds;
+        state.layers[0].allowMultipleMetrics = false;
+        expect(
+          findMetricGroup(
+            pieVisualization.getConfiguration({
+              state,
+              frame,
+              layerId: state.layers[0].layerId,
+            })
+          )?.dimensionsTooMany
+        ).toBe(3);
+
+        state.layers[0].allowMultipleMetrics = true;
+        expect(
+          findMetricGroup(
+            pieVisualization.getConfiguration({
+              state,
+              frame,
+              layerId: state.layers[0].layerId,
+            })
+          )?.dimensionsTooMany
+        ).toBe(0);
+      });
     });
 
     it.each(Object.values(PieChartTypes).filter((type) => type !== 'mosaic'))(
