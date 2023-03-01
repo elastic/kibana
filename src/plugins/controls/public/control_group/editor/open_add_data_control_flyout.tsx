@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 import type {
   AddDataControlProps,
   AddOptionsListControlProps,
@@ -24,7 +25,10 @@ import {
   DEFAULT_CONTROL_WIDTH,
 } from '../../../common/control_group/control_group_constants';
 
-export function openAddDataControlFlyout(this: ControlGroupContainer) {
+export function openAddDataControlFlyout(
+  this: ControlGroupContainer,
+  { onSave }: { onSave: (id: string) => void }
+) {
   const {
     overlays: { openFlyout, openConfirm },
     controls: { getControlFactory },
@@ -65,7 +69,7 @@ export function openAddDataControlFlyout(this: ControlGroupContainer) {
             updateTitle={(newTitle) => (controlInput.title = newTitle)}
             updateWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
             updateGrow={(defaultControlGrow: boolean) => this.updateInput({ defaultControlGrow })}
-            onSave={(type) => {
+            onSave={async (type) => {
               this.closeAllFlyouts();
               if (!type) {
                 return;
@@ -76,17 +80,28 @@ export function openAddDataControlFlyout(this: ControlGroupContainer) {
                 controlInput = factory.presaveTransformFunction(controlInput);
               }
 
-              if (type === OPTIONS_LIST_CONTROL) {
-                this.addOptionsListControl(controlInput as AddOptionsListControlProps);
-                return;
+              let newControl;
+
+              switch (type) {
+                case OPTIONS_LIST_CONTROL:
+                  newControl = await this.addOptionsListControl(
+                    controlInput as AddOptionsListControlProps
+                  );
+                  break;
+                case RANGE_SLIDER_CONTROL:
+                  newControl = await this.addRangeSliderControl(
+                    controlInput as AddRangeSliderControlProps
+                  );
+                  break;
+                default:
+                  newControl = await this.addDataControlFromField(
+                    controlInput as AddDataControlProps
+                  );
               }
 
-              if (type === RANGE_SLIDER_CONTROL) {
-                this.addRangeSliderControl(controlInput as AddRangeSliderControlProps);
-                return;
+              if (!isErrorEmbeddable(newControl)) {
+                onSave(newControl.id);
               }
-
-              this.addDataControlFromField(controlInput as AddDataControlProps);
             }}
             onCancel={onCancel}
             onTypeEditorChange={(partialInput) =>

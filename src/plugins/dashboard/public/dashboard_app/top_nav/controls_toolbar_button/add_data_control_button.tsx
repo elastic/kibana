@@ -9,6 +9,7 @@
 import React from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ControlGroupContainer } from '@kbn/controls-plugin/public';
+import { useDashboardContainerContext } from '../../..';
 import { getAddControlButtonTitle } from '../../_dashboard_app_strings';
 
 interface Props {
@@ -17,6 +18,11 @@ interface Props {
 }
 
 export const AddDataControlButton = ({ closePopover, controlGroup, ...rest }: Props) => {
+  const { embeddableInstance: dashboardContainer } = useDashboardContainerContext();
+  const onSave = () => {
+    dashboardContainer.scrollToTop();
+  };
+
   return (
     <EuiContextMenuItem
       {...rest}
@@ -24,7 +30,7 @@ export const AddDataControlButton = ({ closePopover, controlGroup, ...rest }: Pr
       data-test-subj="controls-create-button"
       aria-label={getAddControlButtonTitle()}
       onClick={() => {
-        controlGroup.openAddDataControlFlyout();
+        controlGroup.openAddDataControlFlyout({ onSave });
         closePopover();
       }}
     >
