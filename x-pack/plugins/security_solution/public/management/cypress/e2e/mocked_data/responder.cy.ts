@@ -67,8 +67,6 @@ describe('When accessing Endpoint Response Console', () => {
         .then(() => {
           return addAlertsToCase({ caseId: caseData.data.id, alertIds: [alertData.alerts[0]._id] });
         });
-
-      // TODO: Add alert to the case
     });
 
     after(() => {
