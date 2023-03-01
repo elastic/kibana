@@ -18,7 +18,7 @@ export const kibanaStartMock = {
         ...coreMock.createStart(),
         ...observabilityPublicPluginsStartMock.createStart(),
         storage: coreMock.createStorage(),
-        ...casesPluginMock.createStartContract(),
+        cases: { ...casesPluginMock.createStartContract() },
       },
     };
   },

@@ -43,7 +43,7 @@ import type { GetAllCasesSelectorModalProps } from './client/ui/get_all_cases_se
 import type { GetCreateCaseFlyoutProps } from './client/ui/get_create_case_flyout';
 import type { GetRecentCasesProps } from './client/ui/get_recent_cases';
 import type { Cases, CasesStatus, CasesMetrics } from '../common/ui';
-import type { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
+import type { GroupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import type { getUICapabilities } from './client/helpers/capabilities';
 import type { AttachmentFramework } from './client/attachment_framework/types';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
@@ -147,7 +147,7 @@ export interface CasesUiStart {
     canUseCases: ReturnType<typeof canUseCases>;
     getUICapabilities: typeof getUICapabilities;
     getRuleIdFromEvent: typeof getRuleIdFromEvent;
-    groupAlertsByRule: typeof groupAlertsByRule;
+    groupAlertsByRule: GroupAlertsByRule;
   };
 }
 
