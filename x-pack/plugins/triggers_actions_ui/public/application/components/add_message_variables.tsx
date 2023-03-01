@@ -19,9 +19,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopoverFooter,
+  EuiToolTip,
 } from '@elastic/eui';
 import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
+import { TruncatedText } from '../../common/truncated_text';
 
 interface Props {
   buttonTitle?: string;
@@ -154,7 +156,9 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           </EuiText>
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
-            <EuiHighlight search={searchValue}>{option.secondaryContent || ''}</EuiHighlight>
+            <EuiToolTip display="block" position="top" content={option.secondaryContent || ''}>
+              <TruncatedText text={option.secondaryContent || ''} />
+            </EuiToolTip>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -176,7 +180,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         isLoading={false}
         options={shownOptions}
         listProps={{
-          rowHeight: 90,
+          rowHeight: 70,
           showIcons: false,
           paddingSize: 'none',
           textWrap: 'wrap',
