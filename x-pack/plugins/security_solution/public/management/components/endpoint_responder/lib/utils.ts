@@ -8,8 +8,10 @@ import type {
   ConsoleResponseActionCommands,
   EndpointCapabilities,
 } from '../../../../../common/endpoint/service/response_actions/constants';
-import type { ResponseActionParametersWithPidOrEntityId } from '../../../../../common/endpoint/types';
-import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import type {
+  EndpointPrivileges,
+  ResponseActionParametersWithPidOrEntityId,
+} from '../../../../../common/endpoint/types';
 
 export const parsedPidOrEntityIdParameter = (parameters: {
   pid?: string[];

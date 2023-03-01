@@ -26,7 +26,6 @@ export const ResponseActionFormField = React.memo(
       [setErrors, clearErrors]
     );
 
-    console.log('2');
     return (
       <EndpointResponseActionParamsForm
         defaultValues={value}

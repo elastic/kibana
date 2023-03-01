@@ -40,7 +40,6 @@ const EndpointResponseActionParamsFormComponent = ({
     },
   });
 
-  console.log('3');
   const { watch, formState } = hooksForm;
 
   useEffect(() => {

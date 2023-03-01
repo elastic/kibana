@@ -18,7 +18,6 @@ export const EndpointResponseAction = React.memo((props: EndpointResponseActionP
   // TODO Decide when should it be available
   // const endpointPrivileges = useUserPrivileges().endpointPrivileges;
 
-  console.log('1');
   return (
     <UseField
       path={`${props.item.path}.params`}
