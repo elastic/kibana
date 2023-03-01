@@ -111,6 +111,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
       error,
       data: actionDetails,
       isFetching,
+      isFetched,
     } = useGetActionDetails(action.id, {
       enabled: !outputContent,
     });
@@ -122,7 +123,7 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
     useEffect(() => {
       if (
         isMounted() &&
-        !isFetching &&
+        isFetched &&
         actionDetails &&
         actionDetails.data &&
         actionDetails.data.outputs &&
@@ -136,9 +137,9 @@ export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOut
       return () => {
         setExecuteOutputContent(undefined);
       };
-    }, [actionDetails, agentId, isFetching, isMounted]);
+    }, [actionDetails, agentId, isFetched, isMounted]);
 
-    if (isFetching) {
+    if (isFetching && !executeOutputContent) {
       return (
         <EuiSkeletonText size="relative" lines={2} data-test-subj={`${dataTestSubj}-loading`} />
       );
