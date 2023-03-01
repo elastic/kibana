@@ -42,6 +42,7 @@ responses:
 
 ```
 node scripts/type_check.js --project x-pack/plugins/cloud_defend/tsconfig.json
+node scripts/eslint.js x-pack/plugins/cloud_defend
 yarn test:jest x-pack/plugins/cloud_defend
 ```
 
