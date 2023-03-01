@@ -23,6 +23,7 @@ import { DataQuality } from './pages/data_quality';
 import { DetectionResponse } from './pages/detection_response';
 import { PluginTemplateWrapper } from '../common/components/plugin_template_wrapper';
 import { EntityAnalyticsPage } from './pages/entity_analytics';
+import { EntityAnalyticsPageNew } from './pages/entity_analytics_new';
 
 const OverviewRoutes = () => (
   <PluginTemplateWrapper>
@@ -56,6 +57,14 @@ const EntityAnalyticsRoutes = () => (
   </PluginTemplateWrapper>
 );
 
+const EntityAnalyticsNewRoutes = () => (
+  <PluginTemplateWrapper>
+    <TrackApplicationView viewId={SecurityPageName.entityAnalytics}>
+      <EntityAnalyticsPageNew />
+    </TrackApplicationView>
+  </PluginTemplateWrapper>
+);
+
 const DataQualityRoutes = () => (
   <PluginTemplateWrapper>
     <TrackApplicationView viewId={SecurityPageName.dataQuality}>
@@ -80,6 +89,10 @@ export const routes: SecuritySubPluginRoutes = [
   {
     path: ENTITY_ANALYTICS_PATH,
     render: EntityAnalyticsRoutes,
+  },
+  {
+    path: ENTITY_ANALYTICS_PATH + '_new',
+    render: EntityAnalyticsNewRoutes,
   },
   {
     path: DATA_QUALITY_PATH,
