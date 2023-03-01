@@ -17,6 +17,10 @@ import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { getTimeFieldRange } from './time_field_range';
 import type { GetTimeFieldRangeResponse } from './types';
 
+export type SetFullTimeRangeApiPath =
+  | '/internal/file_upload/time_field_range'
+  | '/api/ml/fields_service/time_field_range';
+
 /**
  * Determines the full available time range of the given Data View and updates
  * the timefilter accordingly.
@@ -27,6 +31,7 @@ import type { GetTimeFieldRangeResponse } from './types';
  * @param http - HttpStart
  * @param query - optional query
  * @param excludeFrozenData - optional boolean flag
+ * @param path - optional SetFullTimeRangeApiPath
  * @returns {GetTimeFieldRangeResponse}
  */
 export async function setFullTimeRange(
@@ -36,7 +41,7 @@ export async function setFullTimeRange(
   http: HttpStart,
   query?: QueryDslQueryContainer,
   excludeFrozenData?: boolean,
-  path: string = '/internal/file_upload/time_field_range'
+  path: SetFullTimeRangeApiPath = '/internal/file_upload/time_field_range'
 ): Promise<GetTimeFieldRangeResponse> {
   try {
     const runtimeMappings = dataView.getRuntimeMappings();
