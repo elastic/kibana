@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiBadge, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars } from '@kbn/ui-theme';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 export interface SloStatusProps {
@@ -21,7 +20,7 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
       <EuiFlexItem grow={false}>
         <div>
           {slo.summary.status === 'NO_DATA' && (
-            <EuiBadge color={euiLightVars.euiColorDisabled}>
+            <EuiBadge color="default">
               {i18n.translate('xpack.observability.slos.slo.state.noData', {
                 defaultMessage: 'No data',
               })}
@@ -29,7 +28,7 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
           )}
 
           {slo.summary.status === 'HEALTHY' && (
-            <EuiBadge color={euiLightVars.euiColorSuccess}>
+            <EuiBadge color="success">
               {i18n.translate('xpack.observability.slos.slo.state.healthy', {
                 defaultMessage: 'Healthy',
               })}
@@ -37,7 +36,7 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
           )}
 
           {slo.summary.status === 'DEGRADING' && (
-            <EuiBadge color={euiLightVars.euiColorWarning}>
+            <EuiBadge color="warning">
               {i18n.translate('xpack.observability.slos.slo.state.degrading', {
                 defaultMessage: 'Degrading',
               })}
@@ -45,7 +44,7 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
           )}
 
           {slo.summary.status === 'VIOLATED' && (
-            <EuiBadge color={euiLightVars.euiColorDanger}>
+            <EuiBadge color="danger">
               {i18n.translate('xpack.observability.slos.slo.state.violated', {
                 defaultMessage: 'Violated',
               })}
@@ -56,7 +55,7 @@ export function SloStatusBadge({ slo }: SloStatusProps) {
       {slo.summary.errorBudget.isEstimated && (
         <EuiFlexItem grow={false}>
           <div>
-            <EuiBadge color={euiLightVars.euiColorDisabled}>
+            <EuiBadge color="default">
               {i18n.translate('xpack.observability.slos.slo.state.forecasted', {
                 defaultMessage: 'Forecasted',
               })}
