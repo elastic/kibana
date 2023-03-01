@@ -69,7 +69,7 @@ export interface IndicesActions {
   }): { meta: Meta; returnHiddenIndices: boolean; searchQuery?: string };
   makeRequest: typeof FetchIndicesAPILogic.actions.makeRequest;
   onPaginate(newPageIndex: number): { newPageIndex: number };
-  openDeleteModal(index: ElasticsearchViewIndex): { index: ElasticsearchViewIndex };
+  openDeleteModal(indexName: string): { indexName: string };
   setIsFirstRequest(): void;
 }
 export interface IndicesValues {
@@ -102,7 +102,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       searchQuery,
     }),
     onPaginate: (newPageIndex) => ({ newPageIndex }),
-    openDeleteModal: (index) => ({ index }),
+    openDeleteModal: (indexName) => ({ indexName }),
     setIsFirstRequest: true,
   },
   connect: {
@@ -137,8 +137,8 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       await breakpoint(150);
       actions.makeRequest(input);
     },
-    openDeleteModal: ({ index }) => {
-      actions.fetchIndexDetails({ indexName: index.name });
+    openDeleteModal: ({ indexName }) => {
+      actions.fetchIndexDetails({ indexName });
     },
   }),
   path: ['enterprise_search', 'content', 'indices_logic'],
@@ -147,7 +147,7 @@ export const IndicesLogic = kea<MakeLogicType<IndicesValues, IndicesActions>>({
       '',
       {
         closeDeleteModal: () => '',
-        openDeleteModal: (_, { index: { name } }) => name,
+        openDeleteModal: (_, { indexName }) => indexName,
       },
     ],
     isDeleteModalVisible: [
