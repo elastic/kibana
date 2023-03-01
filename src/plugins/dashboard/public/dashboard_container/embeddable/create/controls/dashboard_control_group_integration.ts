@@ -37,7 +37,6 @@ type DashboardControlGroupCommonKeys = keyof Pick<
 >;
 
 export function startSyncingDashboardControlGroup(this: DashboardContainer) {
-  debugger;
   if (!this.controlGroup) return;
   const isControlGroupInputEqual = () =>
     persistableControlGroupInputIsEqual(
