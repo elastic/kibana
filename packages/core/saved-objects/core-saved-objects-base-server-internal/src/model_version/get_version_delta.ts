@@ -23,8 +23,9 @@ interface ModelVersionDeltaResult {
 }
 
 interface ModelVersionDeltaTypeResult {
+  /** the name of the type */
   name: string;
-  /** the current version the type is in */
+  /** the current version the type is at */
   current: number;
   /** the target version the type should go to */
   target: number;
