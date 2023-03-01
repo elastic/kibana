@@ -8,10 +8,12 @@
 import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
+import type { IdentifierType } from '../types';
 import { RISK_SCORES_URL } from '../../../../common/constants';
 import { riskScoresRequestSchema } from '../../../../common/risk_engine/risk_scoring/risk_scores_request_schema';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { buildRiskScoreService } from '../risk_score_service';
 
 export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.post(
@@ -24,11 +26,19 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      // const { client } = (await context.core).elasticsearch;
+      const esClient = (await context.core).elasticsearch.client.asInternalUser;
       const options = request.body;
+      const riskScoreService = buildRiskScoreService({
+        esClient,
+      });
+
+      const result = await riskScoreService.getScores({
+        range: options.range ?? { start: 'now-15d', end: 'now' },
+        identifierType: options.identifier_type as IdentifierType, // TODO validate
+      });
 
       try {
-        return response.ok({ body: options });
+        return response.ok({ body: result });
       } catch (e) {
         const error = transformError(e);
         return siemResponse.error({ statusCode: error.statusCode, body: error.message });
