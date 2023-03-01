@@ -195,7 +195,7 @@ export const useStateProps = (
           return !sug.hide && sug.visualizationId !== 'lnsLegacyMetric';
         });
         const firstSuggestionExists = restSuggestions?.find(
-          (sug) => sug.visualizationId === firstSuggestion?.visualizationId
+          (sug) => sug.title === firstSuggestion?.title
         );
         if (firstSuggestion && !firstSuggestionExists) {
           restSuggestions?.push(firstSuggestion);
