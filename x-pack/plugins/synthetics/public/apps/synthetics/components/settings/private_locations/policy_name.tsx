@@ -28,28 +28,26 @@ export const PolicyName = ({ agentPolicyId }: { agentPolicyId: string }) => {
 
   return (
     <EuiText size="s">
-      <p>
-        {canReadAgentPolicies ? (
-          <EuiTextColor color="subdued">
-            {policy ? (
-              <EuiLink href={`${basePath}/app/fleet/policies/${agentPolicyId}`}>
-                {policy?.name}
-              </EuiLink>
-            ) : (
-              <EuiText color="danger" size="s" className="eui-displayInline">
-                {POLICY_IS_DELETED}
-              </EuiText>
-            )}
-          </EuiTextColor>
-        ) : (
-          agentPolicyId
-        )}
-        &nbsp; &nbsp;
-        <EuiBadge color={policy?.agents === 0 ? 'warning' : 'hollow'}>
-          {AGENTS_LABEL}
-          {policy?.agents}
-        </EuiBadge>
-      </p>
+      {canReadAgentPolicies ? (
+        <EuiTextColor color="subdued">
+          {policy ? (
+            <EuiLink href={`${basePath}/app/fleet/policies/${agentPolicyId}`}>
+              {policy?.name}
+            </EuiLink>
+          ) : (
+            <EuiText color="danger" size="s" className="eui-displayInline">
+              {POLICY_IS_DELETED}
+            </EuiText>
+          )}
+        </EuiTextColor>
+      ) : (
+        agentPolicyId
+      )}
+      &nbsp; &nbsp;
+      <EuiBadge color={policy?.agents === 0 ? 'warning' : 'hollow'}>
+        {AGENTS_LABEL}
+        {policy?.agents}
+      </EuiBadge>
     </EuiText>
   );
 };
