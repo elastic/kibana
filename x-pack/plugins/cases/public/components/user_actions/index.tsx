@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexItem, EuiBadge } from '@elastic/eui';
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import { EuiFlexItem } from '@elastic/eui';
+import React, { useMemo, useState, useEffect } from 'react';
 import styled from 'styled-components';
 
 import { AddComment } from '../add_comment';
@@ -20,12 +20,6 @@ import { UserToolTip } from '../user_profiles/user_tooltip';
 import { Username } from '../user_profiles/username';
 import { HoverableAvatar } from '../user_profiles/hoverable_avatar';
 import { UserActionsList } from './user_actions_list';
-import * as i18n from './translations';
-
-const MyEuiButton = styled(EuiButton)`
-  margin-top: 16px;
-  height: 100px;
-`;
 
 const BottomUserActionsListWrapper = styled(EuiFlexItem)`
   padding-top: 16px;
@@ -42,7 +36,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
   } = props;
   const { detailName: caseId, commentId } = useCaseViewParams();
   const [initLoading, setInitLoading] = useState(true);
-  const [currentPage, setCurrentPage] = useState<number>(userActivityQueryParams?.page ?? 0);
 
   const lastPage = useMemo(() => {
     if (!userActionsStats) {
@@ -66,6 +59,10 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
 
   const [loadingAlertData, manualAlertsData] = useFetchAlertData(alertIdsWithoutRuleInfo);
 
+  const { permissions } = useCasesContext();
+
+  const showCommentEditor = permissions.create && userActivityQueryParams.type !== 'action'; // add-comment markdown is not visible in History filter
+
   const {
     loadingCommentIds,
     commentRefs,
@@ -78,6 +75,15 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     handleDeleteComment,
     handleUpdate,
   } = useUserActionsHandler();
+
+  useEffect(() => {
+    if (initLoading && loadingCommentIds.length === 0) {
+      setInitLoading(false);
+      if (commentId != null) {
+        handleOutlineComment(commentId);
+      }
+    }
+  }, [commentId, initLoading, loadingCommentIds, handleOutlineComment]);
 
   const MarkdownNewComment = useMemo(
     () => (
@@ -93,23 +99,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     ),
     [caseId, handleUpdate, handleManageMarkdownEditId, statusActionButton, commentRefs]
   );
-
-  useEffect(() => {
-    if (initLoading && loadingCommentIds.length === 0) {
-      setInitLoading(false);
-      if (commentId != null) {
-        handleOutlineComment(commentId);
-      }
-    }
-  }, [commentId, initLoading, loadingCommentIds, handleOutlineComment]);
-
-  const handleShowMore = useCallback(() => {
-    setCurrentPage(currentPage + 1);
-  }, [setCurrentPage, currentPage]);
-
-  const { permissions } = useCasesContext();
-
-  const showCommentEditor = permissions.create && userActivityQueryParams.type !== 'action'; // add-comment markdown is not visible in History filter
 
   const bottomActions = showCommentEditor
     ? [
@@ -127,31 +116,13 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
       ]
     : [];
 
-  // const getLastShowMoreData = () => {
-  //   if(currentPage === lastPage - 1) {
-  //     switch (userActivityQueryParams.type) {
-  //       case 'all':
-  //         return userActionsStats.total%10;
-  //       case 'action':
-  //           return userActionsStats.totalOtherActions%10;
-  //       case 'user':
-  //         return userActionsStats.totalComments%10;
-  //       default:
-  //         return userActivityQueryParams.perPage;
-  //     }
-  //   }
-  //   return userActivityQueryParams.perPage
-  // }
-
   return (
     <>
       <UserActionsList
         {...props}
-        key={`top-${userActivityQueryParams.type}-${userActivityQueryParams.sortOrder}-${userActivityQueryParams.page}`}
+        key={`top-${userActivityQueryParams.type}-${userActivityQueryParams.sortOrder}`}
         loadingAlertData={loadingAlertData}
         manualAlertsData={manualAlertsData}
-        // userActivityQueryParams={{ ...userActivityQueryParams, page: currentPage, perPage: getLastShowMoreData()}}
-        userActivityQueryParams={{ ...userActivityQueryParams, page: currentPage }}
         bottomActions={[]}
         loadingCommentIds={loadingCommentIds}
         commentRefs={commentRefs}
@@ -162,24 +133,14 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
         handleSaveComment={handleSaveComment}
         handleManageQuote={handleManageQuote}
         handleDeleteComment={handleDeleteComment}
-        showOldData={true}
+        isExpandable={true}
       />
-      {currentPage + 1 < lastPage && (
-        <MyEuiButton onClick={handleShowMore} color="text">
-          <EuiBadge>{i18n.SHOW_MORE}</EuiBadge>
-        </MyEuiButton>
-      )}
-      {currentPage !== lastPage && (
+      {lastPage > 0 && (
         <BottomUserActionsListWrapper>
           <UserActionsList
             {...props}
-            key={`bottom-${userActivityQueryParams.type}-${userActivityQueryParams.sortOrder}-${lastPage}`}
             loadingAlertData={loadingAlertData}
             manualAlertsData={manualAlertsData}
-            userActivityQueryParams={{
-              ...userActivityQueryParams,
-              page: lastPage > 0 ? lastPage : 0,
-            }}
             bottomActions={bottomActions}
             loadingCommentIds={loadingCommentIds}
             commentRefs={commentRefs}
@@ -190,7 +151,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
             handleSaveComment={handleSaveComment}
             handleManageQuote={handleManageQuote}
             handleDeleteComment={handleDeleteComment}
-            // lastPage={lastPage}
+            userActivityQueryParams={{ ...userActivityQueryParams, page: lastPage }}
           />
         </BottomUserActionsListWrapper>
       )}

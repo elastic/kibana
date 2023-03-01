@@ -102,7 +102,7 @@ describe('UseFindCaseUserActions', () => {
 
     expect(spy).toHaveBeenCalledWith(
       basicCase.id,
-      { type: filterActionType, sortOrder, page: 1, perPAge: 10 },
+      { type: filterActionType, sortOrder, page: 1, perPage: 10 },
       expect.any(AbortSignal)
     );
     expect(addError).toHaveBeenCalled();

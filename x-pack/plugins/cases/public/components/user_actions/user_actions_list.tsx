@@ -6,21 +6,28 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCommentList } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCommentList,  EuiBadge, EuiButton } from '@elastic/eui';
 
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
+import type { CaseUserActions } from '../../containers/types';
+import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
+import * as i18n from './translations';
 import { builderMap } from './builder';
 import { isUserActionTypeSupported } from './helpers';
 import type { AddCommentMarkdown, UserActionBuilderArgs, UserActionTreeProps } from './types';
 import { NEW_COMMENT_ID } from './constants';
-import { useCasesContext } from '../cases_context/use_cases_context';
-import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
-import type { CaseUserActions } from '../../containers/types';
 
 const MyEuiFlexGroup = styled(EuiFlexGroup)`
   margin-bottom: 8px;
+`;
+
+const MyEuiButton = styled(EuiButton)`
+  margin-top: 16px;
+  height: 100px;
 `;
 
 const MyEuiCommentList = styled(EuiCommentList)`
@@ -89,8 +96,7 @@ type UserActionListProps = UserActionTreeProps &
     loadingAlertData: boolean;
     manualAlertsData: Record<string, unknown>;
     bottomActions: AddCommentMarkdown[];
-    showOldData?: boolean;
-    // lastPage?: number;
+    isExpandable?: boolean;
   };
 
 export const UserActionsList = React.memo(
@@ -116,7 +122,7 @@ export const UserActionsList = React.memo(
     handleOutlineComment,
     selectedOutlineCommentId,
     loadingCommentIds,
-    showOldData = false,
+    isExpandable = false,
   }: UserActionListProps) => {
     const {
       externalReferenceAttachmentTypeRegistry,
@@ -124,35 +130,32 @@ export const UserActionsList = React.memo(
       appId,
     } = useCasesContext();
 
-    // fetch last 10 in descending order
-    // const params = !showOldData && userActivityQueryParams.page === lastPage && userActivityQueryParams.sortOrder === 'asc' ? {...userActivityQueryParams, sortOrder: 'desc', page:1} : userActivityQueryParams;
+    const {
+      data: caseInfiniteUserActionsData,
+      isLoading: isLoadingInfiniteUserActions,
+      hasNextPage,
+      fetchNextPage,
+      isFetchingNextPage,
+    } = useInfiniteFindCaseUserActions(caseData.id, userActivityQueryParams, isExpandable) ?? {};
 
-    // const { data: caseUserActionsData, isLoading: isLoadingUserActions } = useFindCaseUserActions(
-    //   caseData.id,
-    //   {
-    //     ...params
-    //   }
-    // );
+    const { data: caseUserActionsData, isLoading: isLoadingUserActions } =
+      useFindCaseUserActions(caseData.id, userActivityQueryParams, isExpandable) ?? {};
 
-    const { data: caseUserActionsData, isLoading: isLoadingUserActions } = useFindCaseUserActions(
-      caseData.id,
-      userActivityQueryParams
-    );
-
-    const [caseUserActions, setCaseUserActions] = useState<CaseUserActions[]>([]);
-
-    useEffect(() => {
-      if (caseUserActionsData?.userActions) {
-        setCaseUserActions((oldUserActions) => {
-          if (oldUserActions.length && showOldData) {
-            return [...oldUserActions, ...caseUserActionsData.userActions];
-          }
-          return [...caseUserActionsData.userActions];
-        });
+    const caseUserActions = useMemo<CaseUserActions[]>(() => {
+      if (!isExpandable) {
+        return caseUserActionsData?.userActions ?? [];
+      } else if (!caseInfiniteUserActionsData || !caseInfiniteUserActionsData?.pages?.length) {
+        return [];
       }
-    }, [caseUserActionsData?.userActions, showOldData]);
 
-    const userActions: EuiCommentProps[] = useMemo(() => {
+      const data: CaseUserActions[] = [];
+
+      caseInfiniteUserActionsData.pages.forEach((page) => data.push(...page.userActions));
+
+      return data;
+    }, [caseUserActionsData, caseInfiniteUserActionsData, isExpandable]);
+
+    const builtUserActions: EuiCommentProps[] = useMemo(() => {
       if (!caseUserActions) {
         return [];
       }
@@ -223,11 +226,20 @@ export const UserActionsList = React.memo(
       onRuleDetailsClick,
     ]);
 
-    const comments = [...userActions, ...bottomActions];
+    const comments = [...builtUserActions, ...bottomActions];
+
+    const handleShowMore = useCallback(() => {
+      if (fetchNextPage) {
+        fetchNextPage();
+      }
+    }, [fetchNextPage]);
 
     return (
       <>
-        {(isLoadingUserActions || loadingCommentIds.includes(NEW_COMMENT_ID)) && (
+        {(isLoadingUserActions ||
+          isLoadingInfiniteUserActions ||
+          loadingCommentIds.includes(NEW_COMMENT_ID) ||
+          isFetchingNextPage) && (
           <MyEuiFlexGroup justifyContent="center" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiLoadingSpinner data-test-subj="user-actions-loading" size="l" />
@@ -235,6 +247,11 @@ export const UserActionsList = React.memo(
           </MyEuiFlexGroup>
         )}
         <MyEuiCommentList comments={comments} data-test-subj="user-actions-list" />
+        {hasNextPage && isExpandable && (
+          <MyEuiButton onClick={handleShowMore} color="text">
+            <EuiBadge>{i18n.SHOW_MORE}</EuiBadge>
+          </MyEuiButton>
+        )}
       </>
     );
   }

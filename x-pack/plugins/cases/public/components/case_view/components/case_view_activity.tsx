@@ -225,36 +225,35 @@ export const CaseViewActivity = ({
         <EuiSkeletonText
           lines={8}
           data-test-subj="case-view-loading-content"
-          isLoading={isLoadingCaseConnectors}
+          isLoading={isLoadingCaseConnectors || isLoadingUserActionsStats}
         >
           <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
             <EuiFlexItem>
-              {showUserActions && (
-                <UserActions
-                  key={`${userActivityQueryParams.type}-${userActivityQueryParams.sortOrder}-${userActivityQueryParams.page}`}
-                  userProfiles={userProfiles}
-                  currentUserProfile={currentUserProfile}
-                  getRuleDetailsHref={ruleDetailsNavigation?.href}
-                  onRuleDetailsClick={ruleDetailsNavigation?.onClick}
-                  caseConnectors={caseConnectors}
-                  data={caseData}
-                  actionsNavigation={actionsNavigation}
-                  onShowAlertDetails={onShowAlertDetails}
-                  onUpdateField={onUpdateField}
-                  statusActionButton={
-                    permissions.update ? (
-                      <StatusActionButton
-                        status={caseData.status}
-                        onStatusChanged={changeStatus}
-                        isLoading={isLoading && loadingKey === 'status'}
-                      />
-                    ) : null
-                  }
-                  useFetchAlertData={useFetchAlertData}
-                  userActivityQueryParams={userActivityQueryParams}
-                  userActionsStats={userActionsStats}
-                />
-              )}
+              <UserActions
+                key={`${userActivityQueryParams.type}-${userActivityQueryParams.sortOrder}-${userActivityQueryParams.page}`}
+                userProfiles={userProfiles}
+                currentUserProfile={currentUserProfile}
+                getRuleDetailsHref={ruleDetailsNavigation?.href}
+                onRuleDetailsClick={ruleDetailsNavigation?.onClick}
+                caseConnectors={caseConnectors}
+                isLoadingConnectors={isLoadingCaseConnectors}
+                data={caseData}
+                actionsNavigation={actionsNavigation}
+                onShowAlertDetails={onShowAlertDetails}
+                onUpdateField={onUpdateField}
+                statusActionButton={
+                  permissions.update ? (
+                    <StatusActionButton
+                      status={caseData.status}
+                      onStatusChanged={changeStatus}
+                      isLoading={isLoading && loadingKey === 'status'}
+                    />
+                  ) : null
+                }
+                useFetchAlertData={useFetchAlertData}
+                userActivityQueryParams={userActivityQueryParams}
+                userActionsStats={userActionsStats}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiSkeletonText>

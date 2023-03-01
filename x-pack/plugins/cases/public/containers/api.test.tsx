@@ -468,7 +468,7 @@ describe('Cases API', () => {
   describe('findCaseUserActions', () => {
     const findCaseUserActionsSnake = {
       page: 1,
-      perPage: 10,
+      perPage: 1000,
       total: 20,
       userActions: [...caseUserActionsWithRegisteredAttachmentsSnake],
     };
@@ -478,7 +478,7 @@ describe('Cases API', () => {
       type: filterActionType,
       sortOrder,
       page: 1,
-      perPage: 10,
+      perPage: 1000,
     };
 
     beforeEach(() => {
@@ -495,7 +495,7 @@ describe('Cases API', () => {
           types: [],
           sortOrder: 'asc',
           page: 1,
-          perPage: 10,
+          perPage: 1000,
         },
       });
     });
@@ -527,7 +527,7 @@ describe('Cases API', () => {
           types: ['user'],
           sortOrder: 'asc',
           page: 1,
-          perPage: 10,
+          perPage: 1000,
         },
       });
     });
