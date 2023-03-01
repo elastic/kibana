@@ -12,19 +12,7 @@ export class DashboardReplacePanelService extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly flyout = this.ctx.getService('flyout');
-
-  async toggleFilterPopover() {
-    this.log.debug('DashboardReplacePanel.toggleFilter');
-    await this.testSubjects.click('savedObjectFinderFilterButton');
-  }
-
-  async toggleFilter(type: string) {
-    this.log.debug(`DashboardReplacePanel.replaceToFilter(${type})`);
-    await this.waitForListLoading();
-    await this.toggleFilterPopover();
-    await this.testSubjects.click(`savedObjectFinderFilter-${type}`);
-    await this.toggleFilterPopover();
-  }
+  private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
 
   async isReplacePanelOpen() {
     this.log.debug('DashboardReplacePanel.isReplacePanelOpen');
@@ -66,10 +54,10 @@ export class DashboardReplacePanelService extends FtrService {
       `DashboardReplacePanel.replaceEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
     );
     await this.ensureReplacePanelIsShowing();
-    if (embeddableType) {
-      await this.toggleFilter(embeddableType);
-    }
     await this.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
+    if (embeddableType) {
+      await this.savedObjectsFinder.toggleFilter(embeddableType);
+    }
     await this.testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
     await this.testSubjects.exists('addObjectToDashboardSuccess');
     await this.closeReplacePanel();
