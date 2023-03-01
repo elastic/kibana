@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { ActionListApiResponse } from '../../../../../common/endpoint/types';
 import type { EndpointActionListRequestQuery } from '../../../../../common/endpoint/schema/actions';
 import { FormattedDate } from '../../../../common/components/formatted_date';
-import { TABLE_COLUMN_NAMES, UX_MESSAGES } from '../translations';
+import { TABLE_COLUMN_NAMES, UX_MESSAGES, ARIA_LABELS } from '../translations';
 import { getActionStatus, getUiCommand } from './hooks';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 import { StatusBadge } from './status_badge';
@@ -291,7 +291,11 @@ export const ActionsLogTable = memo<ActionsLogTableProps>(
               <EuiButtonIcon
                 data-test-subj={getTestId('expand-button')}
                 onClick={onClickCallback(actionListDataItem)}
-                aria-label={itemIdToExpandedRowMap[actionListDataItem.id] ? 'Collapse' : 'Expand'}
+                aria-label={
+                  itemIdToExpandedRowMap[actionListDataItem.id]
+                    ? ARIA_LABELS.collapse
+                    : ARIA_LABELS.expand
+                }
                 iconType={itemIdToExpandedRowMap[actionListDataItem.id] ? 'arrowUp' : 'arrowDown'}
               />
             );
