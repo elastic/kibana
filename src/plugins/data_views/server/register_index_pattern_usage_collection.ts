@@ -88,7 +88,7 @@ export async function getIndexPatternTelemetry(savedObjectsService: SavedObjects
   const findOptions: SavedObjectsCreatePointInTimeFinderOptions = {
     type: DATA_VIEW_SAVED_OBJECT_TYPE,
     perPage: 1000,
-    fields: ['attributes.fields', 'attributes.runtimeFieldMap'],
+    fields: ['fields', 'runtimeFieldMap'],
   };
 
   const finder = savedObjectsService.createPointInTimeFinder<DataViewFieldAttrs>(findOptions);
@@ -103,7 +103,6 @@ export async function getIndexPatternTelemetry(savedObjectsService: SavedObjects
         ? JSON.parse(obj.attributes.runtimeFieldMap) || {}
         : {};
       const scriptedFields: FieldSpec[] = fields.filter((fld: FieldSpec) => !!fld.script);
-      // to array
       const runtimeFields: RuntimeField[] = Object.values(runtimeFieldsMap);
 
       // calc LoC
