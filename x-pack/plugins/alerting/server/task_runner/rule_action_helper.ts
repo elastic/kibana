@@ -82,7 +82,8 @@ export const getSummaryActionsFromTaskState = ({
 }) => {
   return Object.entries(summaryActions).reduce((newObj, [key, val]) => {
     const actionExists = actions.find(
-      (action) => action.uuid === key || generateActionHash(action) === key
+      (action) =>
+        action.frequency?.summary && (action.uuid === key || generateActionHash(action) === key)
     );
     if (actionExists) {
       return { ...newObj, [actionExists.uuid!]: val }; // replace hash with uuid
