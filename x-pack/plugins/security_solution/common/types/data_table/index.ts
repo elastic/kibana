@@ -37,7 +37,7 @@ export enum TableId {
   alertsOnCasePage = 'alerts-case-page',
 }
 
-enum TableEntityType {
+export enum TableEntityType {
   alert = 'alert',
   event = 'event',
   session = 'session',
