@@ -8,9 +8,8 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
-import type { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import illustration from '../assets/images/illustration_product_no_results_magnifying_glass.svg';
 
 const panelStyle = {
   maxWidth: 500,
@@ -24,8 +23,6 @@ const heights = {
 export const EmptyGroupingComponent: React.FC<{ height?: keyof typeof heights }> = ({
   height = 'tall',
 }) => {
-  const { http } = useKibana<CoreStart>().services;
-
   return (
     <EuiPanel color="subdued" data-test-subj="empty-results-panel">
       <EuiFlexGroup style={{ height: heights[height] }} alignItems="center" justifyContent="center">
@@ -51,13 +48,7 @@ export const EmptyGroupingComponent: React.FC<{ height?: keyof typeof heights }>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiImage
-                  size="200"
-                  alt=""
-                  url={http.basePath.prepend(
-                    '/plugins/timelines/assets/illustration_product_no_results_magnifying_glass.svg'
-                  )}
-                />
+                <EuiImage size="200" alt="" src={illustration} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

@@ -8,6 +8,7 @@
 
 import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
+import { I18nProvider } from '@kbn/i18n-react';
 import { Grouping } from './grouping';
 import { createGroupFilter } from './accordion_panel/helpers';
 
@@ -115,7 +116,11 @@ describe('grouping container', () => {
     jest.clearAllMocks();
   });
   it('Renders group counts when groupsNumber > 0', () => {
-    const { getByTestId, getAllByTestId, queryByTestId } = render(<Grouping {...testProps} />);
+    const { getByTestId, getAllByTestId, queryByTestId } = render(
+      <I18nProvider>
+        <Grouping {...testProps} />
+      </I18nProvider>
+    );
     expect(getByTestId('alert-count').textContent).toBe('2 alerts');
     expect(getByTestId('groups-count').textContent).toBe('2 groups');
     expect(getAllByTestId('grouping-accordion').length).toBe(2);
@@ -136,7 +141,11 @@ describe('grouping container', () => {
         value: 0,
       },
     };
-    const { getByTestId, queryByTestId } = render(<Grouping {...testProps} data={data} />);
+    const { getByTestId, queryByTestId } = render(
+      <I18nProvider>
+        <Grouping {...testProps} data={data} />
+      </I18nProvider>
+    );
     expect(queryByTestId('alert-count')).not.toBeInTheDocument();
     expect(queryByTestId('groups-count')).not.toBeInTheDocument();
     expect(queryByTestId('grouping-accordion')).not.toBeInTheDocument();
@@ -144,7 +153,11 @@ describe('grouping container', () => {
   });
 
   it('Opens one group at a time when each group is clicked', () => {
-    const { getAllByTestId } = render(<Grouping {...testProps} />);
+    const { getAllByTestId } = render(
+      <I18nProvider>
+        <Grouping {...testProps} />
+      </I18nProvider>
+    );
     const group1 = within(getAllByTestId('grouping-accordion')[0]).getAllByRole('button')[0];
     const group2 = within(getAllByTestId('grouping-accordion')[1]).getAllByRole('button')[0];
     fireEvent.click(group1);
