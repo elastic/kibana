@@ -43,13 +43,14 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
 import { createHash } from 'crypto';
 
-import type { BaseSignalHit, SimpleHit, ThresholdResult } from '../../../signals/types';
+import type { BaseSignalHit, SimpleHit } from '../../types';
+import type { ThresholdResult } from '../../threshold/types';
 import {
   getField,
   getValidDateFromDoc,
   isWrappedDetectionAlert,
   isWrappedSignalHit,
-} from '../../../signals/utils';
+} from '../../utils/utils';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import type { SearchTypes } from '../../../../telemetry/types';
 import {

@@ -18,6 +18,7 @@ export const createCaseUserActionSavedObjectType = (
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
+    dynamic: false,
     properties: {
       action: {
         type: 'keyword',
@@ -27,16 +28,7 @@ export const createCaseUserActionSavedObjectType = (
       },
       created_by: {
         properties: {
-          email: {
-            type: 'keyword',
-          },
           username: {
-            type: 'keyword',
-          },
-          full_name: {
-            type: 'keyword',
-          },
-          profile_uid: {
             type: 'keyword',
           },
         },
