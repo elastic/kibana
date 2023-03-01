@@ -10,7 +10,11 @@ import { login, visitWithoutDateRange } from '../../tasks/login';
 
 import { TIMELINES_URL } from '../../urls/navigation';
 import { TOASTER } from '../../screens/alerts_detection_rules';
-import { TIMELINE_CHECKBOX } from '../../screens/timelines';
+import {
+  TIMELINE_CHECKBOX,
+  TIMELINE_ITEM_ACTION_BTN,
+  EXPORT_TIMELINE,
+} from '../../screens/timelines';
 import { createTimeline } from '../../tasks/api_calls/timelines';
 import { expectedExportedTimeline, getTimeline } from '../../objects/timeline';
 import { cleanKibana, deleteTimelines } from '../../tasks/common';
@@ -38,12 +42,21 @@ describe('Export timelines', () => {
     visitWithoutDateRange(TIMELINES_URL);
   });
 
-  it('Exports a custom timeline', function () {
+  it('Exports a custom timeline using timeline actions', function () {
+    cy.get(TIMELINE_ITEM_ACTION_BTN(this.timelineId1)).click();
+    cy.get(EXPORT_TIMELINE).click();
+
+    cy.wait('@export').then(({ response }) => {
+      cy.wrap(response?.statusCode).should('eql', 200);
+      cy.wrap(response?.body).should('eql', expectedExportedTimeline(this.timelineResponse1));
+    });
+  });
+
+  it('Exports a custom timeline using bulk action', function () {
     exportTimeline(this.timelineId1);
 
     cy.wait('@export').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
-
       cy.wrap(response?.body).should('eql', expectedExportedTimeline(this.timelineResponse1));
     });
   });
