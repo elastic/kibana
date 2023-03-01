@@ -24,7 +24,7 @@ export function openAddPanelFlyout(options: {
   showCreateNewMenu?: boolean;
   reportUiCounter?: UsageCollectionStart['reportUiCounter'];
   theme: ThemeServiceStart;
-  onAddPanel?: (embeddable) => void;
+  onAddPanel?: (id: string) => void;
 }): OverlayRef {
   const {
     embeddable,

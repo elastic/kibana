@@ -15,8 +15,7 @@ import { CoreSetup, SavedObjectAttributes, SimpleSavedObject, Toast } from '@kbn
 import { EuiContextMenuItem, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { EmbeddableError } from '../../../../embeddables/i_embeddable';
-import { Embeddable, EmbeddableFactory, EmbeddableStart } from '../../../../..';
+import { EmbeddableFactory, EmbeddableStart } from '../../../../..';
 import { IContainer } from '../../../../containers';
 import { EmbeddableFactoryNotFoundError } from '../../../../errors';
 import { SavedObjectFinderCreateNew } from './saved_object_finder_create_new';
@@ -31,7 +30,7 @@ interface Props {
   SavedObjectFinder: React.ComponentType<any>;
   showCreateNewMenu?: boolean;
   reportUiCounter?: UsageCollectionStart['reportUiCounter'];
-  onAddPanel?: (embeddable) => void;
+  onAddPanel?: (id: string) => void;
 }
 
 interface State {
@@ -112,7 +111,7 @@ export class AddPanelFlyout extends React.Component<Props, State> {
 
     this.showToast(name);
     if (this.props.onAddPanel) {
-      this.props.onAddPanel(embeddable);
+      this.props.onAddPanel(embeddable.id);
     }
   };
 

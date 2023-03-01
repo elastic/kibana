@@ -41,8 +41,8 @@ export function addFromLibrary(this: DashboardContainer) {
       notifications,
       overlays,
       theme,
-      onAddPanel: (embeddable) => {
-        this.scrollToPanel(embeddable.id);
+      onAddPanel: (id: string) => {
+        this.scrollToPanel(id);
       },
     })
   );
