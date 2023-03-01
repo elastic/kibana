@@ -470,7 +470,6 @@ export class DashboardContainer extends Container<InheritedChildInput, Dashboard
       viewMode,
       query,
       id,
-      useSearchSession: true,
     };
   }
 

@@ -30,7 +30,7 @@ export function shouldFetch$<
     distinctUntilChanged((a: TFilterableEmbeddableInput, b: TFilterableEmbeddableInput) => {
       // Only need to diff searchSessionId when container uses search sessions because
       // searchSessionId changes with any filter, query, or time changes
-      if (a.useSearchSession) {
+      if (a.searchSessionId !== undefined || b.searchSessionId !== undefined) {
         return a.searchSessionId === b.searchSessionId;
       }
 
