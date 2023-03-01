@@ -75,7 +75,8 @@ export const init: ModelStage<
     indexPrefix: context.indexPrefix,
     kibanaVersion: context.kibanaVersion,
   });
-  const currentIndexMeta = cloneDeep(currentMappings._meta!); // cloning as we may be mutating it.
+  // cloning as we may be mutating it in later stages.
+  const currentIndexMeta = cloneDeep(currentMappings._meta!);
 
   switch (versionCheck.status) {
     // app version is greater than the index mapping version.

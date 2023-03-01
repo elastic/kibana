@@ -24,12 +24,25 @@ export interface InitState extends BaseState {
 }
 
 export interface PostInitState extends BaseState {
+  /**
+   * The index we're currently migrating.
+   */
   readonly currentIndex: string;
+  /**
+   * The aliases that are already present for the current index.
+   */
   readonly aliases: string[];
+  /**
+   * The alias actions to perform to update the aliases.
+   */
   readonly aliasActions: AliasAction[];
+  /**
+   * The *previous* mappings (and _meta), as they were when we resolved the index
+   * information. This shouldn't be updated once populated.
+   */
   readonly previousMappings: IndexMapping;
   /**
-   * The current _meta field of the index.
+   * The *current* _meta field of the index.
    * All operations updating this field will update in the state accordingly.
    */
   readonly currentIndexMeta: IndexMappingMeta;

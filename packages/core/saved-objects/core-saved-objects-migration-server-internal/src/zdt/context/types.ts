@@ -11,13 +11,14 @@ import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
-import { ModelVersionMap } from '@kbn/core-saved-objects-base-server-internal';
+import type { ModelVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 import type { DocLinks } from '@kbn/doc-links';
 
 /**
  * The set of static, precomputed values and services used by the ZDT migration
  */
 export interface MigratorContext {
+  /** The current Kibana version */
   readonly kibanaVersion: string;
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
   readonly indexPrefix: string;

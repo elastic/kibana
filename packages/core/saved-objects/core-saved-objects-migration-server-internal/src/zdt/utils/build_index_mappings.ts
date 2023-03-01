@@ -19,6 +19,11 @@ interface BuildIndexMappingsOpts {
   types: SavedObjectsType[];
 }
 
+/**
+ * Build the mappings to use when creating a new index.
+ *
+ * @param types The list of all registered SO types.
+ */
 export const buildIndexMappings = ({ types }: BuildIndexMappingsOpts): IndexMapping => {
   const mappings: IndexMapping = cloneDeep(getBaseMappings());
   const typeMappings = buildTypesMappings(types);
@@ -37,6 +42,11 @@ interface BuildIndexMetaOpts {
   types: SavedObjectsType[];
 }
 
+/**
+ * Build the mapping _meta field to used when creating a new index.
+ *
+ * @param types The list of all registered SO types.
+ */
 export const buildIndexMeta = ({ types }: BuildIndexMetaOpts): IndexMappingMeta => {
   const modelVersions = getModelVersionMapForTypes(types);
 

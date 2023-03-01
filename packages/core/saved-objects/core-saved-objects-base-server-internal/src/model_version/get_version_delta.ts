@@ -32,7 +32,7 @@ interface ModelVersionDeltaTypeResult {
 }
 
 /**
- * Will generate the difference to go from `appVersions` to `indexVersions`.
+ * Will generate the difference to go from `currentVersions` to `targetVersions`.
  *
  * @remarks: will throw if the version maps are in conflict
  */

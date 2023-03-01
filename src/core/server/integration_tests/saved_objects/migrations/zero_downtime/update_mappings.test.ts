@@ -125,6 +125,7 @@ describe('ZDT upgrades - basic mapping update', () => {
     );
 
     expect(mappingMeta).toEqual({
+      // doc migration not implemented yet - docVersions are not bumped.
       docVersions: {
         foo: 2,
         bar: 1,
