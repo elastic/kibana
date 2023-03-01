@@ -29,6 +29,10 @@ export const createContextMock = (
     kibanaVersion: '8.7.0',
     indexPrefix: '.kibana',
     types: ['foo', 'bar'],
+    typeModelVersions: {
+      foo: 1,
+      bar: 2,
+    },
     elasticsearchClient: elasticsearchClientMock.createElasticsearchClient(),
     maxRetryAttempts: 15,
     migrationDocLinks: docLinksServiceMock.createSetupContract().links.kibanaUpgradeSavedObjects,

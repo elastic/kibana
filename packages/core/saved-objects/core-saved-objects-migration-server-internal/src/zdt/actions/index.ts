@@ -15,6 +15,7 @@ import type {
   ClusterShardLimitExceeded,
   IndexNotFound,
   AliasNotFound,
+  IncompatibleMappingException,
 } from '../../actions';
 
 export {
@@ -22,6 +23,7 @@ export {
   waitForIndexStatus,
   createIndex,
   updateAliases,
+  updateMappings,
   updateAndPickupMappings,
   waitForPickupUpdatedMappingsTask,
   type InitActionParams,
@@ -40,6 +42,7 @@ export interface ActionErrorTypeMap {
   index_not_yellow_timeout: IndexNotYellowTimeout;
   cluster_shard_limit_exceeded: ClusterShardLimitExceeded;
   alias_not_found_exception: AliasNotFound;
+  incompatible_mapping_exception: IncompatibleMappingException;
 }
 
 /** Type guard for narrowing the type of a left */

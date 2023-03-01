@@ -65,7 +65,7 @@ describe('ZDT upgrades - basic mapping update', () => {
     await runMigrations();
   };
 
-  it('do some shit', async () => {
+  it('updates the mappings and the meta', async () => {
     await createBaseline();
 
     const fooType = getFooType();
@@ -130,8 +130,8 @@ describe('ZDT upgrades - basic mapping update', () => {
         bar: 1,
       },
       mappingVersions: {
-        foo: 2,
-        bar: 1,
+        foo: 3,
+        bar: 2,
       },
     });
 
@@ -147,7 +147,8 @@ describe('ZDT upgrades - basic mapping update', () => {
 
     expectLogsContains('INIT -> UPDATE_INDEX_MAPPINGS');
     expectLogsContains('UPDATE_INDEX_MAPPINGS -> UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK');
-    expectLogsContains('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> DONE');
+    expectLogsContains('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> UPDATE_MAPPING_MODEL_VERSIONS');
+    expectLogsContains('UPDATE_MAPPING_MODEL_VERSIONS -> DONE');
     expectLogsContains('Migration completed');
   });
 });

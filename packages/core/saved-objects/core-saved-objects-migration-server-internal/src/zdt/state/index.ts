@@ -13,6 +13,7 @@ export type {
   WaitForYellowIndexState,
   UpdateIndexMappingsState,
   UpdateIndexMappingsWaitForTaskState,
+  UpdateMappingModelVersionState,
   UpdateAliasesState,
   DoneState,
   FatalState,

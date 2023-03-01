@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { cloneDeep } from 'lodash';
 import * as Either from 'fp-ts/lib/Either';
 import { delayRetryState } from '../../../model/retry_state';
 import { throwBadResponse } from '../../../model/helpers';
@@ -61,6 +62,12 @@ export const init: ModelStage<
     source: 'mappingVersions',
     deletedTypes: context.deletedTypes,
   });
+
+  logs.push({
+    level: 'info',
+    message: `Mappings model version check result: ${versionCheck.status}`,
+  });
+
   const aliases = Object.keys(indices[currentIndex].aliases);
   const aliasActions = getAliasActions({
     existingAliases: aliases,
@@ -68,11 +75,7 @@ export const init: ModelStage<
     indexPrefix: context.indexPrefix,
     kibanaVersion: context.kibanaVersion,
   });
-
-  logs.push({
-    level: 'info',
-    message: `Mappings model version check result: ${versionCheck.status}`,
-  });
+  const currentIndexMeta = cloneDeep(currentMappings._meta!); // cloning as we may be mutating it.
 
   switch (versionCheck.status) {
     // app version is greater than the index mapping version.
@@ -85,13 +88,14 @@ export const init: ModelStage<
       });
       return {
         ...state,
+        controlState: 'UPDATE_INDEX_MAPPINGS',
         logs,
         currentIndex,
+        currentIndexMeta,
         aliases,
         aliasActions,
         previousMappings: currentMappings,
         additiveMappingChanges,
-        controlState: 'UPDATE_INDEX_MAPPINGS',
       };
     // app version and index mapping version are the same.
     // either application upgrade without model change, or a simple reboot on the same version.
@@ -99,21 +103,22 @@ export const init: ModelStage<
     case 'equal':
       return {
         ...state,
+        controlState: 'UPDATE_ALIASES',
         logs,
         currentIndex,
+        currentIndexMeta,
         aliases,
         aliasActions,
         previousMappings: currentMappings,
-        controlState: 'UPDATE_ALIASES',
       };
     // app version is lower than the index mapping version.
     // likely a rollback scenario - unsupported for the initial implementation
     case 'lesser':
       return {
         ...state,
-        logs,
-        reason: 'Downgrading model version is currently unsupported',
         controlState: 'FATAL',
+        reason: 'Downgrading model version is currently unsupported',
+        logs,
       };
     // conflicts: version for some types are greater, some are lower
     // shouldn't occur in any normal scenario - cannot recover
@@ -121,9 +126,9 @@ export const init: ModelStage<
     default:
       return {
         ...state,
-        logs,
-        reason: 'Model version conflict: inconsistent higher/lower versions',
         controlState: 'FATAL',
+        reason: 'Model version conflict: inconsistent higher/lower versions',
+        logs,
       };
   }
 };

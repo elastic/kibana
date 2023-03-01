@@ -60,6 +60,12 @@ export const model = (
         response as StateActionResponse<'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'>,
         context
       );
+    case 'UPDATE_MAPPING_MODEL_VERSIONS':
+      return Stages.updateMappingModelVersion(
+        current,
+        response as StateActionResponse<'UPDATE_MAPPING_MODEL_VERSIONS'>,
+        context
+      );
     case 'DONE':
     case 'FATAL':
       // The state-action machine will never call the model in the terminating states

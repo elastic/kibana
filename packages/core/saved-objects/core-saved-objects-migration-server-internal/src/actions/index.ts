@@ -95,7 +95,7 @@ export type {
 } from './update_and_pickup_mappings';
 export { updateAndPickupMappings } from './update_and_pickup_mappings';
 
-export { updateMappings } from './update_mappings';
+export { updateMappings, type IncompatibleMappingException } from './update_mappings';
 
 import type { UnknownDocsFound } from './check_for_unknown_docs';
 import type { IncompatibleClusterRoutingAllocation } from './initialize_action';

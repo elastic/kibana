@@ -14,6 +14,7 @@ import type {
   CreateTargetIndexState,
   UpdateIndexMappingsState,
   UpdateIndexMappingsWaitForTaskState,
+  UpdateMappingModelVersionState,
   UpdateAliasesState,
 } from './state';
 import type { MigratorContext } from './context';
@@ -30,9 +31,6 @@ export type ActionMap = ReturnType<typeof nextActionMap>;
 export type ResponseType<ControlState extends AllActionStates> = Awaited<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
-
-// TODO: remove when done
-// const NOT_IMPLEMENTED = () => Promise.resolve({} as any);
 
 export const nextActionMap = (context: MigratorContext) => {
   const client = context.elasticsearchClient;
@@ -59,6 +57,15 @@ export const nextActionMap = (context: MigratorContext) => {
         client,
         taskId: state.updateTargetMappingsTaskId,
         timeout: '60s',
+      }),
+    UPDATE_MAPPING_MODEL_VERSIONS: (state: UpdateMappingModelVersionState) =>
+      Actions.updateMappings({
+        client,
+        index: state.currentIndex,
+        mappings: {
+          properties: {},
+          _meta: state.currentIndexMeta,
+        },
       }),
     UPDATE_ALIASES: (state: UpdateAliasesState) =>
       Actions.updateAliases({
