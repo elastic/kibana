@@ -86,7 +86,7 @@ export const TitleDocsPopover: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="indexPatternEditor.titleDocsPopover.useCommasDescription"
-                  defaultMessage="To match multiple single sources, enter their names, separated by a comma. Do not include a space after the comma."
+                  defaultMessage="To match multiple single sources, enter their names, separated by a comma (,). Do not include a space after the comma."
                 />
               </p>
               <p>

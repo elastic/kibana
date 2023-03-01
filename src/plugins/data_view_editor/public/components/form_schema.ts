@@ -30,7 +30,7 @@ export const schema = {
     defaultValue: '',
     helpText: i18n.translate('indexPatternEditor.validations.titleInputHelpText', {
       defaultMessage:
-        'Enter an index pattern that matches one or more data sources. Use a wildcard (*) to match multiple characters. Separate with a comma (,) to include several sources. Spaces and the characters /?"<>| are not allowed.',
+        'Enter an index pattern that matches one or more data sources. Use a wildcard (*) to match multiple sources. Separate with a comma (,) to match multiple single sources. Spaces and the characters /?"<>| are not allowed.',
     }),
     validations: [
       {
@@ -84,7 +84,7 @@ export const schema = {
   },
   isAdHoc: {
     label: i18n.translate('indexPatternEditor.editor.form.IsAdHocLabel', {
-      defaultMessage: 'Creeate AdHoc DataView',
+      defaultMessage: 'Create AdHoc DataView',
     }),
     defaultValue: false,
     type: 'hidden',
