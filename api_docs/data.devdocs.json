@@ -13087,35 +13087,35 @@
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             }
           ]
         },
