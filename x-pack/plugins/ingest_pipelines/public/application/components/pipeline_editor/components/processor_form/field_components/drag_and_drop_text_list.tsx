@@ -123,6 +123,7 @@ function DragAndDropTextListComponent({
               {value.map((item, idx) => {
                 return (
                   <EuiDraggable
+                    isDragDisabled={disableDragging}
                     customDragHandle
                     spacing="none"
                     draggableId={String(item.id)}
