@@ -32,20 +32,22 @@ export function SloDetails({ slo }: Props) {
   }));
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="l">
+    <EuiFlexGroup direction="column" gutterSize="xl">
       <EuiFlexItem>
         <Overview slo={slo} />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <SliChartPanel data={historicalSliData} isLoading={historicalSummaryLoading} slo={slo} />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ErrorBudgetChartPanel
-          data={errorBudgetBurnDownData}
-          isLoading={historicalSummaryLoading}
-          slo={slo}
-        />
-      </EuiFlexItem>
+      <EuiFlexGroup direction="column" gutterSize="l">
+        <EuiFlexItem>
+          <SliChartPanel data={historicalSliData} isLoading={historicalSummaryLoading} slo={slo} />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ErrorBudgetChartPanel
+            data={errorBudgetBurnDownData}
+            isLoading={historicalSummaryLoading}
+            slo={slo}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiFlexGroup>
   );
 }

@@ -9,7 +9,9 @@ import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
+import moment from 'moment';
 import React from 'react';
+import { DEFAULT_DATE_FORMAT } from '../constants';
 import { toHighPrecisionPercentage } from '../helpers/number';
 
 import { OverviewItem } from './overview_item';
@@ -21,43 +23,78 @@ export interface Props {
 export function Overview({ slo }: Props) {
   return (
     <EuiPanel paddingSize="none" color="transparent">
-      <EuiFlexGroup direction="row">
-        <OverviewItem
-          title={i18n.translate('xpack.observability.slo.sloDetails.overview.observedValueTitle', {
-            defaultMessage: 'Observed value',
-          })}
-          subtitle={i18n.translate(
-            'xpack.observability.slo.sloDetails.overview.observedValueSubtitle',
-            {
-              defaultMessage: '{value} (objective is {objective})',
-              values: {
-                value: `${toHighPrecisionPercentage(slo.summary.sliValue)}%`,
-                objective: `${toHighPrecisionPercentage(slo.objective.target)}%`,
-              },
-            }
-          )}
-        />
-        <OverviewItem
-          title={i18n.translate('xpack.observability.slo.sloDetails.overview.indicatorTypeTitle', {
-            defaultMessage: 'Indicator type',
-          })}
-          subtitle={toIndicatorTypeLabel(slo.indicator.type)}
-        />
-        <OverviewItem
-          title={i18n.translate('xpack.observability.slo.sloDetails.overview.timeWindowTitle', {
-            defaultMessage: 'Time window',
-          })}
-          subtitle={toTimeWindowLabel(slo.timeWindow)}
-        />
-        <OverviewItem
-          title={i18n.translate(
-            'xpack.observability.slo.sloDetails.overview.budgetingMethodTitle',
-            {
-              defaultMessage: 'Budgeting method',
-            }
-          )}
-          subtitle={toBudgetingMethod(slo.budgetingMethod)}
-        />
+      <EuiFlexGroup direction="column" gutterSize="l">
+        <EuiFlexGroup direction="row" alignItems="flexStart">
+          <OverviewItem
+            title={i18n.translate(
+              'xpack.observability.slo.sloDetails.overview.observedValueTitle',
+              {
+                defaultMessage: 'Observed value',
+              }
+            )}
+            subtitle={i18n.translate(
+              'xpack.observability.slo.sloDetails.overview.observedValueSubtitle',
+              {
+                defaultMessage: '{value} (objective is {objective})',
+                values: {
+                  value: `${toHighPrecisionPercentage(slo.summary.sliValue)}%`,
+                  objective: `${toHighPrecisionPercentage(slo.objective.target)}%`,
+                },
+              }
+            )}
+          />
+          <OverviewItem
+            title={i18n.translate(
+              'xpack.observability.slo.sloDetails.overview.indicatorTypeTitle',
+              {
+                defaultMessage: 'Indicator type',
+              }
+            )}
+            subtitle={toIndicatorTypeLabel(slo.indicator.type)}
+          />
+          <OverviewItem
+            title={i18n.translate('xpack.observability.slo.sloDetails.overview.timeWindowTitle', {
+              defaultMessage: 'Time window',
+            })}
+            subtitle={toTimeWindowLabel(slo.timeWindow)}
+          />
+          <OverviewItem
+            title={i18n.translate(
+              'xpack.observability.slo.sloDetails.overview.budgetingMethodTitle',
+              {
+                defaultMessage: 'Budgeting method',
+              }
+            )}
+            subtitle={toBudgetingMethod(slo.budgetingMethod)}
+          />
+        </EuiFlexGroup>
+
+        <EuiFlexGroup direction="row" alignItems="flexStart">
+          <OverviewItem
+            title={i18n.translate('xpack.observability.slo.sloDetails.overview.descriptionTitle', {
+              defaultMessage: 'Description',
+            })}
+            subtitle={!!slo.description ? slo.description : '-'}
+          />
+          <OverviewItem
+            title={i18n.translate('xpack.observability.slo.sloDetails.overview.createdAtTitle', {
+              defaultMessage: 'Created at',
+            })}
+            subtitle={moment(slo.createdAt).format(DEFAULT_DATE_FORMAT)}
+          />
+          <OverviewItem
+            title={i18n.translate('xpack.observability.slo.sloDetails.overview.updatedAtTitle', {
+              defaultMessage: 'Last update at',
+            })}
+            subtitle={moment(slo.updatedAt).format(DEFAULT_DATE_FORMAT)}
+          />
+          <OverviewItem
+            title={i18n.translate('xpack.observability.slo.sloDetails.overview.tagsTitle', {
+              defaultMessage: 'Tags',
+            })}
+            subtitle="-"
+          />
+        </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPanel>
   );
