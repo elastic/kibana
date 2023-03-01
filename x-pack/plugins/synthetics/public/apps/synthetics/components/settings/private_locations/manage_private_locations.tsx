@@ -6,9 +6,10 @@
  */
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { EuiSpacer } from '@elastic/eui';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { PrivateLocationsTable } from './locations_table';
-import { useFleetPermissions } from '../../../hooks';
+import { useCanManagePrivateLocation } from '../../../hooks';
 import { ManageEmptyState } from './manage_empty_state';
 import { AddLocationFlyout } from './add_location_flyout';
 import { useLocationsAPI } from './hooks/use_locations_api';
@@ -25,12 +26,11 @@ export const ManagePrivateLocations = () => {
   const dispatch = useDispatch();
 
   const isAddingNew = useSelector(selectAddingNewPrivateLocation);
-
   const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
 
   const { onSubmit, loading, privateLocations, onDelete, deleteLoading } = useLocationsAPI();
 
-  const { canReadAgentPolicies } = useFleetPermissions();
+  const canManagePrivateLocation = useCanManagePrivateLocation();
 
   useEffect(() => {
     dispatch(getAgentPoliciesAction.get());
@@ -43,7 +43,12 @@ export const ManagePrivateLocations = () => {
 
   return (
     <>
-      {!canReadAgentPolicies && <FleetPermissionsCallout />}
+      {!canManagePrivateLocation && (
+        <>
+          <FleetPermissionsCallout />
+          <EuiSpacer />
+        </>
+      )}
 
       {loading ? (
         <LoadingState />
@@ -51,7 +56,7 @@ export const ManagePrivateLocations = () => {
         <ManageEmptyState
           privateLocations={privateLocations}
           setIsAddingNew={setIsAddingNew}
-          hasFleetPermissions={canReadAgentPolicies}
+          hasFleetPermissions={canManagePrivateLocation}
         >
           <PrivateLocationsTable
             privateLocations={privateLocations}
