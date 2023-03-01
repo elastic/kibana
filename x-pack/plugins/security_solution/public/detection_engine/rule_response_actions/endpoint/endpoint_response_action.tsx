@@ -6,26 +6,30 @@
  */
 
 import React from 'react';
+import { map } from 'lodash';
 import { ResponseActionFormField } from './endpoint_response_action_form_field';
 import type { ArrayItem } from '../../../shared_imports';
-import { UseField } from '../../../shared_imports';
+import { UseField, useFormData } from '../../../shared_imports';
 
 interface EndpointResponseActionProps {
   item: ArrayItem;
   editDisabled: boolean;
-  usedEndpointCommands: string[];
 }
 
 export const EndpointResponseAction = React.memo((props: EndpointResponseActionProps) => {
   // TODO Decide when should it be available
   // const endpointPrivileges = useUserPrivileges().endpointPrivileges;
+  const [data] = useFormData();
 
+  const usedEndpointCommands = map(data.responseActions, (responseAction) => {
+    return responseAction?.params?.command;
+  });
   return (
     <UseField
       path={`${props.item.path}.params`}
       componentProps={{
         editDisabled: props.editDisabled,
-        usedEndpointCommands: props.usedEndpointCommands,
+        usedEndpointCommands,
       }}
       component={ResponseActionFormField}
       readDefaultValueOnForm={!props.item.isNew}
