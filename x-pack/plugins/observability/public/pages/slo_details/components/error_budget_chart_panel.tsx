@@ -63,9 +63,12 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
         <EuiFlexItem>
           <WideChart
             chart="area"
-            id={i18n.translate('xpack.observability.slo.sloDetails.errorBudgetChartPanel.title', {
-              defaultMessage: 'Error budget remaining',
-            })}
+            id={i18n.translate(
+              'xpack.observability.slo.sloDetails.errorBudgetChartPanel.chartTitle',
+              {
+                defaultMessage: 'Error budget remaining',
+              }
+            )}
             state={isSloFailed ? 'error' : 'success'}
             data={data}
             loading={isLoading}

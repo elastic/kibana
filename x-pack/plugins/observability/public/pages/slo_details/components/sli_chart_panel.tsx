@@ -75,9 +75,12 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
         <EuiFlexItem>
           <WideChart
             chart="line"
-            id={i18n.translate('xpack.observability.slo.sloDetails.sliHistoryChartPanel.title', {
-              defaultMessage: 'SLI value',
-            })}
+            id={i18n.translate(
+              'xpack.observability.slo.sloDetails.sliHistoryChartPanel.chartTitle',
+              {
+                defaultMessage: 'SLI value',
+              }
+            )}
             state={isSloFailed ? 'error' : 'success'}
             data={data}
             loading={isLoading}
