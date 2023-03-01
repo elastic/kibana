@@ -80,7 +80,7 @@ export function ErrorDetailsPage() {
           <EuiSpacer size="m" />
           <StepDurationPanel doBreakdown={false} />
           <EuiSpacer size="m" />
-          <MonitorDetailsPanelContainer />
+          <MonitorDetailsPanelContainer hideLocations />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
