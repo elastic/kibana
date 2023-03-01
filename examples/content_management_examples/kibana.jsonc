@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/content-management-examples-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Example plugin integrating with content management plugin",
+  "plugin": {
+    "id": "contentManagementExamples",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "contentManagement",
+      "developerExamples"
+    ]
+  }
+}
