@@ -152,6 +152,7 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
               href={getAppUrl({ path: getPolicyDetailPath(policy.id) })}
               appPath={getPolicyDetailPath(policy.id)}
               target="_blank"
+              data-test-subj={getTestId('policyLink')}
             >
               <FormattedMessage
                 id="xpack.securitySolution.effectedPolicySelect.viewPolicyLinkLabel"
@@ -165,7 +166,16 @@ export const EffectedPolicySelect = memo<EffectedPolicySelectProps>(
           'data-test-subj': `policy-${policy.id}`,
         }))
         .sort(({ label: labelA }, { label: labelB }) => labelA.localeCompare(labelB));
-    }, [canReadPolicyManagement, disabled, getAppUrl, isGlobal, isPlatinumPlus, options, selected]);
+    }, [
+      canReadPolicyManagement,
+      disabled,
+      getAppUrl,
+      getTestId,
+      isGlobal,
+      isPlatinumPlus,
+      options,
+      selected,
+    ]);
 
     const handleOnPolicySelectChange = useCallback<
       Required<EuiSelectableProps<OptionPolicyData>>['onChange']
