@@ -63,25 +63,16 @@ export const transformToAlertThrottle = (throttle: string | null | undefined): s
  * @param legacyRuleActions Legacy "side car" rule actions that if it detects it being passed it in will transform using it.
  * @returns The "security_solution" throttle
  */
-export const transformFromAlertThrottle = (
-  rule: RuleAlertType,
-  legacyRuleActions: LegacyRuleActions | null | undefined
-): string => {
-  if (legacyRuleActions == null || (rule.actions != null && rule.actions.length > 0)) {
-    if (rule.muteAll || rule.actions.length === 0) {
-      return NOTIFICATION_THROTTLE_NO_ACTIONS;
-    } else if (rule.notifyWhen == null) {
-      return transformFromFirstActionThrottle(rule);
-    } else if (rule.notifyWhen === 'onActiveAlert') {
-      return NOTIFICATION_THROTTLE_RULE;
-    } else if (rule.throttle == null) {
-      return NOTIFICATION_THROTTLE_NO_ACTIONS;
-    } else {
-      return rule.throttle;
-    }
-  } else {
-    return legacyRuleActions.ruleThrottle;
+export const transformFromAlertThrottle = (rule: RuleAlertType): string => {
+  if (rule.muteAll || rule.actions.length === 0) {
+    return NOTIFICATION_THROTTLE_NO_ACTIONS;
+  } else if (rule.notifyWhen == null) {
+    return transformFromFirstActionThrottle(rule);
+  } else if (rule.notifyWhen === 'onActiveAlert') {
+    return NOTIFICATION_THROTTLE_RULE;
   }
+
+  return rule.throttle ?? NOTIFICATION_THROTTLE_NO_ACTIONS;
 };
 
 function transformFromFirstActionThrottle(rule: RuleAlertType) {

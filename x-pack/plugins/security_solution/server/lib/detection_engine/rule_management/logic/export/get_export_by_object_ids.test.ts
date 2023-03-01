@@ -102,7 +102,7 @@ describe('get_export_by_object_ids', () => {
           to: 'now',
           type: 'query',
           threat: getThreatMock(),
-          throttle: 'no_actions',
+          throttle: 'rule',
           note: '# Investigative notes',
           version: 1,
           exceptions_list: getListArrayMock(),

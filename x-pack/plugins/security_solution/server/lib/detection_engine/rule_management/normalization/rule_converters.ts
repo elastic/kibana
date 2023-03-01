@@ -75,6 +75,7 @@ import type {
 } from '../../rule_schema';
 import {
   getSecurityRuleThrottle,
+  transformFromAlertThrottle,
   transformToAlertThrottle,
   transformToNotifyWhen,
 } from './rule_actions';
@@ -694,7 +695,7 @@ export const internalRuleToAPIResponse = (
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
-    throttle: getSecurityRuleThrottle(rule.throttle),
+    throttle: transformFromAlertThrottle(rule),
     actions: rule.actions.map(transformAlertToRuleAction),
     // Execution summary
     execution_summary: executionSummary ?? undefined,
