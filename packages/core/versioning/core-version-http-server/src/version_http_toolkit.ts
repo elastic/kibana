@@ -100,17 +100,13 @@ export interface VersionHTTPToolkit {
   ): VersionedRouter<Ctx>;
 }
 
-type WithRequiredProperty<Type, Key extends keyof Type> = Type & {
-  [Property in Key]-?: Type[Property];
-};
-
 /**
  * Versioned route access flag, required
  * - '/api/foo' is 'public'
  * - '/internal/my-foo'  is 'internal'
  * Required
  */
-type VersionedRouteConfigOptions = WithRequiredProperty<RouteConfigOptions<RouteMethod>, 'access'>;
+type VersionedRouteConfigOptions = Required<Pick<RouteConfigOptions<RouteMethod>, 'access'>>;
 /**
  * Configuration for a versioned route
  * @experimental

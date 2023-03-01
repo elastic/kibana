@@ -227,7 +227,7 @@ export class CoreKibanaRequest<
   private getAccess(request: RawRequest): 'internal' | 'public' {
     return (
       ((request.route?.settings as RouteOptions)?.app as KibanaRouteOptions)?.access ??
-      (request.path.includes('internal') ? 'internal' : 'public')
+      (request.path.startsWith('/internal') ? 'internal' : 'public')
     );
   }
 

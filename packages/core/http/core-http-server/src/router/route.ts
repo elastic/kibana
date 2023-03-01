@@ -121,14 +121,14 @@ export interface RouteConfigOptions<Method extends RouteMethod> {
   xsrfRequired?: Method extends 'get' ? never : boolean;
 
   /**
-   * Defines access permission for a route
+   * Defines intended request origin of the route:
    * - public. The route is public, declared stable and intended for external access.
    *           In the future, may require an incomming request to contain a specified header.
    * - internal. The route is internal and intended for internal access only.
    *
    * If not declared, infers access from route path:
    * - access =`internal` for '/internal' route path prefix
-   * - access = `public` for '/api' route path prefix
+   * - access = `public` for everything else
    */
   access?: 'public' | 'internal';
 
