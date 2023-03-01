@@ -16,7 +16,7 @@ import {
   selectAllAgents,
   submitQuery,
 } from '../../tasks/live_query';
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { activatePack, deactivatePack, preparePack } from '../../tasks/packs';
 import { addIntegration, closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
@@ -26,7 +26,6 @@ import {
   getSavedQueriesDropdown,
   LIVE_QUERY_EDITOR,
 } from '../../screens/live_query';
-import { ROLES } from '../../test';
 import { getRandomInt } from '../../tasks/helpers';
 
 describe('ALL - Packs', () => {
@@ -44,7 +43,7 @@ describe('ALL - Packs', () => {
     });
 
     beforeEach(() => {
-      login(ROLES.soc_manager);
+      login(ROLE.soc_manager);
       navigateTo('/app/osquery');
     });
 
@@ -397,7 +396,7 @@ describe('ALL - Packs', () => {
 
   describe('Load prebuilt packs', () => {
     beforeEach(() => {
-      login(ROLES.soc_manager);
+      login(ROLE.soc_manager);
       navigateTo('/app/osquery/packs');
     });
     const PREBUILD_PACK_NAME = 'it-compliance';

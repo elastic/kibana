@@ -12,14 +12,13 @@ import {
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { login } from '../../tasks/login';
-import { ROLES } from '../../test';
+import { ROLE, login } from '../../tasks/login';
 
 describe('Add to Cases', () => {
   describe('observability', () => {
     before(() => {
       runKbnArchiverScript(ArchiverMethod.LOAD, 'case_observability');
-      login(ROLES.soc_manager);
+      login(ROLE.soc_manager);
       navigateTo('/app/osquery');
     });
 
@@ -43,7 +42,7 @@ describe('Add to Cases', () => {
   describe('security', () => {
     before(() => {
       runKbnArchiverScript(ArchiverMethod.LOAD, 'case_security');
-      login(ROLES.soc_manager);
+      login(ROLE.soc_manager);
       navigateTo('/app/osquery');
     });
 

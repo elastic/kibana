@@ -6,7 +6,7 @@
  */
 
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   addToCase,
@@ -26,7 +26,6 @@ import {
   RESULTS_TABLE_CELL_WRRAPER,
 } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
-import { ROLES } from '../../test';
 
 describe('ALL - Live Query', () => {
   before(() => {
@@ -36,7 +35,7 @@ describe('ALL - Live Query', () => {
   });
 
   beforeEach(() => {
-    login(ROLES.soc_manager);
+    login(ROLE.soc_manager);
     navigateTo('/app/osquery');
   });
 

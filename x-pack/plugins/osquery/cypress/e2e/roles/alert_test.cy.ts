@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { ROLES } from '../../test';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import {
   checkResults,
   findAndClickButton,
@@ -30,7 +29,7 @@ describe('Alert_Test', () => {
 
   describe('alert_test role', () => {
     it('should not be able to run live query', () => {
-      login(ROLES.alert_test);
+      login(ROLE.alert_test);
 
       const PACK_NAME = 'testpack';
       const RULE_NAME = 'Test-rule';
@@ -69,7 +68,7 @@ describe('Alert_Test', () => {
 
   describe('t1_analyst role', () => {
     it('should be able to run rule investigation guide query', () => {
-      login(ROLES.t1_analyst);
+      login(ROLE.t1_analyst);
 
       navigateTo('/app/osquery');
 
@@ -83,7 +82,7 @@ describe('Alert_Test', () => {
     });
 
     it('should not be able to run custom query', () => {
-      login(ROLES.t1_analyst);
+      login(ROLE.t1_analyst);
 
       navigateTo('/app/osquery');
 

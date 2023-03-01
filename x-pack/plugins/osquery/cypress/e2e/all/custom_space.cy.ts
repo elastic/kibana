@@ -6,7 +6,7 @@
  */
 
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -15,13 +15,12 @@ import {
   selectAllAgents,
   submitQuery,
 } from '../../tasks/live_query';
-import { ROLES } from '../../test';
 
 describe('ALL - Custom space', () => {
   const CUSTOM_SPACE = 'custom-space';
   const PACK_NAME = 'testpack';
   before(() => {
-    login(ROLES.admin);
+    login(ROLE.admin);
     cy.request({
       method: 'POST',
       url: '/api/spaces/space',
@@ -35,7 +34,7 @@ describe('ALL - Custom space', () => {
   });
 
   after(() => {
-    login(ROLES.admin);
+    login(ROLE.admin);
     cy.request({
       method: 'DELETE',
       url: '/api/spaces/space/custom-space',
@@ -50,7 +49,7 @@ describe('ALL - Custom space', () => {
       });
 
       beforeEach(() => {
-        login(ROLES.soc_manager);
+        login(ROLE.soc_manager);
         navigateTo(`/s/${space}/app/osquery`);
       });
 

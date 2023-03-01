@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { ROLES } from '../../test';
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 
 describe('None', () => {
   beforeEach(() => {
-    login(ROLES.none);
+    login(ROLE.none);
 
     cy.visit('/app/home');
   });

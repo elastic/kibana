@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLES } from '../../test';
 import {
   checkResults,
   selectAllAgents,
@@ -18,19 +17,21 @@ import {
   checkActionItemsInResults,
 } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
+import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
+import { getRandomInt } from '../../tasks/helpers';
 
 describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
-  // const randomNumber = getRandomInt();
-  //
-  // const NEW_SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
-  // const NEW_SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
+  const randomNumber = getRandomInt();
+  const NEW_SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
+  const NEW_SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
+
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
   });
 
   beforeEach(() => {
-    login(ROLES.t2_analyst);
+    login(ROLE.t2_analyst);
     navigateTo('/app/osquery');
   });
 
@@ -38,8 +39,7 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
   });
 
-  // TODO unskip after FF
-  // getSavedQueriesComplexTest(NEW_SAVED_QUERY_ID, NEW_SAVED_QUERY_DESCRIPTION);
+  getSavedQueriesComplexTest(NEW_SAVED_QUERY_ID, NEW_SAVED_QUERY_DESCRIPTION);
 
   it('should not be able to add nor edit packs', () => {
     const PACK_NAME = 'removing-pack';

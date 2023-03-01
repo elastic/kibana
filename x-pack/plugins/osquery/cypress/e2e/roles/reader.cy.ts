@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLES } from '../../test';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 
 describe('Reader - only READ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
 
   beforeEach(() => {
-    login(ROLES.reader);
+    login(ROLE.reader);
   });
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');

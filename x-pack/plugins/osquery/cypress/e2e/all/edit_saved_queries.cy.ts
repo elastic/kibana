@@ -6,9 +6,9 @@
  */
 
 import { navigateTo } from '../../tasks/navigation';
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
+
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { ROLES } from '../../test';
 
 describe('ALL - Edit saved query', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
@@ -17,7 +17,7 @@ describe('ALL - Edit saved query', () => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
   });
   beforeEach(() => {
-    login(ROLES.soc_manager);
+    login(ROLE.soc_manager);
     navigateTo('/app/osquery/saved_queries');
   });
 

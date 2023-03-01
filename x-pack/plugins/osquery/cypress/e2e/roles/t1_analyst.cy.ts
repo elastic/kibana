@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
-import { ROLES } from '../../test';
 import {
   checkActionItemsInResults,
   checkResults,
@@ -21,7 +20,7 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
 
   beforeEach(() => {
-    login(ROLES.t1_analyst);
+    login(ROLE.t1_analyst);
   });
   before(() => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');

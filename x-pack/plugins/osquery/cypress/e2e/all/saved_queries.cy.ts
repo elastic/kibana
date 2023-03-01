@@ -19,9 +19,7 @@ import {
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
-
-import { login } from '../../tasks/login';
-import { ROLES } from '../../test';
+import { ROLE, login } from '../../tasks/login';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
 import { getRandomInt } from '../../tasks/helpers';
 
@@ -35,7 +33,7 @@ describe('ALL - Saved queries', () => {
   });
 
   beforeEach(() => {
-    login(ROLES.soc_manager);
+    login(ROLE.soc_manager);
     navigateTo('/app/osquery');
   });
 

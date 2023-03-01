@@ -13,7 +13,7 @@ import {
   RESPONSE_ACTIONS_ITEM_3,
 } from '../../tasks/response_actions';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
 import {
   addToCase,
   checkActionItemsInResults,
@@ -31,7 +31,6 @@ import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
 import { LIVE_QUERY_EDITOR, RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
-import { ROLES } from '../../test';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
@@ -46,7 +45,7 @@ describe('Alert Event Details', () => {
   });
 
   beforeEach(() => {
-    login(ROLES.soc_manager);
+    login(ROLE.soc_manager);
   });
 
   after(() => {
