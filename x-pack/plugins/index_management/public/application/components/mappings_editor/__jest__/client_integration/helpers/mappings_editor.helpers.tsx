@@ -141,6 +141,15 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     component.update();
   };
 
+  const updateFieldName = async (name: string) => {
+    await act(async () => {
+      form.setInputValue('nameParameterInput', name);
+      jest.advanceTimersByTime(0); // advance timers to allow the form to validate
+    });
+
+    component.update();
+  };
+
   const startEditField = async (path: string) => {
     const { testSubject } = getFieldAt(path);
     await act(async () => {
@@ -157,6 +166,9 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     });
     component.update();
   };
+
+  const isUpdateButtonDisabled = () =>
+    find('mappingsEditorFieldEdit.editFieldUpdateButton').props().disabled;
 
   const showAdvancedSettings = async () => {
     if (find('mappingsEditorFieldEdit.advancedSettings').props().style.display === 'block') {
@@ -323,8 +335,10 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     getFieldAt,
     addField,
     expandAllFieldsAndReturnMetadata,
+    updateFieldName,
     startEditField,
     updateFieldAndCloseFlyout,
+    isUpdateButtonDisabled,
     showAdvancedSettings,
     updateJsonEditor,
     getJsonEditorValue,

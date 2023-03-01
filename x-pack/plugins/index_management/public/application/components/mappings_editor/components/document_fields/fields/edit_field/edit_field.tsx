@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import SemVer from 'semver/classes/semver';
 
+import { useFormIsModified } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { documentationService } from '../../../../../../services/documentation';
 import { Form, FormHook, FormDataProvider } from '../../../../shared_imports';
 import { TYPE_DEFINITION } from '../../../../constants';
@@ -63,6 +64,8 @@ export const EditField = React.memo(
     };
 
     const { isMultiField } = field;
+
+    const isFormModified = useFormIsModified({ form });
 
     return (
       <Form form={form} FormWrapper={FormWrapper}>
@@ -199,7 +202,7 @@ export const EditField = React.memo(
                 fill
                 onClick={submitForm}
                 type="submit"
-                disabled={form.isSubmitted && !form.isValid}
+                disabled={(form.isSubmitted && !form.isValid) || !isFormModified}
                 data-test-subj="editFieldUpdateButton"
               >
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldUpdateButtonLabel', {
