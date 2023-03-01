@@ -29,6 +29,7 @@ import { formatHit } from '../../utils/format_hit';
 import { DataTableRecord, EsHitRecord } from '../../types';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { MAX_DOC_FIELDS_DISPLAYED } from '../../../common';
+import { defaultMonacoEditorWidth } from './constants';
 import { type ShouldShowFieldInTableHandler } from '../../utils/get_should_show_field_handler';
 
 const CELL_CLASS = 'dscDiscoverGrid__cellValue';
@@ -200,12 +201,8 @@ function renderPopoverContent({
             <EuiFlexItem grow={false}>{closeButton}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem>
-          <JsonCodeEditor
-            json={getJSON(columnId, row, useTopLevelObjectColumns)}
-            width={500}
-            height={200}
-          />
+        <EuiFlexItem style={{ minWidth: defaultMonacoEditorWidth }}>
+          <JsonCodeEditor json={getJSON(columnId, row, useTopLevelObjectColumns)} height={300} />
         </EuiFlexItem>
       </EuiFlexGroup>
     );

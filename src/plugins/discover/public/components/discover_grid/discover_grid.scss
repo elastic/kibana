@@ -43,8 +43,9 @@
   min-width: 100px;
   min-height: 100px;
   width: 516px;
-  max-width: 800px !important;
+  max-width: 900px !important;
   max-height: 800px !important;
+  resize: horizontal;
 
   & > div {
     height: 100%;
@@ -54,6 +55,7 @@
 .euiDataGridRowCell__popover:has(.dscDiscoverGrid__cellPopoverValue) {
   resize: both;
   width: 400px;
+  height: 150px;
 }
 
 .dscDiscoverGrid__cellPopover {
