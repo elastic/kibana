@@ -9,7 +9,7 @@ import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index
 
 export const indexNewCase = async (): Promise<IndexedCase> => {
   return new Promise<IndexedCase>((resolve) => {
-    cy.task('indexCase').then((caseData) => {
+    cy.task<IndexedCase['data']>('indexCase').then((caseData) => {
       resolve({
         data: caseData,
         cleanup: async (): Promise<void> => {
