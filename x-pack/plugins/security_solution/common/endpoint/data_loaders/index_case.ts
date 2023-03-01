@@ -10,9 +10,11 @@ import type { CaseResponse } from '@kbn/cases-plugin/common';
 import { CASES_URL } from '@kbn/cases-plugin/common';
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
 import { CaseSeverity, ConnectorTypes } from '@kbn/cases-plugin/common/api';
+import type { AxiosError } from 'axios';
+import { EndpointError } from '../errors';
 
 export interface IndexedCase {
-  case: CaseResponse;
+  data: CaseResponse;
   cleanup: () => Promise<void>;
 }
 
@@ -53,18 +55,36 @@ export const indexCase = async (
     })
   ).data;
 
-  const cleanup = async (): Promise<void> => {
+  return {
+    data: createdCase,
+    cleanup: deleteIndexedCase.bind(undefined, kbnClient, createdCase),
+  };
+};
+
+export const deleteIndexedCase = async (
+  kbnClient: KbnClient,
+  data: IndexedCase['data']
+): Promise<void> => {
+  try {
     await kbnClient.request({
       method: 'DELETE',
       path: CASES_URL,
       query: {
-        ids: [createdCase.id],
+        ids: JSON.stringify([data.id]),
       },
     });
-  };
+  } catch (_error) {
+    const error = _error as AxiosError;
 
-  return {
-    case: createdCase,
-    cleanup,
-  };
+    // ignore 404 (not found) -data has already been deleted
+    if ((error as AxiosError).response?.status !== 404) {
+      const message = `${error.message}
+  Request:
+    ${error.request.method} ${error.request.path}
+  Response Body:
+    ${JSON.stringify(error.response?.data ?? {}, null, 2)}`;
+
+      throw new EndpointError(message, error);
+    }
+  }
 };

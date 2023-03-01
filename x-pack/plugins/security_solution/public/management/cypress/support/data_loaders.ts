@@ -15,17 +15,23 @@ import {
   indexFleetEndpointPolicy,
   deleteIndexedFleetEndpointPolicies,
 } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
-import { indexCase } from '../../../../common/endpoint/data_loaders/index_case';
+import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_loaders/index_case';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Cypress {
     interface Chainable {
-      task<S = IndexedCase>(
+      task(
         name: 'indexCase',
         arg?: Partial<CasePostRequest>,
         options?: Partial<Cypress.Loggable & Cypress.Timeoutable>
-      ): Cypress.Chainable<S>;
+      ): Cypress.Chainable<IndexedCase['data']>;
+
+      task(
+        name: 'deleteIndexedCase',
+        arg: IndexedCase['data'],
+        options?: Partial<Cypress.Loggable & Cypress.Timeoutable>
+      ): Cypress.Chainable<null>;
     }
   }
 }
@@ -51,8 +57,13 @@ export const dataLoaders = (on: Cypress.PluginEvents, config: Cypress.PluginConf
       return deleteIndexedFleetEndpointPolicies(kbnClient, indexData);
     },
 
-    indexCase: (newCase: Partial<CasePostRequest> = {}): Promise<IndexedCase> => {
-      return indexCase(kbnClient, newCase);
+    indexCase: async (newCase: Partial<CasePostRequest> = {}): Promise<IndexedCase['data']> => {
+      return (await indexCase(kbnClient, newCase)).data;
+    },
+
+    deleteIndexedCase: async (data: IndexedCase['data']): Promise<null> => {
+      await deleteIndexedCase(kbnClient, data);
+      return null;
     },
   });
 };

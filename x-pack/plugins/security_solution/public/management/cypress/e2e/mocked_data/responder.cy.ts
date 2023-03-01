@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { APP_CASES_PATH } from '../../../../../common/constants';
 import type { IndexedCase } from '../../../../../common/endpoint/data_loaders/index_case';
 import {
   closeResponder,
@@ -37,35 +38,48 @@ describe('When accessing Endpoint Response Console', () => {
 
   describe('from Cases', () => {
     let caseData: IndexedCase;
+    let caseUrlPath: string;
 
     before(() => {
       indexNewCase().then((indexCase) => {
         caseData = indexCase;
+        caseUrlPath = `${APP_CASES_PATH}/${indexCase.data.id}`;
       });
+
+      // TODO: create an endpoint
 
       // TODO: create an alert
 
       // TODO: Add alert to the case
-
-      // TODO: go to the case
-
-      // TODO: open alert in case
     });
 
     after(() => {
       if (caseData) {
-        caseData.cleanup();
+        const { cleanup } = caseData;
+        // @ts-expect-error ignore setting to undefined
+        caseData = undefined;
+
+        cleanup();
       }
     });
 
+    beforeEach(() => {
+      login();
+    });
+
     it('should display responder option in take action menu', () => {
-      // TODO
+      cy.visit(caseUrlPath);
     });
 
     it('should display Responder response action interface', () => {
+      cy.visit(caseUrlPath);
+
+      // TODO: open alert in case
+
       // FIXME: Open console
 
-      performResponderSanityChecks();
+      // FIXME: perform checks
+      // performResponderSanityChecks();
     });
   });
 });
