@@ -19,10 +19,14 @@ import {
   transformServiceMapResponses,
   ServiceMapResponse,
 } from './transform_service_map_responses';
+import { Environment } from '../../../common/environment_rt';
 
 const nodejsService = {
   [SERVICE_NAME]: 'opbeans-node',
-  [SERVICE_ENVIRONMENT]: 'production',
+  [SERVICE_ENVIRONMENT]: 'production' as Exclude<
+    Environment,
+    'ENVIRONMENT_ALL'
+  >,
   [AGENT_NAME]: 'nodejs',
 };
 
@@ -34,7 +38,10 @@ const nodejsExternal = {
 
 const javaService = {
   [SERVICE_NAME]: 'opbeans-java',
-  [SERVICE_ENVIRONMENT]: 'production',
+  [SERVICE_ENVIRONMENT]: 'production' as Exclude<
+    Environment,
+    'ENVIRONMENT_ALL'
+  >,
   [AGENT_NAME]: 'java',
 };
 

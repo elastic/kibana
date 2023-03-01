@@ -42,6 +42,8 @@ export function ServiceGroupsListItems({
               serviceGroup: item.id,
               environment,
               kuery: '',
+              highlighted: '',
+              highlightedTransactionType: '',
             },
           })}
           isLoading={isLoading}

@@ -35,3 +35,16 @@ export const serviceTransactionDataSourceRt = t.type({
     t.literal(RollupInterval.None),
   ]),
 });
+
+export const serviceDestinationDataSourceRt = t.type({
+  documentType: t.union([
+    t.literal(ApmDocumentType.ServiceDestinationMetric),
+    t.literal(ApmDocumentType.SpanEvent),
+  ]),
+  rollupInterval: t.union([
+    t.literal(RollupInterval.OneMinute),
+    t.literal(RollupInterval.TenMinutes),
+    t.literal(RollupInterval.SixtyMinutes),
+    t.literal(RollupInterval.None),
+  ]),
+});

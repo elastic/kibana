@@ -13,12 +13,15 @@ export const UPDATE_POINTER_EVENT = 'updatePointerEvent';
 export const ChartPointerEventContext = createContext<{
   pointerEventTargetRef: React.MutableRefObject<EventTarget>;
   updatePointerEvent: (pointerEvent: PointerEvent) => void;
+  disabled: boolean;
 } | null>(null);
 
 export function ChartPointerEventContextProvider({
   children,
+  disabled = false,
 }: {
   children: ReactNode;
+  disabled?: boolean;
 }) {
   const pointerEventTargetRef = useRef(new EventTarget());
   const updatePointerEventRef = useRef((pointerEvent: PointerEvent) => {
@@ -32,6 +35,7 @@ export function ChartPointerEventContextProvider({
       value={{
         pointerEventTargetRef,
         updatePointerEvent: updatePointerEventRef.current,
+        disabled,
       }}
       children={children}
     />

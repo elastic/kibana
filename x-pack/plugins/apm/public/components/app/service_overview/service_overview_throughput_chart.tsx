@@ -112,7 +112,7 @@ export function ServiceOverviewThroughputChart({
   const timeseries = [
     {
       data: data.currentPeriod,
-      type: 'linemark',
+      type: 'line' as const,
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
         defaultMessage: 'Throughput',
@@ -122,7 +122,7 @@ export function ServiceOverviewThroughputChart({
       ? [
           {
             data: data.previousPeriod,
-            type: 'area',
+            type: 'area' as const,
             color: previousPeriodColor,
             title: previousPeriodLabel,
           },

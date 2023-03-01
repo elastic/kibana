@@ -88,6 +88,10 @@ const documentTypeConfigMap: Record<
       },
     }),
   },
+  [ApmDocumentType.SpanEvent]: {
+    processorEvent: ProcessorEvent.span,
+    rollupIntervals: [RollupInterval.None],
+  },
 };
 
 type DocumentTypeConfigOf<TApmDocumentType extends ApmDocumentType> =

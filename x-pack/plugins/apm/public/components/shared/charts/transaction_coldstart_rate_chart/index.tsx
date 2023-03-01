@@ -120,7 +120,7 @@ export function TransactionColdstartRateChart({
   const timeseries = [
     {
       data: data.currentPeriod.transactionColdstartRate,
-      type: 'linemark',
+      type: 'line' as const,
       color: theme.eui.euiColorVis5,
       title: i18n.translate('xpack.apm.coldstartRate.chart.coldstartRate', {
         defaultMessage: 'Cold start rate (avg.)',
@@ -130,7 +130,7 @@ export function TransactionColdstartRateChart({
       ? [
           {
             data: data.previousPeriod.transactionColdstartRate,
-            type: 'area',
+            type: 'area' as const,
             color: theme.eui.euiColorMediumShade,
             title: previousPeriodLabel,
           },

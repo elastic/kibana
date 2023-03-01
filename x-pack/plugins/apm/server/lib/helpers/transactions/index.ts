@@ -16,10 +16,17 @@ import {
   METRICSET_INTERVAL,
   METRICSET_NAME,
   TRANSACTION_DURATION_SUMMARY,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT,
+  SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
+  SPAN_DURATION,
 } from '../../../../common/es_fields/apm';
 import { APMConfig } from '../../..';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
-import { ApmDocumentType } from '../../../../common/document_type';
+import {
+  ApmDocumentType,
+  ApmServiceDestinationDocumentType,
+  ApmServiceTransactionDocumentType,
+} from '../../../../common/document_type';
 
 export async function getHasTransactionsEvents({
   start,
@@ -92,9 +99,7 @@ export async function getSearchTransactionsEvents({
 
 export function getDurationFieldForTransactions(
   typeOrSearchAgggregatedTransactions:
-    | ApmDocumentType.ServiceTransactionMetric
-    | ApmDocumentType.TransactionMetric
-    | ApmDocumentType.TransactionEvent
+    | ApmServiceTransactionDocumentType
     | boolean
 ) {
   let type: ApmDocumentType;
@@ -115,6 +120,22 @@ export function getDurationFieldForTransactions(
   }
 
   return TRANSACTION_DURATION;
+}
+
+export function getDurationSumFieldForExitSpans(
+  type: ApmServiceDestinationDocumentType
+) {
+  return type === ApmDocumentType.ServiceDestinationMetric
+    ? SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM
+    : SPAN_DURATION;
+}
+
+export function getDurationCountFieldForExitSpans(
+  type: ApmServiceDestinationDocumentType
+) {
+  return type === ApmDocumentType.ServiceDestinationMetric
+    ? SPAN_DESTINATION_SERVICE_RESPONSE_TIME_COUNT
+    : SPAN_DURATION;
 }
 
 export function getDocumentTypeFilterForTransactions(

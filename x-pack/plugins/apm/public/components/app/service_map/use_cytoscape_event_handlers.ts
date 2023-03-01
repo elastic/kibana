@@ -43,10 +43,12 @@ function getLayoutOptions({
   fit = false,
   nodeHeight,
   theme,
+  compact,
 }: {
   fit?: boolean;
   nodeHeight: number;
   theme: EuiTheme;
+  compact?: boolean;
 }): cytoscape.LayoutOptions {
   const animationOptions = getAnimationOptions(theme);
 
@@ -59,8 +61,8 @@ function getLayoutOptions({
     name: 'dagre',
     animate: !fit,
     padding: nodeHeight,
-    spacingFactor: 1.2,
-    nodeSep: nodeHeight,
+    spacingFactor: compact ? 1 : 1.2,
+    nodeSep: nodeHeight / (compact ? 1.5 : 1),
     edgeSep: 32,
     rankSep: 128,
     rankDir: 'LR',
@@ -90,10 +92,12 @@ export function useCytoscapeEventHandlers({
   cy,
   serviceName,
   theme,
+  compact,
 }: {
   cy?: cytoscape.Core;
   serviceName?: string;
   theme: EuiTheme;
+  compact?: boolean;
 }) {
   const trackApmEvent = useUiTracker({ app: 'apm' });
 
@@ -118,7 +122,7 @@ export function useCytoscapeEventHandlers({
       event.cy
         .elements('[!hasBeenDragged]')
         .difference('node:selected')
-        .layout(getLayoutOptions({ fit, nodeHeight, theme }))
+        .layout(getLayoutOptions({ fit, nodeHeight, theme, compact }))
         .run();
     };
 
@@ -226,5 +230,5 @@ export function useCytoscapeEventHandlers({
         cy.removeListener('tapend', undefined, tapendHandler);
       }
     };
-  }, [cy, serviceName, trackApmEvent, theme]);
+  }, [cy, serviceName, trackApmEvent, theme, compact]);
 }

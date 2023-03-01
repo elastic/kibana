@@ -52,6 +52,7 @@ interface TimeseriesChartProps extends TimeseriesChartWithContextProps {
   annotations?: Array<
     ReactElement<typeof RectAnnotation | typeof LineAnnotation>
   >;
+  hideYAxis?: boolean;
 }
 export function TimeseriesChart({
   id,
@@ -69,6 +70,9 @@ export function TimeseriesChart({
   offset,
   timeZone,
   annotations,
+  hideXAxis = false,
+  hideYAxis = false,
+  hideLegend = false,
 }: TimeseriesChartProps) {
   const history = useHistory();
   const { chartRef, updatePointerEvent } = useChartPointerEventContext();
@@ -82,22 +86,23 @@ export function TimeseriesChart({
   const isEmpty = isTimeseriesEmpty(timeseries);
   const isComparingExpectedBounds =
     comparisonEnabled && isExpectedBoundsComparison(offset);
+
   const allSeries = [
-    ...timeseries,
+    // bounds should be in the background
     ...(isComparingExpectedBounds
       ? anomalyChartTimeseries?.boundaries ?? []
       : []),
-    ...(anomalyChartTimeseries?.scores ?? []),
-  ]
     // Sorting series so that area type series are before line series
     // This is a workaround so that the legendSort works correctly
     // Can be removed when https://github.com/elastic/elastic-charts/issues/1685 is resolved
-    .sort(
+    ...timeseries.sort(
       isComparingExpectedBounds
         ? (prev, curr) => prev.type.localeCompare(curr.type)
         : undefined
-    );
-
+    ),
+    // markers should be on top
+    ...(anomalyChartTimeseries?.scores ?? []),
+  ];
   const xValues = timeseries.flatMap(({ data }) => data.map(({ x }) => x));
   const xValuesExpectedBounds =
     anomalyChartTimeseries?.boundaries?.flatMap(({ data }) =>
@@ -194,7 +199,7 @@ export function TimeseriesChart({
           externalPointerEvents={{
             tooltip: { visible: true },
           }}
-          showLegend
+          showLegend={!hideLegend}
           legendSort={legendSort}
           legendPosition={Position.Bottom}
           xDomain={xDomain}
@@ -210,6 +215,7 @@ export function TimeseriesChart({
           showOverlappingTicks
           tickFormat={xFormatter}
           gridLine={{ visible: false }}
+          hide={hideXAxis}
         />
         <Axis
           domain={yDomain}
@@ -218,6 +224,7 @@ export function TimeseriesChart({
           position={Position.Left}
           tickFormat={yTickFormat ? yTickFormat : yLabelFormat}
           labelFormat={yLabelFormat}
+          hide={hideYAxis}
         />
         {showAnnotations && annotations}
         <RectAnnotation
@@ -257,6 +264,7 @@ export function TimeseriesChart({
               }
               areaSeriesStyle={serie.areaSeriesStyle}
               lineSeriesStyle={serie.lineSeriesStyle}
+              barSeriesStyle={serie.barSeriesStyle}
             />
           );
         })}

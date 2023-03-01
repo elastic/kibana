@@ -36,6 +36,7 @@ export async function getDocumentSources({
       ? [ApmDocumentType.ServiceTransactionMetric as const]
       : []),
     ApmDocumentType.TransactionMetric as const,
+    ApmDocumentType.ServiceDestinationMetric as const,
   ].flatMap((documentType) => {
     const docTypeConfig = getConfigForDocumentType(documentType);
 
@@ -138,9 +139,16 @@ export async function getDocumentSources({
       };
     });
 
-  return sources.concat({
-    documentType: ApmDocumentType.TransactionEvent,
-    rollupInterval: RollupInterval.None,
-    hasDocs: true,
-  });
+  return sources.concat(
+    {
+      documentType: ApmDocumentType.TransactionEvent,
+      rollupInterval: RollupInterval.None,
+      hasDocs: true,
+    },
+    {
+      documentType: ApmDocumentType.SpanEvent,
+      rollupInterval: RollupInterval.None,
+      hasDocs: true,
+    }
+  );
 }

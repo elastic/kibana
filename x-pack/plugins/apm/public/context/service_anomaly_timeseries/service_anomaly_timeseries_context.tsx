@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { useEnvironmentsContext } from '../environments_context/use_environments_context';
-import { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
 import { useAnyOfApmParams } from '../../hooks/use_apm_params';
 import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import { useTimeRange } from '../../hooks/use_time_range';
@@ -15,10 +14,11 @@ import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
 import { useApmServiceContext } from '../apm_service/use_apm_service_context';
 import { isActivePlatinumLicense } from '../../../common/license_check';
 import { useLicenseContext } from '../license/use_license_context';
+import { ApmMlJobResultWithTimeseries } from '../../../common/anomaly_detection/apm_ml_job_result';
 
 export const ServiceAnomalyTimeseriesContext = React.createContext<{
   status: FETCH_STATUS;
-  allAnomalyTimeseries: ServiceAnomalyTimeseries[];
+  allAnomalyTimeseries: ApmMlJobResultWithTimeseries[];
 }>({
   status: FETCH_STATUS.NOT_INITIATED,
   allAnomalyTimeseries: [],

@@ -8,9 +8,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { ENVIRONMENT_ALL } from '../environment_filter_values';
 import { Environment } from '../environment_rt';
 import { ApmMlDetectorType } from './apm_ml_detectors';
+import { ApmMlJobResultWithTimeseries } from './apm_ml_job_result';
 import { ApmMlModule } from './apm_ml_module';
 import { getPreferredServiceAnomalyTimeseries } from './get_preferred_service_anomaly_timeseries';
-import { ServiceAnomalyTimeseries } from './service_anomaly_timeseries';
 
 const PROD = 'production' as Environment;
 const DEV = 'development' as Environment;
@@ -23,17 +23,27 @@ function createMockAnomalyTimeseries({
   type: ApmMlDetectorType;
   environment?: Environment;
   version?: number;
-}): ServiceAnomalyTimeseries {
+}): ApmMlJobResultWithTimeseries {
   return {
-    anomalies: [],
-    bounds: [],
-    environment,
-    jobId: uuidv4(),
+    anomalies: {
+      max: 0,
+      actual: 0,
+      timeseries: [],
+    },
+    bounds: {
+      min: 0,
+      max: 0,
+      timeseries: [],
+    },
+    job: {
+      environment,
+      jobId: uuidv4(),
+      version,
+      module: ApmMlModule.Transaction,
+    },
     type,
-    serviceName: 'opbeans-java',
-    transactionType: 'request',
-    version,
-    module: ApmMlModule.Transaction,
+    by: 'opbeans-java',
+    partition: 'request',
   };
 }
 
@@ -73,7 +83,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
               detectorType: ApmMlDetectorType.txLatency,
               preferredEnvironment,
               fallbackToTransactions: false,
-            })?.environment
+            })?.job.environment
           ).toBe(PROD);
         });
       });
@@ -117,7 +127,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
 
           expect(series).toBeDefined();
 
-          expect(series?.environment).toBe(PROD);
+          expect(series?.job.environment).toBe(PROD);
         });
       });
     });
@@ -147,7 +157,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
         fallbackToTransactions: false,
       });
 
-      expect(series?.version).toBe(3);
+      expect(series?.job.version).toBe(3);
     });
 
     it('selects the legacy version when transaction metrics are being used', () => {
@@ -158,7 +168,7 @@ describe('getPreferredServiceAnomalyTimeseries', () => {
         fallbackToTransactions: true,
       });
 
-      expect(series?.version).toBe(2);
+      expect(series?.job.version).toBe(2);
     });
   });
 });

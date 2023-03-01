@@ -9,11 +9,16 @@ export enum ApmDocumentType {
   TransactionMetric = 'transactionMetric',
   ServiceTransactionMetric = 'serviceTransactionMetric',
   TransactionEvent = 'transactionEvent',
-  ServiceDestinationMetric = 'serviceDestinationMetric',
   ServiceSummaryMetric = 'serviceSummaryMetric',
+  ServiceDestinationMetric = 'serviceDestinationMetric',
+  SpanEvent = 'spanEvent',
 }
 
 export type ApmServiceTransactionDocumentType =
   | ApmDocumentType.ServiceTransactionMetric
   | ApmDocumentType.TransactionMetric
   | ApmDocumentType.TransactionEvent;
+
+export type ApmServiceDestinationDocumentType =
+  | ApmDocumentType.ServiceDestinationMetric
+  | ApmDocumentType.SpanEvent;

@@ -6,6 +6,7 @@
  */
 
 import { getSeverity } from '../../../../common/anomaly_detection';
+import { Environment } from '../../../../common/environment_rt';
 import {
   getServiceHealthStatus,
   ServiceHealthStatus,
@@ -14,7 +15,7 @@ import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getServiceAnomalies } from '../../service_map/get_service_anomalies';
 
 interface AggregationParams {
-  environment: string;
+  environment: Environment;
   mlClient?: MlClient;
   start: number;
   end: number;

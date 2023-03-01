@@ -11,9 +11,13 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import { joinByKey } from '../../../../common/utils/join_by_key';
 import { getStats } from './get_stats';
 import { getDestinationMap } from './get_destination_map';
-import { calculateThroughputWithRange } from '../../helpers/calculate_throughput';
+import {
+  calculateThroughputWithInterval,
+  calculateThroughputWithRange,
+} from '../../helpers/calculate_throughput';
 import { withApmSpan } from '../../../utils/with_apm_span';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
+import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 
 export function getConnectionStats({
   apmEventClient,
@@ -32,6 +36,13 @@ export function getConnectionStats({
   collapseBy: 'upstream' | 'downstream';
   offset?: string;
 }) {
+  const { bucketSize, intervalString } = getBucketSize({
+    start,
+    end,
+    numBuckets,
+    minBucketSize: 60,
+  });
+
   return withApmSpan('get_connection_stats_and_map', async () => {
     const [allMetrics, destinationMap] = await Promise.all([
       getStats({
@@ -39,7 +50,7 @@ export function getConnectionStats({
         start,
         end,
         filter,
-        numBuckets,
+        intervalString,
         offset,
       }),
       getDestinationMap({
@@ -134,10 +145,9 @@ export function getConnectionStats({
             x: point.x,
             y:
               point.count > 0
-                ? calculateThroughputWithRange({
-                    start,
-                    end,
+                ? calculateThroughputWithInterval({
                     value: point.count,
+                    bucketSize,
                   })
                 : null,
           })),

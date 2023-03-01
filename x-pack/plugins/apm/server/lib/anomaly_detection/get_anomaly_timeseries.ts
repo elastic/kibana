@@ -6,246 +6,44 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { compact, keyBy } from 'lodash';
-import { rangeQuery } from '@kbn/observability-plugin/server';
-import { parseInterval } from '@kbn/data-plugin/common';
+import { ApmMlJobResultWithTimeseries } from '../../../common/anomaly_detection/apm_ml_job_result';
+import { ApmMlModule } from '../../../common/anomaly_detection/apm_ml_module';
 import { Environment } from '../../../common/environment_rt';
-import { apmMlAnomalyQuery } from './apm_ml_anomaly_query';
-import {
-  ApmMlDetectorType,
-  getApmMlDetectorType,
-} from '../../../common/anomaly_detection/apm_ml_detectors';
-import type { ServiceAnomalyTimeseries } from '../../../common/anomaly_detection/service_anomaly_timeseries';
-import { apmMlJobsQuery } from './apm_ml_jobs_query';
-import { asMutableArray } from '../../../common/utils/as_mutable_array';
-import { maybe } from '../../../common/utils/maybe';
 import type { MlClient } from '../helpers/get_ml_client';
-import { anomalySearch } from './anomaly_search';
-import { getAnomalyResultBucketSize } from './get_anomaly_result_bucket_size';
-import { getMlJobsWithAPMGroup } from './get_ml_jobs_with_apm_group';
-import { getApmMlModuleFromJob } from '../../../common/anomaly_detection/apm_ml_module';
-
-const FALLBACK_ML_BUCKET_SPAN = 15; // minutes
-
-function divide(value: number | null, divider: number) {
-  if (value === null) {
-    return null;
-  }
-  return value / divider;
-}
-
-// Expected bounds are retrieved with bucket span interval padded to the time range
-// so we need to cut the excess bounds to just the start and end time
-// so that the chart show up correctly without the padded time
-function getBoundedX(value: number | null, start: number, end: number) {
-  if (value === null) {
-    return null;
-  }
-  if (value < start) return start;
-  if (value > end) return end;
-  return value;
-}
+import { getAnomalyResults } from './get_anomaly_results';
 
 export async function getAnomalyTimeseries({
-  serviceName,
-  transactionType,
+  partition,
+  by,
   start,
   end,
-  logger,
   mlClient,
-  environment: preferredEnvironment,
+  environment,
+  module,
+  bucketSizeInSeconds,
 }: {
-  serviceName: string;
-  transactionType: string;
+  partition?: string;
+  by?: string;
   start: number;
   end: number;
   environment: Environment;
   logger: Logger;
   mlClient: MlClient;
-}): Promise<ServiceAnomalyTimeseries[]> {
+  module?: ApmMlModule;
+  bucketSizeInSeconds: number | 'auto';
+}): Promise<ApmMlJobResultWithTimeseries[]> {
   if (!mlClient) {
     return [];
   }
 
-  const mlJobs = await getMlJobsWithAPMGroup(mlClient.anomalyDetectors);
-
-  if (!mlJobs.length) {
-    return [];
-  }
-
-  // If multiple ML jobs exist
-  // find the first job with valid running datafeed that matches the preferred environment
-  const preferredBucketSpan = mlJobs.find(
-    (j) =>
-      j.datafeedState !== undefined && j.environment === preferredEnvironment
-  )?.bucketSpan;
-
-  const minBucketSize =
-    parseInterval(
-      preferredBucketSpan ?? `${FALLBACK_ML_BUCKET_SPAN}m`
-    )?.asSeconds() ?? FALLBACK_ML_BUCKET_SPAN * 60; // secs
-
-  // Expected bounds (aka ML model plots) are stored as points in time, in intervals of the predefined bucket_span,
-  // so to query bounds that include start and end time
-  // we need to append bucket size before and after the range
-  const extendedStart = start - minBucketSize * 1000; // ms
-  const extendedEnd = end + minBucketSize * 1000; // ms
-
-  const { intervalString } = getAnomalyResultBucketSize({
-    start: extendedStart,
-    end: extendedEnd,
-    // If the calculated bucketSize is smaller than the bucket span interval,
-    // use the original job's bucket_span
-    minBucketSize,
+  return getAnomalyResults({
+    partition,
+    by,
+    start,
+    end,
+    bucketSizeInSeconds,
+    mlClient,
+    environment,
+    module,
   });
-  const anomaliesResponse = await anomalySearch(
-    mlClient.mlSystem.mlAnomalySearch,
-    {
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...apmMlAnomalyQuery({
-                serviceName,
-                transactionType,
-              }),
-              ...rangeQuery(extendedStart, extendedEnd, 'timestamp'),
-              ...apmMlJobsQuery(mlJobs),
-            ],
-          },
-        },
-        aggs: {
-          by_timeseries_id: {
-            composite: {
-              size: 5000,
-              sources: asMutableArray([
-                {
-                  jobId: {
-                    terms: {
-                      field: 'job_id',
-                    },
-                  },
-                },
-                {
-                  detectorIndex: {
-                    terms: {
-                      field: 'detector_index',
-                    },
-                  },
-                },
-                {
-                  serviceName: {
-                    terms: {
-                      field: 'partition_field_value',
-                    },
-                  },
-                },
-                {
-                  transactionType: {
-                    terms: {
-                      field: 'by_field_value',
-                    },
-                  },
-                },
-              ] as const),
-            },
-            aggs: {
-              timeseries: {
-                date_histogram: {
-                  field: 'timestamp',
-                  fixed_interval: intervalString,
-                  extended_bounds: {
-                    min: extendedStart,
-                    max: extendedEnd,
-                  },
-                },
-                aggs: {
-                  top_anomaly: {
-                    top_metrics: {
-                      metrics: asMutableArray([
-                        { field: 'record_score' },
-                        { field: 'actual' },
-                      ] as const),
-                      size: 1,
-                      sort: {
-                        record_score: 'desc',
-                      },
-                    },
-                  },
-                  model_lower: {
-                    min: {
-                      field: 'model_lower',
-                    },
-                  },
-                  model_upper: {
-                    max: {
-                      field: 'model_upper',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    }
-  );
-
-  const jobsById = keyBy(mlJobs, (job) => job.jobId);
-
-  const series: Array<ServiceAnomalyTimeseries | undefined> =
-    anomaliesResponse.aggregations?.by_timeseries_id.buckets.map((bucket) => {
-      const jobId = bucket.key.jobId as string;
-      const job = maybe(jobsById[jobId]);
-
-      if (!job) {
-        logger.warn(`Could not find job for id ${jobId}`);
-        return undefined;
-      }
-
-      const module = getApmMlModuleFromJob(job.jobId);
-
-      const type = getApmMlDetectorType({
-        detectorIndex: Number(bucket.key.detectorIndex),
-        module,
-      });
-
-      // ml failure rate is stored as 0-100, we calculate failure rate as 0-1
-      const divider = type === ApmMlDetectorType.txFailureRate ? 100 : 1;
-
-      return {
-        jobId,
-        type,
-        module,
-        serviceName: bucket.key.serviceName as string,
-        environment: job.environment,
-        transactionType: bucket.key.transactionType as string,
-        version: job.version,
-        anomalies: bucket.timeseries.buckets.map((dateBucket) => ({
-          x: dateBucket.key as number,
-          y:
-            (dateBucket.top_anomaly.top[0]?.metrics.record_score as
-              | number
-              | null
-              | undefined) ?? null,
-          actual: divide(
-            (dateBucket.top_anomaly.top[0]?.metrics.actual as
-              | number
-              | null
-              | undefined) ?? null,
-            divider
-          ),
-        })),
-        bounds: bucket.timeseries.buckets.map((dateBucket) => {
-          return {
-            x: getBoundedX(dateBucket.key, start, end) as number,
-            y0: divide(dateBucket.model_lower.value, divider),
-            y1: divide(dateBucket.model_upper.value, divider),
-          };
-        }),
-      };
-    }) ?? [];
-
-  return compact(series);
 }

@@ -27,7 +27,7 @@ const chartBase: ChartBase = {
     defaultMessage: 'Garbage collection time spent per minute',
   }),
   key: 'gc_time_line_chart',
-  type: 'linemark',
+  type: 'line',
   yUnit: 'time',
   series,
 };

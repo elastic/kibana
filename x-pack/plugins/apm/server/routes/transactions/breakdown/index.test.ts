@@ -63,7 +63,7 @@ describe('getTransactionBreakdown', () => {
 
       const appTimeseries = timeseries[0];
       expect(appTimeseries.title).toBe('app');
-      expect(appTimeseries.type).toBe('areaStacked');
+      expect(appTimeseries.type).toBe('area');
       expect(appTimeseries.hideLegend).toBe(false);
 
       // empty buckets should result in null values for visible types

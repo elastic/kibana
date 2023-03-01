@@ -105,7 +105,7 @@ async function createAnomalyDetectionJob({
   environment: string;
   apmMetricIndex: string;
 }) {
-  function createAnomalyDetectionJob({
+  function createJob({
     moduleId,
     query,
   }: {
@@ -121,7 +121,7 @@ async function createAnomalyDetectionJob({
         groups: [APM_ML_JOB_GROUP],
         indexPatternName: apmMetricIndex,
         applyToAllSpaces: true,
-        start: moment().subtract(4, 'weeks').valueOf(),
+        start: moment().subtract(4, 'years').valueOf(),
         startDatafeed: true,
         jobOverrides: [
           {
@@ -150,7 +150,7 @@ async function createAnomalyDetectionJob({
     });
   }
 
-  const serviceDestinationJob = await createAnomalyDetectionJob({
+  const serviceDestinationJob = await createJob({
     moduleId: ApmMlModule.ServiceDestination,
     query: {
       bool: {
@@ -163,7 +163,7 @@ async function createAnomalyDetectionJob({
     },
   });
 
-  const transactionJob = await createAnomalyDetectionJob({
+  const transactionJob = await createJob({
     moduleId: ApmMlModule.Transaction,
     query: {
       bool: {
@@ -175,17 +175,6 @@ async function createAnomalyDetectionJob({
       },
     },
   });
-
-  console.log(
-    JSON.stringify(
-      {
-        serviceDestinationJob,
-        transactionJob,
-      },
-      null,
-      2
-    )
-  );
 
   return [transactionJob, serviceDestinationJob];
 }

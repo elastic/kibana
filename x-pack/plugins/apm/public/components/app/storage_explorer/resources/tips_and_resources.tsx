@@ -115,6 +115,8 @@ export function TipsAndResources() {
           comparisonEnabled,
           kuery,
           serviceGroup: '',
+          highlighted: '',
+          highlightedTransactionType: '',
         },
       }),
       iconType: 'tableDensityExpanded',

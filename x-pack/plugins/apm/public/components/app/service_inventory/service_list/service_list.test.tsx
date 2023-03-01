@@ -24,6 +24,8 @@ const query = {
   kuery: '',
   serviceGroup: '',
   comparisonEnabled: false,
+  highlighted: '',
+  highlightedTransactionType: '',
 };
 
 const service: any = {
@@ -83,6 +85,7 @@ describe('ServiceList', () => {
           showAlertsColumn: true,
           link: apmRouter.link,
           serviceOverflowCount: 0,
+          onHealthBadgeClick: () => {},
         }).map((c) =>
           c.render ? c.render!(service[c.field!], service) : service[c.field!]
         );
@@ -124,6 +127,7 @@ describe('ServiceList', () => {
           showAlertsColumn: true,
           link: apmRouter.link,
           serviceOverflowCount: 0,
+          onHealthBadgeClick: () => {},
         }).map((c) =>
           c.render ? c.render!(service[c.field!], service) : service[c.field!]
         );
@@ -154,6 +158,7 @@ describe('ServiceList', () => {
             showAlertsColumn: true,
             link: apmRouter.link,
             serviceOverflowCount: 0,
+            onHealthBadgeClick: () => {},
           }).map((c) =>
             c.render ? c.render!(service[c.field!], service) : service[c.field!]
           );
@@ -194,6 +199,7 @@ describe('ServiceList', () => {
             showAlertsColumn: true,
             link: apmRouter.link,
             serviceOverflowCount: 0,
+            onHealthBadgeClick: () => {},
           }).map((c) =>
             c.render ? c.render!(service[c.field!], service) : service[c.field!]
           );
@@ -237,6 +243,7 @@ describe('ServiceList', () => {
         showAlertsColumn: true,
         link: apmRouter.link,
         serviceOverflowCount: 0,
+        onHealthBadgeClick: () => {},
       }).map((c) => c.field);
       expect(renderedColumns.includes('healthStatus')).toBeFalsy();
     });
@@ -257,6 +264,7 @@ describe('ServiceList', () => {
         showAlertsColumn: true,
         link: apmRouter.link,
         serviceOverflowCount: 0,
+        onHealthBadgeClick: () => {},
       }).map((c) => c.field);
       expect(renderedColumns.includes('healthStatus')).toBeTruthy();
     });
@@ -277,6 +285,7 @@ describe('ServiceList', () => {
         showAlertsColumn: false,
         link: apmRouter.link,
         serviceOverflowCount: 0,
+        onHealthBadgeClick: () => {},
       }).map((c) => c.field);
       expect(renderedColumns.includes('alertsCount')).toBeFalsy();
     });
@@ -297,6 +306,7 @@ describe('ServiceList', () => {
         showAlertsColumn: true,
         link: apmRouter.link,
         serviceOverflowCount: 0,
+        onHealthBadgeClick: () => {},
       }).map((c) => c.field);
       expect(renderedColumns.includes('alertsCount')).toBeTruthy();
     });

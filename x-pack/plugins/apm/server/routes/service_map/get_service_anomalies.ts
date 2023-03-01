@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
-import type { ESSearchResponse } from '@kbn/es-types';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
-import { rangeQuery } from '@kbn/observability-plugin/server';
-import { compact, sortBy, uniqBy } from 'lodash';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
-import {
-  ApmMlDetectorType,
-  getApmMlDetectorType,
-} from '../../../common/anomaly_detection/apm_ml_detectors';
-import { getApmMlModuleFromJob } from '../../../common/anomaly_detection/apm_ml_module';
+import { ApmMlModule } from '../../../common/anomaly_detection/apm_ml_module';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
+import { Environment } from '../../../common/environment_rt';
 import { getServiceHealthStatus } from '../../../common/service_health_status';
 import { defaultTransactionTypes } from '../../../common/transaction_types';
+import { getAnomalyResults } from '../../lib/anomaly_detection/get_anomaly_results';
 import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 import { MlClient } from '../../lib/helpers/get_ml_client';
 import { withApmSpan } from '../../utils/with_apm_span';
@@ -36,133 +30,57 @@ export async function getServiceAnomalies({
   environment,
   start,
   end,
+  serviceName,
 }: {
-  mlClient?: MlClient;
-  environment: string;
+  mlClient: MlClient;
+  environment: Environment;
   start: number;
   end: number;
+  serviceName?: string;
 }) {
   return withApmSpan('get_service_anomalies', async () => {
     if (!mlClient) {
       throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
     }
 
-    const params = {
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              ...rangeQuery(
-                Math.min(end - 30 * 60 * 1000, start),
-                end,
-                'timestamp'
-              ),
-              {
-                terms: {
-                  // Only retrieving anomalies for default transaction types
-                  by_field_value: defaultTransactionTypes,
-                },
-              },
-            ] as estypes.QueryDslQueryContainer[],
-          },
-        },
-        aggs: {
-          services: {
-            composite: {
-              size: 5000,
-              sources: [
-                { serviceName: { terms: { field: 'partition_field_value' } } },
-                { jobId: { terms: { field: 'job_id' } } },
-              ] as Array<
-                Record<string, estypes.AggregationsCompositeAggregationSource>
-              >,
-            },
-            aggs: {
-              metrics: {
-                top_metrics: {
-                  metrics: [
-                    { field: 'actual' } as const,
-                    { field: 'by_field_value' } as const,
-                    { field: 'result_type' } as const,
-                    { field: 'record_score' } as const,
-                    { field: 'detector_index' } as const,
-                  ],
-                  sort: {
-                    record_score: 'desc' as const,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
-    };
-
-    const [anomalyResponse, jobIds] = await Promise.all([
-      // pass an empty array of job ids to anomaly search
-      // so any validation is skipped
-      withApmSpan('ml_anomaly_search', () =>
-        mlClient.mlSystem.mlAnomalySearch(params, [])
-      ),
-      getMLJobIds(mlClient.anomalyDetectors, environment),
+    const [transactionResults, serviceDestinationResults] = await Promise.all([
+      getAnomalyResults({
+        mlClient,
+        start,
+        end,
+        environment,
+        module: ApmMlModule.Transaction,
+        bucketSizeInSeconds: null,
+        partition: serviceName,
+        by: defaultTransactionTypes,
+      }),
+      getAnomalyResults({
+        mlClient,
+        start,
+        end,
+        environment,
+        module: ApmMlModule.ServiceDestination,
+        bucketSizeInSeconds: null,
+        partition: serviceName,
+      }),
     ]);
 
-    const typedAnomalyResponse: ESSearchResponse<unknown, typeof params> =
-      anomalyResponse as any;
-    const relevantBuckets = uniqBy(
-      sortBy(
-        // make sure we only return data for jobs that are available in this space
-        typedAnomalyResponse.aggregations?.services.buckets.filter((bucket) =>
-          jobIds.includes(bucket.key.jobId as string)
-        ) ?? [],
-        // sort by job ID in case there are multiple jobs for one service to
-        // ensure consistent results
-        (bucket) => bucket.key.jobId
-      ),
-      // return one bucket per service
-      (bucket) => bucket.key.serviceName
-    );
+    const results = transactionResults.concat(serviceDestinationResults);
 
     return {
-      serviceAnomalies: compact(
-        relevantBuckets.map((bucket) => {
-          const metrics = bucket.metrics.top[0].metrics;
+      serviceAnomalies: results.map((result) => {
+        const severity = getSeverity(result.anomalies.max);
+        const healthStatus = getServiceHealthStatus({ severity });
 
-          const anomalyScore =
-            metrics.result_type === 'record' && metrics.record_score
-              ? (metrics.record_score as number)
-              : 0;
-
-          const severity = getSeverity(anomalyScore);
-          const healthStatus = getServiceHealthStatus({ severity });
-
-          const jobId = bucket.key.jobId as string;
-
-          if (!jobIds.includes(jobId)) {
-            return undefined;
-          }
-
-          const module = getApmMlModuleFromJob(jobId);
-
-          const detectorType = getApmMlDetectorType({
-            detectorIndex: Number(metrics.detector_index),
-            module,
-          });
-
-          return detectorType === ApmMlDetectorType.txLatency
-            ? {
-                serviceName: bucket.key.serviceName as string,
-                jobId,
-                transactionType: metrics.by_field_value as string,
-                actualValue: metrics.actual as number | null,
-                anomalyScore,
-                healthStatus,
-                detectorType,
-              }
-            : undefined;
-        })
-      ),
+        return {
+          serviceName: result.partition,
+          transactionType: result.by,
+          actualValue: result.anomalies.actual,
+          anomalyScore: result.anomalies.max,
+          jobId: result.job.jobId,
+          healthStatus,
+        };
+      }),
     };
   });
 }
@@ -177,11 +95,7 @@ export async function getMLJobs(
   // and checking that it is compatable.
   const mlJobs = jobs.filter((job) => job.version >= 2);
   if (environment && environment !== ENVIRONMENT_ALL.value) {
-    const matchingMLJob = mlJobs.find((job) => job.environment === environment);
-    if (!matchingMLJob) {
-      return [];
-    }
-    return [matchingMLJob];
+    return mlJobs.filter((job) => job.environment === environment);
   }
   return mlJobs;
 }

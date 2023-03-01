@@ -16,6 +16,7 @@ export function usePreferredDataSourceAndBucketSize<
   TDocumentType extends
     | ApmDocumentType.ServiceTransactionMetric
     | ApmDocumentType.TransactionMetric
+    | ApmDocumentType.ServiceDestinationMetric
 >({
   rangeFrom,
   rangeTo,
@@ -36,6 +37,8 @@ export function usePreferredDataSourceAndBucketSize<
           | ApmDocumentType.ServiceTransactionMetric
           | ApmDocumentType.TransactionMetric
           | ApmDocumentType.TransactionMetric
+      : TDocumentType extends ApmDocumentType.ServiceDestinationMetric
+      ? ApmDocumentType.ServiceDestinationMetric | ApmDocumentType.SpanEvent
       : ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
   >;
 } | null {
@@ -65,6 +68,11 @@ export function usePreferredDataSourceAndBucketSize<
     suitableTypes = [
       ApmDocumentType.TransactionMetric,
       ApmDocumentType.TransactionEvent,
+    ];
+  } else if (type === ApmDocumentType.ServiceDestinationMetric) {
+    suitableTypes = [
+      ApmDocumentType.ServiceDestinationMetric,
+      ApmDocumentType.SpanEvent,
     ];
   }
 

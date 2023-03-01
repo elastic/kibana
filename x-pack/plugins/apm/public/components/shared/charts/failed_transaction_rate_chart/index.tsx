@@ -129,7 +129,7 @@ export function FailedTransactionRateChart({
   const timeseries = [
     {
       data: data.currentPeriod.timeseries,
-      type: 'linemark',
+      type: 'line' as const,
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
         defaultMessage: 'Failed transaction rate (avg.)',
@@ -139,7 +139,7 @@ export function FailedTransactionRateChart({
       ? [
           {
             data: data.previousPeriod.timeseries,
-            type: 'area',
+            type: 'area' as const,
             color: previousPeriodColor,
             title: previousPeriodLabel,
           },

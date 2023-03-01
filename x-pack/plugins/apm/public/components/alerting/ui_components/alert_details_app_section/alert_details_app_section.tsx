@@ -201,7 +201,7 @@ export function AlertDetailsAppSection({
   const timeseriesThroughput = [
     {
       data: dataThroughput.currentPeriod,
-      type: 'linemark',
+      type: 'line' as const,
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
         defaultMessage: 'Throughput',
@@ -211,7 +211,7 @@ export function AlertDetailsAppSection({
       ? [
           {
             data: dataThroughput.previousPeriod,
-            type: 'area',
+            type: 'area' as const,
             color: previousPeriodColor,
             title: '',
           },
@@ -274,7 +274,7 @@ export function AlertDetailsAppSection({
   const timeseriesErrorRate = [
     {
       data: dataErrorRate.currentPeriod.timeseries,
-      type: 'linemark',
+      type: 'line' as const,
       color: currentPeriodColorErrorRate,
       title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
         defaultMessage: 'Failed transaction rate (avg.)',

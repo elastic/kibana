@@ -16,13 +16,21 @@ import { useTheme } from '../../../../hooks/use_theme';
 
 export function HealthBadge({
   healthStatus,
+  onClick,
 }: {
   healthStatus: ServiceHealthStatus;
+  onClick: () => void;
 }) {
   const theme = useTheme();
 
   return (
-    <EuiBadge color={getServiceHealthStatusBadgeColor(theme, healthStatus)}>
+    <EuiBadge
+      color={getServiceHealthStatusBadgeColor(theme, healthStatus)}
+      onClick={onClick}
+      onClickAriaLabel=""
+      iconOnClick={onClick}
+      iconOnClickAriaLabel=""
+    >
       {getServiceHealthStatusLabel(healthStatus)}
     </EuiBadge>
   );

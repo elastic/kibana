@@ -37,7 +37,7 @@ const chartBase: ChartBase = {
     defaultMessage: 'Lambda Duration',
   }),
   key: 'avg_duration',
-  type: 'linemark',
+  type: 'line',
   yUnit: 'time',
   series: {},
   description: i18n.translate(
@@ -87,7 +87,7 @@ async function getServerlessLantecySeries({
         { defaultMessage: 'Transaction Duration' }
       ),
       key: 'transaction_duration',
-      type: 'linemark',
+      type: 'line',
       color: getVizColorForIndex(1, theme),
       overallValue: transactionLatency.overallAvgDuration ?? 0,
       data: transactionLatency.latencyTimeseries,

@@ -48,7 +48,7 @@ const chartBase: ChartBase = {
     defaultMessage: 'CPU usage',
   }),
   key: 'cpu_usage_chart',
-  type: 'linemark',
+  type: 'line',
   yUnit: 'percent',
   series,
 };

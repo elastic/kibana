@@ -59,7 +59,7 @@ export const getDestinationMap = ({
   end: number;
   filter: QueryDslQueryContainer[];
   offset?: string;
-}) => {
+}): Promise<Map<string, Node>> => {
   return withApmSpan('get_destination_map', async () => {
     const { startWithOffset, endWithOffset } = getOffsetInMs({
       start,
@@ -207,6 +207,7 @@ export const getDestinationMap = ({
           agentName: mergedDestination.agentName,
           environment: mergedDestination.environment,
           id: objectHash({ serviceName: mergedDestination.serviceName }),
+          address: destination.dependencyName,
           type: NodeType.service,
         };
       } else {
@@ -216,6 +217,7 @@ export const getDestinationMap = ({
           spanSubtype: mergedDestination.spanSubtype,
           id: objectHash({ dependencyName: mergedDestination.dependencyName }),
           type: NodeType.dependency,
+          address: destination.dependencyName,
         };
       }
 

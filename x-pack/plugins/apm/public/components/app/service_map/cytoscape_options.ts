@@ -104,10 +104,13 @@ function isService(el: cytoscape.NodeSingular) {
   return el.data(SERVICE_NAME) !== undefined;
 }
 
-const getStyle = (
-  theme: EuiTheme,
-  isTraceExplorerEnabled: boolean
-): cytoscape.Stylesheet[] => {
+const getStyle = ({
+  theme,
+  isTraceExplorerEnabled,
+}: {
+  theme: EuiTheme;
+  isTraceExplorerEnabled: boolean;
+}): cytoscape.Stylesheet[] => {
   const lineColor = theme.eui.euiColorMediumShade;
   return [
     {
@@ -270,12 +273,17 @@ ${theme.eui.euiColorLightShade}`,
   marginTop: 0,
 });
 
-export const getCytoscapeOptions = (
-  theme: EuiTheme,
-  isTraceExplorerEnabled: boolean
-): cytoscape.CytoscapeOptions => ({
+export const getCytoscapeOptions = ({
+  theme,
+  isTraceExplorerEnabled,
+  compact,
+}: {
+  theme: EuiTheme;
+  isTraceExplorerEnabled: boolean;
+  compact?: boolean;
+}): cytoscape.CytoscapeOptions => ({
   boxSelectionEnabled: false,
   maxZoom: 3,
-  minZoom: 0.2,
-  style: getStyle(theme, isTraceExplorerEnabled),
+  minZoom: compact ? 0.4 : 0.2,
+  style: getStyle({ theme, isTraceExplorerEnabled }),
 });

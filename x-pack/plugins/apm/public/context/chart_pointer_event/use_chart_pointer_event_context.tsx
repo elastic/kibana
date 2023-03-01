@@ -20,12 +20,17 @@ export function useChartPointerEventContext() {
     throw new Error('Missing ChartPointerEventContext provider');
   }
 
-  const { pointerEventTargetRef } = context;
+  const { pointerEventTargetRef, disabled } = context;
   const chartRef = React.createRef<Chart>();
   const requestIdRef = useRef(0);
   const updatePointerEventHandler = useCallback(
     (event: Event) => {
       cancelAnimationFrame(requestIdRef.current);
+
+      if (disabled) {
+        return;
+      }
+
       requestIdRef.current = requestAnimationFrame(() => {
         const pointerEvent = (
           event instanceof CustomEvent ? event.detail : null
@@ -35,7 +40,7 @@ export function useChartPointerEventContext() {
         }
       });
     },
-    [chartRef]
+    [chartRef, disabled]
   );
 
   useEffect(() => {

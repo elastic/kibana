@@ -7,6 +7,7 @@
 
 import { Logger } from '@kbn/logging';
 import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
+import { Environment } from '../../../../common/environment_rt';
 import { RollupInterval } from '../../../../common/rollup';
 import { ServiceGroup } from '../../../../common/service_groups';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
@@ -36,7 +37,7 @@ export async function getServicesItems({
   documentType,
   rollupInterval,
 }: {
-  environment: string;
+  environment: Environment;
   kuery: string;
   mlClient?: MlClient;
   apmEventClient: APMEventClient;

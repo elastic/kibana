@@ -41,9 +41,10 @@ import {
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
+import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../shared/list_metric';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
-import { ServiceLink } from '../../../shared/links/apm/service_link';
+import { ServiceSummaryFlyout } from '../../../shared/service_summary_flyout';
 import { HealthBadge } from './health_badge';
 
 type ServicesDetailedStatisticsAPIResponse =
@@ -59,6 +60,7 @@ export function getServiceColumns({
   showAlertsColumn,
   link,
   serviceOverflowCount,
+  onHealthBadgeClick,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
@@ -69,6 +71,10 @@ export function getServiceColumns({
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   link: any;
   serviceOverflowCount: number;
+  onHealthBadgeClick: (service: {
+    serviceName: string;
+    transactionType: string;
+  }) => void;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
@@ -124,10 +130,16 @@ export function getServiceColumns({
             }),
             width: `${unit * 6}px`,
             sortable: true,
-            render: (_, { healthStatus }) => {
+            render: (_, { healthStatus, serviceName, transactionType }) => {
               return (
                 <HealthBadge
                   healthStatus={healthStatus ?? ServiceHealthStatus.unknown}
+                  onClick={() => {
+                    onHealthBadgeClick({
+                      serviceName,
+                      transactionType: transactionType || '',
+                    });
+                  }}
                 />
               );
             },
@@ -304,12 +316,15 @@ export function ServiceList({
   serviceOverflowCount,
 }: Props) {
   const breakpoints = useBreakpoints();
-  const { link } = useApmRouter();
+
+  const apmRouter = useApmRouter();
 
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) =>
       transactionType && !isDefaultTransactionType(transactionType)
   );
+
+  const params = useApmParams('/services');
 
   const {
     // removes pagination and sort instructions from the query so it won't be passed down to next route
@@ -320,9 +335,17 @@ export function ServiceList({
       sortField: field,
       ...query
     },
-  } = useApmParams('/services');
+  } = params;
 
-  const { kuery } = query;
+  const {
+    kuery,
+    highlighted,
+    highlightedTransactionType,
+    rangeFrom,
+    rangeTo,
+    environment,
+  } = query;
+
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
@@ -337,8 +360,16 @@ export function ServiceList({
         breakpoints,
         showHealthStatusColumn: displayHealthStatus,
         showAlertsColumn: displayAlerts,
-        link,
+        link: apmRouter.link,
         serviceOverflowCount,
+        onHealthBadgeClick: ({ serviceName, transactionType }) => {
+          apmRouter.push('/services', {
+            query: {
+              highlighted: serviceName,
+              highlightedTransactionType: transactionType,
+            },
+          });
+        },
       }),
     [
       query,
@@ -348,67 +379,83 @@ export function ServiceList({
       breakpoints,
       displayHealthStatus,
       displayAlerts,
-      link,
       serviceOverflowCount,
+      apmRouter,
     ]
   );
 
   return (
-    <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
-      <EuiFlexItem>
-        <EuiFlexGroup
-          alignItems="center"
-          gutterSize="xs"
-          justifyContent="flexEnd"
-        >
-          {fallbackToTransactions && (
-            <EuiFlexItem>
-              <AggregatedTransactionsBadge />
+    <>
+      <EuiFlexGroup gutterSize="xs" direction="column" responsive={false}>
+        <EuiFlexItem>
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="xs"
+            justifyContent="flexEnd"
+          >
+            {fallbackToTransactions && (
+              <EuiFlexItem>
+                <AggregatedTransactionsBadge />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="top"
+                content={i18n.translate(
+                  'xpack.apm.servicesTable.tooltip.metricsExplanation',
+                  {
+                    defaultMessage:
+                      'Service metrics are aggregated on transaction type "request", "page-load", or the top available transaction type.',
+                  }
+                )}
+              >
+                <EuiIcon type="questionInCircle" color="subdued" />
+              </EuiToolTip>
             </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="top"
-              content={i18n.translate(
-                'xpack.apm.servicesTable.tooltip.metricsExplanation',
-                {
-                  defaultMessage:
-                    'Service metrics are aggregated on transaction type "request", "page-load", or the top available transaction type.',
-                }
-              )}
-            >
-              <EuiIcon type="questionInCircle" color="subdued" />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs" color="subdued">
-              {i18n.translate(
-                'xpack.apm.servicesTable.metricsExplanationLabel',
-                { defaultMessage: 'What are these metrics?' }
-              )}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <ManagedTable<ServiceListItem>
-          isLoading={isLoading}
-          error={isFailure}
-          columns={serviceColumns}
-          items={items}
-          noItemsMessage={noItemsMessage}
-          initialSortField={initialSortField}
-          initialSortDirection={initialSortDirection}
-          initialPageSize={initialPageSize}
-          sortFn={(itemsToSort, sortField, sortDirection) =>
-            sortFn(
-              itemsToSort,
-              sortField as ServiceInventoryFieldName,
-              sortDirection
-            )
-          }
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {i18n.translate(
+                  'xpack.apm.servicesTable.metricsExplanationLabel',
+                  { defaultMessage: 'What are these metrics?' }
+                )}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <ManagedTable<ServiceListItem>
+            isLoading={isLoading}
+            error={isFailure}
+            columns={serviceColumns}
+            items={items}
+            noItemsMessage={noItemsMessage}
+            initialSortField={initialSortField}
+            initialSortDirection={initialSortDirection}
+            initialPageSize={initialPageSize}
+            sortFn={(itemsToSort, sortField, sortDirection) =>
+              sortFn(
+                itemsToSort,
+                sortField as ServiceInventoryFieldName,
+                sortDirection
+              )
+            }
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <ServiceSummaryFlyout
+        serviceName={highlighted}
+        transactionType={highlightedTransactionType}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        environment={environment}
+        isOpen={!!highlighted}
+        onClose={() => {
+          apmRouter.push('/services', { query: { highlighted: '' } });
+        }}
+        key={highlighted}
+        params={params}
+        routePath="/services"
+      />
+    </>
   );
 }

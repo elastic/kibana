@@ -223,7 +223,7 @@ export async function getTransactionBreakdown({
   const timeseries = kpis.map((kpi) => ({
     title: kpi.name,
     color: kpi.color,
-    type: 'areaStacked',
+    type: 'area' as const,
     data: timeseriesPerSubtype[kpi.name],
     hideLegend: false,
     legendValue: asPercent(kpi.percentage, 1),

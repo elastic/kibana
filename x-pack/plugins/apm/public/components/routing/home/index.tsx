@@ -9,6 +9,8 @@ import { toBooleanRt, toNumberRt } from '@kbn/io-ts-utils';
 import { Outlet } from '@kbn/typed-react-router-config';
 import * as t from 'io-ts';
 import React, { ComponentProps } from 'react';
+import { RouteParamsRT } from '@kbn/server-route-repository';
+import { merge } from 'lodash';
 import { offsetRt } from '../../../../common/comparison_rt';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { environmentRt } from '../../../../common/environment_rt';
@@ -29,11 +31,22 @@ import { dependencies } from './dependencies';
 import { legacyBackends } from './legacy_backends';
 import { storageExplorer } from './storage_explorer';
 
-function serviceGroupPage<TPath extends string>({
+const serviceGroupRt = t.type({
+  query: t.type({ serviceGroup: t.string }),
+});
+
+type ServiceGroupRT = typeof serviceGroupRt;
+
+function serviceGroupPage<
+  TPath extends string,
+  TParams extends RouteParamsRT | undefined
+>({
   path,
   element,
   title,
   serviceGroupContextTab,
+  params,
+  defaults,
 }: {
   path: TPath;
   element: React.ReactElement<any, any>;
@@ -41,11 +54,15 @@ function serviceGroupPage<TPath extends string>({
   serviceGroupContextTab: ComponentProps<
     typeof ServiceGroupTemplate
   >['serviceGroupContextTab'];
+  params?: TParams;
+  defaults?: Record<string, any>;
 }): Record<
   TPath,
   {
     element: React.ReactElement<any, any>;
-    params: t.TypeC<{ query: t.TypeC<{ serviceGroup: t.StringC }> }>;
+    params: t.IntersectionC<
+      [ServiceGroupRT, TParams extends RouteParamsRT ? TParams : t.TypeC<{}>]
+    >;
     defaults: { query: { serviceGroup: string } };
   }
 > {
@@ -61,19 +78,10 @@ function serviceGroupPage<TPath extends string>({
           </ServiceGroupTemplate>
         </Breadcrumb>
       ),
-      params: t.type({
-        query: t.type({ serviceGroup: t.string }),
-      }),
-      defaults: { query: { serviceGroup: '' } },
+      params: t.intersection([serviceGroupRt, params ? params : t.type({})]),
+      defaults: merge({ query: { serviceGroup: '' } }, defaults),
     },
-  } as Record<
-    TPath,
-    {
-      element: React.ReactElement<any, any>;
-      params: t.TypeC<{ query: t.TypeC<{ serviceGroup: t.StringC }> }>;
-      defaults: { query: { serviceGroup: string } };
-    }
-  >;
+  } as Record<TPath, any>;
 }
 
 export const ServiceInventoryTitle = i18n.translate(
@@ -135,6 +143,18 @@ export const home = {
         title: ServiceInventoryTitle,
         element: <ServiceInventory />,
         serviceGroupContextTab: 'service-inventory',
+        params: t.type({
+          query: t.type({
+            highlighted: t.string,
+            highlightedTransactionType: t.string,
+          }),
+        }),
+        defaults: {
+          query: {
+            highlighted: '',
+            highlightedTransactionType: '',
+          },
+        },
       }),
       ...serviceGroupPage({
         path: '/service-map',

@@ -30,7 +30,6 @@ import { Popover } from './popover';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
 import { SearchBar } from '../../shared/search_bar';
-import { useServiceName } from '../../../hooks/use_service_name';
 import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -72,6 +71,7 @@ export function ServiceMapHome() {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   return (
     <ServiceMap
+      serviceName={null}
       environment={environment}
       kuery={kuery}
       start={start}
@@ -83,6 +83,7 @@ export function ServiceMapHome() {
 
 export function ServiceMapServiceDetail() {
   const {
+    path: { serviceName },
     query: { environment, kuery, rangeFrom, rangeTo },
   } = useAnyOfApmParams(
     '/services/{serviceName}/service-map',
@@ -91,6 +92,7 @@ export function ServiceMapServiceDetail() {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   return (
     <ServiceMap
+      serviceName={serviceName}
       environment={environment}
       kuery={kuery}
       start={start}
@@ -100,22 +102,28 @@ export function ServiceMapServiceDetail() {
 }
 
 export function ServiceMap({
+  serviceName,
   environment,
   kuery,
   start,
   end,
   serviceGroupId,
+  compact = false,
 }: {
+  serviceName: string | null;
   environment: Environment;
   kuery: string;
   start: string;
   end: string;
   serviceGroupId?: string;
+  compact?: boolean;
 }) {
   const theme = useTheme();
   const license = useLicenseContext();
 
-  const serviceName = useServiceName();
+  const height = compact ? 200 : undefined;
+  const hideSearchBar = !!compact;
+  const popoverEnabled = !compact;
 
   const {
     data = { elements: [] },
@@ -135,7 +143,7 @@ export function ServiceMap({
             start,
             end,
             environment,
-            serviceName,
+            serviceName: serviceName ?? undefined,
             serviceGroup: serviceGroupId,
             kuery,
           },
@@ -145,11 +153,11 @@ export function ServiceMap({
     [license, serviceName, environment, start, end, serviceGroupId, kuery]
   );
 
-  const { ref, height } = useRefDimensions();
+  const { ref, height: refHeight } = useRefDimensions();
 
   // Temporary hack to work around bottom padding introduced by EuiPage
   const PADDING_BOTTOM = 24;
-  const heightWithPadding = height - PADDING_BOTTOM;
+  const heightWithPadding = (height ?? refHeight) - PADDING_BOTTOM;
 
   if (!license) {
     return null;
@@ -187,7 +195,7 @@ export function ServiceMap({
 
   return (
     <>
-      <SearchBar showTimeComparison />
+      {hideSearchBar ? null : <SearchBar showTimeComparison />}
       <EuiPanel hasBorder={true} paddingSize="none">
         <div
           data-test-subj="ServiceMap"
@@ -197,19 +205,22 @@ export function ServiceMap({
           <Cytoscape
             elements={data.elements}
             height={heightWithPadding}
-            serviceName={serviceName}
+            serviceName={serviceName ?? undefined}
             style={getCytoscapeDivStyle(theme, status)}
+            compact={compact}
           >
             <Controls />
             {serviceName && <EmptyBanner />}
             {status === FETCH_STATUS.LOADING && <LoadingSpinner />}
-            <Popover
-              focusedServiceName={serviceName}
-              environment={environment}
-              kuery={kuery}
-              start={start}
-              end={end}
-            />
+            {popoverEnabled && (
+              <Popover
+                focusedServiceName={serviceName ?? undefined}
+                environment={environment}
+                kuery={kuery}
+                start={start}
+                end={end}
+              />
+            )}
           </Cytoscape>
         </div>
       </EuiPanel>

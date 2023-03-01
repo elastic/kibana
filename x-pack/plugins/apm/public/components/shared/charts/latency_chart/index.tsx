@@ -123,7 +123,7 @@ export function LatencyChart({ height, kuery }: Props) {
           <EuiFlexItem grow={false}>
             <MLHeader
               hasValidMlLicense={license?.getFeature('ml').isAvailable}
-              mlJobId={preferredAnomalyTimeseries?.jobId}
+              mlJobId={preferredAnomalyTimeseries?.job.jobId}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

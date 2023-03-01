@@ -4,7 +4,7 @@
   ],
   "description": "Detects anomalies in service destination latency, throughput and error percentage for metric data.",
   "analysis_config": {
-    "bucket_span": "15m",
+    "bucket_span": "5m",
     "summary_count_field_name": "doc_count",
     "detectors": [
       {
@@ -24,7 +24,7 @@
       {
         "detector_description": "failed span rate for an APM service",
         "function": "high_mean",
-        "field_name": "exit_span_failure_rate",
+        "field_name": "failed_exit_span_rate",
         "by_field_name": "span.destination.service.resource",
         "partition_field_name": "service.name"
       }

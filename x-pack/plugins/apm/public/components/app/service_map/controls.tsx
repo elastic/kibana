@@ -110,7 +110,8 @@ export function Controls() {
   } = useAnyOfApmParams(
     '/service-map',
     '/services/{serviceName}/service-map',
-    '/mobile-services/{serviceName}/service-map'
+    '/mobile-services/{serviceName}/service-map',
+    '/services'
   );
 
   const [zoom, setZoom] = useState((cy && cy.zoom()) || 1);

@@ -70,7 +70,7 @@ function getPreviousPeriodTimeseries({
 
   return {
     data: previousPeriod.latencyTimeseries ?? [],
-    type: 'area',
+    type: 'area' as const,
     color: previousPeriodColor,
     title: previousPeriodLabel,
   };
@@ -96,7 +96,7 @@ function getLatencyTimeseries({
         ),
         data: latencyTimeseries,
         legendValue: asDuration(overallAvgDuration),
-        type: 'linemark',
+        type: 'line' as const,
         color: currentPeriodColor,
       };
     }
@@ -109,7 +109,7 @@ function getLatencyTimeseries({
         ),
         titleShort: '95th',
         data: latencyTimeseries,
-        type: 'linemark',
+        type: 'line' as const,
         color: currentPeriodColor,
       };
     }
@@ -122,7 +122,7 @@ function getLatencyTimeseries({
         ),
         titleShort: '99th',
         data: latencyTimeseries,
-        type: 'linemark',
+        type: 'line' as const,
         color: currentPeriodColor,
       };
     }

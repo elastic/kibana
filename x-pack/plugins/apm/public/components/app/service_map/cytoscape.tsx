@@ -34,6 +34,7 @@ export interface CytoscapeProps {
   height: number;
   serviceName?: string;
   style?: CSSProperties;
+  compact?: boolean;
 }
 
 function useCytoscape(options: cytoscape.CytoscapeOptions) {
@@ -64,14 +65,15 @@ function CytoscapeComponent({
   height,
   serviceName,
   style,
+  compact,
 }: CytoscapeProps) {
   const theme = useTheme();
   const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
   const [ref, cy] = useCytoscape({
-    ...getCytoscapeOptions(theme, isTraceExplorerEnabled),
+    ...getCytoscapeOptions({ theme, compact, isTraceExplorerEnabled }),
     elements,
   });
-  useCytoscapeEventHandlers({ cy, serviceName, theme });
+  useCytoscapeEventHandlers({ cy, serviceName, theme, compact });
 
   // Add items from the elements prop to the cytoscape collection and remove
   // items that no longer are in the list, then trigger an event to notify

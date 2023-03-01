@@ -93,7 +93,7 @@ export function DependencyLatencyChart({
     if (data?.currentTimeseries) {
       specs.push({
         data: data.currentTimeseries,
-        type: 'linemark',
+        type: 'line',
         color: currentPeriodColor,
         title: i18n.translate('xpack.apm.dependencyLatencyChart.chartTitle', {
           defaultMessage: 'Latency',

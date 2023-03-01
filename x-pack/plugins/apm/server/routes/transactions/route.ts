@@ -356,7 +356,7 @@ const transactionChartsBreakdownRoute = createApmServerRoute({
     timeseries: Array<{
       title: string;
       color: string;
-      type: string;
+      type: 'area';
       data: Array<{ x: number; y: number | null }>;
       hideLegend: boolean;
       legendValue: string;

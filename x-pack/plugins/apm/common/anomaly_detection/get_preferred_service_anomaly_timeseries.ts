@@ -7,7 +7,7 @@
 
 import { Environment } from '../environment_rt';
 import { ApmMlDetectorType } from './apm_ml_detectors';
-import { ServiceAnomalyTimeseries } from './service_anomaly_timeseries';
+import { ApmMlJobResultWithTimeseries } from './apm_ml_job_result';
 
 export function getPreferredServiceAnomalyTimeseries({
   preferredEnvironment,
@@ -17,7 +17,7 @@ export function getPreferredServiceAnomalyTimeseries({
 }: {
   preferredEnvironment: Environment;
   detectorType: ApmMlDetectorType;
-  allAnomalyTimeseries: ServiceAnomalyTimeseries[];
+  allAnomalyTimeseries: ApmMlJobResultWithTimeseries[];
   fallbackToTransactions: boolean;
 }) {
   const seriesForType = allAnomalyTimeseries.filter(
@@ -26,7 +26,7 @@ export function getPreferredServiceAnomalyTimeseries({
 
   return seriesForType.find(
     (serie) =>
-      serie.environment === preferredEnvironment &&
-      (fallbackToTransactions ? serie.version <= 2 : serie.version >= 3)
+      serie.job.environment === preferredEnvironment &&
+      (fallbackToTransactions ? serie.job.version <= 2 : serie.job.version >= 3)
   );
 }

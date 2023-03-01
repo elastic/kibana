@@ -22,7 +22,10 @@ import { Environment } from '../../../common/environment_rt';
 import { EventOutcome } from '../../../common/event_outcome';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
+import {
+  calculateThroughputWithInterval,
+  calculateThroughputWithRange,
+} from '../../lib/helpers/calculate_throughput';
 import { getBucketSizeForAggregatedTransactions } from '../../lib/helpers/get_bucket_size_for_aggregated_transactions';
 import {
   getDocumentTypeFilterForServiceDestinationStatistics,
@@ -71,11 +74,13 @@ export async function getTopDependencyOperations({
     offset,
   });
 
-  const { intervalString } = getBucketSizeForAggregatedTransactions({
-    start: startWithOffset,
-    end: endWithOffset,
-    searchAggregatedServiceMetrics: searchServiceDestinationMetrics,
-  });
+  const { intervalString, bucketSize } = getBucketSizeForAggregatedTransactions(
+    {
+      start: startWithOffset,
+      end: endWithOffset,
+      searchAggregatedServiceMetrics: searchServiceDestinationMetrics,
+    }
+  );
 
   const field = getLatencyFieldForServiceDestinationStatistics(
     searchServiceDestinationMetrics
@@ -189,12 +194,11 @@ export async function getTopDependencyOperations({
             : 1;
           timeseries.throughput.push({
             x,
-            y: calculateThroughputWithRange({
-              start: startWithOffset,
-              end: endWithOffset,
+            y: calculateThroughputWithInterval({
               value: searchServiceDestinationMetrics
                 ? dateBucket.count.value || 0
                 : dateBucket.doc_count,
+              bucketSize,
             }),
           });
           timeseries.latency.push({

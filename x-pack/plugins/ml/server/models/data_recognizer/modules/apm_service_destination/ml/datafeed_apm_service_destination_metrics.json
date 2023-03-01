@@ -59,7 +59,8 @@
         },
         "exit_span_throughput": {
           "rate": {
-            "unit": "minute"
+            "unit": "minute",
+            "field": "span.destination.service.response_time.count"
           }
         },
         "exit_span_latency_sum": {

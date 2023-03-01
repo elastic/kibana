@@ -37,7 +37,7 @@ const chartBase: ChartBase = {
     defaultMessage: 'Thread Count',
   }),
   key: 'thread_count_line_chart',
-  type: 'linemark',
+  type: 'line',
   yUnit: 'number',
   series,
 };

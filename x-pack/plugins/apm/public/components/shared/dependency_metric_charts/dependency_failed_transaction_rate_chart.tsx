@@ -94,7 +94,7 @@ export function DependencyFailedTransactionRateChart({
     if (data?.currentTimeseries) {
       specs.push({
         data: data.currentTimeseries,
-        type: 'linemark',
+        type: 'line',
         color: currentPeriodColor,
         title: i18n.translate('xpack.apm.dependencyErrorRateChart.chartTitle', {
           defaultMessage: 'Failed transaction rate',

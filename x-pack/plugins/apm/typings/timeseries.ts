@@ -8,6 +8,7 @@
 import {
   AccessorFn,
   AreaSeriesStyle,
+  BarSeriesStyle,
   Fit,
   FitConfig,
   LineSeriesStyle,
@@ -55,7 +56,7 @@ export interface APMChartSpec<
   hideTooltipValue?: boolean;
   data: TCoordinate[];
   legendValue?: string;
-  type: string;
+  type: 'area' | 'bar' | 'line';
   color: string | SeriesColorsArray | SeriesColorAccessorFn;
   areaColor?: string;
   fit?: Exclude<Fit, 'explicit'> | FitConfig;
@@ -66,8 +67,9 @@ export interface APMChartSpec<
   markSizeAccessor?: string | AccessorFn;
   lineSeriesStyle?: RecursivePartial<LineSeriesStyle>;
   areaSeriesStyle?: RecursivePartial<AreaSeriesStyle>;
+  barSeriesStyle?: RecursivePartial<BarSeriesStyle>;
   groupId?: string;
 }
 
-export type ChartType = 'area' | 'linemark' | 'bar';
+export type ChartType = 'area' | 'line' | 'bar';
 export type YUnit = 'percent' | 'bytes' | 'number' | 'time' | 'integer';

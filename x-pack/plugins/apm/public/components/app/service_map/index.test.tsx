@@ -70,6 +70,7 @@ describe('ServiceMap', () => {
       expect(
         await render(
           <ServiceMap
+            serviceName="opbeans-java"
             environment={ENVIRONMENT_ALL.value}
             kuery=""
             start="2021-08-20T10:00:00.000Z"
@@ -88,6 +89,7 @@ describe('ServiceMap', () => {
       expect(
         await render(
           <ServiceMap
+            serviceName="opbeans-java"
             environment={ENVIRONMENT_ALL.value}
             kuery=""
             start="2021-08-20T10:00:00.000Z"
@@ -113,6 +115,7 @@ describe('ServiceMap', () => {
         expect(
           await render(
             <ServiceMap
+              serviceName="opbeans-java"
               environment={ENVIRONMENT_ALL.value}
               kuery=""
               start="2021-08-20T10:00:00.000Z"

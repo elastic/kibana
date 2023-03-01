@@ -6,30 +6,24 @@
  */
 
 import {
-  AnnotationDomainType,
   LegendItemListener,
-  LineAnnotation,
-  Position,
+  PartialTheme,
   YDomainRange,
 } from '@elastic/charts';
 import React from 'react';
-import { EuiIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { asAbsoluteDateTime } from '../../../../common/utils/formatters';
-import { useAnnotationsContext } from '../../../context/annotations/use_annotations_context';
-import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { ServiceAnomalyTimeseries } from '../../../../common/anomaly_detection/service_anomaly_timeseries';
+import { ApmMlJobResultWithTimeseries } from '../../../../common/anomaly_detection/apm_ml_job_result';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
-import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
+import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useDeploymentAnnotations } from '../../../hooks/use_deployment_annotations';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useTimeZone } from '../../../hooks/use_time_zone';
 import { unit } from '../../../utils/style';
-import { getTimeZone } from './helper/timezone';
 import { TimeseriesChart } from './timeseries_chart';
-import { useTheme } from '../../../hooks/use_theme';
 
-interface AnomalyTimeseries extends ServiceAnomalyTimeseries {
+interface ColoredAnomalyTimeseries extends ApmMlJobResultWithTimeseries {
   color?: string;
 }
+
 export interface TimeseriesChartWithContextProps {
   id: string;
   fetchStatus: FETCH_STATUS;
@@ -46,9 +40,11 @@ export interface TimeseriesChartWithContextProps {
   yTickFormat?: (y: number) => string;
   showAnnotations?: boolean;
   yDomain?: YDomainRange;
-  anomalyTimeseries?: AnomalyTimeseries;
-  customTheme?: Record<string, unknown>;
-  anomalyTimeseriesColor?: string;
+  anomalyTimeseries?: ColoredAnomalyTimeseries;
+  customTheme?: PartialTheme;
+  hideXAxis?: boolean;
+  hideYAxis?: boolean;
+  hideLegend?: boolean;
 }
 
 export function TimeseriesChartWithContext({
@@ -63,6 +59,8 @@ export function TimeseriesChartWithContext({
   yDomain,
   anomalyTimeseries,
   customTheme = {},
+  hideXAxis,
+  hideYAxis,
 }: TimeseriesChartWithContextProps) {
   const {
     query: { comparisonEnabled, offset },
@@ -71,31 +69,11 @@ export function TimeseriesChartWithContext({
     '/dependencies/*',
     '/services/{serviceName}'
   );
-  const { core } = useApmPluginContext();
-  const timeZone = getTimeZone(core.uiSettings);
-  const theme = useTheme();
-  const annotationColor = theme.eui.euiColorSuccess;
-  const { annotations } = useAnnotationsContext();
 
-  const timeseriesAnnotations = [
-    <LineAnnotation
-      key="annotations"
-      id="annotations"
-      domainType={AnnotationDomainType.XDomain}
-      dataValues={annotations.map((annotation) => ({
-        dataValue: annotation['@timestamp'],
-        header: asAbsoluteDateTime(annotation['@timestamp']),
-        details: `${i18n.translate('xpack.apm.chart.annotation.version', {
-          defaultMessage: 'Version',
-        })} ${annotation.text}`,
-      }))}
-      style={{
-        line: { strokeWidth: 1, stroke: annotationColor, opacity: 1 },
-      }}
-      marker={<EuiIcon type="dot" color={annotationColor} />}
-      markerPosition={Position.Top}
-    />,
-  ];
+  const timeZone = useTimeZone();
+
+  const timeseriesAnnotations = useDeploymentAnnotations();
+
   return (
     <TimeseriesChart
       id={id}
@@ -113,6 +91,8 @@ export function TimeseriesChartWithContext({
       timeZone={timeZone}
       comparisonEnabled={comparisonEnabled}
       offset={offset}
+      hideXAxis={hideXAxis}
+      hideYAxis={hideYAxis}
     />
   );
 }

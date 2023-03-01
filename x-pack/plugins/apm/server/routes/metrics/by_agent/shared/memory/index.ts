@@ -41,7 +41,7 @@ const chartBase: ChartBase = {
     }
   ),
   key: 'memory_usage_chart',
-  type: 'linemark',
+  type: 'line',
   yUnit: 'percent',
   series,
 };

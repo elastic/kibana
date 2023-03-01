@@ -23,7 +23,9 @@ export function ApmServiceWrapper() {
     () => [
       {
         title: ServiceInventoryTitle,
-        href: router.link('/services', { query }),
+        href: router.link('/services', {
+          query: { ...query, highlighted: '', highlightedTransactionType: '' },
+        }),
       },
       {
         title: serviceName,

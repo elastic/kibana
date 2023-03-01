@@ -24,7 +24,7 @@ const chartBase: ChartBase = {
     defaultMessage: 'Cold start duration',
   }),
   key: 'cold_start_duration',
-  type: 'linemark',
+  type: 'line',
   yUnit: 'time',
   series: {
     coldStart: {

@@ -57,6 +57,8 @@ export function getPathForServiceDetail(
     rangeFrom: from,
     rangeTo: to,
     environment: defaultEnvironment as Environment,
+    highlighted: '',
+    highlightedTransactionType: '',
   } as const;
 
   if (!payload.serviceName) {

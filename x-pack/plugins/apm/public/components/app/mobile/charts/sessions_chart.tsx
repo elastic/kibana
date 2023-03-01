@@ -96,7 +96,7 @@ export function SessionsChart({
   const timeseries = [
     {
       data: data.currentPeriod.timeseries,
-      type: 'linemark',
+      type: 'line' as const,
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.transactions.sessionsChartTitle', {
         defaultMessage: 'Sessions',
@@ -106,7 +106,7 @@ export function SessionsChart({
       ? [
           {
             data: data.previousPeriod.timeseries,
-            type: 'area',
+            type: 'area' as const,
             color: previousPeriodColor,
             title: previousPeriodLabel,
           },

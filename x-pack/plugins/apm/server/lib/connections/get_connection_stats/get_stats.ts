@@ -25,7 +25,6 @@ import {
   SPAN_SUBTYPE,
   SPAN_TYPE,
 } from '../../../../common/es_fields/apm';
-import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { NodeType } from '../../../../common/connections';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
@@ -37,14 +36,14 @@ export const getStats = async ({
   start,
   end,
   filter,
-  numBuckets,
+  intervalString,
   offset,
 }: {
   apmEventClient: APMEventClient;
   start: number;
   end: number;
   filter: QueryDslQueryContainer[];
-  numBuckets: number;
+  intervalString: string;
   offset?: string;
 }) => {
   const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
@@ -127,12 +126,7 @@ export const getStats = async ({
             timeseries: {
               date_histogram: {
                 field: '@timestamp',
-                fixed_interval: getBucketSize({
-                  start: startWithOffset,
-                  end: endWithOffset,
-                  numBuckets,
-                  minBucketSize: 60,
-                }).intervalString,
+                fixed_interval: intervalString,
                 extended_bounds: {
                   min: startWithOffset,
                   max: endWithOffset,
@@ -187,6 +181,7 @@ export const getStats = async ({
         to: {
           id: objectHash({ dependencyName }),
           dependencyName,
+          address: dependencyName,
           spanType: sample[SPAN_TYPE] as string,
           spanSubtype: (sample[SPAN_SUBTYPE] || '') as string,
           type: NodeType.dependency as const,

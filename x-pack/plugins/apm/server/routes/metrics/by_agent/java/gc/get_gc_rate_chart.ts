@@ -27,7 +27,7 @@ const chartBase: ChartBase = {
     defaultMessage: 'Garbage collection per minute',
   }),
   key: 'gc_rate_line_chart',
-  type: 'linemark',
+  type: 'line',
   yUnit: 'integer',
   series,
 };

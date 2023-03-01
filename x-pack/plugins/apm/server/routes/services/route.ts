@@ -17,6 +17,8 @@ import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import * as t from 'io-ts';
 import { mergeWith, uniq } from 'lodash';
 import { ML_ERRORS } from '../../../common/anomaly_detection';
+import { ApmMlJobResultWithTimeseries } from '../../../common/anomaly_detection/apm_ml_job_result';
+import { ApmMlModule } from '../../../common/anomaly_detection/apm_ml_module';
 import { offsetRt } from '../../../common/comparison_rt';
 import { ConnectionStatsItemWithImpact } from '../../../common/connections';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
@@ -32,11 +34,12 @@ import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
-  serviceTransactionDataSourceRt,
   environmentRt,
   kueryRt,
   probabilityRt,
   rangeRt,
+  serviceDestinationDataSourceRt,
+  serviceTransactionDataSourceRt,
 } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { getServiceAnnotations } from './annotations';
@@ -54,6 +57,18 @@ import { getServiceMetadataDetails } from './get_service_metadata_details';
 import { getServiceMetadataIcons } from './get_service_metadata_icons';
 import { getServiceNodeMetadata } from './get_service_node_metadata';
 import { getServiceOverviewContainerMetadata } from './get_service_overview_container_metadata';
+import {
+  getServiceSummaryAnomalies,
+  ServiceSummaryAnomalyStats,
+} from './get_service_summary/get_service_summary_anomalies';
+import {
+  getServiceSummaryServiceDestinationStats,
+  ServiceSummaryServiceDestinationStats,
+} from './get_service_summary/get_service_summary_service_destination';
+import {
+  getServiceTransactionSummary,
+  ServiceSummaryTransactionStats,
+} from './get_service_summary/get_service_transaction_summary';
 import { getServiceTransactionTypes } from './get_service_transaction_types';
 import { getThroughput } from './get_throughput';
 
@@ -1108,9 +1123,7 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    allAnomalyTimeseries: Array<
-      import('./../../../common/anomaly_detection/service_anomaly_timeseries').ServiceAnomalyTimeseries
-    >;
+    allAnomalyTimeseries: ApmMlJobResultWithTimeseries[];
   }> => {
     const mlClient = await getMlClient(resources);
 
@@ -1125,13 +1138,15 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
 
     try {
       const allAnomalyTimeseries = await getAnomalyTimeseries({
-        serviceName,
-        transactionType,
+        partition: serviceName,
+        by: transactionType,
         start,
         end,
         mlClient,
         logger: resources.logger,
         environment,
+        bucketSizeInSeconds: 'auto',
+        module: ApmMlModule.Transaction,
       });
 
       return {
@@ -1186,6 +1201,163 @@ const serviceAlertsRoute = createApmServerRoute({
   },
 });
 
+const serviceSummaryTransactionRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/summary/transaction',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      serviceTransactionDataSourceRt,
+      t.type({
+        bucketSizeInSeconds: toNumberRt,
+        transactionType: t.string,
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (
+    resources
+  ): Promise<{ stats: ServiceSummaryTransactionStats }> => {
+    const {
+      path: { serviceName },
+      query: {
+        start,
+        end,
+        environment,
+        documentType,
+        rollupInterval,
+        bucketSizeInSeconds,
+        transactionType,
+      },
+    } = resources.params;
+
+    const apmEventClient = await getApmEventClient(resources);
+
+    return {
+      stats: await getServiceTransactionSummary({
+        apmEventClient,
+        documentType,
+        rollupInterval,
+        bucketSizeInSeconds,
+        serviceName,
+        start,
+        end,
+        environment,
+        transactionType,
+      }),
+    };
+  },
+});
+
+const serviceSummaryServiceDestinationRoute = createApmServerRoute({
+  endpoint:
+    'GET /internal/apm/services/{serviceName}/summary/service_destination',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      serviceDestinationDataSourceRt,
+      t.type({
+        bucketSizeInSeconds: toNumberRt,
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (
+    resources
+  ): Promise<{ stats: ServiceSummaryServiceDestinationStats }> => {
+    const {
+      path: { serviceName },
+      query: {
+        start,
+        end,
+        environment,
+        documentType,
+        rollupInterval,
+        bucketSizeInSeconds,
+      },
+    } = resources.params;
+
+    const apmEventClient = await getApmEventClient(resources);
+
+    return {
+      stats: await getServiceSummaryServiceDestinationStats({
+        apmEventClient,
+        documentType,
+        rollupInterval,
+        bucketSizeInSeconds,
+        serviceName,
+        start,
+        end,
+        environment,
+      }),
+    };
+  },
+});
+
+const serviceSummaryAnomalyRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/summary/anomalies',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      rangeRt,
+      environmentRt,
+      t.type({ by: t.union([t.string, t.null]) }),
+      t.type({
+        module: t.union([
+          t.literal(ApmMlModule.Transaction),
+          t.literal(ApmMlModule.ServiceDestination),
+        ]),
+      }),
+      t.type({
+        bucketSizeInSeconds: toNumberRt,
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (
+    resources
+  ): Promise<{ anomalies: ServiceSummaryAnomalyStats }> => {
+    const {
+      path: { serviceName },
+      query: { start, end, environment, by, bucketSizeInSeconds, module },
+    } = resources.params;
+
+    const mlClient = await getMlClient(resources);
+
+    if (!mlClient) {
+      throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
+    }
+
+    return {
+      anomalies: await getServiceSummaryAnomalies({
+        mlClient,
+        bucketSizeInSeconds,
+        serviceName,
+        start,
+        end,
+        environment,
+        by,
+        module,
+      }),
+    };
+  },
+});
+
 export const serviceRouteRepository = {
   ...servicesRoute,
   ...servicesDetailedStatisticsRoute,
@@ -1204,4 +1376,7 @@ export const serviceRouteRepository = {
   ...serviceDependenciesBreakdownRoute,
   ...serviceAnomalyChartsRoute,
   ...serviceAlertsRoute,
+  ...serviceSummaryTransactionRoute,
+  ...serviceSummaryServiceDestinationRoute,
+  ...serviceSummaryAnomalyRoute,
 };

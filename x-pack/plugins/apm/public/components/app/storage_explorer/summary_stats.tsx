@@ -58,6 +58,8 @@ export function SummaryStats() {
       comparisonEnabled,
       kuery,
       serviceGroup: '',
+      highlighted: '',
+      highlightedTransactionType: '',
     },
   });
 
