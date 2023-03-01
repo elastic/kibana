@@ -60,6 +60,7 @@ export function getConnectorType(): SlackConnectorType {
       params: {
         schema: SlackParamsSchema,
       },
+      connector: validate.connector,
     },
     renderParameterTemplates,
     executor: (execOptions: SlackExecutorOptions) => {

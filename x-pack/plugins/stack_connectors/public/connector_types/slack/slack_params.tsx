@@ -20,7 +20,7 @@ const SlackParamsFields: React.FunctionComponent<
 
   return (
     <>
-      {slackType === 'webhook' ? <SlackWebhookParamsFields {...props} /> : null}
+      {!slackType || slackType === 'webhook' ? <SlackWebhookParamsFields {...props} /> : null}
       {slackType === 'web_api' ? <SlackWebApiParamsFields {...props} /> : null}
     </>
   );
