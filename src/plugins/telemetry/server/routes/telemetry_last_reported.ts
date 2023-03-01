@@ -9,6 +9,7 @@
 import type { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
+import { v2 } from '../../common/types';
 import { getTelemetrySavedObject, updateTelemetrySavedObject } from '../saved_objects';
 
 export function registerTelemetryLastReported(
@@ -25,10 +26,12 @@ export function registerTelemetryLastReported(
       const savedObjectsInternalClient = await firstValueFrom(savedObjectsInternalClient$);
       const telemetrySavedObject = await getTelemetrySavedObject(savedObjectsInternalClient);
 
+      const body: v2.FetchLastReportedResponse = {
+        lastReported: telemetrySavedObject && telemetrySavedObject?.lastReported,
+      };
+
       return res.ok({
-        body: {
-          lastReported: telemetrySavedObject && telemetrySavedObject?.lastReported,
-        },
+        body,
       });
     }
   );
