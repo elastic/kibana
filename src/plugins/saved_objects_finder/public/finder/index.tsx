@@ -13,7 +13,6 @@ import { HttpStart } from '@kbn/core-http-browser';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SavedObjectFinderProps } from './saved_object_finder';
-import SavedObjectFinderUi from './saved_object_finder';
 
 const LazySavedObjectFinder = React.lazy(() => import('./saved_object_finder'));
 const SavedObjectFinder = (props: SavedObjectFinderProps) => (
@@ -43,4 +42,4 @@ export const getSavedObjectFinder = (
 };
 
 export type { SavedObjectMetaData, SavedObjectFinderProps } from './saved_object_finder';
-export { SavedObjectFinder, SavedObjectFinderUi };
+export { SavedObjectFinder };
