@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import { take, filter } from 'rxjs/operators';
-
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
@@ -118,7 +118,7 @@ export interface FleetSetupDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   cloud?: CloudSetup;
   usageCollection?: UsageCollectionSetup;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
 }
@@ -386,7 +386,7 @@ export class FleetPlugin
             return getInternalSoClient();
           },
           get spaceId() {
-            return deps.spaces.spacesService.getSpaceId(request);
+            return deps.spaces?.spacesService?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
           },
 
           get limitedToPackages() {

@@ -1,0 +1,1581 @@
+{
+  "id": "@kbn/shared-ux-file-types",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-file-types",
+        "id": "def-common.Abortable",
+        "type": "Interface",
+        "tags": [],
+        "label": "Abortable",
+        "description": [],
+        "path": "packages/shared-ux/file/types/base_file_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.Abortable.abortSignal",
+            "type": "Object",
+            "tags": [],
+            "label": "abortSignal",
+            "description": [],
+            "signature": [
+              "AbortSignal | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-types",
+        "id": "def-common.BaseFilesClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseFilesClient",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-file-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileTypesPluginApi",
+            "section": "def-common.BaseFilesClient",
+            "text": "BaseFilesClient"
+          },
+          "<M>"
+        ],
+        "path": "packages/shared-ux/file/types/base_file_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.find",
+            "type": "Function",
+            "tags": [],
+            "label": "find",
+            "description": [
+              "\nFind a set of files given some filters.\n"
+            ],
+            "signature": [
+              "(args: { kind?: string | string[] | undefined; status?: string | string[] | undefined; extension?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Pagination",
+                "text": "Pagination"
+              },
+              " & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Abortable",
+                "text": "Abortable"
+              },
+              ") => Promise<{ files: ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
+              "<unknown>[]; total: number; }>"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.find.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- File filters"
+                ],
+                "signature": [
+                  "{ kind?: string | string[] | undefined; status?: string | string[] | undefined; extension?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Pagination",
+                    "text": "Pagination"
+                  },
+                  " & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Abortable",
+                    "text": "Abortable"
+                  }
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.bulkDelete",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkDelete",
+            "description": [
+              "\nBulk a delete a set of files given their IDs.\n"
+            ],
+            "signature": [
+              "(args: { ids: string[]; } & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Abortable",
+                "text": "Abortable"
+              },
+              ") => Promise<{ succeeded: string[]; failed?: [id: string, reason: string][] | undefined; }>"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.bulkDelete.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- Bulk delete args"
+                ],
+                "signature": [
+                  "{ ids: string[]; } & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Abortable",
+                    "text": "Abortable"
+                  }
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "\nCreate a new file object with the provided metadata.\n"
+            ],
+            "signature": [
+              "(args: { name: string; meta?: M | undefined; alt?: string | undefined; mimeType?: string | undefined; kind: string; } & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Abortable",
+                "text": "Abortable"
+              },
+              ") => Promise<{ file: ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
+              "<M>; }>"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.create.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- create file args"
+                ],
+                "signature": [
+                  "{ name: string; meta?: M | undefined; alt?: string | undefined; mimeType?: string | undefined; kind: string; } & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Abortable",
+                    "text": "Abortable"
+                  }
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [
+              "\nDelete a file object and all associated share and content objects.\n"
+            ],
+            "signature": [
+              "(args: { id: string; kind: string; } & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Abortable",
+                "text": "Abortable"
+              },
+              ") => Promise<{ ok: true; }>"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.delete.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- delete file args"
+                ],
+                "signature": [
+                  "{ id: string; kind: string; } & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Abortable",
+                    "text": "Abortable"
+                  }
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.getById",
+            "type": "Function",
+            "tags": [],
+            "label": "getById",
+            "description": [
+              "\nGet a file object by ID.\n"
+            ],
+            "signature": [
+              "(args: { id: string; kind: string; } & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Abortable",
+                "text": "Abortable"
+              },
+              ") => Promise<{ file: ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
+              "<M>; }>"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.getById.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- get file by ID args"
+                ],
+                "signature": [
+                  "{ id: string; kind: string; } & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Abortable",
+                    "text": "Abortable"
+                  }
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.list",
+            "type": "Function",
+            "tags": [],
+            "label": "list",
+            "description": [
+              "\nList all file objects, of a given {@link FileKindBrowser}.\n"
+            ],
+            "signature": [
+              "(args: { kind: string; status?: string | string[] | undefined; extension?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Pagination",
+                "text": "Pagination"
+              },
+              " & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Abortable",
+                "text": "Abortable"
+              },
+              ") => Promise<{ files: ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
+              "<M>[]; total: number; }>"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.list.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- list files args"
+                ],
+                "signature": [
+                  "{ kind: string; status?: string | string[] | undefined; extension?: string | string[] | undefined; name?: string | string[] | undefined; meta?: M | undefined; } & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Pagination",
+                    "text": "Pagination"
+                  },
+                  " & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Abortable",
+                    "text": "Abortable"
+                  }
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [
+              "\nUpdate a set of of metadata values of the file object.\n"
+            ],
+            "signature": [
+              "(args: { id: string; kind: string; name?: string | undefined; meta?: M | undefined; alt?: string | undefined; } & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Abortable",
+                "text": "Abortable"
+              },
+              ") => Promise<{ file: ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
+              "<M>; }>"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.update.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- update file args"
+                ],
+                "signature": [
+                  "{ id: string; kind: string; name?: string | undefined; meta?: M | undefined; alt?: string | undefined; } & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Abortable",
+                    "text": "Abortable"
+                  }
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.upload",
+            "type": "Function",
+            "tags": [],
+            "label": "upload",
+            "description": [
+              "\nStream the contents of the file to Kibana server for storage.\n"
+            ],
+            "signature": [
+              "(args: { id: string; body: unknown; kind: string; abortSignal?: AbortSignal | undefined; contentType?: string | undefined; selfDestructOnAbort?: boolean | undefined; } & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Abortable",
+                "text": "Abortable"
+              },
+              ") => Promise<{ ok: true; size: number; }>"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.upload.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- upload file args"
+                ],
+                "signature": [
+                  "{ id: string; body: unknown; kind: string; abortSignal?: AbortSignal | undefined; contentType?: string | undefined; selfDestructOnAbort?: boolean | undefined; } & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Abortable",
+                    "text": "Abortable"
+                  }
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.download",
+            "type": "Function",
+            "tags": [],
+            "label": "download",
+            "description": [
+              "\nStream a download of the file object's content.\n"
+            ],
+            "signature": [
+              "(args: { fileName?: string | undefined; id: string; kind: string; } & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Abortable",
+                "text": "Abortable"
+              },
+              ") => Promise<any>"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.download.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- download file args"
+                ],
+                "signature": [
+                  "{ fileName?: string | undefined; id: string; kind: string; } & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Abortable",
+                    "text": "Abortable"
+                  }
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.getDownloadHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getDownloadHref",
+            "description": [
+              "\nGet a string for downloading a file that can be passed to a button element's\nhref for download.\n"
+            ],
+            "signature": [
+              "(args: Pick<",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileJSON",
+                "text": "FileJSON"
+              },
+              "<unknown>, \"id\" | \"fileKind\">) => string"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.getDownloadHref.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- get download URL args"
+                ],
+                "signature": [
+                  "Pick<",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.FileJSON",
+                    "text": "FileJSON"
+                  },
+                  "<unknown>, \"id\" | \"fileKind\">"
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.share",
+            "type": "Function",
+            "tags": [
+              "note"
+            ],
+            "label": "share",
+            "description": [
+              "\nShare a file by creating a new file share instance.\n"
+            ],
+            "signature": [
+              "(args: { name?: string | undefined; validUntil?: number | undefined; fileId: string; kind: string; } & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Abortable",
+                "text": "Abortable"
+              },
+              ") => Promise<",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileShareJSONWithToken",
+                "text": "FileShareJSONWithToken"
+              },
+              ">"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.share.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- File share arguments"
+                ],
+                "signature": [
+                  "{ name?: string | undefined; validUntil?: number | undefined; fileId: string; kind: string; } & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Abortable",
+                    "text": "Abortable"
+                  }
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.unshare",
+            "type": "Function",
+            "tags": [],
+            "label": "unshare",
+            "description": [
+              "\nDelete a file share instance.\n"
+            ],
+            "signature": [
+              "(args: { id: string; kind: string; } & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Abortable",
+                "text": "Abortable"
+              },
+              ") => Promise<{ ok: true; }>"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.unshare.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- File unshare arguments"
+                ],
+                "signature": [
+                  "{ id: string; kind: string; } & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Abortable",
+                    "text": "Abortable"
+                  }
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.getShare",
+            "type": "Function",
+            "tags": [],
+            "label": "getShare",
+            "description": [
+              "\nGet a file share instance.\n"
+            ],
+            "signature": [
+              "(args: { id: string; kind: string; } & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Abortable",
+                "text": "Abortable"
+              },
+              ") => Promise<{ share: ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileShareJSON",
+                "text": "FileShareJSON"
+              },
+              "; }>"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.getShare.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- Get file share arguments"
+                ],
+                "signature": [
+                  "{ id: string; kind: string; } & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Abortable",
+                    "text": "Abortable"
+                  }
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.listShares",
+            "type": "Function",
+            "tags": [],
+            "label": "listShares",
+            "description": [
+              "\nList all file shares. Optionally scoping to a specific\nfile.\n"
+            ],
+            "signature": [
+              "(args: { forFileId?: string | undefined; kind: string; } & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Pagination",
+                "text": "Pagination"
+              },
+              " & ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.Abortable",
+                "text": "Abortable"
+              },
+              ") => Promise<{ shares: ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileShareJSON",
+                "text": "FileShareJSON"
+              },
+              "[]; }>"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.listShares.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "args",
+                "description": [
+                  "- Get file share arguments"
+                ],
+                "signature": [
+                  "{ forFileId?: string | undefined; kind: string; } & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Pagination",
+                    "text": "Pagination"
+                  },
+                  " & ",
+                  {
+                    "pluginId": "@kbn/shared-ux-file-types",
+                    "scope": "common",
+                    "docId": "kibKbnSharedUxFileTypesPluginApi",
+                    "section": "def-common.Abortable",
+                    "text": "Abortable"
+                  }
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.BaseFilesClient.getFileKind",
+            "type": "Function",
+            "tags": [],
+            "label": "getFileKind",
+            "description": [
+              "\nGet a file kind"
+            ],
+            "signature": [
+              "(id: string) => ",
+              {
+                "pluginId": "@kbn/shared-ux-file-types",
+                "scope": "common",
+                "docId": "kibKbnSharedUxFileTypesPluginApi",
+                "section": "def-common.FileKindBase",
+                "text": "FileKindBase"
+              }
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/shared-ux-file-types",
+                "id": "def-common.BaseFilesClient.getFileKind.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [
+                  "The id of the file kind"
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/shared-ux/file/types/base_file_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-types",
+        "id": "def-common.FileImageMetadata",
+        "type": "Interface",
+        "tags": [],
+        "label": "FileImageMetadata",
+        "description": [
+          "\nSet of metadata captured for every image uploaded via the file services'\npublic components."
+        ],
+        "path": "packages/shared-ux/file/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileImageMetadata.blurhash",
+            "type": "string",
+            "tags": [],
+            "label": "blurhash",
+            "description": [
+              "\nThe blurhash that can be displayed while the image is loading"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileImageMetadata.width",
+            "type": "number",
+            "tags": [],
+            "label": "width",
+            "description": [
+              "\nWidth, in px, of the original image"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileImageMetadata.height",
+            "type": "number",
+            "tags": [],
+            "label": "height",
+            "description": [
+              "\nHeight, in px, of the original image"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-types",
+        "id": "def-common.FileJSON",
+        "type": "Interface",
+        "tags": [],
+        "label": "FileJSON",
+        "description": [
+          "\nAttributes of a file that represent a serialised version of the file."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-file-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileTypesPluginApi",
+            "section": "def-common.FileJSON",
+            "text": "FileJSON"
+          },
+          "<Meta>"
+        ],
+        "path": "packages/shared-ux/file/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileJSON.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique file ID."
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileJSON.created",
+            "type": "string",
+            "tags": [],
+            "label": "created",
+            "description": [
+              "\nISO string of when this file was created"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileJSON.updated",
+            "type": "string",
+            "tags": [],
+            "label": "updated",
+            "description": [
+              "\nISO string of when the file was updated"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileJSON.name",
+            "type": "string",
+            "tags": [
+              "note"
+            ],
+            "label": "name",
+            "description": [
+              "\nFile name.\n"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileJSON.mimeType",
+            "type": "string",
+            "tags": [],
+            "label": "mimeType",
+            "description": [
+              "\nMIME type of the file's contents."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileJSON.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [
+              "\nThe size, in bytes, of the file content."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileJSON.extension",
+            "type": "string",
+            "tags": [
+              "note"
+            ],
+            "label": "extension",
+            "description": [
+              "\nThe file extension (dot suffix).\n"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileJSON.meta",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "meta",
+            "description": [
+              "\nA consumer defined set of attributes.\n\nConsumers of the file service can add their own tags and identifiers to\na file using the \"meta\" object."
+            ],
+            "signature": [
+              "Meta | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileJSON.alt",
+            "type": "string",
+            "tags": [],
+            "label": "alt",
+            "description": [
+              "\nUse this text to describe the file contents for display and accessibility."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileJSON.fileKind",
+            "type": "string",
+            "tags": [
+              "note"
+            ],
+            "label": "fileKind",
+            "description": [
+              "\nA unique kind that governs various aspects of the file. A consumer of the\nfiles service must register a file kind and link their files to a specific\nkind.\n"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileJSON.status",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "status",
+            "description": [
+              "\nThe current status of the file.\n\nSee {@link FileStatus} for more details."
+            ],
+            "signature": [
+              "\"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\""
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileJSON.user",
+            "type": "Object",
+            "tags": [],
+            "label": "user",
+            "description": [
+              "\nUser data associated with this file"
+            ],
+            "signature": [
+              "{ name?: string | undefined; id?: string | undefined; } | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-types",
+        "id": "def-common.FileKindBase",
+        "type": "Interface",
+        "tags": [],
+        "label": "FileKindBase",
+        "description": [],
+        "path": "packages/shared-ux/file/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileKindBase.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique file kind ID"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileKindBase.allowedMimeTypes",
+            "type": "Array",
+            "tags": [
+              "default"
+            ],
+            "label": "allowedMimeTypes",
+            "description": [
+              "\nThe MIME type of the file content.\n"
+            ],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-types",
+        "id": "def-common.FileKindBrowser",
+        "type": "Interface",
+        "tags": [],
+        "label": "FileKindBrowser",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-file-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileTypesPluginApi",
+            "section": "def-common.FileKindBrowser",
+            "text": "FileKindBrowser"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/shared-ux-file-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileTypesPluginApi",
+            "section": "def-common.FileKindBase",
+            "text": "FileKindBase"
+          }
+        ],
+        "path": "packages/shared-ux/file/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileKindBrowser.maxSizeBytes",
+            "type": "number",
+            "tags": [
+              "default"
+            ],
+            "label": "maxSizeBytes",
+            "description": [
+              "\nMax file contents size, in bytes, enforced for this file kind in the upload\ncomponent.\n"
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-types",
+        "id": "def-common.FileShareJSON",
+        "type": "Interface",
+        "tags": [],
+        "label": "FileShareJSON",
+        "description": [
+          "\nAttributes of a file that represent a serialised version of the file."
+        ],
+        "path": "packages/shared-ux/file/types/sharing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileShareJSON.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [
+              "\nUnique ID share instance"
+            ],
+            "path": "packages/shared-ux/file/types/sharing.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileShareJSON.created",
+            "type": "string",
+            "tags": [],
+            "label": "created",
+            "description": [
+              "\nISO timestamp the share was created"
+            ],
+            "path": "packages/shared-ux/file/types/sharing.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileShareJSON.validUntil",
+            "type": "number",
+            "tags": [],
+            "label": "validUntil",
+            "description": [
+              "\nUnix timestamp (in milliseconds) of when this share expires"
+            ],
+            "path": "packages/shared-ux/file/types/sharing.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileShareJSON.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [
+              "\nA user-friendly name for the file share"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/sharing.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.FileShareJSON.fileId",
+            "type": "string",
+            "tags": [],
+            "label": "fileId",
+            "description": [
+              "\nThe ID of the file this share is linked to"
+            ],
+            "path": "packages/shared-ux/file/types/sharing.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-types",
+        "id": "def-common.Pagination",
+        "type": "Interface",
+        "tags": [],
+        "label": "Pagination",
+        "description": [],
+        "path": "packages/shared-ux/file/types/base_file_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.Pagination.page",
+            "type": "number",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/shared-ux-file-types",
+            "id": "def-common.Pagination.perPage",
+            "type": "number",
+            "tags": [],
+            "label": "perPage",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "packages/shared-ux/file/types/base_file_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-file-types",
+        "id": "def-common.BaseFileMetadata",
+        "type": "Type",
+        "tags": [],
+        "label": "BaseFileMetadata",
+        "description": [
+          "\nFile metadata fields are defined per the ECS specification:\n\nhttps://www.elastic.co/guide/en/ecs/current/ecs-file.html\n\nCustom fields are named according to the custom field convention: \"CustomFieldName\"."
+        ],
+        "signature": [
+          "{ name?: string | undefined; mime_type?: string | undefined; created?: string | undefined; size?: number | undefined; hash?: { [hashName: string]: string | undefined; md5?: string | undefined; sha1?: string | undefined; sha256?: string | undefined; sha384?: string | undefined; sha512?: string | undefined; ssdeep?: string | undefined; tlsh?: string | undefined; } | undefined; user?: { name?: string | undefined; id?: string | undefined; } | undefined; extension?: string | undefined; Alt?: string | undefined; Updated?: string | undefined; Status?: ",
+          {
+            "pluginId": "@kbn/shared-ux-file-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileTypesPluginApi",
+            "section": "def-common.FileStatus",
+            "text": "FileStatus"
+          },
+          " | undefined; ChunkSize?: number | undefined; Compression?: ",
+          {
+            "pluginId": "@kbn/shared-ux-file-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileTypesPluginApi",
+            "section": "def-common.FileCompression",
+            "text": "FileCompression"
+          },
+          " | undefined; }"
+        ],
+        "path": "packages/shared-ux/file/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-types",
+        "id": "def-common.FileCompression",
+        "type": "Type",
+        "tags": [],
+        "label": "FileCompression",
+        "description": [
+          "\nSupported file compression algorithms"
+        ],
+        "signature": [
+          "\"none\" | \"br\" | \"gzip\" | \"deflate\""
+        ],
+        "path": "packages/shared-ux/file/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-types",
+        "id": "def-common.FileMetadata",
+        "type": "Type",
+        "tags": [],
+        "label": "FileMetadata",
+        "description": [
+          "\nExtra metadata on a file object specific to Kibana implementation."
+        ],
+        "signature": [
+          "Required<Pick<",
+          {
+            "pluginId": "@kbn/shared-ux-file-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileTypesPluginApi",
+            "section": "def-common.BaseFileMetadata",
+            "text": "BaseFileMetadata"
+          },
+          ", \"name\" | \"created\" | \"Status\" | \"Updated\">> & ",
+          {
+            "pluginId": "@kbn/shared-ux-file-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileTypesPluginApi",
+            "section": "def-common.BaseFileMetadata",
+            "text": "BaseFileMetadata"
+          },
+          " & { FileKind: string; Meta?: Meta | undefined; }"
+        ],
+        "path": "packages/shared-ux/file/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-types",
+        "id": "def-common.FileShare",
+        "type": "Type",
+        "tags": [],
+        "label": "FileShare",
+        "description": [
+          "\nData stored with a file share object"
+        ],
+        "signature": [
+          "{ created: string; token: string; name?: string | undefined; valid_until: number; }"
+        ],
+        "path": "packages/shared-ux/file/types/sharing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-types",
+        "id": "def-common.FileShareJSONWithToken",
+        "type": "Type",
+        "tags": [
+          "note"
+        ],
+        "label": "FileShareJSONWithToken",
+        "description": [
+          "\nA version of the file share with a token included.\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-file-types",
+            "scope": "common",
+            "docId": "kibKbnSharedUxFileTypesPluginApi",
+            "section": "def-common.FileShareJSON",
+            "text": "FileShareJSON"
+          },
+          " & { token: string; }"
+        ],
+        "path": "packages/shared-ux/file/types/sharing.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-file-types",
+        "id": "def-common.FileStatus",
+        "type": "Type",
+        "tags": [],
+        "label": "FileStatus",
+        "description": [],
+        "signature": [
+          "\"AWAITING_UPLOAD\" | \"UPLOADING\" | \"READY\" | \"UPLOAD_ERROR\" | \"DELETED\""
+        ],
+        "path": "packages/shared-ux/file/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

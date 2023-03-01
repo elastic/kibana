@@ -869,6 +869,69 @@
     "functions": [
       {
         "parentPluginId": "alerting",
+        "id": "def-server.getComponentTemplate",
+        "type": "Function",
+        "tags": [],
+        "label": "getComponentTemplate",
+        "description": [],
+        "signature": [
+          "(fieldMap: ",
+          {
+            "pluginId": "@kbn/alerts-as-data-utils",
+            "scope": "common",
+            "docId": "kibKbnAlertsAsDataUtilsPluginApi",
+            "section": "def-common.FieldMap",
+            "text": "FieldMap"
+          },
+          ", context?: string | undefined) => ",
+          "ClusterPutComponentTemplateRequest"
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.getComponentTemplate.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldMap",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerts-as-data-utils",
+                "scope": "common",
+                "docId": "kibKbnAlertsAsDataUtilsPluginApi",
+                "section": "def-common.FieldMap",
+                "text": "FieldMap"
+              }
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.getComponentTemplate.$2",
+            "type": "string",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/alerts_service/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-server.getEsErrorMessage",
         "type": "Function",
         "tags": [],
@@ -3241,6 +3304,33 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-server.ECS_COMPONENT_TEMPLATE_NAME",
+        "type": "string",
+        "tags": [],
+        "label": "ECS_COMPONENT_TEMPLATE_NAME",
+        "description": [],
+        "path": "x-pack/plugins/alerting/server/alerts_service/alerts_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-server.ECS_CONTEXT",
+        "type": "string",
+        "tags": [],
+        "label": "ECS_CONTEXT",
+        "description": [],
+        "signature": [
+          "\"ecs\""
+        ],
+        "path": "x-pack/plugins/alerting/server/alerts_service/alerts_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-server.ExecutorType",
         "type": "Type",
         "tags": [],
@@ -3940,6 +4030,42 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.getComponentTemplateFromFieldMap",
+        "type": "Function",
+        "tags": [],
+        "label": "getComponentTemplateFromFieldMap",
+        "description": [],
+        "signature": [
+          "({ name, fieldMap, fieldLimit, }: ",
+          "GetComponentTemplateFromFieldMapOpts",
+          ") => ",
+          "ClusterPutComponentTemplateRequest"
+        ],
+        "path": "x-pack/plugins/alerting/common/alert_schema/field_maps/component_template_from_field_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.getComponentTemplateFromFieldMap.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  name,\n  fieldMap,\n  fieldLimit,\n}",
+            "description": [],
+            "signature": [
+              "GetComponentTemplateFromFieldMapOpts"
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_schema/field_maps/component_template_from_field_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.getDurationNumberInItsUnit",
         "type": "Function",
         "tags": [],
@@ -4044,6 +4170,69 @@
               "string"
             ],
             "path": "x-pack/plugins/alerting/common/disabled_action_groups.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
+        "id": "def-common.mappingFromFieldMap",
+        "type": "Function",
+        "tags": [],
+        "label": "mappingFromFieldMap",
+        "description": [],
+        "signature": [
+          "(fieldMap: ",
+          {
+            "pluginId": "@kbn/alerts-as-data-utils",
+            "scope": "common",
+            "docId": "kibKbnAlertsAsDataUtilsPluginApi",
+            "section": "def-common.FieldMap",
+            "text": "FieldMap"
+          },
+          ", dynamic: boolean | \"strict\") => ",
+          "MappingTypeMapping"
+        ],
+        "path": "x-pack/plugins/alerting/common/alert_schema/field_maps/mapping_from_field_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.mappingFromFieldMap.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "fieldMap",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/alerts-as-data-utils",
+                "scope": "common",
+                "docId": "kibKbnAlertsAsDataUtilsPluginApi",
+                "section": "def-common.FieldMap",
+                "text": "FieldMap"
+              }
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_schema/field_maps/mapping_from_field_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.mappingFromFieldMap.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "dynamic",
+            "description": [],
+            "signature": [
+              "boolean | \"strict\""
+            ],
+            "path": "x-pack/plugins/alerting/common/alert_schema/field_maps/mapping_from_field_map.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

@@ -20,12 +20,14 @@ export const ActionsLogFilter = memo(
     filterName,
     isFlyout,
     onChangeFilterOptions,
+    'data-test-subj': dataTestSubj,
   }: {
     filterName: FilterName;
     isFlyout: boolean;
     onChangeFilterOptions: (selectedOptions: string[]) => void;
+    'data-test-subj'?: string;
   }) => {
-    const getTestId = useTestIdGenerator('response-actions-list');
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     // popover states and handlers
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -177,6 +179,7 @@ export const ActionsLogFilter = memo(
         numActiveFilters={numActiveFilters}
         numFilters={numFilters}
         onButtonClick={onPopoverButtonClick}
+        data-test-subj={dataTestSubj}
       >
         <EuiSelectable
           aria-label={`${filterName}`}
