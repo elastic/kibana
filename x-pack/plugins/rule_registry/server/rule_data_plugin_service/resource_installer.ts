@@ -141,7 +141,7 @@ export class ResourceInstaller {
   public async installIndexLevelResources(indexInfo: IndexInfo): Promise<void> {
     await this.installWithTimeout(`resources for index ${indexInfo.baseName}`, async () => {
       const { frameworkAlerts } = this.options;
-      const { componentTemplates, ilmPolicy } = indexInfo.indexOptions;
+      const { componentTemplates, ilmPolicy, additionalPrefix } = indexInfo.indexOptions;
       if (ilmPolicy != null) {
         await this.createOrUpdateLifecyclePolicy({
           name: indexInfo.getIlmPolicyName(),
@@ -149,7 +149,7 @@ export class ResourceInstaller {
         });
       }
 
-      if (!frameworkAlerts.enabled()) {
+      if (!frameworkAlerts.enabled() || additionalPrefix) {
         await Promise.all(
           componentTemplates.map(async (ct) => {
             await this.createOrUpdateComponentTemplate({
@@ -260,7 +260,11 @@ export class ResourceInstaller {
 
     const alias = indexInfo.getPrimaryAlias(namespace);
 
-    if (namespace === 'default' && frameworkAlerts.enabled()) {
+    if (
+      namespace === 'default' &&
+      !indexInfo.indexOptions.additionalPrefix &&
+      frameworkAlerts.enabled()
+    ) {
       const initialized = await frameworkAlerts.isContextInitialized(
         indexInfo.indexOptions.registrationContext
       );

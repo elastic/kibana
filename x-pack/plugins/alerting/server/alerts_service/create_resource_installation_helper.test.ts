@@ -195,7 +195,7 @@ describe('createResourceInstallationHelper', () => {
     ).toBe(false);
   });
 
-  test(`test should correct return context initialized = true when context requested before initialization has started`, async () => {
+  test(`should correctly return context initialized = true when context requested before initialization has started`, async () => {
     const helper = createResourceInstallationHelper(logger, initFn);
 
     // Add two contexts that need to be initialized but don't call helper.setReadyToInitialize()
