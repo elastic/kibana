@@ -52,11 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const filterSelectItem = await find.byCssSelector(`.euiFilterSelectItem`);
       await filterSelectItem.click();
       await testSubjects.click('thresholdAlertTimeFieldSelect');
-      await retry.try(async () => {
-        const fieldOptions = await find.allByCssSelector('#thresholdTimeField option');
-        expect(fieldOptions[1]).not.to.be(undefined);
-        await fieldOptions[1].click();
-      });
+      await testSubjects.setValue('thresholdAlertTimeFieldSelect', '@timestamp');
       await commonScreenshots.takeScreenshot(
         'rule-types-index-threshold-example-index',
         screenshotDirectories,
