@@ -529,11 +529,11 @@ x-pack/plugins/security @elastic/kibana-security
 x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/response-ops
 x-pack/plugins/security_solution @elastic/security-solution
 x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
-packages/kbn-securitysolution-grouping @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-es-utils @elastic/security-solution-platform
 packages/kbn-securitysolution-exception-list-components @elastic/security-solution-platform
+packages/kbn-securitysolution-grouping @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-hook-utils @elastic/security-solution-platform
 packages/kbn-securitysolution-io-ts-alerting-types @elastic/security-solution-platform
 packages/kbn-securitysolution-io-ts-list-types @elastic/security-solution-platform
