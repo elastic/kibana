@@ -15,15 +15,6 @@ export interface GenericBuckets {
 
 export const NONE_GROUP_KEY = 'none';
 
-// export type RawBucket = GenericBuckets &
-//   T & {
-//     stackByMultipleFields1?: {
-//       buckets?: GenericBuckets[];
-//       doc_count_error_upper_bound?: number;
-//       sum_other_doc_count?: number;
-//     };
-//   };
-
 export type RawBucket = GenericBuckets & {
   groupCount?: {
     value?: number | null; // Elasticsearch returns `null` when a sub-aggregation cannot be computed
