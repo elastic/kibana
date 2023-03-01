@@ -101,12 +101,19 @@ export interface VersionHTTPToolkit {
 }
 
 /**
+ * Converts an input property from optional to required. Needed for making RouteConfigOptions['access'] required.
+ */
+type WithRequiredProperty<Type, Key extends keyof Type> = Type & {
+  [Property in Key]-?: Type[Property];
+};
+
+/**
  * Versioned route access flag, required
  * - '/api/foo' is 'public'
  * - '/internal/my-foo'  is 'internal'
  * Required
  */
-type VersionedRouteConfigOptions = Required<Pick<RouteConfigOptions<RouteMethod>, 'access'>>;
+type VersionedRouteConfigOptions = WithRequiredProperty<RouteConfigOptions<RouteMethod>, 'access'>;
 /**
  * Configuration for a versioned route
  * @experimental
