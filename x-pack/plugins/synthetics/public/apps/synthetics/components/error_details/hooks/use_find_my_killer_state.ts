@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
+import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
 import { Ping } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
@@ -17,18 +17,25 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 import { useGetUrlParams } from '../../../hooks';
 
-export function useErrorFailedTests() {
+export function useFindMyKillerState() {
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { errorStateId, monitorId } = useParams<{ errorStateId: string; monitorId: string }>();
 
   const { dateRangeStart, dateRangeEnd } = useGetUrlParams();
 
-  const { data, loading } = useEsSearch(
+  const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
+
       body: {
-        size: 10000,
+        // TODO: remove this once we have a better way to handle this mapping
+        runtime_mappings: {
+          'state.ends.id': {
+            type: 'keyword',
+          },
+        },
+        size: 1,
         query: {
           bool: {
             filter: [
@@ -36,7 +43,7 @@ export function useErrorFailedTests() {
               EXCLUDE_RUN_ONCE_FILTER,
               {
                 term: {
-                  'state.id': errorStateId,
+                  'state.ends.id': errorStateId,
                 },
               },
               {
@@ -51,19 +58,19 @@ export function useErrorFailedTests() {
       },
     },
     [lastRefresh, monitorId, dateRangeStart, dateRangeEnd],
-    { name: 'getMonitorErrorFailedTests' }
+    { name: 'getStateWhichEndTheState' }
   );
 
   return useMemo(() => {
-    const failedTests =
+    const killerStates =
       data?.hits.hits?.map((doc) => {
         const source = doc._source as any;
         return { ...source, timestamp: source['@timestamp'] } as Ping;
       }) ?? [];
 
     return {
-      failedTests,
       loading,
+      killerState: killerStates?.[0],
     };
   }, [data, loading]);
 }
