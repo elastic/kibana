@@ -29,5 +29,6 @@
     "@kbn/securitysolution-io-ts-list-types",
     "@kbn/cypress-config",
     "@kbn/test-subj-selector",
+    "@kbn/cases-plugin",
   ]
 }
