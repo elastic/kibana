@@ -33,6 +33,7 @@ interface KibanaLogicProps {
   application: ApplicationStart;
   config: { host?: string };
   productAccess: ProductAccess;
+  getIsSidebarEnabled: () => boolean;
   // Kibana core
   capabilities: Capabilities;
   history: ScopedHistory;
@@ -49,9 +50,11 @@ interface KibanaLogicProps {
   // Optional plugins
   cloud?: CloudSetup;
 }
+
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
   cloud: Partial<CloudSetup>;
   isCloud: boolean;
+  isSidebarEnabled: boolean;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
 }
 
@@ -63,6 +66,7 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     config: [props.config || {}, {}],
     charts: [props.charts, {}],
     cloud: [props.cloud || {}, {}],
+    getIsSidebarEnabled: [props.getIsSidebarEnabled, {}],
     guidedOnboarding: [props.guidedOnboarding, {}],
     history: [props.history, {}],
     navigateToUrl: [
@@ -83,6 +87,10 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
   }),
   selectors: ({ selectors }) => ({
     isCloud: [() => [selectors.cloud], (cloud?: Partial<CloudSetup>) => !!cloud?.isCloudEnabled],
+    isSidebarEnabled: [
+      () => [selectors.getIsSidebarEnabled],
+      (getIsSidebarEnabled: () => boolean) => getIsSidebarEnabled(),
+    ],
   }),
 });
 
