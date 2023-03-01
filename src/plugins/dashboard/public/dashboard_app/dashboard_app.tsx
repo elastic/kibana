@@ -54,6 +54,12 @@ export function DashboardApp({
   history,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  /**
+   * This state keeps track of the height of the top navigation bar so that padding at the
+   * top of the viewport can be adjusted dynamically.
+   */
+  const [topNavHeight, setTopNavHeight] = useState(0);
+
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
@@ -184,8 +190,6 @@ export function DashboardApp({
     return () => stopWatchingAppStateInUrl();
   }, [dashboardContainer, kbnUrlStateStorage]);
 
-  const [topNavHeight, setTopNavHeight] = useState(0);
-
   return (
     <div className={'dshAppWrapper'}>
       {showNoDataPage && (
@@ -205,10 +209,8 @@ export function DashboardApp({
 
           {getLegacyConflictWarning?.()}
           <div
+            className="dashboardViewportWrapper"
             css={css`
-              display: flex;
-              flex: 1;
-              flex-direction: column;
               padding-top: ${topNavHeight}px;
             `}
           >

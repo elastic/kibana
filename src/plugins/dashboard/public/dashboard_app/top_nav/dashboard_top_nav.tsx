@@ -17,8 +17,7 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-import { EuiHorizontalRule, useEuiBackgroundColor, useResizeObserver } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiHorizontalRule, useResizeObserver } from '@elastic/eui';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -34,6 +33,7 @@ import { useDashboardMountContext } from '../hooks/dashboard_mount_context';
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../../dashboard_constants';
 import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_context';
 
+import './_dashboard_top_nav.scss';
 export interface DashboardTopNavProps {
   embedSettings?: DashboardEmbedSettings;
   redirectTo: DashboardRedirect;
@@ -231,15 +231,7 @@ export function DashboardTopNav({
   }, [dimensions, currentHeight, onHeightChange]);
 
   return (
-    <div
-      ref={resizeRef}
-      css={css`
-        position: fixed;
-        z-index: 1001;
-        background: ${useEuiBackgroundColor('subdued')};
-        width: 100%;
-      `}
-    >
+    <div ref={resizeRef} className={'dashboardTopNav'}>
       <h1
         id="dashboardTitle"
         className="euiScreenReaderOnly"

@@ -10,7 +10,7 @@
     position: absolute;
     right: $euiSizeXS;
     top: (-$euiSizeL);
-    z-index: 1002;
+    z-index: $euiZLevel9; // the highest possible z-level
   }
 
   &:hover, &:focus-within {
