@@ -18,7 +18,7 @@ import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
 import { operationDefinitionMap } from '..';
 import { FieldBasedIndexPatternColumn } from '../../../types';
-import {IndexPatternField} from "../../../../../types";
+import { IndexPatternField } from '../../../../../types';
 
 export const buildLabelFunction =
   (ofName: (name?: string) => string) =>

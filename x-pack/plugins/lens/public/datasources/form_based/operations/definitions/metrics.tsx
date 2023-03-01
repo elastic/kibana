@@ -103,7 +103,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       if (
         (supportedTypes.includes(fieldType) || (supportsDate && fieldType === 'date')) &&
         aggregatable &&
-        timeSeriesMetric !== 'counter' &&
+        (timeSeriesMetric !== 'counter' || ['min', 'max'].includes(type)) &&
         (!aggregationRestrictions || aggregationRestrictions[type])
       ) {
         return {
