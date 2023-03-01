@@ -28,10 +28,16 @@ export function shouldFetch$<
     // wrapping distinctUntilChanged with startWith and skip to prime distinctUntilChanged with an initial input value.
     startWith(getInput()),
     distinctUntilChanged((a: TFilterableEmbeddableInput, b: TFilterableEmbeddableInput) => {
+      // Only need to diff searchSessionId when container uses search sessions because 
+      // searchSessionId changes with any filter, query, or time changes
+      if (a.useSearchSession) {
+        return a.searchSessionId === b.searchSessionId;
+      }
+
       if (
         !fastIsEqual(
-          [a.searchSessionId, a.query, a.timeRange, a.timeslice],
-          [b.searchSessionId, b.query, b.timeRange, b.timeslice]
+          [a.query, a.timeRange, a.timeslice],
+          [b.query, b.timeRange, b.timeslice]
         )
       ) {
         return false;

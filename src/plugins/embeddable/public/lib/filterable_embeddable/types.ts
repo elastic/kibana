@@ -14,6 +14,7 @@ export type FilterableEmbeddableInput = EmbeddableInput & {
   query?: Query;
   timeRange?: TimeRange;
   timeslice?: [number, number];
+  useSearchSession?: boolean;
 };
 
 /**
