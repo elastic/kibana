@@ -21,7 +21,7 @@ import { FailedTestsList } from './components/failed_tests_list';
 import { ErrorTimeline } from './components/error_timeline';
 import { useErrorDetailsBreadcrumbs } from './hooks/use_error_details_breadcrumbs';
 import { StepImage } from '../step_details_page/step_screenshot/step_image';
-import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel';
+import { MonitorDetailsPanelContainer } from '../monitor_details/monitor_summary/monitor_details_panel_container';
 
 export function ErrorDetailsPage() {
   const { failedTests, loading } = useErrorFailedTests();
@@ -80,7 +80,7 @@ export function ErrorDetailsPage() {
           <EuiSpacer size="m" />
           <StepDurationPanel doBreakdown={false} />
           <EuiSpacer size="m" />
-          <MonitorDetailsPanelContainer />
+          <MonitorDetailsPanelContainer hideLocations />
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>
