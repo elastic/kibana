@@ -22,9 +22,12 @@ const uiMock: jest.Mocked<CasesUiStart['ui']> = {
 };
 
 export const openAddToExistingCaseModalMock = jest.fn();
+export const openAddToNewCaseFlyoutMock = jest.fn();
 
 const hooksMock: jest.Mocked<CasesUiStart['hooks']> = {
-  useCasesAddToNewCaseFlyout: jest.fn(),
+  useCasesAddToNewCaseFlyout: jest.fn().mockImplementation(() => ({
+    open: openAddToNewCaseFlyoutMock,
+  })),
   useCasesAddToExistingCaseModal: jest.fn().mockImplementation(() => ({
     open: openAddToExistingCaseModalMock,
   })),

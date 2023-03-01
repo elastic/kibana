@@ -29,6 +29,7 @@ import { DefaultSort } from './hooks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getCasesMockMap } from './cases/index.mock';
+import { createCasesServiceMock } from './index.mock';
 
 jest.mock('./hooks/use_fetch_alerts');
 jest.mock('./hooks/use_fetch_browser_fields_capabilities');
@@ -37,6 +38,7 @@ jest.mock('./hooks/use_bulk_get_cases');
 jest.mock('@kbn/kibana-utils-plugin/public');
 
 const mockCurrentAppId$ = new BehaviorSubject<string>('testAppId');
+const mockCaseService = createCasesServiceMock();
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
@@ -53,21 +55,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
         },
         currentAppId$: mockCurrentAppId$,
       },
-      cases: {
-        ui: {
-          getCasesContext: () => null,
-        },
-        helpers: {
-          getUICapabilities: () => ({
-            all: true,
-            read: true,
-            create: true,
-            update: true,
-            delete: true,
-            push: true,
-          }),
-        },
-      },
+      cases: mockCaseService,
       notifications: {
         toasts: {
           addDanger: () => {},
@@ -267,8 +255,7 @@ describe('AlertsTableState', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    useBulkGetCasesMock.mockReturnValue({ data: casesMap, isLoading: false });
+    useBulkGetCasesMock.mockReturnValue({ data: casesMap, isFetching: false });
   });
 
   describe('cases column', () => {
@@ -281,6 +268,13 @@ describe('AlertsTableState', () => {
       render(<AlertsTableWithLocale {...tableProps} />);
       expect(await screen.findByText('Test case')).toBeInTheDocument();
       expect(await screen.findByText('Test case 2')).toBeInTheDocument();
+    });
+
+    it('should show the loading skeleton when fetching cases', async () => {
+      useBulkGetCasesMock.mockReturnValue({ data: casesMap, isFetching: true });
+
+      render(<AlertsTableWithLocale {...tableProps} />);
+      expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(2);
     });
 
     it('should pass the correct case ids to useBulkGetCases', async () => {

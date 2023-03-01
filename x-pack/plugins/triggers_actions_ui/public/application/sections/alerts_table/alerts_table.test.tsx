@@ -175,8 +175,7 @@ const mockedUseCellActions: UseCellActions = () => {
   };
 };
 
-// FAILING: https://github.com/elastic/kibana/issues/151688
-describe.skip('AlertsTable', () => {
+describe('AlertsTable', () => {
   const fetchAlertsData = {
     activePage: 0,
     alerts,

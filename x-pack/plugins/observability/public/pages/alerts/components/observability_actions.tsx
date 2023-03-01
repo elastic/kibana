@@ -114,6 +114,7 @@ export function ObservabilityActions({
     selectCaseModal.open({ attachments: caseAttachments });
     closeActionsPopover();
   }, [caseAttachments, closeActionsPopover, selectCaseModal]);
+
   const actionsMenuItems = useMemo(() => {
     return [
       ...(userCasesPermissions.create && userCasesPermissions.read
@@ -122,6 +123,7 @@ export function ObservabilityActions({
               data-test-subj="add-to-existing-case-action"
               onClick={handleAddToExistingCaseClick}
               size="s"
+              key="add-to-existing-case-action"
             >
               {ADD_TO_EXISTING_CASE}
             </EuiContextMenuItem>,
@@ -129,6 +131,7 @@ export function ObservabilityActions({
               data-test-subj="add-to-new-case-action"
               onClick={handleAddToNewCaseClick}
               size="s"
+              key="add-to-new-case-action"
             >
               {ADD_TO_NEW_CASE}
             </EuiContextMenuItem>,
