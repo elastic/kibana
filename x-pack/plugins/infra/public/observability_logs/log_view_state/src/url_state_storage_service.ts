@@ -53,12 +53,12 @@ export const initializeFromUrl =
 
       send({
         type: 'INITIALIZED_FROM_URL',
-        logView: null,
+        logViewReference: null,
       });
     } else {
       send({
         type: 'INITIALIZED_FROM_URL',
-        logView: pipe(
+        logViewReference: pipe(
           // Via the legacy sourceId key
           pipe(
             sourceIdQueryE.right,
@@ -73,8 +73,8 @@ export const initializeFromUrl =
     }
   };
 
-const logViewStateInUrlRT = rt.union([logViewReferenceRT, rt.undefined]);
-const sourceIdStateInUrl = rt.union([rt.string, rt.undefined]);
+const logViewStateInUrlRT = rt.union([logViewReferenceRT, rt.null]);
+const sourceIdStateInUrl = rt.union([rt.string, rt.null]);
 
 const decodeLogViewQueryValueFromUrl = (queryValueFromUrl: unknown) => {
   return logViewStateInUrlRT.decode(queryValueFromUrl);

@@ -16,8 +16,8 @@ import type {
 import { type NotificationChannel } from '../../xstate_helpers';
 import { type LogViewNotificationEvent } from './notifications';
 
-export interface LogViewContextWithId {
-  logViewId: string;
+export interface LogViewContextWithReference {
+  logViewReference: LogViewReference;
 }
 
 export interface LogViewContextWithLogView {
@@ -39,46 +39,48 @@ export interface LogViewContextWithError {
 export type LogViewTypestate =
   | {
       value: 'uninitialized';
-      context: LogViewContextWithId;
+      context: LogViewContextWithReference;
     }
   | {
       value: 'loading';
-      context: LogViewContextWithId;
+      context: LogViewContextWithReference;
     }
   | {
       value: 'resolving';
-      context: LogViewContextWithId & LogViewContextWithLogView;
+      context: LogViewContextWithReference & LogViewContextWithLogView;
     }
   | {
       value: 'checkingStatus';
-      context: LogViewContextWithId & LogViewContextWithLogView & LogViewContextWithResolvedLogView;
+      context: LogViewContextWithReference &
+        LogViewContextWithLogView &
+        LogViewContextWithResolvedLogView;
     }
   | {
       value: 'resolved';
-      context: LogViewContextWithId &
+      context: LogViewContextWithReference &
         LogViewContextWithLogView &
         LogViewContextWithResolvedLogView &
         LogViewContextWithStatus;
     }
   | {
       value: 'updating';
-      context: LogViewContextWithId;
+      context: LogViewContextWithReference;
     }
   | {
       value: 'loadingFailed';
-      context: LogViewContextWithId & LogViewContextWithError;
+      context: LogViewContextWithReference & LogViewContextWithError;
     }
   | {
       value: 'updatingFailed';
-      context: LogViewContextWithId & LogViewContextWithError;
+      context: LogViewContextWithReference & LogViewContextWithError;
     }
   | {
       value: 'resolutionFailed';
-      context: LogViewContextWithId & LogViewContextWithLogView & LogViewContextWithError;
+      context: LogViewContextWithReference & LogViewContextWithLogView & LogViewContextWithError;
     }
   | {
       value: 'checkingStatusFailed';
-      context: LogViewContextWithId & LogViewContextWithLogView & LogViewContextWithError;
+      context: LogViewContextWithReference & LogViewContextWithLogView & LogViewContextWithError;
     };
 
 export type LogViewContext = LogViewTypestate['context'];
@@ -92,7 +94,7 @@ export type LogViewEvent =
     }
   | {
       type: 'INITIALIZED_FROM_URL';
-      logView: LogViewReference | null;
+      logViewReference: LogViewReference | null;
     }
   | {
       type: 'LOADING_SUCCEEDED';

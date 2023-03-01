@@ -18,8 +18,10 @@ import {
 import {
   FetchLogViewError,
   FetchLogViewStatusError,
+  inlineLogViewReferenceRT,
   LogView,
   LogViewAttributes,
+  LogViewReference,
   LogViewsStaticConfig,
   LogViewStatus,
   PutLogViewError,
@@ -37,7 +39,15 @@ export class LogViewsClient implements ILogViewsClient {
     private readonly config: LogViewsStaticConfig
   ) {}
 
-  public async getLogView(logViewId: string): Promise<LogView> {
+  public async getLogView(logViewReference: LogViewReference): Promise<LogView> {
+    if (inlineLogViewReferenceRT.is(logViewReference)) {
+      return {
+        ...logViewReference,
+        origin: 'inline',
+      };
+    }
+
+    const { logViewId } = logViewReference;
     const response = await this.http.get(getLogViewUrl(logViewId)).catch((error) => {
       throw new FetchLogViewError(`Failed to fetch log view "${logViewId}": ${error}`);
     });
@@ -51,8 +61,8 @@ export class LogViewsClient implements ILogViewsClient {
     return data;
   }
 
-  public async getResolvedLogView(logViewId: string): Promise<ResolvedLogView> {
-    const logView = await this.getLogView(logViewId);
+  public async getResolvedLogView(logViewReference: LogViewReference): Promise<ResolvedLogView> {
+    const logView = await this.getLogView(logViewReference);
     const resolvedLogView = await this.resolveLogView(logView.id, logView.attributes);
     return resolvedLogView;
   }

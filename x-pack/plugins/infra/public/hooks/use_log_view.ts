@@ -43,7 +43,7 @@ export const useLogView = ({
     () =>
       createLogViewStateMachine({
         initialContext: {
-          logView: DEFAULT_LOG_VIEW,
+          logViewReference: DEFAULT_LOG_VIEW,
         },
         logViews,
         notificationChannel: logViewStateNotifications,
