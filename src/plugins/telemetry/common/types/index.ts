@@ -6,5 +6,6 @@
  * Side Public License, v 1.
  */
 
-export type EncryptedTelemetryPayload = Array<{ clusterUuid: string; stats: string }>;
-export type UnencryptedTelemetryPayload = Array<{ clusterUuid: string; stats: object }>;
+export * from './latest';
+
+export * as v2 from './v2';
