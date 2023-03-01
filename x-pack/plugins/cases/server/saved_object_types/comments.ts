@@ -20,6 +20,7 @@ export const createCaseCommentSavedObjectType = ({
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
   mappings: {
+    dynamic: false,
     properties: {
       comment: {
         type: 'text',
@@ -32,20 +33,10 @@ export const createCaseCommentSavedObjectType = ({
       },
       actions: {
         properties: {
-          targets: {
-            type: 'nested',
-            properties: {
-              hostname: { type: 'keyword' },
-              endpointId: { type: 'keyword' },
-            },
-          },
           type: { type: 'keyword' },
         },
       },
       alertId: {
-        type: 'keyword',
-      },
-      index: {
         type: 'keyword',
       },
       created_at: {
@@ -53,28 +44,7 @@ export const createCaseCommentSavedObjectType = ({
       },
       created_by: {
         properties: {
-          full_name: {
-            type: 'keyword',
-          },
           username: {
-            type: 'keyword',
-          },
-          email: {
-            type: 'keyword',
-          },
-          profile_uid: {
-            type: 'keyword',
-          },
-        },
-      },
-      externalReferenceId: {
-        type: 'keyword',
-      },
-      externalReferenceStorage: {
-        dynamic: false,
-        properties: {
-          // externalReferenceStorage.type
-          type: {
             type: 'keyword',
           },
         },
@@ -82,64 +52,14 @@ export const createCaseCommentSavedObjectType = ({
       externalReferenceAttachmentTypeId: {
         type: 'keyword',
       },
-      externalReferenceMetadata: {
-        dynamic: false,
-        properties: {},
-      },
       persistableStateAttachmentTypeId: {
         type: 'keyword',
-      },
-      persistableStateAttachmentState: {
-        dynamic: false,
-        properties: {},
       },
       pushed_at: {
         type: 'date',
       },
-      pushed_by: {
-        properties: {
-          username: {
-            type: 'keyword',
-          },
-          full_name: {
-            type: 'keyword',
-          },
-          email: {
-            type: 'keyword',
-          },
-          profile_uid: {
-            type: 'keyword',
-          },
-        },
-      },
-      rule: {
-        properties: {
-          id: {
-            type: 'keyword',
-          },
-          name: {
-            type: 'keyword',
-          },
-        },
-      },
       updated_at: {
         type: 'date',
-      },
-      updated_by: {
-        properties: {
-          username: {
-            type: 'keyword',
-          },
-          full_name: {
-            type: 'keyword',
-          },
-          email: {
-            type: 'keyword',
-          },
-          profile_uid: {
-            type: 'keyword',
-          },
-        },
       },
     },
   },
