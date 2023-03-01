@@ -1015,7 +1015,7 @@ describe('createLifecycleExecutor', () => {
         return { state };
       });
 
-      await executor(
+      const serializedAlerts = await executor(
         createDefaultAlertExecutorOptions({
           alertId: 'TEST_ALERT_0',
           params: {},
@@ -1061,6 +1061,43 @@ describe('createLifecycleExecutor', () => {
         })
       );
 
+      expect(serializedAlerts.state.trackedAlerts).toEqual({
+        TEST_ALERT_0: {
+          alertId: 'TEST_ALERT_0',
+          alertUuid: 'TEST_ALERT_0_UUID',
+          flapping: true,
+          flappingHistory: flapping.slice(1).concat([false]),
+          pendingRecoveredCount: 0,
+          started: '2020-01-01T12:00:00.000Z',
+        },
+        TEST_ALERT_1: {
+          alertId: 'TEST_ALERT_1',
+          alertUuid: 'TEST_ALERT_1_UUID',
+          flapping: false,
+          flappingHistory: [false, false, false],
+          pendingRecoveredCount: 0,
+          started: '2020-01-02T12:00:00.000Z',
+        },
+        TEST_ALERT_2: {
+          alertId: 'TEST_ALERT_2',
+          alertUuid: 'TEST_ALERT_2_UUID',
+          flapping: true,
+          flappingHistory: flapping.slice(1).concat([false]),
+          pendingRecoveredCount: 0,
+          started: '2020-01-01T12:00:00.000Z',
+        },
+        TEST_ALERT_3: {
+          alertId: 'TEST_ALERT_3',
+          alertUuid: 'TEST_ALERT_3_UUID',
+          flapping: true,
+          flappingHistory: [false, false, false],
+          pendingRecoveredCount: 0,
+          started: '2020-01-02T12:00:00.000Z',
+        },
+      });
+
+      expect(serializedAlerts.state.trackedAlertsRecovered).toEqual({});
+
       expect((await ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           body: [
@@ -1070,7 +1107,7 @@ describe('createLifecycleExecutor', () => {
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
               [ALERT_WORKFLOW_STATUS]: 'closed',
               [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-              [ALERT_FLAPPING]: true,
+              [ALERT_FLAPPING]: false,
               [EVENT_ACTION]: 'active',
               [EVENT_KIND]: 'signal',
             }),
@@ -1182,7 +1219,7 @@ describe('createLifecycleExecutor', () => {
         return { state };
       });
 
-      await executor(
+      const serializedAlerts = await executor(
         createDefaultAlertExecutorOptions({
           alertId: 'TEST_ALERT_0',
           params: {},
@@ -1228,6 +1265,44 @@ describe('createLifecycleExecutor', () => {
         })
       );
 
+      expect(serializedAlerts.state.trackedAlerts).toEqual({
+        TEST_ALERT_2: {
+          alertId: 'TEST_ALERT_2',
+          alertUuid: 'TEST_ALERT_2_UUID',
+          flapping: true,
+          flappingHistory: [true, true, true],
+          pendingRecoveredCount: 1,
+          started: '2020-01-02T12:00:00.000Z',
+        },
+      });
+
+      expect(serializedAlerts.state.trackedAlertsRecovered).toEqual({
+        TEST_ALERT_0: {
+          alertId: 'TEST_ALERT_0',
+          alertUuid: 'TEST_ALERT_0_UUID',
+          flapping: true,
+          flappingHistory: [true, true, true, true, true],
+          pendingRecoveredCount: 0,
+          started: '2020-01-01T12:00:00.000Z',
+        },
+        TEST_ALERT_1: {
+          alertId: 'TEST_ALERT_1',
+          alertUuid: 'TEST_ALERT_1_UUID',
+          flapping: false,
+          flappingHistory: notFlapping.slice(0, notFlapping.length - 1).concat([true]),
+          pendingRecoveredCount: 0,
+          started: '2020-01-02T12:00:00.000Z',
+        },
+        TEST_ALERT_3: {
+          alertId: 'TEST_ALERT_3',
+          alertUuid: 'TEST_ALERT_3_UUID',
+          flapping: false,
+          flappingHistory: notFlapping.slice(0, notFlapping.length - 1).concat([true]),
+          pendingRecoveredCount: 0,
+          started: '2020-01-02T12:00:00.000Z',
+        },
+      });
+
       expect((await ruleDataClientMock.getWriter()).bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           body: expect.arrayContaining([
@@ -1235,10 +1310,10 @@ describe('createLifecycleExecutor', () => {
             { index: { _id: 'TEST_ALERT_0_UUID' } },
             expect.objectContaining({
               [ALERT_INSTANCE_ID]: 'TEST_ALERT_0',
-              [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-              [EVENT_ACTION]: 'active',
+              [ALERT_STATUS]: ALERT_STATUS_RECOVERED,
+              [EVENT_ACTION]: 'close',
               [EVENT_KIND]: 'signal',
-              [ALERT_FLAPPING]: true,
+              [ALERT_FLAPPING]: false,
             }),
             { index: { _id: 'TEST_ALERT_1_UUID' } },
             expect.objectContaining({
