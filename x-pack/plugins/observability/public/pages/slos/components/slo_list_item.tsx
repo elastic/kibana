@@ -13,6 +13,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiPopover,
   EuiText,
@@ -62,6 +63,10 @@ export function SloListItem({
     setIsActionsPopoverOpen(!isActionsPopoverOpen);
   };
 
+  const handleViewDetails = () => {
+    navigateToUrl(basePath.prepend(paths.observability.sloDetails(slo.id)));
+  };
+
   const handleEdit = () => {
     navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
   };
@@ -102,7 +107,9 @@ export function SloListItem({
             <EuiFlexItem grow>
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem>
-                  <EuiText size="s">{slo.name}</EuiText>
+                  <EuiText size="s">
+                    <EuiLink onClick={handleViewDetails}>{slo.name}</EuiLink>
+                  </EuiText>
                 </EuiFlexItem>
                 <SloBadges slo={slo} activeAlerts={activeAlerts} />
               </EuiFlexGroup>
@@ -139,6 +146,16 @@ export function SloListItem({
             <EuiContextMenuPanel
               size="s"
               items={[
+                <EuiContextMenuItem
+                  key="view"
+                  icon="inspect"
+                  onClick={handleViewDetails}
+                  data-test-subj="sloActionsView"
+                >
+                  {i18n.translate('xpack.observability.slo.slo.item.actions.details', {
+                    defaultMessage: 'Details',
+                  })}
+                </EuiContextMenuItem>,
                 <EuiContextMenuItem
                   key="edit"
                   icon="pencil"
