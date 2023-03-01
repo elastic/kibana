@@ -6,6 +6,7 @@
  */
 
 import { ROLE, login } from '../../tasks/login';
+import { NAV_SEARCH_INPUT_OSQUERY_RESULTS } from '../../tasks/navigation';
 
 describe('None', () => {
   beforeEach(() => {
@@ -16,12 +17,12 @@ describe('None', () => {
 
   it('should not see osquery in global search', () => {
     cy.getBySel('nav-search-input').type('Osquery');
-    cy.get('[title="Osquery • Management"]').should('not.exist');
-    cy.get('[title="Osquery Logs • Integration"]').should('not.exist');
-    cy.get('[title="Osquery Manager • Integration"]').should('not.exist');
+    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGEMENT}"]`).should('not.exist');
+    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('not.exist');
+    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('not.exist');
   });
 
-  it('should get 403 forbidded response when trying to GET osquery', () => {
+  it('should get 403 forbidden response when trying to GET osquery', () => {
     cy.request({
       url: '/app/osquery/live_queries',
       failOnStatusCode: false,

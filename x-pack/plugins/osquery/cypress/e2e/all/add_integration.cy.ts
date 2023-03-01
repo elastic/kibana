@@ -31,9 +31,10 @@ import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks
 
 describe('ALL - Add Integration', () => {
   let savedQueryId: string;
+
   before(() => {
-    loadSavedQuery().then((queryId) => {
-      savedQueryId = queryId;
+    loadSavedQuery().then((data) => {
+      savedQueryId = data.id;
     });
   });
 
