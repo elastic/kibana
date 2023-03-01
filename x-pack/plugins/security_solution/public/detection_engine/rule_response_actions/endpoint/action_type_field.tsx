@@ -8,6 +8,7 @@ import React, { useMemo } from 'react';
 import { useController } from 'react-hook-form';
 import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { difference } from 'lodash';
 import { getUiCommand } from '../../../management/components/endpoint_response_actions_list/components/hooks';
 import { getRbacControl } from '../../../management/components/endpoint_responder/lib/utils';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
@@ -16,9 +17,14 @@ import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/
 interface ActionTypeFieldProps {
   euiFieldProps?: Record<string, unknown>;
   disabled: boolean;
+  usedEndpointCommands: string[];
 }
 
-const ActionTypeFieldComponent = ({ euiFieldProps, disabled }: ActionTypeFieldProps) => {
+const ActionTypeFieldComponent = ({
+  euiFieldProps,
+  disabled,
+  usedEndpointCommands,
+}: ActionTypeFieldProps) => {
   const {
     field: { onChange, value, name: fieldName },
     fieldState: { error },
@@ -27,17 +33,30 @@ const ActionTypeFieldComponent = ({ euiFieldProps, disabled }: ActionTypeFieldPr
     defaultValue: '',
   });
 
+  const AVAILABLE_COMMANDS = useMemo(() => {
+    return difference(
+      RESPONSE_ACTION_API_COMMANDS_NAMES,
+      usedEndpointCommands.filter((commandName) => commandName !== value)
+    );
+  }, [usedEndpointCommands, value]);
+
   const endpointPrivileges = useUserPrivileges().endpointPrivileges;
   const FIELD_OPTIONS = useMemo(() => {
-    return RESPONSE_ACTION_API_COMMANDS_NAMES.map((name, index) => ({
-      value: name,
-      inputDisplay: name,
-      disabled: !getRbacControl({
-        commandName: getUiCommand(name),
-        privileges: endpointPrivileges,
-      }),
-    }));
-  }, [endpointPrivileges]);
+    return RESPONSE_ACTION_API_COMMANDS_NAMES.map((name, index) => {
+      const isDisabled =
+        !AVAILABLE_COMMANDS.includes(name) ||
+        !getRbacControl({
+          commandName: getUiCommand(name),
+          privileges: endpointPrivileges,
+        });
+
+      return {
+        value: name,
+        inputDisplay: name,
+        disabled: isDisabled,
+      };
+    });
+  }, [AVAILABLE_COMMANDS, endpointPrivileges]);
 
   const hasError = useMemo(() => !!error?.message, [error?.message]);
 

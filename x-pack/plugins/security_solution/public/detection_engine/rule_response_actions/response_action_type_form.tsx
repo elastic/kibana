@@ -15,7 +15,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
+import { get, map } from 'lodash';
 import styled from 'styled-components';
 
 import { useCheckEndpointPermissions } from './endpoint/check_permissions';
@@ -52,11 +52,20 @@ const ResponseActionTypeFormComponent = ({ item, onDeleteAction }: ResponseActio
       return <OsqueryResponseAction item={item} />;
     }
     if (action?.actionTypeId === RESPONSE_ACTION_TYPES.ENDPOINT) {
-      return <EndpointResponseAction item={item} editDisabled={editDisabled} />;
+      const usedEndpointCommands = map(data.responseActions, (responseAction) => {
+        return responseAction?.params?.command;
+      });
+      return (
+        <EndpointResponseAction
+          item={item}
+          editDisabled={editDisabled}
+          usedEndpointCommands={usedEndpointCommands}
+        />
+      );
     }
     // Place for other ResponseActionTypes
     return null;
-  }, [action?.actionTypeId, editDisabled, item]);
+  }, [action?.actionTypeId, data.responseActions, editDisabled, item]);
 
   const handleDelete = useCallback(() => {
     onDeleteAction(item.id);

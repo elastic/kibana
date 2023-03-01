@@ -15,9 +15,11 @@ export const ResponseActionFormField = React.memo(
   ({
     field,
     editDisabled,
+    usedEndpointCommands,
   }: {
     field: FieldHook<EndpointResponseActionsValues>;
     editDisabled: boolean;
+    usedEndpointCommands: string[];
   }) => {
     const { setErrors, clearErrors, value, setValue } = field;
 
@@ -35,6 +37,7 @@ export const ResponseActionFormField = React.memo(
     return (
       <EndpointResponseActionParamsForm
         editDisabled={editDisabled}
+        usedEndpointCommands={usedEndpointCommands}
         defaultValues={value}
         onError={handleError}
         onChange={setValue}
