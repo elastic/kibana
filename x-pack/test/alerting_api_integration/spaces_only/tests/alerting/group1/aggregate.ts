@@ -6,12 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { getDefaultRuleAggregation, getRuleTagsAggregation } from '@kbn/alerting-plugin/common';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-
-const aggregation = JSON.stringify(getDefaultRuleAggregation());
 
 // eslint-disable-next-line import/no-default-export
 export default function createAggregateTests({ getService }: FtrProviderContext) {
@@ -24,41 +21,35 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
 
     it('should aggregate when there are no alerts', async () => {
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate?aggs=${aggregation}`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
       );
       expect(response.status).to.eql(200);
       expect(response.body).to.eql({
-        snoozed: {
-          doc_count: 0,
-          count: {
-            doc_count: 0,
-          },
+        rule_enabled_status: {
+          disabled: 0,
+          enabled: 0,
         },
-        muted: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [],
+        rule_execution_status: {
+          ok: 0,
+          active: 0,
+          error: 0,
+          pending: 0,
+          unknown: 0,
+          warning: 0,
         },
-        enabled: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [],
+        rule_last_run_outcome: {
+          succeeded: 0,
+          warning: 0,
+          failed: 0,
         },
-        outcome: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [],
+        rule_muted_status: {
+          muted: 0,
+          unmuted: 0,
         },
-        tags: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [],
+        rule_snoozed_status: {
+          snoozed: 0,
         },
-        status: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [],
-        },
+        rule_tags: [],
       });
     });
 
@@ -114,166 +105,43 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       // too early.
       await delay(1000);
       const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate?aggs=${aggregation}`
+        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
       );
       expect(response.status).to.eql(200);
       expect(response.body).to.eql({
-        snoozed: {
-          doc_count: 0,
-          count: {
-            doc_count: 0,
-          },
+        rule_enabled_status: {
+          disabled: 0,
+          enabled: 7,
         },
-        muted: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [
-            {
-              key: 0,
-              key_as_string: 'false',
-              doc_count: 7,
-            },
-          ],
+        rule_execution_status: {
+          ok: NumOkAlerts,
+          active: NumActiveAlerts,
+          error: NumErrorAlerts,
+          pending: 0,
+          unknown: 0,
+          warning: 0,
         },
-        enabled: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [
-            {
-              key: 1,
-              key_as_string: 'true',
-              doc_count: 7,
-            },
-          ],
+        rule_last_run_outcome: {
+          succeeded: 5,
+          warning: 0,
+          failed: 2,
         },
-        outcome: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [
-            {
-              key: 'succeeded',
-              doc_count: 5,
-            },
-            {
-              key: 'failed',
-              doc_count: 2,
-            },
-          ],
+        rule_muted_status: {
+          muted: 0,
+          unmuted: 7,
         },
-        tags: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [
-            {
-              key: 'foo',
-              doc_count: 7,
-            },
-          ],
+        rule_snoozed_status: {
+          snoozed: 0,
         },
-        status: {
-          doc_count_error_upper_bound: 0,
-          sum_other_doc_count: 0,
-          buckets: [
-            {
-              key: 'ok',
-              doc_count: 4,
-            },
-            {
-              key: 'error',
-              doc_count: 2,
-            },
-            {
-              key: 'active',
-              doc_count: 1,
-            },
-          ],
-        },
+        rule_tags: ['foo'],
       });
-    });
-
-    it('should reject invalid aggregations with forbidden terms', async () => {
-      const invalidAggs = JSON.stringify({
-        status: {
-          terms: { field: 'alert.attributes.executionStatus.status' },
-        },
-        outcome: {
-          terms: { field: 'alert.attributes.lastRun.outcome' },
-        },
-        apiKey: {
-          terms: { field: 'alert.attributes.apiKey' },
-        },
-      });
-      const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate?aggs=${invalidAggs}`
-      );
-
-      expect(response.status).to.eql(400);
-      expect(response.body.message).to.eql('Invalid aggregation term: alert.attributes.apiKey');
-    });
-
-    it('should reject invalid nested aggregations with forbidden terms', async () => {
-      const invalidAggs = JSON.stringify({
-        status: {
-          terms: { field: 'alert.attributes.executionStatus.status' },
-          aggs: {
-            apiKey: {
-              terms: { field: 'alert.attributes.apiKey' },
-            },
-          },
-        },
-      });
-
-      const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate?aggs=${invalidAggs}`
-      );
-
-      expect(response.status).to.eql(400);
-      expect(response.body.message).to.eql('Invalid aggregation term: alert.attributes.apiKey');
-    });
-
-    it('should reject invalid root level aggregation with forbidden terms', async () => {
-      const invalidAggs = JSON.stringify({
-        status: {
-          terms: { field: 'alert.attributes.executionStatus.status' },
-        },
-        apiKey: {
-          cardinality: {
-            field: 'alert.attributes.apiKey',
-          },
-        },
-      });
-
-      const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate?aggs=${invalidAggs}`
-      );
-
-      expect(response.status).to.eql(400);
-      expect(response.body.message).to.eql('Invalid aggregation term: alert.attributes.apiKey');
-    });
-
-    it('should reject incorret aggregation', async () => {
-      const invalidAggs = JSON.stringify({
-        invalid: {
-          max_price: {
-            max: 'price',
-          },
-        },
-      });
-
-      const response = await supertest.get(
-        `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate?aggs=${invalidAggs}`
-      );
-
-      expect(response.status).to.eql(400);
-      expect(response.body.message).to.eql(
-        'Invalid aggregation: [invalid.max_price] max_price aggregation is not valid (or not registered yet): Bad Request'
-      );
     });
 
     describe('tags limit', () => {
-      beforeEach(async () => {
+      it('should be 50 be default', async () => {
         const numOfAlerts = 3;
         const numOfTagsPerAlert = 30;
+
         await Promise.all(
           [...Array(numOfAlerts)].map(async (_, alertIndex) => {
             const okAlertId = await createTestAlert(
@@ -289,121 +157,12 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
             objectRemover.add(Spaces.space1.id, okAlertId, 'rule', 'alerting');
           })
         );
-      });
-
-      it('should be 50 be default', async () => {
-        const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate?aggs=${aggregation}`
-        );
-
-        expect(response.body.tags.buckets.length).to.eql(50);
-      });
-
-      it('should paginate tags', async () => {
-        const tagsAggs = JSON.stringify(
-          getRuleTagsAggregation({
-            maxTags: 5,
-          })
-        );
 
         const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate?aggs=${tagsAggs}`
+          `${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`
         );
 
-        expect(response.body).to.eql({
-          tags: {
-            after_key: {
-              tags: 'tag-12',
-            },
-            buckets: [
-              {
-                key: {
-                  tags: 'tag-0',
-                },
-                doc_count: 1,
-              },
-              {
-                key: {
-                  tags: 'tag-1',
-                },
-                doc_count: 1,
-              },
-              {
-                key: {
-                  tags: 'tag-10',
-                },
-                doc_count: 1,
-              },
-              {
-                key: {
-                  tags: 'tag-11',
-                },
-                doc_count: 1,
-              },
-              {
-                key: {
-                  tags: 'tag-12',
-                },
-                doc_count: 1,
-              },
-            ],
-          },
-        });
-
-        const nextTagsAggs = JSON.stringify(
-          getRuleTagsAggregation({
-            maxTags: 5,
-            after: {
-              tags: 'tag-12',
-            },
-          })
-        );
-
-        const nextResponse = await supertest.get(
-          `${getUrlPrefix(
-            Spaces.space1.id
-          )}/internal/alerting/rules/_aggregate?aggs=${nextTagsAggs}`
-        );
-
-        expect(nextResponse.body).to.eql({
-          tags: {
-            after_key: {
-              tags: 'tag-17',
-            },
-            buckets: [
-              {
-                key: {
-                  tags: 'tag-13',
-                },
-                doc_count: 1,
-              },
-              {
-                key: {
-                  tags: 'tag-14',
-                },
-                doc_count: 1,
-              },
-              {
-                key: {
-                  tags: 'tag-15',
-                },
-                doc_count: 1,
-              },
-              {
-                key: {
-                  tags: 'tag-16',
-                },
-                doc_count: 1,
-              },
-              {
-                key: {
-                  tags: 'tag-17',
-                },
-                doc_count: 1,
-              },
-            ],
-          },
-        });
+        expect(response.body.rule_tags.length).to.eql(50);
       });
     });
 
