@@ -141,6 +141,7 @@ jest.mock('../../hooks/response_actions/use_get_file_info', () => {
 
 let mockUseGetActionDetails: {
   isFetching?: boolean;
+  isFetched?: boolean;
   error?: Partial<IHttpFetchError> | null;
   data?: ActionDetailsApiResponse;
 };
@@ -579,6 +580,7 @@ describe('Response actions history', () => {
 
         mockUseGetActionDetails = {
           isFetching: false,
+          isFetched: true,
           error: null,
           data: {
             ...apiMocks.responseProvider.actionDetails({
@@ -630,6 +632,7 @@ describe('Response actions history', () => {
 
         mockUseGetActionDetails = {
           isFetching: false,
+          isFetched: true,
           error: null,
           data: {
             data: {
