@@ -26,35 +26,33 @@ export const actionsSchema = schema.arrayOf(
     ),
     uuid: schema.maybe(schema.string()),
     alerts_filter: schema.maybe(
-      schema.nullable(
-        schema.object({
-          query: schema.nullable(
-            schema.object({
-              kql: schema.string(),
-              dsl: schema.string(),
-            })
-          ),
-          timeframe: schema.nullable(
-            schema.object({
-              days: schema.arrayOf(
-                schema.oneOf([
-                  schema.literal(0),
-                  schema.literal(1),
-                  schema.literal(2),
-                  schema.literal(3),
-                  schema.literal(4),
-                  schema.literal(5),
-                  schema.literal(6),
-                ])
-              ),
-              hours: schema.object({
-                start: schema.string(),
-                end: schema.string(),
-              }),
-            })
-          ),
-        })
-      )
+      schema.object({
+        query: schema.nullable(
+          schema.object({
+            kql: schema.string(),
+            dsl: schema.string(),
+          })
+        ),
+        timeframe: schema.nullable(
+          schema.object({
+            days: schema.arrayOf(
+              schema.oneOf([
+                schema.literal(0),
+                schema.literal(1),
+                schema.literal(2),
+                schema.literal(3),
+                schema.literal(4),
+                schema.literal(5),
+                schema.literal(6),
+              ])
+            ),
+            hours: schema.object({
+              start: schema.string(),
+              end: schema.string(),
+            }),
+          })
+        ),
+      })
     ),
   }),
   { defaultValue: [] }
