@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import * as Option from 'fp-ts/lib/Option';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { omit } from 'lodash';
 import type {
@@ -69,8 +70,8 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
 
 export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
   return {
-    INIT: (state: InitState) =>
-      Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
+    INIT: ({ currentAlias, kibanaVersion, versionAlias }: InitState) =>
+      Actions.initAction({ client, currentAlias, kibanaVersion, versionAlias }),
     WAIT_FOR_MIGRATION_COMPLETION: (state: WaitForMigrationCompletionState) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
@@ -169,7 +170,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.refreshIndex({ client, index: state.targetIndex }),
     CHECK_TARGET_MAPPINGS: (state: CheckTargetMappingsState) =>
       Actions.checkTargetMappings({
-        actualMappings: state.targetIndexRawMappings,
+        actualMappings: Option.toUndefined(state.sourceIndexMappings),
         expectedMappings: state.targetIndexMappings,
       }),
     UPDATE_TARGET_MAPPINGS_PROPERTIES: (state: UpdateTargetMappingsPropertiesState) =>
@@ -233,7 +234,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.createIndex({
         client,
         indexName: state.sourceIndex.value,
-        mappings: state.legacyReindexTargetMappings,
+        mappings: state.sourceIndexMappings.value,
       }),
     LEGACY_REINDEX: (state: LegacyReindexState) =>
       Actions.reindex({

@@ -133,11 +133,20 @@ describe('migration actions', () => {
     });
     it('resolves right empty record if no indices were found', async () => {
       expect.assertions(1);
-      const task = initAction({ client, indices: ['no_such_index'] });
+      const task = initAction({
+        client,
+        currentAlias: 'no_such_index',
+        versionAlias: '.kibana_8.8.0',
+        kibanaVersion: '8.8.0',
+      });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Right",
-          "right": Object {},
+          "right": Object {
+            "aliases": Object {},
+            "indices": Object {},
+            "source": undefined,
+          },
         }
       `);
     });
@@ -145,10 +154,13 @@ describe('migration actions', () => {
       expect.assertions(1);
       const res = (await initAction({
         client,
-        indices: ['no_such_index', 'existing_index_with_docs'],
+        currentAlias: 'existing_index_with_docs',
+        versionAlias: 'no_such_index',
+        kibanaVersion: '8.8.0',
       })()) as Either.Right<unknown>;
 
-      expect(res.right).toEqual(
+      expect(res.right).toHaveProperty(
+        'indices',
         expect.objectContaining({
           existing_index_with_docs: {
             aliases: {},
@@ -162,10 +174,13 @@ describe('migration actions', () => {
       expect.assertions(1);
       const res = (await initAction({
         client,
-        indices: ['existing_index_with_docs'],
+        currentAlias: 'existing_index_with_docs',
+        versionAlias: '.kibana_8.8.0',
+        kibanaVersion: '8.8.0',
       })()) as Either.Right<unknown>;
 
-      expect(res.right).toEqual(
+      expect(res.right).toHaveProperty(
+        'indices',
         expect.objectContaining({
           existing_index_with_docs: {
             aliases: {},
@@ -196,7 +211,9 @@ describe('migration actions', () => {
       });
       const task = initAction({
         client,
-        indices: ['existing_index_with_docs'],
+        currentAlias: 'existing_index_with_docs',
+        versionAlias: '.kibana_8.8.0',
+        kibanaVersion: '8.8.0',
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
@@ -216,7 +233,9 @@ describe('migration actions', () => {
       });
       const task2 = initAction({
         client,
-        indices: ['existing_index_with_docs'],
+        currentAlias: 'existing_index_with_docs',
+        versionAlias: '.kibana_8.8.0',
+        kibanaVersion: '8.8.0',
       });
       await expect(task2()).resolves.toMatchInlineSnapshot(`
         Object {
@@ -236,7 +255,9 @@ describe('migration actions', () => {
       });
       const task3 = initAction({
         client,
-        indices: ['existing_index_with_docs'],
+        currentAlias: 'existing_index_with_docs',
+        versionAlias: '.kibana_8.8.0',
+        kibanaVersion: '8.8.0',
       });
       await expect(task3()).resolves.toMatchInlineSnapshot(`
         Object {
@@ -258,7 +279,9 @@ describe('migration actions', () => {
       });
       const task = initAction({
         client,
-        indices: ['existing_index_with_docs'],
+        currentAlias: 'existing_index_with_docs',
+        versionAlias: '.kibana_8.8.0',
+        kibanaVersion: '8.8.0',
       });
       const result = await task();
       expect(Either.isRight(result)).toBe(true);
