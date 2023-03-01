@@ -141,10 +141,10 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   style?: React.CSSProperties;
   className?: string;
   noPadding?: boolean;
-  onBrushEnd?: (data: BrushTriggerEvent['data']) => void;
+  onBrushEnd?: (data: BrushTriggerEvent['data']) => void | false;
   onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
-  onFilter?: (data: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => void;
-  onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void;
+  onFilter?: (data: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => void | false;
+  onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void | false;
 }
 
 export type LensByValueInput = {
@@ -1114,43 +1114,61 @@ export class Embeddable
       return;
     }
     if (isLensBrushEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: {
-          ...event.data,
-          timeFieldName:
-            event.data.timeFieldName ||
-            inferTimeField(this.deps.data.datatableUtilities, event.data),
-        },
-        embeddable: this,
-      });
+      let shouldExecuteDefaultAction = true;
+      if (this.input.onBrushEnd) {
+        shouldExecuteDefaultAction = this.input.onBrushEnd(event.data) !== false;
+      }
+      if (shouldExecuteDefaultAction) {
+        this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: {
+            ...event.data,
+            timeFieldName:
+              event.data.timeFieldName ||
+              inferTimeField(this.deps.data.datatableUtilities, event.data),
+          },
+          embeddable: this,
+        });
 
       if (this.input.onBrushEnd) {
         this.input.onBrushEnd(event.data);
       }
     }
     if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
-        data: {
-          ...event.data,
-          timeFieldName:
-            event.data.timeFieldName ||
-            inferTimeField(this.deps.data.datatableUtilities, event.data),
-        },
-        embeddable: this,
-      });
+      let shouldExecuteDefaultAction = true;
+      if (this.input.onFilter) {
+        shouldExecuteDefaultAction = this.input.onFilter(event.data) !== false;
+      }
+      if (shouldExecuteDefaultAction) {
+        this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
+          data: {
+            ...event.data,
+            timeFieldName:
+              event.data.timeFieldName ||
+              inferTimeField(this.deps.data.datatableUtilities, event.data),
+          },
+          embeddable: this,
+        });
       if (this.input.onFilter) {
         this.input.onFilter(event.data);
       }
     }
 
     if (isLensTableRowContextMenuClickEvent(event)) {
-      this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
-        {
-          data: event.data,
-          embeddable: this,
-        },
-        true
-      );
+      let shouldExecuteDefaultAction = true;
+      if (this.input.onTableRowClick) {
+        shouldExecuteDefaultAction =
+          this.input.onTableRowClick(
+            event.data as unknown as LensTableRowContextMenuEvent['data']
+          ) !== false;
+      }
+      if (shouldExecuteDefaultAction) {
+        this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(
+          {
+            data: event.data,
+            embeddable: this,
+          },
+          true
+        );
       if (this.input.onTableRowClick) {
         this.input.onTableRowClick(event.data as unknown as LensTableRowContextMenuEvent['data']);
       }
