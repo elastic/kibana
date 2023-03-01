@@ -14,7 +14,7 @@ const testProps: GroupingQueryArgs = {
   additionalAggregationsRoot: [],
   additionalStatsAggregationsFields0: [
     {
-      groupCount: {
+      alertsCount: {
         cardinality: {
           field: 'kibana.alert.uuid',
         },
@@ -72,13 +72,13 @@ describe('group selector', () => {
     });
     expect(result.aggs.stackByMultipleFields0.aggs).toEqual({
       bucket_truncate: { bucket_sort: { from: 0, size: 25 } },
-      groupCount: { cardinality: { field: 'kibana.alert.uuid' } },
+      alertsCount: { cardinality: { field: 'kibana.alert.uuid' } },
       rulesCountAggregation: { cardinality: { field: 'kibana.alert.rule.rule_id' } },
       countSeveritySubAggregation: { cardinality: { field: 'kibana.alert.severity' } },
       severitiesSubAggregation: { terms: { field: 'kibana.alert.severity' } },
       usersCountAggregation: { cardinality: { field: 'user.name' } },
     });
-    expect(result.aggs.groupCount).toBeUndefined();
+    expect(result.aggs.alertsCount).toBeUndefined();
     expect(result.aggs.groupsNumber).toBeUndefined();
     expect(result.query.bool.filter.length).toEqual(1);
   });
@@ -87,7 +87,7 @@ describe('group selector', () => {
       ...testProps,
       additionalAggregationsRoot: [
         {
-          groupCount: {
+          alertsCount: {
             terms: {
               field: 'kibana.alert.rule.producer',
               exclude: ['alerts'],
@@ -103,7 +103,7 @@ describe('group selector', () => {
         },
       ],
     });
-    expect(result.aggs.groupCount).toEqual({
+    expect(result.aggs.alertsCount).toEqual({
       terms: { field: 'kibana.alert.rule.producer', exclude: ['alerts'] },
     });
     expect(result.aggs.groupsNumber).toEqual({ cardinality: { field: 'host.name' } });

@@ -34,14 +34,14 @@ export const EmptyGroupingComponent: React.FC<{ height?: keyof typeof heights }>
                   <EuiTitle>
                     <h3>
                       <FormattedMessage
-                        id="xpack.securitySolution.grouping.empty.title"
+                        id="packages.grouping.empty.title"
                         defaultMessage="No grouping results match your selected Group alerts field"
                       />
                     </h3>
                   </EuiTitle>
                   <p>
                     <FormattedMessage
-                      id="xpack.securitySolution.grouping.empty.description"
+                      id="packages.grouping.empty.description"
                       defaultMessage="Try searching over a longer period of time or modifying your Group alerts field"
                     />
                   </p>

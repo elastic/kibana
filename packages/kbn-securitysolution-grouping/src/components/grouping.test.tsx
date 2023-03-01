@@ -40,7 +40,7 @@ const testProps = {
             sum_other_doc_count: 0,
             buckets: [],
           },
-          groupCount: {
+          alertsCount: {
             value: 1,
           },
           severitiesSubAggregation: {
@@ -72,7 +72,7 @@ const testProps = {
             sum_other_doc_count: 0,
             buckets: [],
           },
-          groupCount: {
+          alertsCount: {
             value: 1,
           },
           severitiesSubAggregation: {
@@ -94,7 +94,7 @@ const testProps = {
         },
       ],
     },
-    groupCount: {
+    alertsCount: {
       value: 2,
     },
   },
@@ -137,7 +137,7 @@ describe('grouping container', () => {
         sum_other_doc_count: 0,
         buckets: [],
       },
-      groupCount: {
+      alertsCount: {
         value: 0,
       },
     };

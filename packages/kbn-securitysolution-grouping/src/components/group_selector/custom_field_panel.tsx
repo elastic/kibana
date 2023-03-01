@@ -7,7 +7,7 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiButton, EuiComboBox, EuiForm, EuiFormRow } from '@elastic/eui';
+import { EuiButton, EuiComboBox, EuiFormRow } from '@elastic/eui';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -49,24 +49,21 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
     const isSubmitDisabled = !this.state.selectedOptions.length;
     return (
       <div data-test-subj="custom-field-panel" style={{ padding: 16 }}>
-        <EuiForm>
+        <EuiForwm>
           <EuiFormRow
-            label={i18n.translate('xpack.securitySolution.groupsSelector.customGroupByFieldLabel', {
+            label={i18n.translate('packages.grouping.groupsSelector.customGroupByFieldLabel', {
               defaultMessage: 'Field',
             })}
-            helpText={i18n.translate(
-              'xpack.securitySolution.groupsSelector.customGroupByHelpText',
-              {
-                defaultMessage: 'This is the field used for the terms aggregation',
-              }
-            )}
+            helpText={i18n.translate('packages.grouping.groupsSelector.customGroupByHelpText', {
+              defaultMessage: 'This is the field used for the terms aggregation',
+            })}
             display="rowCompressed"
             fullWidth
           >
             <EuiComboBox
               data-test-subj="groupByCustomField"
               placeholder={i18n.translate(
-                'xpack.securitySolution.groupsSelector.customGroupByDropdownPlacehoder',
+                'packages.grouping.groupsSelector.customGroupByDropdownPlacehoder',
                 {
                   defaultMessage: 'Select one',
                 }
@@ -87,11 +84,11 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
             fill
             onClick={this.handleSubmit}
           >
-            {i18n.translate('xpack.securitySolution.selector.grouping.label.add', {
+            {i18n.translate('packages.grouping.selector.grouping.label.add', {
               defaultMessage: 'Add',
             })}
           </EuiButton>
-        </EuiForm>
+        </EuiForwm>
       </div>
     );
   }
