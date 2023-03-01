@@ -7,9 +7,9 @@
 
 import { HttpSetup } from '@kbn/core/public';
 import { AsApiContract } from '@kbn/actions-plugin/common';
-import { BASE_ALERTING_API_PATH, INTERNAL_BASE_ALERTING_API_PATH } from '../common';
-import type { Rule, RuleType } from '../common';
-import { transformRule, transformRuleType, ApiRule } from './lib/common_transformations';
+import { BASE_ALERTING_API_PATH, INTERNAL_BASE_ALERTING_API_PATH } from '../../common';
+import type { Rule, RuleType } from '../../common';
+import { transformRule, transformRuleType, ApiRule } from '../lib/common_transformations';
 
 export async function loadRuleTypes({ http }: { http: HttpSetup }): Promise<RuleType[]> {
   const res = await http.get<Array<AsApiContract<RuleType>>>(

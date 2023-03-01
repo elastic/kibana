@@ -20,7 +20,9 @@
       "features",
       "kibanaUtils",
       "licensing",
-      "taskManager"
+      "taskManager",
+      "kibanaReact",
+      "management",
     ],
     "optionalPlugins": [
       "usageCollection",
