@@ -26,7 +26,6 @@ export const ManagePrivateLocations = () => {
   const dispatch = useDispatch();
 
   const isAddingNew = useSelector(selectAddingNewPrivateLocation);
-
   const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
 
   const { onSubmit, loading, privateLocations, onDelete, deleteLoading } = useLocationsAPI();
