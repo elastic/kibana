@@ -43,6 +43,7 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
+import { delay } from './test_utils';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
@@ -382,6 +383,7 @@ export const getIncompatibleMappingsMigrator = async ({
 };
 
 export const readLog = async (logFilePath: string = defaultLogFilePath): Promise<string> => {
+  await delay(0.1); // give the logger enough time to write to the file
   return await fs.readFile(logFilePath, 'utf-8');
 };
 
