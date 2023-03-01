@@ -10,6 +10,7 @@ import { Env } from '@kbn/config';
 import { getDocLinksMeta, getDocLinks } from '@kbn/doc-links';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 
 export const getDocVersion = () => {
   const env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -24,3 +25,11 @@ export const getMigrationDocLink = () => {
 
 export const delay = (seconds: number) =>
   new Promise((resolve) => setTimeout(resolve, seconds * 1000));
+
+export const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
+  name: 'test-type',
+  hidden: false,
+  namespaceType: 'single',
+  mappings: { properties: {} },
+  ...parts,
+});
