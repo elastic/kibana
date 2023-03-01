@@ -17,7 +17,7 @@ export const selectAllAgents = () => {
   }).click();
   cy.react('EuiFilterSelectItem').contains('All agents').should('exist');
   cy.react('AgentsTable EuiComboBox').type('{downArrow}{enter}{esc}');
-  cy.contains('1 agent selected.');
+  cy.contains('2 agents selected.');
 };
 
 export const clearInputQuery = () =>

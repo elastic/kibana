@@ -74,7 +74,9 @@ export const MonitorAlerts = ({
                       filters: [
                         {
                           field: 'observer.geo.name',
-                          values: [selectedLocation.label],
+                          // in 8.6.0, observer.geo.name was mapped to the id,
+                          // so we have to pass both values to maintain history
+                          values: [selectedLocation.label, selectedLocation.id],
                         },
                       ],
                     },
@@ -117,7 +119,9 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['active'] },
                   {
                     field: 'observer.geo.name',
-                    values: [selectedLocation.label],
+                    // in 8.6.0, observer.geo.name was mapped to the id,
+                    // so we have to pass both values to maintain history
+                    values: [selectedLocation.label, selectedLocation.id],
                   },
                 ],
               },
@@ -147,7 +151,9 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['active'] },
                   {
                     field: 'observer.geo.name',
-                    values: [selectedLocation.label],
+                    // in 8.6.0, observer.geo.name was mapped to the id,
+                    // so we have to pass both values to maintain history
+                    values: [selectedLocation.label, selectedLocation.id],
                   },
                 ],
                 color: theme.eui.euiColorVis7_behindText,
@@ -176,7 +182,9 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['recovered'] },
                   {
                     field: 'observer.geo.name',
-                    values: [selectedLocation.label],
+                    // in 8.6.0, observer.geo.name was mapped to the id,
+                    // so we have to pass both values to maintain history
+                    values: [selectedLocation.label, selectedLocation.id],
                   },
                 ],
               },
@@ -206,7 +214,9 @@ export const MonitorAlerts = ({
                   { field: 'kibana.alert.status', values: ['recovered'] },
                   {
                     field: 'observer.geo.name',
-                    values: [selectedLocation.label],
+                    // in 8.6.0, observer.geo.name was mapped to the id,
+                    // so we have to pass both values to maintain history
+                    values: [selectedLocation.label, selectedLocation.id],
                   },
                 ],
                 color: theme.eui.euiColorVis0_behindText,

@@ -834,10 +834,10 @@
           },
           {
             "parentPluginId": "maps",
-            "id": "def-public.MapEmbeddable._getFilters",
+            "id": "def-public.MapEmbeddable._getInputFilters",
             "type": "Function",
             "tags": [],
-            "label": "_getFilters",
+            "label": "_getInputFilters",
             "description": [],
             "signature": [
               "() => ",
