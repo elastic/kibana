@@ -23,6 +23,7 @@ import {
   markAcknowledgedFirstAlert,
   resetFilters,
   selectCountTable,
+  visitAlertsPageWithCustomFilters,
   waitForAlerts,
   waitForPageFilters,
 } from '../../tasks/alerts';
@@ -197,5 +198,35 @@ describe.skip('Detections : Page Filters', () => {
 
     cy.get(OPTION_LIST_VALUES).eq(0).contains('open'); // status should be Open as previously selected
     cy.get(OPTION_LIST_VALUES).eq(1).contains('high'); // severity should be low as previously selected
+  });
+
+  it('Custom filters from URLS are populated', () => {
+    visitAlertsPageWithCustomFilters([
+      {
+        fieldName: 'process.name',
+      },
+      {
+        fieldName: 'event.module',
+      },
+      {
+        fieldName: 'agent.type',
+      },
+      {
+        fieldName: 'kibana.alert.workflow_status',
+      },
+      {
+        fieldName: 'kibana.alert.rule.name',
+      },
+      {
+        fieldName: 'kibana.alert.severity',
+      },
+      {
+        fieldName: 'user.name',
+      },
+    ]);
+
+    cy.get(CONTROL_FRAMES).then(($el) => {
+      expect($el.length).eq(7);
+    });
   });
 });

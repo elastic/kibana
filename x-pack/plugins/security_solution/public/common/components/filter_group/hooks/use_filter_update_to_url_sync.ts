@@ -10,6 +10,7 @@ import type {
   ControlPanelState,
   OptionsListEmbeddableInput,
 } from '@kbn/controls-plugin/common';
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useEffect, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { formatPageFilterSearchParam } from '../../../../../common/utils/format_page_filter_search_param';
@@ -43,11 +44,12 @@ export const useFilterUpdatesToUrlSync = ({ controlGroupInput }: UseFilterUrlSyn
 
   useEffect(() => {
     if (!formattedFilters) return;
+    if (controlGroupInput?.viewMode !== ViewMode.VIEW) return;
     dispatch(
       updateUrlParam({
         key: URL_PARAM_KEY.pageFilter,
         value: formatPageFilterSearchParam(formattedFilters),
       })
     );
-  }, [formattedFilters, dispatch]);
+  }, [formattedFilters, dispatch, controlGroupInput]);
 };

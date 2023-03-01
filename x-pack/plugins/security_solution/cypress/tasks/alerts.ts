@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { formatPageFilterSearchParam } from '../../common/utils/format_page_filter_search_param';
 import { TOP_N_CONTAINER } from '../screens/network/flows';
 import {
   ADD_EXCEPTION_BTN,
@@ -68,6 +69,8 @@ import {
 import { LOADING_SPINNER } from '../screens/common/page';
 import { ALERTS_URL } from '../urls/navigation';
 import { FIELDS_BROWSER_BTN } from '../screens/rule_details';
+import type { FilterItemObj } from '../../public/common/components/filter_group/types';
+import { visit } from './login';
 
 export const addExceptionFromFirstAlert = () => {
   expandFirstAlertActions();
@@ -409,4 +412,10 @@ export const selectFirstPageAlerts = () => {
 export const selectAllAlerts = () => {
   selectFirstPageAlerts();
   cy.get(SELECT_ALL_ALERTS).click();
+};
+
+export const visitAlertsPageWithCustomFilters = (pageFilters: FilterItemObj[]) => {
+  const pageFilterUrlVal = formatPageFilterSearchParam(pageFilters);
+  const newURL = `${ALERTS_URL}?pageFilters=${pageFilterUrlVal}`;
+  visit(newURL);
 };
