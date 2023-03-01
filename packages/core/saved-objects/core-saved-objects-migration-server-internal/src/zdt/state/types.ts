@@ -59,10 +59,6 @@ export interface UpdateAliasesState extends PostInitState {
   readonly controlState: 'UPDATE_ALIASES';
 }
 
-export interface WaitForYellowIndexState extends PostInitState {
-  readonly controlState: 'WAIT_FOR_YELLOW_INDEX';
-}
-
 /** Migration completed successfully */
 export interface DoneState extends BaseState {
   readonly controlState: 'DONE';
@@ -83,8 +79,7 @@ export type State =
   | UpdateIndexMappingsState
   | UpdateIndexMappingsWaitForTaskState
   | UpdateMappingModelVersionState
-  | UpdateAliasesState
-  | WaitForYellowIndexState;
+  | UpdateAliasesState;
 
 export type AllControlStates = State['controlState'];
 
@@ -102,7 +97,6 @@ export interface ControlStateMap {
   UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: UpdateIndexMappingsWaitForTaskState;
   UPDATE_MAPPING_MODEL_VERSIONS: UpdateMappingModelVersionState;
   UPDATE_ALIASES: UpdateAliasesState;
-  WAIT_FOR_YELLOW_INDEX: WaitForYellowIndexState;
 }
 
 /**

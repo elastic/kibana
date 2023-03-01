@@ -10,7 +10,6 @@ import type {
   AllActionStates,
   State,
   InitState,
-  WaitForYellowIndexState,
   CreateTargetIndexState,
   UpdateIndexMappingsState,
   UpdateIndexMappingsWaitForTaskState,
@@ -71,12 +70,6 @@ export const nextActionMap = (context: MigratorContext) => {
       Actions.updateAliases({
         client,
         aliasActions: state.aliasActions,
-      }),
-    WAIT_FOR_YELLOW_INDEX: (state: WaitForYellowIndexState) =>
-      Actions.waitForIndexStatus({
-        client,
-        index: state.currentIndex,
-        status: 'yellow',
       }),
   };
 };

@@ -30,10 +30,6 @@ export const model = (
   }
 
   switch (current.controlState) {
-    // TODO: unimplemented
-    case 'WAIT_FOR_YELLOW_INDEX':
-      return current;
-    // END TODO
     case 'INIT':
       return Stages.init(current, response as StateActionResponse<'INIT'>, context);
     case 'CREATE_TARGET_INDEX':
