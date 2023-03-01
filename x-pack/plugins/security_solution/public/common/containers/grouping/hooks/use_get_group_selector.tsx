@@ -8,7 +8,7 @@
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getGroupSelector, isNoneGroup } from '@kbn/securitysolution-alerts_grouping';
+import { getGroupSelector, isNoneGroup } from '@kbn/securitysolution-grouping';
 import type { TableId } from '../../../../../common/types';
 import { getDefaultGroupingOptions } from '../../../../detections/components/alerts_table/grouping_settings';
 import type { State } from '../../../store';

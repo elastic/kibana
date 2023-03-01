@@ -7,7 +7,7 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import type { RawBucket } from '@kbn/securitysolution-alerts_grouping';
+import type { RawBucket } from '@kbn/securitysolution-grouping';
 import * as i18n from '../translations';
 
 const getSingleGroupSeverity = (severity?: string) => {

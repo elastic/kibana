@@ -531,7 +531,7 @@
     "@kbn/security-solution-fixtures-plugin": "link:x-pack/test/cases_api_integration/common/plugins/security_solution",
     "@kbn/security-solution-plugin": "link:x-pack/plugins/security_solution",
     "@kbn/security-test-endpoints-plugin": "link:x-pack/test/security_functional/plugins/test_endpoints",
-    "@kbn/securitysolution-alerts_grouping": "link:packages/kbn-securitysolution-alerts-grouping",
+    "@kbn/securitysolution-grouping": "link:packages/kbn-securitysolution-grouping",
     "@kbn/securitysolution-autocomplete": "link:packages/kbn-securitysolution-autocomplete",
     "@kbn/securitysolution-ecs": "link:packages/kbn-securitysolution-ecs",
     "@kbn/securitysolution-es-utils": "link:packages/kbn-securitysolution-es-utils",

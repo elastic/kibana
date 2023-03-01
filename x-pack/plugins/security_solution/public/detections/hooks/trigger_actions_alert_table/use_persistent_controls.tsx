@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { isNoneGroup } from '@kbn/securitysolution-alerts_grouping';
+import { isNoneGroup } from '@kbn/securitysolution-grouping';
 import { useGetGroupSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
 import { defaultGroup } from '../../../common/store/grouping/defaults';
 import type { State } from '../../../common/store';

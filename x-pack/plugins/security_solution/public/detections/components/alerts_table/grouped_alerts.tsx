@@ -17,8 +17,8 @@ import type {
   GroupingFieldTotalAggregation,
   GroupingAggregation,
   RawBucket,
-} from '@kbn/securitysolution-alerts_grouping';
-import { getGrouping, isNoneGroup } from '@kbn/securitysolution-alerts_grouping';
+} from '@kbn/securitysolution-grouping';
+import { getGrouping, isNoneGroup } from '@kbn/securitysolution-grouping';
 import { useGetGroupSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { defaultGroup } from '../../../common/store/grouping/defaults';

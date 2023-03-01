@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
-  "id": "@kbn/securitysolution-alerts_grouping",
+  "id": "@kbn/securitysolution-grouping",
   "owner": "@elastic/security-threat-hunting-explore"
 }

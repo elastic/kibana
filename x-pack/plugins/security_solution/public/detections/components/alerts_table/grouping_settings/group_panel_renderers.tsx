@@ -18,7 +18,7 @@ import {
 import { euiThemeVars } from '@kbn/ui-theme';
 import { isArray } from 'lodash/fp';
 import React from 'react';
-import type { RawBucket } from '@kbn/securitysolution-alerts_grouping';
+import type { RawBucket } from '@kbn/securitysolution-grouping';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
 import type { GenericBuckets } from '../../../../../common/search_strategy';
 import { PopoverItems } from '../../../../common/components/popover_items';
