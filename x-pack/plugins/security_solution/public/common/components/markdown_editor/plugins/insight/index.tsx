@@ -68,7 +68,7 @@ export const parser: Plugin = function () {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.inlineTokenizers;
   const methods = Parser.prototype.inlineMethods;
-  const insightPrefix = '!{insight';
+  const insightPrefix = '!{investigate';
 
   const tokenizeInsight: RemarkTokenizer = function (eat, value, silent) {
     if (value.startsWith(insightPrefix) === false) {
