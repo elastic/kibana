@@ -81,18 +81,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('groupByExpression');
       await testSubjects.click('overExpressionSelect');
-      await retry.try(async () => {
-        const groupByOption = await find.allByCssSelector('#overField option');
-        expect(groupByOption[1]).not.to.be(undefined);
-        await groupByOption[1].click();
-      });
-      const groupByTermSize = await testSubjects.find('fieldsNumberSelect');
-      await groupByTermSize.click();
-      await groupByTermSize.clearValue();
-      await groupByTermSize.type('4');
-      const groupByTermField = await testSubjects.find('fieldsExpressionSelect');
-      await groupByTermField.click();
-      await groupByTermField.type('host.keyword');
+      await testSubjects.setValue('overExpressionSelect', 'top');
+      await testSubjects.setValue('fieldsNumberSelect', '4');
+      await testSubjects.setValue('fieldsExpressionSelect', 'host.keyword');
       await commonScreenshots.takeScreenshot(
         'rule-types-index-threshold-example-grouping',
         screenshotDirectories,
