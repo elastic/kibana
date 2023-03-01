@@ -1,6 +1,7 @@
 get:
-  summary: Agents - Current Bulk Upgrades
-  tags: []
+  summary: List current bulk upgrade operations
+  tags:
+    - Agents
   responses:
     '200':
       description: OK

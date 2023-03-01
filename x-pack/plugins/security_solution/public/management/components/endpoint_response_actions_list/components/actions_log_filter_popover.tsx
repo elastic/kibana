@@ -21,6 +21,7 @@ export const ActionsLogFilterPopover = memo(
     numActiveFilters,
     numFilters,
     onButtonClick,
+    'data-test-subj': dataTestSubj,
   }: {
     children: React.ReactNode;
     closePopover: () => void;
@@ -30,8 +31,9 @@ export const ActionsLogFilterPopover = memo(
     numActiveFilters: number;
     numFilters: number;
     onButtonClick: () => void;
+    'data-test-subj'?: string;
   }) => {
-    const getTestId = useTestIdGenerator('response-actions-list');
+    const getTestId = useTestIdGenerator(dataTestSubj);
 
     const filterGroupPopoverId = useGeneratedHtmlId({
       prefix: 'filterGroupPopover',
