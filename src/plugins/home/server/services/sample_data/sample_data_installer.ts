@@ -157,7 +157,7 @@ export class SampleDataInstaller {
     const index = createIndexName(dataset.id, dataIndex.id);
     try {
       if (dataIndex.isDataStream) {
-        /*const request = {
+        /* const request = {
           name: index,
           body: {
             template: {
@@ -194,7 +194,7 @@ export class SampleDataInstaller {
         console.log(JSON.stringify(request));
 
         await this.esClient.asCurrentUser.indices.create(request);
-        /*await this.esClient.asCurrentUser.indices.putIndexTemplate(request);
+        /* await this.esClient.asCurrentUser.indices.putIndexTemplate(request);
 
         await this.esClient.asCurrentUser.indices.createDataStream({
           name: index,
