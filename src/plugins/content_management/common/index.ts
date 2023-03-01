@@ -7,5 +7,19 @@
  */
 
 export { PLUGIN_ID, API_ENDPOINT } from './constants';
-export type { ProcedureSchemas, ProcedureName, GetIn, CreateIn } from './rpc';
-export { procedureNames, schemas as rpcSchemas } from './rpc';
+
+export type {
+  ProcedureSchemas,
+  ProcedureName,
+  GetIn,
+  BulkGetIn,
+  CreateIn,
+  UpdateIn,
+  DeleteIn,
+  SearchIn,
+} from './rpc';
+
+export { procedureNames } from './rpc/constants';
+
+// intentionally not exporting schemas to not include @kbn/schema in the public bundle
+// export { schemas as rpcSchemas } from './rpc';

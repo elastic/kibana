@@ -75,11 +75,7 @@ export const createAppContextStartContractMock = (
     kibanaBranch: 'main',
     telemetryEventsSender: createMockTelemetryEventsSender(),
     bulkActionsResolver: {} as any,
-    messageSigningService: {
-      generateKeyPair: jest.fn(),
-      sign: jest.fn(),
-      getPublicKey: jest.fn(),
-    },
+    messageSigningService: createMessageSigningServiceMock(),
   };
 };
 
@@ -164,3 +160,12 @@ export const createMockAgentClient = () => agentServiceMock.createClient();
  * Creates a mock PackageService
  */
 export const createMockPackageService = () => packageServiceMock.create();
+
+export function createMessageSigningServiceMock() {
+  return {
+    isEncryptionAvailable: true,
+    generateKeyPair: jest.fn(),
+    sign: jest.fn(),
+    getPublicKey: jest.fn(),
+  };
+}

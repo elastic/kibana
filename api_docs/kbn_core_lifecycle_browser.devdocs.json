@@ -578,14 +578,6 @@
                 "path": "src/plugins/saved_objects/public/plugin.ts"
               },
               {
-                "plugin": "savedObjects",
-                "path": "src/plugins/saved_objects/public/finder/saved_object_finder.tsx"
-              },
-              {
-                "plugin": "embeddable",
-                "path": "src/plugins/embeddable/public/plugin.tsx"
-              },
-              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/types.ts"
               },
@@ -634,10 +626,6 @@
                 "path": "src/plugins/dashboard/public/dashboard_actions/index.ts"
               },
               {
-                "plugin": "dashboard",
-                "path": "src/plugins/dashboard/public/dashboard_actions/index.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/lens_attribute_service.ts"
               },
@@ -675,10 +663,6 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/open_search_panel.tsx"
-              },
-              {
-                "plugin": "discover",
                 "path": "src/plugins/discover/public/application/main/utils/persist_saved_search.ts"
               },
               {
@@ -692,10 +676,6 @@
               {
                 "plugin": "discover",
                 "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
               },
               {
                 "plugin": "fileUpload",
@@ -779,14 +759,6 @@
               },
               {
                 "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/components/source_picker.tsx"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/source_modal.tsx"
-              },
-              {
-                "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/plugin.ts"
               },
               {
@@ -858,24 +830,8 @@
                 "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
               },
               {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/plugin.tsx"
-              },
-              {
                 "plugin": "dataVisualizer",
                 "path": "x-pack/plugins/data_visualizer/public/application/index_data_visualizer/index_data_visualizer.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/index_or_search/page.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/jobs/new_job/pages/components/datafeed_step/components/data_view/change_data_view.tsx"
-              },
-              {
-                "plugin": "ml",
-                "path": "x-pack/plugins/ml/public/application/data_frame_analytics/pages/analytics_management/components/source_selection/source_selection.tsx"
               },
               {
                 "plugin": "ml",
@@ -884,14 +840,6 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/public/pages/rules/use_csp_rules.ts"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/components/search_bar.tsx"
-              },
-              {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/components/guidance_panel/guidance_panel.tsx"
               },
               {
                 "plugin": "securitySolution",

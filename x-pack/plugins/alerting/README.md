@@ -695,7 +695,7 @@ alerting.registerNavigation(
 
 This tells the Alerting Framework that, given a rule of the RuleType whose ID is `my-application-id.my-unique-rule-type`, if that rule's `consumer` value (which is set when the rule is created by your plugin) is your application (whose id is `my-application-id`), then it will navigate to your application using the path `/my-unique-rule/${the id of the rule}`.
 
-The navigation is handled using the `navigateToApp` API, meaning that the path will be automatically picked up by your `react-router-dom` **Route** component, so all you have top do is configure a Route that handles the path `/my-unique-rule/:id`.
+The navigation is handled using the `navigateToUrl` API, meaning that the path will be automatically picked up by your `react-router-dom` **Route** component, so all you have top do is configure a Route that handles the path `/my-unique-rule/:id`.
 
 You can look at the `alerting-example` plugin to see an example of using this API, which is enabled using the `--run-examples` flag when you run `yarn start`.
 

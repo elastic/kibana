@@ -179,6 +179,16 @@ export const useEnterpriseSearchNav = () => {
               to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
             }),
           },
+          {
+            id: 'searchExperiences',
+            name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+              defaultMessage: 'Search Experiences',
+            }),
+            ...generateNavLink({
+              shouldNotCreateHref: true,
+              to: SEARCH_EXPERIENCES_PLUGIN.URL,
+            }),
+          },
         ],
         name: i18n.translate('xpack.enterpriseSearch.nav.searchTitle', {
           defaultMessage: 'Search',
@@ -281,17 +291,16 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
                 to: `${enginePath}/${EngineViewTabs.SCHEMA}`,
               }),
             },
-            // Hidden until Preview page is available
-            // {
-            //   id: 'enterpriseSearchEnginePreview',
-            //   name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
-            //     defaultMessage: 'Preview',
-            //   }),
-            //   ...generateNavLink({
-            //     shouldNotCreateHref: true,
-            //     to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
-            //   }),
-            // },
+            {
+              id: 'enterpriseSearchEnginePreview',
+              name: i18n.translate('xpack.enterpriseSearch.nav.engine.previewTitle', {
+                defaultMessage: 'Preview',
+              }),
+              ...generateNavLink({
+                shouldNotCreateHref: true,
+                to: `${enginePath}/${EngineViewTabs.PREVIEW}`,
+              }),
+            },
             {
               id: 'enterpriseSearchEngineAPI',
               name: i18n.translate('xpack.enterpriseSearch.nav.engine.apiTitle', {

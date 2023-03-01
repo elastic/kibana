@@ -10547,38 +10547,6 @@
           },
           {
             "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
           },
           {
@@ -10592,18 +10560,6 @@
           {
             "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -10774,14 +10730,6 @@
             "path": "src/plugins/data_views/server/utils.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
             "plugin": "dataViews",
             "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
           },
@@ -10816,18 +10764,6 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
           },
           {
             "plugin": "fleet",
@@ -10940,18 +10876,6 @@
           {
             "plugin": "@kbn/core-saved-objects-browser-mocks",
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
@@ -13163,35 +13087,35 @@
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             }
           ]
         },
@@ -13623,7 +13547,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/grouped_alerts.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -13635,7 +13559,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -13870,10 +13794,6 @@
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/no_results/no_results_suggestions/use_fetch_occurances_range.ts"
-              },
-              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
@@ -14032,14 +13952,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_dataset.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_log_level.tsx"
               },
               {
                 "plugin": "fleet",
@@ -17478,7 +17390,7 @@
               "\nReturns the default data view as an object.\nIf no default is found, or it is missing\nanother data view is selected as default and returned.\nIf no possible data view found to become a default returns null.\n"
             ],
             "signature": [
-              "(refreshFields?: boolean | undefined) => Promise<",
+              "(options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -17495,19 +17407,43 @@
               {
                 "parentPluginId": "data",
                 "id": "def-server.DataViewsService.getDefaultDataView.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
-                "label": "refreshFields",
-                "description": [
-                  "- if true, will refresh the fields of the default data view"
-                ],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "label": "options",
+                "description": [],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.DataViewsService.getDefaultDataView.$1.displayErrors",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "displayErrors",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.DataViewsService.getDefaultDataView.$1.refreshFields",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "refreshFields",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": [
@@ -21234,7 +21170,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/grouped_alerts.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -21246,7 +21182,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -21481,10 +21417,6 @@
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
               },
               {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/no_results/no_results_suggestions/use_fetch_occurances_range.ts"
-              },
-              {
                 "plugin": "aiops",
                 "path": "x-pack/plugins/aiops/public/components/log_categorization/log_categorization_page.tsx"
               },
@@ -21643,14 +21575,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_dataset.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_log_level.tsx"
               },
               {
                 "plugin": "fleet",
@@ -25957,7 +25881,7 @@
               "\nReturns the default data view as an object.\nIf no default is found, or it is missing\nanother data view is selected as default and returned.\nIf no possible data view found to become a default returns null.\n"
             ],
             "signature": [
-              "(refreshFields?: boolean | undefined) => Promise<",
+              "(options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -25974,19 +25898,43 @@
               {
                 "parentPluginId": "data",
                 "id": "def-common.DataViewsService.getDefaultDataView.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
-                "label": "refreshFields",
-                "description": [
-                  "- if true, will refresh the fields of the default data view"
-                ],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "label": "options",
+                "description": [],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.DataViewsService.getDefaultDataView.$1.displayErrors",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "displayErrors",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.DataViewsService.getDefaultDataView.$1.refreshFields",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "refreshFields",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": [
@@ -27949,7 +27897,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; getDefaultDataView: (refreshFields?: boolean | undefined) => Promise<",
+          ">; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -28376,38 +28324,6 @@
           },
           {
             "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
           },
           {
@@ -28421,18 +28337,6 @@
           {
             "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-browser-internal",
@@ -28603,14 +28507,6 @@
             "path": "src/plugins/data_views/server/utils.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
             "plugin": "dataViews",
             "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
           },
@@ -28645,18 +28541,6 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
           },
           {
             "plugin": "fleet",
@@ -28769,18 +28653,6 @@
           {
             "plugin": "@kbn/core-saved-objects-browser-mocks",
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
           },
           {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
