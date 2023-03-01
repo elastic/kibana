@@ -67,8 +67,8 @@ export const DATA_STATISTICS_MESSAGE = (groupbySelection: string) =>
     }
   );
 
-export const NON_EMPTY_FILTER = (groupbySelection: string) =>
+export const NON_EMPTY_FILTER = (groupBySelection: string) =>
   i18n.translate('xpack.securitySolution.detectionEngine.alerts.alertsByGrouping.nonEmptyFilter', {
-    values: { groupbySelection },
+    values: { groupBySelection },
     defaultMessage: `NOT {groupBySelection}: exists`,
   });
