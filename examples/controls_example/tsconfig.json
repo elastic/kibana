@@ -22,6 +22,5 @@
     "@kbn/embeddable-plugin",
     "@kbn/data-views-plugin",
     "@kbn/es-query",
-    "@kbn/presentation-util-plugin"
   ]
 }
