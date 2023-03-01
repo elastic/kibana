@@ -10,7 +10,10 @@
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
 import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
 import { createKbnClient } from '../../../../scripts/endpoint/common/stack_services';
-import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import type {
+  DeleteIndexedFleetEndpointPoliciesResponse,
+  IndexedFleetEndpointPolicyResponse,
+} from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   indexFleetEndpointPolicy,
   deleteIndexedFleetEndpointPolicies,
@@ -22,10 +25,25 @@ declare global {
   namespace Cypress {
     interface Chainable {
       task(
-        name: 'indexCase',
+        name: 'indexFleetEndpointPolicy',
         arg?: Partial<CasePostRequest>,
         options?: Partial<Cypress.Loggable & Cypress.Timeoutable>
       ): Cypress.Chainable<IndexedCase['data']>;
+
+      task(
+        name: 'deleteIndexedFleetEndpointPolicies',
+        arg: IndexedFleetEndpointPolicyResponse,
+        options?: Partial<Cypress.Loggable & Cypress.Timeoutable>
+      ): Cypress.Chainable<DeleteIndexedFleetEndpointPoliciesResponse>;
+
+      task(
+        name: 'indexFleetEndpointPolicy',
+        arg: {
+          policyName: string;
+          endpointPackageVersion: string;
+        },
+        options?: Partial<Cypress.Loggable & Cypress.Timeoutable>
+      ): Cypress.Chainable<IndexedFleetEndpointPolicyResponse>;
 
       task(
         name: 'deleteIndexedCase',
@@ -53,6 +71,7 @@ export const dataLoaders = (on: Cypress.PluginEvents, config: Cypress.PluginConf
     }) => {
       return indexFleetEndpointPolicy(kbnClient, policyName, endpointPackageVersion);
     },
+
     deleteIndexedFleetEndpointPolicies: async (indexData: IndexedFleetEndpointPolicyResponse) => {
       return deleteIndexedFleetEndpointPolicies(kbnClient, indexData);
     },
