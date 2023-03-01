@@ -14,17 +14,13 @@ import { useMonitorListBreadcrumbs } from '../monitors_page/hooks/use_breadcrumb
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 
 export const useMonitorDetailsPage = () => {
-  const { monitor, error } = useSelectedMonitor();
+  const { monitor, isMonitorMissing } = useSelectedMonitor();
 
   const { monitorId } = useParams<{ monitorId: string }>();
 
   useMonitorListBreadcrumbs(monitor ? [{ text: monitor?.name ?? '' }] : []);
 
-  if (
-    error?.body.statusCode === 404 &&
-    (error.getPayload as { monitorId: string })?.monitorId === monitorId &&
-    monitor?.[ConfigKey.CONFIG_ID] !== monitorId
-  ) {
+  if (isMonitorMissing && monitor?.[ConfigKey.CONFIG_ID] !== monitorId) {
     return <Redirect to={MONITOR_NOT_FOUND_ROUTE.replace(':monitorId', monitorId)} />;
   }
   return null;
