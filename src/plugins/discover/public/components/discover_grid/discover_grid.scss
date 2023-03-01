@@ -39,7 +39,26 @@
   font-family: $euiCodeFontFamily;
 }
 
+.euiDataGridRowCell__popover:has(.dscDiscoverGrid__cellPopoverWrapper) {
+  min-width: 100px;
+  min-height: 100px;
+  width: max-content;
+  max-width: 800px !important;
+  max-height: 800px !important;
+
+  & > div {
+    height: 100%;
+  }
+}
+
+.euiDataGridRowCell__popover:has(.dscDiscoverGrid__cellPopoverValue) {
+  resize: both;
+  width: 400px;
+}
+
 .dscDiscoverGrid__cellPopover {
+  height: 100%;
+
   // Fixes https://github.com/elastic/kibana/issues/145216 in Chrome
   .lines-content.monaco-editor-background {
     overflow: unset !important;

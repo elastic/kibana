@@ -33,6 +33,7 @@ import { getSchemaDetectors } from './discover_grid_schema';
 import { DiscoverGridFlyout } from './discover_grid_flyout';
 import { DiscoverGridContext } from './discover_grid_context';
 import { getRenderCellValueFn } from './get_render_cell_value';
+import { getRenderCellPopoverFn } from './get_render_cell_popover';
 import { DiscoverGridSettings } from './types';
 import {
   getEuiGridColumns,
@@ -601,6 +602,7 @@ export const DiscoverGrid = ({
             onColumnResize={onResize}
             pagination={paginationObj}
             renderCellValue={renderCellValue}
+            renderCellPopover={getRenderCellPopoverFn}
             ref={dataGridRef}
             rowCount={rowCount}
             schemaDetectors={schemaDetectors}
