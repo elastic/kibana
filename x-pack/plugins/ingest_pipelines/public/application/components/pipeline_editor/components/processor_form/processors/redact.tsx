@@ -47,9 +47,7 @@ const patternsValidation: ValidationFunc = ({ value }) => {
   }
 };
 
-const patternValidations = [
-  emptyField(valueRequiredMessage),
-];
+const patternValidations = [emptyField(valueRequiredMessage)];
 
 const fieldsConfig: FieldsConfig = {
   /* Required field configs */
