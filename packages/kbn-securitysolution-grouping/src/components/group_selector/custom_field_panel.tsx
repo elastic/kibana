@@ -7,7 +7,7 @@
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
-import { EuiButton, EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiButton, EuiComboBox, EuiForm, EuiFormRow } from '@elastic/eui';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -49,7 +49,7 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
     const isSubmitDisabled = !this.state.selectedOptions.length;
     return (
       <div data-test-subj="custom-field-panel" style={{ padding: 16 }}>
-        <EuiForwm>
+        <EuiForm>
           <EuiFormRow
             label={i18n.translate('grouping.groupsSelector.customGroupByFieldLabel', {
               defaultMessage: 'Field',
@@ -88,7 +88,7 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
               defaultMessage: 'Add',
             })}
           </EuiButton>
-        </EuiForwm>
+        </EuiForm>
       </div>
     );
   }
