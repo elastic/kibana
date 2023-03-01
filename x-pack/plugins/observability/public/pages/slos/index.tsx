@@ -36,7 +36,7 @@ export function SlosPage() {
 
   const { total } = sloList || {};
 
-  const [autoRefresh, setAutoRefresh] = useState<boolean>(true);
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(true);
 
   useBreadcrumbs([
     {
@@ -52,7 +52,7 @@ export function SlosPage() {
   };
 
   const handleToggleAutoRefresh = () => {
-    setAutoRefresh(!autoRefresh);
+    setIsAutoRefreshing(!isAutoRefreshing);
   };
 
   if (!isSloFeatureEnabled(config)) {
@@ -85,13 +85,16 @@ export function SlosPage() {
               defaultMessage: 'Create new SLO',
             })}
           </EuiButton>,
-          <AutoRefreshButton enabled={autoRefresh} onClick={handleToggleAutoRefresh} />,
+          <AutoRefreshButton
+            isAutoRefreshing={isAutoRefreshing}
+            onClick={handleToggleAutoRefresh}
+          />,
         ],
         bottomBorder: false,
       }}
       data-test-subj="slosPage"
     >
-      <SloList autoRefresh={autoRefresh} />
+      <SloList autoRefresh={isAutoRefreshing} />
     </ObservabilityPageTemplate>
   );
 }

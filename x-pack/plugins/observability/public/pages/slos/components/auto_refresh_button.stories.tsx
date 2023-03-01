@@ -17,14 +17,14 @@ export default {
   decorators: [KibanaReactStorybookDecorator],
 };
 
-const Template: ComponentStory<typeof Component> = (props) => {
-  const [enabled, setEnabled] = useState(true);
+const Template: ComponentStory<typeof Component> = () => {
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState(true);
 
   const toggleEnabled = () => {
-    setEnabled(!enabled);
+    setIsAutoRefreshing(!isAutoRefreshing);
   };
 
-  return <Component enabled={enabled} onClick={toggleEnabled} />;
+  return <Component isAutoRefreshing={isAutoRefreshing} onClick={toggleEnabled} />;
 };
 
 const defaultProps = {

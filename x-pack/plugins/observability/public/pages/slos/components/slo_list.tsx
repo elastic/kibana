@@ -34,7 +34,7 @@ export function SloList({ autoRefresh }: Props) {
     name: query,
     sortBy: sort,
     indicatorTypes: indicatorTypeFilter,
-    refetchInterval: autoRefresh ? 5000 : undefined,
+    shouldRefetch: autoRefresh,
   });
 
   const { results = [], total = 0, perPage = 0 } = sloList || {};

@@ -9,7 +9,7 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface Props {
-  enabled: boolean;
+  isAutoRefreshing: boolean;
   dataTestSubj?: string;
   disabled?: boolean;
   onClick: () => void;
@@ -18,10 +18,10 @@ interface Props {
 export function AutoRefreshButton({
   dataTestSubj = 'autoRefreshButton',
   disabled,
-  enabled,
+  isAutoRefreshing,
   onClick,
 }: Props) {
-  return enabled ? (
+  return isAutoRefreshing ? (
     <EuiButtonEmpty
       data-test-subj={dataTestSubj}
       disabled={disabled}

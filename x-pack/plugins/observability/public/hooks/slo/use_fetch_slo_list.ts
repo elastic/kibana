@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useState } from 'react';
 import {
   QueryObserverResult,
   RefetchOptions,
@@ -20,7 +21,7 @@ interface SLOListParams {
   page?: number;
   sortBy?: string;
   indicatorTypes?: string[];
-  refetchInterval?: number;
+  shouldRefetch?: boolean;
 }
 
 export interface UseFetchSloListResponse {
@@ -34,14 +35,19 @@ export interface UseFetchSloListResponse {
   ) => Promise<QueryObserverResult<FindSLOResponse | undefined, unknown>>;
 }
 
+const SHORT_REFETCH_INTERVAL = 5000; // 5 seconds
+const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
+
 export function useFetchSloList({
   name = '',
   page = 1,
   sortBy = 'name',
   indicatorTypes = [],
-  refetchInterval,
+  shouldRefetch,
 }: SLOListParams | undefined = {}): UseFetchSloListResponse {
   const { http } = useKibana().services;
+
+  const [stateRefetchInterval, setStateRefetchInterval] = useState(SHORT_REFETCH_INTERVAL);
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
@@ -68,8 +74,19 @@ export function useFetchSloList({
       },
       keepPreviousData: true,
       refetchOnWindowFocus: false,
-      refetchInterval,
+      refetchInterval: shouldRefetch ? stateRefetchInterval : undefined,
       staleTime: 1000,
+      onSuccess: ({ results }: FindSLOResponse) => {
+        if (!shouldRefetch) {
+          return;
+        }
+
+        if (results.find((slo) => slo.summary.status === 'NO_DATA')) {
+          setStateRefetchInterval(SHORT_REFETCH_INTERVAL);
+        } else {
+          setStateRefetchInterval(LONG_REFETCH_INTERVAL);
+        }
+      },
     }
   );
 
