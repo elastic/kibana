@@ -204,7 +204,7 @@ function renderPopoverContent({
           <JsonCodeEditor
             json={getJSON(columnId, row, useTopLevelObjectColumns)}
             width={500}
-            height={500}
+            height={200}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
