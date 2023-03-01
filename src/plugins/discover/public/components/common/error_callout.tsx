@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiButtonIcon, EuiCallOut, EuiToolTip } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiLink, EuiPopover, useEuiTheme } from '@elastic/eui';
+import { css, SerializedStyles } from '@emotion/react';
+import { getSearchErrorOverrideDisplay } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useCallback } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 
 export interface ErrorCalloutProps {
@@ -25,17 +27,26 @@ export const ErrorCallout = ({
   'data-test-subj': dataTestSubj,
 }: ErrorCalloutProps) => {
   const { core } = useDiscoverServices();
-
-  const showError = useCallback(() => {
-    core.notifications.showErrorDialog({ title, error });
-  }, [core.notifications, error, title]);
+  const { euiTheme } = useEuiTheme();
 
   const showErrorMessage = i18n.translate('discover.errorCalloutShowErrorMessage', {
-    defaultMessage: 'Show error details',
+    defaultMessage: 'Show details',
   });
 
-  let formattedTitle: ReactNode = title;
+  const overrideDisplay = getSearchErrorOverrideDisplay({
+    error,
+    application: core.application,
+  });
+
+  const [overridePopoverOpen, setOverridePopoverOpen] = useState(false);
+
+  const showError = overrideDisplay?.body
+    ? () => setOverridePopoverOpen(true)
+    : () => core.notifications.showErrorDialog({ title, error });
+
+  let formattedTitle: ReactNode = overrideDisplay?.title || title;
   let body: ReactNode;
+  let calloutCss: SerializedStyles | undefined;
 
   if (inline) {
     const formattedTitleMessage = i18n.translate('discover.errorCalloutFormattedTitle', {
@@ -43,19 +54,50 @@ export const ErrorCallout = ({
       values: { title, errorMessage: error.message },
     });
 
+    let link = (
+      <EuiLink
+        onClick={showError}
+        css={css`
+          white-space: nowrap;
+          margin-inline-start: ${euiTheme.size.s};
+        `}
+      >
+        {showErrorMessage}
+      </EuiLink>
+    );
+
+    if (overrideDisplay?.body) {
+      link = (
+        <EuiPopover
+          isOpen={overridePopoverOpen}
+          closePopover={() => setOverridePopoverOpen(false)}
+          button={link}
+        >
+          {overrideDisplay.body}
+        </EuiPopover>
+      );
+    }
+
     formattedTitle = (
       <>
-        {formattedTitleMessage}{' '}
-        <EuiToolTip content={showErrorMessage} position="top">
-          <EuiButtonIcon onClick={showError} iconType="inspect" aria-label={showErrorMessage} />
-        </EuiToolTip>
+        <span className="eui-textTruncate" data-test-subj="discoverErrorCalloutMessage">
+          {formattedTitleMessage}
+        </span>
+        {link}
       </>
     );
+
+    calloutCss = css`
+      .euiTitle {
+        display: flex;
+        align-items: center;
+      }
+    `;
   } else {
-    body = (
+    body = overrideDisplay?.body ?? (
       <>
-        <p>{error.message}</p>
-        <EuiButton size="s" color="danger" onClick={() => showError()}>
+        <p data-test-subj="discoverErrorCalloutMessage">{error.message}</p>
+        <EuiButton size="s" color="danger" onClick={showError}>
           {showErrorMessage}
         </EuiButton>
       </>
@@ -69,6 +111,7 @@ export const ErrorCallout = ({
       iconType="error"
       size={inline ? 's' : undefined}
       children={body}
+      css={calloutCss}
       data-test-subj={dataTestSubj}
     />
   );
