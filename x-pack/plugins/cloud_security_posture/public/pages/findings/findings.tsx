@@ -36,10 +36,7 @@ export const Findings = () => {
     <>
       <EuiTitle size="l">
         <h1>
-          <FormattedMessage
-            id="xpack.cloudSecurityPosture.findings.title"
-            defaultMessage="Findings"
-          />
+          <FormattedMessage id="xpack.csp.findings.title" defaultMessage="Findings" />
         </h1>
       </EuiTitle>
       <EuiSpacer />
@@ -52,7 +49,7 @@ export const Findings = () => {
           <EuiFlexGroup responsive={false} alignItems="center" direction="row" gutterSize="s">
             <EuiFlexItem grow={false}>
               <FormattedMessage
-                id="xpack.cloudSecurityPosture.findings.tabs.vulnerabilities"
+                id="xpack.csp.findings.tabs.vulnerabilities"
                 defaultMessage="Vulnerabilities"
               />
             </EuiFlexItem>
@@ -72,7 +69,7 @@ export const Findings = () => {
           isSelected={location.pathname !== findingsNavigation.vulnerabilities.path}
         >
           <FormattedMessage
-            id="xpack.cloudSecurityPosture.findings.tabs.configurations"
+            id="xpack.csp.findings.tabs.configurations"
             defaultMessage="Configurations"
           />
         </EuiTab>
