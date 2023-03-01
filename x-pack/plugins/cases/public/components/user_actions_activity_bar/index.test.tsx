@@ -122,6 +122,7 @@ describe('UserActionsActivityBar ', () => {
 
     await waitFor(() =>
       expect(onUserActionsActivityChanged).toHaveBeenCalledWith({
+        ...params,
         type: 'action',
         sortOrder: 'asc',
       })

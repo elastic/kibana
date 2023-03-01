@@ -82,8 +82,13 @@ const caseViewProps: CaseViewProps = {
     },
   ],
 };
-const filterActionType = 'all';
-const sortOrder = 'asc';
+
+const userActivityQueryParams = {
+  type: 'all',
+  sortOrder: 'asc',
+  page: 1,
+  perPage: 10,
+};
 
 const pushCaseToExternalService = jest.fn();
 
@@ -136,7 +141,6 @@ describe('Case View Page activity tab', () => {
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
-    useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
     useGetCaseUsersMock.mockReturnValue({ isLoading: false, data: caseUsers });
   });
 
@@ -145,14 +149,11 @@ describe('Case View Page activity tab', () => {
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
 
     expect(result.getByTestId('case-view-activity')).toBeInTheDocument();
-    expect(result.getByTestId('user-actions')).toBeInTheDocument();
+    expect(result.getAllByTestId('user-actions-list')).toHaveLength(2);
     expect(result.getByTestId('case-tags')).toBeInTheDocument();
     expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
     expect(result.getByTestId('case-view-status-action-button')).toBeInTheDocument();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
-      type: filterActionType,
-      sortOrder,
-    });
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams);
 
     await waitForComponentToUpdate();
   });
@@ -165,14 +166,11 @@ describe('Case View Page activity tab', () => {
 
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
     expect(result.getByTestId('case-view-activity')).toBeInTheDocument();
-    expect(result.getByTestId('user-actions')).toBeInTheDocument();
+    expect(result.getAllByTestId('user-actions-list')).toHaveLength(2);
     expect(result.getByTestId('case-tags')).toBeInTheDocument();
     expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
     expect(result.queryByTestId('case-view-status-action-button')).not.toBeInTheDocument();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
-      type: filterActionType,
-      sortOrder,
-    });
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams);
 
     await waitForComponentToUpdate();
   });
@@ -185,32 +183,19 @@ describe('Case View Page activity tab', () => {
 
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
     expect(result.getByTestId('case-view-activity')).toBeInTheDocument();
-    expect(result.getByTestId('user-actions')).toBeInTheDocument();
     expect(result.getByTestId('case-tags')).toBeInTheDocument();
     expect(result.getByTestId('connector-edit-header')).toBeInTheDocument();
     expect(result.getByTestId('case-severity-selection')).toBeDisabled();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
-      type: filterActionType,
-      sortOrder,
-    });
 
     await waitForComponentToUpdate();
   });
 
   it('should show a loading when is fetching data is true and hide the user actions activity', () => {
-    useFindCaseUserActionsMock.mockReturnValue({
-      ...defaultUseFindCaseUserActions,
-      isFetching: true,
-      isLoading: true,
-    });
     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
     expect(result.getByTestId('case-view-loading-content')).toBeInTheDocument();
     expect(result.queryByTestId('case-view-activity')).not.toBeInTheDocument();
-    expect(result.queryByTestId('user-actions')).not.toBeInTheDocument();
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
-      type: filterActionType,
-      sortOrder,
-    });
+    expect(result.queryByTestId('user-actions-list')).not.toBeInTheDocument();
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams);
   });
 
   it('should not render the assignees on basic license', () => {
@@ -256,18 +241,15 @@ describe('Case View Page activity tab', () => {
     it('should show all filter as active', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
-        type: filterActionType,
-        sortOrder,
-      });
+      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams);
 
       userEvent.click(screen.getByTestId('user-actions-filter-activity-button-all'));
 
       await waitFor(() => {
-        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
-          type: 'all',
-          sortOrder,
-        });
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          userActivityQueryParams
+        );
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         expect(screen.getByLabelText(`${userActionsStats.total - 1} active filters`));
         expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
@@ -280,17 +262,14 @@ describe('Case View Page activity tab', () => {
     it('should show comment filter as active', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
-        type: filterActionType,
-        sortOrder,
-      });
+      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams);
 
       userEvent.click(screen.getByTestId('user-actions-filter-activity-button-comments'));
 
       await waitFor(() => {
         expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
+          ...userActivityQueryParams,
           type: 'user',
-          sortOrder,
         });
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         expect(screen.getByLabelText(`${userActionsStats.totalComments} active filters`));
@@ -304,17 +283,14 @@ describe('Case View Page activity tab', () => {
     it('should show history filter as active', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
-        type: filterActionType,
-        sortOrder,
-      });
+      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams);
 
       userEvent.click(screen.getByTestId('user-actions-filter-activity-button-history'));
 
       await waitFor(() => {
         expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
+          ...userActivityQueryParams,
           type: 'action',
-          sortOrder,
         });
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         expect(screen.getByLabelText(`${userActionsStats.totalOtherActions - 1} active filters`));
@@ -326,10 +302,7 @@ describe('Case View Page activity tab', () => {
     it('should render by desc sort order', async () => {
       appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
-        type: filterActionType,
-        sortOrder,
-      });
+      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams);
 
       const sortSelect = screen.getByTestId('user-actions-sort-select');
 
@@ -337,7 +310,7 @@ describe('Case View Page activity tab', () => {
 
       await waitFor(() => {
         expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
-          type: 'all',
+          ...userActivityQueryParams,
           sortOrder: 'desc',
         });
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
