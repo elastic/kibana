@@ -15,7 +15,7 @@ import {
 export const latestVulnerabilitiesTransform: TransformPutTransformRequest = {
   transform_id: 'cloud_security_posture.vulnerabilities_latest-default-8.8.0',
   description:
-    'Defines vulnerabilities transformation to view only the latest vulnerability per report',
+    'Defines vulnerabilities transformation to view only the latest vulnerability per resource',
   source: {
     index: VULNERABILITIES_INDEX_PATTERN,
   },
