@@ -1,6 +1,7 @@
 get:
-  summary: Outputs
-  tags: []
+  summary: List outputs
+  tags:
+    - Outputs
   responses:
     '200':
       description: OK
@@ -23,9 +24,9 @@ get:
       $ref: ../components/responses/error.yaml
   operationId: get-outputs
 post:
-  summary: Outputs
-  description: 'Create a new output'
-  tags: []
+  summary: Create output
+  tags:
+    - Outputs
   responses:
     '200':
       description: OK
@@ -50,7 +51,7 @@ post:
               type: string
             type:
               type: string
-              enum: ["elasticsearch"]
+              enum: ['elasticsearch']
             is_default:
               type: boolean
             is_default_monitoring:
