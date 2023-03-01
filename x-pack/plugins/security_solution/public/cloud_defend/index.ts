@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-export interface IndexPatternStats {
-  indexPatternsWithGeoFieldCount: number;
-  indexPatternsWithGeoPointFieldCount: number;
-  indexPatternsWithGeoShapeFieldCount: number;
-  geoShapeAggLayersCount: number;
+import type { SecuritySubPlugin } from '../app/types';
+import { routes } from './routes';
+
+export class CloudDefend {
+  public setup() {}
+
+  public start(): SecuritySubPlugin {
+    return { routes };
+  }
 }
