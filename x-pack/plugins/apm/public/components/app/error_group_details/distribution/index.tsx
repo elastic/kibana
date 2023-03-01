@@ -39,7 +39,7 @@ type ErrorDistributionAPIResponse =
 
 interface Props {
   fetchStatus: FETCH_STATUS;
-  distribution: ErrorDistributionAPIResponse;
+  distribution?: ErrorDistributionAPIResponse;
   title: React.ReactNode;
 }
 
@@ -56,7 +56,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
   );
   const timeseries = [
     {
-      data: distribution.currentPeriod,
+      data: distribution?.currentPeriod ?? [],
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.errorGroup.chart.ocurrences', {
         defaultMessage: 'Error occurrences',
@@ -65,7 +65,7 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
     ...(comparisonEnabled
       ? [
           {
-            data: distribution.previousPeriod,
+            data: distribution?.previousPeriod ?? [],
             color: previousPeriodColor,
             title: previousPeriodLabel,
           },

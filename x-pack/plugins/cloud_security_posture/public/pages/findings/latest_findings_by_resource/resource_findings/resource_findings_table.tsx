@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
@@ -25,14 +25,19 @@ import {
 } from '../../layout/findings_layout';
 import { FindingsRuleFlyout } from '../../findings_flyout/findings_flyout';
 import { getSelectedRowStyle } from '../../utils/utils';
+import * as TEST_SUBJECTS from '../../test_subjects';
 
-interface Props {
+export interface ResourceFindingsTableProps {
   items: CspFinding[];
   loading: boolean;
   pagination: Pagination;
   sorting: Required<EuiBasicTableProps<CspFinding>>['sorting'];
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
   onAddFilter: OnAddFilter;
+  onPaginateFlyout: (pageIndex: number) => void;
+  onCloseFlyout: () => void;
+  onOpenFlyout: (finding: CspFinding) => void;
+  flyoutFindingIndex: number;
 }
 
 const ResourceFindingsTableComponent = ({
@@ -42,12 +47,18 @@ const ResourceFindingsTableComponent = ({
   sorting,
   setTableOptions,
   onAddFilter,
-}: Props) => {
+  onOpenFlyout,
+  flyoutFindingIndex,
+  onPaginateFlyout,
+  onCloseFlyout,
+}: ResourceFindingsTableProps) => {
   const { euiTheme } = useEuiTheme();
-  const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
+
+  const selectedFinding = items[flyoutFindingIndex];
 
   const getRowProps = (row: CspFinding) => ({
     style: getSelectedRowStyle(euiTheme, row, selectedFinding),
+    'data-test-subj': TEST_SUBJECTS.getResourceFindingsTableRowTestId(row.resource.id),
   });
 
   const columns: [
@@ -55,20 +66,21 @@ const ResourceFindingsTableComponent = ({
     ...Array<EuiBasicTableColumn<CspFinding>>
   ] = useMemo(
     () => [
-      getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
+      getExpandColumn<CspFinding>({ onClick: onOpenFlyout }),
       createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
       baseFindingsColumns['rule.benchmark.rule_number'],
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
-      baseFindingsColumns['rule.section'],
+      createColumnWithFilters(baseFindingsColumns['rule.section'], { onAddFilter }),
       baseFindingsColumns['@timestamp'],
     ],
-    [onAddFilter]
+    [onAddFilter, onOpenFlyout]
   );
 
   if (!loading && !items.length)
     return (
       <EuiEmptyPrompt
         iconType="logoKibana"
+        data-test-subj={TEST_SUBJECTS.RESOURCES_FINDINGS_TABLE_EMPTY_STATE}
         title={
           <h2>
             <FormattedMessage
@@ -83,6 +95,7 @@ const ResourceFindingsTableComponent = ({
   return (
     <>
       <EuiBasicTable
+        data-test-subj={TEST_SUBJECTS.RESOURCES_FINDINGS_TABLE}
         loading={loading}
         items={items}
         columns={columns}
@@ -94,7 +107,10 @@ const ResourceFindingsTableComponent = ({
       {selectedFinding && (
         <FindingsRuleFlyout
           findings={selectedFinding}
-          onClose={() => setSelectedFinding(undefined)}
+          onClose={onCloseFlyout}
+          findingsCount={pagination.totalItemCount}
+          flyoutIndex={flyoutFindingIndex + pagination.pageIndex * pagination.pageSize}
+          onPaginate={onPaginateFlyout}
         />
       )}
     </>

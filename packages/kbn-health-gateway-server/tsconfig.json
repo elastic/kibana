@@ -22,6 +22,7 @@
     "@kbn/server-http-tools",
     "@kbn/utility-types",
     "@kbn/repo-info",
+    "@kbn/repo-packages",
   ],
   "exclude": [
     "target/**/*",

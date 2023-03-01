@@ -5,23 +5,74 @@
  * 2.0.
  */
 import React, { ComponentType } from 'react';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { AppMountParameters } from '@kbn/core-application-browser';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { sloFeatureId } from '../../common';
+import { PluginContext } from '../context/plugin_context';
+import { createObservabilityRuleTypeRegistryMock } from '../rules/observability_rule_type_registry_mock';
+import { ConfigSchema } from '../plugin';
 
 export function KibanaReactStorybookDecorator(Story: ComponentType) {
+  const queryClient = new QueryClient();
+
+  const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
+  const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
+
+  const config: ConfigSchema = {
+    unsafe: {
+      slo: {
+        enabled: false,
+      },
+      alertDetails: {
+        apm: { enabled: false },
+        logs: { enabled: false },
+        metrics: { enabled: false },
+        uptime: { enabled: false },
+      },
+    },
+  };
   return (
     <KibanaContextProvider
       services={{
-        charts: {
-          theme: {
-            useChartsTheme: () => {},
-            useChartsBaseTheme: () => {},
+        application: {
+          navigateToUrl: () => {},
+          capabilities: {
+            [sloFeatureId]: {
+              read: true,
+              write: true,
+            },
           },
         },
-        application: { navigateToUrl: () => {} },
-        http: { basePath: { prepend: (_: string) => '' } },
-        docLinks: { links: { query: {} } },
-        notifications: { toasts: {} },
-        storage: { get: () => {} },
+        charts: {
+          theme: {
+            useChartsBaseTheme: () => {},
+            useChartsTheme: () => {},
+          },
+        },
+        data: {},
+        dataViews: {
+          create: () => Promise.resolve({}),
+        },
+        docLinks: {
+          links: {
+            query: {},
+          },
+        },
+        http: {
+          basePath: {
+            prepend: (_: string) => '',
+          },
+        },
+        notifications: {
+          toasts: {
+            addDanger: () => {},
+          },
+        },
+        storage: {
+          get: () => {},
+        },
         uiSettings: {
           get: (setting: string) => {
             if (setting === 'dateFormat') {
@@ -29,9 +80,21 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
             }
           },
         },
+        unifiedSearch: {},
       }}
     >
-      <Story />
+      <PluginContext.Provider
+        value={{
+          appMountParameters,
+          config,
+          observabilityRuleTypeRegistry,
+          ObservabilityPageTemplate: KibanaPageTemplate,
+        }}
+      >
+        <QueryClientProvider client={queryClient}>
+          <Story />
+        </QueryClientProvider>
+      </PluginContext.Provider>
     </KibanaContextProvider>
   );
 }

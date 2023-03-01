@@ -23,7 +23,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { ThreatMatchRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
 import { ENRICHMENT_TYPES } from '@kbn/security-solution-plugin/common/cti/constants';
-import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
+import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -37,7 +37,7 @@ import {
   getOpenSignals,
   getPreviewAlerts,
   deleteSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   createRule,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -72,11 +72,11 @@ export default ({ getService }: FtrProviderContext) => {
     after(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
-    // First test creates a real rule - remaining tests use preview API
-    it('should be able to execute and get 10 signals when doing a specific query', async () => {
+    // First 2 test creates a real rule - remaining tests use preview API
+    it('should be able to execute and get 10 signals when doing a specific query (terms query)', async () => {
       const rule: ThreatMatchRuleCreateProps = {
         description: 'Detecting root and admin users',
         name: 'Query with a rule id',
@@ -94,6 +94,192 @@ export default ({ getService }: FtrProviderContext) => {
           // We match host.name against host.name
           {
             entries: [
+              {
+                field: 'host.name',
+                value: 'host.name',
+                type: 'mapping',
+              },
+            ],
+          },
+        ],
+        threat_filters: [],
+      };
+
+      const createdRule = await createRule(supertest, log, rule);
+      const alerts = await getOpenSignals(supertest, log, es, createdRule);
+      expect(alerts.hits.hits.length).equal(10);
+      const fullSource = alerts.hits.hits.find(
+        (signal) =>
+          (signal._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
+      );
+      const fullSignal = fullSource?._source;
+      if (!fullSignal) {
+        return expect(fullSignal).to.be.ok();
+      }
+      expect(fullSignal).eql({
+        ...fullSignal,
+        '@timestamp': fullSignal['@timestamp'],
+        agent: {
+          ephemeral_id: '1b4978a0-48be-49b1-ac96-323425b389ab',
+          hostname: 'zeek-sensor-amsterdam',
+          id: 'e52588e6-7aa3-4c89-a2c4-d6bc5c286db1',
+          type: 'auditbeat',
+          version: '8.0.0',
+        },
+        auditd: {
+          data: {
+            hostname: '46.101.47.213',
+            op: 'PAM:bad_ident',
+            terminal: 'ssh',
+          },
+          message_type: 'user_err',
+          result: 'fail',
+          sequence: 2267,
+          session: 'unset',
+          summary: {
+            actor: {
+              primary: 'unset',
+              secondary: 'root',
+            },
+            how: '/usr/sbin/sshd',
+            object: {
+              primary: 'ssh',
+              secondary: '46.101.47.213',
+              type: 'user-session',
+            },
+          },
+        },
+        cloud: {
+          instance: {
+            id: '133551048',
+          },
+          provider: 'digitalocean',
+          region: 'ams3',
+        },
+        ecs: {
+          version: '1.0.0-beta2',
+        },
+        ...flattenWithPrefix('event', {
+          action: 'error',
+          category: 'user-login',
+          module: 'auditd',
+          kind: 'signal',
+        }),
+        host: {
+          architecture: 'x86_64',
+          containerized: false,
+          hostname: 'zeek-sensor-amsterdam',
+          id: '2ce8b1e7d69e4a1d9c6bcddc473da9d9',
+          name: 'zeek-sensor-amsterdam',
+          os: {
+            codename: 'bionic',
+            family: 'debian',
+            kernel: '4.15.0-45-generic',
+            name: 'Ubuntu',
+            platform: 'ubuntu',
+            version: '18.04.2 LTS (Bionic Beaver)',
+          },
+        },
+        network: {
+          direction: 'incoming',
+        },
+        process: {
+          executable: '/usr/sbin/sshd',
+          pid: 32739,
+        },
+        service: {
+          type: 'auditd',
+        },
+        source: {
+          ip: '46.101.47.213',
+        },
+        user: {
+          audit: {
+            id: 'unset',
+          },
+          id: '0',
+          name: 'root',
+        },
+        [ALERT_ANCESTORS]: [
+          {
+            id: '7yJ-B2kBR346wHgnhlMn',
+            type: 'event',
+            index: 'auditbeat-8.0.0-2019.02.19-000001',
+            depth: 0,
+          },
+        ],
+        [ALERT_DEPTH]: 1,
+        [ALERT_ORIGINAL_EVENT_ACTION]: 'error',
+        [ALERT_ORIGINAL_EVENT_CATEGORY]: 'user-login',
+        [ALERT_ORIGINAL_EVENT_MODULE]: 'auditd',
+        [ALERT_ORIGINAL_TIME]: fullSignal[ALERT_ORIGINAL_TIME],
+        [ALERT_REASON]:
+          'user-login event with source 46.101.47.213 by root on zeek-sensor-amsterdam created high alert Query with a rule id.',
+        [ALERT_RULE_UUID]: fullSignal[ALERT_RULE_UUID],
+        [ALERT_STATUS]: 'active',
+        [ALERT_UUID]: fullSignal[ALERT_UUID],
+        [ALERT_WORKFLOW_STATUS]: 'open',
+        [SPACE_IDS]: ['default'],
+        [VERSION]: fullSignal[VERSION],
+        threat: {
+          enrichments: get(fullSignal, 'threat.enrichments'),
+        },
+        ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
+          actions: [],
+          author: [],
+          category: 'Indicator Match Rule',
+          consumer: 'siem',
+          created_by: 'elastic',
+          description: 'Detecting root and admin users',
+          enabled: true,
+          exceptions_list: [],
+          false_positives: [],
+          from: '1900-01-01T00:00:00.000Z',
+          immutable: false,
+          interval: '5m',
+          max_signals: 100,
+          name: 'Query with a rule id',
+          producer: 'siem',
+          references: [],
+          risk_score: 55,
+          risk_score_mapping: [],
+          rule_type_id: 'siem.indicatorRule',
+          severity: 'high',
+          severity_mapping: [],
+          tags: [],
+          threat: [],
+          to: 'now',
+          type: 'threat_match',
+          updated_at: fullSignal[ALERT_RULE_UPDATED_AT],
+          updated_by: 'elastic',
+          uuid: fullSignal[ALERT_RULE_UUID],
+          version: 1,
+        }),
+      });
+    });
+    it('should be able to execute and get 10 signals when doing a specific query (match query)', async () => {
+      const rule: ThreatMatchRuleCreateProps = {
+        description: 'Detecting root and admin users',
+        name: 'Query with a rule id',
+        severity: 'high',
+        index: ['auditbeat-*'],
+        type: 'threat_match',
+        risk_score: 55,
+        language: 'kuery',
+        rule_id: 'rule-1',
+        from: '1900-01-01T00:00:00.000Z',
+        query: '*:*',
+        threat_query: 'source.ip: "188.166.120.93"', // narrow things down with a query to a specific source ip
+        threat_index: ['auditbeat-*'], // We use auditbeat as both the matching index and the threat list for simplicity
+        threat_mapping: [
+          // We match host.name against host.name
+          {
+            entries: [
+              {
+                field: 'host.name',
+                value: 'host.name',
+                type: 'mapping',
+              },
               {
                 field: 'host.name',
                 value: 'host.name',

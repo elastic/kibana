@@ -16,7 +16,6 @@ import { useCaseViewParams } from '../../common/navigation';
 import { builderMap } from './builder';
 import { isUserActionTypeSupported, getManualAlertIdsWithNoRuleId } from './helpers';
 import type { UserActionTreeProps } from './types';
-import { getDescriptionUserAction } from './description';
 import { useUserActionsHandler } from './use_user_actions_handler';
 import { NEW_COMMENT_ID } from './constants';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -80,20 +79,20 @@ const MyEuiCommentList = styled(EuiCommentList)`
 
 export const UserActions = React.memo(
   ({
-    caseServices,
+    caseConnectors,
     caseUserActions,
     userProfiles,
     currentUserProfile,
     data: caseData,
     getRuleDetailsHref,
     actionsNavigation,
-    isLoadingDescription,
     isLoadingUserActions,
     onRuleDetailsClick,
     onShowAlertDetails,
     onUpdateField,
     statusActionButton,
     useFetchAlertData,
+    filterOptions,
   }: UserActionTreeProps) => {
     const { detailName: caseId, commentId } = useCaseViewParams();
     const [initLoading, setInitLoading] = useState(true);
@@ -147,87 +146,57 @@ export const UserActions = React.memo(
       }
     }, [commentId, initLoading, isLoadingUserActions, loadingCommentIds, handleOutlineComment]);
 
-    const descriptionCommentListObj: EuiCommentProps = useMemo(
-      () =>
-        getDescriptionUserAction({
-          appId,
-          userProfiles,
-          caseData,
-          commentRefs,
-          manageMarkdownEditIds,
-          isLoadingDescription,
-          onUpdateField,
-          handleManageMarkdownEditId,
-          handleManageQuote,
-        }),
-      [
-        appId,
-        userProfiles,
-        caseData,
-        commentRefs,
-        manageMarkdownEditIds,
-        isLoadingDescription,
-        onUpdateField,
-        handleManageMarkdownEditId,
-        handleManageQuote,
-      ]
-    );
-
     const userActions: EuiCommentProps[] = useMemo(
       () =>
-        caseUserActions.reduce<EuiCommentProps[]>(
-          (comments, userAction, index) => {
-            if (!isUserActionTypeSupported(userAction.type)) {
-              return comments;
-            }
+        caseUserActions.reduce<EuiCommentProps[]>((comments, userAction, index) => {
+          if (!isUserActionTypeSupported(userAction.type)) {
+            return comments;
+          }
 
-            const builder = builderMap[userAction.type];
+          const builder = builderMap[userAction.type];
 
-            if (builder == null) {
-              return comments;
-            }
+          if (builder == null) {
+            return comments;
+          }
 
-            const userActionBuilder = builder({
-              appId,
-              caseData,
-              externalReferenceAttachmentTypeRegistry,
-              persistableStateAttachmentTypeRegistry,
-              userAction,
-              userProfiles,
-              currentUserProfile,
-              caseServices,
-              comments: caseData.comments,
-              index,
-              commentRefs,
-              manageMarkdownEditIds,
-              selectedOutlineCommentId,
-              loadingCommentIds,
-              loadingAlertData,
-              alertData: manualAlertsData,
-              handleOutlineComment,
-              handleManageMarkdownEditId,
-              handleDeleteComment,
-              handleSaveComment,
-              handleManageQuote,
-              onShowAlertDetails,
-              actionsNavigation,
-              getRuleDetailsHref,
-              onRuleDetailsClick,
-            });
-            return [...comments, ...userActionBuilder.build()];
-          },
-          [descriptionCommentListObj]
-        ),
+          const userActionBuilder = builder({
+            appId,
+            caseData,
+            caseConnectors,
+            externalReferenceAttachmentTypeRegistry,
+            persistableStateAttachmentTypeRegistry,
+            userAction,
+            userProfiles,
+            currentUserProfile,
+            comments: caseData.comments,
+            index,
+            commentRefs,
+            manageMarkdownEditIds,
+            selectedOutlineCommentId,
+            loadingCommentIds,
+            loadingAlertData,
+            alertData: manualAlertsData,
+            handleOutlineComment,
+            handleManageMarkdownEditId,
+            handleDeleteComment,
+            handleSaveComment,
+            handleManageQuote,
+            onShowAlertDetails,
+            actionsNavigation,
+            getRuleDetailsHref,
+            onRuleDetailsClick,
+          });
+          return [...comments, ...userActionBuilder.build()];
+        }, []),
       [
         appId,
+        caseConnectors,
         caseUserActions,
         userProfiles,
         currentUserProfile,
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
-        descriptionCommentListObj,
         caseData,
-        caseServices,
         commentRefs,
         manageMarkdownEditIds,
         selectedOutlineCommentId,
@@ -248,7 +217,9 @@ export const UserActions = React.memo(
 
     const { permissions } = useCasesContext();
 
-    const bottomActions = permissions.create
+    const showCommentEditor = permissions.create && filterOptions !== 'action'; // add-comment markdown is not visible in History filter
+
+    const bottomActions = showCommentEditor
       ? [
           {
             username: (

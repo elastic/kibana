@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { SloListItem } from './slo_list_item';
 import { SloListEmpty } from './slo_list_empty';
@@ -17,18 +18,15 @@ export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
-  onDeleted: () => void;
-  onDeleting: () => void;
 }
 
-export function SloListItems({ sloList, loading, error, onDeleted, onDeleting }: Props) {
-  const [sloIds, setSloIds] = useState<string[]>([]);
-  useEffect(() => {
-    setSloIds(sloList.map((slo) => slo.id));
-  }, [sloList]);
+export function SloListItems({ sloList, loading, error }: Props) {
+  const { isLoading: historicalSummaryLoading, sloHistoricalSummaryResponse } =
+    useFetchHistoricalSummary({ sloIds: sloList.map((slo) => slo.id) });
 
-  const { loading: historicalSummaryLoading, data: historicalSummaryBySlo } =
-    useFetchHistoricalSummary({ sloIds });
+  const { data: activeAlertsBySlo } = useFetchActiveAlerts({
+    sloIds: sloList.map((slo) => slo.id),
+  });
 
   if (!loading && !error && sloList.length === 0) {
     return <SloListEmpty />;
@@ -43,10 +41,9 @@ export function SloListItems({ sloList, loading, error, onDeleted, onDeleting }:
         <EuiFlexItem key={slo.id}>
           <SloListItem
             slo={slo}
-            historicalSummary={historicalSummaryBySlo[slo.id]}
+            historicalSummary={sloHistoricalSummaryResponse[slo.id]}
             historicalSummaryLoading={historicalSummaryLoading}
-            onDeleted={onDeleted}
-            onDeleting={onDeleting}
+            activeAlerts={activeAlertsBySlo[slo.id]}
           />
         </EuiFlexItem>
       ))}

@@ -11,11 +11,14 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
+import { StepTabs } from '../../test_run_details/step_tabs';
 import { ResultDetails } from './result_details';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
@@ -24,6 +27,7 @@ import { StepDetailsLinkIcon } from '../links/step_details_link';
 
 import { parseBadgeStatus, getTextColorForMonitorStatus } from './status_badge';
 import { StepDurationText } from './step_duration_text';
+import { ResultDetailsSuccessful } from './result_details_successful';
 
 interface Props {
   steps: JourneyStep[];
@@ -33,6 +37,8 @@ interface Props {
   screenshotImageSize?: ScreenshotImageSize;
   compressed?: boolean;
   showExpand?: boolean;
+  testNowMode?: boolean;
+  showLastSuccessful?: boolean;
 }
 
 export function isStepEnd(step: JourneyStep) {
@@ -44,9 +50,11 @@ export const BrowserStepsList = ({
   error,
   loading,
   screenshotImageSize = THUMBNAIL_SCREENSHOT_SIZE,
+  showLastSuccessful = true,
   showStepNumber = false,
   compressed = true,
   showExpand = true,
+  testNowMode = false,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const stepEnds: JourneyStep[] = steps.filter(isStepEnd);
@@ -59,7 +67,17 @@ export const BrowserStepsList = ({
     if (itemIdToExpandedRowMapValues[item._id]) {
       delete itemIdToExpandedRowMapValues[item._id];
     } else {
-      itemIdToExpandedRowMapValues[item._id] = <></>;
+      if (testNowMode) {
+        itemIdToExpandedRowMapValues[item._id] = (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <StepTabs step={item} loading={false} stepsList={steps} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      } else {
+        itemIdToExpandedRowMapValues[item._id] = <></>;
+      }
     }
     setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
   };
@@ -101,8 +119,8 @@ export const BrowserStepsList = ({
           checkGroup={step.monitor.check_group}
           initialStepNumber={step.synthetics?.step?.index}
           stepStatus={step.synthetics.payload?.status}
-          allStepsLoaded={true}
-          retryFetchOnRevisit={false}
+          allStepsLoaded={!loading}
+          retryFetchOnRevisit={true}
           size={screenshotImageSize}
         />
       ),
@@ -142,21 +160,36 @@ export const BrowserStepsList = ({
         <ResultDetails
           step={item}
           pingStatus={pingStatus}
-          isExpanded={Boolean(itemIdToExpandedRowMap[item._id])}
+          isExpanded={Boolean(itemIdToExpandedRowMap[item._id]) && !testNowMode}
         />
       ),
     },
-    {
-      align: 'left',
-      name: STEP_DURATION,
-      render: (item: JourneyStep) => {
-        return <StepDurationText step={item} />;
-      },
-      mobileOptions: {
-        header: STEP_DURATION,
-        show: true,
-      },
-    },
+    ...(showLastSuccessful
+      ? [
+          {
+            field: 'synthetics.step.status',
+            name: LAST_SUCCESSFUL,
+            render: (pingStatus: string, item: JourneyStep) => (
+              <ResultDetailsSuccessful
+                step={item}
+                isExpanded={Boolean(itemIdToExpandedRowMap[item._id])}
+              />
+            ),
+          },
+        ]
+      : [
+          {
+            align: 'left' as const,
+            name: STEP_DURATION,
+            render: (item: JourneyStep) => {
+              return <StepDurationText step={item} />;
+            },
+            mobileOptions: {
+              header: STEP_DURATION,
+              show: true,
+            },
+          },
+        ]),
     {
       align: 'right',
       field: 'timestamp',
@@ -175,12 +208,13 @@ export const BrowserStepsList = ({
   return (
     <>
       <EuiBasicTable
-        rowProps={() => ({
-          style: { verticalAlign: 'initial' },
-        })}
-        cellProps={() => ({
-          style: { verticalAlign: 'initial' },
-        })}
+        cellProps={(row) => {
+          if (itemIdToExpandedRowMap[row._id]) {
+            return {
+              style: { verticalAlign: 'top' },
+            };
+          }
+        }}
         compressed={compressed}
         loading={loading}
         columns={columns}
@@ -199,6 +233,7 @@ export const BrowserStepsList = ({
         }
         tableLayout={'auto'}
         itemId="_id"
+        itemIdToExpandedRowMap={testNowMode ? itemIdToExpandedRowMap : undefined}
       />
     </>
   );
@@ -232,6 +267,9 @@ const RESULT_LABEL = i18n.translate('xpack.synthetics.monitor.result.label', {
   defaultMessage: 'Result',
 });
 
+const LAST_SUCCESSFUL = i18n.translate('xpack.synthetics.monitor.result.lastSuccessful', {
+  defaultMessage: 'Last successful',
+});
 const SCREENSHOT_LABEL = i18n.translate('xpack.synthetics.monitor.screenshot.label', {
   defaultMessage: 'Screenshot',
 });

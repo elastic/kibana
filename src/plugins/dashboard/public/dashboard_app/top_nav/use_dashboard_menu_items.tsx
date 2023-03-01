@@ -19,7 +19,7 @@ import { ShowShareModal } from './share/show_share_modal';
 import { pluginServices } from '../../services/plugin_services';
 import { CHANGE_CHECK_DEBOUNCE } from '../../dashboard_constants';
 import { SaveDashboardReturn } from '../../services/dashboard_saved_object/types';
-import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_renderer';
+import { useDashboardContainerContext } from '../../dashboard_container/dashboard_container_context';
 import { confirmDiscardUnsavedChanges } from '../listing/confirm_overlays';
 
 export const useDashboardMenuItems = ({
@@ -156,7 +156,10 @@ export const useDashboardMenuItems = ({
         iconType: 'pencil',
         testId: 'dashboardEditMode',
         className: 'eui-hideFor--s eui-hideFor--xs', // hide for small screens - editing doesn't work in mobile mode.
-        run: () => dispatch(setViewMode(ViewMode.EDIT)),
+        run: () => {
+          dashboardContainer.clearOverlays();
+          dispatch(setViewMode(ViewMode.EDIT));
+        },
       } as TopNavMenuData,
 
       quickSave: {

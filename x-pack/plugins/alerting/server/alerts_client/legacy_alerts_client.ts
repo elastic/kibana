@@ -28,7 +28,9 @@ import {
   AlertInstanceState,
   RawAlertInstance,
   WithoutReservedActionGroups,
+  RuleNotifyWhenType,
 } from '../types';
+import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 
 interface ConstructorOpts {
   logger: Logger;
@@ -48,6 +50,7 @@ export class LegacyAlertsClient<
   private processedAlerts: {
     new: Record<string, Alert<State, Context, ActionGroupIds>>;
     active: Record<string, Alert<State, Context, ActionGroupIds>>;
+    activeCurrent: Record<string, Alert<State, Context, ActionGroupIds>>;
     recovered: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
     recoveredCurrent: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   };
@@ -64,6 +67,7 @@ export class LegacyAlertsClient<
     this.processedAlerts = {
       new: {},
       active: {},
+      activeCurrent: {},
       recovered: {},
       recoveredCurrent: {},
     };
@@ -111,11 +115,15 @@ export class LegacyAlertsClient<
     ruleLabel,
     ruleRunMetricsStore,
     shouldLogAndScheduleActionsForAlerts,
+    flappingSettings,
+    notifyWhen,
   }: {
     eventLogger: AlertingEventLogger;
     ruleLabel: string;
     shouldLogAndScheduleActionsForAlerts: boolean;
     ruleRunMetricsStore: RuleRunMetricsStore;
+    flappingSettings: RulesSettingsFlappingProperties;
+    notifyWhen: RuleNotifyWhenType | null;
   }) {
     const {
       newAlerts: processedAlertsNew,
@@ -132,10 +140,11 @@ export class LegacyAlertsClient<
         this.options.ruleType.autoRecoverAlerts !== undefined
           ? this.options.ruleType.autoRecoverAlerts
           : true,
-      setFlapping: true,
+      flappingSettings,
     });
 
     setFlapping<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+      flappingSettings,
       processedAlertsActive,
       processedAlertsRecovered
     );
@@ -147,6 +156,8 @@ export class LegacyAlertsClient<
     );
 
     const alerts = getAlertsForNotification<State, Context, ActionGroupIds, RecoveryActionGroupId>(
+      flappingSettings,
+      notifyWhen,
       this.options.ruleType.defaultActionGroupId,
       processedAlertsNew,
       processedAlertsActive,
@@ -157,6 +168,7 @@ export class LegacyAlertsClient<
 
     this.processedAlerts.new = alerts.newAlerts;
     this.processedAlerts.active = alerts.activeAlerts;
+    this.processedAlerts.activeCurrent = alerts.currentActiveAlerts;
     this.processedAlerts.recovered = alerts.recoveredAlerts;
     this.processedAlerts.recoveredCurrent = alerts.currentRecoveredAlerts;
 
@@ -164,7 +176,7 @@ export class LegacyAlertsClient<
       logger: this.options.logger,
       alertingEventLogger: eventLogger,
       newAlerts: alerts.newAlerts,
-      activeAlerts: alerts.activeAlerts,
+      activeAlerts: alerts.currentActiveAlerts,
       recoveredAlerts: alerts.currentRecoveredAlerts,
       ruleLogPrefix: ruleLabel,
       ruleRunMetricsStore,
@@ -173,7 +185,9 @@ export class LegacyAlertsClient<
     });
   }
 
-  public getProcessedAlerts(type: 'new' | 'active' | 'recovered' | 'recoveredCurrent') {
+  public getProcessedAlerts(
+    type: 'new' | 'active' | 'activeCurrent' | 'recovered' | 'recoveredCurrent'
+  ) {
     if (this.processedAlerts.hasOwnProperty(type)) {
       return this.processedAlerts[type];
     }

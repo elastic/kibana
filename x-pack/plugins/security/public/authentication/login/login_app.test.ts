@@ -64,6 +64,7 @@ describe('loginApp', () => {
       { element: appMountParams.element, theme$: appMountParams.theme$ },
       {
         http: coreStartMock.http,
+        customBranding: coreStartMock.customBranding,
         notifications: coreStartMock.notifications,
         fatalErrors: coreStartMock.fatalErrors,
         loginAssistanceMessage: 'some-message',

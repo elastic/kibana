@@ -11,10 +11,12 @@ import { KibanaServices } from '../common/lib/kibana';
 
 import { ConnectorTypes, CommentType, CaseStatuses, CaseSeverity } from '../../common/api';
 import {
+  CASES_INTERNAL_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   SECURITY_SOLUTION_OWNER,
   MAX_DOCS_PER_PAGE,
+  INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
 } from '../../common/constants';
 
 import {
@@ -34,6 +36,8 @@ import {
   resolveCase,
   getFeatureIds,
   postComment,
+  getCaseConnectors,
+  getCaseUserActionsStats,
 } from './api';
 
 import {
@@ -54,10 +58,16 @@ import {
   caseWithRegisteredAttachmentsSnake,
   caseWithRegisteredAttachments,
   caseUserActionsWithRegisteredAttachmentsSnake,
+  basicPushSnake,
+  getCaseUserActionsStatsResponse,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './use_get_cases';
 import { getCasesStatus } from '../api';
+import { getCaseConnectorsMockResponse } from '../common/mock/connectors';
+import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep } from 'lodash';
+import type { CaseUserActionTypeWithAll } from './types';
 
 const abortCtrl = new AbortController();
 const mockKibanaServices = KibanaServices.get as jest.Mock;
@@ -463,6 +473,12 @@ describe('Cases API', () => {
       total: 20,
       userActions: [...caseUserActionsWithRegisteredAttachmentsSnake],
     };
+    const filterActionType: CaseUserActionTypeWithAll = 'all';
+    const sortOrder: 'asc' | 'desc' = 'asc';
+    const params = {
+      type: filterActionType,
+      sortOrder,
+    };
 
     beforeEach(() => {
       fetchMock.mockClear();
@@ -470,25 +486,86 @@ describe('Cases API', () => {
     });
 
     it('should be called with correct check url, method, signal', async () => {
-      await findCaseUserActions(basicCase.id, abortCtrl.signal);
+      await findCaseUserActions(basicCase.id, params, abortCtrl.signal);
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
         method: 'GET',
         signal: abortCtrl.signal,
         query: {
+          types: [],
+          sortOrder: 'asc',
+          perPage: MAX_DOCS_PER_PAGE,
+        },
+      });
+    });
+
+    it('should be called with action type user action and desc sort order', async () => {
+      await findCaseUserActions(
+        basicCase.id,
+        { type: 'action', sortOrder: 'desc' },
+        abortCtrl.signal
+      );
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
+        method: 'GET',
+        signal: abortCtrl.signal,
+        query: {
+          types: ['action'],
+          sortOrder: 'desc',
+          perPage: MAX_DOCS_PER_PAGE,
+        },
+      });
+    });
+
+    it('should be called with user type user action and desc sort order', async () => {
+      await findCaseUserActions(basicCase.id, { ...params, type: 'user' }, abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/user_actions/_find`, {
+        method: 'GET',
+        signal: abortCtrl.signal,
+        query: {
+          types: ['user'],
+          sortOrder: 'asc',
           perPage: MAX_DOCS_PER_PAGE,
         },
       });
     });
 
     it('should return correct response', async () => {
-      const resp = await findCaseUserActions(basicCase.id, abortCtrl.signal);
+      const resp = await findCaseUserActions(basicCase.id, params, abortCtrl.signal);
       expect(resp).toEqual(findCaseUserActionsResponse);
     });
 
     it('should not covert to camel case registered attachments', async () => {
       fetchMock.mockResolvedValue(findCaseUserActionsSnake);
-      const resp = await findCaseUserActions(basicCase.id, abortCtrl.signal);
+      const resp = await findCaseUserActions(basicCase.id, params, abortCtrl.signal);
       expect(resp).toEqual(findCaseUserActionsResponse);
+    });
+  });
+
+  describe('getCaseUserActionsStats', () => {
+    const getCaseUserActionsStatsSnake = {
+      total: 20,
+      total_comments: 10,
+      total_other_actions: 10,
+    };
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(getCaseUserActionsStatsSnake);
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await getCaseUserActionsStats(basicCase.id, abortCtrl.signal);
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL.replace('{case_id}', basicCase.id)}`,
+        {
+          method: 'GET',
+          signal: abortCtrl.signal,
+        }
+      );
+    });
+
+    it('should return correct response', async () => {
+      const resp = await getCaseUserActionsStats(basicCase.id, abortCtrl.signal);
+      expect(resp).toEqual(getCaseUserActionsStatsResponse);
     });
   });
 
@@ -844,6 +921,33 @@ describe('Cases API', () => {
       fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
       const resp = await postComment(data, basicCase.id, abortCtrl.signal);
       expect(resp).toEqual(caseWithRegisteredAttachments);
+    });
+  });
+
+  describe('getCaseConnectors', () => {
+    const caseConnectors = getCaseConnectorsMockResponse();
+    const connectorCamelCase = caseConnectors['servicenow-1'];
+
+    const snakeCaseConnector = cloneDeep(connectorCamelCase);
+    set(snakeCaseConnector, 'push.details.externalService', basicPushSnake);
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue({ 'servicenow-1': snakeCaseConnector });
+    });
+
+    it('should be called with correct check url, method, signal', async () => {
+      await getCaseConnectors(basicCase.id, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_INTERNAL_URL}/${basicCase.id}/_connectors`, {
+        method: 'GET',
+        signal: abortCtrl.signal,
+      });
+    });
+
+    it('should return correct response', async () => {
+      const resp = await getCaseConnectors(basicCase.id, abortCtrl.signal);
+      expect(resp).toEqual({ 'servicenow-1': connectorCamelCase });
     });
   });
 });

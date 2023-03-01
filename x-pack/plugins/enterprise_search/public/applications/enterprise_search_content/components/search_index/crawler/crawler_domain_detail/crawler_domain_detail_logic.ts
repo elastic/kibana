@@ -7,7 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { HttpError, Status } from '../../../../../../../common/types/api';
+import { Status } from '../../../../../../../common/types/api';
+import { ExtractionRule } from '../../../../../../../common/types/extraction_rules';
 
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
 
@@ -42,11 +43,11 @@ export interface CrawlerDomainDetailValues {
   deleteStatus: Status;
   domain: CrawlerDomain | null;
   domainId: string;
+  extractionRules: ExtractionRule[];
   getLoading: boolean;
 }
 
 export interface CrawlerDomainDetailActions {
-  deleteApiError(error: HttpError): HttpError;
   deleteApiSuccess(response: DeleteCrawlerDomainResponse): DeleteCrawlerDomainResponse;
   deleteDomain(): void;
   deleteMakeRequest(args: DeleteCrawlerDomainArgs): DeleteCrawlerDomainArgs;
@@ -59,24 +60,13 @@ export interface CrawlerDomainDetailActions {
   };
   updateCrawlRules(crawlRules: CrawlRule[]): { crawlRules: CrawlRule[] };
   updateEntryPoints(entryPoints: EntryPoint[]): { entryPoints: EntryPoint[] };
+  updateExtractionRules(extractionRules: ExtractionRule[]): { extractionRules: ExtractionRule[] };
   updateSitemaps(entryPoints: Sitemap[]): { sitemaps: Sitemap[] };
 }
 
 export const CrawlerDomainDetailLogic = kea<
   MakeLogicType<CrawlerDomainDetailValues, CrawlerDomainDetailActions>
 >({
-  path: ['enterprise_search', 'crawler', 'crawler_domain_detail_logic'],
-  connect: {
-    actions: [
-      DeleteCrawlerDomainApiLogic,
-      [
-        'apiError as deleteApiError',
-        'apiSuccess as deleteApiSuccess',
-        'makeRequest as deleteMakeRequest',
-      ],
-    ],
-    values: [DeleteCrawlerDomainApiLogic, ['status as deleteStatus']],
-  },
   actions: {
     deleteDomain: () => true,
     deleteDomainComplete: () => true,
@@ -86,36 +76,26 @@ export const CrawlerDomainDetailLogic = kea<
     submitDeduplicationUpdate: ({ fields, enabled }) => ({ enabled, fields }),
     updateCrawlRules: (crawlRules) => ({ crawlRules }),
     updateEntryPoints: (entryPoints) => ({ entryPoints }),
+    updateExtractionRules: (extractionRules) => ({ extractionRules }),
     updateSitemaps: (sitemaps) => ({ sitemaps }),
   },
-  reducers: ({ props }) => ({
-    domain: [
-      null,
-      {
-        receiveDomainData: (_, { domain }) => domain,
-        updateCrawlRules: (currentDomain, { crawlRules }) =>
-          ({ ...currentDomain, crawlRules } as CrawlerDomain),
-        updateEntryPoints: (currentDomain, { entryPoints }) =>
-          ({ ...currentDomain, entryPoints } as CrawlerDomain),
-        updateSitemaps: (currentDomain, { sitemaps }) =>
-          ({ ...currentDomain, sitemaps } as CrawlerDomain),
-      },
+  connect: {
+    actions: [
+      DeleteCrawlerDomainApiLogic,
+      ['apiSuccess as deleteApiSuccess', 'makeRequest as deleteMakeRequest'],
     ],
-    domainId: [props.domainId, { fetchDomainData: (_, { domainId }) => domainId }],
-    getLoading: [
-      true,
-      {
-        receiveDomainData: () => false,
-      },
-    ],
-  }),
-  selectors: ({ selectors }) => ({
-    deleteLoading: [
-      () => [selectors.deleteStatus],
-      (deleteStatus: Status) => deleteStatus === Status.LOADING,
-    ],
-  }),
+    values: [DeleteCrawlerDomainApiLogic, ['status as deleteStatus']],
+  },
   listeners: ({ actions, values }) => ({
+    deleteApiSuccess: () => {
+      const { indexName } = IndexNameLogic.values;
+      KibanaLogic.values.navigateToUrl(
+        generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
+          indexName,
+          tabId: SearchIndexTabId.DOMAIN_MANAGEMENT,
+        })
+      );
+    },
     deleteDomain: async () => {
       const { domain } = values;
       const { indexName } = IndexNameLogic.values;
@@ -125,15 +105,6 @@ export const CrawlerDomainDetailLogic = kea<
           indexName,
         });
       }
-    },
-    deleteApiSuccess: () => {
-      const { indexName } = IndexNameLogic.values;
-      KibanaLogic.values.navigateToUrl(
-        generateEncodedPath(SEARCH_INDEX_TAB_PATH, {
-          indexName,
-          tabId: SearchIndexTabId.DOMAIN_MANAGEMENT,
-        })
-      );
     },
     fetchDomainData: async ({ domainId }) => {
       const { http } = HttpLogic.values;
@@ -200,5 +171,37 @@ export const CrawlerDomainDetailLogic = kea<
         flashAPIErrors(e);
       }
     },
+  }),
+  path: ['enterprise_search', 'crawler', 'crawler_domain_detail_logic'],
+  reducers: ({ props }) => ({
+    domain: [
+      null,
+      {
+        receiveDomainData: (_, { domain }) => domain,
+        updateCrawlRules: (currentDomain, { crawlRules }) =>
+          currentDomain ? { ...currentDomain, crawlRules } : currentDomain,
+        updateEntryPoints: (currentDomain, { entryPoints }) =>
+          currentDomain ? { ...currentDomain, entryPoints } : currentDomain,
+        updateSitemaps: (currentDomain, { sitemaps }) =>
+          currentDomain ? { ...currentDomain, sitemaps } : currentDomain,
+      },
+    ],
+    domainId: [props.domainId, { fetchDomainData: (_, { domainId }) => domainId }],
+    getLoading: [
+      true,
+      {
+        receiveDomainData: () => false,
+      },
+    ],
+  }),
+  selectors: ({ selectors }) => ({
+    deleteLoading: [
+      () => [selectors.deleteStatus],
+      (deleteStatus: Status) => deleteStatus === Status.LOADING,
+    ],
+    extractionRules: [
+      () => [selectors.domain],
+      (domain: CrawlerDomain | null) => domain?.extractionRules ?? [],
+    ],
   }),
 });

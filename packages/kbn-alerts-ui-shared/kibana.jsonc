@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/alerts-ui-shared",
+  "owner": "@elastic/response-ops"
+}

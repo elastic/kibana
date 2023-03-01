@@ -255,6 +255,7 @@ export type {
   SavedObjectsImportWarning,
   SavedObjectTypeIdTuple,
 } from '@kbn/core-saved-objects-common';
+
 export type {
   SavedObjectsBulkCreateObject,
   SavedObjectsBulkGetObject,
@@ -358,12 +359,9 @@ export type {
   SavedObjectsRequestHandlerContext,
   EncryptedObjectDescriptor,
   ISavedObjectsEncryptionExtension,
-  PerformAuthorizationParams,
   AuthorizationTypeEntry,
   AuthorizationTypeMap,
   CheckAuthorizationResult,
-  EnforceAuthorizationParams,
-  AddAuditEventParams,
   RedactNamespacesParams,
   ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
@@ -373,9 +371,9 @@ export {
   ENCRYPTION_EXTENSION_ID,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 export {
-  SavedObjectsErrorHelpers,
   SavedObjectsUtils,
   mergeSavedObjectMigrationMaps,
 } from '@kbn/core-saved-objects-utils-server';
@@ -530,3 +528,5 @@ export type {
   PublicHttpServiceSetup as HttpServiceSetup,
   HttpServiceSetup as BaseHttpServiceSetup,
 };
+
+export type { CustomBrandingSetup } from '@kbn/core-custom-branding-server';

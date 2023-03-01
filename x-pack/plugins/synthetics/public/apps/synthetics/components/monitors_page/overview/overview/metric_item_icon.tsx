@@ -16,14 +16,17 @@ import {
   EuiButton,
   useEuiShadow,
   EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { useRef } from 'react';
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
 import { useErrorDetailsLink } from '../../../common/links/error_details_link';
-import { MonitorOverviewItem, Ping } from '../../../../../../../common/runtime_types';
+import { MonitorOverviewItem, OverviewPing } from '../../../../../../../common/runtime_types';
 import { manualTestRunSelector } from '../../../../state/manual_test_runs';
 import { useFormatTestRunAt } from '../../../../utils/monitor_test_result/test_time_formats';
 
@@ -46,12 +49,14 @@ export const MetricItemIcon = ({
   status: string;
   configIdByLocation: string;
   timestamp?: string;
-  ping?: Ping;
+  ping?: OverviewPing;
 }) => {
   const testNowRun = useSelector(manualTestRunSelector(monitor.configId));
   const isPopoverOpen = useSelector(selectErrorPopoverState);
 
   const dispatch = useDispatch();
+
+  const timer = useRef<NodeJS.Timeout | null>(null);
 
   const setIsPopoverOpen = () => {
     dispatch(toggleErrorPopoverOpen(configIdByLocation));
@@ -59,8 +64,12 @@ export const MetricItemIcon = ({
 
   const inProgress = testNowRun?.status === 'in-progress' || testNowRun?.status === 'loading';
 
-  const errorLink = useErrorDetailsLink({ configId: monitor.configId, stateId: ping?.state?.id! });
-  const euiShadow = useEuiShadow('l');
+  const errorLink = useErrorDetailsLink({
+    configId: monitor.configId,
+    stateId: ping?.state?.id!,
+    locationId: monitor.location.id,
+  });
+  const euiShadow = useEuiShadow('s');
 
   const testTime = useFormatTestRunAt(timestamp);
 
@@ -82,7 +91,23 @@ export const MetricItemIcon = ({
         <EuiPopover
           button={
             <StyledIcon
-              onMouseEnter={() => setIsPopoverOpen()}
+              onMouseEnter={() => {
+                // show popover with delay
+                if (timer.current) {
+                  clearTimeout(timer.current);
+                }
+                timer.current = setTimeout(() => {
+                  setIsPopoverOpen();
+                }, 300);
+              }}
+              onMouseLeave={() => {
+                if (isPopoverOpen) {
+                  return;
+                }
+                if (timer.current) {
+                  clearTimeout(timer.current);
+                }
+              }}
               boxShadow={euiShadow}
               onClick={() => {
                 if (configIdByLocation === isPopoverOpen) {
@@ -92,7 +117,7 @@ export const MetricItemIcon = ({
                 }
               }}
             >
-              <EuiButtonIcon iconType="alert" color="danger" size="m" />
+              <EuiButtonIcon iconType="alert" color="danger" size="m" aria-label={ERROR_DETAILS} />
             </StyledIcon>
           }
           isOpen={configIdByLocation === isPopoverOpen}
@@ -102,7 +127,14 @@ export const MetricItemIcon = ({
             outline: 'none',
           }}
         >
-          <EuiPopoverTitle>{testTime}</EuiPopoverTitle>
+          <EuiPopoverTitle>
+            <EuiFlexGroup>
+              <EuiFlexItem grow>{testTime}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon iconType="cross" onClick={closePopover} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPopoverTitle>
           <div style={{ width: '300px' }}>
             <EuiCallOut title={ping?.error?.message} color="danger" iconType="alert" />
           </div>
@@ -128,7 +160,6 @@ const StyledIcon = euiStyled.div<{ boxShadow: string }>`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 8px;
   gap: 10px;
   width: 32px;
   height: 32px;

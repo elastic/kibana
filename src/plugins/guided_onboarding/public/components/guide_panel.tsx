@@ -25,6 +25,7 @@ import {
   EuiFlexItem,
   useEuiTheme,
   EuiEmptyPrompt,
+  EuiImage,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -41,6 +42,9 @@ import { GuideStep } from './guide_panel_step';
 import { QuitGuideModal } from './quit_guide_modal';
 import { getGuidePanelStyles } from './guide_panel.styles';
 import { GuideButton } from './guide_button';
+
+import wellDoneAnimatedGif from '../../assets/well_done_animated.gif';
+import wellDoneAnimatedDarkGif from '../../assets/well_done_animated_dark.gif';
 
 interface GuidePanelProps {
   api: GuidedOnboardingApi;
@@ -220,6 +224,9 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
 
   const stepsCompleted = getProgress(pluginState?.activeGuide);
   const isGuideReadyToComplete = pluginState?.activeGuide?.status === 'ready_to_complete';
+  const getImageUrl = () => {
+    return isDarkTheme ? wellDoneAnimatedDarkGif : wellDoneAnimatedGif;
+  };
 
   const backToGuidesButton = (
     <EuiButtonEmpty
@@ -277,13 +284,27 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
 
               <EuiFlyoutBody css={styles.flyoutOverrides.flyoutBody}>
                 <div>
+                  {isGuideReadyToComplete && (
+                    <>
+                      <EuiImage
+                        size="fullWidth"
+                        src={getImageUrl()}
+                        alt={i18n.translate('guidedOnboarding.dropdownPanel.wellDoneAnimatedGif', {
+                          defaultMessage: `Guide completed animated gif`,
+                        })}
+                      />
+
+                      <EuiSpacer />
+                    </>
+                  )}
+
                   <EuiText size="m">
                     <p data-test-subj="guideDescription">
                       {isGuideReadyToComplete
                         ? i18n.translate(
                             'guidedOnboarding.dropdownPanel.completeGuideFlyoutDescription',
                             {
-                              defaultMessage: `You've completed the Elastic {guideName} guide.`,
+                              defaultMessage: `You've completed the Elastic {guideName} guide. Feel free to come back to the Guides for more onboarding help or a refresher.`,
                               values: {
                                 guideName: guideConfig.guideName,
                               },
@@ -295,7 +316,7 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
 
                   {guideConfig.docs && (
                     <>
-                      <EuiSpacer size="s" />
+                      <EuiSpacer size="l" />
                       <EuiText size="m">
                         <EuiLink external target="_blank" href={guideConfig.docs.url}>
                           {guideConfig.docs.text}

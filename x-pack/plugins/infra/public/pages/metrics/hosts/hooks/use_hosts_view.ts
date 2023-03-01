@@ -12,59 +12,85 @@
  * 2.0.
  */
 
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import createContainer from 'constate';
+import { BoolQuery } from '@kbn/es-query';
+import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { useSourceContext } from '../../../../containers/metrics_source';
-import type { UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
+import { useSnapshot, type UseSnapshotRequest } from '../../inventory_view/hooks/use_snaphot';
 import { useUnifiedSearchContext } from './use_unified_search';
+import { StringDateRangeTimestamp } from './use_unified_search_url_state';
 
-export interface HostViewState {
-  totalHits: number;
-  loading: boolean;
-  error: string | null;
-}
-
-export const INITAL_VALUE = {
-  error: null,
-  loading: true,
-  totalHits: 0,
-};
+const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
+  { type: 'rx' },
+  { type: 'tx' },
+  { type: 'memory' },
+  { type: 'cpu' },
+  { type: 'diskLatency' },
+  { type: 'memoryTotal' },
+];
 
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
-  const { buildQuery, dateRangeTimestamp } = useUnifiedSearchContext();
-  const [hostViewState, setHostViewState] = useState<HostViewState>(INITAL_VALUE);
+  const { buildQuery, getDateRangeAsTimestamp } = useUnifiedSearchContext();
 
-  const baseRequest = useMemo(() => {
-    const esQuery = buildQuery();
-    const snapshotRequest: UseSnapshotRequest = {
-      filterQuery: esQuery ? JSON.stringify(esQuery) : null,
-      metrics: [],
-      groupBy: [],
-      nodeType: 'host',
-      sourceId,
-      currentTime: dateRangeTimestamp.to,
-      includeTimeseries: false,
-      sendRequestImmediately: true,
-      timerange: {
-        interval: '1m',
-        from: dateRangeTimestamp.from,
-        to: dateRangeTimestamp.to,
-        ignoreLookback: true,
-      },
-      // The user might want to click on the submit button without changing the filters
-      // This makes sure all child componets will re-render.
-      requestTs: Date.now(),
-    };
-    return snapshotRequest;
-  }, [buildQuery, dateRangeTimestamp.from, dateRangeTimestamp.to, sourceId]);
+  const baseRequest = useMemo(
+    () =>
+      createSnapshotRequest({
+        dateRange: getDateRangeAsTimestamp(),
+        esQuery: buildQuery(),
+        sourceId,
+      }),
+    [buildQuery, getDateRangeAsTimestamp, sourceId]
+  );
+
+  // Snapshot endpoint internally uses the indices stored in source.configuration.metricAlias.
+  // For the Unified Search, we create a data view, which for now will be built off of source.configuration.metricAlias too
+  // if we introduce data view selection, we'll have to change this hook and the endpoint to accept a new parameter for the indices
+  const {
+    loading,
+    error,
+    nodes: hostNodes,
+  } = useSnapshot({ ...baseRequest, metrics: HOST_TABLE_METRICS });
 
   return {
     baseRequest,
-    hostViewState,
-    setHostViewState,
+    loading,
+    error,
+    hostNodes,
   };
 };
 
 export const HostsView = createContainer(useHostsView);
 export const [HostsViewProvider, useHostsViewContext] = HostsView;
+
+/**
+ * Helpers
+ */
+const createSnapshotRequest = ({
+  esQuery,
+  sourceId,
+  dateRange,
+}: {
+  esQuery: { bool: BoolQuery } | null;
+  sourceId: string;
+  dateRange: StringDateRangeTimestamp;
+}): UseSnapshotRequest => ({
+  filterQuery: esQuery ? JSON.stringify(esQuery) : null,
+  metrics: [],
+  groupBy: [],
+  nodeType: 'host',
+  sourceId,
+  currentTime: dateRange.to,
+  includeTimeseries: false,
+  sendRequestImmediately: true,
+  timerange: {
+    interval: '1m',
+    from: dateRange.from,
+    to: dateRange.to,
+    ignoreLookback: true,
+  },
+  // The user might want to click on the submit button without changing the filters
+  // This makes sure all child components will re-render.
+  requestTs: Date.now(),
+});

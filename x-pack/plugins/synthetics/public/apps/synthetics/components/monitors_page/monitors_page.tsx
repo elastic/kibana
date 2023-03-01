@@ -10,6 +10,7 @@ import { Redirect } from 'react-router-dom';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 
+import { useOverviewStatus } from './hooks/use_overview_status';
 import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
 
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
@@ -24,19 +25,11 @@ import { useMonitorListBreadcrumbs } from './hooks/use_breadcrumbs';
 import { useMonitorList } from './hooks/use_monitor_list';
 import * as labels from './management/labels';
 
-const MonitorPage: React.FC = () => {
+const MonitorManagementPage: React.FC = () => {
   useTrackPageview({ app: 'synthetics', path: 'monitors' });
   useTrackPageview({ app: 'synthetics', path: 'monitors', delay: 15000 });
 
   useMonitorListBreadcrumbs();
-
-  const monitorListProps = useMonitorList();
-  const {
-    syntheticsMonitors,
-    loading: monitorsLoading,
-    isDataQueried,
-    absoluteTotal,
-  } = monitorListProps;
 
   const {
     error: enablementError,
@@ -45,10 +38,15 @@ const MonitorPage: React.FC = () => {
     enableSynthetics,
   } = useEnablement();
 
+  useOverviewStatus({ scopeStatusByLocation: false });
+
+  const monitorListProps = useMonitorList();
+  const { syntheticsMonitors, loading: monitorsLoading, absoluteTotal, loaded } = monitorListProps;
+
   const { loading: locationsLoading } = useLocations();
   const showEmptyState = isEnabled !== undefined && syntheticsMonitors.length === 0;
 
-  if (isEnabled && !monitorsLoading && absoluteTotal === 0 && isDataQueried) {
+  if (isEnabled && !monitorsLoading && absoluteTotal === 0 && loaded) {
     return <Redirect to={GETTING_STARTED_ROUTE} />;
   }
 
@@ -96,6 +94,6 @@ const MonitorPage: React.FC = () => {
 
 export const MonitorsPageWithServiceAllowed = React.memo(() => (
   <ServiceAllowedWrapper>
-    <MonitorPage />
+    <MonitorManagementPage />
   </ServiceAllowedWrapper>
 ));

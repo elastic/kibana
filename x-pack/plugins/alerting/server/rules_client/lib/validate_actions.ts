@@ -17,13 +17,27 @@ import { parseDuration } from '../../lib';
 export async function validateActions(
   context: RulesClientContext,
   alertType: UntypedNormalizedRuleType,
-  data: Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & { actions: NormalizedAlertAction[] }
+  data: Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
+    actions: NormalizedAlertAction[];
+  },
+  allowMissingConnectorSecrets?: boolean
 ): Promise<void> {
   const { actions, notifyWhen, throttle } = data;
   const hasRuleLevelNotifyWhen = typeof notifyWhen !== 'undefined';
   const hasRuleLevelThrottle = Boolean(throttle);
   if (actions.length === 0) {
     return;
+  }
+
+  const errors = [];
+
+  const uniqueActions = new Set(actions.map((action) => action.uuid));
+  if (uniqueActions.size < actions.length) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.hasDuplicatedUuid', {
+        defaultMessage: 'Actions have duplicated UUIDs',
+      })
+    );
   }
 
   // check for actions using connectors with missing secrets
@@ -33,20 +47,26 @@ export async function validateActions(
   const actionsUsingConnectorsWithMissingSecrets = actionResults.filter(
     (result) => result.isMissingSecrets
   );
-
   if (actionsUsingConnectorsWithMissingSecrets.length) {
-    throw Boom.badRequest(
-      i18n.translate('xpack.alerting.rulesClient.validateActions.misconfiguredConnector', {
-        defaultMessage: 'Invalid connectors: {groups}',
-        values: {
-          groups: actionsUsingConnectorsWithMissingSecrets
-            .map((connector) => connector.name)
-            .join(', '),
-        },
-      })
-    );
+    if (allowMissingConnectorSecrets) {
+      context.logger.error(
+        `Invalid connectors with "allowMissingConnectorSecrets": ${actionsUsingConnectorsWithMissingSecrets
+          .map((connector) => connector.name)
+          .join(', ')}`
+      );
+    } else {
+      errors.push(
+        i18n.translate('xpack.alerting.rulesClient.validateActions.misconfiguredConnector', {
+          defaultMessage: 'Invalid connectors: {groups}',
+          values: {
+            groups: actionsUsingConnectorsWithMissingSecrets
+              .map((connector) => connector.name)
+              .join(', '),
+          },
+        })
+      );
+    }
   }
-
   // check for actions with invalid action groups
   const { actionGroups: alertTypeActionGroups } = alertType;
   const usedAlertActionGroups = actions.map((action) => action.group);
@@ -55,7 +75,7 @@ export async function validateActions(
     (group) => !availableAlertTypeActionGroups.has(group)
   );
   if (invalidActionGroups.length) {
-    throw Boom.badRequest(
+    errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.invalidGroups', {
         defaultMessage: 'Invalid action groups: {groups}',
         values: {
@@ -69,7 +89,7 @@ export async function validateActions(
   if (hasRuleLevelNotifyWhen || hasRuleLevelThrottle) {
     const actionsWithFrequency = actions.filter((action) => Boolean(action.frequency));
     if (actionsWithFrequency.length) {
-      throw Boom.badRequest(
+      errors.push(
         i18n.translate('xpack.alerting.rulesClient.validateActions.mixAndMatchFreqParams', {
           defaultMessage:
             'Cannot specify per-action frequency params when notify_when or throttle are defined at the rule level: {groups}',
@@ -82,7 +102,7 @@ export async function validateActions(
   } else {
     const actionsWithoutFrequency = actions.filter((action) => !action.frequency);
     if (actionsWithoutFrequency.length) {
-      throw Boom.badRequest(
+      errors.push(
         i18n.translate('xpack.alerting.rulesClient.validateActions.notAllActionsWithFreq', {
           defaultMessage: 'Actions missing frequency parameters: {groups}',
           values: {
@@ -101,7 +121,7 @@ export async function validateActions(
       parseDuration(action.frequency.throttle!) < scheduleInterval
   );
   if (actionsWithInvalidThrottles.length) {
-    throw Boom.badRequest(
+    errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidThrottles', {
         defaultMessage:
           'Action throttle cannot be shorter than the schedule interval of {scheduleIntervalText}: {groups}',
@@ -110,6 +130,20 @@ export async function validateActions(
           groups: actionsWithInvalidThrottles
             .map((a) => `${a.group} (${a.frequency?.throttle})`)
             .join(', '),
+        },
+      })
+    );
+  }
+
+  // Finalize and throw any errors present
+  if (errors.length) {
+    throw Boom.badRequest(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.errorSummary', {
+        defaultMessage:
+          'Failed to validate actions due to the following {errorNum, plural, one {error:} other {# errors:\n-}} {errorList}',
+        values: {
+          errorNum: errors.length,
+          errorList: errors.join('\n- '),
         },
       })
     );

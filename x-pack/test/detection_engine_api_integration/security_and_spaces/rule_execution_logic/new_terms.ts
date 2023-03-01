@@ -10,14 +10,13 @@ import expect from '@kbn/expect';
 import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { orderBy } from 'lodash';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema/mocks';
-import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
 import {
   getNewTermsRuntimeMappings,
   AGG_FIELD_NAME,
 } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/new_terms/utils';
 import {
   createRule,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getOpenSignals,
   getPreviewAlerts,
@@ -29,23 +28,7 @@ import { previewRuleWithExceptionEntries } from '../../utils/preview_rule_with_e
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 
 import { largeArraysBuckets } from './mocks/new_terms';
-
-const removeRandomValuedProperties = (alert: DetectionAlert | undefined) => {
-  if (!alert) {
-    return undefined;
-  }
-  const {
-    'kibana.version': version,
-    'kibana.alert.rule.execution.uuid': execUuid,
-    'kibana.alert.rule.uuid': uuid,
-    '@timestamp': timestamp,
-    'kibana.alert.rule.created_at': createdAt,
-    'kibana.alert.rule.updated_at': updatedAt,
-    'kibana.alert.uuid': alertUuid,
-    ...restOfAlert
-  } = alert;
-  return restOfAlert;
-};
+import { removeRandomValuedProperties } from './utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -64,7 +47,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/new_terms');
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     // First test creates a real rule - remaining tests use preview API

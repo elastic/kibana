@@ -36,7 +36,7 @@ export const getNormalizeICMPFields = ({
   const errors = [];
   const { yamlConfig, unsupportedKeys } = normalizeYamlConfig(monitor);
 
-  const commonFields = getNormalizeCommonFields({
+  const { errors: commonErrors, normalizedFields: commonFields } = getNormalizeCommonFields({
     locations,
     privateLocations,
     monitor,
@@ -44,6 +44,9 @@ export const getNormalizeICMPFields = ({
     namespace,
     version,
   });
+
+  // Add common erros to errors arary
+  errors.push(...commonErrors);
 
   /* Check if monitor has multiple hosts */
   const hosts = getOptionalListField(monitor.hosts);

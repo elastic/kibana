@@ -7,6 +7,7 @@
  */
 
 import chalk from 'chalk';
+import { getPackages } from '@kbn/repo-packages';
 import { CliArgs, Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
@@ -39,6 +40,7 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   const env = Env.createDefault(REPO_ROOT, {
     configs,
     cliArgs,
+    repoPackages: getPackages(REPO_ROOT),
   });
 
   const rawConfigService = new RawConfigService(env.configs, applyConfigOverrides);

@@ -20,7 +20,7 @@ interface StatusBucket {
   statusBySeverity?: StatusBySeverity;
 }
 
-interface SeverityBucket {
+export interface SeverityBucket {
   key: Severity;
   doc_count: number;
 }

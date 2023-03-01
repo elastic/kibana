@@ -29,13 +29,17 @@ import { IndicesLogic } from './indices_logic';
 const DEFAULT_VALUES = {
   data: undefined,
   deleteModalIndex: null,
+  deleteModalIndexHasInProgressSyncs: false,
   deleteModalIndexName: '',
   deleteModalIngestionMethod: IngestionMethod.API,
   deleteStatus: Status.IDLE,
   hasNoIndices: false,
+  indexDetails: undefined,
+  indexDetailsStatus: 0,
   indices: [],
   isDeleteLoading: false,
   isDeleteModalVisible: false,
+  isFetchIndexDetailsLoading: true,
   isFirstRequest: true,
   isLoading: true,
   meta: DEFAULT_META,
@@ -80,21 +84,27 @@ describe('IndicesLogic', () => {
     });
     describe('openDeleteModal', () => {
       it('should set deleteIndexName and set isDeleteModalVisible to true', () => {
-        IndicesLogic.actions.openDeleteModal(connectorIndex);
+        IndicesLogic.actions.fetchIndexDetails = jest.fn();
+        IndicesLogic.actions.openDeleteModal(connectorIndex.name);
         expect(IndicesLogic.values).toEqual({
           ...DEFAULT_VALUES,
-          deleteModalIndex: connectorIndex,
           deleteModalIndexName: 'connector',
-          deleteModalIngestionMethod: IngestionMethod.CONNECTOR,
           isDeleteModalVisible: true,
+        });
+        expect(IndicesLogic.actions.fetchIndexDetails).toHaveBeenCalledWith({
+          indexName: 'connector',
         });
       });
     });
     describe('closeDeleteModal', () => {
       it('should set deleteIndexName to empty and set isDeleteModalVisible to false', () => {
-        IndicesLogic.actions.openDeleteModal(connectorIndex);
+        IndicesLogic.actions.openDeleteModal(connectorIndex.name);
+        IndicesLogic.actions.fetchIndexDetails = jest.fn();
         IndicesLogic.actions.closeDeleteModal();
-        expect(IndicesLogic.values).toEqual(DEFAULT_VALUES);
+        expect(IndicesLogic.values).toEqual({
+          ...DEFAULT_VALUES,
+          indexDetailsStatus: Status.LOADING,
+        });
       });
     });
   });

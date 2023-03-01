@@ -13,10 +13,13 @@ import {
   useEuiShadow,
   EuiPanel,
   EuiLoadingSpinner,
+  EuiContextMenuPanelItemDescriptor,
+  EuiToolTip,
 } from '@elastic/eui';
 import { FETCH_STATUS } from '@kbn/observability-plugin/public';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
+import { PRIVATE_AVAILABLE_LABEL } from '../../../monitor_add_edit/form/run_test_btn';
 import {
   manualTestMonitorAction,
   manualTestRunInProgressSelector,
@@ -24,12 +27,21 @@ import {
 import { toggleStatusAlert } from '../../../../../../../common/runtime_types/monitor_management/alert_config';
 import { useSelectedMonitor } from '../../../monitor_details/hooks/use_selected_monitor';
 import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enable';
-import { ConfigKey, MonitorOverviewItem } from '../../../../../../../common/runtime_types';
-import { useMonitorEnableHandler } from '../../../../hooks/use_monitor_enable_handler';
+import {
+  ConfigKey,
+  EncryptedSyntheticsMonitor,
+  MonitorOverviewItem,
+} from '../../../../../../../common/runtime_types';
+import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
+import {
+  useMonitorEnableHandler,
+  useLocationName,
+  useCanUpdatePrivateMonitor,
+} from '../../../../hooks';
 import { setFlyoutConfig } from '../../../../state/overview/actions';
-import { useEditMonitorLocator } from '../../hooks/use_edit_monitor_locator';
+import { useEditMonitorLocator } from '../../../../hooks/use_edit_monitor_locator';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
-import { useLocationName } from '../../../../hooks';
+import { NoPermissionsTooltip } from '../../../common/components/permissions';
 
 type PopoverPosition = 'relative' | 'default';
 
@@ -64,6 +76,7 @@ interface Props {
   position: PopoverPosition;
   iconHasPanel?: boolean;
   iconSize?: 's' | 'xs';
+  locationId?: string;
 }
 
 const CustomShadowPanel = styled(EuiPanel)<{ shadow: string }>`
@@ -95,18 +108,26 @@ export function ActionsPopover({
   position,
   iconHasPanel = true,
   iconSize = 's',
+  locationId,
 }: Props) {
   const euiShadow = useEuiShadow('l');
   const dispatch = useDispatch();
-  const locationName = useLocationName({ locationId: monitor.location.id });
+  const location = useLocationName({ locationId: monitor.location.id });
+  const locationName = location?.label || monitor.location.id;
+
+  const isPrivateLocation = !Boolean(location?.isServiceManaged);
 
   const detailUrl = useMonitorDetailLocator({
     configId: monitor.configId,
-    locationId: monitor.location.id,
+    locationId: locationId ?? monitor.location.id,
   });
   const editUrl = useEditMonitorLocator({ configId: monitor.configId });
 
   const { monitor: monitorFields } = useSelectedMonitor(monitor.configId);
+  const canEditSynthetics = useCanEditSynthetics();
+  const canUpdatePrivateMonitor = useCanUpdatePrivateMonitor(
+    monitorFields as EncryptedSyntheticsMonitor
+  );
 
   const labels = useMemo(
     () => ({
@@ -160,7 +181,7 @@ export function ActionsPopover({
 
   const alertLoading = alertStatus(monitor.configId) === FETCH_STATUS.LOADING;
 
-  let popoverItems = [
+  let popoverItems: EuiContextMenuPanelItemDescriptor[] = [
     {
       name: actionsMenuGoToMonitorName,
       icon: 'sortRight',
@@ -168,23 +189,45 @@ export function ActionsPopover({
     },
     quickInspectPopoverItem,
     {
-      name: runTestManually,
+      name: isPrivateLocation ? (
+        <EuiToolTip content={PRIVATE_AVAILABLE_LABEL}>
+          <span>{runTestManually}</span>
+        </EuiToolTip>
+      ) : (
+        runTestManually
+      ),
       icon: 'beaker',
-      disabled: testInProgress,
+      disabled: testInProgress || isPrivateLocation,
       onClick: () => {
-        dispatch(manualTestMonitorAction.get(monitor.configId));
+        dispatch(manualTestMonitorAction.get({ configId: monitor.configId, name: monitor.name }));
         dispatch(setFlyoutConfig(null));
         setIsPopoverOpen(false);
       },
     },
     {
-      name: actionsMenuEditMonitorName,
+      name: (
+        <NoPermissionsTooltip
+          canEditSynthetics={canEditSynthetics}
+          canUpdatePrivateMonitor={canUpdatePrivateMonitor}
+        >
+          {actionsMenuEditMonitorName}
+        </NoPermissionsTooltip>
+      ),
       icon: 'pencil',
+      disabled: !canEditSynthetics || !canUpdatePrivateMonitor,
       href: editUrl,
     },
     {
-      name: enableLabel,
+      name: (
+        <NoPermissionsTooltip
+          canEditSynthetics={canEditSynthetics}
+          canUpdatePrivateMonitor={canUpdatePrivateMonitor}
+        >
+          {enableLabel}
+        </NoPermissionsTooltip>
+      ),
       icon: 'invert',
+      disabled: !canEditSynthetics || !canUpdatePrivateMonitor,
       onClick: () => {
         if (status !== FETCH_STATUS.LOADING) {
           updateMonitorEnabledState(!monitor.isEnabled);

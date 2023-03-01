@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-export interface Meta {
-  from: number;
-  size: number;
-  total: number;
-}
+import { Page } from '../../../../../common/types/pagination';
 
 export const DEFAULT_META = {
   from: 0,
@@ -17,13 +13,6 @@ export const DEFAULT_META = {
   total: 0,
 };
 
-export const convertMetaToPagination = (meta: Meta) => {
-  return {
-    pageIndex: meta.from / meta.size,
-    pageSize: meta.size,
-    totalItemCount: meta.total,
-  };
-};
-export const updateMetaPageIndex = (oldState: Meta, newPageIndex: number) => {
+export const updateMetaPageIndex = (oldState: Page, newPageIndex: number) => {
   return { ...oldState, from: newPageIndex * oldState.size };
 };

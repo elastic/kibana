@@ -7,11 +7,12 @@
 
 import type {
   ControlGroupInput,
-  ControlGroupContainer,
   controlGroupInputBuilder,
   ControlGroupOutput,
   OptionsListEmbeddableInput,
+  ControlGroupContainer,
 } from '@kbn/controls-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useEffect, useState, useRef, useMemo } from 'react';
@@ -66,6 +67,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     chainingSystem = 'HIERARCHICAL',
     initialControls,
     spaceId,
+    onInit,
   } = props;
 
   const filterChangedSubscription = useRef<Subscription>();
@@ -162,9 +164,13 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     });
   }, [controlGroup, debouncedFilterUpdates, debouncedInputUpdatesHandler]);
 
-  const onControlGroupLoadHandler = useCallback((controlGroupContainer: ControlGroupContainer) => {
-    setControlGroup(controlGroupContainer);
-  }, []);
+  const onControlGroupLoadHandler = useCallback(
+    (controlGroupContainer: ControlGroupContainer) => {
+      if (onInit) onInit(controlGroupContainer);
+      setControlGroup(controlGroupContainer);
+    },
+    [onInit]
+  );
 
   const selectControlsWithPriority = useCallback(() => {
     /*
@@ -263,6 +269,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
           hideExclude: true,
           hideSort: true,
           hidePanelTitles: true,
+          placeholder: '',
           // option List controls will handle an invalid dataview
           // & display an appropriate message
           dataViewId: dataViewId ?? '',
@@ -270,7 +277,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
         });
       });
 
-      return initialInput;
+      return { initialInput };
     },
     [dataViewId, timeRange, filters, chainingSystem, query, selectControlsWithPriority]
   );
@@ -329,7 +336,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
         <EuiFlexItem grow={true} data-test-subj="filter_group__items">
           <ControlGroupRenderer
             onLoadComplete={onControlGroupLoadHandler}
-            getInitialInput={setOptions}
+            getCreationOptions={setOptions}
           />
           {!controlGroup ? <FilterGroupLoading /> : null}
         </EuiFlexItem>
@@ -338,6 +345,9 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             id="filter-group__context-menu"
             button={
               <EuiButtonIcon
+                aria-label={i18n.translate('xpack.securitySolution.filterGroup.groupMenuTitle', {
+                  defaultMessage: 'Filter group menu',
+                })}
                 display="empty"
                 size="s"
                 iconType="boxesHorizontal"

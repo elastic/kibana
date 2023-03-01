@@ -76,7 +76,10 @@
     "@kbn/babel-register",
     "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/core-elasticsearch-server",
+    "@kbn/shared-ux-prompt-not-found",
     "@kbn/core-saved-objects-api-server",
+    "@kbn/safer-lodash-set",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

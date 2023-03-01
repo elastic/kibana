@@ -8,6 +8,7 @@ export const TIMESTAMP = 'timestamp.us';
 export const AGENT = 'agent';
 export const AGENT_NAME = 'agent.name';
 export const AGENT_VERSION = 'agent.version';
+export const AGENT_ACTIVATION_METHOD = 'agent.activation_method';
 
 export const DESTINATION_ADDRESS = 'destination.address';
 
@@ -21,6 +22,8 @@ export const CLOUD_INSTANCE_ID = 'cloud.instance.id';
 export const CLOUD_INSTANCE_NAME = 'cloud.instance.name';
 export const CLOUD_SERVICE_NAME = 'cloud.service.name';
 
+export const EVENT_SUCCESS_COUNT = 'event.success_count';
+
 export const SERVICE = 'service';
 export const SERVICE_NAME = 'service.name';
 export const SERVICE_ENVIRONMENT = 'service.environment';
@@ -33,6 +36,8 @@ export const SERVICE_RUNTIME_VERSION = 'service.runtime.version';
 export const SERVICE_NODE_NAME = 'service.node.name';
 export const SERVICE_VERSION = 'service.version';
 export const SERVICE_TARGET_TYPE = 'service.target.type';
+export const SERVICE_OVERFLOW_COUNT =
+  'service_transaction.aggregation.overflow_count';
 
 export const URL_FULL = 'url.full';
 export const HTTP_REQUEST_METHOD = 'http.request.method';
@@ -56,6 +61,8 @@ export const TRANSACTION_SAMPLED = 'transaction.sampled';
 export const TRANSACTION_PAGE_URL = 'transaction.page.url';
 export const TRANSACTION_FAILURE_COUNT = 'transaction.failure_count';
 export const TRANSACTION_SUCCESS_COUNT = 'transaction.success_count';
+export const TRANSACTION_OVERFLOW_COUNT =
+  'transaction.aggregation.overflow_count';
 // for transaction metrics
 export const TRANSACTION_ROOT = 'transaction.root';
 
@@ -144,8 +151,6 @@ export const KUBERNETES = 'kubernetes';
 export const KUBERNETES_POD_NAME = 'kubernetes.pod.name';
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 
-export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
-
 export const FAAS_ID = 'faas.id';
 export const FAAS_NAME = 'faas.name';
 export const FAAS_COLDSTART = 'faas.coldstart';
@@ -164,5 +169,12 @@ export const DEVICE_MODEL_IDENTIFIER = 'device.model.identifier';
 export const SESSION_ID = 'session.id';
 export const APP_LAUNCH_TIME = 'application.launch.time';
 export const EVENT_NAME = 'event.name';
+
+// Location
+export const CLIENT_GEO_COUNTRY_ISO_CODE = 'client.geo.country_iso_code';
+export const CLIENT_GEO_REGION_ISO_CODE = 'client.geo.region_iso_code';
+export const CLIENT_GEO_COUNTRY_NAME = 'client.geo.country_name';
+export const CLIENT_GEO_CITY_NAME = 'client.geo.city_name';
+export const CLIENT_GEO_REGION_NAME = 'client.geo.region_name';
 
 export const CHILD_ID = 'child.id';

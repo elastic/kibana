@@ -42,7 +42,7 @@ export async function validateOutputForPolicy(
   soClient: SavedObjectsClientContract,
   newData: Partial<AgentPolicySOAttributes>,
   existingData: Partial<AgentPolicySOAttributes> = {},
-  isPolicyUsingAPM = false
+  allowedOutputTypeForPolicy = Object.values(outputType)
 ) {
   if (
     newData.data_output_id === existingData.data_output_id &&
@@ -53,13 +53,13 @@ export async function validateOutputForPolicy(
 
   const data = { ...existingData, ...newData };
 
-  if (isPolicyUsingAPM) {
-    const dataOutput = await getDataOutputForAgentPolicy(soClient, data);
+  const isOutputTypeRestricted =
+    allowedOutputTypeForPolicy.length !== Object.values(outputType).length;
 
-    if (dataOutput.type === outputType.Logstash) {
-      throw new OutputInvalidError(
-        'Logstash output is not usable with policy using the APM integration.'
-      );
+  if (isOutputTypeRestricted) {
+    const dataOutput = await getDataOutputForAgentPolicy(soClient, data);
+    if (!allowedOutputTypeForPolicy.includes(dataOutput.type)) {
+      throw new OutputInvalidError(`${dataOutput.type} output is not usable with that policy.`);
     }
   }
 

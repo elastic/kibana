@@ -109,9 +109,13 @@
     "@kbn/apm-synthtrace-client",
     "@kbn/utils",
     "@kbn/journeys",
-    "@kbn/alerting-fixture-plugin",
     "@kbn/stdio-dev-helpers",
     "@kbn/alerting-api-integration-helpers",
     "@kbn/securitysolution-ecs",
+    "@kbn/cloud-security-posture-plugin",
+    "@kbn/cloud-integration-saml-provider-plugin",
+    "@kbn/security-api-integration-helpers",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/discover-plugin",
   ]
 }

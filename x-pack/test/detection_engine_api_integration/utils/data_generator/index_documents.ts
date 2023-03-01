@@ -7,6 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { ToolingLog } from '@kbn/tooling-log';
 interface IndexDocumentsParams {
   es: Client;
   documents: Array<Record<string, unknown>>;
@@ -24,6 +25,22 @@ export const indexDocuments: IndexDocuments = async ({ es, documents, index }) =
   return es.bulk({ refresh: true, operations });
 };
 
-export const indexDocumentsFactory = ({ es, index }: Omit<IndexDocumentsParams, 'documents'>) => {
-  return (documents: Array<Record<string, unknown>>) => indexDocuments({ es, index, documents });
+export const indexDocumentsFactory = ({
+  es,
+  index,
+  log,
+}: Omit<IndexDocumentsParams, 'documents'> & { log: ToolingLog }) => {
+  return async (documents: Array<Record<string, unknown>>) => {
+    const response = await indexDocuments({ es, index, documents });
+    // throw error if document wasn't indexed, so test will be terminated earlier and no false positives can happen
+    response.items.some(({ index: responseIndex } = {}) => {
+      if (responseIndex?.error) {
+        log.error(
+          `Failed to index document in non_ecs_fields test suits: "${responseIndex.error?.reason}"`
+        );
+        throw Error(responseIndex.error.message);
+      }
+    });
+    return response;
+  };
 };

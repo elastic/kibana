@@ -18,7 +18,7 @@ import { IField } from '../../fields/field';
 import { getFeatureCollectionBounds } from '../../util/get_feature_collection_bounds';
 import { InlineField } from '../../fields/inline_field';
 
-function getFeatureCollection(
+function convertToFeatureCollection(
   geoJson: Feature | FeatureCollection | null | undefined
 ): FeatureCollection {
   if (!geoJson) {
@@ -45,7 +45,7 @@ export class GeoJsonFileSource extends AbstractVectorSource {
   ): GeojsonFileSourceDescriptor {
     return {
       type: SOURCE_TYPES.GEOJSON_FILE,
-      __featureCollection: getFeatureCollection(descriptor.__featureCollection),
+      __featureCollection: convertToFeatureCollection(descriptor.__featureCollection),
       __fields: descriptor.__fields || [],
       areResultsTrimmed:
         descriptor.areResultsTrimmed !== undefined ? descriptor.areResultsTrimmed : false,
@@ -105,13 +105,13 @@ export class GeoJsonFileSource extends AbstractVectorSource {
     boundsFilters: BoundsRequestMeta,
     registerCancelCallback: (callback: () => void) => void
   ): Promise<MapExtent | null> {
-    const featureCollection = (this._descriptor as GeojsonFileSourceDescriptor).__featureCollection;
+    const featureCollection = this.getFeatureCollection();
     return getFeatureCollectionBounds(featureCollection, false);
   }
 
   async getGeoJsonWithMeta(): Promise<GeoJsonWithMeta> {
     return {
-      data: (this._descriptor as GeojsonFileSourceDescriptor).__featureCollection,
+      data: this.getFeatureCollection(),
       meta: {},
     };
   }
@@ -129,6 +129,10 @@ export class GeoJsonFileSource extends AbstractVectorSource {
       tooltipContent: (this._descriptor as GeojsonFileSourceDescriptor).tooltipContent,
       areResultsTrimmed: (this._descriptor as GeojsonFileSourceDescriptor).areResultsTrimmed,
     };
+  }
+
+  getFeatureCollection() {
+    return (this._descriptor as GeojsonFileSourceDescriptor).__featureCollection;
   }
 }
 

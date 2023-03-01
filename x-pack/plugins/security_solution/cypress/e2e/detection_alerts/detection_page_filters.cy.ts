@@ -48,13 +48,14 @@ const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_P
       expect(sub.eq(idx).text().replace(',', '')).eq(
         filter.selectedOptions && filter.selectedOptions.length > 0
           ? filter.selectedOptions.join('')
-          : 'Any'
+          : ''
       );
     });
   });
 };
 
-describe('Detections : Page Filters', () => {
+// Skipped because this featured is behind feature flag
+describe.skip('Detections : Page Filters', () => {
   before(() => {
     cleanKibana();
     login();
@@ -150,7 +151,6 @@ describe('Detections : Page Filters', () => {
       .then((noOfAlerts) => {
         const originalAlertCount = noOfAlerts.split(' ')[0];
         markAcknowledgedFirstAlert();
-        cy.reload();
         waitForAlerts();
         cy.get(OPTION_LIST_VALUES).eq(0).click();
         cy.get(OPTION_SELECTABLE(0, 'acknowledged')).should('be.visible');

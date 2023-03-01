@@ -7,17 +7,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, throwOnHttpHiddenTypes } from './utils';
 
 interface RouteDependencies {
+  config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerFindRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { config, coreUsageData, logger }: RouteDependencies
 ) => {
   const referenceSchema = schema.object({
     type: schema.string(),
@@ -26,7 +30,7 @@ export const registerFindRoute = (
   const searchOperatorSchema = schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
   });
-
+  const { allowHttpApiAccess } = config;
   router.get(
     {
       path: '/_find',
@@ -59,6 +63,7 @@ export const registerFindRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      logger.warn("The find saved object API '/api/saved_objects/_find' is deprecated.");
       const query = req.query;
 
       const namespaces =
@@ -92,7 +97,7 @@ export const registerFindRoute = (
           return fullType.name;
         }
       });
-      if (unsupportedTypes.length > 0) {
+      if (unsupportedTypes.length > 0 && !allowHttpApiAccess) {
         throwOnHttpHiddenTypes(unsupportedTypes);
       }
 

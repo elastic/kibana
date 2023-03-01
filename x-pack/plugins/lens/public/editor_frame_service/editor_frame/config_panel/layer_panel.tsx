@@ -512,16 +512,9 @@ export function LayerPanel(
                       {group.accessors.map((accessorConfig, accessorIndex) => {
                         const { columnId } = accessorConfig;
 
-                        const messages = props.getUserMessages('dimensionTrigger', {
-                          // TODO - support warnings
-                          severity: 'error',
+                        const messages = props.getUserMessages('dimensionButton', {
                           dimensionId: columnId,
                         });
-
-                        const hasMessages = Boolean(messages.length);
-                        const messageToDisplay = hasMessages
-                          ? messages[0].shortMessage || messages[0].longMessage
-                          : undefined;
 
                         return (
                           <DraggableDimensionButton
@@ -574,16 +567,7 @@ export function LayerPanel(
                                   props.onRemoveDimension({ columnId: id, layerId });
                                   removeButtonRef(id);
                                 }}
-                                invalid={
-                                  layerDatasource &&
-                                  !layerDatasource?.isValidColumn(
-                                    layerDatasourceState,
-                                    dataViews.indexPatterns,
-                                    layerId,
-                                    columnId,
-                                    dateRange
-                                  )
-                                }
+                                message={messages[0]}
                               >
                                 {layerDatasource ? (
                                   <NativeRenderer
@@ -593,9 +577,6 @@ export function LayerPanel(
                                       columnId: accessorConfig.columnId,
                                       groupId: group.groupId,
                                       filterOperations: group.filterOperations,
-                                      hideTooltip,
-                                      invalid: hasMessages,
-                                      invalidMessage: messageToDisplay,
                                       indexPatterns: dataViews.indexPatterns,
                                     }}
                                   />
@@ -605,8 +586,6 @@ export function LayerPanel(
                                       columnId,
                                       label: columnLabelMap?.[columnId] ?? '',
                                       hideTooltip,
-                                      invalid: hasMessages,
-                                      invalidMessage: messageToDisplay,
                                     })}
                                   </>
                                 )}

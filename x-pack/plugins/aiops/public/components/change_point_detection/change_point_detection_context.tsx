@@ -16,9 +16,13 @@ import React, {
 } from 'react';
 import { type DataViewField } from '@kbn/data-views-plugin/public';
 import { startWith } from 'rxjs';
-import type { Query, Filter } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
+import moment from 'moment';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { DEFAULT_AGG_FUNCTION } from './constants';
+import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import {
   createMergedEsQuery,
   getEsQueryFromSavedSearch,
@@ -36,11 +40,12 @@ export interface ChangePointDetectionPageUrlState {
 
 export interface ChangePointDetectionRequestParams {
   fn: string;
-  splitField: string;
+  splitField?: string;
   metricField: string;
   interval: string;
   query: Query;
   filters: Filter[];
+  changePointType?: ChangePointType[];
 }
 
 export const ChangePointDetectionContext = createContext<{
@@ -61,6 +66,7 @@ export const ChangePointDetectionContext = createContext<{
     pageCount: number;
     updatePagination: (newPage: number) => void;
   };
+  splitFieldCardinality: number | null;
 }>({
   isLoading: false,
   splitFieldsOptions: [],
@@ -79,6 +85,7 @@ export const ChangePointDetectionContext = createContext<{
     pageCount: 1,
     updatePagination: () => {},
   },
+  splitFieldCardinality: null,
 });
 
 export type ChangePointType =
@@ -95,12 +102,13 @@ export interface ChangePointAnnotation {
   label: string;
   reason: string;
   timestamp: string;
-  group_field: string;
+  group?: {
+    name: string;
+    value: string;
+  };
   type: ChangePointType;
   p_value: number;
 }
-
-const DEFAULT_AGG_FUNCTION = 'min';
 
 export const ChangePointDetectionContextProvider: FC = ({ children }) => {
   const { dataView, savedSearch } = useDataSource();
@@ -156,7 +164,9 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
       ({ aggregatable, esTypes, displayName }) =>
         aggregatable &&
         esTypes &&
-        esTypes.includes('keyword') &&
+        esTypes.some((el) =>
+          [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP].includes(el as ES_FIELD_TYPES)
+        ) &&
         !['_id', '_index'].includes(displayName)
     );
   }, [dataView]);
@@ -181,12 +191,9 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     if (!params.metricField && metricFieldOptions.length > 0) {
       params.metricField = metricFieldOptions[0].name;
     }
-    if (!params.splitField && splitFieldsOptions.length > 0) {
-      params.splitField = splitFieldsOptions[0].name;
-    }
     params.interval = bucketInterval?.expression!;
     return params;
-  }, [requestParamsFromUrl, metricFieldOptions, splitFieldsOptions, bucketInterval]);
+  }, [requestParamsFromUrl, metricFieldOptions, bucketInterval]);
 
   const updateFilters = useCallback(
     (update: Filter[]) => {
@@ -231,8 +238,8 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     mergedQuery.bool!.filter.push({
       range: {
         [dataView.timeFieldName!]: {
-          from: timeRange.from,
-          to: timeRange.to,
+          from: moment(timeRange.from).valueOf(),
+          to: moment(timeRange.to).valueOf(),
         },
       },
     });
@@ -240,12 +247,14 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     return mergedQuery;
   }, [resultFilters, resultQuery, uiSettings, dataView, timeRange]);
 
+  const splitFieldCardinality = useSplitFieldCardinality(requestParams.splitField, combinedQuery);
+
   const {
     results: annotations,
     isLoading: annotationsLoading,
     progress,
     pagination,
-  } = useChangePointResults(requestParams, combinedQuery);
+  } = useChangePointResults(requestParams, combinedQuery, splitFieldCardinality);
 
   if (!bucketInterval) return null;
 
@@ -263,6 +272,7 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
     updateFilters,
     resultQuery,
     pagination,
+    splitFieldCardinality,
   };
 
   return (

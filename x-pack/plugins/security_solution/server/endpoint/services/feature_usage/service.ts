@@ -22,6 +22,7 @@ const FEATURES = {
   SUSPEND_PROCESS: 'Suspend process',
   RUNNING_PROCESSES: 'Get running processes',
   GET_FILE: 'Get file',
+  EXECUTE: 'Execute command',
   ALERTS_BY_PROCESS_ANCESTRY: 'Get related alerts by process ancestry',
 } as const;
 

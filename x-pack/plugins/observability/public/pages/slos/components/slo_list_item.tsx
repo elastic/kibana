@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { useIsMutating } from '@tanstack/react-query';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -19,35 +20,43 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
+import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useKibana } from '../../../utils/kibana_react';
+import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
 import { SloSummary } from './slo_summary';
 import { SloDeleteConfirmationModal } from './slo_delete_confirmation_modal';
 import { SloBadges } from './badges/slo_badges';
+import {
+  transformSloResponseToCreateSloInput,
+  transformValuesToCreateSLOInput,
+} from '../../slo_edit/helpers/process_slo_form_values';
 import { paths } from '../../../config';
 
 export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;
-  onDeleted: () => void;
-  onDeleting: () => void;
+  activeAlerts?: ActiveAlerts;
 }
 
 export function SloListItem({
   slo,
   historicalSummary = [],
   historicalSummaryLoading,
-  onDeleted,
-  onDeleting,
+  activeAlerts,
 }: SloListItemProps) {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
+  const { hasWriteCapabilities } = useCapabilities();
+
+  const { mutate: cloneSlo } = useCloneSlo();
+  const isDeletingSlo = Boolean(useIsMutating(['deleteSlo', slo.id]));
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleClickActions = () => {
     setIsActionsPopoverOpen(!isActionsPopoverOpen);
@@ -57,28 +66,34 @@ export function SloListItem({
     navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
   };
 
+  const handleClone = () => {
+    const newSlo = transformValuesToCreateSLOInput(
+      transformSloResponseToCreateSloInput({ ...slo, name: `[Copy] ${slo.name}` })!
+    );
+
+    cloneSlo({ slo: newSlo, idToCopyFrom: slo.id });
+    setIsActionsPopoverOpen(false);
+  };
+
   const handleDelete = () => {
     setDeleteConfirmationModalOpen(true);
-    setIsDeleting(true);
     setIsActionsPopoverOpen(false);
   };
 
   const handleDeleteCancel = () => {
     setDeleteConfirmationModalOpen(false);
-    setIsDeleting(false);
-  };
-
-  const handleDeleteSuccess = () => {
-    setDeleteConfirmationModalOpen(false);
-    onDeleted();
   };
 
   return (
     <EuiPanel
+      data-test-subj="sloItem"
+      color={isDeletingSlo ? 'subdued' : undefined}
       hasBorder
       hasShadow={false}
-      color={isDeleting ? 'subdued' : undefined}
-      style={{ opacity: isDeleting ? 0.3 : 1, transition: 'opacity 0.15s ease-in' }}
+      style={{
+        opacity: isDeletingSlo ? 0.3 : 1,
+        transition: 'opacity 0.1s ease-in',
+      }}
     >
       <EuiFlexGroup responsive={false} alignItems="center">
         {/* CONTENT */}
@@ -89,7 +104,7 @@ export function SloListItem({
                 <EuiFlexItem>
                   <EuiText size="s">{slo.name}</EuiText>
                 </EuiFlexItem>
-                <SloBadges slo={slo} />
+                <SloBadges slo={slo} activeAlerts={activeAlerts} />
               </EuiFlexGroup>
             </EuiFlexItem>
 
@@ -124,12 +139,35 @@ export function SloListItem({
             <EuiContextMenuPanel
               size="s"
               items={[
-                <EuiContextMenuItem key="edit" icon="pencil" onClick={handleEdit}>
+                <EuiContextMenuItem
+                  key="edit"
+                  icon="pencil"
+                  disabled={!hasWriteCapabilities}
+                  onClick={handleEdit}
+                  data-test-subj="sloActionsEdit"
+                >
                   {i18n.translate('xpack.observability.slos.slo.item.actions.edit', {
                     defaultMessage: 'Edit',
                   })}
                 </EuiContextMenuItem>,
-                <EuiContextMenuItem key="delete" icon="trash" onClick={handleDelete}>
+                <EuiContextMenuItem
+                  key="clone"
+                  disabled={!hasWriteCapabilities}
+                  icon="copy"
+                  onClick={handleClone}
+                  data-test-subj="sloActionsClone"
+                >
+                  {i18n.translate('xpack.observability.slos.slo.item.actions.clone', {
+                    defaultMessage: 'Clone',
+                  })}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  key="delete"
+                  icon="trash"
+                  disabled={!hasWriteCapabilities}
+                  onClick={handleDelete}
+                  data-test-subj="sloActionsDelete"
+                >
                   {i18n.translate('xpack.observability.slos.slo.item.actions.delete', {
                     defaultMessage: 'Delete',
                   })}
@@ -141,12 +179,7 @@ export function SloListItem({
       </EuiFlexGroup>
 
       {isDeleteConfirmationModalOpen ? (
-        <SloDeleteConfirmationModal
-          slo={slo}
-          onCancel={handleDeleteCancel}
-          onDeleting={onDeleting}
-          onDeleted={handleDeleteSuccess}
-        />
+        <SloDeleteConfirmationModal slo={slo} onCancel={handleDeleteCancel} />
       ) : null}
     </EuiPanel>
   );

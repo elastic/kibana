@@ -15,10 +15,10 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { isEmpty, mapValues } from 'lodash';
-import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
 import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmRuleTypes } from './routes/alerts/register_apm_rule_types';
@@ -130,25 +130,32 @@ export class APMPlugin
               ...experimentalRuleFieldMap,
               [SERVICE_NAME]: {
                 type: 'keyword',
+                required: false,
               },
               [SERVICE_ENVIRONMENT]: {
                 type: 'keyword',
+                required: false,
               },
               [TRANSACTION_TYPE]: {
                 type: 'keyword',
+                required: false,
               },
               [PROCESSOR_EVENT]: {
                 type: 'keyword',
+                required: false,
               },
               [AGENT_NAME]: {
                 type: 'keyword',
+                required: false,
               },
               [SERVICE_LANGUAGE_NAME]: {
                 type: 'keyword',
+                required: false,
               },
               labels: {
                 type: 'object',
                 dynamic: true,
+                required: false,
               },
             },
             'strict'
@@ -225,6 +232,9 @@ export class APMPlugin
       coreStartPromise: getCoreStart(),
       plugins: resourcePlugins,
       config: currentConfig,
+    }).catch((e) => {
+      this.logger?.error('Failed to register APM Fleet policy callbacks');
+      this.logger?.error(e);
     });
 
     // This will add an API key to all existing APM package policies
@@ -232,6 +242,9 @@ export class APMPlugin
       coreStartPromise: getCoreStart(),
       pluginStartPromise: getPluginStart(),
       logger: this.logger,
+    }).catch((e) => {
+      this.logger?.error('Failed to add API keys to APM package policies');
+      this.logger?.error(e);
     });
 
     const taskManager = plugins.taskManager;
