@@ -5,8 +5,9 @@ parameters:
     in: path
     required: true
 get:
-  summary: Enrollment API Key - Info
-  tags: []
+  summary: Get enrollment API key by ID
+  tags:
+    - Enrollment API keys
   responses:
     '200':
       description: OK
@@ -24,8 +25,9 @@ get:
   operationId: get-enrollment-api-key-deprecated
   deprecated: true
 delete:
-  summary: Enrollment API Key - Delete
-  tags: []
+  summary: Delete enrollment API key by ID
+  tags:
+    - Enrollment API keys
   responses:
     '200':
       description: OK
