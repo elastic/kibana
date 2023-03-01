@@ -83,7 +83,7 @@ describe('validate', () => {
   describe('transformValidate', () => {
     test('it should do a validation correctly of a partial alert', () => {
       const ruleAlert = getRuleMock(getQueryRuleParams());
-      const [validated, errors] = transformValidate(ruleAlert, null);
+      const [validated, errors] = transformValidate(ruleAlert);
       expect(validated).toEqual(ruleOutput());
       expect(errors).toEqual(null);
     });
@@ -92,7 +92,7 @@ describe('validate', () => {
       const ruleAlert = getRuleMock(getQueryRuleParams());
       // @ts-expect-error
       delete ruleAlert.name;
-      const [validated, errors] = transformValidate(ruleAlert, null);
+      const [validated, errors] = transformValidate(ruleAlert);
       expect(validated).toEqual(null);
       expect(errors).toEqual('Invalid value "undefined" supplied to "name"');
     });

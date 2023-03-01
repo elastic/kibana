@@ -13,7 +13,7 @@ import type { UnifiedQueryRuleParams } from '../../rule_schema';
 import { unifiedQueryRuleParams } from '../../rule_schema';
 import { queryExecutor } from './query';
 import type { CreateQueryRuleOptions, SecurityAlertType } from '../types';
-import { validateIndexPatterns, legacyActionsMigrationHook } from '../utils';
+import { validateIndexPatterns } from '../utils';
 
 export interface QueryRuleState {
   suppressionGroupHistory?: BucketHistory[];
@@ -87,6 +87,5 @@ export const createQueryAlertType = (
         licensing,
       });
     },
-    migrateRules: legacyActionsMigrationHook,
   };
 };
