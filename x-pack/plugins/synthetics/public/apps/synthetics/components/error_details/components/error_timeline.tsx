@@ -7,21 +7,29 @@
 import React from 'react';
 import { EuiLoadingContent } from '@elastic/eui';
 import moment from 'moment';
+import { Ping } from '../../../../../../common/runtime_types';
 import { MonitorFailedTests } from '../../monitor_details/monitor_errors/failed_tests';
 
-export const ErrorTimeline = ({
-  startedAt,
-  endsAt,
-}: {
-  startedAt?: string;
-  endsAt?: string | null;
-}) => {
-  if (!startedAt) {
+export const ErrorTimeline = ({ lastTestRun }: { lastTestRun?: Ping }) => {
+  if (!lastTestRun) {
     return <EuiLoadingContent lines={3} />;
   }
+  const diff = moment(lastTestRun.monitor.timespan?.lt).diff(
+    moment(lastTestRun.monitor.timespan?.gte),
+    'minutes'
+  );
+  const startedAt = lastTestRun?.state?.started_at;
+
   return (
     <MonitorFailedTests
-      time={{ from: moment(startedAt).subtract(10, 'minutes').toISOString(), to: endsAt ?? 'now' }}
+      time={{
+        from: moment(startedAt)
+          .subtract(diff / 2, 'minutes')
+          .toISOString(),
+        to: moment(lastTestRun.timestamp)
+          .add(diff / 2, 'minutes')
+          .toISOString(),
+      }}
       allowBrushing={false}
     />
   );

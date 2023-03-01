@@ -95,7 +95,7 @@ export function useMonitorErrors(monitorIdArg?: string) {
   );
 
   return useMemo(() => {
-    const errorStates = (data?.aggregations?.errorStates.buckets ?? []).map((loc) => {
+    const errorStates = data?.aggregations?.errorStates.buckets?.map((loc) => {
       return loc.summary.hits.hits?.[0]._source as PingState;
     });
 

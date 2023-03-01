@@ -43,10 +43,7 @@ export function ErrorDetailsPage() {
   return (
     <div>
       <PanelWithTitle title={TIMELINE_LABEL}>
-        <ErrorTimeline
-          startedAt={lastTestRun?.state?.started_at}
-          endsAt={lastTestRun?.state?.ends}
-        />
+        <ErrorTimeline lastTestRun={lastTestRun} />
       </PanelWithTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m">

@@ -50,6 +50,10 @@ export const ErrorsList = ({
 
   const selectedLocation = useSelectedLocation();
 
+  const lastTestRun = errorStates?.sort((a, b) => {
+    return moment(a.timestamp).valueOf() - moment(b.timestamp).valueOf();
+  })?.[0];
+
   const columns = [
     {
       field: 'item.state.started_at',
@@ -67,7 +71,7 @@ export const ErrorsList = ({
           />
         );
         const isActive = isActiveState(item);
-        if (!isActive) {
+        if (!isActive || lastTestRun.state.id !== item.state.id) {
           return link;
         }
 
