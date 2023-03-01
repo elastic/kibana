@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { formatMitreAttackDescription } from '../../helpers/rules';
-import { getNewOverrideRule, getSeveritiesOverride } from '../../objects/rule';
+import { formatMitreAttackDescription, getHumanizedDuration } from '../../helpers/rules';
+import { getIndexPatterns, getNewOverrideRule, getSeveritiesOverride } from '../../objects/rule';
 
 import { ALERT_GRID_CELL, ALERTS_COUNT } from '../../screens/alerts';
 
@@ -88,7 +88,7 @@ describe('Detection rules, override', () => {
 
     cy.get(RULE_NAME).should('have.text', rule.name);
     cy.get(RISK_SCORE).should('have.text', rule.risk_score);
-    cy.get(SEVERITY).should('have.text', rule.severity);
+    cy.get(SEVERITY).should('have.text', 'High');
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
@@ -96,7 +96,7 @@ describe('Detection rules, override', () => {
     cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
     cy.get(ABOUT_DETAILS).within(() => {
-      getDetails(SEVERITY_DETAILS).should('have.text', rule.severity);
+      getDetails(SEVERITY_DETAILS).should('have.text', 'High');
       getDetails(RISK_SCORE_DETAILS).should('have.text', rule.risk_score);
       getDetails(RISK_SCORE_OVERRIDE_DETAILS).should(
         'have.text',
@@ -128,20 +128,15 @@ describe('Detection rules, override', () => {
     cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', 'auditbeat-*');
-      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
+      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
+      getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Query');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
-      getDetails(RUNS_EVERY_DETAILS).should(
-        'have.text',
-        `${this.rule.runsEvery.interval}${this.rule.runsEvery.type}`
-      );
-      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
-        'have.text',
-        `${this.rule.lookBack.interval}${this.rule.lookBack.type}`
-      );
+      getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+      const humanizedDuration = getHumanizedDuration(rule.from ?? 'now-6m', rule.interval ?? '5m');
+      getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
     });
 
     waitForTheRuleToBeExecuted();
