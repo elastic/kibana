@@ -107,12 +107,12 @@ export function addExcludedTypesToBoolQuery(
 
 /**
  * Add the given clauses to the 'must' of the given query
+ * @param filterClauses the clauses to be added to a 'must'
  * @param boolQuery the bool query to be enriched
- * @param mustClauses the clauses to be added to a 'must'
  * @returns a new query container with the enriched query
  */
 export function addMustClausesToBoolQuery(
-  mustClauses: QueryDslQueryContainer[],
+  filterClauses: QueryDslQueryContainer[],
   boolQuery?: QueryDslBoolQuery
 ): QueryDslQueryContainer {
   let must: QueryDslQueryContainer[] = [];
@@ -121,7 +121,7 @@ export function addMustClausesToBoolQuery(
     must = must.concat(boolQuery.must);
   }
 
-  must.push(...mustClauses);
+  must.push(...filterClauses);
 
   return {
     bool: {
@@ -133,8 +133,8 @@ export function addMustClausesToBoolQuery(
 
 /**
  * Add the given clauses to the 'must_not' of the given query
- * @param boolQuery the bool query to be enriched
  * @param filterClauses the clauses to be added to a 'must_not'
+ * @param boolQuery the bool query to be enriched
  * @returns a new query container with the enriched query
  */
 export function addMustNotClausesToBoolQuery(
