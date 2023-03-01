@@ -37,7 +37,7 @@ export const FILTER_BUILDER_TEXT = i18n.translate(
   'xpack.securitySolution.markdown.insight.filterBuilderText',
   {
     defaultMessage:
-      'Create filters to be used for displaying matching document counts and to populate the timeline query builder when clicked. Parameters that are wrapped in double braces {{kibana.alert.example}} are assumed to be keys in the alert associated with the investigation guide.',
+      'Create filters to be used for displaying matching document counts and to populate the timeline query builder when clicked. Parameters that are wrapped in double braces {{kibana.alert.example}} are assumed to be keys in the alert associated with the investigation guide, and values from the alert document will be substituted in place at query time.',
   }
 );
 
