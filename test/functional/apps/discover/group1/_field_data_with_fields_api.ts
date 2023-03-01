@@ -74,9 +74,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'whitespace but "(" found.';
         await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
-        const { message } = await toasts.getErrorToast();
+        expect(await PageObjects.discover.noResultsErrorVisible()).to.be(true);
+        const message = await PageObjects.discover.getDiscoverErrorMessage();
         expect(message).to.contain(expectedError);
-        await toasts.dismissToast();
       });
 
       it('shows top-level object keys', async function () {

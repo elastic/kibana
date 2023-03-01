@@ -90,7 +90,7 @@ export const DiscoverMainContent = ({
           })}
           error={dataState.error}
           inline
-          data-test-subj="discoverDocumentsError"
+          data-test-subj="discoverMainError"
         />
       )}
       {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
