@@ -96,7 +96,6 @@ export function FieldIcon({
       {...token}
       aria-label={label || type}
       className={classNames('kbnFieldIcon', className)}
-      data-test-subj={`dvFieldTypeIcon-${type}`}
       fill={scripted ? 'dark' : undefined}
       title={label || type}
       size={size as EuiTokenProps['size']}

@@ -33,7 +33,7 @@ export const FieldTypeIcon: FC<FieldTypeIconProps> = ({ tooltipEnabled = false, 
         data-test-subj="dvFieldTypeTooltip"
         position="left"
       >
-        <FieldIcon type={type} />
+        <FieldIcon type={type} data-test-subj={`dvFieldTypeIcon-${type}`} />
       </EuiToolTip>
     );
   }
