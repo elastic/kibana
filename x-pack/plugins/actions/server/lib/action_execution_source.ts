@@ -33,6 +33,13 @@ export function asHttpRequestExecutionSource(source: KibanaRequest): HttpRequest
   };
 }
 
+export function asEmptySource(type: ActionExecutionSourceType): ActionExecutionSource<{}> {
+  return {
+    type,
+    source: {},
+  };
+}
+
 export function asSavedObjectExecutionSource(
   source: Omit<SavedObjectReference, 'name'>
 ): SavedObjectExecutionSource {

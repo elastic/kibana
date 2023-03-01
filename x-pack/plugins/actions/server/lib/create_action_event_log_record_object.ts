@@ -9,7 +9,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { isEmpty } from 'lodash';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { RelatedSavedObjects } from './related_saved_objects';
-import { ActionExecutionSourceType } from './action_execution_source';
+import { ActionExecutionSource, isSavedObjectExecutionSource } from './action_execution_source';
 
 export type Event = Exclude<IEvent, undefined>;
 
@@ -36,7 +36,7 @@ interface CreateActionEventLogRecordParams {
   }>;
   relatedSavedObjects?: RelatedSavedObjects;
   isPreconfigured?: boolean;
-  source?: ActionExecutionSourceType;
+  source?: ActionExecutionSource<unknown>;
 }
 
 export function createActionEventLogRecordObject(params: CreateActionEventLogRecordParams): Event {
@@ -91,12 +91,19 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
         id: actionId,
         execution: {
           uuid: actionExecutionId,
-          ...(source ? { source } : {}),
         },
       },
     },
     ...(message ? { message } : {}),
   };
+
+  if (source) {
+    if (isSavedObjectExecutionSource(source)) {
+      set(event, 'kibana.action.execution.source', source.source.type);
+    } else {
+      set(event, 'kibana.action.execution.source', source.type?.toLowerCase());
+    }
+  }
 
   for (const relatedSavedObject of relatedSavedObjects || []) {
     const ruleTypeId = relatedSavedObject.type === 'alert' ? relatedSavedObject.typeId : null;

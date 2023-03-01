@@ -29,7 +29,7 @@ const executeParamsFields = [
   'executionId',
   'request.headers',
   'taskInfo',
-  'sourceType',
+  'source',
 ];
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -288,7 +288,7 @@ test('executes the task by calling the executor with proper parameters when cons
   );
 });
 
-test('executes the task by calling the executor with proper parameters when source is provided', async () => {
+test('executes the task by calling the executor with proper parameters when saved_object source is provided', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: mockedTaskInstance,
   });
@@ -304,6 +304,67 @@ test('executes the task by calling the executor with proper parameters when sour
       params: { baz: true },
       executionId: '123abc',
       source: 'SAVED_OBJECT',
+      apiKey: Buffer.from('123:abc').toString('base64'),
+    },
+    references: [{ name: 'source', id: 'abc', type: 'alert' }],
+  });
+
+  const runnerResult = await taskRunner.run();
+
+  expect(runnerResult).toBeUndefined();
+  expect(spaceIdToNamespace).toHaveBeenCalledWith('test');
+  expect(mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
+    'action_task_params',
+    '3',
+    { namespace: 'namespace-test' }
+  );
+
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, [...executeParamsFields, 'consumer'])).toEqual({
+    actionId: '2',
+    consumer: 'test-consumer',
+    isEphemeral: false,
+    params: { baz: true },
+    relatedSavedObjects: [],
+    executionId: '123abc',
+    request: {
+      headers: {
+        // base64 encoded "123:abc"
+        authorization: 'ApiKey MTIzOmFiYw==',
+      },
+    },
+    source: {
+      type: 'SAVED_OBJECT',
+      source: { id: 'abc', type: 'alert' },
+    },
+    taskInfo: {
+      scheduled: new Date(),
+      attempts: 0,
+    },
+  });
+
+  expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
+    executeParams.request,
+    '/s/test'
+  );
+});
+
+test('executes the task by calling the executor with proper parameters when notification source is provided', async () => {
+  const taskRunner = taskRunnerFactory.create({
+    taskInstance: mockedTaskInstance,
+  });
+
+  mockedActionExecutor.execute.mockResolvedValueOnce({ status: 'ok', actionId: '2' });
+  spaceIdToNamespace.mockReturnValueOnce('namespace-test');
+  mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+    id: '3',
+    type: 'action_task_params',
+    attributes: {
+      actionId: '2',
+      consumer: 'test-consumer',
+      params: { baz: true },
+      executionId: '123abc',
+      source: 'NOTIFICATION',
       apiKey: Buffer.from('123:abc').toString('base64'),
     },
     references: [],
@@ -333,7 +394,10 @@ test('executes the task by calling the executor with proper parameters when sour
         authorization: 'ApiKey MTIzOmFiYw==',
       },
     },
-    sourceType: 'SAVED_OBJECT',
+    source: {
+      type: 'NOTIFICATION',
+      source: {},
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,

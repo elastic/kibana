@@ -2240,7 +2240,7 @@ describe('execute()', () => {
         name: 'my name',
       },
       actionExecutionId,
-      sourceType: 'HTTP_REQUEST',
+      source: asHttpRequestExecutionSource(request),
     });
 
     await expect(
@@ -2274,7 +2274,7 @@ describe('execute()', () => {
         },
       ],
       actionExecutionId,
-      sourceType: 'HTTP_REQUEST',
+      source: asHttpRequestExecutionSource(request),
     });
 
     await expect(
@@ -2301,7 +2301,7 @@ describe('execute()', () => {
       params: {
         name: 'my name',
       },
-      sourceType: 'HTTP_REQUEST',
+      source: asHttpRequestExecutionSource(request),
       relatedSavedObjects: [
         {
           id: 'some-id',

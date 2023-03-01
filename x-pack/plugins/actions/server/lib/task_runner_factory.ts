@@ -6,6 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { pick } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
 import {
   Logger,
@@ -16,6 +17,7 @@ import {
   SavedObject,
   Headers,
   FakeRawRequest,
+  SavedObjectReference,
 } from '@kbn/core/server';
 import { RunContext } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -30,7 +32,11 @@ import {
   isPersistedActionTask,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
-import { ActionExecutionSourceType } from './action_execution_source';
+import {
+  ActionExecutionSourceType,
+  asEmptySource,
+  asSavedObjectExecutionSource,
+} from './action_execution_source';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
@@ -98,6 +104,7 @@ export class TaskRunnerFactory {
             source,
             relatedSavedObjects,
           },
+          references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
           encryptedSavedObjectsClient,
@@ -127,7 +134,7 @@ export class TaskRunnerFactory {
             consumer,
             relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
             actionExecutionId,
-            ...(source ? { sourceType: source as ActionExecutionSourceType } : {}),
+            ...getSource(references, source),
           });
         } catch (e) {
           logger.error(
@@ -196,6 +203,7 @@ export class TaskRunnerFactory {
 
         const {
           attributes: { actionId, apiKey, executionId, consumer, source, relatedSavedObjects },
+          references,
         } = await getActionTaskParams(
           actionTaskExecutorParams,
           encryptedSavedObjectsClient,
@@ -213,7 +221,7 @@ export class TaskRunnerFactory {
           executionId,
           relatedSavedObjects: (relatedSavedObjects || []) as RelatedSavedObjects,
           actionExecutionId,
-          ...(source ? { sourceType: source as ActionExecutionSourceType } : {}),
+          ...getSource(references, source),
         });
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_TIMEOUTS);
@@ -279,4 +287,13 @@ async function getActionTaskParams(
   } else {
     return { attributes: executorParams.taskParams, references: executorParams.references ?? [] };
   }
+}
+
+function getSource(references: SavedObjectReference[], sourceType?: string) {
+  const sourceInReferences = references.find((ref) => ref.name === 'source');
+  if (sourceInReferences) {
+    return { source: asSavedObjectExecutionSource(pick(sourceInReferences, 'id', 'type')) };
+  }
+
+  return sourceType ? { source: asEmptySource(sourceType as ActionExecutionSourceType) } : {};
 }

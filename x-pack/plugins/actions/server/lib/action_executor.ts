@@ -29,7 +29,7 @@ import {
   ValidatorServices,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { ActionExecutionSourceType } from './action_execution_source';
+import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
@@ -52,13 +52,13 @@ export interface TaskInfo {
   attempts: number;
 }
 
-export interface ExecuteOptions {
+export interface ExecuteOptions<Source = unknown> {
   actionId: string;
   actionExecutionId: string;
   isEphemeral?: boolean;
   request: KibanaRequest;
   params: Record<string, unknown>;
-  sourceType?: ActionExecutionSourceType;
+  source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
   executionId?: string;
   consumer?: string;
@@ -90,7 +90,7 @@ export class ActionExecutor {
     actionId,
     params,
     request,
-    sourceType,
+    source,
     isEphemeral,
     taskInfo,
     executionId,
@@ -185,7 +185,7 @@ export class ActionExecutor {
           name,
           actionExecutionId,
           isPreconfigured: this.actionInfo.isPreconfigured,
-          ...(sourceType ? { source: sourceType } : {}),
+          ...(source ? { source } : {}),
         });
 
         eventLogger.startTiming(event);
@@ -286,11 +286,11 @@ export class ActionExecutor {
     );
   }
 
-  public async logCancellation({
+  public async logCancellation<Source = unknown>({
     actionId,
     request,
     relatedSavedObjects,
-    sourceType,
+    source,
     executionId,
     taskInfo,
     consumer,
@@ -302,7 +302,7 @@ export class ActionExecutor {
     taskInfo?: TaskInfo;
     executionId?: string;
     relatedSavedObjects: RelatedSavedObjects;
-    sourceType?: ActionExecutionSourceType;
+    source?: ActionExecutionSource<Source>;
     consumer?: string;
   }) {
     const { spaces, encryptedSavedObjectsClient, preconfiguredActions, eventLogger } =
@@ -350,7 +350,7 @@ export class ActionExecutor {
       relatedSavedObjects,
       actionExecutionId,
       isPreconfigured: this.actionInfo.isPreconfigured,
-      ...(sourceType ? { source: sourceType } : {}),
+      ...(source ? { source } : {}),
     });
 
     eventLogger.logEvent(event);

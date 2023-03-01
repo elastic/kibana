@@ -410,7 +410,7 @@ export default function ({ getService }: FtrProviderContext) {
     expect(executeEvent?.kibana?.task).to.eql(undefined);
 
     if (source) {
-      expect(executeEvent?.kibana?.action?.execution?.source).to.eql(source);
+      expect(executeEvent?.kibana?.action?.execution?.source).to.eql(source.toLowerCase());
     }
 
     if (errorMessage) {
