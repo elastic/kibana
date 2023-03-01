@@ -52,8 +52,8 @@ describe('when migrating to a new version', () => {
       expect(logs).toMatch(
         'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION.'
       );
-      expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> REFRESH_TARGET.');
-      expect(logs).toMatch('REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.');
+      expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> REFRESH_SOURCE.');
+      expect(logs).toMatch('REFRESH_SOURCE -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.');
       expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS.');
       expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.');
 
@@ -81,8 +81,8 @@ describe('when migrating to a new version', () => {
       expect(logs).toMatch(
         'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION.'
       );
-      expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> REFRESH_TARGET.');
-      expect(logs).toMatch('REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.');
+      expect(logs).toMatch('PREPARE_COMPATIBLE_MIGRATION -> REFRESH_SOURCE.');
+      expect(logs).toMatch('REFRESH_SOURCE -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT.');
       expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES.');
       expect(logs).toMatch('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS.');
       expect(logs).toMatch('CHECK_VERSION_INDEX_READY_ACTIONS -> DONE.');
