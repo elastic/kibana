@@ -94,14 +94,9 @@ describe('validate params', () => {
 
     test('should validate and pass when params are valid for get channels', () => {
       expect(
-        validateParams(
-          connectorType,
-          { subAction: 'getChannels', subActionParams: {} },
-          { configurationUtilities }
-        )
+        validateParams(connectorType, { subAction: 'getChannels' }, { configurationUtilities })
       ).toEqual({
         subAction: 'getChannels',
-        subActionParams: {},
       });
     });
   });
@@ -547,7 +542,6 @@ describe('execute', () => {
         secrets: { token: 'some token' },
         params: {
           subAction: 'getChannels',
-          subActionParams: {},
         },
         configurationUtilities,
         logger: mockedLogger,

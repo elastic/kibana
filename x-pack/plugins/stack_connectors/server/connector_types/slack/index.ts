@@ -244,15 +244,7 @@ const slackWebApiExecutor = async (
   execOptions: SlackWebApiExecutorOptions
 ): Promise<ConnectorTypeExecutorResult<unknown>> => {
   const { actionId, params, secrets, configurationUtilities, logger } = execOptions;
-  const { subAction, subActionParams } = params;
-
-  const externalService = createExternalService(
-    {
-      secrets,
-    },
-    logger,
-    configurationUtilities
-  );
+  const subAction = params.subAction;
 
   if (!api[subAction]) {
     const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;
@@ -266,6 +258,14 @@ const slackWebApiExecutor = async (
     throw new Error(errorMessage);
   }
 
+  const externalService = createExternalService(
+    {
+      secrets,
+    },
+    logger,
+    configurationUtilities
+  );
+
   if (subAction === 'getChannels') {
     return await api.getChannels({
       externalService,
@@ -275,7 +275,7 @@ const slackWebApiExecutor = async (
   if (subAction === 'postMessage') {
     return await api.postMessage({
       externalService,
-      params: subActionParams,
+      params: params.subActionParams,
     });
   }
 

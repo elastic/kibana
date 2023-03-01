@@ -27,7 +27,6 @@ export const SlackSecretsSchema = schema.oneOf([
 
 export const ExecutorGetChannelsParamsSchema = schema.object({
   subAction: schema.literal('getChannels'),
-  subActionParams: schema.object({}),
 });
 
 export const PostMessageSubActionParamsSchema = schema.object({
