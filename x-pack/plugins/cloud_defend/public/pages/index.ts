@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { IndexPatternStatsCollector } from './index_pattern_stats_collector';
-export type { IndexPatternStats } from './types';
+export { Policies } from './policies';
