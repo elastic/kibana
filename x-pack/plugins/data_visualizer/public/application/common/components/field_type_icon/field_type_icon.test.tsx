@@ -16,13 +16,13 @@ describe('FieldTypeIcon', () => {
       <FieldTypeIcon type={SUPPORTED_FIELD_TYPES.KEYWORD} tooltipEnabled={false} />
     );
 
-    expect(container.querySelector('.euiToken')).toBeDefined();
+    expect(container.querySelector('[data-test-subj="dvFieldTypeIcon-keyword"]')).toBeDefined();
 
     fireEvent.mouseOver(getByText('Keyword'));
 
     await waitFor(
       () => {
-        const tooltip = document.querySelector('.euiToolTipPopover');
+        const tooltip = document.querySelector('[data-test-subj="dvFieldTypeTooltip"]');
         expect(tooltip).toBeNull();
       },
       { timeout: 1500 } // Account for long delay on tooltips
@@ -33,7 +33,8 @@ describe('FieldTypeIcon', () => {
     const { container } = render(
       <FieldTypeIcon type={SUPPORTED_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
     );
-    expect(container.querySelector('.euiToken')).toBeDefined();
+
+    expect(container.querySelector('[data-test-subj="dvFieldTypeIcon-keyword"]')).toBeDefined();
     expect(container).toHaveTextContent('keyword');
   });
 
@@ -41,14 +42,14 @@ describe('FieldTypeIcon', () => {
     const { getByText, container } = render(
       <FieldTypeIcon type={SUPPORTED_FIELD_TYPES.KEYWORD} tooltipEnabled={true} />
     );
-    expect(container.querySelector('.euiToken')).toBeDefined();
+    expect(container.querySelector('[data-test-subj="dvFieldTypeIcon-keyword"]')).toBeDefined();
     expect(container).toHaveTextContent('keyword');
 
     fireEvent.mouseOver(getByText('keyword'));
 
     await waitFor(
       () => {
-        const tooltip = document.querySelector('.euiToolTipPopover');
+        const tooltip = document.querySelector('[data-test-subj="dvFieldTypeTooltip"]');
         expect(tooltip).toBeVisible();
         expect(tooltip?.textContent).toEqual('Keyword');
       },
@@ -57,7 +58,7 @@ describe('FieldTypeIcon', () => {
     fireEvent.mouseOut(getByText('keyword'));
 
     await waitFor(() => {
-      const tooltip = document.querySelector('.euiToolTipPopover');
+      const tooltip = document.querySelector('[data-test-subj="dvFieldTypeTooltip"]');
       expect(tooltip).toBeNull();
     });
   });

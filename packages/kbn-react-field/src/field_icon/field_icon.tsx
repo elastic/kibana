@@ -94,11 +94,12 @@ export function FieldIcon({
   return (
     <EuiToken
       {...token}
-      className={classNames('kbnFieldIcon', className)}
       aria-label={label || type}
+      className={classNames('kbnFieldIcon', className)}
+      data-test-subj={`dvFieldTypeIcon-${type}`}
+      fill={scripted ? 'dark' : undefined}
       title={label || type}
       size={size as EuiTokenProps['size']}
-      fill={scripted ? 'dark' : undefined}
       {...rest}
     />
   );
