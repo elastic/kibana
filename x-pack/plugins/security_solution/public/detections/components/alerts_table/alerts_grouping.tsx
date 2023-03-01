@@ -240,7 +240,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
               getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket),
             customMetricStats: (fieldBucket: RawBucket) =>
               getSelectedGroupCustomMetrics(selectedGroup, fieldBucket),
-            data: alertsGroupsData?.aggregations ?? {},
+            data: alertsGroupsData?.aggregations,
             groupPanelRenderer: (fieldBucket: RawBucket) =>
               getSelectedGroupButtonContent(selectedGroup, fieldBucket),
             groupsSelector,
