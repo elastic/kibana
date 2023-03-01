@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`annotation group save action successful initial save 1`] = `
+Array [
+  Array [
+    Object {
+      "layers": Array [
+        Object {
+          "__lastSaved": Object {
+            "annotations": Array [
+              Object {
+                "id": "some-annotation-id",
+                "key": Object {
+                  "timestamp": "timestamp",
+                  "type": "point_in_time",
+                },
+                "type": "manual",
+              },
+            ],
+            "ignoreGlobalFilters": false,
+            "indexPatternId": "some-index-pattern",
+            "layerId": "mylayerid",
+            "layerType": "annotations",
+            "title": "title",
+          },
+          "annotationGroupId": "saved-id-123",
+          "annotations": Array [
+            Object {
+              "id": "some-annotation-id",
+              "key": Object {
+                "timestamp": "timestamp",
+                "type": "point_in_time",
+              },
+              "type": "manual",
+            },
+          ],
+          "ignoreGlobalFilters": false,
+          "indexPatternId": "some-index-pattern",
+          "layerId": "mylayerid",
+          "layerType": "annotations",
+        },
+      ],
+      "legend": Object {
+        "isVisible": true,
+        "position": "bottom",
+      },
+      "preferredSeriesType": "area",
+    },
+  ],
+]
+`;

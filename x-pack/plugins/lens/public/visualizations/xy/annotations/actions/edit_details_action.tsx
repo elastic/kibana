@@ -28,13 +28,11 @@ export const EditDetailsFlyout = ({
   domElement,
   groupLabel,
   title,
-  isNew,
   onConfirm,
 }: {
   domElement: Element;
   groupLabel: string;
   title?: string;
-  isNew?: boolean;
   onConfirm: (title: string) => void;
 }) => {
   const [newTitle, setNewTitle] = React.useState(title);
@@ -43,49 +41,47 @@ export const EditDetailsFlyout = ({
     <FlyoutContainer
       isOpen={true}
       customFooter={
-        isNew ? (
-          <EuiFlyoutFooter className="lnsDimensionContainer__footer">
-            <EuiFlexGroup
-              responsive={false}
-              gutterSize="s"
-              alignItems="center"
-              justifyContent="spaceBetween"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  flush="left"
-                  size="s"
-                  iconType="cross"
-                  onClick={() => unmountComponentAtNode(domElement)}
-                  data-test-subj="lns-indexPattern-loadLibraryCancel"
-                >
-                  {i18n.translate('xpack.lens.annotations.cancel', {
-                    defaultMessage: 'Cancel',
-                  })}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  onClick={() => {
-                    if (newTitle) {
-                      onConfirm(newTitle);
-                      // todo: notification?
-                      unmountComponentAtNode(domElement);
-                    }
-                  }}
-                  iconType="plusInCircleFilled"
-                  fill
-                  color="success"
-                  // disabled={!selectedItem} // TODO: disable if no title
-                >
-                  {i18n.translate('xpack.lens.annotations.addToLibrary', {
-                    defaultMessage: 'Add to library',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlyoutFooter>
-        ) : undefined
+        <EuiFlyoutFooter className="lnsDimensionContainer__footer">
+          <EuiFlexGroup
+            responsive={false}
+            gutterSize="s"
+            alignItems="center"
+            justifyContent="spaceBetween"
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                flush="left"
+                size="s"
+                iconType="cross"
+                onClick={() => unmountComponentAtNode(domElement)}
+                data-test-subj="lns-indexPattern-loadLibraryCancel"
+              >
+                {i18n.translate('xpack.lens.annotations.cancel', {
+                  defaultMessage: 'Cancel',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                onClick={() => {
+                  if (newTitle) {
+                    onConfirm(newTitle);
+                    // todo: notification?
+                    unmountComponentAtNode(domElement);
+                  }
+                }}
+                iconType="plusInCircleFilled"
+                fill
+                color="success"
+                // disabled={!selectedItem} // TODO: disable if no title
+              >
+                {i18n.translate('xpack.lens.annotations.addToLibrary', {
+                  defaultMessage: 'Add to library',
+                })}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlyoutFooter>
       }
       groupLabel={groupLabel}
       handleClose={() => {
@@ -147,7 +143,6 @@ export const getEditDetailsAction = ({
       { defaultMessage: 'Edit title, description and tags of the annotation group' }
     ),
     execute: async (domElement) => {
-      console.log('what', domElement);
       if (domElement) {
         render(
           <EditDetailsFlyout
