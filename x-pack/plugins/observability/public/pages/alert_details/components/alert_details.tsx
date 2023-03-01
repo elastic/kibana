@@ -5,13 +5,20 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
 
-import { ALERT_RULE_TYPE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+} from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { formatAlertEvaluationValue } from '../../../utils/format_alert_evaluation_value';
 import { getTimeZone } from '../../../utils/get_time_zone';
 import { useFetchRule } from '../../../hooks/use_fetch_rule';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
@@ -65,6 +72,44 @@ export function AlertDetails() {
     },
   ]);
 
+  const getSummaryFields = useCallback(() => {
+    return [
+      {
+        labelElement: (
+          <FormattedMessage
+            id="xpack.observability.pages.alertDetails.alertSummary.actualValue"
+            defaultMessage="Actual value"
+          />
+        ),
+        value: formatAlertEvaluationValue(
+          alert?.fields[ALERT_RULE_TYPE_ID],
+          alert?.fields[ALERT_EVALUATION_VALUE]
+        ),
+      },
+      {
+        labelElement: (
+          <FormattedMessage
+            id="xpack.observability.pages.alertDetails.alertSummary.expectedValue"
+            defaultMessage="Expected value"
+          />
+        ),
+        value: formatAlertEvaluationValue(
+          alert?.fields[ALERT_RULE_TYPE_ID],
+          alert?.fields[ALERT_EVALUATION_THRESHOLD]
+        ),
+      },
+      {
+        labelElement: (
+          <FormattedMessage
+            id="xpack.observability.pages.alertDetails.alertSummary.source"
+            defaultMessage="Source"
+          />
+        ),
+        value: '-',
+      },
+    ];
+  }, [alert]);
+
   if (isLoading) {
     return <CenterJustifiedSpinner />;
   }
@@ -99,6 +144,7 @@ export function AlertDetails() {
     );
   const AlertDetailsAppSection = ruleTypeModel ? ruleTypeModel.alertDetailsAppSection : null;
   const timeZone = getTimeZone(uiSettings);
+
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -116,7 +162,7 @@ export function AlertDetails() {
       }}
       data-test-subj="alertDetails"
     >
-      <AlertSummary alert={alert} />
+      <AlertSummary alert={alert} summaryFields={getSummaryFields()} />
       <EuiSpacer size="l" />
       {AlertDetailsAppSection && rule && (
         <AlertDetailsAppSection alert={alert} rule={rule} timeZone={timeZone} />
