@@ -11,6 +11,7 @@ import {
   transformRuleToAlertResponseAction,
   transformAlertToRuleResponseAction,
 } from './transform_actions';
+import type { ResponseAction, RuleResponseAction } from './rule_response_actions/schemas';
 import { RESPONSE_ACTION_TYPES } from './rule_response_actions/schemas';
 
 describe('transform_actions', () => {
@@ -48,10 +49,9 @@ describe('transform_actions', () => {
     });
   });
   test('it should transform ResponseAction[] to RuleResponseAction[]', () => {
-    const ruleAction = {
+    const ruleAction: ResponseAction = {
       action_type_id: RESPONSE_ACTION_TYPES.OSQUERY,
       params: {
-        id: 'test',
         ecs_mapping: {},
         saved_query_id: undefined,
         pack_id: undefined,
@@ -63,7 +63,6 @@ describe('transform_actions', () => {
     expect(alertAction).toEqual({
       actionTypeId: ruleAction.action_type_id,
       params: {
-        id: 'test',
         ecsMapping: {},
         savedQueryId: undefined,
         packId: undefined,
@@ -74,10 +73,9 @@ describe('transform_actions', () => {
   });
 
   test('it should transform RuleResponseAction[] to ResponseAction[]', () => {
-    const alertAction = {
+    const alertAction: RuleResponseAction = {
       actionTypeId: RESPONSE_ACTION_TYPES.OSQUERY,
       params: {
-        id: 'test',
         ecsMapping: {},
         savedQueryId: undefined,
         packId: undefined,
@@ -89,7 +87,6 @@ describe('transform_actions', () => {
     expect(ruleAction).toEqual({
       action_type_id: alertAction.actionTypeId,
       params: {
-        id: 'test',
         ecs_mapping: {},
         saved_query_id: undefined,
         pack_id: undefined,

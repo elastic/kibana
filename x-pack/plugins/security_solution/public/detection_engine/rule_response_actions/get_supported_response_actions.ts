@@ -27,8 +27,13 @@ export const getSupportedResponseActions = (
 export const responseActionTypes = [
   {
     id: RESPONSE_ACTION_TYPES.OSQUERY,
-    name: 'osquery',
+    name: 'Osquery',
     iconClass: 'logoOsquery',
+  },
+  {
+    id: RESPONSE_ACTION_TYPES.ENDPOINT,
+    name: 'Endpoint Security',
+    iconClass: 'logoSecurity',
   },
   // { id: '.endpointSecurity', name: 'endpointSecurity', iconClass: 'logoSecurity' },
 ];
