@@ -67,29 +67,35 @@ export const indexEndpointRuleAlerts = async ({
 
   return {
     alerts: indexedAlerts,
-    cleanup: async (): Promise<void> => {
-      if (indexedAlerts.length) {
-        log.verbose('cleaning up loaded endpoint rule alerts');
-
-        await esClient.bulk({
-          body: indexedAlerts.map((indexedDoc) => {
-            return {
-              delete: {
-                _index: indexedDoc._index,
-                _id: indexedDoc._id,
-              },
-            };
-          }),
-        });
-
-        log.verbose(
-          `Deleted ${indexedAlerts.length} endpoint rule alerts. Ids: [${indexedAlerts
-            .map((alert) => alert._id)
-            .join()}]`
-        );
-      }
-    },
+    cleanup: deleteIndexedEndpointRuleAlerts.bind(null, esClient, indexedAlerts, log),
   };
+};
+
+export const deleteIndexedEndpointRuleAlerts = async (
+  esClient: Client,
+  indexedAlerts: IndexedEndpointRuleAlerts['alerts'],
+  log = new ToolingLog()
+): Promise<void> => {
+  if (indexedAlerts.length) {
+    log.verbose('cleaning up loaded endpoint rule alerts');
+
+    await esClient.bulk({
+      body: indexedAlerts.map((indexedDoc) => {
+        return {
+          delete: {
+            _index: indexedDoc._index,
+            _id: indexedDoc._id,
+          },
+        };
+      }),
+    });
+
+    log.verbose(
+      `Deleted ${indexedAlerts.length} endpoint rule alerts. Ids: [${indexedAlerts
+        .map((alert) => alert._id)
+        .join()}]`
+    );
+  }
 };
 
 const ensureEndpointRuleAlertsIndexExists = async (esClient: Client): Promise<void> => {
