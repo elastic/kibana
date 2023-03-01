@@ -59,11 +59,7 @@ export interface PackageClient {
     packageVersion: string
   ): Promise<{ packageInfo: ArchivePackage; paths: string[] }>;
 
-  getPackages({
-    excludeInstallStatus,
-    category,
-    prerelease,
-  }: {
+  getPackages(params?: {
     excludeInstallStatus?: false;
     category?: CategoryId;
     prerelease?: false;
@@ -155,7 +151,7 @@ class PackageClientImpl implements PackageClient {
     category?: CategoryId;
     prerelease?: false;
   }) {
-    const { excludeInstallStatus, category, prerelease } = params;
+    const { excludeInstallStatus, category, prerelease } = params || {};
     await this.#runPreflight();
     return getPackages({
       savedObjectsClient: this.internalSoClient,
