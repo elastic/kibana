@@ -284,7 +284,7 @@ describe('getExportAll', () => {
       to: 'now',
       type: 'query',
       threat: getThreatMock(),
-      throttle: 'rule',
+      throttle: 'no_actions',
       note: '# Investigative notes',
       version: 1,
       exceptions_list: getListArrayMock(),

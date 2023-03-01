@@ -294,7 +294,7 @@ describe('get_export_by_object_ids', () => {
         to: 'now',
         type: 'query',
         threat: getThreatMock(),
-        throttle: 'rule',
+        throttle: 'no_actions',
         note: '# Investigative notes',
         version: 1,
         exceptions_list: getListArrayMock(),
