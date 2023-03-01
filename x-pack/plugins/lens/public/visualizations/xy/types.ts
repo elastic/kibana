@@ -38,7 +38,6 @@ import {
   IconChartBarHorizontal,
 } from '@kbn/chart-icons';
 
-import { DistributiveOmit } from '@elastic/eui';
 import { CollapseFunction } from '../../../common/expressions';
 import type { VisualizationType } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
@@ -126,22 +125,42 @@ export interface ByValueXYAnnotationLayerConfig {
   ignoreGlobalFilters: boolean;
 }
 
-export type ByReferenceXYAnnotationLayerConfig = ByValueXYAnnotationLayerConfig & {
+export type XYPersistedByValueAnnotationLayerConfig = Omit<
+  ByValueXYAnnotationLayerConfig,
+  'indexPatternId'
+>;
+
+export type XYByReferenceAnnotationLayerConfig = ByValueXYAnnotationLayerConfig & {
   annotationGroupId: string;
   __lastSaved: ByValueXYAnnotationLayerConfig & {
     title: EventAnnotationGroupAttributes['title'];
   };
 };
 
+export interface XYPersistedByReferenceAnnotationLayerConfig {
+  layerId: string;
+  layerType: 'annotations';
+  annotationGroupId: string;
+}
+
 export type XYAnnotationLayerConfig =
-  | ByReferenceXYAnnotationLayerConfig
+  | XYByReferenceAnnotationLayerConfig
   | ByValueXYAnnotationLayerConfig;
 
+export type XYPersistedAnnotationLayerConfig =
+  | XYPersistedByReferenceAnnotationLayerConfig
+  | XYPersistedByValueAnnotationLayerConfig;
+
 export const isByReferenceXyAnnotationLayer = (
-  layer: ByReferenceXYAnnotationLayerConfig | ByValueXYAnnotationLayerConfig
-): layer is ByReferenceXYAnnotationLayerConfig => {
-  return 'annotationGroupId' in layer;
+  layer: XYByReferenceAnnotationLayerConfig | ByValueXYAnnotationLayerConfig
+): layer is XYByReferenceAnnotationLayerConfig => {
+  return 'annotationGroupId' in layer && '__lastSaved' in layer;
 };
+
+export type XYPersistedLayerConfig =
+  | XYDataLayerConfig
+  | XYReferenceLineLayerConfig
+  | XYPersistedAnnotationLayerConfig;
 
 export type XYLayerConfig =
   | XYDataLayerConfig
@@ -186,7 +205,7 @@ export interface XYState {
 export type State = XYState;
 
 export type XYPersistedState = Omit<XYState, 'layers'> & {
-  layers: Array<DistributiveOmit<XYLayerConfig, 'indexPatternId'>>;
+  layers: XYPersistedLayerConfig[];
 };
 
 export type PersistedState = XYPersistedState;

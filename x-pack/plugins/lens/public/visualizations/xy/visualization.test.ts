@@ -22,6 +22,8 @@ import type {
   XYReferenceLineLayerConfig,
   SeriesType,
   XYPersistedState,
+  ByValueXYAnnotationLayerConfig,
+  XYByReferenceAnnotationLayerConfig,
 } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar, IconCircle } from '@kbn/chart-icons';
@@ -30,7 +32,10 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { eventAnnotationServiceMock } from '@kbn/event-annotation-plugin/public/mocks';
-import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import {
+  EventAnnotationConfig,
+  PointInTimeEventAnnotationConfig,
+} from '@kbn/event-annotation-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewsState } from '../../state_management';
@@ -38,6 +43,7 @@ import { createMockedIndexPattern } from '../../datasources/form_based/mocks';
 import { createMockDataViewsState } from '../../data_views_service/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { layerTypes, Visualization } from '../..';
+import { set } from '@kbn/safer-lodash-set';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
@@ -81,6 +87,7 @@ const paletteServiceMock = chartPluginMock.createPaletteRegistry();
 const fieldFormatsMock = fieldFormatsServiceMock.createStartContract();
 
 const core = coreMock.createStart();
+set(core, 'application.capabilities.visualize.save', true);
 
 const xyVisualization = getXyVisualization({
   paletteService: paletteServiceMock,
@@ -2881,6 +2888,113 @@ describe('xy_visualization', () => {
         '5': 'Event [1] [1]',
         '6': 'Custom [1]',
       });
+    });
+  });
+
+  describe('#getPersistableState', () => {
+    it('should extract index pattern ids from by-value annotation layers', () => {
+      const state = exampleState();
+      const layer: ByValueXYAnnotationLayerConfig = {
+        layerId: 'layer-id',
+        layerType: 'annotations',
+        indexPatternId: 'some-index-pattern',
+        ignoreGlobalFilters: false,
+        annotations: [
+          {
+            id: 'some-annotation-id',
+            type: 'manual',
+            key: {
+              type: 'point_in_time',
+              timestamp: 'timestamp',
+            },
+          } as PointInTimeEventAnnotationConfig,
+        ],
+      };
+      state.layers = [layer];
+
+      const { state: persistableState, savedObjectReferences } =
+        xyVisualization.getPersistableState!(state);
+
+      expect(persistableState.layers).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "annotations": Array [
+              Object {
+                "id": "some-annotation-id",
+                "key": Object {
+                  "timestamp": "timestamp",
+                  "type": "point_in_time",
+                },
+                "type": "manual",
+              },
+            ],
+            "ignoreGlobalFilters": false,
+            "layerId": "layer-id",
+            "layerType": "annotations",
+          },
+        ]
+      `);
+
+      expect(savedObjectReferences).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "some-index-pattern",
+            "name": "xy-visualization-layer-layer-id",
+            "type": "index-pattern",
+          },
+        ]
+      `);
+    });
+
+    it('should extract annotation group ids from by-reference annotation layers', () => {
+      const state = exampleState();
+      const byValueLayer: ByValueXYAnnotationLayerConfig = {
+        layerId: 'layer-id',
+        layerType: 'annotations',
+        indexPatternId: 'some-index-pattern',
+        ignoreGlobalFilters: false,
+        annotations: [
+          {
+            id: 'some-annotation-id',
+            type: 'manual',
+            key: {
+              type: 'point_in_time',
+              timestamp: 'timestamp',
+            },
+          } as PointInTimeEventAnnotationConfig,
+        ],
+      };
+
+      const layer: XYByReferenceAnnotationLayerConfig = {
+        ...byValueLayer,
+        annotationGroupId: 'annotation-group-id',
+        __lastSaved: { ...byValueLayer, title: 'My saved object title' },
+      };
+
+      state.layers = [layer];
+
+      const { state: persistableState, savedObjectReferences } =
+        xyVisualization.getPersistableState!(state);
+
+      expect(persistableState.layers).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "annotationGroupId": "annotation-group-id",
+            "layerId": "layer-id",
+            "layerType": "annotations",
+          },
+        ]
+      `);
+
+      expect(savedObjectReferences).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "id": "annotation-group-id",
+            "name": "xy-visualization-layer-layer-id",
+            "type": "event-annotation-group",
+          },
+        ]
+      `);
     });
   });
 

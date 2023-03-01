@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DistributiveOmit } from '@elastic/eui';
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { SavedObjectReference } from '@kbn/core/public';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-plugin/common';
 import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
@@ -24,6 +24,8 @@ import {
   XYState,
   XYPersistedState,
   XYAnnotationLayerConfig,
+  isByReferenceXyAnnotationLayer,
+  XYPersistedLayerConfig,
 } from './types';
 import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
 
@@ -117,20 +119,33 @@ function getLayerReferenceName(layerId: string) {
   return `xy-visualization-layer-${layerId}`;
 }
 
-export function extractReferences(state: XYState) {
+export function getPersistableState(state: XYState) {
   const savedObjectReferences: SavedObjectReference[] = [];
-  const persistableLayers: Array<DistributiveOmit<XYLayerConfig, 'indexPatternId'>> = [];
+  const persistableLayers: XYPersistedLayerConfig[] = [];
   state.layers.forEach((layer) => {
-    if (isAnnotationsLayer(layer)) {
-      const { indexPatternId, ...persistableLayer } = layer;
-      savedObjectReferences.push({
-        type: 'index-pattern',
-        id: indexPatternId,
-        name: getLayerReferenceName(layer.layerId),
-      });
-      persistableLayers.push(persistableLayer);
-    } else {
+    if (!isAnnotationsLayer(layer)) {
       persistableLayers.push(layer);
+    } else {
+      if (isByReferenceXyAnnotationLayer(layer)) {
+        savedObjectReferences.push({
+          type: EVENT_ANNOTATION_GROUP_TYPE,
+          id: layer.annotationGroupId,
+          name: getLayerReferenceName(layer.layerId),
+        });
+        persistableLayers.push({
+          layerId: layer.layerId,
+          layerType: layer.layerType,
+          annotationGroupId: layer.annotationGroupId,
+        });
+      } else {
+        const { indexPatternId, ...persistableLayer } = layer;
+        savedObjectReferences.push({
+          type: 'index-pattern',
+          id: indexPatternId,
+          name: getLayerReferenceName(layer.layerId),
+        });
+        persistableLayers.push(persistableLayer);
+      }
     }
   });
   return { savedObjectReferences, state: { ...state, layers: persistableLayers } };

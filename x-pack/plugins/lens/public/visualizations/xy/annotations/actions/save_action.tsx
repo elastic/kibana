@@ -13,7 +13,7 @@ import { ToastsStart } from '@kbn/core-notifications-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { LayerAction, StateSetter } from '../../../../types';
-import { ByReferenceXYAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
+import { XYByReferenceAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
 import { EditDetailsFlyout } from './edit_details_action';
 
 // exported for testing only
@@ -63,7 +63,7 @@ export const Flyout = ({
         return;
       }
 
-      const newLayer: ByReferenceXYAnnotationLayerConfig = {
+      const newLayer: XYByReferenceAnnotationLayerConfig = {
         ...layer,
         annotationGroupId: savedId,
         __lastSaved: {

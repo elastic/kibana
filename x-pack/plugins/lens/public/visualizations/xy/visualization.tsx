@@ -52,7 +52,7 @@ import {
   visualizationTypes,
 } from './types';
 import {
-  extractReferences,
+  getPersistableState,
   getAnnotationLayerErrors,
   injectReferences,
   isHorizontalChart,
@@ -202,9 +202,8 @@ export const getXyVisualization = ({
     };
   },
 
-  // how to implement this for saved object annotations?
   getPersistableState(state) {
-    return extractReferences(state);
+    return getPersistableState(state);
   },
   // how to implement this for saved object annotations?
   fromPersistableState(state, references, initialContext) {
