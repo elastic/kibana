@@ -20,29 +20,30 @@ import { TIMELINE_DATA_PROVIDERS_CONTAINER } from '../../screens/timeline';
 import { closeTimelineUsingCloseButton } from '../../tasks/security_main';
 
 describe('Histogram legend hover actions', { testIsolation: false }, () => {
+  const ruleConfigs = getNewRule();
   before(() => {
     cleanKibana();
     login();
-    createCustomRuleEnabled(getNewRule(), 'new custom rule');
+    createCustomRuleEnabled(ruleConfigs, 'new custom rule');
     visit(ALERTS_URL);
     selectAlertsHistogram();
   });
 
   it('Filter in/out should add a filter to KQL bar', function () {
     const expectedNumberOfAlerts = 2;
-    cy.get(ALERTS_HISTOGRAM_LEGEND).trigger('mouseover').click();
-    cy.get(LEGEND_ACTIONS.FILTER_FOR).click();
+    cy.get(ALERTS_HISTOGRAM_LEGEND).click();
+    cy.get(LEGEND_ACTIONS.FILTER_FOR(ruleConfigs.name)).click();
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
       'have.text',
-      `kibana.alert.rule.name: ${getNewRule().name}`
+      `kibana.alert.rule.name: ${ruleConfigs.name}`
     );
     cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
 
-    cy.get(ALERTS_HISTOGRAM_LEGEND).trigger('mouseover').click();
-    cy.get(LEGEND_ACTIONS.FILTER_OUT).click();
+    cy.get(ALERTS_HISTOGRAM_LEGEND).click();
+    cy.get(LEGEND_ACTIONS.FILTER_OUT(ruleConfigs.name)).click();
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
       'have.text',
-      `NOT kibana.alert.rule.name: ${getNewRule().name}`
+      `NOT kibana.alert.rule.name: ${ruleConfigs.name}`
     );
     cy.get(ALERTS_COUNT).should('not.exist');
 
@@ -51,8 +52,8 @@ describe('Histogram legend hover actions', { testIsolation: false }, () => {
   });
 
   it('Add To Timeline', function () {
-    cy.get(ALERTS_HISTOGRAM_LEGEND).trigger('mouseover').click();
-    cy.get(LEGEND_ACTIONS.ADD_TO_TIMELINE).click();
+    cy.get(ALERTS_HISTOGRAM_LEGEND).click();
+    cy.get(LEGEND_ACTIONS.ADD_TO_TIMELINE(ruleConfigs.name)).click();
     cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('be.visible');
     cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('contain.text', getNewRule().name);
     closeTimelineUsingCloseButton();

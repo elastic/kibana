@@ -17,6 +17,8 @@ import { mockRuntimeMappings } from '../../containers/source/mock';
 import { dnsTopDomainsLensAttributes } from '../visualization_actions/lens_attributes/network/dns_top_domains';
 import { useQueryToggle } from '../../containers/query_toggle';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../common/experimental_features';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 jest.mock('../../containers/query_toggle');
 
@@ -81,8 +83,16 @@ describe('Matrix Histogram Component', () => {
   const mockUseMatrix = useMatrixHistogramCombined as jest.Mock;
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const mockSetToggle = jest.fn();
+  const getMockUseIsExperimentalFeatureEnabled =
+    (mockMapping?: Partial<ExperimentalFeatures>) =>
+    (flag: keyof typeof allowedExperimentalValues) =>
+      mockMapping ? mockMapping?.[flag] : allowedExperimentalValues?.[flag];
+
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseIsExperimentalFeatureEnabled.mockImplementation(
+      getMockUseIsExperimentalFeatureEnabled({ chartEmbeddablesEnabled: false })
+    );
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
     mockUseMatrix.mockReturnValue([
       false,
@@ -92,7 +102,6 @@ describe('Matrix Histogram Component', () => {
         totalCount: null,
       },
     ]);
-    mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
   });
 
   describe('on initial load', () => {
@@ -257,9 +266,15 @@ describe('Matrix Histogram Component', () => {
     });
   });
 
-  describe('useIsExperimentalFeatureEnabled = true', () => {
+  describe('when the chartEmbeddablesEnabled experimental feature flag is enabled', () => {
     beforeEach(() => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      const mockMapping: Partial<ExperimentalFeatures> = {
+        chartEmbeddablesEnabled: true,
+      };
+
+      mockUseIsExperimentalFeatureEnabled.mockImplementation(
+        getMockUseIsExperimentalFeatureEnabled(mockMapping)
+      );
 
       wrapper = mount(<MatrixHistogram {...mockMatrixOverTimeHistogramProps} />, {
         wrappingComponent: TestProviders,

@@ -26,9 +26,15 @@ jest.mock('../../../../common/containers/sourcerer', () => ({
 
 describe('getAggregatableFields', () => {
   test('getAggregatableFields when useLensCompatibleFields = false', () => {
-    expect(
-      getAggregatableFields(mockBrowserFields.base?.fields as GetAggregatableFields)
-    ).toMatchSnapshot();
+    expect(getAggregatableFields(mockBrowserFields.base?.fields as GetAggregatableFields))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "label": "@timestamp",
+          "value": "@timestamp",
+        },
+      ]
+    `);
   });
 
   test('getAggregatableFields when useLensCompatibleFields = true', () => {

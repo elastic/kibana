@@ -33,6 +33,8 @@ import { mount } from 'enzyme';
 import type { UseFieldBrowserOptionsProps } from '../../../../timelines/components/fields_browser';
 import type { TransformColumnsProps } from '../../../../common/components/control_columns';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 
 jest.mock('../../../../common/components/control_columns', () => ({
   transformControlColumns: (props: TransformColumnsProps) => [],
@@ -50,9 +52,12 @@ jest.mock('../../../../common/utils/normalize_time_range');
 jest.mock('../../../../common/components/events_viewer/use_timelines_events');
 jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(false),
+  useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+const getMockUseIsExperimentalFeatureEnabled =
+  (mockMapping?: Partial<ExperimentalFeatures>) => (flag: keyof typeof allowedExperimentalValues) =>
+    mockMapping ? mockMapping?.[flag] : allowedExperimentalValues?.[flag];
 const originalKibanaLib = jest.requireActual('../../../../common/lib/kibana');
 
 // Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
@@ -83,6 +88,9 @@ describe('PreviewHistogram', () => {
   const mockSetQuery = jest.fn();
 
   beforeEach(() => {
+    mockUseIsExperimentalFeatureEnabled.mockImplementation(
+      getMockUseIsExperimentalFeatureEnabled({ alertsPreviewChartEmbeddablesEnabled: false })
+    );
     (useGlobalTime as jest.Mock).mockReturnValue({
       from: '2020-07-07T08:20:18.966Z',
       isInitializing: false,
@@ -146,7 +154,6 @@ describe('PreviewHistogram', () => {
           />
         </TestProviders>
       );
-
       expect(wrapper.findWhere((node) => node.text() === '1 alert').exists()).toBeTruthy();
       expect(
         wrapper.findWhere((node) => node.text() === ALL_VALUES_ZEROS_TITLE).exists()
@@ -247,10 +254,15 @@ describe('PreviewHistogram', () => {
     });
   });
 
-  describe('when useIsExperimentalFeatureEnabled = true', () => {
+  describe('when the alertsPreviewChartEmbeddablesEnabled experimental feature flag is enabled', () => {
     let wrapper: ReactWrapper;
     beforeEach(() => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
+      mockUseIsExperimentalFeatureEnabled.mockImplementation(
+        getMockUseIsExperimentalFeatureEnabled({
+          alertsPreviewChartEmbeddablesEnabled: true,
+        })
+      );
+
       (usePreviewHistogram as jest.Mock).mockReturnValue([
         false,
         {
