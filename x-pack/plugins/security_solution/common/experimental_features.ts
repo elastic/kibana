@@ -109,7 +109,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables new Set of filters on the Alerts page.
    *
    **/
-  alertsPageFiltersEnabled: false,
+  alertsPageFiltersEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
