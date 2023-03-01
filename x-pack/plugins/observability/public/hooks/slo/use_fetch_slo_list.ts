@@ -11,6 +11,7 @@ import {
   RefetchOptions,
   RefetchQueryFilters,
   useQuery,
+  useQueryClient,
 } from '@tanstack/react-query';
 import { FindSLOResponse } from '@kbn/slo-schema';
 
@@ -35,7 +36,7 @@ export interface UseFetchSloListResponse {
   ) => Promise<QueryObserverResult<FindSLOResponse | undefined, unknown>>;
 }
 
-const SHORT_REFETCH_INTERVAL = 5000; // 5 seconds
+const SHORT_REFETCH_INTERVAL = 1000 * 5; // 5 seconds
 const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 
 export function useFetchSloList({
@@ -46,6 +47,7 @@ export function useFetchSloList({
   shouldRefetch,
 }: SLOListParams | undefined = {}): UseFetchSloListResponse {
   const { http } = useKibana().services;
+  const queryClient = useQueryClient();
 
   const [stateRefetchInterval, setStateRefetchInterval] = useState(SHORT_REFETCH_INTERVAL);
 
@@ -86,6 +88,14 @@ export function useFetchSloList({
         } else {
           setStateRefetchInterval(LONG_REFETCH_INTERVAL);
         }
+
+        queryClient.invalidateQueries(['fetchHistoricalSummary'], {
+          exact: false,
+        });
+
+        queryClient.invalidateQueries(['fetchActiveAlerts'], {
+          exact: false,
+        });
       },
     }
   );
