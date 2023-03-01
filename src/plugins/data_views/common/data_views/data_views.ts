@@ -515,12 +515,12 @@ export class DataViewsService {
    */
   getFieldsForIndexPattern = async (
     indexPattern: DataView | DataViewSpec,
-    options?: GetFieldsOptions
+    options?: Omit<GetFieldsOptions, 'allowNoIndex'>
   ) =>
     this.getFieldsForWildcard({
       type: indexPattern.type,
       rollupIndex: indexPattern?.typeMeta?.params?.rollup_index,
-      allowNoIndex: indexPattern.allowNoIndex,
+      allowNoIndex: true,
       ...options,
       pattern: indexPattern.title as string,
     });
