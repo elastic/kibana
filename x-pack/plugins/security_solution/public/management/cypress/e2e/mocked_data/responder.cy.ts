@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UnwrapPromise } from '@kbn/infra-plugin/common/utility_types';
 import { APP_CASES_PATH } from '../../../../../common/constants';
 import type { IndexedCase } from '../../../../../common/endpoint/data_loaders/index_case';
 import {
@@ -16,6 +17,7 @@ import {
 import { login } from '../../tasks/login';
 import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '../../../../../../../test/security_solution_ftr/page_objects/helpers/super_date_picker';
 import { indexNewCase } from '../../tasks/index_new_case';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 
 describe('When accessing Endpoint Response Console', () => {
   const performResponderSanityChecks = () => {
@@ -37,6 +39,7 @@ describe('When accessing Endpoint Response Console', () => {
   });
 
   describe('from Cases', () => {
+    let endpointData: UnwrapPromise<ReturnType<typeof indexEndpointHosts>>;
     let caseData: IndexedCase;
     let caseUrlPath: string;
 
@@ -46,7 +49,9 @@ describe('When accessing Endpoint Response Console', () => {
         caseUrlPath = `${APP_CASES_PATH}/${indexCase.data.id}`;
       });
 
-      // TODO: create an endpoint
+      indexEndpointHosts().then((indexEndpoints) => {
+        endpointData = indexEndpoints;
+      });
 
       // TODO: create an alert
 
@@ -55,11 +60,13 @@ describe('When accessing Endpoint Response Console', () => {
 
     after(() => {
       if (caseData) {
-        const { cleanup } = caseData;
+        caseData.cleanup();
         // @ts-expect-error ignore setting to undefined
         caseData = undefined;
+      }
 
-        cleanup();
+      if (endpointData) {
+        endpointData.cleanup();
       }
     });
 

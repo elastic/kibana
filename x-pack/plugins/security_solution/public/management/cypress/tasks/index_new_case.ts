@@ -13,6 +13,7 @@ export const indexNewCase = async (): Promise<IndexedCase> => {
       resolve({
         data: caseData,
         cleanup: async (): Promise<void> => {
+          cy.log(`Deleting Case data: ${caseData.title} (${caseData.id})`);
           cy.task('deleteIndexedCase', caseData);
         },
       });
