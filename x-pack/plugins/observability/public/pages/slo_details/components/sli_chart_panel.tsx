@@ -21,6 +21,7 @@ export interface Props {
 
 export function SliChartPanel({ data, isLoading, slo }: Props) {
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
+  const hasNoData = slo.summary.status === 'NO_DATA';
 
   return (
     <EuiPanel paddingSize="m" color="transparent" hasBorder>
@@ -49,7 +50,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
           <EuiFlexItem grow={false}>
             <EuiStat
               titleColor={isSloFailed ? 'danger' : 'success'}
-              title={`${toHighPrecisionPercentage(slo.summary.sliValue)}%`}
+              title={hasNoData ? '-' : `${toHighPrecisionPercentage(slo.summary.sliValue)}%`}
               titleSize="s"
               description={i18n.translate(
                 'xpack.observability.slo.sloDetails.sliHistoryChartPanel.current',

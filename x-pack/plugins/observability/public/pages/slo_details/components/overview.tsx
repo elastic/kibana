@@ -21,6 +21,7 @@ export interface Props {
 }
 
 export function Overview({ slo }: Props) {
+  const hasNoData = slo.summary.status === 'NO_DATA';
   return (
     <EuiPanel paddingSize="none" color="transparent">
       <EuiFlexGroup direction="column" gutterSize="l">
@@ -37,7 +38,7 @@ export function Overview({ slo }: Props) {
               {
                 defaultMessage: '{value} (objective is {objective})',
                 values: {
-                  value: `${toHighPrecisionPercentage(slo.summary.sliValue)}%`,
+                  value: hasNoData ? '-' : `${toHighPrecisionPercentage(slo.summary.sliValue)}%`,
                   objective: `${toHighPrecisionPercentage(slo.objective.target)}%`,
                 },
               }
