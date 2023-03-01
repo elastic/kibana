@@ -34,7 +34,7 @@ import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
-import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/grouped_alerts';
+import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { FILTER_OPEN, TableId } from '../../../../../common/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';

@@ -49,9 +49,6 @@ import {
 import { initGrouping } from '../../../common/store/grouping/actions';
 import { useGroupingPagination } from '../../../common/containers/grouping/hooks/use_grouping_pagination';
 
-/** This local storage key stores the `Grid / Event rendered view` selection */
-export const ALERTS_TABLE_GROUPS_SELECTION_KEY = 'securitySolution.alerts.table.group-selection';
-
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 
 interface OwnProps {

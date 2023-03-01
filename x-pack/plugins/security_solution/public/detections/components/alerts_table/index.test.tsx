@@ -18,8 +18,8 @@ import {
   SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../common/mock';
-import type { AlertsTableComponentProps } from './grouped_alerts';
-import { GroupedAlertsTableComponent } from './grouped_alerts';
+import type { AlertsTableComponentProps } from './alerts_grouping';
+import { GroupedAlertsTableComponent } from './alerts_grouping';
 import { TableId } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
