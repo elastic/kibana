@@ -45,7 +45,7 @@ export const transformRequestToMetricsAPIRequest = async ({
       ? snapshotRequest.overrideCompositeSize
       : compositeSize,
     alignDataToEnd: true,
-    dropPartialBuckets: snapshotRequest.dropPartialBuckets,
+    dropPartialBuckets: snapshotRequest.dropPartialBuckets ?? true,
     includeTimeseries: snapshotRequest.includeTimeseries,
   };
 
