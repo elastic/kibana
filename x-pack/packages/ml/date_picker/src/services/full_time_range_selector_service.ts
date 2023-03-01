@@ -17,6 +17,9 @@ import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { getTimeFieldRange } from './time_field_range';
 import type { GetTimeFieldRangeResponse } from './types';
 
+/**
+ * Allowed API paths to be passed to `setFullTimeRange`.
+ */
 export type SetFullTimeRangeApiPath =
   | '/internal/file_upload/time_field_range'
   | '/api/ml/fields_service/time_field_range';
