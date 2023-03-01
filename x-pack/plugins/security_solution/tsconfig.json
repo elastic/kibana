@@ -133,7 +133,6 @@
     "@kbn/storybook",
     "@kbn/cypress-config",
     "@kbn/controls-plugin",
-    "@kbn/shared-ux-utility",
     "@kbn/core-saved-objects-common",
     "@kbn/core-saved-objects-import-export-server-mocks",
     "@kbn/user-profile-components",
@@ -142,5 +141,7 @@
     "@kbn/cell-actions",
     "@kbn/shared-ux-router",
     "@kbn/alerts-as-data-utils",
+    "@kbn/cloud-defend-plugin",
+    "@kbn/expandable-flyout",
   ]
 }
