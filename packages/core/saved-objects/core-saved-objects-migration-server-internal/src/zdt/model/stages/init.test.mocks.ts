@@ -9,6 +9,7 @@
 export const getCurrentIndexMock = jest.fn();
 export const checkVersionCompatibilityMock = jest.fn();
 export const buildIndexMappingsMock = jest.fn();
+export const generateAdditiveMappingDiffMock = jest.fn();
 
 jest.doMock('../../utils', () => {
   const realModule = jest.requireActual('../../utils');
@@ -17,5 +18,6 @@ jest.doMock('../../utils', () => {
     getCurrentIndex: getCurrentIndexMock,
     checkVersionCompatibility: checkVersionCompatibilityMock,
     buildIndexMappings: buildIndexMappingsMock,
+    generateAdditiveMappingDiff: generateAdditiveMappingDiffMock,
   };
 });

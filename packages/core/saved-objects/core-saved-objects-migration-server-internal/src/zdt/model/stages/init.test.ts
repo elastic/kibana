@@ -10,6 +10,7 @@ import {
   getCurrentIndexMock,
   checkVersionCompatibilityMock,
   buildIndexMappingsMock,
+  generateAdditiveMappingDiffMock,
 } from './init.test.mocks';
 import * as Either from 'fp-ts/lib/Either';
 import { FetchIndexResponse } from '../../../actions';
@@ -36,7 +37,7 @@ describe('Action: init', () => {
       aliases: {},
       mappings: {
         properties: {},
-        _meta: {},
+        _meta: { mappingVersions: { foo: 1, bar: 1 } },
       },
       settings: {},
     },
@@ -47,6 +48,7 @@ describe('Action: init', () => {
     checkVersionCompatibilityMock.mockReset().mockReturnValue({
       status: 'equal',
     });
+    generateAdditiveMappingDiffMock.mockReset().mockReturnValue({});
 
     context = createContextMock({ indexPrefix: '.kibana', types: ['foo', 'bar'] });
     context.typeRegistry.registerType({
@@ -143,7 +145,7 @@ describe('Action: init', () => {
   });
 
   describe('when checkVersionCompatibility returns `greater`', () => {
-    it('forwards to UPDATE_INDEX_MAPPINGS', () => {
+    it('calls generateAdditiveMappingDiff with the correct parameters', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
@@ -152,6 +154,26 @@ describe('Action: init', () => {
         status: 'greater',
       });
 
+      init(state, res, context);
+
+      expect(generateAdditiveMappingDiffMock).toHaveBeenCalledTimes(1);
+      expect(generateAdditiveMappingDiffMock).toHaveBeenCalledWith({
+        types: ['foo', 'bar'].map((type) => context.typeRegistry.getType(type)),
+        meta: fetchIndexResponse[currentIndex].mappings._meta,
+        deletedTypes: context.deletedTypes,
+      });
+    });
+
+    it('forwards to UPDATE_INDEX_MAPPINGS', () => {
+      const state = createState();
+      const fetchIndexResponse = createResponse();
+      const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
+
+      checkVersionCompatibilityMock.mockReturnValue({
+        status: 'greater',
+      });
+      generateAdditiveMappingDiffMock.mockReturnValue({ someToken: {} });
+
       const newState = init(state, res, context);
 
       expect(newState).toEqual(
@@ -159,6 +181,7 @@ describe('Action: init', () => {
           controlState: 'UPDATE_INDEX_MAPPINGS',
           currentIndex,
           previousMappings: fetchIndexResponse[currentIndex].mappings,
+          additiveMappingChanges: { someToken: {} },
         })
       );
     });
