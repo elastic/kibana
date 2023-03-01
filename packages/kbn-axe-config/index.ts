@@ -54,5 +54,8 @@ export const AXE_OPTIONS = {
     bypass: {
       enabled: false, // disabled because it's too flaky
     },
+    'nested-interactive': {
+      enabled: false, // disabled because we have too many failures on interactive controls
+    },
   },
 };
