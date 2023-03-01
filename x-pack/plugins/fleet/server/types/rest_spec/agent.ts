@@ -60,6 +60,12 @@ export const PostCancelActionRequestSchema = {
   }),
 };
 
+export const PostRetrieveAgentsByActionsRequestSchema = {
+  body: schema.object({
+    actionIds: schema.arrayOf(schema.string()),
+  }),
+};
+
 export const PostAgentUnenrollRequestSchema = {
   params: schema.object({
     agentId: schema.string(),

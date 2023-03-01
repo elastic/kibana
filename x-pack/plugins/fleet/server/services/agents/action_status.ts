@@ -11,6 +11,7 @@ import { SO_SEARCH_LIMIT } from '../../constants';
 
 import type { FleetServerAgentAction, ActionStatus, ListWithKuery } from '../../types';
 import { AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
+
 import { appContextService } from '..';
 
 const PRECISION_THRESHOLD = 40000;
