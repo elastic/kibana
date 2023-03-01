@@ -32,6 +32,7 @@ jest.mock('./all_cases_selector_modal', () => {
   };
 });
 
+const onSuccess = jest.fn();
 const useCasesToastMock = useCasesToast as jest.Mock;
 
 const AllCasesSelectorModalMock = AllCasesSelectorModal as unknown as jest.Mock;
@@ -81,7 +82,7 @@ describe('use cases add to existing case modal hook', () => {
   };
 
   const defaultParams = () => {
-    return { onRowClick: jest.fn() };
+    return { onSuccess };
   };
 
   beforeEach(() => {

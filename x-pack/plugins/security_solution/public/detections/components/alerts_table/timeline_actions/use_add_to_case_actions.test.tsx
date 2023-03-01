@@ -43,6 +43,7 @@ const defaultProps = {
       kind: ['signal'],
     },
   },
+  refetch: jest.fn(),
 };
 
 describe('useAddToCaseActions', () => {

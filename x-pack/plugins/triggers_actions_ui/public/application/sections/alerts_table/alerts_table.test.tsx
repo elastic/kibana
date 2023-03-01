@@ -198,7 +198,6 @@ describe.skip('AlertsTable', () => {
 
   const alertsTableConfiguration: AlertsTableConfigurationRegistry = {
     id: '',
-    casesFeatureId: '',
     columns,
     sort: [],
     useInternalFlyout: jest.fn().mockImplementation(() => ({
