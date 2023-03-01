@@ -15,7 +15,6 @@ import type {
 import * as Either from 'fp-ts/lib/Either';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
-import type { State } from '../state';
 import type { AliasAction, FetchIndexResponse } from '../actions';
 import type { BulkIndexOperationTuple } from './create_batches';
 
@@ -23,15 +22,15 @@ import type { BulkIndexOperationTuple } from './create_batches';
  * A helper function/type for ensuring that all control state's are handled.
  */
 export function throwBadControlState(p: never): never;
-export function throwBadControlState(controlState: any) {
+export function throwBadControlState(controlState: unknown) {
   throw new Error('Unexpected control state: ' + controlState);
 }
 
 /**
  * A helper function/type for ensuring that all response types are handled.
  */
-export function throwBadResponse(state: State, p: never): never;
-export function throwBadResponse(state: State, res: any): never {
+export function throwBadResponse(state: { controlState: string }, p: never): never;
+export function throwBadResponse(state: { controlState: string }, res: unknown): never {
   throw new Error(
     `${state.controlState} received unexpected action response: ` + JSON.stringify(res)
   );
@@ -108,12 +107,12 @@ export function addExcludedTypesToBoolQuery(
 
 /**
  * Add the given clauses to the 'must' of the given query
+ * @param filterClauses the clauses to be added to a 'must'
  * @param boolQuery the bool query to be enriched
- * @param mustClauses the clauses to be added to a 'must'
  * @returns a new query container with the enriched query
  */
 export function addMustClausesToBoolQuery(
-  mustClauses: QueryDslQueryContainer[],
+  filterClauses: QueryDslQueryContainer[],
   boolQuery?: QueryDslBoolQuery
 ): QueryDslQueryContainer {
   let must: QueryDslQueryContainer[] = [];
@@ -122,7 +121,7 @@ export function addMustClausesToBoolQuery(
     must = must.concat(boolQuery.must);
   }
 
-  must.push(...mustClauses);
+  must.push(...filterClauses);
 
   return {
     bool: {
@@ -134,8 +133,8 @@ export function addMustClausesToBoolQuery(
 
 /**
  * Add the given clauses to the 'must_not' of the given query
- * @param boolQuery the bool query to be enriched
  * @param filterClauses the clauses to be added to a 'must_not'
+ * @param boolQuery the bool query to be enriched
  * @returns a new query container with the enriched query
  */
 export function addMustNotClausesToBoolQuery(
