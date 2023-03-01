@@ -22,7 +22,7 @@ const testProps = {
     doc_count: 2,
     hostsCountAggregation: { value: 1 },
     ruleTags: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
-    alertsCount: { value: 2 },
+    groupCount: { value: 2 },
     rulesCountAggregation: { value: 2 },
     severitiesSubAggregation: {
       doc_count_error_upper_bound: 0,

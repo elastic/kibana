@@ -25,7 +25,7 @@ export const NONE_GROUP_KEY = 'none';
 //   };
 
 export type RawBucket = GenericBuckets & {
-  alertsCount?: {
+  groupCount?: {
     value?: number | null; // Elasticsearch returns `null` when a sub-aggregation cannot be computed
   };
   severitiesSubAggregation?: {
@@ -72,7 +72,7 @@ export type GroupingFieldTotalAggregation = Record<
 
 export type FlattenedBucket = Pick<
   RawBucket,
-  'doc_count' | 'key' | 'key_as_string' | 'alertsCount'
+  'doc_count' | 'key' | 'key_as_string' | 'groupCount'
 > & {
   stackByMultipleFields1Key?: string;
   stackByMultipleFields1DocCount?: number;

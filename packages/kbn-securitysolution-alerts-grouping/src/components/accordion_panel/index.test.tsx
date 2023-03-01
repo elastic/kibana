@@ -30,7 +30,7 @@ const testProps = {
       sum_other_doc_count: 0,
       buckets: [],
     },
-    alertsCount: {
+    groupCount: {
       value: 98,
     },
     rulesCountAggregation: {
