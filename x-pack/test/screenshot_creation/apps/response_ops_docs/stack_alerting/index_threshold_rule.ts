@@ -111,9 +111,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.setValue('intervalInput', '4');
       await testSubjects.setValue('intervalInputUnit', 'hours');
-      // need this two out of popup clicks to close them
-      const nameInput3 = await testSubjects.find('ruleNameInput');
-      await nameInput3.click();
       await testSubjects.scrollIntoView('alertVisualizationChart');
       await commonScreenshots.takeScreenshot(
         'rule-types-index-threshold-example-preview',
