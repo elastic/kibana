@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { isNoneGroup } from '@kbn/securitysolution-alerts_grouping';
-import { useGetGroupingSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
+import { useGetGroupSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
 import { defaultGroup } from '../../../common/store/grouping/defaults';
 import type { State } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
@@ -33,7 +33,7 @@ export const getPersistentControlsHook = (tableId: TableId) => {
 
     const { indexPattern: indexPatterns } = useSourcererDataView(SourcererScopeName.detections);
 
-    const groupsSelector = useGetGroupingSelector({
+    const groupsSelector = useGetGroupSelector({
       fields: indexPatterns.fields,
       groupingId: tableId,
       tableId,

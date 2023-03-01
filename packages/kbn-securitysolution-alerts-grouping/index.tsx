@@ -9,32 +9,23 @@
 import React from 'react';
 import {
   GroupSelectorProps,
-  GroupedTables,
-  GroupedTablesProps,
-  GroupsSelector,
+  Grouping,
+  GroupingProps,
+  GroupSelector,
   RawBucket,
   getGroupingQuery,
   isNoneGroup,
 } from './src';
-import type {
-  NamedAggregation,
-  GroupingFieldTotalAggregation,
-  GroupingTableAggregation,
-} from './src';
+import type { NamedAggregation, GroupingFieldTotalAggregation, GroupingAggregation } from './src';
 
-export const getGroupedTables = (
-  props: GroupedTablesProps
-): React.ReactElement<GroupedTablesProps> => <GroupedTables {...props} />;
+export const getGrouping = (props: GroupingProps): React.ReactElement<GroupingProps> => (
+  <Grouping {...props} />
+);
 
 export const getGroupSelector = (
   props: GroupSelectorProps
-): React.ReactElement<GroupSelectorProps> => <GroupsSelector {...props} />;
+): React.ReactElement<GroupSelectorProps> => <GroupSelector {...props} />;
 
 export { isNoneGroup, getGroupingQuery };
 
-export type {
-  GroupingTableAggregation,
-  GroupingFieldTotalAggregation,
-  NamedAggregation,
-  RawBucket,
-};
+export type { GroupingAggregation, GroupingFieldTotalAggregation, NamedAggregation, RawBucket };

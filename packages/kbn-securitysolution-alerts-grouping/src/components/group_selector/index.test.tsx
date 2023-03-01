@@ -7,7 +7,7 @@
  */
 
 import { fireEvent, render } from '@testing-library/react';
-import { GroupsSelector } from '..';
+import { GroupSelector } from '..';
 import React from 'react';
 
 const onGroupChange = jest.fn();
@@ -69,11 +69,11 @@ describe('group selector', () => {
     jest.clearAllMocks();
   });
   it('Sets the selected group from the groupSelected prop', () => {
-    const { getByTestId } = render(<GroupsSelector {...testProps} />);
+    const { getByTestId } = render(<GroupSelector {...testProps} />);
     expect(getByTestId('group-selector-dropdown').textContent).toBe('Group alerts by: Rule name');
   });
   it('Presents correct option when group selector dropdown is clicked', () => {
-    const { getByTestId } = render(<GroupsSelector {...testProps} />);
+    const { getByTestId } = render(<GroupSelector {...testProps} />);
     fireEvent.click(getByTestId('group-selector-dropdown'));
     [
       ...testProps.options,
@@ -84,7 +84,7 @@ describe('group selector', () => {
     });
   });
   it('Presents fields dropdown when custom field option is selected', () => {
-    const { getByTestId } = render(<GroupsSelector {...testProps} />);
+    const { getByTestId } = render(<GroupSelector {...testProps} />);
     fireEvent.click(getByTestId('group-selector-dropdown'));
     fireEvent.click(getByTestId('panel-none'));
     expect(onGroupChange).toHaveBeenCalled();

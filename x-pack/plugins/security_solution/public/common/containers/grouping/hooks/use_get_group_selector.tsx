@@ -22,11 +22,7 @@ export interface UseGetGroupSelectorArgs {
   tableId: TableId;
 }
 
-export const useGetGroupingSelector = ({
-  fields,
-  groupingId,
-  tableId,
-}: UseGetGroupSelectorArgs) => {
+export const useGetGroupSelector = ({ fields, groupingId, tableId }: UseGetGroupSelectorArgs) => {
   const dispatch = useDispatch();
 
   const getGroupByIdSelector = groupSelectors.getGroupByIdSelector();

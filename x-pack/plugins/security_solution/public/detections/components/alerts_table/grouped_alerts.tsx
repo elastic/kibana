@@ -15,11 +15,11 @@ import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type {
   GroupingFieldTotalAggregation,
-  GroupingTableAggregation,
+  GroupingAggregation,
   RawBucket,
 } from '@kbn/securitysolution-alerts_grouping';
-import { getGroupedTables, isNoneGroup } from '@kbn/securitysolution-alerts_grouping';
-import { useGetGroupingSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
+import { getGrouping, isNoneGroup } from '@kbn/securitysolution-alerts_grouping';
+import { useGetGroupSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { defaultGroup } from '../../../common/store/grouping/defaults';
 import { groupSelectors } from '../../../common/store/grouping';
@@ -186,7 +186,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     request,
     response,
     setQuery: setAlertsQuery,
-  } = useQueryAlerts<{}, GroupingTableAggregation & GroupingFieldTotalAggregation>({
+  } = useQueryAlerts<{}, GroupingAggregation & GroupingFieldTotalAggregation>({
     query: queryGroups,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
@@ -216,7 +216,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     [uniqueQueryId]
   );
 
-  const groupsSelector = useGetGroupingSelector({
+  const groupsSelector = useGetGroupSelector({
     tableId,
     groupingId,
     fields: indexPattern.fields,
@@ -238,7 +238,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     () =>
       isNoneGroup(selectedGroup)
         ? renderChildComponent([])
-        : getGroupedTables({
+        : getGrouping({
             badgeMetricStats: (fieldBucket: RawBucket) =>
               getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket),
             customMetricStats: (fieldBucket: RawBucket) =>

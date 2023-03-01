@@ -8,8 +8,8 @@
 
 import { NONE_GROUP_KEY } from './types';
 
-export * from './groups_selector';
+export * from './group_selector';
 export * from './types';
-export * from './grouped_tables';
+export * from './grouping';
 
 export const isNoneGroup = (groupKey: string) => groupKey === NONE_GROUP_KEY;

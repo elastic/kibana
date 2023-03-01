@@ -23,21 +23,12 @@ import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_resuls_panel';
 import { GroupingStyledContainer, GroupsUnitCount } from './styles';
 import { GROUPS_UNIT } from './translations';
-import type { GroupingTableAggregation, RawBucket } from './types';
+import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } from './types';
 
-export interface GroupedTablesProps {
+export interface GroupingProps {
   badgeMetricStats?: (fieldBucket: RawBucket) => BadgeMetric[];
   customMetricStats?: (fieldBucket: RawBucket) => CustomMetric[];
-  data: GroupingTableAggregation &
-    Record<
-      string,
-      {
-        value?: number | null;
-        buckets?: Array<{
-          doc_count?: number | null;
-        }>;
-      }
-    >;
+  data?: GroupingAggregation & GroupingFieldTotalAggregation;
   groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element | undefined;
   groupsSelector?: JSX.Element;
   inspectButton?: JSX.Element;
@@ -55,7 +46,7 @@ export interface GroupedTablesProps {
   unit?: (n: number) => string;
 }
 
-const GroupedTablesComponent = ({
+const GroupingComponent = ({
   badgeMetricStats,
   customMetricStats,
   data,
@@ -68,7 +59,7 @@ const GroupedTablesComponent = ({
   selectedGroup,
   takeActionItems,
   unit = defaultUnit,
-}: GroupedTablesProps) => {
+}: GroupingProps) => {
   const [trigger, setTrigger] = useState<
     Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket }>
   >({});
@@ -86,7 +77,7 @@ const GroupedTablesComponent = ({
 
   const groupPanels = useMemo(
     () =>
-      data.stackByMultipleFields0?.buckets?.map((groupBucket) => {
+      data?.stackByMultipleFields0?.buckets?.map((groupBucket) => {
         const group = firstNonNullValue(groupBucket.key);
         const groupKey = `group0-${group}`;
 
@@ -128,7 +119,7 @@ const GroupedTablesComponent = ({
     [
       badgeMetricStats,
       customMetricStats,
-      data.stackByMultipleFields0?.buckets,
+      data?.stackByMultipleFields0?.buckets,
       groupPanelRenderer,
       isLoading,
       renderChildComponent,
@@ -199,4 +190,4 @@ const GroupedTablesComponent = ({
   );
 };
 
-export const GroupedTables = React.memo(GroupedTablesComponent);
+export const Grouping = React.memo(GroupingComponent);

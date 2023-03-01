@@ -26,7 +26,7 @@ export interface GroupSelectorProps {
   title?: string;
 }
 
-const GroupsSelectorComponent = ({
+const GroupSelectorComponent = ({
   'data-test-subj': dataTestSubj,
   fields,
   groupSelected = 'none',
@@ -149,4 +149,4 @@ const GroupsSelectorComponent = ({
   );
 };
 
-export const GroupsSelector = React.memo(GroupsSelectorComponent);
+export const GroupSelector = React.memo(GroupSelectorComponent);
