@@ -48,6 +48,9 @@ import { addSyntheticsParamsRoute } from './settings/add_param';
 import { enableDefaultAlertingRoute } from './default_alerts/enable_default_alert';
 import { getDefaultAlertingRoute } from './default_alerts/get_default_alert';
 import { createNetworkEventsRoute } from './network_events';
+import { addPrivateLocationRoute } from './settings/private_locations/add_private_location';
+import { deletePrivateLocationRoute } from './settings/private_locations/delete_private_location';
+import { getPrivateLocationsRoute } from './settings/private_locations/get_private_locations';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
@@ -86,6 +89,9 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   createJourneyFailedStepsRoute,
   createNetworkEventsRoute,
   createJourneyScreenshotRoute,
+  addPrivateLocationRoute,
+  deletePrivateLocationRoute,
+  getPrivateLocationsRoute,
 ];
 
 export const syntheticsAppStreamingApiRoutes: SyntheticsStreamingRouteFactory[] = [
