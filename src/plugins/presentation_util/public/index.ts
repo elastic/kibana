@@ -48,8 +48,6 @@ export {
   type ReduxToolsPackage,
 } from './redux_tools';
 
-export { createReduxTools } from './redux_tools/create_redux_tools';
-
 export type {
   ExpressionInputEditorRef,
   ExpressionInputProps,
