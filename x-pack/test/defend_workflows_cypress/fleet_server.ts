@@ -20,7 +20,13 @@ export class FleetManager extends Manager {
   }
 
   public async setup(): Promise<void> {
-    this.fleetContainerId = await runFleetServerIfNeeded();
+    const fleetServerConfig = await runFleetServerIfNeeded();
+
+    if (!fleetServerConfig) {
+      throw new Error('Fleet server config not found');
+    }
+
+    this.fleetContainerId = fleetServerConfig.fleetServerContainerId;
   }
 
   public cleanup() {

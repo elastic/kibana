@@ -84,7 +84,7 @@ describe('ALL - Add Integration', () => {
     cy.getBySel('createAgentPolicyButton').click();
     cy.getBySel('createAgentPolicyNameField').type(policyName);
     cy.getBySel('createAgentPolicyFlyoutBtn').click();
-    cy.contains(policyName).click();
+    cy.getBySel('agentPolicyNameLink').contains(policyName).click();
     cy.getBySel('addPackagePolicyButton').click();
     cy.getBySel('integration-card:epr:osquery_manager').click();
     cy.getBySel('addIntegrationPolicyButton').click();
@@ -99,15 +99,6 @@ describe('ALL - Add Integration', () => {
     cy.contains('Live queries history');
 
     cleanupPolicy(policyName);
-  });
-
-  it.skip(`add integration to ${OSQUERY_POLICY}`, () => {
-    cy.visit(FLEET_AGENT_POLICIES);
-    cy.contains(OSQUERY_POLICY).click();
-    cy.contains('Add integration').click();
-    cy.contains(integration).click();
-    addIntegration(OSQUERY_POLICY);
-    cy.contains('osquery_manager-');
   });
 
   it('should have integration and packs copied when upgrading integration', () => {
