@@ -1,0 +1,776 @@
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".alerts-observability.apm.alerts-default": {
+        "is_write_index": true
+      }
+    },
+    "index": ".internal.alerts-observability.apm.alerts-default-000001",
+    "mappings": {
+      "_meta": {
+        "kibana": {
+          "version": "8.0.0"
+        },
+        "namespace": "default"
+      },
+      "dynamic": "false",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "ecs": {
+          "properties": {
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "action": {
+              "type": "keyword"
+            },
+            "kind": {
+              "type": "keyword"
+            }
+          }
+        },
+        "kibana": {
+          "properties": {
+            "alert": {
+              "properties": {
+                "action_group": {
+                  "type": "keyword"
+                },
+                "duration": {
+                  "properties": {
+                    "us": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "end": {
+                  "type": "date"
+                },
+                "evaluation": {
+                  "properties": {
+                    "threshold": {
+                      "scaling_factor": 100,
+                      "type": "scaled_float"
+                    },
+                    "value": {
+                      "scaling_factor": 100,
+                      "type": "scaled_float"
+                    }
+                  }
+                },
+                "instance": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "reason": {
+                  "type": "keyword"
+                },
+                "rule": {
+                  "properties": {
+                    "author": {
+                      "type": "keyword"
+                    },
+                    "category": {
+                      "type": "keyword"
+                    },
+                    "consumer": {
+                      "type": "keyword"
+                    },
+                    "created_at": {
+                      "type": "date"
+                    },
+                    "created_by": {
+                      "type": "keyword"
+                    },
+                    "description": {
+                      "type": "keyword"
+                    },
+                    "enabled": {
+                      "type": "keyword"
+                    },
+                    "from": {
+                      "type": "keyword"
+                    },
+                    "interval": {
+                      "type": "keyword"
+                    },
+                    "license": {
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "note": {
+                      "type": "keyword"
+                    },
+                    "params": {
+                      "index": false,
+                      "type": "keyword"
+                    },
+                    "producer": {
+                      "type": "keyword"
+                    },
+                    "references": {
+                      "type": "keyword"
+                    },
+                    "risk_score": {
+                      "type": "float"
+                    },
+                    "risk_score_mapping": {
+                      "properties": {
+                        "field": {
+                          "type": "keyword"
+                        },
+                        "operator": {
+                          "type": "keyword"
+                        },
+                        "value": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "rule_id": {
+                      "type": "keyword"
+                    },
+                    "rule_name_override": {
+                      "type": "keyword"
+                    },
+                    "rule_type_id": {
+                      "type": "keyword"
+                    },
+                    "severity": {
+                      "type": "keyword"
+                    },
+                    "severity_mapping": {
+                      "properties": {
+                        "field": {
+                          "type": "keyword"
+                        },
+                        "operator": {
+                          "type": "keyword"
+                        },
+                        "severity": {
+                          "type": "keyword"
+                        },
+                        "value": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "tags": {
+                      "type": "keyword"
+                    },
+                    "to": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "updated_at": {
+                      "type": "date"
+                    },
+                    "updated_by": {
+                      "type": "keyword"
+                    },
+                    "uuid": {
+                      "type": "keyword"
+                    },
+                    "version": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "severity": {
+                  "type": "keyword"
+                },
+                "start": {
+                  "type": "date"
+                },
+                "status": {
+                  "type": "keyword"
+                },
+                "system_status": {
+                  "type": "keyword"
+                },
+                "uuid": {
+                  "type": "keyword"
+                },
+                "workflow_reason": {
+                  "type": "keyword"
+                },
+                "workflow_status": {
+                  "type": "keyword"
+                },
+                "workflow_user": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "space_ids": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "version"
+            }
+          }
+        },
+        "processor": {
+          "properties": {
+            "event": {
+              "type": "keyword"
+            }
+          }
+        },
+        "service": {
+          "properties": {
+            "environment": {
+              "type": "keyword"
+            },
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "tags": {
+          "type": "keyword"
+        },
+        "transaction": {
+          "properties": {
+            "type": {
+              "type": "keyword"
+            }
+          }
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "lifecycle": {
+          "name": ".alerts-ilm-policy",
+          "rollover_alias": ".alerts-observability.apm.alerts-default"
+        },
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".alerts-observability.logs.alerts-default": {
+        "is_write_index": true
+      }
+    },
+    "index": ".internal.alerts-observability.logs.alerts-default-000001",
+    "mappings": {
+      "_meta": {
+        "kibana": {
+          "version": "8.0.0"
+        },
+        "namespace": "default"
+      },
+      "dynamic": "false",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "ecs": {
+          "properties": {
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "action": {
+              "type": "keyword"
+            },
+            "kind": {
+              "type": "keyword"
+            }
+          }
+        },
+        "kibana": {
+          "properties": {
+            "alert": {
+              "properties": {
+                "action_group": {
+                  "type": "keyword"
+                },
+                "duration": {
+                  "properties": {
+                    "us": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "end": {
+                  "type": "date"
+                },
+                "evaluation": {
+                  "properties": {
+                    "threshold": {
+                      "scaling_factor": 100,
+                      "type": "scaled_float"
+                    },
+                    "value": {
+                      "scaling_factor": 100,
+                      "type": "scaled_float"
+                    }
+                  }
+                },
+                "instance": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "reason": {
+                  "type": "keyword"
+                },
+                "rule": {
+                  "properties": {
+                    "author": {
+                      "type": "keyword"
+                    },
+                    "category": {
+                      "type": "keyword"
+                    },
+                    "consumer": {
+                      "type": "keyword"
+                    },
+                    "created_at": {
+                      "type": "date"
+                    },
+                    "created_by": {
+                      "type": "keyword"
+                    },
+                    "description": {
+                      "type": "keyword"
+                    },
+                    "enabled": {
+                      "type": "keyword"
+                    },
+                    "from": {
+                      "type": "keyword"
+                    },
+                    "interval": {
+                      "type": "keyword"
+                    },
+                    "license": {
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "note": {
+                      "type": "keyword"
+                    },
+                    "params": {
+                      "index": false,
+                      "type": "keyword"
+                    },
+                    "producer": {
+                      "type": "keyword"
+                    },
+                    "references": {
+                      "type": "keyword"
+                    },
+                    "risk_score": {
+                      "type": "float"
+                    },
+                    "risk_score_mapping": {
+                      "properties": {
+                        "field": {
+                          "type": "keyword"
+                        },
+                        "operator": {
+                          "type": "keyword"
+                        },
+                        "value": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "rule_id": {
+                      "type": "keyword"
+                    },
+                    "rule_name_override": {
+                      "type": "keyword"
+                    },
+                    "rule_type_id": {
+                      "type": "keyword"
+                    },
+                    "severity": {
+                      "type": "keyword"
+                    },
+                    "severity_mapping": {
+                      "properties": {
+                        "field": {
+                          "type": "keyword"
+                        },
+                        "operator": {
+                          "type": "keyword"
+                        },
+                        "severity": {
+                          "type": "keyword"
+                        },
+                        "value": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "tags": {
+                      "type": "keyword"
+                    },
+                    "to": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "updated_at": {
+                      "type": "date"
+                    },
+                    "updated_by": {
+                      "type": "keyword"
+                    },
+                    "uuid": {
+                      "type": "keyword"
+                    },
+                    "version": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "severity": {
+                  "type": "keyword"
+                },
+                "start": {
+                  "type": "date"
+                },
+                "status": {
+                  "type": "keyword"
+                },
+                "system_status": {
+                  "type": "keyword"
+                },
+                "uuid": {
+                  "type": "keyword"
+                },
+                "workflow_reason": {
+                  "type": "keyword"
+                },
+                "workflow_status": {
+                  "type": "keyword"
+                },
+                "workflow_user": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "space_ids": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "version"
+            }
+          }
+        },
+        "tags": {
+          "type": "keyword"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "lifecycle": {
+          "name": ".alerts-ilm-policy",
+          "rollover_alias": ".alerts-observability.logs.alerts-default"
+        },
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}
+
+{
+  "type": "index",
+  "value": {
+    "aliases": {
+      ".alerts-observability.metrics.alerts-default": {
+        "is_write_index": true
+      }
+    },
+    "index": ".internal.alerts-observability.metrics.alerts-default-000001",
+    "mappings": {
+      "_meta": {
+        "kibana": {
+          "version": "8.0.0"
+        },
+        "namespace": "default"
+      },
+      "dynamic": "false",
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "host": {
+          "properties": {
+            "name": {
+              "type": "keyword"
+            }
+          }
+        },
+        "ecs": {
+          "properties": {
+            "version": {
+              "type": "keyword"
+            }
+          }
+        },
+        "event": {
+          "properties": {
+            "action": {
+              "type": "keyword"
+            },
+            "kind": {
+              "type": "keyword"
+            }
+          }
+        },
+        "kibana": {
+          "properties": {
+            "alert": {
+              "properties": {
+                "action_group": {
+                  "type": "keyword"
+                },
+                "duration": {
+                  "properties": {
+                    "us": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "end": {
+                  "type": "date"
+                },
+                "evaluation": {
+                  "properties": {
+                    "threshold": {
+                      "scaling_factor": 100,
+                      "type": "scaled_float"
+                    },
+                    "value": {
+                      "scaling_factor": 100,
+                      "type": "scaled_float"
+                    }
+                  }
+                },
+                "instance": {
+                  "properties": {
+                    "id": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "reason": {
+                  "type": "keyword"
+                },
+                "rule": {
+                  "properties": {
+                    "author": {
+                      "type": "keyword"
+                    },
+                    "category": {
+                      "type": "keyword"
+                    },
+                    "consumer": {
+                      "type": "keyword"
+                    },
+                    "created_at": {
+                      "type": "date"
+                    },
+                    "created_by": {
+                      "type": "keyword"
+                    },
+                    "description": {
+                      "type": "keyword"
+                    },
+                    "enabled": {
+                      "type": "keyword"
+                    },
+                    "from": {
+                      "type": "keyword"
+                    },
+                    "interval": {
+                      "type": "keyword"
+                    },
+                    "license": {
+                      "type": "keyword"
+                    },
+                    "name": {
+                      "type": "keyword"
+                    },
+                    "note": {
+                      "type": "keyword"
+                    },
+                    "params": {
+                      "index": false,
+                      "type": "keyword"
+                    },
+                    "producer": {
+                      "type": "keyword"
+                    },
+                    "references": {
+                      "type": "keyword"
+                    },
+                    "risk_score": {
+                      "type": "float"
+                    },
+                    "risk_score_mapping": {
+                      "properties": {
+                        "field": {
+                          "type": "keyword"
+                        },
+                        "operator": {
+                          "type": "keyword"
+                        },
+                        "value": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "rule_id": {
+                      "type": "keyword"
+                    },
+                    "rule_name_override": {
+                      "type": "keyword"
+                    },
+                    "rule_type_id": {
+                      "type": "keyword"
+                    },
+                    "severity": {
+                      "type": "keyword"
+                    },
+                    "severity_mapping": {
+                      "properties": {
+                        "field": {
+                          "type": "keyword"
+                        },
+                        "operator": {
+                          "type": "keyword"
+                        },
+                        "severity": {
+                          "type": "keyword"
+                        },
+                        "value": {
+                          "type": "keyword"
+                        }
+                      }
+                    },
+                    "tags": {
+                      "type": "keyword"
+                    },
+                    "to": {
+                      "type": "keyword"
+                    },
+                    "type": {
+                      "type": "keyword"
+                    },
+                    "updated_at": {
+                      "type": "date"
+                    },
+                    "updated_by": {
+                      "type": "keyword"
+                    },
+                    "uuid": {
+                      "type": "keyword"
+                    },
+                    "version": {
+                      "type": "keyword"
+                    }
+                  }
+                },
+                "severity": {
+                  "type": "keyword"
+                },
+                "start": {
+                  "type": "date"
+                },
+                "status": {
+                  "type": "keyword"
+                },
+                "system_status": {
+                  "type": "keyword"
+                },
+                "uuid": {
+                  "type": "keyword"
+                },
+                "workflow_reason": {
+                  "type": "keyword"
+                },
+                "workflow_status": {
+                  "type": "keyword"
+                },
+                "workflow_user": {
+                  "type": "keyword"
+                }
+              }
+            },
+            "space_ids": {
+              "type": "keyword"
+            },
+            "version": {
+              "type": "version"
+            }
+          }
+        },
+        "tags": {
+          "type": "keyword"
+        }
+      }
+    },
+    "settings": {
+      "index": {
+        "lifecycle": {
+          "name": ".alerts-ilm-policy",
+          "rollover_alias": ".alerts-observability.metrics.alerts-default"
+        },
+        "number_of_replicas": "1",
+        "number_of_shards": "1"
+      }
+    }
+  }
+}

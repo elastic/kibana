@@ -1,0 +1,34 @@
+title: Custom KQL indicator type definition
+required:
+  - type
+  - params
+description: Defines properties for a custom KQL indicator type
+type: object
+properties:
+  params:
+    description: An object containing the indicator parameters.
+    type: object
+    nullable: false
+    required:
+      - index
+    properties:
+      index:
+        description: The index or index pattern to use
+        type: string
+        example: my-service-*
+      filter:
+        description: the KQL query to filter the documents with.
+        type: string
+        example: 'field.environment : "production" and service.name : "my-service"'
+      good:
+        description: the KQL query used to define the good events.
+        type: string
+        example: 'request.latency <= 150 and request.status_code : "2xx"'
+      total:
+        description: the KQL query used to define all events.
+        type: string
+        example: ''
+  type:
+    description: The type of indicator.
+    type: string
+    example: sli.kql.custom
