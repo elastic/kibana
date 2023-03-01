@@ -30,7 +30,7 @@ See the [Contributing to Kibana documentation](https://github.com/elastic/kibana
 
 This plugin follows the `common`, `server`, `public` structure described in the [Kibana Developer Guide](https://docs.elastic.dev/kibana-dev-docs/key-concepts/platform-intro). Refer to [The anatomy of a plugin](https://docs.elastic.dev/kibana-dev-docs/key-concepts/anatomy-of-a-plugin) in the guide for further details.
 
-We follow the pattern of developing feature branches under your personal fork of Kibana. Refer to [Set up a Development Environment](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env) in the guide for further details. Other best practices including developper principles, standards and style guide can be found under the Contributing section of the guide.
+We follow the pattern of developing feature branches under your personal fork of Kibana. Refer to [Set up a Development Environment](https://docs.elastic.dev/kibana-dev-docs/getting-started/setup-dev-env) in the guide for further details. Other best practices including developer principles, standards and style guide can be found under the Contributing section of the guide.
 
 Note: The plugin was previously named Ingest Manager, it's possible that some variables are still named with that old plugin name.
 
@@ -125,7 +125,7 @@ docker run -e KIBANA_HOST=http://{YOUR-IP}:5601/{BASE-PATH} -e KIBANA_USERNAME=e
 
 Ensure you provide the `-p 8220:8220` port mapping to map the Fleet Server container's port `8220` to your local machine's port `8220` in order for Fleet to communicate with Fleet Server.
 
-For the latest version, use `8.8.0-SNAPSHOT`. Otherwise, you can explore the available versions at https://www.docker.elastic.co/r/beats/elastic-agent.
+Explore the available versions at https://www.docker.elastic.co/r/beats/elastic-agent. Only released versions are shown by default: tick the `Include snapshots` checkbox to see the latest version, e.g. `8.8.0-SNAPSHOT`.
 
 Once the Fleet Server container is running, you should be able to treat it as if it were a local process running on `https://localhost:8220` when configuring Fleet via the UI. You can then run `elastic-agent` on your local machine directly for testing purposes, or with Docker (recommended) see next section.
 
