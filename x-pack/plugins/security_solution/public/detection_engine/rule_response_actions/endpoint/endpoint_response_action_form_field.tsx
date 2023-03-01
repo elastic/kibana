@@ -12,7 +12,13 @@ import type { EndpointResponseActionsValues } from './endpoint_action_type_form'
 import { EndpointResponseActionParamsForm } from './endpoint_action_type_form';
 
 export const ResponseActionFormField = React.memo(
-  ({ field }: { field: FieldHook<EndpointResponseActionsValues> }) => {
+  ({
+    field,
+    editDisabled,
+  }: {
+    field: FieldHook<EndpointResponseActionsValues>;
+    editDisabled: boolean;
+  }) => {
     const { setErrors, clearErrors, value, setValue } = field;
 
     const handleError = useCallback(
@@ -28,6 +34,7 @@ export const ResponseActionFormField = React.memo(
 
     return (
       <EndpointResponseActionParamsForm
+        editDisabled={editDisabled}
         defaultValues={value}
         onError={handleError}
         onChange={setValue}

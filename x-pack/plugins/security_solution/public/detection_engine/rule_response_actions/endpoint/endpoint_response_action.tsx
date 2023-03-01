@@ -12,6 +12,7 @@ import { UseField } from '../../../shared_imports';
 
 interface EndpointResponseActionProps {
   item: ArrayItem;
+  editDisabled: boolean;
 }
 
 export const EndpointResponseAction = React.memo((props: EndpointResponseActionProps) => {
@@ -21,6 +22,7 @@ export const EndpointResponseAction = React.memo((props: EndpointResponseActionP
   return (
     <UseField
       path={`${props.item.path}.params`}
+      componentProps={{ editDisabled: props.editDisabled }}
       component={ResponseActionFormField}
       readDefaultValueOnForm={!props.item.isNew}
     />

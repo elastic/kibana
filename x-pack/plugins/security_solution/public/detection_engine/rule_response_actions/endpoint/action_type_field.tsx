@@ -15,9 +15,10 @@ import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/
 
 interface ActionTypeFieldProps {
   euiFieldProps?: Record<string, unknown>;
+  disabled: boolean;
 }
 
-const ActionTypeFieldComponent = ({ euiFieldProps }: ActionTypeFieldProps) => {
+const ActionTypeFieldComponent = ({ euiFieldProps, disabled }: ActionTypeFieldProps) => {
   const {
     field: { onChange, value, name: fieldName },
     fieldState: { error },
@@ -42,7 +43,6 @@ const ActionTypeFieldComponent = ({ euiFieldProps }: ActionTypeFieldProps) => {
 
   return (
     <EuiFormRow
-      // fix path
       label={i18n.translate('xpack.securitySolution.responseActions.endpoint.commandLabel', {
         defaultMessage: 'Command',
       })}
@@ -51,6 +51,7 @@ const ActionTypeFieldComponent = ({ euiFieldProps }: ActionTypeFieldProps) => {
       fullWidth
     >
       <EuiSuperSelect
+        disabled={disabled}
         isInvalid={hasError}
         name={fieldName}
         data-test-subj={'commandTypeField'}

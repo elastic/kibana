@@ -11,9 +11,10 @@ import { i18n } from '@kbn/i18n';
 
 interface ActionTypeFieldProps {
   euiFieldProps?: Record<string, unknown>;
+  disabled: boolean;
 }
 
-const CommentFieldComponent = ({ euiFieldProps }: ActionTypeFieldProps) => {
+const CommentFieldComponent = ({ euiFieldProps, disabled }: ActionTypeFieldProps) => {
   const {
     field: { onChange, value, name: fieldName },
     fieldState: { error },
@@ -34,6 +35,7 @@ const CommentFieldComponent = ({ euiFieldProps }: ActionTypeFieldProps) => {
       fullWidth
     >
       <EuiFieldText
+        disabled={disabled}
         isInvalid={hasError}
         onChange={onChange}
         value={value}

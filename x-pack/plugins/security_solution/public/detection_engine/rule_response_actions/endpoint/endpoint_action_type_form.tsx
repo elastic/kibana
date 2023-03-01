@@ -25,12 +25,14 @@ export interface OsqueryResponseActionsParamsFormProps {
   defaultValues: EndpointResponseActionsValues;
   onChange: (data: EndpointResponseActionsValues) => void;
   onError: (error: FieldErrors<OsqueryResponseActionsParamsFormFields>) => void;
+  editDisabled: boolean;
 }
 
 const EndpointResponseActionParamsFormComponent = ({
   defaultValues,
   onError,
   onChange,
+  editDisabled,
 }: OsqueryResponseActionsParamsFormProps) => {
   const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
     mode: 'all',
@@ -60,8 +62,8 @@ const EndpointResponseActionParamsFormComponent = ({
   return (
     <>
       <FormProvider {...hooksForm}>
-        <ActionTypeField />
-        <CommentField />
+        <ActionTypeField disabled={editDisabled} />
+        <CommentField disabled={editDisabled} />
       </FormProvider>
     </>
   );
