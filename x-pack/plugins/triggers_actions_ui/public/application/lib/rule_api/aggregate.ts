@@ -18,7 +18,7 @@ import {
 
 // TODO: https://github.com/elastic/kibana/issues/131682
 export async function loadRuleTags({ http }: { http: HttpSetup }): Promise<RuleTagsAggregations> {
-  const res = await http.get<AsApiContract<RuleAggregations>>(
+  const res = await http.get<AsApiContract<RuleTagsAggregations>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`
   );
   return rewriteTagsBodyRes(res);
