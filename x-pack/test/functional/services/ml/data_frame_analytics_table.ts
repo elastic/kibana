@@ -14,7 +14,7 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 type ExpectedSectionTableEntries = Record<string, string>;
 export interface ExpectedSectionTable {
   section: string;
-  expectedEntries: ExpectedSectionTableEntries;
+  expectedEntries: string[] | ExpectedSectionTableEntries;
 }
 
 export type AnalyticsTableRowDetails = Record<'jobDetails', ExpectedSectionTable[]>;
@@ -459,7 +459,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
     public async assertRowDetailsDescriptionListContent(
       jobId: string,
       sectionSubject: string,
-      expectedEntries: string[] // ExpectedSectionTable['expectedEntries']
+      expectedEntries: string[]
     ) {
       const sectionSelector = this.detailsSectionSelector(jobId, sectionSubject);
       await this.assertDetailsSectionExists(jobId, sectionSubject);
@@ -500,7 +500,7 @@ export function MachineLearningDataFrameAnalyticsTableProvider({
           await this.assertRowDetailsDescriptionListContent(
             jobId,
             section,
-            expectedEntries as unknown as string[] // TODO: fix this
+            expectedEntries as string[]
           );
         }
       }
