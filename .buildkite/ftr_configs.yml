@@ -64,6 +64,9 @@ disabled:
   - x-pack/test/plugin_api_perf/config.js
   - x-pack/test/screenshot_creation/config.ts
   - x-pack/test/fleet_packages/config.ts
+  - x-pack/test/api_integration/apis/aiops/data_scenarios/config.ts
+  - x-pack/test/api_integration/apis/ml/data_scenarios/config.ts
+  - x-pack/test/api_integration/apis/transform/data_scenarios/config.ts
 
   # Scalability testing config that we run in its own pipeline
   - x-pack/test/scalability/config.ts
