@@ -8,7 +8,6 @@ import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Evaluation } from '../../../../common/types';
-import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import type { FindingsBaseProps } from '../types';
 import { FindingsTable } from './latest_findings_table';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
@@ -24,7 +23,7 @@ import {
   useBaseEsQuery,
   usePersistedQuery,
 } from '../utils/utils';
-import { LimitedResultsBar, PageTitle, PageTitleText } from '../layout/findings_layout';
+import { LimitedResultsBar } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import { usePageSlice } from '../../../common/hooks/use_page_slice';
@@ -143,10 +142,8 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={findingsGroupByNone.isFetching}
       />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <LatestFindingsPageTitle />
-        </EuiFlexItem>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false} style={{ width: 400 }}>
           {!error && <FindingsGroupBySelector type="default" />}
         </EuiFlexItem>
@@ -210,17 +207,3 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     </div>
   );
 };
-
-const LatestFindingsPageTitle = () => (
-  <PageTitle>
-    <PageTitleText
-      title={
-        <CloudPosturePageTitle
-          title={i18n.translate('xpack.csp.findings.latestFindings.latestFindingsPageTitle', {
-            defaultMessage: 'Findings',
-          })}
-        />
-      }
-    />
-  </PageTitle>
-);
