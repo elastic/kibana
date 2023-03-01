@@ -196,6 +196,7 @@ export const TitleField = ({
               fullWidth
               data-test-subj="createIndexPatternTitleInput"
               append={<TitleDocsPopover />}
+              placeholder="example-*"
             />
           </EuiFormRow>
         );
