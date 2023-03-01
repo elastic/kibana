@@ -62,7 +62,7 @@ export const benchmarksNavigation: Record<CspBenchmarksPage, CspPageNavigationIt
 export const findingsNavigation = {
   findings_default: {
     name: NAV_ITEMS_NAMES.FINDINGS,
-    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/default`,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/configurations`,
     id: 'cloud_security_posture-findings-default',
   },
   findings_by_resource: {
@@ -74,6 +74,11 @@ export const findingsNavigation = {
     name: NAV_ITEMS_NAMES.FINDINGS,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/resource/:resourceId`,
     id: 'cloud_security_posture-findings-resourceId',
+  },
+  vulnerabilities: {
+    name: NAV_ITEMS_NAMES.FINDINGS,
+    path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities`,
+    id: 'cloud_security_posture-findings-vulnerabilities',
   },
 };
 
