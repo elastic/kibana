@@ -6,6 +6,9 @@
  */
 
 import type { UnwrapPromise } from '@kbn/infra-plugin/common/utility_types';
+import { addAlertsToCase } from '../../tasks/add_alerts_to_case';
+import type { IndexedEndpointRuleAlerts } from '../../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 import { APP_CASES_PATH } from '../../../../../common/constants';
 import type { IndexedCase } from '../../../../../common/endpoint/data_loaders/index_case';
 import {
@@ -41,6 +44,7 @@ describe('When accessing Endpoint Response Console', () => {
   describe('from Cases', () => {
     let endpointData: UnwrapPromise<ReturnType<typeof indexEndpointHosts>>;
     let caseData: IndexedCase;
+    let alertData: IndexedEndpointRuleAlerts;
     let caseUrlPath: string;
 
     before(() => {
@@ -49,11 +53,20 @@ describe('When accessing Endpoint Response Console', () => {
         caseUrlPath = `${APP_CASES_PATH}/${indexCase.data.id}`;
       });
 
-      indexEndpointHosts().then((indexEndpoints) => {
-        endpointData = indexEndpoints;
-      });
-
-      // TODO: create an alert
+      indexEndpointHosts()
+        .then((indexEndpoints) => {
+          endpointData = indexEndpoints;
+        })
+        .then(() => {
+          return indexEndpointRuleAlerts({
+            endpointAgentId: endpointData.data.hosts[0].agent.id,
+          }).then((indexedAlert) => {
+            alertData = indexedAlert;
+          });
+        })
+        .then(() => {
+          return addAlertsToCase({ caseId: caseData.data.id, alertIds: [alertData.alerts[0]._id] });
+        });
 
       // TODO: Add alert to the case
     });
@@ -67,6 +80,14 @@ describe('When accessing Endpoint Response Console', () => {
 
       if (endpointData) {
         endpointData.cleanup();
+        // @ts-expect-error ignore setting to undefined
+        endpointData = undefined;
+      }
+
+      if (alertData) {
+        alertData.cleanup();
+        // @ts-expect-error ignore setting to undefined
+        alertData = undefined;
       }
     });
 
