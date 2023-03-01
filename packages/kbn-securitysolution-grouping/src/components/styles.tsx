@@ -8,20 +8,21 @@
 
 import { EuiButtonEmpty, EuiContextMenu } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import styled from 'styled-components';
+import { css } from '@emotion/react';
+import { euiThemeVars } from '@kbn/ui-theme';
 
-export const GroupsUnitCount = styled.span`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  border-right: ${({ theme }) => theme.eui.euiBorderThin};
+export const groupsUnitCountCss = css`
+  font-size: ${euiThemeVars.euiFontSizeXS};
+  font-weight: ${euiThemeVars.euiFontWeightSemiBold};
+  border-right: ${euiThemeVars.euiBorderThin};
   margin-right: 16px;
   padding-right: 16px;
 `;
 
-export const StatsContainer = styled.span`
-  font-size: ${({ theme }) => theme.eui.euiFontSizeXS};
-  font-weight: ${({ theme }) => theme.eui.euiFontWeightSemiBold};
-  border-right: ${({ theme }) => theme.eui.euiBorderThin};
+export const statsContainerCss = css`
+  font-size: ${euiThemeVars.euiFontSizeXS};
+  font-weight: ${euiThemeVars.euiFontWeightSemiBold};
+  border-right: ${euiThemeVars.euiBorderThin};
   margin-right: 16px;
   padding-right: 16px;
   .smallDot {
@@ -34,26 +35,26 @@ export const StatsContainer = styled.span`
   }
 `;
 
-export const GroupingStyledContainer = styled.div`
+export const groupingContainerCss = css`
   .euiAccordion__childWrapper .euiAccordion__padding--m {
     margin-left: 8px;
     margin-right: 8px;
-    border-left: ${({ theme }) => theme.eui.euiBorderThin};
-    border-right: ${({ theme }) => theme.eui.euiBorderThin};
-    border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+    border-left: ${euiThemeVars.euiBorderThin};
+    border-right: ${euiThemeVars.euiBorderThin};
+    border-bottom: ${euiThemeVars.euiBorderThin};
     border-radius: 0 0 6px 6px;
   }
   .euiAccordion__triggerWrapper {
-    border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
-    border-left: ${({ theme }) => theme.eui.euiBorderThin};
-    border-right: ${({ theme }) => theme.eui.euiBorderThin};
+    border-bottom: ${euiThemeVars.euiBorderThin};
+    border-left: ${euiThemeVars.euiBorderThin};
+    border-right: ${euiThemeVars.euiBorderThin};
     border-radius: 6px;
     min-height: 78px;
     padding-left: 16px;
     padding-right: 16px;
   }
   .groupingAccordionForm {
-    border-top: ${({ theme }) => theme.eui.euiBorderThin};
+    border-top: ${euiThemeVars.euiBorderThin};
     border-bottom: none;
     border-radius: 6px;
     min-width: 1090px;
@@ -76,7 +77,7 @@ export const StyledContextMenu = euiStyled(EuiContextMenu)`
     text-overflow: ellipsis;
   }
   .euiContextMenuItem {
-    border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+    border-bottom: ${euiThemeVars.euiBorderThin};
   }
   .euiContextMenuItem:last-child {
     border: none;

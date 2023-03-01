@@ -21,7 +21,7 @@ import type { BadgeMetric, CustomMetric } from './accordion_panel';
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_resuls_panel';
-import { GroupingStyledContainer, GroupsUnitCount } from './styles';
+import { groupingContainerCss, groupsUnitCountCss } from './styles';
 import { GROUPS_UNIT } from './translations';
 import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } from './types';
 
@@ -144,12 +144,18 @@ const GroupingComponent = ({
           {groupsNumber > 0 ? (
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow={false}>
-                <GroupsUnitCount data-test-subj="alert-count">{unitCountText}</GroupsUnitCount>
+                <span css={groupsUnitCountCss} data-test-subj="alert-count">
+                  {unitCountText}
+                </span>
               </EuiFlexItem>
               <EuiFlexItem>
-                <GroupsUnitCount data-test-subj="groups-count" style={{ borderRight: 'none' }}>
+                <span
+                  css={groupsUnitCountCss}
+                  data-test-subj="groups-count"
+                  style={{ borderRight: 'none' }}
+                >
                   {unitGroupsCountText}
-                </GroupsUnitCount>
+                </span>
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : null}
@@ -161,7 +167,7 @@ const GroupingComponent = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <GroupingStyledContainer className="eui-xScroll">
+      <div css={groupingContainerCss} className="eui-xScroll">
         {groupsNumber > 0 ? (
           <>
             {groupPanels}
@@ -185,7 +191,7 @@ const GroupingComponent = ({
             <EmptyGroupingComponent />
           </>
         )}
-      </GroupingStyledContainer>
+      </div>
     </>
   );
 };
