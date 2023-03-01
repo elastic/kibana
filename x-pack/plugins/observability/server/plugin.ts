@@ -18,6 +18,7 @@ import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plu
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { createUICapabilities } from '@kbn/cases-plugin/common';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 
@@ -50,6 +51,7 @@ interface PluginSetup {
   features: FeaturesSetup;
   guidedOnboarding: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
