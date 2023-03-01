@@ -283,6 +283,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: [
         {
+          id: 'service-groups-list',
+          title: serviceGroupsTitle,
+          path: '/service-groups',
+        },
+        {
           id: 'services',
           title: servicesTitle,
           path: '/services',
