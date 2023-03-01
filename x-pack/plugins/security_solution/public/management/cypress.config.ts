@@ -44,8 +44,8 @@ export default defineCypressConfig({
     supportFile: 'public/management/cypress/support/e2e.ts',
     specPattern: 'public/management/cypress/e2e/mocked_data/*.cy.{js,jsx,ts,tsx}',
     experimentalRunAllSpecs: true,
-    setupNodeEvents: async (on, config) => {
-      await dataLoaders(on, config);
+    setupNodeEvents: (on, config) => {
+      return dataLoaders(on, config);
     },
   },
 });

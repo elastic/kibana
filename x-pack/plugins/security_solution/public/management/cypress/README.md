@@ -97,9 +97,10 @@ Cypress convention. Contains the specs that are going to be executed.
 
 Cypress convention. Fixtures are used as external pieces of static data when we stub responses.
 
-### plugins/
+### support/
 
 Cypress convention. As a convenience, by default Cypress will automatically include the plugins file cypress/plugins/index.js before every single spec file it runs.
+Directory also holds Cypress Plugins that are then initialized via `setupNodeEvents()` in the Cypress configuration.
 
 ### screens/
 

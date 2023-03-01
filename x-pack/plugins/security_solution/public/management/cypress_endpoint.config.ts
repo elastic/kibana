@@ -39,8 +39,8 @@ export default defineCypressConfig({
     supportFile: 'public/management/cypress/support/e2e.ts',
     specPattern: 'public/management/cypress/e2e/endpoint/*.cy.{js,jsx,ts,tsx}',
     experimentalRunAllSpecs: true,
-    setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) {
-      dataLoaders(on, config);
+    setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
+      return dataLoaders(on, config);
     },
   },
 });

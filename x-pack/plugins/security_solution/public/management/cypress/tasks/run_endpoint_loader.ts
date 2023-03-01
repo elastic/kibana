@@ -6,6 +6,7 @@
  */
 
 export const runEndpointLoaderScript = () => {
+  // FIXME:PT remove use of `hostname` and `configport` nad use `KIBANA_URL`
   const {
     ELASTICSEARCH_USERNAME,
     ELASTICSEARCH_PASSWORD,
