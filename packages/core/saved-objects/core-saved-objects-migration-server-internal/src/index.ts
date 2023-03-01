@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { KibanaMigrator, mergeTypes } from './kibana_migrator';
+export { KibanaMigrator } from './kibana_migrator';
 export type { KibanaMigratorOptions } from './kibana_migrator';
-export { buildActiveMappings } from './core';
+export { buildActiveMappings, buildTypesMappings } from './core';
 export { DocumentMigrator } from './document_migrator';
