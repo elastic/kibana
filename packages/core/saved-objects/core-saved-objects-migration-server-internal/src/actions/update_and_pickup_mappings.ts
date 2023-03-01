@@ -45,13 +45,11 @@ export const updateAndPickupMappings = ({
     RetryableEsClientError,
     'update_mappings_succeeded'
   > = () => {
-    // ._meta property will be updated on a later step
-    const { _meta, ...mappingsWithoutMeta } = mappings;
     return client.indices
       .putMapping({
         index,
         timeout: DEFAULT_TIMEOUT,
-        ...mappingsWithoutMeta,
+        ...mappings,
       })
       .then(() => {
         // Ignore `acknowledged: false`. When the coordinating node accepts

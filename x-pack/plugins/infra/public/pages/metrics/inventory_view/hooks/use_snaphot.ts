@@ -34,6 +34,7 @@ export function useSnapshot({
   groupBy = null,
   sendRequestImmediately = true,
   includeTimeseries = true,
+  dropPartialBuckets = true,
   requestTs,
   ...args
 }: UseSnapshotRequest) {
@@ -56,6 +57,7 @@ export function useSnapshot({
       lookbackSize: 5,
     },
     includeTimeseries,
+    dropPartialBuckets,
   };
 
   const { error, loading, response, makeRequest } = useHTTPRequest(

@@ -20,13 +20,40 @@ export const TAKE_ACTION = i18n.translate(
   }
 );
 
-export const TECHNICAL_PREVIEW = i18n.translate(
-  'xpack.securitySolution.grouping.technicalPreviewLabel',
+export const BETA = i18n.translate('xpack.securitySolution.grouping.betaLabel', {
+  defaultMessage: 'Beta',
+});
+
+export const BETA_TOOL_TIP = i18n.translate('xpack.securitySolution.grouping.betaToolTip', {
+  defaultMessage:
+    'Grouping may show only a subset of alerts while in beta. To see all alerts, use the list view by selecting "None"',
+});
+
+export const GROUP_BY = i18n.translate('xpack.securitySolution.selector.grouping.label', {
+  defaultMessage: 'Group alerts by',
+});
+
+export const GROUP_BY_CUSTOM_FIELD = i18n.translate(
+  'xpack.securitySolution.groupsSelector.customGroupByPanelTitle',
   {
-    defaultMessage: 'Technical Preview',
+    defaultMessage: 'Group By Custom Field',
   }
 );
 
-export const GROUP_BY = i18n.translate('xpack.securitySolution.selector.grouping.label', {
-  defaultMessage: 'Group by field',
+export const SELECT_FIELD = i18n.translate(
+  'xpack.securitySolution.groupsSelector.groupByPanelTitle',
+  {
+    defaultMessage: 'Select Field',
+  }
+);
+
+export const NONE = i18n.translate('xpack.securitySolution.groupsSelector.noneGroupByOptionName', {
+  defaultMessage: 'None',
 });
+
+export const CUSTOM_FIELD = i18n.translate(
+  'xpack.securitySolution.groupsSelector.customGroupByOptionName',
+  {
+    defaultMessage: 'Custom field',
+  }
+);

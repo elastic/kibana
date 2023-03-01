@@ -87,12 +87,15 @@ export function useMonitorErrors(monitorIdArg?: string) {
         },
       },
     },
-    [lastRefresh, monitorId, monitorIdArg, dateRangeStart, dateRangeEnd],
-    { name: 'getMonitorErrors', isRequestReady: Boolean(selectedLocation?.label) }
+    [lastRefresh, monitorId, monitorIdArg, dateRangeStart, dateRangeEnd, selectedLocation?.label],
+    {
+      name: `getMonitorErrors/${dateRangeStart}/${dateRangeEnd}`,
+      isRequestReady: Boolean(selectedLocation?.label),
+    }
   );
 
   return useMemo(() => {
-    const errorStates = (data?.aggregations?.errorStates.buckets ?? []).map((loc) => {
+    const errorStates = data?.aggregations?.errorStates.buckets?.map((loc) => {
       return loc.summary.hits.hits?.[0]._source as PingState;
     });
 
