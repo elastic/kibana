@@ -18,11 +18,6 @@ export interface BaseState extends ControlState {
   readonly logs: MigrationLog[];
 }
 
-/**
- * The state after
- */
-export interface StateWithIndexPresent {}
-
 /** Initial state before any action is performed */
 export interface InitState extends BaseState {
   readonly controlState: 'INIT';
