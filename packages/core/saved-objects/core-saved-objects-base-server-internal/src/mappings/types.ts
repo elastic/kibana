@@ -62,15 +62,19 @@ export interface IndexMappingMeta {
    * with each key being a root-level mapping property, and each value being
    * the md5 hash of that mapping's value when the index was created.
    *
-   * @remark: Only defined for the v2 migration algorithm.
+   * @remark: Only defined for indices using the v2 migration algorithm.
    */
   migrationMappingPropertyHashes?: { [k: string]: string };
   /**
-   * TODO: doc
+   * The current model versions of the mapping of the index.
+   *
+   * @remark: Only defined for indices using the zdt migration algorithm.
    */
   mappingVersions?: { [k: string]: number };
   /**
-   * TODO: doc
+   * The current model versions of the documents of the index.
+   *
+   * @remark: Only defined for indices using the zdt migration algorithm.
    */
   docVersions?: { [k: string]: number };
 }
