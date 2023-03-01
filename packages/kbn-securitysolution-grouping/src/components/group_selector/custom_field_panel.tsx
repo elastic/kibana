@@ -51,10 +51,10 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
       <div data-test-subj="custom-field-panel" style={{ padding: 16 }}>
         <EuiForwm>
           <EuiFormRow
-            label={i18n.translate('packages.grouping.groupsSelector.customGroupByFieldLabel', {
+            label={i18n.translate('grouping.groupsSelector.customGroupByFieldLabel', {
               defaultMessage: 'Field',
             })}
-            helpText={i18n.translate('packages.grouping.groupsSelector.customGroupByHelpText', {
+            helpText={i18n.translate('grouping.groupsSelector.customGroupByHelpText', {
               defaultMessage: 'This is the field used for the terms aggregation',
             })}
             display="rowCompressed"
@@ -63,7 +63,7 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
             <EuiComboBox
               data-test-subj="groupByCustomField"
               placeholder={i18n.translate(
-                'packages.grouping.groupsSelector.customGroupByDropdownPlacehoder',
+                'grouping.groupsSelector.customGroupByDropdownPlacehoder',
                 {
                   defaultMessage: 'Select one',
                 }
@@ -84,7 +84,7 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
             fill
             onClick={this.handleSubmit}
           >
-            {i18n.translate('packages.grouping.selector.grouping.label.add', {
+            {i18n.translate('grouping.selector.grouping.label.add', {
               defaultMessage: 'Add',
             })}
           </EuiButton>
