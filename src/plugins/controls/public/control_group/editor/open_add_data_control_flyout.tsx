@@ -8,21 +8,26 @@
 
 import React from 'react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+
+import {
+  ControlGroupContainer,
+  ControlGroupContainerContext,
+  setFlyoutRef,
+} from '../embeddable/control_group_container';
 import type {
   AddDataControlProps,
   AddOptionsListControlProps,
   AddRangeSliderControlProps,
 } from '../external_api/control_group_input_builder';
-import { ControlGroupStrings } from '../control_group_strings';
-import { ControlGroupContainer, setFlyoutRef } from '../embeddable/control_group_container';
-import { pluginServices } from '../../services';
-import { ControlEditor } from './control_editor';
-import { DataControlInput, OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../..';
-import { IEditableControlFactory } from '../../types';
 import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_WIDTH,
 } from '../../../common/control_group/control_group_constants';
+import { pluginServices } from '../../services';
+import { ControlEditor } from './control_editor';
+import { IEditableControlFactory } from '../../types';
+import { ControlGroupStrings } from '../control_group_strings';
+import { DataControlInput, OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '../..';
 
 export function openAddDataControlFlyout(this: ControlGroupContainer) {
   const {
@@ -30,7 +35,6 @@ export function openAddDataControlFlyout(this: ControlGroupContainer) {
     controls: { getControlFactory },
     theme: { theme$ },
   } = pluginServices.getServices();
-  const ControlsServicesProvider = pluginServices.getContextProvider();
 
   let controlInput: Partial<DataControlInput> = {};
   const onCancel = () => {
@@ -53,7 +57,7 @@ export function openAddDataControlFlyout(this: ControlGroupContainer) {
 
   const flyoutInstance = openFlyout(
     toMountPoint(
-      <ControlsServicesProvider>
+      <ControlGroupContainerContext.Provider value={this}>
         <ControlEditor
           setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
           getRelevantDataViewId={this.getMostRelevantDataViewId}
@@ -91,7 +95,7 @@ export function openAddDataControlFlyout(this: ControlGroupContainer) {
             (controlInput = { ...controlInput, ...partialInput })
           }
         />
-      </ControlsServicesProvider>,
+      </ControlGroupContainerContext.Provider>,
       { theme$ }
     ),
     {

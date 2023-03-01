@@ -22,6 +22,7 @@ import {
   IEditableControlFactory,
 } from '../../types';
 import {
+  ControlGroupContainerContext,
   controlGroupSelector,
   setFlyoutRef,
   useControlGroupContainer,
@@ -54,7 +55,6 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
   }, [panels, embeddableId]);
 
   const editControl = async () => {
-    const ControlsServicesProvider = pluginServices.getContextProvider();
     const embeddable = (await controlGroup.untilEmbeddableLoaded(
       embeddableId
     )) as ControlEmbeddable<DataControlInput>;
@@ -121,7 +121,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
 
       const flyoutInstance = openFlyout(
         toMountPoint(
-          <ControlsServicesProvider>
+          <ControlGroupContainerContext.Provider value={controlGroup}>
             <ControlEditor
               isCreate={false}
               width={panel.width}
@@ -154,7 +154,7 @@ export const EditControlButton = ({ embeddableId }: { embeddableId: string }) =>
                 });
               }}
             />
-          </ControlsServicesProvider>,
+          </ControlGroupContainerContext.Provider>,
           { theme$ }
         ),
         {
