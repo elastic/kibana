@@ -66,3 +66,9 @@ export const DATA_STATISTICS_MESSAGE = (groupbySelection: string) =>
       defaultMessage: `To see alerts without {groupbySelection} you can filter in by `,
     }
   );
+
+export const NON_EMPTY_FILTER = (groupbySelection: string) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.alertsByGrouping.nonEmptyFilter', {
+    values: { groupbySelection },
+    defaultMessage: `NOT {groupBySelection}: exists`,
+  });

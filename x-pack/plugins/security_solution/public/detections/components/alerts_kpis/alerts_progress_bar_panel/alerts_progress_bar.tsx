@@ -87,7 +87,7 @@ export const AlertsProgressBar: React.FC<AlertsProcessBarProps> = ({
             }
           }}
         >
-          {`NOT ${groupBySelection}: exist`}
+          {i18n.NON_EMPTY_FILTER(groupBySelection)}
         </EuiLink>
       </EuiText>
     </DataStatsWrapper>
