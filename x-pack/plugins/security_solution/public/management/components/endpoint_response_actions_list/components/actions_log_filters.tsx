@@ -33,6 +33,7 @@ export const ActionsLogFilters = memo(
     onRefreshChange,
     onTimeChange,
     showHostsFilter,
+    'data-test-subj': dataTestSubj,
   }: {
     dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
@@ -46,8 +47,9 @@ export const ActionsLogFilters = memo(
     onTimeChange: ({ start, end }: DurationRange) => void;
     onClick: ReturnType<typeof useGetEndpointActionList>['refetch'];
     showHostsFilter: boolean;
+    'data-test-subj'?: string;
   }) => {
-    const getTestId = useTestIdGenerator('response-actions-list');
+    const getTestId = useTestIdGenerator(dataTestSubj);
     const filters = useMemo(() => {
       return (
         <>
@@ -56,21 +58,25 @@ export const ActionsLogFilters = memo(
               filterName={'hosts'}
               isFlyout={isFlyout}
               onChangeFilterOptions={onChangeHostsFilter}
+              data-test-subj={dataTestSubj}
             />
           )}
           <ActionsLogFilter
             filterName={'actions'}
             isFlyout={isFlyout}
             onChangeFilterOptions={onChangeCommandsFilter}
+            data-test-subj={dataTestSubj}
           />
           <ActionsLogFilter
             filterName={'statuses'}
             isFlyout={isFlyout}
             onChangeFilterOptions={onChangeStatusesFilter}
+            data-test-subj={dataTestSubj}
           />
         </>
       );
     }, [
+      dataTestSubj,
       isFlyout,
       onChangeCommandsFilter,
       onChangeHostsFilter,
@@ -83,7 +89,11 @@ export const ActionsLogFilters = memo(
     return (
       <EuiFlexGroup responsive gutterSize="s">
         <EuiFlexItem grow={isFlyout ? 1 : 2}>
-          <ActionsLogUsersFilter isFlyout={isFlyout} onChangeUsersFilter={onChangeUsersFilter} />
+          <ActionsLogUsersFilter
+            isFlyout={isFlyout}
+            onChangeUsersFilter={onChangeUsersFilter}
+            data-test-subj={dataTestSubj}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={isFlyout ? 1 : 1}>
           <EuiFilterGroup>{filters}</EuiFilterGroup>
@@ -96,6 +106,7 @@ export const ActionsLogFilters = memo(
             onRefresh={onRefresh}
             onRefreshChange={onRefreshChange}
             onTimeChange={onTimeChange}
+            data-test-subj={dataTestSubj}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
