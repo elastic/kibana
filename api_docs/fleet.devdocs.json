@@ -5625,7 +5625,8 @@
                 "docId": "kibSpacesPluginApi",
                 "section": "def-server.SpacesPluginStart",
                 "text": "SpacesPluginStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/fleet/server/plugin.ts",
             "deprecated": false,
@@ -6025,6 +6026,86 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.PackageClient.getPackages",
+            "type": "Function",
+            "tags": [],
+            "label": "getPackages",
+            "description": [],
+            "signature": [
+              "(params?: { excludeInstallStatus?: false | undefined; category?: string | undefined; prerelease?: false | undefined; } | undefined) => Promise<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.PackageList",
+                "text": "PackageList"
+              },
+              ">"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackageClient.getPackages.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "params",
+                "description": [],
+                "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.getPackages.$1.excludeInstallStatus",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "excludeInstallStatus",
+                    "description": [],
+                    "signature": [
+                      "false | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.getPackages.$1.category",
+                    "type": "string",
+                    "tags": [],
+                    "label": "category",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "fleet",
+                    "id": "def-server.PackageClient.getPackages.$1.prerelease",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "prerelease",
+                    "description": [],
+                    "signature": [
+                      "false | undefined"
+                    ],
+                    "path": "x-pack/plugins/fleet/server/services/epm/package_service.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -25182,6 +25263,17 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.EPM_API_ROUTES.VERIFICATION_KEY_ID",
+            "type": "string",
+            "tags": [],
+            "label": "VERIFICATION_KEY_ID",
+            "description": [],
+            "path": "x-pack/plugins/fleet/common/constants/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.EPM_API_ROUTES.STATS_PATTERN",
             "type": "string",
             "tags": [],
@@ -25238,6 +25330,22 @@
         "deprecated": false,
         "trackAdoption": false,
         "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.epmRouteService.getVerificationKeyIdPath",
+            "type": "Function",
+            "tags": [],
+            "label": "getVerificationKeyIdPath",
+            "description": [],
+            "signature": [
+              "() => string"
+            ],
+            "path": "x-pack/plugins/fleet/common/services/routes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
           {
             "parentPluginId": "fleet",
             "id": "def-common.epmRouteService.getCategoriesPath",

@@ -26,13 +26,17 @@ import { selectAgentPolicies } from '../../../state/private_locations';
 
 export const LocationForm = ({
   privateLocations,
+  hasPermissions,
 }: {
   onDiscard?: () => void;
   privateLocations: PrivateLocation[];
+  hasPermissions: boolean;
 }) => {
   const { data } = useSelector(selectAgentPolicies);
-  const { control, register } = useFormContext<PrivateLocation>();
+  const { control, register, watch } = useFormContext<PrivateLocation>();
   const { errors } = useFormState();
+  const selectedPolicyId = watch('agentPolicyId');
+  const selectedPolicy = data?.items.find((item) => item.id === selectedPolicyId);
 
   const tagsList = privateLocations.reduce((acc, item) => {
     const tags = item.tags || [];
@@ -41,7 +45,7 @@ export const LocationForm = ({
 
   return (
     <>
-      {data?.items.length === 0 && <AgentPolicyNeeded />}
+      {data?.items.length === 0 && <AgentPolicyNeeded disabled={!hasPermissions} />}
       <EuiForm component="form" noValidate>
         <EuiFormRow
           fullWidth
@@ -95,6 +99,39 @@ export const LocationForm = ({
             }
           </p>
         </EuiCallOut>
+
+        <EuiSpacer />
+        {selectedPolicy?.agents === 0 && (
+          <EuiCallOut
+            title={AGENT_MISSING_CALLOUT_TITLE}
+            size="s"
+            style={{ textAlign: 'left' }}
+            color="warning"
+          >
+            <p>
+              {
+                <FormattedMessage
+                  id="xpack.synthetics.monitorManagement.agentMissingCallout.content"
+                  defaultMessage="You have selected an agent policy that has no agents attached. Please ensure you have at least one agent enrolled in this policy. You can add agent before or after creating a location. For more information, {link}."
+                  values={{
+                    link: (
+                      <EuiLink
+                        target="_blank"
+                        href="https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html#synthetics-private-location-fleet-agent"
+                        external
+                      >
+                        <FormattedMessage
+                          id="xpack.synthetics.monitorManagement.agentCallout.link"
+                          defaultMessage="read the docs"
+                        />
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              }
+            </p>
+          </EuiCallOut>
+        )}
       </EuiForm>
     </>
   );
@@ -104,6 +141,13 @@ export const AGENT_CALLOUT_TITLE = i18n.translate(
   'xpack.synthetics.monitorManagement.agentCallout.title',
   {
     defaultMessage: 'Requirement',
+  }
+);
+
+export const AGENT_MISSING_CALLOUT_TITLE = i18n.translate(
+  'xpack.synthetics.monitorManagement.agentMissingCallout.title',
+  {
+    defaultMessage: 'Selected agent policy has no agents',
   }
 );
 
