@@ -14,6 +14,7 @@ import styled from 'styled-components';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { RangeFilterParams } from '@kbn/es-query';
 import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
+import type { XYState } from '@kbn/lens-plugin/public';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -96,6 +97,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     stackByField,
     title: '',
   });
+  const preferredSeriesType = (attributes?.state?.visualization as XYState).preferredSeriesType;
   const LensComponent = lens.EmbeddableComponent;
   const inspectActionProps = useMemo(
     () => ({
@@ -168,7 +170,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
 
   const onFilterCallback = useCallback(
     async (e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => {
-      if (!Array.isArray(e.data)) {
+      if (!Array.isArray(e.data) || preferredSeriesType !== 'area') {
         return;
       }
       const [{ query }] = await createFiltersFromValueClickAction({
@@ -182,7 +184,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
         });
       }
     },
-    [createFiltersFromValueClickAction, updateDateRange]
+    [createFiltersFromValueClickAction, updateDateRange, preferredSeriesType]
   );
 
   const adHocDataViews = useMemo(
