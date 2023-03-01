@@ -22,9 +22,9 @@ export const isPathValid = (path: string, source: SignalSource): boolean => {
   }
   const splitPath = path.split('.');
 
-  return !splitPath.some((_, index, array) => {
+  return splitPath.every((_, index, array) => {
     const newPath = [...array].splice(0, index + 1).join('.');
     const valueToCheck = get(newPath, source);
-    return valueToCheck !== undefined && !isPlainObject(valueToCheck);
+    return valueToCheck === undefined || isPlainObject(valueToCheck);
   });
 };
