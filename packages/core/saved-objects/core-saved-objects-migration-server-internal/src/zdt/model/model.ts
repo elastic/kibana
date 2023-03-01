@@ -32,7 +32,6 @@ export const model = (
   switch (current.controlState) {
     // TODO: unimplemented
     case 'WAIT_FOR_YELLOW_INDEX':
-    case 'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK':
       return current;
     // END TODO
     case 'INIT':
@@ -53,6 +52,12 @@ export const model = (
       return Stages.updateIndexMappings(
         current,
         response as StateActionResponse<'UPDATE_INDEX_MAPPINGS'>,
+        context
+      );
+    case 'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK':
+      return Stages.updateIndexMappingsWaitForTask(
+        current,
+        response as StateActionResponse<'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'>,
         context
       );
     case 'DONE':

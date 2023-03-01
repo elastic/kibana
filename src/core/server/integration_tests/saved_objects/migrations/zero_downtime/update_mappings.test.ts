@@ -11,13 +11,16 @@ import fs from 'fs/promises';
 import JSON5 from 'json5';
 import { LogRecord } from '@kbn/logging';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { getKibanaMigratorTestKit } from '../kibana_migrator_test_kit';
+import {
+  getKibanaMigratorTestKit,
+  type KibanaMigratorTestKitParams,
+} from '../kibana_migrator_test_kit';
 import { delay } from '../test_utils';
-import { getFooType, getBarType } from './base_types.fixtures';
+import { getFooType, getBarType, dummyModelVersion } from './base_types.fixtures';
 
-export const logFilePath = Path.join(__dirname, 'create_index.test.log');
+export const logFilePath = Path.join(__dirname, 'update_mappings.test.log');
 
-describe('ZDT upgrades - running on a fresh cluster', () => {
+describe('ZDT upgrades - basic mapping update', () => {
   let esServer: TestElasticsearchUtils['es'];
 
   const startElasticsearch = async () => {
@@ -32,6 +35,16 @@ describe('ZDT upgrades - running on a fresh cluster', () => {
     return await startES();
   };
 
+  const baseMigratorParams: KibanaMigratorTestKitParams = {
+    kibanaIndex: '.kibana',
+    kibanaVersion: '8.7.0',
+    settings: {
+      migrations: {
+        algorithm: 'zdt',
+      },
+    },
+  };
+
   beforeAll(async () => {
     await fs.unlink(logFilePath).catch(() => {});
     esServer = await startElasticsearch();
@@ -42,20 +55,45 @@ describe('ZDT upgrades - running on a fresh cluster', () => {
     await delay(10);
   });
 
-  it('create the index with the correct mappings and meta', async () => {
+  const createBaseline = async () => {
+    const fooType = getFooType();
+    const barType = getBarType();
+    const { runMigrations } = await getKibanaMigratorTestKit({
+      ...baseMigratorParams,
+      types: [fooType, barType],
+    });
+    await runMigrations();
+  };
+
+  it('do some shit', async () => {
+    await createBaseline();
+
     const fooType = getFooType();
     const barType = getBarType();
 
+    // increasing the model version of the types
+    fooType.modelVersions = {
+      ...fooType.modelVersions,
+      '3': dummyModelVersion,
+    };
+    fooType.mappings.properties = {
+      ...fooType.mappings.properties,
+      someAddedField: { type: 'keyword' },
+    };
+
+    barType.modelVersions = {
+      ...barType.modelVersions,
+      '2': dummyModelVersion,
+    };
+    barType.mappings.properties = {
+      ...barType.mappings.properties,
+      anotherAddedField: { type: 'boolean' },
+    };
+
     const { runMigrations, client } = await getKibanaMigratorTestKit({
-      kibanaIndex: '.kibana',
-      kibanaVersion: '8.7.0',
+      ...baseMigratorParams,
       logFilePath,
       types: [fooType, barType],
-      settings: {
-        migrations: {
-          algorithm: 'zdt',
-        },
-      },
     });
 
     const result = await runMigrations();
@@ -107,9 +145,9 @@ describe('ZDT upgrades - running on a fresh cluster', () => {
       expect(records.find((entry) => entry.message.includes(messagePrefix))).toBeDefined();
     };
 
-    expectLogsContains('INIT -> CREATE_TARGET_INDEX');
-    expectLogsContains('CREATE_TARGET_INDEX -> UPDATE_ALIASES');
-    expectLogsContains('UPDATE_ALIASES -> DONE');
+    expectLogsContains('INIT -> UPDATE_INDEX_MAPPINGS');
+    expectLogsContains('UPDATE_INDEX_MAPPINGS -> UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK');
+    expectLogsContains('UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK -> DONE');
     expectLogsContains('Migration completed');
   });
 });
