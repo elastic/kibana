@@ -16,7 +16,6 @@ import {
   ResultsPerPage,
   SearchBox,
   SearchProvider,
-  Sorting,
 } from '@elastic/react-search-ui';
 import { SearchDriverOptions } from '@elastic/search-ui';
 import EnginesAPIConnector, {
@@ -87,7 +86,7 @@ export const EngineSearchPreview: React.FC = () => {
   const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
   const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null);
   const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
-  const { resultFields, searchableFields, sortOptions } = useValues(EngineSearchPreviewLogic);
+  const { resultFields, searchableFields, sortableFields } = useValues(EngineSearchPreviewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
@@ -143,7 +142,8 @@ export const EngineSearchPreview: React.FC = () => {
             <EuiFlexItem grow={false} css={{ minWidth: '240px' }}>
               <ResultsPerPage view={ResultsPerPageView} options={RESULTS_PER_PAGE_OPTIONS} />
               <EuiSpacer size="m" />
-              <Sorting
+              <SortingView sortableFields={sortableFields} />
+              {/* <Sorting
                 view={SortingView}
                 sortOptions={[
                   {
@@ -155,7 +155,7 @@ export const EngineSearchPreview: React.FC = () => {
                   },
                   ...sortOptions,
                 ]}
-              />
+              /> */}
               <EuiSpacer size="m" />
               <EuiLink href={docLinks.enterpriseSearchEngines} target="_blank">
                 <FormattedMessage

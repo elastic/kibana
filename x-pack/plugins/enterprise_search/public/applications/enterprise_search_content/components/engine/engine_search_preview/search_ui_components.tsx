@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { useValues } from 'kea';
 
@@ -25,6 +25,7 @@ import {
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { withSearch } from '@elastic/react-search-ui';
 import type {
   InputViewProps,
   PagingInfoViewProps,
@@ -226,14 +227,10 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
   </EuiFlexItem>
 );
 
-export const SortingView: React.FC<SortingViewProps> = (
-  {
-    // onChange,
-    // options,
-    // value,
-  }
-) => {
-  const [value, setValue] = useState(null);
+export const SortingView: React.FC<SortingViewProps> = withSearch(({ setSort, sortList }) => ({
+  setSort,
+  sortList: sortList.length === 0 ? [{ direction: '', field: '' }] : sortList,
+}))(({ sortableFields, sortList: [{ direction, field }], setSort }) => {
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -245,19 +242,25 @@ export const SortingView: React.FC<SortingViewProps> = (
           isClearable={false}
           singleSelection={{ asPlainText: true }}
           options={[
-            { value: 'foo', label: 'Foo' },
-            { value: 'bar', label: 'Bar' },
+            { label: 'Relevance', value: '' },
+            ...sortableFields.map((f) => ({ label: f, value: f })),
           ]}
-          selectedOptions={value === null ? [] : [{ value, label: value }]}
-          onChange={(options) => {
-            if (options.length === 0) return;
-
-            const [{ value: newValue }] = options;
-
-            setValue(newValue);
-          }}
+          selectedOptions={[{ label: !!field ? field : 'Relevance', value: field }]}
+          onChange={([{ value }]) =>
+            setSort(value === '' ? [] : [{ direction: 'asc', field: value }])
+          }
         />
+        {field !== '' && (
+          <EuiSelect
+            onChange={(evt) => setSort([{ direction: evt.target.value, field }])}
+            value={direction}
+            options={[
+              { label: 'Ascending', value: 'asc' },
+              { label: 'Descending', value: 'desc' },
+            ]}
+          />
+        )}
       </EuiFlexGroup>
     </EuiFlexItem>
   );
-};
+});
