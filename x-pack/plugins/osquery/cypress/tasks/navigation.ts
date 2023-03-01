@@ -36,3 +36,17 @@ export enum NAV_SEARCH_INPUT_OSQUERY_RESULTS {
   LOGS = '/app/integrations/detail/osquery/overview',
   MANAGER = '/app/integrations/detail/osquery_manager/overview',
 }
+
+export const apiPaths = {
+  fleet: {
+    agent_policies: {
+      delete: '/api/fleet/agent_policies/delete',
+    },
+  },
+  osquery: {
+    packs: '/api/osquery/packs',
+    pack: (packId: string) => `/api/osquery/packs/${packId}`,
+    savedQueries: '/api/osquery/saved_queries',
+    savedQuery: (queryId: string) => `/api/osquery/saved_queries/${queryId}`,
+  },
+};

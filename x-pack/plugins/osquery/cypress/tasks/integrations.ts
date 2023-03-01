@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { navigateTo } from './navigation';
+import { request } from './common';
+import { apiPaths } from './navigation';
 import { DEFAULT_POLICY } from '../screens/fleet';
 import {
   ADD_POLICY_BTN,
@@ -51,22 +52,31 @@ export const integrationExistsWithinPolicyDetails = (integrationName: string) =>
   cy.contains(`name: ${integrationName}`);
 };
 
-export const cleanupPolicy = (policyName: string) => {
-  cy.visit('app/fleet/policies');
-  cy.contains(policyName).click();
-  cy.get('[name="Settings"]').click();
-  cy.getBySel('agentPolicyForm.downloadSource.deleteBtn').click();
-  closeModalIfVisible();
-  cy.contains(`Deleted agent policy '${policyName}'`);
+export const interceptPolicyId = (cb: (policyId: string) => void) => {
+  cy.intercept('POST', '**/api/fleet/agent_policies**', (req) => {
+    req.continue((res) => {
+      cb(res.body.item.id);
+
+      return res.send(res.body);
+    });
+  });
 };
 
-export const cleanupPack = (packName: string) => {
-  navigateTo('app/osquery/packs');
-  cy.contains(packName).click();
-  cy.contains('Edit').click();
-  cy.contains('Delete pack').click();
-  closeModalIfVisible();
+export const interceptPackId = (cb: (packId: string) => void) => {
+  cy.intercept('POST', '**/api/osquery/packs', (req) => {
+    req.continue((res) => {
+      cb(res.body.data.id);
+
+      return res.send(res.body);
+    });
+  });
 };
+
+export const cleanupPolicyApi = (agentPolicyId: string) =>
+  request({ method: 'POST', body: { agentPolicyId }, url: apiPaths.fleet.agent_policies.delete });
+
+export const cleanupPackApi = (packId: string) =>
+  request({ method: 'DELETE', url: apiPaths.osquery.pack(packId) });
 
 export const generateRandomStringName = (length: number) =>
   Array.from({ length }, () => Math.random().toString(36).substring(2));

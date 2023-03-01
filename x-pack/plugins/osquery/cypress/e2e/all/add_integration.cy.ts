@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { cleanupSavedQuery, loadSavedQuery } from '../../tasks/api_fixtures';
 import { CREATE_PACKAGE_POLICY_SAVE_BTN } from '../../screens/integrations';
 import {
   createOldOsqueryPath,
@@ -15,21 +16,25 @@ import {
 } from '../../tasks/navigation';
 import {
   addCustomIntegration,
-  cleanupPack,
-  cleanupPolicy,
+  cleanupPackApi,
+  cleanupPolicyApi,
   closeModalIfVisible,
   generateRandomStringName,
   integrationExistsWithinPolicyDetails,
+  interceptPackId,
+  interceptPolicyId,
   policyContainsIntegration,
 } from '../../tasks/integrations';
 
 import { login } from '../../tasks/login';
 import { findAndClickButton, findFormFieldByRowsLabelAndType } from '../../tasks/live_query';
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 
 describe('ALL - Add Integration', () => {
+  let savedQueryId: string;
   before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
+    loadSavedQuery().then((queryId) => {
+      savedQueryId = queryId;
+    });
   });
 
   beforeEach(() => {
@@ -37,7 +42,7 @@ describe('ALL - Add Integration', () => {
   });
 
   after(() => {
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
+    cleanupSavedQuery(savedQueryId);
   });
 
   it('validate osquery is not available and nav search links to integration', () => {
@@ -54,110 +59,149 @@ describe('ALL - Add Integration', () => {
     cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('exist').click();
   });
 
-  it('should add the old integration and be able to upgrade it', () => {
+  describe('Add and upgrade integration', () => {
     const oldVersion = '0.7.4';
     const [integrationName, policyName] = generateRandomStringName(2);
+    let policyId: string;
 
-    cy.visit(createOldOsqueryPath(oldVersion));
-    addCustomIntegration(integrationName, policyName);
-    cy.contains(integrationName);
-    policyContainsIntegration(integrationName, policyName);
-    cy.contains(`version: ${oldVersion}`);
-    cy.getBySel('euiFlyoutCloseButton').click();
-    cy.getBySel('PackagePoliciesTableUpgradeButton').click();
-    cy.getBySel('saveIntegration').click();
-    cy.contains(`Successfully updated '${integrationName}'`);
-    policyContainsIntegration(integrationName, policyName);
-    cy.contains(`version: ${oldVersion}`).should('not.exist');
-
-    cleanupPolicy(policyName);
-  });
-
-  it('add integration', () => {
-    const [integrationName, policyName] = generateRandomStringName(2);
-
-    cy.visit(FLEET_AGENT_POLICIES);
-    cy.getBySel('createAgentPolicyButton').click();
-    cy.getBySel('createAgentPolicyNameField').type(policyName);
-    cy.getBySel('createAgentPolicyFlyoutBtn').click();
-    cy.getBySel('agentPolicyNameLink').contains(policyName).click();
-    cy.getBySel('addPackagePolicyButton').click();
-    cy.getBySel('integration-card:epr:osquery_manager').click();
-    cy.getBySel('addIntegrationPolicyButton').click();
-    cy.getBySel('agentPolicySelect').within(() => {
-      cy.contains(policyName);
+    before(() => {
+      interceptPolicyId((agentPolicyId) => {
+        policyId = agentPolicyId;
+      });
     });
-    cy.getBySel('packagePolicyNameInput').type(`{selectall}{backspace}${integrationName}`);
-    cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
-    cy.getBySel('confirmModalCancelButton').click();
-    cy.get(`[title="${integrationName}"]`).should('exist');
-    cy.visit(OSQUERY);
-    cy.contains('Live queries history');
 
-    cleanupPolicy(policyName);
+    after(() => {
+      cleanupPolicyApi(policyId);
+    });
+
+    it('should add the old integration and be able to upgrade it', () => {
+      cy.visit(createOldOsqueryPath(oldVersion));
+      addCustomIntegration(integrationName, policyName);
+      cy.contains(integrationName);
+      policyContainsIntegration(integrationName, policyName);
+      cy.contains(`version: ${oldVersion}`);
+      cy.getBySel('euiFlyoutCloseButton').click();
+      cy.getBySel('PackagePoliciesTableUpgradeButton').click();
+      cy.getBySel('saveIntegration').click();
+      cy.contains(`Successfully updated '${integrationName}'`);
+      policyContainsIntegration(integrationName, policyName);
+      cy.contains(`version: ${oldVersion}`).should('not.exist');
+    });
   });
 
-  it('should have integration and packs copied when upgrading integration', () => {
+  describe('Add integration to policy', () => {
+    const [integrationName, policyName] = generateRandomStringName(2);
+    let policyId: string;
+
+    before(() => {
+      interceptPolicyId((agentPolicyId) => {
+        policyId = agentPolicyId;
+      });
+    });
+
+    after(() => {
+      cleanupPolicyApi(policyId);
+    });
+
+    it('add integration', () => {
+      cy.visit(FLEET_AGENT_POLICIES);
+      cy.getBySel('createAgentPolicyButton').click();
+      cy.getBySel('createAgentPolicyNameField').type(policyName);
+      cy.getBySel('createAgentPolicyFlyoutBtn').click();
+      cy.getBySel('agentPolicyNameLink').contains(policyName).click();
+      cy.getBySel('addPackagePolicyButton').click();
+      cy.getBySel('integration-card:epr:osquery_manager').click();
+      cy.getBySel('addIntegrationPolicyButton').click();
+      cy.getBySel('agentPolicySelect').within(() => {
+        cy.contains(policyName);
+      });
+      cy.getBySel('packagePolicyNameInput')
+        .wait(500)
+        .type(`{selectall}{backspace}${integrationName}`);
+      cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
+      cy.getBySel('confirmModalCancelButton').click();
+      cy.get(`[title="${integrationName}"]`).should('exist');
+      cy.visit(OSQUERY);
+      cy.contains('Live queries history');
+    });
+  });
+
+  describe('Upgrade policy with existing packs', () => {
     const oldVersion = '1.2.0';
     const [policyName, integrationName, packName] = generateRandomStringName(3);
+    let policyId: string;
+    let packId: string;
 
-    cy.visit(`app/integrations/detail/osquery_manager-${oldVersion}/overview`);
-    addCustomIntegration(integrationName, policyName);
-    cy.getBySel('integrationPolicyUpgradeBtn');
-    cy.get(`[title="${policyName}"]`).click();
-    cy.get(`[title="${integrationName}"]`)
-      .parents('tr')
-      .within(() => {
-        cy.contains('Osquery Manager');
-        cy.getBySel('PackagePoliciesTableUpgradeButton');
-        cy.contains(`v${oldVersion}`);
-        cy.getBySel('agentActionsBtn').click();
+    before(() => {
+      interceptPolicyId((agentPolicyId) => {
+        policyId = agentPolicyId;
       });
-    integrationExistsWithinPolicyDetails(integrationName);
-    cy.contains(`version: ${oldVersion}`);
-    cy.getBySel('euiFlyoutCloseButton').click();
-
-    navigateTo('app/osquery/packs');
-    findAndClickButton('Add pack');
-    findFormFieldByRowsLabelAndType('Name', packName);
-    findFormFieldByRowsLabelAndType(
-      'Scheduled agent policies (optional)',
-      `${policyName} {downArrow}{enter}{esc}`
-    );
-    findAndClickButton('Add query');
-    cy.getBySel('savedQuerySelect').click().type('{downArrow}{enter}');
-    cy.contains(/^Save$/).click();
-    cy.contains(/^Save pack$/).click();
-    cy.contains(`Successfully created "${packName}" pack`).click();
-    cy.visit('app/fleet/policies');
-    cy.get(`[title="${policyName}"]`).click();
-    cy.getBySel('PackagePoliciesTableUpgradeButton').click();
-    cy.contains(/^Advanced$/).click();
-    cy.getBySel('codeEditorContainer').within(() => {
-      cy.contains(`"${packName}":`);
-    });
-    cy.getBySel('saveIntegration').click();
-    cy.get(`a[title="${integrationName}"]`).click();
-    cy.contains(/^Advanced$/).click();
-    cy.getBySel('codeEditorContainer').within(() => {
-      cy.contains(`"${packName}":`);
-    });
-    cy.contains('Cancel').click();
-    closeModalIfVisible();
-    cy.get(`[title="${integrationName}"]`)
-      .parents('tr')
-      .within(() => {
-        cy.getBySel('PackagePoliciesTableUpgradeButton').should('not.exist');
-        cy.contains('Osquery Manager').and('not.contain', `v${oldVersion}`);
+      interceptPackId((pack) => {
+        packId = pack;
       });
-    integrationExistsWithinPolicyDetails(integrationName);
+    });
 
-    // test list of prebuilt queries
-    navigateTo('/app/osquery/saved_queries');
-    cy.waitForReact();
-    cy.react('EuiTableRow').should('have.length.above', 5);
+    after(() => {
+      cleanupPackApi(packId);
+      cleanupPolicyApi(policyId);
+    });
 
-    cleanupPack(packName);
-    cleanupPolicy(policyName);
+    it('should have integration and packs copied when upgrading integration', () => {
+      cy.visit(`app/integrations/detail/osquery_manager-${oldVersion}/overview`);
+      addCustomIntegration(integrationName, policyName);
+      cy.getBySel('integrationPolicyUpgradeBtn');
+      cy.get(`[title="${policyName}"]`).click();
+      cy.get(`[title="${integrationName}"]`)
+        .parents('tr')
+        .within(() => {
+          cy.contains('Osquery Manager');
+          cy.getBySel('PackagePoliciesTableUpgradeButton');
+          cy.contains(`v${oldVersion}`);
+          cy.getBySel('agentActionsBtn').click();
+        });
+      integrationExistsWithinPolicyDetails(integrationName);
+      cy.contains(`version: ${oldVersion}`);
+      cy.getBySel('euiFlyoutCloseButton').click();
+
+      navigateTo('app/osquery/packs');
+      findAndClickButton('Add pack');
+      findFormFieldByRowsLabelAndType('Name', packName);
+      findFormFieldByRowsLabelAndType(
+        'Scheduled agent policies (optional)',
+        `${policyName} {downArrow}{enter}{esc}`
+      );
+      findAndClickButton('Add query');
+      cy.getBySel('savedQuerySelect').click().type('{downArrow}{enter}');
+      cy.contains(/^Save$/).click();
+      cy.contains(/^Save pack$/).click();
+      cy.contains(`Successfully created "${packName}" pack`).click();
+      cy.visit('app/fleet/policies');
+      cy.get(`[title="${policyName}"]`).click();
+      cy.getBySel('PackagePoliciesTableUpgradeButton').click();
+      cy.contains(/^Advanced$/).click();
+      cy.getBySel('codeEditorContainer').within(() => {
+        cy.contains(`"${packName}":`);
+      });
+      cy.getBySel('saveIntegration').click();
+      cy.get(`a[title="${integrationName}"]`).click();
+      cy.contains(/^Advanced$/).click();
+      cy.getBySel('codeEditorContainer').within(() => {
+        cy.contains(`"${packName}":`);
+      });
+      cy.contains('Cancel').click();
+      closeModalIfVisible();
+      cy.get(`[title="${integrationName}"]`)
+        .parents('tr')
+        .within(() => {
+          cy.getBySel('PackagePoliciesTableUpgradeButton').should('not.exist');
+          cy.contains('Osquery Manager').and('not.contain', `v${oldVersion}`);
+        });
+      integrationExistsWithinPolicyDetails(integrationName);
+
+      // test list of prebuilt queries
+      navigateTo('/app/osquery/saved_queries');
+      cy.waitForReact();
+      cy.react('EuiTableRow').should('have.length.above', 5);
+    });
   });
 });
