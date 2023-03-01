@@ -181,7 +181,6 @@ const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="a
 
 const testProps: AlertsTableComponentProps = {
   defaultFilters: [],
-  dispatch: jest.fn(),
   from: '2020-07-07T08:20:18.966Z',
   globalFilters: [],
   globalQuery: {
@@ -255,7 +254,6 @@ describe('GroupedAlertsTable', () => {
             language: 'language',
           }}
           globalFilters={[]}
-          dispatch={jest.fn()}
           runtimeMappings={{}}
           signalIndexName={'test'}
           renderChildComponent={() => <></>}
