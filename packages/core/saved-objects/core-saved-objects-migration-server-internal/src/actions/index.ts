@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { type Either, right } from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/lib/Either';
+import { right } from 'fp-ts/lib/Either';
 import type { RetryableEsClientError } from './catch_retryable_es_client_errors';
 import type { DocumentsTransformFailed } from '../core/migrate_raw_docs';
 
@@ -41,11 +42,8 @@ export type {
   IndexNotYellowTimeout,
   IndexNotGreenTimeout,
 } from './wait_for_index_status';
-import {
-  type IndexNotGreenTimeout,
-  type IndexNotYellowTimeout,
-  waitForIndexStatus,
-} from './wait_for_index_status';
+import type { IndexNotGreenTimeout, IndexNotYellowTimeout } from './wait_for_index_status';
+import { waitForIndexStatus } from './wait_for_index_status';
 
 export type { WaitForTaskResponse, WaitForTaskCompletionTimeout } from './wait_for_task';
 import { waitForTask, WaitForTaskCompletionTimeout } from './wait_for_task';
@@ -89,8 +87,6 @@ export { createIndex } from './create_index';
 
 export { checkTargetMappings } from './check_target_mappings';
 
-export { updateTargetMappingsMeta } from './update_target_mappings_meta';
-
 export const noop = async (): Promise<Either<never, 'noop'>> => right('noop' as const);
 
 export type {
@@ -98,6 +94,8 @@ export type {
   UpdateAndPickupMappingsParams,
 } from './update_and_pickup_mappings';
 export { updateAndPickupMappings } from './update_and_pickup_mappings';
+
+export { updateMappings } from './update_mappings';
 
 import type { UnknownDocsFound } from './check_for_unknown_docs';
 import type { IncompatibleClusterRoutingAllocation } from './initialize_action';
