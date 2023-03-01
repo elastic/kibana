@@ -31,7 +31,7 @@ export const calculateRiskScores = async ({
           size: 1000,
         },
         aggs: {
-          riskiest_reasons: {
+          riskiest_inputs: {
             top_hits: {
               size: 30,
               sort: [
@@ -77,7 +77,7 @@ export const calculateRiskScores = async ({
           size: 1000,
         },
         aggs: {
-          riskiest_reasons: {
+          riskiest_inputs: {
             top_hits: {
               size: 30,
               sort: [
@@ -129,13 +129,23 @@ export const calculateRiskScores = async ({
       '@timestamp': now,
       identifierField: 'user.name',
       identifierValue: bucket.key,
-      calculatedScoreNorm: bucket.normalized_score,
+      calculatedScoreNorm: bucket.normalized_score.value,
+      riskiest_inputs: bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
+        _id: riskInput._id,
+        _index: riskInput._index,
+        score: riskInput.sort?.at(0),
+      })),
     })),
     hosts: results.aggregations.hosts.buckets.map((bucket) => ({
       '@timestamp': now,
       identifierField: 'host.name',
       identifierValue: bucket.key,
-      calculatedScoreNorm: bucket.normalized_score,
+      calculatedScoreNorm: bucket.normalized_score.value,
+      riskiest_inputs: bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
+        _id: riskInput._id,
+        _index: riskInput._index,
+        score: riskInput.sort?.at(0),
+      })),
     })),
   };
 };

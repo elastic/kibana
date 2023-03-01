@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { DataViewId } from '../../../common/detection_engine/rule_schema';
 
@@ -29,6 +30,12 @@ export interface RiskScore {
   // calculatedLevel: string;
   // calculatedScore: number;
   calculatedScoreNorm: number;
+  riskiest_inputs: RiskInput[] | Ecs[];
+}
+
+export interface RiskInput {
+  _id: string;
+  _index: string;
 }
 
 export type RiskScores = RiskScore[];
@@ -45,6 +52,6 @@ export interface CalculateRiskScoreAggregations {
 interface RiskScoreBucket {
   key: string;
   doc_count: number;
-  normalized_score: number;
-  riskiest_inputs: SearchResponse<{ _index: string; _id: string; sort: [number] }>;
+  normalized_score: { value: number };
+  riskiest_inputs: SearchResponse;
 }
