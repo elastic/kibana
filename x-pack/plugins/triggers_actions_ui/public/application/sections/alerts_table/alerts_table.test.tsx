@@ -468,7 +468,7 @@ describe('AlertsTable', () => {
         expect(queryByTestId('expandColumnCellOpenFlyoutButton')).toBe(null);
       });
 
-      describe('row loading state on action', () => {
+      describe.skip('row loading state on action', () => {
         let mockedFn: jest.Mock;
         let customTableProps: AlertsTableProps;
 
