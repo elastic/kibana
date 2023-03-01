@@ -11,16 +11,7 @@ exports[`IndicesList should change pages 1`] = `
         key="0"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-kibana"
-            disabled={false}
-            id="kibana"
-            indeterminate={false}
-            label="kibana"
-            onChange={[Function]}
-          />
+          kibana
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -28,16 +19,7 @@ exports[`IndicesList should change pages 1`] = `
         key="1"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-es"
-            disabled={false}
-            id="es"
-            indeterminate={false}
-            label="es"
-            onChange={[Function]}
-          />
+          es
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -129,16 +111,7 @@ exports[`IndicesList should change per page 1`] = `
         key="0"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-kibana"
-            disabled={false}
-            id="kibana"
-            indeterminate={false}
-            label="kibana"
-            onChange={[Function]}
-          />
+          kibana
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -228,6 +201,113 @@ exports[`IndicesList should change per page 1`] = `
 </div>
 `;
 
+exports[`IndicesList should highlight fully when an exact match 1`] = `
+<div>
+  <EuiTable
+    responsive={false}
+    tableLayout="auto"
+  >
+    <EuiTableBody>
+      <EuiTableRow
+        key="0"
+      >
+        <EuiTableRowCell>
+          <span>
+            <strong>
+              logs
+            </strong>
+            tash
+          </span>
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+      <EuiTableRow
+        key="1"
+      >
+        <EuiTableRowCell>
+          <strong>
+            some_logs
+          </strong>
+        </EuiTableRowCell>
+        <EuiTableRowCell />
+      </EuiTableRow>
+    </EuiTableBody>
+  </EuiTable>
+  <EuiSpacer
+    size="m"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiPopover
+        anchorPosition="downCenter"
+        button={
+          <EuiButtonEmpty
+            color="text"
+            iconSide="right"
+            iconType="arrowDown"
+            onClick={[Function]}
+            size="s"
+          >
+            <FormattedMessage
+              defaultMessage="Rows per page: {perPage}"
+              id="indexPatternEditor.pagingLabel"
+              values={
+                Object {
+                  "perPage": 10,
+                }
+              }
+            />
+          </EuiButtonEmpty>
+        }
+        closePopover={[Function]}
+        display="inline-block"
+        hasArrow={true}
+        id="customizablePagination"
+        isOpen={false}
+        ownFocus={true}
+        panelPaddingSize="none"
+      >
+        <EuiContextMenuPanel
+          items={
+            Array [
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                5
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                10
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                20
+              </EuiContextMenuItem>,
+              <EuiContextMenuItem
+                icon="empty"
+                onClick={[Function]}
+              >
+                50
+              </EuiContextMenuItem>,
+            ]
+          }
+        />
+      </EuiPopover>
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</div>
+`;
+
 exports[`IndicesList should highlight the query in the matches 1`] = `
 <div>
   <EuiTable
@@ -239,25 +319,12 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
         key="0"
       >
         <EuiTableRowCell>
-          <EuiFlexGroup
-            alignItems="center"
-            direction="row"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                type="check"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <strong>
-                kibana
-              </strong>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <span>
+            <strong>
+              ki
+            </strong>
+            bana
+          </span>
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -265,16 +332,9 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
         key="1"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-es"
-            disabled={false}
-            id="es"
-            indeterminate={false}
-            label="es"
-            onChange={[Function]}
-          />
+          <strong>
+            es
+          </strong>
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -366,16 +426,7 @@ exports[`IndicesList should render normally 1`] = `
         key="0"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-kibana"
-            disabled={false}
-            id="kibana"
-            indeterminate={false}
-            label="kibana"
-            onChange={[Function]}
-          />
+          kibana
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -383,285 +434,7 @@ exports[`IndicesList should render normally 1`] = `
         key="1"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-es"
-            disabled={false}
-            id="es"
-            indeterminate={false}
-            label="es"
-            onChange={[Function]}
-          />
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-    </EuiTableBody>
-  </EuiTable>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiPopover
-        anchorPosition="downCenter"
-        button={
-          <EuiButtonEmpty
-            color="text"
-            iconSide="right"
-            iconType="arrowDown"
-            onClick={[Function]}
-            size="s"
-          >
-            <FormattedMessage
-              defaultMessage="Rows per page: {perPage}"
-              id="indexPatternEditor.pagingLabel"
-              values={
-                Object {
-                  "perPage": 10,
-                }
-              }
-            />
-          </EuiButtonEmpty>
-        }
-        closePopover={[Function]}
-        display="inline-block"
-        hasArrow={true}
-        id="customizablePagination"
-        isOpen={false}
-        ownFocus={true}
-        panelPaddingSize="none"
-      >
-        <EuiContextMenuPanel
-          items={
-            Array [
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                5
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                10
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                20
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                50
-              </EuiContextMenuItem>,
-            ]
-          }
-        />
-      </EuiPopover>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
-`;
-
-exports[`IndicesList should show a warning for the matches 1`] = `
-<div>
-  <EuiTable
-    responsive={false}
-    tableLayout="auto"
-  >
-    <EuiTableBody>
-      <EuiTableRow
-        key="0"
-      >
-        <EuiTableRowCell>
-          <EuiFlexGroup
-            alignItems="center"
-            direction="row"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                type="check"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <strong>
-                kibana
-              </strong>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="1"
-      >
-        <EuiTableRowCell>
-          <EuiFlexGroup
-            alignItems="center"
-            direction="row"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                type="magnifyWithExclamation"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              es
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-    </EuiTableBody>
-  </EuiTable>
-  <EuiSpacer
-    size="m"
-  />
-  <EuiFlexGroup
-    alignItems="center"
-    justifyContent="spaceBetween"
-  >
-    <EuiFlexItem
-      grow={false}
-    >
-      <EuiPopover
-        anchorPosition="downCenter"
-        button={
-          <EuiButtonEmpty
-            color="text"
-            iconSide="right"
-            iconType="arrowDown"
-            onClick={[Function]}
-            size="s"
-          >
-            <FormattedMessage
-              defaultMessage="Rows per page: {perPage}"
-              id="indexPatternEditor.pagingLabel"
-              values={
-                Object {
-                  "perPage": 10,
-                }
-              }
-            />
-          </EuiButtonEmpty>
-        }
-        closePopover={[Function]}
-        display="inline-block"
-        hasArrow={true}
-        id="customizablePagination"
-        isOpen={false}
-        ownFocus={true}
-        panelPaddingSize="none"
-      >
-        <EuiContextMenuPanel
-          items={
-            Array [
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                5
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                10
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                20
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                icon="empty"
-                onClick={[Function]}
-              >
-                50
-              </EuiContextMenuItem>,
-            ]
-          }
-        />
-      </EuiPopover>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-</div>
-`;
-
-exports[`IndicesList should show checkbox when not an exact match 1`] = `
-<div>
-  <EuiTable
-    responsive={false}
-    tableLayout="auto"
-  >
-    <EuiTableBody>
-      <EuiTableRow
-        key="0"
-      >
-        <EuiTableRowCell>
-          <EuiFlexGroup
-            alignItems="center"
-            direction="row"
-            gutterSize="s"
-            responsive={false}
-          >
-            <EuiFlexItem
-              grow={false}
-            >
-              <EuiIcon
-                type="check"
-              />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <strong>
-                logstash
-              </strong>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiTableRowCell>
-        <EuiTableRowCell />
-      </EuiTableRow>
-      <EuiTableRow
-        key="1"
-      >
-        <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-some_logs"
-            disabled={false}
-            id="some_logs"
-            indeterminate={false}
-            label={
-              <span>
-                some_
-                <strong>
-                  logs
-                </strong>
-                
-              </span>
-            }
-            onChange={[Function]}
-          />
+          es
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -753,16 +526,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="0"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-kibana"
-            disabled={false}
-            id="kibana"
-            indeterminate={false}
-            label="kibana"
-            onChange={[Function]}
-          />
+          kibana
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -770,16 +534,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="1"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-es"
-            disabled={false}
-            id="es"
-            indeterminate={false}
-            label="es"
-            onChange={[Function]}
-          />
+          es
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -787,16 +542,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="2"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-kibana"
-            disabled={false}
-            id="kibana"
-            indeterminate={false}
-            label="kibana"
-            onChange={[Function]}
-          />
+          kibana
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -804,16 +550,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="3"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-es"
-            disabled={false}
-            id="es"
-            indeterminate={false}
-            label="es"
-            onChange={[Function]}
-          />
+          es
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -821,16 +558,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="4"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-kibana"
-            disabled={false}
-            id="kibana"
-            indeterminate={false}
-            label="kibana"
-            onChange={[Function]}
-          />
+          kibana
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -838,16 +566,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="5"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-es"
-            disabled={false}
-            id="es"
-            indeterminate={false}
-            label="es"
-            onChange={[Function]}
-          />
+          es
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -855,16 +574,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="6"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-kibana"
-            disabled={false}
-            id="kibana"
-            indeterminate={false}
-            label="kibana"
-            onChange={[Function]}
-          />
+          kibana
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -872,16 +582,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="7"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-es"
-            disabled={false}
-            id="es"
-            indeterminate={false}
-            label="es"
-            onChange={[Function]}
-          />
+          es
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -889,16 +590,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="8"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-kibana"
-            disabled={false}
-            id="kibana"
-            indeterminate={false}
-            label="kibana"
-            onChange={[Function]}
-          />
+          kibana
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>
@@ -906,16 +598,7 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         key="9"
       >
         <EuiTableRowCell>
-          <EuiCheckbox
-            checked={false}
-            compressed={false}
-            data-test-subj="indexCheckbox-es"
-            disabled={false}
-            id="es"
-            indeterminate={false}
-            label="es"
-            onChange={[Function]}
-          />
+          es
         </EuiTableRowCell>
         <EuiTableRowCell />
       </EuiTableRow>

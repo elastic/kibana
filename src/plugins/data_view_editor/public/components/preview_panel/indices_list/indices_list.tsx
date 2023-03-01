@@ -22,9 +22,6 @@ import {
   EuiContextMenuPanel,
   EuiPagination,
   EuiPopover,
-  EuiCheckbox,
-  EuiIcon,
-  EuiIconProps,
 } from '@elastic/eui';
 
 import { Pager } from '@elastic/eui';
@@ -35,9 +32,7 @@ import { MatchedItem, Tag } from '@kbn/data-views-plugin/public';
 export interface IndicesListProps {
   indices: MatchedItem[];
   query: string;
-  hasWarnings: boolean;
   isExactMatch: (indexName: string) => boolean;
-  onUpdateTitle: (title: string) => void;
 }
 
 interface IndicesListState {
@@ -87,11 +82,6 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     this.resetPageTo0();
     this.closePerPageControl();
     this.storage.set(PER_PAGE_STORAGE_KEY, perPage);
-  };
-
-  onClick = (indexName: string, query: string) => {
-    const prefix = query.length && !query.trimEnd().endsWith(',') ? `${query},` : query;
-    this.props.onUpdateTitle(`${prefix}${indexName}`);
   };
 
   openPerPageControl = () => {
@@ -160,38 +150,15 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
     );
   }
 
-  renderIndexItemWithIcon = (label: React.ReactNode, iconType: EuiIconProps['type']) => {
-    return (
-      <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={false}>
-          <EuiIcon type={iconType} />
-        </EuiFlexItem>
-        <EuiFlexItem>{label}</EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
-
-  renderIndexItemWithCheckbox = (label: React.ReactNode, indexName: string, query: string) => {
-    return (
-      <EuiCheckbox
-        id={indexName}
-        label={label}
-        checked={false}
-        data-test-subj={`indexCheckbox-${indexName}`}
-        onChange={() => this.onClick(indexName, query)}
-      />
-    );
-  };
-
   highlightIndexName(indexName: string, query: string) {
-    const { hasWarnings, isExactMatch } = this.props;
+    const { isExactMatch } = this.props;
 
     if (!query) {
-      return this.renderIndexItemWithCheckbox(indexName, indexName, query);
+      return indexName;
     }
 
     if (isExactMatch(indexName)) {
-      return this.renderIndexItemWithIcon(<strong>{indexName}</strong>, 'check');
+      return <strong>{indexName}</strong>;
     }
 
     const queryAsArray = query
@@ -212,26 +179,24 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
       }
     }
 
-    const label =
-      queryIdx === -1 ? (
-        indexName
-      ) : (
-        <span>
-          {indexName.substring(0, queryIdx)}
-          <strong>{queryWithoutWildcard}</strong>
-          {indexName.substr(queryIdx + queryWithoutWildcard.length)}
-        </span>
-      );
-
-    if (hasWarnings) {
-      return this.renderIndexItemWithIcon(label, 'magnifyWithExclamation');
+    if (queryIdx === -1) {
+      return indexName;
     }
 
-    return this.renderIndexItemWithCheckbox(label, indexName, query);
+    const preStr = indexName.substring(0, queryIdx);
+    const postStr = indexName.substr(queryIdx + queryWithoutWildcard.length);
+
+    return (
+      <span>
+        {preStr}
+        <strong>{queryWithoutWildcard}</strong>
+        {postStr}
+      </span>
+    );
   }
 
   render() {
-    const { indices, query, isExactMatch, hasWarnings, onUpdateTitle, ...rest } = this.props;
+    const { indices, query, isExactMatch, ...rest } = this.props;
 
     const paginatedIndices = indices.slice(this.pager.firstItemIndex, this.pager.lastItemIndex + 1);
     const rows = paginatedIndices.map((index, key) => {

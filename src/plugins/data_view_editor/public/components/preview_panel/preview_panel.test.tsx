@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { EuiTable, EuiButtonGroup, EuiCheckbox, EuiIcon } from '@elastic/eui';
+import { EuiTable, EuiButtonGroup } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { INDEX_PATTERN_TYPE, MatchedItem } from '@kbn/data-views-plugin/public';
 import { Props as PreviewPanelProps, PreviewPanel } from './preview_panel';
@@ -24,12 +24,7 @@ describe('DataViewEditor PreviewPanel', () => {
   const commonProps: Omit<PreviewPanelProps, 'matchedIndices$' | 'title'> = {
     type: INDEX_PATTERN_TYPE.DEFAULT,
     allowHidden: false,
-    onUpdateTitle: jest.fn(),
   };
-
-  afterEach(() => {
-    (commonProps.onUpdateTitle as jest.Mock).mockClear();
-  });
 
   it('should render normally by default', async () => {
     const matchedIndices$: PreviewPanelProps['matchedIndices$'] = from([
@@ -46,17 +41,6 @@ describe('DataViewEditor PreviewPanel', () => {
 
     expect(component.find(EuiTable).exists()).toBeTruthy();
     expect(component.find(EuiButtonGroup).exists()).toBeFalsy();
-    expect(component.find(EuiCheckbox)).toHaveLength(3);
-    expect(component.find(EuiTable).find(EuiIcon)).toHaveLength(0);
-
-    const indexToSelect = indices[0].name;
-    findTestSubject(component, `indexCheckbox-${indexToSelect}`).simulate('change', {
-      target: {
-        value: true,
-      },
-    });
-
-    expect(commonProps.onUpdateTitle).toHaveBeenCalledWith(indexToSelect);
   });
 
   it('should render matching indices and can switch to all indices', async () => {
@@ -74,14 +58,6 @@ describe('DataViewEditor PreviewPanel', () => {
 
     expect(component.find(EuiTable).exists()).toBeTruthy();
     expect(component.find(EuiButtonGroup).exists()).toBeTruthy();
-    expect(component.find(EuiCheckbox)).toHaveLength(0);
-    expect(
-      component
-        .find(EuiTable)
-        .find(EuiIcon)
-        .map((item) => item.prop('type'))
-        .join(',')
-    ).toBe('check,check');
 
     expect(component.find('.euiButtonGroupButton-isSelected').first().text()).toBe(
       'Matching sources'
@@ -96,14 +72,6 @@ describe('DataViewEditor PreviewPanel', () => {
     await component.update();
 
     expect(component.find('.euiButtonGroupButton-isSelected').first().text()).toBe('All sources');
-    expect(component.find(EuiCheckbox)).toHaveLength(1);
-    expect(
-      component
-        .find(EuiTable)
-        .find(EuiIcon)
-        .map((item) => item.prop('type'))
-        .join(',')
-    ).toBe('check,check');
   });
 
   it('should render matching indices with warnings', async () => {
@@ -121,14 +89,6 @@ describe('DataViewEditor PreviewPanel', () => {
 
     expect(component.find(EuiTable).exists()).toBeTruthy();
     expect(component.find(EuiButtonGroup).exists()).toBeTruthy();
-    expect(component.find(EuiCheckbox)).toHaveLength(0);
-    expect(
-      component
-        .find(EuiTable)
-        .find(EuiIcon)
-        .map((item) => item.prop('type'))
-        .join(',')
-    ).toBe('magnifyWithExclamation,magnifyWithExclamation');
   });
 
   it('should render all indices tab when ends with a comma and can switch to matching sources', async () => {
@@ -146,14 +106,6 @@ describe('DataViewEditor PreviewPanel', () => {
 
     expect(component.find(EuiTable).exists()).toBeTruthy();
     expect(component.find(EuiButtonGroup).exists()).toBeTruthy();
-    expect(component.find(EuiCheckbox)).toHaveLength(2);
-    expect(
-      component
-        .find(EuiTable)
-        .find(EuiIcon)
-        .map((item) => item.prop('type'))
-        .join(',')
-    ).toBe('check');
 
     expect(component.find('.euiButtonGroupButton-isSelected').first().text()).toBe('All sources');
 
@@ -168,13 +120,5 @@ describe('DataViewEditor PreviewPanel', () => {
     expect(component.find('.euiButtonGroupButton-isSelected').first().text()).toBe(
       'Matching sources'
     );
-    expect(component.find(EuiCheckbox)).toHaveLength(0);
-    expect(
-      component
-        .find(EuiTable)
-        .find(EuiIcon)
-        .map((item) => item.prop('type'))
-        .join(',')
-    ).toBe('check');
   });
 });

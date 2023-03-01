@@ -9,8 +9,6 @@
 import React from 'react';
 import { IndicesList, IndicesListProps, PER_PAGE_STORAGE_KEY } from './indices_list';
 import { shallow } from 'enzyme';
-import { findTestSubject } from '@elastic/eui/lib/test';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { MatchedItem } from '@kbn/data-views-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
@@ -27,14 +25,11 @@ const similarIndices = [
 describe('IndicesList', () => {
   const commonProps: Omit<IndicesListProps, 'query'> = {
     indices,
-    hasWarnings: false,
-    onUpdateTitle: jest.fn(),
     isExactMatch: jest.fn(() => false),
   };
 
   afterEach(() => {
     new Storage(localStorage).remove(PER_PAGE_STORAGE_KEY);
-    (commonProps.onUpdateTitle as jest.Mock).mockClear();
   });
 
   it('should render normally', () => {
@@ -69,51 +64,25 @@ describe('IndicesList', () => {
     const component = shallow(
       <IndicesList
         {...commonProps}
-        query="ki"
-        isExactMatch={(indexName) => indexName === 'kibana'}
+        query="es,ki"
+        isExactMatch={(indexName) => indexName === 'es'}
       />
     );
 
     expect(component).toMatchSnapshot();
   });
 
-  it('should show checkbox when not an exact match', () => {
+  it('should highlight fully when an exact match', () => {
     const component = shallow(
       <IndicesList
         {...commonProps}
         indices={similarIndices}
-        hasWarnings={false}
-        query="logs"
-        isExactMatch={(indexName) => indexName === 'logstash'}
+        query="logs*"
+        isExactMatch={(indexName) => indexName === 'some_logs'}
       />
     );
 
     expect(component).toMatchSnapshot();
-  });
-
-  it('should show a warning for the matches', () => {
-    const component = shallow(
-      <IndicesList
-        {...commonProps}
-        hasWarnings={true}
-        query="ki"
-        isExactMatch={(indexName) => indexName === 'kibana'}
-      />
-    );
-
-    expect(component).toMatchSnapshot();
-  });
-
-  it('should call a callback onn index selection', () => {
-    const component = mountWithIntl(<IndicesList {...commonProps} query="" />);
-    const indexToSelect = indices[1].name;
-    findTestSubject(component, `indexCheckbox-${indexToSelect}`).simulate('change', {
-      target: {
-        value: true,
-      },
-    });
-
-    expect(commonProps.onUpdateTitle).toHaveBeenCalledWith(indexToSelect);
   });
 
   describe('updating props', () => {

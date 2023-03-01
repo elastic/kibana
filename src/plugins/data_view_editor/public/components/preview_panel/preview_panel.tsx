@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useState } from 'react';
 import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
@@ -43,26 +43,11 @@ export interface Props {
   allowHidden: boolean;
   title: string;
   matchedIndices$: Observable<MatchedIndicesSet>;
-  onUpdateTitle: (title: string) => void;
 }
 
-export const PreviewPanel = ({
-  type,
-  allowHidden,
-  title = '',
-  matchedIndices$,
-  onUpdateTitle,
-}: Props) => {
+export const PreviewPanel = ({ type, allowHidden, title = '', matchedIndices$ }: Props) => {
   const [viewMode, setViewMode] = useState<ViewMode>();
   const matched = useObservable(matchedIndices$, matchedIndiciesDefault);
-
-  const onUpdateTitleAndViewMode = useCallback(
-    (updatedTitle: string) => {
-      onUpdateTitle(updatedTitle);
-      setViewMode(ViewMode.allIndices); // user prefers to click rather than type
-    },
-    [onUpdateTitle, setViewMode]
-  );
 
   let currentlyVisibleIndices;
   let currentViewMode;
@@ -83,8 +68,6 @@ export const PreviewPanel = ({
       data-test-subj="createIndexPatternStep1IndicesList"
       query={title}
       indices={currentlyVisibleIndices}
-      onUpdateTitle={onUpdateTitleAndViewMode}
-      hasWarnings={title.length > 0 && matched.exactMatchedIndices.length === 0}
       isExactMatch={(indexName) =>
         title.length > 0 && matched.exactMatchedIndices.some((index) => index.name === indexName)
       }
