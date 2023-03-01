@@ -83,7 +83,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
         description: stateValues.data_counts.skipped_docs_count,
       },
     ],
-    dataTestSubj: '',
+    dataTestSubj: 'mlAnalyticsTableRowDetailsSection counts',
   };
 
   const memoryUsage: SectionConfig = {
@@ -112,11 +112,11 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
             defaultMessage: 'Peak usage bytes',
           }
         ),
-        description: stateValues.memory_usage.peak_usage_bytes, // TODO: convert to kb
+        description: stateValues.memory_usage.peak_usage_bytes,
       },
-      { title: 'Status', description: stateValues.memory_usage.status }, // TODO: convert to number?
+      { title: 'Status', description: stateValues.memory_usage.status },
     ],
-    dataTestSubj: '',
+    dataTestSubj: 'mlAnalyticsTableRowDetailsSection stats',
   };
 
   const { currentPhase, totalPhases } = getDataFrameAnalyticsProgressPhase(item.stats);
@@ -180,7 +180,7 @@ export const ExpandedRow: FC<Props> = ({ item }) => {
         description: item.config.version ?? '',
       },
     ],
-    dataTestSubj: 'mlAnalyticsTableRowDetailsSection stats',
+    dataTestSubj: 'mlAnalyticsTableRowDetailsSection state',
   };
 
   const analysisStats: SectionConfig | undefined = analysisStatsValues

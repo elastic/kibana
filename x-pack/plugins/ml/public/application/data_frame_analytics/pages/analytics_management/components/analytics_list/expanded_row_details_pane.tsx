@@ -39,7 +39,7 @@ interface SectionProps {
 export const OverallDetails: FC<{
   overallDetails: SectionConfig;
 }> = ({ overallDetails }) => (
-  <EuiFlexGroup alignItems="center" wrap>
+  <EuiFlexGroup alignItems="center" wrap data-test-subj={overallDetails.dataTestSubj}>
     {overallDetails.items.map((item) => {
       if (item.title === 'badge') {
         return (
@@ -53,12 +53,12 @@ export const OverallDetails: FC<{
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiDescriptionListDescription>
+              <EuiDescriptionListDescription className="descriptionListTitle">
                 <EuiText size="xs">{item.title}</EuiText>
               </EuiDescriptionListDescription>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiDescriptionListTitle>
+              <EuiDescriptionListTitle className="descriptionListDescription">
                 <EuiText size="s">
                   <h5>{item.description}</h5>
                 </EuiText>
@@ -72,7 +72,7 @@ export const OverallDetails: FC<{
 );
 
 export const Stats = ({ section }: { section: SectionConfig }) => (
-  <EuiFlexGroup direction="column" gutterSize="s">
+  <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={section.dataTestSubj}>
     <EuiFlexItem grow={false}>
       <EuiTitle size="xs">
         <span>{section.title}</span>
@@ -82,10 +82,10 @@ export const Stats = ({ section }: { section: SectionConfig }) => (
       <EuiFlexGroup>
         {section.items.map((item) => (
           <EuiFlexItem grow={false}>
-            <EuiDescriptionListDescription>
+            <EuiDescriptionListDescription className="descriptionListTitle">
               <EuiText size="xs">{item.title}</EuiText>
             </EuiDescriptionListDescription>
-            <EuiDescriptionListTitle>
+            <EuiDescriptionListTitle className="descriptionListDescription">
               <EuiText size="xs">
                 <h5>{item.description}</h5>
               </EuiText>
@@ -179,7 +179,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({
         {/* Bottom area */}
         <EuiFlexItem>
           <EuiFlexGroup>
-            <EuiFlexItem grow={1}>
+            <EuiFlexItem grow={1} data-test-subj={progress.dataTestSubj}>
               <EuiSpacer size="s" />
               <EuiTitle size="xs">
                 <span>{progress.title}</span>
