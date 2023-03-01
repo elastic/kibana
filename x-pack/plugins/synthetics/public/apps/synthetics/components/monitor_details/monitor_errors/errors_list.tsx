@@ -51,7 +51,7 @@ export const ErrorsList = ({
   const selectedLocation = useSelectedLocation();
 
   const lastTestRun = errorStates?.sort((a, b) => {
-    return moment(a.timestamp).valueOf() - moment(b.timestamp).valueOf();
+    return moment(b.state.started_at).valueOf() - moment(a.state.started_at).valueOf();
   })?.[0];
 
   const columns = [
