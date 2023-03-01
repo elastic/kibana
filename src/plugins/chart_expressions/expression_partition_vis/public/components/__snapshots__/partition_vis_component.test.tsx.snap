@@ -1267,7 +1267,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
                   "fillColor": [Function],
                 },
                 "showAccessor": [Function],
-                "sortPredicate": undefined,
+                "sortPredicate": [Function],
               },
             ]
           }
