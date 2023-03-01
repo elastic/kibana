@@ -177,6 +177,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                     matchPath(currentPath: string) {
                       return [
                         '/service-groups',
+                        '/mobile-services',
                         '/services',
                         '/service-map',
                       ].some((testPath) => currentPath.startsWith(testPath));
@@ -281,11 +282,6 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       icon: 'plugins/apm/public/icon.svg',
       category: DEFAULT_APP_CATEGORIES.observability,
       deepLinks: [
-        {
-          id: 'service-groups-list',
-          title: serviceGroupsTitle,
-          path: '/service-groups',
-        },
         {
           id: 'services',
           title: servicesTitle,

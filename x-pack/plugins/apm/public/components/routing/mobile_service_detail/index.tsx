@@ -30,7 +30,7 @@ export function page({
   searchBarOptions,
 }: {
   title: string;
-  tab: React.ComponentProps<typeof MobileServiceTemplate>['selectedTab'];
+  tab: React.ComponentProps<typeof MobileServiceTemplate>['selectedTabKey'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: {
     showKueryBar?: boolean;
@@ -46,7 +46,7 @@ export function page({
     element: (
       <MobileServiceTemplate
         title={title}
-        selectedTab={tab}
+        selectedTabKey={tab}
         searchBarOptions={searchBarOptions}
       >
         {element}
