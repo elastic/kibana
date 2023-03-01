@@ -28,6 +28,7 @@ import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { SavedObjectsStart } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { checkLicense } from '../common/check_license';
 import { ConfigSchema } from '../config';
 
@@ -44,6 +45,7 @@ export interface GraphPluginStartDependencies {
   inspector: InspectorPublicPluginStart;
   home?: HomePublicPluginStart;
   spaces?: SpacesApi;
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 export class GraphPlugin
@@ -113,6 +115,7 @@ export class GraphPlugin
           uiSettings: core.uiSettings,
           spaces: pluginsStart.spaces,
           inspect: pluginsStart.inspector,
+          savedObjectsManagement: pluginsStart.savedObjectsManagement,
         });
       },
     });
