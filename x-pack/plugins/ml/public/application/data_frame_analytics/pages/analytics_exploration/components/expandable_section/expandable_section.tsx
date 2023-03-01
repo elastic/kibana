@@ -93,8 +93,8 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
                   flush="left"
                   data-test-subj={`mlDFExpandableSection-${dataTestId}-toggle-button`}
                 >
-                  <EuiText size="s" color="default">
-                    <h5>{title}</h5>
+                  <EuiText size="m" color="default" style={{ fontWeight: 'bold' }}>
+                    <p>{title}</p>
                   </EuiText>
                 </EuiButtonEmpty>
               </EuiFlexItem>
@@ -109,19 +109,19 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
                       {label !== undefined && value !== undefined ? (
                         <EuiFlexGroup gutterSize="xs" alignItems="center">
                           <EuiFlexItem grow={false}>
-                            <EuiBadge>{label}</EuiBadge>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiText size="xs">
+                            <EuiText size="xs" textAlign="center">
                               <p>{value}</p>
                             </EuiText>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiBadge>{label}</EuiBadge>
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       ) : null}
                       {label === undefined ? (
                         <EuiFlexGroup alignItems="center">
                           <EuiFlexItem grow={false}>
-                            <EuiText size="xs" color="subdued">
+                            <EuiText size="xs" color="subdued" textAlign="center">
                               {value}
                             </EuiText>
                           </EuiFlexItem>

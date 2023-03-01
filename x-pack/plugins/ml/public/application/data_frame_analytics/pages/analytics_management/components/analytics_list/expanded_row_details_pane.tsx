@@ -98,7 +98,7 @@ export const Stats = ({ section }: { section: SectionConfig }) => (
 );
 
 export const Section: FC<SectionProps> = ({ section }) => {
-  if (section.items.length === 0) {
+  if (section?.items && section.items.length === 0) {
     return null;
   }
 
@@ -194,7 +194,7 @@ export const ExpandedRowDetailsPane: FC<ExpandedRowDetailsPaneProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={3}>
               <EuiSpacer size="s" />
-              <Section section={analysisStats!} />
+              {analysisStats ? <Section section={analysisStats} /> : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
