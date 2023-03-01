@@ -16,7 +16,7 @@ export interface Props {
   isLoading: boolean;
 }
 
-export function Title(props: Props) {
+export function HeaderTitle(props: Props) {
   const { isLoading, slo } = props;
   if (isLoading) {
     return <EuiLoadingSpinner data-test-subj="loadingTitle" />;

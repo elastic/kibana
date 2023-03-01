@@ -21,7 +21,7 @@ import { useLicense } from '../../hooks/use_license';
 import PageNotFound from '../404';
 import { isSloFeatureEnabled } from '../slos/helpers/is_slo_feature_enabled';
 import { SloDetails } from './components/slo_details';
-import { Title } from './components/title';
+import { HeaderTitle } from './components/header_title';
 import { paths } from '../../config';
 import type { SloDetailsPathParams } from './types';
 import type { ObservabilityAppServices } from '../../application/types';
@@ -52,7 +52,7 @@ export function SloDetailsPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <Title isLoading={isLoading} slo={slo} />,
+        pageTitle: <HeaderTitle isLoading={isLoading} slo={slo} />,
         rightSideItems: [<HeaderControl isLoading={isLoading} slo={slo} />],
         bottomBorder: false,
       }}
