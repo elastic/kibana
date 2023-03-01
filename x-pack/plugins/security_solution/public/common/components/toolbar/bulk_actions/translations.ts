@@ -38,7 +38,7 @@ export const SELECT_ALL_ENTITIES = (
   total: number
 ) =>
   i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectAllEntitiesTitle', {
-    values: { entityPlural: ENTITY_TYPE_PLURAL(entityType, total), totalFormatted },
+    values: { entityPlural: ENTITY_TYPE_PLURAL(entityType, total), totalFormatted, total },
     defaultMessage: 'Select {total, plural, =1 {} other {all}} {totalFormatted} {entityPlural}',
   });
 
