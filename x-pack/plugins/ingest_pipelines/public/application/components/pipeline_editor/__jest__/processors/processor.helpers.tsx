@@ -187,4 +187,7 @@ type TestSubject =
   | 'droppableList.addButton'
   | 'droppableList.input-0'
   | 'droppableList.input-1'
-  | 'droppableList.input-2';
+  | 'droppableList.input-2'
+  | 'prefixField.input'
+  | 'suffixField.input'
+  | 'patternDefinitionsField';

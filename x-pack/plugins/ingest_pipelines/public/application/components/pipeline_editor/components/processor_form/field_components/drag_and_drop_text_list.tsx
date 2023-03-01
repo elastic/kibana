@@ -52,6 +52,7 @@ interface Props {
    * Deserializer to be applied to every text item
    */
   textDeserializer?: (v: unknown) => string;
+  disableDragging?: boolean;
 }
 
 const i18nTexts = {
@@ -73,6 +74,7 @@ function DragAndDropTextListComponent({
   textValidations,
   textDeserializer,
   textSerializer,
+  disableDragging,
 }: Props): JSX.Element {
   const [droppableId] = useState(() => uuidv4());
   const [firstItemId] = useState(() => uuidv4());
@@ -134,14 +136,16 @@ function DragAndDropTextListComponent({
                           justifyContent="center"
                           gutterSize="none"
                         >
-                          <EuiFlexItem grow={false}>
-                            <div
-                              {...provided.dragHandleProps}
-                              className="pipelineProcessorsEditor__form__dragAndDropList__grabIcon"
-                            >
-                              <EuiIcon type="grab" />
-                            </div>
-                          </EuiFlexItem>
+                          {!disableDragging && (
+                            <EuiFlexItem grow={false}>
+                              <div
+                                {...provided.dragHandleProps}
+                                className="pipelineProcessorsEditor__form__dragAndDropList__grabIcon"
+                              >
+                                <EuiIcon type="grab" />
+                              </div>
+                            </EuiFlexItem>
+                          )}
                           <EuiFlexItem>
                             <UseField<string>
                               path={item.path}

@@ -107,6 +107,7 @@ const fieldsConfig: FieldsConfig = {
       defaultMessage: 'Prefix (optional)',
     }),
     deserializer: String,
+    serializer: from.undefinedIfValue(''),
     helpText: (
       <FormattedMessage
         id="xpack.ingestPipelines.pipelineEditor.redactForm.prefixFieldHelpText"
@@ -116,15 +117,16 @@ const fieldsConfig: FieldsConfig = {
     ),
   },
 
-  sufix: {
+  suffix: {
     type: FIELD_TYPES.TEXT,
-    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.redactForm.sufixLabel', {
-      defaultMessage: 'Sufix (optional)',
+    label: i18n.translate('xpack.ingestPipelines.pipelineEditor.redactForm.suffixLabel', {
+      defaultMessage: 'Suffix (optional)',
     }),
     deserializer: String,
+    serializer: from.undefinedIfValue(''),
     helpText: (
       <FormattedMessage
-        id="xpack.ingestPipelines.pipelineEditor.redactForm.sufixFieldHelpText"
+        id="xpack.ingestPipelines.pipelineEditor.redactForm.suffixFieldHelpText"
         defaultMessage="End a redacted section with this token. If not specified, defaults to {defaultValue}."
         values={{ defaultValue: <EuiCode>{'>'}</EuiCode> }}
       />
@@ -146,6 +148,7 @@ export const Redact: FunctionComponent = () => {
         {({ items, addItem, removeItem, moveItem, error }) => {
           return (
             <DragAndDropTextList
+              disableDragging={true}
               label={fieldsConfig.patterns.label!}
               helpText={fieldsConfig.patterns.helpText}
               error={error}
@@ -167,6 +170,7 @@ export const Redact: FunctionComponent = () => {
         config={fieldsConfig.pattern_definitions}
         componentProps={{
           editorProps: {
+            'data-test-subj': 'patternDefinitionsField',
             height: EDITOR_PX_HEIGHT.medium,
             'aria-label': i18n.translate(
               'xpack.ingestPipelines.pipelineEditor.redactForm.patternDefinitionsAriaLabel',
@@ -183,14 +187,24 @@ export const Redact: FunctionComponent = () => {
 
       <EuiFlexGroup>
         <EuiFlexItem>
-          <UseField config={fieldsConfig.prefix} component={Field} path="fields.prefix" />
+          <UseField
+            config={fieldsConfig.prefix}
+            component={Field}
+            path="fields.prefix"
+            data-test-subj="prefixField"
+          />
         </EuiFlexItem>
         <EuiFlexItem>
-          <UseField config={fieldsConfig.sufix} component={Field} path="fields.sufix" />
+          <UseField
+            config={fieldsConfig.suffix}
+            component={Field}
+            path="fields.suffix"
+            data-test-subj="suffixField"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <EuiSpacer size="l" />
+      <EuiSpacer size="m" />
 
       <IgnoreMissingField />
     </>

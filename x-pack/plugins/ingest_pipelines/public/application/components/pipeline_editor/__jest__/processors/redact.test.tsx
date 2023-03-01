@@ -81,7 +81,7 @@ describe('Processor: Redact', () => {
     } = testBed;
 
     // Add "field" value
-    form.setInputValue('fieldNameField.input', 'test_grok_processor');
+    form.setInputValue('fieldNameField.input', 'test_redact_processor');
 
     // Add pattern 1
     form.setInputValue('droppableList.input-0', 'pattern1');
@@ -90,9 +90,44 @@ describe('Processor: Redact', () => {
     await clickAddPattern();
     form.setInputValue('droppableList.input-1', 'pattern2');
 
-    // Add pattern 3
-    await clickAddPattern();
-    form.setInputValue('droppableList.input-2', 'pattern3');
+    // Save the field
+    await saveNewProcessor();
+
+    const processors = getProcessorValue(onUpdate, REDACT_TYPE);
+
+    expect(processors[0][REDACT_TYPE]).toEqual({
+      field: 'test_redact_processor',
+      patterns: ['pattern1', 'pattern2'],
+    });
+  });
+
+  test('saves with optional parameter values', async () => {
+    const {
+      actions: { saveNewProcessor },
+      component,
+      find,
+      form,
+    } = testBed;
+
+    // Add "field" value
+    form.setInputValue('fieldNameField.input', 'test_redact_processor');
+
+    // Add one pattern to the list
+    form.setInputValue('droppableList.input-0', 'pattern1');
+
+    // Set suffix and prefix
+    form.setInputValue('prefixField.input', '$');
+    form.setInputValue('suffixField.input', '$');
+
+    await act(async () => {
+      find('patternDefinitionsField').simulate('change', {
+        jsonContent: JSON.stringify({ GITHUB_NAME: '@%{USERNAME}' }),
+      });
+
+      // advance timers to allow the form to validate
+      jest.advanceTimersByTime(0);
+    });
+    component.update();
 
     // Save the field
     await saveNewProcessor();
@@ -100,30 +135,11 @@ describe('Processor: Redact', () => {
     const processors = getProcessorValue(onUpdate, REDACT_TYPE);
 
     expect(processors[0][REDACT_TYPE]).toEqual({
-      field: 'test_grok_processor',
-      patterns: ['pattern1', 'pattern2', 'pattern3'],
+      field: 'test_redact_processor',
+      patterns: ['pattern1'],
+      suffix: '$',
+      prefix: '$',
+      pattern_definitions: { GITHUB_NAME: '@%{USERNAME}' },
     });
-  });
-
-  test('accepts grok pattern that contains escaped characters', async () => {
-    const {
-      actions: { saveNewProcessor },
-      form,
-    } = testBed;
-
-    // Add "field" value
-    form.setInputValue('fieldNameField.input', 'test_grok_processor');
-
-    // Add the escaped value of \[%{HTTPDATE:timestamp}\]%{SPACE}\"%{WORD:http_method}%{SPACE}HTTP/%{NUMBER:http_version}\"
-    const escapedValue =
-      '\\[%{HTTPDATE:timestamp}\\]%{SPACE}\\"%{WORD:http_method}%{SPACE}HTTP/%{NUMBER:http_version}\\"';
-    form.setInputValue('droppableList.input-0', escapedValue);
-
-    // Save the field
-    await saveNewProcessor();
-
-    const processors = getProcessorValue(onUpdate, REDACT_TYPE);
-
-    expect(processors[0][REDACT_TYPE].patterns).toEqual([escapedValue]);
   });
 });
