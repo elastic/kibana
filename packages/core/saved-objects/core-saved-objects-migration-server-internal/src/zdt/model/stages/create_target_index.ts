@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { cloneDeep } from 'lodash';
 import * as Either from 'fp-ts/lib/Either';
 import { delayRetryState } from '../../../model/retry_state';
 import { throwBadResponse } from '../../../model/helpers';
@@ -43,10 +44,13 @@ export const createTargetIndex: ModelStage<'CREATE_TARGET_INDEX', 'UPDATE_ALIASE
     kibanaVersion: context.kibanaVersion,
   });
 
+  const currentIndexMeta = cloneDeep(state.indexMappings._meta!);
+
   return {
     ...state,
     controlState: 'UPDATE_ALIASES',
     previousMappings: state.indexMappings,
+    currentIndexMeta,
     aliases: [],
     aliasActions,
   };

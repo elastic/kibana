@@ -10,7 +10,6 @@ export type {
   BaseState,
   InitState,
   CreateTargetIndexState,
-  WaitForYellowIndexState,
   UpdateIndexMappingsState,
   UpdateIndexMappingsWaitForTaskState,
   UpdateMappingModelVersionState,
