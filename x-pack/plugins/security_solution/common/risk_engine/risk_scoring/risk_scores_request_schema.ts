@@ -12,7 +12,7 @@ export type RiskScoresRequestSchema = t.TypeOf<typeof riskScoresRequestSchema>;
 export const riskScoresRequestSchema = t.exact(
   t.partial({
     data_view_id: DataViewId,
-    range: t.partial({
+    range: t.type({
       start: t.string,
       end: t.string,
     }),
