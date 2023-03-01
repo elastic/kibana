@@ -74,7 +74,6 @@ import type {
   NewTermsSpecificRuleParams,
 } from '../../rule_schema';
 import {
-  getSecurityRuleThrottle,
   transformFromAlertThrottle,
   transformToAlertThrottle,
   transformToNotifyWhen,
