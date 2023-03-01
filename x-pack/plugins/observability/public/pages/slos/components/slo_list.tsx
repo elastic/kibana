@@ -18,7 +18,7 @@ import {
 } from './slo_list_search_filter_sort_bar';
 import { SloListItems } from './slo_list_items';
 
-interface Props {
+export interface Props {
   autoRefresh: boolean;
 }
 

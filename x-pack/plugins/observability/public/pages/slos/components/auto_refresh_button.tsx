@@ -41,7 +41,7 @@ export function AutoRefreshButton({
       iconType="play"
       onClick={onClick}
     >
-      {i18n.translate('xpack.observability.slosPage.stopRefreshingButtonLabel', {
+      {i18n.translate('xpack.observability.slosPage.autoRefreshButtonLabel', {
         defaultMessage: 'Auto-refresh',
       })}
     </EuiButtonEmpty>
