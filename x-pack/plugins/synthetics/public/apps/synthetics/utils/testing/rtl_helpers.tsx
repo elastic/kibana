@@ -16,7 +16,7 @@ import {
 import { Router } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 
-import { merge } from 'lodash';
+import { merge, mergeWith } from 'lodash';
 import { createMemoryHistory, History } from 'history';
 import { CoreStart } from '@kbn/core/public';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -227,7 +227,11 @@ export function WrappedHelper<ExtraCore>({
   path,
   history = createMemoryHistory(),
 }: RenderRouterOptions<ExtraCore> & { children: ReactElement; useRealStore?: boolean }) {
-  const testState: AppState = merge({}, mockState, state);
+  const testState: AppState = mergeWith({}, mockState, state, (objValue, srcValue) => {
+    if (Array.isArray(objValue)) {
+      return srcValue;
+    }
+  });
 
   if (url) {
     history = getHistoryFromUrl(url);
