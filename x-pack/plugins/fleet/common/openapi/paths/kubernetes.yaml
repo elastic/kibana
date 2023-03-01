@@ -11,6 +11,8 @@ get:
             properties:
               item:
                 type: string
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-full-k8s-manifest
   parameters:
   - schema:

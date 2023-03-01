@@ -15,6 +15,8 @@ get:
                 type: number
               headers:
                 type: object
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: packages-get-file
 parameters:
   - schema:

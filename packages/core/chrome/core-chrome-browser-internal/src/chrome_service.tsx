@@ -138,6 +138,9 @@ export class ChromeService {
       map(([headerBanner, isVisible]) => {
         return [
           'kbnBody',
+          chromeStyle$.getValue() === 'classic'
+            ? 'kbnBody--classicLayout'
+            : 'kbnBody--projectLayout',
           headerBanner ? 'kbnBody--hasHeaderBanner' : 'kbnBody--noHeaderBanner',
           isVisible ? 'kbnBody--chromeVisible' : 'kbnBody--chromeHidden',
           getKbnVersionClass(),
