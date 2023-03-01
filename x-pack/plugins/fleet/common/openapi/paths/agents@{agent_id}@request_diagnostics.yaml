@@ -5,8 +5,9 @@ parameters:
     in: path
     required: true
 post:
-  summary: Agent - Request Diagnostics
-  tags: []
+  summary: Request agent diagnostics
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
@@ -22,4 +23,3 @@ post:
   operationId: request-diagnostics-agent
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
-
