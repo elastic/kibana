@@ -129,7 +129,7 @@ const getAndFormatAlertSummaryBasicFields = (alert: TopAlert | null): React.Reac
     </>
   );
 };
-export function AlertSummary({ alert, summaryFields }: AlertSummaryProps) {
+export function AlertSummary({ alert, alertSummaryFields }: AlertSummaryProps) {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   return (
     <EuiFlexGrid
@@ -140,11 +140,11 @@ export function AlertSummary({ alert, summaryFields }: AlertSummaryProps) {
       }}
     >
       {getAndFormatAlertSummaryBasicFields(alert)}
-      {summaryFields?.map((field) => {
+      {alertSummaryFields?.map((field) => {
         return (
           <EuiFlexItem>
             <EuiTitle size="xxs">
-              <h5>{field.labelElement}</h5>
+              <h5>{field.label}</h5>
             </EuiTitle>
             <EuiSpacer size="s" />
             <EuiText size="s" color="subdued">

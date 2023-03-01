@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel } from '@elastic/eui';
-import { EuiTitle } from '@elastic/eui';
-import { EuiIconTip } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiIconTip } from '@elastic/eui';
 import {
   ALERT_DURATION,
   ALERT_END,
   ALERT_RULE_UUID,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_RULE_TYPE_ID,
+  ALERT_EVALUATION_VALUE,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
+import { formatAlertEvaluationValue } from '@kbn/observability-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getDurationFormatter } from '../../../../../common/utils/formatters/duration';
@@ -59,7 +60,47 @@ export function AlertDetailsAppSection({
   rule,
   alert,
   timeZone,
+  setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) {
+  useEffect(() => {
+    const alertSummaryFields = [
+      {
+        label: (
+          <FormattedMessage
+            id="xpack.observability.pages.alertDetails.alertSummary.actualValue"
+            defaultMessage="Actual value"
+          />
+        ),
+        value: formatAlertEvaluationValue(
+          alert?.fields[ALERT_RULE_TYPE_ID],
+          alert?.fields[ALERT_EVALUATION_VALUE]
+        ),
+      },
+      {
+        label: (
+          <FormattedMessage
+            id="xpack.observability.pages.alertDetails.alertSummary.expectedValue"
+            defaultMessage="Expected value"
+          />
+        ),
+        value: formatAlertEvaluationValue(
+          alert?.fields[ALERT_RULE_TYPE_ID],
+          alert?.fields[ALERT_EVALUATION_THRESHOLD]
+        ),
+      },
+      {
+        label: (
+          <FormattedMessage
+            id="xpack.observability.pages.alertDetails.alertSummary.source"
+            defaultMessage="Source"
+          />
+        ),
+        value: '-',
+      },
+    ];
+    setAlertSummaryFields(alertSummaryFields);
+  }, [alert?.fields, setAlertSummaryFields]);
+
   const params = rule.params;
   const environment = alert.fields[SERVICE_ENVIRONMENT];
   const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);

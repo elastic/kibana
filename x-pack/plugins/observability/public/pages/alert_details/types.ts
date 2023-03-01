@@ -8,13 +8,13 @@
 import { ReactNode } from 'react';
 import { TopAlert } from '../alerts/containers/alerts_page/types';
 
-export interface SummaryField {
-  labelElement: ReactNode | string;
+export interface AlertSummaryField {
+  label: ReactNode | string;
   value: string;
 }
 export interface AlertSummaryProps {
   alert: TopAlert | null;
-  summaryFields?: SummaryField[];
+  alertSummaryFields?: AlertSummaryField[];
 }
 
 export interface AlertDetailsPathParams {
