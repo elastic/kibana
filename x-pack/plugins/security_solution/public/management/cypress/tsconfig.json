@@ -30,5 +30,8 @@
     "@kbn/cypress-config",
     "@kbn/test-subj-selector",
     "@kbn/cases-plugin",
+    "@kbn/infra-plugin",
+    "@kbn/test",
+    "@kbn/repo-info",
   ]
 }
