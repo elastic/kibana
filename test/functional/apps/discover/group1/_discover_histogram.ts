@@ -270,5 +270,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(canvasExists).to.be(false);
       });
     });
+
+    it('should recover from broken query search when clearing the query bar', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.timePicker.setDefaultAbsoluteRange();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      // type an invalid search query, hit refresh
+      await queryBar.setQuery('this is > not valid');
+      await queryBar.submitQuery();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      // await PageObjects.common.sleep(50000);
+      // check the error state
+      expect(await testSubjects.exists('embeddable-lens-failure')).to.be(true);
+      // now remove the query
+      await queryBar.clearQuery();
+      await queryBar.submitQuery();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      // await PageObjects.common.sleep(50000);
+      // check the success state
+      expect(await PageObjects.discover.isChartVisible()).to.be(true);
+    });
   });
 }
