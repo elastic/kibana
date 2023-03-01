@@ -20,6 +20,7 @@ interface SLOListParams {
   page?: number;
   sortBy?: string;
   indicatorTypes?: string[];
+  refetchInterval?: number;
 }
 
 export interface UseFetchSloListResponse {
@@ -38,6 +39,7 @@ export function useFetchSloList({
   page = 1,
   sortBy = 'name',
   indicatorTypes = [],
+  refetchInterval,
 }: SLOListParams | undefined = {}): UseFetchSloListResponse {
   const { http } = useKibana().services;
 
@@ -64,8 +66,9 @@ export function useFetchSloList({
           // ignore error
         }
       },
-      refetchOnWindowFocus: false,
       keepPreviousData: true,
+      refetchOnWindowFocus: false,
+      refetchInterval,
       staleTime: 1000,
     }
   );
