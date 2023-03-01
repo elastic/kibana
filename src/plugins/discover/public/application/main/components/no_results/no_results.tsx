@@ -10,7 +10,6 @@ import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { NoResultsSuggestions } from './no_results_suggestions';
 import './_no_results.scss';
@@ -21,7 +20,6 @@ export interface DiscoverNoResultsProps {
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
   error?: Error;
-  data: DataPublicPluginStart;
   dataView: DataView;
   onDisableFilters: () => void;
 }
@@ -31,7 +29,6 @@ export function DiscoverNoResults({
   query,
   filters,
   error,
-  data,
   dataView,
   onDisableFilters,
 }: DiscoverNoResultsProps) {

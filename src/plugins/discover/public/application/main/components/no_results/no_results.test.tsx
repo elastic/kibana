@@ -45,7 +45,6 @@ async function mountAndFindSubjects(
     component = await mountWithIntl(
       <KibanaContextProvider services={services}>
         <DiscoverNoResults
-          data={services.data}
           isTimeBased={props.dataView.isTimeBased()}
           onDisableFilters={() => {}}
           {...props}

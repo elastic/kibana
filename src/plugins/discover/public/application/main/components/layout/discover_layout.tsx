@@ -217,7 +217,6 @@ export function DiscoverLayout({
           isTimeBased={isTimeBased}
           query={globalQueryState.query}
           filters={globalQueryState.filters}
-          data={data}
           error={dataState.error}
           dataView={dataView}
           onDisableFilters={onDisableFilters}
