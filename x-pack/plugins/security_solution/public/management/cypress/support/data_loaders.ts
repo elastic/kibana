@@ -8,6 +8,7 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
+import type { IndexedEndpointRuleAlerts } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/index_data';
 import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
 import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
@@ -23,6 +24,10 @@ import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_l
 import type { DeleteIndexedEndpointHostsResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_hosts';
 import { cyLoadEndpointDataHandler } from './plugin_handlers/endpoint_data_loader';
 import { deleteIndexedHostsAndAlerts } from '../../../../common/endpoint/index_data';
+import {
+  deleteIndexedEndpointRuleAlerts,
+  indexEndpointRuleAlerts,
+} from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -66,6 +71,18 @@ declare global {
         arg: IndexedHostsAndAlertsResponse,
         options?: Partial<Cypress.Loggable & Cypress.Timeoutable>
       ): Cypress.Chainable<DeleteIndexedEndpointHostsResponse>;
+
+      task(
+        name: 'indexEndpointRuleAlerts',
+        arg?: { endpointAgentId: string; count?: number },
+        options?: Partial<Cypress.Loggable & Cypress.Timeoutable>
+      ): Cypress.Chainable<IndexedEndpointRuleAlerts['alerts']>;
+
+      task(
+        name: 'deleteIndexedEndpointRuleAlerts',
+        arg: IndexedEndpointRuleAlerts['alerts'],
+        options?: Partial<Cypress.Loggable & Cypress.Timeoutable>
+      ): Cypress.Chainable<null>;
     }
   }
 }
@@ -130,6 +147,23 @@ export const dataLoaders = (
     deleteIndexedEndpointHosts: async (indexedData: IndexedHostsAndAlertsResponse) => {
       const { kbnClient, esClient } = await stackServicesPromise;
       return deleteIndexedHostsAndAlerts(esClient, kbnClient, indexedData);
+    },
+
+    indexEndpointRuleAlerts: async (options: { endpointAgentId: string; count?: number }) => {
+      const { esClient, log } = await stackServicesPromise;
+      return (
+        await indexEndpointRuleAlerts({
+          ...options,
+          esClient,
+          log,
+        })
+      ).alerts;
+    },
+
+    deleteIndexedEndpointRuleAlerts: async (data: IndexedEndpointRuleAlerts['alerts']) => {
+      const { esClient, log } = await stackServicesPromise;
+      await deleteIndexedEndpointRuleAlerts(esClient, data, log);
+      return null;
     },
   });
 };

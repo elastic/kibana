@@ -7,12 +7,12 @@
 
 export const ENDPOINT_VM_NAME = 'ENDPOINT_VM_NAME';
 
-export const API_AUTH = {
+export const API_AUTH = Object.freeze({
   user: Cypress.env('ELASTICSEARCH_USERNAME'),
   pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
-};
+});
 
-export const API_HEADERS = { 'kbn-xsrf': 'cypress' };
+export const API_HEADERS = Object.freeze({ 'kbn-xsrf': 'cypress' });
 
 export const request = <T = unknown>(
   options: Partial<Cypress.RequestOptions>
