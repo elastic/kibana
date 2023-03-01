@@ -12,7 +12,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const commonScreenshots = getService('commonScreenshots');
   const find = getService('find');
-  const retry = getService('retry');
   const rules = getService('rules');
   const testSubjects = getService('testSubjects');
   const pageObjects = getPageObjects(['common', 'header']);
@@ -86,6 +85,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('fieldsExpressionSelect', 'host.keyword');
       await commonScreenshots.takeScreenshot(
         'rule-types-index-threshold-example-grouping',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+      // need this two out of popup clicks to close them
+      const nameInput1 = await testSubjects.find('ruleNameInput');
+      await nameInput1.click();
+
+      await testSubjects.click('thresholdPopover');
+      await testSubjects.setValue('alertThresholdInput', '420000');
+      await testSubjects.click('forLastExpression');
+      await testSubjects.setValue('timeWindowSizeNumber', '24');
+      await testSubjects.setValue('timeWindowUnitSelect', 'hours');
+      // need this two out of popup clicks to close them
+      const nameInput2 = await testSubjects.find('ruleNameInput');
+      await nameInput2.click();
+      await testSubjects.scrollIntoView('thresholdPopover');
+      await commonScreenshots.takeScreenshot(
+        'rule-types-index-threshold-example-threshold',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+
+      await testSubjects.setValue('intervalInput', '4');
+      await testSubjects.setValue('intervalInputUnit', 'hours');
+      // need this two out of popup clicks to close them
+      const nameInput3 = await testSubjects.find('ruleNameInput');
+      await nameInput3.click();
+      await testSubjects.scrollIntoView('alertVisualizationChart');
+      await commonScreenshots.takeScreenshot(
+        'rule-types-index-threshold-example-preview',
         screenshotDirectories,
         1400,
         1024
