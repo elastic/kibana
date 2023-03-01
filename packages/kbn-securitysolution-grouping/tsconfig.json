@@ -20,7 +20,6 @@
     "@kbn/ui-theme",
     "@kbn/i18n",
     "@kbn/es-query",
-    "@kbn/core",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
     "@kbn/data-views-plugin"
