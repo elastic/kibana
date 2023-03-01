@@ -19,17 +19,28 @@ import { PLUGIN, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
 import { transformHealthServiceProvider } from './transform_health_service';
 
-export interface BaseResponse {
-  transform_id: string;
-  description?: string;
+export interface TransformHealth {
+  status: 'green' | 'unknown' | 'yellow' | 'red';
+  issues?: Array<{ issue: string; details?: string; count: number; first_occurrence?: string }>;
 }
 
-export interface NotStartedTransformResponse extends BaseResponse {
+export interface BaseTransformAlertResponse {
+  transform_id: string;
+  description?: string;
+  health: TransformHealth;
+}
+
+export interface NotStartedTransformResponse extends BaseTransformAlertResponse {
   transform_state: string;
   node_name?: string;
 }
 
-export interface ErrorMessagesTransformResponse extends BaseResponse {
+export interface UnhealthyTransformResponse extends BaseTransformAlertResponse {
+  transform_state: string;
+  node_name?: string;
+}
+
+export interface ErrorMessagesTransformResponse extends BaseTransformAlertResponse {
   error_messages: Array<{ message: string; timestamp: number; node_name?: string }>;
 }
 

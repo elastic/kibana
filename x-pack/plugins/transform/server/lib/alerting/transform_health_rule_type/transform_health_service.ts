@@ -8,8 +8,9 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { keyBy, partition } from 'lodash';
+import { keyBy, memoize, partition } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { type TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import { TransformHealthRuleParams } from './schema';
 import {
   ALL_TRANSFORMS_SELECTION,
@@ -18,10 +19,12 @@ import {
   TRANSFORM_STATE,
 } from '../../../../common/constants';
 import { getResultTestConfig } from '../../../../common/utils/alerts';
-import {
+import type {
   ErrorMessagesTransformResponse,
   NotStartedTransformResponse,
+  TransformHealth,
   TransformHealthAlertContext,
+  UnhealthyTransformResponse,
 } from './register_transform_health_rule_type';
 import type { TransformHealthAlertRule } from '../../../../common/types/alerting';
 import { isContinuousTransform } from '../../../../common/types/transform';
@@ -40,6 +43,13 @@ type Transform = estypes.TransformGetTransformTransformSummary & {
 };
 
 type TransformWithAlertingRules = Transform & { alerting_rules: TransformHealthAlertRule[] };
+
+/**
+ * TODO update types in the es client
+ */
+type TransformGetTransformStats = TransformGetTransformStatsTransformStats & {
+  health: TransformHealth;
+};
 
 export function transformHealthServiceProvider(
   esClient: ElasticsearchClient,
@@ -90,6 +100,16 @@ export function transformHealthServiceProvider(
     return resultTransformIds;
   };
 
+  const getTransformStats = memoize(
+    async (transformIds: string[]): Promise<TransformGetTransformStats[]> => {
+      return (
+        await esClient.transform.getTransformStats({
+          transform_id: transformIds.join(','),
+        })
+      ).transforms as TransformGetTransformStats[];
+    }
+  );
+
   return {
     /**
      * Returns report about not started transforms
@@ -100,11 +120,7 @@ export function transformHealthServiceProvider(
     async getTransformsStateReport(
       transformIds: string[]
     ): Promise<[NotStartedTransformResponse[], NotStartedTransformResponse[]]> {
-      const transformsStats = (
-        await esClient.transform.getTransformStats({
-          transform_id: transformIds.join(','),
-        })
-      ).transforms;
+      const transformsStats = await getTransformStats(transformIds);
 
       return partition(
         transformsStats.map((t) => ({
@@ -112,6 +128,7 @@ export function transformHealthServiceProvider(
           description: transformsDict.get(t.id)?.description,
           transform_state: t.state,
           node_name: t.node?.name,
+          health: t.health,
         })),
         (t) =>
           t.transform_state !== TRANSFORM_STATE.STARTED &&
@@ -191,6 +208,27 @@ export function transformHealthServiceProvider(
           } as ErrorMessagesTransformResponse;
         })
         .filter((v) => failedTransforms.has(v.transform_id));
+    },
+    /**
+     * Returns report about unhealthy transforms
+     * @param transformIds
+     */
+    async getUnhealthyTransformsReport(
+      transformIds: string[]
+    ): Promise<UnhealthyTransformResponse[]> {
+      const transformsStats = await getTransformStats(transformIds);
+
+      return transformsStats
+        .filter((t) => t.health.status !== 'green')
+        .map((t) => {
+          return {
+            transform_id: t.id,
+            transform_state: t.state,
+            node_name: t.node?.name,
+            description: transformsDict.get(t.id)?.description,
+            health: t.health,
+          };
+        });
     },
     /**
      * Returns results of the transform health checks
