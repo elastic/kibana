@@ -11,3 +11,4 @@ export { getCurrentIndex } from './get_current_index';
 export { checkVersionCompatibility } from './check_version_compatibility';
 export { buildIndexMappings, buildIndexMeta } from './build_index_mappings';
 export { getAliasActions } from './get_alias_actions';
+export { generateAdditiveMappingDiff } from './generate_additive_mapping_diff';

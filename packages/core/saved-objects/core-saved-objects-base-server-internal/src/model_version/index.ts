@@ -25,4 +25,8 @@ export {
   type CompareModelVersionDetails,
   type CompareModelVersionResult,
 } from './version_compare';
-export { getModelVersionsFromMappings } from './model_version_from_mappings';
+export {
+  getModelVersionsFromMappings,
+  getModelVersionsFromMappingMeta,
+} from './model_version_from_mappings';
+export { getModelVersionDelta } from './get_version_delta';

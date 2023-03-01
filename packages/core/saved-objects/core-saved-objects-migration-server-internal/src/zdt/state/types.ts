@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type { MigrationLog } from '../../types';
 import type { ControlState } from '../../state_action_machine';
@@ -16,6 +17,11 @@ export interface BaseState extends ControlState {
   readonly retryDelay: number;
   readonly logs: MigrationLog[];
 }
+
+/**
+ * The state after
+ */
+export interface StateWithIndexPresent {}
 
 /** Initial state before any action is performed */
 export interface InitState extends BaseState {
@@ -35,12 +41,9 @@ export interface CreateTargetIndexState extends BaseState {
   readonly indexMappings: IndexMapping;
 }
 
-export interface WaitForYellowIndexState extends PostInitState {
-  readonly controlState: 'WAIT_FOR_YELLOW_INDEX';
-}
-
 export interface UpdateIndexMappingsState extends PostInitState {
   readonly controlState: 'UPDATE_INDEX_MAPPINGS';
+  readonly additiveMappingChanges: SavedObjectsMappingProperties;
 }
 
 export interface UpdateIndexMappingsWaitForTaskState extends PostInitState {
@@ -50,6 +53,10 @@ export interface UpdateIndexMappingsWaitForTaskState extends PostInitState {
 
 export interface UpdateAliasesState extends PostInitState {
   readonly controlState: 'UPDATE_ALIASES';
+}
+
+export interface WaitForYellowIndexState extends PostInitState {
+  readonly controlState: 'WAIT_FOR_YELLOW_INDEX';
 }
 
 /** Migration completed successfully */

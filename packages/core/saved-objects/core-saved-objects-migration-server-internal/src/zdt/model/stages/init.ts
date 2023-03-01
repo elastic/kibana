@@ -16,6 +16,7 @@ import {
   checkVersionCompatibility,
   buildIndexMappings,
   getAliasActions,
+  generateAdditiveMappingDiff,
 } from '../../utils';
 import type { ModelStage } from '../types';
 
@@ -77,6 +78,11 @@ export const init: ModelStage<
     // app version is greater than the index mapping version.
     // scenario of an upgrade: we need to update the mappings
     case 'greater':
+      const additiveMappingChanges = generateAdditiveMappingDiff({
+        types,
+        meta: currentMappings._meta ?? {},
+        deletedTypes: context.deletedTypes,
+      });
       return {
         ...state,
         logs,
@@ -84,6 +90,7 @@ export const init: ModelStage<
         aliases,
         aliasActions,
         previousMappings: currentMappings,
+        additiveMappingChanges,
         controlState: 'UPDATE_INDEX_MAPPINGS',
       };
     // app version and index mapping version are the same.

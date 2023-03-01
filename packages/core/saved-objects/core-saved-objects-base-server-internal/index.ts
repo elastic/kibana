@@ -54,4 +54,6 @@ export {
   type CompareModelVersionDetails,
   type CompareModelVersionResult,
   getModelVersionsFromMappings,
+  getModelVersionsFromMappingMeta,
+  getModelVersionDelta,
 } from './src/model_version';

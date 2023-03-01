@@ -32,32 +32,42 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
 >;
 
 // TODO: remove when done
-const NOT_IMPLEMENTED = () => Promise.resolve({} as any);
+// const NOT_IMPLEMENTED = () => Promise.resolve({} as any);
 
 export const nextActionMap = (context: MigratorContext) => {
+  const client = context.elasticsearchClient;
   return {
     INIT: (state: InitState) =>
       Actions.init({
-        client: context.elasticsearchClient,
+        client,
         indices: [`${context.indexPrefix}_*`],
       }),
     CREATE_TARGET_INDEX: (state: CreateTargetIndexState) =>
       Actions.createIndex({
-        client: context.elasticsearchClient,
+        client,
         indexName: state.currentIndex,
         mappings: state.indexMappings,
       }),
-    UPDATE_INDEX_MAPPINGS: (state: UpdateIndexMappingsState) => NOT_IMPLEMENTED,
+    UPDATE_INDEX_MAPPINGS: (state: UpdateIndexMappingsState) =>
+      Actions.updateAndPickupMappings({
+        client,
+        index: state.currentIndex,
+        mappings: { properties: state.additiveMappingChanges },
+      }),
     UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: (state: UpdateIndexMappingsWaitForTaskState) =>
-      NOT_IMPLEMENTED,
+      Actions.waitForPickupUpdatedMappingsTask({
+        client,
+        taskId: state.updateTargetMappingsTaskId,
+        timeout: '60s',
+      }),
     UPDATE_ALIASES: (state: UpdateAliasesState) =>
       Actions.updateAliases({
-        client: context.elasticsearchClient,
+        client,
         aliasActions: state.aliasActions,
       }),
     WAIT_FOR_YELLOW_INDEX: (state: WaitForYellowIndexState) =>
       Actions.waitForIndexStatus({
-        client: context.elasticsearchClient,
+        client,
         index: state.currentIndex,
         status: 'yellow',
       }),

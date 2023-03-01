@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { IndexMapping } from '../mappings';
+import type { IndexMapping, IndexMappingMeta } from '../mappings';
 import type { ModelVersionMap } from './version_map';
 import { assertValidModelVersion } from './conversion';
 
@@ -20,12 +20,30 @@ export const getModelVersionsFromMappings = ({
   mappings: IndexMapping;
   source: 'mappingVersions' | 'docVersions';
 }): ModelVersionMap | undefined => {
-  const indexVersions =
-    source === 'mappingVersions' ? mappings._meta?.mappingVersions : mappings._meta?.docVersions;
-  if (!indexVersions) {
+  if (!mappings._meta) {
     return undefined;
   }
 
+  return getModelVersionsFromMappingMeta({
+    meta: mappings._meta,
+    source,
+  });
+};
+
+/**
+ * Build the version map from the specified source of the provided mappings meta.
+ */
+export const getModelVersionsFromMappingMeta = ({
+  meta,
+  source,
+}: {
+  meta: IndexMappingMeta;
+  source: 'mappingVersions' | 'docVersions';
+}): ModelVersionMap | undefined => {
+  const indexVersions = source === 'mappingVersions' ? meta.mappingVersions : meta.docVersions;
+  if (!indexVersions) {
+    return undefined;
+  }
   return Object.entries(indexVersions).reduce<ModelVersionMap>((map, [type, rawVersion]) => {
     map[type] = assertValidModelVersion(rawVersion);
     return map;

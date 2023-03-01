@@ -22,6 +22,8 @@ export {
   waitForIndexStatus,
   createIndex,
   updateAliases,
+  updateAndPickupMappings,
+  waitForPickupUpdatedMappingsTask,
   type InitActionParams,
   type IncompatibleClusterRoutingAllocation,
   type RetryableEsClientError,
