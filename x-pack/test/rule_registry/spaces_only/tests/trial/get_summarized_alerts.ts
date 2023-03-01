@@ -10,7 +10,7 @@ import type { ElasticsearchClient, Logger, LogMeta } from '@kbn/core/server';
 import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
-import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import {
   AlertConsumers,
   ALERT_REASON,
