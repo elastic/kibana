@@ -5,12 +5,25 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react-hooks';
-import { defaultCore, WrappedHelper } from '../../../../utils/testing';
-
+import { renderHook, act } from '@testing-library/react-hooks';
+import { WrappedHelper } from '../../../../utils/testing';
+import { getServiceLocations } from '../../../../state/service_locations';
+import { setAddingNewPrivateLocation } from '../../../../state/private_locations';
 import { useLocationsAPI } from './use_locations_api';
+import * as locationAPI from '../../../../state/private_locations/api';
+import * as reduxHooks from 'react-redux';
 
 describe('useLocationsAPI', () => {
+  const dispatch = jest.fn();
+  const addAPI = jest.spyOn(locationAPI, 'addSyntheticsPrivateLocations').mockResolvedValue({
+    locations: [],
+  });
+  const deletedAPI = jest.spyOn(locationAPI, 'deleteSyntheticsPrivateLocations').mockResolvedValue({
+    locations: [],
+  });
+  const getAPI = jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations');
+  jest.spyOn(reduxHooks, 'useDispatch').mockReturnValue(dispatch);
+
   it('returns expected results', () => {
     const { result } = renderHook(() => useLocationsAPI(), {
       wrapper: WrappedHelper,
@@ -22,20 +35,15 @@ describe('useLocationsAPI', () => {
         privateLocations: [],
       })
     );
-    expect(defaultCore.savedObjects.client.get).toHaveBeenCalledWith(
-      'synthetics-privates-locations',
-      'synthetics-privates-locations-singleton'
-    );
+    expect(getAPI).toHaveBeenCalledTimes(1);
   });
-  defaultCore.savedObjects.client.get = jest.fn().mockReturnValue({
-    attributes: {
-      locations: [
-        {
-          id: 'Test',
-          agentPolicyId: 'testPolicy',
-        },
-      ],
-    },
+  jest.spyOn(locationAPI, 'getSyntheticsPrivateLocations').mockResolvedValue({
+    locations: [
+      {
+        id: 'Test',
+        agentPolicyId: 'testPolicy',
+      } as any,
+    ],
   });
   it('returns expected results after data', async () => {
     const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI(), {
@@ -71,77 +79,50 @@ describe('useLocationsAPI', () => {
 
     await waitForNextUpdate();
 
-    result.current.onSubmit({
-      id: 'new',
-      agentPolicyId: 'newPolicy',
-      label: 'new',
-      concurrentMonitors: 1,
-      geo: {
-        lat: 0,
-        lon: 0,
-      },
+    act(() => {
+      result.current.onSubmit({
+        id: 'new',
+        agentPolicyId: 'newPolicy',
+        label: 'new',
+        concurrentMonitors: 1,
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
+      });
     });
 
     await waitForNextUpdate();
 
-    expect(defaultCore.savedObjects.client.create).toHaveBeenCalledWith(
-      'synthetics-privates-locations',
-      {
-        locations: [
-          { id: 'Test', agentPolicyId: 'testPolicy' },
-          {
-            concurrentMonitors: 1,
-            id: 'newPolicy',
-            geo: {
-              lat: 0,
-              lon: 0,
-            },
-            label: 'new',
-            agentPolicyId: 'newPolicy',
-          },
-        ],
+    expect(addAPI).toHaveBeenCalledWith({
+      concurrentMonitors: 1,
+      id: 'newPolicy',
+      geo: {
+        lat: 0,
+        lon: 0,
       },
-      { id: 'synthetics-privates-locations-singleton', overwrite: true }
-    );
+      label: 'new',
+      agentPolicyId: 'newPolicy',
+    });
+    expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
+    expect(dispatch).toBeCalledWith(getServiceLocations());
   });
 
   it('deletes location on delete', async () => {
-    defaultCore.savedObjects.client.get = jest.fn().mockReturnValue({
-      attributes: {
-        locations: [
-          {
-            id: 'Test',
-            agentPolicyId: 'testPolicy',
-          },
-          {
-            id: 'Test1',
-            agentPolicyId: 'testPolicy1',
-          },
-        ],
-      },
-    });
-
     const { result, waitForNextUpdate } = renderHook(() => useLocationsAPI(), {
       wrapper: WrappedHelper,
     });
 
     await waitForNextUpdate();
 
-    result.current.onDelete('Test');
+    act(() => {
+      result.current.onDelete('Test');
+    });
 
     await waitForNextUpdate();
 
-    expect(defaultCore.savedObjects.client.create).toHaveBeenLastCalledWith(
-      'synthetics-privates-locations',
-      {
-        locations: [
-          {
-            id: 'Test1',
-            agentPolicyId: 'testPolicy1',
-          },
-        ],
-      },
-      { id: 'synthetics-privates-locations-singleton', overwrite: true }
-    );
+    expect(deletedAPI).toHaveBeenLastCalledWith('Test');
+    expect(dispatch).toBeCalledWith(setAddingNewPrivateLocation(false));
+    expect(dispatch).toBeCalledWith(getServiceLocations());
   });
 });
