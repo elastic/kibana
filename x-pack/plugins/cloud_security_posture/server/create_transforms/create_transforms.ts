@@ -13,8 +13,14 @@ import { latestVulnerabilitiesTransform } from './latest_vulnerabilities_transfo
 
 const LATEST_TRANSFORM_V830 = 'cloud_security_posture.findings_latest-default-0.0.1';
 const LATEST_TRANSFORM_V840 = 'cloud_security_posture.findings_latest-default-8.4.0';
-
-const PREVIOUS_TRANSFORMS = [LATEST_TRANSFORM_V830, LATEST_TRANSFORM_V840];
+const LATEST_TRANSFORM_V880_001 = 'cloud_security_posture.findings_latest-default-0.0.1';
+const LATEST_VULNERABILITIES_V880 = 'cloud_security_posture.vulnerabilities_latest-default-8.8.0';
+const PREVIOUS_TRANSFORMS = [
+  LATEST_TRANSFORM_V830,
+  LATEST_TRANSFORM_V840,
+  LATEST_TRANSFORM_V880_001,
+  LATEST_VULNERABILITIES_V880,
+];
 
 // TODO: Move transforms to integration package
 export const initializeCspTransforms = async (

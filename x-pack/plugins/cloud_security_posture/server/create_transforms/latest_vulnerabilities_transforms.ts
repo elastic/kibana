@@ -37,7 +37,7 @@ export const latestVulnerabilitiesTransform: TransformPutTransformRequest = {
   },
   latest: {
     sort: '@timestamp',
-    unique_key: ['vulnerability.id', 'resource.id'],
+    unique_key: ['vulnerability.id', 'resource.id', 'package.version'],
   },
   _meta: {
     package: {
