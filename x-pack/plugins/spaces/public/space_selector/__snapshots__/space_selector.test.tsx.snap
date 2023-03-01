@@ -6,9 +6,15 @@ exports[`it renders with custom logo 1`] = `
   data-test-subj="kibanaSpaceSelector"
   panelled={true}
 >
+  <EuiPortal>
+    <div
+      className="spcSelectorBackground"
+      role="presentation"
+    />
+  </EuiPortal>
   <_EuiPageSection
-    className="spcSpaceSelector__pageContent"
     color="transparent"
+    paddingSize="xl"
   >
     <EuiText
       size="s"
@@ -63,9 +69,15 @@ exports[`it renders without crashing 1`] = `
   data-test-subj="kibanaSpaceSelector"
   panelled={true}
 >
+  <EuiPortal>
+    <div
+      className="spcSelectorBackground"
+      role="presentation"
+    />
+  </EuiPortal>
   <_EuiPageSection
-    className="spcSpaceSelector__pageContent"
     color="transparent"
+    paddingSize="xl"
   >
     <EuiText
       size="s"

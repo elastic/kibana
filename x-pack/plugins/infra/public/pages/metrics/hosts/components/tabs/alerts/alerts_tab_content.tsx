@@ -27,50 +27,38 @@ import {
   DEFAULT_INTERVAL,
   infraAlertFeatureIds,
 } from '../config';
-import { useAlertsQuery } from '../../../hooks/use_alerts_query';
+import { AlertsEsQuery, useAlertsQuery } from '../../../hooks/use_alerts_query';
 import AlertsStatusFilter from './alerts_status_filter';
+import { HostsState } from '../../../hooks/use_unified_search_url_state';
 
-export const AlertsTabContent = React.memo(() => {
+export const AlertsTabContent = () => {
   const { services } = useKibana<InfraClientCoreStart & InfraClientStartDeps>();
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
 
   const { unifiedSearchDateRange } = useUnifiedSearchContext();
 
-  const summaryTimeRange = useSummaryTimeRange(unifiedSearchDateRange);
+  const { application, cases, triggersActionsUi } = services;
 
-  const { application, cases, charts, triggersActionsUi } = services;
-
-  const {
-    alertsTableConfigurationRegistry,
-    getAlertsStateTable: AlertsStateTable,
-    getAlertSummaryWidget: AlertSummaryWidget,
-  } = triggersActionsUi;
+  const { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable } =
+    triggersActionsUi;
 
   const CasesContext = cases.ui.getCasesContext();
   const uiCapabilities = application?.capabilities;
   const casesCapabilities = cases.helpers.getUICapabilities(uiCapabilities.observabilityCases);
 
-  const chartThemes = {
-    theme: charts.theme.useChartsTheme(),
-    baseTheme: charts.theme.useChartsBaseTheme(),
-  };
-
   return (
     <HeightRetainer>
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-alerts">
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
             <AlertsStatusFilter onChange={setAlertStatus} status={alertStatus} />
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexItem>
-          <AlertSummaryWidget
-            chartThemes={chartThemes}
-            featureIds={infraAlertFeatureIds}
-            filter={alertsEsQueryByStatus}
-            fullSize
-            timeRange={summaryTimeRange}
+          <MemoAlertSummaryWidget
+            alertsQuery={alertsEsQueryByStatus}
+            dateRange={unifiedSearchDateRange}
           />
         </EuiFlexItem>
         {alertsEsQueryByStatus && (
@@ -97,7 +85,38 @@ export const AlertsTabContent = React.memo(() => {
       </EuiFlexGroup>
     </HeightRetainer>
   );
-});
+};
+
+interface MemoAlertSummaryWidgetProps {
+  alertsQuery: AlertsEsQuery;
+  dateRange: HostsState['dateRange'];
+}
+
+const MemoAlertSummaryWidget = React.memo(
+  ({ alertsQuery, dateRange }: MemoAlertSummaryWidgetProps) => {
+    const { services } = useKibana<InfraClientStartDeps>();
+
+    const summaryTimeRange = useSummaryTimeRange(dateRange);
+
+    const { charts, triggersActionsUi } = services;
+    const { getAlertSummaryWidget: AlertSummaryWidget } = triggersActionsUi;
+
+    const chartThemes = {
+      theme: charts.theme.useChartsTheme(),
+      baseTheme: charts.theme.useChartsBaseTheme(),
+    };
+
+    return (
+      <AlertSummaryWidget
+        chartThemes={chartThemes}
+        featureIds={infraAlertFeatureIds}
+        filter={alertsQuery}
+        fullSize
+        timeRange={summaryTimeRange}
+      />
+    );
+  }
+);
 
 const useSummaryTimeRange = (unifiedSearchDateRange: TimeRange) => {
   const timeBuckets = useTimeBuckets();

@@ -13,7 +13,7 @@ import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_te
 import { isTimeComparison } from '../../time_comparison/get_comparison_options';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { asPercent } from '../../../../../common/utils/formatters';
-import { useFetcher } from '../../../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';
 import { TimeseriesChartWithContext } from '../timeseries_chart_with_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -77,12 +77,17 @@ export function FailedTransactionRateChart({
     ApmMlDetectorType.txFailureRate
   );
 
-  const { serviceName, transactionType } = useApmServiceContext();
+  const { serviceName, transactionType, transactionTypeStatus } =
+    useApmServiceContext();
 
   const comparisonChartTheme = getComparisonChartTheme();
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
+      if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
+        return Promise.resolve(INITIAL_STATE);
+      }
+
       if (transactionType && serviceName && start && end) {
         return callApmApi(
           'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
@@ -115,6 +120,7 @@ export function FailedTransactionRateChart({
       start,
       end,
       transactionType,
+      transactionTypeStatus,
       transactionName,
       offset,
       comparisonEnabled,
@@ -128,7 +134,7 @@ export function FailedTransactionRateChart({
   const previousPeriodLabel = usePreviousPeriodLabel();
   const timeseries = [
     {
-      data: data.currentPeriod.timeseries,
+      data: data?.currentPeriod?.timeseries ?? [],
       type: 'linemark',
       color: currentPeriodColor,
       title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
@@ -138,7 +144,7 @@ export function FailedTransactionRateChart({
     ...(comparisonEnabled
       ? [
           {
-            data: data.previousPeriod.timeseries,
+            data: data?.previousPeriod?.timeseries ?? [],
             type: 'area',
             color: previousPeriodColor,
             title: previousPeriodLabel,

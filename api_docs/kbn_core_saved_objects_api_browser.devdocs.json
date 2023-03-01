@@ -2244,14 +2244,6 @@
                 "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.ts"
               },
               {
-                "plugin": "savedObjectsFinder",
-                "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-              },
-              {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
               },
@@ -3989,42 +3981,6 @@
             "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.ts"
           },
           {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
             "plugin": "aiops",
             "path": "x-pack/plugins/aiops/public/application/utils/search_utils.ts"
           },
@@ -4039,50 +3995,6 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
           },
           {
             "plugin": "maps",
