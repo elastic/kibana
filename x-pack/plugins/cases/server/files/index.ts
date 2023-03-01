@@ -27,14 +27,13 @@ const buildFileKind = (owner: Owner): FileKind => {
   };
 };
 
-const fileKindHttpTags = (owner: Owner) => {
+const fileKindHttpTags = (owner: Owner): FileKind['http'] => {
   return {
     create: buildTag(owner, HttpApiTagOperation.Create),
     delete: buildTag(owner, HttpApiTagOperation.Delete),
     download: buildTag(owner, HttpApiTagOperation.Read),
     getById: buildTag(owner, HttpApiTagOperation.Read),
     list: buildTag(owner, HttpApiTagOperation.Read),
-    update: buildTag(owner, HttpApiTagOperation.Update),
   };
 };
 

@@ -10,7 +10,6 @@ import type { OWNERS } from './owners';
 export enum HttpApiTagOperation {
   Read = 'Read',
   Create = 'Create',
-  Update = 'Update',
   Delete = 'Delete',
 }
 

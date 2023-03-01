@@ -15,18 +15,11 @@ import type { Owner } from '../constants/types';
 
 export const getApiTags = (owner: Owner) => {
   const create = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Create);
-  const update = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Update);
   const deleteTag = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Delete);
   const read = constructFilesHttpOperationTag(owner, HttpApiTagOperation.Read);
 
   return {
-    all: [
-      SUGGEST_USER_PROFILES_API_TAG,
-      BULK_GET_USER_PROFILES_API_TAG,
-      create,
-      update,
-      read,
-    ] as const,
+    all: [SUGGEST_USER_PROFILES_API_TAG, BULK_GET_USER_PROFILES_API_TAG, create, read] as const,
     read: [SUGGEST_USER_PROFILES_API_TAG, BULK_GET_USER_PROFILES_API_TAG, read] as const,
     delete: [deleteTag] as const,
   };
