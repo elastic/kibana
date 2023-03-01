@@ -18,8 +18,10 @@ import {
 import React from 'react';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 
+import moment from 'moment';
 import { useKibana } from '../../../utils/kibana_react';
 import { toHighPrecisionPercentage } from '../helpers/number';
+import { DEFAULT_DATE_FORMAT } from '../constants';
 
 export interface Data {
   key: number;
@@ -62,7 +64,7 @@ export function WideChart({ chart, data, id, loading, state }: Props) {
         id="bottom"
         position={Position.Bottom}
         showOverlappingTicks
-        tickFormat={(d) => new Date(d).toISOString()}
+        tickFormat={(d) => moment(d).format(DEFAULT_DATE_FORMAT)}
       />
       <Axis
         id="left"
