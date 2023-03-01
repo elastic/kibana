@@ -10061,7 +10061,6 @@
     "xpack.csp.findings.distributionBar.totalPassedLabel": "通过的结果",
     "xpack.csp.findings.errorCallout.pageSearchErrorTitle": "检索搜索结果时遇到问题",
     "xpack.csp.findings.errorCallout.showErrorButtonLabel": "显示错误消息",
-    "xpack.csp.findings.findingsByResource.findingsByResourcePageTitle": "结果",
     "xpack.csp.findings.findingsByResource.noFindingsTitle": "无结果",
     "xpack.csp.findings.findingsByResource.tableRowTypeLabel": "资源",
     "xpack.csp.findings.findingsByResourceTable.cisSectionsColumnLabel": "CIS 部分",
