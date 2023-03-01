@@ -39,7 +39,7 @@ function ofName(name: string) {
   });
 }
 
-type AggregateFnTypes = 'sum' | 'max' | 'min' | 'avg';
+type AggregateFnTypes = 'aggBucketSum' | 'aggBucketMax' | 'aggBucketMin' | 'aggBucketAvg';
 
 export interface RateIndexPatternColumn extends FieldBasedIndexPatternColumn {
   operationType: typeof OPERATION_TYPE;
@@ -56,21 +56,21 @@ export const rateOperation: OperationDefinition<RateIndexPatternColumn, 'field',
   }),
   allowAsReference: true,
   input: 'field',
-  operationParams: [{ name: 'aggregation', type: 'string', required: false, defaultValue: 'max' }],
+  operationParams: [
+    { name: 'aggregateFn', type: 'string', required: false, defaultValue: 'aggBucketMax' },
+  ],
   getPossibleOperationForField: ({
     aggregationRestrictions,
     aggregatable,
     type,
     timeSeriesMetric,
   }) => {
-    if (supportedTypes.has(type) && aggregatable && timeSeriesMetric === 'counter') {
+    if (supportedTypes.has(type) && aggregatable) {
       return { dataType: 'number', isBucketed: IS_BUCKETED, scale: SCALE };
     }
   },
   getErrorMessage: (layer, columnId, indexPattern) =>
-    combineErrorMessages([
-      getInvalidFieldMessage(layer, columnId, indexPattern),
-    ]),
+    combineErrorMessages([getInvalidFieldMessage(layer, columnId, indexPattern)]),
   isTransferable: (column, newIndexPattern) => {
     const newField = newIndexPattern.getFieldByName(column.sourceField);
 
@@ -98,15 +98,16 @@ export const rateOperation: OperationDefinition<RateIndexPatternColumn, 'field',
       timeShift: columnParams?.shift || previousColumn?.timeShift,
       reducedTimeRange: columnParams?.reducedTimeRange || previousColumn?.reducedTimeRange,
       params: {
-        aggregateFn: 'sum',
+        aggregateFn: 'aggBucketMax',
         ...getFormatFromPreviousColumn(previousColumn),
       },
     };
   },
-  toEsAggsFn: (column, columnId) => {
-    if (true) {
+  toEsAggsFn: (column, columnId, indexPattern) => {
+    const aggFn = column.params?.aggregateFn || 'aggBucketMax';
+    if (indexPattern.getFieldByName(column.sourceField)?.timeSeriesMetric === 'counter') {
       // if wrap in timeseries and bucket agg
-      return buildExpressionFunction<AggFunctionsMapping['aggBucketMax']>('aggBucketMax', {
+      return buildExpressionFunction(aggFn, {
         id: columnId,
         enabled: true,
         schema: 'metric',
@@ -125,7 +126,33 @@ export const rateOperation: OperationDefinition<RateIndexPatternColumn, 'field',
             field: column.sourceField,
             // time shift is added to wrapping aggFilteredMetric if filter is set
             timeShift: column.filter ? undefined : column.timeShift,
-            unit: 'hour',
+            unit: 'second',
+          }),
+        ]),
+      }).toAst();
+    } else {
+      return buildExpressionFunction(aggFn, {
+        id: columnId,
+        enabled: true,
+        schema: 'metric',
+        customBucket: buildExpression([
+          buildExpressionFunction<AggFunctionsMapping['aggDateHistogram']>('aggDateHistogram', {
+            id: `-datehistogram`,
+            enabled: true,
+            schema: 'bucket',
+            field: '@timestamp',
+            interval: '1d',
+          }),
+        ]),
+        customMetric: buildExpression([
+          buildExpressionFunction<AggFunctionsMapping['aggRate']>('aggRate', {
+            id: '-metric',
+            enabled: true,
+            schema: 'metric',
+            field: column.sourceField,
+            // time shift is added to wrapping aggFilteredMetric if filter is set
+            timeShift: column.filter ? undefined : column.timeShift,
+            unit: 'second',
           }),
         ]),
       }).toAst();
@@ -178,8 +205,8 @@ The number of unique values for a specified number, string, date, or boolean fie
       [currentColumn, paramEditorUpdater]
     );
     const { inputValue, handleInputChange } = useDebouncedValue({
-      value: currentColumn?.params?.aggregateFn ?? 'sum',
-      defaultValue: 'sum',
+      value: currentColumn?.params?.aggregateFn ?? 'aggBucketMax',
+      defaultValue: 'aggBucketMax',
       onChange,
     });
 
@@ -188,10 +215,10 @@ The number of unique values for a specified number, string, date, or boolean fie
     });
 
     const options = [
-      { value: 'sum', label: 'Sum' },
-      { value: 'avg', label: 'Average' },
-      { value: 'max', label: 'Max' },
-      { value: 'min', label: 'Min' },
+      { value: 'aggBucketSum', label: 'Sum' },
+      { value: 'aggBucketAvg', label: 'Average' },
+      { value: 'aggBucketMax', label: 'Max' },
+      { value: 'aggBucketMin', label: 'Min' },
     ];
 
     return (
