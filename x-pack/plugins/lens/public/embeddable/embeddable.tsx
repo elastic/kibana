@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -1012,13 +1012,14 @@ export class Embeddable
 
     const input = this.getInput();
     const context: ExecutionContextSearch = {
-      timeRange: input.timeslice !== undefined
-        ? {
-            from: new Date(input.timeslice[0]).toISOString(),
-            to: new Date(input.timeslice[1]).toISOString(),
-            mode: 'absolute' as 'absolute',
-          }
-        : input.timeRange,
+      timeRange:
+        input.timeslice !== undefined
+          ? {
+              from: new Date(input.timeslice[0]).toISOString(),
+              to: new Date(input.timeslice[1]).toISOString(),
+              mode: 'absolute' as 'absolute',
+            }
+          : input.timeRange,
       query: [this.savedVis.state.query],
       filters: this.deps.injectFilterReferences(
         this.savedVis.state.filters,
@@ -1034,7 +1035,7 @@ export class Embeddable
     if (input.filters?.length) {
       context.filters = [
         ...input.filters.filter((filter) => !filter.meta.disabled),
-        ...(context.filters as Filter[])
+        ...(context.filters as Filter[]),
       ];
     }
 
