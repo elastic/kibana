@@ -17,7 +17,6 @@ import {
   UseArray,
   fieldValidators,
   ValidationFunc,
-  ArrayItem,
 } from '../../../../../../shared_imports';
 
 import { XJsonEditor, DragAndDropTextList } from '../field_components';
@@ -40,15 +39,15 @@ const valueRequiredMessage = i18n.translate(
   { defaultMessage: 'A value is required.' }
 );
 
-const patternsValidation: ValidationFunc<any, string, ArrayItem[]> = ({ value }) => {
-  if (value.length === 0) {
+const patternsValidation: ValidationFunc = ({ value }) => {
+  if (typeof value === 'string' && value.length === 0) {
     return {
       message: valueRequiredMessage,
     };
   }
 };
 
-const patternValidations: Array<ValidationFunc<any, string, string>> = [
+const patternValidations = [
   emptyField(valueRequiredMessage),
 ];
 
