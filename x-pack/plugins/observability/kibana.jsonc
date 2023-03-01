@@ -24,8 +24,7 @@
       "unifiedSearch",
       "security",
       "guidedOnboarding",
-      "share",
-      "spaces"
+      "share"
     ],
     "optionalPlugins": [
       "discover",
