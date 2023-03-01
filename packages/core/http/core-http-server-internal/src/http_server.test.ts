@@ -849,6 +849,10 @@ test('infers access flag from path if not defined', async () => {
   router.get({ path: '/random/internal/foo', validate: false }, (context, req, res) =>
     res.ok({ body: { access: req.route.options.access } })
   );
+
+  router.get({ path: '/api/foo/internal/my-foo', validate: false }, (context, req, res) =>
+    res.ok({ body: { access: req.route.options.access } })
+  );
   registerRouter(router);
 
   await server.start();
@@ -857,6 +861,9 @@ test('infers access flag from path if not defined', async () => {
   await supertest(innerServer.listener).get('/random/foo').expect(200, { access: 'public' });
   await supertest(innerServer.listener)
     .get('/random/internal/foo')
+    .expect(200, { access: 'public' });
+  await supertest(innerServer.listener)
+    .get('/api/foo/internal/my-foo')
     .expect(200, { access: 'public' });
 });
 
