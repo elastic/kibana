@@ -63,11 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('whenExpression');
       await testSubjects.click('whenExpressionSelect');
-      await retry.try(async () => {
-        const aggTypeOptions = await find.allByCssSelector('#aggTypeField option');
-        expect(aggTypeOptions[2]).not.to.be(undefined);
-        await aggTypeOptions[2].click();
-      });
+      await testSubjects.setValue('whenExpressionSelect', 'sum()');
       await testSubjects.click('ofExpressionPopover');
       const ofComboBox = await find.byCssSelector('#ofField');
       await ofComboBox.click();
