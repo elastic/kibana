@@ -13,7 +13,7 @@
 
 ## Fleet Requirements
 
-Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on Kibana, (if you want to run Kibana without TLS you can provide the following config flag `--xpack.fleet.agents.tlsCheckDisabled=false`)
+Fleet needs to have Elasticsearch API keys enabled.
 
 Also you need to configure the hosts your agent is going to use to comunication with Elasticsearch and Kibana (Not needed if you use Elastic cloud). You can use the following flags:
 
