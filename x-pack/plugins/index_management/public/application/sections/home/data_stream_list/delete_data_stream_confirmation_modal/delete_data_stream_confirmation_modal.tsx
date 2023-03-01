@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Fragment } from 'react';
+import React, { Fragment, useState } from 'react';
 import { EuiCallOut, EuiConfirmModal, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -25,60 +25,65 @@ export const DeleteDataStreamConfirmationModal: React.FunctionComponent<Props> =
   dataStreams: string[];
   onClose: (data?: { hasDeletedDataStreams: boolean }) => void;
 }) => {
+  const [isLoading, setLoading] = useState(false);
+
   const dataStreamsCount = dataStreams.length;
 
   const handleDeleteDataStreams = () => {
-    deleteDataStreams(dataStreams).then(({ data: { dataStreamsDeleted, errors }, error }) => {
-      const hasDeletedDataStreams = dataStreamsDeleted && dataStreamsDeleted.length;
+    setLoading(true);
 
-      if (hasDeletedDataStreams) {
-        const successMessage =
-          dataStreamsDeleted.length === 1
+    deleteDataStreams(dataStreams)
+      .then(({ data: { dataStreamsDeleted, errors }, error }) => {
+        const hasDeletedDataStreams = dataStreamsDeleted && dataStreamsDeleted.length;
+
+        if (hasDeletedDataStreams) {
+          const successMessage =
+            dataStreamsDeleted.length === 1
+              ? i18n.translate(
+                  'xpack.idxMgmt.deleteDataStreamsConfirmationModal.successDeleteSingleNotificationMessageText',
+                  {
+                    defaultMessage: "Deleted data stream '{dataStreamName}'",
+                    values: { dataStreamName: dataStreams[0] },
+                  }
+                )
+              : i18n.translate(
+                  'xpack.idxMgmt.deleteDataStreamsConfirmationModal.successDeleteMultipleNotificationMessageText',
+                  {
+                    defaultMessage:
+                      'Deleted {numSuccesses, plural, one {# data stream} other {# data streams}}',
+                    values: { numSuccesses: dataStreamsDeleted.length },
+                  }
+                );
+
+          onClose({ hasDeletedDataStreams });
+          notificationService.showSuccessToast(successMessage);
+        }
+
+        if (error || (errors && errors.length)) {
+          const hasMultipleErrors =
+            (errors && errors.length > 1) || (error && dataStreams.length > 1);
+
+          const errorMessage = hasMultipleErrors
             ? i18n.translate(
-                'xpack.idxMgmt.deleteDataStreamsConfirmationModal.successDeleteSingleNotificationMessageText',
+                'xpack.idxMgmt.deleteDataStreamsConfirmationModal.multipleErrorsNotificationMessageText',
                 {
-                  defaultMessage: "Deleted data stream '{dataStreamName}'",
-                  values: { dataStreamName: dataStreams[0] },
+                  defaultMessage: 'Error deleting {count} data streams',
+                  values: {
+                    count: (errors && errors.length) || dataStreams.length,
+                  },
                 }
               )
             : i18n.translate(
-                'xpack.idxMgmt.deleteDataStreamsConfirmationModal.successDeleteMultipleNotificationMessageText',
+                'xpack.idxMgmt.deleteDataStreamsConfirmationModal.errorNotificationMessageText',
                 {
-                  defaultMessage:
-                    'Deleted {numSuccesses, plural, one {# data stream} other {# data streams}}',
-                  values: { numSuccesses: dataStreamsDeleted.length },
+                  defaultMessage: "Error deleting data stream '{name}'",
+                  values: { name: (errors && errors[0].name) || dataStreams[0] },
                 }
               );
-
-        onClose({ hasDeletedDataStreams });
-        notificationService.showSuccessToast(successMessage);
-      }
-
-      if (error || (errors && errors.length)) {
-        const hasMultipleErrors =
-          (errors && errors.length > 1) || (error && dataStreams.length > 1);
-
-        const errorMessage = hasMultipleErrors
-          ? i18n.translate(
-              'xpack.idxMgmt.deleteDataStreamsConfirmationModal.multipleErrorsNotificationMessageText',
-              {
-                defaultMessage: 'Error deleting {count} data streams',
-                values: {
-                  count: (errors && errors.length) || dataStreams.length,
-                },
-              }
-            )
-          : i18n.translate(
-              'xpack.idxMgmt.deleteDataStreamsConfirmationModal.errorNotificationMessageText',
-              {
-                defaultMessage: "Error deleting data stream '{name}'",
-                values: { name: (errors && errors[0].name) || dataStreams[0] },
-              }
-            );
-
-        notificationService.showDangerToast(errorMessage);
-      }
-    });
+          notificationService.showDangerToast(errorMessage);
+        }
+      })
+      .finally(() => setLoading(false));
   };
 
   return (
@@ -107,6 +112,7 @@ export const DeleteDataStreamConfirmationModal: React.FunctionComponent<Props> =
           values={{ dataStreamsCount }}
         />
       }
+      isLoading={isLoading}
     >
       <Fragment>
         <EuiCallOut
