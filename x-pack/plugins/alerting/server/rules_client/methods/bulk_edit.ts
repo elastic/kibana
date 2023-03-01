@@ -69,10 +69,8 @@ export type BulkEditFields = keyof Pick<
   'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen' | 'snoozeSchedule' | 'apiKey'
 >;
 
-export const bulkEditFieldsToExcludeFromRevisionUpdates: Set<BulkEditOperation['field']> = new Set([
-  'snoozeSchedule',
-  'apiKey',
-]);
+export const bulkEditFieldsToExcludeFromRevisionUpdates: ReadonlySet<BulkEditOperation['field']> =
+  new Set(['snoozeSchedule', 'apiKey']);
 
 export type BulkEditOperation =
   | {

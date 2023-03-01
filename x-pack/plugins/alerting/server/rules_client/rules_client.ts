@@ -66,7 +66,7 @@ const fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule> = [
   'activeSnoozes',
 ];
 
-export const fieldsToExcludeFromRevisionUpdates: Set<keyof RuleTypeParams> = new Set([
+export const fieldsToExcludeFromRevisionUpdates: ReadonlySet<keyof RuleTypeParams> = new Set([
   'activeSnoozes',
   'alertTypeId',
   'apiKey',
