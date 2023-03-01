@@ -6,7 +6,6 @@ Object {
     "casesSuggestUserProfiles",
     "bulkGetUserProfiles",
     "casesFilesCasesCreate",
-    "casesFilesCasesUpdate",
     "casesFilesCasesRead",
   ],
   "delete": Array [
@@ -26,7 +25,6 @@ Object {
     "casesSuggestUserProfiles",
     "bulkGetUserProfiles",
     "observabilityFilesCasesCreate",
-    "observabilityFilesCasesUpdate",
     "observabilityFilesCasesRead",
   ],
   "delete": Array [
@@ -46,7 +44,6 @@ Object {
     "casesSuggestUserProfiles",
     "bulkGetUserProfiles",
     "securitySolutionFilesCasesCreate",
-    "securitySolutionFilesCasesUpdate",
     "securitySolutionFilesCasesRead",
   ],
   "delete": Array [
