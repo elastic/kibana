@@ -309,6 +309,34 @@ export function transformHealthServiceProvider(
         });
       }
 
+      if (testsConfig.healthCheck.enabled) {
+        const response = await this.getUnhealthyTransformsReport(transformIds);
+        const isHealthy = response.length === 0;
+        const count = response.length;
+        const transformsString = response.map((t) => t.transform_id).join(', ');
+        result.push({
+          isHealthy,
+          name: TRANSFORM_HEALTH_CHECK_NAMES.healthCheck.name,
+          context: {
+            results: isHealthy ? [] : response,
+            message: isHealthy
+              ? i18n.translate(
+                  'xpack.transform.alertTypes.transformHealth.healthCheckRecoveryMessage',
+                  {
+                    defaultMessage:
+                      '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {is} other {are}} healthy.',
+                    values: { count, transformsString },
+                  }
+                )
+              : i18n.translate('xpack.transform.alertTypes.transformHealth.healthCheckMessage', {
+                  defaultMessage:
+                    '{count, plural, one {Transform} other {Transforms}} {transformsString} {count, plural, one {is} other {are}} unhealthy.',
+                  values: { count, transformsString },
+                }),
+          },
+        });
+      }
+
       return result;
     },
 

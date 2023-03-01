@@ -67,13 +67,13 @@ export function getTransformHealthRuleType(): RuleTypeModel<TransformHealthRuleP
   Transform ID: \\{\\{transform_id\\}\\}
   \\{\\{#description\\}\\}Transform description: \\{\\{description\\}\\}
   \\{\\{/description\\}\\}\\{\\{#transform_state\\}\\}Transform state: \\{\\{transform_state\\}\\}
-  \\{\\{/transform_state\\}\\}\\{\\{#failure_reason\\}\\}Failure reason: \\{\\{failure_reason\\}\\}
+  \\{\\{/transform_state\\}\\}\\{\\{#health\\}\\}Transform health: \\{\\{health\\}\\}
+  \\{\\{/health\\}\\}\\{\\{#failure_reason\\}\\}Failure reason: \\{\\{failure_reason\\}\\}
   \\{\\{/failure_reason\\}\\}\\{\\{#notification_message\\}\\}Notification message: \\{\\{notification_message\\}\\}
   \\{\\{/notification_message\\}\\}\\{\\{#node_name\\}\\}Node name: \\{\\{node_name\\}\\}
   \\{\\{/node_name\\}\\}\\{\\{#timestamp\\}\\}Timestamp: \\{\\{timestamp\\}\\}
   \\{\\{/timestamp\\}\\}\\{\\{#error_messages\\}\\}Error message: \\{\\{message\\}\\}
   \\{\\{/error_messages\\}\\}
-
 \\{\\{/context.results\\}\\}
 `,
       }
