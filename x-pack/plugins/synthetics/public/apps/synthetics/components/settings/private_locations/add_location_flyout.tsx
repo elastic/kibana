@@ -19,7 +19,7 @@ import {
   EuiButton,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useFleetPermissions } from '../../../hooks/use_fleet_permissions';
+import { useCanManagePrivateLocation } from '../../../hooks/use_fleet_permissions';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { FleetPermissionsCallout } from '../../common/components/permissions';
@@ -54,7 +54,7 @@ export const AddLocationFlyout = ({
 
   const { handleSubmit } = form;
 
-  const { canReadAgentPolicies } = useFleetPermissions();
+  const canManagePrivateLocation = useCanManagePrivateLocation();
 
   const closeFlyout = () => {
     setIsOpen(false);
@@ -69,9 +69,12 @@ export const AddLocationFlyout = ({
           </EuiTitle>
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
-          {!canReadAgentPolicies && <FleetPermissionsCallout />}
+          {!canManagePrivateLocation && <FleetPermissionsCallout />}
 
-          <LocationForm privateLocations={privateLocations} />
+          <LocationForm
+            privateLocations={privateLocations}
+            hasPermissions={canManagePrivateLocation}
+          />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
