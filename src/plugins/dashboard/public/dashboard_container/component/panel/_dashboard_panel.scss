@@ -19,4 +19,9 @@
   .embPanel {
     border-color: transparent;
   }
+
+  .embPanel--dragHandle:hover {
+    background-color: unset;
+    cursor: default;
+  }
 }
