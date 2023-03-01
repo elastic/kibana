@@ -119,7 +119,7 @@ export const MANAGE_RULES_SAVE = i18n.translate(
   }
 );
 export const LINK_RULES_HEADER = i18n.translate(
-  'xpack.securitySolution.exceptions.list.manage_rules_header',
+  'xpack.securitySolution.exceptions.list.link_rules_header',
   {
     defaultMessage: 'Link rules',
   }
