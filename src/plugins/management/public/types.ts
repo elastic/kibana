@@ -16,6 +16,7 @@ import type { ManagementAppLocatorParams } from '../common/locator';
 export interface ManagementSetup {
   sections: SectionsServiceSetup;
   locator: LocatorPublic<ManagementAppLocatorParams>;
+  setIsSidebarEnabled: (enabled: boolean) => void;
 }
 
 export interface DefinedSections {
