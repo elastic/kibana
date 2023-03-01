@@ -6,12 +6,14 @@
  */
 
 import { HttpSetup } from '@kbn/core/public';
-import type { AggregationsCompositeAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { RewriteRequestCase } from '@kbn/actions-plugin/common';
-import { RuleAggregationFormattedResult } from '@kbn/alerting-plugin/common';
-import { RuleStatus } from '../../../types';
+import { RuleAggregations, RuleStatus } from '../../../types';
 
-export const rewriteBodyRes: RewriteRequestCase<RuleAggregationFormattedResult> = ({
+export interface RuleTagsAggregations {
+  ruleTags: string[];
+}
+
+export const rewriteBodyRes: RewriteRequestCase<RuleAggregations> = ({
   rule_execution_status: ruleExecutionStatus,
   rule_last_run_outcome: ruleLastRunOutcome,
   rule_enabled_status: ruleEnabledStatus,
@@ -29,6 +31,12 @@ export const rewriteBodyRes: RewriteRequestCase<RuleAggregationFormattedResult> 
   ruleTags,
 });
 
+export const rewriteTagsBodyRes: RewriteRequestCase<RuleTagsAggregations> = ({
+  rule_tags: ruleTags,
+}: any) => ({
+  ruleTags,
+});
+
 export interface LoadRuleAggregationsProps {
   http: HttpSetup;
   searchText?: string;
@@ -38,11 +46,4 @@ export interface LoadRuleAggregationsProps {
   ruleLastRunOutcomesFilter?: string[];
   ruleStatusesFilter?: RuleStatus[];
   tagsFilter?: string[];
-}
-
-export interface LoadRuleTagsProps {
-  http: HttpSetup;
-  searchText?: string;
-  filter?: string[];
-  after?: AggregationsCompositeAggregation['after'];
 }

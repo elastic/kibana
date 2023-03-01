@@ -41,6 +41,7 @@ import {
   SanitizedRule as AlertingSanitizedRule,
   ResolvedSanitizedRule,
   RuleAction,
+  RuleAggregations as AlertingRuleAggregations,
   RuleTaskState,
   AlertSummary as RuleSummary,
   ExecutionDuration,
@@ -102,10 +103,14 @@ type Rule<Params extends RuleTypeParams = RuleTypeParams> = SanitizedRule<Params
 type ResolvedRule = Omit<ResolvedSanitizedRule<RuleTypeParams>, 'alertTypeId'> & {
   ruleTypeId: ResolvedSanitizedRule['alertTypeId'];
 };
+type RuleAggregations = Omit<AlertingRuleAggregations, 'alertExecutionStatus'> & {
+  ruleExecutionStatus: AlertingRuleAggregations['alertExecutionStatus'];
+};
 
 export type {
   Rule,
   RuleAction,
+  RuleAggregations,
   RuleTaskState,
   RuleSummary,
   ExecutionDuration,

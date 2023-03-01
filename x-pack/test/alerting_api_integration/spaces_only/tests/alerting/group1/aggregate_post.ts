@@ -268,7 +268,7 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       expect(response.body.message).to.eql('Invalid aggregation term: alert.attributes.apiKey');
     });
 
-    it('should reject incorret aggregation', async () => {
+    it('should reject incorrect aggregation', async () => {
       const invalidAggs = JSON.stringify({
         invalid: {
           max_price: {
@@ -287,6 +287,26 @@ export default function createAggregateTests({ getService }: FtrProviderContext)
       expect(response.status).to.eql(400);
       expect(response.body.message).to.eql(
         'Invalid aggregation: [invalid.max_price] max_price aggregation is not valid (or not registered yet): Bad Request'
+      );
+    });
+
+    it('should reject incorrect aggregation without using field attributes', async () => {
+      const invalidFieldAggs = JSON.stringify({
+        outcome: {
+          terms: 'alert.attributes.lastRun.outcome',
+        },
+      });
+
+      const response = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/_aggregate`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          aggs: invalidFieldAggs,
+        });
+
+      expect(response.status).to.eql(400);
+      expect(response.body.message).to.eql(
+        'Invalid aggregation: [outcome.terms]: could not parse object value from json input: Bad Request'
       );
     });
 
