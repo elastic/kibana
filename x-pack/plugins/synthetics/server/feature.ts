@@ -55,7 +55,7 @@ export const uptimeFeature = {
       ui: ['save', 'configureSettings', 'show', 'alerting:save'],
     },
     read: {
-      app: ['uptime', 'kibana', 'synthetics'],
+      app: ['uptime', 'kibana', 'synthetics', 'rac'],
       catalogue: ['uptime'],
       api: ['uptime-read', 'lists-read'],
       savedObject: {
