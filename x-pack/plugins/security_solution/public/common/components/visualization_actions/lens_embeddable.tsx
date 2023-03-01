@@ -97,7 +97,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     stackByField,
     title: '',
   });
-  const preferredSeriesType = (attributes?.state?.visualization as XYState).preferredSeriesType;
+  const preferredSeriesType = (attributes?.state?.visualization as XYState)?.preferredSeriesType;
   const LensComponent = lens.EmbeddableComponent;
   const inspectActionProps = useMemo(
     () => ({
