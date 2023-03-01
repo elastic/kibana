@@ -9,6 +9,8 @@ import pMap from 'p-map';
 import type { MigrateRules } from '../..';
 import type { SanitizedRule } from '../../types';
 
+const MIGRATION_CONCURRENCY = 5;
+
 interface MigrateExecutor {
   rules: SanitizedRule[];
   executor?: MigrateRules;
@@ -24,10 +26,11 @@ export const migrateRulesHook: MigrateRules = async ({ rules }, context) => {
   const ruleTypeMap = new Map<string, MigrateExecutor>();
   rules.forEach((rule) => {
     const ruleType = context.ruleTypeRegistry.get(rule.alertTypeId);
-    if (ruleTypeMap.has(ruleType.id)) {
-      ruleTypeMap.get(ruleType.id)?.rules.push(rule);
+    const ruleTypeId = ruleType?.id || 'unknown';
+    if (ruleTypeMap.has(ruleTypeId)) {
+      ruleTypeMap.get(ruleTypeId)?.rules.push(rule);
     } else {
-      ruleTypeMap.set(ruleType.id, { executor: ruleType?.migrateRules, rules: [rule] });
+      ruleTypeMap.set(ruleTypeId, { executor: ruleType?.migrateRules, rules: [rule] });
     }
   });
 
@@ -37,7 +40,7 @@ export const migrateRulesHook: MigrateRules = async ({ rules }, context) => {
       return executor ? executor({ rules: rulesToMigrate }, context) : rulesToMigrate;
     },
     {
-      concurrency: 5,
+      concurrency: MIGRATION_CONCURRENCY,
     }
   );
 
