@@ -94,11 +94,11 @@ export function FieldIcon({
   return (
     <EuiToken
       {...token}
-      aria-label={label || type}
       className={classNames('kbnFieldIcon', className)}
-      fill={scripted ? 'dark' : undefined}
+      aria-label={label || type}
       title={label || type}
       size={size as EuiTokenProps['size']}
+      fill={scripted ? 'dark' : undefined}
       {...rest}
     />
   );
