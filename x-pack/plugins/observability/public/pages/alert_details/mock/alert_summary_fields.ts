@@ -10,11 +10,11 @@ import { alertWithTags } from './alert';
 export const alertSummaryFieldsMock: AlertSummaryField[] = [
   {
     label: 'Actual value',
-    value: String(alertWithTags.fields['kibana.alert.evaluation.value']),
+    value: alertWithTags.fields['kibana.alert.evaluation.value']!,
   },
   {
     label: 'Expected value',
-    value: String(alertWithTags.fields['kibana.alert.evaluation.threshold']),
+    value: alertWithTags.fields['kibana.alert.evaluation.threshold']!,
   },
   {
     label: 'Source',
