@@ -12,11 +12,9 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AggregateOptions } from './rule';
 
-export type RuleTagsAggregationOptions = Pick<
-  AggregateOptions,
-  'filter' | 'search' | 'searchFields' | 'defaultSearchOperator'
-> & {
+export type RuleTagsAggregationOptions = Pick<AggregateOptions, 'filter' | 'search'> & {
   after?: AggregationsCompositeAggregation['after'];
+  maxTags?: number;
 };
 
 export interface RuleTagsAggregationFormattedResult {
