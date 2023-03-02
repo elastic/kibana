@@ -8,8 +8,8 @@
 import React, { useEffect, useState } from 'react';
 import { ControlGroupContainer, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { Filter, TimeRange } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
@@ -17,10 +17,7 @@ interface Props {
   timeRange: TimeRange;
   dataView: DataView;
   filters: Filter[];
-  query: {
-    language: string;
-    query: string;
-  };
+  query: Query;
   onFilterChange: (filters: Filter[]) => void;
 }
 
