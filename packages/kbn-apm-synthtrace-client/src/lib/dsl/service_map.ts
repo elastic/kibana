@@ -10,6 +10,7 @@ import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
 import { apm } from '../apm';
 import { Instance } from '../apm/instance';
 import { elasticsearchSpan, redisSpan, sqliteSpan, Span } from '../apm/span';
+import { Transaction } from '../apm/transaction';
 
 const ENVIRONMENT = 'Synthtrace: service_map';
 
@@ -23,6 +24,7 @@ type DbSpan = 'elasticsearch' | 'redis' | 'sqlite';
 type ServiceMapNode = Instance | DbSpan;
 type TransactionName = string;
 type TraceItem = ServiceMapNode | [ServiceMapNode, TransactionName];
+type TracePath = TraceItem[];
 
 function getTraceItem(traceItem: TraceItem) {
   if (Array.isArray(traceItem)) {
@@ -52,7 +54,7 @@ function getTransactionName(
 }
 
 function getChildren(
-  childTraceItems: TraceItem[],
+  childTraceItems: TracePath,
   parentServiceInstance: Instance,
   timestamp: number,
   index: number
@@ -104,9 +106,14 @@ function getChildren(
   return [childSpan];
 }
 
+interface TracePathOpts {
+  path: TracePath;
+  transaction?: (transaction: Transaction) => Transaction;
+}
+type PathDef = TracePath | TracePathOpts;
 export interface ServiceMapOpts {
   services: Array<string | { [serviceName: string]: AgentName }>;
-  definePaths: (services: Instance[]) => TraceItem[][];
+  definePaths: (services: Instance[]) => PathDef[];
   environment?: string;
 }
 
@@ -119,7 +126,8 @@ export function serviceMap(options: ServiceMapOpts) {
   });
   return (timestamp: number) => {
     const tracePaths = options.definePaths(serviceInstances);
-    return tracePaths.map((tracePath, index) => {
+    return tracePaths.map((traceDef, index) => {
+      const tracePath = 'path' in traceDef ? traceDef.path : traceDef;
       const [first] = tracePath;
 
       const firstTraceItem = getTraceItem(first);
@@ -132,11 +140,17 @@ export function serviceMap(options: ServiceMapOpts) {
         index
       );
 
-      return firstTraceItem.serviceInstance
+      const transaction = firstTraceItem.serviceInstance
         .transaction({ transactionName, transactionType: 'request' })
         .timestamp(timestamp)
         .duration(1000)
         .children(...getChildren(tracePath, firstTraceItem.serviceInstance, timestamp, index));
+
+      if ('transaction' in traceDef && traceDef.transaction) {
+        return traceDef.transaction(transaction);
+      }
+
+      return transaction;
     });
   };
 }

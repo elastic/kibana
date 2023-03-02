@@ -130,12 +130,15 @@ describe('serviceMap', () => {
             [cart, 'POST /dotnet/reserveProduct'],
             ['redis', 'DECR inventory:i012345:stock'],
           ],
-          [
-            [rum, 'Checkout'],
-            [node, 'POST /nodejs/placeOrder'],
-            [chk, 'POST /go/placeOrder'],
-            [pay, 'POST /nodejs/processPayment'],
-          ],
+          {
+            path: [
+              [rum, 'Checkout'],
+              [node, 'POST /nodejs/placeOrder'],
+              [chk, 'POST /go/placeOrder'],
+              [pay, 'POST /nodejs/processPayment'],
+            ],
+            transaction: (t) => t.defaults({ 'labels.name': 'transaction hook test' }),
+          },
           [
             [chk, 'POST /go/clearCart'],
             [cart, 'PUT /dotnet/cart/c12345/reset'],
@@ -235,6 +238,12 @@ describe('serviceMap', () => {
           ],
         ]
       `);
+    });
+
+    it('should apply the transaction hook function if defined', () => {
+      const serviceMapGenerator = serviceMap(DETAILED_SERVICE_MAP_OPTS);
+      const transactions = serviceMapGenerator(TIMESTAMP);
+      expect(transactions[2].fields['labels.name']).toBe('transaction hook test');
     });
   });
 });
