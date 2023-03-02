@@ -27,7 +27,8 @@ export interface TransformHealth {
 export interface BaseTransformAlertResponse {
   transform_id: string;
   description?: string;
-  health: TransformHealth;
+  health_status: TransformHealth['status'];
+  issues?: TransformHealth['issues'];
 }
 
 export interface NotStartedTransformResponse extends BaseTransformAlertResponse {

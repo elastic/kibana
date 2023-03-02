@@ -128,7 +128,8 @@ export function transformHealthServiceProvider(
           description: transformsDict.get(t.id)?.description,
           transform_state: t.state,
           node_name: t.node?.name,
-          health: t.health,
+          health_status: t.health.status,
+          issues: t.health.issues,
         })),
         (t) =>
           t.transform_state !== TRANSFORM_STATE.STARTED &&
@@ -226,7 +227,8 @@ export function transformHealthServiceProvider(
             transform_state: t.state,
             node_name: t.node?.name,
             description: transformsDict.get(t.id)?.description,
-            health: t.health,
+            health_status: t.health.status,
+            issues: t.health.issues,
           };
         });
     },
