@@ -186,7 +186,7 @@ export async function getVisTypeFactory(lens: LensPublicStart) {
 export async function isCompatibleVisualizationType(chartInfo: ChartInfo) {
   return (
     chartInfo.visualizationType === COMPATIBLE_VISUALIZATION &&
-    chartInfo.layers.some((l) => l.layerType === layerTypes.DATA)
+    chartInfo.layers.some((l) => l.layerType === layerTypes.DATA && l.dataView !== undefined)
   );
 }
 
