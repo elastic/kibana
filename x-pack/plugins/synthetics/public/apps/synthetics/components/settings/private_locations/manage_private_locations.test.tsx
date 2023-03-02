@@ -21,7 +21,7 @@ jest.mock('../../../contexts/synthetics_settings_context');
 describe('<ManagePrivateLocations />', () => {
   beforeEach(() => {
     jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(true);
-    jest.spyOn(locationHooks, 'useLocationsAPI').mockReturnValue({
+    jest.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
       formData: {} as PrivateLocation,
       loading: false,
       onSubmit: jest.fn(),
@@ -120,7 +120,7 @@ describe('<ManagePrivateLocations />', () => {
         canSaveIntegrations: hasFleetPermissions,
         canReadAgentPolicies: hasFleetPermissions,
       });
-      jest.spyOn(locationHooks, 'useLocationsAPI').mockReturnValue({
+      jest.spyOn(locationHooks, 'usePrivateLocationsAPI').mockReturnValue({
         formData: {} as PrivateLocation,
         loading: false,
         onSubmit: jest.fn(),

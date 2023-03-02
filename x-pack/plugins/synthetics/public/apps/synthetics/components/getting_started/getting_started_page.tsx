@@ -5,64 +5,150 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
-import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { useDispatch } from 'react-redux';
+import React, { useEffect, useCallback } from 'react';
+import {
+  EuiEmptyPrompt,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import styled from 'styled-components';
-import { useBreadcrumbs, useLocations } from '../../hooks';
-import { EmptyLocations } from '../settings/private_locations/empty_locations';
+import { useBreadcrumbs, useLocations, useFleetPermissions } from '../../hooks';
+import { usePrivateLocationsAPI } from '../settings/private_locations/hooks/use_locations_api';
 import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_flyout';
-import { getServiceLocations } from '../../state';
+import {
+  getServiceLocations,
+  selectAddingNewPrivateLocation,
+  setAddingNewPrivateLocation,
+  getAgentPoliciesAction,
+  selectAgentPolicies,
+} from '../../state';
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
+import { PrivateLocation } from '../../../../../common/runtime_types';
 import { SimpleMonitorForm } from './simple_monitor_form';
+import { AddLocationFlyout } from '../settings/private_locations/add_location_flyout';
 
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
   const history = useHistory();
 
+  const { canReadAgentPolicies } = useFleetPermissions();
+
   useEffect(() => {
     dispatch(getServiceLocations());
-  }, [dispatch]);
+    if (canReadAgentPolicies) {
+      dispatch(getAgentPoliciesAction.get());
+    }
+  }, [canReadAgentPolicies, dispatch]);
 
   useBreadcrumbs([{ text: MONITORING_OVERVIEW_LABEL }]); // No extra breadcrumbs on overview
 
-  const { locations, loading } = useLocations();
+  const { locations, loading: allLocationsLoading } = useLocations();
+  const { loading: agentPoliciesLoading } = useSelector(selectAgentPolicies);
+  const loading = allLocationsLoading || agentPoliciesLoading;
 
-  if (!loading && locations.length === 0) {
-    return <EmptyLocations inFlyout={false} redirectToSettings={true} />;
-  }
+  const hasNoLocations = !allLocationsLoading && locations.length === 0;
 
   return !loading ? (
     <Wrapper>
-      <EuiEmptyPrompt
-        title={<h2>{CREATE_SINGLE_PAGE_LABEL}</h2>}
-        layout="horizontal"
-        color="plain"
-        body={
-          <>
-            <EuiText size="s">
-              {OR_LABEL}{' '}
-              <EuiLink
-                href={history.createHref({
-                  pathname: MONITOR_ADD_ROUTE,
+      {hasNoLocations ? (
+        <GettingStartedOnPrem />
+      ) : (
+        <EuiEmptyPrompt
+          title={<h2>{CREATE_SINGLE_PAGE_LABEL}</h2>}
+          layout="horizontal"
+          color="plain"
+          body={
+            <>
+              <EuiText size="s">
+                {OR_LABEL}{' '}
+                <EuiLink
+                  href={history.createHref({
+                    pathname: MONITOR_ADD_ROUTE,
+                  })}
+                >
+                  {SELECT_DIFFERENT_MONITOR}
+                </EuiLink>
+                {i18n.translate('xpack.synthetics.gettingStarted.createSingle.description', {
+                  defaultMessage: ' to get started with Elastic Synthetics Monitoring',
                 })}
-              >
-                {SELECT_DIFFERENT_MONITOR}
-              </EuiLink>
-              {i18n.translate('xpack.synthetics.gettingStarted.createSingle.description', {
-                defaultMessage: ' to get started with Elastic Synthetics Monitoring',
-              })}
-            </EuiText>
-            <EuiSpacer />
-            <SimpleMonitorForm />
-          </>
-        }
-      />
+              </EuiText>
+              <EuiSpacer />
+              <SimpleMonitorForm />
+            </>
+          }
+        />
+      )}
     </Wrapper>
   ) : (
     <LoadingState />
+  );
+};
+
+export const GettingStartedOnPrem = () => {
+  const dispatch = useDispatch();
+
+  useBreadcrumbs([{ text: MONITORING_OVERVIEW_LABEL }]); // No extra breadcrumbs on overview
+
+  const isAddingNewLocation = useSelector(selectAddingNewPrivateLocation);
+
+  const setIsAddingNewLocation = useCallback(
+    (val: boolean) => dispatch(setAddingNewPrivateLocation(val)),
+    [dispatch]
+  );
+
+  const { onSubmit, privateLocations, loading } = usePrivateLocationsAPI();
+
+  const handleSubmit = (formData: PrivateLocation) => {
+    onSubmit(formData);
+  };
+
+  // make sure flyout is closed when first visiting the page
+  useEffect(() => {
+    setIsAddingNewLocation(false);
+  }, [setIsAddingNewLocation]);
+
+  return (
+    <>
+      <EuiEmptyPrompt
+        title={<h2>{GET_STARTED_LABEL}</h2>}
+        layout="horizontal"
+        color="plain"
+        body={
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem>
+              <EuiText>{CREATE_LOCATION_DESCRIPTION}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiButton
+                fill
+                iconType="plusInCircleFilled"
+                data-test-subj="gettingStartedAddLocationButton"
+                onClick={() => setIsAddingNewLocation(true)}
+              >
+                {CREATE_LOCATION_LABEL}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      />
+
+      {isAddingNewLocation ? (
+        <AddLocationFlyout
+          setIsOpen={setIsAddingNewLocation}
+          onSubmit={handleSubmit}
+          privateLocations={privateLocations}
+          isLoading={loading}
+        />
+      ) : null}
+    </>
   );
 };
 
@@ -80,6 +166,41 @@ const CREATE_SINGLE_PAGE_LABEL = i18n.translate(
   {
     defaultMessage: 'Create a single page browser monitor',
   }
+);
+
+const GET_STARTED_LABEL = i18n.translate('xpack.synthetics.gettingStarted.createLocationHeading', {
+  defaultMessage: 'Get started with synthetic monitoring',
+});
+
+const PRIVATE_LOCATION_LABEL = i18n.translate(
+  'xpack.synthetics.gettingStarted.privateLocationLabel',
+  {
+    defaultMessage: 'private location',
+  }
+);
+
+const CREATE_LOCATION_LABEL = i18n.translate(
+  'xpack.synthetics.gettingStarted.createLocationLabel',
+  {
+    defaultMessage: 'Create location',
+  }
+);
+
+const CREATE_LOCATION_DESCRIPTION = (
+  <FormattedMessage
+    id="xpack.synthetics.gettingStarted.createLocationDescription"
+    defaultMessage="To start creating monitors, you'll first need to create a {link}. Private locations allow you to run monitors from your own premises. They require an Elastic agent and Agent policy which you can control and maintain via Fleet."
+    values={{
+      link: (
+        <EuiLink
+          href="https://www.elastic.co/guide/en/observability/current/synthetics-private-location.html"
+          target="_blank"
+        >
+          {PRIVATE_LOCATION_LABEL}
+        </EuiLink>
+      ),
+    }}
+  />
 );
 
 const SELECT_DIFFERENT_MONITOR = i18n.translate(

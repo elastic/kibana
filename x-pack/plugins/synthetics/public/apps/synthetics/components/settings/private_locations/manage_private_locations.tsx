@@ -12,7 +12,7 @@ import { PrivateLocationsTable } from './locations_table';
 import { useCanManagePrivateLocation } from '../../../hooks';
 import { ManageEmptyState } from './manage_empty_state';
 import { AddLocationFlyout } from './add_location_flyout';
-import { useLocationsAPI } from './hooks/use_locations_api';
+import { usePrivateLocationsAPI } from './hooks/use_locations_api';
 import {
   getAgentPoliciesAction,
   selectAddingNewPrivateLocation,
@@ -28,7 +28,7 @@ export const ManagePrivateLocations = () => {
   const isAddingNew = useSelector(selectAddingNewPrivateLocation);
   const setIsAddingNew = (val: boolean) => dispatch(setAddingNewPrivateLocation(val));
 
-  const { onSubmit, loading, privateLocations, onDelete, deleteLoading } = useLocationsAPI();
+  const { onSubmit, loading, privateLocations, onDelete, deleteLoading } = usePrivateLocationsAPI();
 
   const canManagePrivateLocation = useCanManagePrivateLocation();
 
