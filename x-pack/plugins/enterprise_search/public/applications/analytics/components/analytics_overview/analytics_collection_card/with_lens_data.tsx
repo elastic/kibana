@@ -171,7 +171,7 @@ export const withLensData = <T extends WithLensDataInputProps>(Component: React.
     } = useValues(KibanaLogic);
     const [dataView, setDataView] = useState<DataView | null>(null);
     const [lensData, setLensData] = useState<WithLensDataLogicOutputProps>(initialValues);
-    const [searchSessionId] = useState(() => search?.session.start());
+    const [searchSessionId, setSearchSessionId] = useState<string>();
     const attributes = useMemo(
       () => dataView && getLensAttributes(dataView, formula!, props.filterBy),
       [props.filterBy, dataView]
@@ -206,6 +206,9 @@ export const withLensData = <T extends WithLensDataInputProps>(Component: React.
         }
       });
     }, [props.collection.events_datastream]);
+    useEffect(() => {
+      setSearchSessionId(search.session.start());
+    }, []);
 
     return (
       <Component {...(props as T)} {...lensData}>
