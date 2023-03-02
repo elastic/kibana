@@ -28,3 +28,10 @@ export const DISCARD_CHANGES = i18n.translate(
     defaultMessage: 'Discard Changes',
   }
 );
+
+export const FILTER_GROUP_MENU = i18n.translate(
+  'xpack.securitySolution.filterGroup.groupMenuTitle',
+  {
+    defaultMessage: 'Filter group menu',
+  }
+);

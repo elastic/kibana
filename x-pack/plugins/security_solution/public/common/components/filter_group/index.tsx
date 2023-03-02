@@ -14,49 +14,50 @@ import type {
   ControlGroupContainer,
   ControlGroupRendererProps,
 } from '@kbn/controls-plugin/public';
-import { i18n } from '@kbn/i18n';
 import { LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { ControlPanelState } from '@kbn/controls-plugin/common';
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import {
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { cloneDeep, debounce, isEqual } from 'lodash';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
-import type { FilterContextType, FilterGroupProps, FilterItemObj } from './types';
+import type { FilterGroupProps, FilterItemObj } from './types';
 import { useFilterUpdatesToUrlSync } from './hooks/use_filter_update_to_url_sync';
 import { APP_ID } from '../../../../common/constants';
 import './index.scss';
 import { FilterGroupLoading } from './loading';
 import { withSpaceId } from '../with_space_id';
 import { NUM_OF_CONTROLS } from './config';
-import {
-  DISCARD_CHANGES,
-  EDIT_CONTROLS,
-  PENDING_CHANGES_REMINDER,
-  SAVE_CONTROLS,
-} from './translations';
 import { useControlGroupSyncToLocalStorage } from './hooks/use_control_group_sync_to_local_storage';
 import { useViewEditMode } from './hooks/use_view_edit_mode';
+import { FilterGroupContextMenu } from './context_menu';
+import { AddControl, DiscardChanges, SaveControls } from './buttons';
 
 type ControlGroupBuilder = typeof controlGroupInputBuilder;
 
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
-export const FilterContext = createContext<FilterContextType | undefined>(undefined);
+interface FilterGroupContextType {
+  initialControls: FilterItemObj[];
+  dataViewId: string;
+  controlGroup: ControlGroupContainer | undefined;
+  controlGroupInputUpdates: ControlGroupInput | undefined;
+  isViewMode: boolean;
+  hasPendingChanges: boolean;
+  pendingChangesPopoverOpen: boolean;
+  closePendingChangesPopover: () => void;
+  openPendingChangesPopover: () => void;
+  switchToViewMode: () => void;
+  switchToEditMode: () => void;
+  setHasPendingChanges: (value: boolean) => void;
+}
+
+export const FilterGroupContext = createContext<FilterGroupContextType | undefined>(undefined);
 
 const FilterWrapper = styled.div.attrs((props) => ({
   className: props.className,
@@ -121,12 +122,6 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const urlDataApplied = useRef<boolean>(false);
 
-  const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
-
-  const toggleContextMenu = useCallback(() => {
-    setIsContextMenuVisible((prev) => !prev);
-  }, []);
-
   const onUrlParamInit = (param: FilterItemObj[] | null) => {
     if (!param) setInitialUrlParam([]);
     try {
@@ -165,12 +160,9 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
   useEffect(() => {
     const cleanup = () => {
-      if (filterChangedSubscription.current) {
-        filterChangedSubscription.current.unsubscribe();
-      }
-      if (inputChangedSubscription.current) {
-        inputChangedSubscription.current.unsubscribe();
-      }
+      [filterChangedSubscription.current, inputChangedSubscription.current].forEach((sub) => {
+        if (sub) sub.unsubscribe();
+      });
     };
     return cleanup;
   }, []);
@@ -220,12 +212,9 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     });
 
     const cleanup = () => {
-      if (filterChangedSubscription.current) {
-        filterChangedSubscription.current.unsubscribe();
-      }
-      if (inputChangedSubscription.current) {
-        inputChangedSubscription.current.unsubscribe();
-      }
+      [filterChangedSubscription.current, inputChangedSubscription.current].forEach((sub) => {
+        if (sub) sub.unsubscribe();
+      });
     };
     return cleanup;
   }, [controlGroup, debouncedFilterUpdates, handleInputUpdates]);
@@ -369,190 +358,55 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     controlGroupInput: controlGroupInputUpdates,
   });
 
-  const withContextMenuAction = useCallback(
-    (fn: unknown) => {
-      return () => {
-        if (typeof fn === 'function') {
-          fn();
-        }
-        toggleContextMenu();
-      };
-    },
-    [toggleContextMenu]
-  );
-
-  const resetSelection = useCallback(() => {
-    if (!controlGroupInputUpdates) return;
-
-    // / remove existing embeddables
-    Object.values(controlGroupInputUpdates.panels).forEach((panel) => {
-      controlGroup?.removeEmbeddable(panel.explicitInput.id);
-    });
-
-    initialControls.forEach((control, idx) => {
-      controlGroup?.addOptionsListControl({
-        controlId: String(idx),
-        hideExclude: true,
-        hideSort: true,
-        hidePanelTitles: true,
-        placeholder: '',
-        // option List controls will handle an invalid dataview
-        // & display an appropriate message
-        dataViewId: dataViewId ?? '',
-        ...control,
-      });
-    });
-
-    controlGroup?.reload();
-    switchToViewMode();
-  }, [controlGroupInputUpdates, controlGroup, initialControls, dataViewId, switchToViewMode]);
-
-  const resetButton = useMemo(
-    () => (
-      <EuiContextMenuItem
-        icon="eraser"
-        onClick={withContextMenuAction(resetSelection)}
-        data-test-subj="filter-group__context--reset"
-      >
-        {`Reset`}
-      </EuiContextMenuItem>
-    ),
-    [withContextMenuAction, resetSelection]
-  );
-
-  const editControlsButton = useMemo(
-    () => (
-      <EuiContextMenuItem
-        icon="pencil"
-        onClick={
-          isViewMode
-            ? withContextMenuAction(switchToEditMode)
-            : withContextMenuAction(switchToViewMode)
-        }
-        data-test-subj={isViewMode ? `filter_group__context--edit` : `filter_group__context--save`}
-      >
-        {isViewMode ? EDIT_CONTROLS : SAVE_CONTROLS}
-      </EuiContextMenuItem>
-    ),
-    [withContextMenuAction, isViewMode, switchToEditMode, switchToViewMode]
-  );
-
-  const contextMenuItems = useMemo(
-    () => [resetButton, editControlsButton],
-    [resetButton, editControlsButton]
-  );
-
-  const discardChangesHandler = useCallback(() => {
-    if (hasPendingChanges) {
-      controlGroup?.updateInput({
-        panels: getStoredControlInput()?.panels,
-      });
-    }
-
-    switchToViewMode();
-  }, [controlGroup, switchToViewMode, getStoredControlInput, hasPendingChanges]);
-
-  const discardChanges = useMemo(() => {
-    return (
-      <EuiToolTip content={DISCARD_CHANGES} position="top" display="block">
-        <EuiButtonIcon
-          size="s"
-          iconSize="m"
-          display="base"
-          color="danger"
-          iconType={'minusInCircle'}
-          data-test-subj={'filter-group__discard'}
-          onClick={discardChangesHandler}
-        />
-      </EuiToolTip>
-    );
-  }, [discardChangesHandler]);
-
   return (
-    <FilterWrapper className="filter-group__wrapper">
-      <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
-        {Array.isArray(initialUrlParam) ? (
-          <EuiFlexItem grow={true} data-test-subj="filter_group__items">
-            <ControlGroupRenderer
-              onLoadComplete={onControlGroupLoadHandler}
-              getCreationOptions={getCreationOptions}
-            />
-            {!controlGroup ? <FilterGroupLoading /> : null}
+    <FilterGroupContext.Provider
+      value={{
+        dataViewId: dataViewId ?? '',
+        initialControls,
+        isViewMode,
+        controlGroup,
+        controlGroupInputUpdates,
+        hasPendingChanges,
+        pendingChangesPopoverOpen,
+        setHasPendingChanges,
+        switchToEditMode,
+        switchToViewMode,
+        openPendingChangesPopover,
+        closePendingChangesPopover,
+      }}
+    >
+      <FilterWrapper className="filter-group__wrapper">
+        <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
+          {Array.isArray(initialUrlParam) ? (
+            <EuiFlexItem grow={true} data-test-subj="filter_group__items">
+              <ControlGroupRenderer
+                onLoadComplete={onControlGroupLoadHandler}
+                getCreationOptions={getCreationOptions}
+              />
+              {!controlGroup ? <FilterGroupLoading /> : null}
+            </EuiFlexItem>
+          ) : null}
+          {!isViewMode &&
+          (Object.keys(controlGroupInputUpdates?.panels ?? {}).length > NUM_OF_CONTROLS.MIN ||
+            Object.keys(controlGroupInputUpdates?.panels ?? {}).length < NUM_OF_CONTROLS.MAX) ? (
+            <>
+              <EuiFlexItem grow={false}>
+                <AddControl />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SaveControls />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <DiscardChanges getStoredControlInput={getStoredControlInput} />
+              </EuiFlexItem>
+            </>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <FilterGroupContextMenu />
           </EuiFlexItem>
-        ) : null}
-        {!isViewMode &&
-        (Object.keys(controlGroupInputUpdates?.panels ?? {}).length > NUM_OF_CONTROLS.MIN ||
-          Object.keys(controlGroupInputUpdates?.panels ?? {}).length < NUM_OF_CONTROLS.MAX) ? (
-          <>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                size="s"
-                iconSize="m"
-                display="base"
-                iconType={'plusInCircle'}
-                data-test-subj={'filter-group__add-control'}
-                onClick={() => controlGroup?.openAddDataControlFlyout()}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiPopover
-                button={
-                  <EuiButtonIcon
-                    size="s"
-                    iconSize="m"
-                    display="base"
-                    color={hasPendingChanges ? 'danger' : 'primary'}
-                    iconType={'save'}
-                    data-test-subj={'filter-group__save'}
-                    onClick={switchToViewMode}
-                    onFocus={openPendingChangesPopover}
-                    onBlur={closePendingChangesPopover}
-                    onMouseOver={openPendingChangesPopover}
-                    onMouseOut={closePendingChangesPopover}
-                    disabled={!hasPendingChanges}
-                  />
-                }
-                isOpen={pendingChangesPopoverOpen}
-                anchorPosition={'upCenter'}
-                panelPaddingSize="none"
-                closePopover={closePendingChangesPopover}
-                panelProps={{
-                  'data-test-subj': 'filter-group__save-popover',
-                }}
-              >
-                <div style={{ maxWidth: '200px' }}>
-                  <EuiCallOut title={PENDING_CHANGES_REMINDER} color="warning" iconType="alert" />
-                </div>
-              </EuiPopover>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>{discardChanges}</EuiFlexItem>
-          </>
-        ) : null}
-        <EuiFlexItem grow={false}>
-          <EuiPopover
-            id="filter-group__context-menu"
-            button={
-              <EuiButtonIcon
-                aria-label={i18n.translate('xpack.securitySolution.filterGroup.groupMenuTitle', {
-                  defaultMessage: 'Filter group menu',
-                })}
-                display="empty"
-                size="s"
-                iconType="boxesHorizontal"
-                onClick={toggleContextMenu}
-                data-test-subj="filter-group__context"
-              />
-            }
-            isOpen={isContextMenuVisible}
-            closePopover={toggleContextMenu}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
-          >
-            <EuiContextMenuPanel items={contextMenuItems} />
-          </EuiPopover>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </FilterWrapper>
+        </EuiFlexGroup>
+      </FilterWrapper>
+    </FilterGroupContext.Provider>
   );
 };
 
