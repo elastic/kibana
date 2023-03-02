@@ -9,14 +9,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import type { ResponseActionType } from './get_supported_response_actions';
 import { getSupportedResponseActions, responseActionTypes } from './get_supported_response_actions';
-import { useOsqueryEnabled } from './use_osquery_enabled';
 
 export const useSupportedResponseActionTypes = () => {
   const [supportedResponseActionTypes, setSupportedResponseActionTypes] = useState<
     ResponseActionType[] | undefined
   >();
-
-  const isOsqueryEnabled = useOsqueryEnabled();
 
   const isEndpointEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
 
@@ -29,7 +26,7 @@ export const useSupportedResponseActionTypes = () => {
   useEffect(() => {
     const supportedTypes = getSupportedResponseActions(responseActionTypes, enabledFeatures);
     setSupportedResponseActionTypes(supportedTypes);
-  }, [isOsqueryEnabled, isEndpointEnabled, enabledFeatures]);
+  }, [isEndpointEnabled, enabledFeatures]);
 
   return supportedResponseActionTypes;
 };
