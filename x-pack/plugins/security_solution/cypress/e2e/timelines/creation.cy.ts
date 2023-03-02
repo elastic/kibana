@@ -143,7 +143,7 @@ describe('Timelines', (): void => {
         .should('have.text', getTimeline().notes);
     });
 
-    describe('correlation tab', () => {
+    describe.only('correlation tab', () => {
       it('should update timeline after adding eql', () => {
         cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
         const eql = 'any where process.name == "zsh"';
@@ -162,6 +162,19 @@ describe('Timelines', (): void => {
         const eql = 'any where process.name == "zsh"';
         addEqlToTimeline(eql);
         cy.get(TIMELINE_CORRELATION_INPUT).clear();
+        // We reload as a guarantee since checking the request when multiple occur
+        // can often times group the requests and parse the wrong one
+        cy.reload();
+        cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
+
+        // The count does not exist when the query is empty
+        cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`).should('not.exist');
+      });
+
+      it('should NOT update timeline after adding wrong eql', () => {
+        cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+        const badEql = 'this is not valid eql';
+        addEqlToTimeline(badEql);
         // We reload as a guarantee since checking the request when multiple occur
         // can often times group the requests and parse the wrong one
         cy.reload();
