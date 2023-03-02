@@ -94,7 +94,9 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
                 onClick={props.onClose}
                 data-test-subj="manageSearchesBtn"
                 href={addBasePath(
-                  `/app/management/kibana/objects?_a=${rison.encode({ tab: SEARCH_OBJECT_TYPE })}`
+                  `/app/management/kibana/objects?initialQuery=type:(${rison.encode(
+                    SEARCH_OBJECT_TYPE
+                  )})`
                 )}
               >
                 <FormattedMessage
