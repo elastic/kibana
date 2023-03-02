@@ -1,6 +1,7 @@
 get:
-  summary: Agent Download Sources - Info
-  tags: []
+  summary: Get agent binary download source by ID
+  tags:
+    - Agent binary download sources
   responses:
     '200':
       description: OK
@@ -23,7 +24,9 @@ parameters:
     in: path
     required: true
 delete:
-  summary: Agent Download Sources - Delete
+  summary: Delete agent binary download source by ID
+  tags:
+    - Agent binary download sources
   operationId: delete-download-source
   responses:
     '200':
@@ -42,7 +45,9 @@ delete:
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
 put:
-  summary: Agent Download Sources - Update
+  summary: Update agent binary download source by ID
+  tags:
+    - Agent binary download sources
   operationId: update-download-source
   requestBody:
     content:

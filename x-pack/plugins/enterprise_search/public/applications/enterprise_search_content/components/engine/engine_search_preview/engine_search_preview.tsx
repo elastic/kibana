@@ -9,8 +9,14 @@ import React, { useState, useMemo } from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { SearchProvider, SearchBox, Results } from '@elastic/react-search-ui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  PagingInfo,
+  Results,
+  ResultsPerPage,
+  SearchBox,
+  SearchProvider,
+} from '@elastic/react-search-ui';
 import { SearchDriverOptions } from '@elastic/search-ui';
 import EnginesAPIConnector, {
   Transporter,
@@ -19,7 +25,9 @@ import EnginesAPIConnector, {
 } from '@elastic/search-ui-engines-connector';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../../shared/doc_links';
 import { HttpLogic } from '../../../../shared/http';
 import { EngineViewTabs } from '../../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_template';
@@ -32,7 +40,14 @@ import { DocumentProvider } from './document_context';
 import { DocumentFlyout } from './document_flyout';
 import { EngineSearchPreviewLogic } from './engine_search_preview_logic';
 
-import { InputView, ResultView, ResultsView } from './search_ui_components';
+import {
+  InputView,
+  PagingInfoView,
+  RESULTS_PER_PAGE_OPTIONS,
+  ResultView,
+  ResultsPerPageView,
+  ResultsView,
+} from './search_ui_components';
 
 class InternalEngineTransporter implements Transporter {
   constructor(
@@ -123,8 +138,19 @@ export const EngineSearchPreview: React.FC = () => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiFlexGroup>
-            <EuiFlexItem grow={false} css={{ minWidth: '240px' }} />
+            <EuiFlexItem grow={false} css={{ minWidth: '240px' }}>
+              <ResultsPerPage view={ResultsPerPageView} options={RESULTS_PER_PAGE_OPTIONS} />
+              <EuiSpacer size="m" />
+              <EuiLink href={docLinks.enterpriseSearchEngines} target="_blank">
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.engine.searchPreview.improveResultsLink"
+                  defaultMessage="Improve these results"
+                />
+              </EuiLink>
+            </EuiFlexItem>
             <EuiFlexItem>
+              <PagingInfo view={PagingInfoView} />
+              <EuiSpacer size="m" />
               <Results view={ResultsView} resultView={ResultView} />
             </EuiFlexItem>
           </EuiFlexGroup>

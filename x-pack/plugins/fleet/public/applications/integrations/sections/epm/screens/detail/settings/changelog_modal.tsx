@@ -34,7 +34,7 @@ export interface ChangeLogParams {
 
 interface Props {
   latestVersion: string;
-  currentVersion: string;
+  currentVersion?: string;
   packageName: string;
   onClose: () => void;
 }
@@ -54,7 +54,10 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
   } = useGetFileByPathQuery(`/package/${packageName}/${latestVersion}/changelog.yml`);
   const changelogText = changelogResponse?.data;
 
-  const finalChangelog = getFormattedChangelog(changelogText, currentVersion, latestVersion);
+  // currentVersion is used to display the changelog up to the current installed version, when there is a newer one available
+  const finalChangelog = currentVersion
+    ? getFormattedChangelog(changelogText, latestVersion, currentVersion)
+    : getFormattedChangelog(changelogText, latestVersion);
 
   if (changelogError) {
     notifications.toasts.addError(changelogError, {

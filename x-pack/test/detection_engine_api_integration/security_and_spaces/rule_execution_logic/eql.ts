@@ -17,7 +17,7 @@ import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 import { get } from 'lodash';
 
 import { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
-import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
+import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,

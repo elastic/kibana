@@ -11,6 +11,7 @@ import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
 import type { Role } from '@kbn/security-plugin/common';
+import { request } from './common';
 import { getT1Analyst } from '../../../../scripts/endpoint/common/roles_users/t1_analyst';
 import { getT2Analyst } from '../../../../scripts/endpoint/common/roles_users/t2_analyst';
 import { getHunter } from '../../../../scripts/endpoint/common/roles_users/hunter';
@@ -79,13 +80,6 @@ const ELASTICSEARCH_PASSWORD = 'ELASTICSEARCH_PASSWORD';
  */
 const LOGIN_API_ENDPOINT = '/internal/security/login';
 
-const API_AUTH = {
-  user: Cypress.env(ELASTICSEARCH_USERNAME),
-  pass: Cypress.env(ELASTICSEARCH_PASSWORD),
-};
-
-const API_HEADERS = { 'kbn-xsrf': 'cypress' };
-
 /**
  * cy.visit will default to the baseUrl which uses the default kibana test user
  * This function will override that functionality in cy.visit by building the baseUrl
@@ -151,52 +145,40 @@ export const createRoleAndUser = (role: ROLE) => {
 };
 
 export const createCustomRoleAndUser = (role: string, rolePrivileges: Omit<Role, 'name'>) => {
-  const env = getCurlScriptEnvVars();
-
   // post the role
-  cy.request({
+  request({
     method: 'PUT',
-    url: `${env.KIBANA_URL}/api/security/role/${role}`,
+    url: `/api/security/role/${role}`,
     body: rolePrivileges,
-    headers: API_HEADERS,
-    auth: API_AUTH,
   });
 
   // post the user associated with the role to elasticsearch
-  cy.request({
+  request({
     method: 'POST',
-    url: `${env.KIBANA_URL}/internal/security/users/${role}`,
-    headers: API_HEADERS,
+    url: `/internal/security/users/${role}`,
     body: {
       username: role,
       password: Cypress.env(ELASTICSEARCH_PASSWORD),
       roles: [role],
     },
-    auth: API_AUTH,
   });
 };
 
 export const deleteRoleAndUser = (role: ROLE) => {
-  const env = getCurlScriptEnvVars();
-
-  cy.request({
+  request({
     method: 'DELETE',
-    auth: API_AUTH,
-    headers: API_HEADERS,
-    url: `${env.KIBANA_URL}/internal/security/users/${role}`,
+    url: `/internal/security/users/${role}`,
   });
-  cy.request({
+  request({
     method: 'DELETE',
-    auth: API_AUTH,
-    headers: API_HEADERS,
-    url: `${env.KIBANA_URL}/api/security/role/${role}`,
+    url: `/api/security/role/${role}`,
   });
 };
 
 export const loginWithUser = (user: User) => {
   const url = Cypress.config().baseUrl;
 
-  cy.request({
+  request({
     body: {
       providerType: 'basic',
       providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
@@ -227,7 +209,7 @@ export const loginWithCustomRole = async (role: string, rolePrivileges: Omit<Rol
     port: Cypress.env('configport'),
   } as UrlObject);
   cy.log(`origin: ${theUrl}`);
-  cy.request({
+  request({
     body: {
       providerType: 'basic',
       providerName: 'basic',
@@ -282,7 +264,7 @@ const loginViaEnvironmentCredentials = () => {
   );
 
   // programmatically authenticate without interacting with the Kibana login page
-  cy.request({
+  request({
     body: {
       providerType: 'basic',
       providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
@@ -313,7 +295,7 @@ const loginViaConfig = () => {
     const config = yaml.safeLoad(kibanaDevYml);
 
     // programmatically authenticate without interacting with the Kibana login page
-    cy.request({
+    request({
       body: {
         providerType: 'basic',
         providerName: 'basic',

@@ -15,14 +15,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Control, Controller } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
-export interface Props {
-  control: Control<CreateSLOInput>;
-}
-
-export function SloEditFormDescription({ control }: Props) {
+export function SloEditFormDescription() {
+  const { control } = useFormContext<CreateSLOInput>();
   const sloNameId = useGeneratedHtmlId({ prefix: 'sloName' });
   const descriptionId = useGeneratedHtmlId({ prefix: 'sloDescription' });
 

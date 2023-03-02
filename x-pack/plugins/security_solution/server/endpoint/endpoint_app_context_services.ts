@@ -12,7 +12,7 @@ import type {
   PluginStartContract as CasesPluginStartContract,
 } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { FleetStartContract } from '@kbn/fleet-plugin/server';
+import type { FleetStartContract, MessageSigningServiceInterface } from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import {
@@ -61,6 +61,7 @@ export interface EndpointAppContextServiceStartContract {
   cases: CasesPluginStartContract | undefined;
   featureUsageService: FeatureUsageService;
   experimentalFeatures: ExperimentalFeatures;
+  messageSigningService: MessageSigningServiceInterface | undefined;
 }
 
 /**
@@ -222,5 +223,13 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.exceptionListsClient;
+  }
+
+  public getMessageSigningService(): MessageSigningServiceInterface {
+    if (!this.startDependencies?.messageSigningService) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.startDependencies.messageSigningService;
   }
 }

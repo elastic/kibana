@@ -16,18 +16,14 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Control, Controller, UseFormWatch } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
 import { SloEditFormObjectivesTimeslices } from './slo_edit_form_objectives_timeslices';
 import { BUDGETING_METHOD_OPTIONS, TIMEWINDOW_OPTIONS } from '../constants';
 
-export interface Props {
-  control: Control<CreateSLOInput>;
-  watch: UseFormWatch<CreateSLOInput>;
-}
-
-export function SloEditFormObjectives({ control, watch }: Props) {
+export function SloEditFormObjectives() {
+  const { control, watch } = useFormContext<CreateSLOInput>();
   const budgetingSelect = useGeneratedHtmlId({ prefix: 'budgetingSelect' });
   const timeWindowSelect = useGeneratedHtmlId({ prefix: 'timeWindowSelect' });
 
@@ -112,7 +108,7 @@ export function SloEditFormObjectives({ control, watch }: Props) {
       {watch('budgetingMethod') === 'timeslices' ? (
         <>
           <EuiSpacer size="xl" />
-          <SloEditFormObjectivesTimeslices control={control} />
+          <SloEditFormObjectivesTimeslices />
         </>
       ) : null}
     </>

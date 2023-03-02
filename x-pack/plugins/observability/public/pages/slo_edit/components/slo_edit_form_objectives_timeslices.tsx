@@ -8,14 +8,11 @@
 import React from 'react';
 import { EuiFieldNumber, EuiFlexGrid, EuiFlexItem, EuiFormLabel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Control, Controller } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
-export interface Props {
-  control: Control<CreateSLOInput>;
-}
-
-export function SloEditFormObjectivesTimeslices({ control }: Props) {
+export function SloEditFormObjectivesTimeslices() {
+  const { control } = useFormContext<CreateSLOInput>();
   return (
     <EuiFlexGrid columns={3}>
       <EuiFlexItem>

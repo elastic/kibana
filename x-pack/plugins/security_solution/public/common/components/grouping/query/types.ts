@@ -17,43 +17,31 @@ interface RangeAgg {
   range: { '@timestamp': { gte: string; lte: string } };
 }
 
-export interface TermsOrCardinalityAggregation {
-  [category: string]:
-    | {
-        cardinality: estypes.AggregationsAggregationContainer['cardinality'];
-      }
-    | {
-        terms: estypes.AggregationsAggregationContainer['terms'];
-      };
-}
+export type NamedAggregation = Record<string, estypes.AggregationsAggregationContainer>;
 
 export interface GroupingQueryArgs {
   additionalFilters: BoolAgg[];
   from: string;
   runtimeMappings?: MappingRuntimeFields;
-  additionalAggregationsRoot?: TermsOrCardinalityAggregation[];
+  additionalAggregationsRoot?: NamedAggregation[];
   stackByMultipleFields0: string[];
   stackByMultipleFields0Size?: number;
   stackByMultipleFields0From?: number;
   stackByMultipleFields0Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
-  additionalStatsAggregationsFields0: TermsOrCardinalityAggregation[];
+  additionalStatsAggregationsFields0: NamedAggregation[];
   stackByMultipleFields1: string[] | undefined;
   stackByMultipleFields1Size?: number;
   stackByMultipleFields1From?: number;
   stackByMultipleFields1Sort?: Array<{ [category: string]: { order: estypes.SortOrder } }>;
-  additionalStatsAggregationsFields1: TermsOrCardinalityAggregation[];
+  additionalStatsAggregationsFields1: NamedAggregation[];
   to: string;
 }
 
-export interface SubAggregation extends Record<string, estypes.AggregationsAggregationContainer> {
-  bucket_truncate: { bucket_sort: estypes.AggregationsAggregationContainer['bucket_sort'] };
-}
-
-export interface MainAggregation extends Record<string, estypes.AggregationsAggregationContainer> {
+export interface MainAggregation extends NamedAggregation {
   stackByMultipleFields0: {
     terms?: estypes.AggregationsAggregationContainer['terms'];
     multi_terms?: estypes.AggregationsAggregationContainer['multi_terms'];
-    aggs: SubAggregation;
+    aggs: NamedAggregation;
   };
 }
 

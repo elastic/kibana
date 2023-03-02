@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TOP_N_CONTAINER } from '../screens/network/flows';
 import {
   ADD_EXCEPTION_BTN,
   ALERT_CHECKBOX,
@@ -37,6 +38,7 @@ import {
   ACTIONS_EXPAND_BUTTON,
   SELECT_HISTOGRAM,
   CELL_FILTER_OUT_BUTTON,
+  SHOW_TOP_N_CLOSE_BUTTON,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -331,6 +333,11 @@ export const filterOutAlertProperty = (propertySelector: string, rowIndex: numbe
 export const showTopNAlertProperty = (propertySelector: string, rowIndex: number) => {
   clickExpandActions(propertySelector, rowIndex);
   cy.get(CELL_SHOW_TOP_FIELD_BUTTON).first().click({ force: true });
+};
+export const closeTopNAlertProperty = () => {
+  cy.get(TOP_N_CONTAINER).then(() => {
+    cy.get(SHOW_TOP_N_CLOSE_BUTTON).click();
+  });
 };
 
 export const waitForAlerts = () => {
