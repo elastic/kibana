@@ -21,7 +21,8 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
 
 import { of } from 'rxjs';
-import { FetchTelemetryConfigResponse, FetchTelemetryConfigRoute } from '../common/routes';
+import { FetchTelemetryConfigRoute } from '../common/routes';
+import type { v2 } from '../common/types';
 import { TelemetrySender, TelemetryService, TelemetryNotifications } from './services';
 import { renderWelcomeTelemetryNotice } from './render_welcome_telemetry_notice';
 
@@ -322,7 +323,7 @@ export class TelemetryPlugin implements Plugin<TelemetryPluginSetup, TelemetryPl
    */
   private async fetchUpdatedConfig(http: HttpStart | HttpSetup): Promise<TelemetryPluginConfig> {
     const { allowChangingOptInStatus, optIn, sendUsageFrom, telemetryNotifyUserAboutOptInDefault } =
-      await http.get<FetchTelemetryConfigResponse>(FetchTelemetryConfigRoute);
+      await http.get<v2.FetchTelemetryConfigResponse>(FetchTelemetryConfigRoute);
 
     return {
       ...this.config,

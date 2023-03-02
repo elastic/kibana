@@ -186,6 +186,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           expect(await testSubjects.exists('field-name-agent')).to.be(true);
         });
       });
+
+      it('should disable Save button after pressing', async function () {
+        await PageObjects.settings.clickEditIndexButton();
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
+        await retry.try(async () => {
+          await PageObjects.settings.setIndexPatternField('logs*');
+        });
+        await PageObjects.settings.selectTimeFieldOption('@timestamp');
+
+        expect(await testSubjects.isEnabled('saveIndexPatternButton')).to.be(true);
+        await (await PageObjects.settings.getSaveDataViewButtonActive()).click();
+
+        // wait for the confirmation modal to open
+        await retry.waitFor('confirmation modal', async () => {
+          return await testSubjects.exists('confirmModalConfirmButton');
+        });
+
+        // while the confirmation modal is open, we can check that the form button has actually become disabled
+        expect(await testSubjects.isEnabled('saveIndexPatternButton')).to.be(false);
+
+        await testSubjects.click('confirmModalConfirmButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+      });
     });
 
     describe('index pattern deletion', function indexDelete() {

@@ -1,6 +1,7 @@
 post:
-  summary: Agent - Bulk Request Diagnostics
-  tags: []
+  summary: Bulk request diagnostics from agents
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
@@ -11,6 +12,8 @@ post:
             properties:
               actionId:
                 type: string
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: bulk-request-diagnostics
   parameters:
     - $ref: ../components/headers/kbn_xsrf.yaml
@@ -33,4 +36,4 @@ post:
           required:
             - agents
         example:
-          agents: "fleet-agents.policy_id : (\"policy1\" or \"policy2\")"  
+          agents: 'fleet-agents.policy_id : ("policy1" or "policy2")'

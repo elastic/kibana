@@ -8,10 +8,10 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { runRule } from './run_rule';
 
-jest.mock('./rule_api', () => ({
+jest.mock('./rule_api/run_soon', () => ({
   runSoon: jest.fn(),
 }));
-const mockRunSoon = jest.requireMock('./rule_api').runSoon;
+const { runSoon: mockRunSoon } = jest.requireMock('./rule_api/run_soon');
 
 describe('runRule', () => {
   const mockCoreSetup = coreMock.createSetup();

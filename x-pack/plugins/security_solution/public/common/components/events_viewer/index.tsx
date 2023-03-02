@@ -17,15 +17,16 @@ import { isEmpty } from 'lodash';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
+import { ALERTS_TABLE_VIEW_SELECTION_KEY } from '../../../../common/constants';
 import type { Sort } from '../../../timelines/components/timeline/body/sort';
 import type {
   ControlColumnProps,
-  DataTableCellAction,
   OnRowSelected,
   OnSelectAll,
   SetEventsDeleted,
   SetEventsLoading,
   TableId,
+  ViewSelection,
 } from '../../../../common/types';
 import { dataTableActions } from '../../store/data_table';
 import { InputsModelId } from '../../store/inputs/constants';
@@ -57,15 +58,12 @@ import { getDefaultViewSelection, getCombinedFilterQuery } from './helpers';
 import { useTimelineEvents } from './use_timelines_events';
 import { TableContext, EmptyTable, TableLoading } from './shared';
 import { DataTableComponent } from '../data_table';
-import { FIELDS_WITHOUT_CELL_ACTIONS } from '../../lib/cell_actions/constants';
 import type { AlertWorkflowStatus } from '../../types';
 import { useQueryInspector } from '../page/manage_query';
 import type { SetQuery } from '../../containers/use_global_time/types';
 import { defaultHeaders } from '../../store/data_table/defaults';
 import { checkBoxControlColumn, transformControlColumns } from '../control_columns';
 import { getEventIdToDataMapping } from '../data_table/helpers';
-import { ALERTS_TABLE_VIEW_SELECTION_KEY } from './summary_view_select';
-import type { ViewSelection } from './summary_view_select';
 import { RightTopMenu } from './right_top_menu';
 import { useAlertBulkActions } from './use_alert_bulk_actions';
 import type { BulkActionsProp } from '../toolbar/bulk_actions/types';
@@ -77,8 +75,8 @@ const storage = new Storage(localStorage);
 const SECURITY_ALERTS_CONSUMERS = [AlertConsumers.SIEM];
 
 export interface EventsViewerProps {
-  defaultCellActions?: DataTableCellAction[];
   defaultModel: SubsetDataTableModel;
+  disableCellActions?: boolean;
   end: string;
   entityType?: EntityType;
   tableId: TableId;
@@ -89,7 +87,7 @@ export interface EventsViewerProps {
   pageFilters?: Filter[];
   currentFilter?: AlertWorkflowStatus;
   onRuleChange?: () => void;
-  renderCellValue: (props: CellValueElementProps) => React.ReactNode;
+  renderCellValue: React.FC<CellValueElementProps>;
   rowRenderers: RowRenderer[];
   additionalFilters?: React.ReactNode;
   hasCrudPermissions?: boolean;
@@ -105,8 +103,8 @@ export interface EventsViewerProps {
  * NOTE: As of writting, it is not used in the Case_View component
  */
 const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux> = ({
-  defaultCellActions,
   defaultModel,
+  disableCellActions,
   end,
   entityType = 'events',
   tableId,
@@ -441,7 +439,6 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         columnHeaders,
         controlColumns,
         data: nonDeletedEvents,
-        disabledCellActions: FIELDS_WITHOUT_CELL_ACTIONS,
         fieldBrowserOptions,
         loadingEventIds,
         onRowSelected,
@@ -572,7 +569,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                             unitCountText={unitCountText}
                             browserFields={browserFields}
                             data={nonDeletedEvents}
-                            disabledCellActions={FIELDS_WITHOUT_CELL_ACTIONS}
+                            disableCellActions={disableCellActions}
                             id={tableId}
                             loadPage={loadPage}
                             renderCellValue={renderCellValue}
@@ -580,9 +577,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                             totalItems={totalCountMinusDeleted}
                             bulkActions={bulkActions}
                             fieldBrowserOptions={fieldBrowserOptions}
-                            defaultCellActions={defaultCellActions}
                             hasCrudPermissions={hasCrudPermissions}
-                            filters={filters}
                             leadingControlColumns={transformedLeadingControlColumns}
                             pagination={pagination}
                             isEventRenderedView={tableView === 'eventRenderedView'}

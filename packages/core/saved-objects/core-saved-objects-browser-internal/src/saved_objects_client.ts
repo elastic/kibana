@@ -32,7 +32,6 @@ import type {
   SimpleSavedObject,
   SavedObjectsBulkDeleteResponse,
 } from '@kbn/core-saved-objects-api-browser';
-
 import { SimpleSavedObjectImpl } from './simple_saved_object';
 
 type PromiseType<T extends Promise<any>> = T extends Promise<infer U> ? U : never;

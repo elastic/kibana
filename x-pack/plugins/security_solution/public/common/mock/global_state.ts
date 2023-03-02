@@ -28,6 +28,7 @@ import {
   DEFAULT_INDEX_PATTERN,
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_SIGNALS_INDEX,
+  VIEW_SELECTION,
 } from '../../../common/constants';
 import { networkModel } from '../../explore/network/store';
 import {
@@ -44,6 +45,7 @@ import { getScopePatternListSelection } from '../store/sourcerer/helpers';
 import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
 import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
+import { defaultGroup } from '../store/grouping/defaults';
 
 export const mockSourcererState = {
   ...initialSourcererState,
@@ -405,6 +407,18 @@ export const mockGlobalState: State = {
         isLoading: false,
         queryFields: [],
         totalCount: 0,
+        viewMode: VIEW_SELECTION.gridView,
+        additionalFilters: {
+          showBuildingBlockAlerts: false,
+          showOnlyThreatIndicatorAlerts: false,
+        },
+      },
+    },
+  },
+  groups: {
+    groupById: {
+      testing: {
+        ...defaultGroup,
       },
     },
   },

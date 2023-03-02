@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": "@elastic/observability-ui",
+  "owner": "@elastic/actionable-observability",
   "plugin": {
     "id": "observability",
     "server": true,
@@ -24,8 +24,7 @@
       "unifiedSearch",
       "security",
       "guidedOnboarding",
-      "share",
-      "spaces"
+      "share"
     ],
     "optionalPlugins": [
       "discover",

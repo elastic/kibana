@@ -13,14 +13,13 @@ import { saveAs } from '@elastic/filesaver';
 import { EuiSpacer, Query, CriteriaWithPagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HttpStart, OverlayStart, NotificationsStart, ApplicationStart } from '@kbn/core/public';
-import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
 import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
 import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { Subscription } from 'rxjs';
-import type { SavedObjectManagementTypeInfo } from '../../../common/types';
+import type { SavedObjectManagementTypeInfo, FindQueryHTTP } from '../../../common/types/latest';
 import {
   parseQuery,
   getSavedObjectCounts,
@@ -233,17 +232,15 @@ export class SavedObjectsTable extends Component<SavedObjectsTableProps, SavedOb
 
     // "searchFields" is missing from the "findOptions" but gets injected via the API.
     // The API extracts the fields from each uiExports.savedObjectsManagement "defaultSearchField" attribute
-    const findOptions: SavedObjectsFindOptions = {
+    const findOptions: FindQueryHTTP = {
       search: queryText ? `${queryText}*` : undefined,
       perPage,
       page: page + 1,
-      fields: ['id'],
       type: searchTypes,
+      sortField: sort?.field,
+      sortOrder: sort?.direction,
+      hasReference: getTagFindReferences({ selectedTags, taggingApi }),
     };
-    findOptions.sortField = sort?.field;
-    findOptions.sortOrder = sort?.direction;
-
-    findOptions.hasReference = getTagFindReferences({ selectedTags, taggingApi });
 
     try {
       const resp = await findObjects(http, findOptions);
