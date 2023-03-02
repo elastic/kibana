@@ -275,20 +275,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await PageObjects.timePicker.setDefaultAbsoluteRange();
+      // Make sure the chart is visible
+      await testSubjects.click('unifiedHistogramChartOptionsToggle');
+      await testSubjects.click('unifiedHistogramChartToggle');
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // type an invalid search query, hit refresh
       await queryBar.setQuery('this is > not valid');
       await queryBar.submitQuery();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      // await PageObjects.common.sleep(50000);
       // check the error state
       expect(await testSubjects.exists('embeddable-lens-failure')).to.be(true);
+
       // now remove the query
       await queryBar.clearQuery();
       await queryBar.submitQuery();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      // await PageObjects.common.sleep(50000);
-      // check the success state
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      // check no error state
       expect(await PageObjects.discover.isChartVisible()).to.be(true);
     });
   });
