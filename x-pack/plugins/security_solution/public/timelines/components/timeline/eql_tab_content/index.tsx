@@ -70,7 +70,6 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   display: flex;
   flex-direction: column;
   margin-top: ${({ theme }) => theme.eui.euiSizeM}
-}
   padding: 0;
 
   &.euiFlyoutHeader {
