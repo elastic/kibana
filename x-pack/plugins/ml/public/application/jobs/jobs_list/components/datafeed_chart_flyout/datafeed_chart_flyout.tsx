@@ -121,6 +121,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   const [endDate, setEndDate] = useState<any>(moment(end));
   const [isLoadingChartData, setIsLoadingChartData] = useState<boolean>(false);
   const [bucketData, setBucketData] = useState<ChartDataWithNullValues>([]);
+  const [allEmptyValues, setAllEmptyValues] = useState<boolean>(false);
   const [annotationData, setAnnotationData] = useState<{
     rect: RectAnnotationDatum[];
     line: LineAnnotationDatum[];
@@ -188,7 +189,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
           chartSourceData = fillMissingChartData(chartSourceData, chartBucketData);
         }
       }
-
+      setAllEmptyValues(!chartBucketData.some((datum) => datum[1] !== null && datum[1] !== 0));
       setSourceData(chartSourceData);
       setBucketData(chartBucketData);
       setAnnotationData({
@@ -444,7 +445,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           })}
                           position={Position.Left}
                           domain={
-                            bucketData.length && bucketData[bucketData.length - 1][1] === 0
+                            allEmptyValues
                               ? {
                                   min: 0,
                                   max: 10,
