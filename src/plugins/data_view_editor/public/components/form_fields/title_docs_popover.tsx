@@ -100,7 +100,7 @@ export const TitleDocsPopover: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="indexPatternEditor.titleDocsPopover.dontUseSpecialCharactersDescription"
-                  defaultMessage="Spaces and the characters /?”<> are not allowed."
+                  defaultMessage={`Spaces and the characters /?"<>| are not allowed.`}
                 />
               </p>
             </li>
