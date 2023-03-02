@@ -328,7 +328,7 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
           producer: 'observability.test',
         },
         services: {
-          alertFactory: { create: sinon.stub() },
+          alertFactory: getMockAlertFactory(),
           shouldWriteAlerts: sinon.stub().returns(true),
         },
         flappingSettings: DEFAULT_FLAPPING_SETTINGS,
