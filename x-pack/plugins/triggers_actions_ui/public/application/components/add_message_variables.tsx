@@ -177,6 +177,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
       closePopover={() => setIsVariablesPopoverOpen(false)}
       panelPaddingSize="s"
       anchorPosition="upRight"
+      panelStyle={{ minWidth: 350 }}
     >
       <EuiSelectable
         searchable
@@ -209,9 +210,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
             {search}
             <EuiSpacer size="xs" />
             {list}
-            <EuiPopoverFooter
-              style={{ paddingTop: 0, paddingBottom: 0, minWidth: 300, maxWidth: 300 }}
-            >
+            <EuiPopoverFooter style={{ paddingTop: 0, paddingBottom: 0 }}>
               <EuiFlexGroup
                 gutterSize="s"
                 alignItems="center"
