@@ -5,35 +5,28 @@
  * 2.0.
  */
 
-import type { UnwrapPromise } from '@kbn/infra-plugin/common/utility_types';
+import { closeAllToasts } from '../../tasks/close_all_toasts';
+import type { ReturnTypeFromChainable } from '../../types';
 import { addAlertsToCase } from '../../tasks/add_alerts_to_case';
-import type { IndexedEndpointRuleAlerts } from '../../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
-import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 import { APP_CASES_PATH } from '../../../../../common/constants';
-import type { IndexedCase } from '../../../../../common/endpoint/data_loaders/index_case';
 import {
   closeResponder,
   closeResponderActionLogFlyout,
-  openResponderActionLogDatePickerQuickMenu,
   openResponderActionLogFlyout,
+  setResponderActionLogDateRange,
 } from '../../screens/responder';
 import { login } from '../../tasks/login';
-import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '../../../../../../../test/security_solution_ftr/page_objects/helpers/super_date_picker';
 import { indexNewCase } from '../../tasks/index_new_case';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
 describe('When accessing Endpoint Response Console', () => {
   const performResponderSanityChecks = () => {
-    // Show the Action log
     openResponderActionLogFlyout();
-
     // Ensure the popover in the action log date quick select picker is accessible
     // (this is especially important for when Responder is displayed from a Timeline)
-    openResponderActionLogDatePickerQuickMenu();
-    cy.getByTestSubj(DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP['Last 1 year']);
+    setResponderActionLogDateRange();
     closeResponderActionLogFlyout();
-
-    // Close responder
     closeResponder();
   };
 
@@ -42,10 +35,17 @@ describe('When accessing Endpoint Response Console', () => {
   });
 
   describe('from Cases', () => {
-    let endpointData: UnwrapPromise<ReturnType<typeof indexEndpointHosts>>;
-    let caseData: IndexedCase;
-    let alertData: IndexedEndpointRuleAlerts;
+    let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
+    let caseData: ReturnTypeFromChainable<typeof indexNewCase>;
+    let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts>;
+    let caseAlertActions: ReturnTypeFromChainable<typeof addAlertsToCase>;
+    let alertId: string;
     let caseUrlPath: string;
+
+    const openCaseAlertDetails = () => {
+      cy.getByTestSubj(`comment-action-show-alert-${caseAlertActions.comments[alertId]}`).click();
+      cy.getByTestSubj('take-action-dropdown-btn').click();
+    };
 
     before(() => {
       indexNewCase().then((indexCase) => {
@@ -62,10 +62,16 @@ describe('When accessing Endpoint Response Console', () => {
             endpointAgentId: endpointData.data.hosts[0].agent.id,
           }).then((indexedAlert) => {
             alertData = indexedAlert;
+            alertId = alertData.alerts[0]._id;
           });
         })
         .then(() => {
-          return addAlertsToCase({ caseId: caseData.data.id, alertIds: [alertData.alerts[0]._id] });
+          return addAlertsToCase({
+            caseId: caseData.data.id,
+            alertIds: [alertId],
+          }).then((attachments) => {
+            caseAlertActions = attachments;
+          });
         });
     });
 
@@ -95,17 +101,17 @@ describe('When accessing Endpoint Response Console', () => {
 
     it('should display responder option in take action menu', () => {
       cy.visit(caseUrlPath);
+      closeAllToasts();
+      openCaseAlertDetails();
+      cy.getByTestSubj('endpointResponseActions-action-item').should('be.enabled');
     });
 
     it('should display Responder response action interface', () => {
       cy.visit(caseUrlPath);
-
-      // TODO: open alert in case
-
-      // FIXME: Open console
-
-      // FIXME: perform checks
-      // performResponderSanityChecks();
+      closeAllToasts();
+      openCaseAlertDetails();
+      cy.getByTestSubj('endpointResponseActions-action-item').click();
+      performResponderSanityChecks();
     });
   });
 });
