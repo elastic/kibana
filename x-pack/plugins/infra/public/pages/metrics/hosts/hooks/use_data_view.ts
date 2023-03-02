@@ -7,17 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import { v5 as uuidv5 } from 'uuid';
-import { useEffect } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
-import useAsync from 'react-use/lib/useAsync';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
 import type { InfraClientStartDeps } from '../../../../types';
 import { DATA_VIEW_PREFIX, TIMESTAMP_FIELD } from '../constants';
 
-const generateDataViewId = (indexPattern: string) => {
-  //
+export const generateDataViewId = (indexPattern: string) => {
+  // generates a unique but the same uuid as long as the index pattern doesn't change
   return `${DATA_VIEW_PREFIX}_${uuidv5(indexPattern, uuidv5.DNS)}`;
 };
 
@@ -26,45 +25,54 @@ export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
     services: { dataViews, notifications },
   } = useKibana<InfraClientStartDeps>();
 
-  const [_, createAdhocDataView] = useTrackedPromise(
+  const [dataView, setDataView] = useState<DataView>();
+  const [hasError, setHasError] = useState<boolean>(false);
+
+  const [createAdhocDataViewRequest, createAdhocDataView] = useTrackedPromise(
     {
       createPromise: (config: DataViewSpec): Promise<DataView> => {
-        return dataViews.create(config, false);
+        return dataViews.create(config);
       },
       onResolve: (response: DataView) => {
-        return response;
+        setHasError(false);
+        setDataView(response);
+      },
+      onReject: () => {
+        setHasError(true);
       },
       cancelPreviousOn: 'creation',
     },
     []
   );
 
-  const { value, loading, error } = useAsync(
-    () =>
-      createAdhocDataView({
-        id: generateDataViewId(metricAlias),
-        title: metricAlias,
-        timeFieldName: TIMESTAMP_FIELD,
-      }),
-
-    []
+  const loading = useMemo(
+    () => createAdhocDataViewRequest.state === 'pending',
+    [createAdhocDataViewRequest.state]
   );
 
   useEffect(() => {
-    if (error && notifications) {
+    createAdhocDataView({
+      id: generateDataViewId(metricAlias),
+      title: metricAlias,
+      timeFieldName: TIMESTAMP_FIELD,
+    });
+  }, [createAdhocDataView, metricAlias]);
+
+  useEffect(() => {
+    if (hasError && notifications) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.infra.hostsViewPage.errorOnCreateOrLoadDataview', {
-          defaultMessage: 'There was an error trying to create the Data View: {metricAlias}',
+          defaultMessage: 'There was an error trying to create a Data View',
           values: { metricAlias },
         })
       );
     }
-  }, [error, notifications, metricAlias]);
+  }, [hasError, notifications, metricAlias]);
 
   return {
-    dataView: value,
+    dataView,
     loading,
-    error,
+    hasError,
   };
 };
 

@@ -10,9 +10,8 @@ import _ from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { useUrlState } from '../../../../utils/use_url_state';
-import { useMetricsDataViewContext } from './use_data_view';
 
 const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
 
@@ -48,8 +47,9 @@ const controlPanelConfigs: ControlPanels = {
 
 const availableControlPanelFields = Object.values(availableControlsPanels);
 
-export const useControlPanels = (): [ControlPanels, (state: ControlPanels) => void] => {
-  const { dataView } = useMetricsDataViewContext();
+export const useControlPanels = (
+  dataView: DataView | undefined
+): [ControlPanels, (state: ControlPanels) => void] => {
   const defaultState = getVisibleControlPanelsConfig(dataView);
 
   const [controlPanels, setControlPanels] = useUrlState<ControlPanels>({

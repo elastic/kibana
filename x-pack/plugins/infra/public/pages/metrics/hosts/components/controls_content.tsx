@@ -9,13 +9,14 @@ import React, { useEffect, useState } from 'react';
 import { ControlGroupContainer, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { Filter, TimeRange } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
-import { useMetricsDataViewContext } from '../hooks/use_data_view';
 
 interface Props {
   timeRange: TimeRange;
   filters: Filter[];
+  dataView: DataView | undefined;
   query: {
     language: string;
     query: string;
@@ -29,9 +30,14 @@ const REFRESH_CONFIG = {
   value: 0,
 };
 
-export const ControlsContent: React.FC<Props> = ({ timeRange, query, filters, onFilterChange }) => {
-  const { dataView } = useMetricsDataViewContext();
-  const [controlPanel, setControlPanels] = useControlPanels();
+export const ControlsContent: React.FC<Props> = ({
+  timeRange,
+  dataView,
+  query,
+  filters,
+  onFilterChange,
+}) => {
+  const [controlPanel, setControlPanels] = useControlPanels(dataView);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer | undefined>();
 
   useEffect(() => {

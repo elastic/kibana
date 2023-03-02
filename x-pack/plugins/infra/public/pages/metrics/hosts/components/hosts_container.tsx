@@ -18,7 +18,7 @@ import { Tabs } from './tabs/tabs';
 import { AlertsQueryProvider } from '../hooks/use_alerts_query';
 
 export const HostContainer = () => {
-  const { loading, error } = useMetricsDataViewContext();
+  const { loading, hasError } = useMetricsDataViewContext();
 
   if (loading) {
     return (
@@ -32,7 +32,7 @@ export const HostContainer = () => {
     );
   }
 
-  return !!error ? null : (
+  return !!hasError ? null : (
     <>
       <UnifiedSearchBar />
       <EuiSpacer />
