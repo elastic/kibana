@@ -25,7 +25,8 @@
       "management",
       "security",
       "notifications",
-      "ruleRegistry"
+      "ruleRegistry",
+      "files",
     ],
     "optionalPlugins": [
       "home",

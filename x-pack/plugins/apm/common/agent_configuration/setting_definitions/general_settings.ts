@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { captureBodyRt } from '../runtime_types/capture_body_rt';
 import { logLevelRt } from '../runtime_types/log_level_rt';
+import { logEcsReformattingRt } from '../runtime_types/log_ecs_reformatting_rt';
 import { traceContinuationStrategyRt } from '../runtime_types/trace_continuation_strategy_rt';
 import { RawSettingDefinition } from './types';
 
@@ -93,7 +94,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'The defaults end with a wildcard so that content types like `text/plain; charset=utf-8` are captured as well.',
       }
     ),
-    includeAgents: ['java'],
+    includeAgents: ['java', 'dotnet'],
   },
 
   // Capture headers
@@ -136,6 +137,53 @@ export const generalSettings: RawSettingDefinition[] = [
   },
 
   {
+    key: 'disable_instrumentations',
+    type: 'text',
+    defaultValue: '',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.disableInstrumentations.label',
+      {
+        defaultMessage: 'Disable instrumentations',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.disableInstrumentations.description',
+      {
+        defaultMessage:
+          'Comma-separated list of modules to disable instrumentation for.\n' +
+          'When instrumentation is disabled for a module, no spans will be collected for that module.\n' +
+          '\n' +
+          'The up-to-date list of modules for which instrumentation can be disabled is language specific ' +
+          'and can be found under the following links: ' +
+          '[Java](https://www.elastic.co/guide/en/apm/agent/java/current/config-core.html#config-disable-instrumentations)',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
+    key: 'disable_outgoing_tracecontext_headers',
+    type: 'boolean',
+    defaultValue: 'true',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.disableOutgoingTracecontextHeaders.label',
+      {
+        defaultMessage: 'Disable outgoing tracecontext headers',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.disableOutgoingTracecontextHeaders.description',
+      {
+        defaultMessage:
+          'Use this option to disable `tracecontext` headers injection to any outgoing communication.\n' +
+          '\n' +
+          'WARNING: Disabling `tracecontext` headers injection means that distributed tracing will not work on downstream services.',
+      }
+    ),
+    includeAgents: ['java'],
+  },
+
+  {
     key: 'exit_span_min_duration',
     type: 'duration',
     defaultValue: '0ms',
@@ -152,7 +200,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'NOTE: If a span propagates distributed tracing ids, it will not be ignored, even if it is shorter than the configured threshold. This is to ensure that no broken traces are recorded.',
       }
     ),
-    includeAgents: ['java'],
+    includeAgents: ['java', 'dotnet', 'nodejs', 'python'],
   },
 
   {
@@ -172,6 +220,32 @@ export const generalSettings: RawSettingDefinition[] = [
           'When set, sends-to and receives-from the specified queues/topic will be ignored.',
       }
     ),
+    includeAgents: ['java', 'dotnet', 'nodejs'],
+  },
+
+  {
+    key: 'log_ecs_reformatting',
+    validation: logEcsReformattingRt,
+    type: 'select',
+    defaultValue: 'off',
+    label: i18n.translate('xpack.apm.agentConfig.logEcsReformatting.label', {
+      defaultMessage: 'Log ECS reformatting',
+    }),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.logEcsReformatting.description',
+      {
+        defaultMessage:
+          'Specifying whether and how the agent should automatically reformat application logs into ' +
+          '[ECS-compatible JSON](https://www.elastic.co/guide/en/ecs-logging/overview/master/intro.html), ' +
+          'suitable for ingestion into Elasticsearch for further Log analysis.',
+      }
+    ),
+    options: [
+      { text: 'off', value: 'off' },
+      { text: 'shade', value: 'shade' },
+      { text: 'replace', value: 'replace' },
+      { text: 'override', value: 'override' },
+    ],
     includeAgents: ['java'],
   },
 
@@ -197,6 +271,30 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'off', value: 'off' },
     ],
     includeAgents: ['dotnet', 'ruby', 'java', 'python', 'nodejs', 'go', 'php'],
+  },
+
+  {
+    key: 'mongodb_capture_statement_commands',
+    type: 'boolean',
+    defaultValue: 'false',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.mongodbCaptureStatementCommands.label',
+      {
+        defaultMessage: 'MongoDB capture statement commands',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.mongodbCaptureStatementCommands.description',
+      {
+        defaultMessage:
+          'MongoDB command names for which the command document will be captured, limited to common read-only operations by default. ' +
+          'Set to `""` (empty) to disable capture, and `*` to capture all (which is discouraged as it may lead to sensitive information capture).\n' +
+          '\n' +
+          'This option supports the wildcard `*`, which matches zero or more characters. Examples: `/foo/*/bar/*/baz*`, `*foo*`. ' +
+          'Matching is case insensitive by default. Prepending an element with `(?-i)` makes the matching case sensitive.',
+      }
+    ),
+    includeAgents: ['java'],
   },
 
   // Recording
@@ -250,7 +348,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Span compression reduces the collection, processing, and storage overhead, and removes clutter from the UI. The tradeoff is that some information such as DB statements of all the compressed spans will not be collected.',
       }
     ),
-    includeAgents: ['java'],
+    includeAgents: ['java', 'dotnet', 'python'],
   },
 
   {
@@ -271,7 +369,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Consecutive spans that are exact match and that are under this threshold will be compressed into a single composite span. This option does not apply to composite spans. This reduces the collection, processing, and storage overhead, and removes clutter from the UI. The tradeoff is that the DB statements of all the compressed spans will not be collected.',
       }
     ),
-    includeAgents: ['java'],
+    includeAgents: ['java', 'dotnet', 'python'],
   },
   {
     key: 'span_compression_same_kind_max_duration',
@@ -291,7 +389,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Consecutive spans to the same destination that are under this threshold will be compressed into a single composite span. This option does not apply to composite spans. This reduces the collection, processing, and storage overhead, and removes clutter from the UI. The tradeoff is that the DB statements of all the compressed spans will not be collected.',
       }
     ),
-    includeAgents: ['java'],
+    includeAgents: ['java', 'dotnet', 'python'],
   },
 
   // SPAN_FRAMES_MIN_DURATION
@@ -307,10 +405,36 @@ export const generalSettings: RawSettingDefinition[] = [
       'xpack.apm.agentConfig.spanFramesMinDuration.description',
       {
         defaultMessage:
-          'In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.',
+          '(Deprecated, use `span_stack_trace_min_duration` instead!) In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.',
       }
     ),
     excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php'],
+  },
+
+  {
+    key: 'span_stack_trace_min_duration',
+    type: 'duration',
+    min: '-1ms',
+    defaultValue: '5ms',
+    label: i18n.translate(
+      'xpack.apm.agentConfig.spanStackTraceMinDuration.label',
+      {
+        defaultMessage: 'Span stack trace minimum duration',
+      }
+    ),
+    description: i18n.translate(
+      'xpack.apm.agentConfig.spanStackTraceMinDuration.description',
+      {
+        defaultMessage:
+          'While this is very helpful to find the exact place in your code that causes the span, ' +
+          'collecting this stack trace does have some overhead. When setting this option to the value `0ms`, ' +
+          'stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit ' +
+          'stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n' +
+          '\n' +
+          'To disable stack trace collection for spans completely, set the value to `-1ms`.',
+      }
+    ),
+    includeAgents: ['java', 'dotnet', 'nodejs', 'python'],
   },
 
   // STACK_TRACE_LIMIT
@@ -328,7 +452,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Setting it to 0 will disable stack trace collection. Any positive integer value will be used as the maximum number of frames to collect. Setting it -1 means that all frames will be collected.',
       }
     ),
-    includeAgents: ['java', 'dotnet', 'go'],
+    includeAgents: ['java', 'dotnet', 'go', 'python'],
   },
 
   {
@@ -366,7 +490,7 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'restart', value: 'restart' },
       { text: 'restart_external', value: 'restart_external' },
     ],
-    includeAgents: ['java'],
+    includeAgents: ['java', 'nodejs', 'python'],
   },
 
   // Transaction max spans

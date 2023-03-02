@@ -18,7 +18,7 @@ import { SyncsContextMenu } from './syncs_context_menu';
 export const getHeaderActions = (indexData?: ElasticsearchIndexWithIngestion) => {
   const ingestionMethod = getIngestionMethod(indexData);
   return [
-    ...(isCrawlerIndex(indexData) ? [<CrawlerStatusIndicator />] : []),
+    ...(isCrawlerIndex(indexData) && indexData.connector ? [<CrawlerStatusIndicator />] : []),
     ...(isConnectorIndex(indexData) ? [<SyncsContextMenu />] : []),
     <SearchEnginesPopover
       indexName={indexData?.name}

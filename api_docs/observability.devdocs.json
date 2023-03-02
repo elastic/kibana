@@ -4552,7 +4552,8 @@
                 "docId": "kibSpacesPluginApi",
                 "section": "def-public.SpacesApi",
                 "text": "SpacesApi"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/observability/public/plugin.ts",
             "deprecated": false,
