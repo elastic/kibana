@@ -8,7 +8,7 @@ import { useCallback, useMemo, useState } from 'react';
 import createContainer from 'constate';
 import { getTime } from '@kbn/data-plugin/common';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
-import { BoolQuery, buildEsQuery, Filter, Query } from '@kbn/es-query';
+import { BoolQuery, buildEsQuery, Filter } from '@kbn/es-query';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { HostsState } from './use_unified_search_url_state';
