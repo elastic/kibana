@@ -28,5 +28,4 @@ export const createRootEpic = <State>(): Epic<
     createTimelineNoteEpic<State>(),
     createTimelinePinnedEventEpic<State>(),
     createDataTableLocalStorageEpic<State>()
-    // createGroupingLocalStorageEpic<State>()
   );
