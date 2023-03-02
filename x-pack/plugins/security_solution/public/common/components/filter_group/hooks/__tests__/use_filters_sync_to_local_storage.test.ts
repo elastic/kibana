@@ -6,9 +6,7 @@
  */
 
 import type { ControlGroupInput } from '@kbn/controls-plugin/common';
-import type { Dispatch } from '@kbn/kibana-utils-plugin/common';
 import { renderHook } from '@testing-library/react-hooks';
-import type { SetStateAction } from 'react';
 import { useControlGroupSyncToLocalStorage } from '../use_control_group_sync_to_local_storage';
 
 const TEST_STORAGE_KEY = 'test_key';
@@ -45,7 +43,7 @@ describe('Filters Sync to Local Storage', () => {
       })
     );
     waitForNextUpdate();
-    expect(result.current[0]).toMatchObject(DEFAULT_STORED_VALUE);
+    expect(result.current.controlGroupInput).toMatchObject(DEFAULT_STORED_VALUE);
   });
   it('should be undefined if localstorage as NO initial value', () => {
     const { result, waitForNextUpdate } = renderHook(() =>
@@ -55,9 +53,8 @@ describe('Filters Sync to Local Storage', () => {
       })
     );
     waitForNextUpdate();
-    const [returnVal, setReturnVal] = result.current;
-    expect(returnVal).toBeUndefined();
-    expect(setReturnVal).toBeTruthy();
+    expect(result.current.controlGroupInput).toBeUndefined();
+    expect(result.current.setControlGroupInput).toBeTruthy();
   });
   it('should be update values to local storage when sync is ON', () => {
     const { result, waitFor } = renderHook(() =>
@@ -67,12 +64,12 @@ describe('Filters Sync to Local Storage', () => {
       })
     );
     waitFor(() => {
-      expect(result.current[0]).toBeUndefined();
-      expect(result.current[1]).toBeTruthy();
+      expect(result.current.controlGroupInput).toBeUndefined();
+      expect(result.current.setControlGroupInput).toBeTruthy();
     });
-    (result.current[1] as Dispatch<SetStateAction<ControlGroupInput>>)(DEFAULT_STORED_VALUE);
+    result.current.setControlGroupInput(DEFAULT_STORED_VALUE);
     waitFor(() => {
-      expect(result.current[0]).toMatchObject(DEFAULT_STORED_VALUE);
+      expect(result.current.controlGroupInput).toMatchObject(DEFAULT_STORED_VALUE);
       expect(global.localStorage.getItem(TEST_STORAGE_KEY)).toBe(
         JSON.stringify(DEFAULT_STORED_VALUE)
       );
@@ -88,20 +85,20 @@ describe('Filters Sync to Local Storage', () => {
 
     // Sync is ON
     waitFor(() => {
-      expect(result.current[0]).toBeUndefined();
-      expect(result.current[1]).toBeTruthy();
+      expect(result.current.controlGroupInput).toBeUndefined();
+      expect(result.current.setControlGroupInput).toBeTruthy();
     });
 
-    (result.current[1] as Dispatch<SetStateAction<ControlGroupInput>>)(DEFAULT_STORED_VALUE);
+    result.current.setControlGroupInput(DEFAULT_STORED_VALUE);
     waitFor(() => {
-      expect(result.current[0]).toMatchObject(DEFAULT_STORED_VALUE);
+      expect(result.current.controlGroupInput).toMatchObject(DEFAULT_STORED_VALUE);
     });
 
     // Sync is OFF
     rerender({ storageKey: TEST_STORAGE_KEY, shouldSync: false });
-    (result.current[1] as Dispatch<SetStateAction<ControlGroupInput>>)(ANOTHER_SAMPLE_VALUE);
+    result.current.setControlGroupInput(ANOTHER_SAMPLE_VALUE);
     waitFor(() => {
-      expect(result.current[0]).toMatchObject(ANOTHER_SAMPLE_VALUE);
+      expect(result.current.controlGroupInput).toMatchObject(ANOTHER_SAMPLE_VALUE);
       // old value
       expect(global.localStorage.getItem(TEST_STORAGE_KEY)).toBe(
         JSON.stringify(DEFAULT_STORED_VALUE)

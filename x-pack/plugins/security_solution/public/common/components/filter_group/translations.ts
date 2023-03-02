@@ -14,16 +14,16 @@ export const PENDING_CHANGES_REMINDER = i18n.translate(
   }
 );
 
-export const EDIT_CONTROLS = i18n.translate(`xpack.securitySolutuon.filtersGroup.editControls`, {
+export const EDIT_CONTROLS = i18n.translate(`xpack.securitySolution.filtersGroup.editControls`, {
   defaultMessage: 'Edit Controls',
 });
 
-export const SAVE_CONTROLS = i18n.translate(`xpack.securitySolutuon.filtersGroup.saveControls`, {
+export const SAVE_CONTROLS = i18n.translate(`xpack.securitySolution.filtersGroup.saveControls`, {
   defaultMessage: 'Save Controls',
 });
 
 export const DISCARD_CHANGES = i18n.translate(
-  `xpack.securitySolutuon.filtersGroup.discardChnages`,
+  `xpack.securitySolution.filtersGroup.discardChanges`,
   {
     defaultMessage: 'Discard Changes',
   }
