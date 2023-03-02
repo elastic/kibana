@@ -38,12 +38,13 @@ import { readFromStorage } from '../../settings_storage';
 import { loadIndexPatternRefs, loadIndexPatterns } from '../../data_views_service/loader';
 
 function getIndexPatterns(
+  annotationGroupDataviewIds: string[],
   references?: SavedObjectReference[],
   initialContext?: VisualizeFieldContext | VisualizeEditorContext,
   initialId?: string,
   adHocDataviews?: string[]
 ) {
-  const indexPatternIds = [];
+  const indexPatternIds = [...annotationGroupDataviewIds];
 
   // use the initialId only when no context is passed over
   if (!initialContext && initialId) {
@@ -102,6 +103,7 @@ export async function initializeDataViews(
     references,
     initialContext,
     adHocDataViews: persistedAdHocDataViews,
+    annotationGroups,
   }: {
     dataViews: DataViewsContract;
     datasourceMap: DatasourceMap;
@@ -111,6 +113,7 @@ export async function initializeDataViews(
     references?: SavedObjectReference[];
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
     adHocDataViews?: Record<string, DataViewSpec>;
+    annotationGroups: Record<string, EventAnnotationGroupConfig>;
   },
   options?: InitializationOptions
 ) {
@@ -139,6 +142,7 @@ export async function initializeDataViews(
   const adHocDataviewsIds: string[] = Object.keys(adHocDataViews || {});
 
   const usedIndexPatternsIds = getIndexPatterns(
+    Object.values(annotationGroups).map((group) => group.indexPatternId),
     references,
     initialContext,
     initialId,
@@ -220,6 +224,11 @@ export async function initializeSources(
   },
   options?: InitializationOptions
 ) {
+  const annotationGroups = await initializeEventAnnotationGroups(
+    eventAnnotationService,
+    references
+  );
+
   const { indexPatternRefs, indexPatterns } = await initializeDataViews(
     {
       datasourceMap,
@@ -230,13 +239,9 @@ export async function initializeSources(
       defaultIndexPatternId,
       references,
       adHocDataViews,
+      annotationGroups, // TODO - is this necessary?
     },
     options
-  );
-
-  const annotationGroups = await initializeEventAnnotationGroups(
-    eventAnnotationService,
-    references
   );
 
   return {
