@@ -19,6 +19,7 @@ import type {
   RawBucket,
 } from '@kbn/securitysolution-grouping';
 import { getGrouping, isNoneGroup } from '@kbn/securitysolution-grouping';
+import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import { useGetGroupSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { defaultGroup } from '../../../common/store/grouping/defaults';
@@ -183,7 +184,10 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     request,
     response,
     setQuery: setAlertsQuery,
-  } = useQueryAlerts<{}, GroupingAggregation & GroupingFieldTotalAggregation>({
+  } = useQueryAlerts<
+    {},
+    GroupingAggregation<AlertsGroupingAggregation> & GroupingFieldTotalAggregation
+  >({
     query: queryGroups,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
@@ -236,12 +240,12 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       isNoneGroup(selectedGroup)
         ? renderChildComponent([])
         : getGrouping({
-            badgeMetricStats: (fieldBucket: RawBucket) =>
+            badgeMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
               getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket),
-            customMetricStats: (fieldBucket: RawBucket) =>
+            customMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
               getSelectedGroupCustomMetrics(selectedGroup, fieldBucket),
             data: alertsGroupsData?.aggregations,
-            groupPanelRenderer: (fieldBucket: RawBucket) =>
+            groupPanelRenderer: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
               getSelectedGroupButtonContent(selectedGroup, fieldBucket),
             groupsSelector,
             inspectButton: inspect,
