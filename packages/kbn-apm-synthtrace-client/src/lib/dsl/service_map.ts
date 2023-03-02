@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
 import { apm } from '../apm';
 import { Instance } from '../apm/instance';
-import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
 import { elasticsearchSpan, redisSpan, sqliteSpan, Span } from '../apm/span';
 
 const ENVIRONMENT = 'Synthtrace: service_map';
@@ -104,11 +104,11 @@ function getChildren(
   return [childSpan];
 }
 
-export type ServiceMapOpts = {
+export interface ServiceMapOpts {
   services: Array<string | { [serviceName: string]: AgentName }>;
   definePaths: (services: Instance[]) => TraceItem[][];
   environment?: string;
-};
+}
 
 export function serviceMap(options: ServiceMapOpts) {
   const serviceInstances = options.services.map((s) => {
