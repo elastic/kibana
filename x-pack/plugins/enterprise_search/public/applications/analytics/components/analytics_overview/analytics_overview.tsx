@@ -56,7 +56,7 @@ export const AnalyticsOverview: React.FC = () => {
           <AnalyticsOverviewEmptyPage />
         </>
       ) : (
-        <AnalyticsCollectionTable collections={analyticsCollections} isLoading={isLoading} />
+        <AnalyticsCollectionTable collections={analyticsCollections} />
       )}
     </EnterpriseSearchAnalyticsPageTemplate>
   );

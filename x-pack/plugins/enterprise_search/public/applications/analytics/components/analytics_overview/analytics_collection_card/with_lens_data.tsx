@@ -150,12 +150,14 @@ export interface WithLensDataInputProps {
 
 export interface WithLensDataLogicOutputProps {
   data: Array<[number, number]>;
+  isLoading: boolean;
   metric: number | null;
   secondaryMetric: number | null;
 }
 
 const initialValues = {
   data: [],
+  isLoading: true,
   metric: null,
   secondaryMetric: null,
 };
@@ -175,13 +177,16 @@ export const withLensData = <T extends WithLensDataInputProps>(Component: React.
       [props.filterBy, dataView]
     );
     const onDataLoad: LensByReferenceInput['onLoad'] = (isLoading, adapters) => {
-      if (!isLoading && adapters) {
+      if (isLoading) {
+        setLensData(initialValues);
+      } else if (adapters) {
         setLensData({
           data:
             (adapters.tables?.tables[LENS_LAYERS.trend.id]?.rows?.map((row) => [
               row[LENS_LAYERS.trend.x] as number,
               row[LENS_LAYERS.trend.y] as number,
             ]) as Array<[number, number]>) || [],
+          isLoading: false,
           metric:
             adapters.tables?.tables[LENS_LAYERS.metrics.id]?.rows?.[0]?.[
               LENS_LAYERS.metrics.hitsTotal

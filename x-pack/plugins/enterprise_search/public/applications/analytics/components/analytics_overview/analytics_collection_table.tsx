@@ -71,12 +71,10 @@ const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
 
 interface AnalyticsCollectionTableProps {
   collections: AnalyticsCollection[];
-  isLoading: boolean;
 }
 
 export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> = ({
   collections,
-  isLoading,
 }) => {
   const { euiTheme } = useEuiTheme();
   const analyticsCollectionTableStyles = AnalyticsCollectionTableStyles(euiTheme);
@@ -131,7 +129,6 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem grow={false}>
                 <EuiSuperDatePicker
-                  isLoading={isLoading}
                   start={timeRange.from}
                   end={timeRange.to}
                   onTimeChange={({ start, end }) => {

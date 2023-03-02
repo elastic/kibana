@@ -18,6 +18,7 @@ import {
   EuiI18nNumber,
   EuiIcon,
   EuiText,
+  EuiLoadingChart,
   useEuiTheme,
 } from '@elastic/eui';
 
@@ -87,6 +88,7 @@ const getChartStatus = (metric: number | null): ChartStatus => {
 
 export const AnalyticsCollectionCard: React.FC<AnalyticsCollectionCardProps> = ({
   collection,
+  isLoading,
   isCreatedByEngine,
   subtitle,
   data,
@@ -130,35 +132,47 @@ export const AnalyticsCollectionCard: React.FC<AnalyticsCollectionCardProps> = (
         navigateToUrl(collectionViewUrl);
       }}
       footer={
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="s"
-          alignItems="flexEnd"
-          justifyContent="flexEnd"
-          css={cardStyles.footer}
-        >
-          {secondaryMetric !== null && (
+        isLoading ? (
+          <EuiFlexGroup alignItems="center" justifyContent="center">
+            <EuiLoadingChart size="m" />
+          </EuiFlexGroup>
+        ) : (
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="s"
+            alignItems="flexEnd"
+            justifyContent="flexEnd"
+            css={cardStyles.footer}
+          >
             <EuiText size="s" color={CARD_THEME.text}>
-              <EuiIcon type={CARD_THEME.icon} />
-              {secondaryMetric}%
-            </EuiText>
-          )}
-
-          <EuiText color={CARD_THEME.text}>
-            <h2>
-              {metric !== null ? (
-                <EuiI18nNumber value={metric} />
-              ) : (
+              {secondaryMetric === null ? (
                 i18n.translate('xpack.enterpriseSearch.analytics.collection.notAvailableLabel', {
                   defaultMessage: 'N/A',
                 })
+              ) : (
+                <>
+                  <EuiIcon type={CARD_THEME.icon} />
+                  {secondaryMetric}%
+                </>
               )}
-            </h2>
-          </EuiText>
-        </EuiFlexGroup>
+            </EuiText>
+
+            <EuiText color={CARD_THEME.text}>
+              <h2>
+                {metric === null ? (
+                  i18n.translate('xpack.enterpriseSearch.analytics.collection.notAvailableLabel', {
+                    defaultMessage: 'N/A',
+                  })
+                ) : (
+                  <EuiI18nNumber value={metric} />
+                )}
+              </h2>
+            </EuiText>
+          </EuiFlexGroup>
+        )
       }
     >
-      {!!data?.length && (
+      {!!data?.length && !isLoading && (
         <Chart size={['100%', 130]} css={cardStyles.chart}>
           <Settings
             theme={{
