@@ -3879,7 +3879,6 @@
     "indexPatternEditor.typeSelect.standardDescription": "Effectuer des agrégations complètes à partir de n'importe quelles données",
     "indexPatternEditor.typeSelect.standardTitle": "Vue de données standard",
     "indexPatternEditor.validations.noSingleAstriskPattern": "Un seul astérisque \"*\" n’est pas un modèle d'indexation autorisé",
-    "indexPatternEditor.validations.titleHelpText": "Entrez un modèle d'indexation qui correspond à une ou plusieurs sources de données. Utilisez un astérisque (*) pour faire correspondre plusieurs caractères. Les espaces et les caractères , /, ?, \", &lt;, >, | ne sont pas autorisés.",
     "indexPatternEditor.validations.titleIsRequiredErrorMessage": "Un modèle d'indexation est requis.",
     "indexPatternFieldEditor.date.momentLabel": "Modèle de format Moment.js (par défaut : {defaultPattern})",
     "indexPatternFieldEditor.defaultErrorMessage": "Une erreur s'est produite lors de l'utilisation de cette configuration de format : {message}.",
