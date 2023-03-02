@@ -232,21 +232,31 @@ export const SortingView: React.FC<SortingViewProps> = withSearch(({ setSort, so
   setSort,
   sortList: sortList.length === 0 ? [{ direction: '', field: '' }] : sortList,
 }))(({ sortableFields, sortList: [{ direction, field }], setSort }) => {
+  const relevance = i18n.translate(
+    'xpack.enterpriseSearch.content.engine.searchPreivew.sortingView.relevanceLabel',
+    { defaultMessage: 'Relevance' }
+  );
+
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiTitle size="xxxs">
-          <label htmlFor="sorting-field">Sort By</label>
+          <label htmlFor="sorting-field">
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.engine.searchPreview.sortingView.fieldLabel"
+              defaultMessage="Sort By"
+            />
+          </label>
         </EuiTitle>
         <EuiComboBox
           id="sorting-field"
           isClearable={false}
           singleSelection={{ asPlainText: true }}
           options={[
-            { label: 'Relevance', value: '' },
+            { label: relevance, value: '' },
             ...sortableFields.map((f) => ({ label: f, value: f })),
           ]}
-          selectedOptions={[{ label: !!field ? field : 'Relevance', value: field }]}
+          selectedOptions={[{ label: !!field ? field : relevance, value: field }]}
           onChange={([{ value }]) =>
             setSort(value === '' ? [] : [{ direction: 'asc', field: value }])
           }
@@ -257,15 +267,32 @@ export const SortingView: React.FC<SortingViewProps> = withSearch(({ setSort, so
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="column" gutterSize="s">
             <EuiTitle size="xxxs">
-              <label htmlFor="sorting-direction">Order By</label>
+              <label htmlFor="sorting-direction">
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.engine.searchPreview.sortingView.directionLabel"
+                  defaultMessage="Order By"
+                />
+              </label>
             </EuiTitle>
             <EuiSelect
               id="sorting-direction"
               onChange={(evt) => setSort([{ direction: evt.target.value, field }])}
               value={direction}
               options={[
-                { label: 'Ascending', value: 'asc' },
-                { label: 'Descending', value: 'desc' },
+                {
+                  label: i18n.translate(
+                    'xpack.enterpriseSearch.content.engine.searchPreview.sortingView.ascLabel',
+                    { defaultMessage: 'Ascending' }
+                  ),
+                  value: 'asc',
+                },
+                {
+                  label: i18n.translate(
+                    'xpack.enterpriseSearch.content.engine.searchPreview.sortingView.descLabel',
+                    { defaultMessage: 'Descending' }
+                  ),
+                  value: 'desc',
+                },
               ]}
             />
           </EuiFlexGroup>
