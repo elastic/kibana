@@ -5,37 +5,37 @@
  * 2.0.
  */
 
-import { changePointGroups } from '../../../common/__mocks__/artificial_logs/change_point_groups';
-import { changePoints } from '../../../common/__mocks__/artificial_logs/change_points';
+import { significantTermGroups } from '../../../common/__mocks__/artificial_logs/significant_term_groups';
+import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
 
 import { duplicateIdentifier } from './duplicate_identifier';
 import { getGroupsWithReaddedDuplicates } from './get_groups_with_readded_duplicates';
 import { dropDuplicates, groupDuplicates } from './fetch_frequent_item_sets';
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
 import { getMarkedDuplicates } from './get_marked_duplicates';
-import { getMissingChangePoints } from './get_missing_change_points';
+import { getMissingSignificantTerms } from './get_missing_significant_terms';
 
-describe('getMissingChangePoints', () => {
+describe('getMissingSignificantTerms', () => {
   it('get missing significant terms', () => {
-    const deduplicatedChangePoints = dropDuplicates(changePoints, duplicateIdentifier);
+    const deduplicatedSignificantTerms = dropDuplicates(significantTerms, duplicateIdentifier);
 
-    const groupedChangePoints = groupDuplicates(changePoints, duplicateIdentifier).filter(
+    const groupedSignificantTerms = groupDuplicates(significantTerms, duplicateIdentifier).filter(
       (g) => g.group.length > 1
     );
 
-    const fieldValuePairCounts = getFieldValuePairCounts(changePointGroups);
-    const markedDuplicates = getMarkedDuplicates(changePointGroups, fieldValuePairCounts);
+    const fieldValuePairCounts = getFieldValuePairCounts(significantTermGroups);
+    const markedDuplicates = getMarkedDuplicates(significantTermGroups, fieldValuePairCounts);
     const groupsWithReaddedDuplicates = getGroupsWithReaddedDuplicates(
       markedDuplicates,
-      groupedChangePoints
+      groupedSignificantTerms
     );
 
-    const missingChangePoints = getMissingChangePoints(
-      deduplicatedChangePoints,
+    const missingSignificantTerms = getMissingSignificantTerms(
+      deduplicatedSignificantTerms,
       groupsWithReaddedDuplicates
     );
 
-    expect(missingChangePoints).toEqual([
+    expect(missingSignificantTerms).toEqual([
       {
         bg_count: 553,
         doc_count: 1981,

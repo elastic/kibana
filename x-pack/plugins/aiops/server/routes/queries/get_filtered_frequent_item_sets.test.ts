@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { changePoints } from '../../../common/__mocks__/artificial_logs/change_points';
+import { significantTerms } from '../../../common/__mocks__/artificial_logs/significant_terms';
 import { frequentItemSets } from '../../../common/__mocks__/artificial_logs/frequent_item_sets';
 import { filteredFrequentItemSets } from '../../../common/__mocks__/artificial_logs/filtered_frequent_item_sets';
 
@@ -13,7 +13,7 @@ import { getFilteredFrequentItemSets } from './get_filtered_frequent_item_sets';
 
 describe('getFilteredFrequentItemSets', () => {
   it('filter frequent item set based on provided significant terms', () => {
-    expect(getFilteredFrequentItemSets(frequentItemSets, changePoints)).toStrictEqual(
+    expect(getFilteredFrequentItemSets(frequentItemSets, significantTerms)).toStrictEqual(
       filteredFrequentItemSets
     );
   });

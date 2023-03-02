@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { finalChangePointGroups } from '../../../common/__mocks__/artificial_logs/final_change_point_groups';
+import { finalSignificantTermGroups } from '../../../common/__mocks__/artificial_logs/final_significant_term_groups';
 
 import { getGroupFilter } from './get_group_filter';
 
 describe('getGroupFilter', () => {
   it('gets a query filter for the significant terms of a group with multiple values per field', () => {
-    expect(getGroupFilter(finalChangePointGroups[0])).toStrictEqual([
+    expect(getGroupFilter(finalSignificantTermGroups[0])).toStrictEqual([
       {
         term: {
           response_code: '500',
@@ -26,7 +26,7 @@ describe('getGroupFilter', () => {
   });
 
   it('gets a query filter for the significant terms of a group with just a single field/value', () => {
-    expect(getGroupFilter(finalChangePointGroups[1])).toStrictEqual([
+    expect(getGroupFilter(finalSignificantTermGroups[1])).toStrictEqual([
       {
         term: {
           user: 'Peter',

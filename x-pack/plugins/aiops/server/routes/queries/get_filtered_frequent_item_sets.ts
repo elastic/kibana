@@ -7,7 +7,7 @@
 
 import { isEqual } from 'lodash';
 
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
 import type { ItemsetResult } from '../../../common/types';
 
@@ -16,13 +16,13 @@ import type { ItemsetResult } from '../../../common/types';
 // This cleans up groups and removes those unrelated field/value pairs.
 export function getFilteredFrequentItemSets(
   itemsets: ItemsetResult[],
-  changePoints: ChangePoint[]
+  significantTerms: SignificantTerm[]
 ): ItemsetResult[] {
   return itemsets.reduce<ItemsetResult[]>((p, itemset, itemsetIndex) => {
     // Remove field/value pairs not part of the provided significant terms
     itemset.set = Object.entries(itemset.set).reduce<ItemsetResult['set']>(
       (set, [field, value]) => {
-        if (changePoints.some((cp) => cp.fieldName === field && cp.fieldValue === value)) {
+        if (significantTerms.some((cp) => cp.fieldName === field && cp.fieldValue === value)) {
           set[field] = value;
         }
         return set;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChangePointGroup } from '@kbn/ml-agg-utils';
+import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import type { FieldValuePairCounts } from '../../../common/types';
 
@@ -13,9 +13,9 @@ import type { FieldValuePairCounts } from '../../../common/types';
  * Analyse duplicate field/value pairs in groups.
  */
 export function getMarkedDuplicates(
-  cpgs: ChangePointGroup[],
+  cpgs: SignificantTermGroup[],
   fieldValuePairCounts: FieldValuePairCounts
-): ChangePointGroup[] {
+): SignificantTermGroup[] {
   return cpgs.map((cpg) => {
     return {
       ...cpg,

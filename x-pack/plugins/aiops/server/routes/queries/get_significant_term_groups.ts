@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChangePoint, ChangePointGroup } from '@kbn/ml-agg-utils';
+import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import { duplicateIdentifier } from './duplicate_identifier';
 import { dropDuplicates, groupDuplicates } from './fetch_frequent_item_sets';
@@ -15,25 +15,25 @@ import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_leaves';
 import { getFilteredFrequentItemSets } from './get_filtered_frequent_item_sets';
 import { getGroupsWithReaddedDuplicates } from './get_groups_with_readded_duplicates';
-import { getMissingChangePoints } from './get_missing_change_points';
-import { transformChangePointToGroup } from './transform_change_point_to_group';
+import { getMissingSignificantTerms } from './get_missing_significant_terms';
+import { transformSignificantTermToGroup } from './transform_significant_term_to_group';
 import type { ItemsetResult } from '../../../common/types';
 
-export function getChangePointGroups(
+export function getSignificantTermGroups(
   itemsets: ItemsetResult[],
-  changePoints: ChangePoint[],
+  significantTerms: SignificantTerm[],
   fields: string[]
-): ChangePointGroup[] {
+): SignificantTermGroup[] {
   // These are the deduplicated significant terms we pass to the `frequent_item_sets` aggregation.
-  const deduplicatedChangePoints = dropDuplicates(changePoints, duplicateIdentifier);
+  const deduplicatedSignificantTerms = dropDuplicates(significantTerms, duplicateIdentifier);
 
   // We use the grouped significant terms to later repopulate
   // the `frequent_item_sets` result with the missing duplicates.
-  const groupedChangePoints = groupDuplicates(changePoints, duplicateIdentifier).filter(
+  const groupedSignificantTerms = groupDuplicates(significantTerms, duplicateIdentifier).filter(
     (g) => g.group.length > 1
   );
 
-  const filteredDf = getFilteredFrequentItemSets(itemsets, changePoints);
+  const filteredDf = getFilteredFrequentItemSets(itemsets, significantTerms);
 
   // `frequent_item_sets` returns lot of different small groups of field/value pairs that co-occur.
   // The following steps analyse these small groups, identify overlap between these groups,
@@ -50,25 +50,28 @@ export function getChangePointGroups(
   // unique to a group in a better way. This step will also re-add duplicates we identified in the
   // beginning and didn't pass on to the `frequent_item_sets` agg.
   const fieldValuePairCounts = getFieldValuePairCounts(treeLeaves);
-  const changePointGroupsWithMarkedDuplicates = getMarkedDuplicates(
+  const significantTermGroupsWithMarkedDuplicates = getMarkedDuplicates(
     treeLeaves,
     fieldValuePairCounts
   );
-  const changePointGroups = getGroupsWithReaddedDuplicates(
-    changePointGroupsWithMarkedDuplicates,
-    groupedChangePoints
+  const significantTermGroups = getGroupsWithReaddedDuplicates(
+    significantTermGroupsWithMarkedDuplicates,
+    groupedSignificantTerms
   );
 
   // Some field/value pairs might not be part of the `frequent_item_sets` result set, for example
   // because they don't co-occur with other field/value pairs or because of the limits we set on the query.
   // In this next part we identify those missing pairs and add them as individual groups.
-  const missingChangePoints = getMissingChangePoints(deduplicatedChangePoints, changePointGroups);
+  const missingSignificantTerms = getMissingSignificantTerms(
+    deduplicatedSignificantTerms,
+    significantTermGroups
+  );
 
-  changePointGroups.push(
-    ...missingChangePoints.map((changePoint) =>
-      transformChangePointToGroup(changePoint, groupedChangePoints)
+  significantTermGroups.push(
+    ...missingSignificantTerms.map((significantTerm) =>
+      transformSignificantTermToGroup(significantTerm, groupedSignificantTerms)
     )
   );
 
-  return changePointGroups;
+  return significantTermGroups;
 }

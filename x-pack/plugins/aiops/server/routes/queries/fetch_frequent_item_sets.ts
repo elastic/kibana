@@ -11,10 +11,10 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { type ChangePoint, RANDOM_SAMPLER_SEED } from '@kbn/ml-agg-utils';
+import { type SignificantTerm, RANDOM_SAMPLER_SEED } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type { ChangePointDuplicateGroup, ItemsetResult } from '../../../common/types';
+import type { SignificantTermDuplicateGroup, ItemsetResult } from '../../../common/types';
 
 const FREQUENT_ITEM_SETS_FIELDS_LIMIT = 15;
 
@@ -32,12 +32,15 @@ function isRandomSamplerAggregation(arg: unknown): arg is RandomSamplerAggregati
   return isPopulatedObject(arg, ['sample']);
 }
 
-export function dropDuplicates(cps: ChangePoint[], uniqueFields: Array<keyof ChangePoint>) {
+export function dropDuplicates(cps: SignificantTerm[], uniqueFields: Array<keyof SignificantTerm>) {
   return uniqWith(cps, (a, b) => isEqual(pick(a, uniqueFields), pick(b, uniqueFields)));
 }
 
-export function groupDuplicates(cps: ChangePoint[], uniqueFields: Array<keyof ChangePoint>) {
-  const groups: ChangePointDuplicateGroup[] = [];
+export function groupDuplicates(
+  cps: SignificantTerm[],
+  uniqueFields: Array<keyof SignificantTerm>
+) {
+  const groups: SignificantTermDuplicateGroup[] = [];
 
   for (const cp of cps) {
     const compareAttributes = pick(cp, uniqueFields);
@@ -60,7 +63,7 @@ export async function fetchFrequentItemSets(
   client: ElasticsearchClient,
   index: string,
   searchQuery: estypes.QueryDslQueryContainer,
-  changePoints: ChangePoint[],
+  significantTerms: SignificantTerm[],
   timeFieldName: string,
   deviationMin: number,
   deviationMax: number,
@@ -71,12 +74,12 @@ export async function fetchFrequentItemSets(
   abortSignal?: AbortSignal
 ) {
   // Sort significant terms by ascending p-value, necessary to apply the field limit correctly.
-  const sortedChangePoints = changePoints.slice().sort((a, b) => {
+  const sortedSignificantTerms = significantTerms.slice().sort((a, b) => {
     return (a.pValue ?? 0) - (b.pValue ?? 0);
   });
 
   // Get up to 15 unique fields from significant terms with retained order
-  const fields = sortedChangePoints.reduce<string[]>((p, c) => {
+  const fields = sortedSignificantTerms.reduce<string[]>((p, c) => {
     if (p.length < FREQUENT_ITEM_SETS_FIELDS_LIMIT && !p.some((d) => d === c.fieldName)) {
       p.push(c.fieldName);
     }
@@ -97,7 +100,7 @@ export async function fetchFrequentItemSets(
           },
         },
       ],
-      should: sortedChangePoints.map((t) => {
+      should: sortedSignificantTerms.map((t) => {
         return { term: { [t.fieldName]: t.fieldValue } };
       }),
     },
@@ -190,7 +193,7 @@ export async function fetchFrequentItemSets(
     Object.entries(fis.key).forEach(([key, value]) => {
       result.set[key] = value[0];
 
-      const pValue = sortedChangePoints.find(
+      const pValue = sortedSignificantTerms.find(
         (t) => t.fieldName === key && t.fieldValue === value[0]
       )?.pValue;
 
