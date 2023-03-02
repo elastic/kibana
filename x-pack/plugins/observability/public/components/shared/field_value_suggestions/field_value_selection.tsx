@@ -95,7 +95,8 @@ export function FieldValueSelection({
 
   useEffect(() => {
     setOptions(formatOptions(values, selectedValue, excludedValue, showCount));
-  }, [values, selectedValue, showCount, excludedValue]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [JSON.stringify(values), JSON.stringify(selectedValue), showCount, excludedValue]);
 
   const onButtonClick = () => {
     setIsPopoverOpen(!isPopoverOpen);
