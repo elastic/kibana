@@ -70,7 +70,7 @@ const HIDE = i18n.translate(
   }
 );
 const SHOW_ALL = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.hideDepricatedVariables',
+  'xpack.triggersActionsUI.components.addMessageVariables.ShowAllDepricatedVariables',
   {
     defaultMessage: 'Show all',
   }
