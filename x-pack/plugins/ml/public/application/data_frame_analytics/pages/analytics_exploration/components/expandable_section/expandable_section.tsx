@@ -110,11 +110,11 @@ export const ExpandableSection: FC<ExpandableSectionProps> = ({
                         <EuiFlexGroup gutterSize="xs" alignItems="center">
                           <EuiFlexItem grow={false}>
                             <EuiText size="xs" textAlign="center">
-                              <p>{value}</p>
+                              <p>{label}</p>
                             </EuiText>
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>
-                            <EuiBadge>{label}</EuiBadge>
+                            <EuiBadge>{value}</EuiBadge>
                           </EuiFlexItem>
                         </EuiFlexGroup>
                       ) : null}
