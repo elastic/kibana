@@ -73,9 +73,11 @@ export class IndexPatternsFetcher {
     // if only one pattern, don't bother with validation. We let getFieldCapabilities fail if the single pattern is bad regardless
     if (patternList.length > 1 && !allowNoIndices) {
       patternListActive = await this.validatePatternListActive(patternList);
+      /*
       if (patternListActive.length === 0) {
         throw new DataViewMissingIndices(patternList.join(','));
       }
+      */
     }
     const fieldCapsResponse = await getFieldCapabilities({
       callCluster: this.elasticsearchClient,
