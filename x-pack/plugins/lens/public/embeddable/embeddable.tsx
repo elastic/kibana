@@ -1128,9 +1128,6 @@ export class Embeddable
           },
           embeddable: this,
         });
-
-      if (this.input.onBrushEnd) {
-        this.input.onBrushEnd(event.data);
       }
     }
     if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
@@ -1148,8 +1145,6 @@ export class Embeddable
           },
           embeddable: this,
         });
-      if (this.input.onFilter) {
-        this.input.onFilter(event.data);
       }
     }
 
@@ -1169,8 +1164,6 @@ export class Embeddable
           },
           true
         );
-      if (this.input.onTableRowClick) {
-        this.input.onTableRowClick(event.data as unknown as LensTableRowContextMenuEvent['data']);
       }
     }
 
