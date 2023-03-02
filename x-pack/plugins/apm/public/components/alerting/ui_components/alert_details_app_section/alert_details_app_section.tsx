@@ -67,7 +67,7 @@ export function AlertDetailsAppSection({
       {
         label: (
           <FormattedMessage
-            id="xpack.observability.pages.alertDetails.alertSummary.actualValue"
+            id="xpack.apm.pages.alertDetails.alertSummary.actualValue"
             defaultMessage="Actual value"
           />
         ),
@@ -79,7 +79,7 @@ export function AlertDetailsAppSection({
       {
         label: (
           <FormattedMessage
-            id="xpack.observability.pages.alertDetails.alertSummary.expectedValue"
+            id="xpack.apm.pages.alertDetails.alertSummary.expectedValue"
             defaultMessage="Expected value"
           />
         ),
@@ -91,7 +91,7 @@ export function AlertDetailsAppSection({
       {
         label: (
           <FormattedMessage
-            id="xpack.observability.pages.alertDetails.alertSummary.source"
+            id="xpack.apm.pages.alertDetails.alertSummary.source"
             defaultMessage="Source"
           />
         ),
