@@ -15,6 +15,7 @@ import {
   RawBucket,
   getGroupingQuery,
   isNoneGroup,
+  useGrouping,
 } from './src';
 import type { NamedAggregation, GroupingFieldTotalAggregation, GroupingAggregation } from './src';
 
@@ -26,6 +27,6 @@ export const getGroupSelector = (
   props: GroupSelectorProps
 ): React.ReactElement<GroupSelectorProps> => <GroupSelector {...props} />;
 
-export { isNoneGroup, getGroupingQuery };
+export { isNoneGroup, getGroupingQuery, useGrouping };
 
 export type { GroupingAggregation, GroupingFieldTotalAggregation, NamedAggregation, RawBucket };

@@ -5,26 +5,7 @@
  * 2.0.
  */
 
-export interface GroupOption {
-  key: string;
-  label: string;
-}
-
 export interface GroupModel {
-  activeGroup: string;
-  options: GroupOption[];
-  activePage: number;
-  itemsPerPage: number;
-}
-
-export interface GroupsById {
-  [id: string]: GroupModel;
-}
-
-export interface GroupMap {
-  groupById: GroupsById;
-}
-
-export interface GroupState {
-  groups: GroupMap;
+  groupSelector: React.ReactElement | null;
+  selectedGroup: string | null;
 }

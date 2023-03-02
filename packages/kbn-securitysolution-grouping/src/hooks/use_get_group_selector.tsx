@@ -1,35 +1,34 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useCallback, useEffect } from 'react';
 
 import { getGroupSelector, isNoneGroup } from '@kbn/securitysolution-grouping';
-import {
-  groupActions,
-  groupByIdSelector,
-  useGroupingStateManager,
-} from './use_grouping_state_manager';
+import { groupActions, groupByIdSelector } from './use_grouping_state_manager';
 import type { GroupOption } from './types';
-import { defaultGroup } from './types';
+import { Action, defaultGroup, GroupMap } from './types';
 
 export interface UseGetGroupSelectorArgs {
+  defaultGroupingOptions: GroupOption[];
+  dispatch: React.Dispatch<Action>;
   fields: FieldSpec[];
   groupingId: string;
-  defaultGroupingOptions: GroupOption[];
+  groupingState: GroupMap;
 }
 
 export const useGetGroupSelector = ({
+  defaultGroupingOptions,
+  dispatch,
   fields,
   groupingId,
-  defaultGroupingOptions,
+  groupingState,
 }: UseGetGroupSelectorArgs) => {
-  const { state: groupingState, dispatch } = useGroupingStateManager();
-
   const { activeGroup: selectedGroup, options } =
     groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
 
@@ -73,7 +72,7 @@ export const useGetGroupSelector = ({
     );
   }, [defaultGroupingOptions, selectedGroup, setOptions, options]);
 
-  const groupsSelector = getGroupSelector({
+  return getGroupSelector({
     groupSelected: selectedGroup,
     'data-test-subj': 'alerts-table-group-selector',
     onGroupChange: (groupSelection: string) => {
@@ -98,6 +97,4 @@ export const useGetGroupSelector = ({
     fields,
     options,
   });
-
-  return groupsSelector;
 };

@@ -30,7 +30,7 @@ export interface GroupingProps {
   customMetricStats?: (fieldBucket: RawBucket) => CustomMetric[];
   data?: GroupingAggregation & GroupingFieldTotalAggregation;
   groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element | undefined;
-  groupsSelector?: JSX.Element;
+  groupSelector?: JSX.Element;
   inspectButton?: JSX.Element;
   isLoading: boolean;
   pagination: {
@@ -51,7 +51,7 @@ const GroupingComponent = ({
   customMetricStats,
   data,
   groupPanelRenderer,
-  groupsSelector,
+  groupSelector,
   inspectButton,
   isLoading,
   pagination,
@@ -163,7 +163,7 @@ const GroupingComponent = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs">
             {inspectButton && <EuiFlexItem>{inspectButton}</EuiFlexItem>}
-            <EuiFlexItem>{groupsSelector}</EuiFlexItem>
+            <EuiFlexItem>{groupSelector}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
