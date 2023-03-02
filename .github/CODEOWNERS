@@ -533,6 +533,7 @@ packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-es-utils @elastic/security-solution-platform
 packages/kbn-securitysolution-exception-list-components @elastic/security-solution-platform
+packages/kbn-securitysolution-grouping @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-hook-utils @elastic/security-solution-platform
 packages/kbn-securitysolution-io-ts-alerting-types @elastic/security-solution-platform
 packages/kbn-securitysolution-io-ts-list-types @elastic/security-solution-platform
@@ -803,7 +804,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
 /x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
-
+/x-pack/plugins/observability/public/utils/observability_data_views @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
@@ -1007,7 +1008,6 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/components/grouping @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/detections/components/alerts_table/grouping_settings @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_section @elastic/security-threat-hunting-explore
