@@ -11,6 +11,7 @@ import { render } from '../../../utils/test_helper';
 import { AlertSummary } from './alert_summary';
 import { asDuration } from '../../../../common/utils/formatters';
 import { alertWithTags, alertWithNoData, tags } from '../mock/alert';
+import { alertSummaryFieldsMock } from '../mock/alert_summary_fields';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -29,7 +30,9 @@ describe('Alert summary', () => {
   });
 
   it('should show alert data', async () => {
-    const alertSummary = render(<AlertSummary alert={alertWithTags} />);
+    const alertSummary = render(
+      <AlertSummary alert={alertWithTags} alertSummaryFields={alertSummaryFieldsMock} />
+    );
 
     expect(alertSummary.queryByText('1957')).toBeInTheDocument();
     expect(alertSummary.queryByText(asDuration(882076000))).toBeInTheDocument();
