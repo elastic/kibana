@@ -1,6 +1,7 @@
 get:
-  summary: Agent Download Sources
-  tags: []
+  summary: List agent binary download sources
+  tags:
+    - Agent binary download sources
   responses:
     '200':
       description: OK
@@ -23,9 +24,9 @@ get:
       $ref: ../components/responses/error.yaml
   operationId: get-download-sources
 post:
-  summary: Agent Download Sources
-  description: 'Create a new agent download source'
-  tags: []
+  summary: Create agent binary download source
+  tags:
+    - Agent binary download sources
   responses:
     '200':
       description: OK
