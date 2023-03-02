@@ -41,7 +41,16 @@ declare global {
         ...args: Parameters<Cypress.Chainable<E>['get']>
       ): Chainable<JQuery<E>>;
 
-      /** Finds elements by `data-test-subj` */
+      /**
+       * Finds elements by `data-test-subj` from within another. Can not be used directly from `cy`.
+       *
+       * @example
+       * // Correct:
+       * cy.get('someElement').findByTestSubj('some-subject);
+       *
+       * // Incorrect:
+       * cy.findByTestSubj('some-subject);
+       */
       findByTestSubj<E extends Node = HTMLElement>(
         ...args: Parameters<Cypress.Chainable<E>['find']>
       ): Chainable<JQuery<E>>;
@@ -63,11 +72,10 @@ Cypress.Commands.addQuery<'getByTestSubj'>(
 Cypress.Commands.addQuery<'findByTestSubj'>(
   'findByTestSubj',
   function findByTestSubj(selector, options) {
-    const findFn = cy.now('get', testSubjSelector(selector), options) as (
-      subject: Cypress.Chainable<JQuery<HTMLElement>>
-    ) => Cypress.Chainable<JQuery<HTMLElement>>;
-
-    return (subject) => findFn(subject);
+    return (subject) => {
+      Cypress.ensure.isElement(subject, this.get('name'), cy);
+      return subject.find(testSubjSelector(selector), {});
+    };
   }
 );
 
