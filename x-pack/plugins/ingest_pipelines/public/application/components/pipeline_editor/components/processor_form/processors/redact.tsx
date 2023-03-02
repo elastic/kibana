@@ -19,7 +19,7 @@ import {
   ValidationFunc,
 } from '../../../../../../shared_imports';
 
-import { XJsonEditor, DragAndDropTextList } from '../field_components';
+import { XJsonEditor, InputList } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
@@ -142,15 +142,13 @@ export const Redact: FunctionComponent = () => {
       />
 
       <UseArray path="fields.patterns" validations={fieldsConfig.patterns.validations}>
-        {({ items, addItem, removeItem, moveItem, error }) => {
+        {({ items, addItem, removeItem, error }) => {
           return (
-            <DragAndDropTextList
-              disableDragging={true}
+            <InputList
               label={fieldsConfig.patterns.label!}
               helpText={fieldsConfig.patterns.helpText}
               error={error}
               value={items}
-              onMove={moveItem}
               onAdd={addItem}
               onRemove={removeItem}
               addLabel={i18nTexts.addPatternLabel}
