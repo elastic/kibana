@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_RISK_SCORE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type {
@@ -18,6 +19,7 @@ export const calculateRiskScores = async ({
   dataViewId,
   enrichInputs,
   esClient,
+  filters,
   identifierType,
   range,
 }: {
@@ -29,7 +31,12 @@ export const calculateRiskScores = async ({
   const results = await esClient.search<never, CalculateRiskScoreAggregations>({
     size: 0,
     index,
-    query: { bool: { must: { exists: { field: ALERT_RISK_SCORE } } } },
+    query: {
+      bool: {
+        must: { exists: { field: ALERT_RISK_SCORE } },
+        filter: (filters ?? []) as QueryDslQueryContainer[], // TODO this sucks
+      },
+    },
     aggs: {
       hosts: {
         terms: {
