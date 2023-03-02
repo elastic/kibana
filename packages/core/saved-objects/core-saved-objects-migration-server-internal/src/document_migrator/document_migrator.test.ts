@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { mockGetConvertedObjectId } from './document_migrator.test.mock';
+import {
+  mockGetConvertedObjectId,
+  validateTypeMigrationsMock,
+} from './document_migrator.test.mock';
 import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import type { SavedObjectUnsanitizedDoc, SavedObjectsType } from '@kbn/core-saved-objects-server';
@@ -48,6 +51,7 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
 
 beforeEach(() => {
   mockGetConvertedObjectId.mockClear();
+  validateTypeMigrationsMock.mockReset();
 });
 
 describe('DocumentMigrator', () => {
@@ -60,69 +64,47 @@ describe('DocumentMigrator', () => {
   }
 
   describe('validation', () => {
-    const createDefinition = (migrations: any) => ({
-      kibanaVersion: '3.2.3',
-      convertVersion: '8.0.0',
-      typeRegistry: createRegistry({
-        name: 'foo',
-        migrations: migrations as any,
-      }),
-      log: mockLogger,
-    });
+    describe('during #prepareMigrations', () => {
+      it('calls validateMigrationsMapObject with the correct parameters', () => {
+        const ops = {
+          ...testOpts(),
+          typeRegistry: createRegistry(
+            {
+              name: 'foo',
+              migrations: {
+                '1.2.3': setAttr('attributes.name', 'Chris'),
+              },
+            },
+            {
+              name: 'bar',
+              migrations: {
+                '1.2.3': setAttr('attributes.name', 'Chris'),
+              },
+            }
+          ),
+        };
 
-    describe('#prepareMigrations', () => {
-      it('validates individual migration definitions', () => {
-        const invalidMigrator = new DocumentMigrator(createDefinition(() => 123));
-        const voidMigrator = new DocumentMigrator(createDefinition(() => {}));
-        const emptyObjectMigrator = new DocumentMigrator(createDefinition(() => ({})));
+        const migrator = new DocumentMigrator(ops);
 
-        expect(invalidMigrator.prepareMigrations).toThrow(
-          /Migrations map for type foo should be an object/i
+        expect(validateTypeMigrationsMock).not.toHaveBeenCalled();
+
+        migrator.prepareMigrations();
+
+        expect(validateTypeMigrationsMock).toHaveBeenCalledTimes(3);
+        expect(validateTypeMigrationsMock).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            type: expect.objectContaining({ name: 'foo' }),
+            kibanaVersion,
+          })
         );
-        expect(voidMigrator.prepareMigrations).not.toThrow();
-        expect(emptyObjectMigrator.prepareMigrations).not.toThrow();
-      });
-
-      it('validates individual migrations are valid semvers', () => {
-        const withInvalidVersion = {
-          bar: (doc: any) => doc,
-          '1.2.3': (doc: any) => doc,
-        };
-        const migrationFn = new DocumentMigrator(createDefinition(() => withInvalidVersion));
-        const migrationObj = new DocumentMigrator(createDefinition(withInvalidVersion));
-
-        expect(migrationFn.prepareMigrations).toThrow(/Expected all properties to be semvers/i);
-        expect(migrationObj.prepareMigrations).toThrow(/Expected all properties to be semvers/i);
-      });
-
-      it('validates individual migrations are not greater than the current Kibana version', () => {
-        const withGreaterVersion = {
-          '3.2.4': (doc: any) => doc,
-        };
-        const migrationFn = new DocumentMigrator(createDefinition(() => withGreaterVersion));
-        const migrationObj = new DocumentMigrator(createDefinition(withGreaterVersion));
-
-        const expectedError = `Invalid migration for type foo. Property '3.2.4' cannot be greater than the current Kibana version '3.2.3'.`;
-        expect(migrationFn.prepareMigrations).toThrowError(expectedError);
-        expect(migrationObj.prepareMigrations).toThrowError(expectedError);
-      });
-
-      it('validates the migration function', () => {
-        const invalidVersionFunction = { '1.2.3': 23 as any };
-        const migrationFn = new DocumentMigrator(createDefinition(() => invalidVersionFunction));
-        const migrationObj = new DocumentMigrator(createDefinition(invalidVersionFunction));
-
-        expect(migrationFn.prepareMigrations).toThrow(/expected a function, but got 23/i);
-        expect(migrationObj.prepareMigrations).toThrow(/expected a function, but got 23/i);
-      });
-      it('validates definitions with migrations: Function | Objects', () => {
-        const validMigrationMap = {
-          '1.2.3': () => {},
-        };
-        const migrationFn = new DocumentMigrator(createDefinition(() => validMigrationMap));
-        const migrationObj = new DocumentMigrator(createDefinition(validMigrationMap));
-        expect(migrationFn.prepareMigrations).not.toThrow();
-        expect(migrationObj.prepareMigrations).not.toThrow();
+        expect(validateTypeMigrationsMock).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            type: expect.objectContaining({ name: 'bar' }),
+            kibanaVersion,
+          })
+        );
       });
     });
 
@@ -155,81 +137,6 @@ describe('DocumentMigrator', () => {
         })
       ).toThrow(/Migrations are not ready. Make sure prepareMigrations is called first./i);
     });
-
-    it(`validates convertToMultiNamespaceTypeVersion can only be used with namespaceType 'multiple' or 'multiple-isolated'`, () => {
-      const invalidDefinition = {
-        kibanaVersion: '3.2.3',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          convertToMultiNamespaceTypeVersion: 'bar',
-        }),
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Expected namespaceType to be 'multiple' or 'multiple-isolated', but got 'single'.`
-      );
-    });
-
-    it(`validates convertToMultiNamespaceTypeVersion must be a semver`, () => {
-      const invalidDefinition = {
-        kibanaVersion: '3.2.3',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          convertToMultiNamespaceTypeVersion: 'bar',
-          namespaceType: 'multiple',
-        }),
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Expected value to be a semver, but got 'bar'.`
-      );
-    });
-
-    it('validates convertToMultiNamespaceTypeVersion matches the convertVersion, if specified', () => {
-      const invalidDefinition = {
-        kibanaVersion: '3.2.3',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          convertToMultiNamespaceTypeVersion: '3.2.4',
-          namespaceType: 'multiple',
-        }),
-        convertVersion: '3.2.3',
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.2.4' cannot be any other than '3.2.3'.`
-      );
-    });
-
-    it('validates convertToMultiNamespaceTypeVersion is not greater than the current Kibana version', () => {
-      const invalidDefinition = {
-        kibanaVersion: '3.2.3',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          convertToMultiNamespaceTypeVersion: '3.2.4',
-          namespaceType: 'multiple',
-        }),
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.2.4' cannot be greater than the current Kibana version '3.2.3'.`
-      );
-    });
-
-    it('validates convertToMultiNamespaceTypeVersion is not used on a patch version', () => {
-      const invalidDefinition = {
-        kibanaVersion: '3.2.3',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          convertToMultiNamespaceTypeVersion: '3.1.1',
-          namespaceType: 'multiple',
-        }),
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.1.1' cannot be used on a patch version (must be like 'x.y.0').`
-      );
-    });
   });
 
   describe('migration', () => {
@@ -255,7 +162,6 @@ describe('DocumentMigrator', () => {
         type: 'user',
         attributes: { name: 'Chris' },
         migrationVersion: { user: '1.2.3' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -308,7 +214,6 @@ describe('DocumentMigrator', () => {
         attributes: { name: 'Tyler' },
         migrationVersion: { acl: '2.3.5' },
         acl: 'admins-only, sucka!',
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -347,7 +252,6 @@ describe('DocumentMigrator', () => {
         id: 'me',
         type: 'user',
         attributes: { name: 'Tyler' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -420,7 +324,6 @@ describe('DocumentMigrator', () => {
         type: 'dog',
         attributes: { name: 'Callie', b: 'B', c: 'C' },
         migrationVersion: { dog: '2.0.1' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -525,7 +428,6 @@ describe('DocumentMigrator', () => {
         type: 'dog',
         attributes: { name: 'Callie', a: 1, b: 2, c: 3 },
         migrationVersion: { dog: '10.0.1' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -560,7 +462,6 @@ describe('DocumentMigrator', () => {
         attributes: { name: 'Callie' },
         animal: 'Animal: Doggie',
         migrationVersion: { animal: '1.0.0', dog: '2.2.4' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -588,7 +489,6 @@ describe('DocumentMigrator', () => {
         type: 'dog',
         attributes: { title: 'Title: Name: Callie' },
         migrationVersion: { dog: '1.0.2' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -622,7 +522,6 @@ describe('DocumentMigrator', () => {
         type: 'cat',
         attributes: { name: 'Kitty Callie' },
         migrationVersion: { dog: '2.2.4', cat: '1.0.0' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -694,7 +593,6 @@ describe('DocumentMigrator', () => {
         type: 'cat',
         attributes: { name: 'Boo' },
         migrationVersion: { cat: '1.0.0', foo: '5.6.7' },
-        coreMigrationVersion: kibanaVersion,
       });
     });
 
@@ -824,6 +722,35 @@ describe('DocumentMigrator', () => {
         ]);
       });
 
+      it('does not fail when encountering documents with coreMigrationVersion higher than the latest known', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry(
+            { name: 'dog', namespaceType: 'multiple', convertToMultiNamespaceTypeVersion: '1.0.0' }
+            // no migration transforms are defined, the migrationVersion will be derived from 'convertToMultiNamespaceTypeVersion'
+          ),
+        });
+        migrator.prepareMigrations();
+        const obj = {
+          id: 'mischievous',
+          type: 'dog',
+          attributes: { name: 'Ann' },
+          migrationVersion: { dog: '0.1.0' },
+          coreMigrationVersion: '2.0.0',
+        } as SavedObjectUnsanitizedDoc;
+        const actual = migrator.migrateAndConvert(obj);
+        expect(actual).toEqual([
+          {
+            id: 'mischievous',
+            type: 'dog',
+            attributes: { name: 'Ann' },
+            migrationVersion: { dog: '1.0.0' },
+            coreMigrationVersion: '2.0.0',
+            namespaces: ['default'],
+          },
+        ]);
+      });
+
       it('skips reference transforms and conversion transforms when using `migrate`', () => {
         const migrator = new DocumentMigrator({
           ...testOpts(),
@@ -847,9 +774,43 @@ describe('DocumentMigrator', () => {
           id: 'cowardly',
           type: 'dog',
           attributes: { name: 'Leslie' },
-          migrationVersion: { dog: '1.0.0' },
           references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
-          coreMigrationVersion: kibanaVersion,
+          coreMigrationVersion: '1.0.0',
+          namespace: 'foo-namespace',
+          // there is no 'namespaces' field because no conversion transform was applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
+        });
+      });
+
+      it('should keep the same `migrationVersion` when the conversion transforms are skipped', () => {
+        const migrator = new DocumentMigrator({
+          ...testOpts(),
+          typeRegistry: createRegistry({
+            name: 'dog',
+            namespaceType: 'multiple',
+            convertToMultiNamespaceTypeVersion: '3.0.0',
+            migrations: {
+              '1.0.0': (doc: SavedObjectUnsanitizedDoc) => doc,
+            },
+          }),
+        });
+        migrator.prepareMigrations();
+        const obj = {
+          id: 'cowardly',
+          type: 'dog',
+          attributes: { name: 'Leslie' },
+          migrationVersion: { dog: '2.0.0' },
+          references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+          namespace: 'foo-namespace',
+        };
+        const actual = migrator.migrate(obj);
+        expect(mockGetConvertedObjectId).not.toHaveBeenCalled();
+        expect(actual).toEqual({
+          id: 'cowardly',
+          type: 'dog',
+          attributes: { name: 'Leslie' },
+          migrationVersion: { dog: '2.0.0' },
+          references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }],
+          coreMigrationVersion: '3.0.0',
           namespace: 'foo-namespace',
           // there is no 'namespaces' field because no conversion transform was applied; this scenario is contrived for a clean test case but is not indicative of a real-world scenario
         });
@@ -881,7 +842,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Sweet Peach' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });
@@ -896,7 +857,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Sweet Peach' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespace: 'foo-namespace',
             },
           ]);
@@ -929,7 +890,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Wally' },
               migrationVersion: { dog: '1.0.0' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['default'],
             },
           ]);
@@ -945,7 +906,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Wally' },
               migrationVersion: { dog: '1.0.0' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['foo-namespace'],
               originId: 'loud',
             },
@@ -960,7 +921,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });
@@ -993,7 +954,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Too' },
               migrationVersion: { dog: '1.0.0' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['default'],
             },
           ]);
@@ -1021,7 +982,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Too' },
               migrationVersion: { dog: '1.0.0' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['foo-namespace'],
               originId: 'cute',
             },
@@ -1036,7 +997,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });
@@ -1078,7 +1039,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Patches', age: '11', color: 'tri-color' },
               migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });
@@ -1094,7 +1055,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Patches', age: '11', color: 'tri-color' },
               migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespace: 'foo-namespace',
             },
           ]);
@@ -1131,7 +1092,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Remy' },
               migrationVersion: { dog: '2.0.0' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['default'],
             },
           ]);
@@ -1147,7 +1108,7 @@ describe('DocumentMigrator', () => {
               type: 'dog',
               attributes: { name: 'Remy' },
               migrationVersion: { dog: '2.0.0' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['foo-namespace'],
               originId: 'hungry',
             },
@@ -1162,7 +1123,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });
@@ -1203,7 +1164,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Sasha' },
               migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'favorite', type: 'toy', name: 'BALL!' }], // no change
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['default'],
             },
           ]);
@@ -1231,7 +1192,7 @@ describe('DocumentMigrator', () => {
               attributes: { name: 'Sasha' },
               migrationVersion: { dog: '2.0.0' },
               references: [{ id: 'uuidv5', type: 'toy', name: 'BALL!' }], // changed
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
               namespaces: ['foo-namespace'],
               originId: 'pretty',
             },
@@ -1246,7 +1207,7 @@ describe('DocumentMigrator', () => {
                 purpose: 'savedObjectConversion',
               },
               migrationVersion: { [LEGACY_URL_ALIAS_TYPE]: '0.1.2' },
-              coreMigrationVersion: kibanaVersion,
+              coreMigrationVersion: '1.0.0',
             },
           ]);
         });

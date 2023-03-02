@@ -7,7 +7,7 @@
  */
 
 import React, { forwardRef, useCallback, useMemo } from 'react';
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiSpacer, EuiText } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -218,12 +218,22 @@ export const DocTableWrapper = forwardRef(
         {!rows.length && (
           <div className="kbnDocTable__error">
             <EuiText size="xs" color="subdued">
-              <EuiIcon type="visualizeApp" size="m" color="subdued" />
-              <EuiSpacer size="m" />
-              <FormattedMessage
-                id="discover.docTable.noResultsTitle"
-                defaultMessage="No results found"
-              />
+              {isLoading ? (
+                <>
+                  <EuiLoadingSpinner />
+                  <EuiSpacer size="m" />
+                  <FormattedMessage id="discover.loadingResults" defaultMessage="Loading results" />
+                </>
+              ) : (
+                <>
+                  <EuiIcon type="discoverApp" size="m" color="subdued" />
+                  <EuiSpacer size="m" />
+                  <FormattedMessage
+                    id="discover.docTable.noResultsTitle"
+                    defaultMessage="No results found"
+                  />
+                </>
+              )}
             </EuiText>
           </div>
         )}

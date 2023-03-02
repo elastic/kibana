@@ -94,7 +94,7 @@ export function runBuildApiDocsCli() {
 
       const allPluginStats: { [key: string]: PluginMetaInfo & ApiStats & EslintDisableCounts } = {};
       for (const plugin of plugins) {
-        const id = plugin.manifest.id;
+        const id = plugin.id;
         const pluginApi = pluginApiMap[id];
         const paths = pathsByPlugin.get(plugin) ?? [];
 
@@ -118,11 +118,11 @@ export function runBuildApiDocsCli() {
         // Note that the filtering is done here, and not above because the entire public plugin API has to
         // be parsed in order to correctly determine reference links, and ensure that `removeBrokenLinks`
         // doesn't remove more links than necessary.
-        if (pluginFilter && !pluginFilter.includes(plugin.manifest.id)) {
+        if (pluginFilter && !pluginFilter.includes(plugin.id)) {
           continue;
         }
 
-        const id = plugin.manifest.id;
+        const id = plugin.id;
         const pluginApi = pluginApiMap[id];
         const pluginStats = allPluginStats[id];
         const pluginTeam = plugin.manifest.owner.name;
@@ -212,13 +212,13 @@ export function runBuildApiDocsCli() {
             d.label
           )}`;
 
-        if (collectReferences && pluginFilter?.includes(plugin.manifest.id)) {
+        if (collectReferences && pluginFilter?.includes(plugin.id)) {
           if (referencedDeprecations[id] && pluginStats.deprecatedAPIsReferencedCount > 0) {
             log.info(`${referencedDeprecations[id].length} deprecated APIs used`);
             // eslint-disable-next-line no-console
             console.table(referencedDeprecations[id]);
           } else {
-            log.info(`No referenced deprecations for plugin ${plugin.manifest.id}`);
+            log.info(`No referenced deprecations for plugin ${plugin.id}`);
           }
           if (pluginStats.noReferences.length > 0) {
             // eslint-disable-next-line no-console
@@ -229,7 +229,7 @@ export function runBuildApiDocsCli() {
               }))
             );
           } else {
-            log.info(`No unused APIs for plugin ${plugin.manifest.id}`);
+            log.info(`No unused APIs for plugin ${plugin.id}`);
           }
         }
 

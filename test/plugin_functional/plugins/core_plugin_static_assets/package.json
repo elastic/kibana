@@ -1,5 +1,5 @@
 {
-  "name": "corePluginStaticAssets",
+  "name": "@kbn/core-plugin-static-assets-plugin",
   "version": "1.0.0",
   "main": "target/test/plugin_functional/plugins/core_plugin_static_assets",
   "kibana": {

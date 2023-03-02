@@ -39,6 +39,7 @@ export const ListsDetailViewComponent: FC = () => {
     listId,
     linkedRules,
     exportedList,
+    handleOnDownload,
     viewerStatus,
     listName,
     listDescription,
@@ -91,7 +92,7 @@ export const ListsDetailViewComponent: FC = () => {
           onManageRules={onManageRules}
         />
 
-        <AutoDownload blob={exportedList} name={listId} />
+        <AutoDownload blob={exportedList} name={`${listId}.ndjson`} onDownload={handleOnDownload} />
         <ListWithSearch list={list} refreshExceptions={refreshExceptions} isReadOnly={isReadOnly} />
         <ReferenceErrorModal
           cancelText={i18n.REFERENCE_MODAL_CANCEL_BUTTON}
@@ -126,6 +127,7 @@ export const ListsDetailViewComponent: FC = () => {
     canUserEditList,
     disableManageButton,
     exportedList,
+    handleOnDownload,
     headerBackOptions,
     invalidListId,
     isLoading,

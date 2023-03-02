@@ -1,5 +1,5 @@
 {
-  "name": "alerts-restricted-fixtures",
+  "name": "@kbn/alerts-restricted-fixtures-plugin",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",

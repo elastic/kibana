@@ -1,5 +1,5 @@
 {
-  "name": "status_plugin_b",
+  "name": "@kbn/status-plugin-b-plugin",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",

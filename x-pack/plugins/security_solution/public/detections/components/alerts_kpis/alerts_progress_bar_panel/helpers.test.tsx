@@ -17,7 +17,7 @@ describe('parse progress bar data', () => {
     expect(res).toEqual(mock.parsedAlerts);
   });
 
-  test('parse severity without data', () => {
+  test('parse alerts without data', () => {
     const res = parseAlertsGroupingData(
       mock.mockAlertsEmptyData as AlertSearchResponse<{}, AlertsByGroupingAgg>
     );

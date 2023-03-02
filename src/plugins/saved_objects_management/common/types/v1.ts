@@ -75,7 +75,6 @@ export interface SavedObjectInvalidRelation {
 
 export interface SavedObjectManagementTypeInfo {
   name: string;
-  // TODO: Fix. We should not directly expose these values to public code.
   namespaceType: SavedObjectsNamespaceType;
   hidden: boolean;
   displayName: string;
@@ -118,16 +117,18 @@ export interface FindQueryHTTP {
   perPage?: number;
   page?: number;
   type: string | string[];
-  // TODO: Fix. this API allows writing an arbitrary query that is passed straight to our persistence layer, thus leaking SO attributes to the public...
+  /**
+   * SO's can register one or more "defaultSearchField"'s against which this query will run using the
+   * {@link SavedObjectsFindOptions['searchFields'] | search fields} option.
+   *
+   * Therefore we are not directly exposing SO attributes to the public here.
+   */
   search?: string;
   defaultSearchOperator?: FindSearchOperatorHTTP;
-  // TODO: Fix. this API allows sorting by any field, thus leaking SO attributes to the public...
-  sortField?: string;
+  sortField?: keyof SavedObjectWithMetadata;
   sortOrder?: FindSortOrderHTTP;
   hasReference?: ReferenceHTTP | ReferenceHTTP[];
   hasReferenceOperator?: FindSearchOperatorHTTP;
-  // TODO: Fix. This exposes attribute schemas to clients.
-  fields?: string | string[];
 }
 
 export interface FindResponseHTTP {

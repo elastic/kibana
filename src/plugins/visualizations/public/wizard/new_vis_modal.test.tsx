@@ -10,8 +10,9 @@ import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { TypesStart, VisGroups, BaseVisType } from '../vis_types';
 import NewVisModal from './new_vis_modal';
-import { ApplicationStart, SavedObjectsStart, DocLinksStart } from '@kbn/core/public';
+import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
@@ -75,6 +76,7 @@ describe('NewVisModal', () => {
       },
     },
   };
+  const http = httpServiceMock.createStartContract({ basePath: '' });
 
   beforeAll(() => {
     Object.defineProperty(window, 'location', {
@@ -98,7 +100,7 @@ describe('NewVisModal', () => {
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
-        savedObjects={{} as SavedObjectsStart}
+        http={http}
       />
     );
     expect(wrapper.find('[data-test-subj="visGroup-aggbased"]').exists()).toBe(true);
@@ -115,7 +117,7 @@ describe('NewVisModal', () => {
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
-        savedObjects={{} as SavedObjectsStart}
+        http={http}
       />
     );
     expect(wrapper.find('[data-test-subj="visGroup-tools"]').exists()).toBe(true);
@@ -131,7 +133,7 @@ describe('NewVisModal', () => {
         uiSettings={uiSettings}
         application={{} as ApplicationStart}
         docLinks={docLinks as DocLinksStart}
-        savedObjects={{} as SavedObjectsStart}
+        http={http}
       />
     );
     expect(wrapper.find('[data-test-subj="visType-vis2"]').exists()).toBe(true);
@@ -148,7 +150,7 @@ describe('NewVisModal', () => {
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          savedObjects={{} as SavedObjectsStart}
+          http={http}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
@@ -167,7 +169,7 @@ describe('NewVisModal', () => {
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          savedObjects={{} as SavedObjectsStart}
+          http={http}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-vis"]').last();
@@ -193,7 +195,7 @@ describe('NewVisModal', () => {
           application={{ navigateToApp } as unknown as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
           stateTransfer={stateTransfer}
-          savedObjects={{} as SavedObjectsStart}
+          http={http}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
@@ -218,7 +220,7 @@ describe('NewVisModal', () => {
           uiSettings={uiSettings}
           application={{ navigateToApp } as unknown as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          savedObjects={{} as SavedObjectsStart}
+          http={http}
         />
       );
       const visCard = wrapper.find('[data-test-subj="visType-visWithAliasUrl"]').last();
@@ -239,7 +241,7 @@ describe('NewVisModal', () => {
           uiSettings={uiSettings}
           application={{} as ApplicationStart}
           docLinks={docLinks as DocLinksStart}
-          savedObjects={{} as SavedObjectsStart}
+          http={http}
         />
       );
       const aggBasedGroupCard = wrapper

@@ -7,6 +7,7 @@
 
 import { EcsVersion } from '@kbn/ecs';
 
+import { getIncompatiableFieldsInSameFamilyCount } from '../callouts/incompatible_callout/helpers';
 import {
   ECS_FIELD_REFERENCE_URL,
   ECS_REFERENCE_URL,
@@ -35,8 +36,10 @@ import {
 } from '../../../compare_fields_table/translations';
 
 export const getIncompatibleFieldsMarkdownComment = ({
+  fieldsInSameFamily,
   incompatible,
 }: {
+  fieldsInSameFamily: number;
   incompatible: number;
 }): string =>
   getMarkdownComment({
@@ -45,11 +48,14 @@ export const getIncompatibleFieldsMarkdownComment = ({
       version: EcsVersion,
     })}
 
-${i18n.DETECTION_ENGINE_RULES_WONT_WORK}
-${i18n.PAGES_WONT_DISPLAY_EVENTS}
+${i18n.INCOMPATIBLE_FIELDS_WITH}
+
+${i18n.WHEN_AN_INCOMPATIBLE_FIELD}
+${i18n.DETECTION_ENGINE_RULES_MAY_NOT_MATCH}
+${i18n.PAGES_MAY_NOT_DISPLAY_EVENTS}
 ${i18n.MAPPINGS_THAT_CONFLICT_WITH_ECS}
 `,
-    title: i18n.INCOMPATIBLE_CALLOUT_TITLE(incompatible),
+    title: i18n.INCOMPATIBLE_CALLOUT_TITLE({ fieldCount: incompatible, fieldsInSameFamily }),
   });
 
 export const showInvalidCallout = (enrichedFieldMetadata: EnrichedFieldMetadata[]): boolean =>
@@ -115,9 +121,14 @@ export const getAllIncompatibleMarkdownComments = ({
 }): string[] => {
   const incompatibleMappings = getIncompatibleMappings(partitionedFieldMetadata.incompatible);
   const incompatibleValues = getIncompatibleValues(partitionedFieldMetadata.incompatible);
+  const fieldsInSameFamily = getIncompatiableFieldsInSameFamilyCount(
+    partitionedFieldMetadata.incompatible
+  );
+
   const incompatibleFieldsMarkdownComment =
     partitionedFieldMetadata.incompatible.length > 0
       ? getIncompatibleFieldsMarkdownComment({
+          fieldsInSameFamily,
           incompatible: partitionedFieldMetadata.incompatible.length,
         })
       : '';

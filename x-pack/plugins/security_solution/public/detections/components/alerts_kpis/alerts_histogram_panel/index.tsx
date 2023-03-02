@@ -406,12 +406,13 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                 {showStackBy && (
                   <>
                     <StackByComboBox
-                      ref={comboboxRef}
                       data-test-subj="stackByComboBox"
-                      selected={selectedStackByOption}
+                      inputRef={setComboboxInputRef}
                       onSelect={onSelect}
                       prepend={stackByLabel}
-                      inputRef={setComboboxInputRef}
+                      ref={comboboxRef}
+                      selected={selectedStackByOption}
+                      useLensCompatibleFields={isChartEmbeddablesEnabled}
                       width={stackByWidth}
                     />
                     {showGroupByPlaceholder && (
@@ -422,11 +423,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                           content={i18n.NOT_AVAILABLE_TOOLTIP}
                         >
                           <StackByComboBox
-                            isDisabled={true}
                             data-test-subj="stackByPlaceholder"
+                            isDisabled={true}
                             onSelect={noop}
                             prepend={GROUP_BY_TOP_LABEL}
                             selected=""
+                            useLensCompatibleFields={isChartEmbeddablesEnabled}
                             width={stackByWidth}
                           />
                         </EuiToolTip>

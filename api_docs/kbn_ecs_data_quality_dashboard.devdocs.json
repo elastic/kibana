@@ -2,26 +2,10 @@
   "id": "@kbn/ecs-data-quality-dashboard",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/ecs-data-quality-dashboard",
-        "id": "def-common.DataQualityPanel",
+        "id": "def-public.DataQualityPanel",
         "type": "Function",
         "tags": [],
         "label": "DataQualityPanel",
@@ -38,7 +22,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ecs-data-quality-dashboard",
-            "id": "def-common.DataQualityPanel.$1",
+            "id": "def-public.DataQualityPanel.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "props",
@@ -55,7 +39,7 @@
       },
       {
         "parentPluginId": "@kbn/ecs-data-quality-dashboard",
-        "id": "def-common.getIlmPhaseDescription",
+        "id": "def-public.getIlmPhaseDescription",
         "type": "Function",
         "tags": [],
         "label": "getIlmPhaseDescription",
@@ -71,7 +55,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ecs-data-quality-dashboard",
-            "id": "def-common.getIlmPhaseDescription.$1",
+            "id": "def-public.getIlmPhaseDescription.$1",
             "type": "string",
             "tags": [],
             "label": "phase",
@@ -94,7 +78,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/ecs-data-quality-dashboard",
-        "id": "def-common.DATA_QUALITY_SUBTITLE",
+        "id": "def-public.DATA_QUALITY_SUBTITLE",
         "type": "string",
         "tags": [],
         "label": "DATA_QUALITY_SUBTITLE",
@@ -108,7 +92,7 @@
       },
       {
         "parentPluginId": "@kbn/ecs-data-quality-dashboard",
-        "id": "def-common.ECS_REFERENCE_URL",
+        "id": "def-public.ECS_REFERENCE_URL",
         "type": "string",
         "tags": [],
         "label": "ECS_REFERENCE_URL",
@@ -125,7 +109,7 @@
       },
       {
         "parentPluginId": "@kbn/ecs-data-quality-dashboard",
-        "id": "def-common.ILM_PHASE",
+        "id": "def-public.ILM_PHASE",
         "type": "string",
         "tags": [],
         "label": "ILM_PHASE",
@@ -139,7 +123,7 @@
       },
       {
         "parentPluginId": "@kbn/ecs-data-quality-dashboard",
-        "id": "def-common.INDEX_LIFECYCLE_MANAGEMENT_PHASES",
+        "id": "def-public.INDEX_LIFECYCLE_MANAGEMENT_PHASES",
         "type": "string",
         "tags": [],
         "label": "INDEX_LIFECYCLE_MANAGEMENT_PHASES",
@@ -153,7 +137,7 @@
       },
       {
         "parentPluginId": "@kbn/ecs-data-quality-dashboard",
-        "id": "def-common.SELECT_ONE_OR_MORE_ILM_PHASES",
+        "id": "def-public.SELECT_ONE_OR_MORE_ILM_PHASES",
         "type": "string",
         "tags": [],
         "label": "SELECT_ONE_OR_MORE_ILM_PHASES",
@@ -166,6 +150,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

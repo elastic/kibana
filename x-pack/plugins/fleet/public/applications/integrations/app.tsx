@@ -9,7 +9,8 @@ import React, { memo } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiErrorBoundary, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { Router, Redirect, Route, Switch } from 'react-router-dom';
+import { Router, Redirect, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import useObservable from 'react-use/lib/useObservable';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
@@ -84,7 +85,7 @@ export const IntegrationsAppContext: React.FC<{
                   <KibanaThemeProvider theme$={theme$}>
                     <EuiThemeProvider darkMode={isDarkMode}>
                       <QueryClientProvider client={queryClient}>
-                        <ReactQueryDevtools initialIsOpen={true} />
+                        <ReactQueryDevtools initialIsOpen={false} />
                         <UIExtensionsContext.Provider value={extensions}>
                           <FleetStatusProvider>
                             <startServices.customIntegrations.ContextProvider>

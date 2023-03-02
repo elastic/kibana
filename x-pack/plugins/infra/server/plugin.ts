@@ -16,6 +16,7 @@ import {
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { i18n } from '@kbn/i18n';
 import { Logger } from '@kbn/logging';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { defaultLogViewsStaticConfig } from '../common/log_views';
 import { publicConfigKeys } from '../common/plugin_config_types';
@@ -196,7 +197,7 @@ export class InfraServerPlugin
         const soClient = (await context.core).savedObjects.client;
         const mlSystem = plugins.ml?.mlSystemProvider(request, soClient);
         const mlAnomalyDetectors = plugins.ml?.anomalyDetectorsProvider(request, soClient);
-        const spaceId = plugins.spaces?.spacesService.getSpaceId(request) || 'default';
+        const spaceId = plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
         return {
           mlAnomalyDetectors,

@@ -12,7 +12,6 @@ import {
   EuiPageContent_Deprecated as EuiPageContent,
 } from '@elastic/eui';
 import React from 'react';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { Error } from '../types';
 

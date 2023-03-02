@@ -58,36 +58,10 @@ export const QUESTIONS = [
     default: undefined,
   },
   {
-    name: 'internal',
-    type: 'confirm',
-    message: 'Will this plugin be part of the Kibana repository?',
-    default: false,
-  },
-  {
-    name: 'internalLocation',
-    type: 'list',
-    message: 'What type of internal plugin would you like to create',
-    choices: INTERNAL_PLUGIN_LOCATIONS,
-    default: INTERNAL_PLUGIN_LOCATIONS[0].value,
-    when: ({ internal }: Answers) => internal,
-  },
-  {
     name: 'ownerName',
     message: 'Who is developing and maintaining this plugin?',
     default: undefined,
     when: ({ internal }: Answers) => !internal,
-  },
-  {
-    name: 'ownerName',
-    message: 'What team will maintain this plugin?',
-    default: undefined,
-    when: ({ internal }: Answers) => internal,
-  },
-  {
-    name: 'githubTeam',
-    message: 'What is your gitHub team alias?',
-    default: undefined,
-    when: ({ internal }: Answers) => internal,
   },
   {
     name: 'ui',

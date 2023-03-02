@@ -94,16 +94,10 @@ const testProps = {
       ],
     },
     alertsCount: {
-      doc_count_error_upper_bound: 0,
-      sum_other_doc_count: 0,
-      buckets: [
-        {
-          key: 'siem',
-          doc_count: 2,
-        },
-      ],
+      value: 2,
     },
   },
+  isLoading: false,
   pagination: {
     pageIndex: 0,
     pageSize: 25,
@@ -142,9 +136,7 @@ describe('grouping container', () => {
         buckets: [],
       },
       alertsCount: {
-        doc_count_error_upper_bound: 0,
-        sum_other_doc_count: 0,
-        buckets: [],
+        value: 0,
       },
     };
     const { getByTestId, queryByTestId } = render(

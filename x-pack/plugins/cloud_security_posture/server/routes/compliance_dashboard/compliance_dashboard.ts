@@ -8,6 +8,8 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import type { PosturePolicyTemplate, ComplianceDashboardData } from '../../../common/types';
 import {
   CSPM_POLICY_TEMPLATE,
@@ -69,17 +71,20 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter): void =>
 
         const policyTemplate = request.params.policy_template as PosturePolicyTemplate;
 
+        // runtime mappings create the `safe_posture_type` field, which equals to `kspm` or `cspm` based on the value and existence of the `posture_type` field which was introduced at 8.7
+        // the `query` is then being passed to our getter functions to filter per posture type even for older findings before 8.7
+        const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
         const query: QueryDslQueryContainer = {
           bool: {
-            filter: [{ term: { 'rule.benchmark.posture_type': policyTemplate } }],
+            filter: [{ term: { safe_posture_type: policyTemplate } }],
           },
         };
 
         const [stats, groupedFindingsEvaluation, clustersWithoutTrends, trends] = await Promise.all(
           [
-            getStats(esClient, query, pitId),
-            getGroupedFindingsEvaluation(esClient, query, pitId),
-            getClusters(esClient, query, pitId),
+            getStats(esClient, query, pitId, runtimeMappings),
+            getGroupedFindingsEvaluation(esClient, query, pitId, runtimeMappings),
+            getClusters(esClient, query, pitId, runtimeMappings),
             getTrends(esClient, policyTemplate),
           ]
         );

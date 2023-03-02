@@ -15,19 +15,25 @@ import {
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import {
+  addToCase,
+  checkActionItemsInResults,
   findAndClickButton,
   findFormFieldByRowsLabelAndType,
   inputQuery,
   loadAlertsEvents,
   submitQuery,
+  takeOsqueryActionWithParams,
   toggleRuleOffAndOn,
   typeInECSFieldInput,
+  viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { preparePack } from '../../tasks/packs';
-import { closeModalIfVisible } from '../../tasks/integrations';
+import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
 import { LIVE_QUERY_EDITOR, RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { ROLES } from '../../test';
+
+const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
 describe('Alert Event Details', () => {
   const RULE_NAME = 'Test-rule';
@@ -36,6 +42,7 @@ describe('Alert Event Details', () => {
     runKbnArchiverScript(ArchiverMethod.LOAD, 'pack');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'example_pack');
     runKbnArchiverScript(ArchiverMethod.LOAD, 'rule');
+    runKbnArchiverScript(ArchiverMethod.LOAD, 'case_security');
   });
 
   beforeEach(() => {
@@ -46,11 +53,12 @@ describe('Alert Event Details', () => {
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'pack');
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'example_pack');
     runKbnArchiverScript(ArchiverMethod.UNLOAD, 'rule');
+    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_security');
   });
 
   it('should prepare packs and alert rules', () => {
     const PACK_NAME = 'testpack';
-    navigateTo('/app/osquery/packs');
+    navigateTo('/app/osquery/live_queries');
     preparePack(PACK_NAME);
     findAndClickButton('Edit');
     cy.contains(`Edit ${PACK_NAME}`);
@@ -61,7 +69,7 @@ describe('Alert Event Details', () => {
     findAndClickButton('Update pack');
     closeModalIfVisible();
     cy.contains(`Successfully updated "${PACK_NAME}" pack`);
-    cy.getBySel('toastCloseButton').click();
+    closeToastIfVisible();
 
     toggleRuleOffAndOn(RULE_NAME);
   });
@@ -69,21 +77,18 @@ describe('Alert Event Details', () => {
   it('adds response actions with osquery with proper validation and form values', () => {
     cy.visit('/app/security/rules');
     cy.contains(RULE_NAME).click();
-    cy.contains('Edit rule settings').click();
+    cy.contains('Edit rule settings').click({ force: true });
     cy.getBySel('edit-rule-actions-tab').wait(500).click();
     cy.contains('Response actions are run on each rule execution');
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.get(LIVE_QUERY_EDITOR);
     });
-    cy.contains('Save changes').click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('Query is a required field');
       inputQuery('select * from uptime1');
     });
-
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
-
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('Run a set of queries in a pack').click();
     });
@@ -113,8 +118,8 @@ describe('Alert Event Details', () => {
     // getSavedQueriesDropdown().type(`users{downArrow}{enter}`);
     cy.contains('Save changes').click();
     cy.contains(`${RULE_NAME} was saved`).should('exist');
-    cy.getBySel('toastCloseButton').click();
-    cy.contains('Edit rule settings').click();
+    closeToastIfVisible();
+    cy.contains('Edit rule settings').click({ force: true });
     cy.getBySel('edit-rule-actions-tab').wait(500).click();
     cy.contains('select * from uptime');
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
@@ -157,12 +162,18 @@ describe('Alert Event Details', () => {
     });
 
     cy.contains(`${RULE_NAME} was saved`).should('exist');
-    cy.getBySel('toastCloseButton').click();
-    cy.contains('Edit rule settings').click();
+    closeToastIfVisible();
+    cy.contains('Edit rule settings').click({ force: true });
     cy.getBySel('edit-rule-actions-tab').wait(500).click();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
       cy.contains('testpack');
       cy.getBySel('comboBoxInput').type('Example{downArrow}{enter}');
+      checkActionItemsInResults({
+        cases: false,
+        lens: false,
+        discover: false,
+        timeline: false,
+      });
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
       cy.contains('select * from uptime');
@@ -198,7 +209,7 @@ describe('Alert Event Details', () => {
       'You have queries in the investigation guide. Add them as response actions?';
     cy.visit('/app/security/rules');
     cy.contains(RULE_NAME).click();
-    cy.contains('Edit rule settings').click();
+    cy.contains('Edit rule settings').click({ force: true });
     cy.getBySel('edit-rule-actions-tab').wait(500).click();
 
     cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
@@ -221,13 +232,15 @@ describe('Alert Event Details', () => {
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_2).within(() => {
       cy.contains("SELECT * FROM os_version where name='{{host.os.name}}';");
+      cy.contains('labels');
+      cy.contains('arch');
     });
     cy.getBySel(RESPONSE_ACTIONS_ITEM_3).within(() => {
       cy.contains('select * from users');
     });
     cy.contains('Save changes').click();
     cy.contains(`${RULE_NAME} was saved`).should('exist');
-    cy.getBySel('toastCloseButton').click();
+    closeToastIfVisible();
   });
 
   it('should be able to run live query and add to timeline (-depending on the previous test)', () => {
@@ -248,7 +261,7 @@ describe('Alert Event Details', () => {
     cy.get('.euiButtonEmpty--flushLeft').contains('Cancel').click();
     cy.getBySel('add-to-timeline').first().click();
     cy.getBySel('globalToastList').contains('Added');
-    cy.getBySel('toastCloseButton').click();
+    closeToastIfVisible();
     cy.getBySel(RESULTS_TABLE).within(() => {
       cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
     });
@@ -264,10 +277,14 @@ describe('Alert Event Details', () => {
     loadAlertsEvents();
     cy.getBySel('expand-event').first().click({ force: true });
     cy.contains('Get processes').click();
-    cy.contains("SELECT * FROM os_version where name='Ubuntu';");
+    cy.getBySel('flyout-body-osquery').within(() => {
+      cy.contains("SELECT * FROM os_version where name='Ubuntu';");
+      cy.contains('labels');
+      cy.contains('arch');
+    });
   });
 
-  it('sees osquery results from last action', () => {
+  it('sees osquery results from last action and add to a case', () => {
     toggleRuleOffAndOn(RULE_NAME);
     cy.wait(2000);
     cy.visit('/app/security/alerts');
@@ -295,5 +312,160 @@ describe('Alert Event Details', () => {
         // }
       });
     });
+    checkActionItemsInResults({
+      lens: true,
+      discover: true,
+      cases: true,
+      timeline: true,
+    });
+    addToCase();
+    viewRecentCaseAndCheckResults();
+  });
+  it('can visit discover from response action results', () => {
+    const discoverRegex = new RegExp(`action_id: ${UUID_REGEX}`);
+
+    cy.visit('/app/security/alerts');
+    cy.getBySel('header-page-title').contains('Alerts').should('exist');
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.contains('Osquery Results').click();
+    cy.getBySel('osquery-results').should('exist');
+    checkActionItemsInResults({
+      lens: true,
+      discover: true,
+      cases: true,
+      timeline: true,
+    });
+    cy.contains('View in Discover')
+      .should('exist')
+      .should('have.attr', 'href')
+      .then(($href) => {
+        // @ts-expect-error-next-line href string - check types
+        cy.visit($href);
+        cy.getBySel('breadcrumbs').contains('Discover').should('exist');
+        cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
+          cy.contains(`action_data.query`);
+        });
+        cy.contains(discoverRegex);
+      });
+  });
+  it('can visit lens from response action results', () => {
+    const lensRegex = new RegExp(`Action ${UUID_REGEX} results`);
+
+    cy.visit('/app/security/alerts');
+    cy.getBySel('header-page-title').contains('Alerts').should('exist');
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.contains('Osquery Results').click();
+    cy.getBySel('osquery-results').should('exist');
+    checkActionItemsInResults({
+      lens: true,
+      discover: true,
+      cases: true,
+      timeline: true,
+    });
+    cy.getBySel('osquery-results-comment')
+      .first()
+      .within(() => {
+        let lensUrl = '';
+        cy.window().then((win) => {
+          cy.stub(win, 'open')
+            .as('windowOpen')
+            .callsFake((url) => {
+              lensUrl = url;
+            });
+        });
+        cy.get(`[aria-label="View in Lens"]`).click();
+        cy.window()
+          .its('open')
+          .then(() => {
+            cy.visit(lensUrl);
+          });
+      });
+    cy.getBySel('lnsWorkspace').should('exist');
+    cy.getBySel('breadcrumbs').contains(lensRegex);
+  });
+  it('can add to timeline from response action results', () => {
+    const timelineRegex = new RegExp(`Added ${UUID_REGEX} to timeline`);
+    const filterRegex = new RegExp(`action_id: "${UUID_REGEX}"`);
+
+    cy.visit('/app/security/alerts');
+    cy.getBySel('header-page-title').contains('Alerts').should('exist');
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.contains('Osquery Results').click();
+    cy.getBySel('osquery-results').should('exist');
+    checkActionItemsInResults({
+      lens: true,
+      discover: true,
+      cases: true,
+      timeline: true,
+    });
+    cy.getBySel('osquery-results-comment')
+      .first()
+      .within(() => {
+        cy.get('.euiTableRow')
+          .first()
+          .within(() => {
+            cy.getBySel('add-to-timeline').click();
+          });
+      });
+    cy.contains(timelineRegex);
+    cy.contains('Untitled timeline').click();
+    cy.contains(filterRegex);
+  });
+
+  it('should substitute parameters in live query and increase number of ran queries', () => {
+    let initialNotificationCount: number;
+    let updatedNotificationCount: number;
+    loadAlertsEvents();
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.getBySel('osquery-actions-notification')
+      .should('not.have.text', '0')
+      .then((element) => {
+        initialNotificationCount = parseInt(element.text(), 10);
+      });
+    takeOsqueryActionWithParams();
+    cy.getBySel('osquery-empty-button').click();
+    cy.getBySel('osquery-actions-notification')
+      .should('not.have.text', '0')
+      .then((element) => {
+        updatedNotificationCount = parseInt(element.text(), 10);
+        expect(initialNotificationCount).to.be.equal(updatedNotificationCount - 1);
+      })
+      .then(() => {
+        cy.contains('Osquery Results').click();
+        cy.getBySel('osquery-results').within(() => {
+          cy.contains('tags');
+          cy.getBySel('osquery-results-comment').should('have.length', updatedNotificationCount);
+        });
+      });
+  });
+
+  it('should be able to run take action query against all enrolled agents', () => {
+    loadAlertsEvents();
+    cy.getBySel('expand-event').first().click({ force: true });
+    cy.getBySel('take-action-dropdown-btn').click();
+    cy.getBySel('osquery-action-item').click();
+    cy.getBySel('agentSelection').within(() => {
+      cy.getBySel('comboBoxClearButton').click();
+      cy.getBySel('comboBoxInput').type('All{downArrow}{enter}{esc}');
+      cy.contains('All agents');
+    });
+    inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
+      parseSpecialCharSequences: false,
+    });
+    cy.wait(1000);
+    submitQuery();
+    cy.getBySel('flyout-body-osquery').within(() => {
+      // at least 2 agents should have responded
+      cy.get('[data-grid-row-index]').should('have.length.at.least', 2);
+    });
+  });
+
+  it('should substitute params in osquery ran from timelines alerts', () => {
+    loadAlertsEvents();
+    cy.getBySel('send-alert-to-timeline-button').first().click({ force: true });
+    cy.getBySel('query-events-table').within(() => {
+      cy.getBySel('expand-event').first().click();
+    });
+    takeOsqueryActionWithParams();
   });
 });

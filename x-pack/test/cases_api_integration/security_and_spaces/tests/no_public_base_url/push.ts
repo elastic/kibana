@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
 import {
   postCommentUserReq,
   postCommentAlertReq,
@@ -25,7 +26,6 @@ import {
   createCaseWithConnector,
   getRecordingServiceNowSimulatorServer,
 } from '../../../common/lib/api';
-import { RecordingServiceNowSimulator } from '../../../../alerting_api_integration/common/plugins/actions_simulators/server/servicenow_simulation';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

@@ -154,9 +154,10 @@ export const prepareExceptionItemsForBulkClose = (
       return {
         ...item,
         entries: newEntries,
+        comments: [], // Strips out unneeded comments attribute for bulk close as they are not needed and are throwing type errors
       };
     } else {
-      return item;
+      return { ...item, comments: [] };
     }
   });
 };

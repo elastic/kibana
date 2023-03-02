@@ -10,7 +10,8 @@ import React, { memo, useEffect, useState } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import { EuiCode, EuiEmptyPrompt, EuiErrorBoundary, EuiPanel, EuiPortal } from '@elastic/eui';
 import type { History } from 'history';
-import { Router, Redirect, Route, Switch, useRouteMatch } from 'react-router-dom';
+import { Router, Redirect, Switch, useRouteMatch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
@@ -262,7 +263,7 @@ export const FleetAppContext: React.FC<{
                   <KibanaThemeProvider theme$={theme$}>
                     <EuiThemeProvider darkMode={isDarkMode}>
                       <QueryClientProvider client={queryClient}>
-                        <ReactQueryDevtools initialIsOpen={true} />
+                        <ReactQueryDevtools initialIsOpen={false} />
                         <UIExtensionsContext.Provider value={extensions}>
                           <FleetStatusProvider>
                             <Router history={history}>

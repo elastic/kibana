@@ -6,6 +6,7 @@
  */
 
 import React, { FC, useMemo } from 'react';
+import { css } from '@emotion/react';
 import moment from 'moment-timezone';
 
 import { EuiButtonEmpty, EuiTabbedContent } from '@elastic/eui';
@@ -25,6 +26,7 @@ import { ExpandedRowDetailsPane, SectionConfig, SectionItem } from './expanded_r
 import { ExpandedRowJsonPane } from './expanded_row_json_pane';
 import { ExpandedRowMessagesPane } from './expanded_row_messages_pane';
 import { ExpandedRowPreviewPane } from './expanded_row_preview_pane';
+import { ExpandedRowHealthPane } from './expanded_row_health_pane';
 import { TransformHealthColoredDot } from './transform_health_colored_dot';
 
 function getItemDescription(value: any) {
@@ -258,6 +260,21 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       name: 'JSON',
       content: <ExpandedRowJsonPane json={item.config} />,
     },
+    ...(item.stats.health
+      ? [
+          {
+            id: `transform-health-tab-${tabId}`,
+            'data-test-subj': 'transformHealthTab',
+            name: i18n.translate(
+              'xpack.transform.transformList.transformDetails.tabs.transformHealthLabel',
+              {
+                defaultMessage: 'Health',
+              }
+            ),
+            content: <ExpandedRowHealthPane health={item.stats.health} />,
+          },
+        ]
+      : []),
     {
       id: `transform-messages-tab-${tabId}`,
       'data-test-subj': 'transformMessagesTab',
@@ -293,7 +310,13 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
       initialSelectedTab={tabs[0]}
       onTabClick={() => {}}
       expand={false}
-      style={{ width: '100%' }}
+      css={css`
+        width: 100%;
+
+        .euiTable {
+          background-color: transparent;
+        }
+      `}
       data-test-subj="transformExpandedRowTabbedContent"
     />
   );

@@ -48,7 +48,7 @@ import {
   ConnectorTypes,
   ExternalReferenceStorageType,
 } from '../../common/api';
-import type { UpdateAlertRequest } from '../client/alerts/types';
+import type { UpdateAlertStatusRequest } from '../client/alerts/types';
 import {
   parseCommentString,
   getLensVisualizations,
@@ -267,13 +267,13 @@ export const isCommentRequestTypeExternalReferenceSO = (
 /**
  * Adds the ids and indices to a map of statuses
  */
-export function createAlertUpdateRequest({
+export function createAlertUpdateStatusRequest({
   comment,
   status,
 }: {
   comment: CommentRequest;
   status: CaseStatuses;
-}): UpdateAlertRequest[] {
+}): UpdateAlertStatusRequest[] {
   return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status }));
 }
 

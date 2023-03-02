@@ -14,7 +14,6 @@ export * from './rule';
 export * from './rules_settings';
 export * from './rule_type';
 export * from './rule_task_instance';
-export * from './rule_navigation';
 export * from './alert_instance';
 export * from './alert_summary';
 export * from './builtin_action_groups';
@@ -24,6 +23,8 @@ export * from './rule_notify_when_type';
 export * from './parse_duration';
 export * from './execution_log_types';
 export * from './rule_snooze_type';
+
+export { mappingFromFieldMap, getComponentTemplateFromFieldMap } from './alert_schema';
 
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;

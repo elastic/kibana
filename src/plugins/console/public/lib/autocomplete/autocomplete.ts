@@ -15,7 +15,6 @@ import {
   getGlobalAutocompleteComponents,
   getTopLevelUrlCompleteComponents,
   getUnmatchedEndpointComponents,
-  // @ts-ignore
 } from '../kb/kb';
 
 import { createTokenIterator } from '../../application/factories';
@@ -24,10 +23,8 @@ import type RowParser from '../row_parser';
 
 import * as utils from '../utils';
 
-// @ts-ignore
 import { populateContext } from './engine';
 import type { AutoCompleteContext, DataAutoCompleteRulesOneOf, ResultTerm } from './types';
-// @ts-ignore
 import { URL_PATH_END_MARKER } from './components';
 
 let lastEvaluatedToken: Token | null = null;

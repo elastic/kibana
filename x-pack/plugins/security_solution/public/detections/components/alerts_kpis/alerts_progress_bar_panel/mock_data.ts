@@ -97,5 +97,4 @@ export const parsedAlerts = [
   { key: 'Host-v5biklvcy8', value: 234, label: 'Host-v5biklvcy8', percentage: 41.1 },
   { key: 'Host-5y1uprxfv2', value: 186, label: 'Host-5y1uprxfv2', percentage: 32.6 },
   { key: 'Host-ssf1mhgy5c', value: 150, label: 'Host-ssf1mhgy5c', percentage: 26.3 },
-  { key: 'Other', value: 0, label: 'Other', percentage: 0 },
 ];

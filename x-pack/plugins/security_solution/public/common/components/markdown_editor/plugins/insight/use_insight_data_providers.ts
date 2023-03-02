@@ -45,6 +45,32 @@ const dataProviderQueryType = (type: string): QueryOperator => {
   }
 };
 
+const filterStub = {
+  $state: {
+    store: FilterStateStore.APP_STATE,
+  },
+  meta: {
+    disabled: false,
+    negate: false,
+    alias: null,
+    index: undefined,
+  },
+};
+
+const dataProviderStub: DataProvider = {
+  and: [],
+  enabled: true,
+  id: '',
+  name: '',
+  excluded: false,
+  kqlQuery: '',
+  type: DataProviderType.default,
+  queryMatch: {
+    field: '',
+    value: '',
+    operator: EXISTS_OPERATOR,
+  },
+};
 const buildDataProviders = (
   providers: Provider[][],
   alertData?: TimelineEventsDetailsItem[] | null
@@ -71,7 +97,6 @@ const buildDataProviders = (
         };
       } else {
         const newProvider = {
-          and: [],
           enabled: true,
           id: JSON.stringify(field + value),
           name: field,
@@ -87,20 +112,10 @@ const buildDataProviders = (
         prev.and.push(newProvider);
       }
       return prev;
-    }, {} as DataProvider);
+    }, dataProviderStub);
   });
 };
-const filterStub = {
-  $state: {
-    store: FilterStateStore.APP_STATE,
-  },
-  meta: {
-    disabled: false,
-    negate: false,
-    alias: null,
-    index: undefined,
-  },
-};
+
 const buildPrimitiveFilter = (provider: Provider): Filter => {
   const baseFilter = {
     ...filterStub,

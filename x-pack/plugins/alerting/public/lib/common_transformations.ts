@@ -118,6 +118,7 @@ export function transformRule(input: ApiRule): Rule {
     next_run: nextRun,
     last_run: lastRun,
     monitoring: monitoring,
+    view_in_app_relative_url: viewInAppRelativeUrl,
     ...rest
   } = input;
 
@@ -135,6 +136,7 @@ export function transformRule(input: ApiRule): Rule {
     executionStatus: transformExecutionStatus(executionStatusAPI),
     actions: actionsAPI ? actionsAPI.map((action) => transformAction(action)) : [],
     scheduledTaskId,
+    ...(viewInAppRelativeUrl ? { viewInAppRelativeUrl } : {}),
     ...(nextRun ? { nextRun: new Date(nextRun) } : {}),
     ...(monitoring ? { monitoring: transformMonitoring(monitoring) } : {}),
     ...(lastRun ? { lastRun: transformLastRun(lastRun) } : {}),

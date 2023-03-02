@@ -183,7 +183,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
           }}
         />
       ),
-      icon: <EuiIcon type="trash" size="m" />,
+      icon: <EuiIcon type="download" size="m" />,
       disabled: !atLeastOneActiveAgentSelected,
       onClick: () => {
         closeMenu();

@@ -52,7 +52,7 @@ const isLicenseAtLeastPlatinum = async (context: ObservabilityRequestHandlerCont
 const createSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos',
   options: {
-    tags: [],
+    tags: ['access:slo_write'],
   },
   params: createSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -77,7 +77,7 @@ const createSLORoute = createObservabilityServerRoute({
 const updateSLORoute = createObservabilityServerRoute({
   endpoint: 'PUT /api/observability/slos/{id}',
   options: {
-    tags: [],
+    tags: ['access:slo_write'],
   },
   params: updateSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -101,7 +101,7 @@ const updateSLORoute = createObservabilityServerRoute({
 const deleteSLORoute = createObservabilityServerRoute({
   endpoint: 'DELETE /api/observability/slos/{id}',
   options: {
-    tags: [],
+    tags: ['access:slo_write'],
   },
   params: deleteSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -124,7 +124,7 @@ const deleteSLORoute = createObservabilityServerRoute({
 const getSLORoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/slos/{id}',
   options: {
-    tags: [],
+    tags: ['access:slo_read'],
   },
   params: getSLOParamsSchema,
   handler: async ({ context, params }) => {
@@ -147,7 +147,7 @@ const getSLORoute = createObservabilityServerRoute({
 const enableSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/enable',
   options: {
-    tags: [],
+    tags: ['access:slo_write'],
   },
   params: manageSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -171,7 +171,7 @@ const enableSLORoute = createObservabilityServerRoute({
 const disableSLORoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos/{id}/disable',
   options: {
-    tags: [],
+    tags: ['access:slo_write'],
   },
   params: manageSLOParamsSchema,
   handler: async ({ context, params, logger }) => {
@@ -195,7 +195,7 @@ const disableSLORoute = createObservabilityServerRoute({
 const findSLORoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/slos',
   options: {
-    tags: [],
+    tags: ['access:slo_read'],
   },
   params: findSLOParamsSchema,
   handler: async ({ context, params }) => {
@@ -218,7 +218,7 @@ const findSLORoute = createObservabilityServerRoute({
 const fetchHistoricalSummary = createObservabilityServerRoute({
   endpoint: 'POST /internal/observability/slos/_historical_summary',
   options: {
-    tags: [],
+    tags: ['access:slo_read'],
   },
   params: fetchHistoricalSummaryParamsSchema,
   handler: async ({ context, params }) => {

@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/routing-example-plugin",
+  "owner": "@elastic/kibana-core",
+  "description": "A simple example of how to use core's routing services",
+  "plugin": {
+    "id": "routingExample",
+    "server": true,
+    "browser": true,
+    "requiredPlugins": [
+      "developerExamples"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "type": "plugin",
+  "id": "@kbn/kbn-health-gateway-status-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "kbnHealthGatewayStatus",
+    "server": true,
+    "browser": false
+  }
+}

@@ -108,6 +108,12 @@ describe('Response actions', () => {
       const routerMock = httpServiceMock.createRouter();
       mockResponse = httpServerMock.createResponseFactory();
       const startContract = createMockEndpointAppContextServiceStartContract();
+      (startContract.messageSigningService?.sign as jest.Mock).mockImplementation(() => {
+        return {
+          data: 'thisisthedata',
+          signature: 'thisisasignature',
+        };
+      });
       endpointAppContextService = new EndpointAppContextService();
       const mockSavedObjectClient = savedObjectsClientMock.create();
 
@@ -398,6 +404,17 @@ describe('Response actions', () => {
       expect(actionDoc.data.command).toEqual('get-file');
     });
 
+    it('sends the `execute` command payload from the execute route', async () => {
+      const ctx = await callRoute(EXECUTE_ROUTE, {
+        body: { endpoint_ids: ['XYZ'], parameters: { command: 'ls -al' } },
+      });
+      const actionDoc: EndpointAction = (
+        ctx.core.elasticsearch.client.asInternalUser.index.mock
+          .calls[0][0] as estypes.IndexRequest<EndpointAction>
+      ).body!;
+      expect(actionDoc.data.command).toEqual('execute');
+    });
+
     describe('With endpoint data streams', () => {
       it('handles unisolation', async () => {
         const ctx = await callRoute(
@@ -566,7 +583,7 @@ describe('Response actions', () => {
         expect(responseBody.action).toBeUndefined();
       });
 
-      it('handles execute', async () => {
+      it('handles execute with given `command` and `timeout`', async () => {
         const ctx = await callRoute(
           EXECUTE_ROUTE,
           {
@@ -596,7 +613,7 @@ describe('Response actions', () => {
         expect(responseBody.action).toBeUndefined();
       });
 
-      it('handles execute without optional `timeout`', async () => {
+      it('handles execute without optional `timeout` and sets it to 4 hrs if not given', async () => {
         const ctx = await callRoute(
           EXECUTE_ROUTE,
           {
@@ -618,11 +635,41 @@ describe('Response actions', () => {
         expect(actionDocs[0].body!.EndpointActions.data.command).toEqual('execute');
         const parameters = actionDocs[1].body!.data.parameters as ResponseActionsExecuteParameters;
         expect(parameters.command).toEqual('ls -al');
+        expect(parameters.timeout).toEqual(14400000); // 4hrs
         expect(actionDocs[1].body!.data.command).toEqual('execute');
 
         expect(mockResponse.ok).toBeCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
         expect(responseBody.action).toBeUndefined();
+      });
+
+      it('signs the action', async () => {
+        const ctx = await callRoute(
+          ISOLATE_HOST_ROUTE_V2,
+          {
+            body: { endpoint_ids: ['XYZ'] },
+          },
+          { endpointDsExists: true }
+        );
+
+        const indexDoc = ctx.core.elasticsearch.client.asInternalUser.index;
+        const actionDocs: [
+          { index: string; body?: LogsEndpointAction },
+          { index: string; body?: EndpointAction }
+        ] = [
+          indexDoc.mock.calls[0][0] as estypes.IndexRequest<LogsEndpointAction>,
+          indexDoc.mock.calls[1][0] as estypes.IndexRequest<EndpointAction>,
+        ];
+
+        expect(actionDocs[1].index).toEqual(AGENT_ACTIONS_INDEX);
+        expect(actionDocs[1].body?.signed).toEqual({
+          data: 'thisisthedata',
+          signature: 'thisisasignature',
+        });
+
+        expect(mockResponse.ok).toBeCalled();
+        const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
+        expect(responseBody.action).toBeTruthy();
       });
 
       it('handles errors', async () => {
@@ -649,6 +696,7 @@ describe('Response actions', () => {
     });
 
     describe('License Level', () => {
+      // FIXME: This test also works for downgraded licenses (Gold)
       it('allows platinum license levels to isolate hosts', async () => {
         await callRoute(ISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
@@ -704,6 +752,14 @@ describe('Response actions', () => {
         await callRoute(UNISOLATE_HOST_ROUTE_V2, {
           body: { endpoint_ids: ['XYZ'] },
           authz: { canUnIsolateHost: false },
+        });
+        expect(mockResponse.forbidden).toBeCalled();
+      });
+
+      it('prohibits user from performing execute action if `canWriteExecuteOperations` is `false`', async () => {
+        await callRoute(EXECUTE_ROUTE, {
+          body: { endpoint_ids: ['XYZ'] },
+          authz: { canWriteExecuteOperations: false },
         });
         expect(mockResponse.forbidden).toBeCalled();
       });

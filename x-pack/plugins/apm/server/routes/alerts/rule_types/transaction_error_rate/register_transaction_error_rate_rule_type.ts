@@ -5,31 +5,28 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-import { firstValueFrom } from 'rxjs';
+import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
+import {
+  formatDurationFromTimeUnitChar,
+  ProcessorEvent,
+  TimeUnitChar,
+} from '@kbn/observability-plugin/common';
+import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
-import { asPercent } from '@kbn/observability-plugin/common/utils/formatters';
-import { termQuery } from '@kbn/observability-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
+import { firstValueFrom } from 'rxjs';
+import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
-import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
-import {
-  ApmRuleType,
-  RULE_TYPES_CONFIG,
-  APM_SERVER_FEATURE_ID,
-  formatTransactionErrorRateReason,
-} from '../../../../../common/rules/apm_rule_types';
 import {
   EVENT_OUTCOME,
   PROCESSOR_EVENT,
@@ -38,27 +35,27 @@ import {
   TRANSACTION_TYPE,
 } from '../../../../../common/es_fields/apm';
 import { EventOutcome } from '../../../../../common/event_outcome';
-import { asDecimalOrInteger } from '../../../../../common/utils/formatters';
+import {
+  ApmRuleType,
+  APM_SERVER_FEATURE_ID,
+  formatTransactionErrorRateReason,
+  RULE_TYPES_CONFIG,
+} from '../../../../../common/rules/apm_rule_types';
+import { transactionErrorRateParamsSchema } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
+import {
+  asDecimalOrInteger,
+  getAlertUrlTransaction,
+} from '../../../../../common/utils/formatters';
+import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/transactions';
 import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
-import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
-import { getDocumentTypeFilterForTransactions } from '../../../../lib/helpers/transactions';
 import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
-
-const paramsSchema = schema.object({
-  windowSize: schema.number(),
-  windowUnit: schema.string(),
-  threshold: schema.number(),
-  transactionType: schema.maybe(schema.string()),
-  serviceName: schema.maybe(schema.string()),
-  environment: schema.string(),
-});
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionErrorRate];
 
@@ -81,9 +78,7 @@ export function registerTransactionErrorRateRuleType({
       name: ruleTypeConfig.name,
       actionGroups: ruleTypeConfig.actionGroups,
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
-      validate: {
-        params: paramsSchema,
-      },
+      validate: { params: transactionErrorRateParamsSchema },
       actionVariables: {
         context: [
           ...(observability.getAlertDetailsConfig()?.apm.enabled
@@ -285,7 +280,10 @@ export function registerTransactionErrorRateRuleType({
             .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
               alertDetailsUrl,
               environment: getEnvironmentLabel(environment),
-              interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
+              interval: formatDurationFromTimeUnitChar(
+                ruleParams.windowSize,
+                ruleParams.windowUnit as TimeUnitChar
+              ),
               reason: reasonMessage,
               serviceName,
               threshold: ruleParams.threshold,

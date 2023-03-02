@@ -10,11 +10,11 @@
 // TODO: Refactor code - component can be broken apart
 import {
   EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiWindowEvent,
+  EuiHorizontalRule,
+  EuiFlexItem,
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { noop } from 'lodash/fp';
@@ -25,6 +25,8 @@ import type { Dispatch } from 'redux';
 import { isTab } from '@kbn/timelines-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import type { DocLinks } from '@kbn/doc-links';
+import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
+import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { FILTER_OPEN, TableId } from '../../../../common/types';
 import { tableDefaults } from '../../../common/store/data_table/defaults';
@@ -40,7 +42,6 @@ import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { setAbsoluteRangeDatePicker } from '../../../common/store/inputs/actions';
-import { AlertsTable } from '../../components/alerts_table';
 import { NoApiIntegrationKeyCallOut } from '../../components/callouts/no_api_integration_callout';
 import { useUserData } from '../../components/user_info';
 import { DetectionEngineNoIndex } from './detection_engine_no_index';
@@ -77,6 +78,8 @@ import { DetectionPageFilterSet } from '../../components/detection_page_filters'
 import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
+import { GroupedAlertsTable } from '../../components/alerts_table/grouped_alerts';
+import { AlertsTableComponent } from '../../components/alerts_table';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
  */
@@ -119,10 +122,10 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       isAuthenticated: isUserAuthenticated,
       hasEncryptionKey,
       signalIndexName,
-      hasIndexWrite = false,
-      hasIndexMaintenance = false,
       canUserREAD,
       hasIndexRead,
+      hasIndexWrite,
+      hasIndexMaintenance,
     },
   ] = useUserData();
   const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
@@ -151,8 +154,11 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
   } = useSourcererDataView(SourcererScopeName.detections);
 
   const { formatUrl } = useFormatUrl(SecurityPageName.rules);
-  const [showBuildingBlockAlerts, setShowBuildingBlockAlerts] = useState(false);
-  const [showOnlyThreatIndicatorAlerts, setShowOnlyThreatIndicatorAlerts] = useState(false);
+
+  const { showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts } = useDataTableFilters(
+    TableId.alertsOnAlertsPage
+  );
+
   const loading = userInfoLoading || listsConfigLoading;
   const {
     application: { navigateToUrl },
@@ -237,20 +243,6 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     [showBuildingBlockAlerts, showOnlyThreatIndicatorAlerts, alertPageFilters]
   );
 
-  const onShowBuildingBlockAlertsChangedCallback = useCallback(
-    (newShowBuildingBlockAlerts: boolean) => {
-      setShowBuildingBlockAlerts(newShowBuildingBlockAlerts);
-    },
-    [setShowBuildingBlockAlerts]
-  );
-
-  const onShowOnlyThreatIndicatorAlertsCallback = useCallback(
-    (newShowOnlyThreatIndicatorAlerts: boolean) => {
-      setShowOnlyThreatIndicatorAlerts(newShowOnlyThreatIndicatorAlerts);
-    },
-    [setShowOnlyThreatIndicatorAlerts]
-  );
-
   const { signalIndexNeedsInit, pollForSignalIndex } = useSignalHelpers();
 
   const onSkipFocusBeforeEventsTable = useCallback(() => {
@@ -301,6 +293,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     () => loading || areDetectionPageFiltersLoading,
     [loading, areDetectionPageFiltersLoading]
   );
+
   const isChartPanelLoading = useMemo(
     () => isLoadingIndexPattern || areDetectionPageFiltersLoading,
     [isLoadingIndexPattern, areDetectionPageFiltersLoading]
@@ -363,6 +356,21 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
       to,
       updatedAt,
     ]
+  );
+
+  const renderGroupedAlertTable = useCallback(
+    (groupingFilters: Filter[]) => {
+      return (
+        <AlertsTableComponent
+          configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE}
+          flyoutSize="m"
+          inputFilters={[...alertsTableDefaultFilters, ...groupingFilters]}
+          tableId={TableId.alertsOnAlertsPage}
+          isLoading={isAlertTableLoading}
+        />
+      );
+    },
+    [alertsTableDefaultFilters, isAlertTableLoading]
   );
 
   if (loading) {
@@ -444,23 +452,20 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
                 signalIndexName={signalIndexName}
                 updateDateRangeCallback={updateDateRangeCallback}
               />
-
               <EuiSpacer size="l" />
             </Display>
-            <AlertsTable
+            <GroupedAlertsTable
               tableId={TableId.alertsOnAlertsPage}
               loading={isAlertTableLoading}
               hasIndexWrite={hasIndexWrite ?? false}
               hasIndexMaintenance={hasIndexMaintenance ?? false}
               from={from}
               defaultFilters={alertsTableDefaultFilters}
-              showBuildingBlockAlerts={showBuildingBlockAlerts}
-              onShowBuildingBlockAlertsChanged={onShowBuildingBlockAlertsChangedCallback}
-              showOnlyThreatIndicatorAlerts={showOnlyThreatIndicatorAlerts}
-              onShowOnlyThreatIndicatorAlertsChanged={onShowOnlyThreatIndicatorAlertsCallback}
               signalIndexName={signalIndexName}
               runtimeMappings={runtimeMappings}
               to={to}
+              currentAlertStatusFilterValue={filterGroup}
+              renderChildComponent={renderGroupedAlertTable}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>

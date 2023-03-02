@@ -6,16 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { CSSProperties, ReactElement, useState } from 'react';
+import React, { CSSProperties, ReactElement, useCallback, useEffect, useState } from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
+import { StepTabs } from '../../test_run_details/step_tabs';
 import { ResultDetails } from './result_details';
 import { JourneyStep } from '../../../../../../common/runtime_types';
 import { JourneyStepScreenshotContainer } from '../screenshot/journey_step_screenshot_container';
@@ -34,6 +37,8 @@ interface Props {
   screenshotImageSize?: ScreenshotImageSize;
   compressed?: boolean;
   showExpand?: boolean;
+  testNowMode?: boolean;
+  showLastSuccessful?: boolean;
 }
 
 export function isStepEnd(step: JourneyStep) {
@@ -45,9 +50,11 @@ export const BrowserStepsList = ({
   error,
   loading,
   screenshotImageSize = THUMBNAIL_SCREENSHOT_SIZE,
+  showLastSuccessful = true,
   showStepNumber = false,
   compressed = true,
   showExpand = true,
+  testNowMode = false,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
   const stepEnds: JourneyStep[] = steps.filter(isStepEnd);
@@ -55,17 +62,38 @@ export const BrowserStepsList = ({
     Record<string, ReactElement>
   >({});
 
-  const toggleDetails = (item: JourneyStep) => {
-    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-    if (itemIdToExpandedRowMapValues[item._id]) {
-      delete itemIdToExpandedRowMapValues[item._id];
-    } else {
-      itemIdToExpandedRowMapValues[item._id] = <></>;
-    }
-    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
-  };
+  const toggleDetails = useCallback(
+    (item: JourneyStep) => {
+      setItemIdToExpandedRowMap((prevState) => {
+        const itemIdToExpandedRowMapValues = { ...prevState };
+        if (itemIdToExpandedRowMapValues[item._id]) {
+          delete itemIdToExpandedRowMapValues[item._id];
+        } else {
+          if (testNowMode) {
+            itemIdToExpandedRowMapValues[item._id] = (
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <StepTabs step={item} loading={false} stepsList={steps} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          } else {
+            itemIdToExpandedRowMapValues[item._id] = <></>;
+          }
+        }
+        return itemIdToExpandedRowMapValues;
+      });
+    },
+    [steps, testNowMode]
+  );
 
-  const showLastSuccessful = true;
+  const failedStep = stepEnds?.find((step) => step.synthetics.step?.status === 'failed');
+
+  useEffect(() => {
+    if (failedStep && showExpand) {
+      toggleDetails(failedStep);
+    }
+  }, [failedStep, showExpand, toggleDetails]);
 
   const columns: Array<EuiBasicTableColumn<JourneyStep>> = [
     ...(showExpand
@@ -104,8 +132,8 @@ export const BrowserStepsList = ({
           checkGroup={step.monitor.check_group}
           initialStepNumber={step.synthetics?.step?.index}
           stepStatus={step.synthetics.payload?.status}
-          allStepsLoaded={true}
-          retryFetchOnRevisit={false}
+          allStepsLoaded={!loading}
+          retryFetchOnRevisit={true}
           size={screenshotImageSize}
         />
       ),
@@ -145,7 +173,7 @@ export const BrowserStepsList = ({
         <ResultDetails
           step={item}
           pingStatus={pingStatus}
-          isExpanded={Boolean(itemIdToExpandedRowMap[item._id])}
+          isExpanded={Boolean(itemIdToExpandedRowMap[item._id]) && !testNowMode}
         />
       ),
     },
@@ -218,6 +246,7 @@ export const BrowserStepsList = ({
         }
         tableLayout={'auto'}
         itemId="_id"
+        itemIdToExpandedRowMap={testNowMode ? itemIdToExpandedRowMap : undefined}
       />
     </>
   );

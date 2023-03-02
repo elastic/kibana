@@ -166,9 +166,7 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<",
-                  "Readable",
-                  "> | ",
+                  "<Buffer> | ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -176,7 +174,9 @@
                     "section": "def-common.DeepPartialObject",
                     "text": "DeepPartialObject"
                   },
-                  "<Buffer> | undefined; plugins?: ",
+                  "<",
+                  "Readable",
+                  "> | undefined; plugins?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -205,8 +205,8 @@
                     "text": "DeepPartialObject"
                   },
                   "<",
-                  "Boom",
-                  "<any>> | ",
+                  "ResponseObject",
+                  "> | ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",
@@ -215,8 +215,8 @@
                     "text": "DeepPartialObject"
                   },
                   "<",
-                  "ResponseObject",
-                  "> | undefined; readonly preResponses?: ",
+                  "Boom",
+                  "<any>> | undefined; readonly preResponses?: ",
                   {
                     "pluginId": "@kbn/utility-types",
                     "scope": "common",

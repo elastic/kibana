@@ -124,9 +124,10 @@
               "(kibanaResponse: ",
               "KibanaResponse",
               "<any>) => ",
+              "ResponseObject",
+              " | ",
               "Boom",
-              "<any> | ",
-              "ResponseObject"
+              "<any>"
             ],
             "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
             "deprecated": false,
@@ -380,15 +381,29 @@
           },
           {
             "parentPluginId": "@kbn/core-http-router-server-internal",
+            "id": "def-common.kibanaResponseFactory.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/core/http/core-http-router-server-internal/src/response.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-router-server-internal",
             "id": "def-common.kibanaResponseFactory.custom",
             "type": "Function",
             "tags": [],
             "label": "custom",
             "description": [],
             "signature": [
-              "<T extends string | Record<string, any> | Error | ",
+              "<T extends string | Record<string, any> | Error | Buffer | ",
               "Stream",
-              " | Buffer | { message: string | Error; attributes?: ",
+              " | { message: string | Error; attributes?: ",
               {
                 "pluginId": "@kbn/core-http-server",
                 "scope": "common",

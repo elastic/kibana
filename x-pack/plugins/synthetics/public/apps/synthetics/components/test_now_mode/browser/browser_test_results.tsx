@@ -7,7 +7,16 @@
 
 import { useEffect } from 'react';
 import * as React from 'react';
-import { EuiAccordion, EuiText, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiLoadingSpinner,
+  EuiTitle,
+  EuiCallOut,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';
@@ -24,6 +33,7 @@ interface Props {
   onDone: (testRunId: string) => void;
 }
 export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const { summariesLoading, expectedSummariesLoaded, stepLoadingInProgress, checkGroupResults } =
     useBrowserRunOnceMonitors({
       testRunId,
@@ -44,6 +54,8 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
         const isStepsLoading = !summariesLoading && journeyStarted && summaryDoc && stepsLoading;
         const isStepsLoadingFailed =
           summaryDoc && !summariesLoading && !stepLoadingInProgress && steps.length === 0;
+
+        const isDownMonitor = summaryDoc?.monitor?.status === 'down';
 
         return (
           <AccordionWrapper
@@ -67,23 +79,49 @@ export const BrowserTestRunResult = ({ expectPings, onDone, testRunId }: Props) 
                 </EuiFlexItem>
               </EuiFlexGroup>
             )}
-            {isStepsLoadingFailed && (
-              <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
+
+            {(isStepsLoadingFailed || isDownMonitor) && (
+              <EuiCallOut
+                data-test-subj="monitorTestRunErrorCallout"
+                style={{
+                  marginTop: euiTheme.base,
+                  marginBottom: euiTheme.base,
+                  borderRadius: euiTheme.border.radius.medium,
+                  fontWeight: euiTheme.font.weight.semiBold,
+                }}
+                title={ERROR_RUNNING_TEST}
+                size="s"
+                color="danger"
+                iconType="alert"
+              >
+                <EuiText color="danger">{summaryDoc?.error?.message ?? FAILED_TO_RUN}</EuiText>
+              </EuiCallOut>
             )}
 
-            {isStepsLoadingFailed &&
+            {(isStepsLoadingFailed || isDownMonitor) &&
               summaryDoc?.error?.message?.includes('journey did not finish executing') && (
-                <StdErrorLogs checkGroup={summaryDoc.monitor.check_group} hideTitle={true} />
+                <StdErrorLogs
+                  checkGroup={summaryDoc.monitor.check_group}
+                  hideTitle={completedSteps === 0}
+                  pageSize={completedSteps === 0 ? 5 : 2}
+                />
               )}
 
             {completedSteps > 0 && (
-              <BrowserStepsList
-                steps={steps}
-                loading={Boolean(stepLoadingInProgress)}
-                error={undefined}
-                showStepNumber={true}
-                compressed={true}
-              />
+              <>
+                <EuiTitle size="xxxs">
+                  <h3>{STEPS_LABEL}</h3>
+                </EuiTitle>
+                <BrowserStepsList
+                  steps={steps}
+                  loading={Boolean(stepLoadingInProgress)}
+                  error={undefined}
+                  showStepNumber={true}
+                  compressed={true}
+                  testNowMode={true}
+                  showLastSuccessful={false}
+                />
+              </>
             )}
           </AccordionWrapper>
         );
@@ -132,10 +170,18 @@ function getButtonContent({
   );
 }
 
-const FAILED_TO_RUN = i18n.translate('xpack.synthetics.monitorManagement.failedRun', {
+export const FAILED_TO_RUN = i18n.translate('xpack.synthetics.monitorManagement.failedRun', {
   defaultMessage: 'Failed to run steps',
+});
+
+export const ERROR_RUNNING_TEST = i18n.translate('xpack.synthetics.testRun.runErrorLabel', {
+  defaultMessage: 'Error running test',
 });
 
 const LOADING_STEPS = i18n.translate('xpack.synthetics.monitorManagement.loadingSteps', {
   defaultMessage: 'Loading steps...',
+});
+
+const STEPS_LABEL = i18n.translate('xpack.synthetics.monitorManagement.steps', {
+  defaultMessage: 'Steps',
 });

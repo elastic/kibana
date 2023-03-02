@@ -8,34 +8,38 @@
 import type SuperTest from 'supertest';
 import { parse as parseCookie, Cookie } from 'tough-cookie';
 
-import { UserProfileBulkGetParams, UserProfileServiceStart } from '@kbn/security-plugin/server';
 import { INTERNAL_SUGGEST_USER_PROFILES_URL } from '@kbn/cases-plugin/common/constants';
 import { SuggestUserProfilesRequest } from '@kbn/cases-plugin/common/api';
 import { UserProfileService } from '@kbn/cases-plugin/server/services';
+import { UserProfileAvatarData } from '@kbn/security-plugin/common';
+import { UserProfile, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { superUser } from '../authentication/users';
 import { User } from '../authentication/types';
 import { getSpaceUrlPrefix } from './helpers';
 import { FtrProviderContext as CommonFtrProviderContext } from '../../ftr_provider_context';
 import { getUserInfo } from '../authentication';
 
-type BulkGetUserProfilesParams = Omit<UserProfileBulkGetParams, 'uids'> & { uids: string[] };
+interface BulkGetUserProfilesParams<T> {
+  uids: string[];
+  dataPath?: T;
+}
 
 export const generateFakeAssignees = (num: number) =>
   Array.from(Array(num).keys()).map((uid) => {
     return { uid: `${uid}` };
   });
 
-export const bulkGetUserProfiles = async ({
+export const bulkGetUserProfiles = async <T extends string>({
   supertest,
   req,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
-  req: BulkGetUserProfilesParams;
+  req: BulkGetUserProfilesParams<T>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): ReturnType<UserProfileServiceStart['bulkGet']> => {
+}): Promise<Array<T extends 'avatar' ? UserProfileWithAvatar : UserProfile>> => {
   const { uids, ...restParams } = req;
   const uniqueIDs = [...new Set(uids)];
 
@@ -68,6 +72,31 @@ export const suggestUserProfiles = async ({
     .expect(expectedHttpCode);
 
   return profiles;
+};
+
+/**
+ * Updates the avatar of a user.
+ * The API needs a valid user session.
+ * The session acts as the user identifier
+ * whose the avatar is updated.
+ */
+export const updateUserProfileAvatar = async ({
+  supertest,
+  req,
+  expectedHttpCode = 200,
+  headers = {},
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  req: UserProfileAvatarData;
+  expectedHttpCode?: number;
+  headers?: Record<string, unknown>;
+}): Promise<void> => {
+  await supertest
+    .post('/internal/security/user_profile/_data')
+    .set('kbn-xsrf', 'true')
+    .set(headers)
+    .send({ avatar: req })
+    .expect(expectedHttpCode);
 };
 
 export const loginUsers = async ({

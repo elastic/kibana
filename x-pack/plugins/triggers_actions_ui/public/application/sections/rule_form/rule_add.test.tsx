@@ -13,7 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormLabel } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import RuleAdd from './rule_add';
-import { createRule, alertingFrameworkHealth } from '../../lib/rule_api';
+import { createRule } from '../../lib/rule_api/create';
+import { alertingFrameworkHealth } from '../../lib/rule_api/health';
 import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import {
   Rule,
@@ -32,9 +33,13 @@ import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api'
 
 jest.mock('../../../common/lib/kibana');
 
-jest.mock('../../lib/rule_api', () => ({
+jest.mock('../../lib/rule_api/rule_types', () => ({
   loadRuleTypes: jest.fn(),
+}));
+jest.mock('../../lib/rule_api/create', () => ({
   createRule: jest.fn(),
+}));
+jest.mock('../../lib/rule_api/health', () => ({
   alertingFrameworkHealth: jest.fn(() => ({
     isSufficientlySecure: true,
     hasPermanentEncryptionKey: true,
@@ -88,7 +93,7 @@ describe('rule_add', () => {
   ) {
     const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
     const mocks = coreMock.createSetup();
-    const { loadRuleTypes } = jest.requireMock('../../lib/rule_api');
+    const { loadRuleTypes } = jest.requireMock('../../lib/rule_api/rule_types');
     const ruleTypes = [
       {
         id: 'my-rule-type',

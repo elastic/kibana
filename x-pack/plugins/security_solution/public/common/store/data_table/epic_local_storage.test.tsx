@@ -40,7 +40,6 @@ import { addTableInStorage } from '../../../timelines/containers/local_storage';
 import { Direction } from '../../../../common/search_strategy';
 import { StatefulEventsViewer } from '../../components/events_viewer';
 import { eventsDefaultModel } from '../../components/events_viewer/default_model';
-import { defaultCellActions } from '../../lib/cell_actions/default_cell_actions';
 import { EntityType } from '@kbn/timelines-plugin/common';
 import { getDefaultControlColumn } from '../../../timelines/components/timeline/body/control_columns';
 import { SourcererScopeName } from '../sourcerer/model';
@@ -64,7 +63,6 @@ describe('epicLocalStorage', () => {
     const ACTION_BUTTON_COUNT = 4;
 
     testProps = {
-      defaultCellActions,
       defaultModel: eventsDefaultModel,
       end: to,
       entityType: EntityType.ALERTS,

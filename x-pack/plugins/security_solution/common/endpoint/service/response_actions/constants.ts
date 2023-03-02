@@ -51,3 +51,7 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
 ] as const;
 
 export type ConsoleResponseActionCommands = typeof CONSOLE_RESPONSE_ACTION_COMMANDS[number];
+
+// 4 hrs in milliseconds
+// 4 * 60 * 60 * 1000
+export const DEFAULT_EXECUTE_ACTION_TIMEOUT = 14400000;

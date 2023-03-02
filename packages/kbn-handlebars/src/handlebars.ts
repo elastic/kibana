@@ -7,7 +7,7 @@
 // https://www.typescriptlang.org/docs/handbook/modules.html#export--and-import--require
 import Handlebars from 'handlebars';
 
-import type { DecoratorsHash, ExtendedCompileOptions, ExtendedRuntimeOptions } from './types';
+import type { CompileOptions, RuntimeOptions, TemplateDelegate } from './types';
 import { ElasticHandlebarsVisitor } from './visitor';
 
 const originalCreate = Handlebars.create;
@@ -30,15 +30,10 @@ Handlebars.create = function (): typeof Handlebars {
   return SandboxedHandlebars;
 };
 
-/**
- * Compiles the given Handlbars template without the use of `eval`.
- *
- * @returns A render function with the same API as the return value from the regular Handlebars `compile` function.
- */
 Handlebars.compileAST = function (
   input: string | hbs.AST.Program,
-  options?: ExtendedCompileOptions
-) {
+  options?: CompileOptions
+): TemplateDelegate {
   if (input == null || (typeof input !== 'string' && input.type !== 'Program')) {
     throw new Handlebars.Exception(
       `You must pass a string or Handlebars AST to Handlebars.compileAST. You passed ${input}`
@@ -46,11 +41,7 @@ Handlebars.compileAST = function (
   }
 
   // If `Handlebars.compileAST` is reassigned, `this` will be undefined.
-  const helpers = (this ?? Handlebars).helpers;
-  const partials = (this ?? Handlebars).partials;
-  const decorators = (this ?? Handlebars).decorators as DecoratorsHash;
+  const visitor = new ElasticHandlebarsVisitor(this ?? Handlebars, input, options);
 
-  const visitor = new ElasticHandlebarsVisitor(this, input, options, helpers, partials, decorators);
-  return (context: any, runtimeOptions?: ExtendedRuntimeOptions) =>
-    visitor.render(context, runtimeOptions);
+  return (context: any, runtimeOptions?: RuntimeOptions) => visitor.render(context, runtimeOptions);
 };

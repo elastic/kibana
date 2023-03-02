@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { fireEvent, render, within } from '@testing-library/react';
 
 import { ExceptionsAddToRulesTable } from '.';
 import { TestProviders } from '../../../../../common/mock';
@@ -17,23 +17,19 @@ import type { Rule } from '../../../../rule_management/logic/types';
 jest.mock('../../../../rule_management/logic/use_find_rules');
 
 describe('ExceptionsAddToRulesTable', () => {
-  it('it displays loading state while fetching rules', () => {
+  it('should display the loading state while fetching rules', () => {
     (useFindRules as jest.Mock).mockReturnValue({
       data: { rules: [], total: 0 },
       isFetched: false,
     });
-    const wrapper = mountWithIntl(
-      <TestProviders>
-        <ExceptionsAddToRulesTable initiallySelectedRules={[]} onRuleSelectionChange={jest.fn()} />
-      </TestProviders>
+    const wrapper = render(
+      <ExceptionsAddToRulesTable initiallySelectedRules={[]} onRuleSelectionChange={jest.fn()} />
     );
 
-    expect(
-      wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-loading"]').exists()
-    ).toBeTruthy();
+    expect(wrapper.getByTestId('exceptionItemViewerEmptyPromptsLoading')).toBeInTheDocument();
   });
 
-  it.skip('it displays fetched rules', () => {
+  it('should display the fetched rule selected', () => {
     (useFindRules as jest.Mock).mockReturnValue({
       data: {
         rules: [getRulesSchemaMock(), { ...getRulesSchemaMock(), id: '345', name: 'My rule' }],
@@ -41,7 +37,7 @@ describe('ExceptionsAddToRulesTable', () => {
       },
       isFetched: true,
     });
-    const wrapper = mountWithIntl(
+    const wrapper = render(
       <TestProviders>
         <ExceptionsAddToRulesTable
           initiallySelectedRules={[{ ...getRulesSchemaMock(), id: '345', name: 'My rule' } as Rule]}
@@ -49,12 +45,34 @@ describe('ExceptionsAddToRulesTable', () => {
         />
       </TestProviders>
     );
+    expect(wrapper.queryByTestId('exceptionItemViewerEmptyPromptsLoading')).toBeFalsy();
+    const selectedRow = wrapper.getByText('My rule').closest('tr') as HTMLTableRowElement;
+    const selectedSwitch = within(selectedRow).getByRole('switch');
+    expect(selectedSwitch).toBeChecked();
+  });
 
-    expect(
-      wrapper.find('[data-test-subj="exceptionItemViewerEmptyPrompts-loading"]').exists()
-    ).toBeFalsy();
-    expect(
-      wrapper.find('.euiTableRow-isSelected td[data-test-subj="ruleNameCell"]').text()
-    ).toEqual('NameMy rule');
+  it('should invoke the onRuleSelectionChange when link switch is clicked', () => {
+    (useFindRules as jest.Mock).mockReturnValue({
+      data: {
+        rules: [getRulesSchemaMock(), { ...getRulesSchemaMock(), id: '345', name: 'My rule' }],
+        total: 0,
+      },
+      isFetched: true,
+    });
+    const onRuleSelectionChangeMock = jest.fn();
+    const rule = { ...getRulesSchemaMock(), id: '345', name: 'My rule' };
+    const { queryByTestId, getByText } = render(
+      <TestProviders>
+        <ExceptionsAddToRulesTable
+          initiallySelectedRules={[rule as Rule]}
+          onRuleSelectionChange={onRuleSelectionChangeMock}
+        />
+      </TestProviders>
+    );
+    expect(queryByTestId('exceptionItemViewerEmptyPromptsLoading')).toBeFalsy();
+    const selectedRow = getByText('My rule').closest('tr') as HTMLTableRowElement;
+    const selectedSwitch = within(selectedRow).getByRole('switch');
+    fireEvent.click(selectedSwitch);
+    expect(onRuleSelectionChangeMock).toBeCalledWith([rule]);
   });
 });

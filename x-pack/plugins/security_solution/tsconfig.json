@@ -17,6 +17,7 @@
   "exclude": [
     "target/**/*",
     "**/cypress/**",
+    "public/management/cypress_endpoint.config.ts",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -35,6 +36,7 @@
     "@kbn/actions-plugin",
     "@kbn/alerting-plugin",
     "@kbn/cases-plugin",
+    "@kbn/cloud-defend-plugin",
     "@kbn/cloud-experiments-plugin",
     "@kbn/cloud-security-posture-plugin",
     "@kbn/encrypted-saved-objects-plugin",
@@ -130,7 +132,6 @@
     "@kbn/core-status-common-internal",
     "@kbn/repo-info",
     "@kbn/storybook",
-    "@kbn/ecs",
     "@kbn/cypress-config",
     "@kbn/controls-plugin",
     "@kbn/shared-ux-utility",
@@ -140,5 +141,8 @@
     "@kbn/guided-onboarding",
     "@kbn/securitysolution-ecs",
     "@kbn/cell-actions",
+    "@kbn/shared-ux-router",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/expandable-flyout",
   ]
 }

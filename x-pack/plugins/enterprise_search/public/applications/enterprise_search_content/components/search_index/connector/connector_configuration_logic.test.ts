@@ -56,7 +56,7 @@ describe('ConnectorConfigurationLogic', () => {
       expect(ConnectorConfigurationLogic.values).toEqual({
         ...DEFAULT_VALUES,
         configState: { foo: { label: 'newBar', value: 'oldBar' } },
-        configView: [{ key: 'foo', label: 'newBar', value: 'oldBar' }],
+        configView: [{ isPasswordField: false, key: 'foo', label: 'newBar', value: 'oldBar' }],
       });
     });
     it('should set config on setConfigState', () => {
@@ -66,7 +66,7 @@ describe('ConnectorConfigurationLogic', () => {
       expect(ConnectorConfigurationLogic.values).toEqual({
         ...DEFAULT_VALUES,
         configState: { foo: { label: 'thirdBar', value: 'fourthBar' } },
-        configView: [{ key: 'foo', label: 'thirdBar', value: 'fourthBar' }],
+        configView: [{ isPasswordField: false, key: 'foo', label: 'thirdBar', value: 'fourthBar' }],
       });
     });
     describe('setLocalConfigEntry', () => {
@@ -92,8 +92,8 @@ describe('ConnectorConfigurationLogic', () => {
             password: { label: 'thirdBar', value: 'fourthBar' },
           },
           configView: [
-            { key: 'bar', label: 'foo', value: 'foofoo' },
-            { key: 'password', label: 'thirdBar', value: 'fourthBar' },
+            { isPasswordField: false, key: 'bar', label: 'foo', value: 'foofoo' },
+            { isPasswordField: true, key: 'password', label: 'thirdBar', value: 'fourthBar' },
           ],
           localConfigState: {
             bar: { label: 'foo', value: 'fafa' },
@@ -112,7 +112,7 @@ describe('ConnectorConfigurationLogic', () => {
         expect(ConnectorConfigurationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           configState: connectorIndex.connector.configuration,
-          configView: [{ key: 'foo', label: 'bar', value: 'barbar' }],
+          configView: [{ isPasswordField: false, key: 'foo', label: 'bar', value: 'barbar' }],
           index: connectorIndex,
         });
       });
@@ -134,7 +134,7 @@ describe('ConnectorConfigurationLogic', () => {
         expect(ConnectorConfigurationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           configState: connectorIndex.connector.configuration,
-          configView: [{ key: 'foo', label: 'bar', value: 'barbar' }],
+          configView: [{ isPasswordField: false, key: 'foo', label: 'bar', value: 'barbar' }],
           index: {
             ...connectorIndex,
             connector: { ...connectorIndex.connector, status: ConnectorStatus.NEEDS_CONFIGURATION },
@@ -155,7 +155,7 @@ describe('ConnectorConfigurationLogic', () => {
         });
         ConnectorConfigurationLogic.actions.saveConfig();
         expect(ConnectorConfigurationLogic.actions.makeRequest).toHaveBeenCalledWith({
-          configuration: { foo: { label: 'bar', value: 'Barbara' } },
+          configuration: { foo: 'Barbara' },
           connectorId: '2',
           indexName: 'connector',
         });

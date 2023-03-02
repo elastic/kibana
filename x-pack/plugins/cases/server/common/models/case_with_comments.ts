@@ -35,17 +35,18 @@ import {
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
-import type { CaseSavedObject } from '../types';
+import type { AlertInfo, CaseSavedObject } from '../types';
 import {
   countAlertsForID,
   flattenCommentSavedObjects,
   transformNewComment,
   getOrUpdateLensReferences,
-  createAlertUpdateRequest,
   isCommentRequestTypeAlert,
+  getAlertInfoFromComments,
 } from '../utils';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
+
 const ALERT_LIMIT_MSG = `Case has reached the maximum allowed number (${MAX_ALERTS_PER_CASE}) of attached alerts.`;
 
 /**
@@ -306,25 +307,36 @@ export class CaseCommentModel {
   }
 
   private async handleAlertComments(attachments: CommentRequest[]) {
-    const alerts = attachments.filter(
-      (attachment) =>
-        attachment.type === CommentType.alert && this.caseInfo.attributes.settings.syncAlerts
+    const alertAttachments = attachments.filter(
+      (attachment): attachment is CommentRequestAlertType => attachment.type === CommentType.alert
     );
 
-    await this.updateAlertsStatus(alerts);
+    const alerts = getAlertInfoFromComments(alertAttachments);
+
+    if (alerts.length > 0) {
+      await this.params.services.alertsService.ensureAlertsAuthorized({ alerts });
+      await this.updateAlertsSchemaWithCaseInfo(alerts);
+
+      if (this.caseInfo.attributes.settings.syncAlerts) {
+        await this.updateAlertsStatus(alerts);
+      }
+    }
   }
 
-  private async updateAlertsStatus(alerts: CommentRequest[]) {
-    const alertsToUpdate = alerts
-      .map((alert) =>
-        createAlertUpdateRequest({
-          comment: alert,
-          status: this.caseInfo.attributes.status,
-        })
-      )
-      .flat();
+  private async updateAlertsStatus(alerts: AlertInfo[]) {
+    const alertsToUpdate = alerts.map((alert) => ({
+      ...alert,
+      status: this.caseInfo.attributes.status,
+    }));
 
     await this.params.services.alertsService.updateAlertsStatus(alertsToUpdate);
+  }
+
+  private async updateAlertsSchemaWithCaseInfo(alerts: AlertInfo[]) {
+    await this.params.services.alertsService.bulkUpdateCases({
+      alerts,
+      caseIds: [this.caseInfo.id],
+    });
   }
 
   private async createCommentUserAction(

@@ -12,6 +12,7 @@ jobs:
       actions: read
       contents: read
       security-events: write
+    if: github.repository == 'elastic/kibana' # Hack: Do not run on forks
 
     strategy:
       fail-fast: false

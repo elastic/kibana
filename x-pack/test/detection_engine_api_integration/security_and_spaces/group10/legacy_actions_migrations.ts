@@ -121,6 +121,7 @@ export default ({ getService }: FtrProviderContext) => {
             subject: 'Test Actions',
             to: ['test@test.com'],
           },
+          uuid: ruleSO?.alert.actions[0].uuid,
         },
       ]);
       expect(ruleSO?.alert.throttle).to.eql(null);
@@ -179,6 +180,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           actionRef: 'action_0',
           group: 'default',
+          uuid: ruleSO?.alert.actions[0].uuid,
         },
         {
           actionTypeId: '.slack',
@@ -187,6 +189,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           actionRef: 'action_1',
           group: 'default',
+          uuid: ruleSO?.alert.actions[1].uuid,
         },
       ]);
       expect(ruleSO?.alert.throttle).to.eql('1h');
@@ -249,6 +252,7 @@ export default ({ getService }: FtrProviderContext) => {
             subject: 'Test Actions',
             to: ['test@test.com'],
           },
+          uuid: ruleSO?.alert.actions[0].uuid,
         },
       ]);
       expect(ruleSO?.alert.throttle).to.eql('1d');
@@ -306,6 +310,7 @@ export default ({ getService }: FtrProviderContext) => {
             subject: 'Test Actions',
             to: ['test@test.com'],
           },
+          uuid: ruleSO?.alert.actions[0].uuid,
         },
       ]);
       expect(ruleSO?.alert.throttle).to.eql('7d');

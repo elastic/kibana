@@ -1,9 +1,9 @@
 {
   "author": "Elastic",
-  "name": "ml",
-  "version": "0.0.0",
+  "name": "@kbn/ml-plugin",
+  "version": "1.0.0",
   "private": true,
-  "license": "Elastic-License",
+  "license": "Elastic License 2.0",
   "scripts": {
     "build:apiDocScripts": "cd server/routes/apidoc_scripts && ../../../../../../node_modules/.bin/tsc",
     "generateHeader": "node server/routes/apidoc_scripts/target/header_generator.js",

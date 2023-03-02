@@ -81,7 +81,7 @@ const getDescriptionListItems = (shortcuts: ShortcutMap[]): DescriptionListItem[
 
 export const KeyboardShortcutsDoc: FunctionComponent<Props> = ({ onClose }) => (
   <EuiFlyout
-    closeButtonAriaLabel={strings.getFlyoutCloseButtonAriaLabel()}
+    closeButtonProps={{ 'aria-label': strings.getFlyoutCloseButtonAriaLabel() }}
     size="s"
     onClose={onClose}
   >
