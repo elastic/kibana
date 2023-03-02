@@ -66,18 +66,18 @@ describe('getShouldRefresh', () => {
   describe('timeRange changes', () => {
     test('should return false when timeRange does not change', async () => {
       const lastInput = {
-        timeRange: { from: 'now-15m', to: 'now'  },
+        timeRange: { from: 'now-15m', to: 'now' },
       } as unknown as DashboardContainerByValueInput;
       expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, lastInput)).toBe(false);
     });
 
     test('should return true when timeRange changes (timeRestore is true)', async () => {
       const lastInput = {
-        timeRange: { from: 'now-15m', to: 'now'  },
+        timeRange: { from: 'now-15m', to: 'now' },
         timeRestore: true,
       } as unknown as DashboardContainerByValueInput;
       const input = {
-        timeRange: { from: 'now-30m', to: 'now'  },
+        timeRange: { from: 'now-30m', to: 'now' },
         timeRestore: true,
       } as unknown as DashboardContainerByValueInput;
       expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(true);
@@ -85,11 +85,11 @@ describe('getShouldRefresh', () => {
 
     test('should return true when timeRange changes (timeRestore is false)', async () => {
       const lastInput = {
-        timeRange: { from: 'now-15m', to: 'now'  },
+        timeRange: { from: 'now-15m', to: 'now' },
         timeRestore: false,
       } as unknown as DashboardContainerByValueInput;
       const input = {
-        timeRange: { from: 'now-30m', to: 'now'  },
+        timeRange: { from: 'now-30m', to: 'now' },
         timeRestore: false,
       } as unknown as DashboardContainerByValueInput;
       expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(true);

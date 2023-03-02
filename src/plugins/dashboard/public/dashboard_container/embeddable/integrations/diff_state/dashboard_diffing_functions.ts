@@ -128,6 +128,9 @@ export const shouldRefreshDiffingFunctions: DashboardDiffFunctions = {
       return true;
     }
 
-    return areTimesEqual(currentValue?.from, lastValue?.from) && areTimesEqual(currentValue?.to, lastValue?.to);
+    return (
+      areTimesEqual(currentValue?.from, lastValue?.from) &&
+      areTimesEqual(currentValue?.to, lastValue?.to)
+    );
   },
 };
