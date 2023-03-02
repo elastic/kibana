@@ -71,11 +71,9 @@ export function AlertDetailsAppSection({
             defaultMessage="Actual value"
           />
         ),
-        value: String(
-          formatAlertEvaluationValue(
-            alert?.fields[ALERT_RULE_TYPE_ID],
-            alert?.fields[ALERT_EVALUATION_VALUE]
-          )
+        value: formatAlertEvaluationValue(
+          alert?.fields[ALERT_RULE_TYPE_ID],
+          alert?.fields[ALERT_EVALUATION_VALUE]
         ),
       },
       {
@@ -85,11 +83,9 @@ export function AlertDetailsAppSection({
             defaultMessage="Expected value"
           />
         ),
-        value: String(
-          formatAlertEvaluationValue(
-            alert?.fields[ALERT_RULE_TYPE_ID],
-            alert?.fields[ALERT_EVALUATION_THRESHOLD]
-          )
+        value: formatAlertEvaluationValue(
+          alert?.fields[ALERT_RULE_TYPE_ID],
+          alert?.fields[ALERT_EVALUATION_THRESHOLD]
         ),
       },
       {

@@ -10,7 +10,7 @@ import { TopAlert } from '../alerts/containers/alerts_page/types';
 
 export interface AlertSummaryField {
   label: ReactNode | string;
-  value: string;
+  value: string | number;
 }
 export interface AlertSummaryProps {
   alert: TopAlert | null;
