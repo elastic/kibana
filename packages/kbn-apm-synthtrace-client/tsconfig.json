@@ -15,6 +15,5 @@
   "kbn_references": [
     "@kbn/datemath",
     "@kbn/safer-lodash-set",
-    "@kbn/apm-plugin",
   ]
 }

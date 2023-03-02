@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AgentName } from '@kbn/apm-plugin/typings/es_schemas/ui/fields/agent';
+import { AgentName } from '../../types/agent_names';
 import { apm } from '../apm';
 import { Instance } from '../apm/instance';
 import { elasticsearchSpan, redisSpan, sqliteSpan, Span } from '../apm/span';

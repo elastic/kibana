@@ -175,7 +175,7 @@ describe('serviceMap', () => {
       const traceDocs = transactions.flatMap(getTraceDocsSubset);
       for (const doc of traceDocs) {
         if (!(doc['service.name']! in SERVICE_AGENT_MAP)) {
-          throw `Unexpected service name '${doc['service.name']}' found`;
+          throw new Error(`Unexpected service name '${doc['service.name']}' found`);
         }
 
         expect(doc).toHaveProperty(['agent.name'], SERVICE_AGENT_MAP[doc['service.name']!]);
