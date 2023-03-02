@@ -23,7 +23,7 @@ import type {
 } from '@kbn/expression-xy-plugin/common';
 import {
   EventAnnotationConfig,
-  EventAnnotationGroupAttributes,
+  EventAnnotationGroupConfig,
 } from '@kbn/event-annotation-plugin/common';
 import {
   IconChartArea,
@@ -115,7 +115,7 @@ export interface XYReferenceLineLayerConfig {
   layerType: 'referenceLine';
 }
 
-export interface ByValueXYAnnotationLayerConfig {
+export interface XYByValueAnnotationLayerConfig {
   layerId: string;
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
@@ -126,15 +126,13 @@ export interface ByValueXYAnnotationLayerConfig {
 }
 
 export type XYPersistedByValueAnnotationLayerConfig = Omit<
-  ByValueXYAnnotationLayerConfig,
+  XYByValueAnnotationLayerConfig,
   'indexPatternId'
 >;
 
-export type XYByReferenceAnnotationLayerConfig = ByValueXYAnnotationLayerConfig & {
+export type XYByReferenceAnnotationLayerConfig = XYByValueAnnotationLayerConfig & {
   annotationGroupId: string;
-  __lastSaved: ByValueXYAnnotationLayerConfig & {
-    title: EventAnnotationGroupAttributes['title'];
-  };
+  __lastSaved: EventAnnotationGroupConfig;
 };
 
 export interface XYPersistedByReferenceAnnotationLayerConfig {
@@ -145,17 +143,11 @@ export interface XYPersistedByReferenceAnnotationLayerConfig {
 
 export type XYAnnotationLayerConfig =
   | XYByReferenceAnnotationLayerConfig
-  | ByValueXYAnnotationLayerConfig;
+  | XYByValueAnnotationLayerConfig;
 
 export type XYPersistedAnnotationLayerConfig =
   | XYPersistedByReferenceAnnotationLayerConfig
   | XYPersistedByValueAnnotationLayerConfig;
-
-export const isByReferenceXyAnnotationLayer = (
-  layer: XYByReferenceAnnotationLayerConfig | ByValueXYAnnotationLayerConfig
-): layer is XYByReferenceAnnotationLayerConfig => {
-  return 'annotationGroupId' in layer && '__lastSaved' in layer;
-};
 
 export type XYPersistedLayerConfig =
   | XYDataLayerConfig

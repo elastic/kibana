@@ -205,9 +205,13 @@ export const getXyVisualization = ({
   getPersistableState(state) {
     return getPersistableState(state);
   },
-  // how to implement this for saved object annotations?
-  fromPersistableState(state, references, initialContext) {
-    return injectReferences(state, references, initialContext);
+
+  fromPersistableState(state, annotationGroups, references, initialContext) {
+    if (!references || !references.length) {
+      return state as XYState;
+    }
+
+    return injectReferences(state, annotationGroups, references, initialContext);
   },
 
   getDescription,

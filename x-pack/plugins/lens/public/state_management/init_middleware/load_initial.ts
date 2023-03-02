@@ -114,6 +114,7 @@ export function loadInitial(
   const loaderSharedArgs = {
     dataViews: lensServices.dataViews,
     storage: lensServices.storage,
+    eventAnnotationService: lensServices.eventAnnotationService,
     defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),
   };
 
@@ -302,6 +303,7 @@ export function loadInitial(
               references: [...doc.references, ...(doc.state.internalReferences || [])],
               initialContext,
               dataViews: lensServices.dataViews,
+              eventAnnotationService: lensServices.eventAnnotationService,
               storage: lensServices.storage,
               adHocDataViews: doc.state.adHocDataViews,
               defaultIndexPatternId: lensServices.uiSettings.get('defaultIndex'),

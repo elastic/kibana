@@ -39,6 +39,7 @@ import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
 import React from 'react';
 import { CellValueContext } from '@kbn/embeddable-plugin/public';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import type { DraggingIdentifier, DragDropIdentifier, DragContextState } from './drag_drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
@@ -1060,6 +1061,7 @@ export interface Visualization<T = unknown, P = unknown> {
   /** Hydrate from persistable state and references to final state */
   fromPersistableState?: (
     state: P,
+    annotationGroups: Record<string, EventAnnotationGroupConfig>,
     references?: SavedObjectReference[],
     initialContext?: VisualizeFieldContext | VisualizeEditorContext
   ) => T;

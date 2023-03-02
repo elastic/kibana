@@ -8,7 +8,7 @@
 import React from 'react';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { ByValueXYAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
+import { XYByValueAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
 import { Flyout } from './save_action';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { EditDetailsFlyout } from './edit_details_action';
@@ -17,7 +17,7 @@ import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-plugin/c
 describe('annotation group save action', () => {
   const layerId = 'mylayerid';
 
-  const layer: ByValueXYAnnotationLayerConfig = {
+  const layer: XYByValueAnnotationLayerConfig = {
     layerId,
     layerType: 'annotations',
     indexPatternId: 'some-index-pattern',
@@ -46,6 +46,7 @@ describe('annotation group save action', () => {
     setState: jest.fn(),
     eventAnnotationService: {
       createAnnotationGroup: jest.fn(() => Promise.resolve({ id: savedId })),
+      loadAnnotationGroup: jest.fn(),
       toExpression: jest.fn(),
       toFetchExpression: jest.fn(),
       renderEventAnnotationGroupSavedObjectFinder: jest.fn(),

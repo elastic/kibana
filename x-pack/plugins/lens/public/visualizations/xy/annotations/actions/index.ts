@@ -9,11 +9,12 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { LayerAction, StateSetter } from '../../../../types';
-import { XYState, XYAnnotationLayerConfig, isByReferenceXyAnnotationLayer } from '../../types';
+import { XYState, XYAnnotationLayerConfig } from '../../types';
 import { getUnlinkLayerAction } from './unlink_action';
 import { getIgnoreFilterAction } from './ignore_filters_action';
 import { getEditDetailsAction } from './edit_details_action';
 import { getSaveLayerAction } from './save_action';
+import { isByReferenceAnnotationLayer } from '../../visualization_helpers';
 export {
   IGNORE_GLOBAL_FILTERS_ACTION_ID,
   KEEP_GLOBAL_FILTERS_ACTION_ID,
@@ -44,7 +45,7 @@ export const createAnnotationActions = ({
 
   if (savingToLibraryPermitted) {
     // check if the annotation is saved as a saved object or in inline - same as we check for save modal for visualization
-    if (isByReferenceXyAnnotationLayer(layer)) {
+    if (isByReferenceAnnotationLayer(layer)) {
       // check if Annotation group hasUnsavedChanges to know if we should allow reverting and saving - similar to how we do it for persistedDoc vs currentDoc on app level
       const hasUnsavedChanges = true;
 

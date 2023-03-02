@@ -19,6 +19,9 @@ import {
   XYDataLayerConfig,
   XYReferenceLineLayerConfig,
   SeriesType,
+  XYByReferenceAnnotationLayerConfig,
+  XYPersistedAnnotationLayerConfig,
+  XYPersistedByReferenceAnnotationLayerConfig,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
@@ -139,6 +142,16 @@ export const getReferenceLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'
 export const isAnnotationsLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
 ): layer is XYAnnotationLayerConfig => layer.layerType === layerTypes.ANNOTATIONS;
+
+export const isByReferenceAnnotationLayer = (
+  layer: XYAnnotationLayerConfig
+): layer is XYByReferenceAnnotationLayerConfig =>
+  'annotationGroupId' in layer && '__lastSaved' in layer;
+
+export const isPersistedByReferenceAnnotationLayer = (
+  layer: XYPersistedAnnotationLayerConfig
+): layer is XYPersistedByReferenceAnnotationLayerConfig =>
+  'annotationGroupId' in layer && !('__lastSaved' in layer);
 
 export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));

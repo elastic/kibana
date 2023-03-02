@@ -22,7 +22,7 @@ import type {
   XYReferenceLineLayerConfig,
   SeriesType,
   XYPersistedState,
-  ByValueXYAnnotationLayerConfig,
+  XYByValueAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,
 } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
@@ -2894,7 +2894,7 @@ describe('xy_visualization', () => {
   describe('#getPersistableState', () => {
     it('should extract index pattern ids from by-value annotation layers', () => {
       const state = exampleState();
-      const layer: ByValueXYAnnotationLayerConfig = {
+      const layer: XYByValueAnnotationLayerConfig = {
         layerId: 'layer-id',
         layerType: 'annotations',
         indexPatternId: 'some-index-pattern',
@@ -2948,7 +2948,7 @@ describe('xy_visualization', () => {
 
     it('should extract annotation group ids from by-reference annotation layers', () => {
       const state = exampleState();
-      const byValueLayer: ByValueXYAnnotationLayerConfig = {
+      const byValueLayer: XYByValueAnnotationLayerConfig = {
         layerId: 'layer-id',
         layerType: 'annotations',
         indexPatternId: 'some-index-pattern',

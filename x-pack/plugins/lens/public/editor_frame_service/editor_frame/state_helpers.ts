@@ -14,6 +14,11 @@ import type { DataViewsContract, DataViewSpec } from '@kbn/data-views-plugin/pub
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
+import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import {
+  EventAnnotationGroupConfig,
+  EVENT_ANNOTATION_GROUP_TYPE,
+} from '@kbn/event-annotation-plugin/common';
 import {
   Datasource,
   DatasourceLayers,
@@ -164,12 +169,33 @@ export async function initializeDataViews(
   };
 }
 
+const initializeEventAnnotationGroups = async (
+  eventAnnotationService: EventAnnotationServiceType,
+  references?: SavedObjectReference[]
+) => {
+  const annotationGroups: Record<string, EventAnnotationGroupConfig> = {};
+
+  await Promise.all(
+    // TODO error handling
+    references
+      ?.filter((ref) => ref.type === EVENT_ANNOTATION_GROUP_TYPE)
+      .map(({ id }) =>
+        eventAnnotationService
+          .loadAnnotationGroup(id)
+          .then((group) => (annotationGroups[id] = group))
+      ) || []
+  );
+
+  return annotationGroups;
+};
+
 /**
  * This function composes both initializeDataViews & initializeDatasources into a single call
  */
 export async function initializeSources(
   {
     dataViews,
+    eventAnnotationService,
     datasourceMap,
     visualizationMap,
     visualizationState,
@@ -181,6 +207,7 @@ export async function initializeSources(
     adHocDataViews,
   }: {
     dataViews: DataViewsContract;
+    eventAnnotationService: EventAnnotationServiceType;
     datasourceMap: DatasourceMap;
     visualizationMap: VisualizationMap;
     visualizationState: VisualizationState;
@@ -206,6 +233,12 @@ export async function initializeSources(
     },
     options
   );
+
+  const annotationGroups = await initializeEventAnnotationGroups(
+    eventAnnotationService,
+    references
+  );
+
   return {
     indexPatterns,
     indexPatternRefs,
@@ -222,6 +255,7 @@ export async function initializeSources(
       visualizationState,
       references,
       initialContext,
+      annotationGroups,
     }),
   };
 }
@@ -231,16 +265,19 @@ export function initializeVisualization({
   visualizationState,
   references,
   initialContext,
+  annotationGroups,
 }: {
   visualizationState: VisualizationState;
   visualizationMap: VisualizationMap;
   references?: SavedObjectReference[];
   initialContext?: VisualizeFieldContext | VisualizeEditorContext;
+  annotationGroups: Record<string, EventAnnotationGroupConfig>;
 }) {
   if (visualizationState?.activeId) {
     return (
       visualizationMap[visualizationState.activeId]?.fromPersistableState?.(
         visualizationState.state,
+        annotationGroups,
         references,
         initialContext
       ) ?? visualizationState.state

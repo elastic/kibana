@@ -14,6 +14,7 @@ import { CoreStart, SavedObjectsClientContract } from '@kbn/core/public';
 import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
 import {
   EventAnnotationConfig,
+  EventAnnotationGroupAttributes,
   EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
 } from '../../common';
@@ -34,41 +35,35 @@ export function hasIcon(icon: string | undefined): icon is string {
 export function getEventAnnotationService(core: CoreStart): EventAnnotationServiceType {
   const client: SavedObjectsClientContract = core.savedObjects.client;
 
-  // const loadAnnotationGroup = async (
-  //   savedObjectId: string
-  // ): Promise<EventAnnotationGroupConfig> => {
-  //   const groupResponse = await client.resolve<EventAnnotationGroupAttributes>(
-  //     EVENT_ANNOTATION_GROUP_TYPE,
-  //     savedObjectId
-  //   );
+  const loadAnnotationGroup = async (
+    savedObjectId: string
+  ): Promise<EventAnnotationGroupConfig> => {
+    const savedObject = await client.get<EventAnnotationGroupAttributes>(
+      EVENT_ANNOTATION_GROUP_TYPE,
+      savedObjectId
+    );
 
-  //   if (groupResponse.saved_object.error) {
-  //     throw groupResponse.saved_object.error;
-  //   }
+    // const annotations = (
+    //   await client.find<EventAnnotationConfig>({
+    //     type: EVENT_ANNOTATION_TYPE,
+    //     hasReference: {
+    //       type: EVENT_ANNOTATION_GROUP_TYPE,
+    //       id: savedObjectId,
+    //     },
+    //   })
+    // ).savedObjects
+    //   .filter(({ error }) => !error)
+    //   .map((annotation) => annotation.attributes);
 
-  //   const annotations = (
-  //     await client.find<EventAnnotationConfig>({
-  //       type: EVENT_ANNOTATION_TYPE,
-  //       hasReference: {
-  //         type: EVENT_ANNOTATION_GROUP_TYPE,
-  //         id: savedObjectId,
-  //       },
-  //     })
-  //   ).savedObjects
-  //     .filter(({ error }) => !error)
-  //     .map((annotation) => annotation.attributes);
-
-  //   return {
-  //     title: groupResponse.saved_object.attributes.title,
-  //     description: groupResponse.saved_object.attributes.description,
-  //     tags: groupResponse.saved_object.attributes.tags,
-  //     ignoreGlobalFilters: groupResponse.saved_object.attributes.ignoreGlobalFilters,
-  //     indexPatternId: groupResponse.saved_object.references.find(
-  //       (ref) => ref.type === 'index-pattern'
-  //     )?.id!,
-  //     annotations,
-  //   };
-  // };
+    return {
+      title: savedObject.attributes.title,
+      // description: groupResponse.saved_object.attributes.description,
+      // tags: groupResponse.saved_object.attributes.tags,
+      ignoreGlobalFilters: savedObject.attributes.ignoreGlobalFilters,
+      indexPatternId: savedObject.references.find((ref) => ref.type === 'index-pattern')?.id!,
+      annotations: savedObject.attributes.annotations,
+    };
+  };
 
   // const deleteAnnotationGroup = async (savedObjectId: string): Promise<void> => {
   //   const annotationsSOs = (
@@ -160,7 +155,7 @@ export function getEventAnnotationService(core: CoreStart): EventAnnotationServi
   // };
 
   return {
-    // loadAnnotationGroup,
+    loadAnnotationGroup,
     // updateAnnotations,
     // updateAnnotationGroup,
     createAnnotationGroup,

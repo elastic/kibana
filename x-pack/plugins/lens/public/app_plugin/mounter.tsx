@@ -95,6 +95,7 @@ export async function getLensServices(
     inspector,
     navigation,
     embeddable,
+    eventAnnotation,
     savedObjectsTagging,
     usageCollection,
     fieldFormats,
@@ -106,6 +107,7 @@ export async function getLensServices(
   const storage = new Storage(localStorage);
   const stateTransfer = embeddable?.getStateTransfer();
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
+  const eventAnnotationService = await eventAnnotation.getService(coreStart);
 
   return {
     data,
@@ -117,6 +119,7 @@ export async function getLensServices(
     usageCollection,
     savedObjectsTagging,
     attributeService,
+    eventAnnotationService,
     executionContext: coreStart.executionContext,
     http: coreStart.http,
     uiActions: startDependencies.uiActions,

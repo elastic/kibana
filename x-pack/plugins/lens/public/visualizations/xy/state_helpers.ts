@@ -7,7 +7,10 @@
 
 import { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import type { SavedObjectReference } from '@kbn/core/public';
-import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-plugin/common';
+import {
+  EventAnnotationGroupConfig,
+  EVENT_ANNOTATION_GROUP_TYPE,
+} from '@kbn/event-annotation-plugin/common';
 import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
@@ -24,10 +27,16 @@ import {
   XYState,
   XYPersistedState,
   XYAnnotationLayerConfig,
-  isByReferenceXyAnnotationLayer,
   XYPersistedLayerConfig,
+  XYByReferenceAnnotationLayerConfig,
 } from './types';
-import { getDataLayers, isAnnotationsLayer, isDataLayer } from './visualization_helpers';
+import {
+  getDataLayers,
+  isAnnotationsLayer,
+  isDataLayer,
+  isPersistedByReferenceAnnotationLayer,
+  isByReferenceAnnotationLayer,
+} from './visualization_helpers';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
   return (
@@ -126,7 +135,7 @@ export function getPersistableState(state: XYState) {
     if (!isAnnotationsLayer(layer)) {
       persistableLayers.push(layer);
     } else {
-      if (isByReferenceXyAnnotationLayer(layer)) {
+      if (isByReferenceAnnotationLayer(layer)) {
         savedObjectReferences.push({
           type: EVENT_ANNOTATION_GROUP_TYPE,
           id: layer.annotationGroupId,
@@ -151,15 +160,14 @@ export function getPersistableState(state: XYState) {
   return { savedObjectReferences, state: { ...state, layers: persistableLayers } };
 }
 
+export const REF_NOT_FOUND = 'ref-not-found';
+
 export function injectReferences(
   state: XYPersistedState,
-  references?: SavedObjectReference[],
+  annotationGroups: Record<string, EventAnnotationGroupConfig>,
+  references: SavedObjectReference[],
   initialContext?: VisualizeFieldContext | VisualizeEditorContext
 ): XYState {
-  if (!references || !references.length) {
-    return state as XYState;
-  }
-
   const fallbackIndexPatternId = references.find(({ type }) => type === 'index-pattern')!.id;
   return {
     ...state,
@@ -167,13 +175,42 @@ export function injectReferences(
       if (!isAnnotationsLayer(layer)) {
         return layer as XYLayerConfig;
       }
-      return {
-        ...layer,
-        indexPatternId:
-          getIndexPatternIdFromInitialContext(layer, initialContext) ||
-          references.find(({ name }) => name === getLayerReferenceName(layer.layerId))?.id ||
-          fallbackIndexPatternId,
-      };
+
+      let injectedLayer: XYAnnotationLayerConfig;
+      if (isPersistedByReferenceAnnotationLayer(layer)) {
+        const annotationGroupId = references?.find(
+          ({ name }) => name === getLayerReferenceName(layer.layerId)
+        )?.id;
+
+        const annotationGroup = annotationGroupId ? annotationGroups[annotationGroupId] : undefined;
+
+        if (!annotationGroupId || !annotationGroup) {
+          throw new Error("can't find annotation group!"); // TODO - better handling
+        }
+
+        // declared as a separate variable for type checking
+        const newLayer: XYByReferenceAnnotationLayerConfig = {
+          layerId: layer.layerId,
+          layerType: layer.layerType,
+          annotationGroupId,
+          indexPatternId: annotationGroup.indexPatternId,
+          ignoreGlobalFilters: Boolean(annotationGroup.ignoreGlobalFilters),
+          annotations: annotationGroup.annotations,
+          __lastSaved: annotationGroup,
+        };
+
+        injectedLayer = newLayer;
+      } else {
+        injectedLayer = {
+          ...layer,
+          indexPatternId:
+            getIndexPatternIdFromInitialContext(layer, initialContext) ||
+            references.find(({ name }) => name === getLayerReferenceName(layer.layerId))?.id ||
+            fallbackIndexPatternId,
+        };
+      }
+
+      return injectedLayer;
     }),
   };
 }

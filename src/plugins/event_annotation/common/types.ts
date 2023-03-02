@@ -87,6 +87,7 @@ export interface EventAnnotationGroupAttributes {
   description?: string;
   tags?: string[];
   ignoreGlobalFilters?: boolean;
+  annotations: EventAnnotationConfig[];
 }
 
 export interface EventAnnotationGroupConfig {
