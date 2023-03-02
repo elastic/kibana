@@ -47,7 +47,7 @@ export const EndpointResponseAction = React.memo((props: EndpointResponseActionP
           body={
             <p>
               <FormattedMessage
-                id="xpack.securitySolution.osquery.action.missingPrivileges"
+                id="xpack.securitySolution.endpoint.action.missingPrivileges"
                 defaultMessage="To access this page, ask your administrator for {endpoint} Kibana privileges."
                 values={{
                   endpoint: <EuiCode>{'endpoint'}</EuiCode>,
