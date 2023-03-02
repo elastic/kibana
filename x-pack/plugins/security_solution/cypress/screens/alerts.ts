@@ -14,6 +14,9 @@ export const ALERT_COUNT_TABLE_COLUMN = (column: number) =>
 
 export const ALERT_EMBEDDABLE_PROGRESS_BAR = '[data-test-subj="embeddablePanel"] .euiProgress';
 
+export const ALERT_EMBEDDABLE_EMPTY_PROMPT =
+  '[data-test-subj="embeddablePanel"] [data-test-subj="emptyPlaceholder"]';
+
 export const ALERT_CHECKBOX = '[data-test-subj="bulk-actions-row-cell"].euiCheckbox__input';
 
 export const ALERT_GRID_CELL = '[data-test-subj="dataGridRowCell"]';

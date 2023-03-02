@@ -6,8 +6,8 @@
  */
 
 import { getNewRule } from '../../objects/rule';
-import { ALERTS_HISTOGRAM_LEGEND, ALERTS_COUNT, LEGEND_ACTIONS } from '../../screens/alerts';
-import { selectAlertsHistogram } from '../../tasks/alerts';
+import { ALERTS_COUNT, LEGEND_ACTIONS } from '../../screens/alerts';
+import { clickAlertsHistogramLegend, selectAlertsHistogram } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
@@ -31,7 +31,7 @@ describe('Histogram legend hover actions', { testIsolation: false }, () => {
 
   it('Filter in/out should add a filter to KQL bar', function () {
     const expectedNumberOfAlerts = 2;
-    cy.get(ALERTS_HISTOGRAM_LEGEND).click();
+    clickAlertsHistogramLegend();
     cy.get(LEGEND_ACTIONS.FILTER_FOR(ruleConfigs.name)).click();
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
       'have.text',
@@ -39,7 +39,7 @@ describe('Histogram legend hover actions', { testIsolation: false }, () => {
     );
     cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
 
-    cy.get(ALERTS_HISTOGRAM_LEGEND).click();
+    clickAlertsHistogramLegend();
     cy.get(LEGEND_ACTIONS.FILTER_OUT(ruleConfigs.name)).click();
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
       'have.text',
@@ -52,7 +52,7 @@ describe('Histogram legend hover actions', { testIsolation: false }, () => {
   });
 
   it('Add To Timeline', function () {
-    cy.get(ALERTS_HISTOGRAM_LEGEND).click();
+    clickAlertsHistogramLegend();
     cy.get(LEGEND_ACTIONS.ADD_TO_TIMELINE(ruleConfigs.name)).click();
     cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('be.visible');
     cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('contain.text', getNewRule().name);

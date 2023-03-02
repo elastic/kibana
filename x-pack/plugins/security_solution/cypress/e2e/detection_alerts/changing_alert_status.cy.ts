@@ -12,6 +12,7 @@ import {
   TAKE_ACTION_POPOVER_BTN,
   SELECTED_ALERTS,
   ALERT_COUNT_TABLE_COLUMN,
+  ALERT_EMBEDDABLE_EMPTY_PROMPT,
 } from '../../screens/alerts';
 
 import {
@@ -26,7 +27,8 @@ import {
   openAlerts,
   openFirstAlert,
   selectCountTable,
-  checkAlertCountFromAlertCountTable,
+  sumAlertCountFromAlertCountTable,
+  parseAlertsCountToInt,
 } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
@@ -89,7 +91,9 @@ describe('Changing alert status', () => {
               const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeOpened;
               cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
 
-              checkAlertCountFromAlertCountTable(expectedNumberOfAlerts);
+              sumAlertCountFromAlertCountTable((sumAlerts) => {
+                expect(sumAlerts).to.eq(parseAlertsCountToInt(expectedNumberOfAlerts));
+              });
 
               goToOpenedAlerts();
               waitForAlerts();
@@ -101,7 +105,11 @@ describe('Changing alert status', () => {
                 `${numberOfOpenedAlerts + numberOfAlertsToBeOpened} alerts`.toString()
               );
 
-              checkAlertCountFromAlertCountTable(numberOfOpenedAlerts + numberOfAlertsToBeOpened);
+              sumAlertCountFromAlertCountTable((sumAlerts) => {
+                expect(sumAlerts).to.eq(
+                  parseAlertsCountToInt(numberOfOpenedAlerts + numberOfAlertsToBeOpened)
+                );
+              });
             });
         });
     });
@@ -129,14 +137,18 @@ describe('Changing alert status', () => {
           markAcknowledgedFirstAlert();
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
           cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
-          checkAlertCountFromAlertCountTable(expectedNumberOfAlerts);
+          sumAlertCountFromAlertCountTable((sumAlerts) => {
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(expectedNumberOfAlerts));
+          });
 
           goToAcknowledgedAlerts();
           waitForAlerts();
 
           cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeMarkedAcknowledged} alert`);
 
-          checkAlertCountFromAlertCountTable(numberOfAlertsToBeMarkedAcknowledged);
+          sumAlertCountFromAlertCountTable((sumAlerts) => {
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(numberOfAlertsToBeMarkedAcknowledged));
+          });
         });
     });
   });
@@ -155,7 +167,9 @@ describe('Changing alert status', () => {
         .then((alertNumberString) => {
           const numberOfAlerts = alertNumberString.split(' ')[0];
           cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`);
-          checkAlertCountFromAlertCountTable(numberOfAlerts);
+          sumAlertCountFromAlertCountTable((sumAlerts) => {
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(numberOfAlerts));
+          });
 
           selectNumberOfAlerts(numberOfAlertsToBeClosed);
 
@@ -169,7 +183,9 @@ describe('Changing alert status', () => {
 
           const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
           cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlertsAfterClosing} alerts`);
-          checkAlertCountFromAlertCountTable(expectedNumberOfAlertsAfterClosing);
+          sumAlertCountFromAlertCountTable((sumAlerts) => {
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(expectedNumberOfAlertsAfterClosing));
+          });
 
           goToClosedAlerts();
           waitForAlerts();
@@ -190,8 +206,9 @@ describe('Changing alert status', () => {
             `${expectedNumberOfClosedAlertsAfterOpened} alerts`
           );
 
-          checkAlertCountFromAlertCountTable(expectedNumberOfClosedAlertsAfterOpened);
-
+          sumAlertCountFromAlertCountTable((sumAlerts) => {
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(expectedNumberOfClosedAlertsAfterOpened));
+          });
           goToOpenedAlerts();
           waitForAlerts();
 
@@ -200,7 +217,9 @@ describe('Changing alert status', () => {
 
           cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfOpenedAlerts} alerts`);
 
-          checkAlertCountFromAlertCountTable(expectedNumberOfOpenedAlerts);
+          sumAlertCountFromAlertCountTable((sumAlerts) => {
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(expectedNumberOfOpenedAlerts));
+          });
         });
     });
 
@@ -221,14 +240,18 @@ describe('Changing alert status', () => {
 
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeClosed;
           cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
-          checkAlertCountFromAlertCountTable(expectedNumberOfAlerts);
+          sumAlertCountFromAlertCountTable((sumAlerts) => {
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(expectedNumberOfAlerts));
+          });
 
           goToClosedAlerts();
           waitForAlerts();
 
           cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeClosed} alert`);
 
-          checkAlertCountFromAlertCountTable(numberOfAlertsToBeClosed);
+          sumAlertCountFromAlertCountTable((sumAlerts) => {
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(numberOfAlertsToBeClosed));
+          });
         });
     });
 
@@ -239,7 +262,9 @@ describe('Changing alert status', () => {
         .then((alertNumberString) => {
           const numberOfAlerts = alertNumberString.split(' ')[0];
           cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`);
-          checkAlertCountFromAlertCountTable(numberOfAlerts);
+          sumAlertCountFromAlertCountTable((sumAlerts) => {
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(numberOfAlerts));
+          });
 
           selectNumberOfAlerts(numberOfAlertsToBeClosed);
 
@@ -251,8 +276,9 @@ describe('Changing alert status', () => {
           const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
           cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlertsAfterClosing} alerts`);
 
-          checkAlertCountFromAlertCountTable(expectedNumberOfAlertsAfterClosing);
-
+          sumAlertCountFromAlertCountTable((sumAlerts) => {
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(expectedNumberOfAlertsAfterClosing));
+          });
           goToClosedAlerts();
           waitForAlerts();
 
@@ -262,14 +288,17 @@ describe('Changing alert status', () => {
           selectNumberOfAlerts(numberOfAlertsToBeOpened);
 
           cy.get(SELECTED_ALERTS).should('have.text', `Selected ${numberOfAlertsToBeOpened} alert`);
-          cy.get(ALERT_COUNT_TABLE_COLUMN(1)).should('exist');
+          const alertRuleNameColumn = ALERT_COUNT_TABLE_COLUMN(1);
+          const alertCountColumn = ALERT_COUNT_TABLE_COLUMN(3);
+          cy.get(alertRuleNameColumn).should('exist').should('have.text', getNewRule().name);
 
           openAlerts();
           waitForAlerts();
 
           cy.get(ALERTS_COUNT).should('not.exist');
-          cy.get(ALERT_COUNT_TABLE_COLUMN(3)).should('not.exist');
-          cy.get(ALERT_COUNT_TABLE_COLUMN(1)).should('not.exist');
+          cy.get(alertCountColumn).should('not.exist');
+          cy.get(alertRuleNameColumn).should('not.exist');
+          cy.get(ALERT_EMBEDDABLE_EMPTY_PROMPT).should('exist');
         });
     });
   });
@@ -301,14 +330,17 @@ describe('Changing alert status', () => {
           const expectedNumberOfAlerts = +numberOfAlerts - numberOfAlertsToBeMarkedAcknowledged;
           cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
 
-          checkAlertCountFromAlertCountTable(expectedNumberOfAlerts);
-
+          sumAlertCountFromAlertCountTable((sumAlerts) => {
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(expectedNumberOfAlerts));
+          });
           goToAcknowledgedAlerts();
           waitForAlerts();
 
           cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlertsToBeMarkedAcknowledged} alert`);
 
-          checkAlertCountFromAlertCountTable(numberOfAlertsToBeMarkedAcknowledged);
+          sumAlertCountFromAlertCountTable((sumAlerts) => {
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(numberOfAlertsToBeMarkedAcknowledged));
+          });
         });
     });
 
@@ -319,8 +351,9 @@ describe('Changing alert status', () => {
         .then((alertNumberString) => {
           const numberOfAlerts = alertNumberString.split(' ')[0];
           cy.get(ALERTS_COUNT).should('have.text', `${numberOfAlerts} alerts`);
-          checkAlertCountFromAlertCountTable(numberOfAlerts);
-
+          sumAlertCountFromAlertCountTable((sumAlerts) => {
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(numberOfAlerts));
+          });
           selectNumberOfAlerts(numberOfAlertsToBeClosed);
 
           cy.get(SELECTED_ALERTS).should(
@@ -334,8 +367,9 @@ describe('Changing alert status', () => {
           const expectedNumberOfAlertsAfterClosing = +numberOfAlerts - numberOfAlertsToBeClosed;
           cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlertsAfterClosing} alerts`);
 
-          checkAlertCountFromAlertCountTable(expectedNumberOfAlertsAfterClosing);
-
+          sumAlertCountFromAlertCountTable((sumAlerts) => {
+            expect(sumAlerts).to.eq(parseAlertsCountToInt(expectedNumberOfAlertsAfterClosing));
+          });
           goToClosedAlerts();
           waitForAlerts();
 
