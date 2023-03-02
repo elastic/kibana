@@ -6,5 +6,16 @@
  * Side Public License, v 1.
  */
 
-export { createContextMock, type MockedMigratorContext } from './context';
-export { createPostInitState } from './state';
+import { PostInitState } from '../state/types';
+
+export const createPostInitState = (): PostInitState => ({
+  controlState: 'INIT',
+  retryDelay: 0,
+  retryCount: 0,
+  logs: [],
+  currentIndex: '.kibana_1',
+  aliases: ['.kibana'],
+  aliasActions: [],
+  previousMappings: { properties: {} },
+  currentIndexMeta: {},
+});
