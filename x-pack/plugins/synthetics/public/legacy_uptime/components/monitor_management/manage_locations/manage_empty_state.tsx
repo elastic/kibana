@@ -19,7 +19,7 @@ export const ManageEmptyState: FC<{
 }> = ({ children, privateLocations, setIsAddingNew, hasFleetPermissions }) => {
   const { data: agentPolicies } = useSelector(selectAgentPolicies);
 
-  if (!agentPolicies || agentPolicies?.total === 0) {
+  if (agentPolicies?.total === 0) {
     return <AgentPolicyNeeded />;
   }
 
