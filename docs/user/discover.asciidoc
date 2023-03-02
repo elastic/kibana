@@ -106,11 +106,26 @@ image:images/document-table.png[Document table with fields for manufacturer, cus
 . To rearrange the table columns, click a
 column header, and then select *Move left* or *Move right*.
 
-. To view more of the document table,
+. To copy the name or values in a column to the clipboard, click the column header and select the desired **Copy** option.
+
+. Optionally try out these actions:
++
+* For keyboard shortcuts on the document table, click
+image:images/keyboard-shortcut-icon.png[icon button for opening list of keyboard shortcuts, width=24px].
++
+* To view more of the document table,
 click
 image:images/chart-icon.png[icon button for opening Show/Hide chart menu, width=24px]
 to open the *Chart options* menu,
 and then select *Hide chart*.
++
+* To toggle the table in and out of fullscreen mode, click the fullscreen icon
+image:images/fullscreen-icon.png[icon to display the document table in fullscreen mode].
+
+
+
+
+
 
 [float]
 [[add-field-in-discover]]
@@ -136,7 +151,7 @@ emit("Hello World!");
 
 . Click *Save*.
 
-. In the fields list, search for the *hello* field, and then add it to the document table.
+. In the sidebar, search for the *hello* field, and then add it to the document table.
 +
 [role="screenshot"]
 image:images/hello-field.png[hello field in the document tables]
@@ -196,7 +211,7 @@ and more.
 Exclude documents where day of week is not Wednesday:
 
 . Click image:images/add-icon.png[Add icon] next to the query bar.
-. In the *Add filter* pop-up, set the field to *day_of_week* field, the operator to *is not*,
+. In the *Add filter* pop-up, set the field to *day_of_week*, the operator to *is not*,
 and the value to *Wednesday*.
 +
 [role="screenshot"]
@@ -255,10 +270,7 @@ visualize it from **Discover**.
 
 . In the sidebar, find and then click `day_of_week`.
 
-. Click **Visualize**.
-+
-[role="screenshot"]
-image:images/discover-visualize.png[Discover sidebar field popover with visualize button, width=75%]
+. In the popup, click **Visualize**.
 +
 {kib} creates a visualization best suited for this field.
 
@@ -319,6 +331,6 @@ include::{kib-repo-dir}/discover/search-for-relevance.asciidoc[]
 
 include::{kib-repo-dir}/discover/save-search.asciidoc[]
 
-include::{kib-repo-dir}/discover/search-sessions.asciidoc[]
-
 include::{kib-repo-dir}/discover/field-statistics.asciidoc[]
+
+include::{kib-repo-dir}/discover/search-sessions.asciidoc[]
