@@ -35,6 +35,9 @@ const mapErrorMessageToUserMessage = (
 ) => {
   let concatenatedActionIds: string = '';
   const mappedErrors = actionConnectorsErrors.map((connectorError) => {
+    // Using "as ImportResponseError" because the "id" field belongs only to
+    // "ImportResponseError" and if the connectorError has the id we use it to get the
+    // number of failing connectors by spliting the unique the connectors ids.
     const { id, error } = connectorError as ImportResponseError;
     concatenatedActionIds =
       concatenatedActionIds && concatenatedActionIds !== id ? `${concatenatedActionIds},${id}` : id;
