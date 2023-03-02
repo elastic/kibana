@@ -429,10 +429,12 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         customPipelineData: Record<string, IngestPipeline | undefined> | undefined,
         index: ElasticsearchIndexWithIngestion
       ) =>
-        hasCustomPipeline &&
-        customPipelineData &&
-        !customPipelineData[pipelineName] &&
-        isConnectorIndex(index),
+        Boolean(
+          hasCustomPipeline &&
+            customPipelineData &&
+            !customPipelineData[pipelineName] &&
+            isConnectorIndex(index)
+        ),
     ],
   }),
 });

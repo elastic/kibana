@@ -14,7 +14,7 @@ describe('RevertConnectorPipelineApiLogic', () => {
     const { http } = mockHttpValues;
     revertConnectorPipeline({ indexName: 'indexName' });
     expect(http.delete).toHaveBeenCalledWith(
-      '/internal/enterprise_search/indices/indexName/pipeline'
+      '/internal/enterprise_search/indices/indexName/pipelines'
     );
   });
 });

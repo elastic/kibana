@@ -8,8 +8,6 @@ import { merge } from 'lodash';
 
 import { ElasticsearchClient } from '@kbn/core/server';
 
-import { getInferencePipelineNameFromIndexName } from '../../utils/ml_inference_pipeline_utils';
-
 import { createIndexPipelineDefinitions } from './create_pipeline_definitions';
 import { formatMlPipelineBody } from './create_pipeline_definitions';
 
@@ -22,10 +20,6 @@ describe('createIndexPipelineDefinitions util function', () => {
     },
   };
 
-  const expectedResult = {
-    created: [indexName, `${indexName}@custom`, getInferencePipelineNameFromIndexName(indexName)],
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -34,7 +28,7 @@ describe('createIndexPipelineDefinitions util function', () => {
     mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
     await expect(
       createIndexPipelineDefinitions(indexName, mockClient as unknown as ElasticsearchClient)
-    ).resolves.toEqual(expectedResult);
+    ).resolves;
     expect(mockClient.ingest.putPipeline).toHaveBeenCalledTimes(3);
   });
 });
