@@ -233,7 +233,7 @@ export class GroupSelector extends Component {
         isOpen={this.state.isPopoverOpen}
         closePopover={() => this.closePopover()}
       >
-        <div className="group-selector">
+        <div>
           <EuiPopoverTitle>
             <FormattedMessage
               id="xpack.ml.jobsList.multiJobActions.groupSelector.applyGroupsToJobTitle"

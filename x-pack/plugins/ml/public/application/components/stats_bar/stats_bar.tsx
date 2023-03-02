@@ -6,6 +6,7 @@
  */
 
 import React, { FC } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { Stat, StatsBarStat } from './stat';
 
 interface Stats {
@@ -37,9 +38,13 @@ interface StatsBarProps {
 }
 
 export const StatsBar: FC<StatsBarProps> = ({ stats, dataTestSub }) => {
+  const { euiTheme } = useEuiTheme();
   const statsList = Object.keys(stats).map((k) => stats[k as StatsKey]);
   return (
-    <div className="mlStatsBar" data-test-subj={dataTestSub}>
+    <div
+      css={{ padding: euiTheme.size.m, backgroundColor: euiTheme.colors.lightestShade }}
+      data-test-subj={dataTestSub}
+    >
       {statsList
         .filter((s: StatsBarStat) => s.show)
         .map((s: StatsBarStat) => (
