@@ -71,6 +71,15 @@ remote monitoring cluster, you must use credentials that are valid on both the
 
 .. Create users that have the `monitoring_user` and `kibana_admin`
 {ref}/built-in-roles.html[built-in roles].
++
+****
+**Question for reviewers:**
+
+What do we recommend here for viewing data collected by Elastic Agent? Looks like the
+monitoring_user role has read and read_cross_cluster on .monitoring-* and 
+metricbeat-* indices, not the ones created by the agent.
+
+****
 
 . Open {kib} in your web browser.
 +
