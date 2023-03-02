@@ -1,6 +1,7 @@
 get:
-  summary: Packages - Info
-  tags: []
+  summary: Get package
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -59,16 +60,17 @@ parameters:
     name: full
     description: 'Return all fields from the package manifest, not just those supported by the Elastic Package Registry'
     in: query
-  - in: query 
+  - in: query
     name: prerelease
     schema:
       type: boolean
       default: false
     description: >-
-      Whether to return prerelease versions of packages (e.g. beta, rc, preview) 
+      Whether to return prerelease versions of packages (e.g. beta, rc, preview)
 post:
-  summary: Packages - Install
-  tags: []
+  summary: Install package
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -119,8 +121,9 @@ post:
             ignore_constraints:
               type: boolean
 put:
-  summary: Packages - Update
-  tags: []
+  summary: Update package settings
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -158,8 +161,9 @@ put:
             keepPoliciesUpToDate:
               type: boolean
 delete:
-  summary: Packages - Delete
-  tags: []
+  summary: Delete package
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
