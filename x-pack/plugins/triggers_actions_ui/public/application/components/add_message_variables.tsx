@@ -39,18 +39,40 @@ const LOADING_VARIABLES = i18n.translate(
     defaultMessage: 'Loading variables',
   }
 );
-
 const NO_VARIABLES_FOUND = i18n.translate(
   'xpack.triggersActionsUI.components.addMessageVariables.noVariablesFound',
   {
     defaultMessage: 'No variables found',
   }
 );
-
 const NO_VARIABLES_AVAILABLE = i18n.translate(
   'xpack.triggersActionsUI.components.addMessageVariables.noVariablesAvailable',
   {
     defaultMessage: 'No variables available',
+  }
+);
+const DEPRICATED_VARIABLES_ARE_SHOWN = i18n.translate(
+  'xpack.triggersActionsUI.components.addMessageVariables.depricatedVariablesAreShown',
+  {
+    defaultMessage: 'Depricated variables are shown',
+  }
+);
+const DEPRICATED_VARIABLES_ARE_HIDDEN = i18n.translate(
+  'xpack.triggersActionsUI.components.addMessageVariables.depricatedVariablesAreHidden',
+  {
+    defaultMessage: 'Depricated variables are hidden',
+  }
+);
+const HIDE = i18n.translate(
+  'xpack.triggersActionsUI.components.addMessageVariables.hideDepricatedVariables',
+  {
+    defaultMessage: 'Hide',
+  }
+);
+const SHOW_ALL = i18n.translate(
+  'xpack.triggersActionsUI.components.addMessageVariables.hideDepricatedVariables',
+  {
+    defaultMessage: 'Show_all',
   }
 );
 
@@ -221,8 +243,8 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
                 <EuiFlexItem grow={false}>
                   <EuiText color="grey" size="xs">
                     {isShowAllPressed
-                      ? 'Depricated variables are shown'
-                      : 'Depricated variables were hidden'}
+                      ? DEPRICATED_VARIABLES_ARE_SHOWN
+                      : DEPRICATED_VARIABLES_ARE_HIDDEN}
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -233,7 +255,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
                       isShowAllPressed ? setIsShowAllPressed(false) : setIsShowAllPressed(true)
                     }
                   >
-                    {isShowAllPressed ? 'Hide' : 'Show all'}
+                    {isShowAllPressed ? HIDE : SHOW_ALL}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
