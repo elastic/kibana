@@ -97,6 +97,7 @@ const testProps = {
       value: 2,
     },
   },
+  isLoading: false,
   pagination: {
     pageIndex: 0,
     pageSize: 25,

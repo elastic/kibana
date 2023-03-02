@@ -4,9 +4,10 @@ parameters:
     name: agentId
     in: path
     required: true
-put:
-  summary: Agent - Reassign
-  tags: []
+post:
+  summary: Reassign agent
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
@@ -30,4 +31,31 @@ put:
               type: string
           required:
             - policy_id
-
+put:
+  summary: Reassign agent
+  tags:
+    - Agents
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+    '400':
+      $ref: ../components/responses/error.yaml
+  operationId: reassign-agent-deprecated
+  parameters:
+    - $ref: ../components/headers/kbn_xsrf.yaml
+  requestBody:
+    required: true
+    content:
+      application/json:
+        schema:
+          type: object
+          properties:
+            policy_id:
+              type: string
+          required:
+            - policy_id
+  deprecated: true

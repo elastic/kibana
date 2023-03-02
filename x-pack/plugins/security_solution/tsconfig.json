@@ -36,6 +36,7 @@
     "@kbn/actions-plugin",
     "@kbn/alerting-plugin",
     "@kbn/cases-plugin",
+    "@kbn/cloud-defend-plugin",
     "@kbn/cloud-experiments-plugin",
     "@kbn/cloud-security-posture-plugin",
     "@kbn/encrypted-saved-objects-plugin",
@@ -141,5 +142,7 @@
     "@kbn/securitysolution-ecs",
     "@kbn/cell-actions",
     "@kbn/shared-ux-router",
+    "@kbn/alerts-as-data-utils",
+    "@kbn/expandable-flyout",
   ]
 }

@@ -194,26 +194,33 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
   options,
   value,
 }) => (
-  <EuiFlexGroup direction="column" gutterSize="s">
-    <EuiTitle size="xxxs">
-      <label htmlFor="results-per-page">Show</label>
-    </EuiTitle>
-    <EuiSelect
-      id="results-per-page"
-      options={
-        options?.map((option) => ({
-          text: i18n.translate(
-            'xpack.enterpriseSearch.content.engine.searchPreview.resultsPerPage.label',
-            {
-              defaultMessage: '{value} {value, plural, one {Result} other {Results}}',
-              values: { value: option },
-            }
-          ),
-          value: option,
-        })) ?? []
-      }
-      value={value}
-      onChange={(evt) => onChange(parseInt(evt.target.value, 10))}
-    />
-  </EuiFlexGroup>
+  <EuiFlexItem grow={false}>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiTitle size="xxxs">
+        <label htmlFor="results-per-page">
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.engine.searchPreview.resultsPerPage.label"
+            defaultMessage="Show"
+          />
+        </label>
+      </EuiTitle>
+      <EuiSelect
+        id="results-per-page"
+        options={
+          options?.map((option) => ({
+            text: i18n.translate(
+              'xpack.enterpriseSearch.content.engine.searchPreview.resultsPerPage.option.label',
+              {
+                defaultMessage: '{value} {value, plural, one {Result} other {Results}}',
+                values: { value: option },
+              }
+            ),
+            value: option,
+          })) ?? []
+        }
+        value={value}
+        onChange={(evt) => onChange(parseInt(evt.target.value, 10))}
+      />
+    </EuiFlexGroup>
+  </EuiFlexItem>
 );

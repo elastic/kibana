@@ -31,6 +31,7 @@ interface GroupPanelProps {
   forceState?: 'open' | 'closed';
   groupBucket: RawBucket;
   groupPanelRenderer?: JSX.Element;
+  isLoading: boolean;
   level?: number;
   onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket) => void;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
@@ -56,6 +57,7 @@ const GroupPanelComponent = ({
   forceState,
   groupBucket,
   groupPanelRenderer,
+  isLoading,
   level = 0,
   onToggleGroup,
   renderChildComponent,
@@ -89,6 +91,7 @@ const GroupPanelComponent = ({
       data-test-subj="grouping-accordion"
       extraAction={extraAction}
       forceState={forceState}
+      isLoading={isLoading}
       id={`group${level}-${groupFieldValue}`}
       onToggle={onToggle}
       paddingSize="m"

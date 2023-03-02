@@ -8,12 +8,12 @@ slug: /kibana-dev-docs/api/cloudDefend
 title: "cloudDefend"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the cloudDefend plugin
-date: 2023-02-27
+date: 2023-03-02
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'cloudDefend']
 ---
 import cloudDefendObj from './cloud_defend.devdocs.json';
 
-Defend for Containers
+Defend for containers (D4C)
 
 Contact [@elastic/sec-cloudnative-integrations](https://github.com/orgs/elastic/teams/sec-cloudnative-integrations) for questions regarding this plugin.
 
@@ -21,7 +21,7 @@ Contact [@elastic/sec-cloudnative-integrations](https://github.com/orgs/elastic/
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 2 | 0 | 2 | 0 |
+| 15 | 0 | 4 | 1 |
 
 ## Client
 
@@ -30,4 +30,21 @@ Contact [@elastic/sec-cloudnative-integrations](https://github.com/orgs/elastic/
 
 ### Start
 <DocDefinitionList data={[cloudDefendObj.client.start]}/>
+
+### Functions
+<DocDefinitionList data={cloudDefendObj.client.functions}/>
+
+### Interfaces
+<DocDefinitionList data={cloudDefendObj.client.interfaces}/>
+
+### Consts, variables and types
+<DocDefinitionList data={cloudDefendObj.client.misc}/>
+
+## Server
+
+### Setup
+<DocDefinitionList data={[cloudDefendObj.server.setup]}/>
+
+### Start
+<DocDefinitionList data={[cloudDefendObj.server.start]}/>
 

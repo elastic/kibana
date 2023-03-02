@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { shallow } from 'enzyme';
 import { waitFor, render, fireEvent } from '@testing-library/react';
-import type { Filter, Query } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import useResizeObserver from 'use-resize-observer/polyfilled';
 
 import '../../../common/mock/match_media';
@@ -19,6 +18,7 @@ import {
   SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../common/mock';
+import type { AlertsTableComponentProps } from './grouped_alerts';
 import { GroupedAlertsTableComponent } from './grouped_alerts';
 import { TableId } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
@@ -28,8 +28,8 @@ import { mockTimelines } from '../../../common/mock/mock_timelines_plugin';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
-import { AlertsTableComponent } from '.';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { defaultGroup } from '../../../common/store/grouping/defaults';
 
 jest.mock('../../../common/containers/sourcerer');
 jest.mock('../../../common/containers/use_global_time', () => ({
@@ -149,6 +149,18 @@ const state: State = {
 const { storage } = createSecuritySolutionStorageMock();
 const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
 
+const groupingStore = createStore(
+  {
+    ...state,
+    groups: {
+      groupById: { [`${TableId.test}`]: { ...defaultGroup, activeGroup: 'host.name' } },
+    },
+  },
+  SUB_PLUGINS_REDUCER,
+  kibanaObservable,
+  storage
+);
+
 jest.mock('./timeline_actions/use_add_bulk_to_timeline', () => ({
   useAddBulkToTimelineAction: jest.fn(() => {}),
 }));
@@ -165,52 +177,64 @@ const sourcererDataView = {
   },
   browserFields: {},
 };
+const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="alerts-table" />;
 
-const from = '2020-07-07T08:20:18.966Z';
-const to = '2020-07-08T08:20:18.966Z';
-const renderChildComponent = (groupingFilters: Filter[]) => (
-  <AlertsTableComponent
-    configId={'testing'}
-    flyoutSize="m"
-    inputFilters={[...[], ...groupingFilters]}
-    tableId={TableId.alertsOnAlertsPage}
-    isLoading={false}
-  />
-);
+const testProps: AlertsTableComponentProps = {
+  defaultFilters: [],
+  dispatch: jest.fn(),
+  from: '2020-07-07T08:20:18.966Z',
+  globalFilters: [],
+  globalQuery: {
+    query: 'query',
+    language: 'language',
+  },
+  hasIndexMaintenance: true,
+  hasIndexWrite: true,
+  loading: false,
+  renderChildComponent,
+  runtimeMappings: {},
+  signalIndexName: 'test',
+  tableId: TableId.test,
+  to: '2020-07-08T08:20:18.966Z',
+};
 
 describe('GroupedAlertsTable', () => {
-  (useSourcererDataView as jest.Mock).mockReturnValue({
-    ...sourcererDataView,
-    selectedPatterns: ['myFakebeat-*'],
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useSourcererDataView as jest.Mock).mockReturnValue({
+      ...sourcererDataView,
+      selectedPatterns: ['myFakebeat-*'],
+    });
   });
 
-  it('renders correctly', () => {
-    const wrapper = shallow(
+  it('renders alerts table when no group selected', () => {
+    const { getByTestId, queryByTestId } = render(
       <TestProviders store={store}>
-        <GroupedAlertsTableComponent
-          defaultFilters={[]}
-          tableId={TableId.test}
-          from={from}
-          to={to}
-          globalQuery={
-            {
-              query: 'query',
-              language: 'language',
-            } as Query
-          }
-          globalFilters={[]}
-          dispatch={jest.fn()}
-          runtimeMappings={{}}
-          signalIndexName={'test'}
-          hasIndexWrite
-          hasIndexMaintenance
-          loading={false}
-          renderChildComponent={renderChildComponent}
-        />
+        <GroupedAlertsTableComponent {...testProps} />
       </TestProviders>
     );
+    expect(getByTestId('alerts-table')).toBeInTheDocument();
+    expect(queryByTestId('grouping-table')).not.toBeInTheDocument();
+  });
 
-    expect(wrapper.find('[title="Alerts"]')).toBeTruthy();
+  it('renders grouped alerts when group selected', () => {
+    const { getByTestId, queryByTestId } = render(
+      <TestProviders store={groupingStore}>
+        <GroupedAlertsTableComponent {...testProps} />
+      </TestProviders>
+    );
+    expect(getByTestId('grouping-table')).toBeInTheDocument();
+    expect(queryByTestId('alerts-table')).not.toBeInTheDocument();
+    expect(queryByTestId('is-loading-grouping-table')).not.toBeInTheDocument();
+  });
+
+  it('renders loading when expected', () => {
+    const { getByTestId } = render(
+      <TestProviders store={groupingStore}>
+        <GroupedAlertsTableComponent {...testProps} loading={true} />
+      </TestProviders>
+    );
+    expect(getByTestId('is-loading-grouping-table')).toBeInTheDocument();
   });
 
   // Not a valid test as of now.. because, table is used from trigger actions..
