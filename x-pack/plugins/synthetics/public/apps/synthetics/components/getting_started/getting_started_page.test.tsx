@@ -150,7 +150,7 @@ describe('GettingStartedPage', () => {
 
   it('shows permissions callout when agent policy is needed but the user does not have permissions', async () => {
     jest.spyOn(permissionsHooks, 'useCanManagePrivateLocation').mockReturnValue(false);
-    const { getByText, getByRole, queryByLabelText, queryByRole } = render(<GettingStartedPage />, {
+    const { getByText, getByRole, queryByLabelText } = render(<GettingStartedPage />, {
       state: {
         serviceLocations: {
           locations: [],
