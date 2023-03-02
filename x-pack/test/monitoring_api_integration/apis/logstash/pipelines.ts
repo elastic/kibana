@@ -9,7 +9,9 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { getTestRunner } from '../../utils/test_runner';
 
-import response from '../../fixtures/logstash/pipelines.json';
+import allPipelinesResponse from '../../fixtures/logstash/pipelines.json';
+import pipelineResponse from '../../fixtures/logstash/pipeline.json';
+import vertexResponse from '../../fixtures/logstash/vertex.json';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -37,7 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      expect(body).to.eql(response);
+      expect(body).to.eql(allPipelinesResponse);
     });
 
     it('should get all pipelines after enough pagination', async () => {
@@ -69,6 +71,33 @@ export default function ({ getService }: FtrProviderContext) {
           sort: { field: 'logstash_cluster_pipeline_throughput', direction: 'asc' },
         })
         .expect(200);
+    });
+
+    it('should return pipeline details', async () => {
+      const { body } = await supertest
+        .post(
+          '/api/monitoring/v1/clusters/b0z1XQQNSyiV2y8bWz_zzQ/logstash/pipeline/pipeline-with-memory-queue'
+        )
+        .set('kbn-xsrf', 'xxx')
+        .send({ timeRange })
+        .expect(200);
+
+      expect(body).to.eql(pipelineResponse);
+    });
+
+    it('should return vertex details', async () => {
+      const { body } = await supertest
+        .post(
+          '/api/monitoring/v1/clusters/b0z1XQQNSyiV2y8bWz_zzQ/logstash/pipeline/pipeline-with-memory-queue'
+        )
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          timeRange,
+          detailVertexId: '635a080aacc8700059852859da284a9cb92cb78a6d7112fbf55e441e51b6658a',
+        })
+        .expect(200);
+
+      expect(body).to.eql(vertexResponse);
     });
   });
 }
