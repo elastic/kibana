@@ -159,11 +159,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
           );
         case 'select':
           return (
-            <EuiSelect
-              options={options}
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-            />
+            <EuiSelect options={options} value={value} onChange={(e) => onChange(e.target.value)} />
           );
         default:
           return (
