@@ -155,6 +155,21 @@ describe('SLOs Page', () => {
         expect(screen.getByText('Create new SLO')).toBeTruthy();
       });
 
+      it('should have an Auto Refresh button', async () => {
+        useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
+
+        useFetchHistoricalSummaryMock.mockReturnValue({
+          isLoading: false,
+          sloHistoricalSummaryResponse: historicalSummaryData,
+        });
+
+        await act(async () => {
+          render(<SlosPage />, config);
+        });
+
+        expect(screen.getByTestId('autoRefreshButton')).toBeTruthy();
+      });
+
       describe('when API has returned results', () => {
         it('renders the SLO list with SLO items', async () => {
           useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
