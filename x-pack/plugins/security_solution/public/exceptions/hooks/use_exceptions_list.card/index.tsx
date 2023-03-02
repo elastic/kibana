@@ -24,6 +24,7 @@ import { checkIfListCannotBeEdited } from '../../utils/list.utils';
 interface ExportListAction {
   id: string;
   listId: string;
+  name: string;
   namespaceType: NamespaceType;
   includeExpiredExceptions: boolean;
 }
@@ -42,6 +43,7 @@ export const useExceptionsListCard = ({
   handleExport: ({
     id,
     listId,
+    name,
     namespaceType,
     includeExpiredExceptions,
   }: ExportListAction) => () => Promise<void>;
@@ -192,6 +194,7 @@ export const useExceptionsListCard = ({
       handleExport({
         id: exceptionsList.id,
         listId: exceptionsList.list_id,
+        name: exceptionsList.name,
         namespaceType: exceptionsList.namespace_type,
         includeExpiredExceptions,
       })();

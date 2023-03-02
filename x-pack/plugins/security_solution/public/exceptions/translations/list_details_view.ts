@@ -94,12 +94,6 @@ export const EXCEPTION_ITEM_DELETE_TEXT = (itemName: string) =>
     }
   );
 
-export const EXCEPTION_LIST_EXPORTED_SUCCESSFULLY = (listName: string) =>
-  i18n.translate('xpack.securitySolution.exceptions.list.exported_successfully', {
-    values: { listName },
-    defaultMessage: '{listName} exported successfully',
-  });
-
 export const EXCEPTION_LIST_DELETED_SUCCESSFULLY = (listName: string) =>
   i18n.translate('xpack.securitySolution.exceptions.list.deleted_successfully', {
     values: { listName },
