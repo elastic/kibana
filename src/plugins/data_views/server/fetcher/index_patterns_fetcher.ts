@@ -8,6 +8,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { keyBy } from 'lodash';
+import { DataViewMissingIndices } from '../../common';
 import type { QueryDslQueryContainer } from '../../common/types';
 
 import {
@@ -72,6 +73,9 @@ export class IndexPatternsFetcher {
     // if only one pattern, don't bother with validation. We let getFieldCapabilities fail if the single pattern is bad regardless
     if (patternList.length > 1 && !allowNoIndices) {
       patternListActive = await this.validatePatternListActive(patternList);
+      if (patternListActive.length === 0) {
+        throw new DataViewMissingIndices(patternList.join(','));
+      }
     }
     const fieldCapsResponse = await getFieldCapabilities({
       callCluster: this.elasticsearchClient,
