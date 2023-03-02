@@ -27,13 +27,14 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const esClient = (await context.core).elasticsearch.client.asInternalUser;
-      const options = request.body;
+      const options = request.body; // TODO why is this any???
       const riskScoreService = buildRiskScoreService({
         esClient,
       });
 
       const result = await riskScoreService.getScores({
         enrichInputs: options.enrich_inputs,
+        filters: options.filters ?? [],
         range: options.range ?? { start: 'now-15d', end: 'now' },
         identifierType: options.identifier_type as IdentifierType, // TODO validate
       });
