@@ -34,35 +34,35 @@ import { AnalyticsCollectionTableStyles } from './analytics_collection_table.sty
 const defaultQuickRanges: EuiSuperDatePickerCommonRange[] = [
   {
     end: 'now',
-    label: i18n.translate('xpack.canvas.units.quickRange.last7Days', {
+    label: i18n.translate('xpack.enterpriseSearch.analytics..units.quickRange.last7Days', {
       defaultMessage: 'Last 7 days',
     }),
     start: 'now-7d',
   },
   {
     end: 'now',
-    label: i18n.translate('xpack.canvas.units.quickRange.last2Weeks', {
+    label: i18n.translate('xpack.enterpriseSearch.analytics..units.quickRange.last2Weeks', {
       defaultMessage: 'Last 2 weeks',
     }),
     start: 'now-14d',
   },
   {
     end: 'now',
-    label: i18n.translate('xpack.canvas.units.quickRange.last30Days', {
+    label: i18n.translate('xpack.enterpriseSearch.analytics..units.quickRange.last30Days', {
       defaultMessage: 'Last 30 days',
     }),
     start: 'now-30d',
   },
   {
     end: 'now',
-    label: i18n.translate('xpack.canvas.units.quickRange.last90Days', {
+    label: i18n.translate('xpack.enterpriseSearch.analytics..units.quickRange.last90Days', {
       defaultMessage: 'Last 90 days',
     }),
     start: 'now-90d',
   },
   {
     end: 'now',
-    label: i18n.translate('xpack.canvas.units.quickRange.last1Year', {
+    label: i18n.translate('xpack.enterpriseSearch.analytics..units.quickRange.last1Year', {
       defaultMessage: 'Last 1 year',
     }),
     start: 'now-1y',
