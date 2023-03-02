@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { v4 as uuidv4 } from 'uuid';
+import { v5 as uuidv5 } from 'uuid';
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
@@ -14,6 +14,12 @@ import useAsync from 'react-use/lib/useAsync';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
 import type { InfraClientStartDeps } from '../../../../types';
+import { DATA_VIEW_PREFIX, TIMESTAMP_FIELD } from '../constants';
+
+const generateDataViewId = (indexPattern: string) => {
+  //
+  return `${DATA_VIEW_PREFIX}_${uuidv5(indexPattern, uuidv5.DNS)}`;
+};
 
 export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
   const {
@@ -23,7 +29,7 @@ export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
   const [_, createAdhocDataView] = useTrackedPromise(
     {
       createPromise: (config: DataViewSpec): Promise<DataView> => {
-        return dataViews.create(config);
+        return dataViews.create(config, false);
       },
       onResolve: (response: DataView) => {
         return response;
@@ -36,10 +42,11 @@ export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
   const { value, loading, error } = useAsync(
     () =>
       createAdhocDataView({
-        id: uuidv4(),
+        id: generateDataViewId(metricAlias),
         title: metricAlias,
-        timeFieldName: '@timestamp',
+        timeFieldName: TIMESTAMP_FIELD,
       }),
+
     []
   );
 

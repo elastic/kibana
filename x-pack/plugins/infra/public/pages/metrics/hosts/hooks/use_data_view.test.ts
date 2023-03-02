@@ -55,9 +55,9 @@ describe('useHostTable hook', () => {
     const { result, waitForNextUpdate } = renderHook(() => useDataView(prop));
 
     await waitForNextUpdate();
-    expect(result.current.isDataViewLoading).toEqual(false);
-    expect(result.current.hasFailedLoadingDataView).toEqual(false);
-    expect(result.current.metricsDataView).toEqual(mockDataView);
+    expect(result.current.loading).toEqual(false);
+    expect(result.current.error).toEqual(false);
+    expect(result.current.dataView).toEqual(mockDataView);
   });
 
   it('should create a new Data view', async () => {
@@ -66,9 +66,9 @@ describe('useHostTable hook', () => {
     const { result, waitForNextUpdate } = renderHook(() => useDataView(prop));
 
     await waitForNextUpdate();
-    expect(result.current.isDataViewLoading).toEqual(false);
-    expect(result.current.hasFailedLoadingDataView).toEqual(false);
-    expect(result.current.metricsDataView).toEqual(mockDataView);
+    expect(result.current.loading).toEqual(false);
+    expect(result.current.error).toEqual(false);
+    expect(result.current.dataView).toEqual(mockDataView);
   });
 
   it('should display a toast when it fails to load the data view', async () => {
@@ -76,9 +76,9 @@ describe('useHostTable hook', () => {
     const { result, waitForNextUpdate } = renderHook(() => useDataView(prop));
 
     await waitForNextUpdate();
-    expect(result.current.isDataViewLoading).toEqual(false);
-    expect(result.current.hasFailedLoadingDataView).toEqual(true);
-    expect(result.current.metricsDataView).toBeUndefined();
+    expect(result.current.loading).toEqual(false);
+    expect(result.current.error).toEqual(true);
+    expect(result.current.dataView).toBeUndefined();
     expect(notificationMock.toasts.addDanger).toBeCalledTimes(1);
   });
 });
