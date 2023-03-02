@@ -28,10 +28,6 @@ export const schema = {
       defaultMessage: 'Index pattern',
     }),
     defaultValue: '',
-    helpText: i18n.translate('indexPatternEditor.validations.titleInputHelpText', {
-      defaultMessage:
-        'Enter an index pattern that matches one or more data sources. Use a wildcard (*) to match multiple sources. Separate with a comma (,) to match multiple single sources. Spaces and the characters /?"<>| are not allowed.',
-    }),
     validations: [
       {
         validator: fieldValidators.emptyField(

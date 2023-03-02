@@ -58,8 +58,8 @@ export const TitleDocsPopover: React.FC = () => {
         <EuiText size="s" data-test-subj="indexPatternDocsPopoverContent">
           <p>
             <FormattedMessage
-              id="indexPatternEditor.titleDocsPopover.startTypingDescription"
-              defaultMessage="Start typing in the Index pattern field, and Kibana looks for the names of indices, data streams, and aliases that match your input."
+              id="indexPatternEditor.titleDocsPopover.indexPatternDescription"
+              defaultMessage="An index pattern is a string that you use to match one or more data streams, indices, or aliases."
             />
           </p>
           <ul>
@@ -67,52 +67,40 @@ export const TitleDocsPopover: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="indexPatternEditor.titleDocsPopover.useWildcardDescription"
-                  defaultMessage="To match multiple sources, use a wildcard (*)."
+                  defaultMessage="Match multiple sources with a wildcard (*)."
                 />
               </p>
               <p>
-                <FormattedMessage
-                  id="indexPatternEditor.titleDocsPopover.useWildcardExample"
-                  defaultMessage="{pattern} matches {index1}, {index2}, and so on."
-                  values={{
-                    pattern: <EuiCode>filebeat-*</EuiCode>,
-                    index1: <EuiCode>filebeat-apache-a</EuiCode>,
-                    index2: <EuiCode>filebeat-apache-b</EuiCode>,
-                  }}
-                />
+                <EuiCode>filebeat-*</EuiCode>
               </p>
             </li>
             <li>
               <p>
                 <FormattedMessage
                   id="indexPatternEditor.titleDocsPopover.useCommasDescription"
-                  defaultMessage="To match multiple single sources, enter their names, separated by a comma (,). Do not include a space after the comma."
+                  defaultMessage="Separate multiple single sources with a comma (,)."
                 />
               </p>
               <p>
-                <FormattedMessage
-                  id="indexPatternEditor.titleDocsPopover.useCommasExample"
-                  defaultMessage="{pattern} matches two indices"
-                  values={{
-                    pattern: <EuiCode>filebeat-a,filebeat-b</EuiCode>,
-                  }}
-                />
+                <EuiCode>filebeat-a,filebeat-b</EuiCode>
               </p>
             </li>
             <li>
               <p>
                 <FormattedMessage
                   id="indexPatternEditor.titleDocsPopover.useMinusDescription"
-                  defaultMessage="To exclude a source, use a minus sign (-)."
+                  defaultMessage="Exclude a source with the minus sign (-)."
                 />
               </p>
               <p>
+                <EuiCode>filebeat-*,-filebeat-c</EuiCode>
+              </p>
+            </li>
+            <li>
+              <p>
                 <FormattedMessage
-                  id="indexPatternEditor.titleDocsPopover.useMinusExample"
-                  defaultMessage="For example, {pattern}."
-                  values={{
-                    pattern: <EuiCode>-test3</EuiCode>,
-                  }}
+                  id="indexPatternEditor.titleDocsPopover.dontUseSpecialCharactersDescription"
+                  defaultMessage="Spaces and the characters /?”<> are not allowed."
                 />
               </p>
             </li>
