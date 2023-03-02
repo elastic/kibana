@@ -10,11 +10,11 @@ import { ComponentStory } from '@storybook/react';
 
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
 import { buildSlo } from '../../../data/slo/slo';
-import { SloDetails as Component, Props } from './slo_details';
+import { Overview as Component, Props } from './overview';
 
 export default {
   component: Component,
-  title: 'app/SLO/DetailsPage/SloDetails',
+  title: 'app/SLO/DetailsPage/Overview',
   decorators: [KibanaReactStorybookDecorator],
 };
 
@@ -24,5 +24,5 @@ const defaultProps: Props = {
   slo: buildSlo(),
 };
 
-export const SloDetails = Template.bind({});
-SloDetails.args = defaultProps;
+export const Overview = Template.bind({});
+Overview.args = defaultProps;
