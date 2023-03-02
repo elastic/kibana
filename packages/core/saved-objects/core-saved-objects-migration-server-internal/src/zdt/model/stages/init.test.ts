@@ -240,7 +240,7 @@ describe('Action: init', () => {
   });
 
   describe('when checkVersionCompatibility returns `lesser`', () => {
-    it('forwards to UPDATE_INDEX_MAPPINGS', () => {
+    it('forwards to FATAL', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);
@@ -276,7 +276,7 @@ describe('Action: init', () => {
   });
 
   describe('when checkVersionCompatibility returns `conflict`', () => {
-    it('forwards to UPDATE_INDEX_MAPPINGS', () => {
+    it('forwards to FATAL', () => {
       const state = createState();
       const fetchIndexResponse = createResponse();
       const res: StateActionResponse<'INIT'> = Either.right(fetchIndexResponse);

@@ -43,7 +43,7 @@ interface BuildIndexMetaOpts {
 }
 
 /**
- * Build the mapping _meta field to used when creating a new index.
+ * Build the mapping _meta field to use when creating a new index.
  *
  * @param types The list of all registered SO types.
  */
