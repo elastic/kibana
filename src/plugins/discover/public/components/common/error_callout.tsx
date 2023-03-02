@@ -41,7 +41,7 @@ export const ErrorCallout = ({
   const [overridePopoverOpen, setOverridePopoverOpen] = useState(false);
 
   const showError = overrideDisplay?.body
-    ? () => setOverridePopoverOpen(true)
+    ? () => setOverridePopoverOpen((isOpen) => !isOpen)
     : () => core.notifications.showErrorDialog({ title, error });
 
   let formattedTitle: ReactNode = overrideDisplay?.title || title;
@@ -49,10 +49,12 @@ export const ErrorCallout = ({
   let calloutCss: SerializedStyles | undefined;
 
   if (inline) {
-    const formattedTitleMessage = i18n.translate('discover.errorCalloutFormattedTitle', {
-      defaultMessage: '{title}: {errorMessage}',
-      values: { title, errorMessage: error.message },
-    });
+    const formattedTitleMessage = overrideDisplay
+      ? formattedTitle
+      : i18n.translate('discover.errorCalloutFormattedTitle', {
+          defaultMessage: '{title}: {errorMessage}',
+          values: { title, errorMessage: error.message },
+        });
 
     let link = (
       <EuiLink
@@ -72,8 +74,15 @@ export const ErrorCallout = ({
           isOpen={overridePopoverOpen}
           closePopover={() => setOverridePopoverOpen(false)}
           button={link}
+          panelProps={{
+            css: css`
+              max-width: ${euiTheme.base * 30}px;
+            `,
+          }}
         >
-          {overrideDisplay.body}
+          <EuiCallOut title={overrideDisplay.title} color="danger">
+            {overrideDisplay.body}
+          </EuiCallOut>
         </EuiPopover>
       );
     }
