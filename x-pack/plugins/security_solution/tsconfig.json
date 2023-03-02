@@ -144,5 +144,6 @@
     "@kbn/shared-ux-router",
     "@kbn/alerts-as-data-utils",
     "@kbn/expandable-flyout",
+    "@kbn/securitysolution-grouping",
   ]
 }
