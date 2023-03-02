@@ -8,8 +8,13 @@
 
 export const fieldMappings = {
   request: {
-    type: 'keyword',
-    time_series_dimension: true,
+    type: 'text',
+    fields: {
+      keyword: {
+        type: 'keyword',
+        time_series_dimension: true,
+      },
+    },
   },
   geo: {
     properties: {
@@ -112,12 +117,18 @@ export const fieldMappings = {
   ip: {
     type: 'ip',
   },
+  ip_range: {
+    type: 'ip_range',
+  },
   '@timestamp': {
     type: 'date',
   },
   timestamp: {
     type: 'alias',
     path: '@timestamp',
+  },
+  timestamp_range: {
+    type: 'date_range',
   },
   phpmemory: {
     type: 'long',
