@@ -9,7 +9,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import illustration from '../assets/images/illustration_product_no_results_magnifying_glass.svg';
+import { noResultsIllustrationLight } from '@kbn/shared-svg';
 
 const panelStyle = {
   maxWidth: 500,
@@ -48,7 +48,7 @@ export const EmptyGroupingComponent: React.FC<{ height?: keyof typeof heights }>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiImage size="200" alt="" src={illustration} />
+                <EuiImage size="200" alt="" src={noResultsIllustrationLight} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
