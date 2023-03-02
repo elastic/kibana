@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { type Filter, FilterStateStore } from '@kbn/es-query';
 import type {
   PersistedIndexPatternLayer,
   FormulaPublicApi,
@@ -13,11 +12,14 @@ import type {
   FormBasedLayer,
 } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
 import {
+  DEFAULT_AD_HOC_DATA_VIEW_ID,
   DEFAULT_LAYER_ID,
+  getAdhocDataView,
   getBreakdownColumn,
+  getDefaultReferences,
   getHistogramColumn,
   getXYVisualizationState,
 } from '../utils';
@@ -130,61 +132,13 @@ export class Load implements ILensVisualization {
     });
   };
 
-  getFilters = (): Filter[] => {
-    return [
-      {
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-        meta: {
-          disabled: false,
-          negate: false,
-          alias: null,
-          index: 'c1ec8212-ecee-494a-80da-f6f33b3393f2',
-          key: 'system.load.cores',
-          value: 'exists',
-          type: 'exists',
-        },
-        query: {
-          exists: {
-            field: 'system.load.cores',
-          },
-        },
-      },
-      {
-        $state: {
-          store: FilterStateStore.APP_STATE,
-        },
-        meta: {
-          disabled: false,
-          negate: false,
-          alias: null,
-          index: 'c1ec8212-ecee-494a-80da-f6f33b3393f2',
-          key: 'system.load.1',
-          value: 'exists',
-          type: 'exists',
-        },
-        query: {
-          exists: {
-            field: 'system.load.1',
-          },
-        },
-      },
-    ];
-  };
-
-  getReferences = (): SavedObjectReference[] => {
-    return [
-      {
-        type: 'index-pattern',
-        id: this.dataView.id ?? '',
-        name: `indexpattern-datasource-layer-${DEFAULT_LAYER_ID}`,
-      },
-      {
-        type: 'index-pattern',
-        id: this.dataView.id ?? '',
-        name: `indexpattern-datasource-layer-${REFERENCE_LAYER}`,
-      },
-    ];
-  };
+  getReferences = (): SavedObjectReference[] => [
+    ...getDefaultReferences(this.dataView, DEFAULT_LAYER_ID),
+    {
+      type: 'index-pattern',
+      id: this.dataView.id ?? DEFAULT_AD_HOC_DATA_VIEW_ID,
+      name: `indexpattern-datasource-layer-${REFERENCE_LAYER}`,
+    },
+  ];
+  getAdhocDataView = () => getAdhocDataView(this.dataView);
 }

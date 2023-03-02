@@ -7,7 +7,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
 import { useCallback, useEffect } from 'react';
-import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { buildEsQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { debounce } from 'lodash';
 import deepEqual from 'fast-deep-equal';
@@ -37,7 +37,7 @@ const buildQuerySubmittedPayload = (
 
 export const useUnifiedSearch = () => {
   const { state, dispatch, getTime, getDateRangeAsTimestamp } = useHostsUrlState();
-  const { metricsDataView } = useMetricsDataViewContext();
+  const { dataView } = useMetricsDataViewContext();
   const { services } = useKibana<InfraClientStartDeps>();
   const {
     data: { query: queryManager },
@@ -145,14 +145,11 @@ export const useUnifiedSearch = () => {
   }, [filterManager, dispatch]);
 
   const buildQuery = useCallback(() => {
-    if (!metricsDataView) {
+    if (!dataView) {
       return null;
     }
-    return buildEsQuery(metricsDataView, state.query, [
-      ...state.filters,
-      ...(state.panelFilters ?? []),
-    ]);
-  }, [metricsDataView, state.query, state.filters, state.panelFilters]);
+    return buildEsQuery(dataView, state.query, [...state.filters, ...(state.panelFilters ?? [])]);
+  }, [dataView, state.query, state.filters, state.panelFilters]);
 
   return {
     buildQuery,

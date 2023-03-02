@@ -12,6 +12,7 @@ import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { useUrlState } from '../../../../utils/use_url_state';
+import { useMetricsDataViewContext } from './use_data_view';
 
 const HOST_FILTERS_URL_STATE_KEY = 'controlPanels';
 
@@ -47,9 +48,8 @@ const controlPanelConfigs: ControlPanels = {
 
 const availableControlPanelFields = Object.values(availableControlsPanels);
 
-export const useControlPanels = (
-  dataView: DataView
-): [ControlPanels, (state: ControlPanels) => void] => {
+export const useControlPanels = (): [ControlPanels, (state: ControlPanels) => void] => {
+  const { dataView } = useMetricsDataViewContext();
   const defaultState = getVisibleControlPanelsConfig(dataView);
 
   const [controlPanels, setControlPanels] = useUrlState<ControlPanels>({
@@ -65,7 +65,9 @@ export const useControlPanels = (
    * 2. Existing filters from the URL parameter (not colliding with allowed fields from data view)
    * 3. Enhanced with dataView.id
    */
-  const controlsPanelsWithId = mergeDefaultPanelsWithUrlConfig(dataView, controlPanels);
+  const controlsPanelsWithId = dataView
+    ? mergeDefaultPanelsWithUrlConfig(dataView, controlPanels)
+    : ({} as ControlPanels);
 
   return [controlsPanelsWithId, setControlPanels];
 };
@@ -73,18 +75,18 @@ export const useControlPanels = (
 /**
  * Utils
  */
-const getVisibleControlPanels = (dataView: DataView) => {
+const getVisibleControlPanels = (dataView: DataView | undefined) => {
   return availableControlPanelFields.filter(
-    (panelKey) => dataView.fields.getByName(panelKey) !== undefined
+    (panelKey) => dataView?.fields.getByName(panelKey) !== undefined
   );
 };
 
-const getVisibleControlPanelsConfig = (dataView: DataView) => {
+const getVisibleControlPanelsConfig = (dataView: DataView | undefined) => {
   return getVisibleControlPanels(dataView).reduce((panelsMap, panelKey) => {
     const config = controlPanelConfigs[panelKey];
 
     return { ...panelsMap, [panelKey]: config };
-  }, {});
+  }, {} as ControlPanels);
 };
 
 const addDataViewIdToControlPanels = (controlPanels: ControlPanels, dataViewId: string = '') => {

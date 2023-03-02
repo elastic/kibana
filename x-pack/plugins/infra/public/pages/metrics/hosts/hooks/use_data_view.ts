@@ -6,89 +6,58 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useCallback, useState, useEffect, useMemo } from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { InfraClientStartDeps } from '../../../../types';
+import useAsync from 'react-use/lib/useAsync';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
+import type { InfraClientStartDeps } from '../../../../types';
 
 export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
-  const [metricsDataView, setMetricsDataView] = useState<DataView>();
   const {
     services: { dataViews, notifications },
   } = useKibana<InfraClientStartDeps>();
 
-  const [createDataViewRequest, createDataView] = useTrackedPromise(
+  const [_, createAdhocDataView] = useTrackedPromise(
     {
-      createPromise: (config): Promise<DataView> => {
-        return dataViews.createAndSave(config);
+      createPromise: (config: DataViewSpec): Promise<DataView> => {
+        return dataViews.create(config);
       },
       onResolve: (response: DataView) => {
-        setMetricsDataView(response);
+        return response;
       },
       cancelPreviousOn: 'creation',
     },
     []
   );
 
-  const [getDataViewRequest, getDataView] = useTrackedPromise(
-    {
-      createPromise: (_indexPattern: string): Promise<DataView[]> => {
-        return dataViews.find(metricAlias, 1);
-      },
-      onResolve: (response: DataView[]) => {
-        setMetricsDataView(response[0]);
-      },
-      cancelPreviousOn: 'creation',
-    },
+  const { value, loading, error } = useAsync(
+    () =>
+      createAdhocDataView({
+        id: uuidv4(),
+        title: metricAlias,
+        timeFieldName: '@timestamp',
+      }),
     []
   );
 
-  const loadDataView = useCallback(async () => {
-    try {
-      let view = (await getDataView(metricAlias))[0];
-      if (!view) {
-        view = await createDataView({
-          title: metricAlias,
-          timeFieldName: '@timestamp',
-        });
-      }
-    } catch (error) {
-      setMetricsDataView(undefined);
-    }
-  }, [metricAlias, createDataView, getDataView]);
-
-  const isDataViewLoading = useMemo(
-    () => getDataViewRequest.state === 'pending' || createDataViewRequest.state === 'pending',
-    [getDataViewRequest.state, createDataViewRequest.state]
-  );
-
-  const hasFailedLoadingDataView = useMemo(
-    () => getDataViewRequest.state === 'rejected' || createDataViewRequest.state === 'rejected',
-    [getDataViewRequest.state, createDataViewRequest.state]
-  );
-
   useEffect(() => {
-    loadDataView();
-  }, [metricAlias, loadDataView]);
-
-  useEffect(() => {
-    if (hasFailedLoadingDataView && notifications) {
+    if (error && notifications) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.infra.hostsViewPage.errorOnCreateOrLoadDataview', {
-          defaultMessage:
-            'There was an error trying to load or create the Data View: {metricAlias}',
+          defaultMessage: 'There was an error trying to create the Data View: {metricAlias}',
           values: { metricAlias },
         })
       );
     }
-  }, [hasFailedLoadingDataView, notifications, metricAlias]);
+  }, [error, notifications, metricAlias]);
 
   return {
-    metricsDataView,
-    isDataViewLoading,
-    hasFailedLoadingDataView,
+    dataView: value,
+    loading,
+    error,
   };
 };
 

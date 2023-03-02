@@ -18,10 +18,9 @@ import { Tabs } from './tabs/tabs';
 import { AlertsQueryProvider } from '../hooks/use_alerts_query';
 
 export const HostContainer = () => {
-  const { metricsDataView, isDataViewLoading, hasFailedLoadingDataView } =
-    useMetricsDataViewContext();
+  const { loading, error } = useMetricsDataViewContext();
 
-  if (isDataViewLoading) {
+  if (loading) {
     return (
       <InfraLoadingPanel
         height="100%"
@@ -33,9 +32,9 @@ export const HostContainer = () => {
     );
   }
 
-  return hasFailedLoadingDataView || !metricsDataView ? null : (
+  return !!error ? null : (
     <>
-      <UnifiedSearchBar dataView={metricsDataView} />
+      <UnifiedSearchBar />
       <EuiSpacer />
       <HostsViewProvider>
         <EuiFlexGroup direction="column">

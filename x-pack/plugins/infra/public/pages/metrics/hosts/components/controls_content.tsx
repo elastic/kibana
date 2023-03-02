@@ -8,14 +8,13 @@
 import React, { useEffect, useState } from 'react';
 import { ControlGroupContainer, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { Filter, TimeRange } from '@kbn/es-query';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
+import { useMetricsDataViewContext } from '../hooks/use_data_view';
 
 interface Props {
   timeRange: TimeRange;
-  dataView: DataView;
   filters: Filter[];
   query: {
     language: string;
@@ -30,14 +29,9 @@ const REFRESH_CONFIG = {
   value: 0,
 };
 
-export const ControlsContent: React.FC<Props> = ({
-  timeRange,
-  dataView,
-  query,
-  filters,
-  onFilterChange,
-}) => {
-  const [controlPanel, setControlPanels] = useControlPanels(dataView);
+export const ControlsContent: React.FC<Props> = ({ timeRange, query, filters, onFilterChange }) => {
+  const { dataView } = useMetricsDataViewContext();
+  const [controlPanel, setControlPanels] = useControlPanels();
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer | undefined>();
 
   useEffect(() => {
@@ -62,7 +56,7 @@ export const ControlsContent: React.FC<Props> = ({
       filters={filters}
       getCreationOptions={async () => ({
         initialInput: {
-          id: dataView.id ?? '',
+          id: dataView?.id ?? '',
           type: CONTROL_GROUP_TYPE,
           timeRange,
           refreshConfig: REFRESH_CONFIG,

@@ -37,7 +37,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
     controlPanelFilters,
     onSubmit,
   } = useUnifiedSearchContext();
-  const { metricsDataView } = useMetricsDataViewContext();
+  const { dataView } = useMetricsDataViewContext();
   const { baseRequest } = useHostsViewContext();
   const {
     services: { lens },
@@ -47,7 +47,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
 
   const { injectData, getExtraActions, error } = useLensAttributes({
     type,
-    dataView: metricsDataView,
+    dataView,
     options: {
       breakdownSize,
     },
