@@ -38,7 +38,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   varDef: RegistryVarsEntry;
   value: any;
   onChange: (newValue: any) => void;
-  options?: { value: string; text: string }[];
+  options?: Array<{ value: string; text: string }>;
   errors?: string[] | null;
   forceShowErrors?: boolean;
   frozen?: boolean;
@@ -183,6 +183,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
       type,
       value,
       onChange,
+      options,
       frozen,
       packageName,
       datastreams,
