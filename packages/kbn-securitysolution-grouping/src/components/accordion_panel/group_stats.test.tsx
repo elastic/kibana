@@ -1,14 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { GroupStats } from './group_stats';
-import { TestProviders } from '../../../mock';
 
 const onTakeActionsOpen = jest.fn();
 const testProps = {
@@ -49,11 +49,7 @@ describe('Group stats', () => {
     jest.clearAllMocks();
   });
   it('renders each stat item', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <GroupStats {...testProps} />
-      </TestProviders>
-    );
+    const { getByTestId } = render(<GroupStats {...testProps} />);
     expect(getByTestId('group-stats')).toBeInTheDocument();
     testProps.badgeMetricStats.forEach(({ title: stat }) => {
       expect(getByTestId(`metric-${stat}`)).toBeInTheDocument();
@@ -63,11 +59,7 @@ describe('Group stats', () => {
     });
   });
   it('when onTakeActionsOpen is defined, call onTakeActionsOpen on popover click', () => {
-    const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <GroupStats {...testProps} />
-      </TestProviders>
-    );
+    const { getByTestId, queryByTestId } = render(<GroupStats {...testProps} />);
     fireEvent.click(getByTestId('take-action-button'));
     expect(onTakeActionsOpen).toHaveBeenCalled();
     ['takeActionItem-1', 'takeActionItem-2'].forEach((actionItem) => {
@@ -75,11 +67,7 @@ describe('Group stats', () => {
     });
   });
   it('when onTakeActionsOpen is undefined, render take actions dropdown on popover click', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <GroupStats {...testProps} onTakeActionsOpen={undefined} />
-      </TestProviders>
-    );
+    const { getByTestId } = render(<GroupStats {...testProps} onTakeActionsOpen={undefined} />);
     fireEvent.click(getByTestId('take-action-button'));
     ['takeActionItem-1', 'takeActionItem-2'].forEach((actionItem) => {
       expect(getByTestId(actionItem)).toBeInTheDocument();

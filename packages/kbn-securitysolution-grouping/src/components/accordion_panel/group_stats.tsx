@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -16,7 +17,7 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { BadgeMetric, CustomMetric } from '.';
-import { StatsContainer } from '../styles';
+import { statsContainerCss } from '../styles';
 import { TAKE_ACTION } from '../translations';
 import type { RawBucket } from '../types';
 
@@ -46,7 +47,7 @@ const GroupStatsComponent = ({
     () =>
       badgeMetricStats?.map((metric) => (
         <EuiFlexItem grow={false} key={metric.title}>
-          <StatsContainer data-test-subj={`metric-${metric.title}`}>
+          <span css={statsContainerCss} data-test-subj={`metric-${metric.title}`}>
             <>
               {metric.title}
               <EuiToolTip position="top" content={metric.value}>
@@ -58,7 +59,7 @@ const GroupStatsComponent = ({
                 </EuiBadge>
               </EuiToolTip>
             </>
-          </StatsContainer>
+          </span>
         </EuiFlexItem>
       )),
     [badgeMetricStats]
@@ -68,10 +69,10 @@ const GroupStatsComponent = ({
     () =>
       customMetricStats?.map((customMetric) => (
         <EuiFlexItem grow={false} key={customMetric.title}>
-          <StatsContainer data-test-subj={`customMetric-${customMetric.title}`}>
+          <span css={statsContainerCss} data-test-subj={`customMetric-${customMetric.title}`}>
             {customMetric.title}
             {customMetric.customStatRenderer}
-          </StatsContainer>
+          </span>
         </EuiFlexItem>
       )),
     [customMetricStats]

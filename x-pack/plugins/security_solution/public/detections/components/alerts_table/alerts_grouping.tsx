@@ -8,32 +8,30 @@
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import type { ConnectedProps } from 'react-redux';
-import { connect, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
-import { useGetGroupingSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
+import type {
+  GroupingFieldTotalAggregation,
+  GroupingAggregation,
+  RawBucket,
+} from '@kbn/securitysolution-grouping';
+import { getGrouping, isNoneGroup } from '@kbn/securitysolution-grouping';
+import { useGetGroupSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
 import { defaultGroup } from '../../../common/store/grouping/defaults';
 import { groupSelectors } from '../../../common/store/grouping';
 import { InspectButton } from '../../../common/components/inspect';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
-import type {
-  GroupingFieldTotalAggregation,
-  GroupingTableAggregation,
-  RawBucket,
-} from '../../../common/components/grouping';
-import { GroupingContainer, isNoneGroup } from '../../../common/components/grouping';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { TableIdLiteral } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { useKibana } from '../../../common/lib/kibana';
-import type { inputsModel, State } from '../../../common/store';
-import { inputsSelectors } from '../../../common/store';
+import type { State } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useInspectButton } from '../alerts_kpis/common/hooks';
 
@@ -51,26 +49,25 @@ import {
 import { initGrouping } from '../../../common/store/grouping/actions';
 import { useGroupingPagination } from '../../../common/containers/grouping/hooks/use_grouping_pagination';
 
-/** This local storage key stores the `Grid / Event rendered view` selection */
-export const ALERTS_TABLE_GROUPS_SELECTION_KEY = 'securitySolution.alerts.table.group-selection';
-
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 
 interface OwnProps {
+  currentAlertStatusFilterValue?: Status;
   defaultFilters?: Filter[];
   from: string;
+  globalFilters: Filter[];
+  globalQuery: Query;
   hasIndexMaintenance: boolean;
   hasIndexWrite: boolean;
   loading: boolean;
-  tableId: TableIdLiteral;
-  to: string;
+  renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
   runtimeMappings: MappingRuntimeFields;
   signalIndexName: string | null;
-  currentAlertStatusFilterValue?: Status;
-  renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
+  tableId: TableIdLiteral;
+  to: string;
 }
 
-export type AlertsTableComponentProps = OwnProps & PropsFromRedux;
+export type AlertsTableComponentProps = OwnProps;
 
 export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = ({
   defaultFilters = [],
@@ -95,20 +92,18 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   const { activeGroup: selectedGroup } =
     useSelector((state: State) => getGroupByIdSelector(state, groupingId)) ?? defaultGroup;
 
-  const {
-    browserFields,
-    indexPattern: indexPatterns,
-    selectedPatterns,
-  } = useSourcererDataView(SourcererScopeName.detections);
+  const { browserFields, indexPattern, selectedPatterns } = useSourcererDataView(
+    SourcererScopeName.detections
+  );
   const kibana = useKibana();
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
-      if (browserFields != null && indexPatterns != null) {
+      if (browserFields != null && indexPattern != null) {
         return combineQueries({
           config: getEsQueryConfig(kibana.services.uiSettings),
           dataProviders: [],
-          indexPattern: indexPatterns,
+          indexPattern,
           browserFields,
           filters: [
             ...(defaultFilters ?? []),
@@ -122,7 +117,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       }
       return null;
     },
-    [browserFields, defaultFilters, globalFilters, globalQuery, indexPatterns, kibana, to, from]
+    [browserFields, defaultFilters, globalFilters, globalQuery, indexPattern, kibana, to, from]
   );
 
   useInvalidFilterQuery({
@@ -188,7 +183,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     request,
     response,
     setQuery: setAlertsQuery,
-  } = useQueryAlerts<{}, GroupingTableAggregation & GroupingFieldTotalAggregation>({
+  } = useQueryAlerts<{}, GroupingAggregation & GroupingFieldTotalAggregation>({
     query: queryGroups,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
@@ -218,14 +213,14 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     [uniqueQueryId]
   );
 
-  const groupsSelector = useGetGroupingSelector({
+  const groupsSelector = useGetGroupSelector({
     tableId,
     groupingId,
-    fields: indexPatterns.fields,
+    fields: indexPattern.fields,
   });
 
   const takeActionItems = useGroupTakeActionsItems({
-    indexName: indexPatterns.title,
+    indexName: indexPattern.title,
     currentStatus: currentAlertStatusFilterValue,
     showAlertStatusActions: hasIndexWrite && hasIndexMaintenance,
   });
@@ -238,30 +233,25 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
 
   const groupedAlerts = useMemo(
     () =>
-      isNoneGroup(selectedGroup) ? (
-        renderChildComponent([])
-      ) : (
-        <GroupingContainer
-          badgeMetricStats={(fieldBucket: RawBucket) =>
-            getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket)
-          }
-          customMetricStats={(fieldBucket: RawBucket) =>
-            getSelectedGroupCustomMetrics(selectedGroup, fieldBucket)
-          }
-          data={alertsGroupsData?.aggregations ?? {}}
-          groupPanelRenderer={(fieldBucket: RawBucket) =>
-            getSelectedGroupButtonContent(selectedGroup, fieldBucket)
-          }
-          groupsSelector={groupsSelector}
-          inspectButton={inspect}
-          isLoading={loading || isLoadingGroups}
-          pagination={pagination}
-          renderChildComponent={renderChildComponent}
-          selectedGroup={selectedGroup}
-          takeActionItems={getTakeActionItems}
-          unit={defaultUnit}
-        />
-      ),
+      isNoneGroup(selectedGroup)
+        ? renderChildComponent([])
+        : getGrouping({
+            badgeMetricStats: (fieldBucket: RawBucket) =>
+              getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket),
+            customMetricStats: (fieldBucket: RawBucket) =>
+              getSelectedGroupCustomMetrics(selectedGroup, fieldBucket),
+            data: alertsGroupsData?.aggregations,
+            groupPanelRenderer: (fieldBucket: RawBucket) =>
+              getSelectedGroupButtonContent(selectedGroup, fieldBucket),
+            groupsSelector,
+            inspectButton: inspect,
+            isLoading: loading || isLoadingGroups,
+            pagination,
+            renderChildComponent,
+            selectedGroup,
+            takeActionItems: getTakeActionItems,
+            unit: defaultUnit,
+          }),
     [
       alertsGroupsData?.aggregations,
       getTakeActionItems,
@@ -282,21 +272,4 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   return groupedAlerts;
 };
 
-const makeMapStateToProps = () => {
-  const getGlobalInputs = inputsSelectors.globalSelector();
-  const mapStateToProps = (state: State) => {
-    const globalInputs: inputsModel.InputsRange = getGlobalInputs(state);
-    const { query, filters } = globalInputs;
-    return {
-      globalQuery: query,
-      globalFilters: filters,
-    };
-  };
-  return mapStateToProps;
-};
-
-const connector = connect(makeMapStateToProps);
-
-type PropsFromRedux = ConnectedProps<typeof connector>;
-
-export const GroupedAlertsTable = connector(React.memo(GroupedAlertsTableComponent));
+export const GroupedAlertsTable = React.memo(GroupedAlertsTableComponent);

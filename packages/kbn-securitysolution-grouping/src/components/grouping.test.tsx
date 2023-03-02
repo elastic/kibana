@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { fireEvent, render, within } from '@testing-library/react';
 import React from 'react';
-import { GroupingContainer } from '..';
-import { TestProviders } from '../../../mock';
-import { createGroupFilter } from '../accordion_panel/helpers';
+import { I18nProvider } from '@kbn/i18n-react';
+import { Grouping } from './grouping';
+import { createGroupFilter } from './accordion_panel/helpers';
 
 const renderChildComponent = jest.fn();
 const takeActionItems = jest.fn();
@@ -103,6 +104,7 @@ const testProps = {
     pageSize: 25,
     onChangeItemsPerPage: jest.fn(),
     onChangePage: jest.fn(),
+    itemsPerPageOptions: [10, 25, 50, 100],
   },
   renderChildComponent,
   selectedGroup: 'kibana.alert.rule.name',
@@ -115,9 +117,9 @@ describe('grouping container', () => {
   });
   it('Renders group counts when groupsNumber > 0', () => {
     const { getByTestId, getAllByTestId, queryByTestId } = render(
-      <TestProviders>
-        <GroupingContainer {...testProps} />
-      </TestProviders>
+      <I18nProvider>
+        <Grouping {...testProps} />
+      </I18nProvider>
     );
     expect(getByTestId('alert-count').textContent).toBe('2 alerts');
     expect(getByTestId('groups-count').textContent).toBe('2 groups');
@@ -140,9 +142,9 @@ describe('grouping container', () => {
       },
     };
     const { getByTestId, queryByTestId } = render(
-      <TestProviders>
-        <GroupingContainer {...testProps} data={data} />
-      </TestProviders>
+      <I18nProvider>
+        <Grouping {...testProps} data={data} />
+      </I18nProvider>
     );
     expect(queryByTestId('alert-count')).not.toBeInTheDocument();
     expect(queryByTestId('groups-count')).not.toBeInTheDocument();
@@ -152,9 +154,9 @@ describe('grouping container', () => {
 
   it('Opens one group at a time when each group is clicked', () => {
     const { getAllByTestId } = render(
-      <TestProviders>
-        <GroupingContainer {...testProps} />
-      </TestProviders>
+      <I18nProvider>
+        <Grouping {...testProps} />
+      </I18nProvider>
     );
     const group1 = within(getAllByTestId('grouping-accordion')[0]).getAllByRole('button')[0];
     const group2 = within(getAllByTestId('grouping-accordion')[1]).getAllByRole('button')[0];
