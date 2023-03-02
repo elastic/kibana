@@ -124,6 +124,19 @@ export function DashboardTopNav({
   }, [embedSettings, setChromeVisibility, viewMode]);
 
   /**
+   * Keep track of the height of the top nav bar as it changes so that the padding at the top of the
+   * dashboard viewport can be adjusted dynamically as it changes
+   */
+  const resizeRef = useRef<HTMLDivElement>(null);
+  const dimensions = useResizeObserver(resizeRef.current);
+  useEffect(() => {
+    if (dimensions.height !== currentHeight) {
+      onHeightChange(dimensions.height);
+      setCurrentHeight(dimensions.height);
+    }
+  }, [dimensions, currentHeight, onHeightChange]);
+
+  /**
    * populate recently accessed, and set is chrome visible.
    */
   useEffect(() => {
@@ -219,16 +232,6 @@ export function DashboardTopNav({
   UseUnmount(() => {
     dashboardContainer.clearOverlays();
   });
-
-  const resizeRef = useRef<HTMLDivElement>(null);
-  const dimensions = useResizeObserver(resizeRef.current);
-
-  useEffect(() => {
-    if (dimensions.height !== currentHeight) {
-      onHeightChange(dimensions.height);
-      setCurrentHeight(dimensions.height);
-    }
-  }, [dimensions, currentHeight, onHeightChange]);
 
   return (
     <div ref={resizeRef} className={'dashboardTopNav'}>
