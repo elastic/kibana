@@ -98,10 +98,12 @@ export const TitleDocsPopover: React.FC = () => {
             </li>
             <li>
               <p>
-                <FormattedMessage
-                  id="indexPatternEditor.titleDocsPopover.dontUseSpecialCharactersDescription"
-                  defaultMessage={`Spaces and the characters /?"<>| are not allowed.`}
-                />
+                {i18n.translate(
+                  'indexPatternEditor.titleDocsPopover.dontUseSpecialCharactersDescription',
+                  {
+                    defaultMessage: 'Spaces and the characters /?"<>| are not allowed.',
+                  }
+                )}
               </p>
             </li>
           </ul>
