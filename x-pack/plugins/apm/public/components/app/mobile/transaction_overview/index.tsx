@@ -24,6 +24,7 @@ import { MobileTransactionCharts } from './transaction_charts';
 import { MobileLocationStats } from '../service_overview/stats/location_stats';
 import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
 import { GeoMap } from '../service_overview/geo_map';
+import { DeviceTreemap } from './device_treemap';
 
 export function MobileTransactionOverview() {
   const {
@@ -71,6 +72,17 @@ export function MobileTransactionOverview() {
     <>
       <EuiFlexItem>
         <EuiHorizontalRule />
+      </EuiFlexItem>
+      <EuiFlexItem grow={10}>
+        <EuiPanel hasBorder={true}>
+          <DeviceTreemap
+            serviceName={serviceName}
+            kuery={kueryWithMobileFilters}
+            environment={environment}
+            start={start}
+            end={end}
+          />
+        </EuiPanel>
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup>

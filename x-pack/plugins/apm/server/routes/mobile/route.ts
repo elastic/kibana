@@ -6,6 +6,7 @@
  */
 
 import * as t from 'io-ts';
+import { toNumberRt } from '@kbn/io-ts-utils';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
@@ -21,6 +22,8 @@ import {
   getMobileLocationStatsPeriods,
   MobileLocationStats,
 } from './get_mobile_location_stats';
+import { getMobileTermsByField } from './get_mobile_terms_by_field';
+import { DEVICE_MODEL_IDENTIFIER } from '../../../common/es_fields/apm';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -219,10 +222,52 @@ const httpRequestsChartRoute = createApmServerRoute({
   },
 });
 
+const mobileMostUsedDevices = createApmServerRoute({
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/devices',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      environmentRt,
+      t.type({
+        size: toNumberRt,
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (
+    resources
+  ): Promise<{
+    devices: Awaited<ReturnType<typeof getMobileTermsByField>>;
+  }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { kuery, environment, start, end, size } = params.query;
+
+    const devices = await getMobileTermsByField({
+      kuery,
+      environment,
+      start,
+      end,
+      serviceName,
+      apmEventClient,
+      fieldName: DEVICE_MODEL_IDENTIFIER,
+      size,
+    });
+
+    return { devices };
+  },
+});
+
 export const mobileRouteRepository = {
   ...mobileFiltersRoute,
   ...sessionsChartRoute,
   ...httpRequestsChartRoute,
   ...mobileStatsRoute,
   ...mobileLocationStatsRoute,
+  ...mobileMostUsedDevices,
 };
