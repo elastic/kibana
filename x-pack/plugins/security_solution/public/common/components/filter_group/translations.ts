@@ -21,3 +21,10 @@ export const EDIT_CONTROLS = i18n.translate(`xpack.securitySolutuon.filtersGroup
 export const SAVE_CONTROLS = i18n.translate(`xpack.securitySolutuon.filtersGroup.saveControls`, {
   defaultMessage: 'Save Controls',
 });
+
+export const DISCARD_CHANGES = i18n.translate(
+  `xpack.securitySolutuon.filtersGroup.discardChnages`,
+  {
+    defaultMessage: 'Discard Changes',
+  }
+);

@@ -16,6 +16,7 @@ import type {
 } from '@kbn/controls-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
+import type { ControlPanelState } from '@kbn/controls-plugin/common';
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
@@ -27,12 +28,12 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { cloneDeep, debounce, isEqual } from 'lodash';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import { URL_PARAM_KEY } from '../../hooks/use_url_state';
 import type { FilterContextType, FilterGroupProps, FilterItemObj } from './types';
@@ -42,7 +43,14 @@ import './index.scss';
 import { FilterGroupLoading } from './loading';
 import { withSpaceId } from '../with_space_id';
 import { NUM_OF_CONTROLS } from './config';
-import { EDIT_CONTROLS, PENDING_CHANGES_REMINDER, SAVE_CONTROLS } from './translations';
+import {
+  DISCARD_CHANGES,
+  EDIT_CONTROLS,
+  PENDING_CHANGES_REMINDER,
+  SAVE_CONTROLS,
+} from './translations';
+import { useControlGroupSyncToLocalStorage } from './hooks/use_control_group_sync_to_local_storage';
+import { useViewEditMode } from './hooks/use_view_edit_mode';
 
 type ControlGroupBuilder = typeof controlGroupInputBuilder;
 
@@ -75,12 +83,8 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     onInit,
   } = props;
 
-  const [filterGroupViewMode, setFilterGroupViewMode] = useState(ViewMode.VIEW);
-
   const filterChangedSubscription = useRef<Subscription>();
   const inputChangedSubscription = useRef<Subscription>();
-
-  const [pendingChangesPopoverOpen, setPendingChangesPopoverOpen] = useState(false);
 
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
@@ -89,13 +93,29 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     [spaceId]
   );
 
-  const [hasPendingChanges, setHasPendingChanges] = useState(false);
-
   const currentFiltersRef = useRef<Filter[]>();
 
-  const [controlGroupInputUpdates, setControlGroupInputUpdates] = useLocalStorage<
-    ControlGroupInput | undefined
-  >(localStoragePageFilterKey, undefined);
+  const {
+    isViewMode,
+    hasPendingChanges,
+    pendingChangesPopoverOpen,
+    closePendingChangesPopover,
+    openPendingChangesPopover,
+    switchToViewMode,
+    switchToEditMode,
+    setHasPendingChanges,
+  } = useViewEditMode({
+    controlGroup,
+  });
+
+  const {
+    controlGroupInput: controlGroupInputUpdates,
+    setControlGroupInput: setControlGroupInputUpdates,
+    getStoredControlGroupInput: getStoredControlInput,
+  } = useControlGroupSyncToLocalStorage({
+    storageKey: localStoragePageFilterKey,
+    shouldSync: isViewMode,
+  });
 
   const [initialUrlParam, setInitialUrlParam] = useState<FilterItemObj[]>();
 
@@ -110,6 +130,28 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   const onUrlParamInit = (param: FilterItemObj[] | null) => {
     if (!param) setInitialUrlParam([]);
     try {
+      //
+      //
+      const panels = getStoredControlInput()?.panels;
+      if (panels) {
+        const panelsFormatted = Object.values(panels)
+          .sort((a, b) => b.order - a.order)
+          .map((panel) => {
+            const {
+              explicitInput: { fieldName, selectedOptions, title, existsSelected, exclude },
+            } = panel as ControlPanelState<OptionsListEmbeddableInput>;
+            return {
+              fieldName: fieldName as string,
+              selectedOptions: selectedOptions ?? [],
+              title,
+              existsSelected,
+              exclude,
+            };
+          });
+        if (!isEqual(panelsFormatted, param)) {
+          switchToEditMode();
+        }
+      }
       setInitialUrlParam(param ?? []);
     } catch (err) {
       // if there is an error ignore url Param
@@ -144,22 +186,13 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const handleInputUpdates = useCallback(
     (newInput: ControlGroupInput) => {
-      if (isEqual(controlGroupInputUpdates, newInput)) return;
-      if (
-        !isEqual(newInput.panels, controlGroupInputUpdates?.panels) &&
-        filterGroupViewMode === ViewMode.EDIT
-      ) {
-        setPendingChangesPopoverOpen(true);
+      if (isEqual(getStoredControlInput(), newInput)) return;
+      if (!isEqual(newInput.panels, getStoredControlInput()?.panels) && !isViewMode) {
         setHasPendingChanges(true);
       }
       setControlGroupInputUpdates(newInput);
     },
-    [setControlGroupInputUpdates, controlGroupInputUpdates, filterGroupViewMode]
-  );
-
-  const debouncedInputUpdatesHandler = useMemo(
-    () => debounce(handleInputUpdates, 500),
-    [handleInputUpdates]
+    [setControlGroupInputUpdates, getStoredControlInput, isViewMode, setHasPendingChanges]
   );
 
   const handleFilterUpdates = useCallback(
@@ -183,7 +216,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     });
 
     inputChangedSubscription.current = controlGroup.getInput$().subscribe({
-      next: debouncedInputUpdatesHandler,
+      next: handleInputUpdates,
     });
 
     const cleanup = () => {
@@ -195,7 +228,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
       }
     };
     return cleanup;
-  }, [controlGroup, debouncedFilterUpdates, debouncedInputUpdatesHandler]);
+  }, [controlGroup, debouncedFilterUpdates, handleInputUpdates]);
 
   const onControlGroupLoadHandler = useCallback(
     (controlGroupContainer: ControlGroupContainer) => {
@@ -216,7 +249,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
      * */
 
     const localInitialControls = cloneDeep(initialControls);
-    const resultControls = [];
+    const resultControls = cloneDeep(initialControls);
 
     let overridingControls = initialUrlParam;
     if ((!initialUrlParam || initialUrlParam.length === 0) && controlGroupInputUpdates) {
@@ -348,39 +381,31 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     [toggleContextMenu]
   );
 
-  const toggleViewMode = useCallback(() => {
-    setFilterGroupViewMode((prev) => {
-      if (prev === ViewMode.EDIT) {
-        setPendingChangesPopoverOpen(false);
-        setHasPendingChanges(false);
-        controlGroup?.updateInput({ viewMode: ViewMode.VIEW });
-        return ViewMode.VIEW;
-      } else {
-        controlGroup?.updateInput({ viewMode: ViewMode.EDIT });
-        return ViewMode.EDIT;
-      }
-    });
-  }, [controlGroup]);
-
   const resetSelection = useCallback(() => {
     if (!controlGroupInputUpdates) return;
 
-    const { panels } = controlGroupInputUpdates;
+    // / remove existing embeddables
+    Object.values(controlGroupInputUpdates.panels).forEach((panel) => {
+      controlGroup?.removeEmbeddable(panel.explicitInput.id);
+    });
 
-    Object.values(panels)
-      .sort((a, b) => b.order - a.order)
-      .forEach((control, idx) => {
-        controlGroup?.updateInputForChild(String(idx), {
-          ...control.explicitInput,
-          selectedOptions: initialControls[idx].selectedOptions ?? [],
-          existsSelected: false,
-          exclude: false,
-          title: initialControls[idx].title ?? initialControls[idx].fieldName,
-          fieldName: initialControls[idx].fieldName,
-        });
+    initialControls.forEach((control, idx) => {
+      controlGroup?.addOptionsListControl({
+        controlId: String(idx),
+        hideExclude: true,
+        hideSort: true,
+        hidePanelTitles: true,
+        placeholder: '',
+        // option List controls will handle an invalid dataview
+        // & display an appropriate message
+        dataViewId: dataViewId ?? '',
+        ...control,
       });
+    });
+
     controlGroup?.reload();
-  }, [controlGroupInputUpdates, controlGroup, initialControls]);
+    switchToViewMode();
+  }, [controlGroupInputUpdates, controlGroup, initialControls, dataViewId, switchToViewMode]);
 
   const resetButton = useMemo(
     () => (
@@ -399,19 +424,49 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     () => (
       <EuiContextMenuItem
         icon="pencil"
-        onClick={withContextMenuAction(toggleViewMode)}
-        data-test-subj="filter_group__context--edit"
+        onClick={
+          isViewMode
+            ? withContextMenuAction(switchToEditMode)
+            : withContextMenuAction(switchToViewMode)
+        }
+        data-test-subj={isViewMode ? `filter_group__context--edit` : `filter_group__context--save`}
       >
-        {filterGroupViewMode === ViewMode.EDIT ? SAVE_CONTROLS : EDIT_CONTROLS}
+        {isViewMode ? EDIT_CONTROLS : SAVE_CONTROLS}
       </EuiContextMenuItem>
     ),
-    [withContextMenuAction, toggleViewMode, filterGroupViewMode]
+    [withContextMenuAction, isViewMode, switchToEditMode, switchToViewMode]
   );
 
   const contextMenuItems = useMemo(
     () => [resetButton, editControlsButton],
     [resetButton, editControlsButton]
   );
+
+  const discardChangesHandler = useCallback(() => {
+    if (hasPendingChanges) {
+      controlGroup?.updateInput({
+        panels: getStoredControlInput()?.panels,
+      });
+    }
+
+    switchToViewMode();
+  }, [controlGroup, switchToViewMode, getStoredControlInput, hasPendingChanges]);
+
+  const discardChanges = useMemo(() => {
+    return (
+      <EuiToolTip content={DISCARD_CHANGES} position="top" display="block">
+        <EuiButtonIcon
+          size="s"
+          iconSize="m"
+          display="base"
+          color="danger"
+          iconType={'minusInCircle'}
+          data-test-subj={'filter-group__discard'}
+          onClick={discardChangesHandler}
+        />
+      </EuiToolTip>
+    );
+  }, [discardChangesHandler]);
 
   return (
     <FilterWrapper className="filter-group__wrapper">
@@ -425,7 +480,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             {!controlGroup ? <FilterGroupLoading /> : null}
           </EuiFlexItem>
         ) : null}
-        {filterGroupViewMode === ViewMode.EDIT &&
+        {!isViewMode &&
         (Object.keys(controlGroupInputUpdates?.panels ?? {}).length > NUM_OF_CONTROLS.MIN ||
           Object.keys(controlGroupInputUpdates?.panels ?? {}).length < NUM_OF_CONTROLS.MAX) ? (
           <>
@@ -435,6 +490,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
                 iconSize="m"
                 display="base"
                 iconType={'plusInCircle'}
+                data-test-subj={'filter-group__add-control'}
                 onClick={() => controlGroup?.openAddDataControlFlyout()}
               />
             </EuiFlexItem>
@@ -447,22 +503,29 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
                     display="base"
                     color={hasPendingChanges ? 'danger' : 'primary'}
                     iconType={'save'}
-                    onClick={toggleViewMode}
-                    onFocus={() => setPendingChangesPopoverOpen(true)}
-                    onMouseOver={() => setPendingChangesPopoverOpen(true)}
-                    onMouseOut={() => setPendingChangesPopoverOpen(false)}
+                    data-test-subj={'filter-group__save'}
+                    onClick={switchToViewMode}
+                    onFocus={openPendingChangesPopover}
+                    onBlur={closePendingChangesPopover}
+                    onMouseOver={openPendingChangesPopover}
+                    onMouseOut={closePendingChangesPopover}
+                    disabled={!hasPendingChanges}
                   />
                 }
                 isOpen={pendingChangesPopoverOpen}
                 anchorPosition={'upCenter'}
                 panelPaddingSize="none"
-                closePopover={() => setPendingChangesPopoverOpen(false)}
+                closePopover={closePendingChangesPopover}
+                panelProps={{
+                  'data-test-subj': 'filter-group__save-popover',
+                }}
               >
                 <div style={{ maxWidth: '200px' }}>
                   <EuiCallOut title={PENDING_CHANGES_REMINDER} color="warning" iconType="alert" />
                 </div>
               </EuiPopover>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>{discardChanges}</EuiFlexItem>
           </>
         ) : null}
         <EuiFlexItem grow={false}>

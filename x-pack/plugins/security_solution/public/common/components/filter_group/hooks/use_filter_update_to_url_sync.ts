@@ -28,18 +28,20 @@ export const useFilterUpdatesToUrlSync = ({ controlGroupInput }: UseFilterUrlSyn
   const formattedFilters: FilterItemObj[] | undefined = useMemo(() => {
     if (!controlGroupInput) return;
     const { panels } = controlGroupInput;
-    return Object.keys(panels).map((panelId) => {
-      const {
-        explicitInput: { fieldName, selectedOptions, title, existsSelected, exclude },
-      } = panels[panelId] as ControlPanelState<OptionsListEmbeddableInput>;
-      return {
-        fieldName: fieldName as string,
-        selectedOptions: selectedOptions ?? [],
-        title,
-        existsSelected,
-        exclude,
-      };
-    });
+    return Object.values(panels)
+      .sort((a, b) => b.order - a.order)
+      .map((panel) => {
+        const {
+          explicitInput: { fieldName, selectedOptions, title, existsSelected, exclude },
+        } = panel as ControlPanelState<OptionsListEmbeddableInput>;
+        return {
+          fieldName: fieldName as string,
+          selectedOptions: selectedOptions ?? [],
+          title,
+          existsSelected,
+          exclude,
+        };
+      });
   }, [controlGroupInput]);
 
   useEffect(() => {

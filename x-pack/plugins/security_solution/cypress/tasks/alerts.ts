@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { encode } from '@kbn/rison';
 import { formatPageFilterSearchParam } from '../../common/utils/format_page_filter_search_param';
 import { TOP_N_CONTAINER } from '../screens/network/flows';
 import {
@@ -190,7 +191,7 @@ export const refreshAlertPageFilter = () => {
 };
 
 export const togglePageFilterPopover = (filterIndex: number) => {
-  cy.get(OPTION_LIST_VALUES).eq(filterIndex).click({ force: true });
+  cy.get(OPTION_LIST_VALUES(filterIndex)).click({ force: true });
 };
 
 export const clearAllSelections = () => {
@@ -415,7 +416,7 @@ export const selectAllAlerts = () => {
 };
 
 export const visitAlertsPageWithCustomFilters = (pageFilters: FilterItemObj[]) => {
-  const pageFilterUrlVal = formatPageFilterSearchParam(pageFilters);
+  const pageFilterUrlVal = encode(formatPageFilterSearchParam(pageFilters));
   const newURL = `${ALERTS_URL}?pageFilters=${pageFilterUrlVal}`;
   visit(newURL);
 };
