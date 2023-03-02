@@ -14,31 +14,35 @@ export type IdentifierType = 'user' | 'host';
 export interface GetScoresParams {
   dataViewId?: DataViewId;
   filters?: unknown[];
-  range: { start: string; end: string };
   identifierType?: IdentifierType;
+  enrichInputs?: boolean;
+  range: { start: string; end: string };
 }
 
-export interface GetScoresResponse {
-  hosts: RiskScores;
-  users: RiskScores;
+export interface SimpleRiskInput {
+  _id: string;
+  _index: string;
+  sort: [number];
 }
 
-export interface RiskScore {
+export type RiskInput = Ecs;
+
+export interface BaseRiskScore {
   '@timestamp': string;
   identifierField: string;
   identifierValue: string;
   // calculatedLevel: string;
   // calculatedScore: number;
   calculatedScoreNorm: number;
-  riskiestInputs: RiskInput[] | Ecs[];
 }
 
-export interface RiskInput {
-  _id: string;
-  _index: string;
+export interface SimpleRiskScore extends BaseRiskScore {
+  riskiestInputs: SimpleRiskInput[];
 }
 
-export type RiskScores = RiskScore[];
+export interface FullRiskScore extends BaseRiskScore {
+  riskiestInputs: RiskInput[];
+}
 
 export interface CalculateRiskScoreAggregations {
   users: {

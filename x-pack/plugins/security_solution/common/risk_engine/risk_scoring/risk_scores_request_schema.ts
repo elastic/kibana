@@ -12,11 +12,12 @@ export type RiskScoresRequestSchema = t.TypeOf<typeof riskScoresRequestSchema>;
 export const riskScoresRequestSchema = t.exact(
   t.partial({
     data_view_id: DataViewId,
+    enrich_inputs: t.boolean,
+    filters: t.array(t.unknown),
+    identifier_type: t.string,
     range: t.type({
       start: t.string,
       end: t.string,
     }),
-    identifier_type: t.string,
-    filters: t.array(t.unknown),
   })
 );
