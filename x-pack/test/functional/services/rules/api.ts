@@ -60,7 +60,7 @@ export function RulesAPIServiceProvider({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .expect(200);
 
-      for (const rule of body) {
+      for (const rule of body.data) {
         await this.deleteRule(rule.id);
       }
     },

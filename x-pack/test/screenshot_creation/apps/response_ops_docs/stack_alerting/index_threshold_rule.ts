@@ -130,7 +130,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
-
+      /*
+       * const saveButton = await testSubjects.find('saveRuleButton');
+       * await saveButton.click();
+       */
       const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
       await flyOutCancelButton.click();
     });
