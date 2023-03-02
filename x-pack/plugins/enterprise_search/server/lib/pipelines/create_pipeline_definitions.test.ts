@@ -26,9 +26,7 @@ describe('createIndexPipelineDefinitions util function', () => {
 
   it('should create the pipelines', async () => {
     mockClient.ingest.putPipeline.mockImplementation(() => Promise.resolve({ acknowledged: true }));
-    await expect(
-      createIndexPipelineDefinitions(indexName, mockClient as unknown as ElasticsearchClient)
-    ).resolves;
+    await createIndexPipelineDefinitions(indexName, mockClient as unknown as ElasticsearchClient);
     expect(mockClient.ingest.putPipeline).toHaveBeenCalledTimes(3);
   });
 });
