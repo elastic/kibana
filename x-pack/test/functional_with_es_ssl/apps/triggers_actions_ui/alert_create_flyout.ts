@@ -116,14 +116,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 - Timestamp: {{context.date}}`
       );
       await testSubjects.setValue('messageTextArea', 'test message ');
-      await testSubjects.click('messageAddVariableButton-Title');
+      await testSubjects.click('messageAddVariableButton');
       await testSubjects.click('variableMenuButton-alert.actionGroup');
       expect(await messageTextArea.getAttribute('value')).to.eql(
         'test message {{alert.actionGroup}}'
       );
       await messageTextArea.type(' some additional text ');
 
-      await testSubjects.click('messageAddVariableButton-Title');
+      await testSubjects.click('messageAddVariableButton');
       // await testSubjects.moveMouseTo('variableMenuButton-alert.actionGroup');
       // await testSubjects.scrollIntoView('variableMenuButton-rule.id');
       // await testSubjects.click('variableMenuButton-rule.id');

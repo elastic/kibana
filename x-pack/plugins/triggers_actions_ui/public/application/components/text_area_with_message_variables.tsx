@@ -62,7 +62,6 @@ export const TextAreaWithMessageVariables: React.FunctionComponent<Props> = ({
           messageVariables={messageVariables}
           onSelectEventHandler={onSelectMessageVariable}
           paramsProperty={paramsProperty}
-          showButtonTitle
         />
       }
     >

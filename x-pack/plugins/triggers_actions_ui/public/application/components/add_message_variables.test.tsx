@@ -33,7 +33,6 @@ describe('AddMessageVariables', () => {
     expect(screen.getByTestId('myVar-selectableOption')).toBeInTheDocument();
     expect(screen.getByTestId('myVar2-selectableOption')).toBeInTheDocument();
   });
-  // data-test-subj={'messageVariablesDescriptioToolTip'}
 
   test('it renders variables title and description', async () => {
     render(
