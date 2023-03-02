@@ -184,7 +184,7 @@ export const AnalyticsCollectionCard: React.FC<AnalyticsCollectionCardProps> = (
             xAccessor={0}
             yAccessors={[1]}
             xScaleType={ScaleType.Time}
-            yScaleType={ScaleType.Sqrt}
+            yScaleType={ScaleType.Linear}
             curve={CurveType.CURVE_BASIS}
             yNice
           />

@@ -34,7 +34,7 @@ export const AnalyticsCollectionCardStyles = (euiTheme: EuiThemeComputed) => ({
   },
   chart: {
     '.euiPanel:hover &': {
-      transform: 'scaleY(1.3)',
+      transform: 'scale(1.03)',
     },
     bottom: 0,
     left: 0,
