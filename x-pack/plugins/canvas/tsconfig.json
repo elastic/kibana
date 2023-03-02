@@ -45,7 +45,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/presentation-util-plugin",
-    "@kbn/saved-objects-plugin",
     "@kbn/ui-actions-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/visualizations-plugin",
@@ -79,6 +78,8 @@
     "@kbn/shared-ux-router",
     "@kbn/babel-register",
     "@kbn/shared-ux-button-toolbar",
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/saved-objects-management-plugin",
   ],
   "exclude": [
     "target/**/*",

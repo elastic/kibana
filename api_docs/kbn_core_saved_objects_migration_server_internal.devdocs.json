@@ -1771,37 +1771,39 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-        "id": "def-common.updateTargetMappingsMeta",
+        "id": "def-common.updateMappings",
         "type": "Function",
         "tags": [],
-        "label": "updateTargetMappingsMeta",
+        "label": "updateMappings",
         "description": [
-          "\nUpdates an index's mappings _meta information"
+          "\nUpdates an index's mappings and runs an pickupUpdatedMappings task so that the mapping\nchanges are \"picked up\". Returns a taskId to track progress."
         ],
         "signature": [
-          "({ client, index, meta, }: ",
-          "UpdateTargetMappingsMetaParams",
+          "({ client, index, mappings, }: ",
+          "UpdateMappingsParams",
           ") => ",
           "TaskEither",
           "<",
           "RetryableEsClientError",
-          ", \"update_mappings_meta_succeeded\">"
+          " | ",
+          "IncompatibleMappingException",
+          ", \"update_mappings_succeeded\">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_target_mappings_meta.ts",
+        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-common.updateTargetMappingsMeta.$1",
+            "id": "def-common.updateMappings.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    client,\n    index,\n    meta,\n  }",
+            "label": "{\n  client,\n  index,\n  mappings,\n}",
             "description": [],
             "signature": [
-              "UpdateTargetMappingsMetaParams"
+              "UpdateMappingsParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_target_mappings_meta.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

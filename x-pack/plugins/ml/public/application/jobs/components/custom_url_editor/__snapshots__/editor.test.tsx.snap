@@ -21,7 +21,6 @@ exports[`CustomUrlEditor renders the editor for a dashboard type URL with a labe
     data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
-      className="url-label"
       describedByIds={Array []}
       display="rowCompressed"
       error={Array []}
@@ -218,7 +217,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with an enti
     data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
-      className="url-label"
       describedByIds={Array []}
       display="rowCompressed"
       error={Array []}
@@ -452,7 +450,6 @@ exports[`CustomUrlEditor renders the editor for a discover type URL with valid t
     data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
-      className="url-label"
       describedByIds={Array []}
       display="rowCompressed"
       error={Array []}
@@ -682,7 +679,6 @@ exports[`CustomUrlEditor renders the editor for a new dashboard type URL with no
     data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
-      className="url-label"
       describedByIds={Array []}
       display="rowCompressed"
       error={
@@ -883,7 +879,6 @@ exports[`CustomUrlEditor renders the editor for other type of URL with duplicate
     data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
-      className="url-label"
       describedByIds={Array []}
       display="rowCompressed"
       error={
@@ -998,7 +993,6 @@ exports[`CustomUrlEditor renders the editor for other type of URL with unique la
     data-test-subj="mlJobCustomUrlForm"
   >
     <EuiFormRow
-      className="url-label"
       describedByIds={Array []}
       display="rowCompressed"
       error={Array []}
