@@ -21,14 +21,10 @@ export const useFindCaseUserActions = (
     page: number;
     perPage: number;
   },
-  isExpandable?: boolean
+  isEnabled: boolean
 ) => {
   const { showErrorToast } = useCasesToast();
   const abortCtrlRef = new AbortController();
-
-  if (isExpandable) {
-    return;
-  }
 
   return useQuery<FindCaseUserActions, ServerError>(
     casesQueriesKeys.caseUserActions(caseId, params),
@@ -36,7 +32,7 @@ export const useFindCaseUserActions = (
       return findCaseUserActions(caseId, params, abortCtrlRef.signal);
     },
     {
-      keepPreviousData: true,
+      enabled: isEnabled,
       onError: (error: ServerError) => {
         showErrorToast(error, { title: ERROR_TITLE });
       },

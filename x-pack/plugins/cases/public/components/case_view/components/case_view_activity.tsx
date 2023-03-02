@@ -7,7 +7,7 @@
 
 /* eslint-disable complexity */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
@@ -221,12 +221,10 @@ export const CaseViewActivity = ({
           />
         </EuiFlexItem>
         <EuiSpacer size="l" />
-
-        <EuiSkeletonText
-          lines={8}
-          data-test-subj="case-view-loading-content"
-          isLoading={isLoadingCaseConnectors || isLoadingUserActionsStats}
-        >
+        {!showUserActions && (
+          <EuiLoadingSpinner data-test-subj="case-view-loading-content" size="l" />
+        )}
+        {showUserActions ? (
           <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
             <EuiFlexItem>
               <UserActions
@@ -236,7 +234,6 @@ export const CaseViewActivity = ({
                 getRuleDetailsHref={ruleDetailsNavigation?.href}
                 onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                 caseConnectors={caseConnectors}
-                isLoadingConnectors={isLoadingCaseConnectors}
                 data={caseData}
                 actionsNavigation={actionsNavigation}
                 onShowAlertDetails={onShowAlertDetails}
@@ -256,7 +253,7 @@ export const CaseViewActivity = ({
               />
             </EuiFlexItem>
           </EuiFlexGroup>
-        </EuiSkeletonText>
+        ) : null}
       </EuiFlexItem>
       <EuiFlexItem grow={2}>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="xl">

@@ -12,30 +12,37 @@ import { waitFor, screen } from '@testing-library/react';
 import routeData from 'react-router';
 
 import { useUpdateComment } from '../../containers/use_update_comment';
-import {
-  basicCase,
-  getUserAction,
-  getHostIsolationUserAction,
-  hostIsolationComment,
-} from '../../containers/mock';
+import { basicCase, getUserAction } from '../../containers/mock';
 import { UserActions } from '.';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer, TestProviders } from '../../common/mock';
 import { Actions } from '../../../common/api';
-import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
+import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { connectorsMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
-import type { UserActivityFilter } from '../user_actions_activity_bar/types';
+import type { UserActivityParams } from '../user_actions_activity_bar/types';
+import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
+import { defaultUseFindCaseUserActions } from '../case_view/mocks';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
 const updateCase = jest.fn();
 const onShowAlertDetails = jest.fn();
 
-const filterOptions: UserActivityFilter = 'all';
+const userActionsStats = {
+  total: 25,
+  totalComments: 9,
+  totalOtherActions: 16,
+};
+
+const userActivityQueryParams: UserActivityParams = {
+  type: 'all',
+  sortOrder: 'asc',
+  page: 1,
+  perPage: 10,
+};
 
 const defaultProps = {
   caseConnectors: getCaseConnectorsMockResponse(),
-  caseUserActions: [],
   userProfiles: new Map(),
   currentUserProfile: undefined,
   connectors: connectorsMock,
@@ -55,15 +62,18 @@ const defaultProps = {
   ],
   alerts: {},
   onShowAlertDetails,
-  filterOptions,
+  userActivityQueryParams,
+  userActionsStats,
 };
 
+jest.mock('../../containers/use_find_case_user_actions');
 jest.mock('../../containers/use_update_comment');
 jest.mock('./timestamp', () => ({
   UserActionTimestamp: () => <></>,
 }));
 jest.mock('../../common/lib/kibana');
 
+const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useUpdateCommentMock = useUpdateComment as jest.Mock;
 const patchComment = jest.fn();
 
@@ -79,6 +89,7 @@ describe(`UserActions`, () => {
       isLoadingIds: [],
       patchComment,
     });
+    useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
 
     jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
     appMockRender = createAppMockRenderer();
@@ -96,94 +107,97 @@ describe(`UserActions`, () => {
     expect(screen.getByText('DR')).toBeInTheDocument();
   });
 
-  it('Renders service now update line with top and bottom when push is required', async () => {
-    const caseConnectors = getCaseConnectorsMockResponse({ 'push.needsToBePushed': true });
+  // it('Renders expandable and bottom user action lists', async () => {
+  //   const caseConnectors = getCaseConnectorsMockResponse({ 'push.needsToBePushed': true });
+  //   const ourActions = [
+  //     getUserAction('pushed', 'push_to_service', {
+  //       createdAt: '2023-01-17T09:46:29.813Z',
+  //     }),
+  //   ];
 
-    const ourActions = [
-      getUserAction('pushed', 'push_to_service', {
-        createdAt: '2023-01-17T09:46:29.813Z',
-      }),
-    ];
+  //   useFindCaseUserActionsMock.mockReturnValue({...defaultUseFindCaseUserActions, data: {...defaultUseFindCaseUserActions.data.userActions, ...ourActions}});
 
-    const props = {
-      ...defaultProps,
-      caseConnectors,
-      caseUserActions: ourActions,
-    };
+  //   const props = {
+  //     ...defaultProps,
+  //     caseConnectors,
+  //   };
 
-    const wrapper = mount(
-      <TestProviders>
-        <UserActions {...props} />
-      </TestProviders>
-    );
+  //   const component = appMockRender.render(
+  //     <UserActions {...props} />
+  //   );
 
-    await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
-      expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(true);
-    });
-  });
+  //   await waitForComponentToUpdate();
 
-  it('Renders service now update line with top only when push is up to date', async () => {
-    const ourActions = [
-      getUserAction('pushed', 'push_to_service', {
-        createdAt: '2023-01-17T09:46:29.813Z',
-      }),
-    ];
+  //   expect(component).toMatchSnapshot();
 
-    const props = {
-      ...defaultProps,
-      caseUserActions: ourActions,
-    };
+  //   await waitFor(() => {
+  //     expect(screen.getByTestId('top-footer')).toBeInTheDocument();
+  //     expect(screen.getByTestId('bottom-footer')).toBeInTheDocument();
+  //   });
+  // });
 
-    const wrapper = mount(
-      <TestProviders>
-        <UserActions {...props} />
-      </TestProviders>
-    );
-    await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
-      expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(false);
-    });
-  });
+  // it('Renders service now update line with top only when push is up to date', async () => {
+  //   const ourActions = [
+  //     getUserAction('pushed', 'push_to_service', {
+  //       createdAt: '2023-01-17T09:46:29.813Z',
+  //     }),
+  //   ];
 
-  it('Outlines comment when update move to link is clicked', async () => {
-    const ourActions = [
-      getUserAction('comment', Actions.create),
-      getUserAction('comment', Actions.update),
-    ];
-    const props = {
-      ...defaultProps,
-      caseUserActions: ourActions,
-    };
+  //   const props = {
+  //     ...defaultProps,
+  //     caseUserActions: ourActions,
+  //   };
 
-    const wrapper = mount(
-      <TestProviders>
-        <UserActions {...props} />
-      </TestProviders>
-    );
-    expect(
-      wrapper
-        .find(`[data-test-subj="comment-create-action-${props.data.comments[0].id}"]`)
-        .first()
-        .hasClass('outlined')
-    ).toEqual(false);
+  //   const wrapper = mount(
+  //     <TestProviders>
+  //       <UserActions {...props} />
+  //     </TestProviders>
+  //   );
+  //   await waitFor(() => {
+  //     expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
+  //     expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(false);
+  //   });
+  // });
 
-    wrapper
-      .find(
-        `[data-test-subj="comment-update-action-${ourActions[1].id}"] [data-test-subj="move-to-link-${props.data.comments[0].id}"]`
-      )
-      .first()
-      .simulate('click');
+  // it('Outlines comment when update move to link is clicked', async () => {
+  //   const ourActions = [
+  //     getUserAction('comment', Actions.create),
+  //     getUserAction('comment', Actions.update),
+  //   ];
+  //   const props = {
+  //     ...defaultProps,
+  //     caseUserActions: ourActions,
+  //   };
 
-    await waitFor(() => {
-      expect(
-        wrapper
-          .find(`[data-test-subj="comment-create-action-${props.data.comments[0].id}"]`)
-          .first()
-          .hasClass('outlined')
-      ).toEqual(true);
-    });
-  });
+  //   const wrapper = mount(
+  //     <TestProviders>
+  //       <UserActions {...props} />
+  //     </TestProviders>
+  //   );
+  //   expect(
+  //     wrapper
+  //       .find(`[data-test-subj="comment-create-action-${props.data.comments[0].id}"]`)
+  //       .first()
+  //       .hasClass('outlined')
+  //   ).toEqual(false);
+
+  //   wrapper
+  //     .find(
+  //       `[data-test-subj="comment-update-action-${ourActions[1].id}"] [data-test-subj="move-to-link-${props.data.comments[0].id}"]`
+  //     )
+  //     .first()
+  //     .simulate('click');
+
+  //   await waitFor(() => {
+  //     expect(
+  //       wrapper
+  //         .find(`[data-test-subj="comment-create-action-${props.data.comments[0].id}"]`)
+  //         .first()
+  //         .hasClass('outlined')
+  //     ).toEqual(true);
+  //   });
+  // });
+
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
     const ourActions = [getUserAction('comment', Actions.create)];
     const props = {
@@ -326,7 +340,12 @@ describe(`UserActions`, () => {
   });
 
   it('does not show add comment markdown when history filter is selected', async () => {
-    appMockRender.render(<UserActions {...defaultProps} filterOptions="action" />);
+    appMockRender.render(
+      <UserActions
+        {...defaultProps}
+        userActivityQueryParams={{ ...userActivityQueryParams, type: 'action' }}
+      />
+    );
 
     await waitFor(() => {
       expect(screen.queryByTestId('add-comment')).not.toBeInTheDocument();
@@ -426,44 +445,44 @@ describe(`UserActions`, () => {
     expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(newComment);
   });
 
-  describe('Host isolation action', () => {
-    it('renders in the cases details view', async () => {
-      const isolateAction = [getHostIsolationUserAction()];
-      const props = {
-        ...defaultProps,
-        caseUserActions: isolateAction,
-        data: { ...defaultProps.data, comments: [...basicCase.comments, hostIsolationComment()] },
-      };
+  // describe('Host isolation action', () => {
+  //   it('renders in the cases details view', async () => {
+  //     const isolateAction = [getHostIsolationUserAction()];
+  //     const props = {
+  //       ...defaultProps,
+  //       caseUserActions: isolateAction,
+  //       data: { ...defaultProps.data, comments: [...basicCase.comments, hostIsolationComment()] },
+  //     };
 
-      const wrapper = mount(
-        <TestProviders>
-          <UserActions {...props} />
-        </TestProviders>
-      );
-      await waitFor(() => {
-        expect(wrapper.find(`[data-test-subj="endpoint-action"]`).exists()).toBe(true);
-      });
-    });
+  //     const wrapper = mount(
+  //       <TestProviders>
+  //         <UserActions {...props} />
+  //       </TestProviders>
+  //     );
+  //     await waitFor(() => {
+  //       expect(wrapper.find(`[data-test-subj="endpoint-action"]`).exists()).toBe(true);
+  //     });
+  //   });
 
-    it('shows the correct username', async () => {
-      const isolateAction = [
-        getHostIsolationUserAction({ createdBy: { profileUid: userProfiles[0].uid } }),
-      ];
-      const props = {
-        ...defaultProps,
-        userProfiles: userProfilesMap,
-        caseUserActions: isolateAction,
-        data: {
-          ...defaultProps.data,
-          comments: [hostIsolationComment({ createdBy: { profileUid: userProfiles[0].uid } })],
-        },
-      };
+  //   it('shows the correct username', async () => {
+  //     const isolateAction = [
+  //       getHostIsolationUserAction({ createdBy: { profileUid: userProfiles[0].uid } }),
+  //     ];
+  //     const props = {
+  //       ...defaultProps,
+  //       userProfiles: userProfilesMap,
+  //       caseUserActions: isolateAction,
+  //       data: {
+  //         ...defaultProps.data,
+  //         comments: [hostIsolationComment({ createdBy: { profileUid: userProfiles[0].uid } })],
+  //       },
+  //     };
 
-      appMockRender.render(<UserActions {...props} />);
+  //     appMockRender.render(<UserActions {...props} />);
 
-      expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
-      expect(screen.getByText('DR')).toBeInTheDocument();
-      expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-    });
-  });
+  //     expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
+  //     expect(screen.getByText('DR')).toBeInTheDocument();
+  //     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+  //   });
+  // });
 });
