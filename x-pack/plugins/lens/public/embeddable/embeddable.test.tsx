@@ -632,7 +632,7 @@ describe('embeddable', () => {
             indexPatternRefs: [],
           }),
       },
-      { id: '123', searchSessionId: 'firstSession', } as LensEmbeddableInput
+      { id: '123', searchSessionId: 'firstSession' } as LensEmbeddableInput
     );
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
     embeddable.render(mountpoint);
@@ -1197,7 +1197,7 @@ describe('embeddable', () => {
     embeddable.updateInput({
       searchSessionId: 'newSession',
     });
-    
+
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     // loading should become again true
@@ -1574,5 +1574,4 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(4);
     expect(expressionRenderer.mock.calls[1][0]!.padding).toBe(undefined);
   });
-
 });
