@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { Panel } from '../../common/components/panel';
@@ -22,6 +22,7 @@ import { RiskScore } from '../../explore/components/risk_score/severity/common';
 import { StyledBasicTable } from '../components/entity_analytics/common/styled_basic_table';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useKibana } from '../../common/lib/kibana';
+import { RISK_SCORES_URL } from '../../../common/constants';
 
 const StyledFullHeightContainer = styled.div`
   display: flex;
@@ -41,18 +42,48 @@ const EntityAnalyticsPageNewComponent = () => {
     unifiedSearch: {
       ui: { SearchBar },
     },
+    http,
   } = useKibana().services;
 
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
     []
   );
+
+  const [hostRiskList, setHostRiskList] = useState([]);
+  const [userRiskList, setUserRiskList] = useState([]);
+
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
+  const range = useDeepEqualSelector(inputsSelectors.globalTimeRangeSelector);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const data = await http.fetch(RISK_SCORES_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          range: {
+            start: range.from,
+            end: range.to,
+          },
+        }),
+      });
+      setHostRiskList(data.hosts);
+      setUserRiskList(data.users);
+      console.log(data);
+    };
+
+    try {
+      fetchData();
+    } catch (error) {
+      console.log('error', error);
+    }
+  }, [range]);
 
   console.log('query', query);
   console.log('filters', filters);
+  console.log('range', range);
   const data = [
     {
       '@timestamp': 1,
@@ -85,7 +116,7 @@ const EntityAnalyticsPageNewComponent = () => {
       '@timestamp': 1,
       identifierField: 'user.name',
       identifierValue: 'user-3',
-      identityType  : 'user',
+      identityType: 'user',
       calculatedLevel: 'Low',
       calculatedScore: 30,
       calculatedScoreNorm: 31,
@@ -104,10 +135,22 @@ const EntityAnalyticsPageNewComponent = () => {
     {
       field: 'calculatedScore',
       name: 'Score',
+      render: (score) => {
+        if (score != null) {
+          return score.value;
+        }
+        return '';
+      },
     },
     {
       field: 'calculatedScoreNorm',
       name: 'Score norm',
+      render: (scoreNorm) => {
+        if (scoreNorm != null) {
+          return scoreNorm.value;
+        }
+        return '';
+      },
     },
     ,
     {
@@ -120,9 +163,6 @@ const EntityAnalyticsPageNewComponent = () => {
       },
     },
   ];
-
-  const hostRiskData = data.filter(item => item.identityType === 'host');
-  const userRiskData = data.filter(item => item.identityType === 'user');
 
   return (
     <StyledFullHeightContainer>
@@ -141,7 +181,7 @@ const EntityAnalyticsPageNewComponent = () => {
                   <EuiFlexItem grow={false}>
                     <StyledBasicTable
                       responsive={false}
-                      items={hostRiskData}
+                      items={hostRiskList}
                       columns={columns}
                       loading={false}
                     />
@@ -159,7 +199,7 @@ const EntityAnalyticsPageNewComponent = () => {
                   <EuiFlexItem grow={false}>
                     <StyledBasicTable
                       responsive={false}
-                      items={userRiskData}
+                      items={userRiskList}
                       columns={columns}
                       loading={false}
                     />
