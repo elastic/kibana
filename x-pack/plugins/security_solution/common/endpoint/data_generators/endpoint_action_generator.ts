@@ -220,9 +220,9 @@ export class EndpointActionGenerator extends BaseDataGenerator {
             ResponseActionsExecuteParameters
           >
         ).parameters = {
-          command: (overrides.parameters as ResponseActionsExecuteParameters).command ?? 'ls -al',
+          command: (overrides.parameters as ResponseActionsExecuteParameters)?.command ?? 'ls -al',
           timeout:
-            (overrides.parameters as ResponseActionsExecuteParameters).timeout ??
+            (overrides.parameters as ResponseActionsExecuteParameters)?.timeout ??
             DEFAULT_EXECUTE_ACTION_TIMEOUT, // 4hrs
         };
       }

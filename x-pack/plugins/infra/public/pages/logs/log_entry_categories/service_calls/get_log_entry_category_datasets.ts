@@ -31,7 +31,7 @@ export const callGetLogEntryCategoryDatasetsAPI = async (
     body: JSON.stringify(
       getLogEntryCategoryDatasetsRequestPayloadRT.encode({
         data: {
-          sourceId,
+          logView: { type: 'log-view-reference', logViewId: sourceId },
           timeRange: {
             startTime,
             endTime,
