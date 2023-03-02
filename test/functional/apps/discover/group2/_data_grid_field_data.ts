@@ -13,7 +13,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const toasts = getService('toasts');
   const queryBar = getService('queryBar');
   const PageObjects = getPageObjects(['common', 'header', 'discover', 'visualize', 'timePicker']);
   const defaultSettings = { defaultIndex: 'logstash-*' };
@@ -85,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'whitespace but "(" found.';
         await queryBar.setQuery('xxx(yyy))');
         await queryBar.submitQuery();
-        expect(await PageObjects.discover.noResultsErrorVisible()).to.be(true);
+        expect(await PageObjects.discover.mainErrorVisible()).to.be(true);
         const message = await PageObjects.discover.getDiscoverErrorMessage();
         expect(message).to.contain(expectedError);
       });
