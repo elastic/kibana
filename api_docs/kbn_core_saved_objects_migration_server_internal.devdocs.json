@@ -601,6 +601,57 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+        "id": "def-common.buildTypesMappings",
+        "type": "Function",
+        "tags": [],
+        "label": "buildTypesMappings",
+        "description": [
+          "\nMerge mappings from all registered saved object types."
+        ],
+        "signature": [
+          "(types: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsType",
+            "text": "SavedObjectsType"
+          },
+          "<any>[]) => ",
+          "SavedObjectsTypeMappingDefinitions"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/build_types_mappings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-common.buildTypesMappings.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "types",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsType",
+                "text": "SavedObjectsType"
+              },
+              "<any>[]"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/core/build_types_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
         "id": "def-common.bulkOverwriteTransformedDocuments",
         "type": "Function",
         "tags": [],
@@ -609,7 +660,7 @@
           "\nWrite the up-to-date transformed documents to the index, overwriting any\ndocuments that are still on their outdated version."
         ],
         "signature": [
-          "({ client, index, transformedDocs, refresh, }: ",
+          "({ client, index, operations, refresh, }: ",
           "BulkOverwriteTransformedDocumentsParams",
           ") => ",
           "TaskEither",
@@ -632,7 +683,7 @@
             "id": "def-common.bulkOverwriteTransformedDocuments.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    client,\n    index,\n    transformedDocs,\n    refresh = false,\n  }",
+            "label": "{\n    client,\n    index,\n    operations,\n    refresh = false,\n  }",
             "description": [],
             "signature": [
               "BulkOverwriteTransformedDocumentsParams"
@@ -808,6 +859,92 @@
               "ClosePitParams"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/close_pit.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+        "id": "def-common.createBulkDeleteOperationBody",
+        "type": "Function",
+        "tags": [],
+        "label": "createBulkDeleteOperationBody",
+        "description": [
+          "\nGiven a document id, creates a valid body to delete the document using the Bulk API."
+        ],
+        "signature": [
+          "(_id: string) => ",
+          "BulkOperationContainer"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-common.createBulkDeleteOperationBody.$1",
+            "type": "string",
+            "tags": [],
+            "label": "_id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+        "id": "def-common.createBulkIndexOperationTuple",
+        "type": "Function",
+        "tags": [],
+        "label": "createBulkIndexOperationTuple",
+        "description": [
+          "\nGiven a document, creates a valid body to index the document using the Bulk API."
+        ],
+        "signature": [
+          "(doc: ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsRawDoc",
+            "text": "SavedObjectsRawDoc"
+          },
+          ") => ",
+          "BulkIndexOperationTuple"
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
+            "id": "def-common.createBulkIndexOperationTuple.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+                "section": "def-common.SavedObjectsRawDoc",
+                "text": "SavedObjectsRawDoc"
+              }
+            ],
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/model/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1086,57 +1223,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-        "id": "def-common.mergeTypes",
-        "type": "Function",
-        "tags": [],
-        "label": "mergeTypes",
-        "description": [
-          "\nMerges savedObjectMappings properties into a single object, verifying that\nno mappings are redefined."
-        ],
-        "signature": [
-          "(types: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-common.SavedObjectsType",
-            "text": "SavedObjectsType"
-          },
-          "<any>[]) => ",
-          "SavedObjectsTypeMappingDefinitions"
-        ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-common.mergeTypes.$1",
-            "type": "Array",
-            "tags": [],
-            "label": "types",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-common.SavedObjectsType",
-                "text": "SavedObjectsType"
-              },
-              "<any>[]"
-            ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/kibana_migrator.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -1685,37 +1771,39 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-        "id": "def-common.updateTargetMappingsMeta",
+        "id": "def-common.updateMappings",
         "type": "Function",
         "tags": [],
-        "label": "updateTargetMappingsMeta",
+        "label": "updateMappings",
         "description": [
-          "\nUpdates an index's mappings _meta information"
+          "\nUpdates an index's mappings and runs an pickupUpdatedMappings task so that the mapping\nchanges are \"picked up\". Returns a taskId to track progress."
         ],
         "signature": [
-          "({ client, index, meta, }: ",
-          "UpdateTargetMappingsMetaParams",
+          "({ client, index, mappings, }: ",
+          "UpdateMappingsParams",
           ") => ",
           "TaskEither",
           "<",
           "RetryableEsClientError",
-          ", \"update_mappings_meta_succeeded\">"
+          " | ",
+          "IncompatibleMappingException",
+          ", \"update_mappings_succeeded\">"
         ],
-        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_target_mappings_meta.ts",
+        "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_mappings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-migration-server-internal",
-            "id": "def-common.updateTargetMappingsMeta.$1",
+            "id": "def-common.updateMappings.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    client,\n    index,\n    meta,\n  }",
+            "label": "{\n  client,\n  index,\n  mappings,\n}",
             "description": [],
             "signature": [
-              "UpdateTargetMappingsMetaParams"
+              "UpdateMappingsParams"
             ],
-            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_target_mappings_meta.ts",
+            "path": "packages/core/saved-objects/core-saved-objects-migration-server-internal/src/actions/update_mappings.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3335,7 +3423,7 @@
             "label": "soMigrationsConfig",
             "description": [],
             "signature": [
-              "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly batchSize: number; readonly maxBatchSizeBytes: ",
+              "{ readonly discardUnknownObjects?: string | undefined; readonly discardCorruptObjects?: string | undefined; readonly skip: boolean; readonly pollInterval: number; readonly algorithm: \"v2\" | \"zdt\"; readonly batchSize: number; readonly maxBatchSizeBytes: ",
               {
                 "pluginId": "@kbn/config-schema",
                 "scope": "common",

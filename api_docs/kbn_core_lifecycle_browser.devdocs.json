@@ -663,10 +663,6 @@
               },
               {
                 "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/top_nav/open_search_panel.tsx"
-              },
-              {
-                "plugin": "discover",
                 "path": "src/plugins/discover/public/application/main/utils/persist_saved_search.ts"
               },
               {
@@ -680,10 +676,6 @@
               {
                 "plugin": "discover",
                 "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
               },
               {
                 "plugin": "fileUpload",
@@ -807,10 +799,6 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/private_locations/hooks/use_locations_api.ts"
-              },
-              {
-                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_name.ts"
               },
               {
@@ -836,10 +824,6 @@
               {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/plugin.tsx"
               },
               {
                 "plugin": "dataVisualizer",

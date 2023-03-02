@@ -6252,6 +6252,59 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.shouldFetch$",
+        "type": "Function",
+        "tags": [],
+        "label": "shouldFetch$",
+        "description": [],
+        "signature": [
+          "(updated$: ",
+          "Observable",
+          "<unknown>, getInput: () => TFilterableEmbeddableInput) => ",
+          "Observable",
+          "<TFilterableEmbeddableInput>"
+        ],
+        "path": "src/plugins/embeddable/public/lib/filterable_embeddable/should_fetch.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.shouldFetch$.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "updated$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<unknown>"
+            ],
+            "path": "src/plugins/embeddable/public/lib/filterable_embeddable/should_fetch.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.shouldFetch$.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "getInput",
+            "description": [],
+            "signature": [
+              "() => TFilterableEmbeddableInput"
+            ],
+            "path": "src/plugins/embeddable/public/lib/filterable_embeddable/should_fetch.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.useEmbeddableFactory",
         "type": "Function",
         "tags": [],
@@ -8116,6 +8169,26 @@
                 "docId": "kibInspectorPluginApi",
                 "section": "def-public.Start",
                 "text": "Start"
+              }
+            ],
+            "path": "src/plugins/embeddable/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableStartDependencies.savedObjectsManagement",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsManagement",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementPluginStart",
+                "text": "SavedObjectsManagementPluginStart"
               }
             ],
             "path": "src/plugins/embeddable/public/plugin.tsx",
@@ -10706,6 +10779,47 @@
               "any"
             ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.shouldRefreshFilterCompareOptions",
+        "type": "Object",
+        "tags": [],
+        "label": "shouldRefreshFilterCompareOptions",
+        "description": [],
+        "path": "src/plugins/embeddable/public/lib/filterable_embeddable/should_fetch.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.shouldRefreshFilterCompareOptions.Unnamed",
+            "type": "Any",
+            "tags": [],
+            "label": "Unnamed",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/embeddable/public/lib/filterable_embeddable/should_fetch.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.shouldRefreshFilterCompareOptions.state",
+            "type": "boolean",
+            "tags": [],
+            "label": "state",
+            "description": [
+              "// do not compare $state to avoid refreshing when filter is pinned/unpinned (which does not impact results)"
+            ],
+            "path": "src/plugins/embeddable/public/lib/filterable_embeddable/should_fetch.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
