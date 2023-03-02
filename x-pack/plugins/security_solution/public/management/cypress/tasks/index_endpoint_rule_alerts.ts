@@ -5,24 +5,30 @@
  * 2.0.
  */
 
-import type { IndexedEndpointRuleAlerts } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import type {
+  IndexedEndpointRuleAlerts,
+  DeletedIndexedEndpointRuleAlerts,
+} from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
 
-export const indexEndpointRuleAlerts = async (options: {
+export const indexEndpointRuleAlerts = (options: {
   endpointAgentId: string;
   count?: number;
-}): Promise<IndexedEndpointRuleAlerts> => {
-  return new Promise<IndexedEndpointRuleAlerts>((resolve) => {
-    cy.task<IndexedEndpointRuleAlerts['alerts']>('indexEndpointRuleAlerts').then((alerts) => {
-      resolve({
-        alerts,
-        cleanup: async (): Promise<void> => {
-          cy.log(
-            `Deleting Endpoint Rule Alerts data for endpoint id: ${options.endpointAgentId}`,
-            alerts.map((alert) => alert._id)
-          );
-          cy.task('deleteIndexedEndpointRuleAlerts', alerts);
-        },
-      });
-    });
+}): Cypress.Chainable<
+  Pick<IndexedEndpointRuleAlerts, 'alerts'> & {
+    cleanup: () => Cypress.Chainable<DeletedIndexedEndpointRuleAlerts>;
+  }
+> => {
+  return cy.task('indexEndpointRuleAlerts', options).then((alerts) => {
+    return {
+      alerts,
+      cleanup: () => {
+        cy.log(
+          `Deleting Endpoint Rule Alerts data for endpoint id: ${options.endpointAgentId}`,
+          alerts.map((alert) => alert._id)
+        );
+
+        return cy.task('deleteIndexedEndpointRuleAlerts', alerts);
+      },
+    };
   });
 };

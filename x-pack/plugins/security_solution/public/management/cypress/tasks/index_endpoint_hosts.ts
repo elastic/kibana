@@ -5,28 +5,32 @@
  * 2.0.
  */
 
-import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/index_data';
+import type {
+  IndexedHostsAndAlertsResponse,
+  DeleteIndexedHostsAndAlertsResponse,
+} from '../../../../common/endpoint/index_data';
 
-export const indexEndpointHosts = async (
+interface CyIndexEndpointHosts {
+  data: IndexedHostsAndAlertsResponse;
+  cleanup: () => Cypress.Chainable<DeleteIndexedHostsAndAlertsResponse>;
+}
+
+export const indexEndpointHosts = (
   options: {
     count?: number;
   } = {}
-): Promise<{
-  data: IndexedHostsAndAlertsResponse;
-  cleanup: () => Promise<void>;
-}> => {
-  return new Promise((resolve) => {
-    cy.task('indexEndpointHosts', options).then((indexHosts) => {
-      resolve({
-        data: indexHosts,
-        cleanup: async (): Promise<void> => {
-          cy.log(
-            'Deleting Endpoint data',
-            indexHosts.hosts.map((host) => `${host.host.name} (${host.host.id})`)
-          );
-          cy.task('deleteIndexedEndpointHosts', indexHosts);
-        },
-      });
-    });
+): Cypress.Chainable<CyIndexEndpointHosts> => {
+  return cy.task('indexEndpointHosts', options).then((indexHosts) => {
+    return {
+      data: indexHosts,
+      cleanup: () => {
+        cy.log(
+          'Deleting Endpoint Host data',
+          indexHosts.hosts.map((host) => `${host.host.name} (${host.host.id})`)
+        );
+
+        return cy.task('deleteIndexedEndpointHosts', indexHosts);
+      },
+    };
   });
 };
