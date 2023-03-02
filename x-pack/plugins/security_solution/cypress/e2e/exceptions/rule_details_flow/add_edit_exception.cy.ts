@@ -34,6 +34,7 @@ import {
 import {
   addExceptionConditions,
   addExceptionFlyoutItemName,
+  clearExceptionFlyoutExpireTime,
   editException,
   editExceptionFlyoutItemName,
   selectAddToRuleRadio,
@@ -56,6 +57,7 @@ import {
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_CARD_ITEM_CONDITIONS,
   FIELD_INPUT_PARENT,
+  EXCEPTION_CARD_ITEM_META_INFO,
 } from '../../../screens/exceptions';
 import {
   createExceptionList,
@@ -118,6 +120,7 @@ describe('Add/edit exception from rule details', () => {
               value: ['foo'],
             },
           ],
+          expire_time: new Date(Date.now() + 1000000).toISOString(),
         });
       });
 
@@ -135,6 +138,7 @@ describe('Add/edit exception from rule details', () => {
       cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
       cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', ITEM_NAME);
       cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' unique_value.testis one of foo');
+      cy.get(EXCEPTION_CARD_ITEM_META_INFO).should('exist');
 
       // open edit exception modal
       openEditException();
@@ -152,6 +156,7 @@ describe('Add/edit exception from rule details', () => {
 
       // edit conditions
       editException(FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD, 0, 0);
+      clearExceptionFlyoutExpireTime();
 
       // submit
       submitEditedExceptionItem();
@@ -162,6 +167,7 @@ describe('Add/edit exception from rule details', () => {
       // check that updates stuck
       cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', NEW_ITEM_NAME);
       cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.nameIS foo');
+      cy.get(EXCEPTION_CARD_ITEM_META_INFO).should('not.exist');
     });
 
     describe('rule with existing shared exceptions', () => {

@@ -30,6 +30,7 @@ import {
   addExceptionEntryOperatorValue,
   addExceptionFlyoutItemName,
   closeExceptionBuilderFlyout,
+  editExceptionFlyoutExpireTime,
 } from '../../../tasks/exceptions';
 import {
   ADD_AND_BTN,
@@ -321,6 +322,28 @@ describe('Exceptions flyout', () => {
     closeExceptionBuilderFlyout();
   });
 
+  it('Validates expire time field correctly', () => {
+    // open add exception modal
+    openExceptionFlyoutFromEmptyViewerPrompt();
+
+    // add exception item name
+    addExceptionFlyoutItemName('My item name');
+
+    // add an entry with a value and submit button should enable
+    addExceptionEntryFieldValue('agent.name', 0);
+    addExceptionEntryFieldValueValue('test', 0);
+
+    // set an expiration date in the past
+    editExceptionFlyoutExpireTime(new Date(Date.now() - 1000000).toISOString());
+    cy.get(CONFIRM_BTN).should('be.disabled');
+
+    // set an expiration date in the future
+    editExceptionFlyoutExpireTime(new Date(Date.now() + 1000000).toISOString());
+    cy.get(CONFIRM_BTN).should('be.enabled');
+
+    closeExceptionBuilderFlyout();
+  });
+
   // TODO - Add back in error states into modal
   describe.skip('flyout errors', () => {
     beforeEach(() => {
@@ -341,6 +364,7 @@ describe('Exceptions flyout', () => {
             value: ['some host', 'another host'],
           },
         ],
+        expire_time: undefined,
       });
 
       reload();

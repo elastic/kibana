@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import type { Exception } from '../objects/exception';
 import {
   FIELD_INPUT,
@@ -24,6 +25,7 @@ import {
   SHARED_LIST_SWITCH,
   OS_SELECTION_SECTION,
   OS_INPUT,
+  EXCEPTION_ITEM_EXPIRE_TIME_INPUT,
 } from '../screens/exceptions';
 
 export const addExceptionEntryFieldValueOfItemX = (
@@ -91,6 +93,24 @@ export const editExceptionFlyoutItemName = (name: string) => {
     .clear()
     .type(`${name}{enter}`)
     .should('have.value', name);
+};
+
+export const editExceptionFlyoutExpireTime = (date: string) => {
+  const formattedDate = moment(new Date(date).toISOString()).format('MM DD YYYY hh:mm a');
+  cy.root()
+    .pipe(($el) => {
+      return $el.find(EXCEPTION_ITEM_EXPIRE_TIME_INPUT);
+    })
+    .clear()
+    .type(`${formattedDate}{enter}`);
+};
+
+export const clearExceptionFlyoutExpireTime = () => {
+  cy.root()
+    .pipe(($el) => {
+      return $el.find(EXCEPTION_ITEM_EXPIRE_TIME_INPUT);
+    })
+    .clear();
 };
 
 export const selectBulkCloseAlerts = () => {
