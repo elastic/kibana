@@ -8,15 +8,14 @@ import React from 'react';
 import { Chart, Datum, Partition, PartitionLayout } from '@elastic/charts';
 import { euiPaletteColorBlind } from '@elastic/eui';
 import { percentValueGetter } from '@elastic/charts/dist/chart_types/partition_chart/layout/config';
+import { isEmpty } from 'lodash';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { ChartContainer } from '../chart_container';
-import { isEmpty } from 'lodash';
 
-type DataType = {
+type DataType = Array<{
   label: string;
   count: number;
-}[];
-
+}>;
 export function TreemapChart({
   data,
   height,

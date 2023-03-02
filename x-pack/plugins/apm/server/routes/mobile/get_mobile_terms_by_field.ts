@@ -33,7 +33,7 @@ export async function getMobileTermsByField({
   end: number;
   size: number;
   fieldName: string;
-}): Promise<{ label: string; count: number }[]> {
+}): Promise<Array<{ label: string; count: number }>> {
   const response = await apmEventClient.search(
     `get_mobile_terms_by_${fieldName}`,
     {
