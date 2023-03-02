@@ -14,7 +14,7 @@ import { getUnlinkLayerAction } from './unlink_action';
 import { getIgnoreFilterAction } from './ignore_filters_action';
 import { getEditDetailsAction } from './edit_details_action';
 import { getSaveLayerAction } from './save_action';
-import { isByReferenceAnnotationLayer } from '../../visualization_helpers';
+import { isByReferenceAnnotationsLayer } from '../../visualization_helpers';
 export {
   IGNORE_GLOBAL_FILTERS_ACTION_ID,
   KEEP_GLOBAL_FILTERS_ACTION_ID,
@@ -45,7 +45,7 @@ export const createAnnotationActions = ({
 
   if (savingToLibraryPermitted) {
     // check if the annotation is saved as a saved object or in inline - same as we check for save modal for visualization
-    if (isByReferenceAnnotationLayer(layer)) {
+    if (isByReferenceAnnotationsLayer(layer)) {
       // check if Annotation group hasUnsavedChanges to know if we should allow reverting and saving - similar to how we do it for persistedDoc vs currentDoc on app level
       const hasUnsavedChanges = true;
 

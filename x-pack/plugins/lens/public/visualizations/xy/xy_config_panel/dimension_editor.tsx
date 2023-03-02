@@ -16,11 +16,7 @@ import { FormatFactory } from '../../../../common';
 import { getSeriesColor, isHorizontalChart } from '../state_helpers';
 import { ColorPicker } from './color_picker';
 import { PalettePicker, useDebouncedValue } from '../../../shared_components';
-import {
-  getDataLayers,
-  isByValueAnnotationLayer,
-  isReferenceLayer,
-} from '../visualization_helpers';
+import { getDataLayers, isAnnotationsLayer, isReferenceLayer } from '../visualization_helpers';
 import { ReferenceLinePanel } from './reference_line_config_panel';
 import { AnnotationsPanel } from './annotations_config_panel';
 import { CollapseSetting } from '../../../shared_components/collapse_setting';
@@ -55,7 +51,7 @@ export function DimensionEditor(
   const { state, layerId } = props;
   const index = state.layers.findIndex((l) => l.layerId === layerId);
   const layer = state.layers[index];
-  if (isByValueAnnotationLayer(layer)) {
+  if (isAnnotationsLayer(layer)) {
     return <AnnotationsPanel {...props} />;
   }
 

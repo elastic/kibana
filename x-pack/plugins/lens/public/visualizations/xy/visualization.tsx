@@ -78,7 +78,7 @@ import {
 import {
   checkXAccessorCompatibility,
   defaultSeriesType,
-  getAnnotationLayers,
+  getAnnotationsLayers,
   getAxisName,
   getDataLayers,
   getDescription,
@@ -86,7 +86,7 @@ import {
   getLayersByType,
   getReferenceLayers,
   getVisualizationType,
-  isByValueAnnotationLayer,
+  isAnnotationsLayer,
   isBucketed,
   isDataLayer,
   isNumericDynamicMetric,
@@ -153,7 +153,7 @@ export const getXyVisualization = ({
   cloneLayer(state, layerId, newLayerId, clonedIDsMap) {
     const toCopyLayer = state.layers.find((l) => l.layerId === layerId);
     if (toCopyLayer) {
-      if (isByValueAnnotationLayer(toCopyLayer)) {
+      if (isAnnotationsLayer(toCopyLayer)) {
         toCopyLayer.annotations.forEach((i) => clonedIDsMap.set(i.id, generateId()));
       }
       const newLayer = renewIDs(toCopyLayer, [...clonedIDsMap.keys()], (id: string) =>
@@ -262,7 +262,7 @@ export const getXyVisualization = ({
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
     const actions = [];
-    if (isByValueAnnotationLayer(layer)) {
+    if (isAnnotationsLayer(layer)) {
       actions.push(
         ...createAnnotationActions({
           state,
@@ -281,7 +281,7 @@ export const getXyVisualization = ({
   onIndexPatternChange(state, indexPatternId, layerId) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
-    if (!layer || !isByValueAnnotationLayer(layer)) {
+    if (!layer || !isAnnotationsLayer(layer)) {
       return state;
     }
     const newLayers = [...state.layers];
@@ -298,7 +298,7 @@ export const getXyVisualization = ({
       return { groups: [] };
     }
 
-    if (isByValueAnnotationLayer(layer)) {
+    if (isAnnotationsLayer(layer)) {
       return getAnnotationsConfiguration({ state, frame, layer });
     }
 
@@ -451,7 +451,7 @@ export const getXyVisualization = ({
       throw new Error('target layer should exist');
     }
 
-    if (isByValueAnnotationLayer(targetLayer)) {
+    if (isAnnotationsLayer(targetLayer)) {
       return onAnnotationDrop?.(props) || props.prevState;
     }
     return onDropForVisualization(props, this);
@@ -470,7 +470,7 @@ export const getXyVisualization = ({
     if (isReferenceLayer(foundLayer)) {
       return setReferenceDimension(props);
     }
-    if (isByValueAnnotationLayer(foundLayer)) {
+    if (isAnnotationsLayer(foundLayer)) {
       return setAnnotationsDimension(props);
     }
 
@@ -495,7 +495,7 @@ export const getXyVisualization = ({
     if (!foundLayer) {
       return prevState;
     }
-    if (isByValueAnnotationLayer(foundLayer)) {
+    if (isAnnotationsLayer(foundLayer)) {
       const newLayer = {
         ...foundLayer,
         annotations: foundLayer.annotations.filter(({ id }) => id !== columnId),
@@ -600,7 +600,7 @@ export const getXyVisualization = ({
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />
-    ) : isByValueAnnotationLayer(layer) ? (
+    ) : isAnnotationsLayer(layer) ? (
       <AnnotationsPanel {...allProps} />
     ) : (
       <DimensionEditor {...allProps} />
@@ -641,7 +641,7 @@ export const getXyVisualization = ({
     if (isReferenceLayer(layer)) {
       return;
     }
-    if (isByValueAnnotationLayer(layer)) {
+    if (isAnnotationsLayer(layer)) {
       return;
     }
 
@@ -692,7 +692,7 @@ export const getXyVisualization = ({
 
   getUserMessages(state, { frame }) {
     const { datasourceLayers, dataViews, activeData } = frame;
-    const annotationLayers = getAnnotationLayers(state.layers);
+    const annotationLayers = getAnnotationsLayers(state.layers);
     const errors: UserMessage[] = [];
 
     const hasDateHistogram = isDateHistogram(getDataLayers(state.layers), frame);
@@ -873,12 +873,11 @@ export const getXyVisualization = ({
     return getUniqueLabels(state.layers);
   },
   getUsedDataView(state, layerId) {
-    return getAnnotationLayers(state.layers).find((l) => l.layerId === layerId)?.indexPatternId;
+    return getAnnotationsLayers(state.layers).find((l) => l.layerId === layerId)?.indexPatternId;
   },
   getUsedDataViews(state) {
     return (
-      state?.layers.filter(isByValueAnnotationLayer).map(({ indexPatternId }) => indexPatternId) ??
-      []
+      state?.layers.filter(isAnnotationsLayer).map(({ indexPatternId }) => indexPatternId) ?? []
     );
   },
   renderDimensionTrigger({ columnId, label }) {
@@ -963,7 +962,7 @@ export const getXyVisualization = ({
         });
         icon = IconChartBarReferenceLine;
       }
-      if (isByValueAnnotationLayer(layer) && layer.annotations && layer.annotations.length) {
+      if (isAnnotationsLayer(layer) && layer.annotations && layer.annotations.length) {
         layer.annotations.forEach((annotation) => {
           dimensions.push({
             name: i18n.translate('xpack.lens.xyChart.layerAnnotation', {

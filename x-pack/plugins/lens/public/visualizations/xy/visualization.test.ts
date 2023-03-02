@@ -46,7 +46,7 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { layerTypes, Visualization } from '../..';
 import { set } from '@kbn/safer-lodash-set';
 import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { getAnnotationLayers } from './visualization_helpers';
+import { getAnnotationsLayers } from './visualization_helpers';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
@@ -342,7 +342,7 @@ describe('xy_visualization', () => {
 
       const baseState = exampleState();
       expect(
-        getAnnotationLayers(
+        getAnnotationsLayers(
           xyVisualization.initialize!(
             () => 'first',
             {

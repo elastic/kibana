@@ -33,12 +33,12 @@ import {
 } from './types';
 import {
   getDataLayers,
-  isByValueAnnotationLayer,
+  isAnnotationsLayer,
   isDataLayer,
-  isPersistedByReferenceAnnotationLayer,
-  isByReferenceAnnotationLayer,
-  isPersistedByValueAnnotationLayer,
-  getAnnotationLayers,
+  isPersistedByReferenceAnnotationsLayer,
+  isByReferenceAnnotationsLayer,
+  isPersistedByValueAnnotationsLayer,
+  getAnnotationsLayers,
 } from './visualization_helpers';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
@@ -76,7 +76,7 @@ export function getIconForSeries(type: SeriesType): EuiIconType {
 }
 
 export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
-  if (isByValueAnnotationLayer(layer)) {
+  if (isAnnotationsLayer(layer)) {
     return layer?.annotations?.find((ann) => ann.id === accessor)?.color || null;
   }
   if (isDataLayer(layer) && layer.splitAccessor) {
@@ -135,10 +135,10 @@ export function getPersistableState(state: XYState) {
   const savedObjectReferences: SavedObjectReference[] = [];
   const persistableLayers: XYPersistedLayerConfig[] = [];
   state.layers.forEach((layer) => {
-    if (!isByValueAnnotationLayer(layer)) {
+    if (!isAnnotationsLayer(layer)) {
       persistableLayers.push(layer);
     } else {
-      if (isByReferenceAnnotationLayer(layer)) {
+      if (isByReferenceAnnotationsLayer(layer)) {
         const referenceName = `ref-${uuidv4()}`;
         savedObjectReferences.push({
           type: EVENT_ANNOTATION_GROUP_TYPE,
@@ -165,9 +165,9 @@ export function getPersistableState(state: XYState) {
 }
 
 export function isPersistedState(state: XYPersistedState | XYState): state is XYPersistedState {
-  return getAnnotationLayers(state.layers).some(
+  return getAnnotationsLayers(state.layers).some(
     (layer) =>
-      isPersistedByValueAnnotationLayer(layer) || isPersistedByReferenceAnnotationLayer(layer)
+      isPersistedByValueAnnotationsLayer(layer) || isPersistedByReferenceAnnotationsLayer(layer)
   );
 }
 
@@ -185,12 +185,12 @@ export function injectReferences(
   return {
     ...state,
     layers: state.layers.map((layer) => {
-      if (!isByValueAnnotationLayer(layer)) {
+      if (!isAnnotationsLayer(layer)) {
         return layer as XYLayerConfig;
       }
 
       let injectedLayer: XYAnnotationLayerConfig;
-      if (isPersistedByReferenceAnnotationLayer(layer)) {
+      if (isPersistedByReferenceAnnotationsLayer(layer)) {
         const annotationGroupId = references?.find(
           ({ name }) => name === layer.annotationGroupRef
         )?.id;

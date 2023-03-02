@@ -56,7 +56,7 @@ import {
   getLayerTypeOptions,
   getDataLayers,
   getReferenceLayers,
-  getAnnotationLayers,
+  getAnnotationsLayers,
 } from './visualization_helpers';
 import { getUniqueLabels } from './annotations/helpers';
 import {
@@ -207,7 +207,7 @@ export const buildXYExpression = (
   );
 
   const uniqueLabels = getUniqueLabels(state.layers);
-  const validAnnotationsLayers = getAnnotationLayers(state.layers)
+  const validAnnotationsLayers = getAnnotationsLayers(state.layers)
     .filter((layer) => Boolean(layer.annotations.length))
     .map((layer) => {
       return {
