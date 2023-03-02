@@ -27,7 +27,7 @@ import {
 
 export function openAddDataControlFlyout(
   this: ControlGroupContainer,
-  { onSave }: { onSave: (id: string) => void }
+  options?: { onSave?: (id: string) => void }
 ) {
   const {
     overlays: { openFlyout, openConfirm },
@@ -99,8 +99,8 @@ export function openAddDataControlFlyout(
                   );
               }
 
-              if (!isErrorEmbeddable(newControl)) {
-                onSave(newControl.id);
+              if (options?.onSave && !isErrorEmbeddable(newControl)) {
+                options.onSave(newControl.id);
               }
             }}
             onCancel={onCancel}
