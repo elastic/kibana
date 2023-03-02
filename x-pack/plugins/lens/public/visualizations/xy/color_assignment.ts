@@ -17,7 +17,7 @@ import {
 import type { AccessorConfig, FramePublicAPI } from '../../types';
 import { getColumnToLabelMap } from './state_helpers';
 import { FormatFactory } from '../../../common';
-import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
+import { isDataLayer, isReferenceLayer, isByValueAnnotationLayer } from './visualization_helpers';
 import { getAnnotationsAccessorColorConfig } from './annotations/helpers';
 import {
   getReferenceLineAccessorColorConfig,
@@ -121,7 +121,7 @@ export function getAssignedColorConfig(
   if (isReferenceLayer(layer)) {
     return getSingleColorConfig(accessor);
   }
-  if (isAnnotationsLayer(layer)) {
+  if (isByValueAnnotationLayer(layer)) {
     const annotation = layer.annotations.find((a) => a.id === accessor);
     return {
       columnId: accessor,
@@ -175,7 +175,7 @@ export function getAccessorColorConfigs(
   if (isReferenceLayer(layer)) {
     return getReferenceLineAccessorColorConfig(layer);
   }
-  if (isAnnotationsLayer(layer)) {
+  if (isByValueAnnotationLayer(layer)) {
     return getAnnotationsAccessorColorConfig(layer);
   }
   const layerContainsSplits = !layer.collapseFn && layer.splitAccessor;

@@ -395,6 +395,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         timelines: new subPluginClasses.Timelines(),
         management: new subPluginClasses.Management(),
         landingPages: new subPluginClasses.LandingPages(),
+        cloudDefend: new subPluginClasses.CloudDefend(),
         cloudSecurityPosture: new subPluginClasses.CloudSecurityPosture(),
         threatIntelligence: new subPluginClasses.ThreatIntelligence(),
       };
@@ -422,6 +423,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       landingPages: subPlugins.landingPages.start(),
+      cloudDefend: subPlugins.cloudDefend.start(),
       cloudSecurityPosture: subPlugins.cloudSecurityPosture.start(),
       threatIntelligence: subPlugins.threatIntelligence.start(),
     };

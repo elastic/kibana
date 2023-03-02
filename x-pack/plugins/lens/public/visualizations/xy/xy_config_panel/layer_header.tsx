@@ -19,7 +19,7 @@ import { State, visualizationTypes, SeriesType, XYAnnotationLayerConfig } from '
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
 import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
 import { updateLayer } from '.';
-import { isAnnotationsLayer, isDataLayer, isReferenceLayer } from '../visualization_helpers';
+import { isByValueAnnotationLayer, isDataLayer, isReferenceLayer } from '../visualization_helpers';
 
 export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   const layer = props.state.layers.find((l) => l.layerId === props.layerId);
@@ -29,7 +29,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   if (isReferenceLayer(layer)) {
     return <ReferenceLayerHeader />;
   }
-  if (isAnnotationsLayer(layer)) {
+  if (isByValueAnnotationLayer(layer)) {
     return <AnnotationsLayerHeader />;
   }
   return <DataLayerHeader {...props} />;
@@ -37,7 +37,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
 
 export function LayerHeaderContent(props: VisualizationLayerHeaderContentProps<State>) {
   const layer = props.state.layers.find((l) => l.layerId === props.layerId);
-  if (layer && isAnnotationsLayer(layer)) {
+  if (layer && isByValueAnnotationLayer(layer)) {
     return <AnnotationLayerHeaderContent {...props} />;
   }
   return null;

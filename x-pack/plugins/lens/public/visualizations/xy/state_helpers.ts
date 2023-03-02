@@ -32,10 +32,12 @@ import {
 } from './types';
 import {
   getDataLayers,
-  isAnnotationsLayer,
+  isByValueAnnotationLayer,
   isDataLayer,
   isPersistedByReferenceAnnotationLayer,
   isByReferenceAnnotationLayer,
+  isPersistedByValueAnnotationLayer,
+  getAnnotationLayers,
 } from './visualization_helpers';
 
 export function isHorizontalSeries(seriesType: SeriesType) {
@@ -73,7 +75,7 @@ export function getIconForSeries(type: SeriesType): EuiIconType {
 }
 
 export const getSeriesColor = (layer: XYLayerConfig, accessor: string) => {
-  if (isAnnotationsLayer(layer)) {
+  if (isByValueAnnotationLayer(layer)) {
     return layer?.annotations?.find((ann) => ann.id === accessor)?.color || null;
   }
   if (isDataLayer(layer) && layer.splitAccessor) {
@@ -132,7 +134,7 @@ export function getPersistableState(state: XYState) {
   const savedObjectReferences: SavedObjectReference[] = [];
   const persistableLayers: XYPersistedLayerConfig[] = [];
   state.layers.forEach((layer) => {
-    if (!isAnnotationsLayer(layer)) {
+    if (!isByValueAnnotationLayer(layer)) {
       persistableLayers.push(layer);
     } else {
       if (isByReferenceAnnotationLayer(layer)) {
@@ -160,19 +162,28 @@ export function getPersistableState(state: XYState) {
   return { savedObjectReferences, state: { ...state, layers: persistableLayers } };
 }
 
-export const REF_NOT_FOUND = 'ref-not-found';
+export function isPersistedState(state: XYPersistedState | XYState): state is XYPersistedState {
+  return getAnnotationLayers(state.layers).some(
+    (layer) =>
+      isPersistedByValueAnnotationLayer(layer) || isPersistedByReferenceAnnotationLayer(layer)
+  );
+}
 
 export function injectReferences(
   state: XYPersistedState,
   annotationGroups: Record<string, EventAnnotationGroupConfig>,
-  references: SavedObjectReference[],
+  references?: SavedObjectReference[],
   initialContext?: VisualizeFieldContext | VisualizeEditorContext
 ): XYState {
+  if (!references || !references.length) {
+    return state as XYState;
+  }
+
   const fallbackIndexPatternId = references.find(({ type }) => type === 'index-pattern')!.id;
   return {
     ...state,
     layers: state.layers.map((layer) => {
-      if (!isAnnotationsLayer(layer)) {
+      if (!isByValueAnnotationLayer(layer)) {
         return layer as XYLayerConfig;
       }
 

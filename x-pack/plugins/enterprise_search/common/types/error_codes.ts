@@ -19,4 +19,5 @@ export enum ErrorCode {
   RESOURCE_NOT_FOUND = 'resource_not_found',
   UNAUTHORIZED = 'unauthorized',
   UNCAUGHT_EXCEPTION = 'uncaught_exception',
+  ENGINE_NOT_FOUND = 'engine_not_found',
 }

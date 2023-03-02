@@ -39,12 +39,10 @@ import { act } from 'react-dom/test-utils';
 function getStateContainer() {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 
-  stateContainer.setAppState({
+  stateContainer.appState.update({
     interval: 'auto',
     hideChart: false,
   });
-
-  stateContainer.setAppState = jest.fn();
 
   return stateContainer;
 }
@@ -130,9 +128,9 @@ const mountComponent = async ({
     onAddFilter: jest.fn(),
     resetSavedSearch,
     resizeRef: { current: null },
-    searchSessionManager: createSearchSessionMock(session).searchSessionManager,
     inspectorAdapters: { requests: new RequestAdapter() },
   };
+  stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 
   const coreTheme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
 

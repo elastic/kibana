@@ -112,6 +112,8 @@ export const PROCESS_KPI = '[data-test-subj="siem-timeline-process-kpi"';
 
 export const PROVIDER_BADGE = '[data-test-subj="providerBadge"]';
 
+export const PROVIDER_BADGE_DELETE = '.delete-data-provider';
+
 export const RESET_FIELDS =
   '[data-test-subj="fields-browser-container"] [data-test-subj="reset-fields"]';
 
@@ -128,6 +130,8 @@ export const QUERY_EVENT_TABLE_CELL =
 export const QUERY_TAB_BUTTON = '[data-test-subj="timelineTabs-query"]';
 
 export const SERVER_SIDE_EVENT_COUNT = '[data-test-subj="server-side-event-count"]';
+
+export const ALERTS_TABLE_COUNT = `[data-test-subj="toolbar-alerts-count"]`;
 
 export const SOURCE_IP_KPI = '[data-test-subj="siem-timeline-source-ip-kpi"]';
 
@@ -293,7 +297,11 @@ export const EDIT_TIMELINE_TOOLTIP = '[data-test-subj="save-timeline-btn-tooltip
 export const ALERT_TABLE_SEVERITY_VALUES =
   '[data-test-subj="formatted-field-kibana.alert.severity"]';
 
+export const ALERT_TABLE_ACTIONS_HEADER = '[data-gridcell-column-id="expandColumn"]';
+
 export const ALERT_TABLE_FILE_NAME_HEADER = '[data-gridcell-column-id="file.name"]';
+
+export const ALERT_TABLE_SEVERITY_HEADER = '[data-gridcell-column-id="kibana.alert.severity"]';
 
 export const ALERT_TABLE_FILE_NAME_VALUES =
   '[data-gridcell-column-id="file.name"][data-test-subj="dataGridRowCell"]'; // empty column for the test data
@@ -316,4 +324,8 @@ export const HOVER_ACTIONS = {
   FILTER_OUT: '[data-test-subj="filter-out-value"]',
   COPY: '[data-test-subj="clipboard"]',
   SHOW_TOP: 'show-top-field',
+};
+
+export const GET_TIMELINE_HEADER = (fieldName: string) => {
+  return `[data-test-subj="timeline"] [data-test-subj="header-text-${fieldName}"]`;
 };

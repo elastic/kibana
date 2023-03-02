@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiText, EuiSpacer, EuiLink, EuiTitle } from '@elastic/eui';
+import { EuiLink, EuiSpacer, EuiText, EuiTitle, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DataViewField, DataView } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { DiscoverFieldBucket } from './discover_field_bucket';
-import { Bucket } from './types';
+import { Bucket, FieldDetails } from './types';
 import { getDetails, isValidFieldDetails } from './get_details';
 import { FetchStatus } from '../../../../types';
 import { DataDocuments$ } from '../../../services/discover_data_state_container';
@@ -33,12 +33,30 @@ export function DiscoverFieldDetails({
   dataView,
   onAddFilter,
 }: DiscoverFieldDetailsProps) {
-  const details = useMemo(() => {
-    const data = documents$.getValue();
-    const documents = data.fetchStatus === FetchStatus.COMPLETE ? data.result : undefined;
-    return getDetails(field, documents, dataView);
-  }, [field, documents$, dataView]);
+  const [detailsState, setDetailsState] = useState<{
+    details?: FieldDetails;
+    loaded: boolean;
+  }>();
 
+  useEffect(() => {
+    const subscription = documents$.subscribe((data) => {
+      if (data.fetchStatus === FetchStatus.COMPLETE) {
+        setDetailsState({ details: getDetails(field, data.result, dataView), loaded: true });
+      } else {
+        setDetailsState({ details: undefined, loaded: data.fetchStatus !== FetchStatus.LOADING });
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, [documents$, setDetailsState, dataView, field]);
+
+  if (!detailsState?.loaded) {
+    return <EuiLoadingSpinner />;
+  }
+
+  const details = detailsState?.details;
   if (!details) {
     return null;
   }

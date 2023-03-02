@@ -75,8 +75,6 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
     </EuiCallOut>
   );
 
-  const panelClass = isInitialized === false ? 'mlOverviewPanel__isLoading' : 'mlOverviewPanel';
-
   const noDFAJobs = errorMessage === undefined && isInitialized === true && analytics.length === 0;
 
   return (
@@ -84,10 +82,14 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
       {noDFAJobs ? (
         <AnalyticsEmptyPrompt />
       ) : (
-        <EuiPanel className={panelClass} hasShadow={false} hasBorder>
+        <EuiPanel
+          css={isInitialized ? {} : { textAlign: 'center', padding: '10%' }}
+          hasShadow={false}
+          hasBorder
+        >
           {typeof errorMessage !== 'undefined' ? errorDisplay : null}
           {isInitialized === false && (
-            <EuiLoadingSpinner className="mlOverviewPanel__spinner" size="xl" />
+            <EuiLoadingSpinner css={{ display: 'inline-block' }} size="xl" />
           )}
 
           {isInitialized === true && analytics.length > 0 && (

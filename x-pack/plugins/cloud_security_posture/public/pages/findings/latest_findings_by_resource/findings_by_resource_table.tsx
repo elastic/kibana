@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
-import { Link, generatePath } from 'react-router-dom';
+import { generatePath, Link } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
@@ -126,7 +126,9 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
     width: '15%',
     render: (resourceId: FindingsByResourcePage['resource_id']) => (
       <Link
-        to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}
+        to={generatePath(findingsNavigation.resource_findings.path, {
+          resourceId: encodeURIComponent(resourceId),
+        })}
         className="eui-textTruncate"
         title={resourceId}
       >
@@ -178,8 +180,8 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
     sortable: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.findingsByResourceTable.complianceScoreColumnLabel"
-        defaultMessage="Compliance Score"
+        id="xpack.csp.findings.findingsByResourceTable.postureScoreColumnLabel"
+        defaultMessage="Posture Score"
       />
     ),
     render: (complianceScore: FindingsByResourcePage['compliance_score'], data) => (

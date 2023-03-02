@@ -281,6 +281,7 @@ const mockOptions = () => {
     ]),
     kibanaIndex: '.my-index',
     soMigrationsConfig: {
+      algorithm: 'v2',
       batchSize: 20,
       maxBatchSizeBytes: ByteSizeValue.parse('20mb'),
       pollInterval: 20000,

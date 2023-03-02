@@ -56,6 +56,7 @@ import {
   getAnnotationLayerErrors,
   injectReferences,
   isHorizontalChart,
+  isPersistedState,
 } from './state_helpers';
 import { toExpression, toPreviewExpression, getSortedAccessors } from './to_expression';
 import { getAccessorColorConfigs, getColorAssignments } from './color_assignment';
@@ -77,7 +78,7 @@ import {
 import {
   checkXAccessorCompatibility,
   defaultSeriesType,
-  getAnnotationsLayers,
+  getAnnotationLayers,
   getAxisName,
   getDataLayers,
   getDescription,
@@ -85,7 +86,7 @@ import {
   getLayersByType,
   getReferenceLayers,
   getVisualizationType,
-  isAnnotationsLayer,
+  isByValueAnnotationLayer,
   isBucketed,
   isDataLayer,
   isNumericDynamicMetric,
@@ -152,7 +153,7 @@ export const getXyVisualization = ({
   cloneLayer(state, layerId, newLayerId, clonedIDsMap) {
     const toCopyLayer = state.layers.find((l) => l.layerId === layerId);
     if (toCopyLayer) {
-      if (isAnnotationsLayer(toCopyLayer)) {
+      if (isByValueAnnotationLayer(toCopyLayer)) {
         toCopyLayer.annotations.forEach((i) => clonedIDsMap.set(i.id, generateId()));
       }
       const newLayer = renewIDs(toCopyLayer, [...clonedIDsMap.keys()], (id: string) =>
@@ -206,14 +207,6 @@ export const getXyVisualization = ({
     return getPersistableState(state);
   },
 
-  fromPersistableState(state, annotationGroups, references, initialContext) {
-    if (!references || !references.length) {
-      return state as XYState;
-    }
-
-    return injectReferences(state, annotationGroups, references, initialContext);
-  },
-
   getDescription,
 
   switchVisualizationType(seriesType: string, state: State) {
@@ -228,9 +221,13 @@ export const getXyVisualization = ({
 
   triggers: [VIS_EVENT_TO_TRIGGER.filter, VIS_EVENT_TO_TRIGGER.brush],
 
-  initialize(addNewLayer, state) {
+  initialize(addNewLayer, annotationGroups, state, _, references, initialContext) {
+    const finalState =
+      state && isPersistedState(state)
+        ? injectReferences(state, annotationGroups, references, initialContext)
+        : state;
     return (
-      state || {
+      finalState || {
         title: 'Empty XY chart',
         legend: { isVisible: true, position: Position.Right },
         valueLabels: 'hide',
@@ -265,7 +262,7 @@ export const getXyVisualization = ({
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
     const actions = [];
-    if (isAnnotationsLayer(layer)) {
+    if (isByValueAnnotationLayer(layer)) {
       actions.push(
         ...createAnnotationActions({
           state,
@@ -284,7 +281,7 @@ export const getXyVisualization = ({
   onIndexPatternChange(state, indexPatternId, layerId) {
     const layerIndex = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[layerIndex];
-    if (!layer || !isAnnotationsLayer(layer)) {
+    if (!layer || !isByValueAnnotationLayer(layer)) {
       return state;
     }
     const newLayers = [...state.layers];
@@ -301,7 +298,7 @@ export const getXyVisualization = ({
       return { groups: [] };
     }
 
-    if (isAnnotationsLayer(layer)) {
+    if (isByValueAnnotationLayer(layer)) {
       return getAnnotationsConfiguration({ state, frame, layer });
     }
 
@@ -454,7 +451,7 @@ export const getXyVisualization = ({
       throw new Error('target layer should exist');
     }
 
-    if (isAnnotationsLayer(targetLayer)) {
+    if (isByValueAnnotationLayer(targetLayer)) {
       return onAnnotationDrop?.(props) || props.prevState;
     }
     return onDropForVisualization(props, this);
@@ -473,7 +470,7 @@ export const getXyVisualization = ({
     if (isReferenceLayer(foundLayer)) {
       return setReferenceDimension(props);
     }
-    if (isAnnotationsLayer(foundLayer)) {
+    if (isByValueAnnotationLayer(foundLayer)) {
       return setAnnotationsDimension(props);
     }
 
@@ -498,7 +495,7 @@ export const getXyVisualization = ({
     if (!foundLayer) {
       return prevState;
     }
-    if (isAnnotationsLayer(foundLayer)) {
+    if (isByValueAnnotationLayer(foundLayer)) {
       const newLayer = {
         ...foundLayer,
         annotations: foundLayer.annotations.filter(({ id }) => id !== columnId),
@@ -603,7 +600,7 @@ export const getXyVisualization = ({
     const layer = props.state.layers.find((l) => l.layerId === props.layerId)!;
     const dimensionEditor = isReferenceLayer(layer) ? (
       <ReferenceLinePanel {...allProps} />
-    ) : isAnnotationsLayer(layer) ? (
+    ) : isByValueAnnotationLayer(layer) ? (
       <AnnotationsPanel {...allProps} />
     ) : (
       <DimensionEditor {...allProps} />
@@ -644,7 +641,7 @@ export const getXyVisualization = ({
     if (isReferenceLayer(layer)) {
       return;
     }
-    if (isAnnotationsLayer(layer)) {
+    if (isByValueAnnotationLayer(layer)) {
       return;
     }
 
@@ -695,7 +692,7 @@ export const getXyVisualization = ({
 
   getUserMessages(state, { frame }) {
     const { datasourceLayers, dataViews, activeData } = frame;
-    const annotationLayers = getAnnotationsLayers(state.layers);
+    const annotationLayers = getAnnotationLayers(state.layers);
     const errors: UserMessage[] = [];
 
     const hasDateHistogram = isDateHistogram(getDataLayers(state.layers), frame);
@@ -876,11 +873,12 @@ export const getXyVisualization = ({
     return getUniqueLabels(state.layers);
   },
   getUsedDataView(state, layerId) {
-    return getAnnotationsLayers(state.layers).find((l) => l.layerId === layerId)?.indexPatternId;
+    return getAnnotationLayers(state.layers).find((l) => l.layerId === layerId)?.indexPatternId;
   },
   getUsedDataViews(state) {
     return (
-      state?.layers.filter(isAnnotationsLayer).map(({ indexPatternId }) => indexPatternId) ?? []
+      state?.layers.filter(isByValueAnnotationLayer).map(({ indexPatternId }) => indexPatternId) ??
+      []
     );
   },
   renderDimensionTrigger({ columnId, label }) {
@@ -965,7 +963,7 @@ export const getXyVisualization = ({
         });
         icon = IconChartBarReferenceLine;
       }
-      if (isAnnotationsLayer(layer) && layer.annotations && layer.annotations.length) {
+      if (isByValueAnnotationLayer(layer) && layer.annotations && layer.annotations.length) {
         layer.annotations.forEach((annotation) => {
           dimensions.push({
             name: i18n.translate('xpack.lens.xyChart.layerAnnotation', {

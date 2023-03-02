@@ -12,13 +12,16 @@ import type { ExploratoryEmbeddableProps, ObservabilityPublicPluginsStart } from
 import type { DataViewState } from '../hooks/use_app_data_view';
 import type { AppDataType } from '../types';
 import { ObservabilityDataViews } from '../../../../utils/observability_data_views/observability_data_views';
+import { SeriesUrl } from '../../../..';
 
 export const useAppDataView = ({
+  series,
   dataViewCache,
   seriesDataType,
   dataViewsService,
   dataTypesIndexPatterns,
 }: {
+  series: SeriesUrl;
   seriesDataType: AppDataType;
   dataViewCache: Record<string, DataView>;
   dataViewsService: ObservabilityPublicPluginsStart['dataViews'];
@@ -56,10 +59,11 @@ export const useAppDataView = ({
   );
 
   useEffect(() => {
-    if (seriesDataType) {
+    if (seriesDataType && !loading && !dataViews[seriesDataType]) {
       loadIndexPattern({ dataType: seriesDataType });
     }
-  }, [seriesDataType, loadIndexPattern]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [seriesDataType, loadIndexPattern, JSON.stringify(series)]);
 
   return { dataViews, loading };
 };

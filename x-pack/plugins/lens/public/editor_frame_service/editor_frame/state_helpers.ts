@@ -280,9 +280,11 @@ export function initializeVisualization({
 }) {
   if (visualizationState?.activeId) {
     return (
-      visualizationMap[visualizationState.activeId]?.fromPersistableState?.(
-        visualizationState.state,
+      visualizationMap[visualizationState.activeId]?.initialize(
+        () => '',
         annotationGroups,
+        visualizationState.state,
+        undefined,
         references,
         initialContext
       ) ?? visualizationState.state

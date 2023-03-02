@@ -299,7 +299,7 @@ describe('Toaster', () => {
         toast: {
           color: 'danger',
           errors: ['message'],
-          iconType: 'alert',
+          iconType: 'error',
           id: '9e1f72a9-7c73-4b7f-a562-09940f7daf4a',
           title: 'Title',
         },

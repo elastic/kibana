@@ -2472,6 +2472,14 @@
             "path": "x-pack/plugins/alerting/server/types.ts"
           },
           {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
+          },
+          {
+            "plugin": "savedSearch",
+            "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
+          },
+          {
             "plugin": "canvas",
             "path": "x-pack/plugins/canvas/server/routes/custom_elements/find.ts"
           },
@@ -2558,14 +2566,6 @@
           {
             "plugin": "dashboard",
             "path": "src/plugins/dashboard/server/usage/find_by_value_embeddables.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
-          },
-          {
-            "plugin": "savedSearch",
-            "path": "src/plugins/saved_search/server/saved_objects/search_migrations.ts"
           },
           {
             "plugin": "alerting",

@@ -139,7 +139,11 @@ export const isReferenceLayer = (
 export const getReferenceLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYReferenceLineLayerConfig => isReferenceLayer(layer));
 
-export const isAnnotationsLayer = (
+export const isByValueAnnotationLayer = (
+  layer: Pick<XYLayerConfig, 'layerType'>
+): layer is XYAnnotationLayerConfig => layer.layerType === layerTypes.ANNOTATIONS;
+
+export const isPersistedByValueAnnotationLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
 ): layer is XYAnnotationLayerConfig => layer.layerType === layerTypes.ANNOTATIONS;
 
@@ -153,8 +157,10 @@ export const isPersistedByReferenceAnnotationLayer = (
 ): layer is XYPersistedByReferenceAnnotationLayerConfig =>
   'annotationGroupId' in layer && !('__lastSaved' in layer);
 
-export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
-  (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));
+export const getAnnotationLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
+  (layers || []).filter((layer): layer is XYAnnotationLayerConfig =>
+    isByValueAnnotationLayer(layer)
+  );
 
 export interface LayerTypeToLayer {
   [layerTypes.DATA]: (layer: XYDataLayerConfig) => XYDataLayerConfig;

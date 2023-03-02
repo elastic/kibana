@@ -23,10 +23,10 @@ import { annotationsIconSet } from '../xy_config_panel/annotations_config_panel/
 import type { XYState, XYDataLayerConfig, XYAnnotationLayerConfig, XYLayerConfig } from '../types';
 import {
   checkScaleOperation,
-  getAnnotationsLayers,
+  getAnnotationLayers,
   getAxisName,
   getDataLayers,
-  isAnnotationsLayer,
+  isByValueAnnotationLayer,
 } from '../visualization_helpers';
 import { generateId } from '../../../id_generator';
 
@@ -180,7 +180,7 @@ export const onAnnotationDrop: Visualization<XYState>['onDrop'] = ({
   dropType,
 }) => {
   const targetLayer = prevState.layers.find((l) => l.layerId === target.layerId);
-  if (!targetLayer || !isAnnotationsLayer(targetLayer)) {
+  if (!targetLayer || !isByValueAnnotationLayer(targetLayer)) {
     return prevState;
   }
   const targetAnnotation = targetLayer.annotations.find(({ id }) => id === target.columnId);
@@ -244,7 +244,7 @@ export const onAnnotationDrop: Visualization<XYState>['onDrop'] = ({
   }
 
   const sourceLayer = prevState.layers.find((l) => l.layerId === source.layerId);
-  if (!sourceLayer || !isAnnotationsLayer(sourceLayer)) {
+  if (!sourceLayer || !isByValueAnnotationLayer(sourceLayer)) {
     return prevState;
   }
   const sourceAnnotation = sourceLayer.annotations.find(({ id }) => id === source.columnId);
@@ -279,7 +279,7 @@ export const onAnnotationDrop: Visualization<XYState>['onDrop'] = ({
       return {
         ...prevState,
         layers: prevState.layers.map((l): XYLayerConfig => {
-          if (!isAnnotationsLayer(l) || !isAnnotationsLayer(targetLayer)) {
+          if (!isByValueAnnotationLayer(l) || !isByValueAnnotationLayer(targetLayer)) {
             return l;
           }
           if (l.layerId === target.layerId) {
@@ -418,7 +418,7 @@ export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = (
   frame,
 }) => {
   const targetLayer = prevState.layers.find((l) => l.layerId === layerId);
-  if (!targetLayer || !isAnnotationsLayer(targetLayer)) {
+  if (!targetLayer || !isByValueAnnotationLayer(targetLayer)) {
     return prevState;
   }
   const sourceAnnotation = previousColumn
@@ -513,7 +513,7 @@ export const getAnnotationsConfiguration = ({
 };
 
 export const getUniqueLabels = (layers: XYLayerConfig[]) => {
-  const annotationLayers = getAnnotationsLayers(layers);
+  const annotationLayers = getAnnotationLayers(layers);
   const columnLabelMap = {} as Record<string, string>;
   const counts = {} as Record<string, number>;
 

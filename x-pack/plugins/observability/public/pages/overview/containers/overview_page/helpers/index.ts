@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { calculateBucketSize } from './calculate_bucket_size';
+export { calculateBucketSize, calculateTimeRangeBucketSize } from './calculate_bucket_size';
 export { useOverviewMetrics } from './use_metrics';
