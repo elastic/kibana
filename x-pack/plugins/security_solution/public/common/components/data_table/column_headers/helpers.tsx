@@ -65,6 +65,7 @@ export const allowSorting = ({
     'kibana.alert.rule.description',
     'kibana.alert.rule.enabled',
     'kibana.alert.rule.false_positives',
+    'kibana.alert.rule.custom_highlighted_fields',
     'kibana.alert.rule.from',
     'kibana.alert.rule.uuid',
     'kibana.alert.rule.immutable',

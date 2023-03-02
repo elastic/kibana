@@ -18,6 +18,7 @@ curl -X POST ${KIBANA_URL}${SPACE_URL}/api/alerts/alert \
      "description": "Basic threshold rule",
      "exceptionsList": [],
      "falsePositives": [],
+     "customHighlightedFields": [],
      "from": "now-300s",
      "query": "*:*",
      "immutable": false,

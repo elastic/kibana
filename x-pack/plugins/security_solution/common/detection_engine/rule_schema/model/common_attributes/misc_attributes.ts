@@ -55,6 +55,9 @@ export const RuleAuthorArray = t.array(t.string); // should be non-empty strings
 export type RuleFalsePositiveArray = t.TypeOf<typeof RuleFalsePositiveArray>;
 export const RuleFalsePositiveArray = t.array(t.string); // should be non-empty strings?
 
+export type RuleCustomHighlightedFieldArray = t.TypeOf<typeof RuleCustomHighlightedFieldArray>;
+export const RuleCustomHighlightedFieldArray = t.array(t.string); // should be non-empty strings?
+
 export type RuleReferenceArray = t.TypeOf<typeof RuleReferenceArray>;
 export const RuleReferenceArray = t.array(t.string); // should be non-empty strings?
 

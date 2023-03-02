@@ -22,6 +22,7 @@
   "query": "",
   "saved_id": "User's IP",
   "false_positives": [],
+  "custom_highlighted_fields": [],
   "references": [],
   "risk_score": 21,
   "name": "Signal Maker 5000",

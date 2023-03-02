@@ -245,6 +245,7 @@ export const getMockAlertDetailsFieldsResponse = () => ({
         related_integrations: [],
         setup: '',
         false_positives: [],
+        custom_highlighed_fields: [],
         threat: [],
         to: 'now',
       },
@@ -1587,6 +1588,13 @@ export const getMockAlertDetailsTimelineResponse = () => [
   {
     category: 'kibana',
     field: 'kibana.alert.rule.parameters.false_positives',
+    values: [],
+    originalValue: [],
+    isObjectArray: false,
+  },
+  {
+    category: 'kibana',
+    field: 'kibana.alert.rule.parameters.custom_highlighted_fields',
     values: [],
     originalValue: [],
     isObjectArray: false,

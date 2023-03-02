@@ -4,6 +4,7 @@
   "description": "endpoint list only",
   "enabled": true,
   "false_positives": [],
+  "custom_highlighted_fields": [],
   "filters": [],
   "from": "now-360s",
   "index": [

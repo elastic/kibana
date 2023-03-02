@@ -52,6 +52,7 @@ import {
   RuleAuthorArray,
   RuleDescription,
   RuleFalsePositiveArray,
+  RuleCustomHighlightedFieldArray,
   RuleFilterArray,
   RuleLicense,
   RuleMetadata,
@@ -139,6 +140,7 @@ const baseSchema = buildRuleSchemas({
     // Misc attributes
     author: RuleAuthorArray,
     false_positives: RuleFalsePositiveArray,
+    custom_highlighted_fields: RuleCustomHighlightedFieldArray,
     references: RuleReferenceArray,
     // maxSignals not used in ML rules but probably should be used
     max_signals: MaxSignals,
