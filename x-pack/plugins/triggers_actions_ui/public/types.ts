@@ -601,7 +601,7 @@ export type UseFieldBrowserOptions = (args: UseFieldBrowserOptionsArgs) => Field
 
 export interface AlertsTableConfigurationRegistry {
   id: string;
-  cases?: { featureId: string; owner: string; showBulkActions: boolean };
+  cases?: { featureId: string; owner: string[]; showBulkActions: boolean };
   columns: EuiDataGridColumn[];
   useInternalFlyout?: () => {
     header: AlertTableFlyoutComponent;
