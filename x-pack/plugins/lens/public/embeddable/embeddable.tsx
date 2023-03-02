@@ -444,6 +444,9 @@ export class Embeddable
           skip(1)
         )
         .subscribe(async (input) => {
+          // reset removable messages
+          // Dashboard search/context changes are detected here
+          this.additionalUserMessages = {};
           this.onContainerStateChanged(input);
         })
     );
@@ -531,11 +534,10 @@ export class Embeddable
       })
     );
 
-    const mergedSearchContext = this.getMergedSearchContext();
-
     if (!this.savedVis) {
       return userMessages;
     }
+    const mergedSearchContext = this.getMergedSearchContext();
 
     const frameDatasourceAPI: FrameDatasourceAPI = {
       dataViews: {
@@ -587,13 +589,9 @@ export class Embeddable
     }
 
     return () => {
-      const withMessagesRemoved = {
-        ...this.additionalUserMessages,
-      };
-
-      messages.map(({ uniqueId }) => uniqueId).forEach((id) => delete withMessagesRemoved[id]);
-
-      this.additionalUserMessages = withMessagesRemoved;
+      messages.forEach(({ uniqueId }) => {
+        delete this.additionalUserMessages[uniqueId];
+      });
     };
   };
 
@@ -1082,7 +1080,11 @@ export class Embeddable
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
-    this.handleContainerStateChanged(this.input);
+    if (this.handleContainerStateChanged(this.input)) {
+      // reset removable messages
+      // Unified histogram search/context changes are detected here
+      this.additionalUserMessages = {};
+    }
     if (this.domNode) {
       this.render(this.domNode);
     }
