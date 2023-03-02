@@ -5,8 +5,9 @@ parameters:
     in: path
     required: true
 post:
-  summary: Agent - Upgrade
-  tags: []
+  summary: Upgrade agent
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
