@@ -29,8 +29,8 @@ describe('TextAreaWithMessageVariables', () => {
   test('renders variables with double braces by default', () => {
     const wrapper = mountWithIntl(<TextAreaWithMessageVariables {...props} />);
 
-    wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().simulate('click');
+    wrapper.find('[data-test-subj="fooAddVariableButton-Title"]').first().simulate('click');
+    wrapper.find('[data-test-subj="variableMenuButton-myVar"]').last().simulate('click');
 
     expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction).toHaveBeenCalledWith(props.paramsProperty, '{{myVar}}', props.index);
@@ -50,8 +50,8 @@ describe('TextAreaWithMessageVariables', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().simulate('click');
+    wrapper.find('[data-test-subj="fooAddVariableButton-Title"]').first().simulate('click');
+    wrapper.find('[data-test-subj="variableMenuButton-myVar"]').last().simulate('click');
 
     expect(editAction).toHaveBeenCalledTimes(1);
     expect(editAction).toHaveBeenCalledWith(props.paramsProperty, '{{{myVar}}}', props.index);
