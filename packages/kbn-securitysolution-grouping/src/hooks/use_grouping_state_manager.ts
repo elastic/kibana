@@ -7,6 +7,8 @@
  */
 
 import { useReducer } from 'react';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { addGroupsToStorage, getAllGroupsInStorage } from './use_local_storage';
 import type {
   Action,
   UpdateActiveGroup,
@@ -15,13 +17,13 @@ import type {
   UpdateGroupOptions,
   InitGrouping,
   GroupMap,
-  GroupModel,
   GroupOption,
   GroupsById,
   GroupState,
 } from './types';
 import { ActionType, defaultGroup, EMPTY_GROUP_BY_ID } from './types';
 
+const storage = new Storage(window.localStorage);
 // TODO: actions.ts
 const updateActiveGroup = ({
   activeGroup,
@@ -95,83 +97,107 @@ export const groupActions = {
 };
 
 // TODO: selectors.ts
-const selectGroupByEntityId = (state: GroupState): GroupsById => state.groups.groupById;
+const selectGroupById = (state: GroupState): GroupsById => state.groups.groupById;
 
-export const groupByIdSelector = (state: GroupState, id: string) =>
-  selectGroupByEntityId(state)[id];
-
-export const selectGroup = (state: GroupState, entityId: string): GroupModel =>
-  state.groups.groupById[entityId];
+export const groupByIdSelector = (state: GroupState, id: string) => selectGroupById(state)[id];
 
 export const groupsReducer = (state: GroupMap, action: Action) => {
-  switch (action.type) {
-    case ActionType.updateActiveGroup: {
-      const { id, activeGroup } = action.payload;
-      return {
-        ...state,
-        groupById: {
-          ...state.groupById,
-          [id]: {
-            ...state.groupById[id],
-            activeGroup,
-          },
-        },
-      };
-    }
-    case ActionType.updateGroupActivePage: {
-      const { id, activePage } = action.payload;
-      return {
-        ...state,
-        groupById: {
-          ...state.groupById,
-          [id]: {
-            ...state.groupById[id],
-            activePage,
-          },
-        },
-      };
-    }
-    case ActionType.updateGroupItemsPerPage: {
-      const { id, itemsPerPage } = action.payload;
-      return {
-        ...state,
-        groupById: {
-          ...state.groupById,
-          [id]: {
-            ...state.groupById[id],
-            itemsPerPage,
-          },
-        },
-      };
-    }
-    case ActionType.updateGroupOptions: {
-      const { id, newOptionList } = action.payload;
-      return {
-        ...state,
-        groupById: {
-          ...state.groupById,
-          [id]: {
-            ...state.groupById[id],
-            options: newOptionList,
-          },
-        },
-      };
-    }
-    case ActionType.initGrouping: {
-      const { id } = action.payload;
-      return {
-        ...state,
-        groupById: {
-          ...state.groupById,
-          [id]: {
-            ...defaultGroup,
-            ...state.groupById[id],
-          },
-        },
-      };
-    }
+  let groupsInStorage = {};
+  if (storage) {
+    const groupId: string = action.payload.id;
+    console.log('groupId', groupId);
+    groupsInStorage = getAllGroupsInStorage(storage);
   }
-  throw Error(`Unknown grouping action`);
+
+  const groupsById: GroupsById = {
+    ...state.groupById,
+    ...groupsInStorage,
+  };
+  const getState = () => {
+    switch (action.type) {
+      case ActionType.updateActiveGroup: {
+        const { id, activeGroup } = action.payload;
+        console.log('updateActiveGroup', id);
+        return {
+          ...state,
+          groupById: {
+            ...groupsById,
+            [id]: {
+              ...groupsById[id],
+              activeGroup,
+            },
+          },
+        };
+      }
+      case ActionType.updateGroupActivePage: {
+        const { id, activePage } = action.payload;
+        console.log('updateGroupActivePage', id);
+        return {
+          ...state,
+          groupById: {
+            ...groupsById,
+            [id]: {
+              ...groupsById[id],
+              activePage,
+            },
+          },
+        };
+      }
+      case ActionType.updateGroupItemsPerPage: {
+        const { id, itemsPerPage } = action.payload;
+        console.log('updateGroupItemsPerPage', id);
+        return {
+          ...state,
+          groupById: {
+            ...groupsById,
+            [id]: {
+              ...groupsById[id],
+              itemsPerPage,
+            },
+          },
+        };
+      }
+      case ActionType.updateGroupOptions: {
+        const { id, newOptionList } = action.payload;
+        console.log('updateGroupOptions', id);
+        return {
+          ...state,
+          groupById: {
+            ...groupsById,
+            [id]: {
+              ...groupsById[id],
+              options: newOptionList,
+            },
+          },
+        };
+      }
+      case ActionType.initGrouping: {
+        const { id } = action.payload;
+        console.log('initGrouping', id);
+        return {
+          ...state,
+          groupById: {
+            ...groupsById,
+            [id]: {
+              ...defaultGroup,
+              ...groupsById[id],
+            },
+          },
+        };
+      }
+    }
+    throw Error(`Unknown grouping action`);
+  };
+
+  const newState = getState();
+  if (storage) {
+    const groupId: string = action.payload.id;
+    console.log('groupId', groupId);
+    addGroupsToStorage(storage, groupId, newState.groupById[groupId]);
+  }
+  console.log({ newState });
+
+  return newState;
 };
 const initialState: GroupMap = {
   groupById: EMPTY_GROUP_BY_ID,
