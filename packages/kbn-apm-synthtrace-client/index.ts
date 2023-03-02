@@ -20,6 +20,7 @@ export type {
 } from './src/lib/apm/mobile_device';
 export { httpExitSpan } from './src/lib/apm/span';
 export { DistributedTrace } from './src/lib/dsl/distributed_trace_client';
+export { serviceMap } from './src/lib/dsl/service_map';
 export type { Fields } from './src/lib/entity';
 export type { Serializable } from './src/lib/serializable';
 export { timerange } from './src/lib/timerange';
