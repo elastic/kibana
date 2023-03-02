@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getRuleTagsAggregation, getDefaultRuleAggregation } from '../../../common';
+import type { AggregationsAggregateOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { validateRuleAggregationFields } from './validate_rule_aggregation_fields';
 
 describe('validateAggregationTerms', () => {
@@ -13,12 +15,12 @@ describe('validateAggregationTerms', () => {
       validateRuleAggregationFields({
         name1: {
           terms: {
-            field: 'foo.attributes.bar',
+            field: 'alert.attributes.lastRun.outcome',
           },
         },
         name2: {
           terms: {
-            field: 'foo.attributes.bar1',
+            field: 'alert.attributes.tags',
           },
         },
       });
@@ -30,17 +32,17 @@ describe('validateAggregationTerms', () => {
       validateRuleAggregationFields({
         name1: {
           terms: {
-            field: 'foo.attributes.bar',
+            field: 'alert.attributes.executionStatus.status',
           },
           aggs: {
             nestedAggs: {
               terms: {
-                field: 'foo.attributes.bar1',
+                field: 'alert.attributes.snoozeSchedule',
               },
               aggs: {
                 anotherNestedAgg: {
                   terms: {
-                    field: 'foo.attributes.bar2',
+                    field: 'alert.attributes.alertTypeId',
                   },
                 },
               },
@@ -55,19 +57,35 @@ describe('validateAggregationTerms', () => {
     expect(() => {
       validateRuleAggregationFields({
         name1: {
-          max: {
-            field: 'foo.attributes.bar',
+          composite: {
+            sources: [
+              {
+                tags: {
+                  terms: {
+                    field: 'alert.attributes.tags',
+                    order: 'asc' as unknown as AggregationsAggregateOrder,
+                  },
+                },
+              },
+            ],
           },
-          cardinality: {
-            field: 'foo.attributes.bar1',
+          terms: {
+            field: 'alert.attributes.muteAll',
           },
           aggs: {
             nestedAggs: {
-              min: {
-                field: 'foo.attributes.bar2',
+              nested: {
+                path: 'alert.attributes.snoozeSchedule',
               },
-              avg: {
-                field: 'foo.attributes.bar3',
+              terms: {
+                field: 'alert.attributes.enabled',
+              },
+              aggs: {
+                nestedAggsAgain: {
+                  terms: {
+                    field: 'alert.attributes.executionStatus.status',
+                  },
+                },
               },
             },
           },
@@ -76,26 +94,12 @@ describe('validateAggregationTerms', () => {
     }).not.toThrowError();
   });
 
-  it('should allow for valid multi_terms aggregations', () => {
-    expect(() => {
-      validateRuleAggregationFields({
-        name1: {
-          multi_terms: {
-            terms: [{ field: 'foo.attributes.bar' }, { field: 'foo.attributes.bar1' }],
-          },
-          aggs: {
-            nestedAggs: {
-              multi_terms: {
-                terms: [{ field: 'foo.attributes.bar2' }, { field: 'foo.attributes.bar3' }],
-              },
-            },
-          },
-        },
-      });
-    }).not.toThrowError();
+  it('should allow for default and tags aggregations', () => {
+    expect(() => validateRuleAggregationFields(getDefaultRuleAggregation())).not.toThrowError();
+    expect(() => validateRuleAggregationFields(getRuleTagsAggregation())).not.toThrowError();
   });
 
-  it('should throw for simple invalid aggregations', () => {
+  it('should throw for simple aggregation with invalid fields', () => {
     expect(() => {
       validateRuleAggregationFields({
         name1: {
@@ -124,10 +128,10 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.consumer"`);
+    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.bar"`);
   });
 
-  it('should throw for nested invalid aggregations', () => {
+  it('should throw for nested aggregations with invalid fields', () => {
     expect(() => {
       validateRuleAggregationFields({
         name1: {
@@ -156,12 +160,12 @@ describe('validateAggregationTerms', () => {
       validateRuleAggregationFields({
         name1: {
           terms: {
-            field: 'alert.attributes.bar',
+            field: 'alert.attributes.snoozeSchedule',
           },
           aggs: {
             nestedAggs: {
               terms: {
-                field: 'foo.attributes.bar1',
+                field: 'alert.attributes.enabled',
               },
               aggs: {
                 anotherNestedAgg: {
@@ -177,39 +181,39 @@ describe('validateAggregationTerms', () => {
     }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.consumer"`);
   });
 
-  it('should throw for nested invalid aggregations with root level aggs', () => {
+  it('should throw for nested aggregations with invalid root level aggs types', () => {
     expect(() => {
       validateRuleAggregationFields({
         name1: {
           cardinality: {
-            field: 'alert.attributes.apiKey',
+            field: 'alert.attributes.muteAll',
           },
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.apiKey"`);
+    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation type: cardinality"`);
 
     expect(() => {
       validateRuleAggregationFields({
         name1: {
-          max: {
-            field: 'foo.attributes.bar',
-          },
-          cardinality: {
-            field: 'foo.attributes.bar1',
-          },
           aggs: {
             nestedAggs: {
-              min: {
-                field: 'foo.attributes.bar2',
+              terms: {
+                field: 'alert.attributes.executionStatus.status',
               },
               avg: {
-                field: 'alert.attributes.consumer',
+                field: 'alert.attributes.executionStatus.status',
               },
             },
           },
+          max: {
+            field: 'alert.attributes.executionStatus.status',
+          },
+          cardinality: {
+            field: 'alert.attributes.executionStatus.status',
+          },
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.consumer"`);
+    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation type: max"`);
   });
 
   it('should throw for invalid multi_terms aggregations', () => {
@@ -228,7 +232,7 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.apiKey"`);
+    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation type: multi_terms"`);
 
     expect(() => {
       validateRuleAggregationFields({
@@ -245,6 +249,6 @@ describe('validateAggregationTerms', () => {
           },
         },
       });
-    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.consumer"`);
+    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation type: multi_terms"`);
   });
 });

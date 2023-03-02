@@ -8,19 +8,30 @@
 import Boom from '@hapi/boom';
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-const INVALID_RULE_AGG_TERMS = [
-  'kibana.alert.rule.consumer',
-  'kibana.alert.rule.producer',
-  'alert.attributes.consumer',
-  'alert.attributes.apiKey',
+const ALLOW_FIELDS = [
+  'alert.attributes.executionStatus.status',
+  'alert.attributes.lastRun.outcome',
+  'alert.attributes.muteAll',
+  'alert.attributes.tags',
+  'alert.attributes.snoozeSchedule',
+  'alert.attributes.snoozeSchedule.duration',
+  'alert.attributes.alertTypeId',
+  'alert.attributes.enabled',
+  'alert.attributes.params.*',
 ];
+
+const ALLOW_AGG_TYPES = ['terms', 'composite', 'nested', 'filter'];
+
+const aggTypesoVerify = ['field', 'path'];
+
+const aggregationKeys = ['aggs', 'aggregations'];
 
 export const validateRuleAggregationFields = (
   aggs: Record<string, AggregationsAggregationContainer>
 ) => {
   Object.values(aggs).forEach((aggContainer) => {
-    // validate root level aggregation fields (non aggs/aggregations)
-    validateRootLevelRuleAggregationFields(aggContainer);
+    // validate root level aggregation types (non aggs/aggregations)
+    validateTypes(aggContainer);
 
     // Recursively go through aggs to validate terms
     if (aggContainer.aggs) {
@@ -29,38 +40,34 @@ export const validateRuleAggregationFields = (
     if (aggContainer.aggregations) {
       validateRuleAggregationFields(aggContainer.aggregations);
     }
-
-    // Found terms, check terms field against blocklist
-    if (aggContainer.terms?.field && INVALID_RULE_AGG_TERMS.includes(aggContainer.terms.field)) {
-      throw Boom.badRequest(`Invalid aggregation term: ${aggContainer.terms.field}`);
-    }
   });
 };
 
-const validateRootLevelRuleAggregationFields = (container: AggregationsAggregationContainer) => {
-  Object.entries(container).forEach(([aggName, aggContainer]) => {
-    // Found field, check field against blocklist
-    if (aggName === 'field' && INVALID_RULE_AGG_TERMS.includes(aggContainer)) {
-      throw Boom.badRequest(`Invalid aggregation term: ${aggContainer}`);
-    }
-
+const validateTypes = (container: AggregationsAggregationContainer) => {
+  Object.entries(container).forEach(([aggType, aggContainer]) => {
     // Do not try to validate aggs/aggregations, as the above function is already doing that
-    if (aggContainer.aggs || aggContainer.aggregations) {
+    if (aggregationKeys.includes(aggType)) {
       return;
     }
 
-    // Need to check array for multi_term aggregations
-    if (Array.isArray(aggContainer)) {
-      return aggContainer.forEach((innerAggContainer) => {
-        if (typeof innerAggContainer === 'object' && innerAggContainer !== null) {
-          return validateRootLevelRuleAggregationFields(innerAggContainer);
-        }
-      });
+    if (!ALLOW_AGG_TYPES.includes(aggType)) {
+      throw Boom.badRequest(`Invalid aggregation type: ${aggType}`);
     }
 
-    // Did not find anything, keep recursing
-    if (typeof aggContainer === 'object' && aggContainer !== null) {
-      return validateRootLevelRuleAggregationFields(aggContainer);
+    validateFields(aggContainer);
+  });
+};
+
+const validateFields = (container: AggregationsAggregationContainer) => {
+  Object.entries(container).forEach(([aggType, aggContainer]) => {
+    // Found field, check field against blocklist
+    if (aggTypesoVerify.includes(aggType) && !ALLOW_FIELDS.includes(aggContainer)) {
+      throw Boom.badRequest(`Invalid aggregation term: ${aggContainer}`);
+    }
+
+    // Did not find anything, keep recursing if possible
+    if (typeof aggContainer === 'object' && aggContainer !== null && !Array.isArray(aggContainer)) {
+      validateFields(aggContainer);
     }
   });
 };
