@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { estypes } from '@elastic/elasticsearch';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -24,14 +25,26 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
+      const geoPointFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
+        (fieldStat: estypes.ClusterStatsFieldTypes) => {
+          return fieldStat.name === 'geo_point';
+        }
+      );
+      expect(geoPointFieldStats.count).to.be(7);
+      expect(geoPointFieldStats.index_count).to.be(6);
+
+      const geoShapeFieldStats = apiResponse.cluster_stats.indices.mappings.field_types.find(
+        (fieldStat: estypes.ClusterStatsFieldTypes) => {
+          return fieldStat.name === 'geo_shape';
+        }
+      );
+      expect(geoShapeFieldStats.count).to.be(3);
+      expect(geoShapeFieldStats.index_count).to.be(3);
+
       const mapUsage = apiResponse.stack_stats.kibana.plugins.maps;
       delete mapUsage.timeCaptured;
 
       expect(mapUsage).eql({
-        geoShapeAggLayersCount: 1,
-        indexPatternsWithGeoFieldCount: 6,
-        indexPatternsWithGeoPointFieldCount: 4,
-        indexPatternsWithGeoShapeFieldCount: 2,
         mapsTotalCount: 27,
         basemaps: {},
         joins: { term: { min: 1, max: 1, total: 3, avg: 0.1111111111111111 } },

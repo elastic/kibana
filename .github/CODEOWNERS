@@ -83,6 +83,7 @@ packages/kbn-config-mocks @elastic/kibana-core
 packages/kbn-config-schema @elastic/kibana-core
 src/plugins/console @elastic/platform-deployment-management
 packages/content-management/content_editor @elastic/appex-sharedux
+examples/content_management_examples @elastic/appex-sharedux
 src/plugins/content_management @elastic/appex-sharedux
 packages/content-management/table_list @elastic/appex-sharedux
 examples/controls_example @elastic/kibana-presentation
@@ -1157,11 +1158,14 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
 
+# Cloud Defend
+/x-pack/plugins/cloud_defend/ @elastic/sec-cloudnative-integrations
+/x-pack/plugins/security_solution/public/cloud_defend @elastic/sec-cloudnative-integrations
+
 # Cloud Security Posture
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 /x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 /x-pack/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
-
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore

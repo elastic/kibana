@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { PackageListItem, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { capitalize, flatten } from 'lodash';
-import type { PackagePolicy, ArchivePackage } from '@kbn/fleet-plugin/common';
 import type {
   InstalledIntegration,
   InstalledIntegrationArray,
@@ -17,8 +17,8 @@ import type {
 } from '../../../../../../common/detection_engine/fleet_integrations';
 
 export interface IInstalledIntegrationSet {
+  addPackage(fleetPackage: PackageListItem): void;
   addPackagePolicy(policy: PackagePolicy): void;
-  addRegistryPackage(registryPackage: ArchivePackage): void;
 
   getPackages(): InstalledPackageArray;
   getIntegrations(): InstalledIntegrationArray;
@@ -33,10 +33,57 @@ interface PackageInfo extends InstalledPackageBasicInfo {
 export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
   const packageMap: PackageMap = new Map<string, PackageInfo>([]);
 
+  const addPackage = (fleetPackage: PackageListItem): void => {
+    if (fleetPackage.type !== 'integration') {
+      return;
+    }
+    if (fleetPackage.status !== 'installed') {
+      return;
+    }
+
+    const packageKey = `${fleetPackage.name}`;
+    const existingPackageInfo = packageMap.get(packageKey);
+
+    if (existingPackageInfo != null) {
+      return;
+    }
+
+    // Actual `installed_version` is buried in SO, root `version` is latest package version available
+    const installedPackageVersion = fleetPackage.savedObject.attributes.install_version;
+
+    // Policy templates correspond to package's integrations.
+    const packagePolicyTemplates = fleetPackage.policy_templates ?? [];
+
+    const packageInfo: PackageInfo = {
+      package_name: fleetPackage.name,
+      package_title: fleetPackage.title,
+      package_version: installedPackageVersion,
+
+      integrations: new Map<string, InstalledIntegrationBasicInfo>(
+        packagePolicyTemplates.map((pt) => {
+          const integrationTitle: string =
+            packagePolicyTemplates.length === 1 && pt.name === fleetPackage.name
+              ? fleetPackage.title
+              : pt.title;
+
+          const integrationInfo: InstalledIntegrationBasicInfo = {
+            integration_name: pt.name,
+            integration_title: integrationTitle,
+            is_enabled: false, // There might not be an integration policy, so default false and later update in addPackagePolicy()
+          };
+
+          return [integrationInfo.integration_name, integrationInfo];
+        })
+      ),
+    };
+
+    packageMap.set(packageKey, packageInfo);
+  };
+
   const addPackagePolicy = (policy: PackagePolicy): void => {
     const packageInfo = getPackageInfoFromPolicy(policy);
     const integrationsInfo = getIntegrationsInfoFromPolicy(policy, packageInfo);
-    const packageKey = `${packageInfo.package_name}:${packageInfo.package_version}`;
+    const packageKey = `${packageInfo.package_name}`;
     const existingPackageInfo = packageMap.get(packageKey);
 
     if (existingPackageInfo == null) {
@@ -53,21 +100,6 @@ export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
       integrationsInfo.forEach((integration) => {
         addIntegrationToMap(existingPackageInfo.integrations, integration);
       });
-    }
-  };
-
-  const addRegistryPackage = (registryPackage: ArchivePackage): void => {
-    const policyTemplates = registryPackage.policy_templates ?? [];
-    const packageKey = `${registryPackage.name}:${registryPackage.version}`;
-    const existingPackageInfo = packageMap.get(packageKey);
-
-    if (existingPackageInfo != null) {
-      for (const integration of existingPackageInfo.integrations.values()) {
-        const policyTemplate = policyTemplates.find((t) => t.name === integration.integration_name);
-        if (policyTemplate != null) {
-          integration.integration_title = policyTemplate.title;
-        }
-      }
     }
   };
 
@@ -106,8 +138,8 @@ export const createInstalledIntegrationSet = (): IInstalledIntegrationSet => {
   };
 
   return {
+    addPackage,
     addPackagePolicy,
-    addRegistryPackage,
     getPackages,
     getIntegrations,
   };
@@ -125,15 +157,30 @@ const getIntegrationsInfoFromPolicy = (
   policy: PackagePolicy,
   packageInfo: InstalledPackageBasicInfo
 ): InstalledIntegrationBasicInfo[] => {
-  return policy.inputs.map((input) => {
+  // Construct integration info from the available policy_templates
+  const integrationInfos = policy.inputs.map((input) => {
     const integrationName = normalizeString(input.policy_template ?? input.type); // e.g. 'cloudtrail'
     const integrationTitle = `${packageInfo.package_title} ${capitalize(integrationName)}`; // e.g. 'AWS Cloudtrail'
     return {
       integration_name: integrationName,
-      integration_title: integrationTitle, // title gets re-initialized later in addRegistryPackage()
+      integration_title: integrationTitle,
       is_enabled: input.enabled,
     };
   });
+
+  // Base package may not have policy template, so pull directly from `policy.package` if so
+  return [
+    ...integrationInfos,
+    ...(policy.package
+      ? [
+          {
+            integration_name: policy.package.name,
+            integration_title: policy.package.title,
+            is_enabled: true, // Always true if `policy.package` exists since this corresponds to the base package
+          },
+        ]
+      : []),
+  ];
 };
 
 const normalizeString = (raw: string | null | undefined): string => {
