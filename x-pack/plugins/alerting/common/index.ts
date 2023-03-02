@@ -24,6 +24,8 @@ export * from './parse_duration';
 export * from './execution_log_types';
 export * from './rule_snooze_type';
 
+export { mappingFromFieldMap, getComponentTemplateFromFieldMap } from './alert_schema';
+
 export interface AlertingFrameworkHealth {
   isSufficientlySecure: boolean;
   hasPermanentEncryptionKey: boolean;

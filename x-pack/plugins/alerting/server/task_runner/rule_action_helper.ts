@@ -68,7 +68,7 @@ export const isSummaryActionThrottled = ({
 };
 
 export const generateActionHash = (action: RuleAction) => {
-  return `${action.actionTypeId}:${action.group || 'summary'}:${
+  return `${action.actionTypeId}:${action.frequency?.summary ? 'summary' : action.group}:${
     action.frequency?.throttle || 'no-throttling'
   }`;
 };

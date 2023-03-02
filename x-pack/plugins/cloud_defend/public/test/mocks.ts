@@ -71,8 +71,8 @@ export const getCloudDefendNewPolicyMock = (yaml = MOCK_YAML_CONFIGURATION): New
   ],
   package: {
     name: 'cloud_defend',
-    title: 'Kubernetes Security Posture Management',
-    version: '0.0.21',
+    title: 'Container drift prevention',
+    version: '1.0.0',
   },
 });
 
@@ -114,7 +114,7 @@ export const getCloudDefendPolicyMock = (yaml = MOCK_YAML_CONFIGURATION): Packag
   ],
   package: {
     name: 'cloud_defend',
-    title: 'Kubernetes Security Posture Management',
-    version: '0.0.21',
+    title: 'Container drift prevention',
+    version: '1.0.0',
   },
 });

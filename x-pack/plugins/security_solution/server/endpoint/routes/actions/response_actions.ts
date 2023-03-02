@@ -335,21 +335,36 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       }
     }
 
+    // add signature to doc
+    const fleetActionDoc = {
+      ...doc.EndpointActions,
+      '@timestamp': doc['@timestamp'],
+      agents,
+      timeout: 300, // 5 minutes
+      user_id: doc.user.id,
+    };
+    const fleetActionDocSignature = await endpointContext.service
+      .getMessageSigningService()
+      .sign(fleetActionDoc);
+    const signedFleetActionDoc = {
+      ...fleetActionDoc,
+      signed: {
+        data: fleetActionDocSignature.data.toString('base64'),
+        signature: fleetActionDocSignature.signature,
+      },
+    };
+
     // write actions to .fleet-actions index
     try {
       fleetActionIndexResult = await esClient.index<EndpointAction>(
         {
           index: AGENT_ACTIONS_INDEX,
-          body: {
-            ...doc.EndpointActions,
-            '@timestamp': doc['@timestamp'],
-            agents,
-            timeout: 300, // 5 minutes
-            user_id: doc.user.id,
-          },
+          body: signedFleetActionDoc,
           refresh: 'wait_for',
         },
-        { meta: true }
+        {
+          meta: true,
+        }
       );
 
       if (fleetActionIndexResult.statusCode !== 201) {

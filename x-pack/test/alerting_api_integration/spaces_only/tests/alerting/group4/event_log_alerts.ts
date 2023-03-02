@@ -132,7 +132,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
             break;
         }
       }
-      expect(flapping).to.eql(new Array(instanceEvents.length - 1).fill(false).concat([true]));
+      expect(flapping).to.eql(new Array(instanceEvents.length).fill(false));
     });
   });
 }

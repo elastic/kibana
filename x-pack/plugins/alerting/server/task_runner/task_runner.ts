@@ -466,6 +466,8 @@ export class TaskRunner<
       }
     });
 
+    this.legacyAlertsClient.setFlapping(flappingSettings);
+
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
     // Only serialize alerts into task state if we're auto-recovering, otherwise

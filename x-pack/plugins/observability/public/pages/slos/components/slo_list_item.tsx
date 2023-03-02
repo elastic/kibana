@@ -20,6 +20,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import { useCapabilities } from '../../../hooks/slo/use_capabilities';
 import { useKibana } from '../../../utils/kibana_react';
 import { useCloneSlo } from '../../../hooks/slo/use_clone_slo';
@@ -36,12 +37,14 @@ export interface SloListItemProps {
   slo: SLOWithSummaryResponse;
   historicalSummary?: HistoricalSummaryResponse[];
   historicalSummaryLoading: boolean;
+  activeAlerts?: ActiveAlerts;
 }
 
 export function SloListItem({
   slo,
   historicalSummary = [],
   historicalSummaryLoading,
+  activeAlerts,
 }: SloListItemProps) {
   const {
     application: { navigateToUrl },
@@ -101,7 +104,7 @@ export function SloListItem({
                 <EuiFlexItem>
                   <EuiText size="s">{slo.name}</EuiText>
                 </EuiFlexItem>
-                <SloBadges slo={slo} />
+                <SloBadges slo={slo} activeAlerts={activeAlerts} />
               </EuiFlexGroup>
             </EuiFlexItem>
 

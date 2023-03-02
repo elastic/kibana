@@ -377,7 +377,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[] | undefined; dataTestSubj?: string | undefined; indexPatterns?: ",
+              "[] | undefined; dataTestSubj?: string | undefined; isLoading?: boolean | undefined; indexPatterns?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -385,7 +385,7 @@
                 "section": "def-common.DataView",
                 "text": "DataView"
               },
-              "[] | undefined; isDisabled?: boolean | undefined; isLoading?: boolean | undefined; timeHistory?: ",
+              "[] | undefined; isDisabled?: boolean | undefined; timeHistory?: ",
               {
                 "pluginId": "data",
                 "scope": "public",
@@ -1937,9 +1937,9 @@
           "Omit",
           "<Omit<",
           "EuiComboBoxProps",
-          "<any>, \"options\" | \"onChange\" | \"selectedOptions\" | \"isLoading\" | \"onSearchChange\">, \"placeholder\"> & Required<Pick<Omit<",
+          "<any>, \"options\" | \"onChange\" | \"isLoading\" | \"selectedOptions\" | \"onSearchChange\">, \"placeholder\"> & Required<Pick<Omit<",
           "EuiComboBoxProps",
-          "<any>, \"options\" | \"onChange\" | \"selectedOptions\" | \"isLoading\" | \"onSearchChange\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; onNoIndexPatterns?: (() => void) | undefined; }"
+          "<any>, \"options\" | \"onChange\" | \"isLoading\" | \"selectedOptions\" | \"onSearchChange\">, \"placeholder\">> & { onChange: (indexPatternId?: string | undefined) => void; indexPatternId: string; onNoIndexPatterns?: (() => void) | undefined; }"
         ],
         "path": "src/plugins/unified_search/public/index_pattern_select/index_pattern_select.tsx",
         "deprecated": false,

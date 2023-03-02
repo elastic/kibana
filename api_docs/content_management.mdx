@@ -8,7 +8,7 @@ slug: /kibana-dev-docs/api/contentManagement
 title: "contentManagement"
 image: https://source.unsplash.com/400x175/?github
 description: API docs for the contentManagement plugin
-date: 2023-02-27
+date: 2023-03-02
 tags: ['contributor', 'dev', 'apidocs', 'kibana', 'contentManagement']
 ---
 import contentManagementObj from './content_management.devdocs.json';
@@ -21,7 +21,7 @@ Contact [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sh
 
 | Public API count  | Any count | Items lacking comments | Missing exports |
 |-------------------|-----------|------------------------|-----------------|
-| 46 | 0 | 46 | 3 |
+| 110 | 0 | 96 | 3 |
 
 ## Client
 
@@ -31,6 +31,18 @@ Contact [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sh
 ### Start
 <DocDefinitionList data={[contentManagementObj.client.start]}/>
 
+### Functions
+<DocDefinitionList data={contentManagementObj.client.functions}/>
+
+### Classes
+<DocDefinitionList data={contentManagementObj.client.classes}/>
+
+### Interfaces
+<DocDefinitionList data={contentManagementObj.client.interfaces}/>
+
+### Consts, variables and types
+<DocDefinitionList data={contentManagementObj.client.misc}/>
+
 ## Server
 
 ### Setup
@@ -38,6 +50,9 @@ Contact [@elastic/appex-sharedux](https://github.com/orgs/elastic/teams/appex-sh
 
 ### Start
 <DocDefinitionList data={[contentManagementObj.server.start]}/>
+
+### Interfaces
+<DocDefinitionList data={contentManagementObj.server.interfaces}/>
 
 ## Common
 

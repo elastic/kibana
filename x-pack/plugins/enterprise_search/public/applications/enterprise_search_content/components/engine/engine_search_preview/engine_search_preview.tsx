@@ -9,7 +9,7 @@ import React, { useState, useMemo } from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import {
   PagingInfo,
   Results,
@@ -25,7 +25,9 @@ import EnginesAPIConnector, {
 } from '@elastic/search-ui-engines-connector';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../../shared/doc_links';
 import { HttpLogic } from '../../../../shared/http';
 import { EngineViewTabs } from '../../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_template';
@@ -138,6 +140,13 @@ export const EngineSearchPreview: React.FC = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow={false} css={{ minWidth: '240px' }}>
               <ResultsPerPage view={ResultsPerPageView} options={RESULTS_PER_PAGE_OPTIONS} />
+              <EuiSpacer size="m" />
+              <EuiLink href={docLinks.enterpriseSearchEngines} target="_blank">
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.engine.searchPreview.improveResultsLink"
+                  defaultMessage="Improve these results"
+                />
+              </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem>
               <PagingInfo view={PagingInfoView} />
