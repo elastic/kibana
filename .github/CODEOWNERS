@@ -802,7 +802,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
 /x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
-/x-pack/plugins/observability/public/public/utils/observability_data_views @elastic/uptime
+/x-pack/plugins/observability/public/utils/observability_data_views @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
