@@ -29,9 +29,22 @@ export const useOverviewMetrics = ({ hasAnyData }: { hasAnyData: boolean | undef
     }
 
     CAPABILITIES_KEYS.forEach((feature) => {
-      if (capabilities[feature].show === false) {
+      const name = feature === 'infrastructure' ? 'metrics' : feature;
+
+      // Track metric if the feature has been disabled, either because it
+      // is missing or has show === false (manual disabling may not be
+      // possible in all versions of Kibana)
+      if (!capabilities[feature] || capabilities[feature]?.show === false) {
         trackMetric({
-          metric: `oblt_disabled_feature_${feature === 'infrastructure' ? 'metrics' : feature}`,
+          metric: `oblt_disabled_feature_${name}`,
+        });
+      }
+
+      // Track a separate metric if the feature is missing from the capabilities
+      // (This usually means the plugin was auto-disabled by Kibana)
+      if (!capabilities[feature]) {
+        trackMetric({
+          metric: `oblt_missing_feature_${name}`,
         });
       }
     });
