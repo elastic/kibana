@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   // For new routes that do any updates on a rule, please ensure that you are including the legacy
   // action migration code. We are monitoring legacy action telemetry to clean up once we see their
   // existence being near 0.
-  describe('migrate_legacy_actions', () => {
+  describe.only('migrate_legacy_actions', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/legacy_actions');
     });
@@ -75,8 +75,8 @@ export default ({ getService }: FtrProviderContext) => {
       expect(sidecarActionsSOAfterMigration.hits.hits.length).to.eql(0);
 
       expect(ruleSO?.alert.actions).to.eql([]);
-      expect(ruleSO?.alert.throttle).to.eql(null);
-      expect(ruleSO?.alert.notifyWhen).to.eql('onActiveAlert');
+      expect(ruleSO?.alert.throttle).to.eql('no_actions');
+      expect(ruleSO?.alert.notifyWhen).to.eql('onThrottleInterval');
     });
 
     it('migrates legacy actions for rule with action run on every run', async () => {
@@ -124,7 +124,7 @@ export default ({ getService }: FtrProviderContext) => {
           uuid: ruleSO?.alert.actions[0].uuid,
         },
       ]);
-      expect(ruleSO?.alert.throttle).to.eql(null);
+      expect(ruleSO?.alert.throttle).to.eql('rule');
       expect(ruleSO?.alert.notifyWhen).to.eql('onActiveAlert');
       expect(ruleSO?.references).to.eql([
         {

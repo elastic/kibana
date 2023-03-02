@@ -9,7 +9,7 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 
 import type { MigrateRules } from '@kbn/alerting-plugin/server';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
-import { transformActions } from '../../rule_management';
+import { transformActions, transformToNotifyWhen } from '../../rule_management';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from '../../rule_actions_legacy/logic/rule_actions/legacy_get_bulk_rule_actions_saved_object';
@@ -42,7 +42,9 @@ export const legacyActionsMigrationHook: MigrateRules = async (
       // muteAll property is disregarded in further rule processing in Security Solution when legacy actions are present.
       // So it should be safe to set it as false, so it won;t be displayed to user as w/o actions see transformFromAlertThrottle method
       muteAll: legacyActions ? false : rule.muteAll,
-      notifyWhen: legacyActions ? 'onThrottleInterval' : rule.notifyWhen,
+      notifyWhen: legacyActions
+        ? transformToNotifyWhen(legacyActions.ruleThrottle)
+        : rule.notifyWhen,
     };
   });
 };
