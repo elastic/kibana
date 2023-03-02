@@ -71,6 +71,7 @@
     "@kbn/shared-ux-router",
     "@kbn/alerts-ui-shared",
     "@kbn/core-application-browser",
+    "@kbn/files-plugin",
   ],
   "exclude": [
     "target/**/*",

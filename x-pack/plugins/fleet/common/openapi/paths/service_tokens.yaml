@@ -1,6 +1,7 @@
 post:
-  summary: Generate service tokens
-  tags: []
+  summary: Create service token
+  tags:
+    - Service tokens
   responses:
     '200':
       description: OK

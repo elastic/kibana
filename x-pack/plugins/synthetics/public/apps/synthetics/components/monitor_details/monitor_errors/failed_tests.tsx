@@ -15,7 +15,13 @@ import { useUrlParams } from '../../../hooks';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { ClientPluginsStart } from '../../../../../plugin';
 
-export const MonitorFailedTests = ({ time }: { time: { to: string; from: string } }) => {
+export const MonitorFailedTests = ({
+  time,
+  allowBrushing = true,
+}: {
+  time: { to: string; from: string };
+  allowBrushing?: boolean;
+}) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
@@ -41,7 +47,8 @@ export const MonitorFailedTests = ({ time }: { time: { to: string; from: string 
           {
             time,
             reportDefinitions: {
-              ...(monitorId ? { 'monitor.id': [monitorId] } : { 'state.id': [errorStateId] }),
+              ...(monitorId ? { 'monitor.id': [monitorId] } : {}),
+              ...(errorStateId ? { 'state.id': [errorStateId] } : {}),
             },
             dataType: 'synthetics',
             selectedMetricField: 'failed_tests',
@@ -49,21 +56,25 @@ export const MonitorFailedTests = ({ time }: { time: { to: string; from: string 
           },
         ]}
         onBrushEnd={({ range }) => {
-          updateUrl({
-            dateRangeStart: moment(range[0]).toISOString(),
-            dateRangeEnd: moment(range[1]).toISOString(),
-          });
+          if (allowBrushing) {
+            updateUrl({
+              dateRangeStart: moment(range[0]).toISOString(),
+              dateRangeEnd: moment(range[1]).toISOString(),
+            });
+          }
         }}
       />
       <EuiFlexGroup>
         <EuiFlexItem grow style={{ marginLeft: 10 }}>
           <EuiHealth color="danger">{FAILED_TESTS_LABEL}</EuiHealth>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" size="s">
-            {BRUSH_LABEL}
-          </EuiText>
-        </EuiFlexItem>
+        {allowBrushing && (
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued" size="s">
+              {BRUSH_LABEL}
+            </EuiText>
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );
