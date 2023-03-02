@@ -553,7 +553,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ),
           ],
           {
-            max_services: 2,
+            maxServiceOverflowCount: 2,
           }
         );
       });

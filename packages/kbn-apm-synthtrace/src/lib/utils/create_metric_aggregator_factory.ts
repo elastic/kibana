@@ -37,7 +37,7 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
   ) {
     let cb: (() => void) | undefined;
 
-    const { max_transactions: maxTransactions = 10_000, max_services: maxServices = 10_000 } =
+    const { maxTransactionOverflowCount = 10_000, maxServiceOverflowCount = 10_000 } =
       scenarioOptions || {};
 
     const metrics: Map<string, TMetric & { '@timestamp'?: number }> = new Map();
@@ -101,7 +101,8 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
 
         const timestamp = event['@timestamp']!;
         function generateTransactionMetric(service: ServiceMapValue) {
-          const isTransactionCountOverflown = service.transactionCount >= maxTransactions;
+          const isTransactionCountOverflown =
+            service.transactionCount >= maxTransactionOverflowCount;
 
           const truncatedTimestamp = Math.floor(timestamp / flushEveryMs) * flushEveryMs;
           const key =
@@ -150,7 +151,7 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
         function writeServiceMetrics(shouldTrackOverflowCount: boolean = false) {
           // @ts-ignore
           const existingService = serviceListMap.get(event['service.name']);
-          const hasServiceBucketOverflown = serviceListMap.size >= maxServices;
+          const hasServiceBucketOverflown = serviceListMap.size >= maxServiceOverflowCount;
           const truncatedTimestamp = Math.floor(timestamp / flushEveryMs) * flushEveryMs;
           const key =
             serviceOverflowKey || appendHash(getAggregateKey(event), truncatedTimestamp.toString());
