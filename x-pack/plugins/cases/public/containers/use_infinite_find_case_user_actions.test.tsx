@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { useFindCaseUserActions } from './use_find_case_user_actions';
+import { useInfiniteFindCaseUserActions } from './use_infinite_find_case_user_actions';
 import type { CaseUserActionTypeWithAll } from '../../common/ui/types';
 import { basicCase, findCaseUserActionsResponse } from './mock';
 import * as api from './api';
@@ -23,16 +23,14 @@ const initialData = {
   isLoading: true,
 };
 
-describe('UseFindCaseUserActions', () => {
+describe('UseInfiniteFindCaseUserActions', () => {
   const filterActionType: CaseUserActionTypeWithAll = 'all';
   const sortOrder: 'asc' | 'desc' = 'asc';
   const params = {
     type: filterActionType,
     sortOrder,
-    page: 1,
     perPage: 10,
   };
-
   const isEnabled = true;
 
   let appMockRender: AppMockRenderer;
@@ -45,7 +43,7 @@ describe('UseFindCaseUserActions', () => {
 
   it('returns proper state on findCaseUserActions', async () => {
     const { result, waitForNextUpdate } = renderHook(
-      () => useFindCaseUserActions(basicCase.id, params, isEnabled),
+      () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
       { wrapper: appMockRender.AppWrapper }
     );
 
@@ -55,10 +53,15 @@ describe('UseFindCaseUserActions', () => {
       expect.objectContaining({
         ...initialData,
         data: {
-          userActions: [...findCaseUserActionsResponse.userActions],
-          total: 20,
-          perPage: 1000,
-          page: 1,
+          pages: [
+            {
+              userActions: [...findCaseUserActionsResponse.userActions],
+              total: 20,
+              perPage: 1000,
+              page: 1,
+            },
+          ],
+          pageParams: [undefined],
         },
         isError: false,
         isLoading: false,
@@ -72,12 +75,11 @@ describe('UseFindCaseUserActions', () => {
 
     const { waitForNextUpdate } = renderHook(
       () =>
-        useFindCaseUserActions(
+        useInfiniteFindCaseUserActions(
           basicCase.id,
           {
             type: 'user',
             sortOrder: 'desc',
-            page: 1,
             perPage: 5,
           },
           isEnabled
@@ -99,12 +101,11 @@ describe('UseFindCaseUserActions', () => {
 
     renderHook(
       () =>
-        useFindCaseUserActions(
+        useInfiniteFindCaseUserActions(
           basicCase.id,
           {
             type: 'user',
             sortOrder: 'desc',
-            page: 1,
             perPage: 5,
           },
           false
@@ -122,7 +123,7 @@ describe('UseFindCaseUserActions', () => {
     (useToasts as jest.Mock).mockReturnValue({ addError });
 
     const { waitForNextUpdate } = renderHook(
-      () => useFindCaseUserActions(basicCase.id, params, isEnabled),
+      () => useInfiniteFindCaseUserActions(basicCase.id, params, isEnabled),
       {
         wrapper: appMockRender.AppWrapper,
       }

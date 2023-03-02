@@ -20,14 +20,10 @@ export const useInfiniteFindCaseUserActions = (
     sortOrder: 'asc' | 'desc';
     perPage: number;
   },
-  isExpandable: boolean
+  isEnabled: boolean
 ) => {
   const { showErrorToast } = useCasesToast();
   const abortCtrlRef = new AbortController();
-
-  if (!isExpandable) {
-    return;
-  }
 
   return useInfiniteQuery<FindCaseUserActions, ServerError>(
     casesQueriesKeys.caseUserActions(caseId, params),
@@ -35,11 +31,13 @@ export const useInfiniteFindCaseUserActions = (
       return findCaseUserActions(caseId, { ...params, page: pageParam }, abortCtrlRef.signal);
     },
     {
+      enabled: isEnabled,
       onError: (error: ServerError) => {
         showErrorToast(error, { title: ERROR_TITLE });
       },
       getNextPageParam: (lastPage, pages) => {
         const lastPageNumber = Math.ceil(lastPage.total / lastPage.perPage);
+        // here last page fetching is skipped because last page is fetched separately using useQuery hook
         if (lastPage.page < lastPageNumber - 1) {
           return lastPage.page + 1;
         }

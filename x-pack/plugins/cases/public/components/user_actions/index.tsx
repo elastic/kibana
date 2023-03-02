@@ -123,7 +123,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
         key={`top-${userActivityQueryParams.type}-${userActivityQueryParams.sortOrder}`}
         loadingAlertData={loadingAlertData}
         manualAlertsData={manualAlertsData}
-        bottomActions={[]}
         loadingCommentIds={loadingCommentIds}
         commentRefs={commentRefs}
         selectedOutlineCommentId={selectedOutlineCommentId}
@@ -133,7 +132,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
         handleSaveComment={handleSaveComment}
         handleManageQuote={handleManageQuote}
         handleDeleteComment={handleDeleteComment}
-        isExpandable={true}
+        isExpandable
       />
       {lastPage > 0 && (
         <BottomUserActionsListWrapper>

@@ -6,24 +6,20 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiCommentList,  EuiBadge, EuiButton } from '@elastic/eui';
+import { EuiCommentList, EuiBadge, EuiButton, EuiSkeletonText } from '@elastic/eui';
 
 import React, { useMemo, useCallback } from 'react';
 import styled from 'styled-components';
 
-import { useCasesContext } from '../cases_context/use_cases_context';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import type { CaseUserActions } from '../../containers/types';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
 import * as i18n from './translations';
-import { builderMap } from './builder';
-import { isUserActionTypeSupported } from './helpers';
 import type { AddCommentMarkdown, UserActionBuilderArgs, UserActionTreeProps } from './types';
 import { NEW_COMMENT_ID } from './constants';
-
-const MyEuiFlexGroup = styled(EuiFlexGroup)`
-  margin-bottom: 8px;
-`;
+import { isUserActionTypeSupported } from './helpers';
+import { useCasesContext } from '../cases_context/use_cases_context';
+import { builderMap } from './builder';
 
 const MyEuiButton = styled(EuiButton)`
   margin-top: 16px;
@@ -80,7 +76,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
   `}
 `;
 
-type UserActionListProps = UserActionTreeProps &
+export type UserActionListProps = UserActionTreeProps &
   Pick<
     UserActionBuilderArgs,
     | 'loadingCommentIds'
@@ -95,7 +91,7 @@ type UserActionListProps = UserActionTreeProps &
   > & {
     loadingAlertData: boolean;
     manualAlertsData: Record<string, unknown>;
-    bottomActions: AddCommentMarkdown[];
+    bottomActions?: AddCommentMarkdown[];
     isExpandable?: boolean;
   };
 
@@ -110,9 +106,7 @@ export const UserActionsList = React.memo(
     onRuleDetailsClick,
     onShowAlertDetails,
     loadingAlertData,
-    userActivityQueryParams,
     manualAlertsData,
-    bottomActions,
     commentRefs,
     manageMarkdownEditIds,
     handleManageMarkdownEditId,
@@ -122,6 +116,8 @@ export const UserActionsList = React.memo(
     handleOutlineComment,
     selectedOutlineCommentId,
     loadingCommentIds,
+    userActivityQueryParams,
+    bottomActions,
     isExpandable = false,
   }: UserActionListProps) => {
     const {
@@ -135,11 +131,13 @@ export const UserActionsList = React.memo(
       isLoading: isLoadingInfiniteUserActions,
       hasNextPage,
       fetchNextPage,
-      isFetchingNextPage,
-    } = useInfiniteFindCaseUserActions(caseData.id, userActivityQueryParams, isExpandable) ?? {};
+    } = useInfiniteFindCaseUserActions(caseData.id, userActivityQueryParams, isExpandable);
 
-    const { data: caseUserActionsData, isLoading: isLoadingUserActions } =
-      useFindCaseUserActions(caseData.id, userActivityQueryParams, isExpandable) ?? {};
+    const { data: caseUserActionsData, isLoading: isLoadingUserActions } = useFindCaseUserActions(
+      caseData.id,
+      userActivityQueryParams,
+      !isExpandable
+    );
 
     const caseUserActions = useMemo<CaseUserActions[]>(() => {
       if (!isExpandable) {
@@ -226,7 +224,9 @@ export const UserActionsList = React.memo(
       onRuleDetailsClick,
     ]);
 
-    const comments = [...builtUserActions, ...bottomActions];
+    const comments = bottomActions?.length
+      ? [...builtUserActions, ...bottomActions]
+      : [...builtUserActions];
 
     const handleShowMore = useCallback(() => {
       if (fetchNextPage) {
@@ -236,19 +236,23 @@ export const UserActionsList = React.memo(
 
     return (
       <>
-        {(isLoadingUserActions ||
-          isLoadingInfiniteUserActions ||
-          loadingCommentIds.includes(NEW_COMMENT_ID) ||
-          isFetchingNextPage) && (
-          <MyEuiFlexGroup justifyContent="center" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiLoadingSpinner data-test-subj="user-actions-loading" size="l" />
-            </EuiFlexItem>
-          </MyEuiFlexGroup>
-        )}
-        <MyEuiCommentList comments={comments} data-test-subj="user-actions-list" />
-        {hasNextPage && isExpandable && (
-          <MyEuiButton onClick={handleShowMore} color="text">
+        <EuiSkeletonText
+          lines={8}
+          data-test-subj="user-actions-loading"
+          isLoading={
+            isExpandable
+              ? isLoadingInfiniteUserActions
+              : isLoadingUserActions || loadingCommentIds.includes(NEW_COMMENT_ID)
+          }
+        >
+          <MyEuiCommentList comments={comments} data-test-subj="user-actions-list" />
+        </EuiSkeletonText>
+        {hasNextPage && isExpandable && !isLoadingInfiniteUserActions && (
+          <MyEuiButton
+            onClick={handleShowMore}
+            color="text"
+            data-test-subj="show-more-user-actions"
+          >
             <EuiBadge>{i18n.SHOW_MORE}</EuiBadge>
           </MyEuiButton>
         )}
