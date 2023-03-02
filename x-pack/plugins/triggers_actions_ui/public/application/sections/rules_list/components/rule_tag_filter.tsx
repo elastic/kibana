@@ -36,7 +36,6 @@ export interface RuleTagFilterProps {
 const getOptionDataTestSubj = (tag: string) => `ruleTagFilterOption-${tag}`;
 
 export const RuleTagFilter = (props: RuleTagFilterProps) => {
-  console.log('RuleTagFilter');
   const {
     tags = [],
     selectedTags = [],

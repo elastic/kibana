@@ -156,7 +156,12 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           </EuiText>
           <EuiSpacer size="xs" />
           <EuiText size="xs" color="subdued">
-            <EuiToolTip display="block" position="top" content={option.secondaryContent || ''}>
+            <EuiToolTip
+              display="block"
+              position="top"
+              content={option.secondaryContent || ''}
+              data-test-subj={`${option.label}-tooltip`}
+            >
               <TruncatedText text={option.secondaryContent || ''} />
             </EuiToolTip>
           </EuiText>

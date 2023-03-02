@@ -20,9 +20,7 @@ const Text = styled.span`
   word-break: break-word;
 `;
 
-const TruncatedTextComponent: React.FC<{ text: string }> = ({ text }) => (
-  <Text title={text}>{text}</Text>
-);
+const TruncatedTextComponent: React.FC<{ text: string }> = ({ text }) => <Text>{text}</Text>;
 
 TruncatedTextComponent.displayName = 'TruncatedText';
 
