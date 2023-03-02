@@ -108,7 +108,7 @@ export class AlertingPublicPlugin
         defaultMessage: 'Maintenance Windows',
       }),
       async mount(params: ManagementAppMountParams) {
-        const { renderApp } = await import('./application');
+        const { renderApp } = await import('./application/maintenance_windows');
 
         const [coreStart, pluginsStart] = (await core.getStartServices()) as [
           CoreStart,

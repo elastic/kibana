@@ -9,7 +9,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { Router, Switch } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { Route } from '@kbn/shared-ux-router';
 import { CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
@@ -24,9 +23,9 @@ function App() {
   return (
     <>
       <Switch>
-        {Object.keys(routes).map((key) => {
-          const path = key as keyof typeof routes;
-          const { handler, exact } = routes[path];
+        {Object.keys(routes.maintenanceWindows).map((key) => {
+          const path = key as keyof typeof routes.maintenanceWindows;
+          const { handler, exact } = routes.maintenanceWindows[path];
           const Wrapper = () => {
             return handler();
           };
@@ -72,7 +71,6 @@ export const renderApp = ({
               <i18nCore.Context>
                 <QueryClientProvider client={queryClient}>
                   <App />
-                  <ReactQueryDevtools />
                 </QueryClientProvider>
               </i18nCore.Context>
             </EuiThemeProvider>
