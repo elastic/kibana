@@ -273,7 +273,7 @@ export class LensPlugin {
   ) {
     const startServices = createStartServicesGetter(core.getStartServices);
 
-    const getStartServices = async (): Promise<LensEmbeddableStartServices> => {
+    const getStartServicesForEmbeddable = async (): Promise<LensEmbeddableStartServices> => {
       const { getLensAttributeService, setUsageCollectionStart, initMemoizedErrorNotification } =
         await import('./async_services');
       const { core: coreStart, plugins } = startServices();
@@ -289,6 +289,7 @@ export class LensPlugin {
       );
       const visualizationMap = await this.editorFrameService!.loadVisualizations();
       const datasourceMap = await this.editorFrameService!.loadDatasources();
+      const eventAnnotationService = await eventAnnotation.getService(coreStart);
 
       if (plugins.usageCollection) {
         setUsageCollectionStart(plugins.usageCollection);
@@ -310,6 +311,7 @@ export class LensPlugin {
             storage: new Storage(localStorage),
             uiSettings: core.uiSettings,
             timefilter: plugins.data.query.timefilter.timefilter,
+            eventAnnotationService,
           }),
         injectFilterReferences: data.query.filterManager.inject.bind(data.query.filterManager),
         visualizationMap,
@@ -325,7 +327,10 @@ export class LensPlugin {
     };
 
     if (embeddable) {
-      embeddable.registerEmbeddableFactory('lens', new EmbeddableFactory(getStartServices));
+      embeddable.registerEmbeddableFactory(
+        'lens',
+        new EmbeddableFactory(getStartServicesForEmbeddable)
+      );
     }
 
     if (share) {

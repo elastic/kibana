@@ -349,6 +349,13 @@ export const getDatasourceLayers = memoizeOne(function getDatasourceLayers(
   return datasourceLayers;
 });
 
+export interface DocumentToExpressionReturnType {
+  ast: Ast | null;
+  indexPatterns: IndexPatternMap;
+  indexPatternRefs: IndexPatternRef[];
+  activeVisualizationState: unknown;
+}
+
 export async function persistedStateToExpression(
   datasourceMap: DatasourceMap,
   visualizations: VisualizationMap,
@@ -358,12 +365,9 @@ export async function persistedStateToExpression(
     storage: IStorageWrapper;
     dataViews: DataViewsContract;
     timefilter: TimefilterContract;
+    eventAnnotationService: EventAnnotationServiceType;
   }
-): Promise<{
-  ast: Ast | null;
-  indexPatterns: IndexPatternMap;
-  indexPatternRefs: IndexPatternRef[];
-}> {
+): Promise<DocumentToExpressionReturnType> {
   const {
     state: {
       visualization: persistedVisualizationState,
@@ -377,15 +381,22 @@ export async function persistedStateToExpression(
     description,
   } = doc;
   if (!visualizationType) {
-    return { ast: null, indexPatterns: {}, indexPatternRefs: [] };
+    return { ast: null, indexPatterns: {}, indexPatternRefs: [], activeVisualizationState: null };
   }
+
+  const annotationGroups = await initializeEventAnnotationGroups(
+    services.eventAnnotationService,
+    references
+  );
+
   const visualization = visualizations[visualizationType!];
-  const visualizationState = initializeVisualization({
+  const activeVisualizationState = initializeVisualization({
     visualizationMap: visualizations,
     visualizationState: {
       state: persistedVisualizationState,
       activeId: visualizationType,
     },
+    annotationGroups,
     references: [...references, ...(internalReferences || [])],
   });
   const datasourceStatesFromSO = Object.fromEntries(
@@ -403,6 +414,7 @@ export async function persistedStateToExpression(
       storage: services.storage,
       defaultIndexPatternId: services.uiSettings.get('defaultIndex'),
       adHocDataViews,
+      annotationGroups,
     },
     { isFullEditor: false }
   );
@@ -422,6 +434,7 @@ export async function persistedStateToExpression(
       ast: null,
       indexPatterns,
       indexPatternRefs,
+      activeVisualizationState,
     };
   }
 
@@ -432,13 +445,14 @@ export async function persistedStateToExpression(
       title,
       description,
       visualization,
-      visualizationState,
+      visualizationState: activeVisualizationState,
       datasourceMap,
       datasourceStates,
       datasourceLayers,
       indexPatterns,
       dateRange: { fromDate: currentTimeRange.from, toDate: currentTimeRange.to },
     }),
+    activeVisualizationState,
     indexPatterns,
     indexPatternRefs,
   };
