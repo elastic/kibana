@@ -72,7 +72,7 @@ const HIDE = i18n.translate(
 const SHOW_ALL = i18n.translate(
   'xpack.triggersActionsUI.components.addMessageVariables.hideDepricatedVariables',
   {
-    defaultMessage: 'Show_all',
+    defaultMessage: 'Show all',
   }
 );
 
@@ -164,9 +164,28 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     return <></>;
   }
 
+  const ToolTipContent = ({ description, label }: { description: string; label: string }) => {
+    return (
+      <>
+        <EuiText
+          size="s"
+          style={{
+            fontWeight: euiTheme.font.weight.bold,
+          }}
+        >
+          {label}
+        </EuiText>
+        <EuiSpacer size="s" />
+        <hr />
+        <EuiSpacer size="s" />
+        <EuiText size="xs">{description}</EuiText>
+      </>
+    );
+  };
+
   const renderOption = (option: any, searchValue: string) => {
     return (
-      <EuiFlexGroup>
+      <EuiFlexGroup data-test-subj={`variableMenuButton-${option.label}`}>
         <EuiFlexItem>
           <EuiText
             size="s"
@@ -177,16 +196,20 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
             <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
           </EuiText>
           <EuiSpacer size="xs" />
-          <EuiText size="xs" color="subdued">
-            <EuiToolTip
-              display="block"
-              position="top"
-              content={option.secondaryContent || ''}
-              data-test-subj={`${option.label}-tooltip`}
-            >
-              <TruncatedText text={option.secondaryContent || ''} />
-            </EuiToolTip>
-          </EuiText>
+          {option.secondaryContent && (
+            <EuiText size="xs" color="subdued">
+              <EuiToolTip
+                display="block"
+                position="top"
+                content={
+                  <ToolTipContent description={option.secondaryContent} label={option.label} />
+                }
+                data-test-subj={`${option.label}-tooltip`}
+              >
+                <TruncatedText text={option.secondaryContent || ''} />
+              </EuiToolTip>
+            </EuiText>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     );
