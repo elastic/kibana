@@ -582,50 +582,52 @@ export const RuleForm = ({
           </Suspense>
         </EuiErrorBoundary>
       ) : null}
-      <EuiFlexItem>
-        <EuiFormRow
-          fullWidth
-          data-test-subj="intervalFormRow"
-          display="rowCompressed"
-          helpText={getHelpTextForInterval()}
-          isInvalid={errors['schedule.interval'].length > 0}
-          error={errors['schedule.interval']}
-        >
-          <EuiFlexGroup gutterSize="s">
-            <EuiFlexItem grow={2}>
-              <EuiFieldNumber
-                prepend={labelForRuleChecked}
-                fullWidth
-                min={1}
-                isInvalid={errors['schedule.interval'].length > 0}
-                value={ruleInterval || ''}
-                name="interval"
-                data-test-subj="intervalInput"
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === '' || INTEGER_REGEX.test(value)) {
-                    const parsedValue = value === '' ? '' : parseInt(value, 10);
-                    setRuleInterval(parsedValue || undefined);
-                    setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
-                  }
-                }}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={3}>
-              <EuiSelect
-                fullWidth
-                value={ruleIntervalUnit}
-                options={getTimeOptions(ruleInterval ?? 1)}
-                onChange={(e) => {
-                  setRuleIntervalUnit(e.target.value);
-                  setScheduleProperty('interval', `${ruleInterval}${e.target.value}`);
-                }}
-                data-test-subj="intervalInputUnit"
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFormRow>
-      </EuiFlexItem>
+      {rule.params.canEditInterval !== false && (
+        <EuiFlexItem>
+          <EuiFormRow
+            fullWidth
+            data-test-subj="intervalFormRow"
+            display="rowCompressed"
+            helpText={getHelpTextForInterval()}
+            isInvalid={errors['schedule.interval'].length > 0}
+            error={errors['schedule.interval']}
+          >
+            <EuiFlexGroup gutterSize="s">
+              <EuiFlexItem grow={2}>
+                <EuiFieldNumber
+                  prepend={labelForRuleChecked}
+                  fullWidth
+                  min={1}
+                  isInvalid={errors['schedule.interval'].length > 0}
+                  value={ruleInterval || ''}
+                  name="interval"
+                  data-test-subj="intervalInput"
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '' || INTEGER_REGEX.test(value)) {
+                      const parsedValue = value === '' ? '' : parseInt(value, 10);
+                      setRuleInterval(parsedValue || undefined);
+                      setScheduleProperty('interval', `${parsedValue}${ruleIntervalUnit}`);
+                    }
+                  }}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={3}>
+                <EuiSelect
+                  fullWidth
+                  value={ruleIntervalUnit}
+                  options={getTimeOptions(ruleInterval ?? 1)}
+                  onChange={(e) => {
+                    setRuleIntervalUnit(e.target.value);
+                    setScheduleProperty('interval', `${ruleInterval}${e.target.value}`);
+                  }}
+                  data-test-subj="intervalInputUnit"
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFormRow>
+        </EuiFlexItem>
+      )}
       <EuiSpacer size="l" />
       {canShowActions &&
       defaultActionGroupId &&
