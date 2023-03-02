@@ -9,7 +9,6 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { firstValueFrom, Observable } from 'rxjs';
-
 import {
   ElasticsearchClient,
   IRouter,
@@ -17,6 +16,8 @@ import {
   ServiceStatus,
   ServiceStatusLevels,
 } from '@kbn/core/server';
+import { v1 } from '../../../common/types/stats';
+
 import { CollectorSet } from '../../collector';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
@@ -73,8 +74,10 @@ export function registerStatsRoute({
       },
     },
     async (context, req, res) => {
-      const isExtended = req.query.extended === '' || req.query.extended;
-      const isLegacy = req.query.legacy === '' || req.query.legacy;
+      const requestQuery: v1.StatsHTTPQuery = req.query;
+
+      const isExtended = requestQuery.extended === '' || requestQuery.extended;
+      const isLegacy = requestQuery.legacy === '' || requestQuery.legacy;
 
       let extended;
       if (isExtended) {
@@ -119,12 +122,12 @@ export function registerStatsRoute({
         last_updated: collectedAt.toISOString(),
         collection_interval_in_millis: metrics.collectionInterval,
       });
-
+      const body: v1.StatsHTTPBody = {
+        ...kibanaStats,
+        ...extended,
+      };
       return res.ok({
-        body: {
-          ...kibanaStats,
-          ...extended,
-        },
+        body,
       });
     }
   );
@@ -136,3 +139,11 @@ const ServiceStatusToLegacyState: Record<string, string> = {
   [ServiceStatusLevels.degraded.toString()]: 'yellow',
   [ServiceStatusLevels.available.toString()]: 'green',
 };
+
+export interface Extended {
+  kibanaStats: Record<string, unknown> | unknown[];
+}
+
+export interface KibanaStats {
+  extended: Record<string, unknown> | unknown[] | undefined;
+}
