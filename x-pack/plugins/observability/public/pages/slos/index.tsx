@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -17,6 +17,7 @@ import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
 import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
+import { AutoRefreshButton } from './components/auto_refresh_button';
 import PageNotFound from '../404';
 import { paths } from '../../config';
 import { isSloFeatureEnabled } from './helpers/is_slo_feature_enabled';
@@ -35,6 +36,8 @@ export function SlosPage() {
 
   const { total } = sloList || {};
 
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(true);
+
   useBreadcrumbs([
     {
       href: basePath.prepend(paths.observability.slos),
@@ -46,6 +49,10 @@ export function SlosPage() {
 
   const handleClickCreateSlo = () => {
     navigateToUrl(basePath.prepend(paths.observability.sloCreate));
+  };
+
+  const handleToggleAutoRefresh = () => {
+    setIsAutoRefreshing(!isAutoRefreshing);
   };
 
   if (!isSloFeatureEnabled(config)) {
@@ -78,12 +85,16 @@ export function SlosPage() {
               defaultMessage: 'Create new SLO',
             })}
           </EuiButton>,
+          <AutoRefreshButton
+            isAutoRefreshing={isAutoRefreshing}
+            onClick={handleToggleAutoRefresh}
+          />,
         ],
         bottomBorder: false,
       }}
       data-test-subj="slosPage"
     >
-      <SloList />
+      <SloList autoRefresh={isAutoRefreshing} />
     </ObservabilityPageTemplate>
   );
 }
