@@ -155,6 +155,7 @@ export interface ActionStatus {
   newPolicyId?: string;
   creationTime: string;
   hasRolloutPeriod?: boolean;
+  latestErrors?: Array<{ agentId: string; error: string; timestamp: string }>;
 }
 
 export interface AgentDiagnostics {

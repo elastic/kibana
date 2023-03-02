@@ -84,9 +84,10 @@ export async function getActionStatuses(
     const cancelledAction = cancelledActions.find((a) => a.actionId === action.actionId);
 
     let errorCount = 0;
+    let latestErrors = [];
     try {
       // query to find errors in action results, cannot do aggregation on text type
-      const res = await esClient.search({
+      const errorResults = await esClient.search({
         index: AGENT_ACTIONS_RESULTS_INDEX,
         track_total_hits: true,
         rest_total_hits_as_int: true,
@@ -104,8 +105,32 @@ export async function getActionStatuses(
           },
         },
         size: 0,
+        aggs: {
+          top_error_hits: {
+            top_hits: {
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+              _source: {
+                includes: ['@timestamp', 'agent_id', 'error'],
+              },
+              size: 3,
+            },
+          },
+        },
       });
-      errorCount = (res.hits.total as number) ?? 0;
+      errorCount = (errorResults.hits.total as number) ?? 0;
+      latestErrors = ((errorResults.aggregations?.top_error_hits as any)?.hits.hits ?? []).map(
+        (hit: any) => ({
+          agentId: hit._source.agent_id,
+          error: hit._source.error,
+          timestamp: hit._source['@timestamp'],
+        })
+      );
     } catch (err) {
       if (err.statusCode === 404) {
         // .fleet-actions-results does not yet exist
@@ -129,6 +154,7 @@ export async function getActionStatuses(
       nbAgentsActioned,
       cancellationTime: cancelledAction?.timestamp,
       completionTime,
+      latestErrors,
     });
   }
 
