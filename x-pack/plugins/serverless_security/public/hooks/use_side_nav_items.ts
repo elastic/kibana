@@ -51,7 +51,7 @@ const useFindItemsByPath = () => {
  * Returns the formatted `items` and `footerItems` to be rendered in the navigation
  */
 export const useSideNavItems = () => {
-  const { securitySolution } = useKibana().services;
+  const { securitySolution, http } = useKibana().services;
   const navLinks = useObservable(securitySolution.navLinks$, []);
   const getLinkProps = useGetLinkProps();
 
@@ -98,8 +98,15 @@ export const useSideNavItems = () => {
       }
     });
 
+    // TODO: remove, just extra external item for testing
+    mainNavItems.push({
+      id: 'discover',
+      label: 'Discover',
+      href: http.basePath.prepend('/app/discover'),
+    });
+
     return [mainNavItems, footerNavItems];
-  }, [navLinks, formatDefaultItem]);
+  }, [navLinks, formatDefaultItem, http]);
 
   return sideNavItems;
 };
