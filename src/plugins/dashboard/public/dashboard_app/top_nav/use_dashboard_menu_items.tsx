@@ -205,7 +205,7 @@ export const useDashboardMenuItems = ({
         id: 'options',
         testId: 'dashboardOptionsButton',
         disableButton: isSaveInProgress,
-        run: (anchor) => dashboardContainer.showOptions(anchor),
+        run: () => dashboardContainer.showSettings(),
       } as TopNavMenuData,
 
       clone: {
