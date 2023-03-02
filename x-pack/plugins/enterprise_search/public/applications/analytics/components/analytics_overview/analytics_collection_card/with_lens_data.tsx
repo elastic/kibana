@@ -59,10 +59,10 @@ const getLensAttributes = (
   let metric = formulaApi.insertOrReplaceFormulaColumn(
     LENS_LAYERS.metrics.percentage,
     {
-      formula: `round((${getFilterFormulaByFilter(filterBy)}/${getFilterFormulaByFilter(
+      formula: `round(((${getFilterFormulaByFilter(filterBy)}/${getFilterFormulaByFilter(
         filterBy,
         'previous'
-      )})-1, 2)`,
+      )})-1) * 100)`,
       label: ' ',
     },
     {
@@ -187,11 +187,9 @@ export const withLensData = <T extends WithLensDataInputProps>(Component: React.
               LENS_LAYERS.metrics.hitsTotal
             ] ?? null,
           secondaryMetric:
-            Math.round(
-              adapters.tables?.tables[LENS_LAYERS.metrics.id]?.rows?.[0]?.[
-                LENS_LAYERS.metrics.percentage
-              ] * 100
-            ) ?? null,
+            adapters.tables?.tables[LENS_LAYERS.metrics.id]?.rows?.[0]?.[
+              LENS_LAYERS.metrics.percentage
+            ] ?? null,
         });
       }
     };
