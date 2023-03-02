@@ -25,14 +25,17 @@ import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 
 import { i18n } from '@kbn/i18n';
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import { generateEncodedPath } from '../../../../shared/encode_path_params';
 
-import { generateEncodedPath } from '../../../shared/encode_path_params';
-
-import { KibanaLogic } from '../../../shared/kibana';
-import { COLLECTION_VIEW_PATH } from '../../routes';
+import { KibanaLogic } from '../../../../shared/kibana';
+import { COLLECTION_VIEW_PATH } from '../../../routes';
 
 import { AnalyticsCollectionCardStyles } from './analytics_collection_card.styles';
+import {
+  withLensData,
+  WithLensDataInputProps,
+  WithLensDataLogicOutputProps,
+} from './with_lens_data';
 
 import './analytics_collection_card.styles';
 
@@ -69,16 +72,14 @@ const getCardTheme = (euiTheme: EuiThemeComputed) => ({
   },
 });
 
-interface AnalyticsCollectionCardProps {
-  collection: AnalyticsCollection;
-  data: Array<[x: number, y: number]>;
+interface AnalyticsCollectionCardProps
+  extends WithLensDataInputProps,
+    WithLensDataLogicOutputProps {
   isCreatedByEngine?: boolean;
-  metric: number;
-  secondaryMetric?: number;
-  subtitle: string;
+  subtitle?: string;
 }
 
-const getChartStatus = (metric?: number): ChartStatus => {
+const getChartStatus = (metric: number | null): ChartStatus => {
   if (metric && metric > 0) return ChartStatus.INCREASE;
   if (metric && metric < 0) return ChartStatus.DECREASE;
   return ChartStatus.CONSTANT;
@@ -193,3 +194,5 @@ export const AnalyticsCollectionCard: React.FC<AnalyticsCollectionCardProps> = (
     </EuiCard>
   );
 };
+export const AnalyticsCollectionCardWithLens =
+  withLensData<AnalyticsCollectionCardProps>(AnalyticsCollectionCard);

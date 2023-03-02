@@ -18,7 +18,9 @@ import {
   ScopedHistory,
   IUiSettingsClient,
 } from '@kbn/core/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { FormulaPublicApi, LensPublicStart } from '@kbn/lens-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
 import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
@@ -36,7 +38,10 @@ interface KibanaLogicProps {
   productFeatures: ProductFeatures;
   // Kibana core
   capabilities: Capabilities;
+  data: DataPublicPluginStart;
+  formula: FormulaPublicApi;
   history: ScopedHistory;
+  lens: LensPublicStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
   setBreadcrumbs(crumbs: ChromeBreadcrumb[]): void;
   setChromeIsVisible(isVisible: boolean): void;
@@ -52,7 +57,10 @@ interface KibanaLogicProps {
 }
 export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
   cloud: Partial<CloudSetup>;
+  data: DataPublicPluginStart;
+  formula: FormulaPublicApi;
   isCloud: boolean;
+  lens: LensPublicStart;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
 }
 
@@ -82,6 +90,9 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
     setChromeIsVisible: [props.setChromeIsVisible, {}],
     setDocTitle: [props.setDocTitle, {}],
     uiSettings: [props.uiSettings, {}],
+    lens: [props.lens, {}],
+    data: [props.data, {}],
+    formula: [props.formula, {}],
   }),
   selectors: ({ selectors }) => ({
     isCloud: [() => [selectors.cloud], (cloud?: Partial<CloudSetup>) => !!cloud?.isCloudEnabled],

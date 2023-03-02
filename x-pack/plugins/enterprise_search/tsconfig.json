@@ -24,6 +24,8 @@
     "@kbn/cloud-chat-plugin",
     "@kbn/infra-plugin",
     "@kbn/features-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/lens-plugin",
     "@kbn/licensing-plugin",
     "@kbn/security-plugin",
     "@kbn/spaces-plugin",
