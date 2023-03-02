@@ -149,5 +149,14 @@ describe('Discover main content component', () => {
       expect(component.find(DiscoverDocuments).exists()).toBe(false);
       expect(component.find(FieldStatisticsTab).exists()).toBe(true);
     });
+
+    it('should show DiscoverDocuments when VIEW_MODE is not DOCUMENT_LEVEL but it is a text-based query', async () => {
+      const component = mountComponent({
+        isPlainRecord: true,
+        viewMode: VIEW_MODE.AGGREGATED_LEVEL,
+      });
+      expect(component.find(DiscoverDocuments).exists()).toBe(true);
+      expect(component.find(FieldStatisticsTab).exists()).toBe(false);
+    });
   });
 });

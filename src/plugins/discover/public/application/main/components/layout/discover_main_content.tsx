@@ -8,7 +8,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule } from '@elastic/eui';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -64,6 +64,15 @@ export const DiscoverMainContent = ({
     },
     [trackUiMetric, stateContainer]
   );
+
+  // Field Statistics tab is not supported for text-based query mode, so we should switch to Documents view
+  const shouldSwitchToDocumentsView = viewMode === VIEW_MODE.AGGREGATED_LEVEL && isPlainRecord;
+
+  useEffect(() => {
+    if (shouldSwitchToDocumentsView) {
+      stateContainer.appState.update({ viewMode: VIEW_MODE.DOCUMENT_LEVEL });
+    }
+  }, [shouldSwitchToDocumentsView, stateContainer]);
 
   return (
     <EuiFlexGroup

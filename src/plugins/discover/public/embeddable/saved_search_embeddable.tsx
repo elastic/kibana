@@ -169,6 +169,12 @@ export class SavedSearchEmbeddable
     return true;
   }
 
+  private isTextBasedQuery = (savedSearch: SavedSearch): boolean => {
+    const query = savedSearch.searchSource.getField('query');
+    const recordRawType = getRawRecordType(query);
+    return recordRawType === RecordRawType.PLAIN;
+  };
+
   private fetch = async () => {
     const searchSessionId = this.input.searchSessionId;
     const useNewFieldsApi = !this.services.uiSettings.get(SEARCH_FIELDS_FROM_SOURCE, false);
@@ -221,8 +227,7 @@ export class SavedSearchEmbeddable
 
     const query = this.savedSearch.searchSource.getField('query');
     const dataView = this.savedSearch.searchSource.getField('index')!;
-    const recordRawType = getRawRecordType(query);
-    const useSql = recordRawType === RecordRawType.PLAIN;
+    const useSql = this.isTextBasedQuery(this.savedSearch);
 
     try {
       // Request SQL data
@@ -510,6 +515,7 @@ export class SavedSearchEmbeddable
     if (
       this.services.uiSettings.get(SHOW_FIELD_STATISTICS) === true &&
       this.savedSearch.viewMode === VIEW_MODE.AGGREGATED_LEVEL &&
+      !this.isTextBasedQuery(this.savedSearch) &&
       searchProps.services &&
       searchProps.dataView &&
       Array.isArray(searchProps.columns)
