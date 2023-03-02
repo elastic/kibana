@@ -122,25 +122,33 @@ export class ObservabilityDataViews {
 
     const { runtimeFields } = getFieldFormatsForApp(app);
 
-    const dataView = await this.dataViews.create(
-      {
-        title: appIndicesPattern,
-        id: getAppDataViewId(app, indices),
-        timeFieldName: '@timestamp',
-        fieldFormats: this.getFieldFormats(app),
-        name: DataTypesLabels[app],
-      },
-      false,
-      false
-    );
+    const id = getAppDataViewId(app, indices);
 
-    if (runtimeFields !== null) {
-      runtimeFields.forEach(({ name, field }) => {
-        dataView.addRuntimeField(name, field);
-      });
+    try {
+      const dataView = await this.dataViews.create(
+        {
+          id,
+          title: appIndicesPattern,
+          timeFieldName: '@timestamp',
+          fieldFormats: this.getFieldFormats(app),
+          name: DataTypesLabels[app],
+        },
+        false,
+        false
+      );
+
+      if (runtimeFields !== null) {
+        runtimeFields.forEach(({ name, field }) => {
+          dataView.addRuntimeField(name, field);
+        });
+      }
+
+      return dataView;
+    } catch (e) {
+      if (e instanceof DataViewMissingIndices) {
+        this.dataViews.clearInstanceCache(id);
+      }
     }
-
-    return dataView;
   }
 
   async createAndSavedDataView(app: AppDataType, indices: string) {
@@ -230,9 +238,6 @@ export class ObservabilityDataViews {
       } catch (e: unknown) {
         if (e instanceof SavedObjectNotFound) {
           return await this.createAndSavedDataView(app, appIndices);
-        }
-        if (e instanceof DataViewMissingIndices) {
-          this.dataViews.clearInstanceCache();
         }
       }
     }
