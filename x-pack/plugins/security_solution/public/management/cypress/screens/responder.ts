@@ -6,6 +6,7 @@
  */
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
+import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '../../../../../../test/security_solution_ftr/page_objects/helpers/super_date_picker';
 
 const TEST_SUBJ = Object.freeze({
   responderPage: 'consolePageOverlay',
@@ -18,8 +19,8 @@ const ensureOnResponder = (): Cypress.Chainable<JQuery<HTMLDivElement>> => {
 
 export const closeResponder = (): void => {
   ensureOnResponder();
-  cy.get('consolePageOverlay-header-back-link').click();
-  cy.getByTestSubj(TEST_SUBJ.responderPage).should('not.exist');
+  cy.getByTestSubj('consolePageOverlay-header-back-link').click();
+  cy.getByTestSubj(TEST_SUBJ.responderPage, { timeout: 1000 }).should('not.exist');
 };
 
 export const openResponderActionLogFlyout = (): void => {
@@ -31,24 +32,32 @@ export const openResponderActionLogFlyout = (): void => {
 };
 
 export const closeResponderActionLogFlyout = (): void => {
-  ensureOnResponder()
-    .findByTestSubj(TEST_SUBJ.actionLogFlyout)
-    .then((flyout) => {
-      // If its open, then close it
-      if (flyout.length) {
-        cy.get(testSubjSelector(TEST_SUBJ.actionLogFlyout))
-          .findByTestSubj(testSubjSelector('euiFlyoutCloseButton'))
-          .click()
-          .getByTestSubj(TEST_SUBJ.actionLogFlyout)
-          .should('not.exist');
-      }
-    });
+  ensureOnResponder();
+  cy.getByTestSubj(TEST_SUBJ.actionLogFlyout).then((flyout) => {
+    // If It's open, then close it
+    if (flyout.length) {
+      cy.get(testSubjSelector(TEST_SUBJ.actionLogFlyout))
+        .findByTestSubj('euiFlyoutCloseButton')
+        .click();
+      cy.getByTestSubj(TEST_SUBJ.actionLogFlyout).should('not.exist');
+    }
+  });
 };
 
 export const openResponderActionLogDatePickerQuickMenu = (): void => {
   ensureOnResponder();
-  cy.get(testSubjSelector(TEST_SUBJ.actionLogFlyout))
-    .findByTestSubj(testSubjSelector('superDatePickerToggleQuickMenuButton'))
-    .click()
-    .should('not.exist');
+  cy.getByTestSubj(TEST_SUBJ.actionLogFlyout)
+    .findByTestSubj('superDatePickerToggleQuickMenuButton')
+    .click();
+
+  cy.getByTestSubj('superDatePickerQuickMenu').should('exist');
+};
+
+export const setResponderActionLogDateRange = (
+  range: keyof typeof DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP = 'Last 7 days'
+): void => {
+  ensureOnResponder();
+  openResponderActionLogDatePickerQuickMenu();
+  cy.getByTestSubj(DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP[range]).click();
+  cy.getByTestSubj('superDatePickerQuickMenu').should('not.exist');
 };

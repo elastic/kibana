@@ -8,9 +8,15 @@
 // / <reference types="cypress" />
 
 import type { CasePostRequest } from '@kbn/cases-plugin/common/api';
-import type { IndexedEndpointRuleAlerts } from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import type {
+  IndexedEndpointRuleAlerts,
+  DeletedIndexedEndpointRuleAlerts,
+} from '../../../../common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/index_data';
-import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
+import type {
+  DeletedIndexedCase,
+  IndexedCase,
+} from '../../../../common/endpoint/data_loaders/index_case';
 import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
 import type {
   DeleteIndexedFleetEndpointPoliciesResponse,
@@ -35,18 +41,6 @@ declare global {
     interface Chainable {
       task(
         name: 'indexFleetEndpointPolicy',
-        arg?: Partial<CasePostRequest>,
-        options?: Partial<Cypress.Loggable & Cypress.Timeoutable>
-      ): Cypress.Chainable<IndexedCase['data']>;
-
-      task(
-        name: 'deleteIndexedFleetEndpointPolicies',
-        arg: IndexedFleetEndpointPolicyResponse,
-        options?: Partial<Cypress.Loggable & Cypress.Timeoutable>
-      ): Cypress.Chainable<DeleteIndexedFleetEndpointPoliciesResponse>;
-
-      task(
-        name: 'indexFleetEndpointPolicy',
         arg: {
           policyName: string;
           endpointPackageVersion: string;
@@ -55,10 +49,22 @@ declare global {
       ): Cypress.Chainable<IndexedFleetEndpointPolicyResponse>;
 
       task(
+        name: 'deleteIndexedFleetEndpointPolicies',
+        arg: IndexedFleetEndpointPolicyResponse,
+        options?: Partial<Cypress.Loggable & Cypress.Timeoutable>
+      ): Cypress.Chainable<DeleteIndexedFleetEndpointPoliciesResponse>;
+
+      task(
+        name: 'indexCase',
+        arg?: Partial<CasePostRequest>,
+        options?: Partial<Cypress.Loggable & Cypress.Timeoutable>
+      ): Cypress.Chainable<IndexedCase['data']>;
+
+      task(
         name: 'deleteIndexedCase',
         arg: IndexedCase['data'],
         options?: Partial<Cypress.Loggable & Cypress.Timeoutable>
-      ): Cypress.Chainable<null>;
+      ): Cypress.Chainable<DeletedIndexedCase>;
 
       task(
         name: 'indexEndpointHosts',
@@ -82,7 +88,7 @@ declare global {
         name: 'deleteIndexedEndpointRuleAlerts',
         arg: IndexedEndpointRuleAlerts['alerts'],
         options?: Partial<Cypress.Loggable & Cypress.Timeoutable>
-      ): Cypress.Chainable<null>;
+      ): Cypress.Chainable<DeletedIndexedEndpointRuleAlerts>;
     }
   }
 }
@@ -128,7 +134,8 @@ export const dataLoaders = (
 
     indexCase: async (newCase: Partial<CasePostRequest> = {}): Promise<IndexedCase['data']> => {
       const { kbnClient } = await stackServicesPromise;
-      return (await indexCase(kbnClient, newCase)).data;
+      const response = await indexCase(kbnClient, newCase);
+      return response.data;
     },
 
     deleteIndexedCase: async (data: IndexedCase['data']): Promise<null> => {
@@ -160,10 +167,11 @@ export const dataLoaders = (
       ).alerts;
     },
 
-    deleteIndexedEndpointRuleAlerts: async (data: IndexedEndpointRuleAlerts['alerts']) => {
+    deleteIndexedEndpointRuleAlerts: async (
+      data: IndexedEndpointRuleAlerts['alerts']
+    ): Promise<DeletedIndexedEndpointRuleAlerts> => {
       const { esClient, log } = await stackServicesPromise;
-      await deleteIndexedEndpointRuleAlerts(esClient, data, log);
-      return null;
+      return deleteIndexedEndpointRuleAlerts(esClient, data, log);
     },
   });
 };

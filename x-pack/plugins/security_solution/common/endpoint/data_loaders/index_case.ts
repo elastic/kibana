@@ -15,21 +15,28 @@ import { EndpointError } from '../errors';
 
 export interface IndexedCase {
   data: CaseResponse;
-  cleanup: () => Promise<void>;
+  cleanup: () => Promise<{
+    /** The ID of the cases that were deleted */
+    data: string;
+  }>;
+}
+
+export interface DeletedIndexedCase {
+  data: string;
 }
 
 /**
  * Creates a new case in security solution
  *
  * @param kbnClient
- * @param name
+ * @param newCase
  */
 export const indexCase = async (
   kbnClient: KbnClient,
   newCase: Partial<CasePostRequest> = {}
 ): Promise<IndexedCase> => {
   const newCaseReq: CasePostRequest = {
-    title: 'Malware Investigation',
+    title: `Malware Investigation (${Math.random().toString(32).substring(2, 6)})`,
     tags: [],
     severity: CaseSeverity.LOW,
     description: 'foo',
@@ -64,7 +71,7 @@ export const indexCase = async (
 export const deleteIndexedCase = async (
   kbnClient: KbnClient,
   data: IndexedCase['data']
-): Promise<void> => {
+): Promise<DeletedIndexedCase> => {
   try {
     await kbnClient.request({
       method: 'DELETE',
@@ -87,4 +94,6 @@ export const deleteIndexedCase = async (
       throw new EndpointError(message, error);
     }
   }
+
+  return { data: data.id };
 };

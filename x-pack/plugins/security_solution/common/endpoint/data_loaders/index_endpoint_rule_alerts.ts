@@ -28,7 +28,11 @@ export interface IndexEndpointRuleAlertsOptions {
 
 export interface IndexedEndpointRuleAlerts {
   alerts: estypes.WriteResponseBase[];
-  cleanup: () => Promise<void>;
+  cleanup: () => Promise<DeletedIndexedEndpointRuleAlerts>;
+}
+
+export interface DeletedIndexedEndpointRuleAlerts {
+  data: estypes.BulkResponse;
 }
 
 /**
@@ -75,11 +79,17 @@ export const deleteIndexedEndpointRuleAlerts = async (
   esClient: Client,
   indexedAlerts: IndexedEndpointRuleAlerts['alerts'],
   log = new ToolingLog()
-): Promise<void> => {
+): Promise<DeletedIndexedEndpointRuleAlerts> => {
+  let response: estypes.BulkResponse = {
+    took: 0,
+    errors: false,
+    items: [],
+  };
+
   if (indexedAlerts.length) {
     log.verbose('cleaning up loaded endpoint rule alerts');
 
-    await esClient.bulk({
+    response = await esClient.bulk({
       body: indexedAlerts.map((indexedDoc) => {
         return {
           delete: {
@@ -96,6 +106,8 @@ export const deleteIndexedEndpointRuleAlerts = async (
         .join()}]`
     );
   }
+
+  return { data: response };
 };
 
 const ensureEndpointRuleAlertsIndexExists = async (esClient: Client): Promise<void> => {
