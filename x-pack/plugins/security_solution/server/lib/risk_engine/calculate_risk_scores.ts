@@ -130,7 +130,7 @@ export const calculateRiskScores = async ({
       identifierField: 'user.name',
       identifierValue: bucket.key,
       calculatedScoreNorm: bucket.normalized_score.value,
-      riskiest_inputs: bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
+      riskiestInputs: bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
         _id: riskInput._id,
         _index: riskInput._index,
         score: riskInput.sort?.at(0),
@@ -141,7 +141,7 @@ export const calculateRiskScores = async ({
       identifierField: 'host.name',
       identifierValue: bucket.key,
       calculatedScoreNorm: bucket.normalized_score.value,
-      riskiest_inputs: bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
+      riskiestInputs: bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
         _id: riskInput._id,
         _index: riskInput._index,
         score: riskInput.sort?.at(0),
