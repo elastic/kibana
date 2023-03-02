@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header']);
 
   // Failing: See https://github.com/elastic/kibana/issues/138160
+  // Failing: See https://github.com/elastic/kibana/issues/138160
   describe.skip('console app', function testComments() {
     this.tags('includeFirefox');
     before(async () => {
