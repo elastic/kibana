@@ -97,7 +97,7 @@ export class JsonSchemaService {
    */
   public async extractSchema(path: SupportedPath, method: string, schema?: object) {
     const fileContent =
-      schema ?? JSON.parse(Fs.readFileSync(Path.resolve(__dirname, 'openapi_source.json'), 'utf8'));
+      schema ?? JSON.parse(Fs.readFileSync(Path.resolve(__dirname, 'openapi.json'), 'utf8'));
 
     const definition = fileContent.paths[path][method];
 
