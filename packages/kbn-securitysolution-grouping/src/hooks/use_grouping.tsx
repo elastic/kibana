@@ -7,8 +7,8 @@
  */
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
-import { GroupingProps, GroupSelectorProps } from '@kbn/securitysolution-grouping/src';
 import React, { useCallback, useMemo } from 'react';
+import { GroupingProps, GroupSelectorProps } from '..';
 import { useGroupingPagination } from './use_grouping_pagination';
 import {
   groupActions,

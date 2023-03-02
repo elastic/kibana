@@ -9,7 +9,7 @@
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useCallback, useEffect } from 'react';
 
-import { getGroupSelector, isNoneGroup } from '@kbn/securitysolution-grouping';
+import { getGroupSelector, isNoneGroup } from '../..';
 import { groupActions, groupByIdSelector } from './use_grouping_state_manager';
 import type { GroupOption } from './types';
 import { Action, defaultGroup, GroupMap } from './types';
