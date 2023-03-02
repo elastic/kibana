@@ -10,7 +10,9 @@
     "requiredPlugins": [
       "data",
       "inspector",
-      "uiActions"
+      "uiActions",
+      "savedObjectsFinder",
+      "savedObjectsManagement"
     ],
     "requiredBundles": [
       "savedObjects",
