@@ -33,7 +33,6 @@ import {
   EVENT_CONTAINER_TABLE_LOADING,
   SELECT_ALL_ALERTS,
   SELECT_ALL_VISIBLE_ALERTS,
-  ACKNOWLEDGED_ALERTS_FILTER_BTN,
   CELL_ADD_TO_TIMELINE_BUTTON,
   CELL_FILTER_IN_BUTTON,
   CELL_SHOW_TOP_FIELD_BUTTON,
@@ -62,8 +61,8 @@ import {
   DETECTION_PAGE_FILTER_GROUP_LOADING,
   DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON,
   DETECTION_PAGE_FILTER_GROUP_WRAPPER,
+  OPTION_LISTS_EXISTS,
   OPTION_LISTS_LOADING,
-  OPTION_LIST_ACTIVE_CLEAR_SELECTION,
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
 } from '../screens/common/filter_group';
@@ -194,19 +193,58 @@ export const togglePageFilterPopover = (filterIndex: number) => {
   cy.get(OPTION_LIST_VALUES(filterIndex)).click({ force: true });
 };
 
+export const openPageFilterPopover = (filterIndex: number) => {
+  cy.log(`Opening Page filter popover for index ${filterIndex}`);
+  cy.get(OPTION_LIST_VALUES(filterIndex))
+    .pipe(($el) => $el.trigger('click'))
+    .should('have.class', 'euiFilterButton-isSelected');
+  // cy.root().then(($el) => {
+  // const existsOption = $el.find(OPTION_LISTS_EXISTS);
+  // const optionsList = $el.find(OPTION_LIST_VALUES(filterIndex));
+  // if (!existsOption || existsOption.length === 0) {
+  // optionsList.trigger('click');
+  // }
+  // });
+  // cy.get(OPTION_LISTS_EXISTS).should('be.visible');
+};
+
+export const closePageFilterPopover = (filterIndex: number) => {
+  cy.log(`Closing Page filter popover for index ${filterIndex}`);
+  cy.get(OPTION_LIST_VALUES(filterIndex))
+    .pipe(($el) => $el.trigger('click'))
+    .should('not.have.class', 'euiFilterButton-isSelected');
+  // cy.root().then(($el) => {
+  // const existsOption = $el.find(OPTION_LISTS_EXISTS);
+  // if (existsOption.length > 0) {
+  // const optionsList = $el.find(OPTION_LIST_VALUES(filterIndex));
+  // optionsList.trigger('click');
+  // }
+  // });
+  // cy.get(OPTION_LISTS_EXISTS).should('not.be.visible');
+};
+
 export const clearAllSelections = () => {
-  cy.get(OPTION_LIST_ACTIVE_CLEAR_SELECTION).click({ force: true });
+  cy.get(OPTION_LISTS_EXISTS)
+    .click({ force: true })
+    .then(($el) => {
+      if ($el.attr('aria-checked', 'false')) {
+        // check it
+        $el.trigger('click');
+      }
+      // uncheck it
+      $el.trigger('click');
+    });
 };
 
 export const selectPageFilterValue = (filterIndex: number, ...values: string[]) => {
   refreshAlertPageFilter();
-  togglePageFilterPopover(filterIndex);
+  openPageFilterPopover(filterIndex);
   clearAllSelections();
   values.forEach((value) => {
     cy.get(OPTION_SELECTABLE(filterIndex, value)).click({ force: true });
   });
+  closePageFilterPopover(filterIndex);
   waitForAlerts();
-  togglePageFilterPopover(filterIndex);
 };
 
 export const goToClosedAlertsOnRuleDetailsPage = () => {
@@ -217,7 +255,7 @@ export const goToClosedAlertsOnRuleDetailsPage = () => {
 };
 
 export const goToClosedAlerts = () => {
-  cy.get(CLOSED_ALERTS_FILTER_BTN).click();
+  // cy.get(CLOSED_ALERTS_FILTER_BTN).click();
   /*
    * below line commented because alertPageFiltersEnabled feature flag
    * is disabled by default
@@ -226,6 +264,8 @@ export const goToClosedAlerts = () => {
    * selectPageFilterValue(0, 'closed');
    *
    * */
+  waitForPageFilters();
+  selectPageFilterValue(0, 'closed');
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
@@ -242,7 +282,7 @@ export const goToOpenedAlertsOnRuleDetailsPage = () => {
 };
 
 export const goToOpenedAlerts = () => {
-  cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
+  // cy.get(OPENED_ALERTS_FILTER_BTN).click({ force: true });
   /*
    * below line commented because alertPageFiltersEnabled feature flag
    * is disabled by default
@@ -251,6 +291,7 @@ export const goToOpenedAlerts = () => {
    * selectPageFilterValue(0, 'open');
    *
    */
+  selectPageFilterValue(0, 'open');
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
 };
@@ -287,7 +328,8 @@ export const goToAcknowledgedAlerts = () => {
    * selectPageFilterValue(0, 'acknowledged');
    *
    */
-  cy.get(ACKNOWLEDGED_ALERTS_FILTER_BTN).click();
+  // cy.get(ACKNOWLEDGED_ALERTS_FILTER_BTN).click();
+  selectPageFilterValue(0, 'acknowledged');
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
   cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
@@ -353,6 +395,7 @@ export const waitForAlerts = () => {
    * waitforpagefilters();
    *
    * */
+  waitForPageFilters();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
   cy.get(EVENT_CONTAINER_TABLE_LOADING).should('not.exist');

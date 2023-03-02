@@ -28,6 +28,7 @@ import {
   openAlerts,
   openFirstAlert,
   selectCountTable,
+  waitForPageFilters,
 } from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
@@ -55,6 +56,7 @@ describe('Changing alert status', () => {
       cy.get(SELECTED_ALERTS).should('have.text', `Selected 3 alerts`);
       closeAlerts();
       waitForAlerts();
+      waitForPageFilters();
       selectCountTable();
       clearGroupByTopInput();
     });

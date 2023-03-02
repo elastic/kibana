@@ -23,6 +23,8 @@ export const OPTION_LIST_NUMBER_OFF = '.euiFilterButton__notification';
 
 export const OPTION_LISTS_LOADING = '.optionsList--filterBtnWrapper .euiLoadingSpinner';
 
+export const OPTION_LISTS_EXISTS = '[data-test-subj="optionsList-control-selection-exists"]';
+
 export const OPTION_LIST_ACTIVE_CLEAR_SELECTION =
   '[data-test-subj="optionsList-control-clear-all-selections"]';
 
