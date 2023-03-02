@@ -226,8 +226,23 @@ export default ({ getService }: FtrProviderContext): void => {
               getFilesAttachmentReq({
                 externalReferenceMetadata: {
                   // intentionally structure the data in a way that is invalid
-                  ...fileAttachmentMetadata.file,
+                  food: fileAttachmentMetadata.files,
                 },
+              }),
+            ],
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('should return a 400 when attaching a file with an empty metadata', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [
+              getFilesAttachmentReq({
+                externalReferenceMetadata: {},
               }),
             ],
             expectedHttpCode: 400,
@@ -245,7 +260,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('400s when attempting to add an alert to a case that already has 100 files', async () => {
+        it('400s when attempting to add a file to a case that already has 100 files', async () => {
           const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
 
           const postedCase = await createCase(supertest, postCaseReq);
@@ -263,7 +278,7 @@ export default ({ getService }: FtrProviderContext): void => {
           });
         });
 
-        it('400s when the case already has alerts and the sum of existing and new alerts exceed 1k', async () => {
+        it('400s when the case already has files and the sum of existing and new files exceed 100', async () => {
           const fileRequests = [...Array(51).keys()].map(() => getFilesAttachmentReq());
           const postedCase = await createCase(supertest, postCaseReq);
           await bulkCreateAttachments({

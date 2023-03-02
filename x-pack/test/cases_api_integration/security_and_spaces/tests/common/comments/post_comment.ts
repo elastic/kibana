@@ -38,6 +38,7 @@ import {
   updateCase,
   getCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
+  bulkCreateAttachments,
 } from '../../../../common/lib/api';
 import {
   createSignalsIndex,
@@ -178,23 +179,75 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(caseWithAttachments.totalComment).to.be(1);
           expect(fileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
         });
+
+        it('should create a file attachments when there are 99 attachments already within the case', async () => {
+          const fileRequests = [...Array(99).keys()].map(() => getFilesAttachmentReq());
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: fileRequests,
+          });
+
+          const caseWith100Files = await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq(),
+          });
+
+          expect(caseWith100Files.comments?.length).to.be(100);
+        });
       });
     });
 
     describe('unhappy path', () => {
-      it('400s when attaching a file with metadata that is missing the file field', async () => {
-        const postedCase = await createCase(supertest, getPostCaseRequest());
+      describe('files', () => {
+        it('should return a 400 when attaching a file with metadata that is missing the file field', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
 
-        await createComment({
-          supertest,
-          caseId: postedCase.id,
-          params: getFilesAttachmentReq({
-            externalReferenceMetadata: {
-              // intentionally structuring the data in a way that is invalid (aka flattening the files object)
-              ...fileAttachmentMetadata.file,
-            },
-          }),
-          expectedHttpCode: 400,
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq({
+              externalReferenceMetadata: {
+                // intentionally structuring the data in a way that is invalid (using foo instead of files)
+                foo: fileAttachmentMetadata.files,
+              },
+            }),
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('should return a 400 when attaching a file with an empty metadata', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq({
+              externalReferenceMetadata: {},
+            }),
+            expectedHttpCode: 400,
+          });
+        });
+
+        it('should return a 400 when attempting to create a file attachment when the case already has 100 files attached', async () => {
+          const fileRequests = [...Array(100).keys()].map(() => getFilesAttachmentReq());
+
+          const postedCase = await createCase(supertest, postCaseReq);
+          await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: fileRequests,
+          });
+
+          await createComment({
+            supertest,
+            caseId: postedCase.id,
+            params: getFilesAttachmentReq(),
+            expectedHttpCode: 400,
+          });
         });
       });
 

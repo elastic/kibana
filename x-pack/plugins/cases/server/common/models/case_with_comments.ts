@@ -31,7 +31,7 @@ import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants'
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
-import { LimitChecker } from '../limiter_checker';
+import { AttachmentLimitChecker } from '../limiter_checker';
 import type { AlertInfo, CaseSavedObject } from '../types';
 import {
   countAlertsForID,
@@ -87,6 +87,13 @@ export class CaseCommentModel {
       const { id, version, ...queryRestAttributes } = updateRequest;
       const options: SavedObjectsUpdateOptions<CommentAttributes> = {
         version,
+        /**
+         * This is to handle a scenario where an update occurs for an attachment framework style comment.
+         * The code that extracts the reference information from the attributes doesn't know about the reference to the case
+         * and therefore will accidentally remove that reference and we'll lose the connection between the comment and the
+         * case.
+         */
+        references: [...this.buildRefsToCase()],
         refresh: false,
       };
 
@@ -100,6 +107,11 @@ export class CaseCommentModel {
           queryRestAttributes.comment,
           currentComment
         );
+
+        /**
+         * The call to getOrUpdateLensReferences already handles retrieving the reference to the case and ensuring that is
+         * also included here so it's ok to overwrite what was set before.
+         */
         options.references = updatedReferences;
       }
 
@@ -244,7 +256,10 @@ export class CaseCommentModel {
       throw Boom.badRequest('The owner field of the comment must match the case');
     }
 
-    const limitChecker = new LimitChecker(this.params.services.attachmentService, this.caseInfo.id);
+    const limitChecker = new AttachmentLimitChecker(
+      this.params.services.attachmentService,
+      this.caseInfo.id
+    );
 
     await limitChecker.validate(req);
   }

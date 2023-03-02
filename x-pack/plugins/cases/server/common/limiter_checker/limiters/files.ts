@@ -28,7 +28,7 @@ export class FileLimiter extends BaseLimiter {
 
     for (const request of requests) {
       if (isFileAttachmentRequest(request)) {
-        fileRequests++;
+        fileRequests += request.externalReferenceMetadata.files.length;
       }
     }
 

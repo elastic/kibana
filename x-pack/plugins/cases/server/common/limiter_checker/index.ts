@@ -13,7 +13,7 @@ import type { Limiter } from './types';
 import { AlertLimiter } from './limiters/alerts';
 import { FileLimiter } from './limiters/files';
 
-export class LimitChecker {
+export class AttachmentLimitChecker {
   private readonly limiters: Limiter[] = [new AlertLimiter(), new FileLimiter()];
 
   constructor(

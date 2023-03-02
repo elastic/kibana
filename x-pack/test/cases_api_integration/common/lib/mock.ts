@@ -125,12 +125,14 @@ export const postExternalReferenceSOReq: CommentRequestExternalReferenceSOType =
 };
 
 export const fileAttachmentMetadata: FileAttachmentMetadata = {
-  file: {
-    name: 'test_file',
-    extension: 'png',
-    mimeType: 'image/png',
-    createdAt: '2023-02-27T20:26:54.345Z',
-  },
+  files: [
+    {
+      name: 'test_file',
+      extension: 'png',
+      mimeType: 'image/png',
+      createdAt: '2023-02-27T20:26:54.345Z',
+    },
+  ],
 };
 
 export const getFilesAttachmentReq = (
@@ -139,7 +141,7 @@ export const getFilesAttachmentReq = (
   return {
     ...postExternalReferenceSOReq,
     externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
-    externalReferenceMetadata: fileAttachmentMetadata,
+    externalReferenceMetadata: { ...fileAttachmentMetadata },
     ...req,
   };
 };

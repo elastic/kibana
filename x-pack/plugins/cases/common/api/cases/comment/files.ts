@@ -8,12 +8,14 @@
 import * as rt from 'io-ts';
 
 export const FileAttachmentMetadataRt = rt.type({
-  file: rt.type({
-    name: rt.string,
-    extension: rt.string,
-    mimeType: rt.string,
-    createdAt: rt.string,
-  }),
+  files: rt.array(
+    rt.type({
+      name: rt.string,
+      extension: rt.string,
+      mimeType: rt.string,
+      createdAt: rt.string,
+    })
+  ),
 });
 
 export type FileAttachmentMetadata = rt.TypeOf<typeof FileAttachmentMetadataRt>;
