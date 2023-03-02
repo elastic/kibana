@@ -79,7 +79,7 @@ export type RuleActionParam = SavedObjectAttribute;
 export interface AlertsFilter extends SavedObjectAttributes {
   query: null | {
     kql: string;
-    dsl: string;
+    dsl?: string;
   };
   timeframe: null | {
     days: Array<0 | 1 | 2 | 3 | 4 | 5 | 6>;
@@ -167,6 +167,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;
+
 export type ResolvedSanitizedRule<Params extends RuleTypeParams = never> = SanitizedRule<Params> &
   Omit<SavedObjectsResolveResponse, 'saved_object'>;
 

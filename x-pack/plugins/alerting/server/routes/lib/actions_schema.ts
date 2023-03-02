@@ -30,7 +30,7 @@ export const actionsSchema = schema.arrayOf(
         query: schema.nullable(
           schema.object({
             kql: schema.string(),
-            dsl: schema.string(),
+            dsl: schema.maybe(schema.string()),
           })
         ),
         timeframe: schema.nullable(

@@ -59,7 +59,7 @@ import {
   extractReferences,
   validateActions,
   updateMeta,
-  formatActions,
+  addGeneratedActionValues,
 } from '../lib';
 import {
   NormalizedAlertAction,
@@ -67,7 +67,7 @@ import {
   RuleBulkOperationAggregation,
   RulesClientContext,
   CreateAPIKeyResult,
-  NormalizedAlertActionWithUuid,
+  NormalizedAlertActionWithGeneratedValues,
 } from '../types';
 
 export type BulkEditFields = keyof Pick<
@@ -459,7 +459,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     } = await extractReferences(
       context,
       ruleType,
-      ruleActions.actions as NormalizedAlertActionWithUuid[],
+      ruleActions.actions as NormalizedAlertActionWithGeneratedValues[],
       validatedMutatedAlertTypeParams
     );
 
@@ -553,7 +553,7 @@ async function getUpdatedAttributesFromOperations(
       case 'actions': {
         const updatedOperation = {
           ...operation,
-          value: formatActions(operation.value),
+          value: addGeneratedActionValues(operation.value),
         };
 
         try {

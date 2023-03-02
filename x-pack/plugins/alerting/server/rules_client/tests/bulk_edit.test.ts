@@ -607,7 +607,7 @@ describe('bulkEdit()', () => {
         alertsFilter: {
           query: {
             kql: 'name:test',
-            dsl: '{"must": {"term": { "name": "test" }}}',
+            dsl: '{"bool":{"should":[{"match":{"name":"test"}}],"minimum_should_match":1}}',
           },
           timeframe: {
             days: [1],
@@ -625,7 +625,7 @@ describe('bulkEdit()', () => {
         id: '2',
         params: {},
         uuid: '222',
-        alertsFilter: { query: { kql: 'test', dsl: 'test' } },
+        alertsFilter: { query: { kql: 'test:1', dsl: 'test' } },
       };
 
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
@@ -701,7 +701,10 @@ describe('bulkEdit()', () => {
                   params: {},
                   uuid: '222',
                   alertsFilter: {
-                    query: { kql: 'test', dsl: 'test' },
+                    query: {
+                      dsl: '{"bool":{"should":[{"match":{"test":"1"}}],"minimum_should_match":1}}',
+                      kql: 'test:1',
+                    },
                     timeframe: null,
                   },
                 },

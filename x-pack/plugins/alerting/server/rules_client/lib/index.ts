@@ -15,4 +15,4 @@ export { checkAuthorizationAndGetTotal } from './check_authorization_and_get_tot
 export { scheduleTask } from './schedule_task';
 export { createNewAPIKeySet } from './create_new_api_key_set';
 export { recoverRuleAlerts } from './recover_rule_alerts';
-export { formatActions } from './format_actions';
+export { addGeneratedActionValues } from './add_generated_action_values';

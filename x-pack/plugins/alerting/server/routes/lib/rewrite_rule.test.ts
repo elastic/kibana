@@ -43,6 +43,7 @@ const sampleRule: SanitizedRule<RuleTypeParams> & { activeSnoozes?: string[] } =
         notifyWhen: 'onThrottleInterval',
         throttle: '1m',
       },
+      alertsFilter: { timeframe: null, query: { kql: 'test:1', dsl: '{}' } },
     },
   ],
   scheduledTaskId: 'xyz456',

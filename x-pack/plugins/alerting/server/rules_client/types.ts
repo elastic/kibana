@@ -73,7 +73,7 @@ export interface RulesClientContext {
 
 export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
 
-export type NormalizedAlertActionWithUuid = Omit<NormalizedAlertAction, 'uuid'> & {
+export type NormalizedAlertActionWithGeneratedValues = Omit<NormalizedAlertAction, 'uuid'> & {
   uuid: string;
 };
 
