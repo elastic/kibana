@@ -13,7 +13,6 @@ export const ALERT_STATUS_ALL = 'all';
 
 export const ALL_ALERTS: AlertStatusFilter = {
   status: ALERT_STATUS_ALL,
-  query: '',
   label: i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.alertStatusFilter.showAll', {
     defaultMessage: 'Show all',
   }),
@@ -21,7 +20,13 @@ export const ALL_ALERTS: AlertStatusFilter = {
 
 export const ACTIVE_ALERTS: AlertStatusFilter = {
   status: ALERT_STATUS_ACTIVE,
-  query: `${ALERT_STATUS}: "${ALERT_STATUS_ACTIVE}"`,
+  query: {
+    term: {
+      [ALERT_STATUS]: {
+        value: ALERT_STATUS_ACTIVE,
+      },
+    },
+  },
   label: i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.alertStatusFilter.active', {
     defaultMessage: 'Active',
   }),
@@ -29,7 +34,13 @@ export const ACTIVE_ALERTS: AlertStatusFilter = {
 
 export const RECOVERED_ALERTS: AlertStatusFilter = {
   status: ALERT_STATUS_RECOVERED,
-  query: `${ALERT_STATUS}: "${ALERT_STATUS_RECOVERED}"`,
+  query: {
+    term: {
+      [ALERT_STATUS]: {
+        value: ALERT_STATUS_RECOVERED,
+      },
+    },
+  },
   label: i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.alertStatusFilter.recovered', {
     defaultMessage: 'Recovered',
   }),
