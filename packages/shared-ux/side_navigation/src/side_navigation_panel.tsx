@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Fragment, useCallback } from 'react';
@@ -18,25 +19,21 @@ import {
   EuiPanel,
   EuiPortal,
   EuiSpacer,
+  EuiTitle,
   EuiWindowEvent,
   keys,
+  useEuiTheme,
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
-import {
-  EuiPanelStyled,
-  EuiTitleStyled,
-  GlobalPanelStyle,
-  panelClass,
-} from './solution_grouped_nav_panel.styles';
-import type { DefaultSideNavItem } from './types';
-import type { LinkCategories } from '../../../links/types';
-import { NavItemBetaBadge } from '../nav_item_beta_badge';
+import type { DefaultSideNavItem, LinkCategories } from './types';
+import { BetaBadge } from './beta_badge';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { useTelemetryContext } from './telemetry/telemetry_context';
+import { SideNavPanelStyles, panelClass, SideNavTitleStyles } from './side_navigation_panel.styles';
 
-export interface SolutionNavPanelProps {
+export interface SideNavigationPanelProps {
   onClose: () => void;
   onOutsideClick: () => void;
   title: string;
@@ -44,12 +41,12 @@ export interface SolutionNavPanelProps {
   categories?: LinkCategories;
   bottomOffset?: string;
 }
-export interface SolutionNavPanelCategoriesProps {
+export interface SideNavigationPanelCategoriesProps {
   categories: LinkCategories;
   items: DefaultSideNavItem[];
   onClose: () => void;
 }
-export interface SolutionNavPanelItemsProps {
+export interface SideNavigationPanelItemsProps {
   items: DefaultSideNavItem[];
   onClose: () => void;
 }
@@ -57,7 +54,7 @@ export interface SolutionNavPanelItemsProps {
 /**
  * Renders the side navigation panel for secondary links
  */
-const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
+const SideNavigationPanelComponent: React.FC<SideNavigationPanelProps> = ({
   onClose,
   onOutsideClick,
   title,
@@ -65,11 +62,18 @@ const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
   items,
   bottomOffset,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const isLargerBreakpoint = useIsWithinMinBreakpoint('l');
-  const panelClasses = classNames(panelClass, 'eui-yScroll');
 
   // Only larger breakpoint needs to add bottom offset, other sizes should have full height
-  const bottomOffsetLargerBreakpoint = isLargerBreakpoint ? bottomOffset : undefined;
+  const $bottomOffset = isLargerBreakpoint ? bottomOffset : undefined;
+  const $topOffset = isLargerBreakpoint ? '48px' : undefined; // TODO: parametrize like bottomOffset
+  const hasShadow = !$bottomOffset;
+
+  const sideNavPanelStyles = SideNavPanelStyles(euiTheme, { $bottomOffset, $topOffset });
+  const sideNavTitleStyles = SideNavTitleStyles(euiTheme, { $paddingTop: true });
+  const panelClasses = classNames(panelClass, 'eui-yScroll', sideNavPanelStyles);
+  const titleClasses = classNames(sideNavTitleStyles);
 
   // ESC key closes PanelNav
   const onKeyDown = useCallback(
@@ -83,54 +87,58 @@ const SolutionNavPanelComponent: React.FC<SolutionNavPanelProps> = ({
 
   return (
     <>
-      <GlobalPanelStyle />
+      {/* <GlobalPanelStyle /> */}
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
       <EuiPortal>
         <EuiFocusTrap autoFocus>
           <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
-            <EuiPanelStyled
+            <EuiPanel
               className={panelClasses}
-              hasShadow={!bottomOffsetLargerBreakpoint}
-              $bottomOffset={bottomOffsetLargerBreakpoint}
+              hasShadow={hasShadow}
+              // $bottomOffset={bottomOffsetLargerBreakpoint}
               borderRadius="none"
               paddingSize="m"
               data-test-subj="groupedNavPanel"
             >
               <EuiFlexGroup direction="column" gutterSize="l" alignItems="flexStart">
                 <EuiFlexItem>
-                  <EuiTitleStyled size="xs" $paddingTop>
+                  <EuiTitle size="xs" className={titleClasses}>
                     <strong>{title}</strong>
-                  </EuiTitleStyled>
+                  </EuiTitle>
                 </EuiFlexItem>
 
                 <EuiFlexItem>
                   <EuiDescriptionList>
                     {categories ? (
-                      <SolutionNavPanelCategories
+                      <SideNavigationPanelCategories
                         categories={categories}
                         items={items}
                         onClose={onClose}
                       />
                     ) : (
-                      <SolutionNavPanelItems items={items} onClose={onClose} />
+                      <SideNavigationPanelItems items={items} onClose={onClose} />
                     )}
                   </EuiDescriptionList>
                 </EuiFlexItem>
               </EuiFlexGroup>
-            </EuiPanelStyled>
+            </EuiPanel>
           </EuiOutsideClickDetector>
         </EuiFocusTrap>
       </EuiPortal>
     </>
   );
 };
-export const SolutionNavPanel = React.memo(SolutionNavPanelComponent);
+export const SideNavigationPanel = React.memo(SideNavigationPanelComponent);
 
-const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
+const SideNavigationPanelCategories: React.FC<SideNavigationPanelCategoriesProps> = ({
   categories,
   items,
   onClose,
 }) => {
+  const { euiTheme } = useEuiTheme();
+  const sideNavTitleStyles = SideNavTitleStyles(euiTheme);
+  const titleClasses = classNames(sideNavTitleStyles);
+
   const itemsMap = new Map(items.map((item) => [item.id, item]));
 
   return (
@@ -150,11 +158,11 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
 
         return (
           <Fragment key={label}>
-            <EuiTitleStyled size="xxxs">
+            <EuiTitle size="xxxs" className={titleClasses}>
               <h2>{label}</h2>
-            </EuiTitleStyled>
+            </EuiTitle>
             <EuiHorizontalRule margin="xs" />
-            <SolutionNavPanelItems items={links} onClose={onClose} />
+            <SideNavigationPanelItems items={links} onClose={onClose} />
             <EuiSpacer size="l" />
           </Fragment>
         );
@@ -163,7 +171,7 @@ const SolutionNavPanelCategories: React.FC<SolutionNavPanelCategoriesProps> = ({
   );
 };
 
-const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, onClose }) => {
+const SideNavigationPanelItems: React.FC<SideNavigationPanelItemsProps> = ({ items, onClose }) => {
   const panelLinkClassNames = classNames('solutionGroupedNavPanelLink');
   const panelLinkItemClassNames = classNames('solutionGroupedNavPanelLinkItem');
   const { tracker } = useTelemetryContext();
@@ -184,7 +192,7 @@ const SolutionNavPanelItems: React.FC<SolutionNavPanelItemsProps> = ({ items, on
           <EuiPanel hasShadow={false} className={panelLinkItemClassNames} paddingSize="s">
             <EuiDescriptionListTitle>
               {label}
-              {isBeta && <NavItemBetaBadge text={betaOptions?.text} />}
+              {isBeta && <BetaBadge text={betaOptions?.text} />}
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>{description}</EuiDescriptionListDescription>
           </EuiPanel>

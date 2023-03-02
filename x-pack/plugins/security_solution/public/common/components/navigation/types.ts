@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type { IconType } from '@elastic/eui';
 import { SecurityPageName } from '../../../app/types';
-import type { LinkCategories } from '../../links';
 
 export type SearchNavTab = NavTab | { urlKey: UrlStateType; isDetailPage: boolean };
 
@@ -99,18 +97,3 @@ export interface SecuritySolutionTabNavigationProps {
 }
 
 export type NavigateToUrl = (url: string) => void;
-export interface NavLinkItem {
-  categories?: LinkCategories;
-  description?: string;
-  disabled?: boolean;
-  icon?: IconType;
-  id: SecurityPageName;
-  links?: NavLinkItem[];
-  image?: string;
-  title: string;
-  skipUrlState?: boolean;
-  isBeta?: boolean;
-  betaOptions?: {
-    text: string;
-  };
-}

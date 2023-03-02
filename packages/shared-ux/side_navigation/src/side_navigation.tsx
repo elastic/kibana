@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
@@ -12,29 +13,29 @@ import {
   EuiFlexItem,
   EuiLink,
   useIsWithinBreakpoints,
+  useEuiTheme,
+  EuiListGroupItem,
 } from '@elastic/eui';
 
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { SolutionNavPanel } from './solution_grouped_nav_panel';
-import { EuiListGroupItemStyled } from './solution_grouped_nav.styles';
+import { SideNavigationPanel } from './side_navigation_panel';
 import type { DefaultSideNavItem, SideNavItem, Tracker } from './types';
-import { isCustomItem, isDefaultItem } from './types';
-import { EuiIconSpaces } from './icons/spaces';
-import type { LinkCategories } from '../../../links';
+import { isCustomItem, isDefaultItem, type LinkCategories } from './types';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { TelemetryContextProvider, useTelemetryContext } from './telemetry/telemetry_context';
+import { SideNavItemStyles } from './side_navigation.styles';
 
-export interface SolutionGroupedNavProps {
+export interface SideNavigationProps {
   items: SideNavItem[];
   selectedId: string;
   footerItems?: SideNavItem[];
-  bottomOffset?: string;
-  // This enables Telemetry tracking inside group nav, this has to be binded with appId
+  panelBottomOffset?: string;
+  // This enables Telemetry tracking inside side navigation, this has to be bound with the plugin appId
   // e.g.: usageCollection?.reportUiCounter?.bind(null, appId)
   tracker?: Tracker;
 }
-export interface SolutionNavItemsProps {
+export interface SideNavigationItemsProps {
   items: SideNavItem[];
   selectedId: string;
   activePanelNavId: ActivePanelNav;
@@ -42,7 +43,7 @@ export interface SolutionNavItemsProps {
   navItemsById: NavItemsById;
   onOpenPanelNav: (id: string) => void;
 }
-export interface SolutionNavItemProps {
+export interface SideNavigationItemProps {
   item: SideNavItem;
   isSelected: boolean;
   isActive: boolean;
@@ -56,11 +57,11 @@ type NavItemsById = Record<
   { title: string; panelItems: DefaultSideNavItem[]; categories?: LinkCategories }
 >;
 
-export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
+export const SideNavigationComponent: React.FC<SideNavigationProps> = ({
   items,
   selectedId,
   footerItems = [],
-  bottomOffset,
+  panelBottomOffset,
   tracker,
 }) => {
   const isMobileSize = useIsWithinBreakpoints(['xs', 's']);
@@ -112,16 +113,16 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
     }
     const { panelItems, title, categories } = navItemsById[activePanelNavId];
     return (
-      <SolutionNavPanel
+      <SideNavigationPanel
         onClose={onClosePanelNav}
         onOutsideClick={onOutsidePanelClick}
         items={panelItems}
         title={title}
         categories={categories}
-        bottomOffset={bottomOffset}
+        bottomOffset={panelBottomOffset}
       />
     );
-  }, [activePanelNavId, bottomOffset, navItemsById, onClosePanelNav, onOutsidePanelClick]);
+  }, [activePanelNavId, panelBottomOffset, navItemsById, onClosePanelNav, onOutsidePanelClick]);
 
   return (
     <TelemetryContextProvider tracker={tracker}>
@@ -130,7 +131,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
           <EuiFlexGroup gutterSize="none" direction="column">
             <EuiFlexItem>
               <EuiListGroup gutterSize="none">
-                <SolutionNavItems
+                <SideNavigationItems
                   items={items}
                   selectedId={selectedId}
                   activePanelNavId={activePanelNavId}
@@ -142,7 +143,7 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiListGroup gutterSize="none">
-                <SolutionNavItems
+                <SideNavigationItems
                   items={footerItems}
                   selectedId={selectedId}
                   activePanelNavId={activePanelNavId}
@@ -160,9 +161,9 @@ export const SolutionGroupedNavComponent: React.FC<SolutionGroupedNavProps> = ({
     </TelemetryContextProvider>
   );
 };
-export const SolutionGroupedNav = React.memo(SolutionGroupedNavComponent);
+export const SideNavigation = React.memo(SideNavigationComponent);
 
-const SolutionNavItems: React.FC<SolutionNavItemsProps> = ({
+const SideNavigationItems: React.FC<SideNavigationItemsProps> = ({
   items,
   selectedId,
   activePanelNavId,
@@ -172,7 +173,7 @@ const SolutionNavItems: React.FC<SolutionNavItemsProps> = ({
 }) => (
   <>
     {items.map((item) => (
-      <SolutionNavItem
+      <SideNavItem
         key={item.id}
         item={item}
         isSelected={selectedId === item.id}
@@ -184,13 +185,14 @@ const SolutionNavItems: React.FC<SolutionNavItemsProps> = ({
   </>
 );
 
-const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
+const SideNavigationItemComponent: React.FC<SideNavigationItemProps> = ({
   item,
   isSelected,
   isActive,
   hasPanelNav,
   onOpenPanelNav,
 }) => {
+  const { euiTheme } = useEuiTheme();
   const { tracker } = useTelemetryContext();
 
   if (isCustomItem(item)) {
@@ -203,10 +205,16 @@ const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
     tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.NAVIGATION}${id}`);
     onClick?.(ev);
   };
-  const itemClassNames = classNames('solutionGroupedNavItem', {
-    'solutionGroupedNavItem--isActive': isActive,
-    'solutionGroupedNavItem--isPrimary': isSelected,
-  });
+
+  const sideNavItemStyles = SideNavItemStyles(euiTheme);
+  const itemClassNames = classNames(
+    'solutionGroupedNavItem',
+    {
+      'solutionGroupedNavItem--isActive': isActive,
+      'solutionGroupedNavItem--isPrimary': isSelected,
+    },
+    sideNavItemStyles
+  );
   const buttonClassNames = classNames('solutionGroupedNavItemButton');
 
   const onButtonClick: React.MouseEventHandler = (ev) => {
@@ -225,7 +233,7 @@ const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
       color={isSelected ? 'primary' : 'text'}
       data-test-subj={`groupedNavItemLink-${id}`}
     >
-      <EuiListGroupItemStyled
+      <EuiListGroupItem
         className={itemClassNames}
         color={isSelected ? 'primary' : 'text'}
         label={label}
@@ -236,7 +244,7 @@ const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
                 className: buttonClassNames,
                 color: isActive ? 'primary' : 'text',
                 onClick: onButtonClick,
-                iconType: EuiIconSpaces,
+                iconType: 'spaces',
                 iconSize: 'm',
                 'aria-label': 'Toggle group nav',
                 'data-test-subj': `groupedNavItemButton-${id}`,
@@ -248,4 +256,7 @@ const SolutionNavItemComponent: React.FC<SolutionNavItemProps> = ({
     </EuiLink>
   );
 };
-const SolutionNavItem = React.memo(SolutionNavItemComponent);
+const SideNavItem = React.memo(SideNavigationItemComponent);
+
+// eslint-disable-next-line import/no-default-export
+export default SideNavigation;

@@ -7,28 +7,27 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiHorizontalRule, EuiListGroupItem, EuiLoadingSpinner } from '@elastic/eui';
-import { SecurityPageName } from '../../../../app/types';
-import { getAncestorLinksInfo } from '../../../links';
-import { useRouteSpy } from '../../../utils/route/use_route_spy';
-import { SecuritySolutionLinkAnchor, useGetSecuritySolutionLinkProps } from '../../links';
-import { useAppNavLinks } from '../nav_links';
-import { SolutionGroupedNav } from '../solution_grouped_nav';
+import { SideNavigation } from '@kbn/shared-ux-side-navigation';
 import type {
   CustomSideNavItem,
   DefaultSideNavItem,
   SideNavItem,
-} from '../solution_grouped_nav/types';
-import type { NavLinkItem } from '../types';
+} from '@kbn/shared-ux-side-navigation';
+import { SecurityPageName } from '../../../../app/types';
+import { getAncestorLinksInfo, type NavigationLink } from '../../../links';
+import { useRouteSpy } from '../../../utils/route/use_route_spy';
+import { SecuritySolutionLinkAnchor, useGetSecuritySolutionLinkProps } from '../../links';
 import { EuiIconLaunch } from './icons/launch';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
 import { bottomNavOffset } from '../../../lib/helpers';
 import { track } from '../../../lib/telemetry';
+import { useNavLinks } from '../../../links/nav_links';
 
 const isFooterNavItem = (id: SecurityPageName) =>
   id === SecurityPageName.landing || id === SecurityPageName.administration;
 
-type FormatSideNavItems = (navItems: NavLinkItem) => SideNavItem;
+type FormatSideNavItems = (navItems: NavigationLink) => SideNavItem;
 
 /**
  * Renders the navigation item for "Get Started" custom link
@@ -56,14 +55,14 @@ const GetStartedCustomLinkComponent: React.FC<{
 const GetStartedCustomLink = React.memo(GetStartedCustomLinkComponent);
 
 /**
- * Returns a function to format generic `NavLinkItem` array to the `SideNavItem` type
+ * Returns a function to format generic `NavigationLink` array to the `SideNavItem` type
  */
 const useFormatSideNavItem = (): FormatSideNavItems => {
   const getSecuritySolutionLinkProps = useGetSecuritySolutionLinkProps(); // adds href and onClick props
 
   const formatSideNavItem: FormatSideNavItems = useCallback(
     (navLinkItem) => {
-      const formatDefaultItem = (navItem: NavLinkItem): DefaultSideNavItem => ({
+      const formatDefaultItem = (navItem: NavigationLink): DefaultSideNavItem => ({
         id: navItem.id,
         label: navItem.title,
         ...getSecuritySolutionLinkProps({
@@ -91,7 +90,7 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
           : {}),
       });
 
-      const formatGetStartedItem = (navItem: NavLinkItem): CustomSideNavItem => ({
+      const formatGetStartedItem = (navItem: NavigationLink): CustomSideNavItem => ({
         id: navItem.id,
         render: (isSelected) => (
           <GetStartedCustomLink isSelected={isSelected} title={navItem.title} />
@@ -113,25 +112,26 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
  * Returns the formatted `items` and `footerItems` to be rendered in the navigation
  */
 const useSideNavItems = () => {
-  const appNavLinks = useAppNavLinks();
+  const navLinks = useNavLinks();
   const formatSideNavItem = useFormatSideNavItem();
 
   const sideNavItems = useMemo(() => {
     const mainNavItems: SideNavItem[] = [];
     const footerNavItems: SideNavItem[] = [];
-    appNavLinks.forEach((appNavLink) => {
-      if (appNavLink.disabled) {
+    navLinks.forEach((navLink) => {
+      if (navLink.disabled) {
         return;
       }
 
-      if (isFooterNavItem(appNavLink.id)) {
-        footerNavItems.push(formatSideNavItem(appNavLink));
+      if (isFooterNavItem(navLink.id)) {
+        footerNavItems.push(formatSideNavItem(navLink));
       } else {
-        mainNavItems.push(formatSideNavItem(appNavLink));
+        mainNavItems.push(formatSideNavItem(navLink));
       }
     });
+
     return [mainNavItems, footerNavItems];
-  }, [appNavLinks, formatSideNavItem]);
+  }, [navLinks, formatSideNavItem]);
 
   return sideNavItems;
 };
@@ -164,11 +164,11 @@ export const SecuritySideNav: React.FC = () => {
   }
 
   return (
-    <SolutionGroupedNav
+    <SideNavigation
       items={items}
       footerItems={footerItems}
       selectedId={selectedId}
-      bottomOffset={bottomOffset}
+      panelBottomOffset={bottomOffset}
       tracker={track}
     />
   );

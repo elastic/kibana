@@ -1,16 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { SecurityPageName } from '../../../../app/types';
-import { TestProviders } from '../../../mock';
-import type { SolutionGroupedNavProps } from './solution_grouped_nav';
-import { SolutionGroupedNav } from './solution_grouped_nav';
+import { SideNavigation, type SideNavigationProps } from './side_navigation';
 import type { SideNavItem } from './types';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { TELEMETRY_EVENT } from './telemetry/const';
@@ -19,12 +17,12 @@ const mockTrack = jest.fn();
 
 const mockItems: SideNavItem[] = [
   {
-    id: SecurityPageName.dashboardsLanding,
+    id: 'dashboardsLanding',
     label: 'Dashboards',
     href: '/dashboards',
     items: [
       {
-        id: SecurityPageName.overview,
+        id: 'overview',
         label: 'Overview',
         href: '/overview',
         description: 'Overview description',
@@ -32,26 +30,16 @@ const mockItems: SideNavItem[] = [
     ],
   },
   {
-    id: SecurityPageName.alerts,
+    id: 'alerts',
     label: 'Alerts',
     href: '/alerts',
   },
 ];
 
-const renderNav = (props: Partial<SolutionGroupedNavProps> = {}) =>
-  render(
-    <SolutionGroupedNav
-      items={mockItems}
-      selectedId={SecurityPageName.alerts}
-      tracker={mockTrack}
-      {...props}
-    />,
-    {
-      wrapper: TestProviders,
-    }
-  );
+const renderNav = (props: Partial<SideNavigationProps> = {}) =>
+  render(<SideNavigation items={mockItems} selectedId={'alerts'} tracker={mockTrack} {...props} />);
 
-describe('SolutionGroupedNav', () => {
+describe('SideNavigation', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -66,13 +54,11 @@ describe('SolutionGroupedNav', () => {
     it('should contain correct href in links', () => {
       const result = renderNav();
       expect(
-        result
-          .getByTestId(`groupedNavItemLink-${SecurityPageName.dashboardsLanding}`)
-          .getAttribute('href')
+        result.getByTestId(`groupedNavItemLink-${'dashboardsLanding'}`).getAttribute('href')
       ).toBe('/dashboards');
-      expect(
-        result.getByTestId(`groupedNavItemLink-${SecurityPageName.alerts}`).getAttribute('href')
-      ).toBe('/alerts');
+      expect(result.getByTestId(`groupedNavItemLink-${'alerts'}`).getAttribute('href')).toBe(
+        '/alerts'
+      );
     });
 
     it('should call onClick callback if link clicked', () => {
@@ -82,14 +68,14 @@ describe('SolutionGroupedNav', () => {
       const items = [
         ...mockItems,
         {
-          id: SecurityPageName.exploreLanding,
+          id: 'exploreLanding',
           label: 'Explore',
           href: '/explore',
           onClick: mockOnClick,
         },
       ];
       const result = renderNav({ items });
-      result.getByTestId(`groupedNavItemLink-${SecurityPageName.exploreLanding}`).click();
+      result.getByTestId(`groupedNavItemLink-${'exploreLanding'}`).click();
       expect(mockOnClick).toHaveBeenCalled();
     });
 
@@ -97,16 +83,16 @@ describe('SolutionGroupedNav', () => {
       const items = [
         ...mockItems,
         {
-          id: SecurityPageName.exploreLanding,
+          id: 'exploreLanding',
           label: 'Explore',
           href: '/explore',
         },
       ];
       const result = renderNav({ items });
-      result.getByTestId(`groupedNavItemLink-${SecurityPageName.exploreLanding}`).click();
+      result.getByTestId(`groupedNavItemLink-${'exploreLanding'}`).click();
       expect(mockTrack).toHaveBeenCalledWith(
         METRIC_TYPE.CLICK,
-        `${TELEMETRY_EVENT.NAVIGATION}${SecurityPageName.exploreLanding}`
+        `${TELEMETRY_EVENT.NAVIGATION}${'exploreLanding'}`
       );
     });
   });
@@ -114,19 +100,15 @@ describe('SolutionGroupedNav', () => {
   describe('panel button toggle', () => {
     it('should render the group button only for grouped items', () => {
       const result = renderNav();
-      expect(
-        result.getByTestId(`groupedNavItemButton-${SecurityPageName.dashboardsLanding}`)
-      ).toBeInTheDocument();
-      expect(
-        result.queryByTestId(`groupedNavItemButton-${SecurityPageName.alerts}`)
-      ).not.toBeInTheDocument();
+      expect(result.getByTestId(`groupedNavItemButton-${'dashboardsLanding'}`)).toBeInTheDocument();
+      expect(result.queryByTestId(`groupedNavItemButton-${'alerts'}`)).not.toBeInTheDocument();
     });
 
     it('should render the group panel when button is clicked', () => {
       const result = renderNav();
       expect(result.queryByTestId('groupedNavPanel')).not.toBeInTheDocument();
 
-      result.getByTestId(`groupedNavItemButton-${SecurityPageName.dashboardsLanding}`).click();
+      result.getByTestId(`groupedNavItemButton-${'dashboardsLanding'}`).click();
       expect(result.getByTestId('groupedNavPanel')).toBeInTheDocument();
       expect(result.getByText('Overview')).toBeInTheDocument();
     });
@@ -135,19 +117,19 @@ describe('SolutionGroupedNav', () => {
       const result = renderNav();
       expect(result.queryByTestId('groupedNavPanel')).not.toBeInTheDocument();
 
-      result.getByTestId(`groupedNavItemButton-${SecurityPageName.dashboardsLanding}`).click();
+      result.getByTestId(`groupedNavItemButton-${'dashboardsLanding'}`).click();
       expect(mockTrack).toHaveBeenCalledWith(
         METRIC_TYPE.CLICK,
-        `${TELEMETRY_EVENT.GROUPED_NAVIGATION_TOGGLE}${SecurityPageName.dashboardsLanding}`
+        `${TELEMETRY_EVENT.GROUPED_NAVIGATION_TOGGLE}${'dashboardsLanding'}`
       );
     });
 
     it('should close the group panel when the same button is clicked', () => {
       const result = renderNav();
-      result.getByTestId(`groupedNavItemButton-${SecurityPageName.dashboardsLanding}`).click();
+      result.getByTestId(`groupedNavItemButton-${'dashboardsLanding'}`).click();
       expect(result.getByTestId('groupedNavPanel')).toBeInTheDocument();
 
-      result.getByTestId(`groupedNavItemButton-${SecurityPageName.dashboardsLanding}`).click();
+      result.getByTestId(`groupedNavItemButton-${'dashboardsLanding'}`).click();
 
       waitFor(() => {
         expect(result.queryByTestId('groupedNavPanel')).not.toBeInTheDocument();
@@ -158,12 +140,12 @@ describe('SolutionGroupedNav', () => {
       const items = [
         ...mockItems,
         {
-          id: SecurityPageName.exploreLanding,
+          id: 'exploreLanding',
           label: 'Explore',
           href: '/explore',
           items: [
             {
-              id: SecurityPageName.users,
+              id: 'users',
               label: 'Users',
               href: '/users',
               description: 'Users description',
@@ -173,11 +155,11 @@ describe('SolutionGroupedNav', () => {
       ];
       const result = renderNav({ items });
 
-      result.getByTestId(`groupedNavItemButton-${SecurityPageName.dashboardsLanding}`).click();
+      result.getByTestId(`groupedNavItemButton-${'dashboardsLanding'}`).click();
       expect(result.getByTestId('groupedNavPanel')).toBeInTheDocument();
       expect(result.getByText('Overview')).toBeInTheDocument();
 
-      result.getByTestId(`groupedNavItemButton-${SecurityPageName.exploreLanding}`).click();
+      result.getByTestId(`groupedNavItemButton-${'exploreLanding'}`).click();
       expect(result.queryByTestId('groupedNavPanel')).toBeInTheDocument();
       expect(result.getByText('Users')).toBeInTheDocument();
     });
