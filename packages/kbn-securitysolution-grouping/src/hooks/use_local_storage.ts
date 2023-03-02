@@ -19,11 +19,7 @@ export const getAllGroupsInStorage = (storage: Storage): GroupsById => {
   return allGroups;
 };
 
-export const addGroupsToStorage = (
-  storage: Storage,
-  groupingId: string,
-  group: GroupModel
-): GroupsById => {
+export const addGroupsToStorage = (storage: Storage, groupingId: string, group: GroupModel) => {
   const groups = getAllGroupsInStorage(storage);
   storage.set(LOCAL_STORAGE_GROUPING_KEY, {
     ...groups,
