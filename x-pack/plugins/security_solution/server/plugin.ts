@@ -511,7 +511,6 @@ export class Plugin implements ISecuritySolutionPlugin {
       featureUsageService,
       experimentalFeatures: config.experimentalFeatures,
       messageSigningService: plugins.fleet?.messageSigningService,
-      packageService,
     });
 
     this.telemetryReceiver.start(
