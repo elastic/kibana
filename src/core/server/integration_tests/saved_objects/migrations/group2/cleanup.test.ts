@@ -10,28 +10,176 @@ import Path from 'path';
 import Fs from 'fs';
 import Util from 'util';
 import JSON5 from 'json5';
+import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { getMigrationDocLink, delay } from '../test_utils';
 import {
-  createTestServers,
-  createRootWithCorePlugins,
-  type TestElasticsearchUtils,
-} from '@kbn/core-test-helpers-kbn-server';
-import { Root } from '@kbn/core-root-server-internal';
-import { getMigrationDocLink } from '../test_utils';
+  clearLog,
+  currentVersion,
+  defaultKibanaIndex,
+  getKibanaMigratorTestKit,
+  nextMinor,
+  startElasticsearch,
+} from '../kibana_migrator_test_kit';
 
 const migrationDocLink = getMigrationDocLink().resolveMigrationFailures;
 const logFilePath = Path.join(__dirname, 'cleanup.log');
 
-const asyncUnlink = Util.promisify(Fs.unlink);
 const asyncReadFile = Util.promisify(Fs.readFile);
 
-async function removeLogFile() {
-  // ignore errors if it doesn't exist
-  await asyncUnlink(logFilePath).catch(() => void 0);
-}
+describe('migration v2', () => {
+  let esServer: TestElasticsearchUtils['es'];
+  let esClient: ElasticsearchClient;
 
-function createRoot() {
-  return createRootWithCorePlugins(
+  beforeAll(async () => {
+    esServer = await startElasticsearch();
+  });
+
+  beforeEach(async () => {
+    esClient = await setupBaseline();
+    await clearLog(logFilePath);
+  });
+
+  it('clean ups if migration fails', async () => {
+    const { migrator, client } = await setupNextMinor();
+    migrator.prepareMigrations();
+
+    await expect(migrator.runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(`
+      "Unable to complete saved object migrations for the [${defaultKibanaIndex}] index: Migrations failed. Reason: 1 corrupt saved object documents were found: corrupt:2baf4de0-a6d4-11ed-ba5a-39196fc76e60
+
+      To allow migrations to proceed, please delete or fix these documents.
+      Note that you can configure Kibana to automatically discard corrupt documents and transform errors for this migration.
+      Please refer to ${migrationDocLink} for more information."
+    `);
+
+    const logFileContent = await asyncReadFile(logFilePath, 'utf-8');
+    const records = logFileContent
+      .split('\n')
+      .filter(Boolean)
+      .map((str) => JSON5.parse(str));
+
+    const logRecordWithPit = records.find(
+      (rec) => rec.message === `[${defaultKibanaIndex}] REINDEX_SOURCE_TO_TEMP_OPEN_PIT RESPONSE`
+    );
+
+    expect(logRecordWithPit).toBeTruthy();
+
+    const pitId = logRecordWithPit.right.pitId;
+    expect(pitId).toBeTruthy();
+
+    await expect(
+      client.search({
+        body: {
+          pit: { id: pitId },
+        },
+      })
+      // throws an exception that cannot search with closed PIT
+    ).rejects.toThrow(/search_phase_execution_exception/);
+  });
+
+  afterEach(async () => {
+    await esClient?.indices.delete({ index: `${defaultKibanaIndex}_${currentVersion}_001` });
+  });
+
+  afterAll(async () => {
+    await esServer?.stop();
+    await delay(10);
+  });
+});
+
+const setupBaseline = async () => {
+  const typesCurrent: SavedObjectsType[] = [
     {
+      name: 'complex',
+      hidden: false,
+      namespaceType: 'agnostic',
+      mappings: {
+        properties: {
+          name: { type: 'text' },
+          value: { type: 'integer' },
+        },
+      },
+      migrations: {},
+    },
+  ];
+
+  const savedObjects = [
+    {
+      id: 'complex:4baf4de0-a6d4-11ed-ba5a-39196fc76e60',
+      body: {
+        type: 'complex',
+        complex: {
+          name: 'foo',
+          value: 5,
+        },
+        references: [],
+        coreMigrationVersion: currentVersion,
+        updated_at: '2023-02-07T11:04:44.914Z',
+        created_at: '2023-02-07T11:04:44.914Z',
+      },
+    },
+    {
+      id: 'corrupt:2baf4de0-a6d4-11ed-ba5a-39196fc76e60', // incorrect id => corrupt object
+      body: {
+        type: 'complex',
+        complex: {
+          name: 'bar',
+          value: 3,
+        },
+        references: [],
+        coreMigrationVersion: currentVersion,
+        updated_at: '2023-02-07T11:04:44.914Z',
+        created_at: '2023-02-07T11:04:44.914Z',
+      },
+    },
+  ];
+
+  const { migrator: baselineMigrator, client } = await getKibanaMigratorTestKit({
+    types: typesCurrent,
+    logFilePath,
+  });
+
+  baselineMigrator.prepareMigrations();
+  await baselineMigrator.runMigrations();
+
+  // inject corrupt saved objects directly using esClient
+  await Promise.all(
+    savedObjects.map((savedObject) => {
+      client.create({
+        index: defaultKibanaIndex,
+        refresh: 'wait_for',
+        ...savedObject,
+      });
+    })
+  );
+
+  return client;
+};
+
+const setupNextMinor = async () => {
+  const typesNextMinor: SavedObjectsType[] = [
+    {
+      name: 'complex',
+      hidden: false,
+      namespaceType: 'agnostic',
+      mappings: {
+        properties: {
+          name: { type: 'keyword' },
+          value: { type: 'long' },
+        },
+      },
+      migrations: {
+        [nextMinor]: (doc) => doc,
+      },
+    },
+  ];
+
+  const { migrator, client } = await getKibanaMigratorTestKit({
+    types: typesNextMinor,
+    kibanaVersion: nextMinor,
+    logFilePath,
+    settings: {
       migrations: {
         skip: false,
       },
@@ -54,102 +202,7 @@ function createRoot() {
         ],
       },
     },
-    {
-      oss: true,
-    }
-  );
-}
-
-describe('migration v2', () => {
-  let esServer: TestElasticsearchUtils;
-  let root: Root;
-
-  beforeAll(async () => {
-    await removeLogFile();
   });
 
-  afterAll(async () => {
-    if (root) {
-      await root.shutdown();
-    }
-    if (esServer) {
-      await esServer.stop();
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, 10000));
-  });
-
-  it('clean ups if migration fails', async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: (t: number) => jest.setTimeout(t),
-      settings: {
-        es: {
-          license: 'basic',
-          // original SO:
-          // {
-          //   _index: '.kibana_7.13.0_001',
-          //     _type: '_doc',
-          //   _id: 'index-pattern:test_index*',
-          //   _version: 1,
-          //   result: 'created',
-          //   _shards: { total: 2, successful: 1, failed: 0 },
-          //   _seq_no: 0,
-          //     _primary_term: 1
-          // }
-          dataArchive: Path.join(__dirname, '..', 'archives', '7.13.0_with_corrupted_so.zip'),
-        },
-      },
-    });
-
-    root = createRoot();
-
-    esServer = await startES();
-    await root.preboot();
-    const coreSetup = await root.setup();
-
-    coreSetup.savedObjects.registerType({
-      name: 'foo',
-      hidden: false,
-      mappings: {
-        properties: {},
-      },
-      namespaceType: 'agnostic',
-      migrations: {
-        '7.14.0': (doc) => doc,
-      },
-    });
-
-    await expect(root.start()).rejects.toThrowErrorMatchingInlineSnapshot(`
-            "Unable to complete saved object migrations for the [.kibana] index: Migrations failed. Reason: 1 corrupt saved object documents were found: index-pattern:test_index*
-
-            To allow migrations to proceed, please delete or fix these documents.
-            Note that you can configure Kibana to automatically discard corrupt documents and transform errors for this migration.
-            Please refer to ${migrationDocLink} for more information."
-          `);
-
-    const logFileContent = await asyncReadFile(logFilePath, 'utf-8');
-    const records = logFileContent
-      .split('\n')
-      .filter(Boolean)
-      .map((str) => JSON5.parse(str));
-
-    const logRecordWithPit = records.find(
-      (rec) => rec.message === '[.kibana] REINDEX_SOURCE_TO_TEMP_OPEN_PIT RESPONSE'
-    );
-
-    expect(logRecordWithPit).toBeTruthy();
-
-    const pitId = logRecordWithPit.right.pitId;
-    expect(pitId).toBeTruthy();
-
-    const client = esServer.es.getClient();
-    await expect(
-      client.search({
-        body: {
-          pit: { id: pitId },
-        },
-      })
-      // throws an exception that cannot search with closed PIT
-    ).rejects.toThrow(/search_phase_execution_exception/);
-  });
-});
+  return { migrator, client };
+};

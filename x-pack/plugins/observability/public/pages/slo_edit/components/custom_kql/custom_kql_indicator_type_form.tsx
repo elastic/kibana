@@ -12,7 +12,7 @@ import { useFormContext } from 'react-hook-form';
 import { CreateSLOInput } from '@kbn/slo-schema';
 
 import { IndexSelection } from './index_selection';
-import { QueryBuilder } from './query_builder';
+import { QueryBuilder } from '../common/query_builder';
 
 export function CustomKqlIndicatorTypeForm() {
   const { control, watch } = useFormContext<CreateSLOInput>();

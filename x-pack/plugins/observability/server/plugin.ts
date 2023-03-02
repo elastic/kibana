@@ -13,15 +13,20 @@ import {
   DEFAULT_APP_CATEGORIES,
   Logger,
 } from '@kbn/core/server';
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { Dataset, RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
-import { createUICapabilities } from '@kbn/cases-plugin/common';
+import {
+  createUICapabilities as createCasesUICapabilities,
+  getApiTags as getCasesApiTags,
+} from '@kbn/cases-plugin/common';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
-import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
-import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/rule-registry-plugin/common/assets';
+import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
   kubernetesGuideId,
@@ -50,6 +55,7 @@ interface PluginSetup {
   features: FeaturesSetup;
   guidedOnboarding: GuidedOnboardingPluginSetup;
   ruleRegistry: RuleRegistryPluginSetupContract;
+  spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -62,7 +68,9 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   }
 
   public setup(core: CoreSetup, plugins: PluginSetup) {
-    const casesCapabilities = createUICapabilities();
+    const casesCapabilities = createCasesUICapabilities();
+    const casesApiTags = getCasesApiTags(observabilityFeatureId);
+
     const config = this.initContext.config.get<ObservabilityConfig>();
 
     plugins.features.registerKibanaFeature({
@@ -77,7 +85,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       cases: [observabilityFeatureId],
       privileges: {
         all: {
-          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          api: casesApiTags.all,
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {
@@ -87,13 +95,13 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
             push: [observabilityFeatureId],
           },
           savedObject: {
-            all: [],
-            read: [],
+            all: [...filesSavedObjectTypes],
+            read: [...filesSavedObjectTypes],
           },
           ui: casesCapabilities.all,
         },
         read: {
-          api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+          api: casesApiTags.read,
           app: [casesFeatureId, 'kibana'],
           catalogue: [observabilityFeatureId],
           cases: {
@@ -101,7 +109,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           },
           savedObject: {
             all: [],
-            read: [],
+            read: [...filesSavedObjectTypes],
           },
           ui: casesCapabilities.read,
         },
@@ -116,7 +124,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
               groupType: 'independent',
               privileges: [
                 {
-                  api: [],
+                  api: casesApiTags.delete,
                   id: 'cases_delete',
                   name: i18n.translate(
                     'xpack.observability.featureRegistry.deleteSubFeatureDetails',

@@ -65,6 +65,6 @@ journey(`TestRunDetailsPage`, async ({ page, params }) => {
 
     await page.waitForSelector('text=Test run details');
     await page.waitForSelector('text=Go to https://www.google.com');
-    await page.waitForSelector('text=After 2.1 s');
+    await page.waitForSelector('text=After 2.12 s');
   });
 });
