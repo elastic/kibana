@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type {
@@ -16,7 +17,8 @@ import { CustomFieldPanel } from './custom_field_panel';
 import * as i18n from '../translations';
 import { StyledContextMenu, StyledEuiButtonEmpty } from '../styles';
 
-interface GroupSelectorProps {
+export interface GroupSelectorProps {
+  'data-test-subj'?: string;
   fields: FieldSpec[];
   groupSelected: string;
   onGroupChange: (groupSelection: string) => void;
@@ -24,7 +26,8 @@ interface GroupSelectorProps {
   title?: string;
 }
 
-const GroupsSelectorComponent = ({
+const GroupSelectorComponent = ({
+  'data-test-subj': dataTestSubj,
   fields,
   groupSelected = 'none',
   onGroupChange,
@@ -131,6 +134,7 @@ const GroupsSelectorComponent = ({
 
   return (
     <EuiPopover
+      data-test-subj={dataTestSubj ?? 'groupByPopover'}
       button={button}
       closePopover={closePopover}
       isOpen={isPopoverOpen}
@@ -145,4 +149,4 @@ const GroupsSelectorComponent = ({
   );
 };
 
-export const GroupsSelector = React.memo(GroupsSelectorComponent);
+export const GroupSelector = React.memo(GroupSelectorComponent);

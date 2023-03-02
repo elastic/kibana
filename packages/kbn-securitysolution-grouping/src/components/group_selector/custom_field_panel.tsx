@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
@@ -50,22 +51,19 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
       <div data-test-subj="custom-field-panel" style={{ padding: 16 }}>
         <EuiForm>
           <EuiFormRow
-            label={i18n.translate('xpack.securitySolution.groupsSelector.customGroupByFieldLabel', {
+            label={i18n.translate('grouping.groupsSelector.customGroupByFieldLabel', {
               defaultMessage: 'Field',
             })}
-            helpText={i18n.translate(
-              'xpack.securitySolution.groupsSelector.customGroupByHelpText',
-              {
-                defaultMessage: 'This is the field used for the terms aggregation',
-              }
-            )}
+            helpText={i18n.translate('grouping.groupsSelector.customGroupByHelpText', {
+              defaultMessage: 'This is the field used for the terms aggregation',
+            })}
             display="rowCompressed"
             fullWidth
           >
             <EuiComboBox
               data-test-subj="groupByCustomField"
               placeholder={i18n.translate(
-                'xpack.securitySolution.groupsSelector.customGroupByDropdownPlacehoder',
+                'grouping.groupsSelector.customGroupByDropdownPlacehoder',
                 {
                   defaultMessage: 'Select one',
                 }
@@ -86,7 +84,7 @@ export class CustomFieldPanel extends React.PureComponent<Props, State> {
             fill
             onClick={this.handleSubmit}
           >
-            {i18n.translate('xpack.securitySolution.selector.grouping.label.add', {
+            {i18n.translate('grouping.selector.grouping.label.add', {
               defaultMessage: 'Add',
             })}
           </EuiButton>

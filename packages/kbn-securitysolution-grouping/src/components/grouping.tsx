@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import {
@@ -14,31 +15,20 @@ import {
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
-import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
-import { createGroupFilter } from '../accordion_panel/helpers';
-import { tableDefaults } from '../../../store/data_table/defaults';
-import { defaultUnit } from '../../toolbar/unit';
-import type { BadgeMetric, CustomMetric } from '../accordion_panel';
-import { GroupPanel } from '../accordion_panel';
-import { GroupStats } from '../accordion_panel/group_stats';
-import { EmptyGroupingComponent } from '../empty_resuls_panel';
-import { GroupingStyledContainer, GroupsUnitCount } from '../styles';
-import { GROUPS_UNIT } from '../translations';
-import type { GroupingTableAggregation, RawBucket } from '../types';
+import { defaultUnit, firstNonNullValue } from '../helpers';
+import { createGroupFilter } from './accordion_panel/helpers';
+import type { BadgeMetric, CustomMetric } from './accordion_panel';
+import { GroupPanel } from './accordion_panel';
+import { GroupStats } from './accordion_panel/group_stats';
+import { EmptyGroupingComponent } from './empty_resuls_panel';
+import { groupingContainerCss, groupsUnitCountCss } from './styles';
+import { GROUPS_UNIT } from './translations';
+import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } from './types';
 
-export interface GroupingContainerProps {
+export interface GroupingProps {
   badgeMetricStats?: (fieldBucket: RawBucket) => BadgeMetric[];
   customMetricStats?: (fieldBucket: RawBucket) => CustomMetric[];
-  data: GroupingTableAggregation &
-    Record<
-      string,
-      {
-        value?: number | null;
-        buckets?: Array<{
-          doc_count?: number | null;
-        }>;
-      }
-    >;
+  data?: GroupingAggregation & GroupingFieldTotalAggregation;
   groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element | undefined;
   groupsSelector?: JSX.Element;
   inspectButton?: JSX.Element;
@@ -48,6 +38,7 @@ export interface GroupingContainerProps {
     pageSize: number;
     onChangeItemsPerPage: (itemsPerPageNumber: number) => void;
     onChangePage: (pageNumber: number) => void;
+    itemsPerPageOptions: number[];
   };
   renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
   selectedGroup: string;
@@ -55,7 +46,7 @@ export interface GroupingContainerProps {
   unit?: (n: number) => string;
 }
 
-const GroupingContainerComponent = ({
+const GroupingComponent = ({
   badgeMetricStats,
   customMetricStats,
   data,
@@ -68,7 +59,7 @@ const GroupingContainerComponent = ({
   selectedGroup,
   takeActionItems,
   unit = defaultUnit,
-}: GroupingContainerProps) => {
+}: GroupingProps) => {
   const [trigger, setTrigger] = useState<
     Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket }>
   >({});
@@ -86,7 +77,7 @@ const GroupingContainerComponent = ({
 
   const groupPanels = useMemo(
     () =>
-      data.stackByMultipleFields0?.buckets?.map((groupBucket) => {
+      data?.stackByMultipleFields0?.buckets?.map((groupBucket) => {
         const group = firstNonNullValue(groupBucket.key);
         const groupKey = `group0-${group}`;
 
@@ -128,7 +119,7 @@ const GroupingContainerComponent = ({
     [
       badgeMetricStats,
       customMetricStats,
-      data.stackByMultipleFields0?.buckets,
+      data?.stackByMultipleFields0?.buckets,
       groupPanelRenderer,
       isLoading,
       renderChildComponent,
@@ -153,12 +144,18 @@ const GroupingContainerComponent = ({
           {groupsNumber > 0 ? (
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow={false}>
-                <GroupsUnitCount data-test-subj="alert-count">{unitCountText}</GroupsUnitCount>
+                <span css={groupsUnitCountCss} data-test-subj="alert-count">
+                  {unitCountText}
+                </span>
               </EuiFlexItem>
               <EuiFlexItem>
-                <GroupsUnitCount data-test-subj="groups-count" style={{ borderRight: 'none' }}>
+                <span
+                  css={groupsUnitCountCss}
+                  data-test-subj="groups-count"
+                  style={{ borderRight: 'none' }}
+                >
                   {unitGroupsCountText}
-                </GroupsUnitCount>
+                </span>
               </EuiFlexItem>
             </EuiFlexGroup>
           ) : null}
@@ -170,7 +167,7 @@ const GroupingContainerComponent = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <GroupingStyledContainer className="eui-xScroll">
+      <div css={groupingContainerCss} className="eui-xScroll">
         {groupsNumber > 0 ? (
           <>
             {groupPanels}
@@ -179,7 +176,7 @@ const GroupingContainerComponent = ({
               activePage={pagination.pageIndex}
               data-test-subj="grouping-table-pagination"
               itemsPerPage={pagination.pageSize}
-              itemsPerPageOptions={tableDefaults.itemsPerPageOptions}
+              itemsPerPageOptions={pagination.itemsPerPageOptions}
               onChangeItemsPerPage={pagination.onChangeItemsPerPage}
               onChangePage={pagination.onChangePage}
               pageCount={pageCount}
@@ -194,9 +191,9 @@ const GroupingContainerComponent = ({
             <EmptyGroupingComponent />
           </>
         )}
-      </GroupingStyledContainer>
+      </div>
     </>
   );
 };
 
-export const GroupingContainer = React.memo(GroupingContainerComponent);
+export const Grouping = React.memo(GroupingComponent);
