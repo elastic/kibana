@@ -44,6 +44,7 @@ import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipel
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
 import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
+import { revertCustomPipeline } from '../../lib/pipelines/revert_custom_pipeline';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
@@ -294,6 +295,27 @@ export function registerIndexRoutes({
 
       return response.ok({
         body: createResult,
+        headers: { 'content-type': 'application/json' },
+      });
+    })
+  );
+
+  router.delete(
+    {
+      path: '/internal/enterprise_search/indices/{indexName}/pipelines',
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const indexName = decodeURIComponent(request.params.indexName);
+      const { client } = (await context.core).elasticsearch;
+      const body = await revertCustomPipeline(client, indexName);
+
+      return response.ok({
+        body,
         headers: { 'content-type': 'application/json' },
       });
     })
