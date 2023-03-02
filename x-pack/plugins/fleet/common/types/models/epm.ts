@@ -378,6 +378,7 @@ export type RegistryVarType =
   | 'integer'
   | 'bool'
   | 'password'
+  | 'select'
   | 'text'
   | 'yaml'
   | 'string'

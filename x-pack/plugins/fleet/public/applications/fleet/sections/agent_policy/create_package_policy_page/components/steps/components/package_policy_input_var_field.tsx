@@ -17,6 +17,7 @@ import {
   EuiFieldPassword,
   EuiCodeBlock,
   EuiTextArea,
+  EuiSelect,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -37,6 +38,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   varDef: RegistryVarsEntry;
   value: any;
   onChange: (newValue: any) => void;
+  options?: { value: string; text: string }[];
   errors?: string[] | null;
   forceShowErrors?: boolean;
   frozen?: boolean;
@@ -49,6 +51,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
     varDef,
     value,
     onChange,
+    options,
     errors: varErrors,
     forceShowErrors,
     frozen,
@@ -152,6 +155,14 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
               onChange={(e) => onChange(e.target.value)}
               onBlur={() => setIsDirty(true)}
               disabled={frozen}
+            />
+          );
+        case 'select':
+          return (
+            <EuiSelect
+              options={options}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
             />
           );
         default:
