@@ -48,7 +48,11 @@ export const EmptyGroupingComponent: React.FC<{ height?: keyof typeof heights }>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
+<<<<<<<< HEAD:packages/kbn-securitysolution-grouping/src/components/empty_results_panel.tsx
                 <EuiImage size="200px" alt="" src={noResultsIllustrationLight} />
+========
+                <EuiImage size="200" alt="" src={noResultsIllustrationLight} />
+>>>>>>>> main:packages/kbn-securitysolution-grouping/src/components/empty_resuls_panel.tsx
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>

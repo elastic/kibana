@@ -804,7 +804,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
 /x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
-
+/x-pack/plugins/observability/public/utils/observability_data_views @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
@@ -1158,11 +1158,14 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 /x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/server/lib/detection_engine/rule_response_actions @elastic/security-defend-workflows
 
+# Cloud Defend
+/x-pack/plugins/cloud_defend/ @elastic/sec-cloudnative-integrations
+/x-pack/plugins/security_solution/public/cloud_defend @elastic/sec-cloudnative-integrations
+
 # Cloud Security Posture
 /x-pack/plugins/security_solution/public/cloud_security_posture @elastic/kibana-cloud-security-posture
 /x-pack/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture
 /x-pack/test/cloud_security_posture_functional/ @elastic/kibana-cloud-security-posture
-
 
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore

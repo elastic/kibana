@@ -13087,35 +13087,35 @@
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             }
           ]
         },
@@ -13730,6 +13730,14 @@
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
               },
               {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -13752,14 +13760,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
                 "plugin": "controls",
@@ -21353,6 +21353,14 @@
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
               },
               {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -21375,14 +21383,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
                 "plugin": "controls",
