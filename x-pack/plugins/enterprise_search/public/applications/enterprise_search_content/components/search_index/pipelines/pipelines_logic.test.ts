@@ -35,10 +35,12 @@ const DEFAULT_VALUES = {
   hasIndexIngestionPipeline: false,
   index: undefined,
   indexName: '',
+  isDeleteModalOpen: false,
   mlInferencePipelineProcessors: undefined,
   pipelineName: DEFAULT_PIPELINE_VALUES.name,
   pipelineState: DEFAULT_PIPELINE_VALUES,
   showAddMlInferencePipelineModal: false,
+  showMissingPipelineCallout: false,
   showPipelineSettings: false,
 };
 
@@ -145,16 +147,16 @@ describe('PipelinesLogic', () => {
       });
     });
     describe('createCustomPipelineSuccess', () => {
-      it('should call flashSuccessToast', () => {
+      it('should call flashSuccessToast and update pipelines', () => {
         PipelinesLogic.actions.setPipelineState = jest.fn();
         PipelinesLogic.actions.savePipeline = jest.fn();
         PipelinesLogic.actions.fetchCustomPipeline = jest.fn();
         PipelinesLogic.actions.fetchIndexApiSuccess(connectorIndex);
-        PipelinesLogic.actions.createCustomPipelineSuccess({ created: ['a', 'b'] });
+        PipelinesLogic.actions.createCustomPipelineSuccess({ [connectorIndex.name]: {} });
         expect(flashSuccessToast).toHaveBeenCalledWith('Custom pipeline created');
         expect(PipelinesLogic.actions.setPipelineState).toHaveBeenCalledWith({
           ...PipelinesLogic.values.pipelineState,
-          name: 'a',
+          name: connectorIndex.name,
         });
         expect(PipelinesLogic.actions.savePipeline).toHaveBeenCalled();
         expect(PipelinesLogic.actions.fetchCustomPipeline).toHaveBeenCalled();
