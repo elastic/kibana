@@ -1,16 +1,17 @@
 post:
-  summary: Agents - Bulk reassign
-  tags: []
+  summary: Bulk reassign agents
+  tags:
+    - Agents
   responses:
     '200':
-        description: OK
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                actionId: 
-                  type: string
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              actionId:
+                type: string
     '400':
       $ref: ../components/responses/error.yaml
   operationId: bulk-reassign-agents
@@ -38,4 +39,4 @@ post:
             - agents
         example:
           policy_id: policy_id
-          agents: "fleet-agents.policy_id : (\"policy1\" or \"policy2\")"
+          agents: 'fleet-agents.policy_id : ("policy1" or "policy2")'

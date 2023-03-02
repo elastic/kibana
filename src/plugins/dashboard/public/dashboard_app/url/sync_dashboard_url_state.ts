@@ -37,28 +37,35 @@ export const isPanelVersionTooOld = (panels: SavedDashboardPanel[]) => {
   return false;
 };
 
+function getPanelsMap(appStateInUrl: SharedDashboardState): DashboardPanelMap | undefined {
+  if (!appStateInUrl.panels) {
+    return undefined;
+  }
+
+  if (appStateInUrl.panels.length === 0) {
+    return {};
+  }
+
+  if (isPanelVersionTooOld(appStateInUrl.panels)) {
+    pluginServices.getServices().notifications.toasts.addWarning(getPanelTooOldErrorString());
+    return undefined;
+  }
+
+  return convertSavedPanelsToPanelMap(appStateInUrl.panels);
+}
+
 /**
  * Loads any dashboard state from the URL, and removes the state from the URL.
  */
 export const loadAndRemoveDashboardState = (
   kbnUrlStateStorage: IKbnUrlStateStorage
 ): Partial<DashboardContainerByValueInput> => {
-  const {
-    notifications: { toasts },
-  } = pluginServices.getServices();
   const rawAppStateInUrl = kbnUrlStateStorage.get<SharedDashboardState>(
     DASHBOARD_STATE_STORAGE_KEY
   );
   if (!rawAppStateInUrl) return {};
 
-  let panelsMap: DashboardPanelMap | undefined;
-  if (rawAppStateInUrl.panels && rawAppStateInUrl.panels.length > 0) {
-    if (isPanelVersionTooOld(rawAppStateInUrl.panels)) {
-      toasts.addWarning(getPanelTooOldErrorString());
-    } else {
-      panelsMap = convertSavedPanelsToPanelMap(rawAppStateInUrl.panels);
-    }
-  }
+  const panelsMap = getPanelsMap(rawAppStateInUrl);
 
   const nextUrl = replaceUrlHashQuery(window.location.href, (hashQuery) => {
     delete hashQuery[DASHBOARD_STATE_STORAGE_KEY];

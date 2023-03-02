@@ -75,6 +75,8 @@ export const ExecuteActionResult = memo<
       <ExecuteActionHostResponseOutput
         action={completedActionDetails}
         agentId={command.commandDefinition?.meta?.endpointId}
+        data-test-subj="consoleExecuteResponseOutput"
+        textSize="s"
       />
     </ResultComponent>
   );

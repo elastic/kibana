@@ -243,6 +243,13 @@ export interface WaitForYellowSourceState extends BaseWithSource {
   readonly aliases: Record<string, string | undefined>;
 }
 
+export interface UpdateSourceMappingsState extends BaseState {
+  readonly controlState: 'UPDATE_SOURCE_MAPPINGS';
+  readonly sourceIndex: Option.Some<string>;
+  readonly sourceIndexMappings: IndexMapping;
+  readonly aliases: Record<string, string | undefined>;
+}
+
 export interface CheckUnknownDocumentsState extends BaseWithSource {
   /** Check if any unknown document is present in the source index */
   readonly controlState: 'CHECK_UNKNOWN_DOCUMENTS';
@@ -493,6 +500,7 @@ export type State = Readonly<
   | WaitForMigrationCompletionState
   | DoneState
   | WaitForYellowSourceState
+  | UpdateSourceMappingsState
   | CheckUnknownDocumentsState
   | SetSourceWriteBlockState
   | CalculateExcludeFiltersState
