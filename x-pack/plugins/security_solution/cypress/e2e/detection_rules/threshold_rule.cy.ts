@@ -6,7 +6,7 @@
  */
 
 import { formatMitreAttackDescription, getHumanizedDuration } from '../../helpers/rules';
-import { getNewThresholdRule } from '../../objects/rule';
+import { getIndexPatterns, getNewThresholdRule } from '../../objects/rule';
 
 import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../screens/alerts';
 
@@ -90,7 +90,7 @@ describe('Detection rules, threshold', () => {
 
     cy.get(RULE_NAME).should('have.text', rule.name);
     cy.get(RISK_SCORE).should('have.text', rule.risk_score);
-    cy.get(SEVERITY).should('have.text', rule.severity);
+    cy.get(SEVERITY).should('have.text', 'High');
     cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
     goToRuleDetails();
@@ -98,7 +98,7 @@ describe('Detection rules, threshold', () => {
     cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
     cy.get(ABOUT_DETAILS).within(() => {
-      getDetails(SEVERITY_DETAILS).should('have.text', rule.severity);
+      getDetails(SEVERITY_DETAILS).should('have.text', 'High');
       getDetails(RISK_SCORE_DETAILS).should('have.text', rule.risk_score);
       getDetails(REFERENCE_URLS_DETAILS).should((details) => {
         expect(removeExternalLinkText(details.text())).equal(expectedUrls);
@@ -112,13 +112,13 @@ describe('Detection rules, threshold', () => {
     cy.get(INVESTIGATION_NOTES_TOGGLE).click({ force: true });
     cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
     cy.get(DEFINITION_DETAILS).within(() => {
-      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', 'auditbeat-*');
+      getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
       getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
       getDetails(RULE_TYPE_DETAILS).should('have.text', 'Threshold');
       getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
       getDetails(THRESHOLD_DETAILS).should(
         'have.text',
-        `Results aggregated by ${rule.threshold.field[0]} >= ${rule.threshold}`
+        `Results aggregated by ${rule.threshold.field} >= ${rule.threshold.value}`
       );
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
