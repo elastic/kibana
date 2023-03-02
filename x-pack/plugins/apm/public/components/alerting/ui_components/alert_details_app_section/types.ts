@@ -27,6 +27,6 @@ export interface AlertDetailsAppSectionProps {
   }>;
   timeZone: string;
   setAlertSummaryFields: React.Dispatch<
-    React.SetStateAction<AlertSummaryField[]>
+    React.SetStateAction<AlertSummaryField[] | undefined>
   >;
 }
