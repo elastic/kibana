@@ -21,6 +21,7 @@ import {
   EuiIcon,
   EuiPanel,
   EuiSelect,
+  EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
@@ -235,10 +236,10 @@ export const SortingView: React.FC<SortingViewProps> = withSearch(({ setSort, so
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiTitle size="xxxs">
-          <label htmlFor="sorting">Sort By</label>
+          <label htmlFor="sorting-field">Sort By</label>
         </EuiTitle>
         <EuiComboBox
-          id="sorting"
+          id="sorting-field"
           isClearable={false}
           singleSelection={{ asPlainText: true }}
           options={[
@@ -250,17 +251,26 @@ export const SortingView: React.FC<SortingViewProps> = withSearch(({ setSort, so
             setSort(value === '' ? [] : [{ direction: 'asc', field: value }])
           }
         />
-        {field !== '' && (
-          <EuiSelect
-            onChange={(evt) => setSort([{ direction: evt.target.value, field }])}
-            value={direction}
-            options={[
-              { label: 'Ascending', value: 'asc' },
-              { label: 'Descending', value: 'desc' },
-            ]}
-          />
-        )}
       </EuiFlexGroup>
+      {field !== '' && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiTitle size="xxxs">
+              <label htmlFor="sorting-direction">Order By</label>
+            </EuiTitle>
+            <EuiSelect
+              id="sorting-direction"
+              onChange={(evt) => setSort([{ direction: evt.target.value, field }])}
+              value={direction}
+              options={[
+                { label: 'Ascending', value: 'asc' },
+                { label: 'Descending', value: 'desc' },
+              ]}
+            />
+          </EuiFlexGroup>
+        </>
+      )}
     </EuiFlexItem>
   );
 });
