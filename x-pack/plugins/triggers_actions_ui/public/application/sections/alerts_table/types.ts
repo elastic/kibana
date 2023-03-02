@@ -17,7 +17,7 @@ export type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export interface CellComponentProps {
   alert: Alert;
-  cases: AlertsTableProps['casesData']['cases'];
+  cases: AlertsTableProps['cases']['data'];
   columnId: SystemCellId;
   isLoading: boolean;
   showAlertStatusWithFlapping: boolean;

@@ -13,6 +13,22 @@ import { createCasesServiceMock } from '../index.mock';
 jest.mock('./api');
 jest.mock('../../../../common/lib/kibana');
 
+const mockCaseService = createCasesServiceMock();
+const mockKibana = jest.fn().mockReturnValue({
+  services: {
+    cases: mockCaseService,
+  },
+});
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+
+  return {
+    ...original,
+    useKibana: () => mockKibana(),
+  };
+});
+
 describe('bulk action hooks', () => {
   let appMockRender: AppMockRenderer;
 
@@ -24,15 +40,14 @@ describe('bulk action hooks', () => {
   const refresh = jest.fn();
   const clearSelection = jest.fn();
   const open = jest.fn();
-  const caseServicesMock = createCasesServiceMock();
-  caseServicesMock.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
+  mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
 
   const addNewCaseMock = (
-    caseServicesMock.hooks.useCasesAddToNewCaseFlyout as jest.Mock
+    mockCaseService.hooks.useCasesAddToNewCaseFlyout as jest.Mock
   ).mockReturnValue({ open });
 
   const addExistingCaseMock = (
-    caseServicesMock.hooks.useCasesAddToExistingCaseModal as jest.Mock
+    mockCaseService.hooks.useCasesAddToExistingCaseModal as jest.Mock
   ).mockReturnValue({ open });
 
   describe('useBulkAddToCaseActions', () => {
@@ -42,7 +57,7 @@ describe('bulk action hooks', () => {
 
     it('should refetch when calling onSuccess of useCasesAddToNewCaseFlyout', async () => {
       renderHook(
-        () => useBulkAddToCaseActions({ casesService: caseServicesMock, refresh, clearSelection }),
+        () => useBulkAddToCaseActions({ showCaseBulkActions: true, refresh, clearSelection }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -54,7 +69,7 @@ describe('bulk action hooks', () => {
 
     it('should refetch when calling onSuccess of useCasesAddToExistingCaseModal', async () => {
       renderHook(
-        () => useBulkAddToCaseActions({ casesService: caseServicesMock, refresh, clearSelection }),
+        () => useBulkAddToCaseActions({ showCaseBulkActions: true, refresh, clearSelection }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -66,7 +81,7 @@ describe('bulk action hooks', () => {
 
     it('should open the case flyout', async () => {
       const { result } = renderHook(
-        () => useBulkAddToCaseActions({ casesService: caseServicesMock, refresh, clearSelection }),
+        () => useBulkAddToCaseActions({ showCaseBulkActions: true, refresh, clearSelection }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -75,13 +90,13 @@ describe('bulk action hooks', () => {
       // @ts-expect-error: cases do not need all arguments
       result.current[0].onClick([]);
 
-      expect(caseServicesMock.helpers.groupAlertsByRule).toHaveBeenCalled();
+      expect(mockCaseService.helpers.groupAlertsByRule).toHaveBeenCalled();
       expect(open).toHaveBeenCalled();
     });
 
     it('should open the case modal', async () => {
       const { result } = renderHook(
-        () => useBulkAddToCaseActions({ casesService: caseServicesMock, refresh, clearSelection }),
+        () => useBulkAddToCaseActions({ showCaseBulkActions: true, refresh, clearSelection }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -90,17 +105,17 @@ describe('bulk action hooks', () => {
       // @ts-expect-error: cases do not need all arguments
       result.current[1].onClick([]);
 
-      expect(caseServicesMock.helpers.groupAlertsByRule).toHaveBeenCalled();
+      expect(mockCaseService.helpers.groupAlertsByRule).toHaveBeenCalled();
       expect(open).toHaveBeenCalled();
     });
 
     it('should not show the bulk actions when the user does not have write access', async () => {
-      caseServicesMock.helpers.canUseCases = jest
+      mockCaseService.helpers.canUseCases = jest
         .fn()
         .mockReturnValue({ create: false, read: true });
 
       const { result } = renderHook(
-        () => useBulkAddToCaseActions({ casesService: caseServicesMock, refresh, clearSelection }),
+        () => useBulkAddToCaseActions({ showCaseBulkActions: true, refresh, clearSelection }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -110,12 +125,38 @@ describe('bulk action hooks', () => {
     });
 
     it('should not show the bulk actions when the user does not have read access', async () => {
-      caseServicesMock.helpers.canUseCases = jest
+      mockCaseService.helpers.canUseCases = jest
         .fn()
         .mockReturnValue({ create: true, read: false });
 
       const { result } = renderHook(
-        () => useBulkAddToCaseActions({ casesService: caseServicesMock, refresh, clearSelection }),
+        () => useBulkAddToCaseActions({ showCaseBulkActions: true, refresh, clearSelection }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      expect(result.current.length).toBe(0);
+    });
+
+    it('should not show the bulk actions when showCaseBulkActions=false', async () => {
+      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
+
+      const { result } = renderHook(
+        () => useBulkAddToCaseActions({ showCaseBulkActions: false, refresh, clearSelection }),
+        {
+          wrapper: appMockRender.AppWrapper,
+        }
+      );
+
+      expect(result.current.length).toBe(0);
+    });
+
+    it('should not show the bulk actions when the case service is not available', async () => {
+      mockKibana.mockImplementation(() => ({ services: {} }));
+
+      const { result } = renderHook(
+        () => useBulkAddToCaseActions({ showCaseBulkActions: true, refresh, clearSelection }),
         {
           wrapper: appMockRender.AppWrapper,
         }
@@ -128,15 +169,13 @@ describe('bulk action hooks', () => {
   describe('useBulkActions', () => {
     beforeEach(() => {
       jest.clearAllMocks();
-
-      caseServicesMock.helpers.canUseCases = jest
-        .fn()
-        .mockReturnValue({ create: true, read: true });
+      mockKibana.mockImplementation(() => ({ services: { cases: mockCaseService } }));
+      mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
     });
 
     it('appends the case bulk actions', async () => {
       const { result } = renderHook(
-        () => useBulkActions({ alerts: [], query: {}, casesService: caseServicesMock, refresh }),
+        () => useBulkActions({ alerts: [], query: {}, showCaseBulkActions: true, refresh }),
         {
           wrapper: appMockRender.AppWrapper,
         }

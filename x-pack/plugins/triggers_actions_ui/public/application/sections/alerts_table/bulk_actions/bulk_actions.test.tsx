@@ -46,6 +46,21 @@ const columns = [
 
 const mockCaseService = createCasesServiceMock();
 
+const mockKibana = jest.fn().mockReturnValue({
+  services: {
+    cases: mockCaseService,
+  },
+});
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+
+  return {
+    ...original,
+    useKibana: () => mockKibana(),
+  };
+});
+
 describe('AlertsTable.BulkActions', () => {
   const alerts = [
     {
@@ -99,7 +114,7 @@ describe('AlertsTable.BulkActions', () => {
 
   const tableProps: AlertsTableProps = {
     alertsTableConfiguration,
-    casesData: { cases: casesMap, isLoading: false },
+    cases: { data: casesMap, isLoading: false, showBulkActions: true },
     columns,
     deletedEventIds: [],
     disabledCellActions: [],
@@ -165,11 +180,6 @@ describe('AlertsTable.BulkActions', () => {
     },
   };
 
-  const tablePropsWithCasesService = {
-    ...tableProps,
-    casesService: mockCaseService,
-  };
-
   const defaultBulkActionsState = {
     rowSelection: new Map<number, RowSelectionState>(),
     isAllSelected: false,
@@ -210,9 +220,7 @@ describe('AlertsTable.BulkActions', () => {
     it('should show the bulk actions column when the cases service is defined', () => {
       mockCaseService.helpers.canUseCases = jest.fn().mockReturnValue({ create: true, read: true });
 
-      const { getByTestId } = render(
-        <AlertsTableWithBulkActionsContext {...tablePropsWithCasesService} />
-      );
+      const { getByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
       expect(getByTestId('bulk-actions-header')).toBeDefined();
     });
 
@@ -221,9 +229,7 @@ describe('AlertsTable.BulkActions', () => {
         .fn()
         .mockReturnValue({ create: false, read: true });
 
-      const { queryByTestId } = render(
-        <AlertsTableWithBulkActionsContext {...tablePropsWithCasesService} />
-      );
+      const { queryByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
 
       expect(queryByTestId('bulk-actions-header')).toBeNull();
     });
@@ -233,9 +239,7 @@ describe('AlertsTable.BulkActions', () => {
         .fn()
         .mockReturnValue({ create: true, read: false });
 
-      const { queryByTestId } = render(
-        <AlertsTableWithBulkActionsContext {...tablePropsWithCasesService} />
-      );
+      const { queryByTestId } = render(<AlertsTableWithBulkActionsContext {...tableProps} />);
 
       expect(queryByTestId('bulk-actions-header')).toBeNull();
     });
