@@ -379,7 +379,7 @@ export const getAgentsByActionsIds = async (
   actionsIds: string[]
 ) => {
   const actions = await getAgentActionsByIds(esClient, actionsIds);
-  return actions.flatMap((a) => a?.agents);
+  return actions.filter((a) => !!a.agents).flatMap((a) => a?.agents);
 };
 
 export interface ActionsService {
