@@ -15,6 +15,7 @@ import { LogColumn, LogEntry, LogEntryCursor } from '../../../../common/log_entr
 import {
   LogViewColumnConfiguration,
   logViewFieldColumnConfigurationRT,
+  LogViewReference,
   ResolvedLogView,
 } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
@@ -66,7 +67,7 @@ export class InfraLogEntriesDomain {
 
   public async getLogEntriesAround(
     requestContext: InfraPluginRequestHandlerContext,
-    sourceId: string,
+    logView: LogViewReference,
     params: LogEntriesAroundParams,
     columnOverrides?: LogViewColumnConfiguration[]
   ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
@@ -84,7 +85,7 @@ export class InfraLogEntriesDomain {
 
     const { entries: entriesBefore, hasMoreBefore } = await this.getLogEntries(
       requestContext,
-      sourceId,
+      logView,
       {
         startTimestamp,
         endTimestamp,
@@ -110,7 +111,7 @@ export class InfraLogEntriesDomain {
 
     const { entries: entriesAfter, hasMoreAfter } = await this.getLogEntries(
       requestContext,
-      sourceId,
+      logView,
       {
         startTimestamp,
         endTimestamp,
@@ -126,7 +127,7 @@ export class InfraLogEntriesDomain {
 
   public async getLogEntries(
     requestContext: InfraPluginRequestHandlerContext,
-    sourceId: string,
+    logView: LogViewReference,
     params: LogEntriesParams,
     columnOverrides?: LogViewColumnConfiguration[]
   ): Promise<{ entries: LogEntry[]; hasMoreBefore?: boolean; hasMoreAfter?: boolean }> {
@@ -134,7 +135,7 @@ export class InfraLogEntriesDomain {
     const { savedObjects, elasticsearch } = await requestContext.core;
     const resolvedLogView = await logViews
       .getClient(savedObjects.client, elasticsearch.client.asCurrentUser)
-      .getResolvedLogView(sourceId);
+      .getResolvedLogView(logView);
     const columnDefinitions = columnOverrides ?? resolvedLogView.columns;
 
     const messageFormattingRules = compileFormattingRules(
@@ -184,7 +185,7 @@ export class InfraLogEntriesDomain {
 
   public async getLogSummaryBucketsBetween(
     requestContext: InfraPluginRequestHandlerContext,
-    sourceId: string,
+    logView: LogViewReference,
     start: number,
     end: number,
     bucketSize: number,
@@ -194,7 +195,7 @@ export class InfraLogEntriesDomain {
     const { savedObjects, elasticsearch } = await requestContext.core;
     const resolvedLogView = await logViews
       .getClient(savedObjects.client, elasticsearch.client.asCurrentUser)
-      .getResolvedLogView(sourceId);
+      .getResolvedLogView(logView);
     const dateRangeBuckets = await this.adapter.getContainedLogSummaryBuckets(
       requestContext,
       resolvedLogView,
@@ -208,7 +209,7 @@ export class InfraLogEntriesDomain {
 
   public async getLogSummaryHighlightBucketsBetween(
     requestContext: InfraPluginRequestHandlerContext,
-    sourceId: string,
+    logView: LogViewReference,
     startTimestamp: number,
     endTimestamp: number,
     bucketSize: number,
@@ -219,7 +220,7 @@ export class InfraLogEntriesDomain {
     const { savedObjects, elasticsearch } = await requestContext.core;
     const resolvedLogView = await logViews
       .getClient(savedObjects.client, elasticsearch.client.asCurrentUser)
-      .getResolvedLogView(sourceId);
+      .getResolvedLogView(logView);
     const messageFormattingRules = compileFormattingRules(
       getBuiltinRules(resolvedLogView.messageField)
     );

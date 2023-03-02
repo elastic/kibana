@@ -22,7 +22,7 @@ const versionedRouter = vtk.createVersionedRouter({ router });
 const versionedRoute = versionedRouter
   .post({
     path: '/api/my-app/foo/{id?}',
-    options: { timeout: { payload: 60000 } },
+    options: { timeout: { payload: 60000 }, access: 'public' },
   })
   .addVersion(
     {
