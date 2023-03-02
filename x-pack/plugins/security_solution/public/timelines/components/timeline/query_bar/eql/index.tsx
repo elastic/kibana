@@ -107,7 +107,7 @@ export const EqlQueryBarTimeline = memo(({ timelineId }: { timelineId: string })
     watch: ['eqlQueryBar'],
   });
 
-  const prevEqlQuery = useRef<TimelineEqlQueryBar['eqlQueryBar']['query']['query'] | null>(null);
+  const prevEqlQuery = useRef<TimelineEqlQueryBar['eqlQueryBar']['query']['query']>('');
 
   const optionsData = useMemo(
     () =>

@@ -22,6 +22,7 @@ import {
   TIMELINE_TAB_CONTENT_GRAPHS_NOTES,
   EDIT_TIMELINE_BTN,
   EDIT_TIMELINE_TOOLTIP,
+  TIMELINE_CORRELATION_INPUT,
 } from '../../screens/timeline';
 import { createTimelineTemplate } from '../../tasks/api_calls/timelines';
 
@@ -142,17 +143,33 @@ describe('Timelines', (): void => {
         .should('have.text', getTimeline().notes);
     });
 
-    it('should update timeline after adding eql', () => {
-      cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
-      const eql = 'any where process.name == "zsh"';
-      addEqlToTimeline(eql);
+    describe('correlation tab', () => {
+      it('should update timeline after adding eql', () => {
+        cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+        const eql = 'any where process.name == "zsh"';
+        addEqlToTimeline(eql);
 
-      cy.wait('@updateTimeline', { timeout: 10000 }).its('response.statusCode').should('eq', 200);
+        cy.wait('@updateTimeline', { timeout: 10000 }).its('response.statusCode').should('eq', 200);
 
-      cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`)
-        .invoke('text')
-        .then(parseInt)
-        .should('be.gt', 0);
+        cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`)
+          .invoke('text')
+          .then(parseInt)
+          .should('be.gt', 0);
+      });
+
+      it('should update timeline after removing eql', () => {
+        cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+        const eql = 'any where process.name == "zsh"';
+        addEqlToTimeline(eql);
+        cy.get(TIMELINE_CORRELATION_INPUT).clear();
+        // We reload as a guarantee since checking the request when multiple occur
+        // can often times group the requests and parse the wrong one
+        cy.reload();
+        cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
+
+        // The count does not exist when the query is empty
+        cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`).should('not.exist');
+      });
     });
   });
 });
