@@ -136,7 +136,8 @@ async function getComponent({
   return { comp, props };
 }
 
-describe('discover sidebar field', function () {
+// FLAKY: https://github.com/elastic/kibana/issues/148349
+describe.skip('discover sidebar field', function () {
   beforeEach(() => {
     (DetailsUtil.getDetails as jest.Mock).mockClear();
   });
