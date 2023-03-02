@@ -1,0 +1,78 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`xy_visualization #initialize should hydrate by-reference annotation groups 1`] = `
+Array [
+  Object {
+    "__lastSaved": Object {
+      "annotations": Array [
+        Object {
+          "icon": "circle",
+          "id": "an1",
+          "key": Object {
+            "timestamp": "2022-03-18T08:25:17.140Z",
+            "type": "point_in_time",
+          },
+          "label": "Event 1",
+          "type": "manual",
+        },
+      ],
+      "ignoreGlobalFilters": true,
+      "indexPatternId": "data-view-123",
+      "title": "my title!",
+    },
+    "annotationGroupId": "my-annotation-group-id1",
+    "annotations": Array [
+      Object {
+        "icon": "circle",
+        "id": "an1",
+        "key": Object {
+          "timestamp": "2022-03-18T08:25:17.140Z",
+          "type": "point_in_time",
+        },
+        "label": "Event 1",
+        "type": "manual",
+      },
+    ],
+    "ignoreGlobalFilters": true,
+    "indexPatternId": "data-view-123",
+    "layerId": "annotation",
+    "layerType": "annotations",
+  },
+  Object {
+    "__lastSaved": Object {
+      "annotations": Array [
+        Object {
+          "icon": "circle",
+          "id": "an2",
+          "key": Object {
+            "timestamp": "2022-04-18T11:01:59.135Z",
+            "type": "point_in_time",
+          },
+          "label": "Annotation2",
+          "type": "manual",
+        },
+      ],
+      "ignoreGlobalFilters": true,
+      "indexPatternId": "data-view-773203",
+      "title": "my other title!",
+    },
+    "annotationGroupId": "my-annotation-group-id2",
+    "annotations": Array [
+      Object {
+        "icon": "circle",
+        "id": "an2",
+        "key": Object {
+          "timestamp": "2022-04-18T11:01:59.135Z",
+          "type": "point_in_time",
+        },
+        "label": "Annotation2",
+        "type": "manual",
+      },
+    ],
+    "ignoreGlobalFilters": true,
+    "indexPatternId": "data-view-773203",
+    "layerId": "annotation",
+    "layerType": "annotations",
+  },
+]
+`;

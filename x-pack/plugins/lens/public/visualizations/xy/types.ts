@@ -138,7 +138,7 @@ export type XYByReferenceAnnotationLayerConfig = XYByValueAnnotationLayerConfig 
 export interface XYPersistedByReferenceAnnotationLayerConfig {
   layerId: string;
   layerType: 'annotations';
-  annotationGroupId: string;
+  annotationGroupRef: string;
 }
 
 export type XYAnnotationLayerConfig =

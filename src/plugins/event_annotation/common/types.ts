@@ -93,8 +93,8 @@ export interface EventAnnotationGroupAttributes {
 export interface EventAnnotationGroupConfig {
   annotations: EventAnnotationConfig[];
   indexPatternId: string;
-  ignoreGlobalFilters?: boolean;
-  title?: string;
+  ignoreGlobalFilters?: boolean; // TODO - can this be a required attribute?
+  title?: string; // TODO - can this be a required attribute?
 }
 
 export type EventAnnotationArgs =

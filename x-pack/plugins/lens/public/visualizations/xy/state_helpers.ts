@@ -11,6 +11,7 @@ import {
   EventAnnotationGroupConfig,
   EVENT_ANNOTATION_GROUP_TYPE,
 } from '@kbn/event-annotation-plugin/common';
+import { v4 as uuidv4 } from 'uuid';
 import { isQueryAnnotationConfig } from '@kbn/event-annotation-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
@@ -138,15 +139,16 @@ export function getPersistableState(state: XYState) {
       persistableLayers.push(layer);
     } else {
       if (isByReferenceAnnotationLayer(layer)) {
+        const referenceName = `ref-${uuidv4()}`;
         savedObjectReferences.push({
           type: EVENT_ANNOTATION_GROUP_TYPE,
           id: layer.annotationGroupId,
-          name: getLayerReferenceName(layer.layerId),
+          name: referenceName,
         });
         persistableLayers.push({
           layerId: layer.layerId,
           layerType: layer.layerType,
-          annotationGroupId: layer.annotationGroupId,
+          annotationGroupRef: referenceName,
         });
       } else {
         const { indexPatternId, ...persistableLayer } = layer;
@@ -190,7 +192,7 @@ export function injectReferences(
       let injectedLayer: XYAnnotationLayerConfig;
       if (isPersistedByReferenceAnnotationLayer(layer)) {
         const annotationGroupId = references?.find(
-          ({ name }) => name === getLayerReferenceName(layer.layerId)
+          ({ name }) => name === layer.annotationGroupRef
         )?.id;
 
         const annotationGroup = annotationGroupId ? annotationGroups[annotationGroupId] : undefined;

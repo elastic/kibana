@@ -154,8 +154,7 @@ export const isByReferenceAnnotationLayer = (
 
 export const isPersistedByReferenceAnnotationLayer = (
   layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedByReferenceAnnotationLayerConfig =>
-  'annotationGroupId' in layer && !('__lastSaved' in layer);
+): layer is XYPersistedByReferenceAnnotationLayerConfig => 'annotationGroupRef' in layer;
 
 export const getAnnotationLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYAnnotationLayerConfig =>
