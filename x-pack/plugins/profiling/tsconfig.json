@@ -40,6 +40,7 @@
     "@kbn/core-http-request-handler-context-server",
     "@kbn/spaces-plugin",
     "@kbn/cloud-plugin",
+    "@kbn/shared-ux-prompt-not-found",
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
