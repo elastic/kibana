@@ -10,11 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 
+import { ChartData } from '../../../typings/slo';
 import { toHighPrecisionPercentage } from '../helpers/number';
-import { Data, WideChart } from './wide_chart';
+import { WideChart } from './wide_chart';
 
 export interface Props {
-  data: Data[];
+  data: ChartData[];
   isLoading: boolean;
   slo: SLOWithSummaryResponse;
 }
@@ -83,7 +84,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
             )}
             state={isSloFailed ? 'error' : 'success'}
             data={data}
-            loading={isLoading}
+            isLoading={isLoading}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

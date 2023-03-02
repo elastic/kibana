@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
+import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 import { asPercentWithTwoDecimals } from '../../../../common/utils/formatters';
 import { SloSparkline } from './slo_sparkline';
@@ -22,15 +23,8 @@ export interface Props {
 export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoading }: Props) {
   const isSloFailed = slo.summary.status === 'VIOLATED' || slo.summary.status === 'DEGRADING';
   const titleColor = isSloFailed ? 'danger' : '';
-
-  const historicalSliData = historicalSummary.map((data) => ({
-    key: new Date(data.date).getTime(),
-    value: data.status === 'NO_DATA' ? undefined : data.sliValue,
-  }));
-  const errorBudgetBurnDownData = historicalSummary.map((data) => ({
-    key: new Date(data.date).getTime(),
-    value: data.status === 'NO_DATA' ? undefined : data.errorBudget.remaining,
-  }));
+  const errorBudgetBurnDownData = formatHistoricalData(historicalSummary, 'error_budget_remaining');
+  const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
   return (
     <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="xl">

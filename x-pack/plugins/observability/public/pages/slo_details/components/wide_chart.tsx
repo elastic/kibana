@@ -19,26 +19,23 @@ import React from 'react';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 
 import moment from 'moment';
+import { ChartData } from '../../../typings';
 import { useKibana } from '../../../utils/kibana_react';
 import { toHighPrecisionPercentage } from '../helpers/number';
 import { DEFAULT_DATE_FORMAT } from '../constants';
 
-export interface Data {
-  key: number;
-  value: number | undefined;
-}
 type ChartType = 'area' | 'line';
 type State = 'success' | 'error';
 
 export interface Props {
   id: string;
-  data: Data[];
+  data: ChartData[];
   chart: ChartType;
   state: State;
-  loading: boolean;
+  isLoading: boolean;
 }
 
-export function WideChart({ chart, data, id, loading, state }: Props) {
+export function WideChart({ chart, data, id, isLoading, state }: Props) {
   const charts = useKibana().services.charts;
   const theme = charts.theme.useChartsTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
@@ -47,7 +44,7 @@ export function WideChart({ chart, data, id, loading, state }: Props) {
   const color = state === 'error' ? euiTheme.colors.danger : euiTheme.colors.success;
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
 
-  if (loading) {
+  if (isLoading) {
     return <EuiLoadingChart size="m" mono />;
   }
 
@@ -83,7 +80,7 @@ export function WideChart({ chart, data, id, loading, state }: Props) {
           },
           point: { visible: false },
         }}
-        xAccessor={'key'}
+        xAccessor="key"
         xScaleType={ScaleType.Time}
         yAccessors={['value']}
         yScaleType={ScaleType.Linear}
