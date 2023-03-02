@@ -24,6 +24,5 @@
     "@kbn/kibana-react-plugin",
     "@kbn/shared-svg",
     "@kbn/ui-theme",
-    "@kbn/securitysolution-grouping"
   ]
 }
