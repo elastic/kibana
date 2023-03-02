@@ -8,8 +8,8 @@
 import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
-import { get } from 'lodash/fp';
 import styled from 'styled-components';
+import { get } from '../../../../../node_modules/lodash/fp';
 import { UsersTableType } from '../../../../explore/users/store/model';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { HostDetailsLink, UserDetailsLink } from '../../../../common/components/links';
@@ -29,6 +29,10 @@ import {
   SecurityCellActionsTrigger,
   SecurityCellActionType,
 } from '../../../../common/components/cell_actions';
+import { METRIC_TYPE, track } from '../../../../common/lib/telemetry';
+
+import { SecurityPageName } from '../../../../app/types';
+import { ENTITY_RISK_INVESTIGATE_ALERTS } from '../common/telemetry';
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
 
@@ -114,7 +118,7 @@ export const getRiskScoreColumns = (
     name: (
       <EuiToolTip content={i18n.ENTITY_RISK_TOOLTIP(riskEntity)}>
         <>
-          {i18n.ENTITY_RISK(riskEntity)}
+          {i18n.ENTITY_RISK_CLASSIFICATION(riskEntity)}
           <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
         </>
       </EuiToolTip>
@@ -138,12 +142,16 @@ export const getRiskScoreColumns = (
       <EuiLink
         data-test-subj="risk-score-alerts"
         disabled={alertCount === 0}
-        onClick={() =>
+        onClick={() => {
+          track(
+            METRIC_TYPE.CLICK,
+            ENTITY_RISK_INVESTIGATE_ALERTS(SecurityPageName.entityAnalytics, riskEntity)
+          );
           openEntityInTimeline(
             get('host.name', risk) ?? get('user.name', risk),
             risk.oldestAlertTimestamp
-          )
-        }
+          );
+        }}
       >
         <FormattedCount count={alertCount} />
       </EuiLink>

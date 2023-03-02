@@ -175,7 +175,6 @@ const HostRiskScoreTableComponent: React.FC<HostRiskScoreTableProps> = ({
         <SeverityFilterGroup
           selectedSeverities={severitySelectionRedux}
           severityCount={severityCount}
-          title={i18n.HOST_RISK}
           onSelect={onSelect}
         />
       }

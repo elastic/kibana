@@ -176,7 +176,6 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
         <SeverityFilterGroup
           selectedSeverities={severitySelectionRedux}
           severityCount={severityCount}
-          title={i18n.USER_RISK}
           onSelect={onSelect}
         />
       }

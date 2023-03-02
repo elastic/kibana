@@ -15,10 +15,14 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import type { RiskSeverity } from '../../../../../common/search_strategy';
+import type { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
 import { SEVERITY_UI_SORT_ORDER } from '../../../../../common/search_strategy';
 import type { SeverityCount } from './types';
 import { RiskScore } from './common';
+import { METRIC_TYPE, track } from '../../../../common/lib/telemetry';
+import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
+import { ENTITY_RISK_CLASSIFICATION } from '../translations';
+import { ENTITY_RISK_FILTERED } from './telemetry';
 
 interface SeverityItems {
   risk: RiskSeverity;
@@ -29,8 +33,9 @@ export const SeverityFilterGroup: React.FC<{
   severityCount: SeverityCount;
   selectedSeverities: RiskSeverity[];
   onSelect: (newSelection: RiskSeverity[]) => void;
-  title: string;
-}> = ({ severityCount, selectedSeverities, onSelect, title }) => {
+  riskEntity: RiskScoreEntity;
+}> = ({ severityCount, selectedSeverities, onSelect, riskEntity }) => {
+  const [{ pageName }] = useRouteSpy();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = useCallback(() => {
@@ -60,10 +65,10 @@ export const SeverityFilterGroup: React.FC<{
       const newSelection = currentSelection.includes(selectedSeverity)
         ? currentSelection.filter((s) => s !== selectedSeverity)
         : [...currentSelection, selectedSeverity];
-
+      track(METRIC_TYPE.COUNT, ENTITY_RISK_FILTERED(pageName, riskEntity, selectedSeverity));
       onSelect(newSelection);
     },
-    [selectedSeverities, onSelect]
+    [selectedSeverities, pageName, onSelect, riskEntity]
   );
 
   const totalActiveItem = useMemo(
@@ -81,10 +86,10 @@ export const SeverityFilterGroup: React.FC<{
         numActiveFilters={totalActiveItem}
         onClick={onButtonClick}
       >
-        {title}
+        {ENTITY_RISK_CLASSIFICATION(riskEntity)}
       </EuiFilterButton>
     ),
-    [isPopoverOpen, items, onButtonClick, totalActiveItem, title]
+    [isPopoverOpen, items, onButtonClick, totalActiveItem, riskEntity]
   );
 
   return (

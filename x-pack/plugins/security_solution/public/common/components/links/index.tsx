@@ -43,6 +43,9 @@ import {
 } from './helpers';
 import type { HostsTableType } from '../../../explore/hosts/store/model';
 import type { UsersTableType } from '../../../explore/users/store/model';
+import { METRIC_TYPE, track } from '../../lib/telemetry';
+import { useRouteSpy } from '../../utils/route/use_route_spy';
+import { LINKS_TELEMETRY_EVENTS } from './telemetry';
 
 export { LinkButton, LinkAnchor } from './helpers';
 
@@ -64,9 +67,9 @@ const UserDetailsLinkComponent: React.FC<{
   title?: string;
   isButton?: boolean;
   onClick?: (e: SyntheticEvent) => void;
-}> = ({ children, Component, userName, isButton, onClick, title, userTab }) => {
+}> = ({ children, Component, userName, isButton, onClick: onClickParam, title, userTab }) => {
+  const [{ pageName }] = useRouteSpy();
   const encodedUserName = encodeURIComponent(userName);
-
   const { formatUrl, search } = useFormatUrl(SecurityPageName.users);
   const { navigateToApp } = useKibana().services.application;
   const goToUsersDetails = useCallback(
@@ -92,22 +95,31 @@ const UserDetailsLinkComponent: React.FC<{
     [formatUrl, encodedUserName, userTab]
   );
 
+  const onClick = useCallback(
+    (e: SyntheticEvent) => {
+      track(
+        METRIC_TYPE.CLICK,
+        LINKS_TELEMETRY_EVENTS.ENTITY_DETAILS_CLICKED_EVENT(pageName, 'user')
+      );
+
+      const callback = onClickParam ?? goToUsersDetails;
+      callback(e);
+    },
+    [goToUsersDetails, onClickParam, pageName]
+  );
+
   return isButton ? (
     <GenericLinkButton
       Component={Component}
       dataTestSubj="data-grid-user-details"
       href={href}
-      onClick={onClick ?? goToUsersDetails}
+      onClick={onClick}
       title={title ?? userName}
     >
       {children ? children : userName}
     </GenericLinkButton>
   ) : (
-    <LinkAnchor
-      data-test-subj="users-link-anchor"
-      onClick={onClick ?? goToUsersDetails}
-      href={href}
-    >
+    <LinkAnchor data-test-subj="users-link-anchor" onClick={onClick} href={href}>
       {children ? children : userName}
     </LinkAnchor>
   );
@@ -124,7 +136,8 @@ const HostDetailsLinkComponent: React.FC<{
   onClick?: (e: SyntheticEvent) => void;
   hostTab?: HostsTableType;
   title?: string;
-}> = ({ children, Component, hostName, isButton, onClick, title, hostTab }) => {
+}> = ({ children, Component, hostName, isButton, onClick: onClickParam, title, hostTab }) => {
+  const [{ pageName }] = useRouteSpy();
   const { formatUrl, search } = useFormatUrl(SecurityPageName.hosts);
   const { navigateToApp } = useKibana().services.application;
 
@@ -151,23 +164,33 @@ const HostDetailsLinkComponent: React.FC<{
       ),
     [formatUrl, encodedHostName, hostTab]
   );
+
+  const onClick = useCallback(
+    (e: SyntheticEvent) => {
+      track(
+        METRIC_TYPE.CLICK,
+        LINKS_TELEMETRY_EVENTS.ENTITY_DETAILS_CLICKED_EVENT(pageName, 'host')
+      );
+
+      const callback = onClickParam ?? goToHostDetails;
+      callback(e);
+    },
+    [goToHostDetails, onClickParam, pageName]
+  );
+
   return isButton ? (
     <GenericLinkButton
       Component={Component}
       dataTestSubj="data-grid-host-details"
       href={href}
       iconType="expand"
-      onClick={onClick ?? goToHostDetails}
+      onClick={onClick}
       title={title ?? hostName}
     >
       {children}
     </GenericLinkButton>
   ) : (
-    <LinkAnchor
-      onClick={onClick ?? goToHostDetails}
-      href={href}
-      data-test-subj="host-details-button"
-    >
+    <LinkAnchor onClick={onClick} href={href} data-test-subj="host-details-button">
       {children ? children : hostName}
     </LinkAnchor>
   );
