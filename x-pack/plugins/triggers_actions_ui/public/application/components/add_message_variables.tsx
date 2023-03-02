@@ -249,6 +249,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           setIsVariablesPopoverOpen(false);
         }}
         singleSelection
+        searchProps={{ 'data-test-subj': 'messageVariablesSelectableSearch' }}
       >
         {(list, search) => (
           <>
