@@ -50,6 +50,10 @@ export const ErrorsList = ({
 
   const selectedLocation = useSelectedLocation();
 
+  const lastTestRun = errorStates?.sort((a, b) => {
+    return moment(b.state.started_at).valueOf() - moment(a.state.started_at).valueOf();
+  })?.[0];
+
   const columns = [
     {
       field: 'item.state.started_at',
@@ -67,49 +71,56 @@ export const ErrorsList = ({
           />
         );
         const isActive = isActiveState(item);
-        if (!isActive) {
+        if (!isActive || lastTestRun.state.id !== item.state.id) {
           return link;
         }
 
         return (
           <EuiFlexGroup gutterSize="m" alignItems="center">
-            <EuiFlexItem grow={false}>{link}</EuiFlexItem>
+            <EuiFlexItem grow={false} className="eui-textNoWrap">
+              {link}
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiBadge iconType="clock" iconSide="right">
-                Active
+                {ACTIVE_LABEL}
               </EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
         );
       },
     },
+    ...(isBrowserType
+      ? [
+          {
+            field: 'monitor.check_group',
+            name: FAILED_STEP_LABEL,
+            truncateText: true,
+            sortable: (a: PingState) => {
+              const failedStep = failedSteps.find(
+                (step) => step.monitor.check_group === a.monitor.check_group
+              );
+              if (!failedStep) {
+                return a.monitor.check_group;
+              }
+              return failedStep.synthetics?.step?.name;
+            },
+            render: (value: string, item: PingState) => {
+              const failedStep = failedSteps.find((step) => step.monitor.check_group === value);
+              if (!failedStep) {
+                return <>--</>;
+              }
+              return (
+                <EuiText size="s">
+                  {failedStep.synthetics?.step?.index}. {failedStep.synthetics?.step?.name}
+                </EuiText>
+              );
+            },
+          },
+        ]
+      : []),
     {
-      field: 'monitor.check_group',
-      name: !isBrowserType ? ERROR_MESSAGE_LABEL : FAILED_STEP_LABEL,
-      truncateText: true,
-      sortable: (a: PingState) => {
-        const failedStep = failedSteps.find(
-          (step) => step.monitor.check_group === a.monitor.check_group
-        );
-        if (!failedStep) {
-          return a.monitor.check_group;
-        }
-        return failedStep.synthetics?.step?.name;
-      },
-      render: (value: string, item: PingState) => {
-        if (!isBrowserType) {
-          return <EuiText size="s">{item.error.message ?? '--'}</EuiText>;
-        }
-        const failedStep = failedSteps.find((step) => step.monitor.check_group === value);
-        if (!failedStep) {
-          return <>--</>;
-        }
-        return (
-          <EuiText size="s">
-            {failedStep.synthetics?.step?.index}. {failedStep.synthetics?.step?.name}
-          </EuiText>
-        );
-      },
+      field: 'error.message',
+      name: ERROR_MESSAGE_LABEL,
     },
     {
       field: 'state.duration_ms',
@@ -157,6 +168,7 @@ export const ErrorsList = ({
     <div>
       <EuiSpacer />
       <EuiInMemoryTable
+        tableLayout="auto"
         tableCaption={ERRORS_LIST_LABEL}
         loading={loading}
         items={errorStates}
@@ -215,4 +227,8 @@ const FAILED_STEP_LABEL = i18n.translate('xpack.synthetics.failedStep.label', {
 
 const TIMESTAMP_LABEL = i18n.translate('xpack.synthetics.timestamp.label', {
   defaultMessage: '@timestamp',
+});
+
+const ACTIVE_LABEL = i18n.translate('xpack.synthetics.active.label', {
+  defaultMessage: 'Active',
 });
