@@ -73,7 +73,7 @@ export const callGetChartPreviewDataAPI = async (
     body: JSON.stringify(
       getLogAlertsChartPreviewDataRequestPayloadRT.encode({
         data: {
-          sourceId,
+          logView: { type: 'log-view-reference', logViewId: sourceId },
           alertParams,
           buckets,
         },
