@@ -673,7 +673,8 @@ async function getUpdatedAttributesFromOperations(
     // Only increment revision if update wasn't skipped and `operation.field` should result in a revision increment
     if (
       !isAttributesUpdateSkipped &&
-      !bulkEditFieldsToExcludeFromRevisionUpdates.has(operation.field)
+      !bulkEditFieldsToExcludeFromRevisionUpdates.has(operation.field) &&
+      rule.attributes.revision - attributes.revision === 0
     ) {
       attributes.revision += 1;
     }
