@@ -68,14 +68,13 @@ function ResponsiveGrid({
   });
 
   const MARGINS = useMargins ? 8 : 0;
-  // We can't take advantage of isDraggable or isResizable due to performance concerns:
-  // https://github.com/STRML/react-grid-layout/issues/240
+
   return (
     <ReactGridLayout
       width={lastValidGridSize}
       className={classes}
-      isDraggable={true}
-      isResizable={true}
+      isDraggable={!isViewMode && !maximizedPanelId}
+      isResizable={!isViewMode && !maximizedPanelId}
       // There is a bug with d3 + firefox + elements using transforms.
       // See https://github.com/elastic/kibana/issues/16870 for more context.
       useCSSTransforms={false}
@@ -167,10 +166,6 @@ export const DashboardGrid = () => {
 
   const onLayoutChange = useCallback(
     (newLayout: PanelLayout[]) => {
-      if (expandedPanelId) {
-        return;
-      }
-
       const updatedPanels: { [key: string]: DashboardPanelState } = newLayout.reduce(
         (updatedPanelsAcc, panelLayout) => {
           updatedPanelsAcc[panelLayout.i] = {
@@ -187,7 +182,7 @@ export const DashboardGrid = () => {
         dispatch(setPanels(updatedPanels));
       }
     },
-    [dispatch, panels, setPanels, expandedPanelId]
+    [dispatch, panels, setPanels]
   );
 
   const dashboardPanels = useMemo(() => {
