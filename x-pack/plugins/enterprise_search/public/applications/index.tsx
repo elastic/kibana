@@ -40,12 +40,12 @@ export const renderApp = (
     params,
     core,
     plugins,
-    getIsSidebarEnabled,
+    isSidebarEnabled,
   }: {
     params: AppMountParameters;
     core: CoreStart;
     plugins: PluginsStart;
-    getIsSidebarEnabled: () => boolean;
+    isSidebarEnabled: boolean;
   },
   { config, data }: { config: ClientConfigType; data: ClientData }
 ) => {
@@ -74,7 +74,7 @@ export const renderApp = (
     charts: plugins.charts,
     cloud: plugins.cloud,
     uiSettings: core.uiSettings,
-    getIsSidebarEnabled,
+    isSidebarEnabled,
     guidedOnboarding: plugins.guidedOnboarding,
     history: params.history,
     navigateToUrl: core.application.navigateToUrl,

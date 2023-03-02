@@ -324,7 +324,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         : undefined;
     const plugins = { ...pluginsStart, cloud } as PluginsStart;
 
-    return { params, core: coreStart, plugins, getIsSidebarEnabled: () => this.isSidebarEnabled };
+    return { params, core: coreStart, plugins, isSidebarEnabled: this.isSidebarEnabled };
   }
 
   private getPluginData() {
