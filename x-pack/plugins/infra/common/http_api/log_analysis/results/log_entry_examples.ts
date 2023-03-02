@@ -6,6 +6,7 @@
  */
 
 import * as rt from 'io-ts';
+import { persistedLogViewReferenceRT } from '../../../log_views';
 import { logEntryExampleRT } from '../../../log_analysis';
 import {
   badRequestErrorRT,
@@ -28,8 +29,8 @@ export const getLogEntryExamplesRequestPayloadRT = rt.type({
       dataset: rt.string,
       // the number of examples to fetch
       exampleCount: rt.number,
-      // the id of the source configuration
-      sourceId: rt.string,
+      // logView
+      logView: persistedLogViewReferenceRT,
       // the time range to fetch the log rate examples from
       timeRange: timeRangeRT,
     }),
