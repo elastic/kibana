@@ -8,6 +8,8 @@
 /** endpoint data streams that are used for host isolation  */
 import { getFileDataIndexName, getFileMetadataIndexName } from '@kbn/fleet-plugin/common';
 
+export const ENDPOINT_INTEGRATION_NAME = 'endpoint';
+
 /** for index patterns `.logs-endpoint.actions-* and .logs-endpoint.action.responses-*`*/
 export const ENDPOINT_ACTIONS_DS = '.logs-endpoint.actions';
 export const ENDPOINT_ACTIONS_INDEX = `${ENDPOINT_ACTIONS_DS}-default`;
@@ -98,3 +100,4 @@ export const ENDPOINT_ERROR_CODES: Record<string, number> = {
 };
 
 export const ENDPOINT_FIELDS_SEARCH_STRATEGY = 'endpointFields';
+export const PACKAGE_STATUS_ROUTE = `${BASE_ENDPOINT_ROUTE}/package_status`;

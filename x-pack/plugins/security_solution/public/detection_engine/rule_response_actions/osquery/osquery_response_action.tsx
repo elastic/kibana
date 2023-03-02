@@ -14,6 +14,7 @@ import type { ArrayItem } from '../../../shared_imports';
 import { useKibana } from '../../../common/lib/kibana';
 import { NOT_AVAILABLE, PERMISSION_DENIED, SHORT_EMPTY_TITLE } from './translations';
 import { UseField } from '../../../shared_imports';
+import { OSQUERY_STATUS_ROUTE, useFetchStatus } from '../use_fetch_status';
 
 interface OsqueryResponseActionProps {
   item: ArrayItem;
@@ -28,9 +29,9 @@ export const OsqueryResponseAction = React.memo((props: OsqueryResponseActionPro
     [osquery?.OsqueryResponseActionTypeForm]
   );
   const isMounted = useIsMounted();
+  const { disabled, permissionDenied } = useFetchStatus(OSQUERY_STATUS_ROUTE);
 
   if (osquery) {
-    const { disabled, permissionDenied } = osquery.fetchInstallationStatus();
     const disabledOsqueryPermission = !(
       application?.capabilities?.osquery?.writeLiveQueries ||
       (application?.capabilities?.osquery?.runSavedQueries &&

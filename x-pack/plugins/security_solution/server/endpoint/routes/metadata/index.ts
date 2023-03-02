@@ -14,12 +14,14 @@ import {
   getMetadataRequestHandler,
   getMetadataListRequestHandler,
   getMetadataTransformStatsHandler,
+  getStatusHandler,
 } from './handlers';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import {
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   METADATA_TRANSFORMS_STATUS_ROUTE,
+  PACKAGE_STATUS_ROUTE,
 } from '../../../../common/endpoint/constants';
 import { GetMetadataListRequestSchema } from '../../../../common/endpoint/schema/metadata';
 import { withEndpointAuthz } from '../with_endpoint_authz';
@@ -86,6 +88,19 @@ export function registerEndpointRoutes(
       { all: ['canReadSecuritySolution'] },
       logger,
       getMetadataTransformStatsHandler(logger)
+    )
+  );
+
+  router.get(
+    {
+      path: PACKAGE_STATUS_ROUTE,
+      validate: false,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    },
+    withEndpointAuthz(
+      { all: ['canReadSecuritySolution'] },
+      logger,
+      getStatusHandler(endpointAppContext, logger)
     )
   );
 }

@@ -16,7 +16,6 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useAllLiveQueries } from './actions/use_all_live_queries';
 import { getLazyOsqueryResponseActionTypeForm } from './shared_components/lazy_osquery_action_params_form';
-import { useFetchStatus } from './fleet_integration/use_fetch_status';
 import { getLazyOsqueryResults } from './shared_components/lazy_osquery_results';
 import type {
   OsqueryPluginSetup,
@@ -130,7 +129,6 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
       }),
       OsqueryResponseActionTypeForm: getLazyOsqueryResponseActionTypeForm(),
       fetchAllLiveQueries: useAllLiveQueries,
-      fetchInstallationStatus: useFetchStatus,
       isOsqueryAvailable: useIsOsqueryAvailableSimple,
     };
   }

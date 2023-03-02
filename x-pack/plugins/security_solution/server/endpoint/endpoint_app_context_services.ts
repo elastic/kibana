@@ -12,7 +12,11 @@ import type {
   PluginStartContract as CasesPluginStartContract,
 } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { FleetStartContract, MessageSigningServiceInterface } from '@kbn/fleet-plugin/server';
+import type {
+  FleetStartContract,
+  MessageSigningServiceInterface,
+  PackageService,
+} from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
 import { ENDPOINT_HOST_ISOLATION_EXCEPTIONS_LIST_ID } from '@kbn/securitysolution-list-constants';
 import {
@@ -62,6 +66,7 @@ export interface EndpointAppContextServiceStartContract {
   featureUsageService: FeatureUsageService;
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;
+  packageService: PackageService;
 }
 
 /**
@@ -72,6 +77,8 @@ export class EndpointAppContextService {
   private setupDependencies: EndpointAppContextServiceSetupContract | null = null;
   private startDependencies: EndpointAppContextServiceStartContract | null = null;
   private fleetServicesFactory: EndpointFleetServicesFactoryInterface | null = null;
+  private packageService: PackageService | undefined;
+
   public security: SecurityPluginStart | undefined;
 
   public setup(dependencies: EndpointAppContextServiceSetupContract) {
@@ -83,6 +90,7 @@ export class EndpointAppContextService {
       throw new EndpointAppContentServicesNotSetUpError();
     }
 
+    this.packageService = dependencies.packageService;
     this.startDependencies = dependencies;
     this.security = dependencies.security;
     this.fleetServicesFactory = dependencies.endpointFleetServicesFactory;
@@ -231,5 +239,9 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.messageSigningService;
+  }
+
+  public getPackageService(): PackageService | undefined {
+    return this.packageService;
   }
 }

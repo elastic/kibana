@@ -22,6 +22,7 @@ import type { GetMetadataListRequestQuery } from '../../../../common/endpoint/sc
 import {
   ENDPOINT_DEFAULT_PAGE,
   ENDPOINT_DEFAULT_PAGE_SIZE,
+  ENDPOINT_INTEGRATION_NAME,
   METADATA_TRANSFORMS_PATTERN,
 } from '../../../../common/endpoint/constants';
 
@@ -119,3 +120,19 @@ export function getMetadataTransformStatsHandler(
     }
   };
 }
+
+export const getStatusHandler = (
+  endpointAppContext: EndpointAppContext,
+  logger: Logger
+): RequestHandler<unknown, unknown, unknown, SecuritySolutionRequestHandlerContext> => {
+  return async (context, request, response) => {
+    try {
+      const packageService = endpointAppContext.service.getPackageService()?.asInternalUser;
+      const packageInfo = await packageService?.getInstallation(ENDPOINT_INTEGRATION_NAME);
+
+      return response.ok({ body: packageInfo });
+    } catch (error) {
+      return errorHandler(logger, response, error);
+    }
+  };
+};
