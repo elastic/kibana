@@ -11,6 +11,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy, memoize, partition } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { type TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
+import { FIELD_FORMAT_IDS, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { TransformHealthRuleParams } from './schema';
 import {
   ALL_TRANSFORMS_SELECTION,
@@ -21,10 +22,9 @@ import {
 import { getResultTestConfig } from '../../../../common/utils/alerts';
 import type {
   ErrorMessagesTransformResponse,
-  NotStartedTransformResponse,
+  TransformStateReportResponse,
   TransformHealth,
   TransformHealthAlertContext,
-  UnhealthyTransformResponse,
 } from './register_transform_health_rule_type';
 import type { TransformHealthAlertRule } from '../../../../common/types/alerting';
 import { isContinuousTransform } from '../../../../common/types/transform';
@@ -51,10 +51,15 @@ type TransformGetTransformStats = TransformGetTransformStatsTransformStats & {
   health: TransformHealth;
 };
 
-export function transformHealthServiceProvider(
-  esClient: ElasticsearchClient,
-  rulesClient?: RulesClient
-) {
+export function transformHealthServiceProvider({
+  esClient,
+  rulesClient,
+  fieldFormatsRegistry,
+}: {
+  esClient: ElasticsearchClient;
+  rulesClient?: RulesClient;
+  fieldFormatsRegistry?: FieldFormatsRegistry;
+}) {
   const transformsDict = new Map<string, Transform>();
 
   /**
@@ -110,6 +115,34 @@ export function transformHealthServiceProvider(
     }
   );
 
+  function baseTransformAlertResponseFormatter(
+    transformStats: TransformGetTransformStats
+  ): TransformStateReportResponse {
+    const dateFormatter = fieldFormatsRegistry!.deserialize({ id: FIELD_FORMAT_IDS.DATE });
+
+    return {
+      transform_id: transformStats.id,
+      description: transformsDict.get(transformStats.id)?.description,
+      transform_state: transformStats.state,
+      node_name: transformStats.node?.name,
+      health_status: transformStats.health.status,
+      ...(transformStats.health.issues
+        ? {
+            issues: transformStats.health.issues.map((issue) => {
+              return {
+                issue: issue.issue,
+                details: issue.details,
+                count: issue.count,
+                ...(issue.first_occurrence
+                  ? { first_occurrence: dateFormatter.convert(issue.first_occurrence) }
+                  : {}),
+              };
+            }),
+          }
+        : {}),
+    };
+  }
+
   return {
     /**
      * Returns report about not started transforms
@@ -119,18 +152,11 @@ export function transformHealthServiceProvider(
      */
     async getTransformsStateReport(
       transformIds: string[]
-    ): Promise<[NotStartedTransformResponse[], NotStartedTransformResponse[]]> {
+    ): Promise<[TransformStateReportResponse[], TransformStateReportResponse[]]> {
       const transformsStats = await getTransformStats(transformIds);
 
       return partition(
-        transformsStats.map((t) => ({
-          transform_id: t.id,
-          description: transformsDict.get(t.id)?.description,
-          transform_state: t.state,
-          node_name: t.node?.name,
-          health_status: t.health.status,
-          issues: t.health.issues,
-        })),
+        transformsStats.map(baseTransformAlertResponseFormatter),
         (t) =>
           t.transform_state !== TRANSFORM_STATE.STARTED &&
           t.transform_state !== TRANSFORM_STATE.INDEXING
@@ -216,21 +242,12 @@ export function transformHealthServiceProvider(
      */
     async getUnhealthyTransformsReport(
       transformIds: string[]
-    ): Promise<UnhealthyTransformResponse[]> {
+    ): Promise<TransformStateReportResponse[]> {
       const transformsStats = await getTransformStats(transformIds);
 
       return transformsStats
         .filter((t) => t.health.status !== 'green')
-        .map((t) => {
-          return {
-            transform_id: t.id,
-            transform_state: t.state,
-            node_name: t.node?.name,
-            description: transformsDict.get(t.id)?.description,
-            health_status: t.health.status,
-            issues: t.health.issues,
-          };
-        });
+        .map(baseTransformAlertResponseFormatter);
     },
     /**
      * Returns results of the transform health checks

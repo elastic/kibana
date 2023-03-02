@@ -77,8 +77,7 @@ export function getTransformHealthRuleType(): RuleTypeModel<TransformHealthRuleP
   \\{\\{/failure_reason\\}\\}\\{\\{#notification_message\\}\\}Notification message: \\{\\{notification_message\\}\\}
   \\{\\{/notification_message\\}\\}\\{\\{#node_name\\}\\}Node name: \\{\\{node_name\\}\\}
   \\{\\{/node_name\\}\\}\\{\\{#timestamp\\}\\}Timestamp: \\{\\{timestamp\\}\\}
-  \\{\\{/timestamp\\}\\}\\{\\{#error_messages\\}\\}Error message: \\{\\{message\\}\\}
-  \\{\\{/error_messages\\}\\}
+  \\{\\{/timestamp\\}\\}
 \\{\\{/context.results\\}\\}
 `,
       }

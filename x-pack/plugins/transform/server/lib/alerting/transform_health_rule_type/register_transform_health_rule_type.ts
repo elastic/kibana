@@ -15,28 +15,24 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import { RuleType } from '@kbn/alerting-plugin/server';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { PLUGIN, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
 import { transformHealthServiceProvider } from './transform_health_service';
 
 export interface TransformHealth {
   status: 'green' | 'unknown' | 'yellow' | 'red';
-  issues?: Array<{ issue: string; details?: string; count: number; first_occurrence?: string }>;
+  issues?: Array<{ issue: string; details?: string; count: number; first_occurrence?: number }>;
 }
 
 export interface BaseTransformAlertResponse {
   transform_id: string;
   description?: string;
   health_status: TransformHealth['status'];
-  issues?: TransformHealth['issues'];
+  issues?: Array<{ issue: string; details?: string; count: number; first_occurrence?: string }>;
 }
 
-export interface NotStartedTransformResponse extends BaseTransformAlertResponse {
-  transform_state: string;
-  node_name?: string;
-}
-
-export interface UnhealthyTransformResponse extends BaseTransformAlertResponse {
+export interface TransformStateReportResponse extends BaseTransformAlertResponse {
   transform_state: string;
   node_name?: string;
 }
@@ -45,7 +41,7 @@ export interface ErrorMessagesTransformResponse extends BaseTransformAlertRespon
   error_messages: Array<{ message: string; timestamp: number; node_name?: string }>;
 }
 
-export type TransformHealthResult = NotStartedTransformResponse | ErrorMessagesTransformResponse;
+export type TransformHealthResult = TransformStateReportResponse | ErrorMessagesTransformResponse;
 
 export type TransformHealthAlertContext = {
   results: TransformHealthResult[];
@@ -66,14 +62,17 @@ export const TRANSFORM_ISSUE_DETECTED: ActionGroup<TransformIssue> = {
 interface RegisterParams {
   logger: Logger;
   alerting: AlertingSetup;
+  getFieldFormatsStart: () => FieldFormatsStart;
 }
 
 export function registerTransformHealthRuleType(params: RegisterParams) {
   const { alerting } = params;
-  alerting.registerType(getTransformHealthRuleType());
+  alerting.registerType(getTransformHealthRuleType(params.getFieldFormatsStart));
 }
 
-export function getTransformHealthRuleType(): RuleType<
+export function getTransformHealthRuleType(
+  getFieldFormatsStart: () => FieldFormatsStart
+): RuleType<
   TransformHealthRuleParams,
   never,
   RuleTypeState,
@@ -117,13 +116,18 @@ export function getTransformHealthRuleType(): RuleType<
     doesSetRecoveryContext: true,
     async executor(options) {
       const {
-        services: { scopedClusterClient, alertFactory },
+        services: { scopedClusterClient, alertFactory, uiSettingsClient },
         params,
       } = options;
 
-      const transformHealthService = transformHealthServiceProvider(
-        scopedClusterClient.asCurrentUser
+      const fieldFormatsRegistry = await getFieldFormatsStart().fieldFormatServiceFactory(
+        uiSettingsClient
       );
+
+      const transformHealthService = transformHealthServiceProvider({
+        esClient: scopedClusterClient.asCurrentUser,
+        fieldFormatsRegistry,
+      });
 
       const executionResult = await transformHealthService.getHealthChecksResults(params);
 
