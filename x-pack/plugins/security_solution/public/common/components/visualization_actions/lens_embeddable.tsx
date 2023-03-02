@@ -28,11 +28,17 @@ import { getRequestsAndResponses } from './utils';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { VisualizationActions } from './actions';
 
-const LensComponentWrapper = styled.div<{ height?: string; width?: string }>`
+const LensComponentWrapper = styled.div<{
+  height?: string;
+  width?: string;
+  visualizationType?: string;
+}>`
   height: ${({ height }) => height ?? 'auto'};
   width: ${({ width }) => width ?? 'auto'};
   > div {
     background-color: transparent;
+    ${({ visualizationType }) =>
+      visualizationType === 'lnsDatatable' ? `padding: 20px 0 0 0;` : ``}
   }
   .expExpressionRenderer__expression {
     padding: 2px 0 0 0 !important;
@@ -243,7 +249,11 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   return (
     <>
       {attributes && searchSessionId && (
-        <LensComponentWrapper height={wrapperHeight} width={wrapperWidth}>
+        <LensComponentWrapper
+          height={wrapperHeight}
+          width={wrapperWidth}
+          visualizationType={attributes.visualizationType}
+        >
           <LensComponent
             id={id}
             style={style}
