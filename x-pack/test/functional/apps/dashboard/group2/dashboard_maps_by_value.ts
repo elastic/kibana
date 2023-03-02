@@ -76,7 +76,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.dashboard.clickNewDashboard();
   }
 
-  describe('dashboard maps by value', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/152476
+  describe.skip('dashboard maps by value', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(

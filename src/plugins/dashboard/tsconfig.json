@@ -53,6 +53,8 @@
     "@kbn/core-execution-context-common",
     "@kbn/core-custom-branding-browser",
     "@kbn/shared-ux-router",
+    "@kbn/saved-objects-finder-plugin",
+    "@kbn/saved-objects-management-plugin",
     "@kbn/shared-ux-button-toolbar",
   ],
   "exclude": [

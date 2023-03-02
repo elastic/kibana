@@ -8,7 +8,7 @@
 
 import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { getSavedObjectFinder } from '@kbn/saved-objects-plugin/public';
+import { getSavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 
 import { ExportCSVAction } from './export_csv_action';
 import { ClonePanelAction } from './clone_panel_action';
@@ -33,13 +33,13 @@ export const buildAllDashboardActions = async ({
   allowByValueEmbeddables,
 }: BuildAllDashboardActionsProps) => {
   const { uiSettings } = core;
-  const { uiActions, share, presentationUtil } = plugins;
+  const { uiActions, share, presentationUtil, savedObjectsManagement } = plugins;
 
   const clonePanelAction = new ClonePanelAction(core.savedObjects);
   uiActions.registerAction(clonePanelAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, clonePanelAction.id);
 
-  const SavedObjectFinder = getSavedObjectFinder(uiSettings, core.http);
+  const SavedObjectFinder = getSavedObjectFinder(uiSettings, core.http, savedObjectsManagement);
   const changeViewAction = new ReplacePanelAction(SavedObjectFinder);
   uiActions.registerAction(changeViewAction);
   uiActions.attachAction(CONTEXT_MENU_TRIGGER, changeViewAction.id);

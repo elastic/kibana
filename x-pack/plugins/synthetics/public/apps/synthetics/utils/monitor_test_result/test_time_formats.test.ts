@@ -9,16 +9,16 @@ import { formatTestDuration } from './test_time_formats';
 
 describe('formatTestDuration', () => {
   it.each`
-    duration       | expected    | isMilli
-    ${undefined}   | ${'0 ms'}   | ${undefined}
-    ${120_000_000} | ${'2 min'}  | ${undefined}
-    ${6_200_000}   | ${'6.2 s'}  | ${false}
-    ${500_000}     | ${'500 ms'} | ${undefined}
-    ${100}         | ${'0 ms'}   | ${undefined}
-    ${undefined}   | ${'0 ms'}   | ${true}
-    ${600_000}     | ${'10 min'} | ${true}
-    ${6_200}       | ${'6.2 s'}  | ${true}
-    ${500}         | ${'500 ms'} | ${true}
+    duration       | expected     | isMilli
+    ${undefined}   | ${'0 ms'}    | ${undefined}
+    ${120_000_000} | ${'2 mins'}  | ${undefined}
+    ${6_200_000}   | ${'6.2 sec'} | ${false}
+    ${500_000}     | ${'500 ms'}  | ${undefined}
+    ${100}         | ${'0 ms'}    | ${undefined}
+    ${undefined}   | ${'0 ms'}    | ${true}
+    ${600_000}     | ${'10 mins'} | ${true}
+    ${6_200}       | ${'6.2 sec'} | ${true}
+    ${500}         | ${'500 ms'}  | ${true}
   `(
     'returns $expected when `duration` is $duration and `isMilli` $isMilli',
     ({
