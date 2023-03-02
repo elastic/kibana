@@ -26,6 +26,7 @@ const DASHBOARD_TOP_OFFSET = 96 + 105; // 96 for Kibana navigation bar + 105 for
 
 export class DashboardPanelActionsService extends FtrService {
   private readonly log = this.ctx.getService('log');
+  private readonly browser = this.ctx.getService('browser');
   private readonly inspector = this.ctx.getService('inspector');
   private readonly testSubjects = this.ctx.getService('testSubjects');
 
@@ -46,10 +47,12 @@ export class DashboardPanelActionsService extends FtrService {
 
   async toggleContextMenu(parent?: WebElementWrapper) {
     this.log.debug(`toggleContextMenu(${parent})`);
-    await (parent
-      ? parent.moveMouseTo({ topOffset: DASHBOARD_TOP_OFFSET })
-      : this.testSubjects.moveMouseTo('dashboardPanelTitle'));
-
+    if (parent) {
+      await parent.scrollIntoViewIfNecessary(DASHBOARD_TOP_OFFSET);
+      await this.browser.getActions().move({ x: 0, y: 0, origin: parent._webElement }).perform();
+    } else {
+      await this.testSubjects.moveMouseTo('dashboardPanelTitle');
+    }
     const toggleMenuItem = await this.findContextMenu(parent);
     await toggleMenuItem.click(DASHBOARD_TOP_OFFSET);
   }
