@@ -89,7 +89,7 @@ export const TitleDocsPopover: React.FC = () => {
               <p>
                 <FormattedMessage
                   id="indexPatternEditor.titleDocsPopover.useMinusDescription"
-                  defaultMessage="Exclude a source with the minus sign (-)."
+                  defaultMessage="Exclude a source by preceding it with a minus sign (-)."
                 />
               </p>
               <p>
