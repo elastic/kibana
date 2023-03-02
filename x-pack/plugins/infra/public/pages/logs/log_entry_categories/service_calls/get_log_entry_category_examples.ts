@@ -35,7 +35,7 @@ export const callGetLogEntryCategoryExamplesAPI = async (
         data: {
           categoryId,
           exampleCount,
-          sourceId,
+          logView: { type: 'log-view-reference', logViewId: sourceId },
           timeRange: {
             startTime,
             endTime,

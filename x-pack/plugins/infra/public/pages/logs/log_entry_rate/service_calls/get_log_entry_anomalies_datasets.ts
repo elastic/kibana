@@ -29,7 +29,7 @@ export const callGetLogEntryAnomaliesDatasetsAPI = async (
     body: JSON.stringify(
       getLogEntryAnomaliesDatasetsRequestPayloadRT.encode({
         data: {
-          sourceId,
+          logView: { type: 'log-view-reference', logViewId: sourceId },
           timeRange: {
             startTime,
             endTime,
