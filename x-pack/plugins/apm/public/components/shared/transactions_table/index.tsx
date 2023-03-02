@@ -132,7 +132,7 @@ export function TransactionsTable({
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end || !latencyAggregationType || !transactionType) {
-        return;
+        return Promise.resolve(undefined);
       }
       return callApmApi(
         'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
@@ -260,10 +260,6 @@ export function TransactionsTable({
     transactionOverflowCount,
   });
 
-  const isLoading = status === FETCH_STATUS.LOADING;
-  const isNotInitiated = status === FETCH_STATUS.NOT_INITIATED;
-  const hasFailed = status === FETCH_STATUS.FAILURE;
-
   const pagination = useMemo(
     () => ({
       pageIndex: index,
@@ -338,13 +334,14 @@ export function TransactionsTable({
           <OverviewTableContainer
             fixedHeight={fixedHeight}
             isEmptyAndNotInitiated={
-              transactionGroupsTotalItems === 0 && isNotInitiated
+              transactionGroupsTotalItems === 0 &&
+              status === FETCH_STATUS.NOT_INITIATED
             }
           >
             <EuiBasicTable
-              loading={isLoading}
+              loading={status === FETCH_STATUS.LOADING}
               noItemsMessage={
-                isLoading
+                status === FETCH_STATUS.LOADING
                   ? i18n.translate('xpack.apm.transactionsTable.loading', {
                       defaultMessage: 'Loading...',
                     })
@@ -353,7 +350,7 @@ export function TransactionsTable({
                     })
               }
               error={
-                hasFailed
+                status === FETCH_STATUS.FAILURE
                   ? i18n.translate('xpack.apm.transactionsTable.errorMessage', {
                       defaultMessage: 'Failed to fetch',
                     })

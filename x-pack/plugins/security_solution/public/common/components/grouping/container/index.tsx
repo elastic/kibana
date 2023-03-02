@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiSpacer,
+  EuiTablePagination,
+} from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
@@ -36,6 +42,7 @@ export interface GroupingContainerProps {
   groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element | undefined;
   groupsSelector?: JSX.Element;
   inspectButton?: JSX.Element;
+  isLoading: boolean;
   pagination: {
     pageIndex: number;
     pageSize: number;
@@ -55,6 +62,7 @@ const GroupingContainerComponent = ({
   groupPanelRenderer,
   groupsSelector,
   inspectButton,
+  isLoading,
   pagination,
   renderChildComponent,
   selectedGroup,
@@ -96,6 +104,7 @@ const GroupingContainerComponent = ({
               forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
               groupBucket={groupBucket}
               groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
+              isLoading={isLoading}
               onToggleGroup={(isOpen) => {
                 setTrigger({
                   // ...trigger, -> this change will keep only one group at a time expanded and one table displayed
@@ -121,6 +130,7 @@ const GroupingContainerComponent = ({
       customMetricStats,
       data.stackByMultipleFields0?.buckets,
       groupPanelRenderer,
+      isLoading,
       renderChildComponent,
       selectedGroup,
       takeActionItems,
@@ -134,6 +144,7 @@ const GroupingContainerComponent = ({
   return (
     <>
       <EuiFlexGroup
+        data-test-subj="grouping-table"
         justifyContent="spaceBetween"
         alignItems="center"
         style={{ paddingBottom: 20, paddingTop: 20 }}
@@ -176,7 +187,12 @@ const GroupingContainerComponent = ({
             />
           </>
         ) : (
-          <EmptyGroupingComponent />
+          <>
+            {isLoading && (
+              <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
+            )}
+            <EmptyGroupingComponent />
+          </>
         )}
       </GroupingStyledContainer>
     </>

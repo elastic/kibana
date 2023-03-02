@@ -226,18 +226,7 @@ export const shouldTermsAggOnContainer = (groupBy: string | string[] | undefined
 export const flattenAdditionalContext = (
   additionalContext: AdditionalContext | undefined | null
 ): AdditionalContext => {
-  let flattenedContext: AdditionalContext = {};
-  if (additionalContext) {
-    Object.keys(additionalContext).forEach((context: string) => {
-      if (additionalContext[context]) {
-        flattenedContext = {
-          ...flattenedContext,
-          ...flattenObject(additionalContext[context], [context + '.']),
-        };
-      }
-    });
-  }
-  return flattenedContext;
+  return additionalContext ? flattenObject(additionalContext) : {};
 };
 
 export const getContextForRecoveredAlerts = (
@@ -261,39 +250,24 @@ export const unflattenObject = <T extends object = AdditionalContext>(object: ob
     return acc;
   }, {} as T);
 
-/**
- * Wrap the key with [] if it is a key from an Array
- * @param key The object key
- * @param isArrayItem Flag to indicate if it is the key of an Array
- */
-const renderKey = (key: string, isArrayItem: boolean): string => (isArrayItem ? `[${key}]` : key);
+export const flattenObject = (obj: AdditionalContext, prefix: string = ''): AdditionalContext =>
+  Object.keys(obj).reduce<AdditionalContext>((acc, key) => {
+    const nextValue = obj[key];
 
-export const flattenObject = (
-  obj: AdditionalContext,
-  prefix: string[] = [],
-  isArrayItem = false
-): AdditionalContext =>
-  Object.keys(obj).reduce<AdditionalContext>((acc, k) => {
-    const nextValue = obj[k];
-
-    if (typeof nextValue === 'object' && nextValue !== null) {
-      const isNextValueArray = Array.isArray(nextValue);
-      const dotSuffix = isNextValueArray ? '' : '.';
-
-      if (Object.keys(nextValue).length > 0) {
-        return {
-          ...acc,
-          ...flattenObject(
-            nextValue,
-            [...prefix, `${renderKey(k, isArrayItem)}${dotSuffix}`],
-            isNextValueArray
-          ),
-        };
+    if (nextValue) {
+      if (typeof nextValue === 'object' && !Array.isArray(nextValue)) {
+        const dotSuffix = '.';
+        if (Object.keys(nextValue).length > 0) {
+          return {
+            ...acc,
+            ...flattenObject(nextValue, `${prefix}${key}${dotSuffix}`),
+          };
+        }
       }
-    }
 
-    const fullPath = `${prefix.join('')}${renderKey(k, isArrayItem)}`;
-    acc[fullPath] = nextValue;
+      const fullPath = `${prefix}${key}`;
+      acc[fullPath] = nextValue;
+    }
 
     return acc;
   }, {});

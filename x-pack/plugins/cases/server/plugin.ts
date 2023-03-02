@@ -14,6 +14,7 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 
+import type { FilesSetup } from '@kbn/files-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   PluginSetupContract as ActionsPluginSetup,
@@ -56,11 +57,13 @@ import { PersistableStateAttachmentTypeRegistry } from './attachment_framework/p
 import { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
 import { UserProfileService } from './services';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from './common/constants';
+import { registerCaseFileKinds } from './files';
 
 export interface PluginsSetup {
   actions: ActionsPluginSetup;
   lens: LensServerPluginSetup;
   features: FeaturesPluginSetup;
+  files: FilesSetup;
   security: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
   taskManager?: TaskManagerSetupContract;
@@ -103,6 +106,8 @@ export class CasePlugin {
         core
       )}] and plugins [${Object.keys(plugins)}]`
     );
+
+    registerCaseFileKinds(plugins.files);
 
     this.securityPluginSetup = plugins.security;
     this.lensEmbeddableFactory = plugins.lens.lensEmbeddableFactory;
