@@ -47,7 +47,7 @@ import {
   ResultView,
   ResultsPerPageView,
   ResultsView,
-  SortingView,
+  Sorting,
 } from './search_ui_components';
 
 class InternalEngineTransporter implements Transporter {
@@ -142,20 +142,7 @@ export const EngineSearchPreview: React.FC = () => {
             <EuiFlexItem grow={false} css={{ minWidth: '240px' }}>
               <ResultsPerPage view={ResultsPerPageView} options={RESULTS_PER_PAGE_OPTIONS} />
               <EuiSpacer size="m" />
-              <SortingView sortableFields={sortableFields} />
-              {/* <Sorting
-                view={SortingView}
-                sortOptions={[
-                  {
-                    name: i18n.translate(
-                      'xpack.enterpriseSearch.content.engine.searchPreview.relevanceLabel',
-                      { defaultMessage: 'Relevance' }
-                    ),
-                    value: [],
-                  },
-                  ...sortOptions,
-                ]}
-              /> */}
+              <Sorting sortableFields={sortableFields} />
               <EuiSpacer size="m" />
               <EuiLink href={docLinks.enterpriseSearchEngines} target="_blank">
                 <FormattedMessage
