@@ -877,7 +877,6 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 
 # Appex QA
 /src/dev/code_coverage @elastic/appex-qa
-/vars/*Coverage.groovy @elastic/appex-qa
 /test/functional/services/common @elastic/appex-qa
 /test/functional/services/lib @elastic/appex-qa
 /test/functional/services/remote @elastic/appex-qa
