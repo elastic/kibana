@@ -516,6 +516,7 @@ export class HttpServer {
   }
 
   private configureRoute(route: RouterRoute) {
+    const optionsLogger = this.logger.get('http', 'server', this.name, 'options');
     this.log.debug(`registering route handler for [${route.path}]`);
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
     const validate = isSafeMethod(route.method) ? undefined : { payload: true };
@@ -526,6 +527,10 @@ export class HttpServer {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
       access: route.options.access ?? (route.path.startsWith('/internal') ? 'internal' : 'public'),
     };
+    // Log HTTP API target consumer. Warning: may log sensitive information on paths including secrets
+    optionsLogger.debug(
+      `kibanaRouteOptions [${kibanaRouteOptions.access}] for path [${route.path}]`
+    );
 
     this.server!.route({
       handler: route.handler,
