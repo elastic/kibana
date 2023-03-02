@@ -62,7 +62,7 @@ export function ObservabilityAlertSearchBar({
   const onSearchBarParamsChange = useCallback<
     (query: {
       dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
-      query: string;
+      query?: string;
     }) => void
   >(
     ({ dateRange, query }) => {
@@ -76,7 +76,7 @@ export function ObservabilityAlertSearchBar({
           query,
           [...getAlertStatusQuery(status), ...defaultSearchQueries]
         );
-        onKueryChange(query);
+        if (query) onKueryChange(query);
         timeFilterService.setTime(dateRange);
         onRangeFromChange(dateRange.from);
         onRangeToChange(dateRange.to);

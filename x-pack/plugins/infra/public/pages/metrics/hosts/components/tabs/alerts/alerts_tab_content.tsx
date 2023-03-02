@@ -49,7 +49,7 @@ export const AlertsTabContent = () => {
 
   return (
     <HeightRetainer>
-      <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-alerts">
         <EuiFlexGroup justifyContent="flexStart" alignItems="center">
           <EuiFlexItem grow={false}>
             <AlertsStatusFilter onChange={setAlertStatus} status={alertStatus} />

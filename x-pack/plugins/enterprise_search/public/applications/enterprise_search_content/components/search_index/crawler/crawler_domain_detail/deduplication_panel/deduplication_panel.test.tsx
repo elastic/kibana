@@ -14,7 +14,6 @@ import { shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiContextMenuItem,
   EuiPopover,
@@ -25,6 +24,8 @@ import {
 } from '@elastic/eui';
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
+
+import { PageIntroduction } from '../../../../../../shared/page_introduction/page_introduction';
 
 import { rerender } from '../../../../../../test_helpers';
 
@@ -61,8 +62,11 @@ describe('DeduplicationPanel', () => {
 
   it('contains a button to reset to defaults', () => {
     const wrapper = shallow(<DeduplicationPanel />);
+    const dedupeButton = shallow(
+      <div>{wrapper.find(PageIntroduction).prop('actions')}</div>
+    ).children();
 
-    wrapper.find('EuiFlexGroup').first().dive().find(EuiButton).simulate('click');
+    dedupeButton.simulate('click');
 
     expect(MOCK_ACTIONS.submitDeduplicationUpdate).toHaveBeenCalledWith({
       fields: [],

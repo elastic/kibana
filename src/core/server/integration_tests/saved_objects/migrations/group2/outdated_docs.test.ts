@@ -46,7 +46,7 @@ describe('migration v2', () => {
   });
 
   it('migrates the documents to the highest version', async () => {
-    const migratedIndex = `.kibana_${pkg.version}_001`;
+    const migratedIndexAlias = `.kibana_${pkg.version}`;
     const { startES } = createTestServers({
       adjustTimeout: (t: number) => jest.setTimeout(t),
       settings: {
@@ -90,7 +90,7 @@ describe('migration v2', () => {
     const coreStart = await root.start();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-    const migratedDocs = await fetchDocs(esClient, migratedIndex);
+    const migratedDocs = await fetchDocs(esClient, migratedIndexAlias);
 
     expect(migratedDocs.length).toBe(1);
     const [doc] = migratedDocs;
