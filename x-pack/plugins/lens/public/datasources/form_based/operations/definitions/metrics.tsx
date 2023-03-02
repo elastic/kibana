@@ -119,6 +119,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         newField &&
           supportedTypes.includes(newField.type) &&
           newField.aggregatable &&
+          (newField.timeSeriesMetric !== 'counter' || ['min', 'max'].includes(type)) &&
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
