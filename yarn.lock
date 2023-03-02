@@ -5133,6 +5133,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/shared-ux-side-navigation@link:packages/shared-ux/side_navigation":
+  version "0.0.0"
+  uid ""
+
 "@kbn/shared-ux-storybook-config@link:packages/shared-ux/storybook/config":
   version "0.0.0"
   uid ""

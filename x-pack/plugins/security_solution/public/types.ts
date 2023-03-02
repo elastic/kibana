@@ -43,7 +43,7 @@ import type { ThreatIntelligencePluginStart } from '@kbn/threat-intelligence-plu
 import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
-import type { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject, Observable } from 'rxjs';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -59,6 +59,7 @@ import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { Explore } from './explore';
+import type { NavigationLink } from './common/links';
 
 export interface SetupPlugins {
   home?: HomePublicPluginSetup;
@@ -125,8 +126,9 @@ export interface PluginSetup {
   setIsSidebarEnabled: (enabled: boolean) => void;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PluginStart {}
+export interface PluginStart {
+  navLinks$: Observable<NavigationLink[]>;
+}
 
 export interface AppObservableLibs {
   kibana: CoreStart;

@@ -13,6 +13,8 @@ import {
   ServerlessSecurityPluginSetupDependencies,
   ServerlessSecurityPluginStartDependencies,
 } from './types';
+import { SecuritySideNavigation } from './components/side_navigation';
+import { getKibanaServicesProvider } from './services';
 
 export class ServerlessSecurityPlugin
   implements
@@ -32,10 +34,17 @@ export class ServerlessSecurityPlugin
   }
 
   public start(
-    _core: CoreStart,
+    core: CoreStart,
     startDeps: ServerlessSecurityPluginStartDependencies
   ): ServerlessSecurityPluginStart {
-    startDeps.serverless.setServerlessNavigation(<h1 style={{ color: '#fff' }}>Security</h1>);
+    const KibanaServicesProvider = getKibanaServicesProvider(core, startDeps);
+
+    startDeps.serverless.setServerlessNavigation(
+      <KibanaServicesProvider>
+        <SecuritySideNavigation />
+      </KibanaServicesProvider>
+    );
+
     return {};
   }
 

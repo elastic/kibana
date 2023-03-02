@@ -604,6 +604,7 @@
     "@kbn/shared-ux-router": "link:packages/shared-ux/router/impl",
     "@kbn/shared-ux-router-mocks": "link:packages/shared-ux/router/mocks",
     "@kbn/shared-ux-router-types": "link:packages/shared-ux/router/types",
+    "@kbn/shared-ux-side-navigation": "link:packages/shared-ux/side_navigation",
     "@kbn/shared-ux-storybook-config": "link:packages/shared-ux/storybook/config",
     "@kbn/shared-ux-storybook-mock": "link:packages/shared-ux/storybook/mock",
     "@kbn/shared-ux-utility": "link:packages/kbn-shared-ux-utility",

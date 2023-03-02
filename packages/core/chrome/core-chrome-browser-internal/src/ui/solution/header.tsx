@@ -89,6 +89,8 @@ export const SolutionHeader = ({
           css={{
             borderInlineEndWidth: 1,
             background: euiTheme.colors.darkestShade,
+            display: 'flex',
+            flexDirection: 'row',
           }}
           isOpen={true}
           onClose={() => {}}

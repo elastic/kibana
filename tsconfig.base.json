@@ -1198,6 +1198,8 @@
       "@kbn/shared-ux-router-mocks/*": ["packages/shared-ux/router/mocks/*"],
       "@kbn/shared-ux-router-types": ["packages/shared-ux/router/types"],
       "@kbn/shared-ux-router-types/*": ["packages/shared-ux/router/types/*"],
+      "@kbn/shared-ux-side-navigation": ["packages/shared-ux/side_navigation"],
+      "@kbn/shared-ux-side-navigation/*": ["packages/shared-ux/side_navigation/*"],
       "@kbn/shared-ux-storybook-config": ["packages/shared-ux/storybook/config"],
       "@kbn/shared-ux-storybook-config/*": ["packages/shared-ux/storybook/config/*"],
       "@kbn/shared-ux-storybook-mock": ["packages/shared-ux/storybook/mock"],
