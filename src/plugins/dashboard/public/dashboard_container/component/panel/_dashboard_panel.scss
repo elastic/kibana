@@ -26,17 +26,56 @@
   }
 }
 
-@keyframes highlightShadow {
+@keyframes highlightAccentShadow {
   50% {
     box-shadow:
-      0 .9px 4px transparentize($euiColorAccent, .70),
-      0 2.6px 8px transparentize($euiColorAccent, .72),
-      0 5.7px 12px transparentize($euiColorAccent, .73),
-      0 15px 15px transparentize($euiColorAccent, .74);
+      0 8px 16px transparentize($euiColorAccent, .70),
+  }
+}
+
+// .dshDashboardGrid__item--highlighted {
+//   animation-name: highlightAccentShadow;
+//   animation-duration: 4s;
+// }
+
+
+@keyframes highlightOutline {
+  0% {
+    outline: solid $euiSizeXS transparentize($euiColorAccent, .5);
+  }
+  50% {
+    outline: solid $euiSizeXS transparentize($euiColorAccent, .75);
+  }
+  100% {
+    outline: solid $euiSizeXS transparentize($euiColorAccent, 1);
   }
 }
 
 .dshDashboardGrid__item--highlighted {
-  animation-name: highlightShadow;
-  animation-duration: 5s;
+  border-radius: $euiSizeXS;
+  animation-name: highlightOutline;
+  animation-duration: 4s;
 }
+
+@keyframes highlightTitle {
+  50% {
+    background-color: $embEditingModeHoverColor;
+  }
+}
+
+@keyframes highlightShadow {
+  50% {
+    @include euiSlightShadowHover
+  }
+}
+
+// .dshDashboardGrid__item--highlighted {
+//   .embPanel {
+//     animation-name: highlightShadow;
+//     animation-duration: 4s;
+//   }
+//   .embPanel--dragHandle {
+//     animation-name: highlightTitle;
+//     animation-duration: 4s;
+//   }
+// }

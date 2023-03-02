@@ -9,6 +9,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ControlGroupContainer, TIME_SLIDER_CONTROL } from '@kbn/controls-plugin/public';
+import { useDashboardContainerContext } from '../../..';
 import {
   getAddTimeSliderControlButtonTitle,
   getOnlyOneTimeSliderControlMsg,
@@ -21,6 +22,7 @@ interface Props {
 
 export const AddTimeSliderControlButton = ({ closePopover, controlGroup, ...rest }: Props) => {
   const [hasTimeSliderControl, setHasTimeSliderControl] = useState(false);
+  const { embeddableInstance: dashboardContainer } = useDashboardContainerContext();
 
   useEffect(() => {
     const subscription = controlGroup.getInput$().subscribe(() => {
@@ -42,8 +44,9 @@ export const AddTimeSliderControlButton = ({ closePopover, controlGroup, ...rest
     <EuiContextMenuItem
       {...rest}
       icon="plusInCircle"
-      onClick={() => {
-        controlGroup.addTimeSliderControl();
+      onClick={async () => {
+        await controlGroup.addTimeSliderControl();
+        dashboardContainer.scrollToTop();
         closePopover();
       }}
       data-test-subj="controls-create-timeslider-button"
