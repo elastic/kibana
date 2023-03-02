@@ -7,16 +7,22 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_RISK_SCORE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { CalculateRiskScoreAggregations, GetScoresParams, RiskScores } from './types';
+import type {
+  CalculateRiskScoreAggregations,
+  FullRiskScore,
+  GetScoresParams,
+  SimpleRiskScore,
+} from './types';
 
 export const calculateRiskScores = async ({
   dataViewId,
+  enrichInputs,
   esClient,
   identifierType,
   range,
 }: {
   esClient: ElasticsearchClient;
-} & GetScoresParams): Promise<{ users: RiskScores; hosts: RiskScores }> => {
+} & GetScoresParams): Promise<SimpleRiskScore[] | FullRiskScore[]> => {
   const now = new Date().toISOString();
   const index = '.alerts-security*';
 
@@ -41,7 +47,7 @@ export const calculateRiskScores = async ({
                   },
                 },
               ],
-              _source: false,
+              _source: enrichInputs,
             },
           },
           normalized_score: {
@@ -87,7 +93,7 @@ export const calculateRiskScores = async ({
                   },
                 },
               ],
-              _source: false,
+              _source: enrichInputs,
             },
           },
           normalized_score: {
@@ -121,31 +127,41 @@ export const calculateRiskScores = async ({
   });
 
   if (results.aggregations == null) {
-    return { users: [], hosts: [] };
+    return [];
   }
 
-  return {
-    users: results.aggregations.users.buckets.map((bucket) => ({
+  const {
+    users: { buckets: userBuckets },
+    hosts: { buckets: hostBuckets },
+  } = results.aggregations;
+
+  return userBuckets
+    .map((bucket) => ({
       '@timestamp': now,
       identifierField: 'user.name',
       identifierValue: bucket.key,
       calculatedScoreNorm: bucket.normalized_score.value,
-      riskiestInputs: bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
-        _id: riskInput._id,
-        _index: riskInput._index,
-        score: riskInput.sort?.at(0),
-      })),
-    })),
-    hosts: results.aggregations.hosts.buckets.map((bucket) => ({
-      '@timestamp': now,
-      identifierField: 'host.name',
-      identifierValue: bucket.key,
-      calculatedScoreNorm: bucket.normalized_score.value,
-      riskiestInputs: bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
-        _id: riskInput._id,
-        _index: riskInput._index,
-        score: riskInput.sort?.at(0),
-      })),
-    })),
-  };
+      riskiestInputs: enrichInputs
+        ? bucket.riskiest_inputs.hits.hits
+        : bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
+            _id: riskInput._id,
+            _index: riskInput._index,
+            sort: riskInput.sort,
+          })),
+    }))
+    .concat(
+      hostBuckets.map((bucket) => ({
+        '@timestamp': now,
+        identifierField: 'host.name',
+        identifierValue: bucket.key,
+        calculatedScoreNorm: bucket.normalized_score.value,
+        riskiestInputs: enrichInputs
+          ? bucket.riskiest_inputs.hits.hits
+          : bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
+              _id: riskInput._id,
+              _index: riskInput._index,
+              sort: riskInput.sort,
+            })),
+      }))
+    );
 };
