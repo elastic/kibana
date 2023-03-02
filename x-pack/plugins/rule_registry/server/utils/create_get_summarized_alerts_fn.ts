@@ -546,7 +546,7 @@ const generateAlertsFilterDSL = (alertsFilter: AlertsFilter): QueryDslQueryConta
   const filter: QueryDslQueryContainer[] = [];
 
   if (alertsFilter.query) {
-    filter.push(JSON.parse(alertsFilter.query.dsl));
+    filter.push(JSON.parse(alertsFilter.query.dsl!));
   }
   if (alertsFilter.timeframe) {
     filter.push(

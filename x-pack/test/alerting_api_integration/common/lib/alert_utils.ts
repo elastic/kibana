@@ -6,6 +6,7 @@
  */
 
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { AlertsFilter } from '@kbn/alerting-plugin/common/rule';
 import { Space, User } from '../types';
 import { ObjectRemover } from './object_remover';
 import { getUrlPrefix } from './space_test_utils';
@@ -27,6 +28,7 @@ export interface CreateAlertWithActionOpts {
   notifyWhen?: string;
   summary?: boolean;
   throttle?: string | null;
+  alertsFilter?: AlertsFilter;
 }
 export interface CreateNoopAlertOpts {
   objectRemover?: ObjectRemover;
@@ -253,6 +255,7 @@ export class AlertUtils {
     reference,
     notifyWhen,
     throttle,
+    alertsFilter,
   }: CreateAlertWithActionOpts) {
     const objRemover = objectRemover || this.objectRemover;
     const actionId = indexRecordActionId || this.indexRecordActionId;
@@ -270,7 +273,13 @@ export class AlertUtils {
     if (this.user) {
       request = request.auth(this.user.username, this.user.password);
     }
-    const rule = getAlwaysFiringRuleWithSummaryAction(reference, actionId, notifyWhen, throttle);
+    const rule = getAlwaysFiringRuleWithSummaryAction(
+      reference,
+      actionId,
+      notifyWhen,
+      throttle,
+      alertsFilter
+    );
 
     const response = await request.send({ ...rule, ...overwrites });
     if (response.statusCode === 200) {
@@ -495,7 +504,8 @@ function getAlwaysFiringRuleWithSummaryAction(
   reference: string,
   actionId: string,
   notifyWhen = 'onActiveAlert',
-  throttle: string | null = '1m'
+  throttle: string | null = '1m',
+  alertsFilter?: AlertsFilter
 ) {
   const messageTemplate =
     `Alerts, ` +
@@ -529,6 +539,7 @@ function getAlwaysFiringRuleWithSummaryAction(
           notify_when: notifyWhen,
           throttle,
         },
+        ...(alertsFilter && { alerts_filter: alertsFilter }),
       },
     ],
   };
