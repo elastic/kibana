@@ -347,7 +347,7 @@ export const defineExplainLogRateSpikesRoute = (
           await pValuesQueue.drain();
 
           if (changePoints.length === 0) {
-            logDebugMessage('Stopping analysis, did not find change points.');
+            logDebugMessage('Stopping analysis, did not find significant terms.');
             endWithUpdatedLoadingState();
             return;
           }
@@ -423,7 +423,7 @@ export const defineExplainLogRateSpikesRoute = (
               })
             );
 
-            // Deduplicated change points we pass to the `frequent_item_sets` aggregation.
+            // Deduplicated significant terms we pass to the `frequent_item_sets` aggregation.
             const deduplicatedChangePoints = dropDuplicates(changePoints, duplicateIdentifier);
 
             try {

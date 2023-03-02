@@ -29,7 +29,7 @@ describe('streamReducer', () => {
     });
   });
 
-  it('adds change point, then resets state again', () => {
+  it('adds significant term, then resets state again', () => {
     const state1 = streamReducer(
       initialState,
       addChangePointsAction([

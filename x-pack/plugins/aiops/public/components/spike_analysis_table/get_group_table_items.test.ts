@@ -10,7 +10,7 @@ import { finalChangePointGroups } from '../../../common/__mocks__/artificial_log
 import { getGroupTableItems } from './get_group_table_items';
 
 describe('getGroupTableItems', () => {
-  it('transforms change point groups into table items', () => {
+  it('transforms groups into table items', () => {
     const groupTableItems = getGroupTableItems(finalChangePointGroups);
 
     expect(groupTableItems).toEqual([

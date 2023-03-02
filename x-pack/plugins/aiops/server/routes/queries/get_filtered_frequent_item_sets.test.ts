@@ -12,7 +12,7 @@ import { filteredFrequentItemSets } from '../../../common/__mocks__/artificial_l
 import { getFilteredFrequentItemSets } from './get_filtered_frequent_item_sets';
 
 describe('getFilteredFrequentItemSets', () => {
-  it('filter frequent item set based on provided change points', () => {
+  it('filter frequent item set based on provided significant terms', () => {
     expect(getFilteredFrequentItemSets(frequentItemSets, changePoints)).toStrictEqual(
       filteredFrequentItemSets
     );

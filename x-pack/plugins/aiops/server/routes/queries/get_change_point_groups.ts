@@ -24,10 +24,10 @@ export function getChangePointGroups(
   changePoints: ChangePoint[],
   fields: string[]
 ): ChangePointGroup[] {
-  // These are the deduplicated change points we pass to the `frequent_item_sets` aggregation.
+  // These are the deduplicated significant terms we pass to the `frequent_item_sets` aggregation.
   const deduplicatedChangePoints = dropDuplicates(changePoints, duplicateIdentifier);
 
-  // We use the grouped change points to later repopulate
+  // We use the grouped significant terms to later repopulate
   // the `frequent_item_sets` result with the missing duplicates.
   const groupedChangePoints = groupDuplicates(changePoints, duplicateIdentifier).filter(
     (g) => g.group.length > 1

@@ -140,7 +140,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
   const errors = useMemo(() => [...streamErrors, ...data.errors], [streamErrors, data.errors]);
 
   // Start handler clears possibly hovered or pinned
-  // change points on analysis refresh.
+  // significant terms on analysis refresh.
   function startHandler(continueAnalysis = false) {
     if (!continueAnalysis) {
       setOverrides(undefined);

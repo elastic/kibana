@@ -82,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           const histogramActions = data.filter((d) => d.type === testData.expected.histogramFilter);
           const histograms = histogramActions.flatMap((d) => d.payload);
-          // for each change point we should get a histogram
+          // for each significant term we should get a histogram
           expect(histogramActions.length).to.be(changePoints.length);
           // each histogram should have a length of 20 items.
           histograms.forEach((h, index) => {
@@ -101,7 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
             (d) => d.type === testData.expected.groupHistogramFilter
           );
           const groupHistograms = groupHistogramActions.flatMap((d) => d.payload);
-          // for each change point group we should get a histogram
+          // for each significant terms group we should get a histogram
           expect(groupHistograms.length).to.be(groups.length);
           // each histogram should have a length of 20 items.
           groupHistograms.forEach((h, index) => {

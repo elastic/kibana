@@ -10,7 +10,7 @@ import { finalChangePointGroups } from '../../../common/__mocks__/artificial_log
 import { getGroupFilter } from './get_group_filter';
 
 describe('getGroupFilter', () => {
-  it('gets a query filter for the change points of a group with multiple values per field', () => {
+  it('gets a query filter for the significant terms of a group with multiple values per field', () => {
     expect(getGroupFilter(finalChangePointGroups[0])).toStrictEqual([
       {
         term: {
@@ -25,7 +25,7 @@ describe('getGroupFilter', () => {
     ]);
   });
 
-  it('gets a query filter for the change points of a group with just a single field/value', () => {
+  it('gets a query filter for the significant terms of a group with just a single field/value', () => {
     expect(getGroupFilter(finalChangePointGroups[1])).toStrictEqual([
       {
         term: {

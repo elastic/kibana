@@ -70,12 +70,12 @@ export async function fetchFrequentItemSets(
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
 ) {
-  // Sort change points by ascending p-value, necessary to apply the field limit correctly.
+  // Sort significant terms by ascending p-value, necessary to apply the field limit correctly.
   const sortedChangePoints = changePoints.slice().sort((a, b) => {
     return (a.pValue ?? 0) - (b.pValue ?? 0);
   });
 
-  // Get up to 15 unique fields from change points with retained order
+  // Get up to 15 unique fields from significant terms with retained order
   const fields = sortedChangePoints.reduce<string[]>((p, c) => {
     if (p.length < FREQUENT_ITEM_SETS_FIELDS_LIMIT && !p.some((d) => d === c.fieldName)) {
       p.push(c.fieldName);

@@ -12,14 +12,14 @@ import type { ChangePoint } from '@kbn/ml-agg-utils';
 import type { ItemsetResult } from '../../../common/types';
 
 // The way the `frequent_item_sets` aggregation works could return item sets that include
-// field/value pairs that are not part of the original list of significant change points.
+// field/value pairs that are not part of the original list of significant terms.
 // This cleans up groups and removes those unrelated field/value pairs.
 export function getFilteredFrequentItemSets(
   itemsets: ItemsetResult[],
   changePoints: ChangePoint[]
 ): ItemsetResult[] {
   return itemsets.reduce<ItemsetResult[]>((p, itemset, itemsetIndex) => {
-    // Remove field/value pairs not part of the provided change points
+    // Remove field/value pairs not part of the provided significant terms
     itemset.set = Object.entries(itemset.set).reduce<ItemsetResult['set']>(
       (set, [field, value]) => {
         if (changePoints.some((cp) => cp.fieldName === field && cp.fieldValue === value)) {

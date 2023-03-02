@@ -15,7 +15,7 @@ import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_leaves';
 
 describe('markDuplicates', () => {
-  it('marks duplicates based on change point groups for farequote', () => {
+  it('marks duplicates based on significant terms groups for farequote', () => {
     const fieldValuePairCounts = getFieldValuePairCounts(changePointGroups);
     const markedDuplicates = getMarkedDuplicates(changePointGroups, fieldValuePairCounts);
 
@@ -57,7 +57,7 @@ describe('markDuplicates', () => {
     ]);
   });
 
-  it('marks duplicates based on change point groups for artificial logs', () => {
+  it('marks duplicates based on significant terms groups for artificial logs', () => {
     const simpleHierarchicalTree = getSimpleHierarchicalTree(
       filteredFrequentItemSets,
       true,

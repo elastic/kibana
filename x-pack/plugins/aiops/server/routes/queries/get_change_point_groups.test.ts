@@ -13,7 +13,7 @@ import { finalChangePointGroups } from '../../../common/__mocks__/artificial_log
 import { getChangePointGroups } from './get_change_point_groups';
 
 describe('getChangePointGroups', () => {
-  it('gets change point groups', () => {
+  it('gets significant terms groups', () => {
     const changePointGroups = getChangePointGroups(frequentItemSets, changePoints, fields);
 
     expect(changePointGroups).toEqual(finalChangePointGroups);

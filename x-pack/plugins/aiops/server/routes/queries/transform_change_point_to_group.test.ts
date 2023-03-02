@@ -17,7 +17,7 @@ import { getMissingChangePoints } from './get_missing_change_points';
 import { transformChangePointToGroup } from './transform_change_point_to_group';
 
 describe('getMissingChangePoints', () => {
-  it('get missing change points', () => {
+  it('get missing significant terms', () => {
     const deduplicatedChangePoints = dropDuplicates(changePoints, duplicateIdentifier);
 
     const groupedChangePoints = groupDuplicates(changePoints, duplicateIdentifier).filter(

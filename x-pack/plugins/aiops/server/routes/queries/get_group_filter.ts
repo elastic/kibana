@@ -9,7 +9,7 @@ import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ChangePointGroup } from '@kbn/ml-agg-utils';
 
-// Transforms a list of change point items from a group in a query filter.
+// Transforms a list of significant terms from a group in a query filter.
 // Uses a `term` filter for single field value combinations.
 // For fields with multiple values it creates a single `terms` filter that includes
 // all values. This avoids queries not returning any results otherwise because

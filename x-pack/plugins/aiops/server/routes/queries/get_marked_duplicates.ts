@@ -10,7 +10,7 @@ import type { ChangePointGroup } from '@kbn/ml-agg-utils';
 import type { FieldValuePairCounts } from '../../../common/types';
 
 /**
- * Analyse duplicate field/value pairs in change point groups.
+ * Analyse duplicate field/value pairs in groups.
  */
 export function getMarkedDuplicates(
   cpgs: ChangePointGroup[],
