@@ -117,5 +117,6 @@
     "@kbn/security-api-integration-helpers",
     "@kbn/alerts-as-data-utils",
     "@kbn/discover-plugin",
+    "@kbn/securitysolution-io-ts-alerting-types",
   ]
 }
