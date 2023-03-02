@@ -32,21 +32,20 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
   const logStreamQuery = (agentId: string) =>
     buildQuery({
       agentId,
-      datasets: ['elastic_agent', 'elastic_agent.filebeat'],
-      logLevels: [], // ["error"],
+      datasets: ['elastic_agent'],
+      logLevels: ['error'],
       userQuery: '',
     });
 
   // TODO reuse code from AgentLogsUI
-  const getErrorLogsUrl = (agentId: string) => {
+  const getErrorLogsUrl = (agentId: string, timestamp: string) => {
     return coreStart.http.basePath.prepend(
       // TODO remove deprecated format usage
       url.format({
         pathname: '/app/logs/stream',
         search: stringify({
           logPosition: encode({
-            start: 'now-1d',
-            end: 'now',
+            position: { time: Date.parse(timestamp) },
             streamLive: false,
           }),
           logFilter: encode({
@@ -77,7 +76,7 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
                 <EuiFlexItem grow={false}>
                   <RedirectAppLinks coreStart={coreStart}>
                     <EuiButton
-                      href={getErrorLogsUrl(errorItem.agentId)}
+                      href={getErrorLogsUrl(errorItem.agentId, errorItem.timestamp)}
                       iconType="popout"
                       color="danger"
                     >
