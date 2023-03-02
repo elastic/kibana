@@ -120,7 +120,9 @@ export class ElasticsearchService
         }
         this.unauthorizedErrorHandler = handler;
       },
-      agentStore: this.agentManager,
+      agentStatsProvider: {
+        getAgentsStats: this.agentManager.getAgentsStats.bind(this.agentManager),
+      },
     };
   }
 
