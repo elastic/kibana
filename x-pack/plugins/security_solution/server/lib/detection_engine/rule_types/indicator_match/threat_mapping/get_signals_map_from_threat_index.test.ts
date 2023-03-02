@@ -53,6 +53,7 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
     await getSignalsQueryMapFromThreatIndex({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
+      termsQueryAllowed: false,
     });
 
     expect(getThreatListMock).toHaveBeenCalledTimes(1);
@@ -65,6 +66,7 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
     const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
+      termsQueryAllowed: false,
     });
 
     expect(signalsQueryMap).toEqual(new Map());
@@ -98,6 +100,7 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
     const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
+      termsQueryAllowed: false,
     });
 
     expect(signalsQueryMap).toEqual(
@@ -153,6 +156,7 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
     const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
+      termsQueryAllowed: false,
     });
 
     expect(signalsQueryMap.get('source-1')).toHaveLength(MAX_NUMBER_OF_SIGNAL_MATCHES);
@@ -168,6 +172,7 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
     const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
+      termsQueryAllowed: false,
     });
 
     expect(signalsQueryMap).toEqual(new Map());
@@ -201,6 +206,7 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
       signalValueMap,
+      termsQueryAllowed: true,
     });
 
     expect(signalsQueryMap).toEqual(new Map());
@@ -234,6 +240,7 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
       signalValueMap,
+      termsQueryAllowed: true,
     });
 
     const queries = [
@@ -283,6 +290,7 @@ describe('getSignalsQueryMapFromThreatIndex', () => {
       threatSearchParams: threatSearchParamsMock,
       eventsCount: 50,
       signalValueMap,
+      termsQueryAllowed: true,
     });
 
     const queries = [
