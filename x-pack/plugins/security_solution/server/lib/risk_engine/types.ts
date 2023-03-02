@@ -30,7 +30,7 @@ export interface RiskScore {
   // calculatedLevel: string;
   // calculatedScore: number;
   calculatedScoreNorm: number;
-  riskiest_inputs: RiskInput[] | Ecs[];
+  riskiestInputs: RiskInput[] | Ecs[];
 }
 
 export interface RiskInput {
