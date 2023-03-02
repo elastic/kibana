@@ -268,7 +268,6 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
               defaultMessage: 'Close custom URL editor',
             }
           )}
-          className="close-editor-button"
         />
 
         {editor}
