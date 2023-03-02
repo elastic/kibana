@@ -9,12 +9,12 @@ import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { updateGroupSelector, updateSelectedGroup } from './actions';
 import type { GroupModel } from './types';
 
-const initialState: GroupModel = {
+export const initialGroupingState: GroupModel = {
   groupSelector: null,
   selectedGroup: null,
 };
 
-export const groupsReducer = reducerWithInitialState(initialState)
+export const groupsReducer = reducerWithInitialState(initialGroupingState)
   .case(updateSelectedGroup, (state, { selectedGroup }) => ({
     ...state,
     selectedGroup,

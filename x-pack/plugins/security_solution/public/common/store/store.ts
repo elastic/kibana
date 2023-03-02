@@ -24,6 +24,7 @@ import { BehaviorSubject, pluck } from 'rxjs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
+import { initialGroupingState } from './grouping/reducer';
 import {
   DEFAULT_DATA_VIEW_ID,
   DEFAULT_INDEX_KEY,
@@ -47,8 +48,6 @@ import { initDataView } from './sourcerer/model';
 import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
-import type { GroupState } from './grouping/types';
-import { groupSelectors } from './grouping';
 
 type ComposeType = typeof compose;
 declare global {
@@ -129,15 +128,6 @@ export const createStoreFactory = async (
     },
   };
 
-  const groupsInitialState: GroupState = {
-    groups: {
-      groupById: {
-        /* eslint-disable @typescript-eslint/no-non-null-assertion */
-        ...subPlugins.alerts.groups!.groupById,
-      },
-    },
-  };
-
   const timelineReducer = reduceReducers(
     timelineInitialState.timeline,
     startPlugins.timelines?.getTimelineReducer() ?? {},
@@ -157,7 +147,7 @@ export const createStoreFactory = async (
       enableExperimental,
     },
     dataTableInitialState,
-    groupsInitialState
+    initialGroupingState
   );
 
   const rootReducer = {
@@ -190,7 +180,6 @@ export const createStore = (
     timelineByIdSelector: timelineSelectors.timelineByIdSelector,
     timelineTimeRangeSelector: inputsSelectors.timelineTimeRangeSelector,
     tableByIdSelector: dataTableSelectors.tableByIdSelector,
-    groupByIdSelector: groupSelectors.groupByIdSelector,
     storage,
   };
 

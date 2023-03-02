@@ -20,7 +20,7 @@ import { createGroupFilter } from './accordion_panel/helpers';
 import type { BadgeMetric, CustomMetric } from './accordion_panel';
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
-import { EmptyGroupingComponent } from './empty_resuls_panel';
+import { EmptyGroupingComponent } from './empty_results_panel';
 import { groupingContainerCss, groupsUnitCountCss } from './styles';
 import { GROUPS_UNIT } from './translations';
 import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } from './types';

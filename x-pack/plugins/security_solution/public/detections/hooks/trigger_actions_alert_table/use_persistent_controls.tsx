@@ -72,8 +72,12 @@ export const getPersistentControlsHook = (tableId: TableId) => {
       ]
     );
 
-    const rightTopMenu = useMemo(
-      () => (
+    const rightTopMenu = useMemo(() => {
+      console.log('rightTopMenu', {
+        selectedGroup,
+        groupSelector,
+      });
+      return (
         <RightTopMenu
           position="relative"
           tableView={tableView}
@@ -86,9 +90,14 @@ export const getPersistentControlsHook = (tableId: TableId) => {
           showInspect={false}
           additionalMenuOptions={isNoneGroup(selectedGroup) ? [groupSelector] : []}
         />
-      ),
-      [tableView, handleChangeTableView, additionalFiltersComponent, groupSelector, selectedGroup]
-    );
+      );
+    }, [
+      tableView,
+      handleChangeTableView,
+      additionalFiltersComponent,
+      groupSelector,
+      selectedGroup,
+    ]);
 
     return {
       right: rightTopMenu,
