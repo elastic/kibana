@@ -31,14 +31,13 @@ import { VisualizationActions } from './actions';
 const LensComponentWrapper = styled.div<{
   height?: string;
   width?: string;
-  visualizationType?: string;
+  $addHoverActionsPadding?: boolean;
 }>`
   height: ${({ height }) => height ?? 'auto'};
   width: ${({ width }) => width ?? 'auto'};
   > div {
     background-color: transparent;
-    ${({ visualizationType }) =>
-      visualizationType === 'lnsDatatable' ? `padding: 20px 0 0 0;` : ``}
+    ${({ $addHoverActionsPadding }) => ($addHoverActionsPadding ? `padding: 20px 0 0 0;` : ``)}
   }
   .expExpressionRenderer__expression {
     padding: 2px 0 0 0 !important;
@@ -104,6 +103,9 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     title: '',
   });
   const preferredSeriesType = (attributes?.state?.visualization as XYState)?.preferredSeriesType;
+  const addHoverActionsPadding =
+    attributes?.visualizationType !== 'lnsLegacyMetric' &&
+    attributes?.visualizationType !== 'lnsPie';
   const LensComponent = lens.EmbeddableComponent;
   const inspectActionProps = useMemo(
     () => ({
@@ -252,7 +254,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
         <LensComponentWrapper
           height={wrapperHeight}
           width={wrapperWidth}
-          visualizationType={attributes.visualizationType}
+          $addHoverActionsPadding={addHoverActionsPadding}
         >
           <LensComponent
             id={id}
