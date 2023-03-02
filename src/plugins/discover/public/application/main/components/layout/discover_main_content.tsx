@@ -87,7 +87,7 @@ export const DiscoverMainContent = ({
           <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
         </EuiFlexItem>
       )}
-      {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
+      {viewMode === VIEW_MODE.DOCUMENT_LEVEL || shouldSwitchToDocumentsView ? (
         <DiscoverDocuments
           expandedDoc={expandedDoc}
           dataView={dataView}
