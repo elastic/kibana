@@ -301,11 +301,18 @@ const AlertsTableStateWithQueryProvider = ({
     updatedAt,
   ]);
 
+  const CasesContext = casesService?.ui.getCasesContext();
+  const casesPermissions = casesService?.helpers.canUseCases();
+  const isCasesContextAvailable = casesService && CasesContext;
+
   const tableProps: AlertsTableProps = useMemo(
     () => ({
       alertsTableConfiguration,
-      casesData: { cases: cases ?? new Map(), isLoading: isLoadingCases },
-      casesService,
+      cases: {
+        data: cases ?? new Map(),
+        isLoading: isLoadingCases,
+        showBulkActions: Boolean(isCasesContextAvailable && alertsTableConfiguration.cases),
+      },
       columns,
       bulkActions: [],
       deletedEventIds: [],
@@ -339,11 +346,12 @@ const AlertsTableStateWithQueryProvider = ({
       alertsTableConfiguration,
       cases,
       isLoadingCases,
-      casesService,
+      isCasesContextAvailable,
       columns,
       flyoutSize,
       pagination.pageSize,
       id,
+      leadingControlColumns,
       showExpandToDetails,
       showAlertStatusWithFlapping,
       useFetchAlertsData,
@@ -354,7 +362,6 @@ const AlertsTableStateWithQueryProvider = ({
       onResetColumns,
       onColumnsChange,
       onChangeVisibleColumns,
-      leadingControlColumns,
       query,
       rowHeightsOptions,
       renderCellValue,
@@ -364,10 +371,6 @@ const AlertsTableStateWithQueryProvider = ({
       toolbarVisibility,
     ]
   );
-
-  const CasesContext = casesService?.ui.getCasesContext();
-  const casesPermissions = casesService?.helpers.canUseCases();
-  const hasCases = casesService && CasesContext && alertsTableConfiguration.cases;
 
   return hasAlertsTableConfiguration ? (
     <>
@@ -383,9 +386,9 @@ const AlertsTableStateWithQueryProvider = ({
       {(isLoading || isBrowserFieldDataLoading) && (
         <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
       )}
-      {alertsCount !== 0 && hasCases && (
+      {alertsCount !== 0 && isCasesContextAvailable && (
         <CasesContext
-          owner={alertsTableConfiguration.cases?.owner}
+          owner={alertsTableConfiguration.cases?.owner ?? []}
           permissions={casesPermissions}
           features={{ alerts: { sync: false } }}
         >
@@ -395,7 +398,7 @@ const AlertsTableStateWithQueryProvider = ({
           />
         </CasesContext>
       )}
-      {alertsCount !== 0 && !hasCases && (
+      {alertsCount !== 0 && !isCasesContextAvailable && (
         <AlertsTableWithBulkActionsContext
           tableProps={tableProps}
           initialBulkActionsState={initialBulkActionsState}

@@ -60,7 +60,7 @@ const registerAlertsTableConfiguration = (
   // register Alert Table on Alert Page
   registerIfNotAlready(registry, {
     id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.ALERTS_PAGE,
-    cases: { featureId: CASES_FEATURE_ID, owner: [APP_ID], showBulkActions: true },
+    cases: { featureId: CASES_FEATURE_ID, owner: [APP_ID] },
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookAlertPage,
     useActionsColumn: getUseActionColumnHook(TableId.alertsOnAlertsPage),
@@ -76,7 +76,7 @@ const registerAlertsTableConfiguration = (
   // register Alert Table on RuleDetails Page
   registerIfNotAlready(registry, {
     id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.RULE_DETAILS,
-    cases: { featureId: CASES_FEATURE_ID, owner: [APP_ID], showBulkActions: true },
+    cases: { featureId: CASES_FEATURE_ID, owner: [APP_ID] },
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookAlertPage,
     useActionsColumn: getUseActionColumnHook(TableId.alertsOnRuleDetailsPage),
@@ -91,7 +91,7 @@ const registerAlertsTableConfiguration = (
 
   registerIfNotAlready(registry, {
     id: ALERTS_TABLE_REGISTRY_CONFIG_IDS.CASE,
-    cases: { featureId: CASES_FEATURE_ID, owner: [APP_ID], showBulkActions: true },
+    cases: { featureId: CASES_FEATURE_ID, owner: [APP_ID] },
     columns: alertColumns,
     getRenderCellValue: renderCellValueHookCasePage,
     useInternalFlyout,

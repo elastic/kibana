@@ -250,7 +250,7 @@ for (let index = 0; index < 100; index++) {
 
     const tableProps: AlertsTableProps = {
       alertsTableConfiguration,
-      casesData: { cases: casesMap, isLoading: false },
+      cases: { data: casesMap, isLoading: false, showBulkActions: true },
       columns,
       deletedEventIds: [],
       disabledCellActions: [],
@@ -626,10 +626,7 @@ for (let index = 0; index < 100; index++) {
 
         it('show loading skeleton if it loads cases', async () => {
           render(
-            <AlertsTableWithProviders
-              {...props}
-              casesData={{ ...props.casesData, isLoading: true }}
-            />
+            <AlertsTableWithProviders {...props} cases={{ ...props.cases, isLoading: true }} />
           );
 
           expect((await screen.findAllByTestId('cases-cell-loading')).length).toBe(4);
