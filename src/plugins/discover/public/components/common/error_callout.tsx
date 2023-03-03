@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiCallOut, EuiLink, EuiPopover, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiLink,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiText,
+  useEuiTheme,
+} from '@elastic/eui';
 import { css, SerializedStyles } from '@emotion/react';
 import { getSearchErrorOverrideDisplay } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -80,9 +88,8 @@ export const ErrorCallout = ({
             `,
           }}
         >
-          <EuiCallOut title={overrideDisplay.title} color="danger">
-            {overrideDisplay.body}
-          </EuiCallOut>
+          <EuiPopoverTitle>{overrideDisplay.title}</EuiPopoverTitle>
+          <EuiText>{overrideDisplay.body}</EuiText>
         </EuiPopover>
       );
     }
@@ -116,6 +123,7 @@ export const ErrorCallout = ({
   return (
     <EuiCallOut
       title={formattedTitle}
+      heading="h3"
       color="danger"
       iconType="error"
       size={inline ? 's' : undefined}
