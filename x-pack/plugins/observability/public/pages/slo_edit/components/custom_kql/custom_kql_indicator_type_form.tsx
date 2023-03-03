@@ -27,12 +27,12 @@ export function CustomKqlIndicatorTypeForm() {
           control={control}
           dataTestSubj="customKqlIndicatorFormQueryFilterInput"
           indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate('xpack.observability.slos.sloEdit.sliType.customKql.queryFilter', {
+          label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.queryFilter', {
             defaultMessage: 'Query filter',
           })}
           name="indicator.params.filter"
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.sliType.customKql.customFilter',
+            'xpack.observability.slo.sloEdit.sliType.customKql.customFilter',
             {
               defaultMessage: 'Custom filter to apply on the index',
             }
@@ -45,12 +45,12 @@ export function CustomKqlIndicatorTypeForm() {
           control={control}
           dataTestSubj="customKqlIndicatorFormGoodQueryInput"
           indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate('xpack.observability.slos.sloEdit.sliType.customKql.goodQuery', {
+          label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.goodQuery', {
             defaultMessage: 'Good query',
           })}
           name="indicator.params.good"
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.sliType.customKql.goodQueryPlaceholder',
+            'xpack.observability.slo.sloEdit.sliType.customKql.goodQueryPlaceholder',
             {
               defaultMessage: 'Define the good events',
             }
@@ -63,12 +63,12 @@ export function CustomKqlIndicatorTypeForm() {
           control={control}
           dataTestSubj="customKqlIndicatorFormTotalQueryInput"
           indexPatternString={watch('indicator.params.index')}
-          label={i18n.translate('xpack.observability.slos.sloEdit.sliType.customKql.totalQuery', {
+          label={i18n.translate('xpack.observability.slo.sloEdit.sliType.customKql.totalQuery', {
             defaultMessage: 'Total query',
           })}
           name="indicator.params.total"
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.sliType.customKql.totalQueryPlaceholder',
+            'xpack.observability.slo.sloEdit.sliType.customKql.totalQueryPlaceholder',
             {
               defaultMessage: 'Define the total events',
             }

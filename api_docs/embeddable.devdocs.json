@@ -8174,6 +8174,26 @@
             "path": "src/plugins/embeddable/public/plugin.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.EmbeddableStartDependencies.savedObjectsManagement",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsManagement",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementPluginStart",
+                "text": "SavedObjectsManagementPluginStart"
+              }
+            ],
+            "path": "src/plugins/embeddable/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
