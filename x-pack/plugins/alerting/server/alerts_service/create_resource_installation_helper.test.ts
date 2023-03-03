@@ -7,7 +7,13 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { IRuleTypeAlerts } from '../types';
-import { createResourceInstallationHelper } from './create_resource_installation_helper';
+import {
+  createResourceInstallationHelper,
+  errorResult,
+  InitializationPromise,
+  ResourceInstallationHelper,
+  successResult,
+} from './create_resource_installation_helper';
 import { retryUntil } from './test_utils';
 
 const logger: ReturnType<typeof loggingSystemMock['createLogger']> =
@@ -24,14 +30,22 @@ const initFnWithError = async (context: IRuleTypeAlerts, timeoutMs?: number) => 
 const getCommonInitPromise = async (
   resolution: boolean,
   timeoutMs: number = 1
-): Promise<boolean> => {
+): Promise<InitializationPromise> => {
   if (timeoutMs < 0) {
     throw new Error('fail');
   }
   // delay resolution of promise by timeout value
   await new Promise((r) => setTimeout(r, timeoutMs));
   logger.info(`commonInitPromise resolved`);
-  return Promise.resolve(resolution);
+  return Promise.resolve(resolution ? successResult() : errorResult(`error initializing`));
+};
+
+const getContextInitialized = async (
+  helper: ResourceInstallationHelper,
+  context: string = 'test1'
+) => {
+  const { result } = await helper.getInitializedContext(context);
+  return result;
 };
 
 describe('createResourceInstallationHelper', () => {
@@ -61,8 +75,8 @@ describe('createResourceInstallationHelper', () => {
     expect(logger.info).toHaveBeenNthCalledWith(1, `commonInitPromise resolved`);
     expect(logger.info).toHaveBeenNthCalledWith(2, 'test1');
     expect(logger.info).toHaveBeenNthCalledWith(3, 'test2');
-    expect(await helper.getInitializedContext('test1')).toBe(true);
-    expect(await helper.getInitializedContext('test2')).toBe(true);
+    expect(await helper.getInitializedContext('test1')).toEqual({ result: true });
+    expect(await helper.getInitializedContext('test2')).toEqual({ result: true });
   });
 
   test(`should return false if context is unrecognized`, async () => {
@@ -79,8 +93,11 @@ describe('createResourceInstallationHelper', () => {
 
     await retryUntil('init fns run', async () => logger.info.mock.calls.length === 2);
 
-    expect(await helper.getInitializedContext('test1')).toBe(true);
-    expect(await helper.getInitializedContext('test2')).toBe(false);
+    expect(await helper.getInitializedContext('test1')).toEqual({ result: true });
+    expect(await helper.getInitializedContext('test2')).toEqual({
+      result: false,
+      error: `Unrecognized context test2`,
+    });
   });
 
   test(`should log and return false if common init function returns false`, async () => {
@@ -100,7 +117,10 @@ describe('createResourceInstallationHelper', () => {
     expect(logger.warn).toHaveBeenCalledWith(
       `Common resources were not initialized, cannot initialize context for test1`
     );
-    expect(await helper.getInitializedContext('test1')).toBe(false);
+    expect(await helper.getInitializedContext('test1')).toEqual({
+      result: false,
+      error: `error initializing`,
+    });
   });
 
   test(`should log and return false if common init function throws error`, async () => {
@@ -113,10 +133,14 @@ describe('createResourceInstallationHelper', () => {
 
     await retryUntil(
       'common init fns run',
-      async () => (await helper.getInitializedContext('test1')) === false
+      async () => (await getContextInitialized(helper)) === false
     );
 
     expect(logger.error).toHaveBeenCalledWith(`Error initializing context test1 - fail`);
+    expect(await helper.getInitializedContext('test1')).toEqual({
+      result: false,
+      error: `fail`,
+    });
   });
 
   test(`should log and return false if context init function throws error`, async () => {
@@ -133,9 +157,13 @@ describe('createResourceInstallationHelper', () => {
 
     await retryUntil(
       'context init fns run',
-      async () => (await helper.getInitializedContext('test1')) === false
+      async () => (await getContextInitialized(helper)) === false
     );
 
     expect(logger.error).toHaveBeenCalledWith(`Error initializing context test1 - no go`);
+    expect(await helper.getInitializedContext('test1')).toEqual({
+      result: false,
+      error: `no go`,
+    });
   });
 });

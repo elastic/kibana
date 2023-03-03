@@ -141,6 +141,14 @@ const TestRegistrationContext: IRuleTypeAlerts = {
   mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
 };
 
+const getContextInitialized = async (
+  alertsService: AlertsService,
+  context: string = TestRegistrationContext.context
+) => {
+  const { result } = await alertsService.getContextInitializationPromise(context);
+  return result;
+};
+
 describe('Alerts Service', () => {
   let pluginStop$: Subject<void>;
 
@@ -342,9 +350,7 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil(
         'context initialized',
-        async () =>
-          (await alertsService.getContextInitializationPromise(TestRegistrationContext.context)) ===
-          true
+        async () => (await getContextInitialized(alertsService)) === true
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
@@ -385,9 +391,7 @@ describe('Alerts Service', () => {
       alertsService.register({ ...TestRegistrationContext, useLegacyAlerts: true });
       await retryUntil(
         'context initialized',
-        async () =>
-          (await alertsService.getContextInitializationPromise(TestRegistrationContext.context)) ===
-          true
+        async () => (await getContextInitialized(alertsService)) === true
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
@@ -428,9 +432,7 @@ describe('Alerts Service', () => {
       alertsService.register({ ...TestRegistrationContext, useEcs: true });
       await retryUntil(
         'context initialized',
-        async () =>
-          (await alertsService.getContextInitializationPromise(TestRegistrationContext.context)) ===
-          true
+        async () => (await getContextInitialized(alertsService)) === true
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
@@ -471,9 +473,7 @@ describe('Alerts Service', () => {
       alertsService.register({ ...TestRegistrationContext, secondaryAlias: 'another.alias' });
       await retryUntil(
         'context initialized',
-        async () =>
-          (await alertsService.getContextInitializationPromise(TestRegistrationContext.context)) ===
-          true
+        async () => (await getContextInitialized(alertsService)) === true
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
@@ -517,7 +517,7 @@ describe('Alerts Service', () => {
       });
       await retryUntil(
         'context initialized',
-        async () => (await alertsService.getContextInitializationPromise('empty')) === true
+        async () => (await getContextInitialized(alertsService, 'empty')) === true
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledWith(IlmPutBody);
@@ -619,9 +619,7 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil(
         'context initialized',
-        async () =>
-          (await alertsService.getContextInitializationPromise(TestRegistrationContext.context)) ===
-          true
+        async () => (await getContextInitialized(alertsService)) === true
       );
 
       expect(logger.error).toHaveBeenCalledWith(
@@ -653,7 +651,11 @@ describe('Alerts Service', () => {
       await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
       expect(
         await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
-      ).toEqual(false);
+      ).toEqual({
+        result: false,
+        error:
+          'Failure during installation. No mappings would be generated for .alerts-test.alerts-default-index-template, possibly due to failed/misconfigured bootstrapping',
+      });
 
       expect(logger.error).toHaveBeenCalledWith(
         new Error(
@@ -680,7 +682,7 @@ describe('Alerts Service', () => {
 
       expect(
         await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
-      ).toEqual(false);
+      ).toEqual({ error: 'Failure during installation. fail', result: false });
 
       expect(logger.error).toHaveBeenCalledWith(
         `Error installing index template .alerts-test.alerts-default-index-template - fail`
@@ -704,7 +706,7 @@ describe('Alerts Service', () => {
       await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
       expect(
         await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
-      ).toEqual(false);
+      ).toEqual({ error: 'Failure during installation. fail', result: false });
 
       expect(logger.error).toHaveBeenCalledWith(
         `Error fetching concrete indices for .internal.alerts-test.alerts-default-* pattern - fail`
@@ -728,9 +730,7 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil(
         'context initialized',
-        async () =>
-          (await alertsService.getContextInitializationPromise(TestRegistrationContext.context)) ===
-          true
+        async () => (await getContextInitialized(alertsService)) === true
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -751,7 +751,7 @@ describe('Alerts Service', () => {
 
       expect(
         await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
-      ).toEqual(false);
+      ).toEqual({ error: 'Failure during installation. fail', result: false });
 
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to PUT index.mapping.total_fields.limit settings for alias alias_1: fail`
@@ -774,9 +774,7 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil(
         'context initialized',
-        async () =>
-          (await alertsService.getContextInitializationPromise(TestRegistrationContext.context)) ===
-          true
+        async () => (await getContextInitialized(alertsService)) === true
       );
 
       expect(logger.error).toHaveBeenCalledWith(
@@ -801,7 +799,7 @@ describe('Alerts Service', () => {
       await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
       expect(
         await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
-      ).toEqual(false);
+      ).toEqual({ error: 'Failure during installation. fail', result: false });
 
       expect(logger.error).toHaveBeenCalledWith(`Failed to PUT mapping for alias alias_1: fail`);
 
@@ -822,9 +820,7 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil(
         'context initialized',
-        async () =>
-          (await alertsService.getContextInitializationPromise(TestRegistrationContext.context)) ===
-          true
+        async () => (await getContextInitialized(alertsService)) === true
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -858,7 +854,11 @@ describe('Alerts Service', () => {
       await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
       expect(
         await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
-      ).toEqual(false);
+      ).toEqual({
+        error:
+          'Failure during installation. Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default',
+        result: false,
+      });
 
       expect(logger.error).toHaveBeenCalledWith(
         new Error(
@@ -896,9 +896,7 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil(
         'context initialized',
-        async () =>
-          (await alertsService.getContextInitializationPromise(TestRegistrationContext.context)) ===
-          true
+        async () => (await getContextInitialized(alertsService)) === true
       );
 
       expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -920,7 +918,7 @@ describe('Alerts Service', () => {
 
       expect(
         await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
-      ).toEqual(false);
+      ).toEqual({ error: 'Failure during installation. fail', result: false });
 
       expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
@@ -954,9 +952,7 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil(
         'context initialized',
-        async () =>
-          (await alertsService.getContextInitializationPromise(TestRegistrationContext.context)) ===
-          true
+        async () => (await getContextInitialized(alertsService)) === true
       );
 
       expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
@@ -993,7 +989,11 @@ describe('Alerts Service', () => {
       await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
       expect(
         await alertsService.getContextInitializationPromise(TestRegistrationContext.context)
-      ).toEqual(false);
+      ).toEqual({
+        error:
+          'Failure during installation. Attempted to create index: .internal.alerts-test.alerts-default-000001 as the write index for alias: .alerts-test.alerts-default, but the index already exists and is not the write index for the alias',
+        result: false,
+      });
 
       expect(logger.error).toHaveBeenCalledWith(`Error creating concrete write index - fail`);
 
@@ -1070,9 +1070,7 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil(
         'context initialized',
-        async () =>
-          (await alertsService.getContextInitializationPromise(TestRegistrationContext.context)) ===
-          true
+        async () => (await getContextInitialized(alertsService)) === true
       );
 
       expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(3);
@@ -1098,9 +1096,7 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil(
         'context initialized',
-        async () =>
-          (await alertsService.getContextInitializationPromise(TestRegistrationContext.context)) ===
-          true
+        async () => (await getContextInitialized(alertsService)) === true
       );
 
       expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
@@ -1126,9 +1122,7 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil(
         'context initialized',
-        async () =>
-          (await alertsService.getContextInitializationPromise(TestRegistrationContext.context)) ===
-          true
+        async () => (await getContextInitialized(alertsService)) === true
       );
 
       expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(4);
@@ -1154,9 +1148,7 @@ describe('Alerts Service', () => {
       alertsService.register(TestRegistrationContext);
       await retryUntil(
         'context initialized',
-        async () =>
-          (await alertsService.getContextInitializationPromise(TestRegistrationContext.context)) ===
-          true
+        async () => (await getContextInitialized(alertsService)) === true
       );
 
       expect(clusterClient.indices.create).toHaveBeenCalledTimes(3);

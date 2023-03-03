@@ -8,9 +8,13 @@
 import { Logger } from '@kbn/core/server';
 import { IRuleTypeAlerts } from '../types';
 
+export interface InitializationPromise {
+  result: boolean;
+  error?: string;
+}
 export interface ResourceInstallationHelper {
   add: (context: IRuleTypeAlerts, timeoutMs?: number) => void;
-  getInitializedContext: (context: string, delayMs?: number) => Promise<boolean>;
+  getInitializedContext: (context: string, delayMs?: number) => Promise<InitializationPromise>;
 }
 
 /**
@@ -26,29 +30,29 @@ export interface ResourceInstallationHelper {
  */
 export function createResourceInstallationHelper(
   logger: Logger,
-  commonResourcesInitPromise: Promise<boolean>,
+  commonResourcesInitPromise: Promise<InitializationPromise>,
   installFn: (context: IRuleTypeAlerts, timeoutMs?: number) => Promise<void>
 ): ResourceInstallationHelper {
-  const initializedContexts: Map<string, Promise<boolean>> = new Map();
+  const initializedContexts: Map<string, Promise<InitializationPromise>> = new Map();
 
   const waitUntilContextResourcesInstalled = async (
     context: IRuleTypeAlerts,
     timeoutMs?: number
-  ): Promise<boolean> => {
+  ): Promise<InitializationPromise> => {
     try {
-      const commonResourcesInitialized = await commonResourcesInitPromise;
-      if (commonResourcesInitialized) {
+      const { result: commonInitResult, error: commonInitError } = await commonResourcesInitPromise;
+      if (commonInitResult) {
         await installFn(context, timeoutMs);
-        return true;
+        return successResult();
       } else {
         logger.warn(
           `Common resources were not initialized, cannot initialize context for ${context.context}`
         );
-        return false;
+        return errorResult(commonInitError);
       }
     } catch (err) {
       logger.error(`Error initializing context ${context.context} - ${err.message}`);
-      return false;
+      return errorResult(err.message);
     }
   };
 
@@ -61,10 +65,13 @@ export function createResourceInstallationHelper(
         waitUntilContextResourcesInstalled(context, timeoutMs)
       );
     },
-    getInitializedContext: async (context: string): Promise<boolean> => {
+    getInitializedContext: async (context: string): Promise<InitializationPromise> => {
       return initializedContexts.has(context)
         ? initializedContexts.get(context)!
-        : Promise.resolve(false);
+        : errorResult(`Unrecognized context ${context}`);
     },
   };
 }
+
+export const successResult = () => ({ result: true });
+export const errorResult = (error?: string) => ({ result: false, error });

@@ -265,13 +265,13 @@ export class ResourceInstaller {
       !indexInfo.indexOptions.additionalPrefix &&
       frameworkAlerts.enabled()
     ) {
-      const initialized = await frameworkAlerts.getContextInitializationPromise(
+      const { result: initialized, error } = await frameworkAlerts.getContextInitializationPromise(
         indexInfo.indexOptions.registrationContext
       );
 
       if (!initialized) {
         throw new Error(
-          `There was an error in the framework installing namespace-level resources and creating concrete indices for ${alias}`
+          `There was an error in the framework installing namespace-level resources and creating concrete indices for ${alias} - ${error}`
         );
       } else {
         return;

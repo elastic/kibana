@@ -18,7 +18,7 @@ import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 
 const frameworkAlertsService = {
   enabled: () => false,
-  getContextInitializationPromise: async () => false,
+  getContextInitializationPromise: async () => ({ result: false, error: `failed` }),
 };
 
 describe('resourceInstaller', () => {
@@ -287,7 +287,7 @@ describe('resourceInstaller', () => {
         frameworkAlerts: {
           ...frameworkAlertsService,
           enabled: () => true,
-          getContextInitializationPromise: async () => true,
+          getContextInitializationPromise: async () => ({ result: true }),
         },
         pluginStop$,
       });
@@ -344,7 +344,7 @@ describe('resourceInstaller', () => {
       await expect(
         installer.installAndUpdateNamespaceLevelResources(indexInfo, 'default')
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"There was an error in the framework installing namespace-level resources and creating concrete indices for .alerts-observability.logs.alerts-default"`
+        `"There was an error in the framework installing namespace-level resources and creating concrete indices for .alerts-observability.logs.alerts-default - failed"`
       );
       expect(mockClusterClient.indices.simulateTemplate).not.toHaveBeenCalled();
       expect(mockClusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();

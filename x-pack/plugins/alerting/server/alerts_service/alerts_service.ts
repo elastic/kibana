@@ -33,7 +33,10 @@ import { retryTransientEsErrors } from './retry_transient_es_errors';
 import { IRuleTypeAlerts } from '../types';
 import {
   createResourceInstallationHelper,
+  errorResult,
+  InitializationPromise,
   ResourceInstallationHelper,
+  successResult,
 } from './create_resource_installation_helper';
 
 const TOTAL_FIELDS_LIMIT = 2500;
@@ -76,7 +79,7 @@ interface IAlertsService {
    * the index template for the default namespace and the concrete write index
    * for the default namespace.
    */
-  getContextInitializationPromise(context: string): Promise<boolean>;
+  getContextInitializationPromise(context: string): Promise<InitializationPromise>;
 }
 
 export type PublicAlertsService = Pick<IAlertsService, 'getContextInitializationPromise'>;
@@ -88,7 +91,7 @@ export class AlertsService implements IAlertsService {
   private initialized: boolean;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private registeredContexts: Map<string, IRuleTypeAlerts> = new Map();
-  private commonInitPromise: Promise<boolean>;
+  private commonInitPromise: Promise<InitializationPromise>;
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
@@ -111,12 +114,11 @@ export class AlertsService implements IAlertsService {
   public async getContextInitializationPromise(
     context: string,
     timeoutMs?: number
-  ): Promise<boolean> {
+  ): Promise<InitializationPromise> {
     if (!this.registeredContexts.has(context)) {
-      this.options.logger.error(
-        `Error getting initialized status for context ${context} - context has not been registered.`
-      );
-      return Promise.resolve(false);
+      const errMsg = `Error getting initialized status for context ${context} - context has not been registered.`;
+      this.options.logger.error(errMsg);
+      return Promise.resolve(errorResult(errMsg));
     }
     return this.resourceInitializationHelper.getInitializedContext(context, timeoutMs);
   }
@@ -143,7 +145,7 @@ export class AlertsService implements IAlertsService {
    * - ILM policy - common policy shared by all AAD indices
    * - Component template - common mappings for fields populated and used by the framework
    */
-  private async initializeCommon(timeoutMs?: number): Promise<boolean> {
+  private async initializeCommon(timeoutMs?: number): Promise<InitializationPromise> {
     try {
       this.options.logger.debug(`Initializing resources for AlertsService`);
       const esClient = await this.options.elasticsearchClientPromise;
@@ -181,14 +183,14 @@ export class AlertsService implements IAlertsService {
       }
 
       this.initialized = true;
+      return successResult();
     } catch (err) {
       this.options.logger.error(
         `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - ${err.message}`
       );
       this.initialized = false;
+      return errorResult(err.message);
     }
-
-    return this.initialized;
   }
 
   private async initializeContext(

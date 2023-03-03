@@ -87,7 +87,12 @@ import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
-import { AlertsService, PublicFrameworkAlertsService } from './alerts_service/alerts_service';
+import {
+  AlertsService,
+  type PublicFrameworkAlertsService,
+  type InitializationPromise,
+  errorResult,
+} from './alerts_service';
 import { rulesSettingsFeature } from './rules_settings_feature';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
@@ -388,12 +393,12 @@ export class AlertingPlugin {
       },
       frameworkAlerts: {
         enabled: () => this.config.enableFrameworkAlerts,
-        getContextInitializationPromise: (context: string): Promise<boolean> => {
+        getContextInitializationPromise: (context: string): Promise<InitializationPromise> => {
           if (this.alertsService) {
             return this.alertsService.getContextInitializationPromise(context);
           }
 
-          return Promise.resolve(false);
+          return Promise.resolve(errorResult(`Framework alerts service not available`));
         },
       },
     };
