@@ -11,7 +11,7 @@ import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { PublicFrameworkAlertsService } from '@kbn/alerting-plugin/server';
+import { type PublicFrameworkAlertsService } from '@kbn/alerting-plugin/server';
 import { INDEX_PREFIX } from '../config';
 import { type IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
 import { IndexInfo } from './index_info';

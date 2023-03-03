@@ -51,7 +51,7 @@ export const getIndexTemplateAndPattern = ({
 
 type GetComponentTemplateOpts = GetComponentTemplateNameOpts & {
   fieldMap: FieldMap;
-  dynamic?: 'strict' | boolean;
+  dynamic?: 'strict' | false;
   includeSettings?: boolean;
 };
 

@@ -16,7 +16,7 @@ import {
   DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,
   ECS_COMPONENT_TEMPLATE_NAME,
-  PublicFrameworkAlertsService,
+  type PublicFrameworkAlertsService,
 } from '@kbn/alerting-plugin/server';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';

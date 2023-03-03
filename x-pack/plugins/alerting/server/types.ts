@@ -170,7 +170,7 @@ export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
 ) => string;
 
 interface ComponentTemplateSpec {
-  dynamic?: 'strict' | boolean; // defaults to 'strict'
+  dynamic?: 'strict' | false; // defaults to 'strict'
   fieldMap: FieldMap;
 }
 
