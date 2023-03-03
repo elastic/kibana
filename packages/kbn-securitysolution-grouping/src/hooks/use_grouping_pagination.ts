@@ -7,7 +7,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { groupActions, groupByIdSelector } from './use_grouping_state_manager';
+import { groupActions, groupByIdSelector } from './state';
 import { Action, defaultGroup, GroupMap } from './types';
 
 export interface UseGroupingPaginationArgs {

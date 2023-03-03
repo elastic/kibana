@@ -10,7 +10,7 @@ import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useCallback, useEffect } from 'react';
 
 import { getGroupSelector, isNoneGroup } from '../..';
-import { groupActions, groupByIdSelector } from './use_grouping_state_manager';
+import { groupActions, groupByIdSelector } from './state';
 import type { GroupOption } from './types';
 import { Action, defaultGroup, GroupMap } from './types';
 
@@ -82,7 +82,10 @@ export const useGetGroupSelector = ({
       setGroupsActivePage(0);
       setSelectedGroup(groupSelection);
 
-      if (!isNoneGroup(groupSelection) && !options.find((o) => o.key === groupSelection)) {
+      if (
+        !isNoneGroup(groupSelection) &&
+        !options.find((o: GroupOption) => o.key === groupSelection)
+      ) {
         setOptions([
           ...defaultGroupingOptions,
           {
