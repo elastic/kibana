@@ -26,6 +26,7 @@ const notifications: NotificationsStart = {
     remove: () => {},
     get$: () => of([]),
   },
+  showErrorDialog: action('showErrorDialog'),
 };
 
 export const getNotifications = () => notifications;
