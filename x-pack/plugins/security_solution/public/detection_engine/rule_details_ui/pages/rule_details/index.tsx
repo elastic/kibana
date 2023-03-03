@@ -34,7 +34,7 @@ import { isTab } from '@kbn/timelines-plugin/public';
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
 import { AlertsTableComponent } from '../../../../detections/components/alerts_table';
-import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/grouped_alerts';
+import { GroupedAlertsTable } from '../../../../detections/components/alerts_table/alerts_grouping';
 import { useDataTableFilters } from '../../../../common/hooks/use_data_table_filters';
 import { FILTER_OPEN, TableId } from '../../../../../common/types';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
@@ -840,17 +840,19 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                     </Display>
                     {ruleId != null && (
                       <GroupedAlertsTable
-                        tableId={TableId.alertsOnRuleDetailsPage}
-                        defaultFilters={alertMergedFilters}
-                        hasIndexWrite={hasIndexWrite ?? false}
-                        hasIndexMaintenance={hasIndexMaintenance ?? false}
-                        from={from}
-                        loading={loading}
-                        to={to}
-                        signalIndexName={signalIndexName}
-                        runtimeMappings={runtimeMappings}
                         currentAlertStatusFilterValue={filterGroup}
+                        defaultFilters={alertMergedFilters}
+                        from={from}
+                        globalFilters={filters}
+                        globalQuery={query}
+                        hasIndexMaintenance={hasIndexMaintenance ?? false}
+                        hasIndexWrite={hasIndexWrite ?? false}
+                        loading={loading}
                         renderChildComponent={renderGroupedAlertTable}
+                        runtimeMappings={runtimeMappings}
+                        signalIndexName={signalIndexName}
+                        tableId={TableId.alertsOnRuleDetailsPage}
+                        to={to}
                       />
                     )}
                   </>
