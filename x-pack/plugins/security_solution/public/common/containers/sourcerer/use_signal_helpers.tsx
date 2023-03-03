@@ -48,40 +48,62 @@ export const useSignalHelpers = (): {
     () => !defaultDataView.title.includes(`${signalIndexNameSourcerer}`),
     [defaultDataView.title, signalIndexNameSourcerer]
   );
-  const shouldWePollForIndex = useMemo(
-    () => !indicesExist && !signalIndexNeedsInit,
-    [indicesExist, signalIndexNeedsInit]
-  );
+  const shouldWePollForIndex = useMemo(() => {
+    return !indicesExist && !signalIndexNeedsInit;
+  }, [indicesExist, signalIndexNeedsInit]);
 
   const pollForSignalIndex = useCallback(() => {
     const asyncSearch = async () => {
       abortCtrl.current = new AbortController();
       try {
-        const sourcererDataView = await createSourcererDataView({
-          body: { patternList: defaultDataView.title.split(',') },
-          signal: abortCtrl.current.signal,
-          dataViewId,
-          dataViewService: dataViews,
-        });
+        let sourcererDataView;
+
+        if (dataViewId != null) {
+          sourcererDataView = await dataViews.get(dataViewId, true, true);
+        }
+        if (sourcererDataView == null) {
+          sourcererDataView = await createSourcererDataView({
+            body: { patternList: defaultDataView.title.split(',') },
+            signal: abortCtrl.current.signal,
+            dataViewId,
+            dataViewService: dataViews,
+          });
+        }
 
         if (
           signalIndexNameSourcerer !== null &&
-          sourcererDataView?.defaultDataView.patternList.includes(signalIndexNameSourcerer)
+          (sourcererDataView?.defaultDataView.patternList.includes(signalIndexNameSourcerer) ||
+            sourcererDataView?.matchedIndices.includes(signalIndexNameSourcerer))
         ) {
           // first time signals is defined and validated in the sourcerer
           // redo indexFieldsSearch
-          indexFieldsSearch({ dataViewId: sourcererDataView.defaultDataView.id });
+          indexFieldsSearch({
+            dataViewId: sourcererDataView?.defaultDataView.id ?? sourcererDataView?.id,
+          });
           dispatch(sourcererActions.setSourcererDataViews(sourcererDataView));
+        } else {
+          addError('Cannot find alerts index', {
+            title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
+              defaultMessage: 'Error updating Security Data View',
+            }),
+            toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
+              defaultMessage: 'Refresh the page',
+            }),
+          });
         }
       } catch (err) {
-        addError(err, {
-          title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
-            defaultMessage: 'Error updating Security Data View',
-          }),
-          toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
-            defaultMessage: 'Refresh the page',
-          }),
-        });
+        if (err.name === 'AbortError') {
+          // the fetch was canceled, we don't need to do anything about it
+        } else {
+          addError(err, {
+            title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
+              defaultMessage: 'Error updating Security Data View',
+            }),
+            toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
+              defaultMessage: 'Refresh the page',
+            }),
+          });
+        }
       }
     };
 
@@ -99,8 +121,17 @@ export const useSignalHelpers = (): {
     signalIndexNameSourcerer,
   ]);
 
+  const toReturn = useMemo(() => {
+    if (shouldWePollForIndex) {
+      return pollForSignalIndex;
+    } else {
+      return {};
+    }
+  }, [pollForSignalIndex, shouldWePollForIndex]);
+
   return {
-    ...(shouldWePollForIndex ? { pollForSignalIndex } : {}),
+    // ...(shouldWePollForIndex ? { pollForSignalIndex } : {}),
+    ...toReturn,
     signalIndexNeedsInit,
   };
 };

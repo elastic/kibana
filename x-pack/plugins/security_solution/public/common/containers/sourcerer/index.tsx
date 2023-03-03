@@ -244,30 +244,50 @@ export const useInitSourcerer = (
         dispatch(sourcererActions.setSourcererScopeLoading({ loading: true }));
 
         try {
-          const response = await createSourcererDataView({
-            body: { patternList: newPatternList },
-            signal: abortCtrl.current.signal,
-            dataViewService: dataViews,
-            dataViewId,
-          });
+          let sourcererDataView;
 
-          if (response?.defaultDataView.patternList.includes(newSignalsIndex)) {
+          if (dataViewId != null) {
+            sourcererDataView = await dataViews.get(dataViewId, true, true);
+          }
+          if (sourcererDataView == null) {
+            sourcererDataView = await createSourcererDataView({
+              body: { patternList: defaultDataView.title.split(',') },
+              signal: abortCtrl.current.signal,
+              dataViewId,
+              dataViewService: dataViews,
+            });
+          }
+
+          if (sourcererDataView?.defaultDataView.patternList.includes(newSignalsIndex)) {
             // first time signals is defined and validated in the sourcerer
             // redo indexFieldsSearch
-            indexFieldsSearch({ dataViewId: response.defaultDataView.id });
-            dispatch(sourcererActions.setSourcererDataViews(response));
+            indexFieldsSearch({ dataViewId: sourcererDataView.defaultDataView.id });
+            dispatch(sourcererActions.setSourcererDataViews(sourcererDataView));
+          } else {
+            addError('Cannot find alerts index', {
+              title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
+                defaultMessage: 'Error updating Security Data View',
+              }),
+              toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
+                defaultMessage: 'Refresh the page',
+              }),
+            });
           }
           dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
         } catch (err) {
-          addError(err, {
-            title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
-              defaultMessage: 'Error updating Security Data View',
-            }),
-            toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
-              defaultMessage: 'Refresh the page',
-            }),
-          });
-          dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
+          if (err.name === 'AbortError') {
+            // the fetch was canceled, we don't need to do anything about it
+          } else {
+            addError(err, {
+              title: i18n.translate('xpack.securitySolution.sourcerer.error.title', {
+                defaultMessage: 'Error updating Security Data View',
+              }),
+              toastMessage: i18n.translate('xpack.securitySolution.sourcerer.error.toastMessage', {
+                defaultMessage: 'Refresh the page',
+              }),
+            });
+            dispatch(sourcererActions.setSourcererScopeLoading({ loading: false }));
+          }
         }
       };
 
