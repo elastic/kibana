@@ -23,7 +23,7 @@ import {
   createLegacyRuleAction,
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getLegacyActionSO,
   getSimpleMlRule,
@@ -31,7 +31,7 @@ import {
   getSimpleRuleOutput,
   getSlackAction,
   getWebHookAction,
-  installPrePackagedRules,
+  installMockPrebuiltRules,
   removeServerGeneratedProperties,
 } from '../../utils';
 
@@ -76,7 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     it('should export rules', async () => {
@@ -1323,7 +1323,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ];
         cases.forEach(({ type, value }) => {
           it(`should return error when trying to apply "${type}" edit action to prebuilt rule`, async () => {
-            await installPrePackagedRules(supertest, es, log);
+            await installMockPrebuiltRules(supertest, es);
             const prebuiltRule = await fetchPrebuiltRule();
 
             const { body } = await postBulkAction()
@@ -1798,7 +1798,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ];
           cases.forEach(({ type }) => {
             it(`should apply "${type}" rule action to prebuilt rule`, async () => {
-              await installPrePackagedRules(supertest, es, log);
+              await installMockPrebuiltRules(supertest, es);
               const prebuiltRule = await fetchPrebuiltRule();
               const webHookConnector = await createWebHookConnector();
 
@@ -1854,7 +1854,7 @@ export default ({ getService }: FtrProviderContext): void => {
           // if rule action is applied together with another edit action, that can't be applied to prebuilt rule (for example: tags action)
           // bulk edit request should return error
           it(`should return error if one of edit action is not eligible for prebuilt rule`, async () => {
-            await installPrePackagedRules(supertest, es, log);
+            await installMockPrebuiltRules(supertest, es);
             const prebuiltRule = await fetchPrebuiltRule();
             const webHookConnector = await createWebHookConnector();
 

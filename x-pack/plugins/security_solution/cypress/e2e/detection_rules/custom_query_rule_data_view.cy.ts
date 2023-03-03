@@ -9,7 +9,7 @@ import { formatMitreAttackDescription } from '../../helpers/rules';
 import type { Mitre } from '../../objects/rule';
 import { getDataViewRule } from '../../objects/rule';
 import type { CompleteTimeline } from '../../objects/timeline';
-import { ALERT_GRID_CELL, NUMBER_OF_ALERTS } from '../../screens/alerts';
+import { ALERTS_COUNT, ALERT_GRID_CELL } from '../../screens/alerts';
 
 import {
   CUSTOM_RULES_BTN,
@@ -160,7 +160,7 @@ describe('Custom query rules', () => {
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
-      cy.get(NUMBER_OF_ALERTS)
+      cy.get(ALERTS_COUNT)
         .invoke('text')
         .should('match', /^[1-9].+$/);
       cy.get(ALERT_GRID_CELL).contains(this.rule.name);

@@ -27,7 +27,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
     it('returns empty response for importableAndExportable types', async () =>
       await supertest
-        .get('/api/saved_objects/_find?type=test-hidden-importable-exportable&fields=title')
+        .get('/api/saved_objects/_find?type=test-hidden-importable-exportable')
         .set('kbn-xsrf', 'true')
         .expect(200)
         .then((resp) => {
@@ -41,7 +41,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
 
     it('returns empty response for non importableAndExportable types', async () =>
       await supertest
-        .get('/api/saved_objects/_find?type=test-hidden-non-importable-exportable&fields=title')
+        .get('/api/saved_objects/_find?type=test-hidden-non-importable-exportable')
         .set('kbn-xsrf', 'true')
         .expect(200)
         .then((resp) => {

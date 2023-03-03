@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SingleCaseMetricsFeature } from './types';
+import type { SingleCaseMetricsFeature, CaseUserActionTypeWithAll } from './types';
 
 export const DEFAULT_TABLE_ACTIVE_PAGE = 1;
 export const DEFAULT_TABLE_LIMIT = 10;
@@ -15,6 +15,7 @@ export const casesQueriesKeys = {
   users: ['users'] as const,
   connectors: ['connectors'] as const,
   alerts: ['alerts'] as const,
+  userActions: ['user-actions'] as const,
   connectorsList: () => [...casesQueriesKeys.connectors, 'list'] as const,
   casesList: () => [...casesQueriesKeys.all, 'list'] as const,
   casesMetrics: () => [...casesQueriesKeys.casesList(), 'metrics'] as const,
@@ -26,7 +27,22 @@ export const casesQueriesKeys = {
     [...casesQueriesKeys.case(id), 'metrics', features] as const,
   caseConnectors: (id: string) => [...casesQueriesKeys.case(id), 'connectors'],
   caseUsers: (id: string) => [...casesQueriesKeys.case(id), 'users'],
-  userActions: (id: string) => [...casesQueriesKeys.case(id), 'user-actions'] as const,
+  caseUserActions: (
+    id: string,
+    filterActionType: CaseUserActionTypeWithAll,
+    sortOrder: 'asc' | 'desc'
+  ) =>
+    [
+      ...casesQueriesKeys.case(id),
+      ...casesQueriesKeys.userActions,
+      filterActionType,
+      sortOrder,
+    ] as const,
+  caseUserActionsStats: (id: string) => [
+    ...casesQueriesKeys.case(id),
+    ...casesQueriesKeys.userActions,
+    'stats',
+  ],
   userProfiles: () => [...casesQueriesKeys.users, 'user-profiles'] as const,
   userProfilesList: (ids: string[]) => [...casesQueriesKeys.userProfiles(), ids] as const,
   currentUser: () => [...casesQueriesKeys.users, 'current-user'] as const,

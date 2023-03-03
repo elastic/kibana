@@ -12,9 +12,18 @@ import { TestProvider } from '../../../test/test_provider';
 import { mockFindingsHit } from '../__mocks__/findings';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '../../../../common/constants';
 
-const TestComponent = () => (
+const onPaginate = jest.fn();
+
+const TestComponent = ({ ...overrideProps }) => (
   <TestProvider>
-    <FindingsRuleFlyout onClose={jest.fn} findings={mockFindingsHit} />
+    <FindingsRuleFlyout
+      onClose={jest.fn}
+      flyoutIndex={0}
+      findingsCount={2}
+      onPaginate={onPaginate}
+      findings={mockFindingsHit}
+      {...overrideProps}
+    />
   </TestProvider>
 );
 
@@ -65,5 +74,21 @@ describe('<FindingsFlyout/>', () => {
       getAllByText(mockFindingsHit.resource.name);
       getAllByText(mockFindingsHit.resource.id);
     });
+  });
+
+  it('should allow pagination with next', async () => {
+    const { getByTestId } = render(<TestComponent />);
+
+    userEvent.click(getByTestId('pagination-button-next'));
+
+    expect(onPaginate).toHaveBeenCalledWith(1);
+  });
+
+  it('should allow pagination with previous', async () => {
+    const { getByTestId } = render(<TestComponent flyoutIndex={1} />);
+
+    userEvent.click(getByTestId('pagination-button-previous'));
+
+    expect(onPaginate).toHaveBeenCalledWith(0);
   });
 });

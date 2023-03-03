@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { ReportingUsageType } from '@kbn/reporting-plugin/server/usage/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { UsageStats } from '../../services/usage';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -16,18 +16,19 @@ export default function ({ getService }: FtrProviderContext) {
   const usageAPI = getService('usageAPI');
 
   describe('initial state', () => {
-    let usage: UsageStats;
+    let usage: ReportingUsageType;
 
     before(async () => {
       await retry.try(async () => {
         // use retry for stability - usage API could return 503
-        usage = (await usageAPI.getUsageStats()) as UsageStats;
+        const [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
+        usage = stats.stack_stats.kibana.plugins.reporting;
       });
     });
 
     it('shows reporting as available and enabled', async () => {
-      expect(usage.reporting.available).to.be(true);
-      expect(usage.reporting.enabled).to.be(true);
+      expect(usage.available).to.be(true);
+      expect(usage.enabled).to.be(true);
     });
 
     it('all counts are 0', async () => {

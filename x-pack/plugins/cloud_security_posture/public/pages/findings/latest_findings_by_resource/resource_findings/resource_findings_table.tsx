@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiEmptyPrompt,
   EuiBasicTable,
@@ -34,6 +34,10 @@ export interface ResourceFindingsTableProps {
   sorting: Required<EuiBasicTableProps<CspFinding>>['sorting'];
   setTableOptions(options: CriteriaWithPagination<CspFinding>): void;
   onAddFilter: OnAddFilter;
+  onPaginateFlyout: (pageIndex: number) => void;
+  onCloseFlyout: () => void;
+  onOpenFlyout: (finding: CspFinding) => void;
+  flyoutFindingIndex: number;
 }
 
 const ResourceFindingsTableComponent = ({
@@ -43,9 +47,14 @@ const ResourceFindingsTableComponent = ({
   sorting,
   setTableOptions,
   onAddFilter,
+  onOpenFlyout,
+  flyoutFindingIndex,
+  onPaginateFlyout,
+  onCloseFlyout,
 }: ResourceFindingsTableProps) => {
   const { euiTheme } = useEuiTheme();
-  const [selectedFinding, setSelectedFinding] = useState<CspFinding>();
+
+  const selectedFinding = items[flyoutFindingIndex];
 
   const getRowProps = (row: CspFinding) => ({
     style: getSelectedRowStyle(euiTheme, row, selectedFinding),
@@ -57,14 +66,14 @@ const ResourceFindingsTableComponent = ({
     ...Array<EuiBasicTableColumn<CspFinding>>
   ] = useMemo(
     () => [
-      getExpandColumn<CspFinding>({ onClick: setSelectedFinding }),
+      getExpandColumn<CspFinding>({ onClick: onOpenFlyout }),
       createColumnWithFilters(baseFindingsColumns['result.evaluation'], { onAddFilter }),
       baseFindingsColumns['rule.benchmark.rule_number'],
       createColumnWithFilters(baseFindingsColumns['rule.name'], { onAddFilter }),
       createColumnWithFilters(baseFindingsColumns['rule.section'], { onAddFilter }),
       baseFindingsColumns['@timestamp'],
     ],
-    [onAddFilter]
+    [onAddFilter, onOpenFlyout]
   );
 
   if (!loading && !items.length)
@@ -98,7 +107,10 @@ const ResourceFindingsTableComponent = ({
       {selectedFinding && (
         <FindingsRuleFlyout
           findings={selectedFinding}
-          onClose={() => setSelectedFinding(undefined)}
+          onClose={onCloseFlyout}
+          findingsCount={pagination.totalItemCount}
+          flyoutIndex={flyoutFindingIndex + pagination.pageIndex * pagination.pageSize}
+          onPaginate={onPaginateFlyout}
         />
       )}
     </>

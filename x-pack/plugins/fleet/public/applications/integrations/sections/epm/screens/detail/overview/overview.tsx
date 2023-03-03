@@ -15,7 +15,11 @@ import {
   isPackagePrerelease,
 } from '../../../../../../../../common/services';
 
-import { useFleetStatus, useLink, useStartServices } from '../../../../../../../hooks';
+import {
+  useGetPackageVerificationKeyId,
+  useLink,
+  useStartServices,
+} from '../../../../../../../hooks';
 import { isPackageUnverified } from '../../../../../../../services';
 import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 
@@ -115,7 +119,7 @@ export const OverviewPage: React.FC<Props> = memo(
       () => integrationInfo?.screenshots || packageInfo.screenshots || [],
       [integrationInfo, packageInfo.screenshots]
     );
-    const { packageVerificationKeyId } = useFleetStatus();
+    const { packageVerificationKeyId } = useGetPackageVerificationKeyId();
     const isUnverified = isPackageUnverified(packageInfo, packageVerificationKeyId);
     const isPrerelease = isPackagePrerelease(packageInfo.version);
     return (

@@ -101,6 +101,7 @@ export const generateSavedObjectParams = ({
         last_run: {
           timestamp: '1970-01-01T00:00:00.000Z',
           metrics: {
+            duration: 0,
             gap_duration_s: null,
             total_alerts_created: null,
             total_alerts_detected: null,
@@ -281,6 +282,7 @@ export const generateRunnerResult = ({
         history: history.map((success) => ({ success, timestamp: 0 })),
         last_run: {
           metrics: {
+            duration: 0,
             gap_duration_s: null,
             total_alerts_created: null,
             total_alerts_detected: null,

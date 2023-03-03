@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { EuiButtonIcon, EuiConfirmModal, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { useFleetPermissions } from '../../../hooks';
+import { useFleetPermissions, useCanManagePrivateLocation } from '../../../hooks';
 import { CANNOT_SAVE_INTEGRATION_LABEL } from '../../common/components/permissions';
 
 export const DeleteLocation = ({
@@ -30,6 +30,7 @@ export const DeleteLocation = ({
 
   const { canSave } = useSyntheticsSettingsContext();
   const { canSaveIntegrations } = useFleetPermissions();
+  const canManagePrivateLocation = useCanManagePrivateLocation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -62,7 +63,9 @@ export const DeleteLocation = ({
   return (
     <>
       {isModalOpen && deleteModal}
-      <EuiToolTip content={canDelete && canSaveIntegrations ? DELETE_LABEL : deleteDisabledReason}>
+      <EuiToolTip
+        content={canDelete && canManagePrivateLocation ? DELETE_LABEL : deleteDisabledReason}
+      >
         <EuiButtonIcon
           data-test-subj={`deleteLocation-${id}`}
           isLoading={loading}
@@ -72,7 +75,7 @@ export const DeleteLocation = ({
           onClick={() => {
             setIsModalOpen(true);
           }}
-          isDisabled={!canDelete || !canSave}
+          isDisabled={!canDelete || !canManagePrivateLocation || !canSave}
         />
       </EuiToolTip>
     </>

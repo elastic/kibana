@@ -7,7 +7,7 @@
 
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosRequestConfig } from 'axios';
-import { ChildProcess, spawn } from 'child_process';
+import execa from 'execa';
 import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
 
@@ -22,7 +22,7 @@ export interface AgentManagerParams {
 export class AgentManager extends Manager {
   private params: AgentManagerParams;
   private log: ToolingLog;
-  private agentProcess?: ChildProcess;
+  private agentContainerId?: string;
   private requestOptions: AxiosRequestConfig;
   constructor(params: AgentManagerParams, log: ToolingLog, requestOptions: AxiosRequestConfig) {
     super();
@@ -33,34 +33,40 @@ export class AgentManager extends Manager {
 
   public async setup() {
     this.log.info('Running agent preconfig');
-    return await axios.post(
-      `${this.params.kibanaUrl}/api/fleet/agents/setup`,
-      {},
+
+    await axios.post(
+      `${this.params.kibanaUrl}/api/fleet/agent_policies?sys_monitoring=true`,
+      {
+        name: 'Osquery policy',
+        description: '',
+        namespace: 'default',
+        monitoring_enabled: ['logs', 'metrics'],
+        inactivity_timeout: 1209600,
+      },
       this.requestOptions
     );
-  }
 
-  public async startAgent() {
     this.log.info('Getting agent enrollment key');
     const { data: apiKeys } = await axios.get(
       this.params.kibanaUrl + '/api/fleet/enrollment_api_keys',
       this.requestOptions
     );
-    const policy = apiKeys.items[1];
+    const policy = apiKeys.items[0];
 
     this.log.info('Running the agent');
 
     const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
     this.log.info(artifact);
 
-    const args = [
+    const dockerArgs = [
       'run',
+      '--detach',
       '--add-host',
       'host.docker.internal:host-gateway',
       '--env',
       'FLEET_ENROLL=1',
       '--env',
-      `FLEET_URL=http://host.docker.internal:8220`,
+      `FLEET_URL=https://host.docker.internal:8220`,
       '--env',
       `FLEET_ENROLLMENT_TOKEN=${policy.api_key}`,
       '--env',
@@ -69,7 +75,7 @@ export class AgentManager extends Manager {
       artifact,
     ];
 
-    this.agentProcess = spawn('docker', args, { stdio: 'inherit' });
+    this.agentContainerId = (await execa('docker', dockerArgs)).stdout;
 
     // Wait til we see the agent is online
     let done = false;
@@ -92,15 +98,11 @@ export class AgentManager extends Manager {
 
   protected _cleanup() {
     this.log.info('Cleaning up the agent process');
-    if (this.agentProcess) {
-      if (!this.agentProcess.kill(9)) {
-        this.log.warning('Unable to kill agent process');
-      }
+    if (this.agentContainerId) {
+      this.log.info('Closing agent process');
 
-      this.agentProcess.on('close', () => {
-        this.log.info('Agent process closed');
-      });
-      delete this.agentProcess;
+      execa.sync('docker', ['kill', this.agentContainerId]);
+      this.log.info('Agent process closed');
     }
     return;
   }

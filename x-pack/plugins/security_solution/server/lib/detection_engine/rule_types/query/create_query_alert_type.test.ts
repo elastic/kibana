@@ -14,13 +14,13 @@ import { createSecurityRuleTypeWrapper } from '../create_security_rule_type_wrap
 import { createMockConfig } from '../../routes/__mocks__';
 import { createMockTelemetryEventsSender } from '../../../telemetry/__mocks__';
 import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
-import { sampleDocNoSortId } from '../../signals/__mocks__/es_results';
+import { sampleDocNoSortId } from '../__mocks__/es_results';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 
-jest.mock('../../signals/utils', () => ({
-  ...jest.requireActual('../../signals/utils'),
+jest.mock('../utils/utils', () => ({
+  ...jest.requireActual('../utils/utils'),
   getExceptions: () => [],
 }));
 

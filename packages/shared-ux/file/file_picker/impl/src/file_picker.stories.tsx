@@ -10,7 +10,7 @@ import React from 'react';
 import { ComponentMeta, ComponentStory } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { base64dLogo } from '@kbn/shared-ux-file-image-mocks';
-import type { FileImageMetadata, FileKind } from '@kbn/shared-ux-file-types';
+import type { FileImageMetadata, FileKindBrowser } from '@kbn/shared-ux-file-types';
 import type { FileJSON, BaseFilesClient as FilesClient } from '@kbn/shared-ux-file-types';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 import { FilePicker, Props as FilePickerProps } from './file_picker';
@@ -23,7 +23,7 @@ const getFileKind = (id: string) =>
     id: kind,
     http: {},
     allowedMimeTypes: ['*'],
-  } as FileKind);
+  } as FileKindBrowser);
 
 const defaultProps: FilePickerProps = {
   kind,

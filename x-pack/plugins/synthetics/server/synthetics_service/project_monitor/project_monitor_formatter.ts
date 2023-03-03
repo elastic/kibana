@@ -120,11 +120,11 @@ export class ProjectMonitorFormatter {
   }
 
   init = async () => {
-    const locationsPromise = getAllLocations(
-      this.server,
-      this.syntheticsMonitorClient,
-      this.savedObjectsClient
-    );
+    const locationsPromise = getAllLocations({
+      server: this.server,
+      syntheticsMonitorClient: this.syntheticsMonitorClient,
+      savedObjectsClient: this.savedObjectsClient,
+    });
     const existingMonitorsPromise = this.getProjectMonitorsForProject();
 
     const [locations, existingMonitors] = await Promise.all([
