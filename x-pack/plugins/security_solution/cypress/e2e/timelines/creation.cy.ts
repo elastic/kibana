@@ -42,9 +42,11 @@ import {
   goToQueryTab,
   pinFirstEvent,
   populateTimeline,
+  waitForTimelineChanges,
 } from '../../tasks/timeline';
 
 import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../urls/navigation';
+import { EQL_QUERY_VALIDATION_ERROR } from '../../screens/create_new_rule';
 
 describe('Create a timeline from a template', () => {
   before(() => {
@@ -143,7 +145,7 @@ describe('Timelines', (): void => {
         .should('have.text', getTimeline().notes);
     });
 
-    describe.only('correlation tab', () => {
+    describe('correlation tab', () => {
       it('should update timeline after adding eql', () => {
         cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
         const eql = 'any where process.name == "zsh"';
@@ -157,32 +159,52 @@ describe('Timelines', (): void => {
           .should('be.gt', 0);
       });
 
-      it('should update timeline after removing eql', () => {
-        cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+      describe('updates', () => {
         const eql = 'any where process.name == "zsh"';
-        addEqlToTimeline(eql);
-        cy.get(TIMELINE_CORRELATION_INPUT).clear();
-        // We reload as a guarantee since checking the request when multiple occur
-        // can often times group the requests and parse the wrong one
-        cy.reload();
-        cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
+        beforeEach(() => {
+          cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+          addEqlToTimeline(eql);
+          // TODO: It may need a further refactor to handle the frequency with which react calls this api
+          // Since it's based on real time text changes...and real time query validation
+          // there's almost no guarantee on the number of calls, so a cypress.wait may actually be more appropriate
+          cy.wait('@updateTimeline');
+          cy.wait('@updateTimeline');
+          cy.reload();
+          cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
+          cy.get(TIMELINE_CORRELATION_INPUT).should('have.text', eql);
+        });
 
-        // The count does not exist when the query is empty
-        cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`).should('not.exist');
+        it('should update timeline after removing eql', () => {
+          cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+          cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
+          waitForTimelineChanges();
+          cy.get(TIMELINE_CORRELATION_INPUT).type('{selectAll} {del}').clear();
+          // TODO: It may need a further refactor to handle the frequency with which react calls this api
+          // Since it's based on real time text changes...and real time query validation
+          // there's almost no guarantee on the number of calls, so a cypress.wait may actually be more appropriate
+          cy.wait('@updateTimeline');
+          cy.wait('@updateTimeline');
+          cy.wait('@updateTimeline');
+          cy.wait('@updateTimeline');
+          waitForTimelineChanges();
+          cy.reload();
+          cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
+
+          cy.get(TIMELINE_CORRELATION_INPUT).should('have.text', '');
+        });
+
+        it('should NOT update timeline after adding wrong eql', () => {
+          cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
+          const nonFunctionalEql = 'this is not valid eql';
+          addEqlToTimeline(nonFunctionalEql);
+          cy.get(EQL_QUERY_VALIDATION_ERROR).should('be.visible');
+          cy.reload();
+          cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
+
+          cy.get(TIMELINE_CORRELATION_INPUT).should('have.text', eql);
+        });
       });
-
-      it('should NOT update timeline after adding wrong eql', () => {
-        cy.intercept('PATCH', '/api/timeline').as('updateTimeline');
-        const badEql = 'this is not valid eql';
-        addEqlToTimeline(badEql);
-        // We reload as a guarantee since checking the request when multiple occur
-        // can often times group the requests and parse the wrong one
-        cy.reload();
-        cy.get(TIMELINE_CORRELATION_INPUT).should('be.visible');
-
-        // The count does not exist when the query is empty
-        cy.get(`${TIMELINE_TAB_CONTENT_EQL} ${SERVER_SIDE_EVENT_COUNT}`).should('not.exist');
-      });
+      // We reload as a guarantee that the query saved as expected
     });
   });
 });
