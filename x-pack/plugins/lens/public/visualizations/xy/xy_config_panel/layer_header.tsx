@@ -19,7 +19,12 @@ import { State, visualizationTypes, SeriesType, XYAnnotationLayerConfig } from '
 import { isHorizontalChart, isHorizontalSeries } from '../state_helpers';
 import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
 import { updateLayer } from '.';
-import { isAnnotationsLayer, isDataLayer, isReferenceLayer } from '../visualization_helpers';
+import {
+  isAnnotationsLayer,
+  isByReferenceAnnotationsLayer,
+  isDataLayer,
+  isReferenceLayer,
+} from '../visualization_helpers';
 
 export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   const layer = props.state.layers.find((l) => l.layerId === props.layerId);
@@ -30,7 +35,11 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
     return <ReferenceLayerHeader />;
   }
   if (isAnnotationsLayer(layer)) {
-    return <AnnotationsLayerHeader />;
+    return (
+      <AnnotationsLayerHeader
+        title={isByReferenceAnnotationsLayer(layer) ? layer.__lastSaved.title : undefined}
+      />
+    );
   }
   return <DataLayerHeader {...props} />;
 }
@@ -54,13 +63,16 @@ function ReferenceLayerHeader() {
   );
 }
 
-function AnnotationsLayerHeader() {
+function AnnotationsLayerHeader({ title }: { title: string | undefined }) {
   return (
     <StaticHeader
       icon={IconChartBarAnnotations}
-      label={i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
-        defaultMessage: 'Annotations',
-      })}
+      label={
+        title ||
+        i18n.translate('xpack.lens.xyChart.layerAnnotationsLabel', {
+          defaultMessage: 'Annotations',
+        })
+      }
     />
   );
 }
