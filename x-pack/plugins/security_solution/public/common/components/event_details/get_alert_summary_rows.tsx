@@ -6,7 +6,7 @@
  */
 
 import { find, isEmpty, uniqBy } from 'lodash/fp';
-import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS, ALERT_RULE_TYPE, ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS } from '@kbn/rule-data-utils';
 
 import { EventCode, EventCategory } from '@kbn/securitysolution-ecs';
 import * as i18n from './translations';
@@ -294,7 +294,10 @@ export const getSummaryRows = ({
     ? eventRuleTypeField?.originalValue?.[0]
     : eventRuleTypeField?.originalValue;
 
-  const customHighlightedFields = useCustomHighlightedFields();
+  const customRuleHighlightedFieldsField = find({ category: 'kibana', field: ALERT_RULE_CUSTOM_HIGHLIGHTED_FIELDS }, data);
+  const customRuleHighlightedFields = customRuleHighlightedFieldsField?.originalValue;
+    
+  const customHighlightedFields = [...useCustomHighlightedFields(), ...customRuleHighlightedFields ?? []];
   const eventSummaryCustoms: EventSummaryField[] = customHighlightedFields.map(
     (custom: string) => ({'id': custom})
   );
