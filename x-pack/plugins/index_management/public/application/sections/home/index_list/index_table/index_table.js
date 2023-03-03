@@ -35,7 +35,6 @@ import {
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
   EuiText,
-  EuiButtonIcon, EuiBadge,
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
