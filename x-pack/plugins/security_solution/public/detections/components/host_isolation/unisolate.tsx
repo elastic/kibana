@@ -38,7 +38,11 @@ export const UnisolateHost = React.memo(
       return caseInfo.id;
     });
 
-    const { loading, unIsolateHost } = useHostUnisolation({ endpointId, comment, caseIds });
+    const { loading, unIsolateHost } = useHostUnisolation({
+      endpointId,
+      comment,
+      caseIds: caseIds.length > 0 ? caseIds : undefined,
+    });
 
     const confirmHostUnIsolation = useCallback(async () => {
       const hostUnIsolated = await unIsolateHost();
