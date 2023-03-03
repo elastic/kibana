@@ -39,13 +39,16 @@ export const getAllGroupsInStorage = (storage: Storage): GroupsById => {
   if (!allGroups) {
     return EMPTY_GROUP;
   }
-  return allGroups;
+  return JSON.parse(allGroups);
 };
 
 export const addGroupsToStorage = (storage: Storage, groupingId: string, group: GroupModel) => {
   const groups = getAllGroupsInStorage(storage);
-  storage.setItem(LOCAL_STORAGE_GROUPING_KEY, {
-    ...groups,
-    [groupingId]: group,
-  });
+  storage.setItem(
+    LOCAL_STORAGE_GROUPING_KEY,
+    JSON.stringify({
+      ...groups,
+      [groupingId]: group,
+    })
+  );
 };
