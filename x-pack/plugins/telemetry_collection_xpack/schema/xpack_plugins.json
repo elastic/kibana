@@ -2781,6 +2781,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -2861,6 +2867,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -2949,6 +2961,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3029,6 +3047,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -3117,6 +3141,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3197,6 +3227,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -3285,6 +3321,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3365,6 +3407,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -3453,6 +3501,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3537,6 +3591,12 @@
                       "items": {
                         "type": "keyword"
                       }
+                    },
+                    "activation_method": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
                     }
                   }
                 },
@@ -3617,6 +3677,12 @@
                 "agent": {
                   "properties": {
                     "version": {
+                      "type": "array",
+                      "items": {
+                        "type": "keyword"
+                      }
+                    },
+                    "activation_method": {
                       "type": "array",
                       "items": {
                         "type": "keyword"
@@ -4222,6 +4288,9 @@
                     "type": "keyword"
                   },
                   "version": {
+                    "type": "keyword"
+                  },
+                  "activation_method": {
                     "type": "keyword"
                   }
                 }

@@ -448,6 +448,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer size="l" />
             </Display>
             <AlertsTable
+              filterGroup={filterGroup}
               tableId={TableId.alertsOnAlertsPage}
               loading={isAlertTableLoading}
               hasIndexWrite={hasIndexWrite ?? false}

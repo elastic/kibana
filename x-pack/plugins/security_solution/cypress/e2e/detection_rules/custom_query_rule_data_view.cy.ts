@@ -16,7 +16,7 @@ import {
   RISK_SCORE,
   RULE_NAME,
   RULES_ROW,
-  RULES_TABLE,
+  RULES_MANAGEMENT_TABLE,
   RULE_SWITCH,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
@@ -115,7 +115,7 @@ describe('Custom query rules', () => {
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-      cy.get(RULES_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
+      cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
       cy.get(RULE_NAME).should('have.text', this.rule.name);
       cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
       cy.get(SEVERITY).should('have.text', this.rule.severity);

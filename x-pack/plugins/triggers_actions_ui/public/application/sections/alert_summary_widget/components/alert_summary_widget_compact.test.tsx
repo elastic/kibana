@@ -8,17 +8,17 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
-  AlertsSummaryWidgetCompact,
-  AlertsSummaryWidgetCompactProps,
+  AlertSummaryWidgetCompact,
+  AlertSummaryWidgetCompactProps,
 } from './alert_summary_widget_compact';
 import { render } from '@testing-library/react';
 import { mockedAlertSummaryResponse, mockedChartThemes } from '../../../mock/alert_summary_widget';
 
-describe('AlertsSummaryWidgetCompact', () => {
-  const renderComponent = (props: Partial<AlertsSummaryWidgetCompactProps> = {}) =>
+describe('AlertSummaryWidgetCompact', () => {
+  const renderComponent = (props: Partial<AlertSummaryWidgetCompactProps> = {}) =>
     render(
       <IntlProvider locale="en">
-        <AlertsSummaryWidgetCompact
+        <AlertSummaryWidgetCompact
           chartThemes={mockedChartThemes}
           onClick={jest.fn}
           {...mockedAlertSummaryResponse}
@@ -27,7 +27,7 @@ describe('AlertsSummaryWidgetCompact', () => {
       </IntlProvider>
     );
 
-  it('should render AlertsSummaryWidgetCompact', async () => {
+  it('should render AlertSummaryWidgetCompact', async () => {
     const alertSummaryWidget = renderComponent();
 
     expect(alertSummaryWidget.queryByTestId('alertSummaryWidgetCompact')).toBeTruthy();

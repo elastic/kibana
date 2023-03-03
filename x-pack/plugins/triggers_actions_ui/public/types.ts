@@ -207,6 +207,7 @@ export interface ActionParamsProps<TParams> {
   errors: IErrorObject;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
+  useDefaultMessage?: boolean;
   actionConnector?: ActionConnector;
   isLoading?: boolean;
   isDisabled?: boolean;
@@ -665,4 +666,8 @@ export interface UpdateRulesToBulkEditProps {
   action: BulkEditActions;
   rules?: RuleTableItem[];
   filter?: KueryNode | null;
+}
+
+export interface LazyLoadProps {
+  hideLazyLoader?: boolean;
 }

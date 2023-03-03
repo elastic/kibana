@@ -41,7 +41,6 @@ import {
   exceptionListItemToTelemetryEntry,
   trustedApplicationToTelemetryEntry,
   ruleExceptionListItemToTelemetryEvent,
-  metricsResponseToValueListMetaData,
   tlog,
 } from './helpers';
 import { Fetcher } from '../../endpoint/routes/resolver/tree/utils/fetch';
@@ -55,7 +54,7 @@ import type {
   GetEndpointListResponse,
   RuleSearchResult,
   ExceptionListItem,
-  ValueListMetaData,
+  ValueListResponse,
   ValueListResponseAggregation,
   ValueListItemsResponseAggregation,
   ValueListExceptionListResponseAggregation,
@@ -172,7 +171,7 @@ export interface ITelemetryReceiver {
     nodeIds: string[]
   ): Promise<SearchResponse<SafeEndpointEvent, Record<string, AggregationsAggregate>>>;
 
-  fetchValueListMetaData(interval: number): Promise<ValueListMetaData>;
+  fetchValueListMetaData(interval: number): Promise<ValueListResponse>;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -924,12 +923,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
       exceptionListMetrics as unknown as ValueListExceptionListResponseAggregation;
     const indicatorMatchMetricsResponse =
       indicatorMatchMetrics as unknown as ValueListIndicatorMatchResponseAggregation;
-    return metricsResponseToValueListMetaData({
+    return {
       listMetricsResponse,
       itemMetricsResponse,
       exceptionListMetricsResponse,
       indicatorMatchMetricsResponse,
-    });
+    };
   }
 
   public async fetchClusterInfo(): Promise<ESClusterInfo> {

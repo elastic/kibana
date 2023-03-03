@@ -26,7 +26,7 @@ const getFakeFindingsByResource = (): FindingsByResourcePage => {
   );
 
   return {
-    cluster_id: chance.guid(),
+    belongs_to: chance.guid(),
     resource_id: chance.guid(),
     'resource.name': resourceName,
     'resource.sub_type': resourceSubtype,

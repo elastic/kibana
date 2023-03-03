@@ -35,6 +35,7 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
 }) => {
   const {
     decorations: [decorationConfig],
+    columnToLabel,
   } = layer;
 
   if (!decorationConfig) {
@@ -42,15 +43,19 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
   }
 
   const { value } = decorationConfig;
+  const columnToLabelMap: Record<string, string> = columnToLabel ? JSON.parse(columnToLabel) : {};
 
   const axisGroup = getAxisGroupForReferenceLine(axesConfiguration, decorationConfig, isHorizontal);
 
   const formatter = axisGroup?.formatter || xAxisFormatter;
   const id = `${layer.layerId}-${value}`;
+  const name = decorationConfig.textVisibility
+    ? columnToLabelMap[decorationConfig.forAccessor]
+    : undefined;
 
   return (
     <ReferenceLineAnnotations
-      config={{ id, ...decorationConfig, nextValue, axisGroup }}
+      config={{ id, ...decorationConfig, name, nextValue, axisGroup }}
       paddingMap={paddingMap}
       axesMap={yAxesMap}
       formatter={formatter}

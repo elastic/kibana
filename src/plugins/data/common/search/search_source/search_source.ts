@@ -82,7 +82,13 @@ import {
 } from 'rxjs/operators';
 import { defer, EMPTY, from, lastValueFrom, Observable } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { buildEsQuery, Filter, isOfQueryType, isPhraseFilter } from '@kbn/es-query';
+import {
+  buildEsQuery,
+  Filter,
+  isOfQueryType,
+  isPhraseFilter,
+  isPhrasesFilter,
+} from '@kbn/es-query';
 import { fieldWildcardFilter } from '@kbn/kibana-utils-plugin/common';
 import { getHighlightRequest } from '@kbn/field-formats-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -279,12 +285,16 @@ export class SearchSource {
           }, []) ?? [];
 
     const activeIndexPattern = filters?.reduce((acc, f) => {
-      if (isPhraseFilter(f)) {
+      const isPhraseFilterType = isPhraseFilter(f);
+      const isPhrasesFilterType = isPhrasesFilter(f);
+      const filtersToChange = isPhraseFilterType ? f.meta.params?.query : f.meta.params;
+      const filtersArray = Array.isArray(filtersToChange) ? filtersToChange : [filtersToChange];
+      if (isPhraseFilterType || isPhrasesFilterType) {
         if (f.meta.key === '_index' && f.meta.disabled === false) {
           if (f.meta.negate === false) {
-            return concat(acc, f.meta.params?.query ?? f.meta.params);
+            return concat(acc, filtersArray);
           } else {
-            return difference(acc, [f.meta.params?.query]);
+            return difference(acc, filtersArray);
           }
         } else {
           return acc;

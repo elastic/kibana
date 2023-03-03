@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTablePagination } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiProgress,
+  EuiSpacer,
+  EuiTablePagination,
+} from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
 import { firstNonNullValue } from '../../../../../common/endpoint/models/ecs_safety_helpers';
@@ -36,6 +42,7 @@ interface GroupingContainerProps {
   groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element | undefined;
   groupsSelector?: JSX.Element;
   inspectButton?: JSX.Element;
+  isLoading: boolean;
   pagination: {
     pageIndex: number;
     pageSize: number;
@@ -55,6 +62,7 @@ const GroupingContainerComponent = ({
   groupPanelRenderer,
   groupsSelector,
   inspectButton,
+  isLoading,
   pagination,
   renderChildComponent,
   selectedGroup,
@@ -67,12 +75,9 @@ const GroupingContainerComponent = ({
 
   const groupsNumber = data?.groupsNumber?.value ?? 0;
   const unitCountText = useMemo(() => {
-    const count =
-      data?.alertsCount?.buckets && data?.alertsCount?.buckets.length > 0
-        ? data?.alertsCount?.buckets[0].doc_count ?? 0
-        : 0;
+    const count = data?.alertsCount?.value ?? 0;
     return `${count.toLocaleString()} ${unit && unit(count)}`;
-  }, [data?.alertsCount?.buckets, unit]);
+  }, [data?.alertsCount?.value, unit]);
 
   const unitGroupsCountText = useMemo(
     () => `${groupsNumber.toLocaleString()} ${GROUPS_UNIT(groupsNumber)}`,
@@ -99,6 +104,7 @@ const GroupingContainerComponent = ({
               forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
               groupBucket={groupBucket}
               groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
+              isLoading={isLoading}
               onToggleGroup={(isOpen) => {
                 setTrigger({
                   // ...trigger, -> this change will keep only one group at a time expanded and one table displayed
@@ -124,6 +130,7 @@ const GroupingContainerComponent = ({
       customMetricStats,
       data.stackByMultipleFields0?.buckets,
       groupPanelRenderer,
+      isLoading,
       renderChildComponent,
       selectedGroup,
       takeActionItems,
@@ -137,6 +144,7 @@ const GroupingContainerComponent = ({
   return (
     <>
       <EuiFlexGroup
+        data-test-subj="grouping-table"
         justifyContent="spaceBetween"
         alignItems="center"
         style={{ paddingBottom: 20, paddingTop: 20 }}
@@ -179,7 +187,12 @@ const GroupingContainerComponent = ({
             />
           </>
         ) : (
-          <EmptyGroupingComponent />
+          <>
+            {isLoading && (
+              <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
+            )}
+            <EmptyGroupingComponent />
+          </>
         )}
       </GroupingStyledContainer>
     </>

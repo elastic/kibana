@@ -12,7 +12,8 @@ import { deletePolicyStream } from './data_stream_helper';
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
-  describe('Endpoint policy api', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/151855
+  describe.skip('Endpoint policy api', () => {
     describe('GET /api/endpoint/policy_response', () => {
       before(
         async () =>

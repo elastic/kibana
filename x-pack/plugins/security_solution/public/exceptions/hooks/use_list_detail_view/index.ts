@@ -175,7 +175,7 @@ export const useListDetailsView = (exceptionListId: string) => {
           onError: (error: Error) => handleErrorStatus(error),
           onSuccess: (blob) => {
             setExportedList(blob);
-            toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(list.list_id));
+            toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(list.name));
           },
         });
       } catch (error) {

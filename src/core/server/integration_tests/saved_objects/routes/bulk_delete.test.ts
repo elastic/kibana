@@ -18,6 +18,7 @@ import {
   registerBulkDeleteRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
+import { loggerMock } from '@kbn/logging-mocks';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -32,6 +33,7 @@ describe('POST /api/saved_objects/_bulk_delete', () => {
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
+  let loggerWarnSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -52,7 +54,9 @@ describe('POST /api/saved_objects/_bulk_delete', () => {
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsBulkDelete.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
-    registerBulkDeleteRoute(router, { coreUsageData });
+    const logger = loggerMock.create();
+    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registerBulkDeleteRoute(router, { coreUsageData, logger });
 
     await server.start();
   });
@@ -132,5 +136,18 @@ describe('POST /api/saved_objects/_bulk_delete', () => {
       .query({ force: true })
       .expect(400);
     expect(result.body.message).toContain('Unsupported saved object type(s):');
+  });
+
+  it('logs a warning message when called', async () => {
+    await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_delete')
+      .send([
+        {
+          id: 'hiddenID',
+          type: 'hidden-from-http',
+        },
+      ])
+      .expect(400);
+    expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
   });
 });

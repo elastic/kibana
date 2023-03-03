@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { AggregationType, ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { waitForActiveAlert } from '../../../common/utils/wait_for_active_alert';
+import { createApmRule } from '../../alerts/alerting_api_helper';
 import {
   createServiceGroupApi,
   deleteAllServiceGroups,
@@ -26,28 +27,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const start = Date.now() - 24 * 60 * 60 * 1000;
   const end = Date.now();
 
-  async function createRule() {
-    return supertest
-      .post(`/api/alerting/rule`)
-      .set('kbn-xsrf', 'true')
-      .send({
-        params: {
-          serviceName: 'synth-go',
-          transactionType: '',
-          windowSize: 99,
-          windowUnit: 'y',
-          threshold: 100,
-          aggregationType: 'avg',
-          environment: 'testing',
-        },
-        consumer: 'apm',
-        schedule: { interval: '1m' },
-        tags: ['apm'],
-        name: 'Latency threshold | synth-go',
-        rule_type_id: ApmRuleType.TransactionDuration,
-        notify_when: 'onActiveAlert',
-        actions: [],
-      });
+  function createRule() {
+    return createApmRule({
+      supertest,
+      name: 'Latency threshold | synth-go',
+      params: {
+        serviceName: 'synth-go',
+        transactionType: '',
+        windowSize: 99,
+        windowUnit: 'y',
+        threshold: 100,
+        aggregationType: AggregationType.Avg,
+        environment: 'testing',
+      },
+      ruleTypeId: ApmRuleType.TransactionDuration,
+    });
   }
 
   registry.when('Service group counts', { config: 'basic', archives: [] }, () => {
@@ -89,7 +83,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('with alerts', () => {
       let ruleId: string;
       before(async () => {
-        const { body: createdRule } = await createRule();
+        const createdRule = await createRule();
         ruleId = createdRule.id;
         await waitForActiveAlert({ ruleId, esClient, log });
       });

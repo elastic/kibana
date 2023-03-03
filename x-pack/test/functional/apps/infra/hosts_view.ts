@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import moment from 'moment';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES } from './constants';
+import { DATES, HOSTS_LINK_LOCAL_STORAGE_KEY } from './constants';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
@@ -62,6 +62,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       }
     );
 
+    await browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
     await pageObjects.common.navigateToApp('infraOps');
   };
 
@@ -75,6 +76,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const navigateAndDisableHostView = async () => {
     await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+    await browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
     await pageObjects.common.navigateToApp('infraOps');
     await pageObjects.common.navigateToUrl('management', 'kibana/settings', {
       basePath: `/s/default`,
@@ -91,7 +93,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const navigateAndEnableHostView = async () => {
     await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+    await browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
     await pageObjects.common.navigateToApp('infraOps');
+    await pageObjects.infraHome.clickDismissKubernetesTourButton();
     await pageObjects.infraHostsView.clickTryHostViewLink();
     await pageObjects.infraHostsView.clickEnableHostViewButton();
   };
@@ -112,6 +116,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.infraHostsView.clickTryHostViewBadge();
       });
       after(async () => {
+        await browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
         return esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
       });
 
@@ -149,11 +154,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/150143
-    // FLAKY: https://github.com/elastic/kibana/issues/150144
-    // FLAKY: https://github.com/elastic/kibana/issues/150145
-    // FLAKY: https://github.com/elastic/kibana/issues/150146
-    describe.skip('enables hosts view page and checks content', () => {
+    describe('enables hosts view page and checks content', () => {
       before(async () => {
         await navigateAndEnableHostView();
         await pageObjects.timePicker.setAbsoluteRange(
@@ -200,6 +201,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await navigateAndEnableHostView();
         await loginWithReadOnlyUserAndNavigateToInfra();
+        await browser.removeLocalStorageItem(HOSTS_LINK_LOCAL_STORAGE_KEY);
         await pageObjects.infraHostsView.clickTryHostViewLink();
         await pageObjects.timePicker.setAbsoluteRange(
           START_DATE.format(timepickerFormat),

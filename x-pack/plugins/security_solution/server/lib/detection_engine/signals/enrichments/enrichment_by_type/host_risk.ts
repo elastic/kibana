@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { set, cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep } from 'lodash';
 
 import { getHostRiskIndex } from '../../../../../../common/search_strategy/security_solution/risk_score/common';
 import { RiskScoreFields } from '../../../../../../common/search_strategy/security_solution/risk_score/all';

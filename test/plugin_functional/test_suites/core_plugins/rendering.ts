@@ -172,6 +172,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud.is_elastic_staff_owned (boolean)',
         'xpack.cloud.trial_end_date (string)',
         'xpack.cloud_integrations.chat.chatURL (string)',
+        'xpack.cloud_integrations.chat.trialBuffer (number)',
         // No PII. This is an escape patch to override LaunchDarkly's flag resolution mechanism for testing or quick fix.
         'xpack.cloud_integrations.experiments.flag_overrides (record)',
         // Commented because it's inside a schema conditional, and the test is not able to resolve it. But it's shared.
@@ -190,6 +191,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
         'xpack.fleet.enableExperimental (array)',
+        'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number)',
         'xpack.global_search.search_timeout (duration)',
         'xpack.graph.canEditDrillDownUrls (boolean)',
         'xpack.graph.savePolicy (alternatives)',

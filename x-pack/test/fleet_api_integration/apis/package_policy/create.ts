@@ -447,7 +447,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('input only packages', () => {
-      it('should return 400 if dataset not provided for input only pkg', async function () {
+      it('should default dataset if not provided for input only pkg', async function () {
         await supertest
           .post(`/api/fleet/package_policies`)
           .set('kbn-xsrf', 'xxxx')
@@ -476,7 +476,7 @@ export default function (providerContext: FtrProviderContext) {
               },
             },
           })
-          .expect(400);
+          .expect(200);
       });
       it('should successfully create an input only package policy with all required vars', async function () {
         await supertest

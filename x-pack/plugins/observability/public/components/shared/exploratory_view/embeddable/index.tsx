@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
@@ -38,7 +38,29 @@ export function getExploratoryViewEmbeddable(
 
   const lenStateHelperPromise: Promise<{ formula: FormulaPublicApi }> | null = null;
 
+  const lastRefreshed: Record<string, { from: string; to: string }> = {};
+
+  const hasSameTimeRange = (props: ExploratoryEmbeddableProps) => {
+    const { attributes } = props;
+    if (!attributes || attributes?.length === 0) {
+      return false;
+    }
+    const series = attributes[0];
+    const { time } = series;
+    const { from, to } = time;
+    return attributes.every((seriesT) => {
+      const { time: timeT } = seriesT;
+      return timeT.from === from && timeT.to === to;
+    });
+  };
+
   return (props: ExploratoryEmbeddableProps) => {
+    useEffect(() => {
+      if (!services.data.search.session.getSessionId()) {
+        services.data.search.session.start();
+      }
+    }, []);
+
     const { dataTypesIndexPatterns, attributes, customHeight } = props;
 
     if (!dataViewsService || !lens || !attributes || attributes?.length === 0) {
@@ -56,12 +78,43 @@ export function getExploratoryViewEmbeddable(
       return lens.stateHelperApi();
     }, []);
 
+    const [loadCount, setLoadCount] = useState(0);
+
+    const onLensLoaded = useCallback(
+      (lensLoaded: boolean) => {
+        if (lensLoaded && props.id && hasSameTimeRange(props) && !lastRefreshed[props.id]) {
+          lastRefreshed[props.id] = series.time;
+        }
+        setLoadCount((prev) => prev + 1);
+      },
+      [props, series.time]
+    );
+
     const { dataViews, loading } = useAppDataView({
+      series,
       dataViewCache,
       dataViewsService,
       dataTypesIndexPatterns,
       seriesDataType: series?.dataType,
     });
+
+    const embedProps = useMemo(() => {
+      const newProps = { ...props };
+      if (props.sparklineMode) {
+        newProps.axisTitlesVisibility = { x: false, yRight: false, yLeft: false };
+        newProps.legendIsVisible = false;
+        newProps.hideTicks = true;
+      }
+      if (props.id && lastRefreshed[props.id] && loadCount < 2) {
+        newProps.attributes = props.attributes?.map((seriesT) => ({
+          ...seriesT,
+          time: lastRefreshed[props.id!],
+        }));
+      } else if (props.id) {
+        lastRefreshed[props.id] = series.time;
+      }
+      return newProps;
+    }, [loadCount, props, series.time]);
 
     if (Object.keys(dataViews).length === 0 || loading || !lensHelper || lensLoading) {
       return (
@@ -75,13 +128,6 @@ export function getExploratoryViewEmbeddable(
       return <EmptyState height={props.customHeight} />;
     }
 
-    const embedProps = { ...props };
-    if (props.sparklineMode) {
-      embedProps.axisTitlesVisibility = { x: false, yRight: false, yLeft: false };
-      embedProps.legendIsVisible = false;
-      embedProps.hideTicks = true;
-    }
-
     return (
       <EuiErrorBoundary>
         <EuiThemeProvider darkMode={isDarkMode}>
@@ -92,6 +138,8 @@ export function getExploratoryViewEmbeddable(
                 dataViewState={dataViews}
                 lens={lens}
                 lensFormulaHelper={lensHelper.formula}
+                searchSessionId={services.data.search.session.getSessionId()}
+                onLoad={onLensLoaded}
               />
             </Wrapper>
           </KibanaContextProvider>

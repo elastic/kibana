@@ -112,3 +112,11 @@ export const ADD_TO_RULE_OR_LIST_SECTION = '[data-test-subj="exceptionItemAddToR
 export const OS_SELECTION_SECTION = '[data-test-subj="osSelectionDropdown"]';
 
 export const OS_INPUT = '[data-test-subj="osSelectionDropdown"] [data-test-subj="comboBoxInput"]';
+
+export const MANAGE_EXCEPTION_CREATE_BUTTON_MENU =
+  '[data-test-subj="manageExceptionListCreateButton"]';
+
+export const MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION =
+  '[data-test-subj="manageExceptionListCreateExceptionButton"]';
+
+export const RULE_ACTION_LINK_RULE_SWITCH = '[data-test-subj="ruleActionLinkRuleSwitch"]';

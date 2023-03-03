@@ -8,7 +8,12 @@
 import { keys } from 'lodash';
 import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import { Alert } from '../alert';
-import { AlertInstanceState, AlertInstanceContext } from '../types';
+import {
+  AlertInstanceState,
+  AlertInstanceContext,
+  RuleNotifyWhenType,
+  RuleNotifyWhen,
+} from '../types';
 
 export function getAlertsForNotification<
   State extends AlertInstanceState,
@@ -17,15 +22,19 @@ export function getAlertsForNotification<
   RecoveryActionGroupId extends string
 >(
   flappingSettings: RulesSettingsFlappingProperties,
+  notifyWhen: RuleNotifyWhenType | null,
   actionGroupId: string,
   newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
   recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
   currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {}
 ) {
+  const currentActiveAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
+
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
     alert.resetPendingRecoveredCount();
+    currentActiveAlerts[id] = alert;
   }
 
   for (const id of keys(currentRecoveredAlerts)) {
@@ -53,6 +62,11 @@ export function getAlertsForNotification<
           );
           activeAlerts[id] = newAlert;
 
+          // rules with "on status change" should return notifications
+          if (notifyWhen === RuleNotifyWhen.CHANGE) {
+            currentActiveAlerts[id] = newAlert;
+          }
+
           // remove from recovered alerts
           delete recoveredAlerts[id];
           delete currentRecoveredAlerts[id];
@@ -68,6 +82,7 @@ export function getAlertsForNotification<
   return {
     newAlerts,
     activeAlerts,
+    currentActiveAlerts,
     recoveredAlerts,
     currentRecoveredAlerts,
   };

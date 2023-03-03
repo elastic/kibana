@@ -43,7 +43,7 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]): DataViewBase =>
+  (title: string, fields: IndexField[], _includeUnmapped: boolean = false): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -63,7 +63,10 @@ export const getIndexFields = memoizeOne(
           title,
         }
       : { fields: [], title },
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
+  (newArgs, lastArgs) =>
+    newArgs[0] === lastArgs[0] &&
+    newArgs[1].length === lastArgs[1].length &&
+    newArgs[2] === lastArgs[2]
 );
 
 /**
@@ -145,21 +148,24 @@ export const useFetchIndex = (
               if (isCompleteResponse(response)) {
                 Promise.resolve().then(() => {
                   ReactDOM.unstable_batchedUpdates(() => {
-                    const stringifyIndices = `${response.indicesExist
-                      .sort()
-                      .join()} (includeUnmapped: ${includeUnmapped})`;
+                    const stringifyIndices = response.indicesExist.sort().join();
 
                     previousIndexesName.current = response.indicesExist;
                     const { browserFields } = getDataViewStateFromIndexFields(
                       stringifyIndices,
-                      response.indexFields
+                      response.indexFields,
+                      includeUnmapped
                     );
                     setLoading(false);
                     setState({
                       browserFields,
                       indexes: response.indicesExist,
                       indexExists: response.indicesExist.length > 0,
-                      indexPatterns: getIndexFields(stringifyIndices, response.indexFields),
+                      indexPatterns: getIndexFields(
+                        stringifyIndices,
+                        response.indexFields,
+                        includeUnmapped
+                      ),
                     });
 
                     searchSubscription$.current.unsubscribe();

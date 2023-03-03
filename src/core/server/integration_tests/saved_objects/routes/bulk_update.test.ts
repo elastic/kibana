@@ -18,6 +18,7 @@ import {
   registerBulkUpdateRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
+import { loggerMock } from '@kbn/logging-mocks';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -34,6 +35,7 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
+  let loggerWarnSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -51,7 +53,9 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsBulkUpdate.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
-    registerBulkUpdateRoute(router, { coreUsageData });
+    const logger = loggerMock.create();
+    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registerBulkUpdateRoute(router, { coreUsageData, logger });
 
     await server.start();
   });
@@ -168,5 +172,28 @@ describe('PUT /api/saved_objects/_bulk_update', () => {
       ])
       .expect(400);
     expect(result.body.message).toContain('Unsupported saved object type(s):');
+  });
+
+  it('logs a warning message when called', async () => {
+    await supertest(httpSetup.server.listener)
+      .put('/api/saved_objects/_bulk_update')
+      .send([
+        {
+          type: 'visualization',
+          id: 'dd7caf20-9efd-11e7-acb3-3dab96693fab',
+          attributes: {
+            title: 'An existing visualization',
+          },
+        },
+        {
+          type: 'dashboard',
+          id: 'be3733a0-9efe-11e7-acb3-3dab96693fab',
+          attributes: {
+            title: 'An existing dashboard',
+          },
+        },
+      ])
+      .expect(200);
+    expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
   });
 });

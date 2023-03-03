@@ -45,7 +45,7 @@ export const ConnectorConfigurationConfig: React.FC = ({ children }) => {
           displayList.length > 0 && (
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
-                <EuiDescriptionList listItems={displayList} />
+                <EuiDescriptionList listItems={displayList} className="eui-textBreakWord" />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFlexGroup>

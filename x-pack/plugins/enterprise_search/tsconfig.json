@@ -47,5 +47,6 @@
     "@kbn/cypress-config",
     "@kbn/discover-plugin",
     "@kbn/guided-onboarding",
+    "@kbn/safer-lodash-set",
   ]
 }
