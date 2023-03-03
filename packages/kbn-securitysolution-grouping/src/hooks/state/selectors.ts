@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { GroupsById, GroupState } from '@kbn/securitysolution-grouping/src/hooks/types';
+import { GroupsById, GroupState } from '../types';
 
 const selectGroupById = (state: GroupState): GroupsById => state.groups.groupById;
 

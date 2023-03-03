@@ -8,10 +8,7 @@
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useMemo, useReducer } from 'react';
-import {
-  groupsReducer,
-  initialState,
-} from '@kbn/securitysolution-grouping/src/hooks/state/reducer';
+import { groupsReducer, initialState } from './state/reducer';
 import { GroupingProps, GroupSelectorProps } from '..';
 import { useGroupingPagination } from './use_grouping_pagination';
 import { groupActions, groupByIdSelector } from './state';

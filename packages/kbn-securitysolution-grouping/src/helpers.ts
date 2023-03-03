@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { GroupModel, GroupsById } from '@kbn/securitysolution-grouping/src/hooks/types';
+import { GroupModel, GroupsById } from './hooks/types';
 import * as i18n from './components/translations';
 
 /**
