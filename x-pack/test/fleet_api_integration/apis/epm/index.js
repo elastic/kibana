@@ -32,5 +32,6 @@ export default function loadTests({ loadTestFile }) {
     loadTestFile(require.resolve('./install_error_rollback'));
     loadTestFile(require.resolve('./final_pipeline'));
     loadTestFile(require.resolve('./custom_ingest_pipeline'));
+    loadTestFile(require.resolve('./verification_key_id'));
   });
 }

@@ -26,7 +26,10 @@ import type { DataView } from '@kbn/data-plugin/common';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useDatePickerContext } from '../hooks/use_date_picker_context';
-import { setFullTimeRange } from '../services/full_time_range_selector_service';
+import {
+  setFullTimeRange,
+  type SetFullTimeRangeApiPath,
+} from '../services/full_time_range_selector_service';
 import type { GetTimeFieldRangeResponse } from '../services/types';
 import { FROZEN_TIER_PREFERENCE, type FrozenTierPreference } from '../storage';
 
@@ -64,6 +67,11 @@ export interface FullTimeRangeSelectorProps {
    * @param value - The time field range response.
    */
   callback?: (value: GetTimeFieldRangeResponse) => void;
+  /**
+   * Optional API path.
+   * @param value - The time field range response.
+   */
+  apiPath?: SetFullTimeRangeApiPath;
 }
 
 /**
@@ -83,6 +91,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     query,
     disabled,
     callback,
+    apiPath,
   } = props;
   const {
     http,
@@ -98,7 +107,8 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         toasts,
         http,
         query,
-        frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE
+        frozenDataPreference === FROZEN_TIER_PREFERENCE.EXCLUDE,
+        apiPath
       );
       if (typeof callback === 'function') {
         callback(fullTimeRange);
@@ -113,7 +123,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
         )
       );
     }
-  }, [callback, dataView, frozenDataPreference, http, query, timefilter, toasts]);
+  }, [callback, dataView, frozenDataPreference, http, query, timefilter, toasts, apiPath]);
 
   const [isPopoverOpen, setPopover] = useState(false);
 

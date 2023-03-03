@@ -311,6 +311,7 @@ export const Expressions: React.FC<Props> = (props) => {
               setRuleParams={updateParams}
               errors={(errors[idx] as IErrorObject) || emptyError}
               expression={e || {}}
+              dataView={derivedIndexPattern}
             >
               <ExpressionChart
                 expression={e}

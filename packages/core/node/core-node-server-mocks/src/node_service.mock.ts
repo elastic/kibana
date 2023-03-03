@@ -18,6 +18,7 @@ const createInternalPrebootContractMock = () => {
     roles: {
       backgroundTasks: true,
       ui: true,
+      migrator: false,
     },
   };
   return prebootContract;
@@ -27,15 +28,18 @@ const createInternalStartContractMock = (
   {
     ui,
     backgroundTasks,
+    migrator,
   }: {
     ui: boolean;
     backgroundTasks: boolean;
-  } = { ui: true, backgroundTasks: true }
+    migrator: boolean;
+  } = { ui: true, backgroundTasks: true, migrator: false }
 ) => {
   const startContract: jest.Mocked<InternalNodeServiceStart> = {
     roles: {
       backgroundTasks,
       ui,
+      migrator,
     },
   };
   return startContract;
