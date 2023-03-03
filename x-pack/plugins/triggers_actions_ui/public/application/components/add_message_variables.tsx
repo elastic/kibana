@@ -52,25 +52,25 @@ const NO_VARIABLES_AVAILABLE = i18n.translate(
   }
 );
 const DEPRICATED_VARIABLES_ARE_SHOWN = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.depricatedVariablesAreShown',
+  'xpack.triggersActionsUI.components.addMessageVariables.deprecatedVariablesAreShown',
   {
     defaultMessage: 'Depricated variables are shown',
   }
 );
 const DEPRICATED_VARIABLES_ARE_HIDDEN = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.depricatedVariablesAreHidden',
+  'xpack.triggersActionsUI.components.addMessageVariables.deprecatedVariablesAreHidden',
   {
     defaultMessage: 'Depricated variables are hidden',
   }
 );
 const HIDE = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.hideDepricatedVariables',
+  'xpack.triggersActionsUI.components.addMessageVariables.hideDeprecatedVariables',
   {
     defaultMessage: 'Hide',
   }
 );
 const SHOW_ALL = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.ShowAllDepricatedVariables',
+  'xpack.triggersActionsUI.components.addMessageVariables.ShowAllDeprecatedVariables',
   {
     defaultMessage: 'Show all',
   }
@@ -272,7 +272,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj={'showDepricatedVariablesButton'}
+                    data-test-subj={'showDeprecatedVariablesButton'}
                     size="xs"
                     onClick={() =>
                       isShowAllPressed ? setIsShowAllPressed(false) : setIsShowAllPressed(true)
