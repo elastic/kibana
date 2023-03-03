@@ -7,14 +7,14 @@
  */
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useReducer } from 'react';
+import {
+  groupsReducer,
+  initialState,
+} from '@kbn/securitysolution-grouping/src/hooks/state/reducer';
 import { GroupingProps, GroupSelectorProps } from '..';
 import { useGroupingPagination } from './use_grouping_pagination';
-import {
-  groupActions,
-  groupByIdSelector,
-  useGroupingStateManager,
-} from './use_grouping_state_manager';
+import { groupActions, groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
 import { defaultGroup, GroupOption } from './types';
 import { Grouping as GroupingComponent } from '../components/grouping';
@@ -43,9 +43,12 @@ export const useGrouping = ({
   fields,
   groupingId,
 }: GroupingArgs): Grouping => {
-  const { state: groupingState, dispatch } = useGroupingStateManager();
-  const { activeGroup: selectedGroup } =
-    groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
+  const [groupingState, dispatch] = useReducer(groupsReducer, initialState);
+  const { activeGroup: selectedGroup } = useMemo(
+    () => groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup,
+    [groupingId, groupingState]
+  );
+
   const groupSelector = useGetGroupSelector({
     defaultGroupingOptions,
     dispatch,
@@ -53,7 +56,9 @@ export const useGrouping = ({
     groupingId,
     groupingState,
   });
+
   const pagination = useGroupingPagination({ groupingId, groupingState, dispatch });
+
   const getGrouping = useCallback(
     (
       props: Omit<GroupingProps, 'groupSelector' | 'pagination' | 'selectedGroup'>
