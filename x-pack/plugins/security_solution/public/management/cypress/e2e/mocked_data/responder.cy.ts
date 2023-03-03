@@ -38,7 +38,7 @@ describe('When accessing Endpoint Response Console', () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts>;
     let caseData: ReturnTypeFromChainable<typeof indexNewCase>;
     let alertData: ReturnTypeFromChainable<typeof indexEndpointRuleAlerts>;
-    let caseAlertActions: ReturnTypeFromChainable<typeof addAlertsToCase>;
+    let caseAlertActions: ReturnType<typeof addAlertsToCase>;
     let alertId: string;
     let caseUrlPath: string;
 
@@ -66,11 +66,9 @@ describe('When accessing Endpoint Response Console', () => {
           });
         })
         .then(() => {
-          return addAlertsToCase({
+          caseAlertActions = addAlertsToCase({
             caseId: caseData.data.id,
             alertIds: [alertId],
-          }).then((attachments) => {
-            caseAlertActions = attachments;
           });
         });
     });

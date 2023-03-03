@@ -45,7 +45,7 @@ export const cyLoadEndpointDataHandler = async (
     enableFleetIntegration = true,
     generatorSeed = `cy.${Math.random()}`,
     waitUntilTransformed = true,
-    waitTimeout = 60000,
+    // waitTimeout = 60000,
     customIndexFn,
   } = options;
 
