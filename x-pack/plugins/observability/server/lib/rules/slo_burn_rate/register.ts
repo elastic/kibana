@@ -41,7 +41,7 @@ export function sloBurnRateRuleType(createLifecycleRuleExecutor: CreateLifecycle
     defaultActionGroupId: FIRED_ACTION.id,
     actionGroups: [FIRED_ACTION],
     producer: sloFeatureId,
-    minimumLicenseRequired: 'basic' as LicenseType,
+    minimumLicenseRequired: 'platinum' as LicenseType,
     isExportable: true,
     executor: createLifecycleRuleExecutor(getRuleExecutor()),
     doesSetRecoveryContext: true,
