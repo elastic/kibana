@@ -35,6 +35,7 @@ import {
   EuiTableRowCell,
   EuiTableRowCellCheckbox,
   EuiText,
+  EuiButtonIcon, EuiBadge,
 } from '@elastic/eui';
 
 import { UIM_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
@@ -49,6 +50,7 @@ import { getDataStreamDetailsLink } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { AppContextConsumer } from '../../../../app_context';
 import { renderBadges } from '../../../../lib/render_badges';
+import { renderDiscoverLink } from '../../../../lib/render_discover_link';
 import { NoMatch, DataHealth } from '../../../../components';
 import { IndexActionsContextMenu } from '../index_actions_context_menu';
 
@@ -283,20 +285,24 @@ export class IndexTable extends Component {
           >
             {value}
           </EuiLink>
+          {renderDiscoverLink(index.name)}
           {renderBadges(index, filterChanged, appServices.extensionsService)}
         </Fragment>
       );
     } else if (fieldName === 'data_stream' && value) {
       return (
-        <EuiLink
-          data-test-subj="dataStreamLink"
-          {...reactRouterNavigate(history, {
-            pathname: getDataStreamDetailsLink(value),
-            search: '?isDeepLink=true',
-          })}
-        >
-          {value}
-        </EuiLink>
+        <>
+          <EuiLink
+            data-test-subj="dataStreamLink"
+            {...reactRouterNavigate(history, {
+              pathname: getDataStreamDetailsLink(value),
+              search: '?isDeepLink=true',
+            })}
+          >
+            {value}
+          </EuiLink>
+          {renderDiscoverLink(index.name)}
+        </>
       );
     }
 
