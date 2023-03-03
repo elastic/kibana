@@ -32,7 +32,7 @@ const createSetupMock = () => {
     getConfig: jest.fn(),
     frameworkAlerts: {
       enabled: jest.fn(),
-      isContextInitialized: jest.fn(),
+      getContextInitializationPromise: jest.fn(),
     },
   };
   return mock;

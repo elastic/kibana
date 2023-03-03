@@ -392,9 +392,9 @@ export class AlertingPlugin {
       },
       frameworkAlerts: {
         enabled: () => this.config.enableFrameworkAlerts,
-        isContextInitialized: (context: string): Promise<boolean> => {
+        getContextInitializationPromise: (context: string): Promise<boolean> => {
           if (this.alertsService) {
-            return this.alertsService.isContextInitialized(context);
+            return this.alertsService.getContextInitializationPromise(context);
           }
 
           return Promise.resolve(false);

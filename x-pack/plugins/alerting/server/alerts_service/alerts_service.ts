@@ -76,10 +76,10 @@ interface IAlertsService {
    * the index template for the default namespace and the concrete write index
    * for the default namespace.
    */
-  isContextInitialized(context: string): Promise<boolean>;
+  getContextInitializationPromise(context: string): Promise<boolean>;
 }
 
-export type PublicAlertsService = Pick<IAlertsService, 'isContextInitialized'>;
+export type PublicAlertsService = Pick<IAlertsService, 'getContextInitializationPromise'>;
 
 export class AlertsService implements IAlertsService {
   private initialized: boolean;
@@ -105,7 +105,10 @@ export class AlertsService implements IAlertsService {
     return this.initialized;
   }
 
-  public async isContextInitialized(context: string, timeoutMs?: number): Promise<boolean> {
+  public async getContextInitializationPromise(
+    context: string,
+    timeoutMs?: number
+  ): Promise<boolean> {
     if (!this.registeredContexts.has(context)) {
       this.options.logger.error(
         `Error getting initialized status for context ${context} - context has not been registered.`

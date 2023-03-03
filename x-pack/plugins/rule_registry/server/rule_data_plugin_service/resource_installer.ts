@@ -265,7 +265,7 @@ export class ResourceInstaller {
       !indexInfo.indexOptions.additionalPrefix &&
       frameworkAlerts.enabled()
     ) {
-      const initialized = await frameworkAlerts.isContextInitialized(
+      const initialized = await frameworkAlerts.getContextInitializationPromise(
         indexInfo.indexOptions.registrationContext
       );
 

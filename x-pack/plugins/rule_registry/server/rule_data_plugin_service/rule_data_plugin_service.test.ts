@@ -20,7 +20,7 @@ jest.mock('../rule_data_client/rule_data_client', () => ({
 
 const frameworkAlertsService = {
   enabled: () => false,
-  isContextInitialized: async () => false,
+  getContextInitializationPromise: async () => false,
 };
 
 describe('ruleDataPluginService', () => {

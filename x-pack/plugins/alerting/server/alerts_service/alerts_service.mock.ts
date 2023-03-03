@@ -10,7 +10,7 @@ const creatAlertsServiceMock = () => {
     return {
       register: jest.fn(),
       isInitialized: jest.fn(),
-      isContextInitialized: jest.fn(),
+      getContextInitializationPromise: jest.fn(),
     };
   });
 };

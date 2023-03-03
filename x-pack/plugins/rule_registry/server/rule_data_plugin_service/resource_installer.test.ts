@@ -18,7 +18,7 @@ import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 
 const frameworkAlertsService = {
   enabled: () => false,
-  isContextInitialized: async () => false,
+  getContextInitializationPromise: async () => false,
 };
 
 describe('resourceInstaller', () => {
@@ -287,7 +287,7 @@ describe('resourceInstaller', () => {
         frameworkAlerts: {
           ...frameworkAlertsService,
           enabled: () => true,
-          isContextInitialized: async () => true,
+          getContextInitializationPromise: async () => true,
         },
         pluginStop$,
       });
