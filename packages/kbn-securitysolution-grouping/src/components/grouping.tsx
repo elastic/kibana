@@ -196,4 +196,4 @@ const GroupingComponent = <T,>({
   );
 };
 
-export const Grouping = React.memo(GroupingComponent);
+export const Grouping = React.memo(GroupingComponent) as typeof GroupingComponent;
