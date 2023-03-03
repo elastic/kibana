@@ -5,8 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { GroupModel, GroupsById } from '@kbn/securitysolution-grouping/src/hooks/types';
+import { GroupModel, GroupsById, Storage } from './hooks/types';
 import * as i18n from './components/translations';
 
 /**
@@ -36,7 +35,7 @@ export const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
 const LOCAL_STORAGE_GROUPING_KEY = 'groups';
 const EMPTY_GROUP = {} as GroupsById;
 export const getAllGroupsInStorage = (storage: Storage): GroupsById => {
-  const allGroups = storage.get(LOCAL_STORAGE_GROUPING_KEY);
+  const allGroups = storage.getItem(LOCAL_STORAGE_GROUPING_KEY);
   if (!allGroups) {
     return EMPTY_GROUP;
   }
@@ -45,7 +44,7 @@ export const getAllGroupsInStorage = (storage: Storage): GroupsById => {
 
 export const addGroupsToStorage = (storage: Storage, groupingId: string, group: GroupModel) => {
   const groups = getAllGroupsInStorage(storage);
-  storage.set(LOCAL_STORAGE_GROUPING_KEY, {
+  storage.setItem(LOCAL_STORAGE_GROUPING_KEY, {
     ...groups,
     [groupingId]: group,
   });

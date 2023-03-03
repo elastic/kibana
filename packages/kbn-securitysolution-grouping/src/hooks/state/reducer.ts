@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   Action,
   ActionType,
@@ -14,10 +13,11 @@ import {
   EMPTY_GROUP_BY_ID,
   GroupMap,
   GroupsById,
+  Storage,
 } from '../types';
 import { addGroupsToStorage, getAllGroupsInStorage } from '../..';
 
-const storage = new Storage(window.localStorage);
+const storage: Storage = window.localStorage;
 
 export const initialState: GroupMap = {
   groupById: EMPTY_GROUP_BY_ID,

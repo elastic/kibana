@@ -70,6 +70,13 @@ export interface GroupState {
   groups: GroupMap;
 }
 
+export interface Storage<T = any, S = void> {
+  getItem: (key: string) => T | null;
+  setItem: (key: string, value: T) => S;
+  removeItem: (key: string) => T | null;
+  clear: () => void;
+}
+
 // TODO: Move to const.ts file
 export const EMPTY_GROUP_BY_ID: GroupsById = {};
 
