@@ -10,7 +10,7 @@ import { getCaseFindUserActionsUrl } from '@kbn/cases-plugin/common/api';
 import { INTERNAL_BULK_CREATE_ATTACHMENTS_URL } from '@kbn/cases-plugin/common/constants';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { DEFAULT_ALERTS_INDEX, DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
-import { createCyChainable, request } from './common';
+import { createCyChainable, request, toPromise } from './common';
 import { ELASTIC_SECURITY_RULE_ID } from '../../../../../../test/detection_engine_api_integration/utils';
 import type { Rule } from '../../../detection_engine/rule_management/logic';
 
@@ -28,61 +28,64 @@ export const addAlertsToCase = ({
   caseId,
   alertIds,
 }: AddAlertsToCaseOptions): Cypress.Chainable<AddAlertsToCaseOptionsResponse> => {
-  return createCyChainable((): Promise<AddAlertsToCaseOptionsResponse> => {
-    return new Promise<AddAlertsToCaseOptionsResponse>((resolve) => {
-      let endpointRuleDocId: string;
-
-      request<Rule>({
-        method: 'GET',
-        url: DETECTION_ENGINE_RULES_URL,
-        qs: { rule_id: ELASTIC_SECURITY_RULE_ID },
-      })
-        .then((rule) => {
-          endpointRuleDocId = rule.body.id;
+  return createCyChainable(async (): Promise<AddAlertsToCaseOptionsResponse> => {
+    const endpointRuleDocId = (
+      await toPromise(
+        request<Rule>({
+          method: 'GET',
+          url: DETECTION_ENGINE_RULES_URL,
+          qs: { rule_id: ELASTIC_SECURITY_RULE_ID },
         })
-        .then(() => {
-          request({
-            method: 'POST',
-            url: resolvePathVariables(INTERNAL_BULK_CREATE_ATTACHMENTS_URL, { case_id: caseId }),
-            body: alertIds.map((alertId) => {
-              return {
-                alertId,
-                // TODO: get index for each alert id instead of assuming they are in this hardcoded index
-                index: `${DEFAULT_ALERTS_INDEX}-default`,
-                type: 'alert',
-                rule: {
-                  id: endpointRuleDocId,
-                  name: 'Endpoint Security',
-                },
-                owner: 'securitySolution',
-              };
-            }),
-          }).then(() => {
-            request<UserActionFindResponse>({
-              method: 'GET',
-              url: getCaseFindUserActionsUrl(caseId),
-              qs: {
-                sortOrder: 'asc',
-                perPage: 10000,
-              },
-            }).then((caseActions) => {
-              const comments: AddAlertsToCaseOptionsResponse['comments'] = {};
+      )
+    ).body.id;
 
-              for (const userAction of caseActions.body.userActions) {
-                if (
-                  userAction.type === 'comment' &&
-                  userAction.action === 'create' &&
-                  userAction.payload.comment.type === 'alert' &&
-                  alertIds.includes(userAction.payload.comment.alertId as string)
-                ) {
-                  comments[userAction.payload.comment.alertId as string] = userAction.id;
-                }
-              }
+    // Add all alerts to the case
+    await toPromise(
+      request({
+        method: 'POST',
+        url: resolvePathVariables(INTERNAL_BULK_CREATE_ATTACHMENTS_URL, { case_id: caseId }),
+        body: alertIds.map((alertId) => {
+          return {
+            alertId,
+            // TODO: get index for each alert id instead of assuming they are in this hardcoded index
+            index: `${DEFAULT_ALERTS_INDEX}-default`,
+            type: 'alert',
+            rule: {
+              id: endpointRuleDocId,
+              name: 'Endpoint Security',
+            },
+            owner: 'securitySolution',
+          };
+        }),
+      })
+    );
 
-              resolve({ comments });
-            });
-          });
-        });
-    });
+    const userActions = (
+      await toPromise(
+        request<UserActionFindResponse>({
+          method: 'GET',
+          url: getCaseFindUserActionsUrl(caseId),
+          qs: {
+            sortOrder: 'asc',
+            perPage: 10000,
+          },
+        })
+      )
+    ).body.userActions;
+
+    const comments: AddAlertsToCaseOptionsResponse['comments'] = {};
+
+    for (const userAction of userActions) {
+      if (
+        userAction.type === 'comment' &&
+        userAction.action === 'create' &&
+        userAction.payload.comment.type === 'alert' &&
+        alertIds.includes(userAction.payload.comment.alertId as string)
+      ) {
+        comments[userAction.payload.comment.alertId as string] = userAction.id;
+      }
+    }
+
+    return { comments };
   });
 };
