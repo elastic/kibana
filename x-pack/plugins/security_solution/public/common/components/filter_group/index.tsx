@@ -10,16 +10,14 @@ import type {
   ControlGroupInput,
   controlGroupInputBuilder,
   ControlGroupOutput,
-  OptionsListEmbeddableInput,
   ControlGroupContainer,
   ControlGroupRendererProps,
 } from '@kbn/controls-plugin/public';
 import { LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
-import type { ControlPanelState } from '@kbn/controls-plugin/common';
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
 import styled from 'styled-components';
 import { cloneDeep, debounce, isEqual } from 'lodash';
@@ -37,6 +35,8 @@ import { useControlGroupSyncToLocalStorage } from './hooks/use_control_group_syn
 import { useViewEditMode } from './hooks/use_view_edit_mode';
 import { FilterGroupContextMenu } from './context_menu';
 import { AddControl, DiscardChanges, SaveControls } from './buttons';
+import { getFilterItemObjListFromControlInput } from './utils';
+import { FiltersChangedBanner } from './filters_changed_banner';
 
 type ControlGroupBuilder = typeof controlGroupInputBuilder;
 
@@ -55,6 +55,7 @@ interface FilterGroupContextType {
   switchToViewMode: () => void;
   switchToEditMode: () => void;
   setHasPendingChanges: (value: boolean) => void;
+  setShowFiltersChangedBanner: (value: boolean) => void;
 }
 
 export const FilterGroupContext = createContext<FilterGroupContextType | undefined>(undefined);
@@ -120,34 +121,25 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
 
   const [initialUrlParam, setInitialUrlParam] = useState<FilterItemObj[]>();
 
+  const [showFiltersChangedBanner, setShowFiltersChangedBanner] = useState(false);
+
   const urlDataApplied = useRef<boolean>(false);
 
   const onUrlParamInit = (param: FilterItemObj[] | null) => {
-    if (!param) setInitialUrlParam([]);
+    if (!param) {
+      setInitialUrlParam([]);
+      return;
+    }
     try {
-      //
-      //
-      const panels = getStoredControlInput()?.panels;
-      if (panels) {
-        const panelsFormatted = Object.values(panels)
-          .sort((a, b) => b.order - a.order)
-          .map((panel) => {
-            const {
-              explicitInput: { fieldName, selectedOptions, title, existsSelected, exclude },
-            } = panel as ControlPanelState<OptionsListEmbeddableInput>;
-            return {
-              fieldName: fieldName as string,
-              selectedOptions: selectedOptions ?? [],
-              title,
-              existsSelected,
-              exclude,
-            };
-          });
+      const storedControlGroupInput = getStoredControlInput();
+      if (storedControlGroupInput) {
+        const panelsFormatted = getFilterItemObjListFromControlInput(storedControlGroupInput);
         if (!isEqual(panelsFormatted, param)) {
+          setShowFiltersChangedBanner(true);
           switchToEditMode();
         }
       }
-      setInitialUrlParam(param ?? []);
+      setInitialUrlParam(param);
     } catch (err) {
       // if there is an error ignore url Param
       // eslint-disable-next-line no-console
@@ -241,25 +233,15 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     const resultControls = cloneDeep(initialControls);
 
     let overridingControls = initialUrlParam;
-    if ((!initialUrlParam || initialUrlParam.length === 0) && controlGroupInputUpdates) {
+    if (!initialUrlParam || initialUrlParam.length === 0) {
       // if nothing is found in URL Param.. read from local storage
-      const urlParamsFromLocalStorage: FilterItemObj[] = Object.values(
-        controlGroupInputUpdates?.panels
-      )
-        .sort((a, b) => b.order - a.order)
-        .map((panel) => {
-          const { fieldName, title, selectedOptions, existsSelected, exclude } =
-            panel.explicitInput as OptionsListEmbeddableInput;
-          return {
-            fieldName,
-            title,
-            selectedOptions,
-            existsSelected,
-            exclude,
-          };
-        });
+      const storedControlGroupInput = getStoredControlInput();
+      if (storedControlGroupInput) {
+        const urlParamsFromLocalStorage: FilterItemObj[] =
+          getFilterItemObjListFromControlInput(storedControlGroupInput);
 
-      overridingControls = urlParamsFromLocalStorage;
+        overridingControls = urlParamsFromLocalStorage;
+      }
     }
 
     if (!overridingControls || overridingControls.length === 0) return initialControls;
@@ -303,7 +285,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     }
 
     return resultControls;
-  }, [initialUrlParam, initialControls, controlGroupInputUpdates]);
+  }, [initialUrlParam, initialControls, getStoredControlInput]);
 
   const getCreationOptions: ControlGroupRendererProps['getCreationOptions'] = useCallback(
     async (
@@ -358,6 +340,25 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     controlGroupInput: controlGroupInputUpdates,
   });
 
+  const discardChangesHandler = useCallback(() => {
+    if (hasPendingChanges) {
+      controlGroup?.updateInput({
+        panels: getStoredControlInput()?.panels,
+      });
+    }
+    switchToViewMode();
+    setShowFiltersChangedBanner(false);
+  }, [controlGroup, switchToViewMode, getStoredControlInput, hasPendingChanges]);
+
+  const saveChangesHandler = useCallback(() => {
+    switchToViewMode();
+    setShowFiltersChangedBanner(false);
+  }, [switchToViewMode]);
+
+  const addControlsHandler = useCallback(() => {
+    controlGroup?.openAddDataControlFlyout();
+  }, [controlGroup]);
+
   return (
     <FilterGroupContext.Provider
       value={{
@@ -373,6 +374,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
         switchToViewMode,
         openPendingChangesPopover,
         closePendingChangesPopover,
+        setShowFiltersChangedBanner,
       }}
     >
       <FilterWrapper className="filter-group__wrapper">
@@ -391,13 +393,13 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             Object.keys(controlGroupInputUpdates?.panels ?? {}).length < NUM_OF_CONTROLS.MAX) ? (
             <>
               <EuiFlexItem grow={false}>
-                <AddControl />
+                <AddControl onClick={addControlsHandler} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <SaveControls />
+                <SaveControls onClick={saveChangesHandler} />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <DiscardChanges getStoredControlInput={getStoredControlInput} />
+                <DiscardChanges onClick={discardChangesHandler} />
               </EuiFlexItem>
             </>
           ) : null}
@@ -405,6 +407,12 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             <FilterGroupContextMenu />
           </EuiFlexItem>
         </EuiFlexGroup>
+        {showFiltersChangedBanner ? (
+          <>
+            <EuiSpacer size="l" />
+            <FiltersChangedBanner />
+          </>
+        ) : null}
       </FilterWrapper>
     </FilterGroupContext.Provider>
   );

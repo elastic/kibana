@@ -8,7 +8,13 @@
 import { EuiButtonIcon, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { useFilterGroupInternalContext } from './hooks/use_filters';
-import { EDIT_CONTROLS, FILTER_GROUP_MENU, SAVE_CONTROLS } from './translations';
+import {
+  CONTEXT_MENU_RESET,
+  CONTEXT_MENU_RESET_TOOLTIP,
+  EDIT_CONTROLS,
+  FILTER_GROUP_MENU,
+  SAVE_CONTROLS,
+} from './translations';
 
 export const FilterGroupContextMenu = () => {
   const [isContextMenuVisible, setIsContextMenuVisible] = useState(false);
@@ -21,6 +27,7 @@ export const FilterGroupContextMenu = () => {
     switchToEditMode,
     initialControls,
     dataViewId,
+    setShowFiltersChangedBanner,
   } = useFilterGroupInternalContext();
 
   const toggleContextMenu = useCallback(() => {
@@ -42,9 +49,9 @@ export const FilterGroupContextMenu = () => {
   const resetSelection = useCallback(() => {
     if (!controlGroupInputUpdates) return;
 
-    // / remove existing embeddables
-    Object.values(controlGroupInputUpdates.panels).forEach((panel) => {
-      controlGroup?.removeEmbeddable(panel.explicitInput.id);
+    // remove existing embeddables
+    controlGroup?.updateInput({
+      panels: {},
     });
 
     initialControls.forEach((control, idx) => {
@@ -63,7 +70,15 @@ export const FilterGroupContextMenu = () => {
 
     controlGroup?.reload();
     switchToViewMode();
-  }, [controlGroupInputUpdates, controlGroup, initialControls, dataViewId, switchToViewMode]);
+    setShowFiltersChangedBanner(false);
+  }, [
+    controlGroupInputUpdates,
+    controlGroup,
+    initialControls,
+    dataViewId,
+    switchToViewMode,
+    setShowFiltersChangedBanner,
+  ]);
 
   const resetButton = useMemo(
     () => (
@@ -71,8 +86,9 @@ export const FilterGroupContextMenu = () => {
         icon="eraser"
         onClick={withContextMenuAction(resetSelection)}
         data-test-subj="filter-group__context--reset"
+        toolTipContent={CONTEXT_MENU_RESET_TOOLTIP}
       >
-        {`Reset`}
+        {CONTEXT_MENU_RESET}
       </EuiContextMenuItem>
     ),
     [withContextMenuAction, resetSelection]

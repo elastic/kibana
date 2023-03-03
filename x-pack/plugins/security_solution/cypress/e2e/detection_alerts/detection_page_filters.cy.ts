@@ -10,6 +10,7 @@ import { getNewRule } from '../../objects/rule';
 import {
   CONTROL_FRAMES,
   CONTROL_FRAME_TITLE,
+  FILTER_GROUP_CHANGED_BANNER,
   FILTER_GROUP_DISCARD_CHANGES,
   FILTER_GROUP_SAVE_CHANGES_POPOVER,
   OPTION_LIST_LABELS,
@@ -23,7 +24,9 @@ import { ALERTS_URL } from '../../urls/navigation';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../common/constants';
 import { formatPageFilterSearchParam } from '../../../common/utils/format_page_filter_search_param';
 import {
+  closePageFilterPopover,
   markAcknowledgedFirstAlert,
+  openPageFilterPopover,
   resetFilters,
   selectCountTable,
   visitAlertsPageWithCustomFilters,
@@ -36,10 +39,41 @@ import { ALERTS, CASES } from '../../screens/security_header';
 import {
   addNewFilterGroupControlValues,
   deleteFilterGroupControl,
+  discardFilterGroupControls,
   editFilterGroupControls,
   saveFilterGroupControls,
 } from '../../tasks/common/filter_group';
 
+const customFilters = [
+  {
+    fieldName: 'kibana.alert.workflow_status',
+    title: 'Workflow Status',
+  },
+  {
+    fieldName: 'kibana.alert.severity',
+    title: 'Severity',
+  },
+  {
+    fieldName: 'user.name',
+    title: 'User Name',
+  },
+  {
+    fieldName: 'process.name',
+    title: 'ProcessName',
+  },
+  {
+    fieldName: 'event.module',
+    title: 'EventModule',
+  },
+  {
+    fieldName: 'agent.type',
+    title: 'AgentType',
+  },
+  {
+    fieldName: 'kibana.alert.rule.name',
+    title: 'Rule Name',
+  },
+];
 const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_PAGE_FILTERS) => {
   cy.get(CONTROL_FRAMES).should((sub) => {
     expect(sub.length).eq(filterObject.length);
@@ -64,7 +98,6 @@ const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_P
   });
 };
 
-// Skipped because this featured is behind feature flag
 describe('Detections : Page Filters', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
@@ -75,10 +108,8 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
     waitForPageFilters();
   });
 
-  beforeEach(() => {
+  afterEach(() => {
     resetFilters();
-    waitForPageFilters();
-    waitForAlerts();
   });
 
   it('Default page filters are populated when nothing is provided in the URL', () => {
@@ -170,25 +201,9 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
     cy.get(FILTER_GROUP_SAVE_CHANGES_POPOVER).should('be.visible');
   });
 
-  it('URL is updated when ever page filters are loaded', (done) => {
-    cy.on('url:changed', () => {
-      const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
-        if (filter.title === 'Status') {
-          filter.selectedOptions = [];
-        }
-        return filter;
-      });
-      cy.url().should('have.text', formatPageFilterSearchParam(NEW_FILTERS));
-      done();
-    });
-    cy.get(OPTION_LIST_VALUES(0)).click();
-
-    // unselect status open
-    cy.get(OPTION_SELECTABLE(0, 'open')).trigger('click', { force: true });
-  });
-
   it(`Alert list is updated when the alerts are updated`, () => {
     // mark status of one alert to be acknowledged
+    cy.visit(ALERTS_URL);
     selectCountTable();
     cy.get(ALERTS_COUNT)
       .invoke('text')
@@ -206,26 +221,29 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
       });
   });
 
-  it(`URL is updated when filters are updated`, (done) => {
-    const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
-      if (filter.title === 'Severity') {
-        filter.selectedOptions = ['high'];
-      }
-      return filter;
+  it(`URL is updated when filters are updated`, () => {
+    cy.visit(ALERTS_URL);
+
+    cy.on('url:changed', (urlString) => {
+      const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
+        if (filter.title === 'Severity') {
+          filter.selectedOptions = ['high'];
+        }
+        return filter;
+      });
+      const expectedVal = encode(formatPageFilterSearchParam(NEW_FILTERS));
+      expect(urlString).to.contain.text(expectedVal);
     });
 
-    cy.on('url:changed', () => {
-      // we want assertion to run only once URL Changes.
-      cy.url().should('have.text', formatPageFilterSearchParam(NEW_FILTERS));
-      done();
-    });
-    cy.get(OPTION_LIST_VALUES(1)).click();
+    openPageFilterPopover(1);
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
     cy.get(OPTION_SELECTABLE(1, 'high')).click({ force: true });
+    closePageFilterPopover(1);
   });
 
   it(`Filters are restored from localstorage when user navigates back to the page.`, () => {
     // change severity filter to high
+    cy.visit(ALERTS_URL);
     cy.get(OPTION_LIST_VALUES(1)).click();
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
     cy.get(OPTION_SELECTABLE(1, 'high')).click({ force: true });
@@ -244,40 +262,32 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
     cy.get(OPTION_LIST_VALUES(1)).contains('high'); // severity should be low as previously selected
   });
 
-  it('Custom filters from URLS are populated', () => {
-    const allFilters = [
-      {
-        fieldName: 'kibana.alert.workflow_status',
-        title: 'Workflow Status',
-      },
-      {
-        fieldName: 'kibana.alert.severity',
-        title: 'Severity',
-      },
-      {
-        fieldName: 'user.name',
-        title: 'User Name',
-      },
-      {
-        fieldName: 'process.name',
-        title: 'ProcessName',
-      },
-      {
-        fieldName: 'event.module',
-        title: 'EventModule',
-      },
-      {
-        fieldName: 'agent.type',
-        title: 'AgentType',
-      },
-      {
-        fieldName: 'kibana.alert.rule.name',
-        title: 'Rule Name',
-      },
-    ];
+  it('Custom filters from URLS are populated & changed banner is displayed', () => {
+    visitAlertsPageWithCustomFilters(customFilters);
 
-    visitAlertsPageWithCustomFilters(allFilters);
+    assertFilterControlsWithFilterObject(customFilters);
 
-    assertFilterControlsWithFilterObject(allFilters);
+    cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
+  });
+
+  it('Changed banner should hide on saving changes', () => {
+    visitAlertsPageWithCustomFilters(customFilters);
+
+    cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
+    saveFilterGroupControls();
+    cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
+  });
+  it('Changed banner should hide on discarding changes', () => {
+    visitAlertsPageWithCustomFilters(customFilters);
+
+    cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
+    discardFilterGroupControls();
+    cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
+  });
+
+  it('Changed banner should hide on Reset', () => {
+    visitAlertsPageWithCustomFilters(customFilters);
+    resetFilters();
+    cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
 });

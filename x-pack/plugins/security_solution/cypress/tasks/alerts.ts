@@ -439,14 +439,7 @@ export const waitForPageFilters = () => {
 export const resetFilters = () => {
   cy.get(DETECTION_PAGE_FILTER_GROUP_CONTEXT_MENU).click({ force: true });
   cy.get(DETECTION_PAGE_FILTER_GROUP_RESET_BUTTON).click({ force: true });
-  /*
-   * below line commented because alertpagefiltersenabled feature flag
-   * is disabled by default
-   * target: enable by default in v8.8
-   *
-   * waitforpagefilters();
-   *
-   * */
+  waitForPageFilters();
 };
 
 export const selectFirstPageAlerts = () => {

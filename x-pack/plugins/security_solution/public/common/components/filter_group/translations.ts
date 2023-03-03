@@ -14,13 +14,19 @@ export const PENDING_CHANGES_REMINDER = i18n.translate(
   }
 );
 
-export const EDIT_CONTROLS = i18n.translate('xpack.securitySolution.filtersGroup.editControls', {
-  defaultMessage: 'Edit Controls',
-});
+export const EDIT_CONTROLS = i18n.translate(
+  'xpack.securitySolution.filtersGroup.contextMenu.editControls',
+  {
+    defaultMessage: 'Edit Controls',
+  }
+);
 
-export const SAVE_CONTROLS = i18n.translate('xpack.securitySolution.filtersGroup.saveControls', {
-  defaultMessage: 'Save Controls',
-});
+export const SAVE_CONTROLS = i18n.translate(
+  'xpack.securitySolution.filtersGroup.contextMenu.saveControls',
+  {
+    defaultMessage: 'Save Controls',
+  }
+);
 
 export const DISCARD_CHANGES = i18n.translate(
   'xpack.securitySolution.filtersGroup.discardChanges',
@@ -33,5 +39,34 @@ export const FILTER_GROUP_MENU = i18n.translate(
   'xpack.securitySolution.filterGroup.groupMenuTitle',
   {
     defaultMessage: 'Filter group menu',
+  }
+);
+
+export const FILTER_GROUP_BANNER_TITLE = i18n.translate(
+  'xpack.securitySolution.filterGroup.filtersChangedBanner',
+  {
+    defaultMessage: 'Filter Controls have changed',
+  }
+);
+
+export const FILTER_GROUP_BANNER_MESSAGE = i18n.translate(
+  'xpack.securitySolution.filterGroup.filtersChangedTitle',
+  {
+    defaultMessage: `New filter controls on this page are different from what you have previously saved. You can either save the changes or discard them. 
+       Navigating away will automatically discard these changes`,
+  }
+);
+
+export const CONTEXT_MENU_RESET_TOOLTIP = i18n.translate(
+  'xpack.securitySolution.filterGroup.contextMenu.resetTooltip',
+  {
+    defaultMessage: 'Reset Controls to factory settings',
+  }
+);
+
+export const CONTEXT_MENU_RESET = i18n.translate(
+  'xpack.securitySolution.filterGroup.contextMenu.reset',
+  {
+    defaultMessage: 'Reset Controls',
   }
 );
