@@ -14,7 +14,7 @@ import {
   UpdateGroupActivePage,
   UpdateGroupItemsPerPage,
   UpdateGroupOptions,
-} from '@kbn/securitysolution-grouping/src/hooks/types';
+} from '../types';
 
 const updateActiveGroup = ({
   activeGroup,
