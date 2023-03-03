@@ -80,6 +80,9 @@ interface IAlertsService {
 }
 
 export type PublicAlertsService = Pick<IAlertsService, 'getContextInitializationPromise'>;
+export type PublicFrameworkAlertsService = PublicAlertsService & {
+  enabled: () => boolean;
+};
 
 export class AlertsService implements IAlertsService {
   private initialized: boolean;
@@ -180,7 +183,7 @@ export class AlertsService implements IAlertsService {
       this.initialized = true;
     } catch (err) {
       this.options.logger.error(
-        `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted.`
+        `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - ${err.message}`
       );
       this.initialized = false;
     }

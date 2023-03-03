@@ -87,7 +87,7 @@ import { getSecurityHealth, SecurityHealth } from './lib/get_security_health';
 import { registerNodeCollector, registerClusterCollector, InMemoryMetrics } from './monitoring';
 import { getRuleTaskTimeout } from './lib/get_rule_task_timeout';
 import { getActionsConfigMap } from './lib/get_actions_config_map';
-import { AlertsService, PublicAlertsService } from './alerts_service/alerts_service';
+import { AlertsService, PublicFrameworkAlertsService } from './alerts_service/alerts_service';
 import { rulesSettingsFeature } from './rules_settings_feature';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
@@ -102,10 +102,6 @@ export const EVENT_LOG_ACTIONS = {
 };
 export const LEGACY_EVENT_LOG_ACTIONS = {
   resolvedInstance: 'resolved-instance',
-};
-
-export type PublicFrameworkAlertsService = PublicAlertsService & {
-  enabled: () => boolean;
 };
 
 export interface PluginSetupContract {

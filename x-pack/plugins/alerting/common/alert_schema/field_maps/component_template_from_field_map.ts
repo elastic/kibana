@@ -13,7 +13,7 @@ export interface GetComponentTemplateFromFieldMapOpts {
   name: string;
   fieldMap: FieldMap;
   includeSettings?: boolean;
-  dynamic?: 'strict' | boolean;
+  dynamic?: 'strict' | false;
 }
 export const getComponentTemplateFromFieldMap = ({
   name,
