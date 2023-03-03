@@ -7,21 +7,26 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
 import { useCallback, useEffect } from 'react';
-import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { debounce } from 'lodash';
-import { map } from 'rxjs/operators';
+import { buildEsQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
+import { debounceTime, filter as rxFilter, map, startWith, tap } from 'rxjs/operators';
+import { combineLatest, MonoTypeOperatorFunction, defer } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
-import { useKibanaQuerySettings } from '../../../../utils/use_kibana_query_settings';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
-import { useSyncKibanaTimeFilterTime } from '../../../../hooks/use_kibana_timefilter_time';
 import {
   useHostsUrlState,
-  INITIAL_DATE_RANGE,
-  HostsState,
-  StringDateRangeTimestamp,
+  type HostsState,
+  type StringDateRangeTimestamp,
 } from './use_unified_search_url_state';
+
+const filterFirst = <T>(n: number): MonoTypeOperatorFunction<T> => {
+  return (s) =>
+    defer(() => {
+      let count = 0;
+      return s.pipe(rxFilter((_) => n <= count++));
+    });
+};
 
 const buildQuerySubmittedPayload = (
   hostState: HostsState & { dateRangeTimestamp: StringDateRangeTimestamp }
@@ -37,7 +42,6 @@ const buildQuerySubmittedPayload = (
 };
 
 export const useUnifiedSearch = () => {
-  const kibanaQuerySettings = useKibanaQuerySettings();
   const { state, dispatch, getTime, getDateRangeAsTimestamp } = useHostsUrlState();
   const { metricsDataView } = useMetricsDataViewContext();
   const { services } = useKibana<InfraClientStartDeps>();
@@ -52,11 +56,6 @@ export const useUnifiedSearch = () => {
     telemetry,
   } = services;
 
-  useSyncKibanaTimeFilterTime(INITIAL_DATE_RANGE, {
-    from: state.dateRange.from,
-    to: state.dateRange.to,
-  });
-
   const onSubmit = useCallback(
     (data?: {
       query?: Query;
@@ -64,27 +63,20 @@ export const useUnifiedSearch = () => {
       filters?: Filter[];
       panelFilters?: Filter[];
     }) => {
-      const { query, dateRange, filters, panelFilters } = data ?? {};
-      const newDateRange = dateRange ?? getTime();
+      const { query, dateRange, filters = [], panelFilters = [] } = data ?? {};
 
       dispatch({
         type: 'setQuery',
         payload: {
           query,
           filters,
-          dateRange: newDateRange,
+          dateRange,
           panelFilters,
         },
       });
     },
-    [getTime, dispatch]
+    [dispatch]
   );
-
-  // This won't prevent onSubmit from being fired twice when `clear filters` is clicked,
-  // that happens because both onQuerySubmit and onFiltersUpdated are internally triggered on same event by SearchBar.
-  // This just delays potential duplicate onSubmit calls
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debounceOnSubmit = useCallback(debounce(onSubmit, 100), [onSubmit]);
 
   const loadFiltersFromState = useCallback(() => {
     if (!deepEqual(filterManagerService.getFilters(), state.filters)) {
@@ -111,56 +103,43 @@ export const useUnifiedSearch = () => {
   }, [loadDateRangeFromState, loadFiltersFromState, loadQueryFromState]);
 
   useEffect(() => {
-    const filterSubscription = filterManagerService
-      .getUpdates$()
-      .pipe(
-        map(() => filterManagerService.getFilters()),
-        map((filters) =>
-          onSubmit({
-            filters,
-          })
-        )
-      )
-      .subscribe();
+    const filters$ = filterManagerService.getUpdates$().pipe(
+      startWith(undefined),
+      map(() => filterManagerService.getFilters())
+    );
 
-    return () => {
-      filterSubscription.unsubscribe();
-    };
-  }, [onSubmit, filterManagerService]);
+    const query$ = queryStringService.getUpdates$().pipe(
+      startWith(undefined),
+      map(() => queryStringService.getQuery() as Query)
+    );
 
-  useEffect(() => {
-    const timeSubscription = timeFilterService.timefilter
-      .getTimeUpdate$()
-      .pipe(
-        map(() => getTime()),
-        map((dateRange) =>
-          onSubmit({
-            dateRange,
-          })
-        )
-      )
-      .subscribe();
-    return () => {
-      timeSubscription.unsubscribe();
-    };
-  }, [onSubmit, timeFilterService, getTime]);
+    const dateRange$ = timeFilterService.timefilter.getTimeUpdate$().pipe(
+      startWith(undefined),
+      map(() => getTime())
+    );
 
-  useEffect(() => {
-    const querySubscription = queryStringService
-      .getUpdates$()
+    const subscription = combineLatest({
+      filters: filters$,
+      query: query$,
+      dateRange: dateRange$,
+    })
       .pipe(
-        map(() => queryStringService.getQuery() as Query),
-        map((query) => {
+        debounceTime(100),
+        filterFirst(1),
+        tap(({ filters, query, dateRange }) => {
           onSubmit({
             query,
+            filters,
+            dateRange,
           });
         })
       )
       .subscribe();
+
     return () => {
-      querySubscription.unsubscribe();
+      subscription.unsubscribe();
     };
-  }, [onSubmit, queryStringService]);
+  });
 
   // Track telemetry event on query/filter/date changes
   useEffect(() => {
@@ -171,31 +150,20 @@ export const useUnifiedSearch = () => {
   }, [getDateRangeAsTimestamp, state, telemetry]);
 
   const buildQuery = useCallback(() => {
-    if (!metricsDataView) {
-      return null;
-    }
-    return buildEsQuery(
-      metricsDataView,
-      queryStringService.getQuery(),
-      [...filterManagerService.getFilters(), ...(state.panelFilters ?? [])],
-      kibanaQuerySettings
-    );
-  }, [
-    metricsDataView,
-    queryStringService,
-    kibanaQuerySettings,
-    filterManagerService,
-    state.panelFilters,
-  ]);
+    return buildEsQuery(metricsDataView, state.query, [
+      ...state.filters,
+      ...(state.panelFilters ?? []),
+    ]);
+  }, [metricsDataView, state.query, state.filters, state.panelFilters]);
 
   return {
     buildQuery,
     controlPanelFilters: state.panelFilters,
-    onSubmit: debounceOnSubmit,
+    onSubmit,
     getDateRangeAsTimestamp,
-    unifiedSearchQuery: queryStringService.getQuery() as Query,
-    unifiedSearchDateRange: getTime(),
-    unifiedSearchFilters: filterManagerService.getFilters(),
+    unifiedSearchQuery: state.query,
+    unifiedSearchDateRange: state.dateRange,
+    unifiedSearchFilters: state.filters,
   };
 };
 

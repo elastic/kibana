@@ -32,7 +32,7 @@ const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
 
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
-  const { buildQuery, getDateRangeAsTimestamp } = useUnifiedSearchContext();
+  const { getDateRangeAsTimestamp, buildQuery } = useUnifiedSearchContext();
 
   const baseRequest = useMemo(
     () =>
@@ -90,7 +90,4 @@ const createSnapshotRequest = ({
     to: dateRange.to,
     ignoreLookback: true,
   },
-  // The user might want to click on the submit button without changing the filters
-  // This makes sure all child components will re-render.
-  requestTs: Date.now(),
 });

@@ -51,6 +51,13 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
     onSubmit({ query: payload?.query, dateRange: payload?.dateRange, panelFilters });
   };
 
+  const handleRefresh = (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => {
+    // this will not call onQueryChange if fields values have been changed, only on submit button is clicked
+    if (isUpdate === false) {
+      onQueryChange({ payload });
+    }
+  };
+
   return (
     <EuiFlexGrid gutterSize="s">
       <SearchBar
@@ -60,6 +67,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
         placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
           defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
         })}
+        onQuerySubmit={handleRefresh}
         showSaveQuery={Boolean(application?.capabilities?.visualize?.saveQuery)}
         showDatePicker
         showFilterBar
