@@ -135,7 +135,6 @@ describe('Alerting Plugin', () => {
       const setupContract = await plugin.setup(setupMocks, mockPlugins);
 
       expect(AlertsService).toHaveBeenCalled();
-      expect(mockAlertService.initialize).toHaveBeenCalled();
 
       expect(setupContract.frameworkAlerts.enabled()).toEqual(true);
     });

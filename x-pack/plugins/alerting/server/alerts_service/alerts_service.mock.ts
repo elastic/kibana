@@ -8,7 +8,6 @@
 const creatAlertsServiceMock = () => {
   return jest.fn().mockImplementation(() => {
     return {
-      initialize: jest.fn(),
       register: jest.fn(),
       isInitialized: jest.fn(),
       isContextInitialized: jest.fn(),

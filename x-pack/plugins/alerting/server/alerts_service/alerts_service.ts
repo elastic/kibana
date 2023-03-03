@@ -46,6 +46,7 @@ interface AlertsServiceParams {
   pluginStop$: Observable<void>;
   kibanaVersion: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  timeoutMs?: number;
 }
 
 interface ConcreteIndexInfo {
@@ -53,17 +54,8 @@ interface ConcreteIndexInfo {
   alias: string;
   isWriteIndex: boolean;
 }
-interface IAlertsService {
-  /**
-   * Initializes the common ES resources needed for framework alerts as data
-   * - ILM policy - common policy shared by all AAD indices
-   * - Component template - common mappings for fields populated and used by the framework
-   *
-   * Once common resource initialization is complete, look for any solution-specific
-   * resources that have been registered and are awaiting initialization.
-   */
-  initialize(timeoutMs?: number): void;
 
+interface IAlertsService {
   /**
    * Register solution specific resources. If common resource initialization is
    * complete, go ahead and install those resources, otherwise add to queue to
@@ -93,12 +85,18 @@ export class AlertsService implements IAlertsService {
   private initialized: boolean;
   private resourceInitializationHelper: ResourceInstallationHelper;
   private registeredContexts: Map<string, IRuleTypeAlerts> = new Map();
-  private commonInitPromise: Promise<void> = Promise.resolve();
+  private commonInitPromise: Promise<boolean>;
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
+
+    // Kick off initialization of common assets and save the promise
+    this.commonInitPromise = this.initializeCommon(this.options.timeoutMs);
+
+    // Create helper for initializing context-specific resources
     this.resourceInitializationHelper = createResourceInstallationHelper(
       this.options.logger,
+      this.commonInitPromise,
       this.initializeContext.bind(this)
     );
   }
@@ -108,23 +106,13 @@ export class AlertsService implements IAlertsService {
   }
 
   public async isContextInitialized(context: string, timeoutMs?: number): Promise<boolean> {
-    return this.resourceInitializationHelper.getInitializedContext(
-      this.commonInitPromise,
-      context,
-      timeoutMs
-    );
-  }
-
-  public initialize(timeoutMs?: number) {
-    // Only initialize once
-    if (this.initialized) return;
-
-    this.options.logger.debug(`Initializing resources for AlertsService`);
-
-    // Use setImmediate to execute async fns as soon as possible
-    setImmediate(async () => {
-      this.commonInitPromise = this.initializeCommon(timeoutMs);
-    });
+    if (!this.registeredContexts.has(context)) {
+      this.options.logger.error(
+        `Error getting initialized status for context ${context} - context has not been registered.`
+      );
+      return Promise.resolve(false);
+    }
+    return this.resourceInitializationHelper.getInitializedContext(context, timeoutMs);
   }
 
   public register(opts: IRuleTypeAlerts, timeoutMs?: number) {
@@ -144,8 +132,14 @@ export class AlertsService implements IAlertsService {
     this.resourceInitializationHelper.add(opts, timeoutMs);
   }
 
-  private async initializeCommon(timeoutMs?: number) {
+  /**
+   * Initializes the common ES resources needed for framework alerts as data
+   * - ILM policy - common policy shared by all AAD indices
+   * - Component template - common mappings for fields populated and used by the framework
+   */
+  private async initializeCommon(timeoutMs?: number): Promise<boolean> {
     try {
+      this.options.logger.debug(`Initializing resources for AlertsService`);
       const esClient = await this.options.elasticsearchClientPromise;
 
       // Common initialization installs ILM policy and shared component template
@@ -188,9 +182,7 @@ export class AlertsService implements IAlertsService {
       this.initialized = false;
     }
 
-    if (this.initialized) {
-      this.resourceInitializationHelper.setReadyToInitialize(timeoutMs);
-    }
+    return this.initialized;
   }
 
   private async initializeContext(

@@ -254,7 +254,6 @@ export class AlertingPlugin {
           .getStartServices()
           .then(([{ elasticsearch }]) => elasticsearch.client.asInternalUser),
       });
-      this.alertsService!.initialize();
     }
 
     const ruleTypeRegistry = new RuleTypeRegistry({
