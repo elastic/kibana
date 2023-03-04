@@ -80,28 +80,33 @@ export const findAndClickButton = (text: string) => {
 
 export const toggleRuleOffAndOn = (ruleName: string) => {
   cy.visit('/app/security/rules');
-  cy.contains(ruleName);
   cy.wait(2000);
-  cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
-  cy.getBySel('ruleSwitch').click();
-  cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
-  cy.getBySel('ruleSwitch').click();
-  cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+  cy.contains(ruleName)
+    .parents('tr')
+    .within(() => {
+      cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+      cy.getBySel('ruleSwitch').click();
+      cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'false');
+      cy.getBySel('ruleSwitch').click();
+      cy.getBySel('ruleSwitch').should('have.attr', 'aria-checked', 'true');
+    });
 };
 
-export const loadAlertsEvents = () => {
-  cy.visit('/app/security/alerts');
-  cy.getBySel('header-page-title').contains('Alerts').should('exist');
-  cy.getBySel('expand-event')
-    .first()
-    .within(() => {
-      cy.get(`[data-is-loading="true"]`).should('exist');
-    });
-  cy.getBySel('expand-event')
-    .first()
-    .within(() => {
-      cy.get(`[data-is-loading="true"]`).should('not.exist');
-    });
+export const loadRuleAlerts = (ruleName: string) => {
+  cy.visit('/app/security/rules');
+  cy.contains(ruleName).click();
+  cy.getBySel('alertsTable').within(() => {
+    cy.getBySel('expand-event')
+      .first()
+      .within(() => {
+        cy.get(`[data-is-loading="true"]`).should('exist');
+      });
+    cy.getBySel('expand-event')
+      .first()
+      .within(() => {
+        cy.get(`[data-is-loading="true"]`).should('not.exist');
+      });
+  });
 };
 
 export const addToCase = () => {

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { cleanupSavedQuery, loadSavedQuery } from '../../tasks/api_fixtures';
+import {
+  cleanupPack,
+  cleanupPolicy,
+  cleanupSavedQuery,
+  loadSavedQuery,
+} from '../../tasks/api_fixtures';
 import { CREATE_PACKAGE_POLICY_SAVE_BTN } from '../../screens/integrations';
 import {
   createOldOsqueryPath,
@@ -16,8 +21,6 @@ import {
 } from '../../tasks/navigation';
 import {
   addCustomIntegration,
-  cleanupPackApi,
-  cleanupPolicyApi,
   closeModalIfVisible,
   generateRandomStringName,
   integrationExistsWithinPolicyDetails,
@@ -72,7 +75,7 @@ describe('ALL - Add Integration', () => {
     });
 
     after(() => {
-      cleanupPolicyApi(policyId);
+      cleanupPolicy(policyId);
     });
 
     it('should add the old integration and be able to upgrade it', () => {
@@ -101,7 +104,7 @@ describe('ALL - Add Integration', () => {
     });
 
     after(() => {
-      cleanupPolicyApi(policyId);
+      cleanupPolicy(policyId);
     });
 
     it('add integration', () => {
@@ -143,8 +146,8 @@ describe('ALL - Add Integration', () => {
     });
 
     after(() => {
-      cleanupPackApi(packId);
-      cleanupPolicyApi(policyId);
+      cleanupPack(packId);
+      cleanupPolicy(policyId);
     });
 
     it('should have integration and packs copied when upgrading integration', () => {

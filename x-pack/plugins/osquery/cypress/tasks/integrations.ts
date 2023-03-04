@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { request } from './common';
-import { apiPaths } from './navigation';
 import { DEFAULT_POLICY } from '../screens/fleet';
 import {
   ADD_POLICY_BTN,
@@ -71,12 +69,6 @@ export const interceptPackId = (cb: (packId: string) => void) => {
     });
   });
 };
-
-export const cleanupPolicyApi = (agentPolicyId: string) =>
-  request({ method: 'POST', body: { agentPolicyId }, url: apiPaths.fleet.agent_policies.delete });
-
-export const cleanupPackApi = (packId: string) =>
-  request({ method: 'DELETE', url: apiPaths.osquery.pack(packId) });
 
 export const generateRandomStringName = (length: number) =>
   Array.from({ length }, () => Math.random().toString(36).substring(2));
