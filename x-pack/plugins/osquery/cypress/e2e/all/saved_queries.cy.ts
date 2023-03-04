@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { preparePack } from '../../tasks/packs';
 import {
   addToCase,
@@ -21,15 +20,15 @@ import {
 import { navigateTo } from '../../tasks/navigation';
 import { ROLE, login } from '../../tasks/login';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
-import { getRandomInt } from '../../tasks/helpers';
+import { loadCase, cleanupCase, loadPack, cleanupPack } from '../../tasks/api_fixtures';
 
 describe('ALL - Saved queries', () => {
-  const randomNumber = getRandomInt();
-  const SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
-  const SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
+  let caseId: string;
 
   before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'case_security');
+    loadCase('securitySolution').then((caseInfo) => {
+      caseId = caseInfo.id;
+    });
   });
 
   beforeEach(() => {
@@ -38,10 +37,10 @@ describe('ALL - Saved queries', () => {
   });
 
   after(() => {
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_security');
+    cleanupCase(caseId);
   });
 
-  getSavedQueriesComplexTest(SAVED_QUERY_ID, SAVED_QUERY_DESCRIPTION);
+  getSavedQueriesComplexTest();
 
   it('checks that user cant add a saved query with an ID that already exists', () => {
     cy.contains('Saved queries').click();
@@ -63,9 +62,23 @@ describe('ALL - Saved queries', () => {
     });
   });
 
-  describe('prebuilt ', () => {
+  describe('prebuilt', () => {
+    let packName: string;
+    let packId: string;
+
     before(() => {
-      runKbnArchiverScript(ArchiverMethod.LOAD, 'pack_with_prebuilt_saved_queries');
+      loadPack({
+        queries: {
+          test: {
+            interval: 10,
+            query: 'select * from uptime;',
+            ecs_mapping: {},
+          },
+        },
+      }).then((data) => {
+        packId = data.id;
+        packName = data.attributes.name;
+      });
     });
 
     beforeEach(() => {
@@ -73,7 +86,7 @@ describe('ALL - Saved queries', () => {
     });
 
     after(() => {
-      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'pack_with_prebuilt_saved_queries');
+      cleanupPack(packId);
     });
 
     it('checks result type on prebuilt saved query', () => {
@@ -93,7 +106,7 @@ describe('ALL - Saved queries', () => {
       selectAllAgents();
       submitQuery();
       checkResults();
-      addToCase();
+      addToCase(caseId);
       viewRecentCaseAndCheckResults();
     });
 
@@ -115,10 +128,9 @@ describe('ALL - Saved queries', () => {
     });
 
     it('user can edit prebuilt saved query under pack', () => {
-      const PACK_NAME = 'pack_with_prebuilt_sq';
-      preparePack(PACK_NAME);
+      preparePack(packName);
       findAndClickButton('Edit');
-      cy.contains(`Edit ${PACK_NAME}`);
+      cy.contains(`Edit ${packName}`);
       findAndClickButton('Add query');
       cy.contains('Attach next query');
 
@@ -142,7 +154,6 @@ describe('ALL - Saved queries', () => {
       });
       cy.contains('Unique identifier of the us').should('not.exist');
       cy.contains('User ID').should('not.exist');
-      // cy.contains('Save').click();
       cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
 
       cy.react('CustomItemAction', {

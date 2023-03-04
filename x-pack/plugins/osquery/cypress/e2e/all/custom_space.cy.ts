@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
@@ -15,52 +14,61 @@ import {
   selectAllAgents,
   submitQuery,
 } from '../../tasks/live_query';
+import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_fixtures';
 
 describe('ALL - Custom space', () => {
-  const CUSTOM_SPACE = 'custom-space';
-  const PACK_NAME = 'testpack';
-  before(() => {
-    login(ROLE.admin);
-    cy.request({
-      method: 'POST',
-      url: '/api/spaces/space',
-      body: {
-        id: CUSTOM_SPACE,
-        name: CUSTOM_SPACE,
-      },
-      failOnStatusCode: false,
-      headers: { 'kbn-xsrf': 'create-space' },
-    });
-  });
+  ['default', 'custom-space'].forEach((spaceName) => {
+    describe(`[${spaceName}]`, () => {
+      let packName: string;
+      let packId: string;
+      let spaceId: string;
 
-  after(() => {
-    login(ROLE.admin);
-    cy.request({
-      method: 'DELETE',
-      url: '/api/spaces/space/custom-space',
-      headers: { 'kbn-xsrf': 'delete-space' },
-    });
-  });
-
-  ['default', 'custom-space'].forEach((space) => {
-    describe(`[${space}]`, () => {
       before(() => {
-        runKbnArchiverScript(ArchiverMethod.LOAD, 'pack', space);
+        new Promise<string>((resolve) => {
+          if (spaceName !== 'default') {
+            loadSpace().then((space) => {
+              spaceId = space.id;
+              resolve(spaceId);
+            });
+          } else {
+            spaceId = 'default';
+            resolve(spaceId);
+          }
+        }).then((space) => {
+          loadPack(
+            {
+              queries: {
+                test: {
+                  interval: 10,
+                  query: 'select * from uptime;',
+                  ecs_mapping: {},
+                },
+              },
+            },
+            space
+          ).then((data) => {
+            packId = data.id;
+            packName = data.attributes.name;
+          });
+        });
       });
 
       beforeEach(() => {
         login(ROLE.soc_manager);
-        navigateTo(`/s/${space}/app/osquery`);
+        navigateTo(`/s/${spaceId}/app/osquery`);
       });
 
       after(() => {
-        runKbnArchiverScript(ArchiverMethod.UNLOAD, 'pack', space);
+        cleanupPack(packId, spaceId);
+        if (spaceName !== 'default') {
+          cleanupSpace(spaceId);
+        }
       });
 
       it('Discover should be opened in new tab in results table', () => {
         cy.contains('New live query').click();
         selectAllAgents();
-        inputQuery('select * from uptime; ');
+        inputQuery('select * from uptime;');
         submitQuery();
         checkResults();
         checkActionItemsInResults({
@@ -81,11 +89,12 @@ describe('ALL - Custom space', () => {
             });
           });
       });
-      it(`runs packs normally on ${space}`, () => {
+
+      it('runs packs normally', () => {
         cy.contains('Packs').click();
         cy.contains('Create pack').click();
         cy.react('CustomItemAction', {
-          props: { item: { attributes: { name: PACK_NAME } } },
+          props: { item: { attributes: { name: packName } } },
         }).click();
         selectAllAgents();
         cy.contains('Submit').click();

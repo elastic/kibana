@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { RESPONSE_ACTION_TYPES } from '@kbn/security-solution-plugin/common/detection_engine/rule_response_actions/schemas';
 import { ROLE, login } from '../../tasks/login';
 import { NAV_SEARCH_INPUT_OSQUERY_RESULTS } from '../../tasks/navigation';
+import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 
 describe('None', () => {
   beforeEach(() => {
@@ -43,15 +45,40 @@ describe('None', () => {
     });
   });
 
-  it('should not see osquery in alerts', () => {
-    cy.visit('/app/security/alerts');
-    cy.getBySel('expand-event').first().click({ force: true });
-    cy.getBySel('take-action-dropdown-btn').click();
-    cy.getBySel('osquery-action-item').should('not.exist');
+  describe('Detection Engine', () => {
+    let ruleId: string;
 
-    cy.getBySel('osquery-actions-notification').contains('0');
-    cy.contains('Osquery Results').click();
-    cy.contains('Permission denied').should('exist');
-    cy.contains('Error while fetching live queries').should('exist');
+    before(() => {
+      login(ROLE.soc_manager);
+      loadRule({
+        response_actions: [
+          {
+            params: { query: 'select * from uptime', ecs_mapping: {} },
+            action_type_id: RESPONSE_ACTION_TYPES.OSQUERY,
+          },
+        ],
+      }).then((data) => {
+        ruleId = data.id;
+      });
+      cy.visit(`/app/security/alerts`);
+      cy.getBySel('expand-event').should('exist');
+      login(ROLE.none);
+    });
+
+    after(() => {
+      cleanupRule(ruleId);
+    });
+
+    it('should not see osquery in alerts', () => {
+      cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
+      cy.getBySel('expand-event').first().click({ force: true });
+      cy.getBySel('take-action-dropdown-btn').click();
+      cy.getBySel('osquery-action-item').should('not.exist');
+
+      cy.getBySel('osquery-actions-notification').contains('0');
+      cy.contains('Osquery Results').click();
+      cy.contains('Permission denied').should('exist');
+      cy.contains('Error while fetching live queries').should('exist');
+    });
   });
 });

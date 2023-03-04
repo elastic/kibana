@@ -8,28 +8,31 @@
 import { navigateTo } from '../../tasks/navigation';
 import { ROLE, login } from '../../tasks/login';
 import { checkResults, inputQuery, submitQuery } from '../../tasks/live_query';
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
+import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 
 describe('ALL - Inventory', () => {
+  let savedQueryName: string;
+  let savedQueryId: string;
+
+  before(() => {
+    loadSavedQuery().then((data) => {
+      savedQueryId = data.id;
+      savedQueryName = data.attributes.id;
+    });
+  });
+
   beforeEach(() => {
     login(ROLE.soc_manager);
     navigateTo('/app/osquery');
   });
 
-  before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
-  });
-
   after(() => {
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
+    cleanupSavedQuery(savedQueryId);
   });
 
   it('should be able to run the query', () => {
     cy.getBySel('toggleNavButton').click();
     cy.contains('Infrastructure').click();
-
-    // REMOVE ME
-    cy.wait(1000);
 
     cy.getBySel('nodeContainer').first().click();
     cy.contains('Osquery').click();
@@ -49,7 +52,7 @@ describe('ALL - Inventory', () => {
 
     cy.getBySel('comboBoxInput').first().click();
     cy.wait(500);
-    cy.getBySel('comboBoxInput').first().type('saved{downArrow}{enter}');
+    cy.getBySel('comboBoxInput').first().type(`${savedQueryName}{downArrow}{enter}`);
 
     submitQuery();
     checkResults();

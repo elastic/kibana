@@ -17,14 +17,10 @@ import {
   checkActionItemsInResults,
 } from '../../tasks/live_query';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
-import { getRandomInt } from '../../tasks/helpers';
 import { loadPack, loadSavedQuery, cleanupSavedQuery, cleanupPack } from '../../tasks/api_fixtures';
 
 describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
   const SAVED_QUERY_ID = 'Saved-Query-Id';
-  const randomNumber = getRandomInt();
-  const NEW_SAVED_QUERY_ID = `Saved-Query-Id-${randomNumber}`;
-  const NEW_SAVED_QUERY_DESCRIPTION = `Test saved query description ${randomNumber}`;
 
   let savedQueryName: string;
   let savedQueryId: string;
@@ -52,11 +48,13 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     cleanupPack(packId);
   });
 
-  getSavedQueriesComplexTest(NEW_SAVED_QUERY_ID, NEW_SAVED_QUERY_DESCRIPTION);
+  getSavedQueriesComplexTest();
 
   it('should not be able to add nor edit packs', () => {
     navigateTo('/app/osquery/packs');
     cy.waitForReact(1000);
+    cy.getBySel('tablePaginationPopoverButton').click();
+    cy.getBySel('tablePagination-50-rows').click();
     cy.contains('Add pack').should('be.disabled');
     cy.react('ActiveStateSwitchComponent', {
       props: { item: { attributes: { name: packName } } },
@@ -81,7 +79,7 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     const cmd = Cypress.platform === 'darwin' ? '{meta}{enter}' : '{ctrl}{enter}';
     cy.contains('New live query').click();
     selectAllAgents();
-    inputQuery('select * from uptime; ');
+    inputQuery('select * from uptime;');
     cy.wait(500);
     // checking submit by clicking cmd+enter
     inputQuery(cmd);

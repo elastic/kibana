@@ -7,28 +7,31 @@
 
 import { navigateTo } from '../../tasks/navigation';
 import { ROLE, login } from '../../tasks/login';
-
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
+import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 
 describe('ALL - Edit saved query', () => {
-  const SAVED_QUERY_ID = 'Saved-Query-Id';
+  let savedQueryName: string;
+  let savedQueryId: string;
 
   before(() => {
-    runKbnArchiverScript(ArchiverMethod.LOAD, 'saved_query');
+    loadSavedQuery().then((data) => {
+      savedQueryId = data.id;
+      savedQueryName = data.attributes.id;
+    });
   });
+
   beforeEach(() => {
     login(ROLE.soc_manager);
     navigateTo('/app/osquery/saved_queries');
   });
 
   after(() => {
-    runKbnArchiverScript(ArchiverMethod.UNLOAD, 'saved_query');
+    cleanupSavedQuery(savedQueryId);
   });
 
   it('by changing ecs mappings and platforms', () => {
-    cy.getBySel('pagination-button-next').click();
     cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
+      props: { index: 1, item: { attributes: { id: savedQueryName } } },
     }).click();
     cy.contains('Custom key/value pairs.').should('exist');
     cy.contains('Hours of uptime').should('exist');
@@ -69,7 +72,7 @@ describe('ALL - Edit saved query', () => {
     cy.wait(5000);
 
     cy.react('CustomItemAction', {
-      props: { index: 1, item: { attributes: { id: SAVED_QUERY_ID } } },
+      props: { index: 1, item: { attributes: { id: savedQueryName } } },
     }).click();
     cy.contains('Custom key/value pairs').should('not.exist');
     cy.contains('Hours of uptime').should('not.exist');

@@ -18,7 +18,7 @@ describe('Admin', () => {
   it('should be able to run live query with BASE All permissions', () => {
     cy.contains('New live query').click();
     selectAllAgents();
-    inputQuery('select * from uptime; ');
+    inputQuery('select * from uptime;');
     submitQuery();
     checkResults();
   });

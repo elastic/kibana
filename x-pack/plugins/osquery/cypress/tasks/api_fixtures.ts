@@ -9,6 +9,8 @@ import type {
   RuleCreateProps,
   RuleResponse,
 } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { CaseResponse } from '@kbn/cases-plugin/common/api';
+import type { SavedQuerySOFormData } from '../../public/saved_queries/form/use_saved_query_form';
 import type { LiveQueryDetailsItem } from '../../public/actions/use_live_query_details';
 import type { PackSavedObject, PackItem } from '../../public/packs/types';
 import type { SavedQuerySO } from '../../public/routes/saved_queries/list';
@@ -25,10 +27,13 @@ export const savedQueryFixture = {
   platform: 'linux,darwin',
 };
 
-export const loadSavedQuery = () =>
+export const loadSavedQuery = (payload: SavedQuerySOFormData = savedQueryFixture) =>
   request<{ data: SavedQuerySO }>({
     method: 'POST',
-    body: savedQueryFixture,
+    body: {
+      ...payload,
+      id: payload.id ?? generateRandomStringName(1)[0],
+    },
     url: apiPaths.osquery.savedQueries,
   }).then((response) => response.body.data);
 
@@ -36,7 +41,7 @@ export const cleanupSavedQuery = (id: string) => {
   request({ method: 'DELETE', url: apiPaths.osquery.savedQuery(id) });
 };
 
-export const loadPack = (payload: Partial<PackItem> = {}) =>
+export const loadPack = (payload: Partial<PackItem> = {}, space = 'default') =>
   request<{ data: PackSavedObject }>({
     method: 'POST',
     body: {
@@ -44,27 +49,30 @@ export const loadPack = (payload: Partial<PackItem> = {}) =>
       name: payload.name ?? generateRandomStringName(1)[0],
       shards: {},
       queries: payload.queries ?? {},
+      enabled: payload.enabled || true,
     },
-    url: `/api/osquery/packs`,
+    url: `/s/${space}/api/osquery/packs`,
   }).then((response) => response.body.data);
 
-export const cleanupPack = (id: string) => {
-  request({ method: 'DELETE', url: `/api/osquery/packs/${id}` });
+export const cleanupPack = (id: string, space = 'default') => {
+  request({ method: 'DELETE', url: `/s/${space}/api/osquery/packs/${id}` });
 };
 
-export const loadLiveQuery = () =>
+export const loadLiveQuery = (
+  payload = {
+    agent_all: true,
+    query: 'select * from uptime;',
+  }
+) =>
   request<{
     data: LiveQueryDetailsItem & { queries: NonNullable<LiveQueryDetailsItem['queries']> };
   }>({
     method: 'POST',
-    body: {
-      agent_all: true,
-      query: 'select * from uptime;',
-    },
+    body: payload,
     url: `/api/osquery/live_queries`,
   }).then((response) => response.body.data);
 
-export const loadRule = () =>
+export const loadRule = (payload: Partial<RuleCreateProps> = {}) =>
   request<RuleResponse>({
     method: 'POST',
     body: {
@@ -103,10 +111,51 @@ export const loadRule = () =>
       enabled: true,
       throttle: 'no_actions',
       note: '!{osquery{"query":"SELECT * FROM os_version where name=\'{{host.os.name}}\';","label":"Get processes","ecs_mapping":{"host.os.platform":{"field":"platform"}}}}\n\n!{osquery{"query":"select * from users;","label":"Get users"}}',
+      response_actions: payload.response_actions ?? [],
     } as RuleCreateProps,
     url: `/api/detection_engine/rules`,
   }).then((response) => response.body);
 
 export const cleanupRule = (id: string) => {
-  request({ method: 'DELETE', url: `/api/detection_engine/rules?rule_id=${id}` });
+  request({ method: 'DELETE', url: `/api/detection_engine/rules?id=${id}` });
 };
+
+export const loadCase = (owner: string) =>
+  request<CaseResponse>({
+    method: 'POST',
+    url: '/api/cases',
+    body: {
+      title: `Test ${owner} case ${generateRandomStringName(1)[0]}`,
+      tags: [],
+      severity: 'low',
+      description: 'Test security case',
+      assignees: [],
+      connector: { id: 'none', name: 'none', type: '.none', fields: null },
+      settings: { syncAlerts: true },
+      owner,
+    },
+  }).then((response) => response.body);
+
+export const cleanupCase = (id: string) => {
+  request({ method: 'DELETE', url: '/api/cases', qs: { ids: JSON.stringify([id]) } });
+};
+
+export const loadSpace = () => {
+  const spaceId = generateRandomStringName(1)[0];
+
+  return request<{ id: string }>({
+    method: 'POST',
+    url: '/api/spaces/space',
+    body: {
+      id: spaceId,
+      name: spaceId,
+    },
+    failOnStatusCode: false,
+  }).then((response) => response.body);
+};
+
+export const cleanupSpace = (id: string) =>
+  request({
+    method: 'DELETE',
+    url: `/api/spaces/space/${id}`,
+  });

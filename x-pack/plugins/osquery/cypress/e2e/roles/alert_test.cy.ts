@@ -38,7 +38,7 @@ describe('Alert Test', () => {
       packName = data.attributes.name;
     });
     loadRule().then((data) => {
-      ruleId = data.rule_id;
+      ruleId = data.id;
       ruleName = data.name;
     });
   });

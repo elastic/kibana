@@ -65,7 +65,9 @@ export const interceptPolicyId = (cb: (policyId: string) => void) => {
 export const interceptPackId = (cb: (packId: string) => void) => {
   cy.intercept('POST', '**/api/osquery/packs', (req) => {
     req.continue((res) => {
-      cb(res.body.data.id);
+      if (res.body.data) {
+        cb(res.body.data.id);
+      }
 
       return res.send(res.body);
     });

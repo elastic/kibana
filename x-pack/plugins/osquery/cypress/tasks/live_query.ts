@@ -61,7 +61,7 @@ export const getOsqueryFieldTypes = (value: 'Osquery value' | 'Static value', in
 };
 
 export const findFormFieldByRowsLabelAndType = (label: string, text: string) => {
-  cy.react('EuiFormRow', { props: { label } }).type(text);
+  cy.react('EuiFormRow', { props: { label } }).type(`${text}{downArrow}{enter}`);
 };
 
 export const deleteAndConfirm = (type: string) => {
@@ -104,22 +104,18 @@ export const loadAlertsEvents = () => {
     });
 };
 
-export const addToCase = () => {
+export const addToCase = (caseId: string) => {
   cy.contains('Add to Case').click();
   cy.contains('Select case');
-  cy.getBySelContains('cases-table-row-');
-  cy.getBySelContains('cases-table-row-select-').click();
+  cy.getBySelContains(`cases-table-row-select-${caseId}`).click();
 };
 
-export const addLastLiveQueryToCase = () => {
-  cy.waitForReact();
-  cy.react('CustomItemAction', {
-    props: { index: 1 },
-  })
-    .first()
-    .click();
+export const addLiveQueryToCase = (actionId: string, caseId: string) => {
+  cy.react('ActionsTableComponent').within(() => {
+    cy.getBySel(`row-${actionId}`).react('ActionTableResultsButton').click();
+  });
   cy.contains('Live query details');
-  addToCase();
+  addToCase(caseId);
 };
 
 const casesOsqueryResultRegex = /attached Osquery results[\s]?[\d]+[\s]?seconds ago/;
