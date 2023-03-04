@@ -165,6 +165,7 @@ export const useExceptionsListCard = ({
     [
       exceptionsList.id,
       exceptionsList.list_id,
+      exceptionsList.name,
       exceptionsList.namespace_type,
       handleDelete,
       setShowExportModal,
