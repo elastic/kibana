@@ -5,23 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import type {
-  DescriptionOrUndefined,
-  EntriesArray,
-  ExceptionListItemSchema,
-  ExceptionListItemTypeOrUndefined,
-  ExpireTimeOrUndefined,
-  IdOrUndefined,
-  ItemIdOrUndefined,
-  MetaOrUndefined,
-  NameOrUndefined,
-  NamespaceType,
-  OsTypeArray,
-  TagsOrUndefined,
-  UpdateCommentsArrayOrUndefined,
-  _VersionOrUndefined,
-} from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { ExceptionListSoSchema } from '../../schemas/saved_objects';
@@ -31,27 +15,9 @@ import {
   transformUpdateCommentsToComments,
 } from './utils';
 import { getExceptionListItem } from './get_exception_list_item';
+import { UpdateExceptionListItemOptions } from './update_exception_list_item';
 
-export interface UpdateExceptionListItemOptions {
-  id: IdOrUndefined;
-  comments: UpdateCommentsArrayOrUndefined;
-  _version: _VersionOrUndefined;
-  name: NameOrUndefined;
-  description: DescriptionOrUndefined;
-  entries: EntriesArray;
-  expireTime: ExpireTimeOrUndefined;
-  savedObjectsClient: SavedObjectsClientContract;
-  namespaceType: NamespaceType;
-  osTypes: OsTypeArray;
-  itemId: ItemIdOrUndefined;
-  meta: MetaOrUndefined;
-  user: string;
-  tags: TagsOrUndefined;
-  tieBreaker?: string;
-  type: ExceptionListItemTypeOrUndefined;
-}
-
-export const updateExceptionListItem = async ({
+export const updateOverwriteExceptionListItem = async ({
   _version,
   comments,
   entries,
@@ -83,22 +49,31 @@ export const updateExceptionListItem = async ({
       existingComments: exceptionListItem.comments,
       user,
     });
-    const savedObject = await savedObjectsClient.update<ExceptionListSoSchema>(
+    const savedObject = await savedObjectsClient.create<ExceptionListSoSchema>(
       savedObjectType,
-      exceptionListItem.id,
       {
         comments: transformedComments,
-        description,
+        created_at: exceptionListItem.created_at,
+        created_by: exceptionListItem.created_by,
+        description: description ?? exceptionListItem.description,
         entries,
         expire_time: expireTime,
+        immutable: undefined,
+        item_id: itemId,
+        list_id: exceptionListItem.list_id,
+        list_type: 'item',
         meta,
-        name,
+        name: name ?? exceptionListItem.name,
         os_types: osTypes,
-        tags,
-        type,
+        tags: tags ?? exceptionListItem.tags,
+        tie_breaker_id: exceptionListItem.tie_breaker_id,
+        type: type ?? exceptionListItem.type,
         updated_by: user,
+        version: exceptionListItem._version ? parseInt(exceptionListItem._version, 10) : undefined,
       },
       {
+        id,
+        overwrite: true,
         version: _version,
       }
     );
