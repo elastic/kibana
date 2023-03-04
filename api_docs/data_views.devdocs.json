@@ -85,7 +85,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/grouped_alerts.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8293,7 +8293,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/grouped_alerts.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -15596,7 +15596,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/grouped_alerts.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -18900,6 +18900,71 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
+        "id": "def-common.DataViewMissingIndices",
+        "type": "Class",
+        "tags": [],
+        "label": "DataViewMissingIndices",
+        "description": [
+          "\nTried to call a method that relies on SearchSource having an indexPattern assigned"
+        ],
+        "signature": [
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewMissingIndices",
+            "text": "DataViewMissingIndices"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KbnError",
+            "text": "KbnError"
+          }
+        ],
+        "path": "src/plugins/data_views/common/lib/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewMissingIndices.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data_views/common/lib/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewMissingIndices.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/lib/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []

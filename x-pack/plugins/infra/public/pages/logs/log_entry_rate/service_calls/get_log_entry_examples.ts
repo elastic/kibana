@@ -32,7 +32,7 @@ export const callGetLogEntryExamplesAPI = async (requestArgs: RequestArgs, fetch
         data: {
           dataset,
           exampleCount,
-          sourceId,
+          logView: { type: 'log-view-reference', logViewId: sourceId },
           timeRange: {
             startTime,
             endTime,
