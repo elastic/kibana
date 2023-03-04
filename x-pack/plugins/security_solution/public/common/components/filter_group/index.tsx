@@ -15,7 +15,7 @@ import type {
 } from '@kbn/controls-plugin/public';
 import { LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { PropsWithChildren } from 'react';
-import React, { createContext, useCallback, useEffect, useState, useRef, useMemo } from 'react';
+import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { Subscription } from 'rxjs';
@@ -37,28 +37,11 @@ import { FilterGroupContextMenu } from './context_menu';
 import { AddControl, DiscardChanges, SaveControls } from './buttons';
 import { getFilterItemObjListFromControlInput } from './utils';
 import { FiltersChangedBanner } from './filters_changed_banner';
+import { FilterGroupContext } from './filter_group_context';
 
 type ControlGroupBuilder = typeof controlGroupInputBuilder;
 
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
-
-interface FilterGroupContextType {
-  initialControls: FilterItemObj[];
-  dataViewId: string;
-  controlGroup: ControlGroupContainer | undefined;
-  controlGroupInputUpdates: ControlGroupInput | undefined;
-  isViewMode: boolean;
-  hasPendingChanges: boolean;
-  pendingChangesPopoverOpen: boolean;
-  closePendingChangesPopover: () => void;
-  openPendingChangesPopover: () => void;
-  switchToViewMode: () => void;
-  switchToEditMode: () => void;
-  setHasPendingChanges: (value: boolean) => void;
-  setShowFiltersChangedBanner: (value: boolean) => void;
-}
-
-export const FilterGroupContext = createContext<FilterGroupContextType | undefined>(undefined);
 
 const FilterWrapper = styled.div.attrs((props) => ({
   className: props.className,

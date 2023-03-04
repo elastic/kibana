@@ -6,7 +6,7 @@
  */
 
 import { useContext } from 'react';
-import { FilterGroupContext } from '..';
+import { FilterGroupContext } from '../filter_group_context';
 
 export const useFilterGroupInternalContext = () => {
   const filterContext = useContext(FilterGroupContext);
