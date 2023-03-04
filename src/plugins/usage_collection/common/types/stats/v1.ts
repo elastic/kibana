@@ -6,36 +6,41 @@
  * Side Public License, v 1.
  */
 
+import * as OpsMetricsCopy from './core_metrics_duplicated';
 /** v1 types Start */
 
 /**
  * stats query v1
+ * @remarks exclude_usage is always interpreted as true. query param retained to prevent breaking changes to existing consumers.
  */
 export interface StatsHTTPQuery {
   extended?: boolean | '';
   legacy?: boolean | '';
   exclude_usage?: boolean | '';
 }
-/** unused, for demonstration only */
-type MaybeRecord =
-  | {
-      [key: string]: Record<string, unknown>;
-    }
-  | unknown;
 
+export interface UsageObject {
+  kibana?: UsageObject;
+  xpack?: UsageObject;
+  [key: string]: unknown | UsageObject;
+}
+/**
+ * Extended usage stats.
+ * Legacy implementation used to conditionally include kibana usage metrics
+ * as of https://github.com/elastic/kibana/pull/151082, usage is no longer reported
+ * and set to an empty object to prevent breaking changes to existing consumers.
+ */
+export interface ExtendedStats {
+  [key: string]: unknown;
+  clusterUuid?: string; // camel case if legacy === true
+  cluster_uuid?: string; // snake_case if legacy === false
+}
+/**
+ * OpsMetrics: partially typed to avoid duplicating core's OpsMetrics types
+ */
+export type LastOpsMetrics = OpsMetricsCopy.OpsMetrics;
 /** unused, for demonstration only */
-interface StatsHTTPBodyPartiallyTyped {
-  // lastMetrics
-  elasticsearch_client: unknown;
-  process: unknown;
-  processes: unknown[];
-  os: unknown;
-  response_times: MaybeRecord;
-  requests: MaybeRecord;
-  concurrent_connections: number;
-  // stats added
-  lastUpdated: number;
-  collectionInterval: number;
+export interface KibanaStats {
   // kibana
   kibana: {
     uuid: string;
@@ -48,18 +53,11 @@ interface StatsHTTPBodyPartiallyTyped {
     snapshot: boolean;
     status: string;
   };
-  // others
-  [key: string]: unknown;
+  // // others
+  // [key: string]: unknown;
 }
-/** unused, for demonstration only */
-export type StatsHTTPBodyTyped = StatsHTTPBodyUntyped | StatsHTTPBodyPartiallyTyped;
-
-/**
- * stats body v1
- * Used for telemetry purposes, not used to integrate with other Kibana clients.
- * Response body verification handled elsewhere
- */
-type StatsHTTPBodyUntyped = unknown;
+/** Stats response body */
+export type StatsHTTPBodyTyped = LastOpsMetrics | KibanaStats | ExtendedStats;
 
 /**
  * generic type for api response body

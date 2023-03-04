@@ -21,12 +21,6 @@ import { v1 } from '../../../common/types/stats';
 import { CollectorSet } from '../../collector';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
-interface UsageObject {
-  kibana?: UsageObject;
-  xpack?: UsageObject;
-  [key: string]: unknown | UsageObject;
-}
-
 export function registerStatsRoute({
   router,
   config,
@@ -80,24 +74,17 @@ export function registerStatsRoute({
       const isLegacy = requestQuery.legacy === '' || requestQuery.legacy;
 
       let extended;
+
       if (isExtended) {
         const core = await context.core;
         const { asCurrentUser } = core.elasticsearch.client;
-
-        const usage = {} as UsageObject;
+        // as of https://github.com/elastic/kibana/pull/151082, usage will always be an empty object.
         const clusterUuid = await getClusterUuid(asCurrentUser);
-
-        // In an effort to make telemetry more easily augmented, we need to ensure
-        // we can passthrough the data without every part of the process needing
-        // to know about the change; however, to support legacy use cases where this
-        // wasn't true, we need to be backwards compatible with how the legacy data
-        // looked and support those use cases here.
-        extended = isLegacy
-          ? { usage, clusterUuid }
-          : collectorSet.toApiFieldNames({
-              usage,
-              clusterUuid,
-            });
+        const extendedClusterUuid = isLegacy ? { clusterUuid } : { cluster_uuid: clusterUuid };
+        extended = {
+          usage: {},
+          extendedClusterUuid,
+        };
       }
 
       // Guaranteed to resolve immediately due to replay effect on getOpsMetrics$
@@ -122,7 +109,7 @@ export function registerStatsRoute({
         last_updated: collectedAt.toISOString(),
         collection_interval_in_millis: metrics.collectionInterval,
       });
-      const body: v1.StatsHTTPBody = {
+      const body: v1.StatsHTTPBodyTyped = {
         ...kibanaStats,
         ...extended,
       };

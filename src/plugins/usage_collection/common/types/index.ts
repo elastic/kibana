@@ -5,5 +5,5 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export * as OpsMetricsCopy from './core_metrics_duplicated';
-export * from './v1';
+
+export * as v1 from './stats';
