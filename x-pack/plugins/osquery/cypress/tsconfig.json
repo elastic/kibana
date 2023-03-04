@@ -26,6 +26,8 @@
       "force": true
     },
     "@kbn/security-plugin",
-    "@kbn/security-solution-plugin"
+    "@kbn/security-solution-plugin",
+    "@kbn/fleet-plugin",
+    "@kbn/cases-plugin"
   ]
 }

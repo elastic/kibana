@@ -9,14 +9,14 @@ import type {
   RuleCreateProps,
   RuleResponse,
 } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
-import type { CaseResponse } from '@kbn/cases-plugin/common/api';
+import type { AgentPolicy } from '@kbn/fleet-plugin/common';
+import type { CaseResponse } from '@kbn/cases-plugin/common';
 import type { SavedQuerySOFormData } from '../../public/saved_queries/form/use_saved_query_form';
 import type { LiveQueryDetailsItem } from '../../public/actions/use_live_query_details';
 import type { PackSavedObject, PackItem } from '../../public/packs/types';
 import type { SavedQuerySO } from '../../public/routes/saved_queries/list';
 import { generateRandomStringName } from './integrations';
 import { request } from './common';
-import { apiPaths } from './navigation';
 
 export const savedQueryFixture = {
   id: generateRandomStringName(1)[0],
@@ -27,6 +27,44 @@ export const savedQueryFixture = {
   platform: 'linux,darwin',
 };
 
+export const packFixture = () => ({
+  description: generateRandomStringName(1)[0],
+  enabled: true,
+  name: generateRandomStringName(1)[0],
+  queries: {
+    [generateRandomStringName(1)[0]]: {
+      ecs_mapping: {},
+      interval: 3600,
+      query: 'select * from uptime;',
+    },
+  },
+});
+
+export const multiQueryPackFixture = () => ({
+  description: generateRandomStringName(1)[0],
+  enabled: true,
+  name: generateRandomStringName(1)[0],
+  queries: {
+    [generateRandomStringName(1)[0]]: {
+      ecs_mapping: {},
+      interval: 3600,
+      platform: 'linux',
+      query: 'SELECT * FROM memory_info;',
+    },
+    [generateRandomStringName(1)[0]]: {
+      ecs_mapping: {},
+      interval: 3600,
+      platform: 'linux,windows,darwin',
+      query: 'SELECT * FROM system_info;',
+    },
+    [generateRandomStringName(1)[0]]: {
+      ecs_mapping: {},
+      interval: 10,
+      query: 'select opera_extensions.* from users join opera_extensions using (uid);',
+    },
+  },
+});
+
 export const loadSavedQuery = (payload: SavedQuerySOFormData = savedQueryFixture) =>
   request<{ data: SavedQuerySO }>({
     method: 'POST',
@@ -34,11 +72,11 @@ export const loadSavedQuery = (payload: SavedQuerySOFormData = savedQueryFixture
       ...payload,
       id: payload.id ?? generateRandomStringName(1)[0],
     },
-    url: apiPaths.osquery.savedQueries,
+    url: '/api/osquery/saved_queries',
   }).then((response) => response.body.data);
 
 export const cleanupSavedQuery = (id: string) => {
-  request({ method: 'DELETE', url: apiPaths.osquery.savedQuery(id) });
+  request({ method: 'DELETE', url: `/api/osquery/saved_queries/${id}` });
 };
 
 export const loadPack = (payload: Partial<PackItem> = {}, space = 'default') =>
@@ -72,7 +110,7 @@ export const loadLiveQuery = (
     url: `/api/osquery/live_queries`,
   }).then((response) => response.body.data);
 
-export const loadRule = (payload: Partial<RuleCreateProps> = {}) =>
+export const loadRule = (includeResponseActions = false) =>
   request<RuleResponse>({
     method: 'POST',
     body: {
@@ -111,7 +149,29 @@ export const loadRule = (payload: Partial<RuleCreateProps> = {}) =>
       enabled: true,
       throttle: 'no_actions',
       note: '!{osquery{"query":"SELECT * FROM os_version where name=\'{{host.os.name}}\';","label":"Get processes","ecs_mapping":{"host.os.platform":{"field":"platform"}}}}\n\n!{osquery{"query":"select * from users;","label":"Get users"}}',
-      response_actions: payload.response_actions ?? [],
+      ...(includeResponseActions
+        ? {
+            response_actions: [
+              {
+                params: {
+                  query: "SELECT * FROM os_version where name='{{host.os.name}}';",
+                  ecs_mapping: {
+                    'host.os.platform': {
+                      field: 'platform',
+                    },
+                  },
+                },
+                action_type_id: '.osquery',
+              },
+              {
+                params: {
+                  query: 'select * from users;',
+                },
+                action_type_id: '.osquery',
+              },
+            ],
+          }
+        : {}),
     } as RuleCreateProps,
     url: `/api/detection_engine/rules`,
   }).then((response) => response.body);
@@ -159,3 +219,18 @@ export const cleanupSpace = (id: string) =>
     method: 'DELETE',
     url: `/api/spaces/space/${id}`,
   });
+export const loadPolicy = () =>
+  request<{ item: AgentPolicy }>({
+    method: 'POST',
+    body: {
+      name: generateRandomStringName(1)[0],
+      description: '',
+      namespace: 'default',
+      monitoring_enabled: ['logs', 'metrics'],
+      inactivity_timeout: 1209600,
+    },
+    url: '/api/fleet/agent_policies',
+  }).then((response) => response.body.item);
+
+export const cleanupPolicy = (agentPolicyId: string) =>
+  request({ method: 'POST', body: { agentPolicyId }, url: '/api/fleet/agent_policies/delete' });
