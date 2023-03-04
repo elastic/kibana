@@ -78,7 +78,7 @@ import { DetectionPageFilterSet } from '../../components/detection_page_filters'
 import type { FilterGroupHandler } from '../../../common/components/filter_group/types';
 import type { Status } from '../../../../common/detection_engine/schemas/common/schemas';
 import { AlertsTableFilterGroup } from '../../components/alerts_table/alerts_filter_group';
-import { GroupedAlertsTable } from '../../components/alerts_table/grouped_alerts';
+import { GroupedAlertsTable } from '../../components/alerts_table/alerts_grouping';
 import { AlertsTableComponent } from '../../components/alerts_table';
 /**
  * Need a 100% height here to account for the graph/analyze tool, which sets no explicit height parameters, but fills the available space.
@@ -358,7 +358,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
     ]
   );
 
-  const renderGroupedAlertTable = useCallback(
+  const renderAlertTable = useCallback(
     (groupingFilters: Filter[]) => {
       return (
         <AlertsTableComponent
@@ -455,17 +455,19 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ({
               <EuiSpacer size="l" />
             </Display>
             <GroupedAlertsTable
-              tableId={TableId.alertsOnAlertsPage}
-              loading={isAlertTableLoading}
-              hasIndexWrite={hasIndexWrite ?? false}
-              hasIndexMaintenance={hasIndexMaintenance ?? false}
-              from={from}
-              defaultFilters={alertsTableDefaultFilters}
-              signalIndexName={signalIndexName}
-              runtimeMappings={runtimeMappings}
-              to={to}
               currentAlertStatusFilterValue={filterGroup}
-              renderChildComponent={renderGroupedAlertTable}
+              defaultFilters={alertsTableDefaultFilters}
+              from={from}
+              globalFilters={filters}
+              globalQuery={query}
+              hasIndexMaintenance={hasIndexMaintenance ?? false}
+              hasIndexWrite={hasIndexWrite ?? false}
+              loading={isAlertTableLoading}
+              renderChildComponent={renderAlertTable}
+              runtimeMappings={runtimeMappings}
+              signalIndexName={signalIndexName}
+              tableId={TableId.alertsOnAlertsPage}
+              to={to}
             />
           </SecuritySolutionPageWrapper>
         </StyledFullHeightContainer>

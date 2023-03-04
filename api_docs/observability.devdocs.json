@@ -2277,6 +2277,45 @@
       },
       {
         "parentPluginId": "observability",
+        "id": "def-public.ChartData",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChartData",
+        "description": [],
+        "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ChartData.key",
+            "type": "number",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.ChartData.value",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/typings/slo/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-public.ConfigProps",
         "type": "Interface",
         "tags": [],

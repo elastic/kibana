@@ -41,6 +41,7 @@ import { deleteMlInferencePipeline } from '../../lib/indices/pipelines/ml_infere
 import { detachMlInferencePipeline } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline';
 import { fetchMlInferencePipelineProcessors } from '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors';
 import { createIndexPipelineDefinitions } from '../../lib/pipelines/create_pipeline_definitions';
+import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getCustomPipelines } from '../../lib/pipelines/get_custom_pipelines';
 import { getPipeline } from '../../lib/pipelines/get_pipeline';
 import { getMlInferencePipelines } from '../../lib/pipelines/ml_inference/get_ml_inference_pipelines';
@@ -196,6 +197,8 @@ export function registerIndexRoutes({
         if (connector) {
           await deleteConnectorById(client, connector.id);
         }
+
+        await deleteIndexPipelines(client, indexName);
 
         await client.asCurrentUser.indices.delete({ index: indexName });
 
