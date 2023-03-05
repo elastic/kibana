@@ -39,10 +39,11 @@ describe('Test discover state', () => {
     history = createBrowserHistory();
     history.push('/');
     state = getDiscoverStateContainer({
-      savedSearch: savedSearchMock,
+      savedSearch: savedSearchMock.id,
       services: discoverServiceMock,
       history,
     });
+    state.savedSearchState.set(savedSearchMock);
     await state.appState.update({}, true);
     stopSync = startSync(state.appState);
   });
@@ -104,12 +105,11 @@ describe('Test discover initial state sort handling', () => {
     } as SavedSearch;
 
     state = getDiscoverStateContainer({
-      savedSearch: undefined,
       services: discoverServiceMock,
       history,
     });
     state.savedSearchState.load = jest.fn(() => Promise.resolve(savedSearch));
-    await state.actions.loadSavedSearch(savedSearch.id!);
+    await state.actions.loadSavedSearchById(savedSearch.id!);
     const stopSync = state.appState.syncState().stop;
     expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
     stopSync();
@@ -120,7 +120,7 @@ describe('Test discover initial state sort handling', () => {
     history.push('/#?_a=(sort:!())');
     const nextSavedSearch = { ...savedSearchMock, ...{ sort: [['bytes', 'desc']] as SortOrder[] } };
     state = getDiscoverStateContainer({
-      savedSearch: nextSavedSearch,
+      savedSearchId: nextSavedSearch.id,
       services: discoverServiceMock,
       history,
     });
@@ -133,10 +133,11 @@ describe('Test discover initial state sort handling', () => {
     history = createBrowserHistory();
     history.push('/#?_a=(sort:!())');
     state = getDiscoverStateContainer({
-      savedSearch: savedSearchMockWithTimeField,
+      savedSearchId: savedSearchMockWithTimeField.id,
       services: discoverServiceMock,
       history,
     });
+    state.savedSearchState.set(savedSearchMockWithTimeField);
     await state.appState.update({}, true);
     const stopSync = startSync(state.appState);
     expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);

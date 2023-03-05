@@ -7,8 +7,6 @@
  */
 
 import { useCallback, useEffect } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -19,15 +17,11 @@ import { DiscoverStateContainer } from '../services/discover_state';
 import { useFiltersValidation } from './use_filters_validation';
 
 export const useAdHocDataViews = ({
-  dataView,
-  savedSearch,
   stateContainer,
   filterManager,
   toastNotifications,
   trackUiMetric,
 }: {
-  dataView: DataView;
-  savedSearch: SavedSearch;
   stateContainer: DiscoverStateContainer;
   filterManager: FilterManager;
   toastNotifications: ToastsStart;
@@ -35,9 +29,10 @@ export const useAdHocDataViews = ({
 }) => {
   const query = stateContainer.appState.getState().query;
   const isTextBasedMode = query && isOfAggregateQueryType(query);
+  const dataView = stateContainer.internalState.getState().dataView;
 
   useEffect(() => {
-    if (!dataView.isPersisted()) {
+    if (dataView && !dataView.isPersisted()) {
       trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
   }, [dataView, isTextBasedMode, trackUiMetric]);
@@ -45,18 +40,19 @@ export const useAdHocDataViews = ({
   /**
    * Takes care of checking data view id references in filters
    */
-  useFiltersValidation({ savedSearch, filterManager, toastNotifications });
+  useFiltersValidation({ stateContainer, filterManager, toastNotifications });
 
   const { openConfirmSavePrompt, updateSavedSearch } = useConfirmPersistencePrompt(stateContainer);
   const persistDataView = useCallback(async () => {
-    const currentDataView = savedSearch.searchSource.getField('index')!;
+    const currentDataView = stateContainer.internalState.getState().dataView;
+    const savedSearch = stateContainer.savedSearchState.get();
     if (!currentDataView || currentDataView.isPersisted()) {
       return currentDataView;
     }
 
     const createdDataView = await openConfirmSavePrompt(currentDataView);
     if (!createdDataView) {
-      return currentDataView; // persistance cancelled
+      return; // persistance cancelled
     }
 
     if (savedSearch.id) {
@@ -66,7 +62,7 @@ export const useAdHocDataViews = ({
     }
 
     return createdDataView;
-  }, [stateContainer, openConfirmSavePrompt, savedSearch, updateSavedSearch]);
+  }, [stateContainer, openConfirmSavePrompt, updateSavedSearch]);
 
   return { persistDataView };
 };

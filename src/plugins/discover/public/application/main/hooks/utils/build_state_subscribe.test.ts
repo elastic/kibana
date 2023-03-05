@@ -5,22 +5,15 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { createBrowserHistory } from 'history';
 import { buildStateSubscribe } from './build_state_subscribe';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { FetchStatus } from '../../../types';
-import { getDiscoverStateContainer } from '../../services/discover_state';
-import { discoverServiceMock } from '../../../../__mocks__/services';
 import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 describe('buildStateSubscribe', () => {
   const savedSearch = savedSearchMock;
-  const history = createBrowserHistory();
-  const stateContainer = getDiscoverStateContainer({
-    savedSearch,
-    services: discoverServiceMock,
-    history,
-  });
+  const stateContainer = getDiscoverStateMock({ savedSearch });
   stateContainer.dataState.refetch$.next = jest.fn();
   stateContainer.dataState.reset = jest.fn();
   stateContainer.actions.setDataView = jest.fn();
@@ -82,7 +75,7 @@ describe('buildStateSubscribe', () => {
 
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {
     const stateSubscribeFn = getSubscribeFn();
-    stateContainer.dataState.initialFetchStatus = FetchStatus.UNINITIALIZED;
+    stateContainer.dataState.getInitialFetchStatus() = FetchStatus.UNINITIALIZED;
     await stateSubscribeFn({ index: dataViewComplexMock.id });
 
     expect(stateContainer.dataState.reset).toHaveBeenCalled();

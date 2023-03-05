@@ -54,13 +54,10 @@ const SidebarMemoized = React.memo(DiscoverSidebarResponsive);
 const TopNavMemoized = React.memo(DiscoverTopNav);
 
 export function DiscoverLayout({
-  inspectorAdapters,
   navigateTo,
   onChangeDataView,
-  onUpdateQuery,
   stateContainer,
   persistDataView,
-  updateDataViewList,
 }: DiscoverLayoutProps) {
   const {
     trackUiMetric,
@@ -116,7 +113,6 @@ export function DiscoverLayout({
 
   const onOpenInspector = useInspector({
     inspector,
-    inspectorAdapters,
     stateContainer,
   });
 
@@ -219,11 +215,7 @@ export function DiscoverLayout({
     }
 
     if (resultState === 'uninitialized') {
-      return (
-        <DiscoverUninitialized
-          onRefresh={() => stateContainer.dataState.refetch$.next(undefined)}
-        />
-      );
+      return <DiscoverUninitialized onRefresh={() => stateContainer.dataState.fetch()} />;
     }
 
     return (
@@ -238,7 +230,6 @@ export function DiscoverLayout({
           onAddFilter={onAddFilter as DocViewFilterFn}
           onFieldEdited={onFieldEdited}
           resizeRef={resizeRef}
-          inspectorAdapters={inspectorAdapters}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -248,7 +239,6 @@ export function DiscoverLayout({
     data,
     dataState.error,
     dataView,
-    inspectorAdapters,
     isPlainRecord,
     isTimeBased,
     navigateTo,
@@ -285,14 +275,13 @@ export function DiscoverLayout({
         navigateTo={navigateTo}
         savedQuery={savedQuery}
         stateContainer={stateContainer}
-        updateQuery={onUpdateQuery}
+        updateQuery={stateContainer.actions.onUpdateQuery}
         onChangeDataView={onChangeDataView}
         onDataViewCreated={onDataViewCreated}
         isPlainRecord={isPlainRecord}
         textBasedLanguageModeErrors={textBasedLanguageModeErrors}
         onFieldEdited={onFieldEdited}
         persistDataView={persistDataView}
-        updateDataViewList={updateDataViewList}
       />
       <EuiPageBody className="dscPageBody" aria-describedby="savedSearchTitle">
         <SavedSearchURLConflictCallout

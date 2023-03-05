@@ -11,13 +11,11 @@ import { UnifiedHistogramContainer } from '@kbn/unified-histogram-plugin/public'
 import { css } from '@emotion/react';
 import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverHistogram } from './use_discover_histogram';
-import type { InspectorAdapters } from '../../hooks/use_inspector';
 import { type DiscoverMainContentProps, DiscoverMainContent } from './discover_main_content';
 import { ResetSearchButton } from './reset_search_button';
 
 export interface DiscoverHistogramLayoutProps extends DiscoverMainContentProps {
   resizeRef: RefObject<HTMLDivElement>;
-  inspectorAdapters: InspectorAdapters;
 }
 
 const histogramLayoutCss = css`
@@ -29,7 +27,6 @@ export const DiscoverHistogramLayout = ({
   dataView,
   stateContainer,
   resizeRef,
-  inspectorAdapters,
   ...mainContentProps
 }: DiscoverHistogramLayoutProps) => {
   const { dataState, savedSearchState } = stateContainer;
@@ -41,7 +38,7 @@ export const DiscoverHistogramLayout = ({
   const searchSessionId = useObservable(stateContainer.searchSessionManager.searchSessionId$);
 
   const { hideChart, setUnifiedHistogramApi } = useDiscoverHistogram({
-    inspectorAdapters,
+    inspectorAdapters: stateContainer.dataState.inspectorAdapters,
     savedSearchFetch$: dataState.fetch$,
     searchSessionId,
     ...commonProps,

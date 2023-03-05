@@ -129,7 +129,7 @@ function getSavedSearch(dataView: DataView) {
 export function getDocumentsLayoutProps(dataView: DataView) {
   const stateContainer = getDiscoverStateContainer({
     history: createHashHistory(),
-    savedSearch: getSavedSearch(dataView),
+    savedSearchId: getSavedSearch(dataView).id,
     services,
   });
   stateContainer.appState.set({
@@ -153,7 +153,7 @@ export function getDocumentsLayoutProps(dataView: DataView) {
 export const getPlainRecordLayoutProps = (dataView: DataView) => {
   const stateContainer = getDiscoverStateContainer({
     history: createHashHistory(),
-    savedSearch: getSavedSearch(dataView),
+    savedSearchId: getSavedSearch(dataView).id,
     services,
   });
   stateContainer.appState.set({

@@ -74,7 +74,7 @@ export const buildStateSubscribe =
 
     savedSearchState.update({ nextDataView: savedSearchDataView, nextState });
 
-    if (dataViewChanged && dataState.initialFetchStatus === FetchStatus.UNINITIALIZED) {
+    if (dataViewChanged && dataState.getInitialFetchStatus() === FetchStatus.UNINITIALIZED) {
       // stop execution if given data view has changed, and it's not configured to initially start a search in Discover
       return;
     }

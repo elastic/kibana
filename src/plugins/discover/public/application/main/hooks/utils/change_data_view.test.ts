@@ -8,20 +8,17 @@
 
 import { changeDataView } from './change_data_view';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
-import { createBrowserHistory } from 'history';
-import { getDiscoverStateContainer } from '../../services/discover_state';
 import { discoverServiceMock } from '../../../../__mocks__/services';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { dataViewComplexMock } from '../../../../__mocks__/data_view_complex';
+import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 
 const setupTestParams = (dataView: DataView | undefined) => {
   const savedSearch = savedSearchMock;
   const services = discoverServiceMock;
-  const history = createBrowserHistory();
-  const discoverState = getDiscoverStateContainer({
+
+  const discoverState = getDiscoverStateMock({
     savedSearch,
-    services: discoverServiceMock,
-    history,
   });
   discoverState.internalState.transitions.setDataView(savedSearch.searchSource.getField('index')!);
   services.dataViews.get = jest.fn(() => Promise.resolve(dataView as DataView));

@@ -6,20 +6,11 @@
  * Side Public License, v 1.
  */
 
-import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { DiscoverStateContainer } from '../../services/discover_state';
-import type { InspectorAdapters } from '../../hooks/use_inspector';
-
 export interface DiscoverLayoutProps {
-  inspectorAdapters: InspectorAdapters;
   navigateTo: (url: string) => void;
   onChangeDataView: (id: string) => void;
-  onUpdateQuery: (
-    payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
-    isUpdate?: boolean
-  ) => void;
   stateContainer: DiscoverStateContainer;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
-  updateDataViewList: (newAdHocDataViews: DataView[]) => void;
 }

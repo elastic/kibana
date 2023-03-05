@@ -9,9 +9,9 @@
 import { IToasts, ToastsStart } from '@kbn/core/public';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { useEffect } from 'react';
 import { debounceTime } from 'rxjs';
+import { DiscoverStateContainer } from '../services/discover_state';
 
 const addInvalidFiltersWarn = (toastNotifications: IToasts) => {
   const warningTitle = i18n.translate('discover.invalidFiltersWarnToast.title', {
@@ -28,11 +28,11 @@ const addInvalidFiltersWarn = (toastNotifications: IToasts) => {
 };
 
 export const useFiltersValidation = ({
-  savedSearch,
+  stateContainer,
   filterManager,
   toastNotifications,
 }: {
-  savedSearch: SavedSearch;
+  stateContainer: DiscoverStateContainer;
   filterManager: FilterManager;
   toastNotifications: ToastsStart;
 }) => {
@@ -42,7 +42,8 @@ export const useFiltersValidation = ({
       .pipe(debounceTime(500))
       .subscribe(() => {
         const currentFilters = filterManager.getFilters();
-        const dataView = savedSearch.searchSource.getField('index');
+        const dataView = stateContainer.internalState.getState().dataView;
+
         const areFiltersInvalid =
           dataView &&
           !dataView.isPersisted() &&
@@ -52,5 +53,5 @@ export const useFiltersValidation = ({
         }
       });
     return () => subscription.unsubscribe();
-  }, [filterManager, savedSearch.searchSource, toastNotifications]);
+  }, [filterManager, stateContainer.internalState, toastNotifications]);
 };

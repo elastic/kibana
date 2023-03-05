@@ -24,10 +24,10 @@ function getStateContainer() {
   const savedSearch = savedSearchMock;
   const history = createBrowserHistory();
   const stateContainer = getDiscoverStateContainer({
-    savedSearch,
     services: discoverServiceMock,
     history,
   });
+  stateContainer.savedSearchState.set(savedSearch);
   stateContainer.appState.getState = jest.fn(() => ({
     rowsPerPage: 250,
   }));

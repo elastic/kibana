@@ -14,9 +14,8 @@ import {
   AnalyticsNoDataPageKibanaProvider,
   AnalyticsNoDataPage,
 } from '@kbn/shared-ux-page-analytics-no-data';
-import { SavedSearch, getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
+import { getSavedSearchFullPathUrl } from '@kbn/saved-search-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
-import { addLog } from '../../utils/add_log';
 import { useSingleton } from './hooks/use_singleton';
 import { MainHistoryLocationState } from '../../../common/locator';
 import { DiscoverStateContainer, getDiscoverStateContainer } from './services/discover_state';
@@ -56,7 +55,7 @@ export function DiscoverMainRoute(props: Props) {
     getDiscoverStateContainer({
       history,
       services,
-      savedSearchId: id,
+      savedSearch: id,
     })
   );
   const [error, setError] = useState<Error>();
@@ -125,17 +124,9 @@ export function DiscoverMainRoute(props: Props) {
         return;
       }
       try {
-        const isNewSavedSearch = !Boolean(id);
         await stateContainer.actions.loadDataViewList();
-        let currentSavedSearch: SavedSearch | undefined;
-
-        if (isNewSavedSearch) {
-          addLog('[Main route] load new saved search');
-          currentSavedSearch = await stateContainer.actions.loadNewSavedSearch(nextDataView);
-        } else {
-          addLog('[Main route] load saved search', id);
-          currentSavedSearch = await stateContainer.actions.loadSavedSearch(id);
-        }
+        const currentSavedSearch = await stateContainer.actions.loadSavedSearch(id, nextDataView);
+        stateContainer.dataState.reset();
         if (currentSavedSearch?.id) {
           chrome.recentlyAccessed.add(
             getSavedSearchFullPathUrl(currentSavedSearch.id),
@@ -178,7 +169,7 @@ export function DiscoverMainRoute(props: Props) {
     [
       checkData,
       id,
-      stateContainer.actions,
+      stateContainer,
       chrome,
       history,
       core.application.navigateToApp,
@@ -202,7 +193,7 @@ export function DiscoverMainRoute(props: Props) {
 
   useEffect(() => {
     loadSavedSearch();
-  }, [loadSavedSearch]);
+  }, [loadSavedSearch, id]);
 
   if (showNoDataPage) {
     const analyticsServices = {

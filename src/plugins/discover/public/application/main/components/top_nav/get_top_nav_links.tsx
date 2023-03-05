@@ -30,7 +30,6 @@ export const getTopNavLinks = ({
   isPlainRecord,
   persistDataView,
   adHocDataViews,
-  updateDataViewList,
 }: {
   dataView: DataView;
   navigateTo: (url: string) => void;
@@ -39,7 +38,6 @@ export const getTopNavLinks = ({
   onOpenInspector: () => void;
   isPlainRecord: boolean;
   adHocDataViews: DataView[];
-  updateDataViewList: (dataView: DataView[]) => void;
   persistDataView: (dataView: DataView) => Promise<DataView | undefined>;
 }): TopNavMenuData[] => {
   const options = {
@@ -69,6 +67,10 @@ export const getTopNavLinks = ({
       defaultMessage: 'Alerts',
     }),
     run: async (anchorElement: HTMLElement) => {
+      const updateDataViewList = async (newAdHocDataViews: DataView[]) => {
+        await state.actions.loadDataViewList();
+        state.actions.setAdHocDataViews(newAdHocDataViews);
+      };
       openAlertsPopover({
         I18nContext: services.core.i18n.Context,
         theme$: services.core.theme.theme$,

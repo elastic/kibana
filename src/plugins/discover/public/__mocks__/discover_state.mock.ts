@@ -20,13 +20,12 @@ export function getDiscoverStateMock({
 }) {
   const history = createBrowserHistory();
   history.push('/');
-  return getDiscoverStateContainer({
-    savedSearch: savedSearch
-      ? savedSearch
-      : isTimeBased
-      ? savedSearchMockWithTimeField
-      : savedSearchMock,
+  const container = getDiscoverStateContainer({
     services: discoverServiceMock,
     history,
   });
+  container.savedSearchState.set(
+    savedSearch ? savedSearch : isTimeBased ? savedSearchMockWithTimeField : savedSearchMock
+  );
+  return container;
 }

@@ -32,6 +32,6 @@ describe('test useDiscoverState', () => {
         ),
       }
     );
-    expect(result.current.stateContainer).toBeInstanceOf(Object);
+    expect(result.current.persistDataView).toBeInstanceOf(Function);
   });
 });

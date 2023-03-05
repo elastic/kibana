@@ -23,13 +23,12 @@ export interface InspectorAdapters {
 
 export function useInspector({
   inspector,
-  inspectorAdapters,
   stateContainer,
 }: {
-  inspectorAdapters: InspectorAdapters;
   stateContainer: DiscoverStateContainer;
   inspector: InspectorPublicPluginStart;
 }) {
+  const inspectorAdapters = stateContainer.dataState.inspectorAdapters;
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
   const setExpandedDoc = useCallback(
     (doc: DataTableRecord | undefined) => {

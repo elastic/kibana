@@ -13,7 +13,8 @@ import { getUrlTracker } from '../../../kibana_services';
 /**
  * Enable/disable kbn url tracking (That's the URL used when selecting Discover in the side menu)
  */
-export function useUrlTracking(savedSearch: SavedSearch, dataView: DataView) {
+export function useUrlTracking(savedSearch: SavedSearch) {
+  const dataView = savedSearch.searchSource.getField('index');
   const setUrlTracking = useCallback(
     (actualDataView: DataView) => {
       const trackingEnabled = Boolean(actualDataView.isPersisted() || savedSearch.id);
@@ -23,6 +24,9 @@ export function useUrlTracking(savedSearch: SavedSearch, dataView: DataView) {
   );
 
   useEffect(() => {
+    if (!dataView) {
+      return;
+    }
     setUrlTracking(dataView);
   }, [dataView, savedSearch.id, setUrlTracking]);
 

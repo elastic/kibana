@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import { useEffect, useCallback } from 'react';
-import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import { changeDataView } from './utils/change_data_view';
 import { useSearchSession } from './use_search_session';
 import { FetchStatus } from '../../types';
@@ -24,13 +23,9 @@ export function useDiscoverState({
   stateContainer: DiscoverStateContainer;
 }) {
   const { filterManager, dataViews, toastNotifications, trackUiMetric } = services;
-  const savedSearch = stateContainer.savedSearchState.get();
+  const savedSearch = stateContainer.savedSearchState.getPersisted$().getValue();
 
-  const dataView = savedSearch.searchSource.getField('index')!;
-
-  const { setUrlTracking } = useUrlTracking(savedSearch, dataView);
-
-  const { searchSessionManager } = stateContainer;
+  const { setUrlTracking } = useUrlTracking(savedSearch);
 
   /**
    * Search session logic
@@ -41,29 +36,16 @@ export function useDiscoverState({
    * Adhoc data views functionality
    */
   const { persistDataView } = useAdHocDataViews({
-    dataView,
     stateContainer,
-    savedSearch,
     filterManager,
     toastNotifications,
     trackUiMetric,
   });
 
   /**
-   * Updates data views selector state
-   */
-  const updateDataViewList = useCallback(
-    async (newAdHocDataViews: DataView[]) => {
-      await stateContainer.actions.loadDataViewList();
-      stateContainer.actions.setAdHocDataViews(newAdHocDataViews);
-    },
-    [stateContainer.actions]
-  );
-
-  /**
    * Data fetching logic
    */
-  const { data$, refetch$, inspectorAdapters, initialFetchStatus } = stateContainer.dataState;
+  const { data$ } = stateContainer.dataState;
   /**
    * State changes (data view, columns), when a text base query result is returned
    */
@@ -87,19 +69,6 @@ export function useDiscoverState({
     [services, setUrlTracking, stateContainer]
   );
 
-  /**
-   * Function triggered when the user changes the query in the search bar
-   */
-  const onUpdateQuery = useCallback(
-    (_payload, isUpdate?: boolean) => {
-      if (isUpdate === false) {
-        searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
-        refetch$.next(undefined);
-      }
-    },
-    [refetch$, searchSessionManager]
-  );
-
   useEffect(() => {
     const unsubscribe = stateContainer.actions.initializeAndSync();
     return () => unsubscribe();
@@ -109,27 +78,13 @@ export function useDiscoverState({
    * Trigger data fetching on dataView or savedSearch changes
    */
   useEffect(() => {
-    if (dataView && initialFetchStatus === FetchStatus.LOADING) {
+    if (stateContainer.dataState.getInitialFetchStatus() === FetchStatus.LOADING) {
       stateContainer.dataState.fetch();
     }
-  }, [initialFetchStatus, dataView, savedSearch.id, stateContainer.dataState]);
-
-  /**
-   * We need to make sure the auto refresh interval is disabled for
-   * non-time series data or rollups since we don't show the date picker
-   */
-  useEffect(() => {
-    if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
-      stateContainer.actions.pauseAutoRefreshInterval();
-    }
-  }, [dataView, stateContainer]);
+  }, [savedSearch.id, stateContainer.dataState]);
 
   return {
-    inspectorAdapters,
     onChangeDataView,
-    onUpdateQuery,
-    stateContainer,
     persistDataView,
-    updateDataViewList,
   };
 }
