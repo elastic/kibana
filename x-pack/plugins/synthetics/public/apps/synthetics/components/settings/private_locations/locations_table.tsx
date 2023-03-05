@@ -22,7 +22,7 @@ import { ViewLocationMonitors } from './view_location_monitors';
 import { TableTitle } from '../../common/components/table_title';
 import { TAGS_LABEL } from '../components/tags_field';
 import { useSyntheticsSettingsContext } from '../../../contexts';
-import { useFleetPermissions } from '../../../hooks';
+import { useCanManagePrivateLocation } from '../../../hooks';
 import { setAddingNewPrivateLocation } from '../../../state/private_locations';
 import { PrivateLocationDocsLink, START_ADDING_LOCATIONS_DESCRIPTION } from './empty_locations';
 import { PrivateLocation } from '../../../../../../common/runtime_types';
@@ -53,7 +53,7 @@ export const PrivateLocationsTable = ({
   const { locationMonitors, loading } = useLocationMonitors();
 
   const { canSave } = useSyntheticsSettingsContext();
-  const { canSaveIntegrations } = useFleetPermissions();
+  const canManagePrivateLocations = useCanManagePrivateLocation();
 
   const tagsList = privateLocations.reduce((acc, item) => {
     const tags = item.tags || [];
@@ -129,13 +129,14 @@ export const PrivateLocationsTable = ({
   const renderToolRight = () => {
     return [
       <EuiButton
+        key="addPrivateLocationButton"
         fill
         data-test-subj={'addPrivateLocationButton'}
         isLoading={loading}
-        disabled={!canSaveIntegrations || !canSave}
+        disabled={!canManagePrivateLocations || !canSave}
         onClick={() => setIsAddingNew(true)}
         iconType="plusInCircle"
-        title={!canSaveIntegrations ? CANNOT_SAVE_INTEGRATION_LABEL : undefined}
+        title={!canManagePrivateLocations ? CANNOT_SAVE_INTEGRATION_LABEL : undefined}
       >
         {ADD_LABEL}
       </EuiButton>,

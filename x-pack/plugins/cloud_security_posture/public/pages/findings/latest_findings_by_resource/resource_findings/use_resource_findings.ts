@@ -35,7 +35,7 @@ type ResourceFindingsResponse = IKibanaSearchResponse<
 >;
 
 export type ResourceFindingsResponseAggs = Record<
-  'count' | 'clusterId' | 'resourceSubType' | 'resourceName',
+  'count' | 'clusterId' | 'resourceSubType' | 'resourceName' | 'cloudAccountName',
   estypes.AggregationsMultiBucketAggregateBase<
     estypes.AggregationsStringRareTermsBucketKeys | undefined
   >
@@ -59,6 +59,9 @@ const getResourceFindingsQuery = ({
     sort: [{ [sort.field]: sort.direction }],
     aggs: {
       ...getFindingsCountAggQuery(),
+      cloudAccountName: {
+        terms: { field: 'cloud.account.name' },
+      },
       clusterId: {
         terms: { field: 'cluster_id' },
       },
@@ -98,6 +101,7 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
         assertNonBucketsArray(aggregations.clusterId?.buckets);
         assertNonBucketsArray(aggregations.resourceSubType?.buckets);
         assertNonBucketsArray(aggregations.resourceName?.buckets);
+        assertNonBucketsArray(aggregations.cloudAccountName?.buckets);
 
         return {
           page: hits.hits.map((hit) => hit._source!),
@@ -106,6 +110,7 @@ export const useResourceFindings = (options: UseResourceFindingsOptions) => {
           clusterId: getFirstBucketKey(aggregations.clusterId?.buckets),
           resourceSubType: getFirstBucketKey(aggregations.resourceSubType?.buckets),
           resourceName: getFirstBucketKey(aggregations.resourceName?.buckets),
+          cloudAccountName: getFirstBucketKey(aggregations.cloudAccountName?.buckets),
         };
       },
       onError: (err: Error) => showErrorToast(toasts, err),

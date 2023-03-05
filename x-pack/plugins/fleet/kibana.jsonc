@@ -17,7 +17,6 @@
       "navigation",
       "customIntegrations",
       "share",
-      "spaces",
       "security",
       "unifiedSearch",
       "savedObjectsTagging",
@@ -33,7 +32,8 @@
       "globalSearch",
       "telemetry",
       "discover",
-      "ingestPipelines"
+      "ingestPipelines",
+      "spaces",
     ],
     "requiredBundles": [
       "kibanaReact",

@@ -63,7 +63,7 @@ export const filterRatios: TableRequestProcessorsFunction = ({
                 denominator: denominatorPath,
               },
               script:
-                'params.numerator != null && params.denominator != null && params.denominator > 0 ? params.numerator / params.denominator : 0',
+                'params.numerator != null && params.denominator != null && params.denominator != 0 ? params.numerator / params.denominator : 0',
             },
           });
         });
