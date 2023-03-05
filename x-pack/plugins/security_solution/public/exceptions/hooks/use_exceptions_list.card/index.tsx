@@ -127,6 +127,8 @@ export const useExceptionsListCard = ({
         label: i18n.EXPORT_EXCEPTION_LIST,
         onClick: (e: React.MouseEvent<Element, MouseEvent>) => {
           if (listType === ExceptionListTypeEnum.ENDPOINT) {
+            // https://github.com/elastic/kibana/issues/152653
+            // @ts-ignore
             handleExport({
               id: exceptionsList.id,
               listId: exceptionsList.list_id,
