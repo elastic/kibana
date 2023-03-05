@@ -1323,6 +1323,39 @@
       },
       {
         "parentPluginId": "cases",
+        "id": "def-common.getApiTags",
+        "type": "Function",
+        "tags": [],
+        "label": "getApiTags",
+        "description": [],
+        "signature": [
+          "(owner: \"cases\" | \"observability\" | \"securitySolution\") => { all: readonly [\"casesSuggestUserProfiles\", \"bulkGetUserProfiles\", string, string]; read: readonly [\"casesSuggestUserProfiles\", \"bulkGetUserProfiles\", string]; delete: readonly [string]; }"
+        ],
+        "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cases",
+            "id": "def-common.getApiTags.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "owner",
+            "description": [],
+            "signature": [
+              "\"cases\" | \"observability\" | \"securitySolution\""
+            ],
+            "path": "x-pack/plugins/cases/common/utils/api_tags.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cases",
         "id": "def-common.getCasesFromAlertsUrl",
         "type": "Function",
         "tags": [],
@@ -1614,7 +1647,7 @@
         "signature": [
           "\"cases\""
         ],
-        "path": "x-pack/plugins/cases/common/constants.ts",
+        "path": "x-pack/plugins/cases/common/constants/application.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1863,7 +1896,7 @@
         "signature": [
           "\"/api/cases\""
         ],
-        "path": "x-pack/plugins/cases/common/constants.ts",
+        "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2168,7 +2201,7 @@
         "signature": [
           "\"create_cases\""
         ],
-        "path": "x-pack/plugins/cases/common/constants.ts",
+        "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2183,7 +2216,7 @@
         "signature": [
           "\"delete_cases\""
         ],
-        "path": "x-pack/plugins/cases/common/constants.ts",
+        "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2198,7 +2231,7 @@
         "signature": [
           "\"cases\""
         ],
-        "path": "x-pack/plugins/cases/common/constants.ts",
+        "path": "x-pack/plugins/cases/common/constants/owners.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2213,7 +2246,7 @@
         "signature": [
           "\"/internal/cases/_bulk_get\""
         ],
-        "path": "x-pack/plugins/cases/common/constants.ts",
+        "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2228,7 +2261,7 @@
         "signature": [
           "\"observability\""
         ],
-        "path": "x-pack/plugins/cases/common/constants.ts",
+        "path": "x-pack/plugins/cases/common/constants/owners.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2243,7 +2276,7 @@
         "signature": [
           "\"push_cases\""
         ],
-        "path": "x-pack/plugins/cases/common/constants.ts",
+        "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2258,7 +2291,7 @@
         "signature": [
           "\"read_cases\""
         ],
-        "path": "x-pack/plugins/cases/common/constants.ts",
+        "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2275,7 +2308,7 @@
         "signature": [
           "\"securitySolution\""
         ],
-        "path": "x-pack/plugins/cases/common/constants.ts",
+        "path": "x-pack/plugins/cases/common/constants/owners.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2305,7 +2338,7 @@
         "signature": [
           "\"update_cases\""
         ],
-        "path": "x-pack/plugins/cases/common/constants.ts",
+        "path": "x-pack/plugins/cases/common/constants/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
