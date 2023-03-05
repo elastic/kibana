@@ -16,14 +16,6 @@ import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
 import { addIntegrationToAgentPolicy } from './utils';
 
-export interface AgentManagerParams {
-  user: string;
-  password: string;
-  kibanaUrl: string;
-  esHost: string;
-  esPort: string;
-}
-
 export class AgentManager extends Manager {
   private log: ToolingLog;
   private kbnClient: KbnClient;
@@ -99,8 +91,12 @@ export class AgentManager extends Manager {
     if (this.agentContainerId) {
       this.log.info('Closing fleet process');
 
-      execa.sync('docker', ['kill', this.agentContainerId]);
-      this.log.info('Fleet server process closed');
+      try {
+        execa.sync('docker', ['kill', this.agentContainerId]);
+      } catch (err) {
+        this.log.error('Error closing fleet agent process');
+      }
+      this.log.info('Fleet agent process closed');
     }
   }
 }

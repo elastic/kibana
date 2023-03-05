@@ -47,7 +47,11 @@ export class FleetManager extends Manager {
     if (this.fleetContainerId) {
       this.log.info('Closing fleet process');
 
-      execa.sync('docker', ['kill', this.fleetContainerId]);
+      try {
+        execa.sync('docker', ['kill', this.fleetContainerId]);
+      } catch (err) {
+        this.log.error('Error closing fleet server process');
+      }
       this.log.info('Fleet server process closed');
     }
   }
