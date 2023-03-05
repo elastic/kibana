@@ -695,7 +695,7 @@ describe('ALL - Packs', () => {
     });
   });
 
-  describe.only('Load prebuilt packs', () => {
+  describe('Load prebuilt packs', () => {
     beforeEach(() => {
       login(ROLE.soc_manager);
       navigateTo('/app/osquery/packs');
