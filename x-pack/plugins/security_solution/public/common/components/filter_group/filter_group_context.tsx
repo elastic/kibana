@@ -9,7 +9,7 @@ import type { ControlGroupContainer, ControlGroupInput } from '@kbn/controls-plu
 import { createContext } from 'react';
 import type { FilterItemObj } from './types';
 
-interface FilterGroupContextType {
+export interface FilterGroupContextType {
   initialControls: FilterItemObj[];
   dataViewId: string;
   controlGroup: ControlGroupContainer | undefined;
