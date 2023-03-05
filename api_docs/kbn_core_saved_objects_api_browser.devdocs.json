@@ -1280,18 +1280,6 @@
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
-          },
-          {
-            "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/legacy_uptime/state/private_locations/api.ts"
           },
           {
@@ -1557,10 +1545,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
               },
               {
                 "plugin": "synthetics",
@@ -2522,10 +2506,6 @@
               {
                 "plugin": "monitoring",
                 "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
               },
               {
                 "plugin": "synthetics",

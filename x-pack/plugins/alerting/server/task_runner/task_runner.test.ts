@@ -1486,7 +1486,7 @@ describe('Task Runner', () => {
         generateEnqueueFunctionInput({ isBulk, id: '1', foo: true })
       );
       expect(result.state.summaryActions).toEqual({
-        'slack:default:1h': { date: new Date(DATE_1970) },
+        'slack:summary:1h': { date: new Date(DATE_1970) },
       });
     }
   );
