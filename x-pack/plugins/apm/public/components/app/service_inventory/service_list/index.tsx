@@ -15,6 +15,7 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
@@ -110,7 +111,10 @@ export function getServiceColumns({
                     color="danger"
                     href={link('/services/{serviceName}/alerts', {
                       path: { serviceName },
-                      query,
+                      query: {
+                        ...query,
+                        alertStatus: ALERT_STATUS_ACTIVE,
+                      },
                     })}
                   >
                     {alertsCount}

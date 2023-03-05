@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FieldStatsType } from '../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -38,6 +39,20 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     const dateNow = Date.now();
+    const fieldStatsEntries = [
+      {
+        fieldName: 'airline',
+        type: 'keyword' as FieldStatsType,
+        isDependentVariableInput: true,
+        isIncludeFieldInput: true,
+      },
+      {
+        fieldName: '@version',
+        type: 'keyword' as FieldStatsType,
+        isIncludeFieldInput: true,
+      },
+    ];
+
     const testDataList = [
       {
         suiteTitle: 'with lucene query',
@@ -48,6 +63,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
+        fieldStatsEntries,
         runtimeFields: {
           uppercase_airline: {
             type: 'keyword',
@@ -59,6 +75,10 @@ export default function ({ getService }: FtrProviderContext) {
         modelMemory: '20mb',
         createIndexPattern: true,
         expected: {
+          fieldStatsValues: { airline: ['AAL', 'AWE', 'ASA', 'ACA', 'AMX'] } as Record<
+            string,
+            string[]
+          >,
           source: 'ft_farequote_small',
           rocCurveColorState: [
             // tick/grid/axis
@@ -99,6 +119,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
+        fieldStatsEntries,
         runtimeFields: {
           uppercase_airline: {
             type: 'keyword',
@@ -110,6 +131,10 @@ export default function ({ getService }: FtrProviderContext) {
         modelMemory: '20mb',
         createIndexPattern: true,
         expected: {
+          fieldStatsValues: { airline: ['AAL', 'AWE', 'ASA', 'ACA', 'AMX'] } as Record<
+            string,
+            string[]
+          >,
           source: 'ft_farequote_small',
           rocCurveColorState: [
             // tick/grid/axis
@@ -150,6 +175,7 @@ export default function ({ getService }: FtrProviderContext) {
         get destinationIndex(): string {
           return `user-${this.jobId}`;
         },
+        fieldStatsEntries,
         runtimeFields: {
           uppercase_airline: {
             type: 'keyword',
@@ -161,6 +187,9 @@ export default function ({ getService }: FtrProviderContext) {
         modelMemory: '20mb',
         createIndexPattern: true,
         expected: {
+          fieldStatsValues: {
+            airline: ['AAL', 'ASA'],
+          } as Record<string, string[]>,
           source: 'ft_farequote_small',
           rocCurveColorState: [
             // tick/grid/axis
@@ -213,6 +242,7 @@ export default function ({ getService }: FtrProviderContext) {
         modelMemory: '20mb',
         createIndexPattern: true,
         expected: {
+          fieldStatsValues: { airline: ['ASA', 'FFT'] } as Record<string, string[]>,
           source: 'ft_farequote_small',
           rocCurveColorState: [
             // tick/grid/axis
@@ -293,9 +323,23 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.dataFrameAnalyticsCreation.assertRuntimeMappingsEditorContent(
             testData.expected.runtimeFieldsEditorContent
           );
+          await ml.testExecution.logTestStep(
+            'opens field stats flyout from dependent variable input'
+          );
+          await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
+          for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
+            (e) => e.isDependentVariableInput
+          )) {
+            await ml.dataFrameAnalyticsCreation.assertFieldStatsFlyoutContentFromDependentVariableInputTrigger(
+              fieldName,
+              fieldType,
+              testData.expected.fieldStatsValues && fieldName in testData.expected.fieldStatsValues
+                ? (testData.expected.fieldStatsValues[fieldName] as string[])
+                : undefined
+            );
+          }
 
           await ml.testExecution.logTestStep('inputs the dependent variable');
-          await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
           await ml.dataFrameAnalyticsCreation.selectDependentVariable(testData.dependentVariable);
 
           await ml.testExecution.logTestStep('inputs the training percent');
@@ -307,6 +351,19 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('displays the include fields selection');
           await ml.dataFrameAnalyticsCreation.assertIncludeFieldsSelectionExists();
+
+          await ml.testExecution.logTestStep('opens field stats flyout from include fields input');
+          for (const { fieldName, type: fieldType } of fieldStatsEntries.filter(
+            (e) => e.isIncludeFieldInput
+          )) {
+            await ml.dataFrameAnalyticsCreation.assertFieldStatFlyoutContentFromIncludeFieldTrigger(
+              fieldName,
+              fieldType,
+              testData.expected.fieldStatsValues && fieldName in testData.expected.fieldStatsValues
+                ? (testData.expected.fieldStatsValues[fieldName] as string[])
+                : undefined
+            );
+          }
 
           await ml.testExecution.logTestStep('continues to the additional options step');
           await ml.dataFrameAnalyticsCreation.continueToAdditionalOptionsStep();

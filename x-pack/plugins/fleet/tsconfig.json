@@ -89,7 +89,6 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/logging",
     "@kbn/analytics-client",
-    "@kbn/core-saved-objects-utils-server",
     "@kbn/core-logging-server-mocks",
     "@kbn/ml-is-populated-object",
     "@kbn/utils",

@@ -32,7 +32,7 @@ import { getFilters } from './filters';
 import { useTableState } from './use_table_state';
 
 interface Props {
-  spacesApi: SpacesPluginStart | undefined;
+  spacesApi?: SpacesPluginStart;
   setCurrentTab: (tabId: MlSavedObjectType) => void;
 }
 

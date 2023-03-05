@@ -22,6 +22,7 @@ export const Tile = ({ type, ...props }: Props) => {
     metrics: [{ type }],
     groupBy: null,
     includeTimeseries: true,
+    dropPartialBuckets: false,
   });
 
   return <KPIChart id={`$metric-${type}`} type={type} nodes={nodes} loading={loading} {...props} />;

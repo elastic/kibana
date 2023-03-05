@@ -9,12 +9,15 @@
 import { QueryClient } from '@tanstack/react-query';
 import { createQueryObservable } from './query_observable';
 import type { CrudClient } from '../crud_client';
-import type { CreateIn, GetIn } from '../../common';
+import type { CreateIn, GetIn, UpdateIn, DeleteIn, SearchIn } from '../../common';
 
-const queryKeyBuilder = {
+export const queryKeyBuilder = {
   all: (type: string) => [type] as const,
   item: (type: string, id: string) => {
     return [...queryKeyBuilder.all(type), id] as const;
+  },
+  search: (type: string, query: unknown) => {
+    return [...queryKeyBuilder.all(type), 'search', query] as const;
   },
 };
 
@@ -26,8 +29,14 @@ const createQueryOptionBuilder = ({
   return {
     get: <I extends GetIn = GetIn, O = unknown>(input: I) => {
       return {
-        queryKey: queryKeyBuilder.item(input.contentType, input.id),
-        queryFn: () => crudClientProvider(input.contentType).get<I, O>(input),
+        queryKey: queryKeyBuilder.item(input.contentTypeId, input.id),
+        queryFn: () => crudClientProvider(input.contentTypeId).get(input) as Promise<O>,
+      };
+    },
+    search: <I extends SearchIn = SearchIn, O = unknown>(input: I) => {
+      return {
+        queryKey: queryKeyBuilder.search(input.contentTypeId, input.query),
+        queryFn: () => crudClientProvider(input.contentTypeId).search(input) as Promise<O>,
       };
     },
   };
@@ -53,6 +62,22 @@ export class ContentClient {
   }
 
   create<I extends CreateIn, O = unknown>(input: I): Promise<O> {
-    return this.crudClientProvider(input.contentType).create(input);
+    return this.crudClientProvider(input.contentTypeId).create(input) as Promise<O>;
+  }
+
+  update<I extends UpdateIn, O = unknown>(input: I): Promise<O> {
+    return this.crudClientProvider(input.contentTypeId).update(input) as Promise<O>;
+  }
+
+  delete<I extends DeleteIn, O = unknown>(input: I): Promise<O> {
+    return this.crudClientProvider(input.contentTypeId).delete(input) as Promise<O>;
+  }
+
+  search<I extends SearchIn, O = unknown>(input: I): Promise<O> {
+    return this.crudClientProvider(input.contentTypeId).search(input) as Promise<O>;
+  }
+
+  search$<I extends SearchIn, O = unknown>(input: I) {
+    return createQueryObservable(this.queryClient, this.queryOptionBuilder.search<I, O>(input));
   }
 }

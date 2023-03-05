@@ -16,6 +16,7 @@ import { useSelectedLocation } from '../hooks/use_selected_location';
 interface AvailabilityPanelprops {
   from: string;
   to: string;
+  id: string;
 }
 
 export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
@@ -34,6 +35,7 @@ export const AvailabilityPanel = (props: AvailabilityPanelprops) => {
 
   return (
     <ExploratoryViewEmbeddable
+      id={props.id}
       align="left"
       customHeight="70px"
       reportType={ReportTypes.SINGLE_METRIC}

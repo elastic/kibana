@@ -30,5 +30,6 @@ export const createAnalyticsCollection = async ({
 
 export const AddAnalyticsCollectionsAPILogic = createApiLogic(
   ['analytics', 'add_analytics_collections_api_logic'],
-  createAnalyticsCollection
+  createAnalyticsCollection,
+  { showErrorFlash: false }
 );

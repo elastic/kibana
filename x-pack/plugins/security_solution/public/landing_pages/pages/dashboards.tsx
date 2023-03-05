@@ -25,6 +25,7 @@ import { useCapabilities, useNavigateTo } from '../../common/lib/kibana';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { LandingImageCards } from '../components/landing_links_images';
 import * as i18n from './translations';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
 
 /* eslint-disable @elastic/eui/href-or-on-click */
 const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
@@ -45,6 +46,7 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
             href={url}
             onClick={(ev) => {
               ev.preventDefault();
+              track(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.CREATE_DASHBOARD}`);
               navigateTo({ url });
             }}
             data-test-subj="createDashboardButton"

@@ -1354,15 +1354,27 @@
           },
           {
             "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/routing/app_root.tsx"
+            "path": "x-pack/plugins/apm/public/components/routing/app_root/index.tsx"
           },
           {
             "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/routing/app_root.tsx"
+            "path": "x-pack/plugins/apm/public/components/routing/app_root/index.tsx"
           },
           {
             "plugin": "apm",
-            "path": "x-pack/plugins/apm/public/components/routing/app_root.tsx"
+            "path": "x-pack/plugins/apm/public/components/routing/app_root/index.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_view.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_view.tsx"
+          },
+          {
+            "plugin": "enterpriseSearch",
+            "path": "x-pack/plugins/enterprise_search/public/applications/analytics/components/analytics_collection_view/analytics_collection_view.tsx"
           },
           {
             "plugin": "indexLifecycleManagement",

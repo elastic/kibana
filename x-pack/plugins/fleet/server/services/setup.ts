@@ -165,18 +165,18 @@ async function createSetupSideEffects(
   logger.debug('Upgrade Fleet package install versions');
   await upgradePackageInstallVersion({ soClient, esClient, logger });
 
-  logger.debug('Upgrade Agent policy schema version');
-  await upgradeAgentPolicySchemaVersion(soClient);
-
-  logger.debug('Setting up Fleet enrollment keys');
-  await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
-
-  if (appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+  if (appContextService.getMessageSigningService()?.isEncryptionAvailable) {
     logger.debug('Generating key pair for message signing');
     await appContextService.getMessageSigningService()?.generateKeyPair();
   } else {
     logger.info('No encryption key set, skipping key pair generation for message signing');
   }
+
+  logger.debug('Upgrade Agent policy schema version');
+  await upgradeAgentPolicySchemaVersion(soClient);
+
+  logger.debug('Setting up Fleet enrollment keys');
+  await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
 
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');

@@ -47,6 +47,7 @@ export const getUserRiskScoreColumns = ({
               name: 'user.name',
               value: userName,
               type: 'keyword',
+              aggregatable: true,
             }}
           >
             <UserDetailsLink userName={userName} userTab={UsersTableType.risk} />

@@ -44,6 +44,7 @@ export const getHostRiskScoreColumns = ({
               name: 'host.name',
               value: hostName,
               type: 'keyword',
+              aggregatable: true,
             }}
           >
             <HostDetailsLink hostName={hostName} hostTab={HostsTableType.risk} />

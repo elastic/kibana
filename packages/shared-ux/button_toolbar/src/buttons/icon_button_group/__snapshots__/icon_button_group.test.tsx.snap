@@ -15,7 +15,7 @@ exports[`<IconButtonGroup /> is rendered 1`] = `
     <button
       aria-label="Text"
       aria-pressed="false"
-      class="euiButtonGroupButton euiButtonGroupButton-isIconOnly css-1h0umek-base-text-EuiButtonGroupButton-EuiButtonGroup"
+      class="euiButtonGroupButton euiButtonGroupButton-isIconOnly css-3ca8kv-base-text-EuiButtonGroupButton-EuiButtonGroup"
       data-test-subj="generated-id0"
       id="generated-id"
       title="Text"

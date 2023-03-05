@@ -486,6 +486,20 @@
           },
           {
             "parentPluginId": "lens",
+            "id": "def-public.Embeddable.badgeDomNode",
+            "type": "Object",
+            "tags": [],
+            "label": "badgeDomNode",
+            "description": [],
+            "signature": [
+              "HTMLDivElement | undefined"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "lens",
             "id": "def-public.Embeddable.handleEvent",
             "type": "Function",
             "tags": [],
@@ -3066,7 +3080,7 @@
                 "section": "def-public.Visualization",
                 "text": "Visualization"
               },
-              "<T, unknown> | (() => Promise<",
+              "<T, T> | (() => Promise<",
               {
                 "pluginId": "lens",
                 "scope": "public",
@@ -3074,7 +3088,7 @@
                 "section": "def-public.Visualization",
                 "text": "Visualization"
               },
-              "<T, unknown>>)) => void"
+              "<T, T>>)) => void"
             ],
             "path": "x-pack/plugins/lens/public/plugin.ts",
             "deprecated": false,
@@ -3095,7 +3109,7 @@
                     "section": "def-public.Visualization",
                     "text": "Visualization"
                   },
-                  "<T, unknown> | (() => Promise<",
+                  "<T, T> | (() => Promise<",
                   {
                     "pluginId": "lens",
                     "scope": "public",
@@ -3103,7 +3117,7 @@
                     "section": "def-public.Visualization",
                     "text": "Visualization"
                   },
-                  "<T, unknown>>)"
+                  "<T, T>>)"
                 ],
                 "path": "x-pack/plugins/lens/public/plugin.ts",
                 "deprecated": false,
@@ -4574,7 +4588,7 @@
               "\nInitialize is allowed to modify the state stored in memory. The initialize function\nis called with a previous state in two cases:\n- Loading from a saved visualization\n- When using suggestions, the suggested state is passed in"
             ],
             "signature": [
-              "(addNewLayer: () => string, state?: T | undefined, mainPalette?: ",
+              "(addNewLayer: () => string, state?: T | P | undefined, mainPalette?: ",
               {
                 "pluginId": "@kbn/coloring",
                 "scope": "common",
@@ -4582,7 +4596,33 @@
                 "section": "def-common.PaletteOutput",
                 "text": "PaletteOutput"
               },
-              "<{ [key: string]: unknown; }> | undefined) => T"
+              "<{ [key: string]: unknown; }> | undefined, references?: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[] | undefined, initialContext?: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.VisualizeFieldContext",
+                "text": "VisualizeFieldContext"
+              },
+              " | ",
+              "VisualizeEditorContext",
+              "<",
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.Configuration",
+                "text": "Configuration"
+              },
+              "> | undefined) => T"
             ],
             "path": "x-pack/plugins/lens/public/types.ts",
             "deprecated": false,
@@ -4606,12 +4646,12 @@
               {
                 "parentPluginId": "lens",
                 "id": "def-public.Visualization.initialize.$2",
-                "type": "Uncategorized",
+                "type": "CompoundType",
                 "tags": [],
                 "label": "state",
                 "description": [],
                 "signature": [
-                  "T | undefined"
+                  "T | P | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -4634,6 +4674,60 @@
                     "text": "PaletteOutput"
                   },
                   "<{ [key: string]: unknown; }> | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.initialize.$4",
+                "type": "Array",
+                "tags": [],
+                "label": "references",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-common",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                    "section": "def-common.SavedObjectReference",
+                    "text": "SavedObjectReference"
+                  },
+                  "[] | undefined"
+                ],
+                "path": "x-pack/plugins/lens/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.Visualization.initialize.$5",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "initialContext",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.VisualizeFieldContext",
+                    "text": "VisualizeFieldContext"
+                  },
+                  " | ",
+                  "VisualizeEditorContext",
+                  "<",
+                  {
+                    "pluginId": "visualizations",
+                    "scope": "common",
+                    "docId": "kibVisualizationsPluginApi",
+                    "section": "def-common.Configuration",
+                    "text": "Configuration"
+                  },
+                  "> | undefined"
                 ],
                 "path": "x-pack/plugins/lens/public/types.ts",
                 "deprecated": false,
@@ -4954,120 +5048,6 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "lens",
-            "id": "def-public.Visualization.fromPersistableState",
-            "type": "Function",
-            "tags": [],
-            "label": "fromPersistableState",
-            "description": [
-              "Hydrate from persistable state and references to final state"
-            ],
-            "signature": [
-              "((state: P, references?: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
-              "[] | undefined, initialContext?: ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.VisualizeFieldContext",
-                "text": "VisualizeFieldContext"
-              },
-              " | ",
-              "VisualizeEditorContext",
-              "<",
-              {
-                "pluginId": "visualizations",
-                "scope": "common",
-                "docId": "kibVisualizationsPluginApi",
-                "section": "def-common.Configuration",
-                "text": "Configuration"
-              },
-              "> | undefined) => T) | undefined"
-            ],
-            "path": "x-pack/plugins/lens/public/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.fromPersistableState.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  "P"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.fromPersistableState.$2",
-                "type": "Array",
-                "tags": [],
-                "label": "references",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
-                  "[] | undefined"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "lens",
-                "id": "def-public.Visualization.fromPersistableState.$3",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "initialContext",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "uiActions",
-                    "scope": "public",
-                    "docId": "kibUiActionsPluginApi",
-                    "section": "def-public.VisualizeFieldContext",
-                    "text": "VisualizeFieldContext"
-                  },
-                  " | ",
-                  "VisualizeEditorContext",
-                  "<",
-                  {
-                    "pluginId": "visualizations",
-                    "scope": "common",
-                    "docId": "kibVisualizationsPluginApi",
-                    "section": "def-common.Configuration",
-                    "text": "Configuration"
-                  },
-                  "> | undefined"
-                ],
-                "path": "x-pack/plugins/lens/public/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
             "returnComment": []

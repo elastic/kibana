@@ -44,6 +44,7 @@ export const getHostsColumns = (
                 name: 'host.name',
                 value: hostName[0],
                 type: 'keyword',
+                aggregatable: true,
               }}
             >
               <HostDetailsLink hostName={hostName[0]} />

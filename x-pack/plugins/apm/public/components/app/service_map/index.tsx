@@ -12,28 +12,30 @@ import {
   EuiPanel,
 } from '@elastic/eui';
 import React, { ReactNode } from 'react';
+import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
+import { Environment } from '../../../../common/environment_rt';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import {
   invalidLicenseMessage,
   SERVICE_MAP_TIMEOUT_ERROR,
 } from '../../../../common/service_map';
-import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useLicenseContext } from '../../../context/license/use_license_context';
+import { useAnyOfApmParams, useApmParams } from '../../../hooks/use_apm_params';
+import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useTheme } from '../../../hooks/use_theme';
+import { useTimeRange } from '../../../hooks/use_time_range';
 import { LicensePrompt } from '../../shared/license_prompt';
+import { SearchBar } from '../../shared/search_bar/search_bar';
 import { Controls } from './controls';
 import { Cytoscape } from './cytoscape';
 import { getCytoscapeDivStyle } from './cytoscape_options';
+import { DisabledPrompt } from './disabled_prompt';
 import { EmptyBanner } from './empty_banner';
 import { EmptyPrompt } from './empty_prompt';
 import { Popover } from './popover';
 import { TimeoutPrompt } from './timeout_prompt';
 import { useRefDimensions } from './use_ref_dimensions';
-import { SearchBar } from '../../shared/search_bar';
-import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
-import { Environment } from '../../../../common/environment_rt';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -127,6 +129,7 @@ export function ServiceMap({
   const height = compact ? 200 : undefined;
   const hideSearchBar = !!compact;
   const popoverEnabled = !compact;
+  const { config } = useApmPluginContext();
 
   const {
     data = { elements: [] },
@@ -135,7 +138,11 @@ export function ServiceMap({
   } = useFetcher(
     (callApmApi) => {
       // When we don't have a license or a valid license, don't make the request.
-      if (!license || !isActivePlatinumLicense(license)) {
+      if (
+        !license ||
+        !isActivePlatinumLicense(license) ||
+        !config.serviceMapEnabled
+      ) {
         return;
       }
 
@@ -153,7 +160,16 @@ export function ServiceMap({
         },
       });
     },
-    [license, serviceName, environment, start, end, serviceGroupId, kuery]
+    [
+      license,
+      serviceName,
+      environment,
+      start,
+      end,
+      serviceGroupId,
+      kuery,
+      config.serviceMapEnabled,
+    ]
   );
 
   const { ref, height: refHeight } = useRefDimensions();
@@ -170,6 +186,14 @@ export function ServiceMap({
     return (
       <PromptContainer>
         <LicensePrompt text={invalidLicenseMessage} />
+      </PromptContainer>
+    );
+  }
+
+  if (!config.serviceMapEnabled) {
+    return (
+      <PromptContainer>
+        <DisabledPrompt />
       </PromptContainer>
     );
   }

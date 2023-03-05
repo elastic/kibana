@@ -337,7 +337,7 @@ export async function run() {
       Array(currentBatchSize)
         .fill(0)
         .map(async (__, i) => {
-          const agentPolicyId = 'script-create-agent-' + uuidv4();
+          const agentPolicyId = uuidv4();
           const agentPolicy = await createAgentPolicy(agentPolicyId);
           logger.info(`Created agent policy ${agentPolicy.item.id}`);
 

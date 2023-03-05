@@ -20,10 +20,67 @@
     }
   ],
   "paths": {
+    "/health_check": {
+      "post": {
+        "summary": "Fleet Server health check",
+        "tags": [
+          "Fleet internals"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "host": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "fleet-server-health-check",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "host": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/setup": {
       "post": {
-        "summary": "Setup",
-        "tags": [],
+        "summary": "Initiate Fleet setup",
+        "tags": [
+          "Fleet internals"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -34,6 +91,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           },
           "500": {
             "description": "Internal Server Error",
@@ -61,8 +121,10 @@
     },
     "/settings": {
       "get": {
-        "summary": "Settings",
-        "tags": [],
+        "summary": "Get settings",
+        "tags": [
+          "Fleet internals"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -73,13 +135,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-settings"
       },
       "put": {
-        "summary": "Settings - Update",
-        "tags": [],
+        "summary": "Update settings",
+        "tags": [
+          "Fleet internals"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -114,65 +181,20 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "update-settings"
       }
     },
-    "/health_check": {
-      "post": {
-        "summary": "Fleet Server Health Check",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    },
-                    "status": {
-                      "type": "string"
-                    },
-                    "host": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "operationId": "fleet-server-health-check",
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "host": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/service-tokens": {
       "post": {
-        "summary": "Generate service tokens",
-        "tags": [],
+        "summary": "Create service token",
+        "tags": [
+          "Service tokens"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -191,6 +213,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "generate-service-token-deprecated",
@@ -204,8 +229,10 @@
     },
     "/service_tokens": {
       "post": {
-        "summary": "Generate service tokens",
-        "tags": [],
+        "summary": "Create service token",
+        "tags": [
+          "Service tokens"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -224,6 +251,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "generate-service-token",
@@ -234,10 +264,55 @@
         ]
       }
     },
+    "/epm/verification_key_id": {
+      "get": {
+        "summary": "Get package signature verification key ID",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "body": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "string",
+                          "nullable": true,
+                          "description": "the key ID of the GPG key used to verify package signatures"
+                        }
+                      }
+                    },
+                    "statusCode": {
+                      "type": "number"
+                    },
+                    "headers": {
+                      "type": "object"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "packages-get-verification-key-id"
+      },
+      "parameters": []
+    },
     "/epm/categories": {
       "get": {
-        "summary": "Package categories",
-        "tags": [],
+        "summary": "List package categories",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -248,6 +323,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-package-categories"
@@ -260,7 +338,7 @@
             "type": "boolean",
             "default": false
           },
-          "description": "Whether to include prerelease packages in categories count (e.g. beta, rc, preview) "
+          "description": "Whether to include prerelease packages in categories count (e.g. beta, rc, preview)"
         },
         {
           "in": "query",
@@ -283,8 +361,10 @@
     },
     "/epm/packages/limited": {
       "get": {
-        "summary": "Packages - Get limited list",
-        "tags": [],
+        "summary": "Get limited package list",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -303,6 +383,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "list-limited-packages"
@@ -311,8 +394,10 @@
     },
     "/epm/packages": {
       "get": {
-        "summary": "Packages - List",
-        "tags": [],
+        "summary": "List packages",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -323,6 +408,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "list-all-packages",
@@ -343,7 +431,7 @@
               "type": "boolean",
               "default": false
             },
-            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview)"
           },
           {
             "in": "query",
@@ -364,8 +452,10 @@
         ]
       },
       "post": {
-        "summary": "Packages - Install by upload",
-        "tags": [],
+        "summary": "Install by package by direct upload",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -419,6 +509,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "install-package-by-upload",
@@ -435,6 +528,12 @@
                 "type": "string",
                 "format": "binary"
               }
+            },
+            "application/gzip": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
             }
           }
         }
@@ -442,8 +541,10 @@
     },
     "/epm/packages/_bulk": {
       "post": {
-        "summary": "Packages - Bulk install",
-        "tags": [],
+        "summary": "Bulk install packages",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -454,6 +555,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-install-packages",
@@ -465,7 +569,7 @@
               "type": "boolean",
               "default": false
             },
-            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview)"
           }
         ],
         "requestBody": {
@@ -497,8 +601,10 @@
     },
     "/epm/packages/{pkgkey}": {
       "get": {
-        "summary": "Packages - Info",
-        "tags": [],
+        "summary": "Get package",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -538,6 +644,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-package-deprecated",
@@ -562,14 +671,16 @@
               "type": "boolean",
               "default": false
             },
-            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+            "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview)"
           }
         ],
         "deprecated": true
       },
       "post": {
-        "summary": "Packages - Install",
-        "tags": [],
+        "summary": "Install package",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -610,6 +721,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "install-package-deprecated",
@@ -644,8 +758,10 @@
         "deprecated": true
       },
       "delete": {
-        "summary": "Packages - Delete",
-        "tags": [],
+        "summary": "Delete ackage",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -686,6 +802,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "delete-package-deprecated",
@@ -721,8 +840,10 @@
     },
     "/epm/packages/{pkgName}/{pkgVersion}": {
       "get": {
-        "summary": "Packages - Info",
-        "tags": [],
+        "summary": "Get package",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -774,6 +895,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-package",
@@ -823,12 +947,14 @@
             "type": "boolean",
             "default": false
           },
-          "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview) "
+          "description": "Whether to return prerelease versions of packages (e.g. beta, rc, preview)"
         }
       ],
       "post": {
-        "summary": "Packages - Install",
-        "tags": [],
+        "summary": "Install package",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -882,6 +1008,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "install-package",
@@ -910,8 +1039,10 @@
         }
       },
       "put": {
-        "summary": "Packages - Update",
-        "tags": [],
+        "summary": "Update package settings",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -952,6 +1083,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "update-package",
@@ -972,8 +1106,10 @@
         }
       },
       "delete": {
-        "summary": "Packages - Delete",
-        "tags": [],
+        "summary": "Delete package",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1014,6 +1150,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "delete-package",
@@ -1040,8 +1179,10 @@
     },
     "/epm/packages/{pkgName}/{pkgVersion}/{filePath}": {
       "get": {
-        "summary": "Packages - Get file from registry",
-        "tags": [],
+        "summary": "Get package file",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1063,6 +1204,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "packages-get-file"
@@ -1096,8 +1240,10 @@
     },
     "/epm/packages/{pkgName}/stats": {
       "get": {
-        "summary": "Get stats for a package",
-        "tags": [],
+        "summary": "Get package stats",
+        "tags": [
+          "Elastic Package Manager (EPM)"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1116,6 +1262,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-package-stats",
@@ -1138,8 +1287,10 @@
     },
     "/agents/setup": {
       "get": {
-        "summary": "Agents setup - Info",
-        "tags": [],
+        "summary": "Get agent setup info",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1150,6 +1301,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agents-setup-status",
@@ -1160,7 +1314,10 @@
         ]
       },
       "post": {
-        "summary": "Agents setup - Create",
+        "summary": "Initiate agent setup",
+        "tags": [
+          "Agents"
+        ],
         "operationId": "setup-agents",
         "responses": {
           "200": {
@@ -1172,6 +1329,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -1204,8 +1364,10 @@
     },
     "/agent-status": {
       "get": {
-        "summary": "Agents - Summary stats",
-        "tags": [],
+        "summary": "Get agent status summary",
+        "tags": [
+          "Agent status"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1252,6 +1414,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agent-status-deprecated",
@@ -1270,8 +1435,10 @@
     },
     "/agent_status": {
       "get": {
-        "summary": "Agents - Summary stats",
-        "tags": [],
+        "summary": "Get agent status summary",
+        "tags": [
+          "Agent status"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1302,13 +1469,22 @@
                       "type": "integer"
                     },
                     "total": {
-                      "type": "integer"
+                      "type": "integer",
+                      "deprecated": true
                     },
                     "updating": {
+                      "type": "integer"
+                    },
+                    "all": {
+                      "type": "integer"
+                    },
+                    "active": {
                       "type": "integer"
                     }
                   },
                   "required": [
+                    "active",
+                    "all",
                     "error",
                     "events",
                     "inactive",
@@ -1321,6 +1497,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agent-status",
@@ -1346,8 +1525,10 @@
     },
     "/agent_status/data": {
       "get": {
-        "summary": "Agents - Get incoming data",
-        "tags": [],
+        "summary": "Get incoming agent data",
+        "tags": [
+          "Agent status"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1374,6 +1555,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agent-data",
@@ -1394,8 +1578,10 @@
     },
     "/agents": {
       "get": {
-        "summary": "Agents - List",
-        "tags": [],
+        "summary": "List agents",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1406,6 +1592,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agents",
@@ -1452,8 +1641,10 @@
     },
     "/agents/bulk_upgrade": {
       "post": {
-        "summary": "Agents - Bulk Upgrade",
-        "tags": [],
+        "summary": "Bulk upgrade agents",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1471,14 +1662,7 @@
             }
           },
           "400": {
-            "description": "BAD REQUEST",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/upgrade_agent"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-upgrade-agents",
@@ -1511,7 +1695,10 @@
     },
     "/agents/action_status": {
       "get": {
-        "summary": "Agents - Action status",
+        "summary": "Get agent action status",
+        "tags": [
+          "Agent actions"
+        ],
         "parameters": [
           {
             "$ref": "#/components/parameters/page_size"
@@ -1602,6 +1789,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "agents-action-status"
@@ -1619,8 +1809,10 @@
         }
       ],
       "get": {
-        "summary": "Agent - Info",
-        "tags": [],
+        "summary": "Get agent by ID",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1639,6 +1831,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agent",
@@ -1649,8 +1844,10 @@
         ]
       },
       "put": {
-        "summary": "Agent - Update",
-        "tags": [],
+        "summary": "Update agent by ID",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1669,6 +1866,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "update-agent",
@@ -1700,8 +1900,10 @@
         }
       },
       "delete": {
-        "summary": "Agent - Delete",
-        "tags": [],
+        "summary": "Delete agent by ID",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1723,6 +1925,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "delete-agent",
@@ -1745,8 +1950,10 @@
         }
       ],
       "post": {
-        "summary": "Agent - Actions",
-        "tags": [],
+        "summary": "Create agent action",
+        "tags": [
+          "Agent actions"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1771,6 +1978,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "new-agent-action",
@@ -1816,8 +2026,10 @@
         }
       ],
       "post": {
-        "summary": "Agent - Cancel Action",
-        "tags": [],
+        "summary": "Cancel agent action",
+        "tags": [
+          "Agent actions"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1833,6 +2045,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "agent-action-cancel",
@@ -1863,8 +2078,10 @@
         }
       ],
       "get": {
-        "summary": "Get agent upload file",
-        "tags": [],
+        "summary": "Get file uploaded by agent",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1889,6 +2106,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agent-upload-file"
@@ -1905,9 +2125,11 @@
           "required": true
         }
       ],
-      "put": {
-        "summary": "Agent - Reassign",
-        "tags": [],
+      "post": {
+        "summary": "Reassign agent",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -1918,6 +2140,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "reassign-agent",
@@ -1944,6 +2169,52 @@
             }
           }
         }
+      },
+      "put": {
+        "summary": "Reassign agent",
+        "tags": [
+          "Agents"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "reassign-agent-deprecated",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "policy_id": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "policy_id"
+                ]
+              }
+            }
+          }
+        },
+        "deprecated": true
       }
     },
     "/agents/{agentId}/unenroll": {
@@ -1958,8 +2229,10 @@
         }
       ],
       "post": {
-        "summary": "Agent - Unenroll",
-        "tags": [],
+        "summary": "Unenroll agent",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2033,8 +2306,10 @@
         }
       ],
       "post": {
-        "summary": "Agent - Upgrade",
-        "tags": [],
+        "summary": "Upgrade agent",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2047,14 +2322,7 @@
             }
           },
           "400": {
-            "description": "BAD REQUEST",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/upgrade_agent"
-                }
-              }
-            }
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "upgrade-agent",
@@ -2075,7 +2343,7 @@
         }
       }
     },
-    "/agents/{agentId}/upload": {
+    "/agents/{agentId}/uploads": {
       "parameters": [
         {
           "schema": {
@@ -2088,7 +2356,9 @@
       ],
       "get": {
         "summary": "List agent uploads",
-        "tags": [],
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2112,6 +2382,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "list-agent-uploads"
@@ -2119,8 +2392,10 @@
     },
     "/agents/bulk_reassign": {
       "post": {
-        "summary": "Agents - Bulk reassign",
-        "tags": [],
+        "summary": "Bulk reassign agents",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2136,6 +2411,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-reassign-agents",
@@ -2186,8 +2464,10 @@
     },
     "/agents/bulk_unenroll": {
       "post": {
-        "summary": "Agents - Bulk unenroll",
-        "tags": [],
+        "summary": "Bulk unenroll agents",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2203,6 +2483,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-unenroll-agents",
@@ -2260,8 +2543,10 @@
     },
     "/agents/bulk_update_agent_tags": {
       "post": {
-        "summary": "Agents - Bulk update tags",
-        "tags": [],
+        "summary": "Bulk update agent tags",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2277,6 +2562,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-update-agent-tags",
@@ -2345,8 +2633,10 @@
     },
     "/agents/tags": {
       "get": {
-        "summary": "Agent Tags - List",
-        "description": "List all agent tags",
+        "summary": "List agent tags",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2357,6 +2647,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-agent-tags"
@@ -2374,8 +2667,10 @@
         }
       ],
       "post": {
-        "summary": "Agent - Request Diagnostics",
-        "tags": [],
+        "summary": "Request agent diagnostics",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2391,6 +2686,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "request-diagnostics-agent",
@@ -2403,8 +2701,10 @@
     },
     "/agents/bulk_request_diagnostics": {
       "post": {
-        "summary": "Agent - Bulk Request Diagnostics",
-        "tags": [],
+        "summary": "Bulk request diagnostics from agents",
+        "tags": [
+          "Agents"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2420,6 +2720,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-request-diagnostics",
@@ -2467,8 +2770,10 @@
     },
     "/agent_policies": {
       "get": {
-        "summary": "Agent policies - List",
-        "tags": [],
+        "summary": "List agent policies",
+        "tags": [
+          "Agent policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2502,6 +2807,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "agent-policy-list",
@@ -2535,8 +2843,10 @@
         "description": ""
       },
       "post": {
-        "summary": "Agent policy - Create",
-        "tags": [],
+        "summary": "Create agent policy",
+        "tags": [
+          "Agent policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2552,6 +2862,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "create-agent-policy",
@@ -2559,7 +2872,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/new_agent_policy"
+                "$ref": "#/components/schemas/agent_policy_create_request"
               }
             }
           }
@@ -2584,8 +2897,10 @@
         }
       ],
       "get": {
-        "summary": "Agent policy - Info",
-        "tags": [],
+        "summary": "Get agent policy by ID",
+        "tags": [
+          "Agent policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2604,6 +2919,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "agent-policy-info",
@@ -2611,8 +2929,10 @@
         "parameters": []
       },
       "put": {
-        "summary": "Agent policy - Update",
-        "tags": [],
+        "summary": "Update agent policy by ID",
+        "tags": [
+          "Agent policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2631,6 +2951,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "update-agent-policy",
@@ -2638,7 +2961,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/new_agent_policy"
+                "$ref": "#/components/schemas/agent_policy_update_request"
               }
             }
           }
@@ -2662,7 +2985,10 @@
         }
       ],
       "post": {
-        "summary": "Agent policy - copy one policy",
+        "summary": "Copy agent policy by ID",
+        "tags": [
+          "Agent policies"
+        ],
         "operationId": "agent-policy-copy",
         "parameters": [
           {
@@ -2687,6 +3013,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -2714,7 +3043,10 @@
     },
     "/agent_policies/{agentPolicyId}/full": {
       "get": {
-        "summary": "Agent policy - Get full policy",
+        "summary": "Get full agent policy by ID",
+        "tags": [
+          "Agent policies"
+        ],
         "operationId": "agent-policy-full",
         "responses": {
           "200": {
@@ -2738,6 +3070,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         }
       },
@@ -2778,7 +3113,10 @@
     },
     "/agent_policies/{agentPolicyId}/download": {
       "get": {
-        "summary": "Agent policy - Download",
+        "summary": "Download agent policy by ID",
+        "tags": [
+          "Agent policies"
+        ],
         "operationId": "agent-policy-download",
         "responses": {
           "200": {
@@ -2795,6 +3133,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         }
       },
@@ -2835,8 +3176,10 @@
     },
     "/agent_policies/_bulk_get": {
       "post": {
-        "summary": "Agent policies - Bulk Get",
-        "tags": [],
+        "summary": "Bulk get agent policies",
+        "tags": [
+          "Agent policies"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -2886,6 +3229,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-get-agent-policies",
@@ -2895,7 +3241,10 @@
     },
     "/agent_policies/delete": {
       "post": {
-        "summary": "Agent policy - Delete",
+        "summary": "Delete agent policy by ID",
+        "tags": [
+          "Agent policies"
+        ],
         "operationId": "delete-agent-policy",
         "responses": {
           "200": {
@@ -2919,6 +3268,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -2948,8 +3300,10 @@
     },
     "/data_streams": {
       "get": {
-        "summary": "Data streams - List",
-        "tags": [],
+        "summary": "List data streams",
+        "tags": [
+          "Data streams"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -2968,6 +3322,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "data-streams-list"
@@ -2976,8 +3333,10 @@
     },
     "/enrollment-api-keys": {
       "get": {
-        "summary": "Enrollment API Keys - List",
-        "tags": [],
+        "summary": "List enrollment API keys",
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3018,6 +3377,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-enrollment-api-keys-deprecated",
@@ -3025,8 +3387,10 @@
         "deprecated": true
       },
       "post": {
-        "summary": "Enrollment API Key - Create",
-        "tags": [],
+        "summary": "Create enrollment API key",
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3048,6 +3412,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "create-enrollment-api-keys-deprecated",
@@ -3071,8 +3438,10 @@
         }
       ],
       "get": {
-        "summary": "Enrollment API Key - Info",
-        "tags": [],
+        "summary": "Get enrollment API key by ID",
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3091,14 +3460,19 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-enrollment-api-key-deprecated",
         "deprecated": true
       },
       "delete": {
-        "summary": "Enrollment API Key - Delete",
-        "tags": [],
+        "summary": "Delete enrollment API key by ID",
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3120,6 +3494,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "delete-enrollment-api-key-deprecated",
@@ -3133,8 +3510,10 @@
     },
     "/enrollment_api_keys": {
       "get": {
-        "summary": "Enrollment API Keys - List",
-        "tags": [],
+        "summary": "List enrollment API keys",
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3175,14 +3554,19 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-enrollment-api-keys",
         "parameters": []
       },
       "post": {
-        "summary": "Enrollment API Key - Create",
-        "tags": [],
+        "summary": "Create enrollment API key",
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3204,6 +3588,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "create-enrollment-api-keys",
@@ -3226,8 +3613,10 @@
         }
       ],
       "get": {
-        "summary": "Enrollment API Key - Info",
-        "tags": [],
+        "summary": "Get enrollment API key by ID",
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3246,13 +3635,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-enrollment-api-key"
       },
       "delete": {
-        "summary": "Enrollment API Key - Delete",
-        "tags": [],
+        "summary": "Delete enrollment API key by ID",
+        "tags": [
+          "Enrollment API keys"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3274,6 +3668,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "delete-enrollment-api-key",
@@ -3286,8 +3683,10 @@
     },
     "/package_policies": {
       "get": {
-        "summary": "Package policies - List",
-        "tags": [],
+        "summary": "List package policies",
+        "tags": [
+          "Package policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3318,6 +3717,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-package-policies",
@@ -3326,7 +3728,10 @@
       },
       "parameters": [],
       "post": {
-        "summary": "Package policy - Create",
+        "summary": "Create package policy",
+        "tags": [
+          "Package policies"
+        ],
         "operationId": "create-package-policy",
         "responses": {
           "200": {
@@ -3346,6 +3751,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -3367,8 +3775,10 @@
     },
     "/package_policies/_bulk_get": {
       "post": {
-        "summary": "Package policies - Bulk Get",
-        "tags": [],
+        "summary": "Bulk get package policies",
+        "tags": [
+          "Package policies"
+        ],
         "requestBody": {
           "content": {
             "application/json": {
@@ -3414,6 +3824,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "bulk-get-package-policies",
@@ -3423,7 +3836,10 @@
     },
     "/package_policies/delete": {
       "post": {
-        "summary": "Package policy - Delete",
+        "summary": "Delete package policy",
+        "tags": [
+          "Package policies"
+        ],
         "operationId": "post-delete-package-policy",
         "requestBody": {
           "content": {
@@ -3476,6 +3892,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -3487,7 +3906,10 @@
     },
     "/package_policies/upgrade": {
       "post": {
-        "summary": "Package policy - Upgrade",
+        "summary": "Upgrade package policy to a newer package version",
+        "tags": [
+          "Package policies"
+        ],
         "operationId": "upgrade-package-policy",
         "requestBody": {
           "content": {
@@ -3537,13 +3959,19 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         }
       }
     },
     "/package_policies/upgrade/dryrun": {
       "post": {
-        "summary": "Package policy - Upgrade Dry run",
+        "summary": "Dry run package policy upgrade",
+        "tags": [
+          "Package policies"
+        ],
         "operationId": "upgrade-package-policy-dry-run",
         "requestBody": {
           "content": {
@@ -3595,14 +4023,19 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         }
       }
     },
     "/package_policies/{packagePolicyId}": {
       "get": {
-        "summary": "Package policy - Info",
-        "tags": [],
+        "summary": "Get package policy by ID",
+        "tags": [
+          "Package policies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3621,6 +4054,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-package-policy"
@@ -3636,7 +4072,10 @@
         }
       ],
       "put": {
-        "summary": "Package policy - Update",
+        "summary": "Update package policy by ID",
+        "tags": [
+          "Package policies"
+        ],
         "operationId": "update-package-policy",
         "requestBody": {
           "content": {
@@ -3669,6 +4108,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -3678,8 +4120,10 @@
         ]
       },
       "delete": {
-        "summary": "Package policy - Delete",
-        "tags": [],
+        "summary": "Delete package policy by ID",
+        "tags": [
+          "Package policies"
+        ],
         "operationId": "delete-package-policy",
         "responses": {
           "200": {
@@ -3699,6 +4143,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -3714,8 +4161,10 @@
     },
     "/outputs": {
       "get": {
-        "summary": "Outputs",
-        "tags": [],
+        "summary": "List outputs",
+        "tags": [
+          "Outputs"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3743,14 +4192,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-outputs"
       },
       "post": {
-        "summary": "Outputs",
-        "description": "Create a new output",
-        "tags": [],
+        "summary": "Create output",
+        "tags": [
+          "Outputs"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3766,6 +4219,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -3818,8 +4274,10 @@
     },
     "/outputs/{outputId}": {
       "get": {
-        "summary": "Output - Info",
-        "tags": [],
+        "summary": "Get output by ID",
+        "tags": [
+          "Outputs"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3838,6 +4296,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-output"
@@ -3853,7 +4314,10 @@
         }
       ],
       "delete": {
-        "summary": "Output - Delete",
+        "summary": "Delete output by ID",
+        "tags": [
+          "Outputs"
+        ],
         "operationId": "delete-output",
         "responses": {
           "200": {
@@ -3873,6 +4337,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -3882,7 +4349,10 @@
         ]
       },
       "put": {
-        "summary": "Output - Update",
+        "summary": "Update output by ID",
+        "tags": [
+          "Outputs"
+        ],
         "operationId": "update-output",
         "requestBody": {
           "content": {
@@ -3947,6 +4417,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -3956,10 +4429,46 @@
         ]
       }
     },
+    "/logstash_api_keys": {
+      "post": {
+        "summary": "Generate Logstash API key",
+        "tags": [
+          "Outputs"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "api_key": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
+          }
+        },
+        "operationId": "generate-logstash-api-key",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          }
+        ]
+      }
+    },
     "/agent_download_sources": {
       "get": {
-        "summary": "Agent Download Sources",
-        "tags": [],
+        "summary": "List agent binary download sources",
+        "tags": [
+          "Agent binary download sources"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -3987,14 +4496,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-download-sources"
       },
       "post": {
-        "summary": "Agent Download Sources",
-        "description": "Create a new agent download source",
-        "tags": [],
+        "summary": "Create agent binary download source",
+        "tags": [
+          "Agent binary download sources"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4010,6 +4523,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -4045,8 +4561,10 @@
     },
     "/agent_download_sources/{sourceId}": {
       "get": {
-        "summary": "Agent Download Sources - Info",
-        "tags": [],
+        "summary": "Get agent binary download source by ID",
+        "tags": [
+          "Agent binary download sources"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4065,6 +4583,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-one-download-source"
@@ -4080,7 +4601,10 @@
         }
       ],
       "delete": {
-        "summary": "Agent Download Sources - Delete",
+        "summary": "Delete agent binary download source by ID",
+        "tags": [
+          "Agent binary download sources"
+        ],
         "operationId": "delete-download-source",
         "responses": {
           "200": {
@@ -4100,6 +4624,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -4109,7 +4636,10 @@
         ]
       },
       "put": {
-        "summary": "Agent Download Sources - Update",
+        "summary": "Update agent binary download source by ID",
+        "tags": [
+          "Agent binary download sources"
+        ],
         "operationId": "update-download-source",
         "requestBody": {
           "content": {
@@ -4154,37 +4684,11 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/kbn_xsrf"
-          }
-        ]
-      }
-    },
-    "/logstash_api_keys": {
-      "post": {
-        "summary": "Generate Logstash API key",
-        "tags": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "api_key": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          }
-        },
-        "operationId": "generate-logstash-api-key",
         "parameters": [
           {
             "$ref": "#/components/parameters/kbn_xsrf"
@@ -4194,9 +4698,10 @@
     },
     "/fleet_server_hosts": {
       "get": {
-        "summary": "Fleet Server Hosts - List",
-        "description": "Return a list of Fleet server hosts",
-        "tags": [],
+        "summary": "List Fleet Server hosts",
+        "tags": [
+          "Fleet Server hosts"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4224,14 +4729,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-fleet-server-hosts"
       },
       "post": {
-        "summary": "Fleet Server Hosts - Create",
-        "description": "Create a new Fleet Server Host",
-        "tags": [],
+        "summary": "Create Fleet Server host",
+        "tags": [
+          "Fleet Server hosts"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4247,6 +4756,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -4284,8 +4796,10 @@
     },
     "/fleet_server_hosts/{itemId}": {
       "get": {
-        "summary": "Fleet Server Hosts - Info",
-        "tags": [],
+        "summary": "Get Fleet Server host by ID",
+        "tags": [
+          "Fleet Server hosts"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4304,6 +4818,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-one-fleet-server-hosts"
@@ -4319,7 +4836,10 @@
         }
       ],
       "delete": {
-        "summary": "Fleet Server Hosts - Delete",
+        "summary": "Delete Fleet Server host by ID",
+        "tags": [
+          "Fleet Server hosts"
+        ],
         "operationId": "delete-fleet-server-hosts",
         "responses": {
           "200": {
@@ -4339,6 +4859,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -4348,7 +4871,10 @@
         ]
       },
       "put": {
-        "summary": "Fleet Server Hosts - Update",
+        "summary": "Update Fleet Server host by ID",
+        "tags": [
+          "Fleet Server hosts"
+        ],
         "operationId": "update-fleet-server-hosts",
         "requestBody": {
           "content": {
@@ -4391,6 +4917,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -4402,9 +4931,10 @@
     },
     "/proxies": {
       "get": {
-        "summary": "Fleet Proxies - List",
-        "description": "Return a list of Proxies",
-        "tags": [],
+        "summary": "List proxies",
+        "tags": [
+          "Proxies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4432,14 +4962,18 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-fleet-proxies"
       },
       "post": {
-        "summary": "Fleet Proxies - Create",
-        "description": "Create a new Fleet Server Host",
-        "tags": [],
+        "summary": "Create proxy",
+        "tags": [
+          "Proxies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4455,6 +4989,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "requestBody": {
@@ -4498,8 +5035,10 @@
     },
     "/proxies/{itemId}": {
       "get": {
-        "summary": "Fleet Proxies - Info",
-        "tags": [],
+        "summary": "Get proxy by ID",
+        "tags": [
+          "Proxies"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4518,6 +5057,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-one-fleet-proxies"
@@ -4533,7 +5075,10 @@
         }
       ],
       "delete": {
-        "summary": "Fleet Proxies - Delete",
+        "summary": "Delete proxy by ID",
+        "tags": [
+          "Proxies"
+        ],
         "operationId": "delete-fleet-proxies",
         "responses": {
           "200": {
@@ -4553,6 +5098,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -4562,7 +5110,10 @@
         ]
       },
       "put": {
-        "summary": "Fleet Proxies - Update",
+        "summary": "Update proxy by ID",
+        "tags": [
+          "Proxies"
+        ],
         "operationId": "update-fleet-proxies",
         "requestBody": {
           "content": {
@@ -4611,6 +5162,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "parameters": [
@@ -4622,8 +5176,10 @@
     },
     "/kubernetes": {
       "get": {
-        "summary": "Get K8s Full Agent Manifest",
-        "tags": [],
+        "summary": "Get full K8s agent manifest",
+        "tags": [
+          "Kubernetes"
+        ],
         "responses": {
           "200": {
             "description": "OK",
@@ -4639,6 +5195,9 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/error"
           }
         },
         "operationId": "get-full-k8s-manifest",
@@ -4770,6 +5329,29 @@
         "required": false,
         "schema": {
           "type": "boolean"
+        }
+      }
+    },
+    "responses": {
+      "error": {
+        "description": "Generic Error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "statusCode": {
+                  "type": "number"
+                },
+                "error": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
         }
       }
     },
@@ -5573,25 +6155,6 @@
           "version"
         ]
       },
-      "upgrade_agent": {
-        "title": "Upgrade agent",
-        "type": "object",
-        "properties": {
-          "version": {
-            "type": "string"
-          },
-          "source_uri": {
-            "type": "string"
-          },
-          "force": {
-            "type": "boolean",
-            "description": "Force upgrade, skipping validation (should be used with caution)"
-          }
-        },
-        "required": [
-          "version"
-        ]
-      },
       "agent_action": {
         "title": "Agent action",
         "oneOf": [
@@ -5634,6 +6197,25 @@
               }
             }
           }
+        ]
+      },
+      "upgrade_agent": {
+        "title": "Upgrade agent",
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string"
+          },
+          "source_uri": {
+            "type": "string"
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Force upgrade, skipping validation (should be used with caution)"
+          }
+        },
+        "required": [
+          "version"
         ]
       },
       "agent_diagnostics": {
@@ -5684,62 +6266,6 @@
             }
           }
         }
-      },
-      "new_agent_policy": {
-        "title": "New agent policy",
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "name": {
-            "type": "string"
-          },
-          "namespace": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "monitoring_enabled": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "metrics",
-                "logs"
-              ]
-            }
-          },
-          "data_output_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "monitoring_output_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "fleet_server_host_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "download_source_id": {
-            "type": "string",
-            "nullable": true
-          },
-          "unenroll_timeout": {
-            "type": "number",
-            "nullable": true
-          },
-          "inactivity_timeout": {
-            "type": "number",
-            "nullable": true
-          }
-        },
-        "required": [
-          "name",
-          "namespace"
-        ]
       },
       "new_package_policy": {
         "title": "New package policy",
@@ -5851,83 +6377,238 @@
         ]
       },
       "agent_policy": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/new_agent_policy"
+        "title": "Agent Policy",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
           },
-          {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              },
-              "status": {
-                "type": "string",
-                "enum": [
-                  "active",
-                  "inactive"
-                ]
-              },
-              "package_policies": {
-                "description": "This field is present only when retrieving a single agent policy, or when retrieving a list of agent policy with the ?full=true parameter",
-                "type": "array",
-                "items": {
-                  "$ref": "#/components/schemas/package_policy"
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "monitoring_enabled": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "metrics",
+                "logs"
+              ]
+            }
+          },
+          "data_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitoring_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "fleet_server_host_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "download_source_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "unenroll_timeout": {
+            "type": "number"
+          },
+          "inactivity_timeout": {
+            "type": "number"
+          },
+          "package_policies": {
+            "description": "This field is present only when retrieving a single agent policy, or when retrieving a list of agent policy with the ?full=true parameter",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/package_policy"
+            }
+          },
+          "updated_on": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updated_by": {
+            "type": "string"
+          },
+          "revision": {
+            "type": "number"
+          },
+          "agents": {
+            "type": "number"
+          },
+          "agent_features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
                 }
               },
-              "updated_on": {
-                "type": "string",
-                "format": "date-time"
-              },
-              "updated_by": {
-                "type": "string"
-              },
-              "data_output_id": {
-                "type": "string",
-                "nullable": true
-              },
-              "monitoring_output_id": {
-                "type": "string",
-                "nullable": true
-              },
-              "fleet_server_host_id": {
-                "type": "string",
-                "nullable": true
-              },
-              "download_source_id": {
-                "type": "string",
-                "nullable": true
-              },
-              "revision": {
-                "type": "number"
-              },
-              "agents": {
-                "type": "number"
-              },
-              "agent_features": {
-                "type": "array",
-                "items": {
-                  "type": "object",
-                  "properties": {
-                    "name": {
-                      "type": "string"
-                    },
-                    "enabled": {
-                      "type": "boolean"
-                    }
-                  },
-                  "required": [
-                    "name",
-                    "enabled"
-                  ]
-                }
-              }
-            },
-            "required": [
-              "id",
-              "status"
-            ]
+              "required": [
+                "name",
+                "enabled"
+              ]
+            }
           }
+        },
+        "required": [
+          "id",
+          "status",
+          "name",
+          "namespace"
+        ]
+      },
+      "agent_policy_create_request": {
+        "title": "Create agent policy request",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "monitoring_enabled": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "metrics",
+                "logs"
+              ]
+            }
+          },
+          "data_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitoring_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "fleet_server_host_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "download_source_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "unenroll_timeout": {
+            "type": "number"
+          },
+          "inactivity_timeout": {
+            "type": "number"
+          },
+          "agent_features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "name",
+                "enabled"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "namespace"
+        ]
+      },
+      "agent_policy_update_request": {
+        "title": "Update agent policy request",
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "namespace": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "monitoring_enabled": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "metrics",
+                "logs"
+              ]
+            }
+          },
+          "data_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "monitoring_output_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "fleet_server_host_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "download_source_id": {
+            "type": "string",
+            "nullable": true
+          },
+          "unenroll_timeout": {
+            "type": "number"
+          },
+          "inactivity_timeout": {
+            "type": "number"
+          },
+          "agent_features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "name",
+                "enabled"
+              ]
+            }
+          }
+        },
+        "required": [
+          "name",
+          "namespace"
         ]
       },
       "full_agent_policy_output": {
@@ -6050,6 +6731,12 @@
                     "type": "object",
                     "properties": {
                       "verification_mode": {
+                        "type": "string"
+                      },
+                      "certificate": {
+                        "type": "string"
+                      },
+                      "key": {
                         "type": "string"
                       },
                       "certificate_authorities": {

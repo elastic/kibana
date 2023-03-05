@@ -18,7 +18,7 @@ import {
   ADD_TO_TIMELINE_ICON,
   ADD_TO_TIMELINE_SUCCESS_TITLE,
 } from '../constants';
-import { createDataProviders } from '../data_provider';
+import { createDataProviders, isValidDataProviderField } from '../data_provider';
 import { SecurityCellActionType } from '../../constants';
 import type { StartServices } from '../../../types';
 import type { SecurityCellAction } from '../../types';
@@ -38,7 +38,8 @@ export const createAddToTimelineCellActionFactory = createCellActionFactory(
       getIconType: () => ADD_TO_TIMELINE_ICON,
       getDisplayName: () => ADD_TO_TIMELINE,
       getDisplayNameTooltip: () => ADD_TO_TIMELINE,
-      isCompatible: async ({ field }) => fieldHasCellActions(field.name),
+      isCompatible: async ({ field }) =>
+        fieldHasCellActions(field.name) && isValidDataProviderField(field.name, field.type),
       execute: async ({ field, metadata }) => {
         const dataProviders =
           createDataProviders({

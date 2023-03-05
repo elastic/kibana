@@ -32,6 +32,10 @@ export abstract class TransformGenerator {
     };
   }
 
+  public buildDescription(slo: SLO): string {
+    return `Rolled-up SLI data for SLO: ${slo.name}`;
+  }
+
   public buildCommonGroupBy(slo: SLO) {
     let fixedInterval = '1m';
     if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {

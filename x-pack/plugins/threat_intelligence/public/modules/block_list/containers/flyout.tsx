@@ -10,6 +10,7 @@ import {
   CreateExceptionListItemSchema,
   EntriesArray,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { usePolicies } from '../hooks/use_policies';
 import { useBlockListContext } from '../../indicators/hooks/use_block_list_context';
 import { ADD_TO_BLOCKLIST_FLYOUT_TITLE } from './translations';
 import { useSecurityContext } from '../../../hooks/use_security_context';
@@ -33,6 +34,7 @@ export const BlockListFlyout: VFC<BlockListFlyoutProps> = ({ indicatorFileHash }
   const Component = blockList.getFlyoutComponent();
   const exceptionListApiClient = blockList.exceptionListApiClient;
   const FormComponent = blockList.getFormComponent();
+  const { isLoading: policiesIsLoading, data: policies } = usePolicies();
 
   // prepopulate the for with the indicator file hash
   const entries: EntriesArray = [
@@ -67,7 +69,8 @@ export const BlockListFlyout: VFC<BlockListFlyoutProps> = ({ indicatorFileHash }
     apiClient: exceptionListApiClient,
     labels,
     item,
-    policies: [],
+    policies: policies || [],
+    policiesIsLoading,
     FormComponent,
     onClose: clearBlockListIndicatorValue,
   };

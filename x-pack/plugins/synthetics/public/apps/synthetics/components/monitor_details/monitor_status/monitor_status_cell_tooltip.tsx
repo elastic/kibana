@@ -9,7 +9,7 @@ import React from 'react';
 import moment from 'moment';
 import { EuiProgress } from '@elastic/eui';
 
-import { TooltipTable, TooltipHeader, TooltipValue } from '@elastic/charts';
+import { TooltipTable, TooltipHeader, TooltipValue, TooltipContainer } from '@elastic/charts';
 
 import { usePingStatusesIsLoading } from '../hooks/use_ping_statuses';
 import { MonitorStatusTimeBin, SUCCESS_VIZ_COLOR, DANGER_VIZ_COLOR } from './monitor_status_data';
@@ -71,7 +71,7 @@ export const MonitorStatusCellTooltip = ({ timeBin }: { timeBin?: MonitorStatusT
       ];
 
   return (
-    <>
+    <TooltipContainer>
       <TooltipHeader>{tooltipTitle}</TooltipHeader>
       {isLoading && <EuiProgress size="xs" />}
       <TooltipTable
@@ -82,6 +82,6 @@ export const MonitorStatusCellTooltip = ({ timeBin }: { timeBin?: MonitorStatusT
         ]}
         items={tooltipValues}
       />
-    </>
+    </TooltipContainer>
   );
 };

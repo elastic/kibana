@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { defaults, get, set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { defaults, get } from 'lodash';
 import { DataViewsService, DataView } from '.';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 

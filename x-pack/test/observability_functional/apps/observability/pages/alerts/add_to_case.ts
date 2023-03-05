@@ -17,16 +17,15 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs');
       await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/133799
-    describe.skip('When user has all priviledges for cases', () => {
+    describe('When user has all priviledges for cases', () => {
       before(async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({

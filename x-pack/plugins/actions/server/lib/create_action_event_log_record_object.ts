@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { isEmpty, set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { isEmpty } from 'lodash';
 import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { RelatedSavedObjects } from './related_saved_objects';
 

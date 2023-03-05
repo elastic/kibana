@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FieldStatsType } from '../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -33,6 +34,14 @@ export default function ({ getService }: FtrProviderContext) {
       numberOfBackCards: 5,
     },
   ];
+  const fieldStatsEntries = [
+    {
+      fieldName: 'currency',
+      type: 'keyword' as FieldStatsType,
+      expectedValues: ['EUR'],
+    },
+  ];
+
   const bucketSpan = '2h';
   const memoryLimit = '8mb';
 
@@ -133,8 +142,19 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep('job creation displays the pick fields step');
       await ml.jobWizardCommon.advanceToPickFieldsSection();
 
-      await ml.testExecution.logTestStep('job creation selects the population field');
+      await ml.testExecution.logTestStep(
+        'job creation opens field stats flyout from population field input'
+      );
       await ml.jobWizardPopulation.assertPopulationFieldInputExists();
+      for (const { fieldName, type: fieldType, expectedValues } of fieldStatsEntries) {
+        await ml.jobWizardPopulation.assertFieldStatFlyoutContentFromPopulationFieldInputTrigger(
+          fieldName,
+          fieldType,
+          expectedValues
+        );
+      }
+
+      await ml.testExecution.logTestStep('job creation selects the population field');
       await ml.jobWizardPopulation.selectPopulationField(populationField);
 
       await ml.testExecution.logTestStep(

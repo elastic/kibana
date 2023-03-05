@@ -14,4 +14,13 @@ export const CLIENT_DEFAULTS_SYNTHETICS = {
    * The end of the default date range is now.
    */
   DATE_RANGE_END: 'now',
+
+  /**
+   * The application auto refreshes every 30s by default.
+   */
+  AUTOREFRESH_INTERVAL_SECONDS: 60,
+  /**
+   * The application's autorefresh feature is enabled.
+   */
+  AUTOREFRESH_IS_PAUSED: false,
 };

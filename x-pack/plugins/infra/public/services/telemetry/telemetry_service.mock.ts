@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { createLogViewsClientMock } from './telemetry_client.mock';
+import { createTelemetryClientMock } from './telemetry_client.mock';
 
-export const createTelemetryServiceMock = () => createLogViewsClientMock();
+export const createTelemetryServiceMock = () => createTelemetryClientMock();

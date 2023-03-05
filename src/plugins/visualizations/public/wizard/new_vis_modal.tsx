@@ -12,12 +12,7 @@ import { EuiModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
-import {
-  ApplicationStart,
-  IUiSettingsClient,
-  SavedObjectsStart,
-  DocLinksStart,
-} from '@kbn/core/public';
+import { ApplicationStart, IUiSettingsClient, DocLinksStart, HttpStart } from '@kbn/core/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import { SearchSelection } from './search_selection';
 import { GroupSelection } from './group_selection';
@@ -34,7 +29,7 @@ interface TypeSelectionProps {
   addBasePath: (path: string) => string;
   uiSettings: IUiSettingsClient;
   docLinks: DocLinksStart;
-  savedObjects: SavedObjectsStart;
+  http: HttpStart;
   application: ApplicationStart;
   outsideVisualizeApp?: boolean;
   stateTransfer?: EmbeddableStateTransfer;
@@ -97,7 +92,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
             onSearchSelected={this.onSearchSelected}
             visType={this.state.visType}
             uiSettings={this.props.uiSettings}
-            savedObjects={this.props.savedObjects}
+            http={this.props.http}
             goBack={() => this.setState({ showSearchVisModal: false })}
           />
         </EuiModal>

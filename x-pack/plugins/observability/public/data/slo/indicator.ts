@@ -33,7 +33,7 @@ export const buildApmLatencyIndicator = (
       service: 'o11y-app',
       transactionType: 'request',
       transactionName: 'GET /slow',
-      'threshold.us': 5000000,
+      threshold: 5000000,
       ...params,
     },
   };

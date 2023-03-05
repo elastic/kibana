@@ -46,11 +46,11 @@ export const JourneyStepScreenshotContainer = ({
   const intersection = useIntersection(intersectionRef, {
     root: null,
     rootMargin: '0px',
-    threshold: 1,
+    threshold: 0.1,
   });
 
   const imageResult = useRetrieveStepImage({
-    hasIntersected: Boolean(intersection && intersection.intersectionRatio === 1),
+    hasIntersected: Boolean(intersection && intersection.intersectionRatio > 0),
     stepStatus,
     imgPath,
     retryFetchOnRevisit,
