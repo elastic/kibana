@@ -183,9 +183,9 @@ export const SharedLists = React.memo(() => {
   );
 
   const handleExportSuccess = useCallback(
-    (listId: string) =>
+    (listId: string, name: string) =>
       (blob: Blob): void => {
-        addSuccess(i18n.EXCEPTION_EXPORT_SUCCESS);
+        addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(name));
         setExportDownload({ name: listId, blob });
       },
     [addSuccess]
@@ -202,11 +202,13 @@ export const SharedLists = React.memo(() => {
     ({
         id,
         listId,
+        name,
         namespaceType,
         includeExpiredExceptions,
       }: {
         id: string;
         listId: string;
+        name: string;
         namespaceType: NamespaceType;
         includeExpiredExceptions: boolean;
       }) =>
@@ -217,7 +219,7 @@ export const SharedLists = React.memo(() => {
           listId,
           namespaceType,
           onError: handleExportError,
-          onSuccess: handleExportSuccess(listId),
+          onSuccess: handleExportSuccess(listId, name),
         });
       },
     [exportExceptionList, handleExportError, handleExportSuccess]
