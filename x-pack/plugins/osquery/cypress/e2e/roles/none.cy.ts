@@ -63,7 +63,7 @@ describe('None', () => {
 
     it('should not see osquery in alerts', () => {
       cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
-      cy.getBySel('expand-event').first().click({ force: true });
+      cy.getBySel('expand-event').first().click();
       cy.getBySel('take-action-dropdown-btn').click();
       cy.getBySel('osquery-action-item').should('not.exist');
 

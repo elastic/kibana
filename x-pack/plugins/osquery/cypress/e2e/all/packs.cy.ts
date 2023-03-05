@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import { find } from 'lodash';
 import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import {
@@ -162,6 +163,8 @@ describe('ALL - Packs', () => {
 
         cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
         findAndClickButton('Save pack');
+        cy.getBySel('tablePaginationPopoverButton').click();
+        cy.getBySel('tablePagination-50-rows').click();
         cy.react('ScheduledQueryNameComponent', {
           props: {
             name: packName,
@@ -266,6 +269,8 @@ describe('ALL - Packs', () => {
         findAndClickButton('Save pack');
         cy.contains('Save and deploy changes');
         findAndClickButton('Save and deploy changes');
+        cy.getBySel('tablePaginationPopoverButton').click();
+        cy.getBySel('tablePagination-50-rows').click();
         cy.contains(packName);
         cy.contains(`Successfully created "${packName}" pack`);
         closeToastIfVisible();
@@ -463,26 +468,64 @@ describe('ALL - Packs', () => {
       });
     });
 
-    it.skip('should verify that packs are triggered', () => {
-      cy.waitForReact();
-      preparePack(PACK_NAME);
-      cy.contains(`${PACK_NAME} details`).should('exist');
+    describe('should verify that packs are triggered', () => {
+      let packId: string;
+      let packName: string;
 
-      cy.getBySel('docsLoading').should('exist');
-      cy.getBySel('docsLoading').should('not.exist');
-      cy.react('ScheduledQueryLastResults')
-        .should('exist')
-        .within(() => {
-          cy.react('FormattedRelative');
+      before(() => {
+        loadPack({
+          policy_ids: ['fleet-server-policy'],
+          queries: {
+            [savedQueryName]: { ecs_mapping: {}, interval: 60, query: 'select * from uptime;' },
+          },
+        }).then((pack) => {
+          packId = pack.id;
+          packName = pack.attributes.name;
         });
+      });
 
-      cy.react('DocsColumnResults').within(() => {
-        cy.react('EuiNotificationBadge').contains('1');
+      after(() => {
+        cleanupPack(packId);
       });
-      cy.react('AgentsColumnResults').within(() => {
-        cy.react('EuiNotificationBadge').contains('1');
+
+      it('', () => {
+        preparePack(packName);
+        cy.contains(`${packName} details`).should('exist');
+
+        recurse<string>(
+          () => {
+            cy.waitForReact();
+
+            cy.getBySel('docsLoading').should('exist');
+            cy.getBySel('docsLoading').should('not.exist');
+
+            return cy.get('tbody .euiTableRow > td:nth-child(5)').invoke('text');
+          },
+          (response) => response === 'Docs1',
+          {
+            timeout: 300000,
+            post: () => {
+              cy.reload();
+            },
+          }
+        );
+
+        cy.getBySel('packResultsErrorsEmpty', { timeout: 5000 }).should('have.length', 2);
+
+        cy.react('ScheduledQueryLastResults', { options: { timeout: 3000 } })
+          .should('exist')
+          .within(() => {
+            cy.react('FormattedRelative');
+          });
+
+        cy.react('DocsColumnResults').within(() => {
+          cy.react('EuiNotificationBadge').contains('1');
+        });
+        cy.react('AgentsColumnResults').within(() => {
+          cy.react('EuiNotificationBadge').contains('1');
+        });
+        cy.getBySel('packResultsErrorsEmpty').should('have.length', 1);
       });
-      cy.getBySel('packResultsErrorsEmpty').should('have.length', 2);
     });
 
     describe('delete all queries in the pack', () => {
@@ -522,7 +565,7 @@ describe('ALL - Packs', () => {
       });
     });
 
-    describe('delete all queries in the pack', () => {
+    describe('enable changing saved queries and ecs_mappings', () => {
       let packId: string;
       let packName: string;
 
@@ -542,7 +585,7 @@ describe('ALL - Packs', () => {
         cleanupPack(packId);
       });
 
-      it('enable changing saved queries and ecs_mappings', () => {
+      it('', () => {
         preparePack(packName);
         cy.contains(/^Edit$/).click();
 
@@ -573,7 +616,7 @@ describe('ALL - Packs', () => {
 
         findAndClickButton('Save');
         cy.react('CustomItemAction', {
-          props: { index: 0, item: { id: 'ONE_MAPPING_CHANGED' } },
+          props: { index: 0, item: { id: oneMappingSavedQueryName } },
         }).click();
         cy.contains('Name of the continent').should('exist');
         cy.contains('Seconds of uptime').should('exist');
@@ -628,6 +671,8 @@ describe('ALL - Packs', () => {
       findAndClickButton('Save pack');
 
       closeToastIfVisible();
+      cy.getBySel('tablePaginationPopoverButton').click();
+      cy.getBySel('tablePagination-50-rows').click();
       cy.react('ScheduledQueryNameComponent', { props: { name: REMOVING_PACK } }).click();
       cy.contains(`${REMOVING_PACK} details`).should('exist');
       findAndClickButton('Edit');
@@ -768,6 +813,8 @@ describe('ALL - Packs', () => {
 
         findAndClickButton('Save pack');
 
+        cy.getBySel('tablePaginationPopoverButton').click();
+        cy.getBySel('tablePagination-50-rows').click();
         cy.contains(globalPack);
         cy.contains(`Successfully created "${globalPack}" pack`);
         closeToastIfVisible();
