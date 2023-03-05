@@ -4,27 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo, useMemo } from 'react';
+import React, { memo, useEffect, useMemo, useState } from 'react';
 import {
   EuiAccordion,
-  EuiFlexGroup,
   EuiFlexItem,
+  EuiSkeletonText,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ResponseActionFileDownloadLink } from '../response_action_file_download_link';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import { useGetActionDetails } from '../../hooks/response_actions/use_get_action_details';
 import type {
   ActionDetails,
   MaybeImmutable,
   ResponseActionExecuteOutputContent,
 } from '../../../../common/endpoint/types';
-
-const EXECUTE_FILE_LINK_TITLE = i18n.translate(
-  'xpack.securitySolution.responseActionExecuteDownloadLink.downloadButtonLabel',
-  { defaultMessage: 'Click here to download full output' }
-);
+import { FormattedError } from '../formatted_error';
 
 const ACCORDION_BUTTON_TEXT = Object.freeze({
   output: {
@@ -57,14 +54,15 @@ const ACCORDION_BUTTON_TEXT = Object.freeze({
   },
 });
 interface ExecuteActionOutputProps {
-  content: string;
+  content?: string;
   initialIsOpen?: boolean;
-  isTruncated: boolean;
+  isTruncated?: boolean;
+  textSize?: 's' | 'xs';
   type: 'error' | 'output';
 }
 
 const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
-  ({ content, initialIsOpen = false, isTruncated, type }) => {
+  ({ content, initialIsOpen = false, isTruncated = false, textSize, type }) => {
     const id = useGeneratedHtmlId({
       prefix: 'executeActionOutputAccordions',
       suffix: type,
@@ -77,7 +75,7 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
         paddingSize="s"
       >
         <EuiText
-          size="s"
+          size={textSize}
           style={{
             whiteSpace: 'pre-wrap',
             lineBreak: 'anywhere',
@@ -91,7 +89,7 @@ const ExecutionActionOutputAccordion = memo<ExecuteActionOutputProps>(
 );
 ExecutionActionOutputAccordion.displayName = 'ExecutionActionOutputAccordion';
 
-interface ExecuteActionHostResponseOutputProps {
+export interface ExecuteActionHostResponseOutputProps {
   action: MaybeImmutable<ActionDetails>;
   agentId?: string;
   'data-test-subj'?: string;
@@ -99,42 +97,75 @@ interface ExecuteActionHostResponseOutputProps {
 }
 
 export const ExecuteActionHostResponseOutput = memo<ExecuteActionHostResponseOutputProps>(
-  ({ action, agentId = action.agents[0], 'data-test-subj': dataTestSubj, textSize }) => {
+  ({ action, agentId = action.agents[0], 'data-test-subj': dataTestSubj, textSize = 'xs' }) => {
+    const isMounted = useIsMounted();
     const outputContent = useMemo(
       () =>
         action.outputs &&
         action.outputs[agentId] &&
         (action.outputs[agentId].content as ResponseActionExecuteOutputContent),
-      [agentId, action]
+      [action.outputs, agentId]
     );
 
-    return (
-      <EuiFlexGroup direction="column" data-test-subj={dataTestSubj}>
-        <EuiFlexItem>
-          <ResponseActionFileDownloadLink
-            action={action}
-            buttonTitle={EXECUTE_FILE_LINK_TITLE}
-            textSize={textSize}
-          />
-        </EuiFlexItem>
+    const {
+      error,
+      data: actionDetails,
+      isFetching,
+      isFetched,
+    } = useGetActionDetails(action.id, {
+      enabled: !outputContent,
+    });
 
-        {outputContent && (
-          <EuiFlexItem>
-            <ExecutionActionOutputAccordion
-              content={outputContent.stdout}
-              isTruncated={outputContent.stdoutTruncated}
-              initialIsOpen
-              type="output"
-            />
-            <EuiSpacer size="m" />
-            <ExecutionActionOutputAccordion
-              content={outputContent.stderr}
-              isTruncated={outputContent.stderrTruncated}
-              type="error"
-            />
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+    const [executeOutputContent, setExecuteOutputContent] = useState<
+      undefined | ResponseActionExecuteOutputContent
+    >(outputContent);
+
+    useEffect(() => {
+      if (
+        isMounted() &&
+        isFetched &&
+        actionDetails &&
+        actionDetails.data &&
+        actionDetails.data.outputs &&
+        actionDetails.data.outputs[agentId]
+      ) {
+        setExecuteOutputContent(
+          actionDetails.data.outputs[agentId].content as ResponseActionExecuteOutputContent
+        );
+      }
+
+      return () => {
+        setExecuteOutputContent(undefined);
+      };
+    }, [actionDetails, agentId, isFetched, isMounted]);
+
+    if (isFetching && !executeOutputContent) {
+      return (
+        <EuiSkeletonText size="relative" lines={2} data-test-subj={`${dataTestSubj}-loading`} />
+      );
+    }
+
+    if (error) {
+      return <FormattedError error={error} data-test-subj={`${dataTestSubj}-apiError`} />;
+    }
+
+    return (
+      <EuiFlexItem data-test-subj={dataTestSubj}>
+        <ExecutionActionOutputAccordion
+          content={executeOutputContent?.stdout}
+          isTruncated={executeOutputContent?.stdoutTruncated}
+          initialIsOpen
+          textSize={textSize}
+          type="output"
+        />
+        <EuiSpacer size="m" />
+        <ExecutionActionOutputAccordion
+          content={executeOutputContent?.stderr}
+          isTruncated={executeOutputContent?.stderrTruncated}
+          textSize={textSize}
+          type="error"
+        />
+      </EuiFlexItem>
     );
   }
 );
