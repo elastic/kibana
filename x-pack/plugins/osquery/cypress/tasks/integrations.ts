@@ -50,7 +50,7 @@ export const integrationExistsWithinPolicyDetails = (integrationName: string) =>
   cy.contains(`name: ${integrationName}`);
 };
 
-export const interceptPolicyId = (cb: (policyId: string) => void) => {
+export const interceptAgentPolicyId = (cb: (policyId: string) => void) => {
   cy.intercept('POST', '**/api/fleet/agent_policies**', (req) => {
     req.continue((res) => {
       cb(res.body.item.id);

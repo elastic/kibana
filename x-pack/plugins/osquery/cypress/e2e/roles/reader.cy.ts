@@ -87,6 +87,8 @@ describe('Reader - only READ', () => {
     navigateTo('/app/osquery/packs');
     cy.waitForReact(1000);
     cy.contains('Add pack').should('be.disabled');
+    cy.getBySel('tablePaginationPopoverButton').click();
+    cy.getBySel('tablePagination-50-rows').click();
     cy.react('ActiveStateSwitchComponent', {
       props: { item: { attributes: { name: packName } } },
     })

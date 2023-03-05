@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RESPONSE_ACTION_TYPES } from '@kbn/security-solution-plugin/common/detection_engine/rule_response_actions/schemas';
 import { ROLE, login } from '../../tasks/login';
 import { NAV_SEARCH_INPUT_OSQUERY_RESULTS } from '../../tasks/navigation';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
@@ -50,14 +49,7 @@ describe('None', () => {
 
     before(() => {
       login(ROLE.soc_manager);
-      loadRule({
-        response_actions: [
-          {
-            params: { query: 'select * from uptime', ecs_mapping: {} },
-            action_type_id: RESPONSE_ACTION_TYPES.OSQUERY,
-          },
-        ],
-      }).then((data) => {
+      loadRule(true).then((data) => {
         ruleId = data.id;
       });
       cy.visit(`/app/security/alerts`);

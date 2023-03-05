@@ -24,17 +24,19 @@ describe('ALL - Custom space', () => {
       let spaceId: string;
 
       before(() => {
-        new Promise<string>((resolve) => {
-          if (spaceName !== 'default') {
-            loadSpace().then((space) => {
-              spaceId = space.id;
+        cy.wrap(
+          new Promise<string>((resolve) => {
+            if (spaceName !== 'default') {
+              loadSpace().then((space) => {
+                spaceId = space.id;
+                resolve(spaceId);
+              });
+            } else {
+              spaceId = 'default';
               resolve(spaceId);
-            });
-          } else {
-            spaceId = 'default';
-            resolve(spaceId);
-          }
-        }).then((space) => {
+            }
+          })
+        ).then((space) => {
           loadPack(
             {
               queries: {
@@ -45,7 +47,7 @@ describe('ALL - Custom space', () => {
                 },
               },
             },
-            space
+            space as string
           ).then((data) => {
             packId = data.id;
             packName = data.attributes.name;

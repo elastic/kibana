@@ -219,7 +219,8 @@ export const cleanupSpace = (id: string) =>
     method: 'DELETE',
     url: `/api/spaces/space/${id}`,
   });
-export const loadPolicy = () =>
+
+export const loadAgentPolicy = () =>
   request<{ item: AgentPolicy }>({
     method: 'POST',
     body: {
@@ -232,5 +233,5 @@ export const loadPolicy = () =>
     url: '/api/fleet/agent_policies',
   }).then((response) => response.body.item);
 
-export const cleanupPolicy = (agentPolicyId: string) =>
+export const cleanupAgentPolicy = (agentPolicyId: string) =>
   request({ method: 'POST', body: { agentPolicyId }, url: '/api/fleet/agent_policies/delete' });

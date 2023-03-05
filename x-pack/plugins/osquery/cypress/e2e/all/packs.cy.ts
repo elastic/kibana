@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { find } from 'lodash';
 import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -18,15 +18,21 @@ import {
   submitQuery,
 } from '../../tasks/live_query';
 import { ROLE, login } from '../../tasks/login';
-import { activatePack, deactivatePack, preparePack } from '../../tasks/packs';
+import {
+  activatePack,
+  cleanupAllPrebuiltPacks,
+  deactivatePack,
+  preparePack,
+} from '../../tasks/packs';
 import {
   addIntegration,
   closeModalIfVisible,
   closeToastIfVisible,
   generateRandomStringName,
   interceptPackId,
+  interceptAgentPolicyId,
 } from '../../tasks/integrations';
-import { DEFAULT_POLICY } from '../../screens/fleet';
+import { DEFAULT_POLICY, OSQUERY_POLICY } from '../../screens/fleet';
 import {
   getIdFormField,
   getSavedQueriesDropdown,
@@ -37,7 +43,7 @@ import {
   cleanupSavedQuery,
   cleanupPack,
   loadPack,
-  savedQueryFixture,
+  cleanupAgentPolicy,
 } from '../../tasks/api_fixtures';
 
 describe('ALL - Packs', () => {
@@ -52,7 +58,6 @@ describe('ALL - Packs', () => {
 
   const integration = 'Osquery Manager';
   const PACK_NAME = 'Pack-name' + generateRandomStringName(1)[0];
-  const NEW_QUERY_NAME = 'new-query-name' + generateRandomStringName(1)[0];
 
   describe('Create and edit a pack', () => {
     before(() => {
@@ -277,7 +282,7 @@ describe('ALL - Packs', () => {
         loadPack({
           policy_ids: ['fleet-server-policy'],
           queries: {
-            [savedQueryName]: omit(savedQueryFixture, ['id', 'description']),
+            [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
           packId = pack.id;
@@ -319,7 +324,7 @@ describe('ALL - Packs', () => {
         loadPack({
           policy_ids: ['fleet-server-policy'],
           queries: {
-            [savedQueryName]: omit(savedQueryFixture, ['id', 'description']),
+            [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
           packId = pack.id;
@@ -352,7 +357,7 @@ describe('ALL - Packs', () => {
         loadPack({
           policy_ids: ['fleet-server-policy'],
           queries: {
-            [savedQueryName]: omit(savedQueryFixture, ['id', 'description']),
+            [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
           packId = pack.id;
@@ -395,7 +400,7 @@ describe('ALL - Packs', () => {
         loadPack({
           policy_ids: ['fleet-server-policy'],
           queries: {
-            [savedQueryName]: omit(savedQueryFixture, ['id', 'description']),
+            [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
           packId = pack.id;
@@ -439,7 +444,7 @@ describe('ALL - Packs', () => {
         loadPack({
           policy_ids: ['fleet-server-policy'],
           queries: {
-            [savedQueryName]: omit(savedQueryFixture, ['id', 'description']),
+            [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
           packId = pack.id;
@@ -488,7 +493,7 @@ describe('ALL - Packs', () => {
         loadPack({
           policy_ids: ['fleet-server-policy'],
           queries: {
-            [savedQueryName]: omit(savedQueryFixture, ['id', 'description']),
+            [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
           packId = pack.id;
@@ -511,7 +516,7 @@ describe('ALL - Packs', () => {
         cy.react('EuiButtonDisplay')
           .contains(/^Save and deploy changes$/)
           .click();
-        cy.contains(packName).click();
+        cy.get('a').contains(packName).click();
         cy.contains(`${packName} details`).should('exist');
         cy.contains(/^No items found/).should('exist');
       });
@@ -525,7 +530,7 @@ describe('ALL - Packs', () => {
         loadPack({
           policy_ids: ['fleet-server-policy'],
           queries: {
-            [savedQueryName]: omit(savedQueryFixture, ['id', 'description']),
+            [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
           packId = pack.id;
@@ -582,7 +587,7 @@ describe('ALL - Packs', () => {
         loadPack({
           policy_ids: ['fleet-server-policy'],
           queries: {
-            [savedQueryName]: omit(savedQueryFixture, ['id', 'description']),
+            [savedQueryName]: { ecs_mapping: {}, interval: 3600, query: 'select * from uptime;' },
           },
         }).then((pack) => {
           packName = pack.attributes.name;
@@ -652,6 +657,11 @@ describe('ALL - Packs', () => {
       login(ROLE.soc_manager);
       navigateTo('/app/osquery/packs');
     });
+
+    after(() => {
+      cleanupAllPrebuiltPacks();
+    });
+
     const PREBUILD_PACK_NAME = 'it-compliance';
 
     it('should load prebuilt packs', () => {
@@ -733,15 +743,20 @@ describe('ALL - Packs', () => {
       const globalPack = 'globalPack' + generateRandomStringName(1)[0];
       const agentPolicy = 'testGlobal' + generateRandomStringName(1)[0];
       let globalPackId: string;
+      let agentPolicyId: string;
 
       before(() => {
         interceptPackId((pack) => {
           globalPackId = pack;
         });
+        interceptAgentPolicyId((policyId) => {
+          agentPolicyId = policyId;
+        });
       });
 
       after(() => {
         cleanupPack(globalPackId);
+        cleanupAgentPolicy(agentPolicyId);
       });
 
       it('add global packs to policies', () => {
@@ -769,9 +784,9 @@ describe('ALL - Packs', () => {
         cy.contains('Add Elastic Agent later').click();
         cy.contains('osquery_manager-');
         cy.request('/internal/osquery/fleet_wrapper/package_policies').then((response) => {
-          const item = response.body.items[0];
+          const item = find(response.body.items, ['policy_id', agentPolicyId]);
 
-          expect(item.inputs[0].config.osquery.value.packs.globalPack).to.deep.equal({
+          expect(item.inputs[0].config.osquery.value.packs[globalPack]).to.deep.equal({
             shard: 100,
             queries: {},
           });
@@ -810,7 +825,7 @@ describe('ALL - Packs', () => {
           cy.get('#shardsPercentage0').type('{backspace}{backspace}5');
         });
         cy.getBySel('packShardsForm-1').within(() => {
-          cy.getBySel('shards-field-policy').type('{downArrow}{enter}');
+          cy.getBySel('shards-field-policy').type(`${OSQUERY_POLICY}{downArrow}{enter}`);
           cy.get('#shardsPercentage1').type('{backspace}{backspace}{backspace}');
         });
         findAndClickButton('Save pack');
@@ -828,25 +843,27 @@ describe('ALL - Packs', () => {
             queries: {},
           });
         });
+        cy.getBySel('tablePaginationPopoverButton').click();
+        cy.getBySel('tablePagination-50-rows').click();
         cy.contains(shardPack).click();
         cy.contains('Edit').click();
         cy.get('#shardsPercentage0').should('have.value', '15');
         cy.getBySel('packShardsForm-1').within(() => {
-          cy.getBySel('shards-field-policy').contains(shardPack);
+          cy.getBySel('shards-field-policy').contains(OSQUERY_POLICY);
           cy.get('#shardsPercentage1').should('have.value', '0');
         });
         cy.getBySel('policyIdsComboBox').within(() => {
-          cy.contains(shardPack).should('not.exist');
+          cy.contains(OSQUERY_POLICY).should('not.exist');
         });
 
-        cy.getBySel('comboBoxInput').contains(shardPack).should('exist');
+        cy.getBySel('comboBoxInput').contains(OSQUERY_POLICY).should('exist');
         cy.getBySel('policyIdsComboBox').click();
         cy.get('[data-test-subj="packShardsForm-1"]').within(() => {
           cy.get(`[aria-label="Delete shards row"]`).click();
         });
-        cy.getBySel('comboBoxInput').contains(shardPack).should('not.exist');
+        cy.getBySel('comboBoxInput').contains(OSQUERY_POLICY).should('not.exist');
         cy.getBySel('policyIdsComboBox').click();
-        cy.contains(shardPack).should('exist');
+        cy.contains(OSQUERY_POLICY).should('exist');
       });
     });
   });

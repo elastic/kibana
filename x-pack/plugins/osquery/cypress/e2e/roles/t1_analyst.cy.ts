@@ -101,6 +101,8 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
   it('should not be able to add nor edit packs', () => {
     navigateTo('/app/osquery/packs');
     cy.waitForReact(1000);
+    cy.getBySel('tablePaginationPopoverButton').click();
+    cy.getBySel('tablePagination-50-rows').click();
     cy.contains('Add pack').should('be.disabled');
     cy.react('ActiveStateSwitchComponent', {
       props: { item: { attributes: { name: packName } } },

@@ -35,7 +35,7 @@ describe('EcsMapping', () => {
     submitQuery();
     checkResults();
     cy.contains('[ "test1", "test2" ]');
-    typeInECSFieldInput('labels{downArrow}{enter}', 1);
+    typeInECSFieldInput('client.domain{downArrow}{enter}', 1);
 
     getOsqueryFieldTypes('Static value', 1);
 

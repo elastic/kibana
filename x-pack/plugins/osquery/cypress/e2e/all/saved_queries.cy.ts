@@ -83,6 +83,8 @@ describe('ALL - Saved queries', () => {
 
     beforeEach(() => {
       navigateTo('/app/osquery/saved_queries');
+      cy.getBySel('tablePaginationPopoverButton').click();
+      cy.getBySel('tablePagination-50-rows').click();
     });
 
     after(() => {

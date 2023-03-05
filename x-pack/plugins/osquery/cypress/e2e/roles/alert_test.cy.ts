@@ -15,6 +15,7 @@ import {
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
 import { loadPack, loadRule, cleanupRule, cleanupPack } from '../../tasks/api_fixtures';
+import { preparePack } from '../../tasks/packs';
 
 describe('Alert Test', () => {
   let packName: string;
@@ -59,8 +60,7 @@ describe('Alert Test', () => {
 
     it('should not be able to run live query', () => {
       navigateTo('/app/osquery');
-      cy.contains('Packs').click();
-      cy.contains(packName).click();
+      preparePack(packName);
       findAndClickButton('Edit');
       cy.contains(`Edit ${packName}`);
       findFormFieldByRowsLabelAndType(

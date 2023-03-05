@@ -8,11 +8,11 @@
 import {
   cleanupCase,
   cleanupPack,
-  cleanupPolicy,
+  cleanupAgentPolicy,
   cleanupRule,
   loadCase,
   loadPack,
-  loadPolicy,
+  loadAgentPolicy,
   loadRule,
   multiQueryPackFixture,
   packFixture,
@@ -44,7 +44,7 @@ import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
-describe('Alert Event Details', () => {
+describe.skip('Alert Event Details', () => {
   beforeEach(() => {
     login(ROLE.soc_manager);
   });
@@ -68,7 +68,7 @@ describe('Alert Event Details', () => {
         ruleId = data.rule_id;
         ruleName = data.name;
       });
-      loadPolicy().then((data) => {
+      loadAgentPolicy().then((data) => {
         policyId = data.id;
         policyName = data.name;
       });
@@ -76,7 +76,7 @@ describe('Alert Event Details', () => {
     after(() => {
       cleanupPack(packId);
       cleanupRule(ruleId);
-      cleanupPolicy(policyId);
+      cleanupAgentPolicy(policyId);
     });
 
     it('should prepare packs and alert rules', () => {

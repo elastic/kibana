@@ -7,7 +7,7 @@
 
 import {
   cleanupPack,
-  cleanupPolicy,
+  cleanupAgentPolicy,
   cleanupSavedQuery,
   loadSavedQuery,
 } from '../../tasks/api_fixtures';
@@ -25,7 +25,7 @@ import {
   generateRandomStringName,
   integrationExistsWithinPolicyDetails,
   interceptPackId,
-  interceptPolicyId,
+  interceptAgentPolicyId,
   policyContainsIntegration,
 } from '../../tasks/integrations';
 
@@ -69,13 +69,13 @@ describe('ALL - Add Integration', () => {
     let policyId: string;
 
     before(() => {
-      interceptPolicyId((agentPolicyId) => {
+      interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
     });
 
     after(() => {
-      cleanupPolicy(policyId);
+      cleanupAgentPolicy(policyId);
     });
 
     it('should add the old integration and be able to upgrade it', () => {
@@ -98,13 +98,13 @@ describe('ALL - Add Integration', () => {
     let policyId: string;
 
     before(() => {
-      interceptPolicyId((agentPolicyId) => {
+      interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
     });
 
     after(() => {
-      cleanupPolicy(policyId);
+      cleanupAgentPolicy(policyId);
     });
 
     it('add integration', () => {
@@ -137,7 +137,7 @@ describe('ALL - Add Integration', () => {
     let packId: string;
 
     before(() => {
-      interceptPolicyId((agentPolicyId) => {
+      interceptAgentPolicyId((agentPolicyId) => {
         policyId = agentPolicyId;
       });
       interceptPackId((pack) => {
@@ -147,7 +147,7 @@ describe('ALL - Add Integration', () => {
 
     after(() => {
       cleanupPack(packId);
-      cleanupPolicy(policyId);
+      cleanupAgentPolicy(policyId);
     });
 
     it('should have integration and packs copied when upgrading integration', () => {
