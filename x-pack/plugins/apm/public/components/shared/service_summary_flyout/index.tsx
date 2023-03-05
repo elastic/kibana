@@ -35,6 +35,7 @@ import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferre
 import { ApmMlModule } from '../../../../common/anomaly_detection/apm_ml_module';
 import { ApmRoutes } from '../../routing/apm_route_config';
 import { ServiceMap } from '../../app/service_map';
+import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
 
 export type ServiceSummaryFlyoutRoutePath = '/services';
 export type ServiceSummaryFlyoutParams = TypeOf<
@@ -228,6 +229,7 @@ export function ServiceSummaryFlyout({
             start={start}
             end={end}
             compact
+            detectorType={ApmMlDetectorType.txLatency}
           />
           <EuiSpacer size="l" />
           <ServiceSummaryServiceDestinationCharts

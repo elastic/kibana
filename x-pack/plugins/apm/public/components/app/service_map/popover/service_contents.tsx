@@ -111,16 +111,16 @@ export function ServiceContents({
     },
   });
 
-  const { serviceAnomalyStats } = nodeData;
+  const { anomalyResults } = nodeData;
 
   return (
     <>
       <EuiFlexItem>
-        {serviceAnomalyStats && (
+        {anomalyResults && (
           <>
             <AnomalyDetection
               serviceName={serviceName}
-              serviceAnomalyStats={serviceAnomalyStats}
+              serviceAnomalyStats={anomalyResults}
             />
             <EuiHorizontalRule margin="xs" />
           </>

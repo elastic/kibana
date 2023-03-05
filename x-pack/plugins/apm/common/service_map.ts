@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import cytoscape from 'cytoscape';
+import { type ServiceAnomaliesResponse } from '../server/routes/service_map/get_service_anomalies';
 import { Coordinate } from '../typings/timeseries';
-import { ServiceAnomalyStats } from './anomaly_detection';
 
 // These should be imported, but until TypeScript 4.2 we're inlining them here.
 // All instances of "agent.name", "service.name", "service.environment", "span.type",
@@ -29,7 +29,7 @@ export interface ServiceConnectionNode extends cytoscape.NodeDataDefinition {
   'service.name': string;
   'service.environment': string | null;
   'agent.name': string;
-  serviceAnomalyStats?: ServiceAnomalyStats;
+  anomalyResults: ServiceAnomaliesResponse['serviceAnomalies'];
   label?: string;
 }
 export interface ExternalConnectionNode extends cytoscape.NodeDataDefinition {
@@ -48,6 +48,7 @@ export interface ConnectionEdge {
   label?: string;
   bidirectional?: boolean;
   isInverseEdge?: boolean;
+  anomalyResults: ServiceAnomaliesResponse['serviceAnomalies'];
 }
 
 export interface ConnectionElement {

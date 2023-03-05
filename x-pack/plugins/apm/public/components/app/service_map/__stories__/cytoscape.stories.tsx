@@ -7,6 +7,7 @@
 
 import cytoscape from 'cytoscape';
 import React, { ComponentType } from 'react';
+import { ApmMlDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
 import { Cytoscape } from '../cytoscape';
 import { Centerer } from './centerer';
@@ -64,6 +65,7 @@ export function Example() {
       elements={elements}
       height={window.innerHeight}
       serviceName={serviceName}
+      detectorType={ApmMlDetectorType.txLatency}
     >
       <Centerer />
     </Cytoscape>
@@ -76,28 +78,28 @@ export function NodeHealthStatus() {
       data: {
         id: 'undefined',
         'service.name': 'undefined',
-        serviceAnomalyStats: { healthStatus: undefined },
+        anomalyResults: { healthStatus: undefined },
       },
     },
     {
       data: {
         id: 'healthy',
         'service.name': 'healthy',
-        serviceAnomalyStats: { healthStatus: 'healthy' },
+        anomalyResults: { healthStatus: 'healthy' },
       },
     },
     {
       data: {
         id: 'warning',
         'service.name': 'warning',
-        serviceAnomalyStats: { healthStatus: 'warning' },
+        anomalyResults: { healthStatus: 'warning' },
       },
     },
     {
       data: {
         id: 'critical',
         'service.name': 'critical',
-        serviceAnomalyStats: { healthStatus: 'critical' },
+        anomalyResults: { healthStatus: 'critical' },
       },
     },
   ];

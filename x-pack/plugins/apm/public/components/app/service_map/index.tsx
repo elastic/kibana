@@ -33,6 +33,7 @@ import { SearchBar } from '../../shared/search_bar';
 import { useApmParams, useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { Environment } from '../../../../common/environment_rt';
 import { useTimeRange } from '../../../hooks/use_time_range';
+import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
 
 function PromptContainer({ children }: { children: ReactNode }) {
   return (
@@ -109,6 +110,7 @@ export function ServiceMap({
   end,
   serviceGroupId,
   compact = false,
+  detectorType = ApmMlDetectorType.txLatency,
 }: {
   serviceName: string | null;
   environment: Environment;
@@ -117,6 +119,7 @@ export function ServiceMap({
   end: string;
   serviceGroupId?: string;
   compact?: boolean;
+  detectorType?: ApmMlDetectorType;
 }) {
   const theme = useTheme();
   const license = useLicenseContext();
@@ -208,6 +211,7 @@ export function ServiceMap({
             serviceName={serviceName ?? undefined}
             style={getCytoscapeDivStyle(theme, status)}
             compact={compact}
+            detectorType={detectorType}
           >
             <Controls />
             {serviceName && <EmptyBanner />}

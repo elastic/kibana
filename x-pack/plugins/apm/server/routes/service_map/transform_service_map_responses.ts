@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import { sortBy, pickBy, identity } from 'lodash';
+import { identity, pickBy, sortBy } from 'lodash';
 import { ValuesType } from 'utility-types';
+import { ApmMlModule } from '../../../common/anomaly_detection/apm_ml_module';
 import {
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
-  SPAN_TYPE,
   SPAN_SUBTYPE,
+  SPAN_TYPE,
 } from '../../../common/es_fields/apm';
 import {
   Connection,
-  ConnectionNode,
-  ServiceConnectionNode,
-  ExternalConnectionNode,
   ConnectionElement,
+  ConnectionNode,
+  ExternalConnectionNode,
+  ServiceConnectionNode,
 } from '../../../common/service_map';
-import { ConnectionsResponse, ServicesResponse } from './get_service_map';
 import { ServiceAnomaliesResponse } from './get_service_anomalies';
+import { ConnectionsResponse, ServicesResponse } from './get_service_map';
 import { groupResourceNodes } from './group_resource_nodes';
 
 function getConnectionNodeId(node: ConnectionNode): string {
@@ -51,6 +52,7 @@ export function getAllNodes(
       services.map((service) => ({
         ...service,
         id: service[SERVICE_NAME],
+        anomalyResults: [],
       }))
     );
 
@@ -75,7 +77,17 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
   const { discoveredServices, services, connections, anomalies } = response;
 
   const allNodes = getAllNodes(services, connections);
-  const serviceNodes = getServiceNodes(allNodes);
+  const serviceNodes = getServiceNodes(allNodes).map((node) => {
+    const anomalyResults = anomalies.serviceAnomalies.filter(
+      (item) =>
+        item.partition === node[SERVICE_NAME] &&
+        item.job.module === ApmMlModule.Transaction
+    );
+    return {
+      ...node,
+      anomalyResults,
+    };
+  });
 
   // List of nodes that are externals
   const externalNodes = allNodes.filter(
@@ -109,13 +121,7 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
     const matchedServiceNodes = serviceNodes
       .filter((serviceNode) => serviceNode[SERVICE_NAME] === serviceName)
       .map((serviceNode) => pickBy(serviceNode, identity));
-    const mergedServiceNode = Object.assign({}, ...matchedServiceNodes);
-
-    const serviceAnomalyStats = serviceName
-      ? anomalies.serviceAnomalies.find(
-          (item) => item.serviceName === serviceName
-        )
-      : undefined;
+    const mergedServiceNode = Object.assign({}, node, ...matchedServiceNodes);
 
     if (matchedServiceNodes.length) {
       return {
@@ -123,7 +129,6 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
         [node.id]: {
           id: matchedServiceNodes[0][SERVICE_NAME],
           ...mergedServiceNode,
-          ...(serviceAnomalyStats ? { serviceAnomalyStats } : null),
         },
       };
     }
@@ -164,6 +169,13 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
         (targetData[SERVICE_NAME] ||
           targetData[SPAN_DESTINATION_SERVICE_RESOURCE]);
 
+      const anomalyResults = anomalies.serviceAnomalies.filter(
+        (result) =>
+          result.job.module === ApmMlModule.ServiceDestination &&
+          result.partition === sourceData['service.name'] &&
+          result.by === targetData['span.destination.service.resource']
+      );
+
       return {
         source: sourceData.id,
         target: targetData.id,
@@ -171,6 +183,7 @@ export function transformServiceMapResponses(response: ServiceMapResponse) {
         id: getConnectionId({ source: sourceData, destination: targetData }),
         sourceData,
         targetData,
+        anomalyResults,
       };
     })
     .filter((connection) => connection.source !== connection.target);

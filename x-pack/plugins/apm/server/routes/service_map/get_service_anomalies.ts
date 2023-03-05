@@ -8,10 +8,14 @@
 import Boom from '@hapi/boom';
 import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
 import { getSeverity, ML_ERRORS } from '../../../common/anomaly_detection';
+import { ApmMlJobResult } from '../../../common/anomaly_detection/apm_ml_job_result';
 import { ApmMlModule } from '../../../common/anomaly_detection/apm_ml_module';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { Environment } from '../../../common/environment_rt';
-import { getServiceHealthStatus } from '../../../common/service_health_status';
+import {
+  getServiceHealthStatus,
+  ServiceHealthStatus,
+} from '../../../common/service_health_status';
 import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { getAnomalyResults } from '../../lib/anomaly_detection/get_anomaly_results';
 import { getMlJobsWithAPMGroup } from '../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
@@ -22,22 +26,23 @@ export const DEFAULT_ANOMALIES: ServiceAnomaliesResponse = {
   serviceAnomalies: [],
 };
 
-export type ServiceAnomaliesResponse = Awaited<
-  ReturnType<typeof getServiceAnomalies>
->;
+export interface ServiceAnomaliesResponse {
+  serviceAnomalies: Array<
+    ApmMlJobResult & { healthStatus: ServiceHealthStatus }
+  >;
+}
+
 export async function getServiceAnomalies({
   mlClient,
   environment,
   start,
   end,
-  serviceName,
 }: {
   mlClient: MlClient;
   environment: Environment;
   start: number;
   end: number;
-  serviceName?: string;
-}) {
+}): Promise<ServiceAnomaliesResponse> {
   return withApmSpan('get_service_anomalies', async () => {
     if (!mlClient) {
       throw Boom.notImplemented(ML_ERRORS.ML_NOT_AVAILABLE);
@@ -51,7 +56,6 @@ export async function getServiceAnomalies({
         environment,
         module: ApmMlModule.Transaction,
         bucketSizeInSeconds: null,
-        partition: serviceName,
         by: defaultTransactionTypes,
       }),
       getAnomalyResults({
@@ -61,7 +65,6 @@ export async function getServiceAnomalies({
         environment,
         module: ApmMlModule.ServiceDestination,
         bucketSizeInSeconds: null,
-        partition: serviceName,
       }),
     ]);
 
@@ -73,11 +76,7 @@ export async function getServiceAnomalies({
         const healthStatus = getServiceHealthStatus({ severity });
 
         return {
-          serviceName: result.partition,
-          transactionType: result.by,
-          actualValue: result.anomalies.actual,
-          anomalyScore: result.anomalies.max,
-          jobId: result.job.jobId,
+          ...result,
           healthStatus,
         };
       }),

@@ -17,6 +17,7 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
 import { useTheme } from '../../../hooks/use_theme';
 import { useTraceExplorerEnabledSetting } from '../../../hooks/use_trace_explorer_enabled_setting';
 import { getCytoscapeOptions } from './cytoscape_options';
@@ -35,6 +36,7 @@ export interface CytoscapeProps {
   serviceName?: string;
   style?: CSSProperties;
   compact?: boolean;
+  detectorType: ApmMlDetectorType;
 }
 
 function useCytoscape(options: cytoscape.CytoscapeOptions) {
@@ -66,11 +68,17 @@ function CytoscapeComponent({
   serviceName,
   style,
   compact,
+  detectorType,
 }: CytoscapeProps) {
   const theme = useTheme();
   const isTraceExplorerEnabled = useTraceExplorerEnabledSetting();
   const [ref, cy] = useCytoscape({
-    ...getCytoscapeOptions({ theme, compact, isTraceExplorerEnabled }),
+    ...getCytoscapeOptions({
+      theme,
+      compact,
+      detectorType,
+      isTraceExplorerEnabled,
+    }),
     elements,
   });
   useCytoscapeEventHandlers({ cy, serviceName, theme, compact });

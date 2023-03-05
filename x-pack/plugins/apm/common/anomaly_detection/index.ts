@@ -7,19 +7,16 @@
 
 import { i18n } from '@kbn/i18n';
 import {
-  getSeverityType,
   getSeverityColor as mlGetSeverityColor,
+  getSeverityType,
 } from '@kbn/ml-plugin/common';
 import { ANOMALY_SEVERITY } from '../ml_constants';
 import { ServiceHealthStatus } from '../service_health_status';
+import { ApmMlJobResult } from './apm_ml_job_result';
 
-export interface ServiceAnomalyStats {
-  transactionType?: string;
-  anomalyScore?: number;
-  actualValue?: number;
-  jobId?: string;
+export type ServiceAnomalyStats = ApmMlJobResult & {
   healthStatus: ServiceHealthStatus;
-}
+};
 
 export function getSeverity(score: number | undefined) {
   if (score === undefined) {

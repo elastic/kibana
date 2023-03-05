@@ -21,6 +21,7 @@ import { environmentRt, rangeRt, kueryRt } from '../default_api_types';
 import { getServiceGroup } from '../service_groups/get_service_group';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { ServiceAnomalyStats } from '../../../common/anomaly_detection';
 
 const serviceMapRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-map',
@@ -51,9 +52,7 @@ const serviceMapRoute = createApmServerRoute({
                   'service.name': string;
                   'service.environment': string | null;
                   'agent.name': string;
-                  serviceAnomalyStats?:
-                    | import('./../../../common/anomaly_detection/index').ServiceAnomalyStats
-                    | undefined;
+                  anomalyResults: ServiceAnomalyStats[];
                   label: string | undefined;
                   id?: string | undefined;
                   parent?: string | undefined;

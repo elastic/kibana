@@ -122,6 +122,11 @@ function TemplateWithContext({
     <ApmMainTemplate
       pageHeader={{
         tabs,
+        tabsProps: {
+          style: {
+            whiteSpace: 'nowrap',
+          },
+        },
         pageTitle: (
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem>

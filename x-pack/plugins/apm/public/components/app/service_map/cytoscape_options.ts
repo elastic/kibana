@@ -19,41 +19,70 @@ import {
 } from '../../../../common/service_health_status';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { iconForNode } from './icons';
+import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
 
 export const popoverWidth = 350;
 
-function getServiceAnomalyStats(el: cytoscape.NodeSingular) {
-  const serviceAnomalyStats: ServiceAnomalyStats | undefined = el.data(
-    'serviceAnomalyStats'
-  );
-
-  return serviceAnomalyStats;
-}
-
-function getBorderColorFn(
-  theme: EuiTheme
-): cytoscape.Css.MapperFunction<cytoscape.NodeSingular, string> {
-  return (el: cytoscape.NodeSingular) => {
-    const hasAnomalyDetectionJob = el.data('serviceAnomalyStats') !== undefined;
-    const anomalyStats = getServiceAnomalyStats(el);
-    if (hasAnomalyDetectionJob) {
-      return getServiceHealthStatusColor(
-        theme,
-        anomalyStats?.healthStatus ?? ServiceHealthStatus.unknown
-      );
-    }
-    if (el.hasClass('primary') || el.selected()) {
-      return theme.eui.euiColorPrimary;
-    }
-    return theme.eui.euiColorMediumShade;
+function getServiceDestinationDetectorType(type: ApmMlDetectorType) {
+  const map: Record<string, ApmMlDetectorType> = {
+    [ApmMlDetectorType.txLatency]: ApmMlDetectorType.serviceDestinationLatency,
+    [ApmMlDetectorType.txThroughput]:
+      ApmMlDetectorType.serviceDestinationThroughput,
+    [ApmMlDetectorType.txFailureRate]:
+      ApmMlDetectorType.serviceDestinationFailureRate,
   };
+
+  return map[type];
 }
 
-const getBorderStyle: cytoscape.Css.MapperFunction<
-  cytoscape.NodeSingular,
-  cytoscape.Css.LineStyle
-> = (el: cytoscape.NodeSingular) => {
-  const status = getServiceAnomalyStats(el)?.healthStatus;
+function getAnomalyStats({
+  el,
+  detectorType,
+}: {
+  el: cytoscape.SingularData;
+  detectorType: ApmMlDetectorType;
+}) {
+  const anomalyStats: ServiceAnomalyStats[] | undefined =
+    el.data('anomalyResults');
+
+  return anomalyStats?.find((result) => result.type === detectorType);
+}
+
+function getAnomalyColor({
+  el,
+  theme,
+  detectorType,
+  isNode,
+}: {
+  el: cytoscape.NodeSingular | cytoscape.EdgeSingular;
+  theme: EuiTheme;
+  detectorType: ApmMlDetectorType;
+  isNode: boolean;
+}): string {
+  if (!isNode) {
+    detectorType = getServiceDestinationDetectorType(detectorType);
+  }
+
+  const anomalyStats = getAnomalyStats({ el, detectorType });
+
+  if (anomalyStats) {
+    return getServiceHealthStatusColor(theme, anomalyStats.healthStatus);
+  }
+
+  if (el.hasClass('primary') || el.selected()) {
+    return theme.eui.euiColorPrimary;
+  }
+  return theme.eui.euiColorMediumShade;
+}
+
+const getBorderStyle = ({
+  el,
+  detectorType,
+}: {
+  el: cytoscape.NodeSingular;
+  detectorType: ApmMlDetectorType;
+}) => {
+  const status = getAnomalyStats({ el, detectorType })?.healthStatus;
   if (status === ServiceHealthStatus.critical) {
     return 'double';
   } else {
@@ -61,8 +90,14 @@ const getBorderStyle: cytoscape.Css.MapperFunction<
   }
 };
 
-function getBorderWidth(el: cytoscape.NodeSingular) {
-  const status = getServiceAnomalyStats(el)?.healthStatus;
+function getBorderWidth({
+  el,
+  detectorType,
+}: {
+  el: cytoscape.NodeSingular;
+  detectorType: ApmMlDetectorType;
+}) {
+  const status = getAnomalyStats({ el, detectorType })?.healthStatus;
 
   if (status === ServiceHealthStatus.warning) {
     return 4;
@@ -107,9 +142,11 @@ function isService(el: cytoscape.NodeSingular) {
 const getStyle = ({
   theme,
   isTraceExplorerEnabled,
+  detectorType,
 }: {
   theme: EuiTheme;
   isTraceExplorerEnabled: boolean;
+  detectorType: ApmMlDetectorType;
 }): cytoscape.Stylesheet[] => {
   const lineColor = theme.eui.euiColorMediumShade;
   return [
@@ -129,9 +166,12 @@ const getStyle = ({
           isService(el) ? '60%' : '40%',
         'background-width': (el: cytoscape.NodeSingular) =>
           isService(el) ? '60%' : '40%',
-        'border-color': getBorderColorFn(theme),
-        'border-style': getBorderStyle,
-        'border-width': getBorderWidth,
+        'border-color': (el: cytoscape.NodeSingular) =>
+          getAnomalyColor({ el, theme, detectorType, isNode: true }),
+        'border-style': (el: cytoscape.NodeSingular) =>
+          getBorderStyle({ el, detectorType }),
+        'border-width': (el: cytoscape.NodeSingular) =>
+          getBorderWidth({ el, detectorType }),
         color: (el: cytoscape.NodeSingular) =>
           el.hasClass('primary') || el.selected()
             ? theme.eui.euiColorPrimaryText
@@ -230,9 +270,37 @@ const getStyle = ({
         ]
       : []),
     {
+      selector: 'edge',
+      style: {
+        width: (el: cytoscape.EdgeSingular) => {
+          return getAnomalyStats({
+            el,
+            detectorType: getServiceDestinationDetectorType(detectorType),
+          })
+            ? 4
+            : 1;
+        },
+        'target-arrow-color': (el: cytoscape.EdgeSingular) =>
+          getAnomalyColor({
+            el,
+            theme,
+            detectorType,
+            isNode: false,
+          }),
+        'line-color': (el: cytoscape.EdgeSingular) =>
+          getAnomalyColor({
+            el,
+            theme,
+            detectorType,
+            isNode: false,
+          }),
+      },
+    },
+    {
       selector: 'node.hover',
       style: {
-        'border-width': getBorderWidth,
+        'border-width': (el: cytoscape.NodeSingular) =>
+          getBorderWidth({ el, detectorType }),
       },
     },
     {
@@ -276,14 +344,16 @@ ${theme.eui.euiColorLightShade}`,
 export const getCytoscapeOptions = ({
   theme,
   isTraceExplorerEnabled,
+  detectorType,
   compact,
 }: {
   theme: EuiTheme;
   isTraceExplorerEnabled: boolean;
+  detectorType: ApmMlDetectorType;
   compact?: boolean;
 }): cytoscape.CytoscapeOptions => ({
   boxSelectionEnabled: false,
   maxZoom: 3,
   minZoom: compact ? 0.4 : 0.2,
-  style: getStyle({ theme, isTraceExplorerEnabled }),
+  style: getStyle({ theme, detectorType, isTraceExplorerEnabled }),
 });

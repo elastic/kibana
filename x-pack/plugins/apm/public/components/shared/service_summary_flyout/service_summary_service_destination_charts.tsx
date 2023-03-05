@@ -80,18 +80,18 @@ export function ServiceSummaryServiceDestinationCharts({
     return merge({}, stats, {
       latency: {
         severity:
-          anomalyStats?.[ApmMlDetectorType.serviceDestinationLatency].anomalies
+          anomalyStats?.[ApmMlDetectorType.serviceDestinationLatency]?.anomalies
             .max,
       },
       throughput: {
         severity:
           anomalyStats?.[ApmMlDetectorType.serviceDestinationThroughput]
-            .anomalies.max,
+            ?.anomalies.max,
       },
       failureRate: {
         severity:
           anomalyStats?.[ApmMlDetectorType.serviceDestinationFailureRate]
-            .anomalies.max,
+            ?.anomalies.max,
       },
     });
   });

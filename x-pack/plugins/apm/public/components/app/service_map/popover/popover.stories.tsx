@@ -185,7 +185,7 @@ Service.args = {
   nodeData: {
     id: 'example service',
     'service.name': 'example service',
-    serviceAnomalyStats: {
+    anomalyResults: {
       serviceName: 'opbeans-java',
       jobId: 'apm-production-802c-high_mean_transaction_duration',
       transactionType: 'request',

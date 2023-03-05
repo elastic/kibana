@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import { getSeverity } from '../../../../common/anomaly_detection';
+import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
 import { Environment } from '../../../../common/environment_rt';
-import {
-  getServiceHealthStatus,
-  ServiceHealthStatus,
-} from '../../../../common/service_health_status';
+import { ServiceHealthStatus } from '../../../../common/service_health_status';
 import { MlClient } from '../../../lib/helpers/get_ml_client';
 import { getServiceAnomalies } from '../../service_map/get_service_anomalies';
 
@@ -40,12 +37,10 @@ export const getHealthStatuses = async ({
     end,
   });
 
-  return anomalies.serviceAnomalies.map((anomalyStats) => {
-    const severity = getSeverity(anomalyStats.anomalyScore);
-    const healthStatus = getServiceHealthStatus({ severity });
-    return {
-      serviceName: anomalyStats.serviceName,
-      healthStatus,
-    };
-  });
+  return anomalies.serviceAnomalies
+    .filter((result) => result.type === ApmMlDetectorType.txLatency)
+    .map((result) => ({
+      serviceName: result.partition,
+      healthStatus: result.healthStatus,
+    }));
 };

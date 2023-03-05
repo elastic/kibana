@@ -20,7 +20,7 @@ export function generateServiceMapElements({
       'service.environment': 'production',
       'service.name': name,
       'agent.name': getAgentName(),
-      serviceAnomalyStats: hasAnomalies
+      anomalyResults: hasAnomalies
         ? {
             transactionType: 'request',
             anomalyScore,
