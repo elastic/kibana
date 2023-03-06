@@ -144,4 +144,58 @@ In summary: think about the acceptable paramaters for every input your HTTP API 
 
 ### 3. Keep interfaces as "narrow" as possible
 
+```ts
+const nameSchema = schema.string({ minLength: 1, });
+
+router.get(
+  {
+    path: '/api/myobject/find',
+    validate: { query: schema.object({ name: nameSchema, sort: schema.string() }) },
+  },
+  (ctx, req, res) => {
+    const { savedObjects } = await ctx.core;
+    const result = await savedObjects.client.find<MyObjectAttributes>({
+      type: 'myObject',
+      filter: `myObject.attributes.name: ${req.query.name}`,
+      sortField: req.query.sort,
+    });
+    return res.ok({
+      // Note: we observe the same translation for all our responses as in step 1.
+      body: result.saved_objects.map(({ attributes: { foo, bar } }) => ({ foo, bar })),
+    });
+  }
+);
+```
+
+The above code follows guidelines from steps 1 and 2, but it allows clients to specify ANY string by which to sort. This is a far "wider" API than we need for this endpoint.
+
+```ts
+import { escapeKuery } from '@kbn/es-query';
+const nameSchema = schema.string({ minLength: 1, });
+// 1.
+// A stricter schema for the sort by field. Now it is a small, known set of values
+const sortBySchema = schema.oneOf([schema.literal('foo'), schema.literal('bar')]);
+
+router.get(
+  {
+    path: '/api/myobject/find',
+    validate: { query: schema.object({ name: nameSchema, sort: schema.string() }) },
+  },
+  (ctx, req, res) => {
+    const { savedObjects } = await ctx.core;
+    const result = await savedObjects.client.find<MyObjectAttributes>({
+      type: 'myObject',
+      // 2.
+      // Bonus point: defend against injection attacks
+      filter: `myObject.attributes.name: ${escapeKuery(req.query.name)}`,
+      sortField: req.query.sort,
+    });
+    return res.ok({
+      // Note: we observe the same translation for all our responses as in step 1.
+      body: result.saved_objects.map(({ attributes: { foo, bar } }) => ({ foo, bar })),
+    });
+  }
+);
+```
+
 ### 4. Use the versioned API spec
