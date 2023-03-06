@@ -21,7 +21,10 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { connectorsMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
-import { defaultInfiniteUseFindCaseUserActions, defaultUseFindCaseUserActions } from '../case_view/mocks';
+import {
+  defaultInfiniteUseFindCaseUserActions,
+  defaultUseFindCaseUserActions,
+} from '../case_view/mocks';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import userEvent from '@testing-library/user-event';
@@ -102,12 +105,10 @@ describe(`UserActions`, () => {
   });
 
   it('Loading spinner when user actions loading and displays fullName/username', () => {
-    useFindCaseUserActionsMock.mockReturnValue({isLoading: true});
-    useInfiniteFindCaseUserActionsMock.mockReturnValue({isLoading: true});
+    useFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
+    useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
     appMockRender.render(
-      <UserActions
-        {...{ ...defaultProps, currentUserProfile: userProfiles[0] }}
-      />
+      <UserActions {...{ ...defaultProps, currentUserProfile: userProfiles[0] }} />
     );
 
     expect(screen.getAllByTestId('user-actions-loading')).toHaveLength(2);
@@ -124,16 +125,17 @@ describe(`UserActions`, () => {
     ];
 
     useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
-    useFindCaseUserActionsMock.mockReturnValue({...defaultUseFindCaseUserActions, data: {...defaultUseFindCaseUserActions.data.userActions, ...ourActions}});
+    useFindCaseUserActionsMock.mockReturnValue({
+      ...defaultUseFindCaseUserActions,
+      data: { ...defaultUseFindCaseUserActions.data.userActions, ...ourActions },
+    });
 
     const props = {
       ...defaultProps,
       caseConnectors,
     };
 
-    const component = appMockRender.render(
-      <UserActions {...props} />
-    );
+    const component = appMockRender.render(<UserActions {...props} />);
 
     await waitForComponentToUpdate();
 
@@ -179,19 +181,25 @@ describe(`UserActions`, () => {
     };
 
     useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
-    useFindCaseUserActionsMock.mockReturnValue({...defaultUseFindCaseUserActions, data: {...defaultUseFindCaseUserActions.data.userActions, ...ourActions}});
+    useFindCaseUserActionsMock.mockReturnValue({
+      ...defaultUseFindCaseUserActions,
+      data: { ...defaultUseFindCaseUserActions.data.userActions, ...ourActions },
+    });
 
-    appMockRender.render(
-        <UserActions {...props} />
-    );
-    expect(screen.getByTestId(`comment-create-action-${props.data.comments[0].id}`).classList.contains('outlined')).toBe(false);
+    appMockRender.render(<UserActions {...props} />);
+    expect(
+      screen
+        .getByTestId(`comment-create-action-${props.data.comments[0].id}`)
+        .classList.contains('outlined')
+    ).toBe(false);
 
     userEvent.click(screen.getByTestId(`comment-update-action-${ourActions[1].id}`));
 
     await waitFor(() => {
       expect(
-        screen.getByTestId(`comment-create-action-${props.data.comments[0].id}`)
-        .classList.contains('outlined')
+        screen
+          .getByTestId(`comment-create-action-${props.data.comments[0].id}`)
+          .classList.contains('outlined')
       ).toBe(true);
     });
   });

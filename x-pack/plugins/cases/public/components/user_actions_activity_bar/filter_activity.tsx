@@ -50,9 +50,7 @@ export const FilterActivity = React.memo<FilterActivityProps>(
           grow={false}
           onClick={() => handleFilterChange('all')}
           hasActiveFilters={type === 'all'}
-          numFilters={
-            userActionsStats && userActionsStats.total > 0 ? userActionsStats.total : 0
-          }
+          numFilters={userActionsStats && userActionsStats.total > 0 ? userActionsStats.total : 0}
           isLoading={isLoading}
           isDisabled={isLoading}
           data-test-subj="user-actions-filter-activity-button-all"
