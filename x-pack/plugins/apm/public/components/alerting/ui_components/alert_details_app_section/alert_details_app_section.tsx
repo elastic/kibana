@@ -91,11 +91,20 @@ export function AlertDetailsAppSection({
       {
         label: (
           <FormattedMessage
-            id="xpack.apm.pages.alertDetails.alertSummary.source"
-            defaultMessage="Source"
+            id="xpack.apm.pages.alertDetails.alertSummary.serviceEnv"
+            defaultMessage="Service Environment"
           />
         ),
-        value: '-',
+        value: alert?.fields[SERVICE_ENVIRONMENT],
+      },
+      {
+        label: (
+          <FormattedMessage
+            id="xpack.apm.pages.alertDetails.alertSummary.serviceName"
+            defaultMessage="Service name"
+          />
+        ),
+        value: alert?.fields[SERVICE_NAME],
       },
     ];
     setAlertSummaryFields(alertSummaryFields);
