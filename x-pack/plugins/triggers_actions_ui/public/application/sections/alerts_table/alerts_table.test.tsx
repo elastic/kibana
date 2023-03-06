@@ -33,11 +33,30 @@ import { bulkActionsReducer } from './bulk_actions/reducer';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { getCasesMockMap } from './cases/index.mock';
 import { createAppMockRenderer } from '../test_utils';
+import { createCasesServiceMock } from './index.mock';
+import { useCaseViewNavigation } from './cases/use_case_view_navigation';
+
+const mockCaseService = createCasesServiceMock();
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting$: jest.fn((value: string) => ['0,0']),
 }));
+
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+
+  return {
+    ...original,
+    useKibana: () => ({
+      services: {
+        cases: mockCaseService,
+      },
+    }),
+  };
+});
+
+jest.mock('./cases/use_case_view_navigation');
 
 const columns = [
   {
@@ -277,6 +296,9 @@ describe('AlertsTable', () => {
     rowCount: 4,
   };
 
+  const useCaseViewNavigationMock = useCaseViewNavigation as jest.Mock;
+  useCaseViewNavigationMock.mockReturnValue({ navigateToCaseView: jest.fn() });
+
   const AlertsTableWithProviders: React.FunctionComponent<
     AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
   > = (props) => {
@@ -468,7 +490,7 @@ describe('AlertsTable', () => {
         expect(queryByTestId('expandColumnCellOpenFlyoutButton')).toBe(null);
       });
 
-      describe.skip('row loading state on action', () => {
+      describe('row loading state on action', () => {
         let mockedFn: jest.Mock;
         let customTableProps: AlertsTableProps;
 
