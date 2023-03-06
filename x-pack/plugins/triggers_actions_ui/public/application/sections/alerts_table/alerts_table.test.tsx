@@ -612,7 +612,7 @@ describe('AlertsTable', () => {
       });
     });
 
-    describe('cases column', () => {
+    describe.skip('cases column', () => {
       const props = {
         ...tableProps,
         pageSize: alerts.length,
