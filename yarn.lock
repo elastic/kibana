@@ -4841,10 +4841,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-grouping@link:packages/kbn-securitysolution-grouping":
-  version "0.0.0"
-  uid ""
-
 "@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
   version "0.0.0"
   uid ""
@@ -4858,6 +4854,10 @@
   uid ""
 
 "@kbn/securitysolution-exception-list-components@link:packages/kbn-securitysolution-exception-list-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-grouping@link:packages/kbn-securitysolution-grouping":
   version "0.0.0"
   uid ""
 
@@ -8960,10 +8960,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.11":
-  version "4.1.11"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.11.tgz#29ad053d04bf07c148dae36ba09baa3af5323cb0"
-  integrity sha512-KQ+TIvSTdpkUoW+fCLO3XyxlpnoD1PSZc0TBbuSbD/6gltB6gZ9q/VxhDGR7svhwA23G35uCAb5guAlVUaQKeA==
+"@types/selenium-webdriver@^4.1.12":
+  version "4.1.12"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.12.tgz#a2042f6bef044c48ca7a8b4caede4928242271a9"
+  integrity sha512-3DxuYHEbzIyUtuICRtxXtJomdOOkBeCbkXAlAPm/h8ArIn/ArWNnVSC6tIj/ECZ/sdxBoI0F/wuwcpxBew3hGw==
   dependencies:
     "@types/ws" "*"
 
