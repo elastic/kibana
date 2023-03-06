@@ -61,17 +61,16 @@ export type ResponseConsoleRbacControls =
 /**
  * maps the console command to the RBAC control that is required to access it via console
  */
-export const commandToRBACMap = new Map<ConsoleResponseActionCommands, ResponseConsoleRbacControls>(
-  [
-    ['isolate', 'writeHostIsolation'],
-    ['release', 'writeHostIsolation'],
-    ['kill-process', 'writeProcessOperations'],
-    ['suspend-process', 'writeProcessOperations'],
-    ['processes', 'writeProcessOperations'],
-    ['get-file', 'writeFileOperations'],
-    ['execute', 'writeExecuteOperations'],
-  ]
-);
+export const commandToRBACMap: Record<ConsoleResponseActionCommands, ResponseConsoleRbacControls> =
+  Object.freeze({
+    isolate: 'writeHostIsolation',
+    release: 'writeHostIsolation',
+    'kill-process': 'writeProcessOperations',
+    'suspend-process': 'writeProcessOperations',
+    processes: 'writeProcessOperations',
+    'get-file': 'writeFileOperations',
+    execute: 'writeExecuteOperations',
+  });
 
 // 4 hrs in milliseconds
 // 4 * 60 * 60 * 1000

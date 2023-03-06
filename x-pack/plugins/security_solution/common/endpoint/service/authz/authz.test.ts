@@ -126,6 +126,16 @@ describe('Endpoint Authz service', () => {
     });
 
     describe('and endpoint rbac is enabled', () => {
+      const responseConsolePrivileges = CONSOLE_RESPONSE_ACTION_COMMANDS.slice().reduce<
+        ResponseConsoleRbacControls[]
+      >((acc, e) => {
+        const item = commandToRBACMap[e];
+        if (!acc.includes(item)) {
+          acc.push(item);
+        }
+        return acc;
+      }, []);
+
       beforeEach(() => {
         userRoles = [];
       });
@@ -188,15 +198,7 @@ describe('Endpoint Authz service', () => {
         ['canWriteEventFilters', ['writeEventFilters']],
         ['canReadEventFilters', ['writeEventFilters', 'readEventFilters']],
         // all dependent privileges are false and so it should be false
-        [
-          'canAccessResponseConsole',
-          [
-            'writeHostIsolation',
-            'writeExecuteOperations',
-            'writeFileOperations',
-            'writeProcessOperations',
-          ],
-        ],
+        ['canAccessResponseConsole', responseConsolePrivileges],
       ])('%s should be false if `packagePrivilege.%s` is `false`', (auth, privileges) => {
         // read permission checks for write || read so we need to set both to false
         privileges.forEach((privilege) => {
@@ -206,17 +208,9 @@ describe('Endpoint Authz service', () => {
         expect(authz[auth]).toBe(false);
       });
 
-      it('canAccessResponseConsole should be true if one of the CONSOLE privileges is true', () => {
-        const responseConsolePrivileges = CONSOLE_RESPONSE_ACTION_COMMANDS.slice().reduce<
-          ResponseConsoleRbacControls[]
-        >((acc, e) => {
-          if (!acc.includes(commandToRBACMap.get(e) as ResponseConsoleRbacControls)) {
-            acc.push(commandToRBACMap.get(e) as ResponseConsoleRbacControls);
-          }
-          return acc;
-        }, []);
-
-        for (const responseConsolePrivilege of responseConsolePrivileges) {
+      it.each(responseConsolePrivileges)(
+        'canAccessResponseConsole should be true if %s for CONSOLE privileges is true',
+        (responseConsolePrivilege) => {
           // set all to false
           responseConsolePrivileges.forEach((p) => {
             fleetAuthz.packagePrivileges!.endpoint.actions[p].executePackageAction = false;
@@ -229,7 +223,7 @@ describe('Endpoint Authz service', () => {
           const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles, true);
           expect(authz.canAccessResponseConsole).toBe(true);
         }
-      });
+      );
     });
   });
 
