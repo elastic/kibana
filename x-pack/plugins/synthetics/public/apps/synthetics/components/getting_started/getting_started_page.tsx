@@ -125,6 +125,8 @@ export const GettingStartedOnPrem = () => {
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
               <EuiText>{CREATE_LOCATION_DESCRIPTION}</EuiText>
+              <EuiSpacer />
+              <EuiText>{PUBLIC_LOCATION_DESCRIPTION}</EuiText>
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButton
@@ -197,6 +199,34 @@ const CREATE_LOCATION_DESCRIPTION = (
           target="_blank"
         >
           {PRIVATE_LOCATION_LABEL}
+        </EuiLink>
+      ),
+    }}
+  />
+);
+const PUBLIC_LOCATION_DESCRIPTION = (
+  <FormattedMessage
+    id="xpack.synthetics.gettingStarted.createLocationDescription"
+    defaultMessage="In {link} you can also use {elasticManagedLink}. With it, you can create and run monitors in multiple locations without having to manage your own infrastructure. Elastic takes care of software updates and capacity planning for you."
+    values={{
+      elasticManagedLink: (
+        <strong>
+          {i18n.translate(
+            'xpack.synthetics.gettingStarted.gettingStartedLabel.elasticManagedLink',
+            {
+              defaultMessage: 'Elastic’s global managed testing infrastructure',
+            }
+          )}
+        </strong>
+      ),
+      link: (
+        <EuiLink href="https://www.elastic.co/cloud/" target="_blank">
+          {i18n.translate(
+            'xpack.synthetics.gettingStarted.gettingStartedLabel.elasticCloudDeployments',
+            {
+              defaultMessage: 'Elastic Cloud',
+            }
+          )}
         </EuiLink>
       ),
     }}
