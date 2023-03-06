@@ -125,12 +125,12 @@ export function RootDragDropProvider({
             {a11yMessageState}
           </p>
           <p id={`${dataTestSubj}-keyboardInstructionsWithReorder`}>
-            {i18n.translate('kbnDomDragDrop.keyboardInstructionsReorder', {
+            {i18n.translate('domDragDrop.keyboardInstructionsReorder', {
               defaultMessage: `Press space or enter to start dragging. When dragging, use the up/down arrow keys to reorder items in the group and left/right arrow keys to choose drop targets outside of the group. Press space or enter again to finish.`,
             })}
           </p>
           <p id={`${dataTestSubj}-keyboardInstructions`}>
-            {i18n.translate('kbnDomDragDrop.keyboardInstructions', {
+            {i18n.translate('domDragDrop.keyboardInstructions', {
               defaultMessage: `Press space or enter to start dragging. When dragging, use the left/right arrow keys to move between drop targets. Press space or enter again to finish.`,
             })}
           </p>
