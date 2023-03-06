@@ -16,11 +16,11 @@ jest.mock('./kibana_services', () => ({
     return {
       links: {
         maps: {
-          connectToEms: 'https://www.elastic.co/guide/en/kibana/current/maps-connect-to-ems.html'
-        }
-      }
+          connectToEms: 'https://www.elastic.co/guide/en/kibana/current/maps-connect-to-ems.html',
+        },
+      },
     };
-  }
+  },
 }));
 
 describe('getGlyphUrl', () => {
