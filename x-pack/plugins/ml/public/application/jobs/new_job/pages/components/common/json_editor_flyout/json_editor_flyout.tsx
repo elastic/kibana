@@ -96,13 +96,23 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
 
   useEffect(
     function fetchSchemasOnMount() {
-      fetchSchemas(jsonSchemaApi, '/_ml/anomaly_detectors/{job_id}', 'put').then((result) => {
-        setJobSchema(result);
-      });
+      fetchSchemas(jsonSchemaApi, '/_ml/anomaly_detectors/{job_id}', 'put')
+        .then((result) => {
+          setJobSchema(result);
+        })
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.error(e);
+        });
 
-      fetchSchemas(jsonSchemaApi, '/_ml/datafeeds/{datafeed_id}', 'put').then((result) => {
-        setDatefeedSchema(result);
-      });
+      fetchSchemas(jsonSchemaApi, '/_ml/datafeeds/{datafeed_id}', 'put')
+        .then((result) => {
+          setDatefeedSchema(result);
+        })
+        .catch((e) => {
+          // eslint-disable-next-line no-console
+          console.error(e);
+        });
     },
     [jsonSchemaApi]
   );
@@ -189,7 +199,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
         <EuiFlyout onClose={() => setShowJsonFlyout(false)} hideCloseButton size={'l'}>
           <EuiFlyoutBody>
             <EuiFlexGroup>
-              {jobEditorMode !== EDITOR_MODE.HIDDEN && jobSchema ? (
+              {jobEditorMode !== EDITOR_MODE.HIDDEN ? (
                 <Contents
                   editJson={jobEditorMode === EDITOR_MODE.EDITABLE}
                   onChange={onJobChange}
@@ -201,7 +211,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
                   schema={jobSchema}
                 />
               ) : null}
-              {datafeedEditorMode !== EDITOR_MODE.HIDDEN && datafeedSchema ? (
+              {datafeedEditorMode !== EDITOR_MODE.HIDDEN ? (
                 <>
                   <Contents
                     editJson={datafeedEditorMode === EDITOR_MODE.EDITABLE}
