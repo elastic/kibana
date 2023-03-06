@@ -866,6 +866,7 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [
             {
               rule_id: 'rule-1',
+              id: '123',
               error: {
                 status_code: 404,
                 message: '1 connector is missing. Connector id missing is: 123',
@@ -881,6 +882,7 @@ export default ({ getService }: FtrProviderContext): void => {
           action_connectors_errors: [
             {
               rule_id: 'rule-1',
+              id: '123',
               error: {
                 status_code: 404,
                 message: '1 connector is missing. Connector id missing is: 123',
@@ -1153,6 +1155,7 @@ export default ({ getService }: FtrProviderContext): void => {
           errors: [
             {
               rule_id: 'rule-2',
+              id: 'cabc78e0-9031-11ed-b076-53cc4d57aa22',
               error: {
                 status_code: 404,
                 message:
@@ -1173,6 +1176,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   '1 connector is missing. Connector id missing is: cabc78e0-9031-11ed-b076-53cc4d57aa22',
               },
               rule_id: 'rule-2',
+              id: 'cabc78e0-9031-11ed-b076-53cc4d57aa22',
             },
           ],
           action_connectors_warnings: [],
