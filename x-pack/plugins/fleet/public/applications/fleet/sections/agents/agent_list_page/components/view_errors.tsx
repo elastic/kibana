@@ -62,11 +62,11 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
       <EuiAccordion id={action.actionId + '_errors'} buttonContent="Show errors">
         <EuiFlexGroup direction="column" gutterSize="s">
           {(action.latestErrors ?? []).map((errorItem: any) => (
-            <EuiFlexItem>
+            <EuiFlexItem key={errorItem.agentId}>
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <EuiToolTip content={errorItem.error}>
-                    <TruncatedEuiText color="red" size="s">
+                    <TruncatedEuiText color="red" size="s" data-test-subj="errorText">
                       {errorItem.error}
                     </TruncatedEuiText>
                   </EuiToolTip>
@@ -74,6 +74,7 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
                 <EuiFlexItem grow={false}>
                   <RedirectAppLinks coreStart={coreStart}>
                     <EuiButton
+                      data-test-subj="viewLogsBtn"
                       href={getErrorLogsUrl(errorItem.agentId, errorItem.timestamp)}
                       iconType="popout"
                       color="danger"
