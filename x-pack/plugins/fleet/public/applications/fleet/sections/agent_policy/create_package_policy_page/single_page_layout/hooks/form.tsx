@@ -40,9 +40,6 @@ import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
 import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
 
-const isPackagePolicyInitialized = (packagePolicy?: NewPackagePolicy, packageInfo?: PackageInfo) =>
-  packagePolicy?.name === packageInfo?.name;
-
 async function createAgentPolicy({
   packagePolicy,
   newAgentPolicy,
@@ -74,6 +71,26 @@ async function savePackagePolicy(pkgPolicy: CreatePackagePolicyRequest['body']) 
   });
 
   return result;
+}
+
+function usePackagePolicyIncrementedName(packageInfo?: PackageInfo) {
+  const [incrementedName, setIncrementedName] = useState<string>('');
+
+  useEffect(() => {
+    async function init() {
+      if (!packageInfo) return;
+      // Fetch all packagePolicies having the package name
+      const { data: packagePolicyData } = await sendGetPackagePolicies({
+        perPage: SO_SEARCH_LIMIT,
+        page: 1,
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
+      });
+      setIncrementedName(getMaxPackageName(packageInfo.name, packagePolicyData?.items));
+    }
+    init();
+  }, [packageInfo]);
+
+  return { incrementedName };
 }
 
 const DEFAULT_PACKAGE_POLICY = {
@@ -124,7 +141,7 @@ export function useOnSubmit({
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
-
+  const { incrementedName } = usePackagePolicyIncrementedName(packageInfo);
   // Update agent policy method
   const updateAgentPolicy = useCallback(
     (updatedAgentPolicy: AgentPolicy | undefined) => {
@@ -198,14 +215,6 @@ export function useOnSubmit({
         return;
       }
 
-      // Fetch all packagePolicies having the package name
-      const { data: packagePolicyData } = await sendGetPackagePolicies({
-        perPage: SO_SEARCH_LIMIT,
-        page: 1,
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${packageInfo.name}`,
-      });
-      const incrementedName = getMaxPackageName(packageInfo.name, packagePolicyData?.items);
-
       isInitializedRef.current = true;
       updatePackagePolicy(
         packageToPackagePolicy(
@@ -219,13 +228,15 @@ export function useOnSubmit({
       );
     }
     init();
-  }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable]);
+  }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable, incrementedName]);
 
   useEffect(() => {
-    if (isInitialized || isPackagePolicyInitialized(packagePolicy, packageInfo)) return;
+    if (isInitialized || packagePolicy.name === '' || packagePolicy.name !== incrementedName)
+      return;
 
+    // package policy initialized when its name is set to an incremented name
     setIsInitialized(true);
-  }, [packagePolicy, packageInfo, isInitialized]);
+  }, [packagePolicy, incrementedName, isInitialized]);
 
   useEffect(() => {
     if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
