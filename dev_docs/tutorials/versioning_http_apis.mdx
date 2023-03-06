@@ -55,6 +55,7 @@ Therefore a persistence schema is the _shape_ of any data your code directly, or
 Consider the following changes to the code above:
 
 ```ts
+// 1.
 // We add a new interface for this HTTP APIs return value
 // Note: this interface can live in your plugins top-level "common" directory
 interface GetMyObjectResponse {
@@ -71,6 +72,7 @@ router.get(
     const {
       attributes: { foo, bar },
     } = await savedObjects.client.get<MyObjectAttributes>('myObject', req.params.id)
+    // 2.
     // Explicitly map to our HTTP body
     const body: GetMyObjectResponse = { foo, bar };
     return res.ok({ body });
