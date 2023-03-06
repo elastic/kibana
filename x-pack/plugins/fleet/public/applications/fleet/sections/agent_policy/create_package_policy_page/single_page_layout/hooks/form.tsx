@@ -40,6 +40,9 @@ import { SelectedPolicyTab } from '../../components';
 import { useOnSaveNavigate } from '../../hooks';
 import { prepareInputPackagePolicyDataset } from '../../services/prepare_input_pkg_policy_dataset';
 
+const isPackagePolicyInitialized = (packagePolicy?: NewPackagePolicy, packageInfo?: PackageInfo) =>
+  packagePolicy?.name === packageInfo?.name;
+
 async function createAgentPolicy({
   packagePolicy,
   newAgentPolicy,
@@ -214,10 +217,15 @@ export function useOnSubmit({
           integrationToEnable
         )
       );
-      setIsInitialized(true);
     }
     init();
-  }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable, isInitialized]);
+  }, [packageInfo, agentPolicy, updatePackagePolicy, integrationToEnable]);
+
+  useEffect(() => {
+    if (isInitialized || isPackagePolicyInitialized(packagePolicy, packageInfo)) return;
+
+    setIsInitialized(true);
+  }, [packagePolicy, packageInfo, isInitialized]);
 
   useEffect(() => {
     if (agentPolicy && packagePolicy.policy_id !== agentPolicy.id) {
