@@ -71,7 +71,7 @@ describe('DragDrop', () => {
       </DragDrop>
     );
 
-    component.find('[data-test-subj="dragAndDrop"]').at(0).simulate('dragover', { preventDefault });
+    component.find('[data-test-subj="domDragDrop"]').at(0).simulate('dragover', { preventDefault });
 
     expect(preventDefault).toBeCalled();
   });
@@ -84,7 +84,7 @@ describe('DragDrop', () => {
       </DragDrop>
     );
 
-    component.find('[data-test-subj="dragAndDrop"]').at(0).simulate('dragover', { preventDefault });
+    component.find('[data-test-subj="domDragDrop"]').at(0).simulate('dragover', { preventDefault });
 
     expect(preventDefault).not.toBeCalled();
   });
@@ -98,7 +98,7 @@ describe('DragDrop', () => {
       </DragDrop>
     );
 
-    component.find('[data-test-subj="dragAndDrop"]').at(0).simulate('mousedown');
+    component.find('[data-test-subj="domDragDrop"]').at(0).simulate('mousedown');
     expect(global.getSelection).toBeCalled();
     expect(removeAllRanges).toBeCalled();
   });
