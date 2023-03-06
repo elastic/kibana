@@ -86,6 +86,6 @@ Alerts associated with security rules are visible only in the {security-app};
 they are not visible in *{stack-manage-app} > {rules-ui}*.
 ==============================================
 
-include::rule-types/index-threshold.asciidoc[]
+include::rule-types/index-threshold.asciidoc[leveloffset=+1]
 include::rule-types/es-query.asciidoc[leveloffset=+1]
 include::rule-types/geo-rule-types.asciidoc[]
