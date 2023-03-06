@@ -14,8 +14,12 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
 
   return {
     options: {
-      maxTransactionOverflowCount: 2,
-      maxServiceOverflowCount: 2,
+      transactions: {
+        max_groups: 2,
+      },
+      service_transactions: {
+        max_groups: 2,
+      },
     },
     generate: ({ range }) => {
       const TRANSACTION_TYPES = ['request'];
