@@ -1730,7 +1730,8 @@
                               "EXPIRED",
                               "CANCELLED",
                               "FAILED",
-                              "IN_PROGRESS"
+                              "IN_PROGRESS",
+                              "ROLLOUT_PASSED"
                             ]
                           },
                           "nbAgentsActioned": {
@@ -1768,6 +1769,24 @@
                           },
                           "creationTime": {
                             "type": "string"
+                          },
+                          "latestErrors": {
+                            "type": "array",
+                            "description": "latest errors that happened when the agents executed the action",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "agentId": {
+                                  "type": "string"
+                                },
+                                "error": {
+                                  "type": "string"
+                                },
+                                "timestamp": {
+                                  "type": "string"
+                                }
+                              }
+                            }
                           }
                         },
                         "required": [
