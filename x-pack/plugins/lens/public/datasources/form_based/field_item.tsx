@@ -8,12 +8,10 @@
 import './field_item.scss';
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { EuiIconTip, EuiText, EuiButton, EuiPopoverFooter } from '@elastic/eui';
+import { EuiText, EuiButton, EuiPopoverFooter } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FieldButton } from '@kbn/react-field';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { EuiHighlight } from '@elastic/eui';
 import { Filter, Query } from '@kbn/es-query';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
 import { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -24,9 +22,7 @@ import {
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverVisualize,
-  FieldIcon,
-  getFieldIconProps,
-  wrapFieldNameOnDot,
+  FieldItemButton,
 } from '@kbn/unified-field-list-plugin/public';
 import { DragDrop } from '@kbn/dom-drag-drop';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
@@ -150,29 +146,29 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
 
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
-  const lensFieldIcon = <FieldIcon {...getFieldIconProps(field)} />;
-  const lensInfoIcon = (
-    <EuiIconTip
-      anchorClassName="lnsFieldItem__infoIcon"
-      content={
-        hideDetails
-          ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
-              defaultMessage: 'Drag and drop to visualize.',
-            })
-          : exists
-          ? i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
-              defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
-            })
-          : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonEmptyLabel', {
-              defaultMessage:
-                'This field doesn’t have any data but you can still drag and drop to visualize.',
-            })
-      }
-      type="iInCircle"
-      color="subdued"
-      size="s"
-    />
-  );
+  // TODO: move to another element
+  // const lensInfoIcon = (
+  //   <EuiIconTip
+  //     anchorClassName="lnsFieldItem__infoIcon"
+  //     content={
+  //       hideDetails
+  //         ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
+  //             defaultMessage: 'Drag and drop to visualize.',
+  //           })
+  //         : exists
+  //         ? i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+  //             defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
+  //           })
+  //         : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonEmptyLabel', {
+  //             defaultMessage:
+  //               'This field doesn’t have any data but you can still drag and drop to visualize.',
+  //           })
+  //     }
+  //     type="iInCircle"
+  //     color="subdued"
+  //     size="s"
+  //   />
+  // );
 
   return (
     <li>
@@ -195,31 +191,14 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             dataTestSubj={`lnsFieldListPanelField-${field.name}`}
             onDragStart={onDragStart}
           >
-            <FieldButton
+            <FieldItemButton
               className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
                 exists ? 'exists' : 'missing'
               }`}
               isActive={infoIsOpen}
+              field={field}
+              fieldSearchHighlight={highlight}
               onClick={togglePopover}
-              buttonProps={{
-                ['aria-label']: i18n.translate(
-                  'xpack.lens.indexPattern.fieldStatsButtonAriaLabel',
-                  {
-                    defaultMessage: 'Preview {fieldName}: {fieldType}',
-                    values: {
-                      fieldName: field.displayName,
-                      fieldType: field.type,
-                    },
-                  }
-                ),
-              }}
-              fieldIcon={lensFieldIcon}
-              fieldName={
-                <EuiHighlight search={wrapFieldNameOnDot(highlight)}>
-                  {wrapFieldNameOnDot(field.displayName)}
-                </EuiHighlight>
-              }
-              fieldInfoIcon={lensInfoIcon}
             />
           </DragDrop>
         }
