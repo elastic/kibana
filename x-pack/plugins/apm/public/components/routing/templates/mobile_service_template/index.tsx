@@ -81,17 +81,13 @@ function TemplateWithContext({
       },
       ...(selectedTab
         ? [
-            ...(serviceName
-              ? [
-                  {
-                    title: serviceName,
-                    href: router.link('/mobile-services/{serviceName}', {
-                      path: { serviceName },
-                      query,
-                    }),
-                  },
-                ]
-              : []),
+            {
+              title: serviceName,
+              href: router.link('/mobile-services/{serviceName}', {
+                path: { serviceName },
+                query,
+              }),
+            },
             {
               title: selectedTab.label,
               href: selectedTab.href,
