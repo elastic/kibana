@@ -1327,6 +1327,35 @@ describe('merge_all_fields_with_source', () => {
         });
       });
 
+      test('does not add multi field values such as "process.command_line.text" to nested source when "process.command_line" has value', () => {
+        const _source: SignalSourceHit['_source'] = {
+          process: {
+            command_line: 'string longer than 10 characters',
+          },
+        };
+        const fields: SignalSourceHit['fields'] = {
+          'process.command_line.text': ['string longer than 10 characters'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
+
+      test('does not add multi field values such as "process.command_line.text" to nested source when "process.command_line" has array value', () => {
+        const _source: SignalSourceHit['_source'] = {
+          process: {
+            command_line: ['string longer than 10 characters'],
+          },
+        };
+        const fields: SignalSourceHit['fields'] = {
+          'process.command_line.text': ['string longer than 10 characters'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
+
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
+
       test('multi-field values mixed with regular values will not be merged accidentally"', () => {
         const _source: SignalSourceHit['_source'] = {};
         const fields: SignalSourceHit['fields'] = {
@@ -1392,6 +1421,32 @@ describe('merge_all_fields_with_source', () => {
         expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>({
           foo: 'other_value_1',
         });
+      });
+
+      test('does not add multi field values such as "process.command_line.text" to flattened source when "process.command_line" has value', () => {
+        const _source: SignalSourceHit['_source'] = {
+          'process.command_line': 'string longer than 10 characters',
+        };
+
+        const fields: SignalSourceHit['fields'] = {
+          'process.command_line.text': ['string longer than 10 characters'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
+      });
+
+      test('does not add multi field values such as "process.command_line.text" to flattened source when "process.command_line" has array value', () => {
+        const _source: SignalSourceHit['_source'] = {
+          'process.command_line': ['string longer than 10 characters'],
+        };
+
+        const fields: SignalSourceHit['fields'] = {
+          'process.command_line.text': ['string longer than 10 characters'],
+        };
+        const doc: SignalSourceHit = { ...emptyEsResult(), _source, fields };
+        const merged = mergeAllFieldsWithSource({ doc, ignoreFields: [] })._source;
+        expect(merged).toEqual<ReturnTypeMergeFieldsWithSource>(_source);
       });
     });
   });
