@@ -7,7 +7,7 @@
 
 import axios from 'axios';
 import semver from 'semver';
-import { filter } from 'lodash';
+import { map } from 'lodash';
 import { KbnClient } from '@kbn/test';
 
 /**
@@ -20,9 +20,7 @@ export const getLatestAvailableAgentVersion = async (kbnClient: KbnClient): Prom
   const kbnStatus = await kbnClient.status.get();
   const agentVersions = await axios
     .get('https://artifacts-api.elastic.co/v1/versions')
-    .then((response) =>
-      filter(response.data.versions, (versionString) => !versionString.includes('SNAPSHOT'))
-    );
+    .then((response) => map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]));
 
   let version =
     semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??

@@ -13,7 +13,7 @@ import {
   binaryToString,
   createRule,
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleOutput,
@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {

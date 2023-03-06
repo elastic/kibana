@@ -237,7 +237,7 @@ export const CUSTOM_CALLOUT = ({ fieldCount, version }: { fieldCount: number; ve
   i18n.translate('ecsDataQualityDashboard.indexProperties.customCallout', {
     values: { fieldCount, version },
     defaultMessage:
-      '{fieldCount, plural, =1 {This field is not} other {These fields are not}} defined by the Elastic Common Schema (ECS), version {version}. An index may contain custom fields, however:',
+      '{fieldCount, plural, =1 {This field is not} other {These fields are not}} defined by the Elastic Common Schema (ECS), version {version}.',
   });
 
 export const CUSTOM_CALLOUT_TITLE = (fieldCount: number) =>
@@ -281,10 +281,32 @@ export const INCOMPATIBLE_CALLOUT = ({
       "Fields are incompatible with ECS when index mappings, or the values of the fields in the index, don't conform to the Elastic Common Schema (ECS), version {version}.",
   });
 
-export const INCOMPATIBLE_CALLOUT_TITLE = (fieldCount: number) =>
+export const INCOMPATIBLE_FIELDS_WITH = i18n.translate(
+  'ecsDataQualityDashboard.indexProperties.incompatibleCallout.incompatibleFieldsWithLabel',
+  {
+    defaultMessage:
+      'Incompatible fields with mappings in the same family have exactly the same search behavior but may have different space usage or performance characteristics.',
+  }
+);
+
+export const WHEN_AN_INCOMPATIBLE_FIELD = i18n.translate(
+  'ecsDataQualityDashboard.indexProperties.incompatibleCallout.whenAnIncompatibleFieldLabel',
+  {
+    defaultMessage: 'When an incompatible field is not in the same family:',
+  }
+);
+
+export const INCOMPATIBLE_CALLOUT_TITLE = ({
+  fieldCount,
+  fieldsInSameFamily,
+}: {
+  fieldCount: number;
+  fieldsInSameFamily: number;
+}) =>
   i18n.translate('ecsDataQualityDashboard.indexProperties.incompatibleCalloutTitle', {
-    values: { fieldCount },
-    defaultMessage: '{fieldCount} incompatible {fieldCount, plural, =1 {field} other {fields}}',
+    values: { fieldCount, fieldsInSameFamily },
+    defaultMessage:
+      '{fieldCount} incompatible {fieldCount, plural, =1 {field} other {fields}}, {fieldsInSameFamily} {fieldsInSameFamily, plural, =1 {field} other {fields}} with {fieldsInSameFamily, plural, =1 {a mapping} other {mappings}} in the same family',
   });
 
 export const INCOMPATIBLE_EMPTY = i18n.translate(
@@ -309,7 +331,7 @@ export const DETECTION_ENGINE_RULES_WILL_WORK = i18n.translate(
   }
 );
 
-export const DETECTION_ENGINE_RULES_WONT_WORK = i18n.translate(
+export const DETECTION_ENGINE_RULES_MAY_NOT_MATCH = i18n.translate(
   'ecsDataQualityDashboard.indexProperties.detectionEngineRulesWontWorkMessage',
   {
     defaultMessage:
@@ -338,8 +360,8 @@ export const PAGES_MAY_NOT_DISPLAY_FIELDS = i18n.translate(
   }
 );
 
-export const PAGES_WONT_DISPLAY_EVENTS = i18n.translate(
-  'ecsDataQualityDashboard.indexProperties.pagesWontDisplayEventsMessage',
+export const PAGES_MAY_NOT_DISPLAY_EVENTS = i18n.translate(
+  'ecsDataQualityDashboard.indexProperties.pagesMayNotDisplayEventsMessage',
   {
     defaultMessage:
       '❌ Pages may not display some events or fields due to unexpected field mappings or values',
@@ -353,10 +375,11 @@ export const PRE_BUILT_DETECTION_ENGINE_RULES_WORK = i18n.translate(
   }
 );
 
-export const PRE_BUILT_DETECTION_ENGINE_RULES_WONT_WORK = i18n.translate(
-  'ecsDataQualityDashboard.indexProperties.preBuiltDetectionEngineRulesWontWorkMessage',
+export const ECS_IS_A_PERMISSIVE_SCHEMA = i18n.translate(
+  'ecsDataQualityDashboard.indexProperties.ecsIsAPermissiveSchemaMessage',
   {
-    defaultMessage: "🌕 Pre-built detection engine rules won't match these fields",
+    defaultMessage:
+      'ECS is a permissive schema. If your events have additional data that cannot be mapped to ECS, you can simply add them to your events, using custom field names.',
   }
 );
 

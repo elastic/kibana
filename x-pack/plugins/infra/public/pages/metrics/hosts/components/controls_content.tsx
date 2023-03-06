@@ -60,18 +60,20 @@ export const ControlsContent: React.FC<Props> = ({
   return (
     <LazyControlsRenderer
       filters={filters}
-      getInitialInput={async () => ({
-        id: dataView.id ?? '',
-        type: CONTROL_GROUP_TYPE,
-        timeRange,
-        refreshConfig: REFRESH_CONFIG,
-        viewMode: ViewMode.VIEW,
-        filters: [...filters],
-        query,
-        chainingSystem: 'HIERARCHICAL',
-        controlStyle: 'oneLine',
-        defaultControlWidth: 'small',
-        panels: controlPanel,
+      getCreationOptions={async () => ({
+        initialInput: {
+          id: dataView.id ?? '',
+          type: CONTROL_GROUP_TYPE,
+          timeRange,
+          refreshConfig: REFRESH_CONFIG,
+          viewMode: ViewMode.VIEW,
+          filters: [...filters],
+          query,
+          chainingSystem: 'HIERARCHICAL',
+          controlStyle: 'oneLine',
+          defaultControlWidth: 'small',
+          panels: controlPanel,
+        },
       })}
       onLoadComplete={(newControlGroup) => {
         setControlGroup(newControlGroup);

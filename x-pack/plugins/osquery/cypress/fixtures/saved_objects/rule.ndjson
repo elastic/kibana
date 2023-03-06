@@ -48,7 +48,7 @@
       ],
       "query": "_id:*",
       "filters": [],
-      "note": "!{osquery{\"query\":\"SELECT * FROM os_version where name='{{host.os.name}}';\",\"label\":\"Get processes\",\"ecs_mapping\":{\"process.pid\":{\"field\":\"pid\"},\"process.name\":{\"field\":\"name\"},\"process.executable\":{\"field\":\"path\"},\"process.args\":{\"field\":\"cmdline\"},\"process.working_directory\":{\"field\":\"cwd\"},\"user.id\":{\"field\":\"uid\"},\"group.id\":{\"field\":\"gid\"},\"process.parent.pid\":{\"field\":\"parent\"},\"process.pgid\":{\"field\":\"pgroup\"}}}}\n\n!{osquery{\"query\":\"select * from users;\",\"label\":\"Get users\"}}"
+      "note": "!{osquery{\"query\":\"SELECT * FROM os_version where name='{{host.os.name}}';\",\"label\":\"Get processes\",\"ecs_mapping\":{\"labels\":{\"field\":\"arch\"}}}}\n\n!{osquery{\"query\":\"select * from users;\",\"label\":\"Get users\"}}"
     },
     "schedule": {
       "interval": "5m"

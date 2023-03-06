@@ -74,7 +74,7 @@ function showErrorDialog({
             <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody data-test-subj="errorModalBody">
-            <EuiCallOut size="s" color="danger" iconType="alert" title={error.message} />
+            <EuiCallOut size="s" color="danger" iconType="error" title={error.message} />
             {text && (
               <React.Fragment>
                 <EuiSpacer size="s" />

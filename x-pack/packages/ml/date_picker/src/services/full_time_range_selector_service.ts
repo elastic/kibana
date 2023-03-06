@@ -18,6 +18,13 @@ import { getTimeFieldRange } from './time_field_range';
 import type { GetTimeFieldRangeResponse } from './types';
 
 /**
+ * Allowed API paths to be passed to `setFullTimeRange`.
+ */
+export type SetFullTimeRangeApiPath =
+  | '/internal/file_upload/time_field_range'
+  | '/api/ml/fields_service/time_field_range';
+
+/**
  * Determines the full available time range of the given Data View and updates
  * the timefilter accordingly.
  *
@@ -27,6 +34,7 @@ import type { GetTimeFieldRangeResponse } from './types';
  * @param http - HttpStart
  * @param query - optional query
  * @param excludeFrozenData - optional boolean flag
+ * @param path - optional SetFullTimeRangeApiPath
  * @returns {GetTimeFieldRangeResponse}
  */
 export async function setFullTimeRange(
@@ -35,7 +43,8 @@ export async function setFullTimeRange(
   toasts: ToastsStart,
   http: HttpStart,
   query?: QueryDslQueryContainer,
-  excludeFrozenData?: boolean
+  excludeFrozenData?: boolean,
+  path: SetFullTimeRangeApiPath = '/internal/file_upload/time_field_range'
 ): Promise<GetTimeFieldRangeResponse> {
   try {
     const runtimeMappings = dataView.getRuntimeMappings();
@@ -45,6 +54,7 @@ export async function setFullTimeRange(
       query: excludeFrozenData ? addExcludeFrozenToQuery(query) : query,
       ...(isPopulatedObject(runtimeMappings) ? { runtimeMappings } : {}),
       http,
+      path,
     });
 
     if (resp.start.epoch && resp.end.epoch) {
@@ -52,6 +62,16 @@ export async function setFullTimeRange(
         from: moment(resp.start.epoch).toISOString(),
         to: moment(resp.end.epoch).toISOString(),
       });
+    } else if (typeof resp.start === 'number' && typeof resp.end === 'number') {
+      timefilter.setTime({
+        from: moment(resp.start).toISOString(),
+        to: moment(resp.end).toISOString(),
+      });
+      return {
+        success: true,
+        start: { epoch: resp.start, string: moment(resp.start).toISOString() },
+        end: { epoch: resp.end, string: moment(resp.end).toISOString() },
+      };
     } else {
       toasts.addWarning({
         title: i18n.translate('xpack.ml.datePicker.fullTimeRangeSelector.noResults', {

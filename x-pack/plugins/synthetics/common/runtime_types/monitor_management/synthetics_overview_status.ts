@@ -6,8 +6,9 @@
  */
 
 import * as t from 'io-ts';
+import { ObserverCodec } from '../ping/observer';
 import { ErrorStateCodec } from '../ping/error_state';
-import { AgentType, MonitorType, ObserverType, PingErrorType, UrlType } from '..';
+import { AgentType, MonitorType, PingErrorType, UrlType } from '..';
 
 export const OverviewPingCode = t.interface({
   '@timestamp': t.string,
@@ -16,7 +17,7 @@ export const OverviewPingCode = t.interface({
     up: t.number,
   }),
   monitor: MonitorType,
-  observer: ObserverType,
+  observer: ObserverCodec,
   config_id: t.string,
   error: PingErrorType,
   agent: AgentType,

@@ -113,9 +113,11 @@ export const StdErrorLogs = ({
               </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="alert">
-            <p>{summaryMessage}</p>
-          </EuiCallOut>
+          {summaryMessage && (
+            <EuiCallOut title={ERROR_SUMMARY_LABEL} color="danger" iconType="alert">
+              <p>{summaryMessage}</p>
+            </EuiCallOut>
+          )}
         </>
       )}
 

@@ -20,6 +20,7 @@ const mockOldAction: RuleAction = {
   group: 'default',
   actionTypeId: 'slack',
   params: {},
+  uuid: '123-456',
 };
 
 const mockAction: RuleAction = {
@@ -32,12 +33,12 @@ const mockAction: RuleAction = {
     notifyWhen: 'onActiveAlert',
     throttle: null,
   },
+  uuid: '123-456',
 };
 
 const mockSummaryAction: RuleAction = {
   id: '1',
-  // @ts-ignore
-  group: null,
+  group: 'default',
   actionTypeId: 'slack',
   params: {},
   frequency: {

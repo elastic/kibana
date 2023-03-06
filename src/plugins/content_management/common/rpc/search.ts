@@ -19,7 +19,10 @@ export const searchSchemas: ProcedureSchemas = {
     },
     { unknowns: 'forbid' }
   ),
-  out: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  out: schema.oneOf([
+    schema.object({}, { unknowns: 'allow' }),
+    schema.arrayOf(schema.object({}, { unknowns: 'allow' })),
+  ]),
 };
 
 export interface SearchIn<

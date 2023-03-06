@@ -22,6 +22,8 @@ import styled from 'styled-components';
 
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 
+import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
+
 import type { DataStream, RegistryVarsEntry } from '../../../../../../types';
 
 import { MultiTextInput } from './multi_text_input';
@@ -72,7 +74,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
           />
         );
       }
-      if (name === 'data_stream.dataset' && packageType === 'input') {
+      if (name === DATASET_VAR_NAME && packageType === 'input') {
         return (
           <DatasetComboBox
             pkgName={packageName}

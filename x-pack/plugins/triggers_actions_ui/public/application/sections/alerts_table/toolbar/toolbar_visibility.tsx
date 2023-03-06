@@ -15,6 +15,7 @@ import { AlertsCount } from './components/alerts_count/alerts_count';
 import type { Alerts, BulkActionsConfig, GetInspectQuery, RowSelection } from '../../../../types';
 import { LastUpdatedAt } from './components/last_updated_at';
 import { FieldBrowser } from '../../field_browser';
+import { FieldBrowserOptions } from '../../field_browser/types';
 import { InspectButton } from './components/inspect';
 
 const BulkActionsToolbar = lazy(() => import('../bulk_actions/components/toolbar'));
@@ -47,6 +48,7 @@ const getDefaultVisibility = ({
   onResetColumns,
   browserFields,
   controls,
+  fieldBrowserOptions,
   getInspectQuery,
   showInspectButton,
 }: {
@@ -57,6 +59,7 @@ const getDefaultVisibility = ({
   onResetColumns: () => void;
   browserFields: BrowserFields;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
+  fieldBrowserOptions?: FieldBrowserOptions;
   getInspectQuery: GetInspectQuery;
   showInspectButton: boolean;
 }): EuiDataGridToolBarVisibilityOptions => {
@@ -73,6 +76,7 @@ const getDefaultVisibility = ({
               browserFields={browserFields}
               onResetColumns={onResetColumns}
               onToggleColumn={onToggleColumn}
+              options={fieldBrowserOptions}
             />
           )}
         </>
@@ -101,9 +105,13 @@ export const getToolbarVisibility = ({
   onResetColumns,
   browserFields,
   setIsBulkActionsLoading,
+  clearSelection,
   controls,
+  refresh,
+  fieldBrowserOptions,
   getInspectQuery,
   showInspectButton,
+  toolbarVisiblityProp,
 }: {
   bulkActions: BulkActionsConfig[];
   alertsCount: number;
@@ -116,9 +124,13 @@ export const getToolbarVisibility = ({
   onResetColumns: () => void;
   browserFields: any;
   setIsBulkActionsLoading: (isLoading: boolean) => void;
+  clearSelection: () => void;
   controls?: EuiDataGridToolBarAdditionalControlsOptions;
+  refresh: () => void;
+  fieldBrowserOptions?: FieldBrowserOptions;
   getInspectQuery: GetInspectQuery;
   showInspectButton: boolean;
+  toolbarVisiblityProp?: EuiDataGridToolBarVisibilityOptions;
 }): EuiDataGridToolBarVisibilityOptions => {
   const selectedRowsCount = rowSelection.size;
   const defaultVisibility = getDefaultVisibility({
@@ -129,13 +141,18 @@ export const getToolbarVisibility = ({
     onResetColumns,
     browserFields,
     controls,
+    fieldBrowserOptions,
     getInspectQuery,
     showInspectButton,
   });
   const isBulkActionsActive =
     selectedRowsCount === 0 || selectedRowsCount === undefined || bulkActions.length === 0;
 
-  if (isBulkActionsActive) return defaultVisibility;
+  if (isBulkActionsActive)
+    return {
+      ...defaultVisibility,
+      ...(toolbarVisiblityProp ?? {}),
+    };
 
   const options = {
     showColumnSelector: false,
@@ -152,12 +169,15 @@ export const getToolbarVisibility = ({
                 items={bulkActions}
                 alerts={alerts}
                 setIsBulkActionsLoading={setIsBulkActionsLoading}
+                clearSelection={clearSelection}
+                refresh={refresh}
               />
             </Suspense>
           </>
         ),
       },
     },
+    ...(toolbarVisiblityProp ?? {}),
   };
 
   return options;

@@ -12,7 +12,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should update a single rule property of name using a rule_id', async () => {
@@ -229,6 +229,8 @@ export default ({ getService }: FtrProviderContext) => {
           .send(updatedRule)
           .expect(200);
 
+        const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
+
         const outputRule = getSimpleRuleOutputWithoutRuleId();
         outputRule.name = 'some other name';
         outputRule.version = 2;
@@ -241,10 +243,11 @@ export default ({ getService }: FtrProviderContext) => {
               message:
                 'Hourly\nRule {{context.rule.name}} generated {{state.signals_count}} alerts',
             },
+            uuid: bodyToCompare.actions![0].uuid,
           },
         ];
         outputRule.throttle = '1d';
-        const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
+
         expect(bodyToCompare).to.eql(outputRule);
       });
 

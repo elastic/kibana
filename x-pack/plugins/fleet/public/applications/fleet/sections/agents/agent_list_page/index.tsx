@@ -27,6 +27,7 @@ import {
   useStartServices,
   useFlyoutContext,
   sendGetAgentTags,
+  useFleetServerStandalone,
 } from '../../../hooks';
 import { AgentEnrollmentFlyout } from '../../../components';
 import {
@@ -433,6 +434,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   // Fleet server unhealthy status
   const { isUnhealthy: isFleetServerUnhealthy } = useFleetServerUnhealthy();
+  const { isFleetServerStandalone } = useFleetServerStandalone();
+  const showUnhealthyCallout = isFleetServerUnhealthy && !isFleetServerStandalone;
+
   const onClickAddFleetServer = useCallback(() => {
     flyoutContext.openFleetServerFlyout();
   }, [flyoutContext]);
@@ -558,7 +562,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           }}
         />
       )}
-      {isFleetServerUnhealthy && (
+      {showUnhealthyCallout && (
         <>
           {cloud?.deploymentUrl ? (
             <FleetServerCloudUnhealthyCallout deploymentUrl={cloud.deploymentUrl} />
