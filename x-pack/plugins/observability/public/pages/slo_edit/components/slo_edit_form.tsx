@@ -83,7 +83,7 @@ export function SloEditForm({ slo }: Props) {
         await updateSlo({ sloId: slo.id, slo: processedValues });
 
         toasts.addSuccess(
-          i18n.translate('xpack.observability.slos.sloEdit.update.success', {
+          i18n.translate('xpack.observability.slo.sloEdit.update.success', {
             defaultMessage: 'Successfully updated {name}',
             values: { name: getValues().name },
           })
@@ -92,7 +92,7 @@ export function SloEditForm({ slo }: Props) {
         navigateToUrl(basePath.prepend(paths.observability.slos));
       } catch (error) {
         toasts.addError(new Error(error), {
-          title: i18n.translate('xpack.observability.slos.sloEdit.creation.error', {
+          title: i18n.translate('xpack.observability.slo.sloEdit.creation.error', {
             defaultMessage: 'Something went wrong',
           }),
         });
@@ -104,7 +104,7 @@ export function SloEditForm({ slo }: Props) {
         await createSlo({ slo: processedValues });
 
         toasts.addSuccess(
-          i18n.translate('xpack.observability.slos.sloEdit.creation.success', {
+          i18n.translate('xpack.observability.slo.sloEdit.creation.success', {
             defaultMessage: 'Successfully created {name}',
             values: { name: getValues().name },
           })
@@ -112,7 +112,7 @@ export function SloEditForm({ slo }: Props) {
         navigateToUrl(basePath.prepend(paths.observability.slos));
       } catch (error) {
         toasts.addError(new Error(error), {
-          title: i18n.translate('xpack.observability.slos.sloEdit.creation.error', {
+          title: i18n.translate('xpack.observability.slo.sloEdit.creation.error', {
             defaultMessage: 'Something went wrong',
           }),
         });
@@ -153,7 +153,7 @@ export function SloEditForm({ slo }: Props) {
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
             <EuiTitle>
               <h2>
-                {i18n.translate('xpack.observability.slos.sloEdit.definition.title', {
+                {i18n.translate('xpack.observability.slo.sloEdit.definition.title', {
                   defaultMessage: 'Define SLI',
                 })}
               </h2>
@@ -162,7 +162,7 @@ export function SloEditForm({ slo }: Props) {
             <EuiSpacer size="xl" />
 
             <EuiFormLabel>
-              {i18n.translate('xpack.observability.slos.sloEdit.definition.sliType', {
+              {i18n.translate('xpack.observability.slo.sloEdit.definition.sliType', {
                 defaultMessage: 'SLI type',
               })}
             </EuiFormLabel>
@@ -205,7 +205,7 @@ export function SloEditForm({ slo }: Props) {
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
             <EuiTitle>
               <h2>
-                {i18n.translate('xpack.observability.slos.sloEdit.objectives.title', {
+                {i18n.translate('xpack.observability.slo.sloEdit.objectives.title', {
                   defaultMessage: 'Set objectives',
                 })}
               </h2>
@@ -236,7 +236,7 @@ export function SloEditForm({ slo }: Props) {
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none" style={{ maxWidth }}>
             <EuiTitle>
               <h2>
-                {i18n.translate('xpack.observability.slos.sloEdit.description.title', {
+                {i18n.translate('xpack.observability.slo.sloEdit.description.title', {
                   defaultMessage: 'Describe SLO',
                 })}
               </h2>
@@ -258,10 +258,10 @@ export function SloEditForm({ slo }: Props) {
                 onClick={handleSubmit}
               >
                 {isEditMode
-                  ? i18n.translate('xpack.observability.slos.sloEdit.editSloButton', {
+                  ? i18n.translate('xpack.observability.slo.sloEdit.editSloButton', {
                       defaultMessage: 'Update SLO',
                     })
-                  : i18n.translate('xpack.observability.slos.sloEdit.createSloButton', {
+                  : i18n.translate('xpack.observability.slo.sloEdit.createSloButton', {
                       defaultMessage: 'Create SLO',
                     })}
               </EuiButton>
@@ -272,7 +272,7 @@ export function SloEditForm({ slo }: Props) {
                 fill
                 onClick={() => navigateToUrl(basePath.prepend(paths.observability.slos))}
               >
-                {i18n.translate('xpack.observability.slos.sloEdit.cancelButton', {
+                {i18n.translate('xpack.observability.slo.sloEdit.cancelButton', {
                   defaultMessage: 'Cancel',
                 })}
               </EuiButton>

@@ -594,4 +594,12 @@ export const getEndpointRule = (): CustomRule => ({
   lookBack: getLookBack(),
   timeline: getTimeline(),
   maxSignals: 100,
+  exceptionLists: [
+    {
+      id: 'endpoint_list',
+      list_id: 'endpoint_list',
+      namespace_type: 'agnostic',
+      type: 'endpoint',
+    },
+  ],
 });
