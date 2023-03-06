@@ -18,8 +18,8 @@ import {
   SUB_PLUGINS_REDUCER,
   TestProviders,
 } from '../../../common/mock';
-import type { AlertsTableComponentProps } from './grouped_alerts';
-import { GroupedAlertsTableComponent } from './grouped_alerts';
+import type { AlertsTableComponentProps } from './alerts_grouping';
+import { GroupedAlertsTableComponent } from './alerts_grouping';
 import { TableId } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import type { UseFieldBrowserOptionsProps } from '../../../timelines/components/fields_browser';
@@ -181,7 +181,6 @@ const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="a
 
 const testProps: AlertsTableComponentProps = {
   defaultFilters: [],
-  dispatch: jest.fn(),
   from: '2020-07-07T08:20:18.966Z',
   globalFilters: [],
   globalQuery: {
@@ -255,7 +254,6 @@ describe('GroupedAlertsTable', () => {
             language: 'language',
           }}
           globalFilters={[]}
-          dispatch={jest.fn()}
           runtimeMappings={{}}
           signalIndexName={'test'}
           renderChildComponent={() => <></>}
