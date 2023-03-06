@@ -66,16 +66,20 @@ const loadPersistedSavedSearch = async (
     appStateContainer,
     internalStateContainer,
     savedSearchContainer,
+    loadAndResolveDataView,
   }: {
     appStateContainer: DiscoverAppStateContainer;
     internalStateContainer: InternalStateContainer;
     savedSearchContainer: SavedSearchContainer;
+    loadAndResolveDataView: () => Promise<{ dataView: DataView }>;
   }
 ): Promise<SavedSearch> => {
   addLog('🧭 [discoverState] loadSavedSearch');
   const isEmptyURL = appStateContainer.isEmptyURL();
   if (isEmptyURL) {
     appStateContainer.set({});
+  } else {
+    await loadAndResolveDataView();
   }
   const currentSavedSearch = await savedSearchContainer.load(id, {
     dataViewList: internalStateContainer.getState().savedDataViews,
@@ -226,7 +230,7 @@ export interface DiscoverStateContainer {
      */
     loadSavedSearch: (
       savedSearchId: string | undefined,
-      dataView: DataView | undefined
+      dataView?: DataView | undefined
     ) => Promise<SavedSearch | undefined>;
   };
 }
@@ -368,6 +372,7 @@ export function getDiscoverStateContainer({
         appStateContainer,
         internalStateContainer,
         savedSearchContainer,
+        loadAndResolveDataView,
       });
     } else {
       nextSavedSearch = await loadNewSavedSearch(nextDataView, {
@@ -379,9 +384,11 @@ export function getDiscoverStateContainer({
       });
     }
     const dataView = nextSavedSearch.searchSource.getField('index');
-
     if (dataView) {
       setDataView(dataView);
+      if (!dataView.isPersisted()) {
+        internalStateContainer.transitions.appendAdHocDataViews(dataView);
+      }
     }
     return nextSavedSearch;
   };

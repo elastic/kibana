@@ -92,7 +92,7 @@ describe('Test discover state', () => {
   test('pauseAutoRefreshInterval sets refreshInterval.pause to true', async () => {
     history.push('/#?_g=(refreshInterval:(pause:!f,value:5000))');
     expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!f,value:5000))');
-    await state.actions.pauseAutoRefreshInterval();
+    await state.actions.setDataView(dataViewMock);
     expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!t,value:5000))');
   });
 });
@@ -109,7 +109,7 @@ describe('Test discover initial state sort handling', () => {
       history,
     });
     state.savedSearchState.load = jest.fn(() => Promise.resolve(savedSearch));
-    await state.actions.loadSavedSearchById(savedSearch.id!);
+    await state.actions.loadSavedSearch(savedSearch.id!);
     const stopSync = state.appState.syncState().stop;
     expect(state.appState.getState().sort).toEqual([['timestamp', 'desc']]);
     stopSync();
@@ -120,7 +120,7 @@ describe('Test discover initial state sort handling', () => {
     history.push('/#?_a=(sort:!())');
     const nextSavedSearch = { ...savedSearchMock, ...{ sort: [['bytes', 'desc']] as SortOrder[] } };
     state = getDiscoverStateContainer({
-      savedSearchId: nextSavedSearch.id,
+      savedSearch: nextSavedSearch,
       services: discoverServiceMock,
       history,
     });
@@ -133,7 +133,7 @@ describe('Test discover initial state sort handling', () => {
     history = createBrowserHistory();
     history.push('/#?_a=(sort:!())');
     state = getDiscoverStateContainer({
-      savedSearchId: savedSearchMockWithTimeField.id,
+      savedSearch: savedSearchMockWithTimeField,
       services: discoverServiceMock,
       history,
     });

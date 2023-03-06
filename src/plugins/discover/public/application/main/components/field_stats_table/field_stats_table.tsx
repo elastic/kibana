@@ -117,6 +117,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     stateContainer,
     onAddFilter,
     trackUiMetric,
+    savedSearch,
     searchSessionId,
   } = props;
   const totalHits$ = stateContainer?.dataState.data$.totalHits$;
@@ -165,7 +166,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
       // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
         dataView,
-        savedSearch: stateContainer?.savedSearchState.get(),
+        savedSearch,
         query,
         filters,
         visibleFieldNames: columns,
@@ -191,6 +192,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     searchSessionId,
     totalHits$,
     stateContainer,
+    savedSearch,
   ]);
 
   useEffect(() => {
