@@ -13,6 +13,7 @@ import type {
   RequestHandler,
   RouteValidatorFullConfig,
   RequestHandlerContextBase,
+  RouteConfigOptions,
 } from '@kbn/core-http-server';
 
 type RqCtx = RequestHandlerContextBase;
@@ -45,7 +46,7 @@ export interface CreateVersionedRouterArgs<Ctx extends RqCtx = RqCtx> {
  * const versionedRoute = versionedRouter
  *   .post({
  *     path: '/api/my-app/foo/{id?}',
- *     options: { timeout: { payload: 60000 } },
+ *     options: { timeout: { payload: 60000 }, access: 'public' },
  *   })
  *   .addVersion(
  *     {
@@ -100,13 +101,27 @@ export interface VersionHTTPToolkit {
 }
 
 /**
+ * Converts an input property from optional to required. Needed for making RouteConfigOptions['access'] required.
+ */
+type WithRequiredProperty<Type, Key extends keyof Type> = Type & {
+  [Property in Key]-?: Type[Property];
+};
+
+/**
+ * Versioned route access flag, required
+ * - '/api/foo' is 'public'
+ * - '/internal/my-foo'  is 'internal'
+ * Required
+ */
+type VersionedRouteConfigOptions = WithRequiredProperty<RouteConfigOptions<RouteMethod>, 'access'>;
+/**
  * Configuration for a versioned route
  * @experimental
  */
 export type VersionedRouteConfig<Method extends RouteMethod> = Omit<
   RouteConfig<unknown, unknown, unknown, Method>,
-  'validate'
->;
+  'validate' | 'options'
+> & { options: VersionedRouteConfigOptions };
 
 /**
  * Create an {@link VersionedRoute | versioned route}.
