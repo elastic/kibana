@@ -20,6 +20,7 @@ import {
   SAMPLE_ROWS_PER_PAGE_SETTING,
   SORT_DEFAULT_ORDER_SETTING,
   HIDE_ANNOUNCEMENTS,
+  SEARCH_ON_PAGE_LOAD_SETTING,
 } from '../../common';
 import { UI_SETTINGS, calculateBounds } from '@kbn/data-plugin/public';
 import { TopNavMenu } from '@kbn/navigation-plugin/public';
@@ -110,6 +111,8 @@ export function createDiscoverServicesMock(): DiscoverServices {
           return 50;
         } else if (key === HIDE_ANNOUNCEMENTS) {
           return false;
+        } else if (key === SEARCH_ON_PAGE_LOAD_SETTING) {
+          return true;
         }
       }),
       isDefault: (key: string) => {

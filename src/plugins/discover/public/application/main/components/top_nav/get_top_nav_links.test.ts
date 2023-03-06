@@ -33,7 +33,6 @@ test('getTopNavLinks result', () => {
     state,
     isPlainRecord: false,
     persistDataView: jest.fn(),
-    updateDataViewList: jest.fn(),
     adHocDataViews: [],
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
@@ -95,7 +94,6 @@ test('getTopNavLinks result for sql mode', () => {
     state,
     isPlainRecord: true,
     persistDataView: jest.fn(),
-    updateDataViewList: jest.fn(),
     adHocDataViews: [],
   });
   expect(topNavLinks).toMatchInlineSnapshot(`

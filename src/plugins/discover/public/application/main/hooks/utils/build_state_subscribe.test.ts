@@ -35,12 +35,12 @@ describe('buildStateSubscribe', () => {
     jest.clearAllMocks();
   });
 
-  it('should set the data view if the index has changed, but no refetch should be triggered', async () => {
+  it('should set the data view if the index has changed, and refetch should be triggered', async () => {
     await getSubscribeFn()({ index: dataViewComplexMock.id });
 
     expect(stateContainer.actions.setDataView).toHaveBeenCalledWith(dataViewComplexMock);
     expect(stateContainer.dataState.reset).toHaveBeenCalled();
-    expect(stateContainer.dataState.refetch$.next).not.toHaveBeenCalled();
+    expect(stateContainer.dataState.refetch$.next).toHaveBeenCalled();
   });
 
   it('should not call refetch$ if nothing changes', async () => {
@@ -75,7 +75,7 @@ describe('buildStateSubscribe', () => {
 
   it('should not execute setState function if initialFetchStatus is UNINITIALIZED', async () => {
     const stateSubscribeFn = getSubscribeFn();
-    stateContainer.dataState.getInitialFetchStatus() = FetchStatus.UNINITIALIZED;
+    stateContainer.dataState.getInitialFetchStatus = jest.fn(() => FetchStatus.UNINITIALIZED);
     await stateSubscribeFn({ index: dataViewComplexMock.id });
 
     expect(stateContainer.dataState.reset).toHaveBeenCalled();

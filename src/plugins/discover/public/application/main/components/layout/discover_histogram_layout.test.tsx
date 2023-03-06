@@ -28,7 +28,6 @@ import { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import { CoreTheme } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';
-import { RequestAdapter } from '@kbn/inspector-plugin/public';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { getSessionServiceMock } from '@kbn/data-plugin/public/search/session/mocks';
 import { ResetSearchButton } from './reset_search_button';
@@ -112,7 +111,7 @@ const mountComponent = async ({
 
   const stateContainer = getStateContainer(savedSearch);
   stateContainer.dataState.data$ = savedSearchData$;
-  stateContainer.savedSearchState.reset = jest.fn();
+  stateContainer.savedSearchState.undo = jest.fn();
 
   const props: DiscoverHistogramLayoutProps = {
     isPlainRecord,
@@ -124,7 +123,6 @@ const mountComponent = async ({
     viewMode: VIEW_MODE.DOCUMENT_LEVEL,
     onAddFilter: jest.fn(),
     resizeRef: { current: null },
-    inspectorAdapters: { requests: new RequestAdapter() },
   };
   stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 
@@ -180,8 +178,9 @@ describe('Discover histogram layout component', () => {
 
     it('should call resetSavedSearch when clicked', async () => {
       const { component, stateContainer } = await mountComponent();
+      expect(component.find(ResetSearchButton).exists()).toBe(true);
       component.find(ResetSearchButton).find('button').simulate('click');
-      expect(stateContainer.savedSearchState.reset).toHaveBeenCalled();
+      expect(stateContainer.savedSearchState.undo).toHaveBeenCalled();
     });
   });
 });

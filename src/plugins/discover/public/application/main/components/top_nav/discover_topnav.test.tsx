@@ -42,7 +42,6 @@ function getProps(savePermissions = true): DiscoverTopNavProps {
     onChangeDataView: jest.fn(),
     isPlainRecord: false,
     persistDataView: jest.fn(),
-    updateDataViewList: jest.fn(),
     onDataViewCreated: jest.fn(),
   };
 }

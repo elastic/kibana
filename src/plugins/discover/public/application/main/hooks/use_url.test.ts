@@ -15,16 +15,16 @@ describe('test useUrl', () => {
     const { history } = createSearchSessionMock();
     const stateContainer = getDiscoverStateMock({ isTimeBased: true });
     history.push('/view');
-    const reset = jest.fn();
-    stateContainer.savedSearchState.reset = reset;
+    const load = jest.fn();
+    stateContainer.actions.loadSavedSearch = load;
     const props = {
       history,
       stateContainer,
     };
     renderHook(() => useUrl(props));
     history.push('/new');
-    expect(reset).toHaveBeenCalledTimes(0);
+    expect(load).toHaveBeenCalledTimes(0);
     history.push('/');
-    expect(reset).toHaveBeenCalledTimes(1);
+    expect(load).toHaveBeenCalledTimes(1);
   });
 });

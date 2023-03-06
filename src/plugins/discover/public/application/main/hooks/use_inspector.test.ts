@@ -27,7 +27,6 @@ describe('test useInspector', () => {
 
     const { result } = renderHook(() => {
       return useInspector({
-        inspectorAdapters: { requests, lensRequests },
         stateContainer,
         inspector: discoverServiceMock.inspector,
       });

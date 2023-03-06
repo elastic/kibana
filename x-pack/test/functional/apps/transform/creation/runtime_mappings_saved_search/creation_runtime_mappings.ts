@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
     },
   };
 
-  describe.only('creation with runtime mappings', function () {
+  describe('creation with runtime mappings', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');

@@ -66,7 +66,6 @@ function DiscoverDocumentsComponent({
   onFieldEdited,
 }: {
   dataView: DataView;
-  navigateTo: (url: string) => void;
   onAddFilter?: DocViewFilterFn;
   stateContainer: DiscoverStateContainer;
   onFieldEdited?: () => void;

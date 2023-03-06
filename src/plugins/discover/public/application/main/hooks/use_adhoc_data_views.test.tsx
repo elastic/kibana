@@ -74,13 +74,15 @@ const savedSearchMock = {
 
 describe('useAdHocDataViews', () => {
   it('should save data view with new id and update saved search', async () => {
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    const stateContainer = getDiscoverStateMock({
+      isTimeBased: true,
+      savedSearch: savedSearchMock,
+    });
+    stateContainer.actions.setDataView(mockDataView);
 
     const hook = renderHook(
       () =>
         useAdHocDataViews({
-          dataView: mockDataView,
-          savedSearch: savedSearchMock,
           stateContainer,
           filterManager: mockDiscoverServices.filterManager,
           toastNotifications: mockDiscoverServices.toastNotifications,

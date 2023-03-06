@@ -33,7 +33,6 @@ export interface DiscoverMainContentProps {
 export const DiscoverMainContent = ({
   dataView,
   isPlainRecord,
-  navigateTo,
   viewMode,
   onAddFilter,
   onFieldEdited,
@@ -73,7 +72,6 @@ export const DiscoverMainContent = ({
       {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
         <DiscoverDocuments
           dataView={dataView}
-          navigateTo={navigateTo}
           onAddFilter={!isPlainRecord ? onAddFilter : undefined}
           stateContainer={stateContainer}
           onFieldEdited={!isPlainRecord ? onFieldEdited : undefined}
