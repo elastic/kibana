@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import url from 'url';
 import { stringify } from 'querystring';
 
 import React from 'react';
@@ -37,24 +36,18 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
       userQuery: '',
     });
 
-  // TODO reuse code from AgentLogsUI
   const getErrorLogsUrl = (agentId: string, timestamp: string) => {
-    return coreStart.http.basePath.prepend(
-      // TODO remove deprecated format usage
-      url.format({
-        pathname: '/app/logs/stream',
-        search: stringify({
-          logPosition: encode({
-            position: { time: Date.parse(timestamp) },
-            streamLive: false,
-          }),
-          logFilter: encode({
-            expression: logStreamQuery(agentId),
-            kind: 'kuery',
-          }),
-        }),
-      })
-    );
+    const queryParams = stringify({
+      logPosition: encode({
+        position: { time: Date.parse(timestamp) },
+        streamLive: false,
+      }),
+      logFilter: encode({
+        expression: logStreamQuery(agentId),
+        kind: 'kuery',
+      }),
+    });
+    return coreStart.http.basePath.prepend(`/app/logs/stream?${queryParams}`);
   };
 
   return (
