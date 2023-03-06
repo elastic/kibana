@@ -25,7 +25,7 @@ export const useLogView = ({
   logViews,
   useDevTools = isDevMode(),
 }: {
-  initialLogViewReference?: LogViewReference | null;
+  initialLogViewReference?: LogViewReference;
   logViews: ILogViewsClient;
   useDevTools?: boolean;
 }) => {
@@ -71,19 +71,26 @@ export const useLogView = ({
   );
 
   const logView = useSelector(logViewStateService, (state) =>
-    state.matches('resolving') || state.matches('checkingStatus') || state.matches('resolved')
+    state.matches('resolving') ||
+    state.matches('checkingStatus') ||
+    state.matches('resolvedPersistedLogView') ||
+    state.matches('resolvedInlineLogView')
       ? state.context.logView
       : undefined
   );
 
   const resolvedLogView = useSelector(logViewStateService, (state) =>
-    state.matches('checkingStatus') || state.matches('resolved')
+    state.matches('checkingStatus') ||
+    state.matches('resolvedPersistedLogView') ||
+    state.matches('resolvedInlineLogView')
       ? state.context.resolvedLogView
       : undefined
   );
 
   const logViewStatus = useSelector(logViewStateService, (state) =>
-    state.matches('resolved') ? state.context.status : undefined
+    state.matches('resolvedPersistedLogView') || state.matches('resolvedInlineLogView')
+      ? state.context.status
+      : undefined
   );
 
   const isLoadingLogView = useSelector(logViewStateService, (state) => state.matches('loading'));
@@ -139,7 +146,10 @@ export const useLogView = ({
 
       const doneState = await waitFor(
         logViewStateService,
-        (state) => state.matches('updatingFailed') || state.matches('resolved')
+        (state) =>
+          state.matches('updatingFailed') ||
+          state.matches('resolvedPersistedLogView') ||
+          state.matches('resolvedInlineLogView')
       );
 
       if (doneState.matches('updatingFailed')) {

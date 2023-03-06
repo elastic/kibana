@@ -56,7 +56,14 @@ export type LogViewTypestate =
         LogViewContextWithResolvedLogView;
     }
   | {
-      value: 'resolved';
+      value: 'resolvedPersistedLogView';
+      context: LogViewContextWithReference &
+        LogViewContextWithLogView &
+        LogViewContextWithResolvedLogView &
+        LogViewContextWithStatus;
+    }
+  | {
+      value: 'resolvedInlineLogView';
       context: LogViewContextWithReference &
         LogViewContextWithLogView &
         LogViewContextWithResolvedLogView &
