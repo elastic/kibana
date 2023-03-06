@@ -15,7 +15,7 @@ All Kibana HTTP API developers and maintainers must ensure that past versions of
   The exact number of past APIs and the length of time they are kept available will vary per use case. Generally, the length of time will be shorter for internal HTTP APIs than for public HTTP APIs.
 </DocCallOut>
 
-Versioned HTTP APIs should hold to the following set of properties. How you meet these is properties is up to you. Use the examples provided as insipiration for your case.
+Versioned HTTP APIs should hold to the following set of properties. **Note:** how you meet these is properties is up to you. Use the examples provided as a guide.
 
 ### 1. Do not directly expose persistence schemas on your HTTP API endpoints
 
@@ -33,10 +33,10 @@ router.get(
   },
   (ctx, req, res) => {
     const { savedObjects } = await ctx.core;
-    const myObject = await savedObjects.client.get<MyObjectAttributes>('myObject', req.params.id)
+    const myObject = await savedObjects.client.get<MyObjectAttributes>('myObject', req.params.id);
     return res.ok({
       body: { ...myObject.attributes }, // <- Directly exposing SO attributes
-    })
+    });
   }
 );
 ```
@@ -54,7 +54,7 @@ Whenever we perform a data migration the body of this endpoint will change for a
 
 Therefore a persistence schema is the _shape_ of any data your code directly, or indirectly _persists_. Think carefully about any persisted schemas your code might be using and ensure that none of them are exposed directly over your HTTP APIs.
 
-Let's make the minimal changes to prepare the endpoint above for versoning:
+Let's make the minimal changes to prepare the endpoint above for versioning:
 
 ```ts
 interface MyObject {
@@ -77,7 +77,7 @@ router.get(
     const { savedObjects } = await ctx.core;
     const {
       attributes: { foo, bar },
-    } = await savedObjects.client.get<MyObjectAttributes>('myObject', req.params.id)
+    } = await savedObjects.client.get<MyObjectAttributes>('myObject', req.params.id);
     // 2.
     // Explicitly map to our HTTP body
     const body: GetMyObjectResponse = { foo, bar };
@@ -86,7 +86,7 @@ router.get(
 );
 ```
 
-The biggest changes are:
+The changes are:
 
 1. We created a **new interface** to represent our HTTP API contract. **Note:** Even though we duplicated some of our `MyObjectAttributes` in `GetMyObjectResponse`, it removed the risk that a data migration will break our current HTTP contract without TypeScript noticing.
 2. We replaced object spread with **cherry-picking values** from our persistence schema. We now have a **translation layer** between our persistence schema and HTTP API interface.
@@ -114,8 +114,8 @@ router.post(
   },
   (ctx, req, res) => {
     const { savedObjects } = await ctx.core;
-    const { id } = await savedObjects.client.create<MyObjectAttributes>('myObject', req.params.body)
-    return res.ok({ body: id })
+    const { id } = await savedObjects.client.create<MyObjectAttributes>('myObject', req.params.body);
+    return res.ok({ body: id });
   }
 );
 ```
