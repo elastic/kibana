@@ -196,7 +196,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.console.closeHelpIfExists();
         const request = await PageObjects.console.getRequest();
-        expect(request.length).to.be.greaterThan(0);
+        // the request is restored from the local storage value
+        expect(request).to.eql('GET _cat/indices');
         await browser.clearLocalStorage();
       });
     });
