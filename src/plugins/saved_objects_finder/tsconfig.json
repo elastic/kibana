@@ -13,6 +13,8 @@
     "@kbn/saved-objects-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/config-schema",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-http-browser",
   ],
   "exclude": [
     "target/**/*",
