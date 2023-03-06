@@ -23,6 +23,7 @@ import {
   IntervalSchedule,
   SanitizedRule,
   RuleSnoozeSchedule,
+  AlertsFilterTimeframe,
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
@@ -73,8 +74,18 @@ export interface RulesClientContext {
 
 export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
 
-export type NormalizedAlertActionWithGeneratedValues = Omit<NormalizedAlertAction, 'uuid'> & {
+export type NormalizedAlertActionWithGeneratedValues = Omit<
+  NormalizedAlertAction,
+  'uuid' | 'alertsFilter'
+> & {
   uuid: string;
+  alertsFilter?: {
+    query: null | {
+      kql: string;
+      dsl: string;
+    };
+    timeframe: null | AlertsFilterTimeframe;
+  };
 };
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {

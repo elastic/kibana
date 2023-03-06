@@ -51,6 +51,7 @@ import {
   RuleLastRun,
   SanitizedRule,
   AlertsFilter,
+  AlertsFilterTimeframe,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -249,7 +250,13 @@ export interface RawRuleAction extends SavedObjectAttributes {
     notifyWhen: RuleNotifyWhenType;
     throttle: string | null;
   };
-  alertsFilter?: AlertsFilter;
+  alertsFilter?: {
+    query: null | {
+      kql: string;
+      dsl?: string;
+    };
+    timeframe: null | AlertsFilterTimeframe;
+  };
 }
 
 export interface RuleMeta extends SavedObjectAttributes {

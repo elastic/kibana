@@ -47,7 +47,7 @@ enum Reasons {
 }
 
 export interface RunResult {
-  throttledActions: ThrottledActions;
+  throttledSummaryActions: ThrottledActions;
 }
 
 export class ExecutionHandler<
@@ -130,7 +130,7 @@ export class ExecutionHandler<
     alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
   ): Promise<RunResult> {
     const executables = this.generateExecutables(alerts);
-    const throttledActions: ThrottledActions = getSummaryActionsFromTaskState({
+    const throttledSummaryActions: ThrottledActions = getSummaryActionsFromTaskState({
       actions: this.rule.actions,
       summaryActions: this.taskInstance.state?.summaryActions,
     });
@@ -233,7 +233,7 @@ export class ExecutionHandler<
           });
 
           if (isSummaryActionOnInterval(action)) {
-            throttledActions[generateActionHash(action)] = { date: new Date() };
+            throttledSummaryActions[generateActionHash(action)] = { date: new Date() };
           }
 
           logActions.push({
@@ -314,7 +314,7 @@ export class ExecutionHandler<
         }
       }
     }
-    return { throttledActions };
+    return { throttledSummaryActions };
   }
 
   private hasAlerts(

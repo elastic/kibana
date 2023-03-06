@@ -37,13 +37,13 @@ export const actionsSchema = schema.arrayOf(
           schema.object({
             days: schema.arrayOf(
               schema.oneOf([
-                schema.literal(0),
                 schema.literal(1),
                 schema.literal(2),
                 schema.literal(3),
                 schema.literal(4),
                 schema.literal(5),
                 schema.literal(6),
+                schema.literal(7),
               ])
             ),
             hours: schema.object({
