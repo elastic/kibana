@@ -180,6 +180,14 @@ describe('filterByAgent', () => {
       );
     });
 
+    it('android/java', () => {
+      expect(getSettingKeysForAgent('android/java')).toEqual(
+        expect.arrayContaining([
+          'enable_automatic_instrumentation',
+        ])
+      );
+    });
+
     it('"All" services (no agent name)', () => {
       expect(getSettingKeysForAgent(undefined)).toEqual(
         expect.arrayContaining([
