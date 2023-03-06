@@ -8,10 +8,15 @@
 
 import { HttpSetup } from '@kbn/core-http-browser';
 
-/** A number > 0. */
+/**
+ * A number > 0.
+ * @experimental
+ */
 export type Version = `${number}`;
 
+/** @experimental */
 export interface CreateClientArgs {
+  /** @experimental */
   version: Version;
 }
 
