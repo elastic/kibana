@@ -516,7 +516,7 @@ export class HttpServer {
   }
 
   private configureRoute(route: RouterRoute) {
-    const optionsLogger = this.logger.get('http', 'server', this.name, 'options');
+    const optionsLogger = this.log.get('options');
     this.log.debug(`registering route handler for [${route.path}]`);
     // Hapi does not allow payload validation to be specified for 'head' or 'get' requests
     const validate = isSafeMethod(route.method) ? undefined : { payload: true };
@@ -528,7 +528,11 @@ export class HttpServer {
       access: route.options.access ?? (route.path.startsWith('/internal') ? 'internal' : 'public'),
     };
     // Log HTTP API target consumer.
-    optionsLogger.debug(`access [${kibanaRouteOptions.access}] for path [${route.path}]`);
+    optionsLogger.debug(
+      `access [${kibanaRouteOptions.access}] [${route.method.toUpperCase()}] for path [${
+        route.path
+      }]`
+    );
 
     this.server!.route({
       handler: route.handler,
