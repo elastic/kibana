@@ -17,8 +17,8 @@ import {
 } from '@elastic/charts';
 import React from 'react';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
-
 import moment from 'moment';
+
 import { ChartData } from '../../../typings';
 import { useKibana } from '../../../utils/kibana_react';
 import { toHighPrecisionPercentage } from '../helpers/number';
