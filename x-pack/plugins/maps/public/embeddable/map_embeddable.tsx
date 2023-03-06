@@ -752,7 +752,7 @@ export class MapEmbeddable
     if (areLayersLoaded(this._savedMap.getStore().getState())) {
       const layers = getLayerList(this._savedMap.getStore().getState());
       const isLoading =
-        layers.length === 0 ||
+        layers.length !== 0 &&
         layers.some((layer) => {
           return layer.isLayerLoading();
         });
