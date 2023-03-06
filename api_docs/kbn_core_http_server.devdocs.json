@@ -5006,6 +5006,20 @@
             "path": "packages/core/http/core-http-server/src/router/request.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.KibanaRouteOptions.access",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "access",
+            "description": [],
+            "signature": [
+              "\"internal\" | \"public\""
+            ],
+            "path": "packages/core/http/core-http-server/src/router/request.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -6070,6 +6084,22 @@
             ],
             "signature": [
               "(Method extends \"get\" ? never : boolean) | undefined"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.RouteConfigOptions.access",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "access",
+            "description": [
+              "\nDefines intended request origin of the route:\n- public. The route is public, declared stable and intended for external access.\n          In the future, may require an incomming request to contain a specified header.\n- internal. The route is internal and intended for internal access only.\n\nIf not declared, infers access from route path:\n- access =`internal` for '/internal' route path prefix\n- access = `public` for everything else"
+            ],
+            "signature": [
+              "\"internal\" | \"public\" | undefined"
             ],
             "path": "packages/core/http/core-http-server/src/router/route.ts",
             "deprecated": false,

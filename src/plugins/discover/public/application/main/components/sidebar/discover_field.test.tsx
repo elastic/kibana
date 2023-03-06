@@ -136,8 +136,7 @@ async function getComponent({
   return { comp, props };
 }
 
-// FLAKY: https://github.com/elastic/kibana/issues/148349
-describe.skip('discover sidebar field', function () {
+describe('discover sidebar field', function () {
   beforeEach(() => {
     (DetailsUtil.getDetails as jest.Mock).mockClear();
   });
@@ -244,6 +243,10 @@ describe.skip('discover sidebar field', function () {
     await comp.update();
 
     expect(comp.find(EuiPopover).prop('isOpen')).toBe(true);
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await comp.update();
+
     expect(findTestSubject(comp, 'dscFieldStats-title').text()).toBe('Top values');
     expect(findTestSubject(comp, 'dscFieldStats-topValues-bucket')).toHaveLength(2);
     expect(

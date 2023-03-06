@@ -27,6 +27,7 @@ import { groupAlertsByRule } from './client/helpers/group_alerts_by_rule';
 import { getUICapabilities } from './client/helpers/capabilities';
 import { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
+import { registerCaseFileKinds } from './files';
 
 /**
  * @public
@@ -51,6 +52,8 @@ export class CasesUiPlugin
     const storage = this.storage;
     const externalReferenceAttachmentTypeRegistry = this.externalReferenceAttachmentTypeRegistry;
     const persistableStateAttachmentTypeRegistry = this.persistableStateAttachmentTypeRegistry;
+
+    registerCaseFileKinds(plugins.files);
 
     if (plugins.home) {
       plugins.home.featureCatalogue.register({

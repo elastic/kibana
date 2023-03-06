@@ -22,6 +22,7 @@ import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } fr
 import type { DistributiveOmit } from '@elastic/eui';
 import type { ApmBase } from '@elastic/apm-rum';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
 import type {
   CasesByAlertId,
   CasesByAlertIDRequest,
@@ -50,6 +51,7 @@ import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachmen
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 
 export interface CasesPluginSetup {
+  files: FilesSetup;
   security: SecurityPluginSetup;
   management: ManagementSetup;
   home?: HomePublicPluginSetup;
@@ -58,6 +60,7 @@ export interface CasesPluginSetup {
 export interface CasesPluginStart {
   data: DataPublicPluginStart;
   embeddable: EmbeddableStart;
+  files: FilesStart;
   licensing?: LicensingPluginStart;
   lens: LensPublicStart;
   storage: Storage;
