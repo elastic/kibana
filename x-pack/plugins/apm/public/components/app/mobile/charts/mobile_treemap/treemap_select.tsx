@@ -89,7 +89,8 @@ export function TreemapSelect({
         </EuiTitle>
         <EuiText size="s" color="subdued">
           {i18n.translate('xpack.apm.transactionOverview.treemap.subtitle', {
-            defaultMessage: 'Treemap showing the most used {currentTreemap}',
+            defaultMessage:
+              'Treemap showing the total and most used {currentTreemap}',
             values: { currentTreemap: currentTreemap.value },
           })}
         </EuiText>

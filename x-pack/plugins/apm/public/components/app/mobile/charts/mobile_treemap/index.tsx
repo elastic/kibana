@@ -53,7 +53,7 @@ export function MobileTreemap({
                 start,
                 end,
                 fieldName,
-                size: 50,
+                size: 500,
               },
             },
           }
