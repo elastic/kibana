@@ -143,7 +143,7 @@ const getMonitorSummaryHeader = (
         label: i18n.translate('xpack.synthetics.monitorErrorsTab.title', {
           defaultMessage: 'Errors',
         }),
-        prepend: <EuiIcon type="alert" color="danger" />,
+        prepend: <EuiIcon type="warning" color="danger" />,
         isSelected: selectedTab === 'errors',
         href: `${syntheticsPath}${MONITOR_ERRORS_ROUTE.replace(':monitorId', monitorId)}${search}`,
         'data-test-subj': 'syntheticsMonitorErrorsTab',

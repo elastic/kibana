@@ -231,7 +231,7 @@ export const useField = ({
             {label}
             <EuiIcon
               tabIndex={0}
-              type="alert"
+              type="warning"
               title={i18n.FIELD_CONFLICT_INDICES_WARNING_TITLE}
               size="s"
               css={{ marginLeft: `${sPaddingSize}` }}

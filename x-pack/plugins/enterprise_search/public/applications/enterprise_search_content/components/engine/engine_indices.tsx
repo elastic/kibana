@@ -218,7 +218,7 @@ export const EngineIndices: React.FC = () => {
           <>
             <EuiCallOut
               color="warning"
-              iconType="alert"
+              iconType="warning"
               title={i18n.translate(
                 'xpack.enterpriseSearch.content.engine.indices.unknownIndicesCallout.title',
                 { defaultMessage: 'Some of your indices are unavailable.' }

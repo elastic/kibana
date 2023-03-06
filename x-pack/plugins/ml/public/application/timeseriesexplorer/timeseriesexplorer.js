@@ -1238,7 +1238,7 @@ export class TimeSeriesExplorer extends React.Component {
                         }
                       )}
                       color="danger"
-                      iconType="alert"
+                      iconType="warning"
                     >
                       <p>{focusAnnotationError}</p>
                     </EuiCallOut>

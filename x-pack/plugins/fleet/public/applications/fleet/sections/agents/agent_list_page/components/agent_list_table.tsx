@@ -145,7 +145,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
             {showWarning && (
               <EuiFlexItem grow={false}>
                 <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                  <EuiIcon size="m" type="alert" color="warning" />
+                  <EuiIcon size="m" type="warning" color="warning" />
                   &nbsp;
                   <FormattedMessage
                     id="xpack.fleet.agentList.outOfDateLabel"
@@ -243,7 +243,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
           {isAgentSelectable(agent) && isAgentUpgradeable(agent, kibanaVersion) ? (
             <EuiFlexItem grow={false}>
               <EuiText color="subdued" size="xs" className="eui-textNoWrap">
-                <EuiIcon size="m" type="alert" color="warning" />
+                <EuiIcon size="m" type="warning" color="warning" />
                 &nbsp;
                 <FormattedMessage
                   id="xpack.fleet.agentList.agentUpgradeLabel"

@@ -18,7 +18,7 @@ const UNSUPPORTED_COMMAND_INFO = i18n.translate(
 );
 
 const DisabledTooltip = React.memo(() => {
-  return <EuiIconTip content={UNSUPPORTED_COMMAND_INFO} type="alert" color="danger" />;
+  return <EuiIconTip content={UNSUPPORTED_COMMAND_INFO} type="warning" color="danger" />;
 });
 DisabledTooltip.displayName = 'DisabledTooltip';
 

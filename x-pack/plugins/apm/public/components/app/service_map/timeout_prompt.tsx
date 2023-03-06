@@ -17,7 +17,7 @@ export function TimeoutPrompt({
 }) {
   return (
     <EuiEmptyPrompt
-      iconType="alert"
+      iconType="warning"
       iconColor="subdued"
       title={
         <h2>

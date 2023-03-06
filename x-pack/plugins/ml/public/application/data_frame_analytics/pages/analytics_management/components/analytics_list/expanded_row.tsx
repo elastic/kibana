@@ -53,7 +53,7 @@ interface LoadedStatProps {
 const LoadedStat: FC<LoadedStatProps> = ({ isLoading, evalData, resultProperty }) => {
   return (
     <Fragment>
-      {isLoading === false && evalData.error !== null && <EuiIcon type="alert" size="s" />}
+      {isLoading === false && evalData.error !== null && <EuiIcon type="warning" size="s" />}
       {isLoading === true && <EuiLoadingSpinner size="s" />}
       {isLoading === false && evalData.error === null && evalData[resultProperty]}
     </Fragment>
