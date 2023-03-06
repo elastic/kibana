@@ -7,7 +7,7 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { SeverityFilterGroup } from './severity_filter_group';
-import { RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
 import { TestProviders } from '../../../../common/mock';
 
 describe('SeverityFilterGroup', () => {
@@ -23,8 +23,8 @@ describe('SeverityFilterGroup', () => {
             [RiskSeverity.moderate]: 0,
             [RiskSeverity.unknown]: 0,
           }}
-          title={'test title'}
           onSelect={jest.fn()}
+          riskEntity={RiskScoreEntity.user}
         />
       </TestProviders>
     );

@@ -30,6 +30,7 @@ import type {
   RiskSeverity,
   UserRiskScore,
 } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../../common/search_strategy';
 
 export const rowItems: ItemsPerRow[] = [
   {
@@ -177,6 +178,7 @@ const UserRiskScoreTableComponent: React.FC<UserRiskScoreTableProps> = ({
           selectedSeverities={severitySelectionRedux}
           severityCount={severityCount}
           onSelect={onSelect}
+          riskEntity={RiskScoreEntity.user}
         />
       }
       headerSupplement={risk}
