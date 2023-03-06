@@ -510,7 +510,7 @@ describe('AlertsTable', () => {
         fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
 
         // the callback given to our clients to run when they want to update the loading state
-        await act(async () => {
+        act(() => {
           mockedFn.mock.calls[0][0].setIsActionLoading(true);
         });
 
@@ -541,7 +541,7 @@ describe('AlertsTable', () => {
         fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
 
         // the callback given to our clients to run when they want to update the loading state
-        await act(async () => {
+        act(() => {
           mockedFn.mock.calls[0][0].setIsActionLoading(false);
         });
 
