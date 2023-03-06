@@ -27,6 +27,15 @@ describe('getShouldRefresh', () => {
   );
 
   describe('filter changes', () => {
+    test('should return false when filters do not change', async () => {
+      const lastInput = {
+        filters: [existsFilter],
+      } as unknown as DashboardContainerByValueInput;
+      expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, lastInput)).toBe(
+        false
+      );
+    });
+
     test('should return true when pinned filters change', async () => {
       const pinnedFilter = pinFilter(existsFilter);
       const lastInput = {
@@ -35,9 +44,6 @@ describe('getShouldRefresh', () => {
       const input = {
         filters: [toggleFilterNegated(pinnedFilter)],
       } as unknown as DashboardContainerByValueInput;
-      expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, { ...lastInput })).toBe(
-        false
-      );
       expect(await getShouldRefresh.bind(dashboardContainerMock)(lastInput, input)).toBe(true);
     });
 
