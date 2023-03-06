@@ -123,8 +123,8 @@ export function TextBasedDataPanel({
           }}
           dataTestSubj={`lnsFieldListPanelField-${field.name}`}
         >
-          <FieldItemButton
-            className={`lnsFieldItem lnsFieldItem--${field.meta.type}`}
+          <FieldItemButton<DatatableColumn>
+            isEmpty={false}
             isActive={false}
             field={field}
             fieldSearchHighlight={fieldSearchHighlight}

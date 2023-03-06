@@ -146,30 +146,6 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
 
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
-  // TODO: move to another element
-  // const lensInfoIcon = (
-  //   <EuiIconTip
-  //     anchorClassName="lnsFieldItem__infoIcon"
-  //     content={
-  //       hideDetails
-  //         ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
-  //             defaultMessage: 'Drag and drop to visualize.',
-  //           })
-  //         : exists
-  //         ? i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
-  //             defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
-  //           })
-  //         : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonEmptyLabel', {
-  //             defaultMessage:
-  //               'This field doesn’t have any data but you can still drag and drop to visualize.',
-  //           })
-  //     }
-  //     type="iInCircle"
-  //     color="subdued"
-  //     size="s"
-  //   />
-  // );
-
   return (
     <li>
       <FieldPopover
@@ -191,10 +167,8 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             dataTestSubj={`lnsFieldListPanelField-${field.name}`}
             onDragStart={onDragStart}
           >
-            <FieldItemButton
-              className={`lnsFieldItem lnsFieldItem--${field.type} lnsFieldItem--${
-                exists ? 'exists' : 'missing'
-              }`}
+            <FieldItemButton<IndexPatternField>
+              isEmpty={!exists}
               isActive={infoIsOpen}
               field={field}
               fieldSearchHighlight={highlight}

@@ -8,17 +8,20 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import classnames from 'classnames';
 import { FieldButton, type FieldButtonProps } from '@kbn/react-field';
 import { EuiHighlight } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldListItem, type GetCustomFieldType } from '../../types';
 import { wrapFieldNameOnDot } from '../../utils/wrap_field_name_on_dot';
 import { FieldIcon, getFieldIconProps } from '../field_icon';
+import './field_item_button.scss';
 
 export interface FieldItemButtonProps<T extends FieldListItem> {
   field: T;
   fieldSearchHighlight?: string;
   isActive?: FieldButtonProps['isActive'];
+  isEmpty?: boolean; // whether the field has data or not
   className?: FieldButtonProps['className'];
   getCustomFieldType?: GetCustomFieldType<T>;
   onClick: FieldButtonProps['onClick'];
@@ -28,18 +31,32 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   field,
   fieldSearchHighlight,
   isActive,
+  isEmpty,
   className,
   getCustomFieldType,
   onClick,
   ...otherProps
 }: FieldItemButtonProps<T>) {
   const displayName = field.displayName || field.name;
+  const iconProps = getCustomFieldType
+    ? { type: getCustomFieldType(field) }
+    : getFieldIconProps(field);
+  const type = iconProps.type;
+
+  const classes = classnames(
+    'unifiedFieldItemButton',
+    {
+      [`unifiedFieldItemButton--${type}`]: type,
+      [`unifiedFieldItemButton--exists`]: !isEmpty,
+      [`unifiedFieldItemButton--missing`]: isEmpty,
+    },
+    className
+  );
 
   return (
     <FieldButton
-      className={className}
+      className={classes}
       isActive={isActive}
-      onClick={onClick}
       buttonProps={{
         ['aria-label']: i18n.translate('unifiedFieldList.fieldItemButtonAriaLabel', {
           defaultMessage: 'Preview {fieldName}: {fieldType}',
@@ -49,18 +66,13 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
           },
         }),
       }}
-      fieldIcon={
-        getCustomFieldType ? (
-          <FieldIcon type={getCustomFieldType(field)} />
-        ) : (
-          <FieldIcon {...getFieldIconProps(field)} />
-        )
-      }
+      fieldIcon={<FieldIcon {...iconProps} />}
       fieldName={
         <EuiHighlight search={wrapFieldNameOnDot(fieldSearchHighlight)}>
           {wrapFieldNameOnDot(displayName)}
         </EuiHighlight>
       }
+      onClick={onClick}
       {...otherProps}
     />
   );
