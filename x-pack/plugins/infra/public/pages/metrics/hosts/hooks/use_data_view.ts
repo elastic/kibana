@@ -62,7 +62,7 @@ export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
     if (hasError && notifications) {
       notifications.toasts.addDanger(
         i18n.translate('xpack.infra.hostsViewPage.errorOnCreateOrLoadDataview', {
-          defaultMessage: 'There was an error trying to create a Data View',
+          defaultMessage: 'There was an error trying to create a Data View: {metricAlias}',
           values: { metricAlias },
         })
       );
