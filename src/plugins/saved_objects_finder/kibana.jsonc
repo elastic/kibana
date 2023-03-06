@@ -6,8 +6,6 @@
     "id": "savedObjectsFinder",
     "server": true,
     "browser": true,
-    "requiredBundles": [
-      "savedObjects"
-    ]
+    "requiredBundles": ["savedObjects"]
   }
 }
