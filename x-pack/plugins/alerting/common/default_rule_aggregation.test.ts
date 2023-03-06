@@ -81,7 +81,35 @@ describe('formatDefaultAggregationResult', () => {
       },
     });
 
-    expect(result.ruleExecutionStatus).toEqual({
+    expect(result).toEqual(
+      expect.objectContaining({
+        ruleExecutionStatus: {
+          active: 8,
+          error: 6,
+          ok: 10,
+          pending: 4,
+          unknown: 2,
+          warning: 1,
+        },
+        ruleLastRunOutcome: {
+          succeeded: 2,
+          failed: 4,
+          warning: 6,
+        },
+        ruleEnabledStatus: {
+          enabled: 28,
+          disabled: 2,
+        },
+        ruleMutedStatus: {
+          muted: 3,
+          unmuted: 27,
+        },
+        ruleSnoozedStatus: {
+          snoozed: 5,
+        },
+        ruleTags: ['a', 'b', 'c'],
+      })
+    );
       active: 8,
       error: 6,
       ok: 10,
