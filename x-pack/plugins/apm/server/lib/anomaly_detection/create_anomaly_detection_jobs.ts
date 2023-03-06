@@ -136,12 +136,12 @@ async function createAnomalyDetectionJob({
       ],
     });
 
-    waitForIndexStatus({
+    await waitForIndexStatus({
       client: esClient,
       index: '.ml-*',
       timeout: DEFAULT_TIMEOUT,
       status: 'yellow',
-    });
+    })();
 
     return anomalyDetectionJob;
   });
