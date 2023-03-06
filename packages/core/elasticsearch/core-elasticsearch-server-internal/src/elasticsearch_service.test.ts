@@ -201,9 +201,9 @@ describe('#setup', () => {
     );
   });
 
-  it('returns an AgentStore as part of the contract', async () => {
+  it('returns an AgentStatsProvider as part of the contract', async () => {
     const setupContract = await elasticsearchService.setup(setupDeps);
-    expect(typeof setupContract.agentStore.getAgents).toEqual('function');
+    expect(typeof setupContract.agentStatsProvider.getAgentsStats).toEqual('function');
   });
 
   it('esNodeVersionCompatibility$ only starts polling when subscribed to', async () => {
