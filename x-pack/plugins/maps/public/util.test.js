@@ -5,60 +5,88 @@
  * 2.0.
  */
 
-import { getGlyphUrl, makePublicExecutionContext } from './util';
-
-const MOCK_EMS_SETTINGS = {
-  isEMSEnabled: () => true,
-};
+import {
+  getGlyphUrl,
+  makePublicExecutionContext,
+  testOnlyClearCanAccessEmsFontsPromise,
+} from './util';
 
 describe('getGlyphUrl', () => {
   describe('EMS enabled', () => {
-    beforeAll(() => {
+    beforeEach(() => {
       require('./kibana_services').getHttp = () => ({
         basePath: {
-          prepend: (url) => url, // No need to actually prepend a dev basepath for test
+          prepend: (path) => `abc${path}`,
         },
       });
+      testOnlyClearCanAccessEmsFontsPromise();
     });
 
-    describe('EMS proxy disabled', () => {
+    describe('offline', () => {
       beforeAll(() => {
         require('./kibana_services').getEMSSettings = () => {
           return {
             getEMSFontLibraryUrl() {
-              return 'foobar';
+              return 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf';
             },
             isEMSEnabled() {
               return true;
             },
           };
         };
+        require('node-fetch').default = () => {
+          throw new Error('Simulated offline environment with no EMS access');
+        };
       });
 
-      test('should return EMS fonts URL', async () => {
-        expect(getGlyphUrl()).toBe('foobar');
+      test('should return kibana fonts template URL', async () => {
+        expect(await getGlyphUrl()).toBe('abc/api/maps/fonts/{fontstack}/{range}');
+      });
+    });
+
+    describe('online', () => {
+      beforeAll(() => {
+        require('./kibana_services').getEMSSettings = () => {
+          return {
+            getEMSFontLibraryUrl() {
+              return 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf';
+            },
+            isEMSEnabled() {
+              return true;
+            },
+          };
+        };
+        require('node-fetch').default = () => {
+          return Promise.resolve({ status: 200 });
+        };
+      });
+
+      test('should return EMS fonts template URL', async () => {
+        expect(await getGlyphUrl()).toBe(
+          'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf'
+        );
       });
     });
   });
 
   describe('EMS disabled', () => {
     beforeAll(() => {
-      const mockHttp = {
-        basePath: {
-          prepend: (path) => `abc${path}`,
-        },
+      require('./kibana_services').getHttp = () => {
+        return {
+          basePath: {
+            prepend: (path) => `abc${path}`,
+          },
+        };
       };
-      require('./kibana_services').getHttp = () => mockHttp;
       require('./kibana_services').getEMSSettings = () => {
         return {
-          ...MOCK_EMS_SETTINGS,
           isEMSEnabled: () => false,
         };
       };
     });
 
-    test('should return kibana fonts URL', async () => {
-      expect(getGlyphUrl()).toBe('abc/api/maps/fonts/{fontstack}/{range}');
+    test('should return kibana fonts template URL', async () => {
+      expect(await getGlyphUrl()).toBe('abc/api/maps/fonts/{fontstack}/{range}');
     });
   });
 });

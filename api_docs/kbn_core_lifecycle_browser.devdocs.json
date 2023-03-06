@@ -678,10 +678,6 @@
                 "path": "src/plugins/discover/public/application/main/discover_main_route.tsx"
               },
               {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-              },
-              {
                 "plugin": "fileUpload",
                 "path": "x-pack/plugins/file_upload/public/kibana_services.ts"
               },
@@ -803,10 +799,6 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/private_locations/hooks/use_locations_api.ts"
-              },
-              {
-                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_name.ts"
               },
               {
@@ -832,10 +824,6 @@
               {
                 "plugin": "visualizations",
                 "path": "src/plugins/visualizations/public/visualize_app/components/visualize_listing.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/plugin.tsx"
               },
               {
                 "plugin": "dataVisualizer",
