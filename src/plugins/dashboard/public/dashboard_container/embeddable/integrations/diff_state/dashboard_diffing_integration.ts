@@ -217,7 +217,7 @@ async function getInputChanges(
             lastInput,
           },
           diffingFunctions
-        ).then((isEqual) => resolve({ key, isEqual }))
+        ).then((isEqual) => resolve({ key, isEqual }));
       })
   );
   const inputChanges = (await Promise.allSettled(keyComparePromises)).reduce((changes, current) => {

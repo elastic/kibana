@@ -123,7 +123,7 @@ export const shouldRefreshDiffingFunctions: DashboardDiffFunctions = {
     onlyDisabledFiltersChanged(lastValue, currentValue, shouldRefreshFilterCompareOptions),
 
   // fire on all time range changes, regardless of timeRestore
-  timeRange: ({ currentValue, lastValue }) => 
+  timeRange: ({ currentValue, lastValue }) =>
     areTimesEqual(currentValue?.from, lastValue?.from) &&
     areTimesEqual(currentValue?.to, lastValue?.to),
 };
