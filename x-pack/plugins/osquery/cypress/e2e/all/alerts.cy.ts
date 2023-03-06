@@ -8,11 +8,9 @@
 import {
   cleanupCase,
   cleanupPack,
-  cleanupAgentPolicy,
   cleanupRule,
   loadCase,
   loadPack,
-  loadAgentPolicy,
   loadRule,
   multiQueryPackFixture,
   packFixture,
@@ -41,6 +39,7 @@ import { preparePack } from '../../tasks/packs';
 import { closeModalIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 import { navigateTo } from '../../tasks/navigation';
 import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
+import { OSQUERY_POLICY } from '../../screens/fleet';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
@@ -50,8 +49,6 @@ describe('Alert Event Details', () => {
   });
 
   describe('Packs and rules creation', () => {
-    let policyName: string;
-    let policyId: string;
     let ruleId: string;
     let ruleName: string;
     let packId: string;
@@ -65,18 +62,13 @@ describe('Alert Event Details', () => {
         packName = data.attributes.name;
       });
       loadRule().then((data) => {
-        ruleId = data.rule_id;
+        ruleId = data.id;
         ruleName = data.name;
-      });
-      loadAgentPolicy().then((data) => {
-        policyId = data.id;
-        policyName = data.name;
       });
     });
     after(() => {
       cleanupPack(packId);
       cleanupRule(ruleId);
-      cleanupAgentPolicy(policyId);
     });
 
     it('should prepare packs and alert rules', () => {
@@ -86,7 +78,7 @@ describe('Alert Event Details', () => {
       cy.contains(`Edit ${packName}`);
       findFormFieldByRowsLabelAndType(
         'Scheduled agent policies (optional)',
-        `${policyName}{downArrow}{enter}`
+        `${OSQUERY_POLICY}{downArrow}{enter}`
       );
       findAndClickButton('Update pack');
       closeModalIfVisible();
@@ -117,7 +109,7 @@ describe('Alert Event Details', () => {
         multiQueryPackName = data.attributes.name;
       });
       loadRule().then((data) => {
-        ruleId = data.rule_id;
+        ruleId = data.id;
         ruleName = data.name;
       });
     });
@@ -262,13 +254,15 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadRule().then((data) => {
-        ruleId = data.rule_id;
+        ruleId = data.id;
         ruleName = data.name;
       });
     });
+
     after(() => {
       cleanupRule(ruleId);
     });
+
     it('should be able to add investigation guides to response actions', () => {
       const investigationGuideNote =
         'You have queries in the investigation guide. Add them as response actions?';
@@ -301,7 +295,7 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadRule().then((data) => {
-        ruleId = data.rule_id;
+        ruleId = data.id;
         ruleName = data.name;
       });
     });
@@ -345,7 +339,7 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadRule().then((data) => {
-        ruleId = data.rule_id;
+        ruleId = data.id;
         ruleName = data.name;
       });
     });
@@ -372,17 +366,19 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadRule(true).then((data) => {
-        ruleId = data.rule_id;
+        ruleId = data.id;
         ruleName = data.name;
       });
       loadCase('securitySolution').then((data) => {
         caseId = data.id;
       });
     });
+
     after(() => {
       cleanupRule(ruleId);
       cleanupCase(caseId);
     });
+
     it('sees osquery results from last action and add to a case', () => {
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click({ force: true });
@@ -424,7 +420,7 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadRule(true).then((data) => {
-        ruleId = data.rule_id;
+        ruleId = data.id;
         ruleName = data.name;
       });
     });
@@ -465,7 +461,7 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadRule(true).then((data) => {
-        ruleId = data.rule_id;
+        ruleId = data.id;
         ruleName = data.name;
       });
     });
@@ -514,7 +510,7 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadRule(true).then((data) => {
-        ruleId = data.rule_id;
+        ruleId = data.id;
         ruleName = data.name;
       });
     });
@@ -556,10 +552,11 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadRule(true).then((data) => {
-        ruleId = data.rule_id;
+        ruleId = data.id;
         ruleName = data.name;
       });
     });
+
     after(() => {
       cleanupRule(ruleId);
     });
@@ -598,13 +595,15 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadRule(true).then((data) => {
-        ruleId = data.rule_id;
+        ruleId = data.id;
         ruleName = data.name;
       });
     });
+
     after(() => {
       cleanupRule(ruleId);
     });
+
     it('should be able to run take action query against all enrolled agents', () => {
       loadRuleAlerts(ruleName);
       cy.getBySel('expand-event').first().click({ force: true });
@@ -633,13 +632,15 @@ describe('Alert Event Details', () => {
 
     before(() => {
       loadRule(true).then((data) => {
-        ruleId = data.rule_id;
+        ruleId = data.id;
         ruleName = data.name;
       });
     });
+
     after(() => {
       cleanupRule(ruleId);
     });
+
     it('should substitute params in osquery ran from timelines alerts', () => {
       loadRuleAlerts(ruleName);
       cy.getBySel('send-alert-to-timeline-button').first().click({ force: true });
