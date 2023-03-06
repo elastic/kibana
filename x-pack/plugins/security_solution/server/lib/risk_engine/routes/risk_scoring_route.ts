@@ -26,7 +26,7 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
     },
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const esClient = (await context.core).elasticsearch.client.asInternalUser;
+      const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const options = request.body; // TODO why is this any???
       const riskScoreService = buildRiskScoreService({
         esClient,
