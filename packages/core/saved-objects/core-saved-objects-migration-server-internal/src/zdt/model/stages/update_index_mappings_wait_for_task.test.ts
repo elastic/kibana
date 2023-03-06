@@ -17,9 +17,7 @@ import type { UpdateIndexMappingsState } from '../../state';
 import type { StateActionResponse } from '../types';
 import { updateIndexMappings } from './update_index_mappings';
 
-// TODO: all
-
-describe('Action: updateIndexMappings', () => {
+describe('Stage: updateIndexMappings', () => {
   let context: MockedMigratorContext;
 
   const createState = (

@@ -16,7 +16,7 @@ import type { UpdateAliasesState } from '../../state';
 import type { StateActionResponse } from '../types';
 import { updateAliases } from './update_aliases';
 
-describe('Action: updateAliases', () => {
+describe('Stage: updateAliases', () => {
   let context: MockedMigratorContext;
 
   const createState = (parts: Partial<UpdateAliasesState> = {}): UpdateAliasesState => ({

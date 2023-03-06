@@ -19,7 +19,7 @@ import type { InitState } from '../../state';
 import type { StateActionResponse } from '../types';
 import { init } from './init';
 
-describe('Action: init', () => {
+describe('Stage: init', () => {
   let context: MockedMigratorContext;
 
   const currentIndex = '.kibana_1';
