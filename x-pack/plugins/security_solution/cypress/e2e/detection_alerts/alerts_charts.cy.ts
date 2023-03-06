@@ -6,7 +6,7 @@
  */
 
 import { getNewRule } from '../../objects/rule';
-import { ALERTS_COUNT, LEGEND_ACTIONS } from '../../screens/alerts';
+import { ALERTS_COUNT } from '../../screens/alerts';
 import {
   clickAlertsHistogramLegend,
   clickAlertsHistogramLegendAddToTimeline,
