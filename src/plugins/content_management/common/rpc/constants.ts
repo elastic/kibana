@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export const procedureNames = ['get', 'create', 'update', 'delete', 'search'] as const;
+export const procedureNames = ['get', 'bulkGet', 'create', 'update', 'delete', 'search'] as const;
 
 export type ProcedureName = typeof procedureNames[number];

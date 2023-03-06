@@ -16,12 +16,14 @@ export const ErrorDetailsLink = ({
   stateId,
   configId,
   label,
+  locationId,
 }: {
   configId: string;
   stateId: string;
   label: string;
+  locationId?: string;
 }) => {
-  const link = useErrorDetailsLink({ configId, stateId });
+  const link = useErrorDetailsLink({ configId, stateId, locationId });
 
   return <EuiLink href={link}>{label ?? VIEW_DETAILS}</EuiLink>;
 };

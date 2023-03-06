@@ -27,12 +27,11 @@ export const getMonitorAlertDocument = (monitorSummary: MonitorSummaryStatusRule
   [MONITOR_TYPE]: monitorSummary.monitorType,
   [MONITOR_NAME]: monitorSummary.monitorName,
   [URL_FULL]: monitorSummary.monitorUrl,
-  [OBSERVER_GEO_NAME]: monitorSummary.locationId,
+  [OBSERVER_GEO_NAME]: monitorSummary.locationName,
   [ERROR_MESSAGE]: monitorSummary.lastErrorMessage,
   [AGENT_NAME]: monitorSummary.hostName,
   [ALERT_REASON]: monitorSummary.reason,
   'location.id': monitorSummary.locationId,
-  'location.name': monitorSummary.locationName,
   configId: monitorSummary.configId,
 });
 

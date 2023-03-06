@@ -118,11 +118,22 @@ export const getSupportedUrlParams = (params: {
     statusFilter: statusFilter || STATUS_FILTER,
     focusConnectorField: !!focusConnectorField,
     query: query || '',
-    tags: tags ? JSON.parse(tags) : [],
-    monitorTypes: monitorTypes ? JSON.parse(monitorTypes) : [],
-    locations: locations ? JSON.parse(locations) : [],
-    projects: projects ? JSON.parse(projects) : [],
-    schedules: schedules ? JSON.parse(schedules) : [],
+    tags: parseFilters(tags),
+    monitorTypes: parseFilters(monitorTypes),
+    locations: parseFilters(locations),
+    projects: parseFilters(projects),
+    schedules: parseFilters(schedules),
     locationId: locationId || undefined,
   };
+};
+
+const parseFilters = (filters?: string) => {
+  if (!filters) {
+    return [];
+  }
+  try {
+    return JSON.parse(filters);
+  } catch (e) {
+    return [filters];
+  }
 };

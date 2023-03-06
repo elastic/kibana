@@ -18,6 +18,7 @@ const ruleActionSchema = schema.object({
   group: schema.string(),
   id: schema.string(),
   params: schema.recordOf(schema.string(), schema.any(), { defaultValue: {} }),
+  uuid: schema.maybe(schema.string()),
 });
 
 const operationsSchema = schema.arrayOf(

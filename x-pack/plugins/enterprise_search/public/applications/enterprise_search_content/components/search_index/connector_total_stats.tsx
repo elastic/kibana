@@ -85,7 +85,7 @@ export const ConnectorTotalStats: React.FC = () => {
         {stats.map((item, index) => (
           <EuiFlexItem key={index}>
             <EuiPanel color="primary" hasShadow={false} paddingSize="l">
-              <EuiStat {...item} />
+              <EuiStat titleSize="m" {...item} />
             </EuiPanel>
           </EuiFlexItem>
         ))}

@@ -42,6 +42,7 @@ import {
   FLEET_APM_PACKAGE,
   outputType,
   PACKAGES_SAVED_OBJECT_TYPE,
+  DATASET_VAR_NAME,
 } from '../../common/constants';
 import type {
   PostDeletePackagePoliciesResponse,
@@ -2147,17 +2148,16 @@ export function _validateRestrictedFieldsNotModifiedOrThrow(opts: {
           );
           if (
             oldStream &&
-            oldStream?.vars?.['data_stream.dataset'] &&
-            oldStream?.vars['data_stream.dataset']?.value !==
-              stream?.vars?.['data_stream.dataset']?.value
+            oldStream?.vars?.[DATASET_VAR_NAME] &&
+            oldStream?.vars[DATASET_VAR_NAME]?.value !== stream?.vars?.[DATASET_VAR_NAME]?.value
           ) {
             // seeing this error in dev? Package policy must be called with prepareInputPackagePolicyDataset function first in UI code
             appContextService
               .getLogger()
               .debug(
                 `Rejecting package policy update due to dataset change, old val '${
-                  oldStream?.vars['data_stream.dataset']?.value
-                }, new val '${JSON.stringify(stream?.vars?.['data_stream.dataset']?.value)}'`
+                  oldStream?.vars[DATASET_VAR_NAME]?.value
+                }, new val '${JSON.stringify(stream?.vars?.[DATASET_VAR_NAME]?.value)}'`
               );
             throw new PackagePolicyValidationError(
               i18n.translate('xpack.fleet.updatePackagePolicy.datasetCannotBeModified', {

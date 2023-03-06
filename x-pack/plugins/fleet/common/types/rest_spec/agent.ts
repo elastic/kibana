@@ -119,7 +119,17 @@ export type PostBulkAgentUpgradeResponse = BulkAgentAction;
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface PostAgentUpgradeResponse {}
 
+// deprecated
 export interface PutAgentReassignRequest {
+  params: {
+    agentId: string;
+  };
+  body: { policy_id: string };
+}
+// deprecated
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface PutAgentReassignResponse {}
+export interface PostAgentReassignRequest {
   params: {
     agentId: string;
   };
@@ -127,7 +137,7 @@ export interface PutAgentReassignRequest {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface PutAgentReassignResponse {}
+export interface PostAgentReassignResponse {}
 
 export interface PostBulkAgentReassignRequest {
   body: {
@@ -185,6 +195,7 @@ export interface GetAgentStatusRequest {
 export interface GetAgentStatusResponse {
   results: {
     events: number;
+    // deprecated
     total: number;
     online: number;
     error: number;
@@ -193,6 +204,8 @@ export interface GetAgentStatusResponse {
     updating: number;
     inactive: number;
     unenrolled: number;
+    all: number;
+    active: number;
   };
 }
 

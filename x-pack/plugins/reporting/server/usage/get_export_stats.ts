@@ -54,6 +54,7 @@ const metricsSets = {
 const metricsForFeature: { [K in keyof JobTypes]: JobTypes[K]['metrics'] } = {
   csv_searchsource: metricsSets.csv,
   csv_searchsource_immediate: metricsSets.csv,
+  csv_v2: metricsSets.csv,
   PNG: metricsSets.png,
   PNGV2: metricsSets.png,
   printable_pdf: metricsSets.pdf,

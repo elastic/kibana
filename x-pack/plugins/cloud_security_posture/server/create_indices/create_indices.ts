@@ -65,7 +65,16 @@ const createBenchmarkScoreIndex = async (esClient: ElasticsearchClient, logger: 
       priority: 500,
     });
 
-    await createIndexSafe(esClient, logger, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
+    const result = await createIndexSafe(esClient, logger, BENCHMARK_SCORE_INDEX_DEFAULT_NS);
+
+    if (result === 'already-exists') {
+      await updateIndexSafe(
+        esClient,
+        logger,
+        BENCHMARK_SCORE_INDEX_DEFAULT_NS,
+        benchmarkScoreMapping
+      );
+    }
   } catch (e) {
     logger.error(
       `Failed to upsert index template [Template: ${BENCHMARK_SCORE_INDEX_TEMPLATE_NAME}]`

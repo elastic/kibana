@@ -8,8 +8,10 @@
 
 import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
+import { ReactWrapper } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-
+import { EuiLoadingSpinner } from '@elastic/eui';
+import { act } from 'react-dom/test-utils';
 import { DiscoverFieldDetails } from './discover_field_details';
 import { DataViewField } from '@kbn/data-views-plugin/public';
 import { stubDataView, stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
@@ -51,5 +53,58 @@ describe('discover sidebar field details', function () {
     const onAddButton = findTestSubject(component, 'onAddFilterButton');
     onAddButton.simulate('click');
     expect(onAddFilter).toHaveBeenCalledWith('_exists_', visualizableField.name, '+');
+  });
+
+  it('should stay in sync with documents$ state', async function () {
+    const testDocuments$ = new BehaviorSubject({
+      fetchStatus: FetchStatus.LOADING,
+    }) as DataDocuments$;
+    const visualizableField = new DataViewField({
+      name: 'bytes',
+      type: 'number',
+      esTypes: ['long'],
+      count: 10,
+      scripted: false,
+      searchable: true,
+      aggregatable: true,
+      readFromDocValues: true,
+    });
+    let component: ReactWrapper;
+
+    await act(async () => {
+      component = await mountWithIntl(
+        <DiscoverFieldDetails
+          {...defaultProps}
+          field={visualizableField}
+          documents$={testDocuments$}
+        />
+      );
+    });
+
+    expect(component!.find(EuiLoadingSpinner).exists()).toBeTruthy();
+
+    await act(async () => {
+      testDocuments$.next({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: hits,
+      });
+    });
+
+    await component!.update();
+
+    expect(component!.find(EuiLoadingSpinner).exists()).toBeFalsy();
+    expect(
+      findTestSubject(component!, `discoverFieldDetails-${visualizableField.name}`).exists()
+    ).toBeTruthy();
+
+    await act(async () => {
+      testDocuments$.next({
+        fetchStatus: FetchStatus.UNINITIALIZED,
+      });
+    });
+
+    await component!.update();
+
+    expect(component!.isEmptyRender()).toBeTruthy();
   });
 });
