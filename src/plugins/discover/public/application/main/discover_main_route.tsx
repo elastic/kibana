@@ -126,7 +126,6 @@ export function DiscoverMainRoute(props: Props) {
       try {
         await stateContainer.actions.loadDataViewList();
         const currentSavedSearch = await stateContainer.actions.loadSavedSearch(id, nextDataView);
-        stateContainer.dataState.reset();
         if (currentSavedSearch?.id) {
           chrome.recentlyAccessed.add(
             getSavedSearchFullPathUrl(currentSavedSearch.id),

@@ -224,12 +224,12 @@ export interface DiscoverStateContainer {
      */
     initializeAndSync: () => () => void;
     /**
-     * Load a saved search by id or create a new one that's not persited
+     * Load a saved search by id or create a new one that's not persisted yet
      * @param savedSearchId
      * @param dataView
      */
     loadSavedSearch: (
-      savedSearchId: string | undefined,
+      savedSearchId?: string | undefined,
       dataView?: DataView | undefined
     ) => Promise<SavedSearch | undefined>;
   };
@@ -390,6 +390,7 @@ export function getDiscoverStateContainer({
         internalStateContainer.transitions.appendAdHocDataViews(dataView);
       }
     }
+    dataStateContainer.reset();
     return nextSavedSearch;
   };
 
