@@ -38,8 +38,7 @@ const mockAction: RuleAction = {
 
 const mockSummaryAction: RuleAction = {
   id: '1',
-  // @ts-ignore
-  group: null,
+  group: 'default',
   actionTypeId: 'slack',
   params: {},
   frequency: {

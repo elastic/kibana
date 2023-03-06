@@ -29,11 +29,11 @@ export const initGetLogAlertsChartPreviewDataRoute = ({
     },
     framework.router.handleLegacyErrors(async (requestContext, request, response) => {
       const {
-        data: { sourceId, buckets, alertParams },
+        data: { logView, buckets, alertParams },
       } = request.body;
 
       const [, , { logViews }] = await getStartServices();
-      const resolvedLogView = await logViews.getScopedClient(request).getResolvedLogView(sourceId);
+      const resolvedLogView = await logViews.getScopedClient(request).getResolvedLogView(logView);
 
       try {
         const { series } = await getChartPreviewData(

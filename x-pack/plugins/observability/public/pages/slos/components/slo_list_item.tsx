@@ -13,6 +13,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiPopover,
   EuiText,
@@ -62,6 +63,10 @@ export function SloListItem({
     setIsActionsPopoverOpen(!isActionsPopoverOpen);
   };
 
+  const handleViewDetails = () => {
+    navigateToUrl(basePath.prepend(paths.observability.sloDetails(slo.id)));
+  };
+
   const handleEdit = () => {
     navigateToUrl(basePath.prepend(paths.observability.sloEdit(slo.id)));
   };
@@ -102,7 +107,9 @@ export function SloListItem({
             <EuiFlexItem grow>
               <EuiFlexGroup direction="column" gutterSize="m">
                 <EuiFlexItem>
-                  <EuiText size="s">{slo.name}</EuiText>
+                  <EuiText size="s">
+                    <EuiLink onClick={handleViewDetails}>{slo.name}</EuiLink>
+                  </EuiText>
                 </EuiFlexItem>
                 <SloBadges slo={slo} activeAlerts={activeAlerts} />
               </EuiFlexGroup>
@@ -140,13 +147,23 @@ export function SloListItem({
               size="s"
               items={[
                 <EuiContextMenuItem
+                  key="view"
+                  icon="inspect"
+                  onClick={handleViewDetails}
+                  data-test-subj="sloActionsView"
+                >
+                  {i18n.translate('xpack.observability.slo.slo.item.actions.details', {
+                    defaultMessage: 'Details',
+                  })}
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
                   key="edit"
                   icon="pencil"
                   disabled={!hasWriteCapabilities}
                   onClick={handleEdit}
                   data-test-subj="sloActionsEdit"
                 >
-                  {i18n.translate('xpack.observability.slos.slo.item.actions.edit', {
+                  {i18n.translate('xpack.observability.slo.slo.item.actions.edit', {
                     defaultMessage: 'Edit',
                   })}
                 </EuiContextMenuItem>,
@@ -157,7 +174,7 @@ export function SloListItem({
                   onClick={handleClone}
                   data-test-subj="sloActionsClone"
                 >
-                  {i18n.translate('xpack.observability.slos.slo.item.actions.clone', {
+                  {i18n.translate('xpack.observability.slo.slo.item.actions.clone', {
                     defaultMessage: 'Clone',
                   })}
                 </EuiContextMenuItem>,
@@ -168,7 +185,7 @@ export function SloListItem({
                   onClick={handleDelete}
                   data-test-subj="sloActionsDelete"
                 >
-                  {i18n.translate('xpack.observability.slos.slo.item.actions.delete', {
+                  {i18n.translate('xpack.observability.slo.slo.item.actions.delete', {
                     defaultMessage: 'Delete',
                   })}
                 </EuiContextMenuItem>,

@@ -164,7 +164,7 @@ export const NEED_PERMISSIONS = i18n.translate(
 );
 
 export const NEED_FLEET_READ_AGENT_POLICIES_PERMISSION = i18n.translate(
-  'xpack.synthetics.monitorManagement.needFleetReadAgentPoliciesPermission',
+  'xpack.synthetics.monitorManagement.needFleetReadAgentPoliciesPermissionUptime',
   {
     defaultMessage:
       'You are not authorized to access Fleet. Fleet permissions are required to create new private locations.',
