@@ -97,7 +97,7 @@ export const DeleteModalConfirmation = ({
     >
       <p>{getConfirmDeletionModalText(numIdsToDelete, singleTitle, multipleTitle)}</p>
       {showWarningText && (
-        <EuiCallOut title={<>{warningText}</>} color="warning" iconType="alert" />
+        <EuiCallOut title={<>{warningText}</>} color="warning" iconType="warning" />
       )}
     </EuiConfirmModal>
   );

@@ -91,7 +91,7 @@ export const MetricChart = ({ title, type, breakdownSize }: MetricChartProps) =>
           direction="column"
         >
           <EuiFlexItem grow={false}>
-            <EuiIcon type="alert" />
+            <EuiIcon type="warning" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiText size="s" textAlign="center">

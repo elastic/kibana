@@ -175,7 +175,7 @@ export const IndexDataVisualizerViewWrapper = (props: {
   } else {
     return (
       <EuiEmptyPrompt
-        iconType="alert"
+        iconType="warning"
         iconColor="danger"
         title={
           <h2>

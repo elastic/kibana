@@ -133,7 +133,7 @@ export const ComponentTemplateForm = ({
           />
         }
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="saveComponentTemplateError"
       >
         <div>{saveError.message || saveError.statusText}</div>

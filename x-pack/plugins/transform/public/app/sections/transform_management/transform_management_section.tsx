@@ -143,7 +143,7 @@ export const TransformManagement: FC = () => {
                     color="danger"
                   >
                     <EuiEmptyPrompt
-                      iconType="alert"
+                      iconType="warning"
                       title={
                         <h2>
                           <FormattedMessage

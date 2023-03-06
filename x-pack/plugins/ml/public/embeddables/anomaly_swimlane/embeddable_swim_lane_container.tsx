@@ -117,7 +117,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
           />
         }
         color="danger"
-        iconType="alert"
+        iconType="warning"
         css={{ width: '100%' }}
       >
         <p>{error.message}</p>

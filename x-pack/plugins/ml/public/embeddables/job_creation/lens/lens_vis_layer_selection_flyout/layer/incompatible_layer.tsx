@@ -23,7 +23,7 @@ export const IncompatibleLayer: FC<Props> = ({ layer }) => {
     <EuiFlexGroup gutterSize="s" color="subdued" data-test-subj="mlLensLayerIncompatible">
       <EuiFlexItem grow={false}>
         <EuiText size="s">
-          <EuiIcon type="crossInACircleFilled" color="subdued" />
+          <EuiIcon type="error" color="subdued" />
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem>

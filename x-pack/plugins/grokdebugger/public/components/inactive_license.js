@@ -50,7 +50,7 @@ export const InactiveLicenseSlate = () => {
                 defaultMessage: 'License error',
               })}
               color="danger"
-              iconType="alert"
+              iconType="warning"
               style={{ padding: '16px' }}
             >
               <EuiText size="s">

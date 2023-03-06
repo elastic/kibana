@@ -134,7 +134,7 @@ export const RemoveIndexSettingsFlyout = ({
             <EuiCallOut
               title={i18nTexts.errorTitle}
               color="danger"
-              iconType="alert"
+              iconType="warning"
               data-test-subj="deleteSettingsError"
             >
               {statusDetails!.message}

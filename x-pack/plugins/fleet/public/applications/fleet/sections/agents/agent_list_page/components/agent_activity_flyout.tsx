@@ -386,7 +386,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
     ROLLOUT_PASSED: {
       icon:
         action.nbAgentsFailed > 0 ? (
-          <EuiIcon size="m" type="alert" color="red" />
+          <EuiIcon size="m" type="warning" color="red" />
         ) : (
           <EuiIcon size="m" type="checkInCircleFilled" color="green" />
         ),
@@ -422,13 +422,13 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
         ),
     },
     FAILED: {
-      icon: <EuiIcon size="m" type="alert" color="red" />,
+      icon: <EuiIcon size="m" type="warning" color="red" />,
       title: completeTitle,
       titleColor: 'red',
       description: failedDescription,
     },
     CANCELLED: {
-      icon: <EuiIcon size="m" type="alert" color="grey" />,
+      icon: <EuiIcon size="m" type="warning" color="grey" />,
       titleColor: 'grey',
       title: (
         <EuiText>
@@ -454,7 +454,7 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
       ),
     },
     EXPIRED: {
-      icon: <EuiIcon size="m" type="alert" color="grey" />,
+      icon: <EuiIcon size="m" type="warning" color="grey" />,
       titleColor: 'grey',
       title: (
         <EuiText>

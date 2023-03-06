@@ -40,14 +40,14 @@ export const ProcessRowCharts = ({ command }: Props) => {
   const isLoading = loading || !response;
 
   const cpuChart = error ? (
-    <EuiEmptyPrompt iconType="alert" title={<EuiText>{failedToLoadChart}</EuiText>} />
+    <EuiEmptyPrompt iconType="warning" title={<EuiText>{failedToLoadChart}</EuiText>} />
   ) : isLoading ? (
     <EuiLoadingChart />
   ) : (
     <ProcessChart timeseries={response!.cpu} color={Color.color2} label={cpuMetricLabel} />
   );
   const memoryChart = error ? (
-    <EuiEmptyPrompt iconType="alert" title={<EuiText>{failedToLoadChart}</EuiText>} />
+    <EuiEmptyPrompt iconType="warning" title={<EuiText>{failedToLoadChart}</EuiText>} />
   ) : isLoading ? (
     <EuiLoadingChart />
   ) : (

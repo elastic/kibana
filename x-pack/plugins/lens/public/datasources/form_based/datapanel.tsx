@@ -127,7 +127,7 @@ export function FormBasedDataPanel({
                 defaultMessage: 'No data views',
               })}
               color="warning"
-              iconType="alert"
+              iconType="warning"
             >
               <p>
                 <FormattedMessage

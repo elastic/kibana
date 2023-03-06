@@ -286,7 +286,7 @@ export function ServiceInventory() {
           }
         )}
         color="warning"
-        iconType="alert"
+        iconType="warning"
       >
         <EuiText size="s">
           <FormattedMessage

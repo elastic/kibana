@@ -91,7 +91,7 @@ export function ServiceGroupsCard({
                 )}
               >
                 <EuiBadge
-                  iconType="alert"
+                  iconType="warning"
                   color="danger"
                   href={activeAlertsHref}
                   {...({

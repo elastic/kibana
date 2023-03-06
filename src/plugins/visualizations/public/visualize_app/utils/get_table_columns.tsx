@@ -82,7 +82,7 @@ export const getCustomColumn = () => {
           {getBadge(record)}
         </span>
       ) : (
-        <EuiBadge iconType="alert" color="warning">
+        <EuiBadge iconType="warning" color="warning">
           {record.error}
         </EuiBadge>
       ),

@@ -244,7 +244,7 @@ export const SearchAndFilterBar: React.FunctionComponent<{
                       >
                         <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
                           <EuiFlexItem grow={false}>
-                            <EuiIcon type="crossInACircleFilled" color="danger" size="s" />
+                            <EuiIcon type="error" color="danger" size="s" />
                           </EuiFlexItem>
                           <EuiFlexItem grow={false}>Clear all</EuiFlexItem>
                         </EuiFlexGroup>

@@ -262,7 +262,7 @@ function ExplorerChartContainer({
                 content={tooManyBucketsCalloutMsg ?? textTooManyBuckets}
                 position="top"
                 size="s"
-                type="alert"
+                type="warning"
                 color="warning"
               />
             )}

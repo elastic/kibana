@@ -26,7 +26,7 @@ export const FieldPreviewError = () => {
         defaultMessage: 'Error fetching document',
       })}
       color="danger"
-      iconType="alert"
+      iconType="warning"
       role="alert"
       data-test-subj="fetchDocError"
     >

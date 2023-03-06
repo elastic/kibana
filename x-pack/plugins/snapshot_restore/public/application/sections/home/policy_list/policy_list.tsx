@@ -183,7 +183,7 @@ export const PolicyList: React.FunctionComponent<RouteComponentProps<MatchParams
                 />
               }
               color="warning"
-              iconType="alert"
+              iconType="warning"
             >
               <FormattedMessage
                 id="xpack.snapshotRestore.policyScheduleWarningDescription"

@@ -30,7 +30,7 @@ export const ConfirmButtonIcon: FunctionComponent<Props> = ({
         disabled={disabled}
         aria-label={confirmationText}
         color="warning"
-        iconType="alert"
+        iconType="warning"
         onClick={onConfirm}
       />
     </EuiToolTip>

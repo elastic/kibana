@@ -146,7 +146,7 @@ const getColumns = (
                   aria-label={staleMessage}
                   content={staleMessage}
                   size="l"
-                  type="alert"
+                  type="warning"
                   color="warning"
                 />
               </>

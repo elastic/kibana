@@ -68,7 +68,7 @@ const getProgress = (state?: GuideState): number => {
 const errorSection = (
   <EuiEmptyPrompt
     data-test-subj="guideErrorSection"
-    iconType="alert"
+    iconType="warning"
     color="danger"
     title={
       <h2>

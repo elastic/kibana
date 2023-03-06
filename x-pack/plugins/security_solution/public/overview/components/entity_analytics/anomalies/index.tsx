@@ -171,7 +171,7 @@ export const EntityAnalyticsAnomalies = () => {
                 title={i18n.MODULE_NOT_COMPATIBLE_TITLE(incompatibleJobCount)}
                 data-test-subj="incompatible_jobs_warnings"
                 color="warning"
-                iconType="alert"
+                iconType="warning"
                 size="s"
               >
                 <p>

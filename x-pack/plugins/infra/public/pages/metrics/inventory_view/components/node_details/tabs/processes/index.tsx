@@ -135,7 +135,7 @@ const TabComponent = ({ currentTime, node, nodeType }: TabProps) => {
           />
         ) : (
           <EuiEmptyPrompt
-            iconType="alert"
+            iconType="warning"
             title={
               <h4>
                 {i18n.translate('xpack.infra.metrics.nodeDetails.processListError', {

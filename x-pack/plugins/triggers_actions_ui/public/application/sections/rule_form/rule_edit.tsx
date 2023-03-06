@@ -272,7 +272,7 @@ export const RuleEdit = ({
                     {config.isUsingSecurity && (
                       <EuiFlexItem grow={false}>
                         <EuiIconTip
-                          type="alert"
+                          type="warning"
                           position="top"
                           data-test-subj="changeInPrivilegesTip"
                           content={i18n.translate(

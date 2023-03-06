@@ -481,7 +481,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
         <FlyoutBodySection className="builder-section">
           {errorSubmitting != null && (
             <>
-              <EuiCallOut title={i18n.SUBMIT_ERROR_TITLE} color="danger" iconType="alert">
+              <EuiCallOut title={i18n.SUBMIT_ERROR_TITLE} color="danger" iconType="warning">
                 <EuiText>{i18n.SUBMIT_ERROR_DISMISS_MESSAGE}</EuiText>
                 <EuiSpacer size="s" />
                 <EuiButton color="danger" onClick={handleDismissError}>

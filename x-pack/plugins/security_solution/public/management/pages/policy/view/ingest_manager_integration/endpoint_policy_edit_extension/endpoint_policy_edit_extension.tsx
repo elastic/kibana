@@ -122,7 +122,7 @@ const WrappedPolicyDetailsForm = memo<{
                 defaultMessage="Failed to load endpoint policy settings"
               />
             }
-            iconType="alert"
+            iconType="warning"
             color="warning"
             data-test-subj="endpiontPolicySettingsLoadingError"
           >

@@ -27,7 +27,7 @@ export function ApiKeysNotEnabled() {
           )}
         </h2>
       }
-      iconType="alert"
+      iconType="warning"
       body={
         <p>
           <FormattedMessage

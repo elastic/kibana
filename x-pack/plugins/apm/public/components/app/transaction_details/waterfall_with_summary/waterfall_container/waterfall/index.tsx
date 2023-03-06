@@ -115,7 +115,7 @@ export function Waterfall({
         <EuiCallOut
           color="warning"
           size="s"
-          iconType="alert"
+          iconType="warning"
           title={i18n.translate('xpack.apm.waterfall.exceedsMax', {
             defaultMessage:
               'The number of items in this trace is {traceItemCount} which is higher than the current limit of {maxTraceItems}. Please increase the limit to see the full trace',

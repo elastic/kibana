@@ -232,7 +232,7 @@ const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePat
     <EuiCallOut
       color="warning"
       size="s"
-      iconType="alert"
+      iconType="warning"
       data-test-subj="importSavedObjectsWarning"
       title={warning.message}
     >

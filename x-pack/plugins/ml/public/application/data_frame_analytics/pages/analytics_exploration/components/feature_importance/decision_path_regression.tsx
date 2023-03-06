@@ -69,7 +69,7 @@ export const RegressionDecisionPath: FC<RegressionDecisionPathProps> = ({
             />
           }
           color="warning"
-          iconType="alert"
+          iconType="warning"
         />
       )}
       <DecisionPathChart

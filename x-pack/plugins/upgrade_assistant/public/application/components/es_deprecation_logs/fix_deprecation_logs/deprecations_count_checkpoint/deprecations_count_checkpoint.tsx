@@ -103,7 +103,7 @@ export const DeprecationsCountCheckpoint: FunctionComponent<Props> = ({
       <EuiCallOut
         title={i18nTexts.loadingError}
         color="danger"
-        iconType="alert"
+        iconType="warning"
         data-test-subj="errorCallout"
       >
         <p>

@@ -91,7 +91,7 @@ export function ProgressControls({
                   <EuiFlexItem>
                     <EuiIconTip
                       aria-label="Warning"
-                      type="alert"
+                      type="warning"
                       color="warning"
                       content={i18n.translate('xpack.aiops.rerunAnalysisTooltipContent', {
                         defaultMessage:

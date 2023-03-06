@@ -711,7 +711,7 @@ export const VisualizationWrapper = ({
               </>
             }
             iconColor="danger"
-            iconType="alert"
+            iconType="warning"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -780,7 +780,7 @@ export const VisualizationWrapper = ({
                     </>
                   }
                   iconColor="danger"
-                  iconType="alert"
+                  iconType="warning"
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
