@@ -61,6 +61,7 @@ import {
   getMapZoom,
   getHiddenLayerIds,
   getQueryableUniqueIndexPatternIds,
+  getWaitingForMapReadyLayerListRaw,
 } from '../selectors/map_selectors';
 import {
   APP_ID,
@@ -750,9 +751,10 @@ export class MapEmbeddable
     }
 
     if (areLayersLoaded(this._savedMap.getStore().getState())) {
-      const layers = getLayerList(this._savedMap.getStore().getState());
+      const mapState = this._savedMap.getStore().getState();
+      const layers = getLayerList(mapState);
       const isLoading =
-        layers.length !== 0 &&
+        getWaitingForMapReadyLayerListRaw(mapState).length > 0 ||
         layers.some((layer) => {
           return layer.isLayerLoading();
         });

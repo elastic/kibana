@@ -26,6 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   const LAYER_NAME = 'World Countries';
+  let mapCounter = 0;
 
   async function createAndAddMapByValue() {
     log.debug(`createAndAddMapByValue`);
@@ -53,12 +54,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     if (saveToLibrary) {
       await testSubjects.click('importFileButton');
       await testSubjects.click('mapSaveButton');
-      await PageObjects.timeToVisualize.saveFromModal(
-        `my map ${Math.floor(Math.random() * 1000)}`,
-        {
-          redirectToOrigin: saveToDashboard,
-        }
-      );
+      await PageObjects.timeToVisualize.saveFromModal(`my map ${mapCounter++}`, {
+        redirectToOrigin: saveToDashboard,
+      });
 
       if (!saveToDashboard) {
         await appsMenu.clickLink('Dashboard');
@@ -76,8 +74,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     await PageObjects.dashboard.clickNewDashboard();
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/152476
-  describe.only('dashboard maps by value', function () {
+  describe('dashboard maps by value', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
