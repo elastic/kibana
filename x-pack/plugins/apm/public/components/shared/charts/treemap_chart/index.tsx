@@ -52,7 +52,6 @@ export function TreemapChart({
               },
               fillLabel: {
                 valueFormatter: () => '',
-                textColor: 'red',
                 fontWeight: 500,
                 minFontSize: 10,
                 maxFontSize: 14,

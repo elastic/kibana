@@ -66,9 +66,9 @@ export async function getMobileTermsByField({
   );
 
   return (
-    response.aggregations?.terms?.buckets?.map(({ key, doc_count }) => ({
+    response.aggregations?.terms?.buckets?.map(({ key, doc_count: count }) => ({
       label: key as string,
-      count: doc_count,
+      count,
     })) ?? []
   );
 }
