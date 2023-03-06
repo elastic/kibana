@@ -8,3 +8,4 @@ xpack.watcher.enabled: false
 xpack.ccr.enabled: false
 xpack.ilm.enabled: false
 xpack.remote_clusters.enabled: false
+xpack.snapshot_restore.enabled: false
