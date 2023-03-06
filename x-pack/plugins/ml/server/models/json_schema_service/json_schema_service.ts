@@ -116,6 +116,7 @@ export class JsonSchemaService {
 
   /**
    * Generates openapi filed, removing redundant content.
+   * Only used internally via a node command to generate the file.
    */
   public async generateSchemaFile() {
     const schema = JSON.parse(
