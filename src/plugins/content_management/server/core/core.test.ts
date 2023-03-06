@@ -56,6 +56,9 @@ const setup = ({ registerFooType = false }: { registerFooType?: boolean } = {}) 
         search: { in: { query: schema.any() } },
       },
     },
+    version: {
+      latest: 'v2',
+    },
   };
   const cleanUp = () => {
     coreSetup.api.eventBus.stop();
@@ -108,6 +111,27 @@ describe('Content Core', () => {
           // the content into our "contentRegistry" instance
           expect(contentRegistry.isContentRegistered(FOO_CONTENT_ID)).toBe(true);
           expect(contentRegistry.getDefinition(FOO_CONTENT_ID)).toBe(contentDefinition);
+
+          cleanUp();
+        });
+
+        test('should throw if latest version passed is not valid', () => {
+          const { coreSetup, cleanUp, contentDefinition } = setup();
+
+          const {
+            contentRegistry,
+            api: { register },
+          } = coreSetup;
+
+          expect(contentRegistry.isContentRegistered(FOO_CONTENT_ID)).toBe(false);
+
+          expect(() => {
+            register({ ...contentDefinition, version: undefined } as any);
+          }).toThrowError('Invalid version [undefined]. Must follow the pattern [v${number}]');
+
+          expect(() => {
+            register({ ...contentDefinition, version: { latest: 'v0' } });
+          }).toThrowError('Version must be >= 1');
 
           cleanUp();
         });

@@ -9,6 +9,8 @@
 import type { Type } from '@kbn/config-schema';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 
+import type { Version } from '../../common';
+
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
   requestHandlerContext: RequestHandlerContext;
@@ -97,5 +99,8 @@ export interface ContentTypeDefinition<S extends ContentStorage = ContentStorage
   storage: S;
   schemas: {
     content: ContentSchemas;
+  };
+  version: {
+    latest: Version;
   };
 }

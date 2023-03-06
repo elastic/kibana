@@ -148,6 +148,9 @@ describe('RPC -> search()', () => {
         schemas: {
           content: contentSchemas,
         },
+        version: {
+          latest: 'v2',
+        },
       });
 
       const requestHandlerContext = 'mockedRequestHandlerContext';

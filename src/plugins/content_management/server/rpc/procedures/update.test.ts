@@ -140,6 +140,9 @@ describe('RPC -> update()', () => {
         schemas: {
           content: contentSchemas,
         },
+        version: {
+          latest: 'v2',
+        },
       });
 
       const requestHandlerContext = 'mockedRequestHandlerContext';
