@@ -206,7 +206,7 @@ const CREATE_LOCATION_DESCRIPTION = (
 );
 const PUBLIC_LOCATION_DESCRIPTION = (
   <FormattedMessage
-    id="xpack.synthetics.gettingStarted.createLocationDescription"
+    id="xpack.synthetics.gettingStarted.publicLocationDescription"
     defaultMessage="In {link} you can also use {elasticManagedLink}. With it, you can create and run monitors in multiple locations without having to manage your own infrastructure. Elastic takes care of software updates and capacity planning for you."
     values={{
       elasticManagedLink: (
