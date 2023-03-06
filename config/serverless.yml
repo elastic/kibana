@@ -7,3 +7,4 @@ xpack.rollup.enabled: false
 xpack.watcher.enabled: false
 xpack.ccr.enabled: false
 xpack.ilm.enabled: false
+xpack.remote_clusters.enabled: false
