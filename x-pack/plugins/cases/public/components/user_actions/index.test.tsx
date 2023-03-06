@@ -21,7 +21,10 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { connectorsMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
-import { defaultInfiniteUseFindCaseUserActions, defaultUseFindCaseUserActions } from '../case_view/mocks';
+import {
+  defaultInfiniteUseFindCaseUserActions,
+  defaultUseFindCaseUserActions,
+} from '../case_view/mocks';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import userEvent from '@testing-library/user-event';
@@ -102,14 +105,17 @@ describe(`UserActions`, () => {
   });
 
   it('Loading spinner when user actions loading and displays fullName/username', () => {
-    useFindCaseUserActionsMock.mockReturnValue({isLoading: true});
-    useInfiniteFindCaseUserActionsMock.mockReturnValue({isLoading: true});
+    useFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
+    useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
     appMockRender.render(
       <UserActions
         {...{ ...defaultProps, currentUserProfile: userProfiles[0] }}
       />
     );
 
+    expect(screen.getAllByTestId('user-actions-loading')).toHaveLength(2);
+    // expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
+    // expect(screen.getByText('DR')).toBeInTheDocument();
     expect(screen.getAllByTestId('user-actions-loading')).toHaveLength(2);
     // expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
     // expect(screen.getByText('DR')).toBeInTheDocument();
@@ -122,6 +128,12 @@ describe(`UserActions`, () => {
         createdAt: '2023-01-17T09:46:29.813Z',
       }),
     ];
+
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue({
+      ...defaultUseFindCaseUserActions,
+      data: { ...defaultUseFindCaseUserActions.data.userActions, ...ourActions },
+    });
 
     useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
     useFindCaseUserActionsMock.mockReturnValue({...defaultUseFindCaseUserActions, data: {...defaultUseFindCaseUserActions.data.userActions, ...ourActions}});
@@ -140,6 +152,8 @@ describe(`UserActions`, () => {
     expect(component).toMatchSnapshot();
 
     await waitFor(() => {
+      expect(screen.getByTestId('top-footer')).toBeInTheDocument();
+      expect(screen.getByTestId('bottom-footer')).toBeInTheDocument();
       expect(screen.getByTestId('top-footer')).toBeInTheDocument();
       expect(screen.getByTestId('bottom-footer')).toBeInTheDocument();
     });
@@ -179,6 +193,18 @@ describe(`UserActions`, () => {
     };
 
     useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue({
+      ...defaultUseFindCaseUserActions,
+      data: { ...defaultUseFindCaseUserActions.data.userActions, ...ourActions },
+    });
+
+    appMockRender.render(<UserActions {...props} />);
+    expect(
+      screen
+        .getByTestId(`comment-create-action-${props.data.comments[0].id}`)
+        .classList.contains('outlined')
+    ).toBe(false);
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
     useFindCaseUserActionsMock.mockReturnValue({...defaultUseFindCaseUserActions, data: {...defaultUseFindCaseUserActions.data.userActions, ...ourActions}});
 
     appMockRender.render(
@@ -190,11 +216,13 @@ describe(`UserActions`, () => {
 
     await waitFor(() => {
       expect(
-        screen.getByTestId(`comment-create-action-${props.data.comments[0].id}`)
-        .classList.contains('outlined')
+        screen
+          .getByTestId(`comment-create-action-${props.data.comments[0].id}`)
+          .classList.contains('outlined')
       ).toBe(true);
     });
   });
+
 
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
     const ourActions = [getUserAction('comment', Actions.create)];
@@ -344,6 +372,12 @@ describe(`UserActions`, () => {
         userActivityQueryParams={{ ...userActivityQueryParams, type: 'action' }}
       />
     );
+    appMockRender.render(
+      <UserActions
+        {...defaultProps}
+        userActivityQueryParams={{ ...userActivityQueryParams, type: 'action' }}
+      />
+    );
 
     await waitFor(() => {
       expect(screen.queryByTestId('add-comment')).not.toBeInTheDocument();
@@ -461,6 +495,15 @@ describe(`UserActions`, () => {
   //       expect(wrapper.find(`[data-test-subj="endpoint-action"]`).exists()).toBe(true);
   //     });
   //   });
+  //     const wrapper = mount(
+  //       <TestProviders>
+  //         <UserActions {...props} />
+  //       </TestProviders>
+  //     );
+  //     await waitFor(() => {
+  //       expect(wrapper.find(`[data-test-subj="endpoint-action"]`).exists()).toBe(true);
+  //     });
+  //   });
 
   //   it('shows the correct username', async () => {
   //     const isolateAction = [
@@ -478,6 +521,11 @@ describe(`UserActions`, () => {
 
   //     appMockRender.render(<UserActions {...props} />);
 
+  //     expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
+  //     expect(screen.getByText('DR')).toBeInTheDocument();
+  //     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+  //   });
+  // });
   //     expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
   //     expect(screen.getByText('DR')).toBeInTheDocument();
   //     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();

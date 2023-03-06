@@ -19,7 +19,7 @@ import { createCaseUserActionBuilder } from './create_case';
 import type { UserActionBuilderMap } from './types';
 
 export const builderMap: UserActionBuilderMap = {
-  'create_case': createCaseUserActionBuilder,
+  create_case: createCaseUserActionBuilder,
   connector: createConnectorUserActionBuilder,
   tags: createTagsUserActionBuilder,
   title: createTitleUserActionBuilder,

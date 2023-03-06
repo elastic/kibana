@@ -170,11 +170,26 @@ describe.skip('Case View Page activity tab', () => {
 
     const lastPageForAll = Math.ceil(userActionsStats.total / userActivityQueryParams.perPage);
 
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams, false);
-    expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams, true);
-    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {...userActivityQueryParams, page: lastPageForAll}, true);
-    expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {...userActivityQueryParams, page: lastPageForAll}, false);
-
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+      caseData.id,
+      userActivityQueryParams,
+      false
+    );
+    expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+      caseData.id,
+      userActivityQueryParams,
+      true
+    );
+    expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+      caseData.id,
+      { ...userActivityQueryParams, page: lastPageForAll },
+      true
+    );
+    expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+      caseData.id,
+      { ...userActivityQueryParams, page: lastPageForAll },
+      false
+    );
 
     await waitForComponentToUpdate();
   });
@@ -267,10 +282,26 @@ describe.skip('Case View Page activity tab', () => {
       userEvent.click(screen.getByTestId('user-actions-filter-activity-button-all'));
 
       await waitFor(() => {
-        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams, false);
-        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams, true);
-        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {...userActivityQueryParams, page: lastPageForAll}, true);
-        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {...userActivityQueryParams, page: lastPageForAll}, false);
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          userActivityQueryParams,
+          false
+        );
+        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          userActivityQueryParams,
+          true
+        );
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          { ...userActivityQueryParams, page: lastPageForAll },
+          true
+        );
+        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
+          caseData.id,
+          { ...userActivityQueryParams, page: lastPageForAll },
+          false
+        );
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
       });
 
@@ -278,9 +309,7 @@ describe.skip('Case View Page activity tab', () => {
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         expect(screen.getByLabelText(`${userActionsStats.total} active filters`));
         expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
-        expect(
-          screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`)
-        );
+        expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`));
       });
     });
 
@@ -292,9 +321,7 @@ describe.skip('Case View Page activity tab', () => {
       await waitFor(() => {
         expect(screen.getByLabelText(`${userActionsStats.totalComments} active filters`));
         expect(screen.getByLabelText(`${userActionsStats.total} available filters`));
-        expect(
-          screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`)
-        );
+        expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`));
       });
 
     });
@@ -323,9 +350,7 @@ describe.skip('Case View Page activity tab', () => {
         expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
         expect(screen.getByLabelText(`${userActionsStats.total} active filters`));
         expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
-        expect(
-          screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`)
-        );
+        expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`));
       });
     });
   });
