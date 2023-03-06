@@ -497,7 +497,11 @@ export const ActionTypeForm = ({
                       )}
                       {warning && !isOpen && (
                         <EuiFlexItem grow={false}>
-                          <EuiBadge data-test-subj="warning-badge" iconType="warning" color="warning">
+                          <EuiBadge
+                            data-test-subj="warning-badge"
+                            iconType="warning"
+                            color="warning"
+                          >
                             {i18n.translate(
                               'xpack.triggersActionsUI.sections.actionTypeForm.actionWarningsTitle',
                               {
