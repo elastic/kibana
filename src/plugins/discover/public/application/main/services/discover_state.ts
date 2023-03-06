@@ -378,9 +378,10 @@ export function getDiscoverStateContainer({
         loadAndResolveDataView,
       });
     }
+    const dataView = nextSavedSearch.searchSource.getField('index');
 
-    if (nextSavedSearch.searchSource.getField('index') === undefined) {
-      setDataView(nextSavedSearch.searchSource.getField('index')!);
+    if (dataView) {
+      setDataView(dataView);
     }
     return nextSavedSearch;
   };
