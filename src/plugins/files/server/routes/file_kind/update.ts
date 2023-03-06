@@ -24,7 +24,11 @@ const rt = {
     meta: schema.maybe(commonSchemas.fileMeta),
   }),
   params: schema.object({
-    id: schema.string(),
+    id: schema.string({
+      minLength: 3,
+      maxLength: 10,
+      validate: (name) => name.match(/^[a-z0-9]+$/),
+    }),
   }),
 };
 

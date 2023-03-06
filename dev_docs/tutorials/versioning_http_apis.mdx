@@ -102,13 +102,15 @@ Consider this example of an HTTP API that accepts unexpected values as input:
 
 ```ts
 interface MyObjectAttributes {
+  /** A user provided name */
+  name: string;
   /** A number representing a length of time in milliseconds */
   duration: number;
 }
 router.post(
   {
     path: '/api/myobject',
-    validate: { body: schema.object({ duration: schema.number() }) },
+    validate: { body: schema.object({ name: schema.string(), duration: schema.number() }) },
   },
   (ctx, req, res) => {
     const { savedObjects } = await ctx.core;
@@ -118,15 +120,27 @@ router.post(
 );
 ```
 
-This HTTP API currently accepts all numbers as input which allows for unexpected inputs like negative numbers to be provided and persisted. This may break existing or future migrations or integrations that assume the number will non-negative.
+This HTTP API currently accepts all numbers and strings as input which allows for unexpected inputs like negative numbers or non-URL friendly characters. This may break future migrations or integrations that assume your data will always be within certain parameters.
 
 ```ts
-...
-    validate: { body: schema.object({ duration: schema.number({ min: 0 }) }) },
-...
+  {
+    path: '/api/myobject',
+    validate: {
+      body: schema.object({
+        name: schema.string({
+          minLength: 3,
+          maxLength: 100,
+          validate: (name) => name.match(/^[a-z0-9]+$/),
+        }),
+        duration: schema.number({ min: 0 }),
+      })
+    },
+  }
 ```
 
-Adding this validation to `schema.number` we remove the risk of unexpected values. It is not necessary to use `@kbn/config-schema`, as long as your validation mechanism provides finer grained controls than "number" or "string".
+Adding this validation we negate the risk of unexpected values. It is not necessary to use `@kbn/config-schema`, as long as your validation mechanism provides finer grained controls than "number" or "string".
+
+In summary: think about the acceptable paramaters for every input your HTTP API expects.
 
 ### 3. Keep interfaces as "narrow" as possible
 
