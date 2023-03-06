@@ -251,97 +251,84 @@ describe.skip('Case View Page activity tab', () => {
     });
   });
 
-  // describe('filter activity', () => {
-  //   beforeEach(() => {
-  //     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
-  //     useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
-  //   });
+  describe('filter activity', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
+      useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+      useGetCaseUserActionsStatsMock.mockReturnValue({ data: userActionsStats, isLoading: false });
+    });
 
-  //   it('should show all filter as active', async () => {
-  //     appMockRender.render(<CaseViewActivity {...caseProps} />);
+    it('should show all filter as active', async () => {
+      appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-  //     userEvent.click(screen.getByTestId('user-actions-filter-activity-button-all'));
+      const lastPageForAll = Math.ceil(userActionsStats.total / userActivityQueryParams.perPage);
 
-  //     await waitFor(() => {
-  //       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
-  //       expect(screen.getByLabelText(`${userActionsStats.total - 1} active filters`));
-  //       expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
-  //       expect(
-  //         screen.getByLabelText(`${userActionsStats.totalOtherActions - 1} available filters`)
-  //       );
-  //     });
-  //   });
+      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-all'));
 
-  //   it('should show comment filter as active', async () => {
-  //     appMockRender.render(<CaseViewActivity {...caseProps} />);
-  //     const commentUserActivityQueryParams = {
-  //       ...userActivityQueryParams,
-  //       type: 'user',
-  //     }
+      await waitFor(() => {
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams, false);
+        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams, true);
+        expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {...userActivityQueryParams, page: lastPageForAll}, true);
+        expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {...userActivityQueryParams, page: lastPageForAll}, false);
+        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
+      });
 
-  //     const lastPageForComments = Math.ceil(userActionsStats.totalComments / userActivityQueryParams.perPage);
+      await waitFor(() => {
+        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
+        expect(screen.getByLabelText(`${userActionsStats.total} active filters`));
+        expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
+        expect(
+          screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`)
+        );
+      });
+    });
 
-  //     userEvent.click(screen.getByTestId('user-actions-filter-activity-button-comments'));
+    it('should show comment filter as active', async () => {
+      appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-  //     await waitFor(() => {
-  //     expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, commentUserActivityQueryParams, false);
-  //     expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, commentUserActivityQueryParams, true);
-  //     expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {...commentUserActivityQueryParams, page: lastPageForComments}, true);
-  //     expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {...commentUserActivityQueryParams, page: lastPageForComments}, false);
-  //       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
-  //     });
+      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-comments'));
 
-  //     await waitFor(() => {
-  //       expect(screen.getByLabelText(`${userActionsStats.totalComments} active filters`));
-  //       expect(screen.getByLabelText(`${userActionsStats.total - 1} available filters`));
-  //       expect(
-  //         screen.getByLabelText(`${userActionsStats.totalOtherActions - 1} available filters`)
-  //       );
-  //     });
-  //   });
+      await waitFor(() => {
+        expect(screen.getByLabelText(`${userActionsStats.totalComments} active filters`));
+        expect(screen.getByLabelText(`${userActionsStats.total} available filters`));
+        expect(
+          screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`)
+        );
+      });
 
-  //   it('should show history filter as active', async () => {
-  //     appMockRender.render(<CaseViewActivity {...caseProps} />);
+    });
 
-  //     expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams);
+    it('should show history filter as active', async () => {
+      appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-  //     userEvent.click(screen.getByTestId('user-actions-filter-activity-button-history'));
+      userEvent.click(screen.getByTestId('user-actions-filter-activity-button-history'));
 
-  //     await waitFor(() => {
-  //       expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
-  //         ...userActivityQueryParams,
-  //         type: 'action',
-  //       });
-  //       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
-  //       expect(screen.getByLabelText(`${userActionsStats.totalOtherActions - 1} active filters`));
-  //       expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
-  //       expect(screen.getByLabelText(`${userActionsStats.total - 1} available filters`));
-  //     });
-  //   });
+      await waitFor(() => {
+        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
+        expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} active filters`));
+        expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
+        expect(screen.getByLabelText(`${userActionsStats.total} available filters`));
+      });
+    });
 
-  //   it('should render by desc sort order', async () => {
-  //     appMockRender.render(<CaseViewActivity {...caseProps} />);
+    it('should render by desc sort order', async () => {
+      appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-  //     expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, userActivityQueryParams);
+      const sortSelect = screen.getByTestId('user-actions-sort-select');
 
-  //     const sortSelect = screen.getByTestId('user-actions-sort-select');
+      fireEvent.change(sortSelect, { target: { value: 'desc' } });
 
-  //     fireEvent.change(sortSelect, { target: { value: 'desc' } });
-
-  //     await waitFor(() => {
-  //       expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(caseData.id, {
-  //         ...userActivityQueryParams,
-  //         sortOrder: 'desc',
-  //       });
-  //       expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
-  //       expect(screen.getByLabelText(`${userActionsStats.total - 1} active filters`));
-  //       expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
-  //       expect(
-  //         screen.getByLabelText(`${userActionsStats.totalOtherActions - 1} available filters`)
-  //       );
-  //     });
-  //   });
-  // });
+      await waitFor(() => {
+        expect(useGetCaseUserActionsStatsMock).toHaveBeenCalledWith(caseData.id);
+        expect(screen.getByLabelText(`${userActionsStats.total} active filters`));
+        expect(screen.getByLabelText(`${userActionsStats.totalComments} available filters`));
+        expect(
+          screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`)
+        );
+      });
+    });
+  });
 
   describe('Case users', () => {
     describe('Participants', () => {
@@ -463,123 +450,123 @@ describe.skip('Case View Page activity tab', () => {
       });
     });
 
-    // describe('User actions', () => {
-    //   it('renders the descriptions user correctly', async () => {
-    //     appMockRender = createAppMockRenderer();
-    //     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+    describe('User actions', () => {
+      it('renders the descriptions user correctly', async () => {
+        appMockRender = createAppMockRenderer();
+        const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-    //     const description = within(result.getByTestId('description-action'));
+        const description = within(result.getByTestId('description-action'));
 
-    //     await waitFor(() => {
-    //       expect(description.getByText('Leslie Knope')).toBeInTheDocument();
-    //     });
-    //   });
+        await waitFor(() => {
+          expect(description.getByText('Leslie Knope')).toBeInTheDocument();
+        });
+      });
 
-    //   it('renders the unassigned users correctly', async () => {
-    //     useFindCaseUserActionsMock.mockReturnValue({
-    //       ...defaultUseFindCaseUserActions,
-    //       data: {
-    //         userActions: [getUserAction(ActionTypes.assignees, 'delete')],
-    //       },
-    //     });
+      it('renders the unassigned users correctly', async () => {
+        useFindCaseUserActionsMock.mockReturnValue({
+          ...defaultUseFindCaseUserActions,
+          data: {
+            userActions: [getUserAction(ActionTypes.assignees, 'delete')],
+          },
+        });
 
-    //     appMockRender = createAppMockRenderer();
-    //     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+        appMockRender = createAppMockRenderer();
+        const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-    //     const userActions = within(result.getByTestId('user-actions'));
+        const userActions = within(result.getAllByTestId('user-actions-list')[1]);
 
-    //     await waitFor(() => {
-    //       expect(userActions.getByText('cases_no_connectors')).toBeInTheDocument();
-    //       expect(userActions.getByText('Valid Chimpanzee')).toBeInTheDocument();
-    //     });
-    //   });
+        await waitFor(() => {
+          expect(userActions.getByText('cases_no_connectors')).toBeInTheDocument();
+          expect(userActions.getByText('Valid Chimpanzee')).toBeInTheDocument();
+        });
+      });
 
-    //   it('renders the assigned users correctly', async () => {
-    //     useFindCaseUserActionsMock.mockReturnValue({
-    //       ...defaultUseFindCaseUserActions,
-    //       data: {
-    //         userActions: [
-    //           getUserAction(ActionTypes.assignees, 'add', {
-    //             payload: {
-    //               assignees: [
-    //                 { uid: 'not-valid' },
-    //                 { uid: 'u_3OgKOf-ogtr8kJ5B0fnRcqzXs2aQQkZLtzKEEFnKaYg_0' },
-    //               ],
-    //             },
-    //           }),
-    //         ],
-    //       },
-    //     });
+      it('renders the assigned users correctly', async () => {
+        useFindCaseUserActionsMock.mockReturnValue({
+          ...defaultUseFindCaseUserActions,
+          data: {
+            userActions: [
+              getUserAction(ActionTypes.assignees, 'add', {
+                payload: {
+                  assignees: [
+                    { uid: 'not-valid' },
+                    { uid: 'u_3OgKOf-ogtr8kJ5B0fnRcqzXs2aQQkZLtzKEEFnKaYg_0' },
+                  ],
+                },
+              }),
+            ],
+          },
+        });
 
-    //     appMockRender = createAppMockRenderer();
-    //     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+        appMockRender = createAppMockRenderer();
+        const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-    //     const userActions = within(result.getByTestId('user-actions'));
+        const userActions = within(result.getAllByTestId('user-actions-list')[1]);
 
-    //     await waitFor(() => {
-    //       expect(userActions.getByText('Fuzzy Marten')).toBeInTheDocument();
-    //       expect(userActions.getByText('Unknown')).toBeInTheDocument();
-    //     });
-    //   });
+        await waitFor(() => {
+          expect(userActions.getByText('Fuzzy Marten')).toBeInTheDocument();
+          expect(userActions.getByText('Unknown')).toBeInTheDocument();
+        });
+      });
 
-    //   it('renders the user action users correctly', async () => {
-    //     useFindCaseUserActionsMock.mockReturnValue({
-    //       ...defaultUseFindCaseUserActions,
-    //       data: {
-    //         userActions: [
-    //           getUserAction('description', 'create'),
-    //           getUserAction('description', 'update', {
-    //             createdBy: {
-    //               ...caseUsers.participants[0].user,
-    //               fullName: caseUsers.participants[0].user.full_name,
-    //               profileUid: caseUsers.participants[0].uid,
-    //             },
-    //           }),
-    //           getUserAction('comment', 'update', {
-    //             createdBy: {
-    //               ...caseUsers.participants[1].user,
-    //               fullName: caseUsers.participants[1].user.full_name,
-    //               profileUid: caseUsers.participants[1].uid,
-    //             },
-    //           }),
-    //           getUserAction('description', 'update', {
-    //             createdBy: {
-    //               ...caseUsers.participants[2].user,
-    //               fullName: caseUsers.participants[2].user.full_name,
-    //               profileUid: caseUsers.participants[2].uid,
-    //             },
-    //           }),
-    //           getUserAction('title', 'update', {
-    //             createdBy: {
-    //               ...caseUsers.participants[3].user,
-    //               fullName: caseUsers.participants[3].user.full_name,
-    //               profileUid: caseUsers.participants[3].uid,
-    //             },
-    //           }),
-    //           getUserAction('tags', 'add', {
-    //             createdBy: {
-    //               ...caseUsers.participants[4].user,
-    //               fullName: caseUsers.participants[4].user.full_name,
-    //               profileUid: caseUsers.participants[4].uid,
-    //             },
-    //           }),
-    //         ],
-    //       },
-    //     });
+      it('renders the user action users correctly', async () => {
+        useFindCaseUserActionsMock.mockReturnValue({
+          ...defaultUseFindCaseUserActions,
+          data: {
+            userActions: [
+              getUserAction('description', 'create'),
+              getUserAction('description', 'update', {
+                createdBy: {
+                  ...caseUsers.participants[0].user,
+                  fullName: caseUsers.participants[0].user.full_name,
+                  profileUid: caseUsers.participants[0].uid,
+                },
+              }),
+              getUserAction('comment', 'update', {
+                createdBy: {
+                  ...caseUsers.participants[1].user,
+                  fullName: caseUsers.participants[1].user.full_name,
+                  profileUid: caseUsers.participants[1].uid,
+                },
+              }),
+              getUserAction('description', 'update', {
+                createdBy: {
+                  ...caseUsers.participants[2].user,
+                  fullName: caseUsers.participants[2].user.full_name,
+                  profileUid: caseUsers.participants[2].uid,
+                },
+              }),
+              getUserAction('title', 'update', {
+                createdBy: {
+                  ...caseUsers.participants[3].user,
+                  fullName: caseUsers.participants[3].user.full_name,
+                  profileUid: caseUsers.participants[3].uid,
+                },
+              }),
+              getUserAction('tags', 'add', {
+                createdBy: {
+                  ...caseUsers.participants[4].user,
+                  fullName: caseUsers.participants[4].user.full_name,
+                  profileUid: caseUsers.participants[4].uid,
+                },
+              }),
+            ],
+          },
+        });
 
-    //     appMockRender = createAppMockRenderer();
-    //     const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
+        appMockRender = createAppMockRenderer();
+        const result = appMockRender.render(<CaseViewActivity {...caseProps} />);
 
-    //     const userActions = within(result.getByTestId('user-actions'));
+        const userActions = within(result.getAllByTestId('user-actions-list')[1]);
 
-    //     await waitFor(() => {
-    //       expect(userActions.getByText('Participant 1')).toBeInTheDocument();
-    //       expect(userActions.getByText('participant_2@elastic.co')).toBeInTheDocument();
-    //       expect(userActions.getByText('participant_3')).toBeInTheDocument();
-    //       expect(userActions.getByText('P4')).toBeInTheDocument();
-    //       expect(userActions.getByText('Participant 5')).toBeInTheDocument();
-    //     });
-    //   });
-    // });
+        await waitFor(() => {
+          expect(userActions.getByText('Participant 1')).toBeInTheDocument();
+          expect(userActions.getByText('participant_2@elastic.co')).toBeInTheDocument();
+          expect(userActions.getByText('participant_3')).toBeInTheDocument();
+          expect(userActions.getByText('P4')).toBeInTheDocument();
+          expect(userActions.getByText('Participant 5')).toBeInTheDocument();
+        });
+      });
+    });
   });
 });

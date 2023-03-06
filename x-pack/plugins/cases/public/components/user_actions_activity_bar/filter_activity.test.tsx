@@ -77,13 +77,13 @@ describe('FilterActivity ', () => {
     );
 
     expect(
-      screen.getByLabelText(`${userActionsStats.total - 1} active filters`)
+      screen.getByLabelText(`${userActionsStats.total} active filters`)
     ).toBeInTheDocument();
     expect(
       screen.getByLabelText(`${userActionsStats.totalComments} available filters`)
     ).toBeInTheDocument();
     expect(
-      screen.getByLabelText(`${userActionsStats.totalOtherActions - 1} available filters`)
+      screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`)
     ).toBeInTheDocument();
   });
 
