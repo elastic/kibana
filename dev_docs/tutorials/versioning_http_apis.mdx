@@ -46,7 +46,6 @@ Whenever we perform a data migration the body of this endpoint will change for a
 * The shape of attributes in your Saved Object(s)
 * The shape of the document source in an Elasticsearch index you manage, for example, a report
 * The shape of the data whose storage you delegate to some other code
-  * Think of any "persisted" data that survives an upgrade
   * One example is the metadata stored on a `file` object exposed by the `src/plugins/files` plugin
 
 Therefore a persistence schema is the _shape_ of any data your code directly, or indirectly _persists_. Think carefully about any persisted schemas your code might be using and ensure that none of them are exposed directly over your HTTP APIs.
