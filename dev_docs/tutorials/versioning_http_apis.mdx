@@ -22,6 +22,10 @@ Versioned HTTP APIs should hold to the following set of properties. How you meet
 Consider this example of directly exposing a persisted schema over HTTP:
 
 ```ts
+interface MyObject {
+  foo: string;
+  bar: number;
+}
 router.get(
   {
     path: '/api/myobject/{id}',
@@ -55,6 +59,10 @@ Therefore a persistence schema is the _shape_ of any data your code directly, or
 Consider the following changes to the code above:
 
 ```ts
+interface MyObject {
+  foo: string;
+  bar: number;
+}
 // 1.
 // We add a new interface for this HTTP APIs return value
 // Note: this interface can live in your plugins top-level "common" directory
@@ -92,20 +100,22 @@ _See "[Versioning interfaces](/kibana-dev-docs/versioning-interfaces)" for a mor
 
 ### 2. Strict input validation
 
-You may be accepting unexpected values as input to your HTTP APIs.
+You may be accepting unexpected values as input to your HTTP APIs. For example
 
 ```ts
+interface MyObjectAttributes {
+  /** A number representing a length of time in milliseconds */
+  duration: number;
+}
 router.post(
   {
     path: '/api/myobject',
-    validate: { body: schema.object({ num: schema.number() }) },
+    validate: { body: schema.object({ duration: schema.number() }) },
   },
   (ctx, req, res) => {
     const { savedObjects } = await ctx.core;
-    const myObject = await savedObjects.client.create<MyObjectAttributes>('myObject', req.params.id)
-    return res.ok({
-      body: { ...myObject.attributes }, // <- Directly exposing SO attributes
-    })
+    const { id } = await savedObjects.client.create<MyObjectAttributes>('myObject', req.params.body)
+    return res.ok({ body: id })
   }
 );
 ```
