@@ -216,6 +216,7 @@ describe('features', () => {
     expectGetFeatures: true,
     expectEnterpriseSearch: true,
     expectDecryptedTelemetry: true,
+    expectGlobalSettings: true,
   },
   {
     group: 'space',
@@ -223,6 +224,7 @@ describe('features', () => {
     expectGetFeatures: false,
     expectEnterpriseSearch: false,
     expectDecryptedTelemetry: false,
+    expectGlobalSettings: false,
   },
 ].forEach(
   ({
@@ -231,6 +233,7 @@ describe('features', () => {
     expectGetFeatures,
     expectEnterpriseSearch,
     expectDecryptedTelemetry,
+    expectGlobalSettings,
   }) => {
     describe(`${group}`, () => {
       test('actions defined in any feature privilege are included in `all`', () => {
@@ -291,6 +294,7 @@ describe('features', () => {
               ]
             : []),
           ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'save')] : []),
           actions.ui.get('catalogue', 'all-catalogue-1'),
           actions.ui.get('catalogue', 'all-catalogue-2'),
           actions.ui.get('management', 'all-management', 'all-management-1'),
@@ -421,6 +425,7 @@ describe('features', () => {
           actions.login,
           actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
           actions.ui.get('catalogue', 'read-catalogue-1'),
           actions.ui.get('catalogue', 'read-catalogue-2'),
           actions.ui.get('management', 'read-management', 'read-management-1'),
@@ -514,11 +519,13 @@ describe('features', () => {
               ]
             : []),
           ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'save')] : []),
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
           actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
         ]);
       });
 
@@ -581,11 +588,13 @@ describe('features', () => {
               ]
             : []),
           ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'save')] : []),
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
           actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
         ]);
       });
 
@@ -649,11 +658,13 @@ describe('features', () => {
               ]
             : []),
           ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'save')] : []),
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
           actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
         ]);
       });
     });
@@ -917,12 +928,14 @@ describe('subFeatures', () => {
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
+        actions.ui.get('globalSettings', 'save'),
         actions.ui.get('foo', 'foo'),
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.ui.get('globalSettings', 'show'),
         actions.ui.get('foo', 'foo'),
       ]);
 
@@ -1087,6 +1100,7 @@ describe('subFeatures', () => {
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
+        actions.ui.get('globalSettings', 'save'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1111,6 +1125,7 @@ describe('subFeatures', () => {
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1328,11 +1343,13 @@ describe('subFeatures', () => {
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
+        actions.ui.get('globalSettings', 'save'),
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.ui.get('globalSettings', 'show'),
       ]);
 
       expect(actual).toHaveProperty('space.all', [actions.login, actions.version]);
@@ -1470,6 +1487,7 @@ describe('subFeatures', () => {
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
+        actions.ui.get('globalSettings', 'save'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1494,6 +1512,7 @@ describe('subFeatures', () => {
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.ui.get('globalSettings', 'show'),
         actions.ui.get('foo', 'foo'),
       ]);
 
@@ -1657,11 +1676,13 @@ describe('subFeatures', () => {
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
+        actions.ui.get('globalSettings', 'save'),
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.ui.get('globalSettings', 'show'),
       ]);
 
       expect(actual).toHaveProperty('space.all', [actions.login, actions.version]);
@@ -1796,6 +1817,7 @@ describe('subFeatures', () => {
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
+        actions.ui.get('globalSettings', 'save'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1820,6 +1842,7 @@ describe('subFeatures', () => {
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2015,6 +2038,7 @@ describe('subFeatures', () => {
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
+        actions.ui.get('globalSettings', 'save'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2039,6 +2063,7 @@ describe('subFeatures', () => {
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2253,6 +2278,7 @@ describe('subFeatures', () => {
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
+        actions.ui.get('globalSettings', 'save'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2277,6 +2303,7 @@ describe('subFeatures', () => {
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2527,6 +2554,7 @@ describe('subFeatures', () => {
         actions.ui.get('management', 'kibana', 'spaces'),
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
+        actions.ui.get('globalSettings', 'save'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2569,6 +2597,7 @@ describe('subFeatures', () => {
         actions.login,
         actions.version,
         actions.api.get('decryptedTelemetry'),
+        actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
