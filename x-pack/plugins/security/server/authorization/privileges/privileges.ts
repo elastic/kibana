@@ -117,6 +117,7 @@ export function privilegesFactory(
             actions.ui.get('catalogue', 'spaces'),
             actions.ui.get('enterpriseSearch', 'all'),
             actions.ui.get('globalSettings', 'save'),
+            actions.ui.get('globalSettings', 'show'),
             ...allActions,
           ],
           read: [

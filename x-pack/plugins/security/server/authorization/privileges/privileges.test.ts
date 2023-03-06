@@ -295,6 +295,7 @@ describe('features', () => {
             : []),
           ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'save')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
           actions.ui.get('catalogue', 'all-catalogue-1'),
           actions.ui.get('catalogue', 'all-catalogue-2'),
           actions.ui.get('management', 'all-management', 'all-management-1'),
@@ -520,6 +521,7 @@ describe('features', () => {
             : []),
           ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'save')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
@@ -589,6 +591,7 @@ describe('features', () => {
             : []),
           ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'save')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
@@ -659,6 +662,7 @@ describe('features', () => {
             : []),
           ...(expectEnterpriseSearch ? [actions.ui.get('enterpriseSearch', 'all')] : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'save')] : []),
+          ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
@@ -929,6 +933,7 @@ describe('subFeatures', () => {
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.ui.get('globalSettings', 'save'),
+        actions.ui.get('globalSettings', 'show'),
         actions.ui.get('foo', 'foo'),
       ]);
       expect(actual).toHaveProperty('global.read', [
@@ -1101,6 +1106,7 @@ describe('subFeatures', () => {
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.ui.get('globalSettings', 'save'),
+        actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1344,6 +1350,7 @@ describe('subFeatures', () => {
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.ui.get('globalSettings', 'save'),
+        actions.ui.get('globalSettings', 'show'),
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
@@ -1488,6 +1495,7 @@ describe('subFeatures', () => {
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.ui.get('globalSettings', 'save'),
+        actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1677,6 +1685,7 @@ describe('subFeatures', () => {
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.ui.get('globalSettings', 'save'),
+        actions.ui.get('globalSettings', 'show'),
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
@@ -1818,6 +1827,7 @@ describe('subFeatures', () => {
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.ui.get('globalSettings', 'save'),
+        actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2039,6 +2049,7 @@ describe('subFeatures', () => {
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.ui.get('globalSettings', 'save'),
+        actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2279,6 +2290,7 @@ describe('subFeatures', () => {
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.ui.get('globalSettings', 'save'),
+        actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2555,6 +2567,7 @@ describe('subFeatures', () => {
         actions.ui.get('catalogue', 'spaces'),
         actions.ui.get('enterpriseSearch', 'all'),
         actions.ui.get('globalSettings', 'save'),
+        actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
