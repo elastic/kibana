@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { EmbeddedMap } from './embedded_map';
 import { MapTypes } from '../../../../../../common/mobile/constants';

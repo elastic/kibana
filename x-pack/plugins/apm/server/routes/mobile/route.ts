@@ -23,7 +23,6 @@ import {
   MobileLocationStats,
 } from './get_mobile_location_stats';
 import { getMobileTermsByField } from './get_mobile_terms_by_field';
-import { DEVICE_MODEL_IDENTIFIER } from '../../../common/es_fields/apm';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -222,8 +221,8 @@ const httpRequestsChartRoute = createApmServerRoute({
   },
 });
 
-const mobileMostUsedDevices = createApmServerRoute({
-  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/devices',
+const mobileTermsByFieldRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/terms',
   params: t.type({
     path: t.type({
       serviceName: t.string,
@@ -234,6 +233,7 @@ const mobileMostUsedDevices = createApmServerRoute({
       environmentRt,
       t.type({
         size: toNumberRt,
+        fieldName: t.string,
       }),
     ]),
   }),
@@ -241,25 +241,25 @@ const mobileMostUsedDevices = createApmServerRoute({
   handler: async (
     resources
   ): Promise<{
-    devices: Awaited<ReturnType<typeof getMobileTermsByField>>;
+    terms: Awaited<ReturnType<typeof getMobileTermsByField>>;
   }> => {
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { kuery, environment, start, end, size } = params.query;
+    const { kuery, environment, start, end, size, fieldName } = params.query;
 
-    const devices = await getMobileTermsByField({
+    const terms = await getMobileTermsByField({
       kuery,
       environment,
       start,
       end,
       serviceName,
       apmEventClient,
-      fieldName: DEVICE_MODEL_IDENTIFIER,
+      fieldName,
       size,
     });
 
-    return { devices };
+    return { terms };
   },
 });
 
@@ -269,5 +269,5 @@ export const mobileRouteRepository = {
   ...httpRequestsChartRoute,
   ...mobileStatsRoute,
   ...mobileLocationStatsRoute,
-  ...mobileMostUsedDevices,
+  ...mobileTermsByFieldRoute,
 };

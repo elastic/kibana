@@ -16,6 +16,7 @@ type DataType = {
   label: string;
   count: number;
 }[];
+
 export function TreemapChart({
   data,
   height,
