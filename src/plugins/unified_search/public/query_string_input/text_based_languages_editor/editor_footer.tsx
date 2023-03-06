@@ -68,7 +68,7 @@ export const EditorFooter = memo(function EditorFooter({
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
                 <EuiFlexItem grow={false}>
-                  <EuiIcon type="crossInACircleFilled" color="danger" size="s" />
+                  <EuiIcon type="error" color="danger" size="s" />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiPopover
@@ -128,7 +128,7 @@ export const EditorFooter = memo(function EditorFooter({
                                   <EuiFlexGroup gutterSize="s" alignItems="center">
                                     <EuiFlexItem grow={false}>
                                       <EuiIcon
-                                        type="crossInACircleFilled"
+                                        type="error"
                                         color="danger"
                                         size="s"
                                       />

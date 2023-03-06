@@ -123,7 +123,7 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
                 }
               )}
               color="danger"
-              iconType="alert"
+              iconType="warning"
             >
               <p>{errorMessage}</p>
             </EuiCallOut>

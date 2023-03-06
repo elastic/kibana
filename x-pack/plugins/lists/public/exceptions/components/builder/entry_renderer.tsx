@@ -224,7 +224,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
               id={'1'}
               buttonContent={
                 <>
-                  <EuiIcon tabIndex={0} type="alert" size="s" css={warningIconCss} />
+                  <EuiIcon tabIndex={0} type="warning" size="s" css={warningIconCss} />
                   {i18n.FIELD_CONFLICT_INDICES_WARNING_DESCRIPTION}
                 </>
               }
