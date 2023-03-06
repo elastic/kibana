@@ -119,6 +119,7 @@ router.post(
   }
 );
 ```
+#### Why is this problemetic for versioning?
 
 This HTTP API currently accepts all numbers and strings as input which allows for unexpected inputs like negative numbers or non-URL friendly characters. This may break future migrations or integrations that assume your data will always be within certain parameters.
 
@@ -169,6 +170,8 @@ router.get(
 
 The above code follows guidelines from steps 1 and 2, but it allows clients to specify ANY string by which to sort. This is a far "wider" API than we need for this endpoint.
 
+#### Why is this problemetic for versioning?
+
 Without telemetry it is impossible to know what values clients might be passing through &mdash; and what type of sort behaviour they are expecting.
 
 Additionally, the `sortField` is leaking information about our persistence schema. As with step 1, we want to remove direct knowledge of persistence schema from clients. Consider the following changes:
@@ -208,6 +211,5 @@ The changes are:
 2. **Bonus point**: we use the `escapeKuery` utility to defend against KQL injection attacks.
 
 ### 4. Use the versioned API spec
-<!-- TODO: Add guide for how to use the new versioned HTTP router for creating new handlers -->
 
 _Under construction, check back here soon!_
