@@ -33,6 +33,7 @@ import {
   createMockAgentPolicyService,
   createMockAgentService,
   createMockPackageService,
+  createMessageSigningServiceMock,
 } from '@kbn/fleet-plugin/server/mocks';
 // A TS error (TS2403) is thrown when attempting to export the mock function below from Cases
 // plugin server `index.ts`. Its unclear what is actually causing the error. Since this is a Mock
@@ -176,6 +177,7 @@ export const createMockEndpointAppContextServiceStartContract =
       },
       featureUsageService: createFeatureUsageServiceMock(),
       experimentalFeatures: createMockConfig().experimentalFeatures,
+      messageSigningService: createMessageSigningServiceMock(),
     };
   };
 

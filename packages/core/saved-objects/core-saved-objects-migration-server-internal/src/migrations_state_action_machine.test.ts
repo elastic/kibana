@@ -44,6 +44,7 @@ describe('migrationsStateActionMachine', () => {
     migrationVersionPerType: {},
     indexPrefix: '.my-so-index',
     migrationsConfig: {
+      algorithm: 'v2',
       batchSize: 1000,
       maxBatchSizeBytes: new ByteSizeValue(1e8),
       pollInterval: 0,

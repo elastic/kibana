@@ -129,6 +129,10 @@
           "id": "kibDevTutorialSavedObject"
         },
         {
+          "id": "kibDevTutorialVersioningInterfaces",
+          "label": "Versioning interfaces"
+        },
+        {
           "id": "kibDevTutorialSubmitPullRequest"
         },
         {

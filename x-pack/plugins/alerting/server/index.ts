@@ -56,7 +56,10 @@ export {
 export {
   DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,
-} from './alerts_service/default_lifecycle_policy';
+  ECS_COMPONENT_TEMPLATE_NAME,
+  ECS_CONTEXT,
+  getComponentTemplate,
+} from './alerts_service';
 
 export const plugin = (initContext: PluginInitializerContext) => new AlertingPlugin(initContext);
 

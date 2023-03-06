@@ -30,6 +30,7 @@ describe('CrawlRulesTable', () => {
     crawlRules,
     domainId: '6113e1407a2f2e6f42489794',
     indexName,
+    title: 'Crawl rules',
   };
   beforeEach(() => {
     jest.clearAllMocks();

@@ -6,11 +6,11 @@
  */
 
 import { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { getComponentTemplateFromFieldMap } from '../../common/alert_schema';
-import { FieldMap } from '../../common/alert_schema/field_maps/types';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import { getComponentTemplateFromFieldMap } from '../../common';
 
 export const getComponentTemplateName = (context?: string) =>
-  `alerts-${context ? context : 'common'}-component-template`;
+  `.alerts-${context || 'framework'}-mappings`;
 
 export interface IIndexPatternString {
   template: string;
@@ -40,5 +40,5 @@ export const getComponentTemplate = (
     name: getComponentTemplateName(context),
     fieldMap,
     // set field limit slightly higher than actual number of fields
-    fieldLimit: 100, // Math.round(Object.keys(fieldMap).length * 1.5),
+    fieldLimit: Math.ceil(Object.keys(fieldMap).length / 1000) * 1000 + 500,
   });

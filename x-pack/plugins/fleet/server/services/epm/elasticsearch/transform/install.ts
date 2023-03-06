@@ -703,9 +703,13 @@ async function handleTransformInstall({
   // start transform by default if not set in yml file
   // else, respect the setting
   if (startTransform === undefined || startTransform === true) {
-    await esClient.transform.startTransform(
-      { transform_id: transform.installationName },
-      { ignore: [409] }
+    await retryTransientEsErrors(
+      () =>
+        esClient.transform.startTransform(
+          { transform_id: transform.installationName },
+          { ignore: [409] }
+        ),
+      { logger, additionalResponseStatuses: [400] }
     );
     logger.debug(`Started transform: ${transform.installationName}`);
   }
