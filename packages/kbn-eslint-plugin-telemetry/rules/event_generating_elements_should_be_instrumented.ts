@@ -12,7 +12,6 @@ import { AST_NODE_TYPES, TSESTree } from '@typescript-eslint/typescript-estree';
 import { getIntentFromNode } from '../helpers/get_intent_from_node';
 import { getAppName } from '../helpers/get_app_name';
 import { getFunctionName } from '../helpers/get_function_name';
-import { RUNNING_IN_EDITOR } from '../helpers/running_in_editor';
 
 export const EVENT_GENERATING_ELEMENTS = [
   'EuiButton',
@@ -84,13 +83,9 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         report({
           node: node as any,
           message: `<${name}> should have a \`data-test-subj\` for telemetry purposes. Use the autofix suggestion or add your own.`,
-          ...(RUNNING_IN_EDITOR
-            ? {
-                fix(fixer) {
-                  return fixer.insertTextAfterRange(range, ` data-test-subj="${suggestion}"`);
-                },
-              }
-            : {}),
+          fix(fixer) {
+            return fixer.insertTextAfterRange(range, ` data-test-subj="${suggestion}"`);
+          },
         });
       },
     } as Rule.RuleListener;
