@@ -43,6 +43,7 @@ export const handleActionsHaveNoConnectors = (
         : 'connector is missing. Connector id missing is:';
     errors.push(
       createBulkErrorObject({
+        id: actionsIds.join(),
         statusCode: 404,
         message: `${actionsIds.length} ${errorMessage} ${actionsIds.join(', ')}`,
         ruleId: ruleIds,
