@@ -9,7 +9,7 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useGetGroupSelector } from './use_get_group_selector';
 import { initialState } from './state';
-import { defaultGroup } from '@kbn/securitysolution-grouping/src';
+import { ActionType, defaultGroup } from '..';
 
 const defaultGroupingOptions = [
   { label: 'ruleName', key: 'kibana.alert.rule.name' },
@@ -44,7 +44,7 @@ describe('useGetGroupSelector', () => {
         id: groupingId,
         newOptionList: defaultGroupingOptions,
       },
-      type: 'UPDATE_GROUP_OPTIONS',
+      type: ActionType.updateGroupOptions,
     });
   });
 
@@ -70,43 +70,57 @@ describe('useGetGroupSelector', () => {
           },
         ],
       },
-      type: 'UPDATE_GROUP_OPTIONS',
+      type: ActionType.updateGroupOptions,
     });
   });
 
-  it.only('On group change, sets new selectedOptions', async () => {
-    const { result, rerender } = renderHook(() =>
-      useGetGroupSelector({
+  it('On group change, sets new selectedOptions', async () => {
+    const realGroup = {
+      [groupingId]: {
+        ...defaultGroup,
+        options: defaultGroupingOptions,
+        activeGroup: 'host.name',
+      },
+    };
+    const { result, rerender } = renderHook((props) => useGetGroupSelector(props), {
+      initialProps: {
         ...defaultArgs,
         groupingState: {
-          groupById: { [groupingId]: { ...defaultGroup, activeGroup: 'host.name' } },
+          groupById: realGroup,
         },
-      })
-    );
+      },
+    });
     act(() => result.current.props.onGroupChange('user.name'));
+
+    expect(dispatch).toHaveBeenNthCalledWith(2, {
+      payload: {
+        id: groupingId,
+        activePage: 0,
+      },
+      type: ActionType.updateGroupActivePage,
+    });
+    expect(dispatch).toHaveBeenNthCalledWith(3, {
+      payload: {
+        id: groupingId,
+        activeGroup: 'user.name',
+      },
+      type: ActionType.updateActiveGroup,
+    });
+
     rerender({
       ...defaultArgs,
       groupingState: {
-        groupById: { [groupingId]: { ...defaultGroup, activeGroup: 'user.name' } },
+        groupById: {
+          [groupingId]: { ...realGroup[groupingId], itemsPerPage: 99, activeGroup: 'user.name' },
+        },
       },
     });
-    console.log('result.current');
-    // result.current
-    // await waitForNextUpdate();
-    // const container = render(result.current);
-    //
-    // fireEvent.click(container.getByTestId('group-selector-dropdown'));
-    // container.debug();
-
-    //
-    // const groupingState = { [groupingId]: { ...defaultGroup, activeGroup: 'host.name' } };
-    //
-    // expect(dispatch).toHaveBeenCalledWith({
-    //   payload: {
-    //     id: groupingId,
-    //     newOptionList: defaultGroupingOptions,
-    //   },
-    //   type: 'UPDATE_GROUP_OPTIONS',
-    // });
+    expect(dispatch).toHaveBeenNthCalledWith(4, {
+      payload: {
+        id: groupingId,
+        newOptionList: defaultGroupingOptions,
+      },
+      type: ActionType.updateGroupOptions,
+    });
   });
 });

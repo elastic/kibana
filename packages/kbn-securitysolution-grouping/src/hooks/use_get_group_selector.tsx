@@ -34,7 +34,6 @@ export const useGetGroupSelector = ({
 
   const setGroupsActivePage = useCallback(
     (activePage: number) => {
-      console.log('updateGroupActivePage');
       dispatch(groupActions.updateGroupActivePage({ id: groupingId, activePage }));
     },
     [dispatch, groupingId]
@@ -42,7 +41,6 @@ export const useGetGroupSelector = ({
 
   const setSelectedGroup = useCallback(
     (activeGroup: string) => {
-      console.log('updateActiveGroup');
       dispatch(groupActions.updateActiveGroup({ id: groupingId, activeGroup }));
     },
     [dispatch, groupingId]
@@ -50,7 +48,6 @@ export const useGetGroupSelector = ({
 
   const setOptions = useCallback(
     (newOptions: GroupOption[]) => {
-      console.log('updateGroupOptions');
       dispatch(groupActions.updateGroupOptions({ id: groupingId, newOptionList: newOptions }));
     },
     [dispatch, groupingId]
@@ -58,43 +55,18 @@ export const useGetGroupSelector = ({
 
   const onGroupChange = useCallback(
     (groupSelection: string) => {
-      console.log('onGroupChange!!!!!!!');
       if (groupSelection === selectedGroup) {
         return;
       }
       setGroupsActivePage(0);
       setSelectedGroup(groupSelection);
-      // i dont think we need this??
-      if (
-        !isNoneGroup(groupSelection) &&
-        !options.find((o: GroupOption) => o.key === groupSelection)
-      ) {
-        console.log('called set uptions 1');
-        setOptions([
-          ...defaultGroupingOptions,
-          {
-            label: groupSelection,
-            key: groupSelection,
-          },
-        ]);
-      } else {
-        setOptions(defaultGroupingOptions);
-        console.log('called set uptions 2');
-      }
     },
-    [
-      defaultGroupingOptions,
-      options,
-      selectedGroup,
-      setGroupsActivePage,
-      setOptions,
-      setSelectedGroup,
-    ]
+    [selectedGroup, setGroupsActivePage, setSelectedGroup]
   );
 
   useEffect(() => {
+    // condition ensures setOptions is only called for initial state
     if (defaultGroupingOptions.length === 0) return;
-    console.log('selectedGroup', selectedGroup);
     const newOptions = defaultGroupingOptions.find((o) => o.key === selectedGroup)
       ? defaultGroupingOptions
       : [
@@ -109,9 +81,7 @@ export const useGetGroupSelector = ({
             : []),
         ];
     setOptions(newOptions);
-    console.log('called set uptions UE');
   }, [defaultGroupingOptions, selectedGroup, setOptions]);
-  console.log({ options });
   return getGroupSelector({
     groupSelected: selectedGroup,
     'data-test-subj': 'alerts-table-group-selector',
