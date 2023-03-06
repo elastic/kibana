@@ -507,6 +507,7 @@ describe('AlertsTable', () => {
 
       it('should show the row loader when callback triggered', async () => {
         render(<AlertsTableWithProviders {...customTableProps} />);
+        screen.debug(document.body, 1000000);
         fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
 
         // the callback given to our clients to run when they want to update the loading state
@@ -515,15 +516,17 @@ describe('AlertsTable', () => {
         });
 
         expect(await screen.findAllByTestId('row-loader')).toHaveLength(1);
-        const selectedOptions = await screen.findAllByTestId('dataGridRowCell');
 
-        // first row, first column
-        expect(within(selectedOptions[0]).getByLabelText('Loading')).toBeDefined();
-        expect(within(selectedOptions[0]).queryByRole('checkbox')).not.toBeInTheDocument();
+        await waitFor(async () => {
+          const selectedOptions = await screen.findAllByTestId('dataGridRowCell');
+          // first row, first column
+          expect(within(selectedOptions[0]).getByLabelText('Loading')).toBeDefined();
+          expect(within(selectedOptions[0]).queryByRole('checkbox')).not.toBeInTheDocument();
 
-        // second row, first column
-        expect(within(selectedOptions[6]).queryByLabelText('Loading')).not.toBeInTheDocument();
-        expect(within(selectedOptions[6]).getByRole('checkbox')).toBeDefined();
+          // second row, first column
+          expect(within(selectedOptions[6]).queryByLabelText('Loading')).not.toBeInTheDocument();
+          expect(within(selectedOptions[6]).getByRole('checkbox')).toBeDefined();
+        });
       });
 
       it('should show the row loader when callback triggered with false', async () => {
