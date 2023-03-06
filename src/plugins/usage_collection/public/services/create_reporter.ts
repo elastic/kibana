@@ -8,6 +8,7 @@
 
 import { Reporter, Storage } from '@kbn/analytics';
 import { HttpSetup } from '@kbn/core/public';
+import { v1 } from '../../common/types/ui_counters';
 
 interface AnalyicsReporterConfig {
   localStorage: Storage;
@@ -21,14 +22,14 @@ export function createReporter(config: AnalyicsReporterConfig): Reporter {
   return new Reporter({
     debug,
     storage: localStorage,
-    async http(report) {
+    async http(report: v1.UiCountersHTTPRequestBody['report']) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const response = await fetch.post<any>('/api/ui_counters/_report', {
         body: JSON.stringify({ report }),
         asSystemRequest: true,
       });
-
-      if (response.status !== 'ok') {
+      const okStatus: v1.UiCountersResponseOk = response.status;
+      if (response.status !== okStatus) {
         throw Error('Unable to store report.');
       }
       return response;
