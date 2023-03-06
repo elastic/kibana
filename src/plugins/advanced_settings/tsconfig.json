@@ -20,6 +20,7 @@
     "@kbn/i18n-react",
     "@kbn/expect",
     "@kbn/monaco",
+    "@kbn/shared-ux-router",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-application-browser",
     "@kbn/core-ui-settings-browser",

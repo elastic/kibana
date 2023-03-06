@@ -14,7 +14,10 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
+import type { PackageList } from '../../../common';
+
 import type {
+  CategoryId,
   EsAssetReference,
   InstallablePackage,
   Installation,
@@ -28,7 +31,7 @@ import { FleetUnauthorizedError } from '../../errors';
 import { installTransforms, isTransform } from './elasticsearch/transform/install';
 import type { FetchFindLatestPackageOptions } from './registry';
 import { fetchFindLatestPackageOrThrow, getPackage } from './registry';
-import { ensureInstalledPackage, getInstallation } from './packages';
+import { ensureInstalledPackage, getInstallation, getPackages } from './packages';
 
 export type InstalledAssetType = EsAssetReference;
 
@@ -55,6 +58,12 @@ export interface PackageClient {
     packageName: string,
     packageVersion: string
   ): Promise<{ packageInfo: ArchivePackage; paths: string[] }>;
+
+  getPackages(params?: {
+    excludeInstallStatus?: false;
+    category?: CategoryId;
+    prerelease?: false;
+  }): Promise<PackageList>;
 
   reinstallEsAssets(
     packageInfo: InstallablePackage,
@@ -135,6 +144,21 @@ class PackageClientImpl implements PackageClient {
   ) {
     await this.#runPreflight();
     return getPackage(packageName, packageVersion, options);
+  }
+
+  public async getPackages(params?: {
+    excludeInstallStatus?: false;
+    category?: CategoryId;
+    prerelease?: false;
+  }) {
+    const { excludeInstallStatus, category, prerelease } = params || {};
+    await this.#runPreflight();
+    return getPackages({
+      savedObjectsClient: this.internalSoClient,
+      excludeInstallStatus,
+      category,
+      prerelease,
+    });
   }
 
   public async reinstallEsAssets(

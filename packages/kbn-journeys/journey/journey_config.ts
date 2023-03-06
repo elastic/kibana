@@ -71,6 +71,11 @@ export interface ScalabilitySetup {
 
 export interface JourneyConfigOptions<CtxExt> {
   /**
+   * Relative path to FTR config file. Use to override the default ones:
+   * 'x-pack/test/functional/config.base.js', 'test/functional/config.base.js'
+   */
+  ftrConfigPath?: string;
+  /**
    * Set to `true` to skip this journey. should probably be preceded
    * by a link to a Github issue where the reasoning for why this was
    * skipped and not just deleted is outlined.
@@ -109,6 +114,11 @@ export interface JourneyConfigOptions<CtxExt> {
    * be merged with the default context provided to each step function.
    */
   extendContext?: (ctx: BaseStepCtx) => CtxExt;
+  /**
+   * Use this to define actions that will be executed after Kibana & ES were started,
+   * but before archives are loaded. APM traces are not collected for this hook.
+   */
+  beforeSteps?: (ctx: BaseStepCtx & CtxExt) => Promise<void>;
 }
 
 export class JourneyConfig<CtxExt extends object> {
@@ -120,6 +130,10 @@ export class JourneyConfig<CtxExt extends object> {
     this.#path = path;
     this.#name = Path.basename(this.#path, Path.extname(this.#path));
     this.#opts = opts;
+  }
+
+  getFtrConfigPath() {
+    return this.#opts.ftrConfigPath;
   }
 
   getEsArchives() {
@@ -169,5 +183,13 @@ export class JourneyConfig<CtxExt extends object> {
       ...ctx,
       ...ext(ctx),
     };
+  }
+
+  async getBeforeStepsFn(ctx: BaseStepCtx & CtxExt) {
+    if (this.#opts.beforeSteps) {
+      await this.#opts.beforeSteps(ctx);
+    } else {
+      new Promise<void>((resolve) => resolve());
+    }
   }
 }

@@ -90,7 +90,18 @@ export const ProcessListAPIResponseRT = rt.type({
       command: rt.string,
     })
   ),
-  summary: rt.record(rt.string, rt.number),
+  summary: rt.exact(
+    rt.partial({
+      total: rt.number,
+      running: rt.number,
+      sleeping: rt.number,
+      dead: rt.number,
+      stopped: rt.number,
+      idle: rt.number,
+      zombie: rt.number,
+      unknown: rt.number,
+    })
+  ),
 });
 
 export type ProcessListAPIQueryAggregation = rt.TypeOf<typeof ProcessListAPIQueryAggregationRT>;

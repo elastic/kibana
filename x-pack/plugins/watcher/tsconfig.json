@@ -32,6 +32,7 @@
     "@kbn/field-formats-plugin",
     "@kbn/i18n-react",
     "@kbn/ace",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

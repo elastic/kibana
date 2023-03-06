@@ -54,6 +54,11 @@ import {
   SimpleEmbeddableFactory,
   SimpleEmbeddableFactoryDefinition,
 } from './migrations';
+import {
+  FILTER_DEBUGGER_EMBEDDABLE,
+  FilterDebuggerEmbeddableFactory,
+  FilterDebuggerEmbeddableFactoryDefinition,
+} from './filter_debugger';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -74,6 +79,7 @@ interface ExampleEmbeddableFactories {
   getTodoRefEmbeddableFactory: () => TodoRefEmbeddableFactory;
   getBookEmbeddableFactory: () => BookEmbeddableFactory;
   getMigrationsEmbeddableFactory: () => SimpleEmbeddableFactory;
+  getFilterDebuggerEmbeddableFactory: () => FilterDebuggerEmbeddableFactory;
 }
 
 export interface EmbeddableExamplesStart {
@@ -155,6 +161,12 @@ export class EmbeddableExamplesPlugin
           savedObjectsClient: (await core.getStartServices())[0].savedObjects.client,
           overlays: (await core.getStartServices())[0].overlays,
         }))
+      );
+
+    this.exampleEmbeddableFactories.getFilterDebuggerEmbeddableFactory =
+      deps.embeddable.registerEmbeddableFactory(
+        FILTER_DEBUGGER_EMBEDDABLE,
+        new FilterDebuggerEmbeddableFactoryDefinition()
       );
 
     const editBookAction = createEditBookActionDefinition(async () => ({

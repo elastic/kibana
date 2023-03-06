@@ -18,6 +18,7 @@
 import { Args } from './lib/args.mjs';
 import { getHelp } from './lib/help.mjs';
 import { createFlagError, isCliError } from './lib/cli_error.mjs';
+import { checkIfRunningNativelyOnWindows } from './lib/windows.mjs';
 import { getCmd } from './commands/index.mjs';
 import { Log } from './lib/log.mjs';
 import External from './lib/external_packages.js';
@@ -40,6 +41,7 @@ async function tryToGetCiStatsReporter(log) {
 }
 
 try {
+  checkIfRunningNativelyOnWindows(log);
   const cmd = getCmd(cmdName);
 
   if (cmdName && !cmd) {

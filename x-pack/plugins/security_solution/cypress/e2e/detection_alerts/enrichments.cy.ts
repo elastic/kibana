@@ -7,12 +7,12 @@
 
 import { getNewRule } from '../../objects/rule';
 import {
-  NUMBER_OF_ALERTS,
   HOST_RISK_HEADER_COLIMN,
   USER_RISK_HEADER_COLIMN,
   HOST_RISK_COLUMN,
   USER_RISK_COLUMN,
   ACTION_COLUMN,
+  ALERTS_COUNT,
 } from '../../screens/alerts';
 import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -56,7 +56,7 @@ describe('Enrichment', () => {
     });
 
     it('Should has enrichment fields', function () {
-      cy.get(NUMBER_OF_ALERTS)
+      cy.get(ALERTS_COUNT)
         .invoke('text')
         .should('match', /^[1-9].+$/); // Any number of alerts
       cy.get(HOST_RISK_HEADER_COLIMN).contains('host.risk.calculated_level');

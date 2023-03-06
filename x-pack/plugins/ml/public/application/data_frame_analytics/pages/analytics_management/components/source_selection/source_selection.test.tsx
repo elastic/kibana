@@ -71,8 +71,8 @@ const mockNavigateToPath = jest.fn();
 jest.mock('../../../../../contexts/kibana', () => ({
   useMlKibana: () => ({
     services: {
-      savedObjects: {},
       uiSettings: {},
+      http: {},
     },
   }),
   useNavigateToPath: () => mockNavigateToPath,

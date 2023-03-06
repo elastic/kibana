@@ -58,9 +58,6 @@ export const RuleDefinition = suspendedComponentWithProps(
 export const RuleTagBadge = suspendedComponentWithProps(
   lazy(() => import('./rules_list/components/rule_tag_badge'))
 );
-export const AlertSummaryWidget = suspendedComponentWithProps(
-  lazy(() => import('./alert_summary_widget/alert_summary_widget'))
-);
 export const RuleStatusPanel = suspendedComponentWithProps(
   lazy(() => import('./rule_details/components/rule_status_panel'))
 );

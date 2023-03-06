@@ -40,7 +40,13 @@ export const FieldStatsFlyout: FC<{
 
   if (isFlyoutVisible) {
     return (
-      <EuiFlyout type="push" size="xs" onClose={closeFlyout} aria-labelledby={pushedFlyoutTitleId}>
+      <EuiFlyout
+        type="push"
+        size="xs"
+        onClose={closeFlyout}
+        aria-labelledby={pushedFlyoutTitleId}
+        data-test-subj="mlFieldStatsFlyout"
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h3 id={pushedFlyoutTitleId}>

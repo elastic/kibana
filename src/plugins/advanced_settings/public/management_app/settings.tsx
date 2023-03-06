@@ -281,19 +281,18 @@ export const Settings = (props: Props) => {
     return (queryParams[QUERY] as string) ?? '';
   };
 
-  const getQueryState = (search?: string, intialQuery = false): AdvancedSettingsState => {
+  const getQueryState = (search?: string, initialQuery = false): AdvancedSettingsState => {
     const queryString = getQueryText(search);
-    const query = getQuery(queryString, intialQuery);
+    const query = getQuery(queryString, initialQuery);
     const filteredSettings = {
       namespace: mapSettings(Query.execute(query, settings)),
       global: mapSettings(Query.execute(query, globalSettings)),
     };
-    const footerQueryMatched = Object.keys(filteredSettings.namespace).length > 0;
 
     return {
       query,
       filteredSettings,
-      footerQueryMatched,
+      footerQueryMatched: initialQuery ? false : queryState.footerQueryMatched,
     };
   };
 

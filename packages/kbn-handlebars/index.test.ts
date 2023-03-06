@@ -11,6 +11,7 @@
  */
 
 import Handlebars from '.';
+import type { HelperOptions, TemplateDelegate } from './src/types';
 import { expectTemplate, forEachCompileFunctionName } from './src/__jest__/test_bench';
 
 it('Handlebars.create', () => {
@@ -419,7 +420,7 @@ describe('blocks', () => {
           .withInput({ me: 'my' })
           .withDecorator(
             'decorator',
-            (fn): Handlebars.TemplateDelegate =>
+            (fn): TemplateDelegate =>
               (context, options) => {
                 expect(context).toMatchInlineSnapshot(`
               Object {
@@ -446,7 +447,7 @@ describe('blocks', () => {
           .withInput({ arr: ['my'] })
           .withDecorator(
             'decorator',
-            (fn): Handlebars.TemplateDelegate =>
+            (fn): TemplateDelegate =>
               (context, options) => {
                 expect(context).toMatchInlineSnapshot(`"my"`);
                 expect(options).toMatchInlineSnapshot(`
@@ -483,12 +484,12 @@ describe('blocks', () => {
 
       it('decorator nested inside of custom helper', () => {
         expectTemplate('{{#helper}}{{*decorator}}world{{/helper}}')
-          .withHelper('helper', function (options: Handlebars.HelperOptions) {
+          .withHelper('helper', function (options: HelperOptions) {
             return options.fn('my', { foo: 'bar' } as any);
           })
           .withDecorator(
             'decorator',
-            (fn): Handlebars.TemplateDelegate =>
+            (fn): TemplateDelegate =>
               (context, options) => {
                 expect(context).toMatchInlineSnapshot(`"my"`);
                 expect(options).toMatchInlineSnapshot(`
@@ -519,7 +520,7 @@ describe('blocks', () => {
         })
         .withDecorator('decorator', (fn) => {
           const decoratorCallOrder = ++decoratorCall;
-          const ret: Handlebars.TemplateDelegate = () => {
+          const ret: TemplateDelegate = () => {
             const progCallOrder = ++progCall;
             return `(decorator: ${decoratorCallOrder}, prog: ${progCallOrder}, fn: "${fn()}")`;
           };

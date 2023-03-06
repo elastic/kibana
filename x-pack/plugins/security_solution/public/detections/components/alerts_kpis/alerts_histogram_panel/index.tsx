@@ -391,7 +391,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             alignHeader={alignHeader}
             id={uniqueQueryId}
             inspectTitle={inspectTitle}
-            outerDirection="row"
+            outerDirection="column"
             title={titleText}
             titleSize={titleSize}
             toggleStatus={showHistogram}
@@ -399,19 +399,19 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             showInspectButton={isChartEmbeddablesEnabled ? false : chartOptionsContextMenu == null}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
             isInspectDisabled={isInspectDisabled}
-            hideSubtitle
           >
             <EuiFlexGroup alignItems="flexStart" data-test-subj="panelFlexGroup" gutterSize="none">
               <EuiFlexItem grow={false}>
                 {showStackBy && (
                   <>
                     <StackByComboBox
-                      ref={comboboxRef}
                       data-test-subj="stackByComboBox"
-                      selected={selectedStackByOption}
+                      inputRef={setComboboxInputRef}
                       onSelect={onSelect}
                       prepend={stackByLabel}
-                      inputRef={setComboboxInputRef}
+                      ref={comboboxRef}
+                      selected={selectedStackByOption}
+                      useLensCompatibleFields={isChartEmbeddablesEnabled}
                       width={stackByWidth}
                     />
                     {showGroupByPlaceholder && (
@@ -422,11 +422,12 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                           content={i18n.NOT_AVAILABLE_TOOLTIP}
                         >
                           <StackByComboBox
-                            isDisabled={true}
                             data-test-subj="stackByPlaceholder"
+                            isDisabled={true}
                             onSelect={noop}
                             prepend={GROUP_BY_TOP_LABEL}
                             selected=""
+                            useLensCompatibleFields={isChartEmbeddablesEnabled}
                             width={stackByWidth}
                           />
                         </EuiToolTip>

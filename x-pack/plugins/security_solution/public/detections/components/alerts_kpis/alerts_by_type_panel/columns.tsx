@@ -8,6 +8,11 @@ import React from 'react';
 import { EuiHealth, EuiText } from '@elastic/eui';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import type { EuiBasicTableColumn } from '@elastic/eui';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../../../common/components/cell_actions';
 import type { AlertsTypeData, AlertType } from './types';
 import { DefaultDraggable } from '../../../../common/components/draggables';
 import { FormattedCount } from '../../../../common/components/formatted_number';
@@ -46,7 +51,20 @@ export const getAlertsTypeTableColumns = (): Array<EuiBasicTableColumn<AlertsTyp
       return (
         <EuiHealth color={ALERT_TYPE_COLOR[type as AlertType]}>
           <EuiText grow={false} size="xs">
-            {ALERT_TYPE_LABEL[type as AlertType]}
+            <SecurityCellActions
+              mode={CellActionsMode.HOVER}
+              visibleCellActions={4}
+              showActionTooltips
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
+              field={{
+                name: 'event.type',
+                value: 'denied',
+                type: 'keyword',
+              }}
+              metadata={{ negateFilters: type === 'Detection' }} // Detection: event.type != denied
+            >
+              {ALERT_TYPE_LABEL[type as AlertType]}
+            </SecurityCellActions>
           </EuiText>
         </EuiHealth>
       );

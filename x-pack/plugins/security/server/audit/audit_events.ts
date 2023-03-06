@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import type {
-  AuditAction,
-  AddAuditEventParams as SavedObjectEventParams,
-} from '@kbn/core-saved-objects-server';
 import type { EcsEvent, KibanaRequest, LogMeta } from '@kbn/core/server';
 import type { ArrayElement } from '@kbn/utility-types';
 
 import type { AuthenticationProvider } from '../../common/model';
 import type { AuthenticationResult } from '../authentication/authentication_result';
+import type {
+  AuditAction,
+  AddAuditEventParams as SavedObjectEventParams,
+} from '../saved_objects/saved_objects_security_extension';
 
 /**
  * Audit kibana schema using ECS format

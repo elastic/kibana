@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   EuiSpacer,
   EuiButtonEmpty,
@@ -44,11 +44,13 @@ import { useLimitProperties } from '../../utils/get_limit_properties';
 const getDefaultQuery = ({
   query,
   filters,
-}: FindingsBaseURLQuery): FindingsBaseURLQuery & ResourceFindingsQuery => ({
+}: FindingsBaseURLQuery): FindingsBaseURLQuery &
+  ResourceFindingsQuery & { findingIndex: number } => ({
   query,
   filters,
   sort: { field: 'result.evaluation' as keyof CspFinding, direction: 'asc' },
   pageIndex: 0,
+  findingIndex: -1,
 });
 
 const BackToResourcesButton = () => (
@@ -67,6 +69,7 @@ const getResourceFindingSharedValues = (sharedValues: {
   resourceSubType: string;
   resourceName: string;
   clusterId: string;
+  cloudAccountName: string;
 }): EuiDescriptionListProps['listItems'] => [
   {
     title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.resourceTypeTitle', {
@@ -86,10 +89,18 @@ const getResourceFindingSharedValues = (sharedValues: {
     }),
     description: sharedValues.clusterId,
   },
+  {
+    title: i18n.translate('xpack.csp.findings.resourceFindingsSharedValues.cloudAccountName', {
+      defaultMessage: 'Cloud Account Name',
+    }),
+    description: sharedValues.cloudAccountName,
+  },
 ];
 
 export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const params = useParams<{ resourceId: string }>();
+  const decodedResourceId = decodeURIComponent(params.resourceId);
+
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
   const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY);
@@ -109,7 +120,7 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
   const resourceFindings = useResourceFindings({
     sort: urlQuery.sort,
     query: baseEsQuery.query,
-    resourceId: params.resourceId,
+    resourceId: decodedResourceId,
     enabled: !baseEsQuery.error,
   });
 
@@ -135,6 +146,49 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
       }),
     });
   };
+
+  const flyoutFindingIndex = urlQuery?.findingIndex;
+
+  const pagination = getPaginationTableParams({
+    pageSize,
+    pageIndex: urlQuery.pageIndex,
+    totalItemCount: limitedTotalItemCount,
+  });
+
+  const onOpenFlyout = useCallback(
+    (flyoutFinding: CspFinding) => {
+      setUrlQuery({
+        findingIndex: slicedPage.findIndex(
+          (finding) =>
+            finding.resource.id === flyoutFinding?.resource.id &&
+            finding.rule.id === flyoutFinding?.rule.id
+        ),
+      });
+    },
+    [slicedPage, setUrlQuery]
+  );
+
+  const onCloseFlyout = () =>
+    setUrlQuery({
+      findingIndex: -1,
+    });
+
+  const onPaginateFlyout = useCallback(
+    (nextFindingIndex: number) => {
+      // the index of the finding in the current page
+      const newFindingIndex = nextFindingIndex % pageSize;
+
+      // if the finding is not in the current page, we need to change the page
+      const pageIndex = Math.floor(nextFindingIndex / pageSize);
+
+      setUrlQuery({
+        pageIndex,
+        findingIndex: newFindingIndex,
+      });
+    },
+    [pageSize, setUrlQuery]
+  );
+
   return (
     <div data-test-subj={TEST_SUBJECTS.RESOURCES_FINDINGS_CONTAINER}>
       <FindingsSearchBar
@@ -168,10 +222,11 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
           resourceFindings.data && (
             <CspInlineDescriptionList
               listItems={getResourceFindingSharedValues({
-                resourceId: params.resourceId,
+                resourceId: decodedResourceId,
                 resourceName: resourceFindings.data?.resourceName || '',
                 resourceSubType: resourceFindings.data?.resourceSubType || '',
                 clusterId: resourceFindings.data?.clusterId || '',
+                cloudAccountName: resourceFindings.data?.cloudAccountName || '',
               })}
             />
           )
@@ -201,13 +256,13 @@ export const ResourceFindings = ({ dataView }: FindingsBaseProps) => {
           )}
           <EuiSpacer />
           <ResourceFindingsTable
+            onCloseFlyout={onCloseFlyout}
+            onPaginateFlyout={onPaginateFlyout}
+            onOpenFlyout={onOpenFlyout}
+            flyoutFindingIndex={flyoutFindingIndex}
             loading={resourceFindings.isFetching}
             items={slicedPage}
-            pagination={getPaginationTableParams({
-              pageSize,
-              pageIndex: urlQuery.pageIndex,
-              totalItemCount: limitedTotalItemCount,
-            })}
+            pagination={pagination}
             sorting={{
               sort: { field: urlQuery.sort.field, direction: urlQuery.sort.direction },
             }}

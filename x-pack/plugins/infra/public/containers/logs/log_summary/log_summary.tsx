@@ -35,7 +35,7 @@ export const useLogSummary = (
 
     pushLogSummaryBucketsArgs([
       {
-        sourceId,
+        logView: { type: 'log-view-reference', logViewId: sourceId },
         startTimestamp,
         endTimestamp,
         bucketSize,

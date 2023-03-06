@@ -82,8 +82,8 @@ export class Config {
     private readonly dockerTag: string | null,
     private readonly dockerTagQualifier: string | null,
     private readonly dockerPush: boolean,
-    public readonly downloadFreshNode: boolean,
     public readonly isRelease: boolean,
+    public readonly downloadFreshNode: boolean,
     public readonly pluginSelector: PluginSelector
   ) {
     this.pluginFilter = getPluginPackagesFilter(this.pluginSelector);

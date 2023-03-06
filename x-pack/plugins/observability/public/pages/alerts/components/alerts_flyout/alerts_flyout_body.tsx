@@ -21,6 +21,7 @@ import {
   ALERT_EVALUATION_VALUE,
   ALERT_FLAPPING,
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
@@ -32,6 +33,7 @@ import { RULE_DETAILS_PAGE_ID } from '../../../rule_details/constants';
 import { asDuration } from '../../../../../common/utils/formatters';
 import { translations, paths } from '../../../../config';
 import { FlyoutProps } from './types';
+import { formatAlertEvaluationValue } from '../../../../utils/format_alert_evaluation_value';
 
 // eslint-disable-next-line import/no-default-export
 export default function AlertsFlyoutBody({ alert, id: pageId }: FlyoutProps) {
@@ -74,11 +76,17 @@ export default function AlertsFlyoutBody({ alert, id: pageId }: FlyoutProps) {
     },
     {
       title: translations.alertsFlyout.expectedValueLabel,
-      description: alert.fields[ALERT_EVALUATION_THRESHOLD] ?? '-',
+      description: formatAlertEvaluationValue(
+        alert.fields[ALERT_RULE_TYPE_ID],
+        alert.fields[ALERT_EVALUATION_THRESHOLD]
+      ),
     },
     {
       title: translations.alertsFlyout.actualValueLabel,
-      description: alert.fields[ALERT_EVALUATION_VALUE] ?? '-',
+      description: formatAlertEvaluationValue(
+        alert.fields[ALERT_RULE_TYPE_ID],
+        alert.fields[ALERT_EVALUATION_VALUE]
+      ),
     },
     {
       title: translations.alertsFlyout.ruleTypeLabel,

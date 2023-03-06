@@ -235,6 +235,7 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
               stackByField1ComboboxRef={stackByField1ComboboxRef}
               stackByWidth={stackByWidth}
               uniqueQueryId={uniqueQueryId}
+              useLensCompatibleFields={isChartEmbeddablesEnabled}
             />
           </HeaderSection>
           {showCount &&

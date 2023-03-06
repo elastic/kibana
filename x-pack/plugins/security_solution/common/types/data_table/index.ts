@@ -6,6 +6,7 @@
  */
 
 import * as runtimeTypes from 'io-ts';
+import type { VIEW_SELECTION } from '../../constants';
 
 export enum Direction {
   asc = 'asc',
@@ -33,7 +34,28 @@ export enum TableId {
   alternateTest = 'alternateTest',
   rulePreview = 'rule-preview',
   kubernetesPageSessions = 'kubernetes-page-sessions',
+  alertsOnCasePage = 'alerts-case-page',
 }
+
+export enum TableEntityType {
+  alert = 'alert',
+  event = 'event',
+  session = 'session',
+}
+
+export const tableEntity: Record<TableId, TableEntityType> = {
+  [TableId.alertsOnAlertsPage]: TableEntityType.alert,
+  [TableId.alertsOnCasePage]: TableEntityType.alert,
+  [TableId.alertsOnRuleDetailsPage]: TableEntityType.alert,
+  [TableId.hostsPageEvents]: TableEntityType.event,
+  [TableId.networkPageEvents]: TableEntityType.event,
+  [TableId.usersPageEvents]: TableEntityType.event,
+  [TableId.test]: TableEntityType.event,
+  [TableId.alternateTest]: TableEntityType.event,
+  [TableId.rulePreview]: TableEntityType.event,
+  [TableId.hostsPageSessions]: TableEntityType.session,
+  [TableId.kubernetesPageSessions]: TableEntityType.session,
+} as const;
 
 const TableIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TableId.usersPageEvents),
@@ -46,4 +68,9 @@ const TableIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TableId.rulePreview),
   runtimeTypes.literal(TableId.kubernetesPageSessions),
 ]);
+
 export type TableIdLiteral = runtimeTypes.TypeOf<typeof TableIdLiteralRt>;
+
+export type ViewSelectionTypes = keyof typeof VIEW_SELECTION;
+
+export type ViewSelection = typeof VIEW_SELECTION[ViewSelectionTypes];

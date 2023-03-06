@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { flowRight } from 'lodash';
 import React from 'react';
 import { match as RouteMatch, Redirect, RouteComponentProps } from 'react-router-dom';
-import { replaceLogPositionInQueryString } from '../../containers/logs/log_position';
+import { flowRight } from 'lodash';
 import { replaceSourceIdInQueryString } from '../../containers/source_id';
+import { replaceLogPositionInQueryString } from '../../observability_logs/log_stream_position_state/src/url_state_storage_service';
 import { replaceLogFilterInQueryString } from '../../observability_logs/log_stream_query_state';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 
@@ -24,9 +24,10 @@ interface RedirectToLogsProps extends RedirectToLogsType {
 export const RedirectToLogs = ({ location, match }: RedirectToLogsProps) => {
   const sourceId = match.params.sourceId || 'default';
   const filter = getFilterFromLocation(location);
+  const time = getTimeFromLocation(location);
   const searchString = flowRight(
-    replaceLogFilterInQueryString({ language: 'kuery', query: filter }),
-    replaceLogPositionInQueryString(getTimeFromLocation(location)),
+    replaceLogFilterInQueryString({ language: 'kuery', query: filter }, time),
+    replaceLogPositionInQueryString(time),
     replaceSourceIdInQueryString(sourceId)
   )('');
 

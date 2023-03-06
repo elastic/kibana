@@ -18,7 +18,6 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   getLazyOsqueryResults,
   getLazyLiveQueryField,
@@ -50,7 +49,6 @@ export interface StartPlugins {
   fleet: FleetStart;
   lens?: LensPublicStart;
   security: SecurityPluginStart;
-  spaces: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   cases: CasesUiStart;
   timelines: TimelinesUIStart;

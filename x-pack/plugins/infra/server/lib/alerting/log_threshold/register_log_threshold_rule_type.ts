@@ -144,11 +144,18 @@ export async function registerLogThresholdRuleType(
           description: denominatorConditionsActionVariableDescription,
         },
         ...(getAlertDetailsPageEnabledForApp(config, 'logs')
-          ? [{ name: 'alertDetailsUrl', description: alertDetailUrlActionVariableDescription }]
+          ? [
+              {
+                name: 'alertDetailsUrl',
+                description: alertDetailUrlActionVariableDescription,
+                usesPublicBaseUrl: true,
+              },
+            ]
           : []),
         {
           name: 'viewInAppUrl',
           description: viewInAppUrlActionVariableDescription,
+          usesPublicBaseUrl: true,
         },
         { name: 'cloud', description: cloudActionVariableDescription },
         { name: 'host', description: hostActionVariableDescription },

@@ -26,6 +26,12 @@ import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import type {
+  AlertsClient,
+  RuleRegistryPluginStartContract,
+} from '@kbn/rule-registry-plugin/server';
+
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { SAVED_OBJECT_TYPES } from '../../common/constants';
 import { Authorization } from '../authorization/authorization';
@@ -55,10 +61,11 @@ interface CasesClientFactoryArgs {
   actionsPluginStart: ActionsPluginStart;
   licensingPluginStart: LicensingPluginStart;
   lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
+  notifications: NotificationsPluginStart;
+  ruleRegistry: RuleRegistryPluginStartContract;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   publicBaseUrl?: IBasePath['publicBaseUrl'];
-  notifications: NotificationsPluginStart;
 }
 
 /**
@@ -122,6 +129,7 @@ export class CasesClientFactory {
     });
 
     const savedObjectsSerializer = savedObjectsService.createSerializer();
+    const alertsClient = await this.options.ruleRegistry.getRacClientWithRequest(request);
 
     const services = this.createServices({
       unsecuredSavedObjectsClient,
@@ -129,6 +137,7 @@ export class CasesClientFactory {
       esClient: scopedClusterClient,
       request,
       auditLogger,
+      alertsClient,
     });
 
     const userInfo = await this.getUserInfo(request);
@@ -163,12 +172,14 @@ export class CasesClientFactory {
     esClient,
     request,
     auditLogger,
+    alertsClient,
   }: {
     unsecuredSavedObjectsClient: SavedObjectsClientContract;
     savedObjectsSerializer: ISavedObjectsSerializer;
     esClient: ElasticsearchClient;
     request: KibanaRequest;
     auditLogger: AuditLogger;
+    alertsClient: PublicMethodsOf<AlertsClient>;
   }): CasesServices {
     this.validateInitialization();
 
@@ -204,7 +215,7 @@ export class CasesClientFactory {
     });
 
     return {
-      alertsService: new AlertService(esClient, this.logger),
+      alertsService: new AlertService(esClient, this.logger, alertsClient),
       caseService,
       caseConfigureService: new CaseConfigureService(this.logger),
       connectorMappingsService: new ConnectorMappingsService(this.logger),

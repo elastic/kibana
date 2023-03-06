@@ -15,7 +15,6 @@ import useObservable from 'react-use/lib/useObservable';
 
 import { EuiLoadingElastic, EuiLoadingSpinner, useEuiOverflowScroll } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import {
   DashboardContainerFactory,
@@ -23,15 +22,13 @@ import {
   DashboardCreationOptions,
 } from './embeddable/dashboard_container_factory';
 import { DASHBOARD_CONTAINER_TYPE } from '..';
-import { DashboardReduxState } from './types';
 import { pluginServices } from '../services/plugin_services';
 import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
 import { DashboardContainer } from './embeddable/dashboard_container';
-import { dashboardContainerReducers } from './state/dashboard_container_reducers';
 
 export interface DashboardContainerRendererProps {
   savedObjectId?: string;
-  getCreationOptions?: () => DashboardCreationOptions;
+  getCreationOptions?: () => Promise<DashboardCreationOptions>;
   onDashboardContainerLoaded?: (dashboardContainer: DashboardContainer) => void;
 }
 
@@ -68,7 +65,7 @@ export const DashboardContainerRenderer = ({
     let destroyContainer: () => void;
 
     (async () => {
-      const creationOptions = getCreationOptions?.();
+      const creationOptions = await getCreationOptions?.();
       const dashboardFactory = embeddable.getEmbeddableFactory(
         DASHBOARD_CONTAINER_TYPE
       ) as DashboardContainerFactory & { create: DashboardContainerFactoryDefinition['create'] };
@@ -127,13 +124,6 @@ export const DashboardContainerRenderer = ({
     </div>
   );
 };
-
-export const useDashboardContainerContext = () =>
-  useReduxEmbeddableContext<
-    DashboardReduxState,
-    typeof dashboardContainerReducers,
-    DashboardContainer
-  >();
 
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export

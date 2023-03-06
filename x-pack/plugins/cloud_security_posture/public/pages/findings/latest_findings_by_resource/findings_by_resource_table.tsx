@@ -16,7 +16,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import numeral from '@elastic/numeral';
-import { Link, generatePath } from 'react-router-dom';
+import { generatePath, Link } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
+import { ColumnNameWithTooltip } from '../../../components/column_name_with_tooltip';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import type { FindingsByResourcePage } from './use_findings_by_resource';
@@ -79,7 +81,7 @@ const FindingsByResourceTableComponent = ({
         getNonSortableColumn(findingsByResourceColumns['rule.benchmark.name']),
         { onAddFilter }
       ),
-      createColumnWithFilters(getNonSortableColumn(findingsByResourceColumns.cluster_id), {
+      createColumnWithFilters(getNonSortableColumn(findingsByResourceColumns.belongs_to), {
         onAddFilter,
       }),
       findingsByResourceColumns.compliance_score,
@@ -124,7 +126,9 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
     width: '15%',
     render: (resourceId: FindingsByResourcePage['resource_id']) => (
       <Link
-        to={generatePath(findingsNavigation.resource_findings.path, { resourceId })}
+        to={generatePath(findingsNavigation.resource_findings.path, {
+          resourceId: encodeURIComponent(resourceId),
+        })}
         className="eui-textTruncate"
         title={resourceId}
       >
@@ -153,7 +157,22 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
       );
     },
   },
-  baseFindingsColumns.cluster_id,
+  {
+    field: 'belongs_to',
+    name: (
+      <ColumnNameWithTooltip
+        columnName={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnLabel',
+          { defaultMessage: 'Belongs To' }
+        )}
+        tooltipContent={i18n.translate(
+          'xpack.csp.findings.findingsTable.findingsTableColumn.clusterIdColumnTooltipLabel',
+          { defaultMessage: 'Kubernetes Cluster ID or Cloud Account Name' }
+        )}
+      />
+    ),
+    truncateText: true,
+  },
   {
     field: 'compliance_score',
     width: '150px',
@@ -161,8 +180,8 @@ const baseColumns: Array<EuiTableFieldDataColumnType<FindingsByResourcePage>> = 
     sortable: true,
     name: (
       <FormattedMessage
-        id="xpack.csp.findings.findingsByResourceTable.complianceScoreColumnLabel"
-        defaultMessage="Compliance Score"
+        id="xpack.csp.findings.findingsByResourceTable.postureScoreColumnLabel"
+        defaultMessage="Posture Score"
       />
     ),
     render: (complianceScore: FindingsByResourcePage['compliance_score'], data) => (

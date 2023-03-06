@@ -16,7 +16,7 @@ import { EuiPortal } from '@elastic/eui';
 import { DashboardGrid } from '../grid';
 import { pluginServices } from '../../../services/plugin_services';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
-import { useDashboardContainerContext } from '../../dashboard_container_renderer';
+import { useDashboardContainerContext } from '../../dashboard_container_context';
 
 export const DashboardViewportComponent = () => {
   const {

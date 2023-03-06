@@ -14,7 +14,7 @@ export interface GetJourneyDetails {
   checkGroup: string;
 }
 
-type DocumentSource = (Ping & { '@timestamp': string }) | JourneyStep;
+type DocumentSource = (Ping & { '@timestamp': string; synthetics: { type: string } }) | JourneyStep;
 
 export const getJourneyDetails: UMElasticsearchQueryFn<
   GetJourneyDetails,
@@ -47,14 +47,19 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
     'getJourneyDetailsCurrentJourney'
   );
 
-  const journeyStart = thisJourney.hits.hits.find(
+  const journeyStartHit = thisJourney.hits.hits.find(
     (hit) => hit._source.synthetics?.type === 'journey/start'
   );
 
-  if (journeyStart) {
-    const { _id, _source } = journeyStart;
-    const thisJourneySource = Object.assign({ _id }, _source) as JourneyStep;
+  const journeySummaryHit = thisJourney.hits.hits.find(
+    ({ _source: summarySource }) => summarySource.synthetics?.type === 'heartbeat/summary'
+  );
 
+  const foundJourney = journeyStartHit || journeySummaryHit;
+
+  const journeySource = journeyStartHit?._source ?? journeySummaryHit?._source;
+
+  if (journeySource && foundJourney) {
     const baseSiblingParams = createEsParams({
       body: {
         query: {
@@ -62,17 +67,17 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
             filter: [
               {
                 term: {
-                  'monitor.id': thisJourneySource.monitor.id,
+                  'monitor.id': journeySource.monitor.id,
                 },
               },
               {
                 term: {
-                  'observer.geo.name': thisJourneySource.observer?.geo?.name,
+                  'observer.geo.name': journeySource.observer?.geo?.name,
                 },
               },
               {
-                term: {
-                  'synthetics.type': 'journey/start',
+                terms: {
+                  'synthetics.type': ['journey/start', 'heartbeat/summary'],
                 },
               },
             ] as QueryDslQueryContainer[],
@@ -93,7 +98,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
               {
                 range: {
                   '@timestamp': {
-                    lt: thisJourneySource['@timestamp'],
+                    lt: journeySource['@timestamp'],
                   },
                 },
               },
@@ -114,7 +119,7 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
               {
                 range: {
                   '@timestamp': {
-                    gt: thisJourneySource['@timestamp'],
+                    gt: journeySource['@timestamp'],
                   },
                 },
               },
@@ -139,18 +144,30 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
     const { body: previousJourneyResult } = previousJourneyPromise;
     const { body: nextJourneyResult } = nextJourneyPromise;
 
-    const previousJourney =
-      previousJourneyResult?.hits?.hits.length > 0 ? previousJourneyResult?.hits?.hits[0] : null;
-    const nextJourney =
-      nextJourneyResult?.hits?.hits.length > 0 ? nextJourneyResult?.hits?.hits[0] : null;
+    const previousJourney = previousJourneyResult?.hits?.hits?.[0];
+    const nextJourney = nextJourneyResult?.hits?.hits?.[0];
 
     const summaryPing = thisJourney.hits.hits.find(
       ({ _source: summarySource }) => summarySource.synthetics?.type === 'heartbeat/summary'
     )?._source;
 
+    const previousInfo = previousJourney
+      ? {
+          checkGroup: previousJourney._source.monitor.check_group,
+          timestamp: previousJourney._source['@timestamp'],
+        }
+      : undefined;
+
+    const nextInfo = nextJourney
+      ? {
+          checkGroup: nextJourney._source.monitor.check_group,
+          timestamp: nextJourney._source['@timestamp'],
+        }
+      : undefined;
+
     return {
-      timestamp: thisJourneySource['@timestamp'],
-      journey: thisJourneySource,
+      timestamp: journeySource['@timestamp'],
+      journey: { ...journeySource, _id: foundJourney._id },
       ...(summaryPing && 'state' in summaryPing && summaryPing.state
         ? {
             summary: {
@@ -158,18 +175,8 @@ export const getJourneyDetails: UMElasticsearchQueryFn<
             },
           }
         : {}),
-      previous: previousJourney
-        ? {
-            checkGroup: previousJourney._source.monitor.check_group,
-            timestamp: previousJourney._source['@timestamp'],
-          }
-        : undefined,
-      next: nextJourney
-        ? {
-            checkGroup: nextJourney._source.monitor.check_group,
-            timestamp: nextJourney._source['@timestamp'],
-          }
-        : undefined,
+      previous: previousInfo,
+      next: nextInfo,
     };
   } else {
     return null;

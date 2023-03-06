@@ -75,7 +75,7 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
   const fleetContext = await context.fleet;
   const soClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
-  const { full: withPackagePolicies = false, ...restOfQuery } = request.query;
+  const { full: withPackagePolicies = false, noAgentCount = false, ...restOfQuery } = request.query;
   try {
     const { items, total, page, perPage } = await agentPolicyService.list(soClient, {
       withPackagePolicies,
@@ -88,9 +88,11 @@ export const getAgentPoliciesHandler: FleetRequestHandler<
       page,
       perPage,
     };
-
-    await populateAssignedAgentsCount(esClient, soClient, items);
-
+    if (!noAgentCount) {
+      await populateAssignedAgentsCount(esClient, soClient, items);
+    } else {
+      items.forEach((item) => (item.agents = 0));
+    }
     return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
@@ -136,10 +138,12 @@ export const getOneAgentPolicyHandler: RequestHandler<
   TypeOf<typeof GetOneAgentPolicyRequestSchema.params>
 > = async (context, request, response) => {
   const coreContext = await context.core;
+  const esClient = coreContext.elasticsearch.client.asInternalUser;
   const soClient = coreContext.savedObjects.client;
   try {
     const agentPolicy = await agentPolicyService.get(soClient, request.params.agentPolicyId);
     if (agentPolicy) {
+      await populateAssignedAgentsCount(esClient, soClient, [agentPolicy]);
       const body: GetOneAgentPolicyResponse = {
         item: agentPolicy,
       };
@@ -354,7 +358,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         const body = fullAgentConfigMap;
         const headers: ResponseHeaders = {
           'content-type': 'text/x-yaml',
-          'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yaml"`,
+          'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yml"`,
         };
         return response.ok({
           body,
@@ -434,7 +438,7 @@ export const downloadK8sManifest: FleetRequestHandler<
       const body = fullAgentManifest;
       const headers: ResponseHeaders = {
         'content-type': 'text/x-yaml',
-        'content-disposition': `attachment; filename="elastic-agent-managed-kubernetes.yaml"`,
+        'content-disposition': `attachment; filename="elastic-agent-managed-kubernetes.yml"`,
       };
       return response.ok({
         body,

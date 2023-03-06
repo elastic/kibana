@@ -40,6 +40,7 @@ export interface FleetConfigType {
     agentPolicySchemaUpgradeBatchSize?: number;
   };
   developer?: {
+    maxAgentPoliciesWithInactivityTimeout?: number;
     disableRegistryVersionCheck?: boolean;
     bundledPackageLocation?: string;
   };

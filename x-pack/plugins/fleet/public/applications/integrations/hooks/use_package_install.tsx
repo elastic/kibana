@@ -133,7 +133,7 @@ function usePackageInstall({
             />,
             { theme$ }
           ),
-          iconType: 'alert',
+          iconType: 'error',
         });
       } else {
         setPackageInstallStatus({ name, status: InstallStatus.installed, version });
@@ -224,7 +224,7 @@ function usePackageInstall({
             />,
             { theme$ }
           ),
-          iconType: 'alert',
+          iconType: 'error',
         });
       } else {
         setPackageInstallStatus({ name, status: InstallStatus.notInstalled, version: null });

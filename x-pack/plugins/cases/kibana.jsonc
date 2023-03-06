@@ -24,7 +24,9 @@
       "triggersActionsUi",
       "management",
       "security",
-      "notifications"
+      "notifications",
+      "ruleRegistry",
+      "files",
     ],
     "optionalPlugins": [
       "home",
