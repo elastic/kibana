@@ -91,6 +91,7 @@ const AgentPolicyLogsNotEnabledCallout: React.FunctionComponent<{ agentPolicy: A
             values={{
               settingsLink: (
                 <EuiLink
+                  data-test-subj="fleetAgentPolicyLogsNotEnabledCalloutSettingsLink"
                   href={getHref('policy_details', {
                     policyId: agentPolicy.id,
                     tabId: 'settings',
@@ -264,7 +265,12 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
               defaultMessage="The Logs view requires Elastic Agent 7.11 or higher. To upgrade an agent, go to the Actions menu, or {downloadLink} a newer version."
               values={{
                 downloadLink: (
-                  <EuiLink href="https://ela.st/download-elastic-agent" external target="_blank">
+                  <EuiLink
+                    data-test-subj="fleetAgentLogsUIDownloadLink"
+                    href="https://ela.st/download-elastic-agent"
+                    external
+                    target="_blank"
+                  >
                     <FormattedMessage
                       id="xpack.fleet.agentLogs.downloadLink"
                       defaultMessage="download"
@@ -337,7 +343,12 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
             </DatePickerFlexItem>
             <EuiFlexItem grow={false}>
               <RedirectAppLinks application={application}>
-                <EuiButtonEmpty href={viewInLogsUrl} iconType="popout" flush="both">
+                <EuiButtonEmpty
+                  data-test-subj="fleetAgentLogsUIOpenInLogsButtonEmpty"
+                  href={viewInLogsUrl}
+                  iconType="popout"
+                  flush="both"
+                >
                   <FormattedMessage
                     id="xpack.fleet.agentLogs.openInLogsUiLinkText"
                     defaultMessage="Open in Logs"

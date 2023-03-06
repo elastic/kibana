@@ -59,6 +59,7 @@ export const RelevanceTuningPreview: React.FC = () => {
       </EuiTitle>
       <EuiSpacer />
       <EuiFieldSearch
+        data-test-subj="enterpriseSearchRelevanceTuningPreviewFieldSearch"
         onChange={(e) => setSearchQuery(e.target.value)}
         placeholder={i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.preview.searchPlaceholder',

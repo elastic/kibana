@@ -60,6 +60,7 @@ export function RenderExpressionsExample({ expressions, inspector }: Props) {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButton
+                data-test-subj="expressionsExplorerRenderExpressionsExampleOpenInspectorButton"
                 onClick={() => {
                   inspector.open(inspectorAdapters);
                 }}

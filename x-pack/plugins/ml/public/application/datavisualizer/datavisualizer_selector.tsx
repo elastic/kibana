@@ -34,7 +34,11 @@ function startTrialDescription() {
         defaultMessage="To experience the full Machine Learning features that a {subscriptionsLink} offers, start a 30-day trial."
         values={{
           subscriptionsLink: (
-            <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+            <EuiLink
+              data-test-subj="mlStartTrialDescriptionPlatinumOrEnterpriseSubscriptionLink"
+              href="https://www.elastic.co/subscriptions"
+              target="_blank"
+            >
               <FormattedMessage
                 id="xpack.ml.datavisualizer.startTrial.subscriptionsLinkText"
                 defaultMessage="Platinum or Enterprise subscription"

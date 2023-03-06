@@ -20,7 +20,11 @@ interface Props {
 export const LoadMappingsFromJsonButton = ({ onJson, esNodesPlugins }: Props) => (
   <LoadMappingsProvider onJson={onJson} esNodesPlugins={esNodesPlugins}>
     {(openModal) => (
-      <EuiButtonEmpty onClick={openModal} size="s">
+      <EuiButtonEmpty
+        data-test-subj="indexManagementLoadMappingsFromJsonButtonLoadJsonButtonEmpty"
+        onClick={openModal}
+        size="s"
+      >
         {i18n.translate('xpack.idxMgmt.mappingsEditor.loadFromJsonButtonLabel', {
           defaultMessage: 'Load JSON',
         })}

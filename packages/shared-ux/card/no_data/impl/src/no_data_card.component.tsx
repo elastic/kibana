@@ -72,7 +72,11 @@ export const NoDataCard = ({
     }
 
     // Default footer action is a button with the provided or default string
-    return <EuiButton fill>{button || titleProp || defaultTitle}</EuiButton>;
+    return (
+      <EuiButton data-test-subj="sharedUxFooterButton" fill>
+        {button || titleProp || defaultTitle}
+      </EuiButton>
+    );
   };
 
   const title = () => {

@@ -51,6 +51,7 @@ export const LegacyIndexTemplatesDeprecation: React.FunctionComponent<Props> = (
               ),
               learnMoreLink: (
                 <EuiLink
+                  data-test-subj="indexManagementLegacyIndexTemplatesDeprecationLearnMoreLink"
                   href={documentationService.getTemplatesDocumentationLink()}
                   target="_blank"
                   external
@@ -70,6 +71,7 @@ export const LegacyIndexTemplatesDeprecation: React.FunctionComponent<Props> = (
 
       {!showCta && (
         <EuiLink
+          data-test-subj="indexManagementLegacyIndexTemplatesDeprecationLearnMoreLink"
           href={documentationService.getTemplatesDocumentationLink()}
           target="_blank"
           external

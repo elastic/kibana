@@ -115,7 +115,12 @@ export const AnalyticsPanel: FC<Props> = ({ setLazyJobCount }) => {
                       </EuiFlexItem>
                     ) : null}
                     <EuiFlexItem grow={false}>
-                      <EuiButton size="m" fill href={manageJobsLink}>
+                      <EuiButton
+                        data-test-subj="mlAnalyticsPanelManageJobsButton"
+                        size="m"
+                        fill
+                        href={manageJobsLink}
+                      >
                         {i18n.translate('xpack.ml.overview.analyticsList.manageJobsButtonText', {
                           defaultMessage: 'Manage jobs',
                         })}

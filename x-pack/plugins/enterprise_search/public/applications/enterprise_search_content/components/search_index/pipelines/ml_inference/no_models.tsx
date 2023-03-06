@@ -39,7 +39,11 @@ export const NoModelsPanel: React.FC = () => {
                 defaultMessage="You have no trained machine learning models that can be used by an inference pipeline. {documentationLink}"
                 values={{
                   documentationLink: (
-                    <EuiLink href={docLinks.machineLearningStart} target="_blank">
+                    <EuiLink
+                      data-test-subj="enterpriseSearchNoModelsPanelLearnHowToAddATrainedModelLink"
+                      href={docLinks.machineLearningStart}
+                      target="_blank"
+                    >
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.noModels.esDocs.link',
                         { defaultMessage: 'Learn how to add a trained model' }

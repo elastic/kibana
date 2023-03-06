@@ -176,7 +176,11 @@ const ConnectorAddModal = ({
         {preSubmitValidationErrorMessage}
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal} isLoading={isSaving}>
+        <EuiButtonEmpty
+          data-test-subj="triggersActionsUiConnectorAddModalCancelButtonEmpty"
+          onClick={closeModal}
+          isLoading={isSaving}
+        >
           {i18n.translate(
             'xpack.triggersActionsUI.sections.addModalConnectorForm.cancelButtonLabel',
             {

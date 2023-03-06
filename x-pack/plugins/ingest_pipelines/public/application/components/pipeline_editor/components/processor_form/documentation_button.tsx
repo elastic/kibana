@@ -16,7 +16,14 @@ interface Props {
 
 export const DocumentationButton: FunctionComponent<Props> = ({ processorLabel, docLink }) => {
   return (
-    <EuiButtonEmpty size="s" flush="right" href={docLink} target="_blank" iconType="help">
+    <EuiButtonEmpty
+      data-test-subj="ingestPipelinesDocumentationButtonProcessorLabelDocumentationButtonEmpty"
+      size="s"
+      flush="right"
+      href={docLink}
+      target="_blank"
+      iconType="help"
+    >
       {i18n.translate(
         'xpack.ingestPipelines.pipelineEditor.settingsForm.learnMoreLabelLink.processor',
         { defaultMessage: '{processorLabel} documentation', values: { processorLabel } }

@@ -34,7 +34,7 @@ export const NoDataPage = ({
     });
 
   const link = (
-    <EuiLink href={docsLink} target="_blank">
+    <EuiLink data-test-subj="sharedUxNoDataPageLearnMoreLink" href={docsLink} target="_blank">
       <FormattedMessage id="sharedUXPackages.noDataPage.intro.link" defaultMessage="learn more" />
     </EuiLink>
   );

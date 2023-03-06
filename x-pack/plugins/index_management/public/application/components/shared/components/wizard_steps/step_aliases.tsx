@@ -62,6 +62,7 @@ export const StepAliases: React.FunctionComponent<Props> = React.memo(
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="indexManagementStepAliasesIndexAliasesDocsButtonEmpty"
               size="s"
               flush="right"
               href={`${esDocsBase}/indices-aliases.html`}

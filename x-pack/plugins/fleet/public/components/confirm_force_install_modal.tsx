@@ -69,7 +69,12 @@ export const ConfirmForceInstallModal: React.FC<{
             defaultMessage="This integration contains an unsigned package of unknown authenticity and could contain malicious files. Learn more about {learnMoreLink}."
             values={{
               learnMoreLink: (
-                <EuiLink target="_blank" external href={docLinks.links.fleet.packageSignatures}>
+                <EuiLink
+                  data-test-subj="fleetConfirmForceInstallModalPackageSignaturesLink"
+                  target="_blank"
+                  external
+                  href={docLinks.links.fleet.packageSignatures}
+                >
                   <FormattedMessage
                     id="xpack.fleet.ConfirmForceInstallModal.learnMoreLink"
                     defaultMessage="package signatures"

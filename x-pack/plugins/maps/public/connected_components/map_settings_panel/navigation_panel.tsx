@@ -179,6 +179,7 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
           display="columnCompressed"
         >
           <EuiFieldNumber
+            data-test-subj="mapsRenderInitialLocationInputsFieldNumber"
             value={settings.fixedLocation.lat}
             onChange={onFixedLatChange}
             compressed
@@ -191,6 +192,7 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
           display="columnCompressed"
         >
           <EuiFieldNumber
+            data-test-subj="mapsRenderInitialLocationInputsFieldNumber"
             value={settings.fixedLocation.lon}
             onChange={onFixedLonChange}
             compressed
@@ -199,7 +201,10 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
         {zoomFormRow}
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={useCurrentView}>
+            <EuiButtonEmpty
+              data-test-subj="mapsRenderInitialLocationInputsSetToCurrentViewButtonEmpty"
+              onClick={useCurrentView}
+            >
               <FormattedMessage
                 id="xpack.maps.mapSettingsPanel.useCurrentViewBtnLabel"
                 defaultMessage="Set to current view"
@@ -259,6 +264,7 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
         })}
       >
         <EuiRadioGroup
+          data-test-subj="mapsNavigationPanelRadioGroup"
           options={initialLocationOptions}
           idSelected={settings.initialLocation}
           onChange={onInitialLocationChange}

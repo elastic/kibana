@@ -25,6 +25,7 @@ export const QueryTester: React.FC = () => {
   return (
     <>
       <EuiFieldSearch
+        data-test-subj="enterpriseSearchQueryTesterFieldSearch"
         value={searchQuery}
         onChange={(e) => search(e.target.value)}
         isLoading={searchDataLoading}

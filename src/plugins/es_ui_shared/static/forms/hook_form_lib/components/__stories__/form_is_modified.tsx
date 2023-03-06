@@ -41,7 +41,9 @@ export const IsModified = (args: FormArgs) => {
         component={ToggleField}
         config={{ label: 'Is on' }}
       />
-      <EuiButton onClick={() => submitForm(form)}>Send</EuiButton>
+      <EuiButton data-test-subj="pluginsIsModifiedSendButton" onClick={() => submitForm(form)}>
+        Send
+      </EuiButton>
     </Form>
   );
 };

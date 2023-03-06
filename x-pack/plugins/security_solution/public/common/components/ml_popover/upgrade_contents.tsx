@@ -36,7 +36,11 @@ export const UpgradeContentsComponent = () => (
         defaultMessage="To access SIEM’s anomaly detection features, you must update your license to Platinum, start a free 30-day trial, or spin up a {cloudLink} on AWS, GCP, or Azure. You can then run Machine Learning jobs and view anomalies."
         values={{
           cloudLink: (
-            <EuiLink href={`https://www.elastic.co/cloud/`} target="_blank">
+            <EuiLink
+              data-test-subj="securitySolutionUpgradeContentsComponentCloudDeploymentLink"
+              href={`https://www.elastic.co/cloud/`}
+              target="_blank"
+            >
               <FormattedMessage
                 id="xpack.securitySolution.components.mlPopup.cloudLink"
                 defaultMessage="cloud deployment"
@@ -50,6 +54,7 @@ export const UpgradeContentsComponent = () => (
     <EuiFlexGroup gutterSize="s" wrap={true}>
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj="securitySolutionUpgradeContentsComponentButton"
           href="https://www.elastic.co/subscriptions"
           iconType="popout"
           iconSide="right"
@@ -60,6 +65,7 @@ export const UpgradeContentsComponent = () => (
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj="securitySolutionUpgradeContentsComponentButton"
           href={`${useBasePath()}/app/management/stack/license_management`}
           iconType="gear"
           target="_blank"

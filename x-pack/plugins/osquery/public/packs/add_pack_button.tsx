@@ -21,6 +21,7 @@ const AddPackButtonComponent: React.FC<AddPackButtonComponentProps> = ({ fill = 
 
   return (
     <EuiButton
+      data-test-subj="osqueryAddPackButtonComponentAddPackButton"
       fill={!!fill}
       {...newQueryLinkProps}
       iconType="plusInCircle"

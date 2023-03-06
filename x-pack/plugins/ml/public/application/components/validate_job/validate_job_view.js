@@ -90,7 +90,7 @@ const Modal = ({ close, title, children }) => (
     <EuiModalBody>{children}</EuiModalBody>
 
     <EuiModalFooter>
-      <EuiButton onClick={close} size="s" fill>
+      <EuiButton data-test-subj="mlModalCloseButton" onClick={close} size="s" fill>
         <FormattedMessage id="xpack.ml.validateJob.modal.closeButtonLabel" defaultMessage="Close" />
       </EuiButton>
     </EuiModalFooter>
@@ -244,6 +244,7 @@ export class ValidateJobUI extends Component {
         {embedded === false ? (
           <div>
             <EuiButton
+              data-test-subj="mlValidateJobButton"
               onClick={this.validate}
               size="s"
               fill={fill}
@@ -288,7 +289,11 @@ export class ValidateJobUI extends Component {
                     defaultMessage="For more information, see {mlJobTipsLink}."
                     values={{
                       mlJobTipsLink: (
-                        <EuiLink href={jobTipsUrl} target="_blank">
+                        <EuiLink
+                          data-test-subj="mlMachineLearningJobTipsLink"
+                          href={jobTipsUrl}
+                          target="_blank"
+                        >
                           <FormattedMessage
                             id="xpack.ml.validateJob.modal.linkToJobTipsText.mlJobTipsLinkText"
                             defaultMessage="Machine Learning Job Tips"

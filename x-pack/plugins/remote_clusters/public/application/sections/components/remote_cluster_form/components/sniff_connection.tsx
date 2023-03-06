@@ -97,7 +97,11 @@ export const SniffConnection: FunctionComponent<Props> = ({
             defaultMessage="An IP address or host name, followed by the {transportPort} of the remote cluster. Specify multiple seed nodes so discovery doesn't fail if a node is unavailable."
             values={{
               transportPort: (
-                <EuiLink href={transportPortUrl} target="_blank">
+                <EuiLink
+                  data-test-subj="remoteClustersSniffConnectionTransportPortLink"
+                  href={transportPortUrl}
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.remoteClusters.remoteClusterForm.sectionSeedsHelpText.transportPortLinkText"
                     defaultMessage="transport port"
@@ -148,6 +152,7 @@ export const SniffConnection: FunctionComponent<Props> = ({
         fullWidth
       >
         <EuiFieldNumber
+          data-test-subj="remoteClustersSniffConnectionFieldNumber"
           value={nodeConnections || ''}
           onChange={(e) => onFieldsChange({ nodeConnections: Number(e.target.value) })}
           fullWidth

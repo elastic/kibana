@@ -38,7 +38,13 @@ export const EuiLinkTo: React.FC<ReactRouterEuiLinkProps> = ({
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => <EuiLink {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
+}) => (
+  <EuiLink
+    data-test-subj="enterpriseSearchEuiLinkToLink"
+    {...rest}
+    {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })}
+  />
+);
 
 type ReactRouterEuiButtonProps = ReactRouterProps & EuiButtonProps;
 export const EuiButtonTo: React.FC<ReactRouterEuiButtonProps> = ({
@@ -46,7 +52,13 @@ export const EuiButtonTo: React.FC<ReactRouterEuiButtonProps> = ({
   onClick,
   shouldNotCreateHref,
   ...rest
-}) => <EuiButton {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />;
+}) => (
+  <EuiButton
+    data-test-subj="enterpriseSearchEuiButtonToButton"
+    {...rest}
+    {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })}
+  />
+);
 
 type ReactRouterEuiButtonEmptyProps = ReactRouterProps & EuiButtonEmptyProps;
 export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
@@ -55,7 +67,11 @@ export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
   shouldNotCreateHref,
   ...rest
 }) => (
-  <EuiButtonEmpty {...rest} {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })} />
+  <EuiButtonEmpty
+    data-test-subj="enterpriseSearchEuiButtonEmptyToButtonEmpty"
+    {...rest}
+    {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })}
+  />
 );
 
 type ReactRouterEuiButtonIconProps = ReactRouterProps & EuiButtonIconProps;

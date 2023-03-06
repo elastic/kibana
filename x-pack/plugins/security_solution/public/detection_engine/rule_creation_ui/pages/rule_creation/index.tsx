@@ -508,6 +508,7 @@ const CreateRulePageComponent: React.FC = () => {
                           extraAction={
                             stepsData.current[RuleStep.scheduleRule].isValid && (
                               <EuiButtonEmpty
+                                data-test-subj="securitySolutionCreateRulePageComponentButtonEmpty"
                                 iconType="pencil"
                                 size="xs"
                                 onClick={() => editStep(RuleStep.scheduleRule)}
@@ -545,6 +546,7 @@ const CreateRulePageComponent: React.FC = () => {
                           extraAction={
                             stepsData.current[RuleStep.ruleActions].isValid && (
                               <EuiButtonEmpty
+                                data-test-subj="securitySolutionCreateRulePageComponentButtonEmpty"
                                 iconType="pencil"
                                 size="xs"
                                 onClick={() => editStep(RuleStep.ruleActions)}

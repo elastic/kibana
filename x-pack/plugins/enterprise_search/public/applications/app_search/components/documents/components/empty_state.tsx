@@ -32,7 +32,13 @@ export const EmptyState = () => (
       </p>
     }
     actions={
-      <EuiButton size="s" target="_blank" iconType="popout" href={INDEXING_DOCS_URL}>
+      <EuiButton
+        data-test-subj="enterpriseSearchEmptyStateReadTheDocumentsGuideButton"
+        size="s"
+        target="_blank"
+        iconType="popout"
+        href={INDEXING_DOCS_URL}
+      >
         {i18n.translate('xpack.enterpriseSearch.appSearch.engine.documents.empty.buttonLabel', {
           defaultMessage: 'Read the documents guide',
         })}

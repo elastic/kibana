@@ -102,7 +102,12 @@ export const CurationsSettings: React.FC = () => {
           </EuiButtonTo>
         }
       >
-        <EuiButtonEmpty target="_blank" iconType="popout" href={docLinks.licenseManagement}>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchCurationsSettingsLearnMoreAboutLicenseUpgradesButtonEmpty"
+          target="_blank"
+          iconType="popout"
+          href={docLinks.licenseManagement}
+        >
           {i18n.translate('xpack.enterpriseSearch.curations.settings.licenseUpgradeLink', {
             defaultMessage: 'Learn more about license upgrades',
           })}

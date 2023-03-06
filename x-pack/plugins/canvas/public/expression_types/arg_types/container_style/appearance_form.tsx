@@ -62,12 +62,18 @@ export const AppearanceForm: FunctionComponent<Props> = ({
     <EuiFlexGroup gutterSize="s" justify-content="spaceBetween">
       <EuiFlexItem grow={2}>
         <EuiFormRow label={strings.getPaddingLabel()} display="rowCompressed">
-          <EuiFieldNumber compressed value={Number(padding)} onChange={namedChange('padding')} />
+          <EuiFieldNumber
+            data-test-subj="canvasAppearanceFormFieldNumber"
+            compressed
+            value={Number(padding)}
+            onChange={namedChange('padding')}
+          />
         </EuiFormRow>
       </EuiFlexItem>
       <EuiFlexItem grow={3}>
         <EuiFormRow label={strings.getOpacityLabel()} display="rowCompressed">
           <EuiSelect
+            data-test-subj="canvasAppearanceFormSelect"
             compressed
             value={opacity}
             options={opacities}
@@ -78,6 +84,7 @@ export const AppearanceForm: FunctionComponent<Props> = ({
       <EuiFlexItem grow={3}>
         <EuiFormRow label={strings.getOverflowLabel()} display="rowCompressed">
           <EuiSelect
+            data-test-subj="canvasAppearanceFormSelect"
             compressed
             value={overflow}
             options={overflows}

@@ -37,6 +37,7 @@ export const TimeIntervalControl: FC<TimeIntervalControlProps> = ({
       error={invalidTimeIntervalMessage(value ?? undefined)}
     >
       <EuiFieldText
+        data-test-subj="mlTimeIntervalControlFieldText"
         {...fieldTextProps}
         placeholder="15d, 6m"
         value={value ?? ''}

@@ -178,7 +178,12 @@ const TriggerPicker: React.FC<TriggerPickerProps> = ({
             <h5>
               <span>{txtTriggerPickerLabel}</span>{' '}
               <EuiToolTip content={txtTriggerPickerHelpTooltip}>
-                <EuiLink href={triggerPickerDocsLink} target={'blank'} external>
+                <EuiLink
+                  data-test-subj="pluginsTriggerPickerLink"
+                  href={triggerPickerDocsLink}
+                  target={'blank'}
+                  external
+                >
                   {txtTriggerPickerHelpText}
                 </EuiLink>
               </EuiToolTip>
@@ -277,7 +282,11 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
           </EuiFlexItem>
           {showDeselect && (
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="xs" onClick={() => onDeselect()}>
+              <EuiButtonEmpty
+                data-test-subj="pluginsSelectedActionFactoryButtonEmpty"
+                size="xs"
+                onClick={() => onDeselect()}
+              >
                 {txtChangeButton}
               </EuiButtonEmpty>
             </EuiFlexItem>

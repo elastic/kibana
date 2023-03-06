@@ -53,7 +53,7 @@ export const RoutingLink: FC<RoutingLinkProps> = ({ to, ...rest }) => {
 
   const props = { ...rest, href, onClick } as EuiLinkProps;
 
-  return <EuiLink {...props} />;
+  return <EuiLink data-test-subj="canvasRoutingLinkLink" {...props} />;
 };
 
 type RoutingButtonIconProps = Omit<EuiButtonIconProps, 'href' | 'onClick'> & RoutingProps;

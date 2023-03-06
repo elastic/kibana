@@ -113,7 +113,11 @@ export const EventLogListCellRenderer = (props: EventLogListCellRendererProps) =
 
   if (columnId === 'rule_name' && ruleId) {
     return (
-      <EuiLink onClick={onClickRuleName} data-href={ruleNamePathname}>
+      <EuiLink
+        data-test-subj="triggersActionsUiEventLogListCellRendererLink"
+        onClick={onClickRuleName}
+        data-href={ruleNamePathname}
+      >
         {value}
       </EuiLink>
     );

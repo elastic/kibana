@@ -48,7 +48,12 @@ const ManageIntegrationLinkComponent = () => {
     <EuiFlexItem>
       {
         // eslint-disable-next-line @elastic/eui/href-or-on-click
-        <EuiButtonEmpty iconType="gear" href={integrationHref} onClick={integrationClick}>
+        <EuiButtonEmpty
+          data-test-subj="osqueryManageIntegrationLinkComponentManageIntegrationButtonEmpty"
+          iconType="gear"
+          href={integrationHref}
+          onClick={integrationClick}
+        >
           <FormattedMessage
             id="xpack.osquery.appNavigation.manageIntegrationButton"
             defaultMessage="Manage integration"

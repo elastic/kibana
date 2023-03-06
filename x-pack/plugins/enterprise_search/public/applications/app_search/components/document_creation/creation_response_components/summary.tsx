@@ -81,11 +81,20 @@ export const FlyoutFooter: React.FC = () => {
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={closeDocumentCreation}>{CLOSE_BUTTON_LABEL}</EuiButton>
+          <EuiButton
+            data-test-subj="enterpriseSearchFlyoutFooterButton"
+            onClick={closeDocumentCreation}
+          >
+            {CLOSE_BUTTON_LABEL}
+          </EuiButton>
         </EuiFlexItem>
         {hasInvalidDocuments && (
           <EuiFlexItem grow={false}>
-            <EuiButton fill onClick={() => setCreationStep(DocumentCreationStep.AddDocuments)}>
+            <EuiButton
+              data-test-subj="enterpriseSearchFlyoutFooterFixErrorsButton"
+              fill
+              onClick={() => setCreationStep(DocumentCreationStep.AddDocuments)}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.documentCreation.showSummary.fixErrors',
                 { defaultMessage: 'Fix errors' }

@@ -62,7 +62,12 @@ const ActionsExplorer = ({ uiActionsApi, openModal }: Props) => {
                 from. Using the UI Action and Trigger API makes your plugin extensible by other
                 plugins. Any actions attached to the `HELLO_WORLD_TRIGGER_ID` will show up here!
               </p>
-              <EuiFieldText prepend="Name" value={name} onChange={(e) => setName(e.target.value)} />
+              <EuiFieldText
+                data-test-subj="uiActionsExplorerActionsExplorerFieldText"
+                prepend="Name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
               <EuiButton
                 data-test-subj="addDynamicAction"
                 onClick={() => {

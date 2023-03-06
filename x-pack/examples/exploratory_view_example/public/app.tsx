@@ -71,7 +71,12 @@ export const App = (props: {
             </p>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <EuiButton aria-label="Open in exploratory view" href={hrefLink} target="_blank">
+                <EuiButton
+                  data-test-subj="exploratoryViewExampleAppEditInExploratoryViewNewTabButton"
+                  aria-label="Open in exploratory view"
+                  href={hrefLink}
+                  target="_blank"
+                >
                   Edit in exploratory view (new tab)
                 </EuiButton>
               </EuiFlexItem>

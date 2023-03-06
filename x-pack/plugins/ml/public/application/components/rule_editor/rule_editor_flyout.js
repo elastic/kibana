@@ -530,7 +530,12 @@ class RuleEditorFlyoutUI extends Component {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="cross" onClick={this.closeFlyout} flush="left">
+                <EuiButtonEmpty
+                  data-test-subj="mlCloseButtonEmpty"
+                  iconType="cross"
+                  onClick={this.closeFlyout}
+                  flush="left"
+                >
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
                     defaultMessage="Close"
@@ -596,7 +601,7 @@ class RuleEditorFlyoutUI extends Component {
                     satisfied, its actions are triggered. {learnMoreLink}"
                   values={{
                     learnMoreLink: (
-                      <EuiLink href={docsUrl} target="_blank">
+                      <EuiLink data-test-subj="mlLearnMoreLink" href={docsUrl} target="_blank">
                         <FormattedMessage
                           id="xpack.ml.ruleEditor.ruleEditorFlyout.rulesDescription.learnMoreLinkText"
                           defaultMessage="Learn more"
@@ -706,7 +711,12 @@ class RuleEditorFlyoutUI extends Component {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="cross" onClick={this.closeFlyout} flush="left">
+                <EuiButtonEmpty
+                  data-test-subj="mlCloseButtonEmpty"
+                  iconType="cross"
+                  onClick={this.closeFlyout}
+                  flush="left"
+                >
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.closeButtonLabel"
                     defaultMessage="Close"
@@ -714,7 +724,12 @@ class RuleEditorFlyoutUI extends Component {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={this.saveEdit} isDisabled={!isValidRule(rule)} fill>
+                <EuiButton
+                  data-test-subj="mlSaveButton"
+                  onClick={this.saveEdit}
+                  isDisabled={!isValidRule(rule)}
+                  fill
+                >
                   <FormattedMessage
                     id="xpack.ml.ruleEditor.ruleEditorFlyout.saveButtonLabel"
                     defaultMessage="Save"

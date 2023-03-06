@@ -76,7 +76,10 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
             </EuiCodeBlock>
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={() => modal.close()}>
+            <EuiButtonEmpty
+              data-test-subj="transformOpenModalCloseButtonEmpty"
+              onClick={() => modal.close()}
+            >
               {i18n.translate('xpack.transform.toastText.closeModalButtonText', {
                 defaultMessage: 'Close',
               })}
@@ -91,7 +94,10 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
   return (
     <>
       <pre>{previewText}</pre>
-      <EuiButtonEmpty onClick={openModal}>
+      <EuiButtonEmpty
+        data-test-subj="transformToastNotificationTextViewDetailsButtonEmpty"
+        onClick={openModal}
+      >
         {i18n.translate('xpack.transform.toastText.openModalButtonText', {
           defaultMessage: 'View details',
         })}

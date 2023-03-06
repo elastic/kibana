@@ -149,7 +149,12 @@ export const GroupManagerModal: React.FC<GroupManagerModalProps> = ({
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton isDisabled={false} onClick={saveItems} fill>
+                <EuiButton
+                  data-test-subj="enterpriseSearchGroupManagerModalButton"
+                  isDisabled={false}
+                  onClick={saveItems}
+                  fill
+                >
                   {UPDATE_BUTTON}
                 </EuiButton>
               </EuiFlexItem>

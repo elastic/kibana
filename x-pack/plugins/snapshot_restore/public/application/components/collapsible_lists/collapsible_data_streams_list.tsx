@@ -40,6 +40,7 @@ export const CollapsibleDataStreamsList: React.FunctionComponent<Props> = ({ dat
         <>
           <EuiSpacer size="xs" />
           <EuiLink
+            data-test-subj="snapshotRestoreCollapsibleDataStreamsListLink"
             onClick={() =>
               isShowingFullList ? setIsShowingFullList(false) : setIsShowingFullList(true)
             }

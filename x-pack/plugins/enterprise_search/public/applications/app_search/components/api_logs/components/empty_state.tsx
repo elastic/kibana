@@ -31,7 +31,13 @@ export const EmptyState: React.FC = () => (
       </p>
     }
     actions={
-      <EuiButton size="s" target="_blank" iconType="popout" href={API_DOCS_URL}>
+      <EuiButton
+        data-test-subj="enterpriseSearchEmptyStateViewTheApiReferenceButton"
+        size="s"
+        target="_blank"
+        iconType="popout"
+        href={API_DOCS_URL}
+      >
         {i18n.translate('xpack.enterpriseSearch.appSearch.engine.apiLogs.empty.buttonLabel', {
           defaultMessage: 'View the API reference',
         })}

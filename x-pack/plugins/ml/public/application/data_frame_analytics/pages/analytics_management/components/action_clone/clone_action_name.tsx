@@ -441,6 +441,7 @@ export const useNavigateToWizardWithClonedJob = () => {
                       values={{
                         linkToDataViewManagement: (
                           <EuiLink
+                            data-test-subj="mlUseNavigateToWizardWithClonedJobCreateADataViewForSourceIndexLink"
                             href={`${basePath.get()}/app/management/kibana/dataViews/create`}
                             target="_blank"
                           >

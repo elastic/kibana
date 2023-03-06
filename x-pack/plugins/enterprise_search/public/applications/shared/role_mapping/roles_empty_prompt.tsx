@@ -65,12 +65,24 @@ export const RolesEmptyPrompt: React.FC<Props> = ({ onEnable, docsLink, productN
         </>
       }
       actions={[
-        <EuiButton disabled={!isSuperUser} key="enableRolesButton" fill onClick={onEnable}>
+        <EuiButton
+          data-test-subj="enterpriseSearchRolesEmptyPromptButton"
+          disabled={!isSuperUser}
+          key="enableRolesButton"
+          fill
+          onClick={onEnable}
+        >
           {ENABLE_ROLES_BUTTON}
         </EuiButton>,
         rbacDisabledLabel,
         <EuiSpacer key="spacer" size="xs" />,
-        <EuiLink key="enableRolesLink" href={docsLink} target="_blank" external>
+        <EuiLink
+          data-test-subj="enterpriseSearchRolesEmptyPromptLink"
+          key="enableRolesLink"
+          href={docsLink}
+          target="_blank"
+          external
+        >
           {ENABLE_ROLES_LINK}
         </EuiLink>,
       ]}

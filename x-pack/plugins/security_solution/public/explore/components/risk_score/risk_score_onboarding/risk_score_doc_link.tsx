@@ -22,7 +22,12 @@ const RiskScoreDocLinkComponent = ({
     riskScoreEntity === RiskScoreEntity.user ? RISKY_USERS_DOC_LINK : RISKY_HOSTS_DOC_LINK;
 
   return (
-    <EuiLink target="_blank" rel="noopener nofollow noreferrer" href={docLink}>
+    <EuiLink
+      data-test-subj="securitySolutionRiskScoreDocLinkComponentLink"
+      target="_blank"
+      rel="noopener nofollow noreferrer"
+      href={docLink}
+    >
       {title ? title : LEARN_MORE}
     </EuiLink>
   );

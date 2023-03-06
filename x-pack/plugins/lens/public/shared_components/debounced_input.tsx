@@ -34,6 +34,7 @@ const DebouncedInputHelper = ({
 
   return (
     <EuiFieldText
+      data-test-subj="lensDebouncedInputHelperFieldText"
       {...rest}
       value={inputValue}
       onChange={(e) => {

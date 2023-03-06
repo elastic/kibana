@@ -67,6 +67,7 @@ export const CaptureTest: FunctionComponent = () => {
             <EuiFlexGroup alignItems="center" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="reportingExampleCaptureTestBackToMainButtonEmpty"
                   iconType="arrowLeft"
                   href={history.createHref(parsePath(ROUTES.main))}
                 >

@@ -50,7 +50,12 @@ export function AttributionFormRow(props: Props) {
           ) : (
             <div className="mapAttributionFormRow__field">
               <EuiPanel color="subdued" paddingSize="s">
-                <EuiLink color="text" href={layerDescriptor.attribution.url} target="_blank">
+                <EuiLink
+                  data-test-subj="mapsRenderAttributionLink"
+                  color="text"
+                  href={layerDescriptor.attribution.url}
+                  target="_blank"
+                >
                   {layerDescriptor.attribution.label}
                 </EuiLink>
               </EuiPanel>
@@ -73,6 +78,7 @@ export function AttributionFormRow(props: Props) {
                 />
 
                 <EuiButtonEmpty
+                  data-test-subj="mapsRenderAttributionClearButtonEmpty"
                   onClick={() => {
                     props.onChange();
                   }}

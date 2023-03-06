@@ -40,7 +40,7 @@ export const SourceTooltip = ({ isCopiedFromPrimary, sourceTransportAddress, chi
 
   return (
     <EuiToolTip content={tipText} position="bottom">
-      <EuiLink>{children}</EuiLink>
+      <EuiLink data-test-subj="monitoringSourceTooltipLink">{children}</EuiLink>
     </EuiToolTip>
   );
 };

@@ -60,7 +60,11 @@ export const SwitchModePopover = ({ onModeChange, useKibanaIndices }: PopoverPro
         defaultMessage="To query Elasticsearch indices, you must enable the {allowStringIndices} setting."
         values={{
           allowStringIndices: canEditAdvancedSettings ? (
-            <EuiLink color="accent" onClick={handleAllowStringIndicesLinkClick}>
+            <EuiLink
+              data-test-subj="pluginsSwitchModePopoverLink"
+              color="accent"
+              onClick={handleAllowStringIndicesLinkClick}
+            >
               {allowStringIndicesMessage}
             </EuiLink>
           ) : (

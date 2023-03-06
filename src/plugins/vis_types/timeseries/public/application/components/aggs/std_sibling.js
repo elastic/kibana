@@ -49,7 +49,11 @@ const StandardSiblingAggUi = (props) => {
             <FormattedMessage id="visTypeTimeseries.stdSibling.sigmaLabel" defaultMessage="Sigma" />
           }
         >
-          <EuiFieldText value={model.sigma} onChange={handleTextChange('sigma')} />
+          <EuiFieldText
+            data-test-subj="pluginsStandardSiblingAggUiFieldText"
+            value={model.sigma}
+            onChange={handleTextChange('sigma')}
+          />
         </EuiFormRow>
       </EuiFlexItem>
     );

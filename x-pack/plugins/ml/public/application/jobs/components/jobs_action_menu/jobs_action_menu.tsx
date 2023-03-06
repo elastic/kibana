@@ -23,7 +23,11 @@ export const JobsActionMenu: FC = () => {
   };
 
   return (
-    <EuiButtonEmpty onClick={onClick} iconType="gear">
+    <EuiButtonEmpty
+      data-test-subj="mlJobsActionMenuSettingsButtonEmpty"
+      onClick={onClick}
+      iconType="gear"
+    >
       <FormattedMessage id="xpack.ml.navMenu.settingsTabLinkText" defaultMessage="Settings" />
     </EuiButtonEmpty>
   );

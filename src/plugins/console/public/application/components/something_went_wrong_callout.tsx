@@ -39,7 +39,11 @@ export const SomethingWentWrongCallout: FunctionComponent<Props> = ({ error, onB
         </p>
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiButton color="danger" onClick={() => onButtonClick()}>
+      <EuiButton
+        data-test-subj="pluginsSomethingWentWrongCalloutReloadConsoleButton"
+        color="danger"
+        onClick={() => onButtonClick()}
+      >
         <FormattedMessage id="console.loadingError.buttonLabel" defaultMessage="Reload Console" />
       </EuiButton>
     </EuiCallOut>

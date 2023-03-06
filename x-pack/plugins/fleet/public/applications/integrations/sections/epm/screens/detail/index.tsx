@@ -280,7 +280,13 @@ export function Detail() {
         <EuiFlexItem>
           {/* Allows button to break out of full width */}
           <div>
-            <EuiButtonEmpty iconType="arrowLeft" size="xs" flush="left" href={href}>
+            <EuiButtonEmpty
+              data-test-subj="fleetHeaderLeftContentBackToIntegrationsButtonEmpty"
+              iconType="arrowLeft"
+              size="xs"
+              flush="left"
+              href={href}
+            >
               <FormattedMessage
                 id="xpack.fleet.epm.browseAllButtonText"
                 defaultMessage="Back to integrations"

@@ -39,7 +39,7 @@ export const renderEngineLink = (engineName: string) => (
 );
 
 export const renderLastChangeLink = (dateString: string, onClick = () => {}) => (
-  <EuiLink onClick={onClick}>
+  <EuiLink data-test-subj="enterpriseSearchRenderLastChangeLinkLink" onClick={onClick}>
     {!dateString ? '-' : <FormattedDateTime date={new Date(dateString)} hideTime />}
   </EuiLink>
 );

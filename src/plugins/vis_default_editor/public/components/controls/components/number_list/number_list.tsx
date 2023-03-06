@@ -138,7 +138,12 @@ function NumberList({
       ))}
       <EuiSpacer size="s" />
       <EuiFlexItem>
-        <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
+        <EuiButtonEmpty
+          data-test-subj="pluginsNumberListAddUnitNameButtonEmpty"
+          iconType="plusInCircleFilled"
+          onClick={onAdd}
+          size="xs"
+        >
           <FormattedMessage
             id="visDefaultEditor.controls.numberList.addUnitButtonLabel"
             defaultMessage="Add {unitName}"

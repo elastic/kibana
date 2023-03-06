@@ -114,7 +114,10 @@ export class FormEntryRow extends PureComponent {
 
         {canBeResetToDefault && isResetToDefaultVisible && (
           <p>
-            <EuiLink onClick={() => this.onFieldChange(defaultValue)}>
+            <EuiLink
+              data-test-subj="crossClusterReplicationResetToDefaultLink"
+              onClick={() => this.onFieldChange(defaultValue)}
+            >
               <FormattedMessage
                 id="xpack.crossClusterReplication.followerIndexForm.resetFieldButtonLabel"
                 defaultMessage="Reset to default"

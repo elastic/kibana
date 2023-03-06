@@ -125,7 +125,11 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
 
     const aboutInfo = useMemo(() => {
       const link = (
-        <EuiLink href={getAppUrl({ appId: APP_UI_ID, path: getArtifactPath() })} target="_blank">
+        <EuiLink
+          data-test-subj="securitySolutionAboutInfoLink"
+          href={getAppUrl({ appId: APP_UI_ID, path: getArtifactPath() })}
+          target="_blank"
+        >
           {labels.layoutViewAllLinkMessage}
         </EuiLink>
       );

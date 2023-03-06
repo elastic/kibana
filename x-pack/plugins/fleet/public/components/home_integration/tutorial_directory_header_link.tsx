@@ -24,7 +24,13 @@ const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo((
 
   return hasIntegrationsPermissions && noticeState.settingsDataLoaded ? (
     <RedirectAppLinks application={application}>
-      <EuiButtonEmpty size="s" iconType="link" flush="right" href={getHref('integrations')}>
+      <EuiButtonEmpty
+        data-test-subj="fleetTutorialDirectoryHeaderLinkTryIntegrationsButtonEmpty"
+        size="s"
+        iconType="link"
+        flush="right"
+        href={getHref('integrations')}
+      >
         <FormattedMessage
           id="xpack.fleet.homeIntegration.tutorialDirectory.fleetAppButtonText"
           defaultMessage="Try Integrations"

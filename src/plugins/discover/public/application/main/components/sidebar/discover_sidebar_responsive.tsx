@@ -341,6 +341,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       <EuiShowFor sizes={['xs', 's']}>
         <div className="dscSidebar__mobile">
           <EuiButton
+            data-test-subj="pluginsDiscoverSidebarResponsiveButton"
             contentProps={{
               className: 'dscSidebar__mobileButton',
               id: DISCOVER_TOUR_STEP_ANCHOR_IDS.addFields,
@@ -371,7 +372,11 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
               <EuiFlyoutHeader hasBorder>
                 <EuiTitle size="s">
                   <h2 id="flyoutTitle">
-                    <EuiLink color="text" onClick={() => setIsFlyoutVisible(false)}>
+                    <EuiLink
+                      data-test-subj="pluginsDiscoverSidebarResponsiveLink"
+                      color="text"
+                      onClick={() => setIsFlyoutVisible(false)}
+                    >
                       <EuiIcon
                         className="eui-alignBaseline"
                         aria-label={i18n.translate('discover.fieldList.flyoutBackIcon', {

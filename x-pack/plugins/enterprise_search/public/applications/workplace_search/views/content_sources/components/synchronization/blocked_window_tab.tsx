@@ -35,7 +35,12 @@ export const BlockedWindows: React.FC = () => {
         title={<h2>{BLOCKED_EMPTY_STATE_TITLE}</h2>}
         body={<p>{BLOCKED_EMPTY_STATE_DESCRIPTION}</p>}
         actions={
-          <EuiButton color="primary" fill onClick={addBlockedWindow}>
+          <EuiButton
+            data-test-subj="enterpriseSearchBlockedWindowsButton"
+            color="primary"
+            fill
+            onClick={addBlockedWindow}
+          >
             {ADD_LABEL}
           </EuiButton>
         }
@@ -49,7 +54,9 @@ export const BlockedWindows: React.FC = () => {
         <BlockedWindowItem key={i} index={i} blockedWindow={blockedWindow} />
       ))}
       <EuiSpacer />
-      <EuiButton onClick={addBlockedWindow}>{ADD_LABEL}</EuiButton>
+      <EuiButton data-test-subj="enterpriseSearchBlockedWindowsButton" onClick={addBlockedWindow}>
+        {ADD_LABEL}
+      </EuiButton>
     </>
   );
 

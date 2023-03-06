@@ -47,6 +47,7 @@ export const WorkpadTableTools = ({
 
   const downloadButton = (
     <EuiButton
+      data-test-subj="canvasWorkpadTableToolsButton"
       color="success"
       onClick={() => onExportWorkpads(selectedWorkpadIds)}
       iconType="exportAction"

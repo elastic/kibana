@@ -88,7 +88,12 @@ export class EditFlyout extends Component {
             <EuiFlyoutFooter>
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty iconType="cross" onClick={closeEditFlyout} flush="left">
+                  <EuiButtonEmpty
+                    data-test-subj="dataVisualizerCloseButtonEmpty"
+                    iconType="cross"
+                    onClick={closeEditFlyout}
+                    flush="left"
+                  >
                     <FormattedMessage
                       id="xpack.dataVisualizer.file.editFlyout.closeOverrideSettingsButtonLabel"
                       defaultMessage="Close"
@@ -97,6 +102,7 @@ export class EditFlyout extends Component {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButton
+                    data-test-subj="dataVisualizerApplyButton"
                     onClick={this.applyAndClose}
                     isDisabled={this.state.overridesValid === false}
                     fill

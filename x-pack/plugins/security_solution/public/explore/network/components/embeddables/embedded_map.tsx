@@ -303,7 +303,11 @@ export const EmbeddedMapComponent = ({
       buttonContent={<strong>{i18n.EMBEDDABLE_HEADER_TITLE}</strong>}
       extraAction={
         <StyledEuiText size="xs">
-          <EuiLink href={`${services.docLinks.links.siem.networkMap}`} target="_blank">
+          <EuiLink
+            data-test-subj="securitySolutionEmbeddedMapComponentLink"
+            href={`${services.docLinks.links.siem.networkMap}`}
+            target="_blank"
+          >
             {i18n.EMBEDDABLE_HEADER_HELP}
           </EuiLink>
         </StyledEuiText>

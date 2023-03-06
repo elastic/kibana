@@ -173,7 +173,12 @@ export const BulkSnoozeScheduleModal = (props: BulkSnoozeScheduleModalProps) => 
           />
         </EuiModalBody>
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={onClose}>Close</EuiButtonEmpty>
+          <EuiButtonEmpty
+            data-test-subj="triggersActionsUiBulkSnoozeScheduleModalCloseButtonEmpty"
+            onClick={onClose}
+          >
+            Close
+          </EuiButtonEmpty>
         </EuiModalFooter>
       </EuiModal>
     );

@@ -77,7 +77,7 @@ export const UserSelector: React.FC<Props> = ({
   const smptHelpText = !smtpSettingsPresent && (
     <>
       {SMTP_CALLOUT_LABEL}{' '}
-      <EuiLink href={SMTP_URL} target="_blank">
+      <EuiLink data-test-subj="enterpriseSearchUserSelectorLink" href={SMTP_URL} target="_blank">
         {SMTP_LINK_LABEL}
       </EuiLink>
     </>

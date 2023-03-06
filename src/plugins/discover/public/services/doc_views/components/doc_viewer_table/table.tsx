@@ -388,6 +388,7 @@ export const DocViewerTable = ({
 
       <EuiFlexItem grow={false}>
         <EuiFieldSearch
+          data-test-subj="pluginsDocViewerTableFieldSearch"
           aria-label={searchPlaceholder}
           fullWidth
           onChange={handleOnChange}

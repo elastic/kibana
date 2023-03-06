@@ -86,7 +86,14 @@ export const StepComponents = ({ defaultValue, onChange, esDocsBase }: Props) =>
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" flush="right" href={docUri} target="_blank" iconType="help">
+            <EuiButtonEmpty
+              data-test-subj="indexManagementRenderHeaderComponentTemplatesDocsButtonEmpty"
+              size="s"
+              flush="right"
+              href={docUri}
+              target="_blank"
+              iconType="help"
+            >
               <FormattedMessage
                 id="xpack.idxMgmt.formWizard.stepComponents.docsButtonLabel"
                 defaultMessage="Component templates docs"

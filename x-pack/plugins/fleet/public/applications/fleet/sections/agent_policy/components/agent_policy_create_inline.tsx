@@ -116,7 +116,11 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
             defaultMessage="Type of hosts are controlled by an {agentPolicy}. Create a new agent policy to get started."
             values={{
               agentPolicy: (
-                <EuiLink href={docLinks.links.fleet.agentPolicy} target="_blank">
+                <EuiLink
+                  data-test-subj="fleetAgentPolicyCreateInlineFormAgentPolicyLink"
+                  href={docLinks.links.fleet.agentPolicy}
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.fleet.agentPolicyForm.createAgentPolicyDocLink"
                     defaultMessage="agent policy"
@@ -136,6 +140,7 @@ export const AgentPolicyCreateInlineForm: React.FunctionComponent<Props> = ({
             error={touchedFields.name && validation.name ? validation.name : null}
           >
             <EuiFieldText
+              data-test-subj="fleetAgentPolicyCreateInlineFormFieldText"
               fullWidth
               value={newAgentPolicy.name}
               disabled={isLoading}

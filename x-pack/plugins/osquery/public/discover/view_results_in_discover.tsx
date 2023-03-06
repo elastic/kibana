@@ -84,7 +84,13 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
 
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
-      <EuiButtonEmpty size="xs" iconType="discoverApp" href={discoverUrl} target="_blank">
+      <EuiButtonEmpty
+        data-test-subj="osqueryViewResultsInDiscoverActionComponentButtonEmpty"
+        size="xs"
+        iconType="discoverApp"
+        href={discoverUrl}
+        target="_blank"
+      >
         {VIEW_IN_DISCOVER}
       </EuiButtonEmpty>
     );

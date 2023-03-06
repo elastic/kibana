@@ -33,6 +33,7 @@ export const WorkpadStep: FC<{ onDownload: OnDownloadFn }> = ({ onDownload }) =>
     <p>{strings.getStepDescription()}</p>
     <EuiSpacer size="s" />
     <EuiButton
+      data-test-subj="canvasWorkpadStepButton"
       onClick={() => {
         onDownload('share');
       }}

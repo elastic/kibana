@@ -88,6 +88,7 @@ export const ConfigureStandaloneAgentStep = ({
                 <EuiCopy textToCopy={yaml}>
                   {(copy) => (
                     <EuiButton
+                      data-test-subj="fleetConfigureStandaloneAgentStepCopyToClipboardButton"
                       onClick={() => {
                         copy();
                         if (onCopy) onCopy();
@@ -105,6 +106,7 @@ export const ConfigureStandaloneAgentStep = ({
               <EuiFlexItem grow={false}>
                 {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiButton
+                  data-test-subj="fleetConfigureStandaloneAgentStepButton"
                   iconType="download"
                   href={downloadLink}
                   onClick={() => {

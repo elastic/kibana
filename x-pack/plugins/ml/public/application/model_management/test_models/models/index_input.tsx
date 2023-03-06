@@ -41,6 +41,7 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
     <>
       <EuiFormRow label="Index" fullWidth>
         <EuiSelect
+          data-test-subj="mlInferenceInputFormIndexControlsSelect"
           options={dataViewListItems}
           value={selectedDataViewId}
           onChange={(e) => setSelectedDataViewId(e.target.value)}
@@ -57,6 +58,7 @@ export const InferenceInputFormIndexControls: FC<Props> = ({ inferrer, data }) =
         fullWidth
       >
         <EuiSelect
+          data-test-subj="mlInferenceInputFormIndexControlsSelect"
           options={fieldNames}
           value={selectedField}
           onChange={(e) => setSelectedField(e.target.value)}

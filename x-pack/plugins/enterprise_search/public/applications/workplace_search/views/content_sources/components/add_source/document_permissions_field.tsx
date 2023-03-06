@@ -42,7 +42,11 @@ export const DocumentPermissionsField: React.FC<Props> = ({
   setValue,
 }) => {
   const whichDocsLink = (
-    <EuiLink target="_blank" href={docLinks.workplaceSearchDocumentPermissions}>
+    <EuiLink
+      data-test-subj="enterpriseSearchDocumentPermissionsFieldLink"
+      target="_blank"
+      href={docLinks.workplaceSearchDocumentPermissions}
+    >
       {CONNECT_WHICH_OPTION_LINK}
     </EuiLink>
   );
@@ -64,7 +68,11 @@ export const DocumentPermissionsField: React.FC<Props> = ({
                 defaultMessage="Document-level permissions are not yet available for this source. {link}"
                 values={{
                   link: (
-                    <EuiLink target="_blank" href={docLinks.workplaceSearchDocumentPermissions}>
+                    <EuiLink
+                      data-test-subj="enterpriseSearchDocumentPermissionsFieldLink"
+                      target="_blank"
+                      href={docLinks.workplaceSearchDocumentPermissions}
+                    >
                       {LEARN_MORE_LINK}
                     </EuiLink>
                   ),

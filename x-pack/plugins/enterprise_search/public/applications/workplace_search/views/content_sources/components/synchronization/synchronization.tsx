@@ -68,7 +68,11 @@ export const Synchronization: React.FC = () => {
         description={
           <>
             {SOURCE_SYNCHRONIZATION_DESCRIPTION}{' '}
-            <EuiLink href={docLinks.workplaceSearchSynch} external>
+            <EuiLink
+              data-test-subj="enterpriseSearchSynchronizationLink"
+              href={docLinks.workplaceSearchSynch}
+              external
+            >
               {LEARN_MORE_LINK}
             </EuiLink>
           </>

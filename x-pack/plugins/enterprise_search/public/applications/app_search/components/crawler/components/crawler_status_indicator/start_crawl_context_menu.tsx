@@ -34,7 +34,13 @@ export const StartCrawlContextMenu: React.FC<Props> = ({ menuButtonLabel, fill }
   return (
     <EuiPopover
       button={
-        <EuiButton iconType="arrowDown" iconSide="right" onClick={togglePopover} fill={fill}>
+        <EuiButton
+          data-test-subj="enterpriseSearchStartCrawlContextMenuButton"
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={togglePopover}
+          fill={fill}
+        >
           {menuButtonLabel}
         </EuiButton>
       }

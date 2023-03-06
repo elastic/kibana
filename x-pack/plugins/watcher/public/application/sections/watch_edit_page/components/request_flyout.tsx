@@ -75,7 +75,12 @@ export class RequestFlyout extends PureComponent<Props> {
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
-          <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
+          <EuiButtonEmpty
+            data-test-subj="watcherCloseButtonEmpty"
+            iconType="cross"
+            onClick={close}
+            flush="left"
+          >
             <FormattedMessage
               id="xpack.watcher.requestFlyout.closeButtonLabel"
               defaultMessage="Close"

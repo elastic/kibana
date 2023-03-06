@@ -58,5 +58,13 @@ export interface DocLinkProps extends Omit<EuiLinkAnchorProps, 'href'> {
 
 export const DocLink: FunctionComponent<DocLinkProps> = ({ app, doc, ...props }) => {
   const [, getDocLink] = useDocLinks();
-  return <EuiLink href={getDocLink(app, doc)} target="_blank" external {...props} />;
+  return (
+    <EuiLink
+      data-test-subj="pluginsDocLinkLink"
+      href={getDocLink(app, doc)}
+      target="_blank"
+      external
+      {...props}
+    />
+  );
 };

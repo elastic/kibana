@@ -144,11 +144,20 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       render: (id: string) => {
         const currentItem = diagnosticsEntries.find((item) => item.id === id);
         return currentItem?.status === 'READY' ? (
-          <EuiLink href={getAbsolutePath(currentItem?.filePath)} download target="_blank">
+          <EuiLink
+            data-test-subj="fleetColumnsLink"
+            href={getAbsolutePath(currentItem?.filePath)}
+            download
+            target="_blank"
+          >
             <EuiIcon type="download" /> &nbsp; {currentItem?.name}
           </EuiLink>
         ) : currentItem?.status === 'IN_PROGRESS' || currentItem?.status === 'AWAITING_UPLOAD' ? (
-          <EuiLink color="subdued" disabled>
+          <EuiLink
+            data-test-subj="fleetColumnsGeneratingDiagnosticsFileLink"
+            color="subdued"
+            disabled
+          >
             <EuiLoadingSpinner /> &nbsp;
             <FormattedMessage
               id="xpack.fleet.requestDiagnostics.generatingText"
@@ -156,7 +165,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
             />
           </EuiLink>
         ) : (
-          <EuiLink color="subdued" disabled>
+          <EuiLink data-test-subj="fleetColumnsLink" color="subdued" disabled>
             {currentItem?.status ? (
               <EuiToolTip
                 content={
@@ -222,6 +231,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
 
   const requestDiagnosticsButton = (
     <EuiButton
+      data-test-subj="fleetAgentDiagnosticsTabRequestDiagnosticsZipButton"
       fill
       size="m"
       onClick={onSubmit}

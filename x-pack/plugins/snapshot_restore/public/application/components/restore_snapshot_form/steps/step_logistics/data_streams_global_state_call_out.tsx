@@ -25,7 +25,11 @@ const i18nTexts = {
         defaultMessage="Each data stream requires a matching index template. Please ensure any restored data streams have a matching index template. You can restore index templates by restoring the global cluster state. However, this may overwrite existing templates, cluster settings, ingest pipelines, and lifecycle policies. {learnMoreLink} about restoring snapshots that contain data streams."
         values={{
           learnMoreLink: (
-            <EuiLink target="_blank" href={docLink}>
+            <EuiLink
+              data-test-subj="snapshotRestoreI18nTextsLearnMoreLink"
+              target="_blank"
+              href={docLink}
+            >
               {i18n.translate(
                 'xpack.snapshotRestore.restoreForm.dataStreamsWarningCallOut.body.learnMoreLink',
                 { defaultMessage: 'Learn more' }

@@ -167,7 +167,11 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
   const renderToggleFieldsButton = () =>
     totalFields <= INITIAL_MAX_NUMBER_OF_FIELDS ? null : (
       <div className="indexPatternFieldEditor__previewFieldList__showMore">
-        <EuiButtonEmpty onClick={toggleShowAllFields} flush="left">
+        <EuiButtonEmpty
+          data-test-subj="pluginsRenderToggleFieldsButtonButtonEmpty"
+          onClick={toggleShowAllFields}
+          flush="left"
+        >
           {showAllFields
             ? i18n.translate('indexPatternFieldEditor.fieldPreview.showLessFieldsButtonLabel', {
                 defaultMessage: 'Show less',

@@ -48,6 +48,7 @@ export const ColorStopsOrdinal = ({
     }
     return (
       <EuiFieldNumber
+        data-test-subj="mapsRenderStopInputFieldNumber"
         aria-label={i18n.translate('xpack.maps.styles.colorStops.ordinalStop.stopLabel', {
           defaultMessage: 'Stop',
         })}

@@ -79,7 +79,11 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
             </EuiText>
           }
         >
-          <EuiLink onClick={handleClusterTitleClick} color="text">
+          <EuiLink
+            data-test-subj="cloudSecurityPostureClusterDetailsBoxLink"
+            onClick={handleClusterTitleClick}
+            color="text"
+          >
             <EuiTitle css={{ fontSize: 20 }}>
               <h5>
                 <FormattedMessage
@@ -112,7 +116,7 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
       </EuiFlexItem>
       {INTERNAL_FEATURE_FLAGS.showManageRulesMock && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty>
+          <EuiButtonEmpty data-test-subj="cloudSecurityPostureClusterDetailsBoxManageRulesButtonEmpty">
             <FormattedMessage
               id="xpack.csp.dashboard.benchmarkSection.manageRulesButton"
               defaultMessage="Manage Rules"

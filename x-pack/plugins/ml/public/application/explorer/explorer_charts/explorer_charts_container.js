@@ -272,6 +272,7 @@ function ExplorerChartContainer({
                 {/* disabling because we need button to behave as link and to have a callback */}
                 {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                 <EuiButtonEmpty
+                  data-test-subj="mlExplorerChartContainerViewButtonEmpty"
                   iconSide="right"
                   iconType="visLine"
                   size="xs"
@@ -285,6 +286,7 @@ function ExplorerChartContainer({
             {chartType === CHART_TYPE.GEO_MAP && mapsLink ? (
               <EuiToolTip position="top" content={openInMapsPluginMessage}>
                 <EuiButtonEmpty
+                  data-test-subj="mlExplorerChartContainerViewButtonEmpty"
                   iconSide="right"
                   iconType="logoMaps"
                   size="xs"

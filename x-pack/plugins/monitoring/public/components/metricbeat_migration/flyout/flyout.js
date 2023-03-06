@@ -111,6 +111,7 @@ export class Flyout extends Component {
               )}
             >
               <EuiFieldText
+                data-test-subj="monitoringFieldText"
                 fullWidth
                 value={esMonitoringUrl}
                 onChange={(e) => this.setEsMonitoringUrl(e.target.value)}
@@ -196,6 +197,7 @@ export class Flyout extends Component {
 
       return (
         <EuiButton
+          data-test-subj="monitoringNextButton"
           type="submit"
           fill
           iconType="sortRight"
@@ -211,6 +213,7 @@ export class Flyout extends Component {
     }
     return (
       <EuiButton
+        data-test-subj="monitoringDoneButton"
         type="submit"
         fill
         isDisabled={willDisableDoneButton}
@@ -239,7 +242,11 @@ export class Flyout extends Component {
 
     return (
       <EuiText size="s">
-        <EuiLink href={documentationUrl} target="_blank">
+        <EuiLink
+          data-test-subj="monitoringLearnAboutWhyLink"
+          href={documentationUrl}
+          target="_blank"
+        >
           {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.learnMore', {
             defaultMessage: 'Learn about why.',
           })}
@@ -296,6 +303,7 @@ export class Flyout extends Component {
                   instanceIdentifier,
                   link: (
                     <EuiLink
+                      data-test-subj="monitoringClickHereToViewTheStandaloneClusterLink"
                       href={`#/overview?_g=(cluster_uuid:__standalone_cluster__)`}
                       target="_blank"
                     >
@@ -346,7 +354,12 @@ export class Flyout extends Component {
         <EuiFlyoutFooter style={{ marginBottom: '64px' }}>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+              <EuiButtonEmpty
+                data-test-subj="monitoringCloseButtonEmpty"
+                iconType="cross"
+                onClick={onClose}
+                flush="left"
+              >
                 {i18n.translate('xpack.monitoring.metricbeatMigration.flyout.closeButtonLabel', {
                   defaultMessage: 'Close',
                 })}

@@ -36,7 +36,14 @@ const AgentPolicyButtonLink = ({ name, id: policyId }: { name: string; id: strin
   const { http } = useKibana().services;
   const [fleetBase, path] = pagePathGetters.policy_details({ policyId });
 
-  return <EuiLink href={http.basePath.prepend([fleetBase, path].join(''))}>{name}</EuiLink>;
+  return (
+    <EuiLink
+      data-test-subj="cloudDefendAgentPolicyButtonLinkLink"
+      href={http.basePath.prepend([fleetBase, path].join(''))}
+    >
+      {name}
+    </EuiLink>
+  );
 };
 
 const IntegrationButtonLink = ({
@@ -55,7 +62,11 @@ const IntegrationButtonLink = ({
     })
     .join('');
 
-  return <EuiLink href={editIntegrationLink}>{packageName}</EuiLink>;
+  return (
+    <EuiLink data-test-subj="cloudDefendIntegrationButtonLinkLink" href={editIntegrationLink}>
+      {packageName}
+    </EuiLink>
+  );
 };
 
 const POLICIES_TABLE_COLUMNS: Array<EuiBasicTableColumn<CloudDefendPolicy>> = [

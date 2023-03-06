@@ -89,7 +89,11 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
               }
             )}
             <EuiSpacer />
-            <EuiLink href={cloud.baseUrl} external>
+            <EuiLink
+              data-test-subj="enterpriseSearchMethodConnectorManageDeploymentLink"
+              href={cloud.baseUrl}
+              external
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.nativeConnector.memoryCallout.link.title',
                 {
@@ -172,7 +176,12 @@ export const MethodConnector: React.FC<{ isNative: boolean }> = ({ isNative }) =
                             defaultMessage="Using our connector framework and connector client examples, you’ll be able to accelerate ingestion to the Elasticsearch {bulkApiDocLink} for any data source. After creating your index, you will be guided through the steps to access the connector framework and connect your first connector client."
                             values={{
                               bulkApiDocLink: (
-                                <EuiLink href={docLinks.bulkApi} target="_blank" external>
+                                <EuiLink
+                                  data-test-subj="enterpriseSearchMethodConnectorBulkApiLink"
+                                  href={docLinks.bulkApi}
+                                  target="_blank"
+                                  external
+                                >
                                   {i18n.translate(
                                     'xpack.enterpriseSearch.content.newIndex.methodConnector.steps.buildConnector.bulkAPILink',
                                     { defaultMessage: 'Bulk API' }

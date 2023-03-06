@@ -81,6 +81,7 @@ export const createGridCell = (
           })}
         >
           <EuiLink
+            data-test-subj="lensCreateGridCellLink"
             onClick={() => {
               handleFilterClick?.(columnId, rowValue, colIndex, rowIndex);
             }}

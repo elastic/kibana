@@ -42,7 +42,11 @@ export function getSecurityStep(url) {
                 link: (
                   <Fragment>
                     {` `}
-                    <EuiLink href={url} target="_blank">
+                    <EuiLink
+                      data-test-subj="monitoringGetSecurityStepAdditionalSetupLink"
+                      href={url}
+                      target="_blank"
+                    >
                       <FormattedMessage
                         id="xpack.monitoring.metricbeatMigration.securitySetupLinkText"
                         defaultMessage="additional setup"

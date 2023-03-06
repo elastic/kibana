@@ -30,7 +30,12 @@ export const CREATE_ELASTICSEARCH_INDEX_STEP: EuiContainedStepProps = {
           defaultMessage="Provide a unique index name and optionally set a default {languageAnalyzerDocLink} for the index. This index will hold your data source content, and is optimized with default field mappings for relevant search experiences."
           values={{
             languageAnalyzerDocLink: (
-              <EuiLink href={docLinks.languageAnalyzers} target="_blank" external>
+              <EuiLink
+                data-test-subj="enterpriseSearchLanguageAnalyzerLink"
+                href={docLinks.languageAnalyzers}
+                target="_blank"
+                external
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.newIndex.steps.createIndex.languageAnalyzerLink',
                   { defaultMessage: 'language analyzer' }

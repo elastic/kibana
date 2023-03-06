@@ -84,6 +84,7 @@ export const javascriptEmbedSteps = (webClientSrc: string, analyticsDNSUrl: stri
               values={{
                 link: (
                   <EuiLink
+                    data-test-subj="enterpriseSearchJavascriptEmbedStepsLearnMoreAboutTrackingEventsLink"
                     href={docLinks.behavioralAnalyticsEvents}
                     target="_blank"
                     data-telemetry-id={

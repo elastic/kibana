@@ -21,7 +21,13 @@ export const AddResultButton: React.FC = () => {
   const { isAutomated } = useValues(CurationLogic);
 
   return (
-    <EuiButton onClick={openFlyout} iconType="plusInCircle" size="s" disabled={isAutomated}>
+    <EuiButton
+      data-test-subj="enterpriseSearchAddResultButtonAddResultManuallyButton"
+      onClick={openFlyout}
+      iconType="plusInCircle"
+      size="s"
+      disabled={isAutomated}
+    >
       {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.addResult.buttonLabel', {
         defaultMessage: 'Add result manually',
       })}

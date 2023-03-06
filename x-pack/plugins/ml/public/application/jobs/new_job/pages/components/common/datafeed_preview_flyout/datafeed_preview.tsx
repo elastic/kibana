@@ -108,7 +108,12 @@ export const DatafeedPreview: FC<{
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           {outOfDate && (
-            <EuiButton size="s" onClick={loadDataPreview} iconType="refresh">
+            <EuiButton
+              data-test-subj="mlDatafeedPreviewRefreshButton"
+              size="s"
+              onClick={loadDataPreview}
+              iconType="refresh"
+            >
               Refresh
             </EuiButton>
           )}

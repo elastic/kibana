@@ -108,6 +108,7 @@ export const AlertConfiguration: React.FC<Props> = (props: Props) => {
       >
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="monitoringAlertConfigurationButton"
             size={compressed ? 's' : 'm'}
             onClick={() => {
               setShowFlyout(true);

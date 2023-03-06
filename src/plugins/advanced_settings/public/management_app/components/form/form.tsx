@@ -225,7 +225,7 @@ export class Form extends PureComponent<FormProps> {
               values={{
                 settingsCount: totalSettings - currentSettings,
                 clearSearch: (
-                  <EuiLink onClick={clearQuery}>
+                  <EuiLink data-test-subj="pluginsLink" onClick={clearQuery}>
                     <em>
                       <FormattedMessage
                         id="advancedSettings.form.clearSearchResultText"
@@ -292,7 +292,7 @@ export class Form extends PureComponent<FormProps> {
                 defaultMessage="No settings found for {queryText} {clearSearch}"
                 values={{
                   clearSearch: (
-                    <EuiLink onClick={clearQuery}>
+                    <EuiLink data-test-subj="pluginsClearSearchLink" onClick={clearQuery}>
                       <FormattedMessage
                         id="advancedSettings.form.clearNoSearchResultText"
                         defaultMessage="(clear search)"

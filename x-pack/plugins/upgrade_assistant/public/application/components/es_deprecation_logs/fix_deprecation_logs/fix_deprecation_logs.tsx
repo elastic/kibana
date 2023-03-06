@@ -41,7 +41,11 @@ const i18nTexts = {
       defaultMessage="We recommend you resolve all deprecation issues before upgrading. If needed, you can apply API compatibility headers to requests that use deprecated features. {learnMoreLink}."
       values={{
         learnMoreLink: (
-          <EuiLink href={docLink} target="_blank">
+          <EuiLink
+            data-test-subj="upgradeAssistantI18nTextsLearnMoreLink"
+            href={docLink}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.upgradeAssistant.overview.apiCompatibilityNoteLink"
               defaultMessage="Learn more"

@@ -80,6 +80,7 @@ export const BorderForm: FunctionComponent<Props> = ({
       <EuiFlexItem grow={2}>
         <EuiFormRow label={strings.getThicknessLabel()} display="rowCompressed">
           <EuiFieldNumber
+            data-test-subj="canvasBorderFormFieldNumber"
             compressed
             value={Number(borderWidthVal)}
             onChange={(e) => namedChange('borderWidth')(Number(e.target.value))}
@@ -104,6 +105,7 @@ export const BorderForm: FunctionComponent<Props> = ({
       <EuiFlexItem grow={2}>
         <EuiFormRow label={strings.getRadiusLabel()} display="rowCompressed">
           <EuiFieldNumber
+            data-test-subj="canvasBorderFormFieldNumber"
             compressed
             value={Number(radiusVal)}
             onChange={(e) => namedChange('borderRadius')(e.target.value)}

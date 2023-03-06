@@ -65,6 +65,7 @@ export class DistanceFilterForm extends Component<Props, State> {
           display="rowCompressed"
         >
           <EuiFieldText
+            data-test-subj="mapsFieldText"
             compressed
             value={this.state.filterLabel}
             onChange={this._onFilterLabelChange}
@@ -81,7 +82,7 @@ export class DistanceFilterForm extends Component<Props, State> {
         <EuiSpacer size="m" />
 
         <EuiTextAlign textAlign="right">
-          <EuiButton size="s" fill onClick={this._onSubmit}>
+          <EuiButton data-test-subj="mapsButton" size="s" fill onClick={this._onSubmit}>
             {this.props.buttonLabel}
           </EuiButton>
         </EuiTextAlign>

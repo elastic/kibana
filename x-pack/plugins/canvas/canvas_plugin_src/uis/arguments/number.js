@@ -41,12 +41,22 @@ const NumberArgInput = ({ argId, argValue, typeInstance, onValueChange }) => {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
-        <EuiFieldNumber compressed id={argId} value={Number(value)} onChange={onChange} />
+        <EuiFieldNumber
+          data-test-subj="canvasNumberArgInputFieldNumber"
+          compressed
+          id={argId}
+          value={Number(value)}
+          onChange={onChange}
+        />
       </EuiFlexItem>
 
       {confirm && (
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" onClick={() => onValueChange(Number(value))}>
+          <EuiButton
+            data-test-subj="canvasNumberArgInputButton"
+            size="s"
+            onClick={() => onValueChange(Number(value))}
+          >
             {confirm}
           </EuiButton>
         </EuiFlexItem>

@@ -35,7 +35,12 @@ export const ErrorCallout = ({ error }: { error: Error }) => {
             iconType="alert"
           >
             <EuiSpacer />
-            <EuiButton size="s" color="danger" onClick={() => search.showError(error)}>
+            <EuiButton
+              data-test-subj="cloudSecurityPostureErrorCalloutShowErrorMessageButton"
+              size="s"
+              color="danger"
+              onClick={() => search.showError(error)}
+            >
               <FormattedMessage
                 id="xpack.csp.findings.errorCallout.showErrorButtonLabel"
                 defaultMessage="Show error message"

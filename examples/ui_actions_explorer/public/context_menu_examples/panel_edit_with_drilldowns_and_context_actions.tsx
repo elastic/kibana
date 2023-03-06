@@ -61,7 +61,10 @@ export const PanelEditWithDrilldownsAndContextActions: React.FC = () => {
   return (
     <EuiPopover
       button={
-        <EuiButton onClick={() => setOpen((x) => !x)}>
+        <EuiButton
+          data-test-subj="uiActionsExplorerPanelEditWithDrilldownsAndContextActionsEditModeWithDrilldownsAndCustomActionsButton"
+          onClick={() => setOpen((x) => !x)}
+        >
           Edit mode with drilldowns and custom actions
         </EuiButton>
       }

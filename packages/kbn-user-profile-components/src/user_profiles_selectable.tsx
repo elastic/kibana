@@ -378,6 +378,7 @@ export const UserProfilesSelectable = <Option extends UserProfileWithAvatar | nu
                   <EuiFlexItem grow={false}>
                     {selectedCount ? (
                       <EuiButtonEmpty
+                        data-test-subj="kbnUserProfileComponentsUserProfilesSelectableButtonEmpty"
                         size="xs"
                         flush="right"
                         onClick={() => onChange?.([])}

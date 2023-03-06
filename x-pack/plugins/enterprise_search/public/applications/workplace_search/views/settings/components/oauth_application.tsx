@@ -100,7 +100,12 @@ export const OauthApplication: React.FC = () => {
     <>
       <EuiText color="subdued">{NON_PLATINUM_OAUTH_DESCRIPTION}</EuiText>
       <EuiSpacer />
-      <EuiLink external target="_blank" href={docLinks.licenseManagement}>
+      <EuiLink
+        data-test-subj="enterpriseSearchOauthApplicationLink"
+        external
+        target="_blank"
+        href={docLinks.licenseManagement}
+      >
         {EXPLORE_PLATINUM_FEATURES_LINK}
       </EuiLink>
     </>

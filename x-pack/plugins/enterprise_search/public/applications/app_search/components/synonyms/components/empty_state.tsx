@@ -35,7 +35,13 @@ export const EmptyState: React.FC = () => {
           </p>
         }
         actions={
-          <EuiButton size="s" target="_blank" iconType="popout" href={SYNONYMS_DOCS_URL}>
+          <EuiButton
+            data-test-subj="enterpriseSearchEmptyStateReadTheSynonymsGuideButton"
+            size="s"
+            target="_blank"
+            iconType="popout"
+            href={SYNONYMS_DOCS_URL}
+          >
             {i18n.translate('xpack.enterpriseSearch.appSearch.engine.synonyms.empty.buttonLabel', {
               defaultMessage: 'Read the synonyms guide',
             })}

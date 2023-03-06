@@ -34,7 +34,13 @@ export const EmptyMetaEnginesState: React.FC = () => (
       </p>
     }
     actions={
-      <EuiButton size="s" target="_blank" iconType="popout" href={META_ENGINES_DOCS_URL}>
+      <EuiButton
+        data-test-subj="enterpriseSearchEmptyMetaEnginesStateLearnMoreAboutMetaEnginesButton"
+        size="s"
+        target="_blank"
+        iconType="popout"
+        href={META_ENGINES_DOCS_URL}
+      >
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engines.metaEngines.emptyPromptButtonLabel',
           { defaultMessage: 'Learn more about meta engines' }

@@ -33,7 +33,11 @@ const ExchangeFormFields: React.FC<ExchangeFormFieldsProps> = ({ readOnly }) => 
             config={{
               label: i18n.TENANT_ID_LABEL,
               helpText: (
-                <EuiLink href={docLinks.links.alerting.emailExchangeClientIdConfig} target="_blank">
+                <EuiLink
+                  data-test-subj="stackConnectorsExchangeFormFieldsConfigureTenantIdLink"
+                  href={docLinks.links.alerting.emailExchangeClientIdConfig}
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.stackConnectors.components.email.exchangeForm.tenantIdHelpLabel"
                     defaultMessage="Configure Tenant ID"
@@ -60,7 +64,11 @@ const ExchangeFormFields: React.FC<ExchangeFormFieldsProps> = ({ readOnly }) => 
             config={{
               label: i18n.CLIENT_ID_LABEL,
               helpText: (
-                <EuiLink href={docLinks.links.alerting.emailExchangeClientIdConfig} target="_blank">
+                <EuiLink
+                  data-test-subj="stackConnectorsExchangeFormFieldsConfigureClientIdLink"
+                  href={docLinks.links.alerting.emailExchangeClientIdConfig}
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.stackConnectors.components.email.exchangeForm.clientIdHelpLabel"
                     defaultMessage="Configure Client ID"
@@ -89,6 +97,7 @@ const ExchangeFormFields: React.FC<ExchangeFormFieldsProps> = ({ readOnly }) => 
             readOnly={readOnly}
             helpText={
               <EuiLink
+                data-test-subj="stackConnectorsExchangeFormFieldsConfigureClientSecretLink"
                 href={docLinks.links.alerting.emailExchangeClientSecretConfig}
                 target="_blank"
               >

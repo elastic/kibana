@@ -214,6 +214,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj="fleetStepDefinePackagePolicyAdvancedOptionsButtonEmpty"
                       size="xs"
                       iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
                       onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}
@@ -267,6 +268,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                             values={{
                               learnMore: (
                                 <EuiLink
+                                  data-test-subj="fleetStepDefinePackagePolicyLearnMoreLink"
                                   href={docLinks.links.fleet.datastreamsNamingScheme}
                                   target="_blank"
                                 >
@@ -315,7 +317,11 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                           defaultMessage="By default all logs and metrics data are stored on the hot tier. {learnMore} about changing the data retention policy for this integration."
                           values={{
                             learnMore: (
-                              <EuiLink href={docLinks.links.fleet.datastreamsILM} target="_blank">
+                              <EuiLink
+                                data-test-subj="fleetStepDefinePackagePolicyLearnMoreLink"
+                                href={docLinks.links.fleet.datastreamsILM}
+                                target="_blank"
+                              >
                                 {i18n.translate(
                                   'xpack.fleet.createPackagePolicy.stepConfigure.packagePolicyDataRetentionLearnMoreLink',
                                   { defaultMessage: 'Learn more' }

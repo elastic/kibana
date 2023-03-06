@@ -484,7 +484,11 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
               <EuiCallOut title={i18n.SUBMIT_ERROR_TITLE} color="danger" iconType="alert">
                 <EuiText>{i18n.SUBMIT_ERROR_DISMISS_MESSAGE}</EuiText>
                 <EuiSpacer size="s" />
-                <EuiButton color="danger" onClick={handleDismissError}>
+                <EuiButton
+                  data-test-subj="securitySolutionAddExceptionFlyoutButton"
+                  color="danger"
+                  onClick={handleDismissError}
+                >
                   {i18n.SUBMIT_ERROR_DISMISS_BUTTON}
                 </EuiButton>
               </EuiCallOut>

@@ -88,6 +88,7 @@ const LogAnalysisSetupFlyoutSubPage: React.FC<{
     {onViewModuleList ? (
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          data-test-subj="infraLogAnalysisSetupFlyoutSubPageAllMachineLearningJobsButtonEmpty"
           flush="left"
           iconSide="left"
           iconType="arrowLeft"

@@ -65,7 +65,12 @@ export const EmbeddableLegacyUrlConflictInternal = (
                 defaultMessage="Copy this JSON and use it with the {documentationLink}"
                 values={{
                   documentationLink: (
-                    <EuiLink external href={docLink} target="_blank">
+                    <EuiLink
+                      data-test-subj="spacesEmbeddableLegacyUrlConflictInternalLink"
+                      external
+                      href={docLink}
+                      target="_blank"
+                    >
                       {'_disable_legacy_url_aliases API'}
                     </EuiLink>
                   ),
@@ -81,7 +86,10 @@ export const EmbeddableLegacyUrlConflictInternal = (
           </EuiCallOut>
         </EuiTextAlign>
       ) : (
-        <EuiButtonEmpty onClick={() => setExpandError(true)}>
+        <EuiButtonEmpty
+          data-test-subj="spacesEmbeddableLegacyUrlConflictInternalButtonEmpty"
+          onClick={() => setExpandError(true)}
+        >
           {i18n.translate('xpack.spaces.embeddableLegacyUrlConflict.detailsButton', {
             defaultMessage: `View details`,
           })}

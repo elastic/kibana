@@ -119,7 +119,7 @@ export class StylePropEditor<StaticOptions, DynamicOptions> extends Component<
               {staticDynamicSelect}
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiFieldText compressed disabled />
+              <EuiFieldText data-test-subj="mapsFieldText" compressed disabled />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiToolTip>

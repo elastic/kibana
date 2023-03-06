@@ -81,7 +81,11 @@ export const KioskControls = ({ autoplayInterval, onSetInterval }: Props) => {
 
   const RefreshItem = ({ duration, label, descriptionId }: RefreshItemProps) => (
     <li>
-      <EuiLink onClick={() => onSetInterval(duration)} aria-describedby={descriptionId}>
+      <EuiLink
+        data-test-subj="canvasRefreshItemLink"
+        onClick={() => onSetInterval(duration)}
+        aria-describedby={descriptionId}
+      >
         {label}
       </EuiLink>
     </li>

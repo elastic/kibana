@@ -19,7 +19,7 @@ describe('UnifiedFieldList <FieldPopover />', () => {
       <FieldPopover
         isOpen
         closePopover={jest.fn()}
-        button={<EuiButton title="test" />}
+        button={<EuiButton data-test-subj="pluginsButton" title="test" />}
         renderHeader={() => <EuiText>{'header'}</EuiText>}
       />
     );
@@ -34,7 +34,7 @@ describe('UnifiedFieldList <FieldPopover />', () => {
       <FieldPopover
         isOpen
         closePopover={jest.fn()}
-        button={<EuiButton title="test" />}
+        button={<EuiButton data-test-subj="pluginsButton" title="test" />}
         renderHeader={() => <EuiText>{'header'}</EuiText>}
         renderContent={() => <EuiText>{'content'}</EuiText>}
       />
@@ -50,7 +50,7 @@ describe('UnifiedFieldList <FieldPopover />', () => {
       <FieldPopover
         isOpen={false}
         closePopover={jest.fn()}
-        button={<EuiButton title="test" />}
+        button={<EuiButton data-test-subj="pluginsButton" title="test" />}
         renderHeader={() => <EuiText>{'header'}</EuiText>}
         renderContent={() => <EuiText>{'content'}</EuiText>}
       />
@@ -68,7 +68,7 @@ describe('UnifiedFieldList <FieldPopover />', () => {
       <FieldPopover
         isOpen
         closePopover={jest.fn()}
-        button={<EuiButton title="test" />}
+        button={<EuiButton data-test-subj="pluginsButton" title="test" />}
         renderHeader={() => (
           <FieldPopoverHeader
             field={dataView.fields.find((field) => field.name === fieldName)!}

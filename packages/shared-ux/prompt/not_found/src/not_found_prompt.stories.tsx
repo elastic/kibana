@@ -53,10 +53,19 @@ export const CustomActions: Story = (args) => {
         <NotFoundPrompt
           actions={
             <>
-              <EuiButton fill color="primary" onClick={args.onClick}>
+              <EuiButton
+                data-test-subj="sharedUxCustomActionsGoHomeButton"
+                fill
+                color="primary"
+                onClick={args.onClick}
+              >
                 Go home
               </EuiButton>
-              <EuiButton iconType="search" onClick={args.onClick}>
+              <EuiButton
+                data-test-subj="sharedUxCustomActionsGoToDiscoverButton"
+                iconType="search"
+                onClick={args.onClick}
+              >
                 Go to discover
               </EuiButton>
             </>

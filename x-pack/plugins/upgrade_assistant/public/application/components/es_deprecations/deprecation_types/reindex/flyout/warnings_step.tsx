@@ -142,7 +142,12 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="arrowLeft" onClick={hideWarningsStep} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="upgradeAssistantWarningsFlyoutStepBackButtonEmpty"
+              iconType="arrowLeft"
+              onClick={hideWarningsStep}
+              flush="left"
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.cancelButtonLabel"
                 defaultMessage="Back"
@@ -150,7 +155,13 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill color="primary" onClick={continueReindex} disabled={blockAdvance}>
+            <EuiButton
+              data-test-subj="upgradeAssistantWarningsFlyoutStepContinueReindexingButton"
+              fill
+              color="primary"
+              onClick={continueReindex}
+              disabled={blockAdvance}
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.continueButtonLabel"
                 defaultMessage="Continue reindexing"

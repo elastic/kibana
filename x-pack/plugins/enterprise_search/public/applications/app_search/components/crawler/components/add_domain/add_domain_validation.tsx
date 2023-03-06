@@ -58,7 +58,12 @@ export const AddDomainValidation: React.FC = () => {
               }
             )}
             action={
-              <EuiButton size="s" href={addDomainFormInputValue} target="_blank">
+              <EuiButton
+                data-test-subj="enterpriseSearchAddDomainValidationTestUrlInTheBrowserButton"
+                size="s"
+                href={addDomainFormInputValue}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.testUrlButtonLabel',
                   {

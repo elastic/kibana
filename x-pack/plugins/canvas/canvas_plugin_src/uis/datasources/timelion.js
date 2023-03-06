@@ -90,7 +90,11 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
         label={strings.getQueryLabel()}
         labelAppend={
           <EuiText size="xs">
-            <EuiLink href={TIMELION_QUERY_URL} target="_blank">
+            <EuiLink
+              data-test-subj="canvasTimelionDatasourceLink"
+              href={TIMELION_QUERY_URL}
+              target="_blank"
+            >
               {strings.queryLabel()}
             </EuiLink>
           </EuiText>
@@ -98,6 +102,7 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
         display="rowCompressed"
       >
         <EuiTextArea
+          data-test-subj="canvasTimelionDatasourceTextArea"
           className="canvasTextArea__code"
           value={getQuery()}
           onChange={(e) => setArg(argName, e.target.value)}
@@ -114,6 +119,7 @@ const TimelionDatasource = ({ args, updateArgs, defaultIndex }) => {
         display="columnCompressed"
       >
         <EuiFieldText
+          data-test-subj="canvasTimelionDatasourceFieldText"
           compressed
           value={getInterval()}
           onChange={(e) => setArg('interval', e.target.value)}

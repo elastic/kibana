@@ -105,6 +105,7 @@ export class ValidatedNumberInput extends Component<Props, State> {
         helpText={this.props.helpText}
       >
         <EuiFieldNumber
+          data-test-subj="mapsFieldNumber"
           isInvalid={!this.state.isValid}
           min={this.props.min}
           max={this.props.max}

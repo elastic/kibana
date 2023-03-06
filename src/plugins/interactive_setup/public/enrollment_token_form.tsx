@@ -130,6 +130,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
         fullWidth
       >
         <EuiTextArea
+          data-test-subj="pluginsEnrollmentTokenFormTextArea"
           name="token"
           value={form.values.token}
           isInvalid={form.touched.token && !!form.errors.token}
@@ -143,7 +144,12 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
 
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="right" iconType="gear" onClick={onCancel}>
+          <EuiButtonEmpty
+            data-test-subj="pluginsEnrollmentTokenFormConfigureManuallyButtonEmpty"
+            flush="right"
+            iconType="gear"
+            onClick={onCancel}
+          >
             <FormattedMessage
               id="interactiveSetup.enrollmentTokenForm.cancelButton"
               defaultMessage="Configure manually"
@@ -152,6 +158,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="pluginsEnrollmentTokenFormIsSubmittingSelectTrueConfiguringElasticOtherConfigureElasticButton"
             buttonRef={buttonRef}
             type="submit"
             isLoading={form.isSubmitting}
@@ -230,7 +237,10 @@ export const EnrollmentTokenHelpPopover = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (
-    <EuiLink onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}>
+    <EuiLink
+      data-test-subj="pluginsEnrollmentTokenHelpPopoverWhereDoIFindThisLink"
+      onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
+    >
       <FormattedMessage
         id="interactiveSetup.enrollmentTokenHelpPopover.buttonText"
         defaultMessage="Where do I find this?"

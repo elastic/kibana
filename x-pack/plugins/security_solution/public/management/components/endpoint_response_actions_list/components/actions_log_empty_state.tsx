@@ -40,6 +40,7 @@ export const ActionsLogEmptyState = memo(
           }
           actions={[
             <EuiLink
+              data-test-subj="securitySolutionActionsLogEmptyStateReadMoreAboutResponseActionsLink"
               external
               href={docLinks?.links.securitySolution.responseActions}
               target="_blank"

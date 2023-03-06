@@ -33,6 +33,7 @@ export const RuntimeStep: FC<{ onDownload: OnDownloadFn }> = ({ onDownload }) =>
     <p>{strings.getStepDescription()}</p>
     <EuiSpacer size="s" />
     <EuiButton
+      data-test-subj="canvasRuntimeStepButton"
       onClick={() => {
         onDownload('shareRuntime');
       }}

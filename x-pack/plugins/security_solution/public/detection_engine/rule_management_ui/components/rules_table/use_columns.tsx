@@ -409,6 +409,7 @@ export const useMonitoringColumns = ({
                         values={{
                           seeDocs: (
                             <EuiLink
+                              data-test-subj="securitySolutionUseMonitoringColumnsLink"
                               href={`${docLinks.links.siem.troubleshootGaps}`}
                               target="_blank"
                             >

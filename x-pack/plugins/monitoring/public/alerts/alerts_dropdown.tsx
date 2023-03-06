@@ -38,7 +38,12 @@ export const AlertsDropdown: React.FC<{}> = () => {
   };
 
   const button = (
-    <EuiButtonEmpty iconSide={'right'} iconType={'arrowDown'} onClick={togglePopoverVisibility}>
+    <EuiButtonEmpty
+      data-test-subj="monitoringAlertsDropdownAlertsAndRulesButtonEmpty"
+      iconSide={'right'}
+      iconType={'arrowDown'}
+      onClick={togglePopoverVisibility}
+    >
       <FormattedMessage
         id="xpack.monitoring.alerts.dropdown.button"
         defaultMessage="Alerts and rules"

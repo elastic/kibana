@@ -38,7 +38,13 @@ export const TimeseriesexplorerNoJobsFound = () => {
       }
       actions={
         // @ts-ignore disabled type expects undefined
-        <EuiButton color="primary" fill href={jobLink} disabled={disableCreateAnomalyDetectionJob}>
+        <EuiButton
+          data-test-subj="mlTimeseriesexplorerNoJobsFoundCreateNewSingleMetricJobButton"
+          color="primary"
+          fill
+          href={jobLink}
+          disabled={disableCreateAnomalyDetectionJob}
+        >
           <FormattedMessage
             id="xpack.ml.timeSeriesExplorer.createNewSingleMetricJobLinkText"
             defaultMessage="Create new single metric job"

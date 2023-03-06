@@ -135,6 +135,7 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
                 <EuiFlexItem grow={false}>
                   <div>
                     <EuiButton
+                      data-test-subj="fleetAgentPolicyDebuggerDeletePolicyButton"
                       color="danger"
                       onClick={() => deleteAgentPolicyPrompt(selectedPolicyId, onDelete)}
                     >
@@ -155,7 +156,11 @@ export const AgentPolicyDebugger: React.FunctionComponent = () => {
         <>
           <EuiSpacer size="m" />
 
-          <EuiLink target="_blank" href={getHref('policy_details', { policyId: selectedPolicyId })}>
+          <EuiLink
+            data-test-subj="fleetAgentPolicyDebuggerViewAgentPolicyInFleetUiLink"
+            target="_blank"
+            href={getHref('policy_details', { policyId: selectedPolicyId })}
+          >
             <FormattedMessage
               id="xpack.fleet.debug.agentPolicyDebugger.viewAgentPolicyLink"
               defaultMessage="View Agent Policy in Fleet UI"

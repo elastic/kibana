@@ -127,6 +127,7 @@ export const EnginesList: React.FC = () => {
           <>
             <div>
               <EuiFieldSearch
+                data-test-subj="enterpriseSearchEnginesListFieldSearch"
                 value={searchQuery}
                 placeholder={i18n.translate(
                   'xpack.enterpriseSearch.content.engines.searchPlaceholder',

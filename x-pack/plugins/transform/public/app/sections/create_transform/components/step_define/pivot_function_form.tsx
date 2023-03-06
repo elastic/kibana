@@ -92,7 +92,11 @@ export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
                     defaultMessage:
                       'The advanced editor allows you to edit the pivot configuration of the transform.',
                   })}{' '}
-                  <EuiLink href={esTransformPivot} target="_blank">
+                  <EuiLink
+                    data-test-subj="transformPivotFunctionFormLearnMoreAboutAvailableOptionsLink"
+                    href={esTransformPivot}
+                    target="_blank"
+                  >
                     {i18n.translate('xpack.transform.stepDefineForm.advancedEditorHelpTextLink', {
                       defaultMessage: 'Learn more about available options.',
                     })}
@@ -101,6 +105,7 @@ export const PivotFunctionForm: FC<PivotFunctionFormProps> = ({
               </EuiText>
               <EuiSpacer size="s" />
               <EuiButton
+                data-test-subj="transformPivotFunctionFormApplyChangesButton"
                 style={{ width: 'fit-content' }}
                 size="s"
                 fill

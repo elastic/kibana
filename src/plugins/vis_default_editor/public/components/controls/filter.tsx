@@ -146,6 +146,7 @@ function FilterRow({
           display="rowCompressed"
         >
           <EuiFieldText
+            data-test-subj="pluginsFilterRowFieldText"
             value={customLabel}
             placeholder={i18n.translate('visDefaultEditor.controls.filters.labelPlaceholder', {
               defaultMessage: 'Label',

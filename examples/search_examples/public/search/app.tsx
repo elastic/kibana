@@ -639,7 +639,12 @@ export const SearchExamplesApp = ({
                 provided by the <EuiCode>data</EuiCode> plugin. These help you get the data view and
                 search bar configuration, format them into a DSL query and send it to Elasticsearch.
                 <EuiSpacer />
-                <EuiButtonEmpty size="xs" onClick={onClickHandler} iconType="play">
+                <EuiButtonEmpty
+                  data-test-subj="searchExamplesSearchExamplesAppRequestFromLowLevelClientDataSearchSearchButtonEmpty"
+                  size="xs"
+                  onClick={onClickHandler}
+                  iconType="play"
+                >
                   <FormattedMessage
                     id="searchExamples.buttonText"
                     defaultMessage="Request from low-level client (data.search.search)."
@@ -735,6 +740,7 @@ export const SearchExamplesApp = ({
                 sequences up to the length provided, updates the response with each partial result,
                 and updates a progress bar (see the Response tab).
                 <EuiFieldNumber
+                  data-test-subj="searchExamplesSearchExamplesAppFieldNumber"
                   id="FibonacciN"
                   placeholder="Number of Fibonacci numbers to generate"
                   value={fibonacciN}
@@ -769,7 +775,12 @@ export const SearchExamplesApp = ({
                   checked={getCool}
                   onChange={(event) => setGetCool(event.target.checked)}
                 />
-                <EuiButtonEmpty size="xs" onClick={onMyStrategyClickHandler} iconType="play">
+                <EuiButtonEmpty
+                  data-test-subj="searchExamplesSearchExamplesAppRequestFromLowLevelClientViaMyStrategyButtonEmpty"
+                  size="xs"
+                  onClick={onMyStrategyClickHandler}
+                  iconType="play"
+                >
                   <FormattedMessage
                     id="searchExamples.myStrategyButtonText"
                     defaultMessage="Request from low-level client via My Strategy"
@@ -830,7 +841,12 @@ export const SearchExamplesApp = ({
                 query or leaves the page without waiting for the result. Cancellation API is similar
                 on client and server and use `AbortController`.
                 <EuiSpacer />
-                <EuiButtonEmpty size="xs" onClick={onServerClickHandler} iconType="play">
+                <EuiButtonEmpty
+                  data-test-subj="searchExamplesSearchExamplesAppRequestFromLowLevelClientOnTheServerButtonEmpty"
+                  size="xs"
+                  onClick={onServerClickHandler}
+                  iconType="play"
+                >
                   <FormattedMessage
                     id="searchExamples.myServerButtonText"
                     defaultMessage="Request from low-level client on the server"
@@ -847,7 +863,11 @@ export const SearchExamplesApp = ({
               />
               <EuiSpacer />
               {currentAbortController && isLoading && (
-                <EuiButtonEmpty size="xs" onClick={() => currentAbortController?.abort()}>
+                <EuiButtonEmpty
+                  data-test-subj="searchExamplesSearchExamplesAppAbortRequestButtonEmpty"
+                  size="xs"
+                  onClick={() => currentAbortController?.abort()}
+                >
                   <FormattedMessage
                     id="searchExamples.abortButtonText"
                     defaultMessage="Abort request"

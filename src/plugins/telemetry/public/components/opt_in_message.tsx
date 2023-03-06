@@ -25,6 +25,7 @@ export class OptInMessage extends React.PureComponent<Props> {
           values={{
             privacyStatementLink: (
               <EuiLink
+                data-test-subj="pluginsPrivacyStatementLink"
                 href={this.props.telemetryConstants.getPrivacyStatementUrl()}
                 target="_blank"
                 rel="noopener"

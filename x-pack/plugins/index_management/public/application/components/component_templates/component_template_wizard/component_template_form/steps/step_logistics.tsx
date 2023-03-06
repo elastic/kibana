@@ -173,6 +173,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
                 values={{
                   learnMoreLink: (
                     <EuiLink
+                      data-test-subj="indexManagementStepLogisticsLearnMoreLink"
                       href={documentation.componentTemplatesMetadata}
                       target="_blank"
                       external

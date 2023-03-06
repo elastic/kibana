@@ -109,7 +109,10 @@ export class IndexLifecycleSummary extends Component<Props, State> {
   };
   renderPhaseExecutionPopoverButton(ilm: IndexLifecyclePolicy) {
     const button = (
-      <EuiLink onClick={this.togglePhaseExecutionPopover}>
+      <EuiLink
+        data-test-subj="indexLifecycleManagementShowDefinitionLink"
+        onClick={this.togglePhaseExecutionPopover}
+      >
         <FormattedMessage
           defaultMessage="Show definition"
           id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
@@ -168,6 +171,7 @@ export class IndexLifecycleSummary extends Component<Props, State> {
       } else if (fieldName === 'policy') {
         content = (
           <EuiLink
+            data-test-subj="indexLifecycleManagementLink"
             href={this.props.getUrlForApp('management', {
               path: `data/index_lifecycle_management/${getPolicyEditPath(value)}`,
             })}

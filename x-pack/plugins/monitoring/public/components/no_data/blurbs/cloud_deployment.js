@@ -20,14 +20,22 @@ export const CloudDeployment = () => {
             id="xpack.monitoring.noData.blurbs.cloudDeploymentDescription"
             defaultMessage="Configure monitoring through "
           />
-          <EuiLink href="https://cloud.elastic.co/deployments" target="_blank">
+          <EuiLink
+            data-test-subj="monitoringCloudDeploymentElasticsearchServiceConsoleLink"
+            href="https://cloud.elastic.co/deployments"
+            target="_blank"
+          >
             Elasticsearch Service Console
           </EuiLink>{' '}
           <FormattedMessage
             id="xpack.monitoring.noData.blurbs.cloudDeploymentDescription2"
             defaultMessage="Go to "
           />
-          <EuiLink href="https://cloud.elastic.co/deployments" target="_blank">
+          <EuiLink
+            data-test-subj="monitoringCloudDeploymentLogsAndMetricsLink"
+            href="https://cloud.elastic.co/deployments"
+            target="_blank"
+          >
             Logs and metrics
           </EuiLink>{' '}
           <FormattedMessage
@@ -35,6 +43,7 @@ export const CloudDeployment = () => {
             defaultMessage="section for a deployment to configure monitoring. For more information visit "
           />
           <EuiLink
+            data-test-subj="monitoringCloudDeploymentTheDocumentationPageLink"
             href={`${ELASTIC_WEBSITE_URL}guide/en/cloud/current/ec-enable-logging-and-monitoring.html`}
             target="_blank"
           >

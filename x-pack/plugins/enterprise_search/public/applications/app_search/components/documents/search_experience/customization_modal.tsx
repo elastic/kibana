@@ -132,8 +132,14 @@ export const CustomizationModal: React.FC<Props> = ({
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchCustomizationModalButtonEmpty"
+          onClick={onClose}
+        >
+          {CANCEL_BUTTON_LABEL}
+        </EuiButtonEmpty>
         <EuiButton
+          data-test-subj="enterpriseSearchCustomizationModalButton"
           fill
           onClick={() => {
             onSave({

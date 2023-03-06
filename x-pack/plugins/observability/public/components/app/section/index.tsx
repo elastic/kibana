@@ -70,6 +70,7 @@ export function SectionContainer({
         extraAction={
           appLink?.href && (
             <EuiButtonEmpty
+              data-test-subj="o11ySectionContainerButtonEmpty"
               iconType={'sortRight'}
               size="xs"
               color="text"

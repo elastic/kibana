@@ -377,6 +377,7 @@ class TutorialUi extends React.Component {
             ),
             rightSideItems: [
               <EuiButton
+                data-test-subj="pluginsBackToDirectoryButton"
                 href={this.props.addBasePath('/app/home#/tutorial_directory')}
                 fill
                 iconType="sortLeft"

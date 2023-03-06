@@ -36,7 +36,13 @@ export const CustomizationCallout: React.FC<Props> = ({ onClick }) => {
         </strong>
       </EuiText>
       <EuiSpacer />
-      <EuiButton fill color="primary" iconType="gear" onClick={onClick}>
+      <EuiButton
+        data-test-subj="enterpriseSearchCustomizationCalloutCustomizeButton"
+        fill
+        color="primary"
+        iconType="gear"
+        onClick={onClick}
+      >
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.documents.search.customizationCallout.button',
           {

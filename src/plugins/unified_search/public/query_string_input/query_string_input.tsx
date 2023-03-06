@@ -524,7 +524,11 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                   Learn more in our {link}."
                   values={{
                     link: (
-                      <EuiLink href={docLinks.links.query.kueryQuerySyntax} target="_blank">
+                      <EuiLink
+                        data-test-subj="pluginsDocsLink"
+                        href={docLinks.links.query.kueryQuerySyntax}
+                        target="_blank"
+                      >
                         <FormattedMessage
                           id="unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoDocLinkText"
                           defaultMessage="docs"
@@ -536,7 +540,11 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
               </p>
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiButton size="s" onClick={() => onKQLNestedQuerySyntaxInfoOptOut(toast)}>
+                  <EuiButton
+                    data-test-subj="pluginsDontShowAgainButton"
+                    size="s"
+                    onClick={() => onKQLNestedQuerySyntaxInfoOptOut(toast)}
+                  >
                     <FormattedMessage
                       id="unifiedSearch.query.queryBar.KQLNestedQuerySyntaxInfoOptOutText"
                       defaultMessage="Don't show again"

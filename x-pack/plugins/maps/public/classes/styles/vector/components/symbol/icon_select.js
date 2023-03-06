@@ -118,6 +118,7 @@ export class IconSelect extends Component {
         append={this.props.append}
       >
         <EuiFieldText
+          data-test-subj="mapsFieldText"
           onClick={this._togglePopover}
           onKeyDown={this._handleKeyboardActivity}
           value={label || value}
@@ -195,7 +196,12 @@ export class IconSelect extends Component {
             {list}
             <EuiPopoverFooter>
               {' '}
-              <EuiButton fullWidth size="s" onClick={this._toggleModal}>
+              <EuiButton
+                data-test-subj="mapsAddCustomIconButton"
+                fullWidth
+                size="s"
+                onClick={this._toggleModal}
+              >
                 <FormattedMessage
                   id="xpack.maps.styles.vector.iconSelect.addCustomIconButtonLabel"
                   defaultMessage="Add custom icon"

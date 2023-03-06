@@ -263,7 +263,11 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
                   }
                 )}
                 <br />
-                <EuiLink href={createIndexLink} target="_blank">
+                <EuiLink
+                  data-test-subj="mlDetailsStepFormLearnMoreAboutIndexNameLimitationsLink"
+                  href={createIndexLink}
+                  target="_blank"
+                >
                   {i18n.translate(
                     'xpack.ml.dataframe.stepDetailsForm.destinationIndexInvalidErrorLink',
                     {

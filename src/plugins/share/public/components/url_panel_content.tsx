@@ -481,6 +481,7 @@ export class UrlPanelContent extends Component<UrlPanelContentProps, State> {
     return (
       <EuiFormRow helpText={generateLinkAsHelp}>
         <EuiRadioGroup
+          data-test-subj="pluginsRadioGroup"
           options={this.renderExportUrlAsOptions()}
           idSelected={this.state.exportUrlAs}
           onChange={this.handleExportUrlAs}

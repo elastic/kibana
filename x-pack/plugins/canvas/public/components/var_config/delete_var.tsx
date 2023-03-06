@@ -73,6 +73,7 @@ export const DeleteVar: FC<Props> = ({ selectedVar, onCancel, onDelete }) => {
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="canvasDeleteVarButton"
                 color="danger"
                 size="s"
                 fill
@@ -83,7 +84,11 @@ export const DeleteVar: FC<Props> = ({ selectedVar, onCancel, onDelete }) => {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" onClick={() => onCancel()}>
+              <EuiButtonEmpty
+                data-test-subj="canvasDeleteVarButtonEmpty"
+                size="s"
+                onClick={() => onCancel()}
+              >
                 {strings.getCancelButtonLabel()}
               </EuiButtonEmpty>
             </EuiFlexItem>

@@ -51,6 +51,7 @@ export const GroupAssignmentSelector: React.FC = () => {
       <EuiHorizontalRule />
       <EuiFormRow>
         <EuiRadioGroup
+          data-test-subj="enterpriseSearchGroupAssignmentSelectorRadioGroup"
           options={groupOptions}
           idSelected={includeInAllGroups ? 'all' : 'specific'}
           onChange={(id) => handleAllGroupsSelectionChange(id === 'all')}

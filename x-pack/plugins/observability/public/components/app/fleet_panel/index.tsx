@@ -26,7 +26,10 @@ export function FleetPanel() {
         </EuiTextColor>
       }
       footer={
-        <EuiLink href={http.basePath.prepend('/app/fleet#/')}>
+        <EuiLink
+          data-test-subj="o11yFleetPanelTryFleetLink"
+          href={http.basePath.prepend('/app/fleet#/')}
+        >
           {i18n.translate('xpack.observability.fleet.button', {
             defaultMessage: 'Try Fleet',
           })}

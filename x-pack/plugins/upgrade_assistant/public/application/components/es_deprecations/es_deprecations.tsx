@@ -87,6 +87,7 @@ const getBatchReindexLink = (docLinks: DocLinksStart) => {
       values={{
         docsLink: (
           <EuiLink
+            data-test-subj="upgradeAssistantGetBatchReindexLinkBatchReindexingApiLink"
             href={docLinks.links.upgradeAssistant.batchReindex}
             target="_blank"
             external={true}

@@ -199,7 +199,12 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
       ))}
       <EuiSpacer size="s" />
       <EuiFlexItem>
-        <EuiButtonEmpty iconType="plusInCircleFilled" onClick={onAdd} size="xs">
+        <EuiButtonEmpty
+          data-test-subj="pluginsInputListAddRangeButtonEmpty"
+          iconType="plusInCircleFilled"
+          onClick={onAdd}
+          size="xs"
+        >
           <FormattedMessage
             id="visDefaultEditor.controls.ipRanges.addRangeButtonLabel"
             defaultMessage="Add range"

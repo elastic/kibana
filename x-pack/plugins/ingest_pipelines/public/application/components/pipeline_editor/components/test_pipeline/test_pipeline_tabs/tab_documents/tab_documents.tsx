@@ -179,6 +179,7 @@ export const DocumentsTab: FunctionComponent<Props> = ({
               values={{
                 learnMoreLink: (
                   <EuiLink
+                    data-test-subj="ingestPipelinesDocumentsTabLink"
                     href={services.documentation.getSimulatePipelineApiUrl()}
                     target="_blank"
                     external

@@ -131,12 +131,19 @@ const OsqueryEditorComponent = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>
+        <EuiButtonEmpty
+          data-test-subj="securitySolutionOsqueryEditorComponentCancelButtonEmpty"
+          onClick={onCancel}
+        >
           {i18n.translate('xpack.securitySolution.markdown.osquery.modalCancelButtonLabel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
-        <EuiButton onClick={formMethods.handleSubmit(onSubmit)} fill>
+        <EuiButton
+          data-test-subj="securitySolutionOsqueryEditorComponentButton"
+          onClick={formMethods.handleSubmit(onSubmit)}
+          fill
+        >
           {isEditMode ? (
             <FormattedMessage
               id="xpack.securitySolution.markdown.osquery.addModalConfirmButtonLabel"

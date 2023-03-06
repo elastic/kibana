@@ -257,7 +257,12 @@ export class GroupSelector extends Component {
           <div>
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiButton size="s" onClick={this.applyChanges} isDisabled={edited === false}>
+                <EuiButton
+                  data-test-subj="mlApplyButton"
+                  size="s"
+                  onClick={this.applyChanges}
+                  isDisabled={edited === false}
+                >
                   <FormattedMessage
                     id="xpack.ml.jobsList.multiJobActions.groupSelector.applyButtonLabel"
                     defaultMessage="Apply"

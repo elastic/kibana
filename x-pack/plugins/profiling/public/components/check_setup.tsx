@@ -122,7 +122,11 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                           defaultMessage: `Normal data storage costs apply for profiling data stored in Elasticsearch.
                       To control data retention. `,
                         })}
-                        <EuiLink target="_blank" href={docsLink}>
+                        <EuiLink
+                          data-test-subj="profilingCheckSetupReadMoreLink"
+                          target="_blank"
+                          href={docsLink}
+                        >
                           {i18n.translate('xpack.profiling.noDataConfig.readMore.linkLabel', {
                             defaultMessage: 'Read more',
                           })}
@@ -133,6 +137,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                           defaultMessage: `By using this feature, you acknowledge that you have read and agree to `,
                         })}
                         <EuiLink
+                          data-test-subj="profilingCheckSetupElasticBetaReleaseTermsLink"
                           target="_blank"
                           href={`https://www.elastic.co/agreements/beta-release-terms`}
                         >
@@ -151,6 +156,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
               },
               button: (
                 <EuiButton
+                  data-test-subj="profilingCheckSetupButton"
                   disabled={postSetupLoading}
                   onClick={(event) => {
                     event.preventDefault();

@@ -157,6 +157,7 @@ export const AddItem = ({
               <EuiFlexGroup gutterSize="s" alignItems="center">
                 <EuiFlexItem grow>
                   <EuiFieldText
+                    data-test-subj="securitySolutionAddItemFieldText"
                     onBlur={() => setShowValidation(true)}
                     onChange={(e) => updateItem(e, index)}
                     fullWidth

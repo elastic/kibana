@@ -314,6 +314,7 @@ export const EndpointPolicyCreateExtension = memo<PackagePolicyCreateExtensionCo
                         values={{
                           documentation: (
                             <EuiLink
+                              data-test-subj="securitySolutionEndpointPolicyCreateExtensionDocumentationLink"
                               href="https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html"
                               target="_blank"
                             >

@@ -138,7 +138,11 @@ export const TransformStatsBar: FC<TransformStatsBarProps> = ({
                 defaultMessage="You will not be able to create or run transforms. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
-                    <EuiLink href={esNodeRoles} target="_blank">
+                    <EuiLink
+                      data-test-subj="transformTransformStatsBarLearnMoreLink"
+                      href={esNodeRoles}
+                      target="_blank"
+                    >
                       <FormattedMessage
                         id="xpack.transform.transformNodes.noTransformNodesLearnMoreLinkText"
                         defaultMessage="Learn more"

@@ -63,6 +63,7 @@ export const SyncsContextMenu: React.FC = () => {
     <EuiPopover
       button={
         <EuiButton
+          data-test-subj="enterpriseSearchSyncsContextMenuButton"
           data-telemetry-id={`entSearchContent-${ingestionMethod}-header-sync-openSyncMenu`}
           iconType="arrowDown"
           iconSide="right"

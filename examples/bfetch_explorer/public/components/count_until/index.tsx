@@ -58,7 +58,11 @@ export const CountUntil: React.FC<Props> = ({ fetchStreaming }) => {
       <EuiForm data-test-subj="CountUntil">
         <pre>{JSON.stringify(error || results, null, 4)}</pre>
         <EuiSpacer size="l" />
-        <EuiButton disabled={!completed} onClick={handleReset}>
+        <EuiButton
+          data-test-subj="bfetchExplorerCountUntilResetButton"
+          disabled={!completed}
+          onClick={handleReset}
+        >
           Reset
         </EuiButton>
       </EuiForm>
@@ -69,12 +73,18 @@ export const CountUntil: React.FC<Props> = ({ fetchStreaming }) => {
     <EuiForm data-test-subj="CountUntil">
       <EuiFormRow label="Some integer" fullWidth>
         <EuiFieldNumber
+          data-test-subj="bfetchExplorerCountUntilFieldNumber"
           placeholder="Some integer"
           value={data}
           onChange={(e) => setData(Number(e.target.value))}
         />
       </EuiFormRow>
-      <EuiButton type="submit" fill onClick={handleSubmit}>
+      <EuiButton
+        data-test-subj="bfetchExplorerCountUntilStartButton"
+        type="submit"
+        fill
+        onClick={handleSubmit}
+      >
         Start
       </EuiButton>
     </EuiForm>

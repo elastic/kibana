@@ -54,7 +54,12 @@ function IntroductionUI({
     exportedFields = (
       <>
         <br />
-        <EuiLink href={exportedFieldsUrl} target="_blank" rel="noopener">
+        <EuiLink
+          data-test-subj="pluginsIntroductionUIViewExportedFieldsLink"
+          href={exportedFieldsUrl}
+          target="_blank"
+          rel="noopener"
+        >
           <FormattedMessage
             id="home.tutorial.introduction.viewButtonLabel"
             defaultMessage="View exported fields"
@@ -78,6 +83,7 @@ function IntroductionUI({
     <>
       <div>
         <EuiButtonEmpty
+          data-test-subj="pluginsIntroductionUIBrowseAllIntegrationsButtonEmpty"
           iconType="arrowLeft"
           size="xs"
           flush="left"

@@ -107,6 +107,7 @@ export const PreviewListItem: React.FC<Props> = ({
     if (doesContainImage) {
       return (
         <EuiButtonEmpty
+          data-test-subj="pluginsRenderValueViewImageButtonEmpty"
           color="text"
           onClick={() => setIsPreviewImageModalVisible(true)}
           iconType="image"

@@ -188,6 +188,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="enterpriseSearchConnectorSchedulingComponentResetButtonEmpty"
                   data-telemetry-id="entSearchContent-connector-scheduling-resetSchedule"
                   disabled={!hasChanges || status === Status.LOADING}
                   onClick={() => {
@@ -209,6 +210,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="enterpriseSearchConnectorSchedulingComponentSaveButton"
                   data-telemetry-id="entSearchContent-connector-scheduling-saveSchedule"
                   disabled={!hasChanges || status === Status.LOADING}
                   onClick={() => makeRequest({ connectorId: index.connector.id, scheduling })}

@@ -54,7 +54,10 @@ export const Warning: FC<Props> = ({ size, isCloud, isCloudTrial, deploymentId }
               defaultMessage="Please edit your {link}. You may enable a free {maxRamForMLNodes} machine learning node or expand your existing ML configuration."
               values={{
                 link: (
-                  <EuiLink href={`https://cloud.elastic.co/deployments?q=${deploymentId}`}>
+                  <EuiLink
+                    data-test-subj="mlWarningElasticCloudDeploymentLink"
+                    href={`https://cloud.elastic.co/deployments?q=${deploymentId}`}
+                  >
                     <FormattedMessage
                       id="xpack.ml.jobsList.nodeAvailableWarning.linkToCloud.hereLinkText"
                       defaultMessage="Elastic Cloud deployment"

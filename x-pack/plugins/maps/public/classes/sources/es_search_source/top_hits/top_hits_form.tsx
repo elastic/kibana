@@ -133,6 +133,7 @@ export class TopHitsForm extends Component<Props, State> {
           display={this.props.isColumnCompressed ? 'columnCompressed' : 'row'}
         >
           <EuiSelect
+            data-test-subj="mapsSelect"
             disabled={!this.props.sortField}
             options={[
               {

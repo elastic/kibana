@@ -258,7 +258,12 @@ export const PolicyRetentionSchedule: React.FunctionComponent<Props> = ({
           iconType="alert"
         >
           {error.data && error.data.message ? <p>{error.data.message}</p> : null}
-          <EuiButton iconType="refresh" color="danger" onClick={onRetentionScheduleUpdated}>
+          <EuiButton
+            data-test-subj="snapshotRestorePolicyRetentionScheduleReloadButton"
+            iconType="refresh"
+            color="danger"
+            onClick={onRetentionScheduleUpdated}
+          >
             <FormattedMessage
               id="xpack.snapshotRestore.policyRetentionSchedulePanel.errorFetchingRetentionScheduleReloadButtonLabel"
               defaultMessage="Reload"

@@ -74,6 +74,7 @@ export function MetricSelect(props: Props) {
       })}
     >
       <EuiSelect
+        data-test-subj="mapsMetricSelectSelect"
         options={getMetricOptionsForLayer(props.layer)}
         value={props.value}
         onChange={onChange}

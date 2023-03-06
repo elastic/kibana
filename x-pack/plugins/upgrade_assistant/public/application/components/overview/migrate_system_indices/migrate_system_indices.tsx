@@ -57,7 +57,12 @@ const i18nTexts = {
         defaultMessage="Prepare the system indices that store internal information for the upgrade. This is only required during major version upgrades. Any {hiddenIndicesLink} that need to be reindexed are shown in the next step."
         values={{
           hiddenIndicesLink: (
-            <EuiLink external target="_blank" href={docLink}>
+            <EuiLink
+              data-test-subj="upgradeAssistantI18nTextsHiddenIndicesLink"
+              external
+              target="_blank"
+              href={docLink}
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.overview.systemIndices.body.hiddenIndicesLink"
                 defaultMessage="hidden indices"

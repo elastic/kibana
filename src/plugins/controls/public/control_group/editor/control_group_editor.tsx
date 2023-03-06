@@ -189,6 +189,7 @@ export const ControlGroupEditor = ({
         <EuiFlexGroup responsive={false} justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="pluginsControlGroupEditorButtonEmpty"
               aria-label={`cancel-editing-group`}
               iconType="cross"
               onClick={() => {

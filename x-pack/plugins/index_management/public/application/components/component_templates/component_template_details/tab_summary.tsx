@@ -62,6 +62,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({
                   values={{
                     createLink: (
                       <EuiLink
+                        data-test-subj="indexManagementTabSummaryCreateLink"
                         href={getUrlForApp('management', {
                           path: '/data/index_management/create_template',
                         })}
@@ -74,6 +75,7 @@ export const TabSummary: React.FunctionComponent<Props> = ({
                     ),
                     editLink: (
                       <EuiLink
+                        data-test-subj="indexManagementTabSummaryUpdateLink"
                         href={getUrlForApp('management', {
                           path: '/data/index_management/templates',
                         })}

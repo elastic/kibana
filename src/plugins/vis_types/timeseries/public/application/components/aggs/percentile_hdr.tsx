@@ -36,6 +36,11 @@ export const PercentileHdr = ({ value, onChange }: PercentileHdrProps) => (
       </>
     }
   >
-    <EuiFieldNumber min={1} value={value || ''} onChange={onChange} />
+    <EuiFieldNumber
+      data-test-subj="pluginsPercentileHdrFieldNumber"
+      min={1}
+      value={value || ''}
+      onChange={onChange}
+    />
   </EuiFormRow>
 );

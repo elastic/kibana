@@ -35,7 +35,11 @@ export const CloudDataTierCallout: FunctionComponent<Props> = ({ linkToCloudDepl
     <EuiCallOut title={i18nTexts.title} data-test-subj="cloudDataTierCallout">
       {i18nTexts.body}{' '}
       {Boolean(linkToCloudDeployment) && (
-        <EuiLink href={linkToCloudDeployment} external>
+        <EuiLink
+          data-test-subj="indexLifecycleManagementCloudDataTierCalloutLink"
+          href={linkToCloudDeployment}
+          external
+        >
           {i18nTexts.linkText}
         </EuiLink>
       )}

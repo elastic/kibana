@@ -84,6 +84,7 @@ export class ScopeExpression extends Component {
           <EuiFlexGroup style={{ maxWidth: 450 }}>
             <EuiFlexItem grow={false} style={{ width: 150 }}>
               <EuiSelect
+                data-test-subj="mlSelect"
                 value={filterType}
                 onChange={this.onChangeFilterType}
                 options={[
@@ -95,6 +96,7 @@ export class ScopeExpression extends Component {
 
             <EuiFlexItem grow={false} style={{ width: 300 }}>
               <EuiSelect
+                data-test-subj="mlSelect"
                 value={filterId}
                 onChange={this.onChangeFilterId}
                 options={getFilterListOptions(filterListIds)}

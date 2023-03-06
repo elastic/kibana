@@ -33,7 +33,12 @@ export const DiscoverError = ({ error }: { error: Error }) => {
       }
       body={<p>{error.message}</p>}
       actions={
-        <EuiButton color="primary" fill onClick={goToMain}>
+        <EuiButton
+          data-test-subj="pluginsDiscoverErrorGoToDiscoverButton"
+          color="primary"
+          fill
+          onClick={goToMain}
+        >
           <FormattedMessage id="discover.goToDiscoverButtonText" defaultMessage="Go to Discover" />
         </EuiButton>
       }

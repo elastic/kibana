@@ -263,7 +263,12 @@ export const ComponentTemplatesSelector = ({
           />
         )}
         <br />
-        <EuiLink href={docUri} target="_blank" external>
+        <EuiLink
+          data-test-subj="indexManagementComponentTemplatesSelectorLearnMoreLink"
+          href={docUri}
+          target="_blank"
+          external
+        >
           <FormattedMessage
             id="xpack.idxMgmt.componentTemplatesSelector.emptyPromptLearnMoreLinkText"
             defaultMessage="Learn more."

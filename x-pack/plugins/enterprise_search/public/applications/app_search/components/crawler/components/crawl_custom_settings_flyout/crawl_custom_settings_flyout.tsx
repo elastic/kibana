@@ -84,10 +84,16 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={hideFlyout}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+            <EuiButtonEmpty
+              data-test-subj="enterpriseSearchCrawlCustomSettingsFlyoutButtonEmpty"
+              onClick={hideFlyout}
+            >
+              {CANCEL_BUTTON_LABEL}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="enterpriseSearchCrawlCustomSettingsFlyoutApplyAndCrawlNowButton"
               fill
               onClick={startCustomCrawl}
               disabled={isDataLoading || selectedDomainUrls.length === 0}

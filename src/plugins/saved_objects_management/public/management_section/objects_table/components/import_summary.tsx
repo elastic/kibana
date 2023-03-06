@@ -209,6 +209,7 @@ const ImportWarning: FC<{ warning: SavedObjectsImportWarning; basePath: IBasePat
         <EuiFlexGroup alignItems="flexEnd" justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="pluginsWarningContentButton"
               size="s"
               color="warning"
               href={basePath.prepend(warning.actionPath)}

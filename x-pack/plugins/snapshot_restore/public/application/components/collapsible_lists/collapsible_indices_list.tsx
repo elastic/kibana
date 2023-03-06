@@ -39,6 +39,7 @@ export const CollapsibleIndicesList: React.FunctionComponent<Props> = ({ indices
         <>
           <EuiSpacer size="xs" />
           <EuiLink
+            data-test-subj="snapshotRestoreCollapsibleIndicesListLink"
             onClick={() =>
               isShowingFullList ? setIsShowingFullList(false) : setIsShowingFullList(true)
             }

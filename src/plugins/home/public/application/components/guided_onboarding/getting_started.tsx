@@ -164,6 +164,7 @@ export const GettingStarted = () => {
             </EuiText>
             <EuiSpacer />
             <EuiButton
+              data-test-subj="pluginsGettingStartedRefreshButton"
               iconSide="right"
               onClick={fetchGuidesState}
               iconType="refresh"

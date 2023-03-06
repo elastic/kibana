@@ -144,6 +144,7 @@ export const AgentReassignAgentPolicyModal: React.FunctionComponent<Props> = ({
             })}
           >
             <EuiSelect
+              data-test-subj="fleetAgentReassignAgentPolicyModalSelect"
               fullWidth
               isLoading={agentPoliciesRequest.isLoading}
               options={agentPolicies.map((agentPolicy) => ({

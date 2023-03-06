@@ -116,7 +116,7 @@ export const DatasetComboBox: React.FC<{
                       />
                     }
                   >
-                    <EuiLink target="_blank">
+                    <EuiLink data-test-subj="fleetDatasetComboBoxLearnMoreLink" target="_blank">
                       {i18n.translate('xpack.fleet.datasetCombo.learnMoreLink', {
                         defaultMessage: 'learn more',
                       })}

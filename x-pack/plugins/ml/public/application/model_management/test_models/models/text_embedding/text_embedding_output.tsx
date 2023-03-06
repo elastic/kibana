@@ -51,10 +51,15 @@ const TextEmbedding: FC<{
     <>
       <EuiText size="s">{inputText}</EuiText>
       <EuiSpacer size="s" />
-      <EuiTextArea value={value} fullWidth style={{ height: 300 }} />
+      <EuiTextArea
+        data-test-subj="mlTextEmbeddingTextArea"
+        value={value}
+        fullWidth
+        style={{ height: 300 }}
+      />
       <EuiCopy textToCopy={value}>
         {(copy) => (
-          <EuiButton size="s" onClick={copy}>
+          <EuiButton data-test-subj="mlTextEmbeddingCopyToClipboardButton" size="s" onClick={copy}>
             <FormattedMessage
               id="xpack.ml.trainedModels.testModelsFlyout.textEmbedding.copyButton"
               defaultMessage="Copy to clipboard"

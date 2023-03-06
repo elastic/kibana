@@ -139,7 +139,10 @@ function OverviewPageStatusIndicator({ staleMessage }: IndicatorProps) {
           </EuiBadge>
         </EuiToolTip>
       </div>
-      <EuiLink href={instancesHref}>
+      <EuiLink
+        data-test-subj="monitoringOverviewPageStatusIndicatorViewAllInstancesLink"
+        href={instancesHref}
+      >
         {i18n.translate(
           'xpack.monitoring.kibana.clusterStatus.overview.staleStatusLinkToInstancesLabel',
           {

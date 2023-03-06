@@ -193,6 +193,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
 
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            data-test-subj="snapshotRestoreRestoreSnapshotStepLogisticsSnapshotAndRestoreDocsButtonEmpty"
             size="s"
             flush="right"
             href={docLinks.links.snapshotRestore.restoreSnapshot}
@@ -278,6 +279,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiLink
+                            data-test-subj="snapshotRestoreRestoreSnapshotStepLogisticsUseIndexPatternsLink"
                             onClick={() => {
                               setSelectIndicesMode('custom');
                               updateRestoreSettings({ indices: restoreIndexPatterns.join(',') });
@@ -300,6 +302,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                         </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiLink
+                            data-test-subj="snapshotRestoreRestoreSnapshotStepLogisticsSelectDataStreamsAndIndicesLink"
                             onClick={() => {
                               setSelectIndicesMode('list');
                               updateRestoreSettings({ indices: cachedRestoreSettings.indices });
@@ -500,6 +503,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                       error={errors.renamePattern}
                     >
                       <EuiFieldText
+                        data-test-subj="snapshotRestoreRestoreSnapshotStepLogisticsFieldText"
                         value={renamePattern}
                         placeholder="data_(.+)"
                         onChange={(e) => {
@@ -526,6 +530,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
                       error={errors.renameReplacement}
                     >
                       <EuiFieldText
+                        data-test-subj="snapshotRestoreRestoreSnapshotStepLogisticsFieldText"
                         value={renameReplacement}
                         placeholder="restored_data_$1"
                         onChange={(e) => {

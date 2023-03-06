@@ -86,7 +86,10 @@ export const FilebeatConfigFlyout: FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiCopy textToCopy={fileBeatConfig}>
               {(copy) => (
-                <EuiButton onClick={copy}>
+                <EuiButton
+                  data-test-subj="dataVisualizerFilebeatConfigFlyoutCopyToClipboardButton"
+                  onClick={copy}
+                >
                   <FormattedMessage
                     id="xpack.dataVisualizer.fileBeatConfigFlyout.copyButton"
                     defaultMessage="Copy to clipboard"

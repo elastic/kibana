@@ -97,7 +97,11 @@ export const MappingsDatastreamRolloverModal: React.FunctionComponent<Props> = (
           values={{
             templateName: <EuiCode>{componentTemplatename}</EuiCode>,
             moreInfoLink: (
-              <EuiLink external={true} href={documentationService.docLinks.fleet.datastreamsILM}>
+              <EuiLink
+                data-test-subj="indexManagementMappingsDatastreamRolloverModalSeeTheDocumentationForMoreInfoLink"
+                external={true}
+                href={documentationService.docLinks.fleet.datastreamsILM}
+              >
                 <FormattedMessage
                   id="xpack.idxMgmt.componentTemplateEdit.moreInfoLink"
                   defaultMessage="See the documentation for more info."

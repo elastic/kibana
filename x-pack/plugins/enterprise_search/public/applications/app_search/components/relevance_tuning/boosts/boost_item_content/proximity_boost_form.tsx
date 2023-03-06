@@ -45,6 +45,7 @@ export const ProximityBoostForm: React.FC<Props> = ({ boost, index, name }) => {
         fullWidth
       >
         <EuiSelect
+          data-test-subj="enterpriseSearchProximityBoostFormSelect"
           name={`proximity-${BoostType.Proximity}${index}`}
           options={functionOptions}
           value={currentBoostFunction}
@@ -69,6 +70,7 @@ export const ProximityBoostForm: React.FC<Props> = ({ boost, index, name }) => {
         fullWidth
       >
         <EuiFieldText
+          data-test-subj="enterpriseSearchProximityBoostFormFieldText"
           defaultValue={currentBoostCenter}
           onChange={(e) => updateBoostCenter(name, index, e.target.value)}
           fullWidth

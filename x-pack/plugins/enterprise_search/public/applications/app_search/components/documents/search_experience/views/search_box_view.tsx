@@ -22,6 +22,7 @@ interface Props {
 export const SearchBoxView: React.FC<Props> = ({ onChange, value, inputProps }) => {
   return (
     <EuiFieldSearch
+      data-test-subj="enterpriseSearchSearchBoxViewFieldSearch"
       value={value}
       onChange={(event) => onChange(event.target.value)}
       fullWidth

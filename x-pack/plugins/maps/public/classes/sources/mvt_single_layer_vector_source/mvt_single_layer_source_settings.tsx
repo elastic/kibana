@@ -140,6 +140,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
           )}
         >
           <EuiFieldText
+            data-test-subj="mapsFieldText"
             value={this.state.currentLayerName}
             onChange={this._handleLayerNameInputChange}
             isInvalid={this.state.currentLayerName === ''}

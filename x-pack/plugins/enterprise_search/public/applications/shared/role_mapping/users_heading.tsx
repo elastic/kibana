@@ -27,7 +27,7 @@ export const UsersHeading: React.FC<Props> = ({ onClick }) => (
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton fill onClick={onClick}>
+        <EuiButton data-test-subj="enterpriseSearchUsersHeadingButton" fill onClick={onClick}>
           {USERS_HEADING_LABEL}
         </EuiButton>
       </EuiFlexItem>

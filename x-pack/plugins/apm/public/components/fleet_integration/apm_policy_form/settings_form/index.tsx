@@ -167,6 +167,7 @@ function AdvancedOptions({ children }: { children: React.ReactNode }) {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="apmAdvancedOptionsAdvancedOptionsButtonEmpty"
                 iconType={isOpen ? 'arrowDown' : 'arrowRight'}
                 onClick={() => {
                   setIsOpen((state) => !state);

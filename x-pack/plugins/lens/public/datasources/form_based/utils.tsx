@@ -193,7 +193,12 @@ const accuracyModeEnabledWarning = (
           </strong>
         ),
         learnMoreLink: (
-          <EuiLink href={docLink} target="_blank" external={true}>
+          <EuiLink
+            data-test-subj="lensAccuracyModeEnabledWarningLearnMoreLink"
+            href={docLink}
+            target="_blank"
+            external={true}
+          >
             <FormattedMessage
               defaultMessage="Learn more."
               id="xpack.lens.indexPattern.precisionErrorWarning.link"
@@ -381,6 +386,7 @@ export function getPrecisionErrorWarningMessages(
                       name: <strong>{column.name}</strong>,
                       link: (
                         <EuiLink
+                          data-test-subj="lensGetPrecisionErrorWarningMessagesVisitTheDocumentationLink"
                           href={docLinks.links.aggs.rare_terms}
                           target="_blank"
                           external={true}
@@ -395,6 +401,7 @@ export function getPrecisionErrorWarningMessages(
                   />
                   <EuiSpacer size="s" />
                   <EuiLink
+                    data-test-subj="lensGetPrecisionErrorWarningMessagesRankByRarityLink"
                     onClick={() => {
                       setState((prevState) =>
                         mergeLayer({

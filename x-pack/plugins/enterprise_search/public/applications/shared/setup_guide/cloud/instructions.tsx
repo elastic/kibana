@@ -43,7 +43,11 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                   defaultMessage="Visit the Elastic Cloud console to {editDeploymentLink}."
                   values={{
                     editDeploymentLink: cloudDeploymentLink ? (
-                      <EuiLink href={cloudDeploymentLink + '/edit'} target="_blank">
+                      <EuiLink
+                        data-test-subj="enterpriseSearchCloudSetupInstructionsEditYourDeploymentLink"
+                        href={cloudDeploymentLink + '/edit'}
+                        target="_blank"
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.setupGuide.cloud.step1.instruction1LinkText',
                           { defaultMessage: 'edit your deployment' }
@@ -88,7 +92,11 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                   defaultMessage="After enabling Enterprise Search for your instance you can customize the instance, including fault tolerance, RAM, and other {optionsLink}."
                   values={{
                     optionsLink: (
-                      <EuiLink href={docLinks.enterpriseSearchConfig} target="_blank">
+                      <EuiLink
+                        data-test-subj="enterpriseSearchCloudSetupInstructionsConfigurableOptionsLink"
+                        href={docLinks.enterpriseSearchConfig}
+                        target="_blank"
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.setupGuide.cloud.step3.instruction1LinkText',
                           { defaultMessage: 'configurable options' }
@@ -130,7 +138,11 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                   values={{
                     productName,
                     configurePolicyLink: (
-                      <EuiLink href={docLinks.cloudIndexManagement} target="_blank">
+                      <EuiLink
+                        data-test-subj="enterpriseSearchCloudSetupInstructionsConfigureAnIndexLifecyclePolicyLink"
+                        href={docLinks.cloudIndexManagement}
+                        target="_blank"
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.setupGuide.cloud.step5.instruction1LinkText',
                           { defaultMessage: 'configure an index lifecycle policy' }
@@ -157,6 +169,7 @@ export const CloudSetupInstructions: React.FC<Props> = ({ productName, cloudDepl
                     values={{
                       link: (
                         <EuiLink
+                          data-test-subj="enterpriseSearchCloudSetupInstructionsTroubleshootEnterpriseSearchSetupLink"
                           href={docLinks.enterpriseSearchTroubleshootSetup}
                           target="_blank"
                           external

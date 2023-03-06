@@ -40,6 +40,7 @@ export const ShardDetailsTreeNode = ({ operation, index, shard }: Props) => {
       <div className="prfDevTool__profileTree__cell euiTextAlign--left">
         {op.hasChildren ? (
           <EuiLink
+            data-test-subj="searchprofilerRenderTimeRowLink"
             className="prfDevTool__profileTree__shardDetails"
             disabled={!op.hasChildren}
             onClick={() => setChildrenVisible(!childrenVisible)}

@@ -177,6 +177,7 @@ export class TablePanelConfig extends Component<
                     }
                   >
                     <EuiFieldNumber
+                      data-test-subj="pluginsFieldNumber"
                       onChange={this.handleNumberChange('pivot_rows')}
                       value={model.pivot_rows !== undefined ? Number(model.pivot_rows) : ''}
                       placeholder="10"

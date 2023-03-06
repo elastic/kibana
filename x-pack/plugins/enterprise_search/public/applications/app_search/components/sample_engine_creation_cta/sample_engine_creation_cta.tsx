@@ -34,7 +34,11 @@ export const SampleEngineCreationCta: React.FC = () => {
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={createSampleEngine} isLoading={isLoading}>
+          <EuiButton
+            data-test-subj="enterpriseSearchSampleEngineCreationCtaButton"
+            onClick={createSampleEngine}
+            isLoading={isLoading}
+          >
             {SAMPLE_ENGINE_CREATION_CTA_BUTTON_LABEL}
           </EuiButton>
         </EuiFlexItem>

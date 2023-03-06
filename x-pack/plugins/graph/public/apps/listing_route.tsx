@@ -168,7 +168,10 @@ function getNoItemsMessage(
               defaultMessage="New to Kibana? Get started with {sampleDataInstallLink}."
               values={{
                 sampleDataInstallLink: (
-                  <EuiLink href={sampleDataUrl}>
+                  <EuiLink
+                    data-test-subj="graphGetNoItemsMessageSampleDataLink"
+                    href={sampleDataUrl}
+                  >
                     <FormattedMessage
                       id="xpack.graph.listing.createNewGraph.sampleDataInstallLinkText"
                       defaultMessage="sample data"

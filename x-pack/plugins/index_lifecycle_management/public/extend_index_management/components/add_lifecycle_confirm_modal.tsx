@@ -160,6 +160,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
         }
       >
         <EuiSelect
+          data-test-subj="indexLifecycleManagementSelect"
           options={aliasOptions}
           value={selectedAlias}
           onChange={(e) => {
@@ -203,6 +204,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
           }
         >
           <EuiSelect
+            data-test-subj="indexLifecycleManagementSelect"
             options={options}
             value={selectedPolicyName}
             onChange={(e) => {
@@ -263,6 +265,7 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
             >
               <p>
                 <EuiLink
+                  data-test-subj="indexLifecycleManagementDefineLifecyclePolicyLink"
                   href={getUrlForApp('management', {
                     path: `data/index_lifecycle_management/policies/edit`,
                   })}

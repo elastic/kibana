@@ -179,6 +179,7 @@ export const TransformManagement: FC = () => {
                         />
                       </p>
                       <EuiButton
+                        data-test-subj="transformTransformManagementDeleteCountCountPluralOneTransformOtherTransformsButton"
                         color="warning"
                         size="s"
                         onClick={async () => {

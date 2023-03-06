@@ -62,6 +62,7 @@ export const AddDomainForm: React.FC = () => {
                 fullWidth
               >
                 <EuiFieldText
+                  data-test-subj="enterpriseSearchAddDomainFormFieldText"
                   autoFocus
                   value={addDomainFormInputValue}
                   onChange={(e) => setAddDomainFormInputValue(e.target.value)}
@@ -70,7 +71,12 @@ export const AddDomainForm: React.FC = () => {
               </EuiFormControlLayout>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton type="submit" fill disabled={addDomainFormInputValue.length === 0}>
+              <EuiButton
+                data-test-subj="enterpriseSearchAddDomainFormValidateDomainButton"
+                type="submit"
+                fill
+                disabled={addDomainFormInputValue.length === 0}
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.crawler.addDomainForm.validateButtonLabel',
                   {

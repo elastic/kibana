@@ -139,6 +139,7 @@ function GaugeSeriesUi(props) {
 
         <EuiFlexItem>
           <EuiFieldText
+            data-test-subj="pluginsGaugeSeriesUiFieldText"
             fullWidth
             onChange={handleChange('label')}
             placeholder={intl.formatMessage({

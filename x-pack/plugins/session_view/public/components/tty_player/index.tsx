@@ -202,7 +202,7 @@ export const TTYPlayer = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButton iconType="list" disabled={true}>
+            <EuiButton data-test-subj="sessionViewTTYPlayerButton" iconType="list" disabled={true}>
               {DETAIL_PANEL}
             </EuiButton>
           </EuiFlexItem>

@@ -27,7 +27,7 @@ export const SourceDestination = (props) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiToolTip content={targetTransportAddressContent} position="bottom">
-          <EuiLink>{targetName}</EuiLink>
+          <EuiLink data-test-subj="monitoringSourceDestinationLink">{targetName}</EuiLink>
         </EuiToolTip>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -23,7 +23,11 @@ export const TrustedAppsArtifactsDocsLink = memo(() => {
         id="xpack.securitySolution.trustedApps.docsLinkInfoStart"
         defaultMessage="Have too many alerts? Add an "
       />
-      <EuiLink target="_blank" href={`${securitySolution.endpointArtifacts}`}>
+      <EuiLink
+        data-test-subj="securitySolutionTrustedAppsArtifactsDocsLinkEndpointAlertExceptionLink"
+        target="_blank"
+        href={`${securitySolution.endpointArtifacts}`}
+      >
         <FormattedMessage
           id="xpack.securitySolution.trustedApps.docsLinkText"
           defaultMessage="endpoint alert exception"

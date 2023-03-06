@@ -277,6 +277,7 @@ const DatePickerWithInput = ({ date, onChange, minDate, setIsValid, tab }) => {
   return (
     <>
       <EuiFieldText
+        data-test-subj="mlDatePickerWithInputFieldText"
         value={dateString}
         onChange={onTextChange}
         placeholder={TIME_FORMAT}

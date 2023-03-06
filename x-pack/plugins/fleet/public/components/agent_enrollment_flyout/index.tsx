@@ -128,6 +128,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
               values={{
                 userGuideLink: (
                   <EuiLink
+                    data-test-subj="fleetAgentEnrollmentFlyoutFleetAndElasticAgentGuideLink"
                     href={docLinks.links.fleet.fleetServerAddFleetServer}
                     external
                     target="_blank"
@@ -214,7 +215,10 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose}>
+            <EuiButtonEmpty
+              data-test-subj="fleetAgentEnrollmentFlyoutCloseButtonEmpty"
+              onClick={onClose}
+            >
               <FormattedMessage
                 id="xpack.fleet.agentEnrollment.closeFlyoutButtonLabel"
                 defaultMessage="Close"

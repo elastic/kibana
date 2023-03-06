@@ -23,7 +23,11 @@ export const RequestTrialExtension = ({ shouldShowRequestTrialExtension }) => {
         other awesome {subscriptionFeaturesLinkText}, request an extension now."
         values={{
           subscriptionFeaturesLinkText: (
-            <EuiLink href={EXTERNAL_LINKS.SUBSCRIPTIONS} target="_blank">
+            <EuiLink
+              data-test-subj="licenseManagementRequestTrialExtensionSubscriptionFeaturesLink"
+              href={EXTERNAL_LINKS.SUBSCRIPTIONS}
+              target="_blank"
+            >
               <FormattedMessage
                 id="xpack.licenseMgmt.licenseDashboard.requestTrialExtension.subscriptionFeaturesLinkText"
                 defaultMessage="subscription features"

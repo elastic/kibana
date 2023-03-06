@@ -74,7 +74,11 @@ export const Paywall = memo(({ heading }: { heading?: string }) => {
             </EuiFlexItem>
             <EuiFlexItem>
               <div>
-                <EuiButton onClick={goToSubscription} fill>
+                <EuiButton
+                  data-test-subj="securitySolutionPaywallButton"
+                  onClick={goToSubscription}
+                  fill
+                >
                   {i18n.UPGRADE_BUTTON}
                 </EuiButton>
               </div>

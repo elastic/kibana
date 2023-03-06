@@ -73,7 +73,10 @@ export const AccessDeniedPage: React.FC<ComponentProps> = () => {
           </p>
         )}
         <p>
-          <EuiButton href="../app/home">
+          <EuiButton
+            data-test-subj="monitoringAccessDeniedPageBackToKibanaButton"
+            href="../app/home"
+          >
             <FormattedMessage
               id="xpack.monitoring.accessDenied.backToKibanaButtonLabel"
               defaultMessage="Back to Kibana"

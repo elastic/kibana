@@ -22,6 +22,7 @@ export const ColorPickerPopover: FC<Props> = (props: Props) => {
   const { value, anchorPosition, ariaLabel, ...rest } = props;
   const button = (handleClick: React.MouseEventHandler<HTMLButtonElement>) => (
     <EuiLink
+      data-test-subj="canvasButtonLink"
       aria-label={`${ariaLabel} ${tinycolor(value).toName() || value}`}
       style={{ fontSize: 0 }}
       onClick={handleClick}

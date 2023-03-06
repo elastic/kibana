@@ -55,7 +55,10 @@ export function ListingLimitWarning<T>({
               defaultMessage="You can change this setting under {advancedSettingsLink}."
               values={{
                 advancedSettingsLink: (
-                  <EuiLink href={advancedSettingsLink}>
+                  <EuiLink
+                    data-test-subj="contentManagementListingLimitWarningAdvancedSettingsLink"
+                    href={advancedSettingsLink}
+                  >
                     <FormattedMessage
                       id="contentManagement.tableList.listing.listingLimitExceeded.advancedSettingsLinkText"
                       defaultMessage="Advanced Settings"

@@ -43,6 +43,7 @@ export class CalculationVars extends Component {
         <EuiFlexGroup alignItems="center" responsive={false} gutterSize="s">
           <EuiFlexItem>
             <EuiFieldText
+              data-test-subj="pluginsFieldText"
               className="tvbAggs__varName"
               aria-label={i18n.translate('visTypeTimeseries.vars.variableNameAriaLabel', {
                 defaultMessage: 'Variable name',

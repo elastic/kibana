@@ -146,7 +146,11 @@ export const SourceFieldSection = () => {
             defaultMessage="The _source field contains the original JSON document body that was provided at index time. Individual fields can be pruned by defining which ones to include or exclude from the _source field. {docsLink}"
             values={{
               docsLink: (
-                <EuiLink href={documentationService.getMappingSourceFieldLink()} target="_blank">
+                <EuiLink
+                  data-test-subj="indexManagementSourceFieldSectionLearnMoreLink"
+                  href={documentationService.getMappingSourceFieldLink()}
+                  target="_blank"
+                >
                   {i18n.translate('xpack.idxMgmt.mappingsEditor.sourceFieldDocumentionLink', {
                     defaultMessage: 'Learn more.',
                   })}

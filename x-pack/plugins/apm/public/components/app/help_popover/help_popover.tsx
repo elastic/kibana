@@ -37,6 +37,7 @@ export function HelpPopoverButton({
   if (buttonTextEnabled) {
     return (
       <EuiButtonEmpty
+        data-test-subj="apmHelpPopoverButtonButtonEmpty"
         className="apmHelpPopover__buttonIcon"
         size="s"
         iconType="help"

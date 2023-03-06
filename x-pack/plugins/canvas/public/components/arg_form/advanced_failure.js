@@ -70,6 +70,7 @@ export const AdvancedFailure = (props) => {
         error={strings.getRowErrorMessage()}
       >
         <EuiTextArea
+          data-test-subj="canvasAdvancedFailureTextArea"
           id={argId}
           isInvalid={!valid}
           value={argExpression}
@@ -80,11 +81,22 @@ export const AdvancedFailure = (props) => {
       </EuiFormRow>
       <EuiSpacer size="s" />
       <div>
-        <EuiButton disabled={!valid} onClick={(e) => valueChange(e)} size="s" type="submit">
+        <EuiButton
+          data-test-subj="canvasAdvancedFailureButton"
+          disabled={!valid}
+          onClick={(e) => valueChange(e)}
+          size="s"
+          type="submit"
+        >
           {strings.getApplyButtonLabel()}
         </EuiButton>
         {defaultValue && defaultValue.length && (
-          <EuiButtonEmpty size="s" color="danger" onClick={confirmReset}>
+          <EuiButtonEmpty
+            data-test-subj="canvasAdvancedFailureButtonEmpty"
+            size="s"
+            color="danger"
+            onClick={confirmReset}
+          >
             {strings.getResetButtonLabel()}
           </EuiButtonEmpty>
         )}

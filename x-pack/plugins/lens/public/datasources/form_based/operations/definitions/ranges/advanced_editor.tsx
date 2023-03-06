@@ -101,6 +101,7 @@ export const RangePopover = ({
         <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
           <EuiFlexItem>
             <EuiFieldNumber
+              data-test-subj="lensRangePopoverFieldNumber"
               className="lnsRangesOperation__popoverNumberField"
               value={isValidNumber(from) ? Number(from) : ''}
               onChange={({ target }) => {
@@ -132,6 +133,7 @@ export const RangePopover = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiFieldNumber
+              data-test-subj="lensRangePopoverFieldNumber"
               className="lnsRangesOperation__popoverNumberField"
               value={isValidNumber(to) ? Number(to) : ''}
               inputRef={(node) => {
@@ -252,7 +254,11 @@ export const AdvancedRangeEditor = ({
       })}
       labelAppend={
         <EuiText size="xs">
-          <EuiLink color="danger" onClick={onToggleEditor}>
+          <EuiLink
+            data-test-subj="lensAdvancedRangeEditorRemoveCustomRangesLink"
+            color="danger"
+            onClick={onToggleEditor}
+          >
             <EuiIcon size="s" type="cross" color="danger" />{' '}
             {i18n.translate('xpack.lens.indexPattern.ranges.customRangesRemoval', {
               defaultMessage: 'Remove custom ranges',

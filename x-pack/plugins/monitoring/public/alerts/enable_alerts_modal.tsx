@@ -101,6 +101,7 @@ export const EnableAlertsModal: React.FC<Props> = ({ alerts }: Props) => {
               values={{
                 learnMoreLink: (
                   <EuiLink
+                    data-test-subj="monitoringEnableAlertsModalLearnMoreLink"
                     href={Legacy.shims.docLinks.links.monitoring.alertsKibana}
                     target="_blank"
                   >
@@ -122,6 +123,7 @@ export const EnableAlertsModal: React.FC<Props> = ({ alerts }: Props) => {
             <EuiSpacer size="xs" />
 
             <EuiRadioGroup
+              data-test-subj="monitoringEnableAlertsModalRadioGroup"
               options={radios}
               idSelected={radioIdSelected}
               onChange={(id) => onChange(id)}

@@ -40,7 +40,12 @@ export const RelatedAlertsUpsell = React.memo(() => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">
-            <EuiLink color="subdued" onClick={goToSubscription} target="_blank">
+            <EuiLink
+              data-test-subj="securitySolutionRelatedAlertsUpsellLink"
+              color="subdued"
+              onClick={goToSubscription}
+              target="_blank"
+            >
               {INSIGHTS_UPSELL}
             </EuiLink>
           </EuiText>

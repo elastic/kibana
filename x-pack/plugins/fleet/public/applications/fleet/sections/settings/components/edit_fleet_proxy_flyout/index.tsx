@@ -153,7 +153,11 @@ export const FleetProxyFlyout: React.FunctionComponent<FleetProxyFlyoutProps> = 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onClose()} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="fleetFleetProxyFlyoutCancelButtonEmpty"
+              onClick={() => onClose()}
+              flush="left"
+            >
               <FormattedMessage
                 id="xpack.fleet.settings.fleetProxyFlyout.cancelButtonLabel"
                 defaultMessage="Cancel"

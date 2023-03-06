@@ -32,6 +32,7 @@ export const OnFailureProcessorsTitle: FunctionComponent = () => {
           values={{
             learnMoreLink: (
               <EuiLink
+                data-test-subj="ingestPipelinesOnFailureProcessorsTitleLearnMoreLink"
                 href={services.documentation.getHandlingFailureUrl()}
                 target="_blank"
                 external

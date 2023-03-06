@@ -41,7 +41,11 @@ describe('filter popover', () => {
       },
       setFilter: jest.fn(),
       indexPattern: createMockedIndexPattern(),
-      button: <EuiLink onClick={mockOnClick}>trigger</EuiLink>,
+      button: (
+        <EuiLink data-test-subj="lensTriggerLink" onClick={mockOnClick}>
+          trigger
+        </EuiLink>
+      ),
       isOpen: true,
       triggerClose: () => {},
     };

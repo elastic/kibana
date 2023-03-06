@@ -83,7 +83,11 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem style={{ width: 'fit-content' }}>
               <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
-                <EuiButtonEmpty iconType="arrowLeft" contentProps={{ style: { padding: 0 } }}>
+                <EuiButtonEmpty
+                  data-test-subj="cloudSecurityPostureRulesBenchmarkIntegrationsButtonEmpty"
+                  iconType="arrowLeft"
+                  contentProps={{ style: { padding: 0 } }}
+                >
                   <FormattedMessage
                     id="xpack.csp.rules.rulesPageHeader.benchmarkIntegrationsButtonLabel"
                     defaultMessage="Benchmark Integrations"
@@ -112,6 +116,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
         }
         rightSideItems={[
           <EuiButtonEmpty
+            data-test-subj="cloudSecurityPostureRulesManageIntegrationButtonEmpty"
             iconType="gear"
             size="xs"
             href={http.basePath.prepend(pagePathGetters.edit_integration(params).join(''))}

@@ -67,7 +67,9 @@ export const Simple = (args: Args) => {
           ...titleConfigBase,
         }}
       />
-      <EuiButton onClick={() => submitForm(form)}>Send</EuiButton>
+      <EuiButton data-test-subj="pluginsSimpleSendButton" onClick={() => submitForm(form)}>
+        Send
+      </EuiButton>
     </Form>
   );
 };
@@ -122,7 +124,9 @@ export const Schema = (args: Args) => {
   return (
     <Form form={form} {...args}>
       <UseField<string> path="title" component={TextField} />
-      <EuiButton onClick={() => submitForm(form)}>Send</EuiButton>
+      <EuiButton data-test-subj="pluginsSchemaSendButton" onClick={() => submitForm(form)}>
+        Send
+      </EuiButton>
     </Form>
   );
 };

@@ -37,7 +37,12 @@ const UpdatedBy = styled.span`
 const EMPTY_ARRAY: PackSavedObject[] = [];
 
 const ScheduledQueryNameComponent = ({ id, name }: { id: string; name: string }) => (
-  <EuiLink {...useRouterNavigate(`packs/${id}`)}>{name}</EuiLink>
+  <EuiLink
+    data-test-subj="osqueryScheduledQueryNameComponentLink"
+    {...useRouterNavigate(`packs/${id}`)}
+  >
+    {name}
+  </EuiLink>
 );
 
 const ScheduledQueryName = React.memo(ScheduledQueryNameComponent);
@@ -57,7 +62,12 @@ export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?:
 
   const button = useMemo(
     () => (
-      <EuiButtonEmpty size="s" flush="both" onClick={onButtonClick}>
+      <EuiButtonEmpty
+        data-test-subj="osqueryButtonButtonEmpty"
+        size="s"
+        flush="both"
+        onClick={onButtonClick}
+      >
         <>{agentPolicyIds?.length ?? 0}</>
       </EuiButtonEmpty>
     ),

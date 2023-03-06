@@ -85,6 +85,7 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="enterpriseSearchCrawlCustomSettingsFlyoutButtonEmpty"
               data-telemetry-id="entSearchContent-crawler-customCrawlSettings-cancelStartCrawl"
               onClick={hideFlyout}
             >
@@ -93,6 +94,7 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="enterpriseSearchCrawlCustomSettingsFlyoutApplyAndCrawlNowButton"
               data-telemetry-id="entSearchContent-crawler-customCrawlSettings-startCrawl"
               fill
               onClick={startCustomCrawl}

@@ -176,6 +176,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
             <div style={{ zIndex: 200 }}>
               <EuiPopoverTitle>When the People in</EuiPopoverTitle>
               <EuiSelect
+                data-test-subj="alertingExamplePeopleinSpaceExpressionSelect"
                 compressed
                 value={craftTrigger.craft}
                 onChange={(event) => {
@@ -225,6 +226,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={false} style={{ width: 150 }}>
                   <EuiSelect
+                    data-test-subj="alertingExamplePeopleinSpaceExpressionSelect"
                     compressed
                     value={outerSpaceCapacityTrigger.op}
                     onChange={(event) => {
@@ -245,6 +247,7 @@ export const PeopleinSpaceExpression: React.FunctionComponent<PeopleinSpaceParam
 
                 <EuiFlexItem grow={false} style={{ width: 100 }}>
                   <EuiFieldNumber
+                    data-test-subj="alertingExamplePeopleinSpaceExpressionFieldNumber"
                     compressed
                     value={outerSpaceCapacityTrigger.outerSpaceCapacity}
                     onChange={(event) => {

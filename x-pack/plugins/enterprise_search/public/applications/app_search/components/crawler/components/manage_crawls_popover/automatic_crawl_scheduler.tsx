@@ -81,7 +81,11 @@ export const AutomaticCrawlScheduler: React.FC = () => {
           defaultMessage="Don't worry about it, we'll start a crawl for you. {readMoreMessage}."
           values={{
             readMoreMessage: (
-              <EuiLink href={WEB_CRAWLER_DOCS_URL} target="_blank">
+              <EuiLink
+                data-test-subj="enterpriseSearchAutomaticCrawlSchedulerReadMoreLink"
+                href={WEB_CRAWLER_DOCS_URL}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.crawler.automaticCrawlSchedule.readMoreLink',
                   {
@@ -126,6 +130,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFieldNumber
+              data-test-subj="enterpriseSearchAutomaticCrawlSchedulerFieldNumber"
               aria-label={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.crawler.automaticCrawlSchedule.scheduleFrequencyLabel',
                 {
@@ -143,6 +148,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiSelect
+              data-test-subj="enterpriseSearchAutomaticCrawlSchedulerSelect"
               aria-label={i18n.translate(
                 'xpack.enterpriseSearch.appSearch.crawler.automaticCrawlSchedule.scheduleUnitsLabel',
                 {
@@ -189,10 +195,21 @@ export const AutomaticCrawlScheduler: React.FC = () => {
         <EuiFormRow display="rowCompressed">
           <EuiFlexGroup>
             <EuiFlexItem>
-              <EuiButtonEmpty onClick={closePopover}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+              <EuiButtonEmpty
+                data-test-subj="enterpriseSearchAutomaticCrawlSchedulerButtonEmpty"
+                onClick={closePopover}
+              >
+                {CANCEL_BUTTON_LABEL}
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiButton form={formId} type="submit" isLoading={isSubmitting} fill>
+              <EuiButton
+                data-test-subj="enterpriseSearchAutomaticCrawlSchedulerButton"
+                form={formId}
+                type="submit"
+                isLoading={isSubmitting}
+                fill
+              >
                 {SAVE_BUTTON_LABEL}
               </EuiButton>
             </EuiFlexItem>

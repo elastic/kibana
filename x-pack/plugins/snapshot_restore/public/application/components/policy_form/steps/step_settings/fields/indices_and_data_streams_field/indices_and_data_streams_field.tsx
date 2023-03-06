@@ -207,6 +207,7 @@ export const IndicesAndDataStreamsField: FunctionComponent<Props> = ({
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiLink
+                          data-test-subj="snapshotRestoreIndicesAndDataStreamsFieldUseIndexPatternsLink"
                           onClick={() => {
                             setSelectIndicesMode('custom');
                             onUpdate({ indices: indexPatterns.join(',') });

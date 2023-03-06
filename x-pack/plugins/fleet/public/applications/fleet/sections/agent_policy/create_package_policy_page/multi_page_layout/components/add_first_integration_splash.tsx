@@ -214,7 +214,11 @@ const CenteredLearnMoreLink = () => {
   return (
     <EuiFlexGroup justifyContent="spaceAround">
       <EuiFlexItem grow={false}>
-        <EuiLink href={docLinks.links.fleet.elasticAgent} target="_blank">
+        <EuiLink
+          data-test-subj="fleetCenteredLearnMoreLinkLearnMoreAboutInstallingElasticAgentLink"
+          href={docLinks.links.fleet.elasticAgent}
+          target="_blank"
+        >
           <FormattedMessage
             id="xpack.fleet.addFirstIntegrationSplash.learnMoreLink"
             defaultMessage="Learn more about installing Elastic Agent"

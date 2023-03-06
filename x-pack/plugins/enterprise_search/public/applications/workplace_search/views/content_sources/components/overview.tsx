@@ -343,7 +343,11 @@ export const Overview: React.FC = () => {
                   defaultMessage="{learnMoreLink} about permissions"
                   values={{
                     learnMoreLink: (
-                      <EuiLink target="_blank" href={docLinks.workplaceSearchDocumentPermissions}>
+                      <EuiLink
+                        data-test-subj="enterpriseSearchOverviewLink"
+                        target="_blank"
+                        href={docLinks.workplaceSearchDocumentPermissions}
+                      >
                         {LEARN_MORE_LINK}
                       </EuiLink>
                     ),
@@ -404,7 +408,11 @@ export const Overview: React.FC = () => {
                 defaultMessage="The {externalIdentitiesLink} must be used to configure user access mappings. Read the guide to learn more."
                 values={{
                   externalIdentitiesLink: (
-                    <EuiLink target="_blank" href={docLinks.workplaceSearchExternalIdentities}>
+                    <EuiLink
+                      data-test-subj="enterpriseSearchOverviewLink"
+                      target="_blank"
+                      href={docLinks.workplaceSearchExternalIdentities}
+                    >
                       {EXTERNAL_IDENTITIES_LINK}
                     </EuiLink>
                   ),
@@ -450,7 +458,11 @@ export const Overview: React.FC = () => {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiText size="s">
-          <EuiLink target="_blank" href={docLinks.licenseManagement}>
+          <EuiLink
+            data-test-subj="enterpriseSearchOverviewLink"
+            target="_blank"
+            href={docLinks.licenseManagement}
+          >
             {LEARN_CUSTOM_FEATURES_BUTTON}
           </EuiLink>
         </EuiText>
@@ -560,7 +572,11 @@ export const Overview: React.FC = () => {
                 color="primary"
                 iconType="email"
                 title={
-                  <EuiLink href="https://www.elastic.co/kibana/feedback" external>
+                  <EuiLink
+                    data-test-subj="enterpriseSearchOverviewHaveFeedbackAboutDeployingAConnectorPackageLetUsKnowLink"
+                    href="https://www.elastic.co/kibana/feedback"
+                    external
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.workplaceSearch.sources.feedbackCallOutText',
                       {

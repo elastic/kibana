@@ -200,6 +200,7 @@ const TopHitAggUi = (props) => {
             }
           >
             <EuiFieldNumber
+              data-test-subj="pluginsTopHitAggUiFieldNumber"
               onChange={handleNumberChange('size', { isClearable: true })}
               value={model.size}
               placeholder="1"

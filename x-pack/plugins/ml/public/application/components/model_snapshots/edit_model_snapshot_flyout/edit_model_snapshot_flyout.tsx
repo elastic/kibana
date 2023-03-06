@@ -139,6 +139,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
               fullWidth
             >
               <EuiTextArea
+                data-test-subj="mlEditModelSnapshotFlyoutTextArea"
                 fullWidth
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
@@ -159,7 +160,12 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeWithoutReload} flush="left">
+              <EuiButtonEmpty
+                data-test-subj="mlEditModelSnapshotFlyoutCloseButtonEmpty"
+                iconType="cross"
+                onClick={closeWithoutReload}
+                flush="left"
+              >
                 <FormattedMessage
                   id="xpack.ml.editModelSnapshotFlyout.closeButton"
                   defaultMessage="Close"
@@ -169,6 +175,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
             <EuiFlexItem grow={true} />
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="mlEditModelSnapshotFlyoutDeleteButtonEmpty"
                 onClick={showDeleteModal}
                 color="danger"
                 disabled={isCurrentSnapshot === true}
@@ -180,7 +187,11 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={updateSnapshot} fill>
+              <EuiButton
+                data-test-subj="mlEditModelSnapshotFlyoutSaveButton"
+                onClick={updateSnapshot}
+                fill
+              >
                 <FormattedMessage
                   id="xpack.ml.editModelSnapshotFlyout.saveButton"
                   defaultMessage="Save"

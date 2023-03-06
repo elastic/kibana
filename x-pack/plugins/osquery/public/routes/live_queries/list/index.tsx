@@ -54,6 +54,7 @@ const NewLiveQueryButton = React.memo(() => {
 
   return (
     <EuiButton
+      data-test-subj="osqueryNewLiveQueryButtonNewLiveQueryButton"
       fill
       {...newQueryLinkProps}
       iconType="plusInCircle"

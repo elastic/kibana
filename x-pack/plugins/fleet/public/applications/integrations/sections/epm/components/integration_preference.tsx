@@ -124,7 +124,10 @@ export const IntegrationPreference = ({
   }, []);
 
   const link = (
-    <EuiLink href={docLinks.links.fleet.beatsAgentComparison}>
+    <EuiLink
+      data-test-subj="fleetIntegrationPreferenceElasticAgentAndBeatsLink"
+      href={docLinks.links.fleet.beatsAgentComparison}
+    >
       <FormattedMessage
         id="xpack.fleet.epm.integrationPreference.titleLink"
         defaultMessage="Elastic Agent and Beats"
@@ -172,6 +175,7 @@ export const IntegrationPreference = ({
       <EuiSpacer size="m" />
       <EuiForm>
         <EuiRadioGroup
+          data-test-subj="fleetIntegrationPreferenceRadioGroup"
           options={radios}
           idSelected={idSelected}
           onChange={(id, value) => {

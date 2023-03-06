@@ -83,7 +83,12 @@ export const ChangelogModal: React.FunctionComponent<Props> = ({
         </EuiSkeletonText>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButton color="primary" fill onClick={onClose}>
+        <EuiButton
+          data-test-subj="fleetChangelogModalCloseButton"
+          color="primary"
+          fill
+          onClick={onClose}
+        >
           <FormattedMessage id="xpack.fleet.epm.changelogModalCloseBtn" defaultMessage="Close" />
         </EuiButton>
       </EuiModalFooter>

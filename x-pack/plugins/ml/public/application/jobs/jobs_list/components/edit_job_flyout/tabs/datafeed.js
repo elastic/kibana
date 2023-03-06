@@ -122,6 +122,7 @@ export class Datafeed extends Component {
             }
           >
             <EuiFieldText
+              data-test-subj="mlFieldText"
               value={queryDelay}
               placeholder={defaults.queryDelay}
               onChange={this.onQueryDelayChange}
@@ -137,6 +138,7 @@ export class Datafeed extends Component {
             }
           >
             <EuiFieldText
+              data-test-subj="mlFieldText"
               value={frequency}
               placeholder={defaults.frequency}
               onChange={this.onFrequencyChange}
@@ -152,6 +154,7 @@ export class Datafeed extends Component {
             }
           >
             <EuiFieldNumber
+              data-test-subj="mlFieldNumber"
               value={scrollSize}
               placeholder={defaults.scrollSize}
               onChange={this.onScrollSizeChange}

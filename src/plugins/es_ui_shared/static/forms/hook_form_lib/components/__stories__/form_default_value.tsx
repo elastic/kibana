@@ -26,7 +26,9 @@ export const DefaultValue = (args: FormArgs) => {
   return (
     <Form form={form} {...args}>
       <UseField<string> path="title" component={TextField} config={{ ...titleConfigBase }} />
-      <EuiButton onClick={() => submitForm(form)}>Send</EuiButton>
+      <EuiButton data-test-subj="pluginsDefaultValueSendButton" onClick={() => submitForm(form)}>
+        Send
+      </EuiButton>
     </Form>
   );
 };

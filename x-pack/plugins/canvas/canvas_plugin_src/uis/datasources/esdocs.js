@@ -127,6 +127,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
 
         <EuiFormRow label={strings.getSortOrderTitle()} display="columnCompressed">
           <EuiSelect
+            data-test-subj="canvasEsdocsDatasourceSelect"
             value={sortOrder.toLowerCase()}
             onChange={(e) => setArg('sort', [sortField, e.target.value].join(', '))}
             options={sortOptions}
@@ -138,7 +139,11 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
           label={strings.getQueryTitle()}
           labelAppend={
             <EuiText size="xs">
-              <EuiLink href={LUCENE_QUERY_URL} target="_blank">
+              <EuiLink
+                data-test-subj="canvasEsdocsDatasourceLink"
+                href={LUCENE_QUERY_URL}
+                target="_blank"
+              >
                 {strings.getQueryLabel()}
               </EuiLink>
             </EuiText>
@@ -146,6 +151,7 @@ const EsdocsDatasource = ({ args, updateArgs, defaultIndex }) => {
           display="rowCompressed"
         >
           <EuiTextArea
+            data-test-subj="canvasEsdocsDatasourceTextArea"
             value={getQuery()}
             onChange={(e) => setArg(getArgName(), e.target.value)}
             compressed

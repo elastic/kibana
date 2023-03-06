@@ -199,6 +199,7 @@ export class GaugePanelConfig extends Component<
                   }
                 >
                   <EuiFieldNumber
+                    data-test-subj="pluginsFieldNumber"
                     onChange={this.handleTextChange('gauge_max')}
                     value={model.gauge_max}
                   />
@@ -234,6 +235,7 @@ export class GaugePanelConfig extends Component<
                   }
                 >
                   <EuiFieldNumber
+                    data-test-subj="pluginsFieldNumber"
                     onChange={this.handleTextChange('gauge_inner_width')}
                     value={Number(model.gauge_inner_width)}
                   />
@@ -250,6 +252,7 @@ export class GaugePanelConfig extends Component<
                   }
                 >
                   <EuiFieldNumber
+                    data-test-subj="pluginsFieldNumber"
                     onChange={this.handleTextChange('gauge_width')}
                     value={Number(model.gauge_width)}
                   />

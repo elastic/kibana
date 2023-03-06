@@ -30,7 +30,9 @@ interface ValidationStepPanelProps {
 }
 
 const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
-processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
+processingPlugins[1][1].components.a = (props) => (
+  <EuiLink data-test-subj="enterpriseSearchLink" {...props} target="_blank" />
+);
 
 export const ValidationStepPanel: React.FC<ValidationStepPanelProps> = ({
   step,

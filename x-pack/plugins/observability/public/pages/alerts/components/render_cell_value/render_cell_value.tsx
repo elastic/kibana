@@ -96,7 +96,11 @@ export const getRenderCellValue = ({
         const alert = parseAlert(observabilityRuleTypeRegistry)(dataFieldEs);
 
         return (
-          <EuiLink css={displayCss} onClick={() => setFlyoutAlert && setFlyoutAlert(alert)}>
+          <EuiLink
+            data-test-subj="o11yGetRenderCellValueLink"
+            css={displayCss}
+            onClick={() => setFlyoutAlert && setFlyoutAlert(alert)}
+          >
             {alert.reason}
           </EuiLink>
         );

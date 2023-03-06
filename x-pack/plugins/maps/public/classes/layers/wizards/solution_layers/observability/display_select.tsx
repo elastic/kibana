@@ -65,7 +65,12 @@ export function DisplaySelect(props: Props) {
         defaultMessage: 'Display',
       })}
     >
-      <EuiSelect options={DISPLAY_OPTIONS} value={props.value} onChange={onChange} />
+      <EuiSelect
+        data-test-subj="mapsDisplaySelectSelect"
+        options={DISPLAY_OPTIONS}
+        value={props.value}
+        onChange={onChange}
+      />
     </EuiFormRow>
   );
 }

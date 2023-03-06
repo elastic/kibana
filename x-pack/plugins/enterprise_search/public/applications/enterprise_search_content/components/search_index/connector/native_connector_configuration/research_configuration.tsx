@@ -35,7 +35,11 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
       <EuiSpacer />
       <EuiFlexGroup direction="row" alignItems="flexStart">
         <EuiFlexItem grow={false}>
-          <EuiLink target="_blank" href={docsUrl}>
+          <EuiLink
+            data-test-subj="enterpriseSearchResearchConfigurationDocumentationLink"
+            target="_blank"
+            href={docsUrl}
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.connectorDocumentationLinkLabel',
               {
@@ -45,7 +49,11 @@ export const ResearchConfiguration: React.FC<ResearchConfigurationProps> = ({
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink target="_blank" href={externalDocsUrl}>
+          <EuiLink
+            data-test-subj="enterpriseSearchResearchConfigurationNameDocumentationLink"
+            target="_blank"
+            href={externalDocsUrl}
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.researchConfiguration.serviceDocumentationLinkLabel',
               {

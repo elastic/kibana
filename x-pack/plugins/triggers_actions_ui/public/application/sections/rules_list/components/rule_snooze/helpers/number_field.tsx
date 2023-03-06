@@ -41,5 +41,13 @@ export const NumberField: React.FC<
     [displayValue, props, setDisplayValue]
   );
 
-  return <EuiFieldNumber {...props} value={displayValue} onChange={onChange} onBlur={onBlur} />;
+  return (
+    <EuiFieldNumber
+      data-test-subj="triggersActionsUiNumberFieldFieldNumber"
+      {...props}
+      value={displayValue}
+      onChange={onChange}
+      onBlur={onBlur}
+    />
+  );
 };

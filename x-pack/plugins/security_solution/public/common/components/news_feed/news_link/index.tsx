@@ -19,7 +19,12 @@ const REL_NOREFERRER = 'noreferrer';
 
 /** A hyperlink to a (presumed to be external) news site */
 export const NewsLink = ({ href, children }: { href: string; children: React.ReactNode }) => (
-  <EuiLink href={href} rel={`${REL_NOOPENER} ${REL_NOFOLLOW} ${REL_NOREFERRER}`} target="_blank">
+  <EuiLink
+    data-test-subj="securitySolutionNewsLinkLink"
+    href={href}
+    rel={`${REL_NOOPENER} ${REL_NOFOLLOW} ${REL_NOREFERRER}`}
+    target="_blank"
+  >
     {children}
   </EuiLink>
 );

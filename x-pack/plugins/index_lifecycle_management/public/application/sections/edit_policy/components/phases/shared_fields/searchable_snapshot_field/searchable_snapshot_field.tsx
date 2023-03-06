@@ -174,6 +174,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
                   values={{
                     link: (
                       <EuiLink
+                        data-test-subj="indexLifecycleManagementRenderFieldCreateASnapshotRepositoryLink"
                         href={getUrlForApp('management', {
                           path: `data/snapshot_restore/add_repository`,
                         })}
@@ -209,6 +210,7 @@ export const SearchableSnapshotField: FunctionComponent<Props> = ({
                   values={{
                     link: (
                       <EuiLink
+                        data-test-subj="indexLifecycleManagementRenderFieldCreateANewSnapshotRepositoryLink"
                         href={getUrlForApp('management', {
                           path: `data/snapshot_restore/add_repository`,
                         })}

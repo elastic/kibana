@@ -38,7 +38,10 @@ export const CloningNotification: React.FC<CloningNotificationProps> = ({ count 
 
   const title = (
     <>
-      {txtBody(count)} <EuiLink onClick={() => setDismissed(true)}>{txtDismiss}</EuiLink>
+      {txtBody(count)}{' '}
+      <EuiLink data-test-subj="pluginsCloningNotificationLink" onClick={() => setDismissed(true)}>
+        {txtDismiss}
+      </EuiLink>
     </>
   );
 

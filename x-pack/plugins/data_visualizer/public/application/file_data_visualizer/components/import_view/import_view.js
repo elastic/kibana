@@ -540,7 +540,7 @@ export class ImportView extends Component {
             )}
 
             {initialized === true && importing === false && (
-              <EuiButton onClick={this.clickReset}>
+              <EuiButton data-test-subj="dataVisualizerResetButton" onClick={this.clickReset}>
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.importView.resetButtonLabel"
                   defaultMessage="Reset"

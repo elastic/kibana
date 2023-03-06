@@ -275,6 +275,7 @@ export class TimeseriesPanelConfig extends Component<
                   }
                 >
                   <EuiFieldText
+                    data-test-subj="pluginsFieldText"
                     onChange={this.handleTextChange('axis_min')}
                     value={model.axis_min ?? ''}
                   />
@@ -291,6 +292,7 @@ export class TimeseriesPanelConfig extends Component<
                   }
                 >
                   <EuiFieldText
+                    data-test-subj="pluginsFieldText"
                     onChange={this.handleTextChange('axis_max')}
                     value={model.axis_max ?? ''}
                   />

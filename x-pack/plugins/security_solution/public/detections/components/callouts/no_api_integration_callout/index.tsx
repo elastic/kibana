@@ -18,7 +18,11 @@ const NoApiIntegrationKeyCallOutComponent = () => {
     <>
       <EuiCallOut title={i18n.NO_API_INTEGRATION_KEY_CALLOUT_TITLE} color="danger" iconType="alert">
         <p>{i18n.NO_API_INTEGRATION_KEY_CALLOUT_MSG}</p>
-        <EuiButton color="danger" onClick={handleCallOut}>
+        <EuiButton
+          data-test-subj="securitySolutionNoApiIntegrationKeyCallOutComponentButton"
+          color="danger"
+          onClick={handleCallOut}
+        >
           {i18n.DISMISS_CALLOUT}
         </EuiButton>
       </EuiCallOut>

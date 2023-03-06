@@ -137,6 +137,7 @@ export const TopNSeries = injectI18n(function (props) {
 
         <EuiFlexItem>
           <EuiFieldText
+            data-test-subj="pluginsTopNSeriesFieldText"
             fullWidth
             onChange={handleChange('label')}
             placeholder={intl.formatMessage({

@@ -86,7 +86,12 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+              <EuiButtonEmpty
+                data-test-subj="osquerySavedQueryFlyoutComponentCancelButtonEmpty"
+                iconType="cross"
+                onClick={onClose}
+                flush="left"
+              >
                 <FormattedMessage
                   id="xpack.osquery.pack.queryFlyoutForm.cancelButtonLabel"
                   defaultMessage="Cancel"
@@ -94,7 +99,12 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton isLoading={isSubmitting} onClick={handleSubmit(onSubmit)} fill>
+              <EuiButton
+                data-test-subj="osquerySavedQueryFlyoutComponentSaveButton"
+                isLoading={isSubmitting}
+                onClick={handleSubmit(onSubmit)}
+                fill
+              >
                 <FormattedMessage
                   id="xpack.osquery.pack.queryFlyoutForm.saveButtonLabel"
                   defaultMessage="Save"

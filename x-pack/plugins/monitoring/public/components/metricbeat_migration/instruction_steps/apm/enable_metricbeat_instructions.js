@@ -29,7 +29,11 @@ export function getApmInstructionsForEnablingMetricbeat(product, _meta, { esMoni
     children: (
       <EuiText>
         <p>
-          <EuiLink href={metricbeatInstallUrl} target="_blank">
+          <EuiLink
+            data-test-subj="monitoringGetApmInstructionsForEnablingMetricbeatFollowTheInstructionsHereLink"
+            href={metricbeatInstallUrl}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.apmInstructions.installMetricbeatLinkText"
               defaultMessage="Follow the instructions here."
@@ -114,7 +118,11 @@ export function getApmInstructionsForEnablingMetricbeat(product, _meta, { esMoni
     children: (
       <EuiText>
         <p>
-          <EuiLink href={metricbeatStartUrl} target="_blank">
+          <EuiLink
+            data-test-subj="monitoringGetApmInstructionsForEnablingMetricbeatFollowTheInstructionsHereLink"
+            href={metricbeatStartUrl}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.apmInstructions.startMetricbeatLinkText"
               defaultMessage="Follow the instructions here."

@@ -113,6 +113,7 @@ export class FieldChooser extends Component {
             <EuiSpacer size="s" />
 
             <EuiFieldSearch
+              data-test-subj="rollupRenderFlyoutFieldSearch"
               placeholder={prompt}
               value={searchValue}
               onChange={this.onSearch}

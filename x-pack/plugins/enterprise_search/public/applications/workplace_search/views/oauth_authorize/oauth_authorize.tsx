@@ -143,6 +143,7 @@ export const OAuthAuthorize: React.FC = () => {
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiButton
+                data-test-subj="enterpriseSearchOAuthAuthorizeButton"
                 color="danger"
                 onClick={denyOAuthAuthorization}
                 disabled={buttonLoading || hasError}
@@ -152,6 +153,7 @@ export const OAuthAuthorize: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButton
+                data-test-subj="enterpriseSearchOAuthAuthorizeButton"
                 color="primary"
                 fill
                 onClick={allowOAuthAuthorization}

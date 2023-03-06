@@ -49,6 +49,7 @@ const ExpressionsExplorer = ({ expressions, inspector, actions, uiSettings }: Pr
                   There are a couple of ways to run the expressions. Below some of the options are
                   demonstrated. You can read more about it{' '}
                   <EuiLink
+                    data-test-subj="expressionsExplorerExpressionsExplorerHereLink"
                     href={
                       'https://github.com/elastic/kibana/blob/main/src/plugins/expressions/README.asciidoc'
                     }

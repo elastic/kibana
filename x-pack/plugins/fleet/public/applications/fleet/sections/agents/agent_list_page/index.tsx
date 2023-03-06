@@ -462,7 +462,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         defaultMessage="No agents found. {clearFiltersLink}"
         values={{
           clearFiltersLink: (
-            <EuiLink onClick={() => clearFilters()}>
+            <EuiLink
+              data-test-subj="fleetAgentListPageClearFiltersLink"
+              onClick={() => clearFilters()}
+            >
               <FormattedMessage
                 id="xpack.fleet.agentList.clearFiltersLinkText"
                 defaultMessage="Clear filters"

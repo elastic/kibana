@@ -138,6 +138,7 @@ export const SelectConnector: React.FC = () => {
           </EuiFlexGroup>
           <EuiSpacer />
           <EuiButton
+            data-test-subj="enterpriseSearchSelectConnectorSelectAndConfigureButton"
             data-telemetry-id="entSearchContent-connector-selectConnector-selectAndConfigure"
             fill
             color="primary"
@@ -168,7 +169,11 @@ export const SelectConnector: React.FC = () => {
                   </EuiLinkTo>
                 ),
                 workplaceSearchLink: (
-                  <EuiLink target="_blank" href={docLinks.connectorsWorkplaceSearch}>
+                  <EuiLink
+                    data-test-subj="enterpriseSearchSelectConnectorViewAdditionalIntegrationsInWorkplaceSearchLink"
+                    target="_blank"
+                    href={docLinks.connectorsWorkplaceSearch}
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.indices.selectConnector.workplaceSearchLinkLabel',
                       {

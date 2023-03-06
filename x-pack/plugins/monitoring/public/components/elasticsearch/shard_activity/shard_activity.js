@@ -98,7 +98,10 @@ export const ShardActivity = (props) => {
           defaultMessage="Try viewing {shardActivityHistoryLink}."
           values={{
             shardActivityHistoryLink: (
-              <EuiLink onClick={toggleShardActivityHistory}>
+              <EuiLink
+                data-test-subj="monitoringGetNoDataMessageCompletedRecoveriesLink"
+                onClick={toggleShardActivityHistory}
+              >
                 <FormattedMessage
                   id="xpack.monitoring.elasticsearch.shardActivity.noActiveShardRecoveriesMessage.completedRecoveriesLinkText"
                   defaultMessage="completed recoveries"

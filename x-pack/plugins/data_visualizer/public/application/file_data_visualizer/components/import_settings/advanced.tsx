@@ -80,6 +80,7 @@ export const AdvancedSettings: FC<Props> = ({
         error={[indexNameError]}
       >
         <EuiFieldText
+          data-test-subj="dataVisualizerAdvancedSettingsFieldText"
           placeholder={i18n.translate(
             'xpack.dataVisualizer.file.advancedImportSettings.indexNamePlaceholder',
             {
@@ -129,6 +130,7 @@ export const AdvancedSettings: FC<Props> = ({
         error={[dataViewNameError]}
       >
         <EuiFieldText
+          data-test-subj="dataVisualizerAdvancedSettingsFieldText"
           disabled={createDataView === false || initialized === true}
           placeholder={createDataView === true ? index : ''}
           value={dataView}

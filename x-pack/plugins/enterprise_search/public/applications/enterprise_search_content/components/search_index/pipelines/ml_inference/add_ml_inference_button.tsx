@@ -77,6 +77,7 @@ const AddButton: React.FC<{
   onClick?: () => void;
 }> = ({ disabled, ingestionMethod, onClick }) => (
   <EuiButton
+    data-test-subj="enterpriseSearchAddButtonAddInferencePipelineButton"
     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addInferencePipeline`}
     color="success"
     disabled={disabled}

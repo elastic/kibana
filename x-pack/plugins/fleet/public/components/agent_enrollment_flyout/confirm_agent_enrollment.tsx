@@ -102,7 +102,12 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   const { application } = useStartServices();
   const showViewAgents = !!onClickViewAgents;
   const TroubleshootLink = () => (
-    <EuiLink target="_blank" external href={troubleshootLink}>
+    <EuiLink
+      data-test-subj="fleetTroubleshootLinkTroubleshootingGuideLink"
+      target="_blank"
+      external
+      href={troubleshootLink}
+    >
       <FormattedMessage
         id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
         defaultMessage="troubleshooting guide"

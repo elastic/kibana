@@ -44,7 +44,10 @@ export const VariablePopover: React.FC<Props> = ({ variables, onSelect, variable
       ownFocus={true}
       button={
         <EuiText size="xs">
-          <EuiLink onClick={() => setIsVariablesPopoverOpen(true)}>
+          <EuiLink
+            data-test-subj="pluginsVariablePopoverLink"
+            onClick={() => setIsVariablesPopoverOpen(true)}
+          >
             {txtAddVariableButtonTitle} <EuiIcon type="indexOpen" />
           </EuiLink>
         </EuiText>
@@ -78,7 +81,12 @@ export const VariablePopover: React.FC<Props> = ({ variables, onSelect, variable
             {list}
             {variablesHelpLink && (
               <EuiPopoverFooter className={'eui-textRight'}>
-                <EuiLink external href={variablesHelpLink} target="_blank">
+                <EuiLink
+                  data-test-subj="pluginsVariablePopoverLink"
+                  external
+                  href={variablesHelpLink}
+                  target="_blank"
+                >
                   {txtUrlTemplateVariablesHelpLinkText}
                 </EuiLink>
               </EuiPopoverFooter>

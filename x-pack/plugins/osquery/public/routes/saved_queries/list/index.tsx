@@ -273,6 +273,7 @@ const SavedQueriesPageComponent = () => {
   const RightColumn = useMemo(
     () => (
       <EuiButton
+        data-test-subj="osqueryRightColumnAddSavedQueryButton"
         fill
         {...newQueryLinkProps}
         iconType="plusInCircle"

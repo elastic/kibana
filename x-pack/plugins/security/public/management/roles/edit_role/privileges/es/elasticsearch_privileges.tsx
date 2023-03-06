@@ -176,7 +176,11 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
         {editable && (
           <>
             <EuiHorizontalRule />
-            <EuiButton iconType={'plusInCircle'} onClick={this.addIndexPrivilege}>
+            <EuiButton
+              data-test-subj="securityAddIndexPrivilegeButton"
+              iconType={'plusInCircle'}
+              onClick={this.addIndexPrivilege}
+            >
               <FormattedMessage
                 id="xpack.security.management.editRole.elasticSearchPrivileges.addIndexPrivilegesButtonLabel"
                 defaultMessage="Add index privilege"
@@ -189,7 +193,12 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
   };
 
   public learnMore = (href: string) => (
-    <EuiLink className="editRole__learnMore" href={href} target={'_blank'}>
+    <EuiLink
+      data-test-subj="securityLearnMoreLink"
+      className="editRole__learnMore"
+      href={href}
+      target={'_blank'}
+    >
       <FormattedMessage
         id="xpack.security.management.editRole.elasticSearchPrivileges.learnMoreLinkText"
         defaultMessage="Learn more"

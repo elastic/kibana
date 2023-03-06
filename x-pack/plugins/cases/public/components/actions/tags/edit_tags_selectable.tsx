@@ -183,12 +183,22 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
                 gutterSize="xs"
               >
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty size="xs" flush="right" onClick={onSelectAll}>
+                  <EuiButtonEmpty
+                    data-test-subj="casesEditTagsSelectableComponentButtonEmpty"
+                    size="xs"
+                    flush="right"
+                    onClick={onSelectAll}
+                  >
                     {i18n.SELECT_ALL}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty size="xs" flush="right" onClick={onSelectNone}>
+                  <EuiButtonEmpty
+                    data-test-subj="casesEditTagsSelectableComponentButtonEmpty"
+                    size="xs"
+                    flush="right"
+                    onClick={onSelectNone}
+                  >
                     {i18n.SELECT_NONE}
                   </EuiButtonEmpty>
                 </EuiFlexItem>

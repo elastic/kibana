@@ -52,7 +52,12 @@ export const StatusItem: React.FC<StatusItemProps> = ({ details }) => {
       <EuiSpacer size="s" />
       <EuiCopy textToCopy={formattedDetails}>
         {(copy) => (
-          <EuiButton size="s" iconType="copy" onClick={copy}>
+          <EuiButton
+            data-test-subj="enterpriseSearchInfoPopoverButton"
+            size="s"
+            iconType="copy"
+            onClick={copy}
+          >
             {COPY_TEXT}
           </EuiButton>
         )}

@@ -93,6 +93,7 @@ export function RunControls({
 
   const durationInput = (
     <EuiFieldText
+      data-test-subj="mlRunControlsFieldText"
       name="forecastDuration"
       value={newForecastDuration}
       disabled={disabledState.isDisabled}

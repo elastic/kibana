@@ -32,7 +32,10 @@ export const ProductButton: React.FC = () => {
     });
 
   return (
-    <EuiButton {...buttonProps}>
+    <EuiButton
+      data-test-subj="enterpriseSearchProductButtonOpenWorkplaceSearchButton"
+      {...buttonProps}
+    >
       <FormattedMessage
         id="xpack.enterpriseSearch.workplaceSearch.productCta"
         defaultMessage="Open Workplace Search"

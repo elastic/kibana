@@ -117,6 +117,7 @@ function TableSeriesUI(props) {
 
         <EuiFlexItem>
           <EuiFieldText
+            data-test-subj="pluginsTableSeriesUIFieldText"
             fullWidth
             aria-label={intl.formatMessage({
               id: 'visTypeTimeseries.table.labelAriaLabel',

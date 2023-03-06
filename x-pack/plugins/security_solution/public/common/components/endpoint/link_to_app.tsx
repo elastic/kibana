@@ -46,11 +46,19 @@ export const LinkToApp = memo<LinkToAppProps>(
     return (
       <>
         {asButton && asButton === true ? (
-          <EuiButton {...(otherProps as EuiButtonProps)} onClick={handleOnClick}>
+          <EuiButton
+            data-test-subj="securitySolutionLinkToAppButton"
+            {...(otherProps as EuiButtonProps)}
+            onClick={handleOnClick}
+          >
             {children}
           </EuiButton>
         ) : (
-          <EuiLink {...otherProps} onClick={handleOnClick}>
+          <EuiLink
+            data-test-subj="securitySolutionLinkToAppLink"
+            {...otherProps}
+            onClick={handleOnClick}
+          >
             {children}
           </EuiLink>
         )}

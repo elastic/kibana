@@ -216,7 +216,11 @@ export const CategoryTable: FC<Props> = ({
         <>
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={() => openInDiscover(QUERY_MODE.INCLUDE)}>
+              <EuiButton
+                data-test-subj="aiopsCategoryTableShowTheseInDiscoverButton"
+                size="s"
+                onClick={() => openInDiscover(QUERY_MODE.INCLUDE)}
+              >
                 <FormattedMessage
                   id="xpack.aiops.logCategorization.showInDiscover"
                   defaultMessage="Show these in Discover"
@@ -224,7 +228,11 @@ export const CategoryTable: FC<Props> = ({
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton size="s" onClick={() => openInDiscover(QUERY_MODE.EXCLUDE)}>
+              <EuiButton
+                data-test-subj="aiopsCategoryTableFilterOutInDiscoverButton"
+                size="s"
+                onClick={() => openInDiscover(QUERY_MODE.EXCLUDE)}
+              >
                 <FormattedMessage
                   id="xpack.aiops.logCategorization.filterOutInDiscover"
                   defaultMessage="Filter out in Discover"

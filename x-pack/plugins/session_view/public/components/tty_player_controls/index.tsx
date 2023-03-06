@@ -183,6 +183,7 @@ export const TTYPlayerControls = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            data-test-subj="sessionViewTTYPlayerControlsButtonEmpty"
             iconSide="right"
             size="s"
             onClick={handleViewInSession}

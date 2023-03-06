@@ -120,7 +120,10 @@ export class InfluencersCell extends Component {
     if (othersCount > 0) {
       return (
         <div>
-          <EuiLink onClick={() => this.toggleAllInfluencers()}>
+          <EuiLink
+            data-test-subj="mlAndOthersCountMoreLink"
+            onClick={() => this.toggleAllInfluencers()}
+          >
             <FormattedMessage
               id="xpack.ml.anomaliesTable.influencersCell.moreInfluencersLinkText"
               defaultMessage="and {othersCount} more"
@@ -134,7 +137,7 @@ export class InfluencersCell extends Component {
     } else if (totalCount > this.props.limit + 1) {
       return (
         <div>
-          <EuiLink onClick={() => this.toggleAllInfluencers()}>
+          <EuiLink data-test-subj="mlShowLessLink" onClick={() => this.toggleAllInfluencers()}>
             <FormattedMessage
               id="xpack.ml.anomaliesTable.influencersCell.showLessInfluencersLinkText"
               defaultMessage="show less"

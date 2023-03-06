@@ -97,7 +97,11 @@ export class StartTrial extends Component<Props, State> {
                       You'll get immediate access to:"
                     values={{
                       subscriptionFeaturesLinkText: (
-                        <EuiLink href={EXTERNAL_LINKS.SUBSCRIPTIONS} target="_blank">
+                        <EuiLink
+                          data-test-subj="licenseManagementSubscriptionFeaturesLink"
+                          href={EXTERNAL_LINKS.SUBSCRIPTIONS}
+                          target="_blank"
+                        >
                           <FormattedMessage
                             id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.subscriptionFeaturesLinkText"
                             defaultMessage="subscription features"
@@ -147,7 +151,11 @@ export class StartTrial extends Component<Props, State> {
                     values={{
                       authenticationTypeList: 'AD/LDAP, SAML, PKI, SAML/SSO',
                       securityDocumentationLinkText: (
-                        <EuiLink href={docLinks.security} target="_blank">
+                        <EuiLink
+                          data-test-subj="licenseManagementDocumentationLink"
+                          href={docLinks.security}
+                          target="_blank"
+                        >
                           <FormattedMessage
                             id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.securityDocumentationLinkText"
                             defaultMessage="documentation"
@@ -163,7 +171,11 @@ export class StartTrial extends Component<Props, State> {
                     defaultMessage="By starting this trial, you agree that it is subject to these {termsAndConditionsLinkText}."
                     values={{
                       termsAndConditionsLinkText: (
-                        <EuiLink href={EXTERNAL_LINKS.TRIAL_LICENSE} target="_blank">
+                        <EuiLink
+                          data-test-subj="licenseManagementTermsAndConditionsLink"
+                          href={EXTERNAL_LINKS.TRIAL_LICENSE}
+                          target="_blank"
+                        >
                           <FormattedMessage
                             id="xpack.licenseMgmt.licenseDashboard.startTrial.confirmModalDescription.termsAndConditionsLinkText"
                             defaultMessage="terms and conditions"
@@ -239,7 +251,11 @@ export class StartTrial extends Component<Props, State> {
           and all our other {subscriptionFeaturesLinkText} have to offer."
           values={{
             subscriptionFeaturesLinkText: (
-              <EuiLink href={EXTERNAL_LINKS.SUBSCRIPTIONS} target="_blank">
+              <EuiLink
+                data-test-subj="licenseManagementSubscriptionFeaturesLink"
+                href={EXTERNAL_LINKS.SUBSCRIPTIONS}
+                target="_blank"
+              >
                 <FormattedMessage
                   id="xpack.licenseMgmt.licenseDashboard.startTrial.subscriptionFeaturesLinkText"
                   defaultMessage="subscription features"

@@ -318,7 +318,10 @@ export const Main = ({ basename, reporting, screenshotMode }: ReportingExampleAp
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
                       <EuiText size="s">
-                        <EuiLink href={history.createHref(parsePath(ROUTES.captureTest))}>
+                        <EuiLink
+                          data-test-subj="reportingExampleMainGoToCaptureTestLink"
+                          href={history.createHref(parsePath(ROUTES.captureTest))}
+                        >
                           Go to capture test
                         </EuiLink>
                       </EuiText>

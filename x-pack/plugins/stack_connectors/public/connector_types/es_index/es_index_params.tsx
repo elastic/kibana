@@ -156,6 +156,7 @@ export const IndexParamsFields = ({
               values={{ alertHistoryIndex: `${ALERT_HISTORY_PREFIX}${alertHistoryIndexSuffix}` }}
             />
             <EuiLink
+              data-test-subj="stackConnectorsIndexParamsFieldsViewDocsLink"
               href={docLinks.links.alerting.preconfiguredAlertHistoryConnector}
               target="_blank"
             >
@@ -205,7 +206,11 @@ export const IndexParamsFields = ({
       errors={errors.documents as string[]}
       onDocumentsChange={onDocumentsChange}
       helpText={
-        <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
+        <EuiLink
+          data-test-subj="stackConnectorsIndexParamsFieldsIndexDocumentExampleLink"
+          href={docLinks.links.alerting.indexAction}
+          target="_blank"
+        >
           <FormattedMessage
             id="xpack.stackConnectors.components.index.indexDocumentHelpLabel"
             defaultMessage="Index document example."

@@ -86,6 +86,7 @@ export const ColorManager: FC<Props> = ({
       <EuiFlexItem style={{ display: 'inline-block' }}>
         {/* While the label indicates only hex values are honored, it can accept CSS values. */}
         <EuiFieldText
+          data-test-subj="canvasColorManagerFieldText"
           value={value}
           isInvalid={!validColor && value.length > 0}
           placeholder={strings.getCodePlaceholder()}

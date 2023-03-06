@@ -51,6 +51,7 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp }: Props) {
           <p>
             The following examples showcase services and APIs that are available to developers.
             <EuiFieldSearch
+              data-test-subj="developerExamplesDeveloperExamplesFieldSearch"
               placeholder="Search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -72,6 +73,7 @@ function DeveloperExamples({ examples, navigateToApp, getUrlForApp }: Props) {
               title={
                 <React.Fragment>
                   <EuiLink
+                    data-test-subj="developerExamplesDeveloperExamplesLink"
                     onClick={() => {
                       navigateToApp(def.appId);
                     }}

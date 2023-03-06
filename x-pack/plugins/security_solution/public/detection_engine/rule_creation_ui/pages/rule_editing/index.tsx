@@ -537,7 +537,11 @@ const EditRulePageComponent: FC = () => {
                         responsive={false}
                       >
                         <EuiFlexItem grow={false}>
-                          <EuiButton iconType="cross" onClick={goToDetailsRule}>
+                          <EuiButton
+                            data-test-subj="securitySolutionEditRulePageComponentButton"
+                            iconType="cross"
+                            onClick={goToDetailsRule}
+                          >
                             {i18n.CANCEL}
                           </EuiButton>
                         </EuiFlexItem>

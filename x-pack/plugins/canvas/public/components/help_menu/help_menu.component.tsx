@@ -31,6 +31,7 @@ export const HelpMenu: FC<Props> = ({ hideHelpMenu, showKeyboardShortcutsDocFlyo
   return (
     <>
       <EuiButtonEmpty
+        data-test-subj="canvasHelpMenuButtonEmpty"
         size="s"
         flush="left"
         iconType="keyboard"

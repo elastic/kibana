@@ -439,7 +439,11 @@ export const EditPackagePolicyForm = memo<{
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
                     <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty color="ghost" href={cancelUrl}>
+                      <EuiButtonEmpty
+                        data-test-subj="fleetEditPackagePolicyFormCancelButtonEmpty"
+                        color="ghost"
+                        href={cancelUrl}
+                      >
                         <FormattedMessage
                           id="xpack.fleet.editPackagePolicy.cancelButton"
                           defaultMessage="Cancel"

@@ -51,7 +51,11 @@ const noDataOptions: Record<
         defaultMessage="Use our {integrationFullName} (KSPM) integration to detect security misconfigurations in your Kubernetes clusters."
         values={{
           integrationFullName: (
-            <EuiLink href={cspIntegrationDocsNavigation.kspm.overviewPath} target="_blank">
+            <EuiLink
+              data-test-subj="cloudSecurityPostureKubernetesSecurityPostureManagementLink"
+              href={cspIntegrationDocsNavigation.kspm.overviewPath}
+              target="_blank"
+            >
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.kspmIntegration.packageNotInstalled.integrationNameLabel"
                 defaultMessage="Kubernetes Security Posture Management"
@@ -76,7 +80,11 @@ const noDataOptions: Record<
         defaultMessage="Use our {integrationFullName} (CSPM) integration to detect security misconfigurations in your cloud infrastructure."
         values={{
           integrationFullName: (
-            <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
+            <EuiLink
+              data-test-subj="cloudSecurityPostureCloudSecurityPostureManagementLink"
+              href={cspIntegrationDocsNavigation.cspm.overviewPath}
+              target="_blank"
+            >
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.cspmIntegration.packageNotInstalled.integrationNameLabel"
                 defaultMessage="Cloud Security Posture Management"

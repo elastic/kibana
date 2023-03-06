@@ -171,12 +171,16 @@ export const TransformList: FC<TransformListProps> = ({
 
   const bulkActionMenuItems = [
     <div key="startAction" className="transform__BulkActionItem">
-      <EuiButtonEmpty onClick={() => bulkStartAction.openModal(transformSelection)}>
+      <EuiButtonEmpty
+        data-test-subj="transformTransformListButtonEmpty"
+        onClick={() => bulkStartAction.openModal(transformSelection)}
+      >
         <StartActionName items={transformSelection} transformNodes={transformNodes} />
       </EuiButtonEmpty>
     </div>,
     <div key="stopAction" className="transform__BulkActionItem">
       <EuiButtonEmpty
+        data-test-subj="transformTransformListButtonEmpty"
         onClick={() => {
           bulkStopAction.openModal(transformSelection);
         }}
@@ -186,6 +190,7 @@ export const TransformList: FC<TransformListProps> = ({
     </div>,
     <div key="resetAction" className="transform__BulkActionItem">
       <EuiButtonEmpty
+        data-test-subj="transformTransformListButtonEmpty"
         onClick={() => {
           bulkResetAction.openModal(transformSelection);
         }}
@@ -198,7 +203,10 @@ export const TransformList: FC<TransformListProps> = ({
       </EuiButtonEmpty>
     </div>,
     <div key="deleteAction" className="transform__BulkActionItem">
-      <EuiButtonEmpty onClick={() => bulkDeleteAction.openModal(transformSelection)}>
+      <EuiButtonEmpty
+        data-test-subj="transformTransformListButtonEmpty"
+        onClick={() => bulkDeleteAction.openModal(transformSelection)}
+      >
         <DeleteActionName
           canDeleteTransform={capabilities.canDeleteTransform}
           disabled={isDeleteActionDisabled(transformSelection, false)}

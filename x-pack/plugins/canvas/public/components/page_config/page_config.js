@@ -80,6 +80,7 @@ export const PageConfig = ({
         <Fragment>
           <EuiFormRow label={strings.getTransitionLabel()} display="rowCompressed">
             <EuiSelect
+              data-test-subj="canvasPageConfigSelect"
               value={transition ? transition.name : ''}
               options={transitions}
               compressed

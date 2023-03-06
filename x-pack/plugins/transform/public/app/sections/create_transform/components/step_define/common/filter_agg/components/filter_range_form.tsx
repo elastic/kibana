@@ -57,6 +57,7 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
             }
           >
             <EuiFieldNumber
+              data-test-subj="transformFilterRangeFormFieldNumber"
               value={from}
               max={to !== '' ? to : undefined}
               onChange={(e) => {
@@ -65,6 +66,7 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               step="any"
               prepend={
                 <EuiButton
+                  data-test-subj="transformFilterRangeFormButton"
                   minWidth={BUTTON_SIZE}
                   style={{ maxWidth: BUTTON_SIZE }}
                   onChange={(e: any) => {
@@ -88,6 +90,7 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
             }
           >
             <EuiFieldNumber
+              data-test-subj="transformFilterRangeFormFieldNumber"
               value={to}
               min={from !== '' ? from : undefined}
               onChange={(e) => {
@@ -96,6 +99,7 @@ export const FilterRangeForm: FilterAggConfigRange['aggTypeConfig']['FilterAggFo
               step="any"
               append={
                 <EuiButton
+                  data-test-subj="transformFilterRangeFormButton"
                   minWidth={BUTTON_SIZE}
                   style={{ maxWidth: BUTTON_SIZE }}
                   onClick={() => {

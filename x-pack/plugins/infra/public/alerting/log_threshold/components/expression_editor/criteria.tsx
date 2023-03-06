@@ -246,6 +246,7 @@ const AddCriterionButton = ({ addCriterion }: { addCriterion: () => void }) => {
   return (
     <div>
       <EuiButtonEmpty
+        data-test-subj="infraAddCriterionButtonAddConditionButtonEmpty"
         color={'primary'}
         iconSide={'left'}
         flush={'left'}

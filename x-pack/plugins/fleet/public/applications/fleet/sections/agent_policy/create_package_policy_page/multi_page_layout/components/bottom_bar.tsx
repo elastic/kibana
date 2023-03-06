@@ -55,7 +55,13 @@ export const CreatePackagePolicyBottomBar: React.FC<{
         <EuiFlexItem grow={false}>
           <EuiFlexItem grow={false}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiButtonEmpty color="ghost" size="s" href={cancelUrl} onClick={cancelClickHandler}>
+            <EuiButtonEmpty
+              data-test-subj="fleetCreatePackagePolicyBottomBarButtonEmpty"
+              color="ghost"
+              size="s"
+              href={cancelUrl}
+              onClick={cancelClickHandler}
+            >
               {cancelMessage || (
                 <FormattedMessage
                   id="xpack.fleet.createPackagePolicyBottomBar.backButton"
@@ -67,6 +73,7 @@ export const CreatePackagePolicyBottomBar: React.FC<{
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="fleetCreatePackagePolicyBottomBarButton"
             color="primary"
             fill
             size="m"
@@ -102,7 +109,13 @@ export const AgentStandaloneBottomBar: React.FC<{
         <EuiFlexItem grow={false}>
           <EuiFlexItem grow={false}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
-            <EuiButtonEmpty color="ghost" size="s" href={cancelUrl} onClick={cancelClickHandler}>
+            <EuiButtonEmpty
+              data-test-subj="fleetAgentStandaloneBottomBarGoBackButtonEmpty"
+              color="ghost"
+              size="s"
+              href={cancelUrl}
+              onClick={cancelClickHandler}
+            >
               <FormattedMessage
                 id="xpack.fleet.agentStandaloneBottomBar.backButton"
                 defaultMessage="Go back"
@@ -111,7 +124,13 @@ export const AgentStandaloneBottomBar: React.FC<{
           </EuiFlexItem>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" fill size="m" onClick={onNext}>
+          <EuiButton
+            data-test-subj="fleetAgentStandaloneBottomBarViewIncomingDataButton"
+            color="primary"
+            fill
+            size="m"
+            onClick={onNext}
+          >
             <FormattedMessage
               id="xpack.fleet.agentStandaloneBottomBar.viewIncomingDataBtn"
               defaultMessage="View incoming data"
@@ -134,7 +153,12 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="ghost" size="s" href={getHref('integrations_all')}>
+            <EuiButtonEmpty
+              data-test-subj="fleetCreatePackagePolicyFinalBottomBarAddAnotherIntegrationButtonEmpty"
+              color="ghost"
+              size="s"
+              href={getHref('integrations_all')}
+            >
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicyBottomBar.addAnotherIntegration"
                 defaultMessage="Add another integration"
@@ -145,6 +169,7 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
         {!isK8s && (
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="fleetCreatePackagePolicyFinalBottomBarViewAssetsButton"
               color="success"
               fill
               size="m"
@@ -162,6 +187,7 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
         {isK8s && (
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="fleetCreatePackagePolicyFinalBottomBarViewKubernetesMetricsDashboardsButton"
               color="success"
               fill
               size="m"
@@ -193,6 +219,7 @@ export const AgentDataTimedOutBottomBar: React.FC<{
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            data-test-subj="fleetAgentDataTimedOutBottomBarTroubleshootingGuideButtonEmpty"
             color="ghost"
             size="s"
             href={troubleshootLink}
@@ -206,7 +233,12 @@ export const AgentDataTimedOutBottomBar: React.FC<{
           </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton color="success" fill href={discoverLogsLink ?? ''}>
+          <EuiButton
+            data-test-subj="fleetAgentDataTimedOutBottomBarViewIncomingIntegrationLogsButton"
+            color="success"
+            fill
+            href={discoverLogsLink ?? ''}
+          >
             <FormattedMessage
               id="xpack.fleet.confirmIncomingData.timeout.discoverLogsLink"
               defaultMessage="View incoming {integration} logs"

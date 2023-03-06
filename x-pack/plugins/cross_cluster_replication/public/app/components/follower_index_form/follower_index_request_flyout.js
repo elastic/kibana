@@ -67,7 +67,12 @@ export class FollowerIndexRequestFlyout extends PureComponent {
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
-          <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
+          <EuiButtonEmpty
+            data-test-subj="crossClusterReplicationCloseButtonEmpty"
+            iconType="cross"
+            onClick={close}
+            flush="left"
+          >
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexForm.requestFlyout.closeButtonLabel"
               defaultMessage="Close"

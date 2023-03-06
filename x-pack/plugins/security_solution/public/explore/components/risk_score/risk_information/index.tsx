@@ -161,7 +161,12 @@ const RiskInformationFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={handleOnClose}>{i18n.CLOSE_BUTTON_LTEXT}</EuiButton>
+            <EuiButton
+              data-test-subj="securitySolutionRiskInformationFlyoutButton"
+              onClick={handleOnClose}
+            >
+              {i18n.CLOSE_BUTTON_LTEXT}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>

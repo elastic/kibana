@@ -111,6 +111,7 @@ export function ParamsEditorInput({
       const placeholderText = getPlaceholderText(Boolean(field), Boolean(operator?.type));
       return (
         <EuiFieldText
+          data-test-subj="pluginsParamsEditorInputFieldText"
           compressed={true}
           disabled={true}
           placeholder={placeholderText}

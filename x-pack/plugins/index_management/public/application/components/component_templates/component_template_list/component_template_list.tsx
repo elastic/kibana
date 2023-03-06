@@ -164,7 +164,12 @@ export const ComponentTemplateList: React.FunctionComponent<Props> = ({
             defaultMessage="Use component templates to reuse settings, mappings, and aliases configurations in multiple index templates. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href={documentation.componentTemplates} target="_blank" external>
+                <EuiLink
+                  data-test-subj="indexManagementComponentTemplateListLearnMoreLink"
+                  href={documentation.componentTemplates}
+                  target="_blank"
+                  external
+                >
                   {i18n.translate('xpack.idxMgmt.componentTemplates.list.learnMoreLinkText', {
                     defaultMessage: 'Learn more.',
                   })}

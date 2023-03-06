@@ -548,7 +548,12 @@ export const AnomalyExplanationDetails: FC<{ anomaly: AnomaliesTableRecord }> = 
             defaultMessage="Anomaly explanation {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href={docsUrl} target="_blank" css={{ marginLeft: '8px' }}>
+                <EuiLink
+                  data-test-subj="mlAnomalyExplanationDetailsLearnMoreLink"
+                  href={docsUrl}
+                  target="_blank"
+                  css={{ marginLeft: '8px' }}
+                >
                   <FormattedMessage
                     id="xpack.ml.anomaliesTable.anomalyDetails.anomalyExplanation.learnMoreLinkText"
                     defaultMessage="Learn more"

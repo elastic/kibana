@@ -239,6 +239,7 @@ export const DashboardListing = ({
                   values={{
                     sampleDataInstallLink: (
                       <EuiLink
+                        data-test-subj="pluginsEmptyPromptLink"
                         onClick={() =>
                           application.navigateToApp('home', {
                             path: '#/tutorial_directory/sampleData',

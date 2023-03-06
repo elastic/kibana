@@ -99,6 +99,7 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
         <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="filesExampleDetailsFlyoutDownloadButton"
               iconType="download"
               href={files.example.getDownloadHref(file)}
               download={file.name}
@@ -107,7 +108,11 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onDismiss}>
+            <EuiButtonEmpty
+              data-test-subj="filesExampleDetailsFlyoutCloseButtonEmpty"
+              iconType="cross"
+              onClick={onDismiss}
+            >
               Close
             </EuiButtonEmpty>
           </EuiFlexItem>

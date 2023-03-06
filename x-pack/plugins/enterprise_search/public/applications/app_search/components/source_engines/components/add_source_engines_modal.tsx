@@ -52,8 +52,14 @@ export const AddSourceEnginesModal: React.FC = () => {
         />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchAddSourceEnginesModalButtonEmpty"
+          onClick={closeModal}
+        >
+          {CANCEL_BUTTON_LABEL}
+        </EuiButtonEmpty>
         <EuiButton
+          data-test-subj="enterpriseSearchAddSourceEnginesModalButton"
           disabled={selectedEngineNamesToAdd.length === 0}
           isLoading={modalLoading}
           onClick={() => addSourceEngines(selectedEngineNamesToAdd)}

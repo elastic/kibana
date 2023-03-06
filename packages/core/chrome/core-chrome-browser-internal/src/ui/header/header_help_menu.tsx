@@ -150,7 +150,13 @@ export class HeaderHelpMenu extends Component<Props, State> {
 
     return (
       <Fragment>
-        <EuiButtonEmpty href={kibanaDocLink} target="_blank" size="s" flush="left">
+        <EuiButtonEmpty
+          data-test-subj="coreKibanaDocumentationButtonEmpty"
+          href={kibanaDocLink}
+          target="_blank"
+          size="s"
+          flush="left"
+        >
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuKibanaDocumentationTitle"
             defaultMessage="Kibana documentation"
@@ -159,7 +165,13 @@ export class HeaderHelpMenu extends Component<Props, State> {
 
         <EuiSpacer size="xs" />
 
-        <EuiButtonEmpty href={helpSupportUrl} target="_blank" size="s" flush="left">
+        <EuiButtonEmpty
+          data-test-subj="coreAskElasticButtonEmpty"
+          href={helpSupportUrl}
+          target="_blank"
+          size="s"
+          flush="left"
+        >
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuAskElasticTitle"
             defaultMessage="Ask Elastic"
@@ -168,7 +180,13 @@ export class HeaderHelpMenu extends Component<Props, State> {
 
         <EuiSpacer size="xs" />
 
-        <EuiButtonEmpty href={KIBANA_FEEDBACK_LINK} target="_blank" size="s" flush="left">
+        <EuiButtonEmpty
+          data-test-subj="coreGiveFeedbackButtonEmpty"
+          href={KIBANA_FEEDBACK_LINK}
+          target="_blank"
+          size="s"
+          flush="left"
+        >
           <FormattedMessage
             id="core.ui.chrome.headerGlobalNav.helpMenuGiveFeedbackTitle"
             defaultMessage="Give feedback"
@@ -178,6 +196,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
         <EuiSpacer size="xs" />
 
         <EuiButtonEmpty
+          data-test-subj="coreOpenAnIssueInGitHubButtonEmpty"
           href={GITHUB_CREATE_ISSUE_LINK}
           target="_blank"
           size="s"
@@ -340,7 +359,12 @@ const createCustomLink = (
 ) => {
   return (
     <Fragment key={`helpButton${index}`}>
-      <EuiButtonEmpty {...buttonProps} size="s" flush="left">
+      <EuiButtonEmpty
+        data-test-subj="coreCreateCustomLinkButtonEmpty"
+        {...buttonProps}
+        size="s"
+        flush="left"
+      >
         {text}
       </EuiButtonEmpty>
       {addSpacer && <EuiSpacer size="xs" />}

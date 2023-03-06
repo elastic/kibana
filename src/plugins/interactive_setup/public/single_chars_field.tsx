@@ -80,6 +80,7 @@ export const SingleCharsField: FunctionComponent<SingleCharsFieldProps> = ({
     children.push(
       <EuiFlexItem key={i} grow={false} style={{ width: euiThemeVars.euiFormControlHeight }}>
         <EuiFieldText
+          data-test-subj="pluginsSingleCharsFieldFieldText"
           inputRef={(el) => {
             inputRefs.current[i] = el;
           }}

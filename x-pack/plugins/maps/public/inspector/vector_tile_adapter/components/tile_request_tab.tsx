@@ -56,7 +56,13 @@ export function TileRequestTab(props: Props) {
               <div>
                 <EuiCopy textToCopy={consoleRequest}>
                   {(copy) => (
-                    <EuiButtonEmpty size="xs" flush="right" iconType="copyClipboard" onClick={copy}>
+                    <EuiButtonEmpty
+                      data-test-subj="mapsTileRequestTabCopyToClipboardButtonEmpty"
+                      size="xs"
+                      flush="right"
+                      iconType="copyClipboard"
+                      onClick={copy}
+                    >
                       {i18n.translate(
                         'xpack.maps.inspector.vectorTileRequest.copyToClipboardLabel',
                         {
@@ -72,6 +78,7 @@ export function TileRequestTab(props: Props) {
               <EuiFlexItem grow={false}>
                 <div>
                   <EuiButtonEmpty
+                    data-test-subj="mapsTileRequestTabOpenInConsoleButtonEmpty"
                     size="xs"
                     flush="right"
                     onClick={() => {

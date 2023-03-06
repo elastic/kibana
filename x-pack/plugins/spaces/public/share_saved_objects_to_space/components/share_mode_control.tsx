@@ -128,7 +128,11 @@ export const ShareModeControl = (props: Props) => {
             values={{
               objectNoun,
               readAndWritePrivilegesLink: (
-                <EuiLink href={docLink} target="_blank">
+                <EuiLink
+                  data-test-subj="spacesGetPrivilegeWarningReadAndWritePrivilegesLink"
+                  href={docLink}
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.spaces.shareToSpace.privilegeWarningLink"
                     defaultMessage="read and write privileges"

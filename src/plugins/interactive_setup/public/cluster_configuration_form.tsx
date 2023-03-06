@@ -188,6 +188,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
             fullWidth
           >
             <EuiFieldText
+              data-test-subj="pluginsClusterConfigurationFormFieldText"
               icon="user"
               name="username"
               value={form.values.username}
@@ -279,7 +280,12 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
       )}
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty flush="right" iconType="arrowLeft" onClick={onCancel}>
+          <EuiButtonEmpty
+            data-test-subj="pluginsClusterConfigurationFormBackButtonEmpty"
+            flush="right"
+            iconType="arrowLeft"
+            onClick={onCancel}
+          >
             <FormattedMessage
               id="interactiveSetup.clusterConfigurationForm.cancelButton"
               defaultMessage="Back"
@@ -288,6 +294,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="pluginsClusterConfigurationFormIsSubmittingSelectTrueConfiguringElasticOtherConfigureElasticButton"
             buttonRef={buttonRef}
             type="submit"
             isLoading={form.isSubmitting}
@@ -361,7 +368,7 @@ export const CertificatePanel: FunctionComponent<CertificatePanelProps> = ({
                 defaultMessage="Issued by: {issuer}"
                 values={{
                   issuer: onClick ? (
-                    <EuiLink onClick={onClick}>
+                    <EuiLink data-test-subj="pluginsCertificatePanelLink" onClick={onClick}>
                       {certificate.issuer.O || certificate.issuer.CN}
                     </EuiLink>
                   ) : (
@@ -462,7 +469,11 @@ const CertificateChain: FunctionComponent<CertificateChainProps> = ({ certificat
               ))}
           </EuiModalBody>
           <EuiModalFooter>
-            <EuiButton fill onClick={() => setShowModal(false)}>
+            <EuiButton
+              data-test-subj="pluginsCertificateChainCloseButton"
+              fill
+              onClick={() => setShowModal(false)}
+            >
               <FormattedMessage
                 id="interactiveSetup.certificateChain.cancelButton"
                 defaultMessage="Close"
@@ -485,7 +496,10 @@ export const ForgotPasswordPopover: FunctionComponent<ForgotPasswordPopoverProps
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const button = (
-    <EuiLink onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}>
+    <EuiLink
+      data-test-subj="pluginsForgotPasswordPopoverForgotPasswordLink"
+      onClick={() => setIsPopoverOpen((isOpen) => !isOpen)}
+    >
       <FormattedMessage
         id="interactiveSetup.forgotPasswordPopover.buttonText"
         defaultMessage="Forgot password?"

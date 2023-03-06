@@ -36,6 +36,7 @@ export const AddDomainFlyout: React.FC = () => {
   return (
     <>
       <EuiButton
+        data-test-subj="enterpriseSearchAddDomainFlyoutAddDomainButton"
         size="s"
         color="success"
         iconType="plusInCircle"
@@ -88,7 +89,10 @@ export const AddDomainFlyout: React.FC = () => {
             <EuiFlyoutFooter>
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty onClick={() => setIsFlyoutVisible(false)}>
+                  <EuiButtonEmpty
+                    data-test-subj="enterpriseSearchAddDomainFlyoutButtonEmpty"
+                    onClick={() => setIsFlyoutVisible(false)}
+                  >
                     {CANCEL_BUTTON_LABEL}
                   </EuiButtonEmpty>
                 </EuiFlexItem>

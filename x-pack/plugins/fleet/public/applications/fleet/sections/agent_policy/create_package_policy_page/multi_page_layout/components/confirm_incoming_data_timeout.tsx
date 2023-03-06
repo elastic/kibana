@@ -45,7 +45,12 @@ export const ConfirmIncomingDataTimeout: React.FunctionComponent<Props> = ({
           defaultMessage="If the system is not generating data, it may help to generate some to ensure data is being collected correctly. If you're having trouble, see our {troubleshootLink}, or you may check later by viewing {discoverLink}."
           values={{
             troubleshootLink: (
-              <EuiLink external href={troubleshootLink} target="_blank">
+              <EuiLink
+                data-test-subj="fleetConfirmIncomingDataTimeoutTroubleshootingGuideLink"
+                external
+                href={troubleshootLink}
+                target="_blank"
+              >
                 <FormattedMessage
                   id="xpack.fleet.confirmIncomingData.timeout.troubleshootLink"
                   defaultMessage="troubleshooting guide"
@@ -53,7 +58,12 @@ export const ConfirmIncomingDataTimeout: React.FunctionComponent<Props> = ({
               </EuiLink>
             ),
             discoverLink: (
-              <EuiLink external href={discoverLogsLink ?? ''} target="_blank">
+              <EuiLink
+                data-test-subj="fleetConfirmIncomingDataTimeoutIntegrationLogsInDiscoverLink"
+                external
+                href={discoverLogsLink ?? ''}
+                target="_blank"
+              >
                 <FormattedMessage
                   id="xpack.fleet.confirmIncomingData.timeout.discoverLink"
                   defaultMessage="{integration} logs in Discover"

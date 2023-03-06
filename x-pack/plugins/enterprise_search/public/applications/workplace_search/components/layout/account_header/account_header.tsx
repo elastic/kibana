@@ -91,7 +91,12 @@ export const AccountHeader: React.FC = () => {
           >
             <EuiContextMenuPanel size="s" items={accountNavItems} />
           </EuiPopover>
-          <EuiButton href={getWorkplaceSearchUrl('/search')} target="_blank" iconType="search">
+          <EuiButton
+            data-test-subj="enterpriseSearchAccountHeaderButton"
+            href={getWorkplaceSearchUrl('/search')}
+            target="_blank"
+            iconType="search"
+          >
             {ACCOUNT_NAV.SEARCH}
           </EuiButton>
         </EuiHeaderLinks>

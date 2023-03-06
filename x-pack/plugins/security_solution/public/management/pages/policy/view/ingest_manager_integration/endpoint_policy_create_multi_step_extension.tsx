@@ -82,6 +82,7 @@ export const EndpointPolicyCreateMultiStepExtension = memo(() => {
         />
         &nbsp;
         <EuiLink
+          data-test-subj="securitySolutionEndpointPolicyCreateMultiStepExtensionLearnMoreLink"
           href={docLinks.links.securitySolution.configureEndpointIntegrationPolicy}
           target="_blank"
           external

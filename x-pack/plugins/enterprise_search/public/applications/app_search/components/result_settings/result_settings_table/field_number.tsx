@@ -70,6 +70,7 @@ export const FieldNumber: React.FC<Props> = ({
 }) => {
   return (
     <EuiFieldNumber
+      data-test-subj="enterpriseSearchFieldNumberFieldNumber"
       value={
         typeof fieldSettings[fieldSizeProperty] === 'number'
           ? (fieldSettings[fieldSizeProperty] as number)

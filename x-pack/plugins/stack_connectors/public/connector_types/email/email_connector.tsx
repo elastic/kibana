@@ -50,7 +50,11 @@ const getEmailConfig = (
 ): FieldConfig<string> => ({
   label: i18n.FROM_LABEL,
   helpText: (
-    <EuiLink href={href} target="_blank">
+    <EuiLink
+      data-test-subj="stackConnectorsGetEmailConfigConfigureEmailAccountsLink"
+      href={href}
+      target="_blank"
+    >
       <FormattedMessage
         id="xpack.stackConnectors.components.email.configureAccountsHelpLabel"
         defaultMessage="Configure email accounts"

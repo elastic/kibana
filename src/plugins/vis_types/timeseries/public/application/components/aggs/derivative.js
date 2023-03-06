@@ -100,7 +100,12 @@ export const DerivativeAgg = (props) => {
             }
             fullWidth
           >
-            <EuiFieldText onChange={handleTextChange('unit')} value={model.unit} fullWidth />
+            <EuiFieldText
+              data-test-subj="pluginsDerivativeAggFieldText"
+              onChange={handleTextChange('unit')}
+              value={model.unit}
+              fullWidth
+            />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

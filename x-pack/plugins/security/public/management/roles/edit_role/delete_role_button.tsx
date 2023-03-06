@@ -31,7 +31,11 @@ export class DeleteRoleButton extends Component<Props, State> {
 
     return (
       <Fragment>
-        <EuiButtonEmpty color={'danger'} onClick={this.showModal}>
+        <EuiButtonEmpty
+          data-test-subj="securityDeleteRoleButtonEmpty"
+          color={'danger'}
+          onClick={this.showModal}
+        >
           <FormattedMessage
             id="xpack.security.management.editRole.deleteRoleButton.deleteRoleButtonLabel"
             defaultMessage="Delete role"

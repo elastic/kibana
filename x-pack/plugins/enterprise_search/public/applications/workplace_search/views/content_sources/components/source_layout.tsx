@@ -49,7 +49,11 @@ export const SourceLayout: React.FC<PageTemplateProps> = ({
     <>
       <EuiCallOut title={SOURCE_DISABLED_CALLOUT_TITLE} color="warning" iconType="alert">
         <p>{SOURCE_DISABLED_CALLOUT_DESCRIPTION}</p>
-        <EuiButton color="warning" href={docLinks.licenseManagement}>
+        <EuiButton
+          data-test-subj="enterpriseSearchSourceLayoutButton"
+          color="warning"
+          href={docLinks.licenseManagement}
+        >
           {SOURCE_DISABLED_CALLOUT_BUTTON}
         </EuiButton>
       </EuiCallOut>

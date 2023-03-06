@@ -22,7 +22,13 @@ export const NoDataCard: FunctionComponent<NoDataPageActions> = ({
   ...cardRest
 }) => {
   const footer =
-    typeof button !== 'string' ? button : <EuiButton fill>{button || title}</EuiButton>;
+    typeof button !== 'string' ? (
+      button
+    ) : (
+      <EuiButton data-test-subj="pluginsNoDataCardButton" fill>
+        {button || title}
+      </EuiButton>
+    );
 
   return (
     <EuiCard

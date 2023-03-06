@@ -424,6 +424,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiSelect
+                    data-test-subj="watcherThresholdWatchEditSelect"
                     fullWidth
                     value={watch.triggerIntervalUnit}
                     aria-label={i18n.translate(
@@ -490,6 +491,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       )}
                     </EuiPopoverTitle>
                     <EuiSelect
+                      data-test-subj="watcherThresholdWatchEditSelect"
                       value={watch.aggType}
                       onChange={(e) => {
                         setWatchProperty('aggType', e.target.value);
@@ -640,6 +642,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
                         <EuiSelect
+                          data-test-subj="watcherThresholdWatchEditSelect"
                           value={watch.groupBy}
                           onChange={(e) => {
                             setWatchProperty('termSize', null);
@@ -664,6 +667,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                               errors={errors}
                             >
                               <EuiFieldNumber
+                                data-test-subj="watcherThresholdWatchEditFieldNumber"
                                 value={watch.termSize}
                                 onChange={(e) => {
                                   setWatchProperty('termSize', e.target.value);
@@ -679,6 +683,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                               errors={errors}
                             >
                               <EuiSelect
+                                data-test-subj="watcherThresholdWatchEditSelect"
                                 value={watch.termField || ''}
                                 onChange={(e) => {
                                   setWatchProperty('termField', e.target.value);
@@ -745,6 +750,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                     <EuiFlexGroup>
                       <EuiFlexItem grow={false}>
                         <EuiSelect
+                          data-test-subj="watcherThresholdWatchEditSelect"
                           value={watch.thresholdComparator}
                           onChange={(e) => {
                             setWatchProperty('thresholdComparator', e.target.value);
@@ -840,6 +846,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                           errors={errors}
                         >
                           <EuiFieldNumber
+                            data-test-subj="watcherThresholdWatchEditFieldNumber"
                             min={1}
                             value={watch.timeWindowSize || ''}
                             onChange={(e) => {
@@ -852,6 +859,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiSelect
+                          data-test-subj="watcherThresholdWatchEditSelect"
                           value={watch.timeWindowUnit}
                           onChange={(e) => {
                             setWatchProperty('timeWindowUnit', e.target.value);
@@ -919,7 +927,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
               </EuiFlexItem>
 
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={() => goToWatchList()}>
+                <EuiButtonEmpty
+                  data-test-subj="watcherThresholdWatchEditCancelButtonEmpty"
+                  onClick={() => goToWatchList()}
+                >
                   {i18n.translate('xpack.watcher.sections.watchEdit.threshold.cancelButtonLabel', {
                     defaultMessage: 'Cancel',
                   })}
@@ -929,7 +940,10 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => setIsRequestVisible(!isRequestVisible)}>
+            <EuiButtonEmpty
+              data-test-subj="watcherThresholdWatchEditButtonEmpty"
+              onClick={() => setIsRequestVisible(!isRequestVisible)}
+            >
               {isRequestVisible ? (
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.json.hideRequestButtonLabel"

@@ -61,12 +61,18 @@ export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
   ];
 
   const openManagerButton = showManager ? (
-    <EuiButton onClick={() => setShowManager(false)}>Close</EuiButton>
+    <EuiButton
+      data-test-subj="uiActionsEnhancedExamplesDrilldownsWithoutEmbeddableExampleCloseButton"
+      onClick={() => setShowManager(false)}
+    >
+      Close
+    </EuiButton>
   ) : (
     <EuiPopover
       id="contextMenuExample"
       button={
         <EuiButton
+          data-test-subj="uiActionsEnhancedExamplesDrilldownsWithoutEmbeddableExampleOpenDrilldownManagerButton"
           fill={!showManager}
           iconType="arrowDown"
           iconSide="right"
@@ -101,6 +107,7 @@ export const DrilldownsWithoutEmbeddableExample: React.FC = () => {
         <EuiFlexItem grow={false}>{openManagerButton}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="uiActionsEnhancedExamplesDrilldownsWithoutEmbeddableExampleExecuteClickActionButton"
             color="success"
             fill
             iconType="play"

@@ -205,6 +205,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    data-test-subj="mlChangeDataViewModalBackButtonEmpty"
                     onClick={setStep.bind(null, STEP.PICK_DATA_VIEW)}
                     isDisabled={validating}
                     flush="left"

@@ -315,6 +315,7 @@ export function SavedQueryManagementList({
           {canEditSavedObjects && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="pluginsSavedQueryManagementListManageButtonEmpty"
                 href={http.basePath.prepend(
                   `/app/management/kibana/objects?initialQuery=type:("query")`
                 )}

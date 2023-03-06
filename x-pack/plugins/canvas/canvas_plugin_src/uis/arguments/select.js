@@ -23,7 +23,14 @@ const SelectArgInput = ({ typeInstance, onValueChange, argValue, argId }) => {
   };
 
   return (
-    <EuiSelect compressed id={argId} value={argValue} options={choices} onChange={handleChange} />
+    <EuiSelect
+      data-test-subj="canvasSelectArgInputSelect"
+      compressed
+      id={argId}
+      value={argValue}
+      options={choices}
+      onChange={handleChange}
+    />
   );
 };
 

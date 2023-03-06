@@ -103,7 +103,10 @@ export const CloseJobsConfirmModal: FC<Props> = ({
         <>
           <EuiSpacer />
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeModal}>
+            <EuiButtonEmpty
+              data-test-subj="mlCloseJobsConfirmModalCancelButtonEmpty"
+              onClick={closeModal}
+            >
               <FormattedMessage
                 id="xpack.ml.jobsList.startDatafeedsConfirmModal.cancelButtonLabel"
                 defaultMessage="Cancel"

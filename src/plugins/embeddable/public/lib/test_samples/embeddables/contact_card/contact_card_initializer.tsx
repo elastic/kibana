@@ -46,6 +46,7 @@ export class ContactCardInitializer extends Component<ContactCardInitializerProp
           <EuiForm>
             <EuiFormRow label="First name">
               <EuiFieldText
+                data-test-subj="pluginsFieldText"
                 name="popfirst"
                 value={this.state.firstName}
                 onChange={(e) => this.setState({ firstName: e.target.value })}
@@ -54,6 +55,7 @@ export class ContactCardInitializer extends Component<ContactCardInitializerProp
 
             <EuiFormRow label="Last name">
               <EuiFieldText
+                data-test-subj="pluginsFieldText"
                 name="popfirst"
                 value={this.state.lastName}
                 placeholder="optional"
@@ -64,9 +66,12 @@ export class ContactCardInitializer extends Component<ContactCardInitializerProp
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={this.props.onCancel}>Cancel</EuiButtonEmpty>
+          <EuiButtonEmpty data-test-subj="pluginsCancelButtonEmpty" onClick={this.props.onCancel}>
+            Cancel
+          </EuiButtonEmpty>
 
           <EuiButton
+            data-test-subj="pluginsCreateButton"
             isDisabled={!this.state.firstName}
             onClick={() => {
               if (this.state.firstName) {

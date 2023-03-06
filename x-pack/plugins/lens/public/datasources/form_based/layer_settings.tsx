@@ -46,6 +46,7 @@ export function LayerSettingsPanel({
               values={{
                 link: (
                   <EuiLink
+                    data-test-subj="lensLayerSettingsPanelViewDocumentationLink"
                     href="https://www.elastic.co/guide/en/elasticsearch/reference/master/search-aggregations-random-sampler-aggregation.html"
                     target="_blank"
                     external

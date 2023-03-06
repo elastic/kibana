@@ -39,7 +39,7 @@ export const NoDataPageBody = (props: NoDataPageBodyProps) => {
               values={{
                 solution,
                 link: (
-                  <EuiLink href={docsLink}>
+                  <EuiLink data-test-subj="pluginsNoDataPageBodyLearnMoreLink" href={docsLink}>
                     <FormattedMessage
                       id="kibana-react.noDataPage.intro.link"
                       defaultMessage="learn more"

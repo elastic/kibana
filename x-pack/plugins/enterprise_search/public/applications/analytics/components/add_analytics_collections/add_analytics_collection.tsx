@@ -20,7 +20,12 @@ export const AddAnalyticsCollection: React.FC = () => {
 
   return (
     <>
-      <EuiButton fill iconType="plusInCircle" onClick={showModal}>
+      <EuiButton
+        data-test-subj="enterpriseSearchAddAnalyticsCollectionCreateCollectionButton"
+        fill
+        iconType="plusInCircle"
+        onClick={showModal}
+      >
         {i18n.translate('xpack.enterpriseSearch.analytics.collections.create.buttonTitle', {
           defaultMessage: 'Create collection',
         })}

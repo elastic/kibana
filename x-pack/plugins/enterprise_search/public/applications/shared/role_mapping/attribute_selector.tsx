@@ -79,6 +79,7 @@ export const AttributeSelector: React.FC<Props> = ({
           />
         ) : (
           <EuiFieldText
+            data-test-subj="enterpriseSearchAttributeSelectorFieldText"
             value={attributeValue}
             name="attribute-value"
             placeholder={attributeValueExamples[attributeName]}

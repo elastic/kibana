@@ -184,7 +184,10 @@ export class Logs extends PureComponent {
             defaultMessage="Visit {link} to dive deeper."
             values={{
               link: (
-                <EuiLink href={getLogsUiLink(clusterUuid, nodeId, indexUuid)}>
+                <EuiLink
+                  data-test-subj="monitoringLogsLink"
+                  href={getLogsUiLink(clusterUuid, nodeId, indexUuid)}
+                >
                   {i18n.translate('xpack.monitoring.logs.listing.calloutLinkText', {
                     defaultMessage: 'Logs',
                   })}

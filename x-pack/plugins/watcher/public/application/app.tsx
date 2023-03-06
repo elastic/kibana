@@ -75,6 +75,7 @@ export const App = (deps: AppDeps) => {
           body={<p>{message}</p>}
           actions={[
             <EuiLink
+              data-test-subj="watcherAppManageYourLicenseLink"
               href={deps.getUrlForApp('management', { path: 'stack/license_management/home' })}
             >
               <FormattedMessage

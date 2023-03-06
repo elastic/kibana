@@ -211,7 +211,11 @@ export const WatchListPage = () => {
       <EuiText color="subdued">
         <p>
           {watcherDescriptionText}{' '}
-          <EuiLink href={watcherGettingStartedUrl} target="_blank">
+          <EuiLink
+            data-test-subj="watcherWatchListPageLearnMoreLink"
+            href={watcherGettingStartedUrl}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.watcher.sections.watchList.watcherLearnMoreLinkText"
               defaultMessage="Learn more."

@@ -46,6 +46,7 @@ export const SearchEnginesPopover: React.FC<SearchEnginesPopoverProps> = ({
       closePopover={toggleSearchEnginesPopover}
       button={
         <EuiButton
+          data-test-subj="enterpriseSearchSearchEnginesPopoverSearchEnginesButton"
           data-telemetry-id={`entSearchContent-${ingestionMethod}-header-searchEngines`}
           iconSide="right"
           iconType="arrowDown"

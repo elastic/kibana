@@ -247,6 +247,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
             {sampleHits.length > 0 && (
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="mlPreviewAlertConditionButtonEmpty"
                   color={'primary'}
                   size="xs"
                   onClick={setAreResultVisible.bind(null, !areResultsVisible)}

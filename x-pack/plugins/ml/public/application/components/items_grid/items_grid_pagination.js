@@ -63,6 +63,7 @@ export class ItemsGridPagination extends Component {
 
     const button = (
       <EuiButtonEmpty
+        data-test-subj="mlItemsPerPageItemsPerPageButtonEmpty"
         size="s"
         color="text"
         iconType="arrowDown"

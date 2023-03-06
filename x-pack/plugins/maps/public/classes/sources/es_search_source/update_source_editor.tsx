@@ -183,6 +183,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
           display="columnCompressed"
         >
           <EuiSelect
+            data-test-subj="mapsSelect"
             disabled={!this.props.sortField}
             options={[
               {

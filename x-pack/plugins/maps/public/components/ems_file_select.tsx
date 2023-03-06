@@ -78,7 +78,7 @@ export class EMSFileSelect extends Component<Props, State> {
 
   _renderSelect() {
     if (!this.state.hasLoadedOptions) {
-      return <EuiSelect isLoading />;
+      return <EuiSelect data-test-subj="mapsSelect" isLoading />;
     }
 
     const selectedOption = this.state.emsFileOptions.find(

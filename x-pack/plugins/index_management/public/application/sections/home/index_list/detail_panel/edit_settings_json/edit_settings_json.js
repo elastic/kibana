@@ -147,6 +147,7 @@ export class EditSettingsJson extends React.PureComponent {
         {this.errorMessage()}
         <EuiSpacer />
         <EuiLink
+          data-test-subj="indexManagementSettingsReferenceLink"
           href={documentationService.getSettingsDocumentationLink()}
           target="_blank"
           rel="noopener"

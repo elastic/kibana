@@ -227,6 +227,7 @@ export const SavedElementsModal: FunctionComponent<Props> = ({
 
         <EuiModalBody style={{ paddingRight: '1px' }}>
           <EuiFieldSearch
+            data-test-subj="canvasSavedElementsModalFieldSearch"
             fullWidth
             value={search}
             placeholder={strings.getFindElementPlaceholder()}

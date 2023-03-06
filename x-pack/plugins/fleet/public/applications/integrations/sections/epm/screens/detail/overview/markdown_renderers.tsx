@@ -44,7 +44,12 @@ export const markdownRenderers: TransformOptions['components'] = {
   h5: ({ children }) => <h6>{children}</h6>,
   h6: ({ children }) => <h6>{children}</h6>,
   link: ({ children, href }: { children: React.ReactNode[]; href?: string }) => (
-    <EuiLink href={href} target="_blank" rel={`${REL_NOOPENER} ${REL_NOFOLLOW} ${REL_NOREFERRER}`}>
+    <EuiLink
+      data-test-subj="fleetMarkdownRenderersLink"
+      href={href}
+      target="_blank"
+      rel={`${REL_NOOPENER} ${REL_NOFOLLOW} ${REL_NOREFERRER}`}
+    >
       {children}
     </EuiLink>
   ),

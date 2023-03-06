@@ -677,6 +677,7 @@ export const RuleEventLogListTable = <T extends RuleEventLogListOptions>(
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiFieldSearch
+              data-test-subj="triggersActionsUiRuleEventLogListTableFieldSearch"
               fullWidth
               isClearable
               value={search}

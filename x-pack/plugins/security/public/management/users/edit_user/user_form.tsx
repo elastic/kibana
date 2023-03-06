@@ -437,7 +437,11 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
         {disabled || isReservedUser ? (
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiButton iconType="arrowLeft" onClick={onCancel}>
+              <EuiButton
+                data-test-subj="securityUserFormBackToUsersButton"
+                iconType="arrowLeft"
+                onClick={onCancel}
+              >
                 <FormattedMessage
                   id="xpack.security.management.users.userForm.backToUsersButton"
                   defaultMessage="Back to users"
@@ -449,6 +453,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="securityUserFormButton"
                 type="submit"
                 isLoading={form.isSubmitting}
                 isDisabled={form.isSubmitted && form.isInvalid}
@@ -470,7 +475,12 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty flush="left" isDisabled={form.isSubmitting} onClick={onCancel}>
+              <EuiButtonEmpty
+                data-test-subj="securityUserFormCancelButtonEmpty"
+                flush="left"
+                isDisabled={form.isSubmitting}
+                onClick={onCancel}
+              >
                 <FormattedMessage
                   id="xpack.security.management.users.userForm.cancelButton"
                   defaultMessage="Cancel"

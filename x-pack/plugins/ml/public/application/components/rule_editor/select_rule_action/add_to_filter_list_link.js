@@ -18,7 +18,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 export function AddToFilterListLink({ fieldValue, filterId, addItemToFilterList }) {
   return (
-    <EuiLink onClick={() => addItemToFilterList(fieldValue, filterId, true)}>
+    <EuiLink
+      data-test-subj="mlAddToFilterListLinkAddFieldValueToFilterIdLink"
+      onClick={() => addItemToFilterList(fieldValue, filterId, true)}
+    >
       <FormattedMessage
         id="xpack.ml.ruleEditor.addValueToFilterListLinkText"
         defaultMessage="Add {fieldValue} to {filterId}"

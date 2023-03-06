@@ -18,7 +18,12 @@ export const AddSourceEnginesButton: React.FC = () => {
   const { openModal } = useActions(SourceEnginesLogic);
 
   return (
-    <EuiButton fill iconType="plusInCircle" onClick={openModal}>
+    <EuiButton
+      data-test-subj="enterpriseSearchAddSourceEnginesButtonButton"
+      fill
+      iconType="plusInCircle"
+      onClick={openModal}
+    >
       {ADD_SOURCE_ENGINES_BUTTON_LABEL}
     </EuiButton>
   );

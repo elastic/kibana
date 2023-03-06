@@ -57,6 +57,7 @@ export const AnalyticsFilters: React.FC = () => {
     <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="m">
       <EuiFlexItem>
         <EuiSelect
+          data-test-subj="enterpriseSearchAnalyticsFiltersSelect"
           options={convertTagsToSelectOptions(allTags)}
           value={currentTag}
           onChange={(e) => setCurrentTag(e.target.value)}
@@ -101,7 +102,12 @@ export const AnalyticsFilters: React.FC = () => {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton fill isDisabled={hasInvalidDateRange} onClick={onApplyFilters}>
+        <EuiButton
+          data-test-subj="enterpriseSearchAnalyticsFiltersApplyFiltersButton"
+          fill
+          isDisabled={hasInvalidDateRange}
+          onClick={onApplyFilters}
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.engine.analytics.filters.applyButtonLabel',
             { defaultMessage: 'Apply filters' }

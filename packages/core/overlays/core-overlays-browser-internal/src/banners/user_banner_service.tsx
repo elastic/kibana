@@ -75,7 +75,12 @@ export class UserBannerService {
                   <ReactMarkdownLazy>{content.trim()}</ReactMarkdownLazy>
                 </React.Suspense>
 
-                <EuiButton type="primary" size="s" onClick={() => banners.remove(id!)}>
+                <EuiButton
+                  data-test-subj="coreUpdateBannerCloseButton"
+                  type="primary"
+                  size="s"
+                  onClick={() => banners.remove(id!)}
+                >
                   <FormattedMessage
                     id="core.ui.overlays.banner.closeButtonLabel"
                     defaultMessage="Close"

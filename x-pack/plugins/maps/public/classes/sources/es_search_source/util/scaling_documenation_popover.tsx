@@ -129,6 +129,7 @@ export class ScalingDocumenationPopover extends Component<Props, State> {
                 maxResultWindow: this.props.maxResultWindow,
                 link: (
                   <EuiLink
+                    data-test-subj="mapsMaxResultWindowLink"
                     href={getDocLinks().links.elasticsearch.dynamicIndexSettings}
                     target="_blank"
                     external={true}

@@ -45,7 +45,11 @@ export const TypeParameter = ({ isMultiField, isRootLevelField, showDocLink = fa
           helpText={
             docLink ? (
               <EuiText size="xs">
-                <EuiLink href={docLink} target="_blank">
+                <EuiLink
+                  data-test-subj="indexManagementTypeParameterTypeNameDocumentationLink"
+                  href={docLink}
+                  target="_blank"
+                >
                   {i18n.translate('xpack.idxMgmt.mappingsEditor.typeField.documentationLinkLabel', {
                     defaultMessage: '{typeName} documentation',
                     values: {

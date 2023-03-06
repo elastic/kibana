@@ -22,6 +22,7 @@ export const PipelineVersions = (props: Props) => {
     <EuiFlexGroup>
       <EuiFlexItem grow={false}>
         <EuiSelect
+          data-test-subj="monitoringPipelineVersionsSelect"
           value={pipelineHash}
           options={pipelineVersions.map(
             (option: { hash: string; relativeLastSeen: number; relativeFirstSeen: number }) => {

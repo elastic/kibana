@@ -65,7 +65,10 @@ export function SelectRuleAction({
           </EuiText>
         </React.Fragment>
       )}
-      <EuiLink onClick={() => setEditRuleIndex(rules.length)}>
+      <EuiLink
+        data-test-subj="mlSelectRuleActionCreateARuleLink"
+        onClick={() => setEditRuleIndex(rules.length)}
+      >
         <FormattedMessage
           id="xpack.ml.ruleEditor.selectRuleAction.createRuleLinkText"
           defaultMessage="create a rule"

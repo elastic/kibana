@@ -258,7 +258,12 @@ export const useBulkActions = ({
                   </p>
                   <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                     <EuiFlexItem grow={false}>
-                      <EuiButton color="warning" size="s" onClick={hideWarningToast}>
+                      <EuiButton
+                        data-test-subj="securitySolutionHandleBulkEditButton"
+                        color="warning"
+                        size="s"
+                        onClick={hideWarningToast}
+                      >
                         {i18n.BULK_EDIT_WARNING_TOAST_NOTIFY}
                       </EuiButton>
                     </EuiFlexItem>

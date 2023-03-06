@@ -116,6 +116,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
           <EuiFlexGroup direction="column" alignItems="flexStart" gutterSize="xs">
             <EuiFlexItem>
               <EuiFieldText
+                data-test-subj="fleetTagOptionsFieldText"
                 placeholder={i18n.translate('xpack.fleet.tagOptions.nameTextFieldPlaceholder', {
                   defaultMessage: 'Enter new name for tag',
                 })}
@@ -134,6 +135,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButtonEmpty
+                data-test-subj="fleetTagOptionsDeleteTagButtonEmpty"
                 size="s"
                 color="danger"
                 onClick={() => {

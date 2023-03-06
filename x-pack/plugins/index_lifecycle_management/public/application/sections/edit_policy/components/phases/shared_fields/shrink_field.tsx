@@ -67,6 +67,7 @@ export const ShrinkField: FunctionComponent<Props> = ({ phase }) => {
       {isUsingShardSize === undefined ? null : (
         <>
           <EuiRadioGroup
+            data-test-subj="indexLifecycleManagementShrinkFieldRadioGroup"
             options={[
               {
                 id: `${phase}-configureShardCount`,

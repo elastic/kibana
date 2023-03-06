@@ -111,7 +111,10 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
         <EuiFlexItem grow={false}>
           <ol className="gphGuidancePanel__list" aria-labelledby="graphHeading">
             <ListItem state={hasDatasource ? 'done' : 'active'}>
-              <EuiLink onClick={onOpenDatasourcePicker}>
+              <EuiLink
+                data-test-subj="graphGuidancePanelComponentSelectADataSourceLink"
+                onClick={onOpenDatasourcePicker}
+              >
                 {i18n.translate(
                   'xpack.graph.guidancePanel.datasourceItem.indexPatternButtonLabel',
                   {
@@ -121,7 +124,11 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
               </EuiLink>
             </ListItem>
             <ListItem state={hasFields ? 'done' : hasDatasource ? 'active' : 'disabled'}>
-              <EuiLink onClick={onOpenFieldPicker} disabled={!hasFields && !hasDatasource}>
+              <EuiLink
+                data-test-subj="graphGuidancePanelComponentAddFieldsLink"
+                onClick={onOpenFieldPicker}
+                disabled={!hasFields && !hasDatasource}
+              >
                 {i18n.translate('xpack.graph.guidancePanel.fieldsItem.fieldsButtonLabel', {
                   defaultMessage: 'Add fields.',
                 })}
@@ -133,7 +140,11 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
                 defaultMessage="Enter a query in the search bar to start exploring. Don't know where to start? {topTerms}."
                 values={{
                   topTerms: (
-                    <EuiLink onClick={onFillWorkspace} disabled={!hasFields}>
+                    <EuiLink
+                      data-test-subj="graphGuidancePanelComponentGraphTheTopTermsLink"
+                      onClick={onFillWorkspace}
+                      disabled={!hasFields}
+                    >
                       {i18n.translate('xpack.graph.guidancePanel.nodesItem.topTermsButtonLabel', {
                         defaultMessage: 'Graph the top terms',
                       })}
@@ -192,7 +203,10 @@ function GuidancePanelComponent(props: GuidancePanelProps) {
               defaultMessage="New to Kibana? You can also use our {sampleDataInstallLink}."
               values={{
                 sampleDataInstallLink: (
-                  <EuiLink href={sampleDataUrl}>
+                  <EuiLink
+                    data-test-subj="graphGuidancePanelComponentSampleDataLink"
+                    href={sampleDataUrl}
+                  >
                     <FormattedMessage
                       id="xpack.graph.listing.noDataSource.sampleDataInstallLinkText"
                       defaultMessage="sample data"

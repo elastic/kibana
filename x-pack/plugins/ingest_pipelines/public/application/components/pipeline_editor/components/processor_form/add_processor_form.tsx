@@ -112,7 +112,12 @@ export const AddProcessorForm: FunctionComponent<Props> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={closeFlyout}>{cancelButtonLabel}</EuiButtonEmpty>
+              <EuiButtonEmpty
+                data-test-subj="ingestPipelinesAddProcessorFormButtonEmpty"
+                onClick={closeFlyout}
+              >
+                {cancelButtonLabel}
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton

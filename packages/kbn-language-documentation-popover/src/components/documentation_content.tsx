@@ -111,6 +111,7 @@ function DocumentationContent({ language, sections }: DocumentationProps) {
                     <EuiTitle size="xxs" data-test-subj="language-documentation-navigation-title">
                       <h6>
                         <EuiLink
+                          data-test-subj="kbnLanguageDocumentationPopoverDocumentationContentLink"
                           className="documentation__docsNavGroupLink"
                           color="text"
                           onClick={() => {

@@ -72,12 +72,18 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
   ];
 
   const openManagerButton = showManager ? (
-    <EuiButton onClick={() => setShowManager(false)}>Close</EuiButton>
+    <EuiButton
+      data-test-subj="uiActionsEnhancedExamplesDrilldownsWithEmbeddableExampleCloseButton"
+      onClick={() => setShowManager(false)}
+    >
+      Close
+    </EuiButton>
   ) : (
     <EuiPopover
       id="contextMenuExample"
       button={
         <EuiButton
+          data-test-subj="uiActionsEnhancedExamplesDrilldownsWithEmbeddableExampleOpenDrilldownManagerButton"
           fill={!showManager}
           iconType="arrowDown"
           iconSide="right"

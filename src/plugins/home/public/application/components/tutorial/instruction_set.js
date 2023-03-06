@@ -143,6 +143,7 @@ class InstructionSetUi extends React.Component {
 
         <EuiSpacer size="s" />
         <EuiButton
+          data-test-subj="pluginsButton"
           onClick={onStatusCheck}
           isLoading={statusCheckState === StatusCheckStates.FETCHING}
         >
@@ -216,6 +217,7 @@ class InstructionSetUi extends React.Component {
     if (this.props.params) {
       paramsVisibilityToggle = (
         <EuiButton
+          data-test-subj="pluginsCustomizeYourCodeSnippetsButton"
           size="s"
           iconType={this.state.isParamFormVisible ? 'arrowDown' : 'arrowRight'}
           aria-pressed={this.state.isParamFormVisible}

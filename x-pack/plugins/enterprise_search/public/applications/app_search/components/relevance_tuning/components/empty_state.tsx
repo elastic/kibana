@@ -30,7 +30,13 @@ export const EmptyState: React.FC = () => (
       }
     )}
     actions={
-      <EuiButton size="s" target="_blank" iconType="popout" href={RELEVANCE_DOCS_URL}>
+      <EuiButton
+        data-test-subj="enterpriseSearchEmptyStateReadTheRelevanceTuningGuideButton"
+        size="s"
+        target="_blank"
+        iconType="popout"
+        href={RELEVANCE_DOCS_URL}
+      >
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.empty.buttonLabel',
           { defaultMessage: 'Read the relevance tuning guide' }

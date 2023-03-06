@@ -29,7 +29,11 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, { esM
     children: (
       <EuiText>
         <p>
-          <EuiLink href={metricbeatInstallUrl} target="_blank">
+          <EuiLink
+            data-test-subj="monitoringGetKibanaInstructionsForEnablingMetricbeatFollowTheInstructionsHereLink"
+            href={metricbeatInstallUrl}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.kibanaInstructions.installMetricbeatLinkText"
               defaultMessage="Follow the instructions here."
@@ -114,7 +118,11 @@ export function getKibanaInstructionsForEnablingMetricbeat(product, _meta, { esM
     children: (
       <EuiText>
         <p>
-          <EuiLink href={metricbeatStartUrl} target="_blank">
+          <EuiLink
+            data-test-subj="monitoringGetKibanaInstructionsForEnablingMetricbeatFollowTheInstructionsHereLink"
+            href={metricbeatStartUrl}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.kibanaInstructions.startMetricbeatLinkText"
               defaultMessage="Follow the instructions here."

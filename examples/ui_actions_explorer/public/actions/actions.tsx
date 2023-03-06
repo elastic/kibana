@@ -89,8 +89,14 @@ function EditUserModal({
   const [name, setName] = useState(user.name);
   return (
     <EuiModalBody>
-      <EuiFieldText prepend="Name" value={name} onChange={(e) => setName(e.target.value)} />
+      <EuiFieldText
+        data-test-subj="uiActionsExplorerEditUserModalFieldText"
+        prepend="Name"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+      />
       <EuiButton
+        data-test-subj="uiActionsExplorerEditUserModalUpdateButton"
         onClick={() => {
           update({ ...user, name });
           close();

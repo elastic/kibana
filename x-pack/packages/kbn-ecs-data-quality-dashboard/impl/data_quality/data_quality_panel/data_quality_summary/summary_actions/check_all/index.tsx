@@ -143,6 +143,7 @@ const CheckAllComponent: React.FC<Props> = ({
 
   return (
     <EuiButton
+      data-test-subj="kbnEcsDataQualityDashboardCheckAllComponentButton"
       aria-label={isRunning ? i18n.CANCEL : i18n.CHECK_ALL}
       fill={!isRunning}
       onClick={onClick}

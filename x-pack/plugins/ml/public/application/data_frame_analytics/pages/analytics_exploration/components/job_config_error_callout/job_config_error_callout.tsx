@@ -55,7 +55,7 @@ export const JobConfigErrorCallout: FC<Props> = ({
   );
 
   const calloutBody = containsIndexPatternLink ? (
-    <EuiLink href={newIndexPatternUrl} target="_blank">
+    <EuiLink data-test-subj="mlJobConfigErrorCalloutLink" href={newIndexPatternUrl} target="_blank">
       {message}
     </EuiLink>
   ) : (

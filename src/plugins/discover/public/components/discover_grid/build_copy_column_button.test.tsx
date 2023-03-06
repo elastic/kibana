@@ -25,7 +25,7 @@ describe('Build a column button to copy to clipboard', () => {
     execCommandMock.mockImplementationOnce(() => true);
 
     const wrapper = mountWithIntl(
-      <EuiButton iconType={iconType} onClick={onClick}>
+      <EuiButton data-test-subj="pluginsButton" iconType={iconType} onClick={onClick}>
         {label}
       </EuiButton>
     );
@@ -55,7 +55,7 @@ describe('Build a column button to copy to clipboard', () => {
     });
 
     const wrapper = mountWithIntl(
-      <EuiButton iconType={iconType} onClick={onClick}>
+      <EuiButton data-test-subj="pluginsButton" iconType={iconType} onClick={onClick}>
         {label}
       </EuiButton>
     );
@@ -78,7 +78,7 @@ describe('Build a column button to copy to clipboard', () => {
     });
 
     const wrapperSource = mountWithIntl(
-      <EuiButton iconType={iconTypeSource} onClick={onClickSource}>
+      <EuiButton data-test-subj="pluginsButton" iconType={iconTypeSource} onClick={onClickSource}>
         {labelSource}
       </EuiButton>
     );
@@ -106,7 +106,7 @@ describe('Build a column button to copy to clipboard', () => {
     execCommandMock.mockImplementationOnce(() => false);
 
     const wrapper = mountWithIntl(
-      <EuiButton iconType={iconType} onClick={onClick}>
+      <EuiButton data-test-subj="pluginsButton" iconType={iconType} onClick={onClick}>
         {label}
       </EuiButton>
     );

@@ -131,6 +131,7 @@ export const DeleteIndexModal: React.FC = () => {
           )}
         >
           <EuiFieldText
+            data-test-subj="enterpriseSearchDeleteIndexModalFieldText"
             onChange={(e) => setInputIndexName(e.target.value)}
             value={inputIndexName}
           />

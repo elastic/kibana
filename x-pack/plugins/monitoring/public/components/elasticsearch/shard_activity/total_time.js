@@ -23,7 +23,7 @@ export const TotalTime = ({ startTime, totalTime }) => {
       }
       position="bottom"
     >
-      <EuiLink>{totalTime}</EuiLink>
+      <EuiLink data-test-subj="monitoringTotalTimeLink">{totalTime}</EuiLink>
     </EuiToolTip>
   );
 };

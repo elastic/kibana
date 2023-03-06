@@ -50,7 +50,10 @@ export const PanelContentError = memo(function ({
       </EuiText>
       <EuiSpacer size="l" />
 
-      <EuiButtonEmpty {...nodesLinkNavProps}>
+      <EuiButtonEmpty
+        data-test-subj="securitySolutionPanelContentErrorViewAllProcessesButtonEmpty"
+        {...nodesLinkNavProps}
+      >
         {i18n.translate('xpack.securitySolution.endpoint.resolver.panel.error.goBack', {
           defaultMessage: 'View all processes',
         })}

@@ -127,6 +127,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
               values={{
                 learnMoreLink: (
                   <EuiLink
+                    data-test-subj="indexManagementRenderHeaderLearnMoreLink"
                     href={documentationService.getDataStreamsDocumentationLink()}
                     target="_blank"
                     external

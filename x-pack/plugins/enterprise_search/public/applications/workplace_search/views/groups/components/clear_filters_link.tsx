@@ -25,7 +25,7 @@ export const ClearFiltersLink: React.FC<{}> = () => {
   const { resetGroupsFilters } = useActions(GroupsLogic);
 
   return (
-    <EuiLink onClick={resetGroupsFilters}>
+    <EuiLink data-test-subj="enterpriseSearchClearFiltersLinkLink" onClick={resetGroupsFilters}>
       <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="xs" component="span">
         <EuiFlexItem component="span" grow={false}>
           <small>

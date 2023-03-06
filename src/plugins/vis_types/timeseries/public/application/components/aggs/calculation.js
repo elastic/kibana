@@ -120,7 +120,12 @@ export function CalculationAgg(props) {
               </div>
             }
           >
-            <EuiTextArea onChange={handleTextChange('script')} value={model.script} fullWidth />
+            <EuiTextArea
+              data-test-subj="pluginsCalculationAggTextArea"
+              onChange={handleTextChange('script')}
+              value={model.script}
+              fullWidth
+            />
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>

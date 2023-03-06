@@ -35,7 +35,11 @@ const CredentialsApiUrlComponent: React.FC<Props> = ({ isLoading, readOnly, path
             defaultMessage="Provide the full URL to the desired ServiceNow instance. If you don't have one, {instance}."
             values={{
               instance: (
-                <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
+                <EuiLink
+                  data-test-subj="stackConnectorsCredentialsApiUrlComponentLink"
+                  href={docLinks.links.alerting.serviceNowAction}
+                  target="_blank"
+                >
                   {i18n.SETUP_DEV_INSTANCE}
                 </EuiLink>
               ),

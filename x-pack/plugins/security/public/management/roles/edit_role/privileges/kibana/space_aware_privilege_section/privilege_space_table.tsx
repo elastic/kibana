@@ -124,6 +124,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           if (spaces.length > displayedSpaces.length) {
             button = (
               <EuiButtonEmpty
+                data-test-subj="securityColumnsCountMoreButtonEmpty"
                 size="xs"
                 onClick={() => this.toggleExpandSpacesGroup(record.privilegeIndex)}
               >
@@ -137,6 +138,7 @@ export class PrivilegeSpaceTable extends Component<Props, State> {
           } else if (isExpanded) {
             button = (
               <EuiButtonEmpty
+                data-test-subj="securityColumnsShowLessButtonEmpty"
                 size="xs"
                 onClick={() => this.toggleExpandSpacesGroup(record.privilegeIndex)}
               >

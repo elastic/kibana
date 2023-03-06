@@ -43,7 +43,11 @@ const RuleNameComponents = ({ name, id, appId }: RuleNameProps) => {
   );
   return (
     // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink href={hrefRuleDetails} onClick={goToRuleDetails}>
+    <EuiLink
+      data-test-subj="securitySolutionRuleNameComponentsLink"
+      href={hrefRuleDetails}
+      onClick={goToRuleDetails}
+    >
       {name}
     </EuiLink>
   );

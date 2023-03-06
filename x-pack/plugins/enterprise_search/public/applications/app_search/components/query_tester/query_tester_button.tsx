@@ -18,6 +18,7 @@ export const QueryTesterButton: React.FC = () => {
   return (
     <>
       <EuiButtonEmpty
+        data-test-subj="enterpriseSearchQueryTesterButtonButtonEmpty"
         iconType="beaker"
         size="s"
         onClick={() => setIsQueryTesterOpen(!isQueryTesterOpen)}

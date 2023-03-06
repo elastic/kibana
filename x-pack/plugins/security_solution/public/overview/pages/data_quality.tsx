@@ -157,7 +157,13 @@ const DataQualityComponent: React.FC = () => {
     () => (
       <EuiText color="subdued" size="s">
         <span>{DATA_QUALITY_SUBTITLE}</span>{' '}
-        <EuiLink external={true} href={ECS_REFERENCE_URL} rel="noopener noreferrer" target="_blank">
+        <EuiLink
+          data-test-subj="securitySolutionSubtitleLink"
+          external={true}
+          href={ECS_REFERENCE_URL}
+          rel="noopener noreferrer"
+          target="_blank"
+        >
           {i18n.ELASTIC_COMMON_SCHEMA}
         </EuiLink>
       </EuiText>

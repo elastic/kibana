@@ -29,6 +29,7 @@ export const ManageMonitorsBtn = () => {
           </EuiText>
           <EuiSpacer />
           <EuiButton
+            data-test-subj="syntheticsManageMonitorsBtnButton"
             color="primary"
             fill
             href={history.createHref({

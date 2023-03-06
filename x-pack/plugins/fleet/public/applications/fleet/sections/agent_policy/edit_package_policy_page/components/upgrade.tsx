@@ -105,7 +105,10 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
               currentVersion: currentPackagePolicy?.package?.version,
               upgradeVersion: proposedUpgradePackagePolicy?.package?.version,
               previousConfigurationLink: (
-                <EuiLink onClick={() => setIsPreviousVersionFlyoutOpen(true)}>
+                <EuiLink
+                  data-test-subj="fleetUpgradeStatusCalloutPreviousConfigurationLink"
+                  onClick={() => setIsPreviousVersionFlyoutOpen(true)}
+                >
                   <FormattedMessage
                     id="xpack.fleet.upgradePackagePolicy.statusCallout.previousConfigurationLink"
                     defaultMessage="previous configuration"

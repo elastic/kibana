@@ -94,7 +94,11 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
             defaultMessage="{link} to automate the creation and deletion of cluster snapshots."
             values={{
               link: (
-                <EuiLink href={getUrlForSnapshotPolicyWizard()} target="_blank">
+                <EuiLink
+                  data-test-subj="indexLifecycleManagementSnapshotPoliciesFieldCreateASnapshotLifecyclePolicyLink"
+                  href={getUrlForSnapshotPolicyWizard()}
+                  target="_blank"
+                >
                   {i18n.translate(
                     'xpack.indexLifecycleMgmt.editPolicy.deletePhase.noPoliciesCreatedLink',
                     {
@@ -127,7 +131,11 @@ export const SnapshotPoliciesField: React.FunctionComponent = () => {
             defaultMessage="Enter the name of an existing snapshot policy, or {link} with this name."
             values={{
               link: (
-                <EuiLink href={getUrlForSnapshotPolicyWizard()} target="_blank">
+                <EuiLink
+                  data-test-subj="indexLifecycleManagementSnapshotPoliciesFieldCreateANewPolicyLink"
+                  href={getUrlForSnapshotPolicyWizard()}
+                  target="_blank"
+                >
                   {i18n.translate(
                     'xpack.indexLifecycleMgmt.editPolicy.deletePhase.customPolicyLink',
                     {

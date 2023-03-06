@@ -87,8 +87,14 @@ export const CrawlSelectDomainsModal: React.FC = () => {
         />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={hideModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchCrawlSelectDomainsModalButtonEmpty"
+          onClick={hideModal}
+        >
+          {CANCEL_BUTTON_LABEL}
+        </EuiButtonEmpty>
         <EuiButton
+          data-test-subj="enterpriseSearchCrawlSelectDomainsModalApplyAndCrawlNowButton"
           fill
           onClick={() => {
             startCrawl({ domain_allowlist: selectedDomainUrls });

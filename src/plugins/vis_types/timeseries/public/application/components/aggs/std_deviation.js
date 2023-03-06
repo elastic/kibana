@@ -136,7 +136,11 @@ const StandardDeviationAggUi = (props) => {
               />
             }
           >
-            <EuiFieldText value={model.sigma} onChange={handleTextChange('sigma')} />
+            <EuiFieldText
+              data-test-subj="pluginsStandardDeviationAggUiFieldText"
+              value={model.sigma}
+              onChange={handleTextChange('sigma')}
+            />
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>

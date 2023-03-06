@@ -245,6 +245,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
+                        data-test-subj="fleetPackagePolicyInputStreamConfigAdvancedOptionsButtonEmpty"
                         size="xs"
                         iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
                         onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}

@@ -33,7 +33,12 @@ export const SynonymCard: React.FC<SynonymSet> = (synonymSet) => {
       footer={
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => openModal(synonymSet)}>{MANAGE_BUTTON_LABEL}</EuiButton>
+            <EuiButton
+              data-test-subj="enterpriseSearchSynonymCardButton"
+              onClick={() => openModal(synonymSet)}
+            >
+              {MANAGE_BUTTON_LABEL}
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       }

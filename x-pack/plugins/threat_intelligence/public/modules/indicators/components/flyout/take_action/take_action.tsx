@@ -67,7 +67,12 @@ export const TakeAction: VFC<TakeActionProps> = ({ indicator }) => {
   ];
 
   const button = (
-    <EuiButton iconType="arrowDown" iconSide="right" onClick={() => setPopover(!isPopoverOpen)}>
+    <EuiButton
+      data-test-subj="threatIntelligenceTakeActionTakeActionButton"
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={() => setPopover(!isPopoverOpen)}
+    >
       <FormattedMessage
         id="xpack.threatIntelligence.indicators.flyout.take-action.button"
         defaultMessage="Take action"

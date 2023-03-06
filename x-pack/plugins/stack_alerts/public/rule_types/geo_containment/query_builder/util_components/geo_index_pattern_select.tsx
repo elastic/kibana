@@ -101,7 +101,10 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
               id="xpack.stackAlerts.geoContainment.noIndexPattern.doThisPrefixDescription"
               defaultMessage="You'll need to "
             />
-            <EuiLink href={this.props.http.basePath.prepend(`/app/management/kibana/dataViews`)}>
+            <EuiLink
+              data-test-subj="stackAlertsCreateADataViewLink"
+              href={this.props.http.basePath.prepend(`/app/management/kibana/dataViews`)}
+            >
               <FormattedMessage
                 id="xpack.stackAlerts.geoContainment.noIndexPattern.doThisLinkTextDescription"
                 defaultMessage="Create a data view."
@@ -114,6 +117,7 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
               defaultMessage="Don't have any data? "
             />
             <EuiLink
+              data-test-subj="stackAlertsGetStartedWithSomeSampleDataSetsLink"
               href={this.props.http.basePath.prepend('/app/home#/tutorial_directory/sampleData')}
             >
               <FormattedMessage

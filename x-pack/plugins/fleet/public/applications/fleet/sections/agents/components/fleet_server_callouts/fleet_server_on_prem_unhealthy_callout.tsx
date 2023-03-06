@@ -34,7 +34,12 @@ export const FleetServerOnPremUnhealthyCallout: React.FunctionComponent<
         defaultMessage="A healthy Fleet server is required before you can enroll agents with Fleet.  For more information see the {guideLink}."
         values={{
           guideLink: (
-            <EuiLink href={docLinks.links.fleet.fleetServerAddFleetServer} target="_blank" external>
+            <EuiLink
+              data-test-subj="fleetFleetServerOnPremUnhealthyCalloutFleetAndElasticAgentGuideLink"
+              href={docLinks.links.fleet.fleetServerAddFleetServer}
+              target="_blank"
+              external
+            >
               <FormattedMessage
                 id="xpack.fleet.fleetServerOnPremUnhealthyCallout.guideLink"
                 defaultMessage="Fleet and Elastic Agent Guide"

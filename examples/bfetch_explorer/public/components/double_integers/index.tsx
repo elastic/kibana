@@ -69,7 +69,11 @@ export const DoubleIntegers: React.FC<Props> = ({ double }) => {
       <EuiForm data-test-subj="DoubleIntegers">
         <pre>{JSON.stringify(results, null, 4)}</pre>
         <EuiSpacer size="l" />
-        <EuiButton disabled={!!numberOfResultsAwaiting} onClick={handleReset}>
+        <EuiButton
+          data-test-subj="bfetchExplorerDoubleIntegersResetButton"
+          disabled={!!numberOfResultsAwaiting}
+          onClick={handleReset}
+        >
           Reset
         </EuiButton>
       </EuiForm>
@@ -80,13 +84,19 @@ export const DoubleIntegers: React.FC<Props> = ({ double }) => {
     <EuiForm data-test-subj="DoubleIntegers">
       <EuiFormRow label="Numbers in ms separated by new line" fullWidth>
         <EuiTextArea
+          data-test-subj="bfetchExplorerDoubleIntegersTextArea"
           fullWidth
           placeholder="Enter numbers in milliseconds separated by new line"
           value={numbers}
           onChange={(e) => setNumbers(e.target.value)}
         />
       </EuiFormRow>
-      <EuiButton type="submit" fill onClick={handleSubmit}>
+      <EuiButton
+        data-test-subj="bfetchExplorerDoubleIntegersSendButton"
+        type="submit"
+        fill
+        onClick={handleSubmit}
+      >
         Send
       </EuiButton>
     </EuiForm>

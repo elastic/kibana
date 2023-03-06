@@ -77,7 +77,9 @@ export const AssetsAccordion: FunctionComponent<Props> = ({ savedObjects, type }
                   <EuiText size="m">
                     <p>
                       {pathToObjectInApp ? (
-                        <EuiLink href={pathToObjectInApp}>{title}</EuiLink>
+                        <EuiLink data-test-subj="fleetAssetsAccordionLink" href={pathToObjectInApp}>
+                          {title}
+                        </EuiLink>
                       ) : (
                         title
                       )}

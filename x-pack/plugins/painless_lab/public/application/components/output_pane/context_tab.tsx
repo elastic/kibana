@@ -53,7 +53,11 @@ export const ContextTab: FunctionComponent = () => {
         }
         labelAppend={
           <EuiText size="xs">
-            <EuiLink href={links.painlessExecuteAPIContexts} target="_blank">
+            <EuiLink
+              data-test-subj="painlessLabContextTabContextDocsLink"
+              href={links.painlessExecuteAPIContexts}
+              target="_blank"
+            >
               {i18n.translate('xpack.painlessLab.contextFieldDocLinkText', {
                 defaultMessage: 'Context docs',
               })}
@@ -103,6 +107,7 @@ export const ContextTab: FunctionComponent = () => {
           }
         >
           <EuiFieldText
+            data-test-subj="painlessLabContextTabFieldText"
             fullWidth
             value={index || ''}
             onChange={(e) => {
@@ -131,7 +136,11 @@ export const ContextTab: FunctionComponent = () => {
           }
           labelAppend={
             <EuiText size="xs">
-              <EuiLink href={links.esQueryDSL} target="_blank">
+              <EuiLink
+                data-test-subj="painlessLabContextTabQueryDslDocsLink"
+                href={links.esQueryDSL}
+                target="_blank"
+              >
                 {i18n.translate('xpack.painlessLab.queryFieldDocLinkText', {
                   defaultMessage: 'Query DSL docs',
                 })}

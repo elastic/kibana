@@ -246,7 +246,11 @@ export const CrawlDetailsSummary: React.FC<CrawlerDetailsSummaryProps> = ({
               defaultMessage="{configLink} in your enterprise-search.yml or user settings for more detailed crawl statistics."
               values={{
                 configLink: (
-                  <EuiLink href={docLinks.enterpriseSearchConfig} external>
+                  <EuiLink
+                    data-test-subj="enterpriseSearchCrawlDetailsSummaryEnableWebCrawlerLogsLink"
+                    href={docLinks.enterpriseSearchConfig}
+                    external
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.crawler.crawlDetailsSummary.configLink',
                       { defaultMessage: 'Enable web crawler logs' }

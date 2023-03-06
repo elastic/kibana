@@ -49,6 +49,7 @@ function ColorSchemaOptions({
   const resetColorsButton = (
     <EuiText size="xs">
       <EuiLink
+        data-test-subj="pluginsColorSchemaOptionsResetColorsLink"
         onClick={() => {
           uiState.set('vis.colors', null);
           uiState?.emit('reload');

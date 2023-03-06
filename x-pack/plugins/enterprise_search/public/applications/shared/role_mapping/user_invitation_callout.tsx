@@ -35,7 +35,12 @@ export const UserInvitationCallout: React.FC<Props> = ({ isNew, invitationCode, 
       <EuiSpacer size="xs" />
       <EuiText size="s">{INVITATION_DESCRIPTION}</EuiText>
       <EuiSpacer size="xs" />
-      <EuiLink href={link} target="_blank" external>
+      <EuiLink
+        data-test-subj="enterpriseSearchUserInvitationCalloutLink"
+        href={link}
+        target="_blank"
+        external
+      >
         {INVITATION_LINK}
       </EuiLink>{' '}
       <EuiCopy textToCopy={link}>

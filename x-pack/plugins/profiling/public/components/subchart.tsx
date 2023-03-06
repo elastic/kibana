@@ -141,7 +141,7 @@ export const SubChart: React.FC<SubChartProps> = ({
           </EuiFlexGroup>
 
           {hasMoreFrames && !!onShowMoreClick && (
-            <EuiButton onClick={onShowMoreClick}>
+            <EuiButton data-test-subj="profilingSubChartShowMoreButton" onClick={onShowMoreClick}>
               {i18n.translate('xpack.profiling.stackTracesView.showMoreTracesButton', {
                 defaultMessage: 'Show more',
               })}
@@ -191,13 +191,13 @@ export const SubChart: React.FC<SubChartProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow style={{ alignItems: 'flex-start' }}>
             {showFrames ? (
-              <EuiLink onClick={() => onShowMoreClick?.()}>
+              <EuiLink data-test-subj="profilingSubChartLink" onClick={() => onShowMoreClick?.()}>
                 <EuiText size="s">{label}</EuiText>
               </EuiLink>
             ) : category === OTHER_BUCKET_LABEL ? (
               <EuiText size="s">{label}</EuiText>
             ) : (
-              <EuiLink href={href}>
+              <EuiLink data-test-subj="profilingSubChartLink" href={href}>
                 <EuiText size="s">{label}</EuiText>
               </EuiLink>
             )}

@@ -83,7 +83,13 @@ function DefaultEditorControls({
                   defaultMessage: 'Errors in the highlighted fields need to be resolved.',
                 })}
               >
-                <EuiButton color="danger" iconType="alert" size="s" disabled>
+                <EuiButton
+                  data-test-subj="pluginsDefaultEditorControlsUpdateButton"
+                  color="danger"
+                  iconType="alert"
+                  size="s"
+                  disabled
+                >
                   <FormattedMessage
                     id="visDefaultEditor.sidebar.updateChartButtonLabel"
                     defaultMessage="Update"

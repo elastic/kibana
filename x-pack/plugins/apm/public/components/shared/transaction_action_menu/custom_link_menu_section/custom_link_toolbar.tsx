@@ -52,6 +52,7 @@ export function CustomLinkToolbar({
             <EuiToolTip content={!canSave && NO_PERMISSION_LABEL}>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="apmCustomLinkToolbarCreateButtonEmpty"
                   isDisabled={!canSave}
                   iconType="plusInCircle"
                   size="xs"

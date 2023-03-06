@@ -28,7 +28,12 @@ export const FleetServerOnPremRequiredCallout = () => {
         defaultMessage="Follow the instructions below to set up a Fleet Server. For more information, see the {guideLink}."
         values={{
           guideLink: (
-            <EuiLink href={docLinks.links.fleet.fleetServerAddFleetServer} target="_blank" external>
+            <EuiLink
+              data-test-subj="fleetFleetServerOnPremRequiredCalloutFleetAndElasticAgentGuideLink"
+              href={docLinks.links.fleet.fleetServerAddFleetServer}
+              target="_blank"
+              external
+            >
               <FormattedMessage
                 id="xpack.fleet.fleetServerOnPremRequiredCallout.guideLink"
                 defaultMessage="Fleet and Elastic Agent Guide"

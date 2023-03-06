@@ -79,6 +79,7 @@ export const TabHistory: React.FunctionComponent<Props> = ({ policy }) => {
 
               <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
                 <EuiLink
+                  data-test-subj="snapshotRestoreRenderLastSuccessLink"
                   {...reactRouterNavigate(history, linkToSnapshot(repository, snapshotName))}
                 >
                   {snapshotName}

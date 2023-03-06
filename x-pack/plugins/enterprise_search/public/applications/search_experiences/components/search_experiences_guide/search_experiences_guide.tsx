@@ -70,6 +70,7 @@ export const SearchExperiencesGuide: React.FC = () => {
                 <EuiFlexGroup>
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      data-test-subj="enterpriseSearchSearchExperiencesGuideVisitTheSearchUiDocumentationButton"
                       href={SEARCH_EXPERIENCES_PLUGIN.DOCUMENTATION_URL}
                       target="_blank"
                       color="primary"
@@ -85,6 +86,7 @@ export const SearchExperiencesGuide: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj="enterpriseSearchSearchExperiencesGuideSearchUiOnGithubButtonEmpty"
                       href={SEARCH_EXPERIENCES_PLUGIN.GITHUB_URL}
                       target="_blank"
                       iconType={'popout'}

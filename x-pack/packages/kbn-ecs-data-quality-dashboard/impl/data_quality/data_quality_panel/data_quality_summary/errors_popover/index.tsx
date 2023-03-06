@@ -59,6 +59,7 @@ const ErrorsPopoverComponent: React.FC<Props> = ({ addSuccessToast, errorSummary
   const button = useMemo(
     () => (
       <EuiButtonEmpty
+        data-test-subj="kbnEcsDataQualityDashboardButtonButtonEmpty"
         aria-label={i18n.VIEW_ERRORS}
         disabled={errorSummary.length === 0}
         flush="both"
@@ -96,7 +97,13 @@ const ErrorsPopoverComponent: React.FC<Props> = ({ addSuccessToast, errorSummary
           </li>
         </ul>
 
-        <EuiButtonEmpty aria-label={i18n.COPY_TO_CLIPBOARD} flush="both" onClick={onCopy} size="xs">
+        <EuiButtonEmpty
+          data-test-subj="kbnEcsDataQualityDashboardErrorsPopoverComponentButtonEmpty"
+          aria-label={i18n.COPY_TO_CLIPBOARD}
+          flush="both"
+          onClick={onCopy}
+          size="xs"
+        >
           {i18n.COPY_TO_CLIPBOARD}
         </EuiButtonEmpty>
       </CallOut>

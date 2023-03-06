@@ -26,6 +26,7 @@ export const nodeAllocationMigrationGuidance = ({ docLinks }: Props) => (
     values={{
       roleBasedGuidance: (
         <EuiLink
+          data-test-subj="indexLifecycleManagementNodeAllocationMigrationGuidanceUseRoleBasedAllocationLink"
           href={docLinks.links.elasticsearch.migrateIndexAllocationFilters}
           target="_blank"
           external={true}

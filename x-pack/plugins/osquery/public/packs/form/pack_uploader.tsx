@@ -14,7 +14,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 const SUPPORTED_PACK_EXTENSIONS = ['application/json', 'text/plain'];
 
 const ExamplePackLink = React.memo(() => (
-  <EuiLink href="https://github.com/osquery/osquery/tree/master/packs" target="_blank">
+  <EuiLink
+    data-test-subj="osqueryExamplePackLinkExamplePacksLink"
+    href="https://github.com/osquery/osquery/tree/master/packs"
+    target="_blank"
+  >
     <FormattedMessage
       id="xpack.osquery.packUploader.examplePacksLinkLabel"
       defaultMessage="Example packs"

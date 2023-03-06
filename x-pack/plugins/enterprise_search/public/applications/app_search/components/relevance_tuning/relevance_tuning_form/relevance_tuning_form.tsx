@@ -56,6 +56,7 @@ export const RelevanceTuningForm: React.FC = () => {
         {schemaFields.length > FIELD_FILTER_CUTOFF && (
           <>
             <EuiFieldSearch
+              data-test-subj="enterpriseSearchRelevanceTuningFormFieldSearch"
               value={filterInputValue}
               onChange={(e) => setFilterValue(e.target.value)}
               placeholder={i18n.translate(

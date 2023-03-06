@@ -237,6 +237,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
         </EuiTitle>
         {showManagementLink && editData && editData.id && (
           <EuiLink
+            data-test-subj="pluginsIndexPatternEditorFlyoutContentComponentManageSettingsAndViewFieldDetailsLink"
             href={application.getUrlForApp('management', {
               path: `/kibana/dataViews/dataView/${editData.id}`,
             })}

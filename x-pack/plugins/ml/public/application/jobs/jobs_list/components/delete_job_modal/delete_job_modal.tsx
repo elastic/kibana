@@ -158,7 +158,11 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
         <>
           <EuiSpacer />
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={closeModal} disabled={deleting}>
+            <EuiButtonEmpty
+              data-test-subj="mlDeleteJobModalCancelButtonEmpty"
+              onClick={closeModal}
+              disabled={deleting}
+            >
               <FormattedMessage
                 id="xpack.ml.jobsList.deleteJobModal.cancelButtonLabel"
                 defaultMessage="Cancel"

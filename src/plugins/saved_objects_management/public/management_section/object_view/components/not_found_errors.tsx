@@ -72,6 +72,7 @@ export const NotFoundErrors = ({ type, docLinks }: NotFoundErrors) => {
           values={{
             savedObjectsApis: (
               <EuiLink
+                data-test-subj="pluginsNotFoundErrorsLink"
                 aria-label={savedObjectsApisLinkText}
                 href={`${docLinks.management.savedObjectsApiList}`}
                 target="_blank"

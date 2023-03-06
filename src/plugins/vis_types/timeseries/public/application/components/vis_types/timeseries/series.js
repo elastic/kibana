@@ -145,6 +145,7 @@ const TimeseriesSeriesUI = injectI18n(function (props) {
 
         <EuiFlexItem>
           <EuiFieldText
+            data-test-subj="pluginsTimeseriesSeriesUIFieldText"
             fullWidth
             onChange={handleChange('label')}
             placeholder={intl.formatMessage({

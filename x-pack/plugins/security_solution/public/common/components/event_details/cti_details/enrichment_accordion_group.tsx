@@ -44,7 +44,11 @@ const ThreatDetailsDescription: React.FC<ThreatDetailsRow['description']> = ({
   value,
 }) => {
   const tooltipChild = fieldName.match(REFERENCE) ? (
-    <EuiLink href={value} target="_blank">
+    <EuiLink
+      data-test-subj="securitySolutionThreatDetailsDescriptionLink"
+      href={value}
+      target="_blank"
+    >
       {value}
     </EuiLink>
   ) : (

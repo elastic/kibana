@@ -34,7 +34,12 @@ export const ConfirmIncomingDataStandalone: React.FunctionComponent<Props> = ({
             defaultMessage="You can check for agent data in the integration asset tab. If you're having trouble seeing data, check out the {link}."
             values={{
               link: (
-                <EuiLink target="_blank" external href={troubleshootLink}>
+                <EuiLink
+                  data-test-subj="fleetConfirmIncomingDataStandaloneTroubleshootingGuideLink"
+                  target="_blank"
+                  external
+                  href={troubleshootLink}
+                >
                   <FormattedMessage
                     id="xpack.fleet.confirmIncomingDataStandalone.troubleshootingLink"
                     defaultMessage="troubleshooting guide"

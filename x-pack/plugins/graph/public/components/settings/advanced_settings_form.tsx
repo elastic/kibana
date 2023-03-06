@@ -68,6 +68,7 @@ export function AdvancedSettingsForm({
         })}
       >
         <EuiFieldNumber
+          data-test-subj="graphAdvancedSettingsFormFieldNumber"
           fullWidth
           min={1}
           step={1}
@@ -107,6 +108,7 @@ export function AdvancedSettingsForm({
         })}
       >
         <EuiFieldNumber
+          data-test-subj="graphAdvancedSettingsFormFieldNumber"
           fullWidth
           min={1}
           step={1}
@@ -187,6 +189,7 @@ export function AdvancedSettingsForm({
           })}
         >
           <EuiFieldNumber
+            data-test-subj="graphAdvancedSettingsFormFieldNumber"
             fullWidth
             min={1}
             step={1}
@@ -206,6 +209,7 @@ export function AdvancedSettingsForm({
         })}
       >
         <EuiFieldNumber
+          data-test-subj="graphAdvancedSettingsFormFieldNumber"
           fullWidth
           min={1}
           step={1}

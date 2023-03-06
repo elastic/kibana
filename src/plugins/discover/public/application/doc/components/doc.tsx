@@ -129,7 +129,11 @@ export function Doc(props: DocProps) {
               defaultMessage="{indexName} is missing."
               values={{ indexName: props.index }}
             />{' '}
-            <EuiLink href={indexExistsLink} target="_blank">
+            <EuiLink
+              data-test-subj="pluginsDocPleaseEnsureTheIndexExistsLink"
+              href={indexExistsLink}
+              target="_blank"
+            >
               <FormattedMessage
                 id="discover.doc.somethingWentWrongDescriptionAddon"
                 defaultMessage="Please ensure the index exists."

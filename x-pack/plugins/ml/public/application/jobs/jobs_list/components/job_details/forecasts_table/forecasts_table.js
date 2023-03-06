@@ -190,7 +190,10 @@ export class ForecastsTableUI extends Component {
                 defaultMessage="To run a forecast, open the {singleMetricViewerLink}"
                 values={{
                   singleMetricViewerLink: (
-                    <EuiLink onClick={() => this.openSingleMetricView()}>
+                    <EuiLink
+                      data-test-subj="mlSingleMetricViewerLink"
+                      onClick={() => this.openSingleMetricView()}
+                    >
                       <FormattedMessage
                         id="xpack.ml.jobsList.jobDetails.forecastsTable.noForecastsDescription.linkText"
                         defaultMessage="Single Metric Viewer"

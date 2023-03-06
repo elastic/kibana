@@ -73,7 +73,10 @@ export const RoleMappingFlyout: React.FC<Props> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeUsersAndRolesFlyout}>
+            <EuiButtonEmpty
+              data-test-subj="enterpriseSearchRoleMappingFlyoutButtonEmpty"
+              onClick={closeUsersAndRolesFlyout}
+            >
               {CANCEL_BUTTON_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>

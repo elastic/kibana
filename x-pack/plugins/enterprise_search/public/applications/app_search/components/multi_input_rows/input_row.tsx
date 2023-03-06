@@ -33,6 +33,7 @@ export const InputRow: React.FC<Props> = ({
   <EuiFlexGroup className="inputRow" alignItems="center" responsive={false} gutterSize="s">
     <EuiFlexItem>
       <EuiFieldText
+        data-test-subj="enterpriseSearchInputRowFieldText"
         fullWidth
         placeholder={placeholder}
         value={value}

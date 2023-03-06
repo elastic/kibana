@@ -11,7 +11,11 @@ import React from 'react';
 
 export const OsquerySchemaLink = React.memo(() => (
   <EuiText size="xs">
-    <EuiLink href="https://osquery.io/schema/5.7.0" target="_blank">
+    <EuiLink
+      data-test-subj="osqueryOsquerySchemaLinkOsquerySchemaLink"
+      href="https://osquery.io/schema/5.7.0"
+      target="_blank"
+    >
       <FormattedMessage id="xpack.osquery.osquerySchemaLinkLabel" defaultMessage="Osquery schema" />
     </EuiLink>
   </EuiText>

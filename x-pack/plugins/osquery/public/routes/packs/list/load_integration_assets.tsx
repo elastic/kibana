@@ -35,7 +35,13 @@ const LoadIntegrationAssetsButtonComponent: React.FC<LoadIntegrationAssetsButton
 
   if (data?.install.length || data?.update.length) {
     return (
-      <EuiButton fill={!!fill} isLoading={isLoading} onClick={handleClick} iconType="plusInCircle">
+      <EuiButton
+        data-test-subj="osqueryLoadIntegrationAssetsButtonComponentButton"
+        fill={!!fill}
+        isLoading={isLoading}
+        onClick={handleClick}
+        iconType="plusInCircle"
+      >
         {data?.upToDate?.length ? UPDATE_PREBUILT_PACKS_BUTTON : LOAD_PREBUILT_PACKS_BUTTON}
       </EuiButton>
     );

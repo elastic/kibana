@@ -72,12 +72,21 @@ export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
   const actions = (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <EuiButtonEmpty onClick={resetSyncSettings} disabled={!hasUnsavedFrequencyChanges}>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchFrequencyButtonEmpty"
+          onClick={resetSyncSettings}
+          disabled={!hasUnsavedFrequencyChanges}
+        >
           {RESET_BUTTON}
         </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButton fill onClick={updateFrequencySettings} disabled={!hasUnsavedFrequencyChanges}>
+        <EuiButton
+          data-test-subj="enterpriseSearchFrequencyButton"
+          fill
+          onClick={updateFrequencySettings}
+          disabled={!hasUnsavedFrequencyChanges}
+        >
           {SAVE_BUTTON_LABEL}
         </EuiButton>
       </EuiFlexItem>
@@ -102,7 +111,11 @@ export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
         description={
           <>
             {SOURCE_FREQUENCY_DESCRIPTION}{' '}
-            <EuiLink href={docLinks.workplaceSearchIndexingSchedule} external>
+            <EuiLink
+              data-test-subj="enterpriseSearchFrequencyLink"
+              href={docLinks.workplaceSearchIndexingSchedule}
+              external
+            >
               {LEARN_MORE_LINK}
             </EuiLink>
           </>

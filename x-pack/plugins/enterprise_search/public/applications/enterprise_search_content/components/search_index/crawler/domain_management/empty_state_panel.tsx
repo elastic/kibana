@@ -56,6 +56,7 @@ export const EmptyStatePanel: React.FC = () => {
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="enterpriseSearchEmptyStatePanelAddYourFirstDomainButton"
                 data-telemetry-id="entSearchContent-crawler-domainManagement-noDomains-addFirstDomain"
                 onClick={openFlyout}
                 fill
@@ -69,7 +70,12 @@ export const EmptyStatePanel: React.FC = () => {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink target="_blank">Learn more</EuiLink>
+              <EuiLink
+                data-test-subj="enterpriseSearchEmptyStatePanelLearnMoreLink"
+                target="_blank"
+              >
+                Learn more
+              </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         </>

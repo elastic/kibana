@@ -32,7 +32,11 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
             if done incorrectly, can cause Kibana to become unusable."
             values={{
               scripFields: (
-                <EuiLink target="_blank" href={docLinks.scriptedFields.scriptFields}>
+                <EuiLink
+                  data-test-subj="pluginsScriptingWarningCallOutScriptedFieldsLink"
+                  target="_blank"
+                  href={docLinks.scriptedFields.scriptFields}
+                >
                   <FormattedMessage
                     id="indexPatternManagement.warningCallOutLabel.scripFieldsLink"
                     defaultMessage="scripted fields"
@@ -40,7 +44,11 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
                 </EuiLink>
               ),
               scriptsInAggregation: (
-                <EuiLink target="_blank" href={docLinks.scriptedFields.scriptAggs}>
+                <EuiLink
+                  data-test-subj="pluginsScriptingWarningCallOutScriptsInAggregationsLink"
+                  target="_blank"
+                  href={docLinks.scriptedFields.scriptAggs}
+                >
                   <FormattedMessage
                     id="indexPatternManagement.warningCallOutLabel.scriptsInAggregationLink"
                     defaultMessage="scripts in aggregations"
@@ -70,7 +78,11 @@ export const ScriptingWarningCallOut = ({ isVisible = false }: ScriptingWarningC
               defaultMessage="For greater flexibility and Painless script support, use {runtimeDocs}."
               values={{
                 runtimeDocs: (
-                  <EuiLink target="_blank" href={docLinks.runtimeFields.overview}>
+                  <EuiLink
+                    data-test-subj="pluginsScriptingWarningCallOutRuntimeFieldsLink"
+                    target="_blank"
+                    href={docLinks.runtimeFields.overview}
+                  >
                     <FormattedMessage
                       id="indexPatternManagement.warningCallOutLabel.runtimeLink"
                       defaultMessage="runtime fields"

@@ -100,6 +100,7 @@ export const TestsSelectionControl: FC<TestsSelectionControlProps> = React.memo(
                       }
                     >
                       <EuiFieldNumber
+                        data-test-subj="mlTestsSelectionControlFieldNumber"
                         value={uiConfig.delayedData.docsCount}
                         onChange={(e) => {
                           updateCallback({

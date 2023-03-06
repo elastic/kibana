@@ -175,6 +175,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
         <EuiFlexItem grow={false}>
           <div>
             <EuiButton
+              data-test-subj="fleetPreconfigurationDebuggerResetButton"
               color="warning"
               isDisabled={!selectedPolicyId}
               onClick={() => setIsResetModalVisible(true)}
@@ -190,6 +191,7 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
         <EuiFlexItem grow={false}>
           <div>
             <EuiButton
+              data-test-subj="fleetPreconfigurationDebuggerResetAllButton"
               color="danger"
               isDisabled={!preconfiguredPolicies.data?.length}
               onClick={() => setIsResetAllModalVisible(true)}
@@ -256,7 +258,11 @@ export const PreconfigurationDebugger: React.FunctionComponent = () => {
       {selectedPolicyId && (
         <>
           <EuiSpacer size="m" />
-          <EuiLink target="_blank" href={getHref('policy_details', { policyId: selectedPolicyId })}>
+          <EuiLink
+            data-test-subj="fleetPreconfigurationDebuggerViewAgentPolicyInFleetUiLink"
+            target="_blank"
+            href={getHref('policy_details', { policyId: selectedPolicyId })}
+          >
             <FormattedMessage
               id="xpack.fleet.debug.preconfigurationDebugger.viewAgentPolicyLink"
               defaultMessage="View Agent Policy in Fleet UI"

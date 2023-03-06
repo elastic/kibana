@@ -202,6 +202,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             }
           >
             <EuiFieldNumber
+              data-test-subj="pluginsTimeseriesConfigFieldNumber"
               step={0.1}
               onChange={handleTextChange('fill')}
               value={Number(model.fill)}
@@ -219,6 +220,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             }
           >
             <EuiFieldNumber
+              data-test-subj="pluginsTimeseriesConfigFieldNumber"
               onChange={handleTextChange('line_width')}
               value={Number(model.line_width)}
             />
@@ -235,6 +237,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             }
           >
             <EuiFieldNumber
+              data-test-subj="pluginsTimeseriesConfigFieldNumber"
               onChange={handleTextChange('point_size')}
               value={Number(model.point_size)}
             />
@@ -306,6 +309,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             }
           >
             <EuiFieldNumber
+              data-test-subj="pluginsTimeseriesConfigFieldNumber"
               step={0.1}
               onChange={handleTextChange('fill')}
               value={Number(model.fill)}
@@ -323,6 +327,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             }
           >
             <EuiFieldNumber
+              data-test-subj="pluginsTimeseriesConfigFieldNumber"
               onChange={handleTextChange('line_width')}
               value={Number(model.line_width)}
             />
@@ -497,6 +502,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             }
           >
             <EuiFieldNumber
+              data-test-subj="pluginsTimeseriesConfigFieldNumber"
               onChange={handleNumberChange('axis_min', { isClearable: true })}
               value={model.axis_min}
               disabled={disableSeparateYaxis}
@@ -514,6 +520,7 @@ export const TimeseriesConfig = injectI18n(function (props) {
             }
           >
             <EuiFieldNumber
+              data-test-subj="pluginsTimeseriesConfigFieldNumber"
               onChange={handleNumberChange('axis_max', { isClearable: true })}
               value={model.axis_max}
               disabled={disableSeparateYaxis}

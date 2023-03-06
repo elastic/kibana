@@ -55,6 +55,7 @@ export const EngineAssignmentSelector: React.FC = () => {
       <EuiHorizontalRule />
       <EuiFormRow>
         <EuiRadioGroup
+          data-test-subj="enterpriseSearchEngineAssignmentSelectorRadioGroup"
           options={engineOptions}
           disabled={!roleHasScopedEngines(roleType)}
           idSelected={accessAllEngines ? 'all' : 'specific'}

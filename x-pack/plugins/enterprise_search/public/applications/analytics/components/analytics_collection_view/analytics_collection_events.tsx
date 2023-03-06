@@ -78,6 +78,7 @@ export const AnalyticsCollectionEvents: React.FC<AnalyticsCollectionEventsProps>
           )}
           actions={
             <EuiButton
+              data-test-subj="enterpriseSearchAnalyticsCollectionEventsViewIntegrationInstructionsButton"
               color="primary"
               fill
               onClick={() =>
@@ -98,7 +99,11 @@ export const AnalyticsCollectionEvents: React.FC<AnalyticsCollectionEventsProps>
             </EuiButton>
           }
           footer={
-            <EuiLink href={docLinks.behavioralAnalytics} target="_blank">
+            <EuiLink
+              data-test-subj="enterpriseSearchAnalyticsCollectionEventsVisitTheBehavioralAnalyticsDocumentationLink"
+              href={docLinks.behavioralAnalytics}
+              target="_blank"
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.analytics.collections.collectionsView.eventsTab.emptyState.footer',
                 {

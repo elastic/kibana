@@ -46,6 +46,7 @@ export const CrawlRequestsTable: React.FC = () => {
         if (event.stage === 'crawl') {
           return (
             <EuiLink
+              data-test-subj="enterpriseSearchColumnsLink"
               onClick={() => {
                 fetchCrawlRequest(id);
                 openFlyout();

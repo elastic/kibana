@@ -52,7 +52,11 @@ const MissingFleetAccessInfo = React.memo(() => {
         id="xpack.securitySolution.endpoint.onboarding.enableFleetAccess"
         defaultMessage="Deploying Agents for the first time requires Fleet access. For more information, "
       />
-      <EuiLink external href={`${services.docLinks.links.securitySolution.privileges}`}>
+      <EuiLink
+        data-test-subj="securitySolutionMissingFleetAccessInfoViewTheElasticSecurityDocumentationLink"
+        external
+        href={`${services.docLinks.links.securitySolution.privileges}`}
+      >
         <FormattedMessage
           id="xpack.securitySolution.endpoint.onboarding.onboardingDocsLink"
           defaultMessage="view the Elastic Security documentation"
@@ -118,7 +122,11 @@ const PolicyEmptyState = React.memo<{
                 id="xpack.securitySolution.endpoint.policyList.onboardingSectionThree"
                 defaultMessage="To get started, add the Elastic Defend integration to your Agents. For more information, "
               />
-              <EuiLink external href={`${docLinks.links.siem.guide}`}>
+              <EuiLink
+                data-test-subj="securitySolutionPolicyEmptyStateViewTheElasticSecurityDocumentationLink"
+                external
+                href={`${docLinks.links.siem.guide}`}
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.endpoint.policyList.onboardingDocsLink"
                   defaultMessage="view the Elastic Security documentation"

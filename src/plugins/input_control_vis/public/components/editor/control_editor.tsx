@@ -121,7 +121,11 @@ class ControlEditorUi extends PureComponent<ControlEditorUiProps & InjectedIntlP
             />
           }
         >
-          <EuiFieldText value={this.props.controlParams.label} onChange={this.changeLabel} />
+          <EuiFieldText
+            data-test-subj="pluginsFieldText"
+            value={this.props.controlParams.label}
+            onChange={this.changeLabel}
+          />
         </EuiFormRow>
 
         {controlEditor}

@@ -34,6 +34,7 @@ export function StaticLabelForm({
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFieldText
+          data-test-subj="mapsStaticLabelFormFieldText"
           placeholder={i18n.translate('xpack.maps.styles.staticLabel.valuePlaceholder', {
             defaultMessage: 'symbol label',
           })}

@@ -140,6 +140,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                   )}
                 >
                   <EuiFieldText
+                    data-test-subj="enterpriseSearchEditFieldRuleFlyoutFieldText"
                     data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleFieldName"
                     isInvalid={!!error && isTouched}
                     fullWidth
@@ -198,6 +199,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                     )}
                   >
                     <EuiRadioGroup
+                      data-test-subj="enterpriseSearchEditFieldRuleFlyoutRadioGroup"
                       data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleSource"
                       options={[
                         {
@@ -250,6 +252,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                           name="selector"
                           render={({ field: selectorField, fieldState: { error, isTouched } }) => (
                             <EuiFieldText
+                              data-test-subj="enterpriseSearchEditFieldRuleFlyoutFieldText"
                               data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleSelector"
                               isInvalid={!!error && isTouched}
                               fullWidth
@@ -279,6 +282,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                       <EuiSpacer />
                       {field.value === FieldType.HTML ? (
                         <EuiLink
+                          data-test-subj="enterpriseSearchEditFieldRuleFlyoutLearnMoreAboutCssSelectorsLink"
                           data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-learnMoreCSSSelectors"
                           href={`${docLinks.crawlerExtractionRules}#crawler-extraction-rules-css-selectors`}
                           external
@@ -292,6 +296,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                         </EuiLink>
                       ) : (
                         <EuiLink
+                          data-test-subj="enterpriseSearchEditFieldRuleFlyoutLearnMoreAboutUrlPatternsLink"
                           data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-learnMoreUrlPatterns"
                           href={`${docLinks.crawlerExtractionRules}#crawler-extraction-rules-url-patterns`}
                           external
@@ -359,6 +364,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                     error={error}
                   >
                     <EuiRadioGroup
+                      data-test-subj="enterpriseSearchEditFieldRuleFlyoutRadioGroup"
                       data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleExtraction"
                       options={[
                         {
@@ -406,6 +412,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                             )}
                           >
                             <EuiRadioGroup
+                              data-test-subj="enterpriseSearchEditFieldRuleFlyoutRadioGroup"
                               data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleMultipleObjects"
                               options={[
                                 {
@@ -458,6 +465,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
                               )}
                             >
                               <EuiFieldText
+                                data-test-subj="enterpriseSearchEditFieldRuleFlyoutFieldText"
                                 data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-editContentRuleFixedValue"
                                 fullWidth
                                 placeholder={i18n.translate(
@@ -482,6 +490,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
             />
             <EuiSpacer />
             <EuiLink
+              data-test-subj="enterpriseSearchEditFieldRuleFlyoutLearnMoreAboutStoringDifferentKindsOfContentLink"
               data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-learnMoreDifferentContent"
               href={`${docLinks.crawlerExtractionRules}#crawler-extraction-rules-field-content`}
               external
@@ -499,7 +508,10 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={onClose}>
+            <EuiButton
+              data-test-subj="enterpriseSearchEditFieldRuleFlyoutCancelButton"
+              onClick={onClose}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.extractionRules.editContentField.cancelButton.label',
                 {
@@ -510,6 +522,7 @@ export const EditFieldRuleFlyout: React.FC<EditFieldRuleFlyoutProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="enterpriseSearchEditFieldRuleFlyoutSaveButton"
               data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-saveContentField"
               disabled={!formState.isValid}
               onClick={() => {

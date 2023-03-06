@@ -66,7 +66,12 @@ export const ManageCrawlsPopover: React.FC<ManageCrawlsPopoverProps> = ({ domain
       isOpen={isOpen}
       closePopover={closePopover}
       button={
-        <EuiButton onClick={togglePopover} iconType="arrowDown" iconSide="right">
+        <EuiButton
+          data-test-subj="enterpriseSearchManageCrawlsPopoverManageCrawlsButton"
+          onClick={togglePopover}
+          iconType="arrowDown"
+          iconSide="right"
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.appSearch.crawler.manageCrawlsPopover.manageCrawlsButtonLabel',
             { defaultMessage: 'Manage crawls' }

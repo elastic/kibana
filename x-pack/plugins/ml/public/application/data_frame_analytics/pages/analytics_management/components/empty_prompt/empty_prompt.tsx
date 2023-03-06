@@ -83,7 +83,12 @@ export const AnalyticsEmptyPrompt: FC = () => {
                 defaultMessage="Before building a data frame analytics job, use {transforms} to construct an {sourcedata}."
                 values={{
                   transforms: (
-                    <EuiLink href={transformsLink} target="blank" color={'accent'}>
+                    <EuiLink
+                      data-test-subj="mlAnalyticsEmptyPromptTransformsLink"
+                      href={transformsLink}
+                      target="blank"
+                      color={'accent'}
+                    >
                       <FormattedMessage
                         id="xpack.ml.overview.gettingStartedSectionTransforms"
                         defaultMessage="transforms"
@@ -92,6 +97,7 @@ export const AnalyticsEmptyPrompt: FC = () => {
                   ),
                   sourcedata: (
                     <EuiLink
+                      data-test-subj="mlAnalyticsEmptyPromptEntityCentricSourceDataSetLink"
                       href={docLinks.links.ml.dFAPrepareData}
                       target="blank"
                       color={'accent'}
@@ -137,7 +143,12 @@ export const AnalyticsEmptyPrompt: FC = () => {
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiLink href={docLinks.links.ml.dataFrameAnalytics} target="_blank" external>
+            <EuiLink
+              data-test-subj="mlAnalyticsEmptyPromptReadDocumentationLink"
+              href={docLinks.links.ml.dataFrameAnalytics}
+              target="_blank"
+              external
+            >
               <FormattedMessage
                 id="xpack.ml.common.readDocumentationLink"
                 defaultMessage="Read documentation"

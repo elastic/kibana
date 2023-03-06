@@ -224,7 +224,10 @@ export class SpacesGridPage extends Component<Props, State> {
         render: (value: string, record: Space) => {
           return (
             <Suspense fallback={<EuiLoadingSpinner />}>
-              <EuiLink {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}>
+              <EuiLink
+                data-test-subj="spacesLink"
+                {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}
+              >
                 <LazySpaceAvatar space={record} size="s" />
               </EuiLink>
             </Suspense>
@@ -238,7 +241,10 @@ export class SpacesGridPage extends Component<Props, State> {
         }),
         sortable: true,
         render: (value: string, record: Space) => (
-          <EuiLink {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}>
+          <EuiLink
+            data-test-subj="spacesLink"
+            {...reactRouterNavigate(this.props.history, this.getEditSpacePath(record))}
+          >
             {value}
           </EuiLink>
         ),

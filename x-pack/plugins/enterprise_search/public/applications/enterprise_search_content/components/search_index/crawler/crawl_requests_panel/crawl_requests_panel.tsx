@@ -60,7 +60,10 @@ export const CrawlRequestsPanel: React.FC = () => {
       titleSize="s"
       iconType="documents"
       action={
-        <EuiButton onClick={() => discover.locator?.navigate(CRAWLER_LOGS_DISCOVER_RECORD)}>
+        <EuiButton
+          data-test-subj="enterpriseSearchCrawlRequestsPanelViewInDiscoverButton"
+          onClick={() => discover.locator?.navigate(CRAWLER_LOGS_DISCOVER_RECORD)}
+        >
           {i18n.translate('xpack.enterpriseSearch.crawler.crawlRequestsPanel.linkToDiscover', {
             defaultMessage: 'View in Discover',
           })}

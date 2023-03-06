@@ -110,7 +110,14 @@ export const InstallElasticAgentManagedPageStep: React.FC<InstallAgentPageProps>
           defaultMessage="These steps configure and enroll the Elastic Agent in Fleet to automatically deploy updates and
           centrally manage the agent. As an alternative to Fleet, advanced users can run agents in {standaloneLink}."
           values={{
-            standaloneLink: <EuiLink onClick={() => setIsManaged(false)}>standalone mode</EuiLink>,
+            standaloneLink: (
+              <EuiLink
+                data-test-subj="fleetInstallElasticAgentManagedPageStepStandaloneModeLink"
+                onClick={() => setIsManaged(false)}
+              >
+                standalone mode
+              </EuiLink>
+            ),
           }}
         />
       </EuiText>

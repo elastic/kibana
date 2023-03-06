@@ -300,7 +300,11 @@ const PackFormComponent: React.FC<PackFormProps> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="ghost" {...cancelButtonProps}>
+                <EuiButtonEmpty
+                  data-test-subj="osqueryPackFormComponentCancelButtonEmpty"
+                  color="ghost"
+                  {...cancelButtonProps}
+                >
                   <FormattedMessage
                     id="xpack.osquery.pack.form.cancelButtonLabel"
                     defaultMessage="Cancel"
@@ -309,6 +313,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="osqueryPackFormComponentButton"
                   isLoading={isSubmitting}
                   color="primary"
                   fill

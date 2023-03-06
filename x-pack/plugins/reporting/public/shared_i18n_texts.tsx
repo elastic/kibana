@@ -18,7 +18,7 @@ export const sharedI18nTexts = {
         defaultMessage="Kibana needs more memory to generate this report. Check {link}."
         values={{
           link: (
-            <EuiLink href={helpUrl}>
+            <EuiLink data-test-subj="reportingSharedI18nTextsRamRequirementsLink" href={helpUrl}>
               {i18n.translate(
                 'xpack.reporting.listing.infoPanel.callout.cloud.insufficientMemoryError.urlLink',
                 { defaultMessage: 'RAM requirements' }

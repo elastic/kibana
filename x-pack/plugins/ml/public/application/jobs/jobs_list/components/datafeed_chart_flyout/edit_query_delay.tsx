@@ -76,6 +76,7 @@ export const EditQueryDelay: FC<{
 
   const editButton = (
     <EuiButtonEmpty
+      data-test-subj="mlEditQueryDelayQueryDelayQueryDelayButtonEmpty"
       color="primary"
       size="xs"
       isDisabled={isEnabled === false}
@@ -109,6 +110,7 @@ export const EditQueryDelay: FC<{
           <EuiFlexGroup gutterSize="none" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiFieldText
+                data-test-subj="mlEditQueryDelayFieldText"
                 value={newQueryDelay || queryDelay}
                 // @ts-expect-error queryDelay is of type estypes.Duration = string | -1 | 0
                 placeholder={queryDelay}
@@ -120,7 +122,12 @@ export const EditQueryDelay: FC<{
             <EuiFlexItem grow={false}>
               <EuiFlexGroup gutterSize="none" direction="column">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty color="primary" size="xs" onClick={updateQueryDelay}>
+                  <EuiButtonEmpty
+                    data-test-subj="mlEditQueryDelayApplyButtonEmpty"
+                    color="primary"
+                    size="xs"
+                    onClick={updateQueryDelay}
+                  >
                     <FormattedMessage
                       id="xpack.ml.jobsList.datafeedChart.applyQueryDelayLabel"
                       defaultMessage="Apply"
@@ -128,7 +135,12 @@ export const EditQueryDelay: FC<{
                   </EuiButtonEmpty>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty color="text" size="xs" onClick={() => setIsEditing(false)}>
+                  <EuiButtonEmpty
+                    data-test-subj="mlEditQueryDelayCancelButtonEmpty"
+                    color="text"
+                    size="xs"
+                    onClick={() => setIsEditing(false)}
+                  >
                     <FormattedMessage
                       id="xpack.ml.jobsList.datafeedChart.cancelQueryDelayUpdateLabel"
                       defaultMessage="Cancel"

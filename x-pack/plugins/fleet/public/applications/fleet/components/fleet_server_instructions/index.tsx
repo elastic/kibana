@@ -89,6 +89,7 @@ const Header: React.FunctionComponent<{
           values={{
             userGuideLink: (
               <EuiLink
+                data-test-subj="fleetHeaderFleetAndElasticAgentGuideLink"
                 href={docLinks.links.fleet.fleetServerAddFleetServer}
                 external
                 target="_blank"
@@ -172,6 +173,7 @@ export const AddFleetServerLanding: React.FunctionComponent = () => {
               values={{
                 userGuideLink: (
                   <EuiLink
+                    data-test-subj="fleetAddFleetServerLandingFleetAndElasticAgentGuideLink"
                     href={docLinks.links.fleet.fleetServerAddFleetServer}
                     external
                     target="_blank"

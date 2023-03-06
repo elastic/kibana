@@ -191,7 +191,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
           <>
             {packageInfo.licensePath ? (
               <p>
-                <EuiLink onClick={toggleLicenseModal}>
+                <EuiLink data-test-subj="fleetListItemsLink" onClick={toggleLicenseModal}>
                   {packageInfo.source?.license || 'LICENSE.txt'}
                 </EuiLink>
               </p>
@@ -200,7 +200,9 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
             )}
             {packageInfo.notice && (
               <p>
-                <EuiLink onClick={toggleNoticeModal}>NOTICE.txt</EuiLink>
+                <EuiLink data-test-subj="fleetListItemsNoticeTxtLink" onClick={toggleNoticeModal}>
+                  NOTICE.txt
+                </EuiLink>
               </p>
             )}
           </>
@@ -217,7 +219,12 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
       description: (
         <>
           <p>
-            <EuiLink onClick={toggleChangelogModal}>View Changelog</EuiLink>
+            <EuiLink
+              data-test-subj="fleetListItemsViewChangelogLink"
+              onClick={toggleChangelogModal}
+            >
+              View Changelog
+            </EuiLink>
           </p>
         </>
       ),

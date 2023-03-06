@@ -58,6 +58,7 @@ export class ColorMapSelect extends Component {
 
     return (
       <EuiSelect
+        data-test-subj="mapsSelect"
         options={options}
         value={selectedValue}
         onChange={this.props.onColorMapTypeChange}

@@ -80,7 +80,11 @@ export const DefaultDeprecationFlyout = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="upgradeAssistantDefaultDeprecationFlyoutButtonEmpty"
+              onClick={closeFlyout}
+              flush="left"
+            >
               {i18nTexts.closeButtonLabel}
             </EuiButtonEmpty>
           </EuiFlexItem>

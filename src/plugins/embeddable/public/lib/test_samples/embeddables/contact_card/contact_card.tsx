@@ -70,6 +70,7 @@ export class ContactCardEmbeddableComponent extends React.Component<Props, State
       <EuiFlexItem grow={false}>
         <EuiFormRow label="">
           <EuiButton
+            data-test-subj="pluginsButton"
             onClick={this.emitContactTrigger}
           >{`Contact ${this.state.firstName}`}</EuiButton>
         </EuiFormRow>

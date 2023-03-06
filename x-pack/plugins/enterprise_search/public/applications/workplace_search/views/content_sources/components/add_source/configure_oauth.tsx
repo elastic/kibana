@@ -72,7 +72,13 @@ export const ConfigureOauth: React.FC<ConfigureOauthProps> = ({ name, onFormCrea
           </EuiFormRow>
           <EuiSpacer size="xl" />
           <EuiFormRow>
-            <EuiButton isLoading={formLoading} color="primary" fill type="submit">
+            <EuiButton
+              data-test-subj="enterpriseSearchConfigureOauthButton"
+              isLoading={formLoading}
+              color="primary"
+              fill
+              type="submit"
+            >
               {CONFIG_OAUTH_BUTTON}
             </EuiButton>
           </EuiFormRow>

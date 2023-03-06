@@ -252,7 +252,11 @@ const ServiceNowParamsFields: React.FunctionComponent<
                 fullWidth
                 label={i18n.CORRELATION_ID}
                 helpText={
-                  <EuiLink href={docLinks.links.alerting.serviceNowAction} target="_blank">
+                  <EuiLink
+                    data-test-subj="stackConnectorsServiceNowParamsFieldsIdentifierForUpdatingIncidentsLink"
+                    href={docLinks.links.alerting.serviceNowAction}
+                    target="_blank"
+                  >
                     <FormattedMessage
                       id="xpack.stackConnectors.components.serviceNow.correlationIDHelpLabel"
                       defaultMessage="Identifier for updating incidents"

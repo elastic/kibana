@@ -353,6 +353,7 @@ export const AnomalyTimeline: FC<AnomalyTimelineProps> = React.memo(
               <>
                 <EuiFlexItem grow={false}>
                   <EuiSelect
+                    data-test-subj="mlAnomalyTimelineSelect"
                     prepend={i18n.translate('xpack.ml.explorer.viewByLabel', {
                       defaultMessage: 'View by',
                     })}

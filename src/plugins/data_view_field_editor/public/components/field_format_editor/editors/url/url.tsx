@@ -205,6 +205,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           }
           helpText={
             <EuiLink
+              data-test-subj="pluginsUrlTemplateHelpLink"
               target="_blank"
               href={this.context.services.docLinks.links.indexPatterns.fieldFormattersString}
             >
@@ -235,6 +236,7 @@ export class UrlFormatEditor extends DefaultFormatEditor<
           }
           helpText={
             <EuiLink
+              data-test-subj="pluginsLabelTemplateHelpLink"
               target="_blank"
               href={this.context.services.docLinks.links.indexPatterns.fieldFormattersString}
             >

@@ -43,7 +43,10 @@ export const VisualizeNoMatch = () => {
                   defaultMessage="Visualize application doesn't recognize this route: {route}."
                   values={{
                     route: (
-                      <EuiLink href={window.location.href}>
+                      <EuiLink
+                        data-test-subj="pluginsVisualizeNoMatchLink"
+                        href={window.location.href}
+                      >
                         {services.history.location.pathname}
                       </EuiLink>
                     ),

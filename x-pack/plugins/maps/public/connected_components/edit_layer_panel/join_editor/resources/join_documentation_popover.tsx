@@ -73,7 +73,12 @@ export class JoinDocumentationPopover extends Component<{}, State> {
               defaultMessage="Features that do have have a corresponding terms aggregation bucket are not visible on the map."
             />
           </p>
-          <EuiLink href={getDocLinks().links.maps.termJoinsExample} target="_blank" external={true}>
+          <EuiLink
+            data-test-subj="mapsTermJoinExampleLink"
+            href={getDocLinks().links.maps.termJoinsExample}
+            target="_blank"
+            external={true}
+          >
             <FormattedMessage
               id="xpack.maps.joinDocs.linkLabel"
               defaultMessage="Term join example"

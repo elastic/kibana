@@ -24,7 +24,12 @@ export const CrawlerStatusIndicator: React.FC = () => {
 
   if (dataLoading || domains.length === 0) {
     return (
-      <EuiButton disabled iconType="arrowDown" iconSide="right">
+      <EuiButton
+        data-test-subj="enterpriseSearchCrawlerStatusIndicatorCrawlButton"
+        disabled
+        iconType="arrowDown"
+        iconSide="right"
+      >
         {i18n.translate(
           'xpack.enterpriseSearch.crawler.crawlerStatusIndicator.startACrawlButtonLabel',
           {
@@ -39,7 +44,7 @@ export const CrawlerStatusIndicator: React.FC = () => {
     case CrawlerStatus.Pending:
     case CrawlerStatus.Suspended:
       return (
-        <EuiButton isLoading>
+        <EuiButton data-test-subj="enterpriseSearchCrawlerStatusIndicatorPendingButton" isLoading>
           {i18n.translate(
             'xpack.enterpriseSearch.crawler.crawlerStatusIndicator.pendingButtonLabel',
             {
@@ -50,7 +55,7 @@ export const CrawlerStatusIndicator: React.FC = () => {
       );
     case CrawlerStatus.Starting:
       return (
-        <EuiButton isLoading>
+        <EuiButton data-test-subj="enterpriseSearchCrawlerStatusIndicatorStartingButton" isLoading>
           {i18n.translate(
             'xpack.enterpriseSearch.crawler.crawlerStatusIndicator.startingButtonLabel',
             {
@@ -64,7 +69,7 @@ export const CrawlerStatusIndicator: React.FC = () => {
     case CrawlerStatus.Canceling:
     case CrawlerStatus.Suspending:
       return (
-        <EuiButton isLoading>
+        <EuiButton data-test-subj="enterpriseSearchCrawlerStatusIndicatorStoppingButton" isLoading>
           {i18n.translate(
             'xpack.enterpriseSearch.crawler.crawlerStatusIndicator.stoppingButtonLabel',
             {

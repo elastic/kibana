@@ -82,7 +82,14 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
       </EuiFlexGroup>
       {onDocumentDelete && (
         <EuiPopoverFooter>
-          <EuiButton iconType="trash" color="danger" size="s" onClick={closePopover} fullWidth>
+          <EuiButton
+            data-test-subj="enterpriseSearchMetadataPopoverDeleteDocumentButton"
+            iconType="trash"
+            color="danger"
+            size="s"
+            onClick={closePopover}
+            fullWidth
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.content.shared.result.header.metadata.deleteDocument',
               {

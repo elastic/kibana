@@ -273,6 +273,7 @@ export const VisualizeListing = () => {
       values={{
         dashboardApp: (
           <EuiLink
+            data-test-subj="pluginsVisualizeListingDashboardApplicationLink"
             className="visListingCallout__link"
             onClick={(event: MouseEvent) => {
               event.preventDefault();

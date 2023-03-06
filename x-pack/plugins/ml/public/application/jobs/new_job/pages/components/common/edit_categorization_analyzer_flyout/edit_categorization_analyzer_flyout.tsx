@@ -86,6 +86,7 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="mlEditCategorizationAnalyzerFlyoutCloseButtonEmpty"
                   iconType="cross"
                   onClick={() => setShowJsonFlyout(false)}
                   flush="left"
@@ -98,7 +99,10 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
               </EuiFlexItem>
               <EuiFlexItem grow={true} />
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty onClick={onUseDefault}>
+                <EuiButtonEmpty
+                  data-test-subj="mlEditCategorizationAnalyzerFlyoutUseDefaultMlAnalyzerButtonEmpty"
+                  onClick={onUseDefault}
+                >
                   <FormattedMessage
                     id="xpack.ml.newJob.wizard.categorizationAnalyzerFlyout.useDefaultButton"
                     defaultMessage="Use default ML analyzer"
@@ -106,7 +110,12 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={onSave} fill isDisabled={saveable === false}>
+                <EuiButton
+                  data-test-subj="mlEditCategorizationAnalyzerFlyoutSaveButton"
+                  onClick={onSave}
+                  fill
+                  isDisabled={saveable === false}
+                >
                   <FormattedMessage
                     id="xpack.ml.newJob.wizard.categorizationAnalyzerFlyout.saveButton"
                     defaultMessage="Save"

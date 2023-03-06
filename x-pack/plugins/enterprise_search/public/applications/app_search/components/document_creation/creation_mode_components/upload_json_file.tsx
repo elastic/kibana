@@ -67,10 +67,21 @@ export const UploadJsonFileFooterContent: React.FC = () => {
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchUploadJsonFileFooterContentButtonEmpty"
+          onClick={closeDocumentCreation}
+        >
+          {CANCEL_BUTTON_LABEL}
+        </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton fill onClick={onSubmitFile} isLoading={isUploading} isDisabled={!fileInput}>
+        <EuiButton
+          data-test-subj="enterpriseSearchUploadJsonFileFooterContentButton"
+          fill
+          onClick={onSubmitFile}
+          isLoading={isUploading}
+          isDisabled={!fileInput}
+        >
           {CONTINUE_BUTTON_LABEL}
         </EuiButton>
       </EuiFlexItem>

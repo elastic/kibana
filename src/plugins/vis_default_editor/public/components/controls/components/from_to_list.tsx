@@ -72,6 +72,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
       <>
         <EuiFlexItem>
           <EuiFieldText
+            data-test-subj="pluginsRenderInputRowFieldText"
             aria-label={i18n.translate('visDefaultEditor.controls.ipRanges.ipRangeFromAriaLabel', {
               defaultMessage: 'IP range from: {value}',
               values: { value: item.from.value || '*' },
@@ -91,6 +92,7 @@ function FromToList({ showValidation, onBlur, ...rest }: FromToListProps) {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldText
+            data-test-subj="pluginsRenderInputRowFieldText"
             aria-label={i18n.translate('visDefaultEditor.controls.ipRanges.ipRangeToAriaLabel', {
               defaultMessage: 'IP range to: {value}',
               values: { value: item.to.value || '*' },

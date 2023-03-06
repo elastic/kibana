@@ -30,11 +30,19 @@ export const ElasticsearchJavascript: React.FC<{ cloudId?: string }> = ({ cloudI
           <li>Child client support.</li>
           <li>TypeScript support out of the box.</li>
         </ul>
-        <EuiLink target="_blank" href={docLinks.clientsJsIntro}>
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchJavascriptLearnMoreAboutTheOfficialNodeJsClientForElasticsearchLink"
+          target="_blank"
+          href={docLinks.clientsJsIntro}
+        >
           Learn more about the official Node.js client for Elasticsearch
         </EuiLink>
         <EuiSpacer size="m" />
-        <EuiLink target="_blank" href="https://github.com/elastic/elasticsearch-js">
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchJavascriptTheOfficialNodeJsClientForElasticsearchOnGithubLink"
+          target="_blank"
+          href="https://github.com/elastic/elasticsearch-js"
+        >
           The official Node.js client for Elasticsearch on Github
         </EuiLink>
       </EuiText>

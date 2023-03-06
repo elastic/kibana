@@ -81,6 +81,7 @@ export const CrawlerDomainDetail: React.FC<{ domainId: string }> = ({ domainId }
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="enterpriseSearchCrawlerDomainDetailDeleteDomainButton"
                 data-telemetry-id="entSearchContent-crawler-domainDetail-header-deleteDomain"
                 isLoading={getLoading}
                 color="danger"

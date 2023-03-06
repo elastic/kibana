@@ -36,6 +36,7 @@ export const SortingView: React.FC<Props> = ({ onChange, options, value }) => {
   return (
     <>
       <EuiSelect
+        data-test-subj="enterpriseSearchSortingViewSelect"
         fullWidth
         options={options.map(wrapSortingOptionForEuiSelect)}
         value={selectedValue}

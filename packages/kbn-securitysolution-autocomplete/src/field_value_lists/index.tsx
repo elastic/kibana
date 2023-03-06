@@ -123,6 +123,7 @@ export const AutocompleteFieldListsComponent: React.FC<AutocompleteFieldListsPro
         <EuiText size="xs">
           {i18n.LISTS_TOOLTIP_INFO}{' '}
           <EuiLink
+            data-test-subj="kbnSecuritysolutionAutocompleteHelpTextLink"
             external
             target="_blank"
             href={getDocLinks({ kibanaBranch: 'main' }).securitySolution.exceptions.value_lists}

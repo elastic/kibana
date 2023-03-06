@@ -140,7 +140,11 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
       <>
         <EuiSpacer />
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeModal} disabled={resetting}>
+          <EuiButtonEmpty
+            data-test-subj="mlResetJobModalCancelButtonEmpty"
+            onClick={closeModal}
+            disabled={resetting}
+          >
             <FormattedMessage
               id="xpack.ml.jobsList.resetJobModal.cancelButtonLabel"
               defaultMessage="Cancel"

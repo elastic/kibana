@@ -163,13 +163,20 @@ export const Expression: FC<Props> = ({
                     </span>
                   }
                 >
-                  <EuiButton fill disabled={!!error} onClick={handleRun} size="s">
+                  <EuiButton
+                    data-test-subj="canvasExpressionButton"
+                    fill
+                    disabled={!!error}
+                    onClick={handleRun}
+                    size="s"
+                  >
                     {strings.getRunButtonLabel()}
                   </EuiButton>
                 </EuiToolTip>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="canvasExpressionButtonEmpty"
                   size="s"
                   color={formState.dirty ? 'danger' : 'primary'}
                   onClick={done}
@@ -183,6 +190,7 @@ export const Expression: FC<Props> = ({
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiLink
+                  data-test-subj="canvasExpressionLink"
                   href="https://www.elastic.co/guide/en/kibana/current/canvas-function-reference.html"
                   target="_blank"
                 >
@@ -190,7 +198,12 @@ export const Expression: FC<Props> = ({
                 </EuiLink>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="fullScreen" onClick={toggleCompactView} size="s">
+                <EuiButtonEmpty
+                  data-test-subj="canvasExpressionButtonEmpty"
+                  iconType="fullScreen"
+                  onClick={toggleCompactView}
+                  size="s"
+                >
                   {isCompact ? strings.getMaximizeButtonLabel() : strings.getMinimizeButtonLabel()}
                 </EuiButtonEmpty>
               </EuiFlexItem>

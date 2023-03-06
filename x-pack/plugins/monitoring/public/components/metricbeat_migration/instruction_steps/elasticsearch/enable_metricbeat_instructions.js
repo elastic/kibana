@@ -33,7 +33,11 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(
     children: (
       <EuiText>
         <p>
-          <EuiLink href={metricbeatInstallUrl} target="_blank">
+          <EuiLink
+            data-test-subj="monitoringGetElasticsearchInstructionsForEnablingMetricbeatFollowTheseInstructionsLink"
+            href={metricbeatInstallUrl}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.installMetricbeatLinkText"
               defaultMessage="Follow these instructions."
@@ -130,7 +134,11 @@ export function getElasticsearchInstructionsForEnablingMetricbeat(
     children: (
       <EuiText>
         <p>
-          <EuiLink href={metricbeatStartUrl} target="_blank">
+          <EuiLink
+            data-test-subj="monitoringGetElasticsearchInstructionsForEnablingMetricbeatFollowTheseInstructionsLink"
+            href={metricbeatStartUrl}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.elasticsearchInstructions.startMetricbeatLinkText"
               defaultMessage="Follow these instructions."

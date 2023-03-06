@@ -362,6 +362,7 @@ export const SearchSessionsExampleApp = ({
                     session.
                     <div>
                       <EuiButtonEmpty
+                        data-test-subj="searchExamplesSearchSessionsExampleAppTrySavingTheSessionUsingTheSearchSessionIndicatorInTheHeaderButtonEmpty"
                         size="xs"
                         iconType={'save'}
                         onClick={() => {
@@ -430,6 +431,7 @@ export const SearchSessionsExampleApp = ({
                     You can also get back to your session from the Search Session Management.
                     <div>
                       <EuiButtonEmpty
+                        data-test-subj="searchExamplesSearchSessionsExampleAppUseSearchSessionIndicatorToNavigateToManagementButtonEmpty"
                         size="xs"
                         onClick={() => {
                           // hack for demo purposes:
@@ -469,6 +471,7 @@ export const SearchSessionsExampleApp = ({
           )}
           <EuiSpacer size={'xl'} />
           <EuiButtonEmpty
+            data-test-subj="searchExamplesSearchSessionsExampleAppStartAgainButtonEmpty"
             onClick={() => {
               // hack to quickly reset all the state and remove state stuff from the URL
               window.location.assign(window.location.href.split('?')[0]);

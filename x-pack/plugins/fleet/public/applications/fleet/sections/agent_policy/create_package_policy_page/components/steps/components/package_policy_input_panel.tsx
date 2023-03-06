@@ -175,6 +175,7 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
               ) : null}
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="fleetPackagePolicyInputPanelButtonEmpty"
                   color={hasErrors ? 'danger' : 'primary'}
                   onClick={() => setIsShowingStreams(!isShowingStreams)}
                   iconType={isShowingStreams ? 'arrowUp' : 'arrowDown'}

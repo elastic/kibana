@@ -45,7 +45,11 @@ export const SearchIndexEmptyState: React.FC = () => {
                 })}
               </h4>
             </EuiTitle>
-            <EuiLink href={docLinks.start} target="_blank">
+            <EuiLink
+              data-test-subj="enterpriseSearchSearchIndexEmptyStateReadTheDocsLink"
+              href={docLinks.start}
+              target="_blank"
+            >
               {i18n.translate('xpack.enterpriseSearch.content.newIndex.emptyState.footer.link', {
                 defaultMessage: 'Read the docs',
               })}

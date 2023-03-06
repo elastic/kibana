@@ -235,7 +235,12 @@ export const ImportDataModalComponent = ({
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButtonEmpty onClick={handleCloseModal}>{i18n.CANCEL_BUTTON}</EuiButtonEmpty>
+            <EuiButtonEmpty
+              data-test-subj="securitySolutionImportDataModalComponentButtonEmpty"
+              onClick={handleCloseModal}
+            >
+              {i18n.CANCEL_BUTTON}
+            </EuiButtonEmpty>
             <EuiButton
               data-test-subj="import-data-modal-button"
               onClick={importDataCallback}

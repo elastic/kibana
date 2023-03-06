@@ -17,6 +17,7 @@ export const ShowDebugging: FC<Props> = ({ payload }) => {
   return process.env.NODE_ENV === 'production' ? null : (
     <div>
       <EuiButtonEmpty
+        data-test-subj="pluginsShowDebuggingSeeDetailsButtonEmpty"
         iconType={expanded ? 'arrowDown' : 'arrowRight'}
         onClick={() => setExpanded(!expanded)}
       >

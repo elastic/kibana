@@ -217,7 +217,13 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
 
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
-      <EuiButtonEmpty size="xs" iconType="lensApp" onClick={handleClick} isDisabled={!logsDataView}>
+      <EuiButtonEmpty
+        data-test-subj="osqueryViewResultsInLensActionComponentButtonEmpty"
+        size="xs"
+        iconType="lensApp"
+        onClick={handleClick}
+        isDisabled={!logsDataView}
+      >
         {VIEW_IN_LENS}
       </EuiButtonEmpty>
     );
@@ -301,6 +307,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
       <EuiButtonEmpty
+        data-test-subj="osqueryViewResultsInDiscoverActionComponentButtonEmpty"
         size="xs"
         iconType="discoverApp"
         href={discoverUrl}

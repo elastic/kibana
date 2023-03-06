@@ -62,6 +62,7 @@ export const IndexPatternsMissingPromptComponent = () => {
       }
       actions={
         <EuiButton
+          data-test-subj="securitySolutionIndexPatternsMissingPromptComponentButton"
           href={`${kibanaBasePath}/management/kibana/dataViews`}
           color="primary"
           target="_blank"

@@ -65,6 +65,7 @@ export const AddResultFlyout: React.FC = () => {
         </EuiFlyoutHeader>
         <EuiFlyoutBody banner={<FlashMessages />}>
           <EuiFieldSearch
+            data-test-subj="enterpriseSearchAddResultFlyoutFieldSearch"
             value={searchQuery}
             onChange={(e) => search(e.target.value)}
             isLoading={searchDataLoading}

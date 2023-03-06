@@ -69,7 +69,11 @@ export const LockedPolicyCard = memo(({ title }: { title: string }) => {
               free 30-day trial, or spin up a {cloudDeploymentLink} on AWS, GCP, or Azure."
                   values={{
                     cloudDeploymentLink: (
-                      <EuiLink href="https://www.elastic.co/cloud/" target="_blank">
+                      <EuiLink
+                        data-test-subj="securitySolutionLockedPolicyCardCloudDeploymentLink"
+                        href="https://www.elastic.co/cloud/"
+                        target="_blank"
+                      >
                         <FormattedMessage
                           id="xpack.securitySolution.endpoint.policy.details.cloudDeploymentLInk"
                           defaultMessage="cloud deployment"

@@ -72,7 +72,12 @@ export const AddGroupModal: React.FC<{}> = () => {
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeNewGroupModal}>{CANCEL_BUTTON}</EuiButtonEmpty>
+          <EuiButtonEmpty
+            data-test-subj="enterpriseSearchAddGroupModalButtonEmpty"
+            onClick={closeNewGroupModal}
+          >
+            {CANCEL_BUTTON}
+          </EuiButtonEmpty>
           <EuiButton
             disabled={!newGroupName}
             onClick={saveNewGroup}

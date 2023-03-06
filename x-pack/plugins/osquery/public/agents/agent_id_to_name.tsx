@@ -24,6 +24,7 @@ const AgentIdToNameComponent: React.FC<AgentIdToNameProps> = ({ agentId }) => {
   return (
     <EuiToolTip position="top" content={<p>{agentId}</p>}>
       <EuiLink
+        data-test-subj="osqueryAgentIdToNameComponentLink"
         className="eui-textTruncate"
         href={getUrlForApp(PLUGIN_ID, {
           path: pagePathGetters.agent_details({ agentId })[1],

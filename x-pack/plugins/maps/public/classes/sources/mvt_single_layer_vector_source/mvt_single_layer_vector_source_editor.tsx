@@ -91,6 +91,7 @@ export class MVTSingleLayerVectorSourceEditor extends Component<Props, State> {
           )}
         >
           <EuiFieldText
+            data-test-subj="mapsFieldText"
             value={this.state.urlTemplate}
             onChange={this._handleUrlTemplateChange}
             compressed

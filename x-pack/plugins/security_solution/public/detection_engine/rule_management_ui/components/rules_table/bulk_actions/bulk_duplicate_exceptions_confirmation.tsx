@@ -53,6 +53,7 @@ const BulkActionDuplicateExceptionsConfirmationComponent = ({
 
       <EuiSpacer />
       <EuiRadioGroup
+        data-test-subj="securitySolutionBulkActionDuplicateExceptionsConfirmationComponentRadioGroup"
         options={[
           {
             id: DuplicateOptions.withExceptions,

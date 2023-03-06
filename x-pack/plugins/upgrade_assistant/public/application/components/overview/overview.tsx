@@ -99,7 +99,11 @@ export const Overview = withRouter(({ history }: RouteComponentProps) => {
             />
           </EuiText>
           <EuiText data-test-subj="whatsNewLink">
-            <EuiLink href={docLinks.links.elasticsearch.latestReleaseHighlights} target="_blank">
+            <EuiLink
+              data-test-subj="upgradeAssistantOverviewCheckTheLatestReleaseHighlightsLink"
+              href={docLinks.links.elasticsearch.latestReleaseHighlights}
+              target="_blank"
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.overview.whatsNewLink"
                 defaultMessage="Check the latest release highlights"

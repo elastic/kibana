@@ -90,7 +90,12 @@ const InstallFleetServerStepContent: React.FunctionComponent<{
           defaultMessage="Install Fleet Server agent on a centralized host so that other hosts you wish to monitor can connect to it. In production, we recommend using one or more dedicated hosts. For additional guidance, see our {installationLink}."
           values={{
             installationLink: (
-              <EuiLink target="_blank" external href={docLinks.links.fleet.installElasticAgent}>
+              <EuiLink
+                data-test-subj="fleetInstallFleetServerStepContentInstallationDocsLink"
+                target="_blank"
+                external
+                href={docLinks.links.fleet.installElasticAgent}
+              >
                 <FormattedMessage
                   id="xpack.fleet.enrollmentInstructions.installationMessage.link"
                   defaultMessage="installation docs"

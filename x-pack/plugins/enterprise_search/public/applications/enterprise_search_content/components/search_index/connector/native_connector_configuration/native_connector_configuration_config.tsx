@@ -40,7 +40,11 @@ export const NativeConnectorConfigurationConfig: React.FC<
       <EuiSpacer />
       <EuiFlexGroup direction="row">
         <EuiFlexItem grow={false}>
-          <EuiLink href={docLinks.elasticsearchSecureCluster} target="_blank">
+          <EuiLink
+            data-test-subj="enterpriseSearchNativeConnectorConfigurationConfigLearnMoreAboutElasticsearchSecurityLink"
+            href={docLinks.elasticsearchSecureCluster}
+            target="_blank"
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.securityDocumentationLinkLabel',
               {
@@ -51,7 +55,11 @@ export const NativeConnectorConfigurationConfig: React.FC<
         </EuiFlexItem>
         {nativeConnector.externalAuthDocsUrl && (
           <EuiFlexItem grow={false}>
-            <EuiLink href={nativeConnector.externalAuthDocsUrl} target="_blank">
+            <EuiLink
+              data-test-subj="enterpriseSearchNativeConnectorConfigurationConfigNameAuthenticationLink"
+              href={nativeConnector.externalAuthDocsUrl}
+              target="_blank"
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.sourceSecurityDocumentationLinkLabel',
                 {

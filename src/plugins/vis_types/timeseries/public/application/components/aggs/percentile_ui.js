@@ -67,6 +67,7 @@ export class Percentiles extends Component {
           }
         >
           <EuiFieldNumber
+            data-test-subj="pluginsFieldNumber"
             aria-label={i18n.translate('visTypeTimeseries.percentile.percentileAriaLabel', {
               defaultMessage: 'Percentile',
             })}
@@ -160,6 +161,7 @@ export class Percentiles extends Component {
                     }
                   >
                     <EuiFieldNumber
+                      data-test-subj="pluginsFieldNumber"
                       id={htmlId('fillTo')}
                       min={0}
                       max={100}
@@ -179,6 +181,7 @@ export class Percentiles extends Component {
                     }
                   >
                     <EuiFieldNumber
+                      data-test-subj="pluginsFieldNumber"
                       id={htmlId('shade')}
                       step={0.1}
                       onChange={this.handleTextChange(model, 'shade')}

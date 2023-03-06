@@ -116,7 +116,12 @@ export const EditJob: FC<EditJobProps> = ({ job, jobOverride, existingGroupIds, 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={() => onClose(null)} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="mlEditJobCloseButtonEmpty"
+              iconType="cross"
+              onClick={() => onClose(null)}
+              flush="left"
+            >
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.cancelJobOverrideLabel"
                 defaultMessage="Close"
@@ -124,7 +129,12 @@ export const EditJob: FC<EditJobProps> = ({ job, jobOverride, existingGroupIds, 
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => onSave()} fill disabled={!validationResult.formValid}>
+            <EuiButton
+              data-test-subj="mlEditJobSaveButton"
+              onClick={() => onSave()}
+              fill
+              disabled={!validationResult.formValid}
+            >
               <FormattedMessage
                 id="xpack.ml.newJob.recognize.saveJobOverrideLabel"
                 defaultMessage="Save"

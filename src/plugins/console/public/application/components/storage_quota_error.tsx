@@ -18,12 +18,18 @@ interface Props {
 export const StorageQuotaError = ({ onClearHistory, onDisableSavingToHistory }: Props) => (
   <EuiFlexGroup alignItems="center">
     <EuiFlexItem>
-      <EuiButtonEmpty onClick={onClearHistory}>
+      <EuiButtonEmpty
+        data-test-subj="pluginsStorageQuotaErrorClearHistoryButtonEmpty"
+        onClick={onClearHistory}
+      >
         <FormattedMessage id="console.notification.clearHistory" defaultMessage="Clear history" />
       </EuiButtonEmpty>
     </EuiFlexItem>
     <EuiFlexItem>
-      <EuiButton onClick={onDisableSavingToHistory}>
+      <EuiButton
+        data-test-subj="pluginsStorageQuotaErrorDisableSavingButton"
+        onClick={onDisableSavingToHistory}
+      >
         <FormattedMessage
           id="console.notification.disableSavingToHistory"
           defaultMessage="Disable saving"

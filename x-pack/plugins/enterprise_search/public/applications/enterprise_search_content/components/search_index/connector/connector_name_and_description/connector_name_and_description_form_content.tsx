@@ -25,6 +25,7 @@ export const ConnectorNameAndDescriptionFormContent: React.FC = () => {
     <>
       <EuiFormRow label={NAME_LABEL}>
         <EuiFieldText
+          data-test-subj="enterpriseSearchConnectorNameAndDescriptionFormContentFieldText"
           required
           value={name ?? ''}
           onChange={(event) => {
@@ -34,6 +35,7 @@ export const ConnectorNameAndDescriptionFormContent: React.FC = () => {
       </EuiFormRow>
       <EuiFormRow label={DESCRIPTION_LABEL}>
         <EuiTextArea
+          data-test-subj="enterpriseSearchConnectorNameAndDescriptionFormContentTextArea"
           placeholder={OPTIONAL_LABEL}
           value={description || ''}
           onChange={(event) => {

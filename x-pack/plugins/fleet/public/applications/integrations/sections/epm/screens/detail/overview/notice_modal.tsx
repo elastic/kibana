@@ -68,7 +68,12 @@ export const NoticeModal: React.FunctionComponent<Props> = ({ noticePath, onClos
         </EuiCodeBlock>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButton color="primary" fill onClick={onClose}>
+        <EuiButton
+          data-test-subj="fleetNoticeModalCloseButton"
+          color="primary"
+          fill
+          onClick={onClose}
+        >
           <FormattedMessage id="xpack.fleet.epm.noticeModalCloseBtn" defaultMessage="Close" />
         </EuiButton>
       </EuiModalFooter>

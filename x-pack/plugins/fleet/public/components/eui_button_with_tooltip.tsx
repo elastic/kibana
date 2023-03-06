@@ -17,9 +17,9 @@ export const EuiButtonWithTooltip: React.FC<
 > = ({ tooltip: tooltipProps, ...buttonProps }) => {
   return tooltipProps ? (
     <EuiToolTip {...tooltipProps}>
-      <EuiButton {...buttonProps} />
+      <EuiButton data-test-subj="fleetEuiButtonWithTooltipButton" {...buttonProps} />
     </EuiToolTip>
   ) : (
-    <EuiButton {...buttonProps} />
+    <EuiButton data-test-subj="fleetEuiButtonWithTooltipButton" {...buttonProps} />
   );
 };

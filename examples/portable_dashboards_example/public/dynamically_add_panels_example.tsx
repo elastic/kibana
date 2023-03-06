@@ -109,12 +109,20 @@ export const DynamicByReferenceExample = () => {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <EuiButton onClick={addByValue} isDisabled={disableButtons}>
+                <EuiButton
+                  data-test-subj="portableDashboardsExampleDynamicByReferenceExampleAddVisualizationByValueButton"
+                  onClick={addByValue}
+                  isDisabled={disableButtons}
+                >
                   Add visualization by value
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem>
-                <EuiButton onClick={addByReference} isDisabled={disableButtons}>
+                <EuiButton
+                  data-test-subj="portableDashboardsExampleDynamicByReferenceExampleAddVisualizationFromLibraryButton"
+                  onClick={addByReference}
+                  isDisabled={disableButtons}
+                >
                   Add visualization from library
                 </EuiButton>
               </EuiFlexItem>
@@ -123,12 +131,19 @@ export const DynamicByReferenceExample = () => {
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <EuiButton fill onClick={onSave} isLoading={isSaving} isDisabled={disableButtons}>
+                <EuiButton
+                  data-test-subj="portableDashboardsExampleDynamicByReferenceExampleSaveToLocalStorageButton"
+                  fill
+                  onClick={onSave}
+                  isLoading={isSaving}
+                  isDisabled={disableButtons}
+                >
                   Save to local storage
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiButton
+                  data-test-subj="portableDashboardsExampleDynamicByReferenceExampleEmptyDashboardAndResetLocalStorageButton"
                   onClick={resetPersistableInput}
                   isLoading={isSaving}
                   isDisabled={disableButtons}

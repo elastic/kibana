@@ -75,12 +75,14 @@ export const DeleteDomainModal: React.FC = () => {
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
+          data-test-subj="enterpriseSearchDeleteDomainModalButtonEmpty"
           data-telemetry-id="entSearchContent-crawler-domainManagement-deleteDomain-cancel"
           onClick={hideModal}
         >
           {CANCEL_BUTTON_LABEL}
         </EuiButtonEmpty>
         <EuiButton
+          data-test-subj="enterpriseSearchDeleteDomainModalDeleteDomainButton"
           data-telemetry-id="entSearchContent-crawler-domainManagement-deleteDomain-delete"
           onClick={deleteDomain}
           isLoading={isLoading}

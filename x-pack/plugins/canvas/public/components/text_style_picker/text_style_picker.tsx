@@ -172,6 +172,7 @@ export const TextStylePicker: FC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiSelect
+            data-test-subj="canvasTextStylePickerSelect"
             compressed
             value={size}
             onChange={(e) => doChange('size', Number(e.target.value))}

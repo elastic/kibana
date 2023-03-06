@@ -152,7 +152,11 @@ export const DeprecatedMessage = ({
         id="xpack.securitySolution.indexPatterns.timelineTemplate.toggleToNewSourcerer"
         defaultMessage="We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view {link}."
         values={{
-          link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
+          link: (
+            <EuiLink data-test-subj="securitySolutionDeprecatedMessageLink" onClick={onReset}>
+              {i18n.TOGGLE_TO_NEW_SOURCERER}
+            </EuiLink>
+          ),
         }}
       />
     );
@@ -163,7 +167,11 @@ export const DeprecatedMessage = ({
       id="xpack.securitySolution.indexPatterns.timeline.toggleToNewSourcerer"
       defaultMessage="We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can recreate your temporary data view with the new data view selector. You can also manually select a data view {link}."
       values={{
-        link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
+        link: (
+          <EuiLink data-test-subj="securitySolutionDeprecatedMessageLink" onClick={onReset}>
+            {i18n.TOGGLE_TO_NEW_SOURCERER}
+          </EuiLink>
+        ),
       }}
     />
   );
@@ -183,7 +191,11 @@ export const MissingPatternsMessage = ({
         id="xpack.securitySolution.indexPatterns.missingPatterns.timelineTemplate.description"
         defaultMessage="We have preserved your timeline template by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view {link}."
         values={{
-          link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
+          link: (
+            <EuiLink data-test-subj="securitySolutionMissingPatternsMessageLink" onClick={onReset}>
+              {i18n.TOGGLE_TO_NEW_SOURCERER}
+            </EuiLink>
+          ),
         }}
       />
     );
@@ -194,7 +206,11 @@ export const MissingPatternsMessage = ({
       id="xpack.securitySolution.indexPatterns.missingPatterns.timeline.description"
       defaultMessage="We have preserved your timeline by creating a temporary data view. If you'd like to modify your data, we can add the missing index patterns to the Security Data View. You can also manually select a data view {link}."
       values={{
-        link: <EuiLink onClick={onReset}>{i18n.TOGGLE_TO_NEW_SOURCERER}</EuiLink>,
+        link: (
+          <EuiLink data-test-subj="securitySolutionMissingPatternsMessageLink" onClick={onReset}>
+            {i18n.TOGGLE_TO_NEW_SOURCERER}
+          </EuiLink>
+        ),
       }}
     />
   );

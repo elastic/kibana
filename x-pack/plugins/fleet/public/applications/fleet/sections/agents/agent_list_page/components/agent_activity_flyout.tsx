@@ -186,7 +186,10 @@ export const AgentActivityFlyout: React.FunctionComponent<{
         <FlyoutFooterWPadding>
           <EuiFlexGroup justifyContent="flexStart">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose}>
+              <EuiButtonEmpty
+                data-test-subj="fleetAgentActivityFlyoutButtonEmpty"
+                onClick={onClose}
+              >
                 <EuiText>
                   <FormattedMessage
                     id="xpack.fleet.agentActivityFlyout.closeBtn"
@@ -583,7 +586,11 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                     defaultMessage="{guideLink} about agent upgrades."
                     values={{
                       guideLink: (
-                        <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">
+                        <EuiLink
+                          data-test-subj="fleetUpgradeInProgressActivityItemLearnMoreLink"
+                          href={docLinks.links.fleet.upgradeElasticAgent}
+                          target="_blank"
+                        >
                           <FormattedMessage
                             id="xpack.fleet.agentActivityFlyout.guideLink"
                             defaultMessage="Learn more"

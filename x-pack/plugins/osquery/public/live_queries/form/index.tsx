@@ -182,6 +182,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           {formType === 'steps' && queryType !== 'pack' && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="osquerySubmitButtonContentSaveForLaterButtonEmpty"
                 disabled={!permissions.writeSavedQueries || resultsStatus === 'disabled'}
                 onClick={handleShowSaveQueryFlyout}
               >
@@ -194,6 +195,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
           )}
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="osquerySubmitButtonContentSubmitButton"
               id="submit-button"
               disabled={!enabled}
               isLoading={isSubmitting}

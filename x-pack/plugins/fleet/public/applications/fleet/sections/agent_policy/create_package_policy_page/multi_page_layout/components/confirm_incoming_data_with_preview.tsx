@@ -176,7 +176,12 @@ export const ConfirmIncomingDataWithPreview: React.FunctionComponent<Props> = ({
               defaultMessage="It might take a few minutes for the data to get to Elasticsearch. If you're not seeing any, try generating some to verify. If you're having trouble connecting, check out the {link}."
               values={{
                 link: (
-                  <EuiLink target="_blank" external href={troubleshootLink}>
+                  <EuiLink
+                    data-test-subj="fleetConfirmIncomingDataWithPreviewTroubleshootingGuideLink"
+                    target="_blank"
+                    external
+                    href={troubleshootLink}
+                  >
                     <FormattedMessage
                       id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
                       defaultMessage="troubleshooting guide"

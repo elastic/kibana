@@ -45,6 +45,7 @@ export class GetMessageModal extends Component<Props, State> {
           <EuiForm>
             <EuiFormRow label="Message">
               <EuiFieldText
+                data-test-subj="pluginsFieldText"
                 name="popfirst"
                 value={this.state.message}
                 onChange={(e) => this.setState({ message: e.target.value })}
@@ -54,9 +55,12 @@ export class GetMessageModal extends Component<Props, State> {
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={this.props.onCancel}>Cancel</EuiButtonEmpty>
+          <EuiButtonEmpty data-test-subj="pluginsCancelButtonEmpty" onClick={this.props.onCancel}>
+            Cancel
+          </EuiButtonEmpty>
 
           <EuiButton
+            data-test-subj="pluginsDoneButton"
             isDisabled={!this.state.message}
             onClick={() => {
               if (this.state.message) {

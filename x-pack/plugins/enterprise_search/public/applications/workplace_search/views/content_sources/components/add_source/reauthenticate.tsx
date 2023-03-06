@@ -75,7 +75,13 @@ export const Reauthenticate: React.FC<ReauthenticateProps> = ({ name, header }) 
         </EuiFlexGroup>
         <EuiSpacer />
         <EuiFormRow>
-          <EuiButton color="primary" fill type="submit" isLoading={!oauthUrl || formLoading}>
+          <EuiButton
+            data-test-subj="enterpriseSearchReauthenticateReauthenticateNameButton"
+            color="primary"
+            fill
+            type="submit"
+            isLoading={!oauthUrl || formLoading}
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.workplaceSearch.contentSource.reAuthenticate.button',
               {

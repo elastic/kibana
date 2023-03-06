@@ -98,7 +98,11 @@ export const RelevanceTuningCallouts: React.FC = () => {
         values={{
           schemaFieldsWithConflictsCount,
           link: (
-            <EuiLink href={META_ENGINES_DOCS_URL} target="_blank">
+            <EuiLink
+              data-test-subj="enterpriseSearchSchemaFieldsWithConflictsCalloutWhatsThisLink"
+              href={META_ENGINES_DOCS_URL}
+              target="_blank"
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.whatsThisLinkLabel',
                 {

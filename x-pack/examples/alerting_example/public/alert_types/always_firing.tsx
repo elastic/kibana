@@ -89,6 +89,7 @@ export const AlwaysFiringExpression: React.FunctionComponent<
             helpText="How many randomly generated Alert Instances do you wish to activate on each alert run?"
           >
             <EuiFieldNumber
+              data-test-subj="alertingExampleAlwaysFiringExpressionFieldNumber"
               name="instances"
               value={instances}
               onChange={(event) => {
@@ -168,6 +169,7 @@ const TShirtSelector = ({ actionGroup, setTShirtThreshold }: TShirtSelectorProps
         </EuiFlexItem>
         <EuiFlexItem grow={false} style={{ width: 100 }}>
           <EuiFieldNumber
+            data-test-subj="alertingExampleTShirtSelectorFieldNumber"
             compressed
             value={actionGroup.conditions}
             onChange={(e) => {

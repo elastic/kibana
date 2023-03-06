@@ -43,7 +43,12 @@ export class FilterListUsagePopover extends Component {
     const listItems = entityValues.map((value) => <li key={value}>{value}</li>);
 
     const button = (
-      <EuiButtonEmpty size="s" color="primary" onClick={this.onButtonClick}>
+      <EuiButtonEmpty
+        data-test-subj="mlButtonEmpty"
+        size="s"
+        color="primary"
+        onClick={this.onButtonClick}
+      >
         {linkText}
       </EuiButtonEmpty>
     );

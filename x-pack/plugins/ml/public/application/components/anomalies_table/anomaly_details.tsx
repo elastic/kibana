@@ -332,7 +332,10 @@ const Influencers: FC<{
           </>
         ))}
         {othersCount > 0 && (
-          <EuiLink onClick={() => toggleAllInfluencers()}>
+          <EuiLink
+            data-test-subj="mlInfluencersAndOthersCountMoreLink"
+            onClick={() => toggleAllInfluencers()}
+          >
             <FormattedMessage
               id="xpack.ml.anomaliesTable.anomalyDetails.anomalyDescriptionListMoreLinkText"
               defaultMessage="and {othersCount} more"
@@ -341,7 +344,10 @@ const Influencers: FC<{
           </EuiLink>
         )}
         {numToDisplay > influencersLimit + 1 && (
-          <EuiLink onClick={() => toggleAllInfluencers()}>
+          <EuiLink
+            data-test-subj="mlInfluencersShowLessLink"
+            onClick={() => toggleAllInfluencers()}
+          >
             <FormattedMessage
               id="xpack.ml.anomaliesTable.anomalyDetails.anomalyDescriptionShowLessLinkText"
               defaultMessage="Show less"

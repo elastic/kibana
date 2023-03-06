@@ -86,7 +86,11 @@ export const ApiKeyFlyout: React.FC = () => {
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={hideApiKeyForm}>
+              <EuiButtonEmpty
+                data-test-subj="enterpriseSearchApiKeyFlyoutButtonEmpty"
+                iconType="cross"
+                onClick={hideApiKeyForm}
+              >
                 {CLOSE_BUTTON_LABEL}
               </EuiButtonEmpty>
             </EuiFlexItem>

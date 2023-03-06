@@ -46,7 +46,10 @@ export const PanelViewWithSharingLong: React.FC = () => {
   return (
     <EuiPopover
       button={
-        <EuiButton onClick={() => setOpen((x) => !x)}>
+        <EuiButton
+          data-test-subj="uiActionsExplorerPanelViewWithSharingLongViewModeWithManySharingOptionsButton"
+          onClick={() => setOpen((x) => !x)}
+        >
           View mode with many sharing options
         </EuiButton>
       }

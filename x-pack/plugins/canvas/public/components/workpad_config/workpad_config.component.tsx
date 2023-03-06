@@ -137,6 +137,7 @@ export const WorkpadConfig: FC<Props> = (props) => {
         <EuiFlexItem>
           <EuiFormRow label={strings.getPageWidthLabel()} display="rowCompressed">
             <EuiFieldNumber
+              data-test-subj="canvasWorkpadConfigFieldNumber"
               compressed
               onChange={(e) => setSize({ width: Number(e.target.value), height: size.height })}
               value={size.width}
@@ -158,6 +159,7 @@ export const WorkpadConfig: FC<Props> = (props) => {
         <EuiFlexItem>
           <EuiFormRow label={strings.getPageHeightLabel()} display="rowCompressed">
             <EuiFieldNumber
+              data-test-subj="canvasWorkpadConfigFieldNumber"
               compressed
               onChange={(e) => setSize({ height: Number(e.target.value), width: size.width })}
               value={size.height}
@@ -203,6 +205,7 @@ export const WorkpadConfig: FC<Props> = (props) => {
         >
           <div className="canvasSidebar__accordionContent">
             <EuiTextArea
+              data-test-subj="canvasWorkpadConfigTextArea"
               aria-label={strings.getGlobalCSSTooltip()}
               value={css}
               compressed
@@ -210,7 +213,11 @@ export const WorkpadConfig: FC<Props> = (props) => {
               rows={10}
             />
             <EuiSpacer size="s" />
-            <EuiButton size="s" onClick={() => setWorkpadCSS(css || DEFAULT_WORKPAD_CSS)}>
+            <EuiButton
+              data-test-subj="canvasWorkpadConfigButton"
+              size="s"
+              onClick={() => setWorkpadCSS(css || DEFAULT_WORKPAD_CSS)}
+            >
               {strings.getApplyStylesheetButtonLabel()}
             </EuiButton>
             <EuiSpacer size="xs" />

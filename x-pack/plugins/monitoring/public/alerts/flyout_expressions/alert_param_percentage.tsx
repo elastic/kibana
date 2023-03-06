@@ -22,6 +22,7 @@ export const AlertParamPercentage: React.FC<Props> = (props: Props) => {
   return (
     <EuiFormRow label={label} error={errors} isInvalid={errors.length > 0}>
       <EuiFieldNumber
+        data-test-subj="monitoringAlertParamPercentageFieldNumber"
         compressed
         value={value}
         append={

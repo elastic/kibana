@@ -30,6 +30,7 @@ export const DataStreamsAndIndicesListHelpText: FunctionComponent<Props> = ({
         values={{
           selectAllLink: (
             <EuiLink
+              data-test-subj="snapshotRestoreDataStreamsAndIndicesListHelpTextSelectAllLink"
               onClick={() => {
                 onSelectionChange('all');
               }}

@@ -58,6 +58,7 @@ export const DeleteDomainPanel: React.FC = ({}) => {
       </EuiText>
       <EuiSpacer size="m" />
       <EuiButton
+        data-test-subj="enterpriseSearchDeleteDomainPanelDeleteDomainButton"
         color="danger"
         iconType="trash"
         onClick={() => {

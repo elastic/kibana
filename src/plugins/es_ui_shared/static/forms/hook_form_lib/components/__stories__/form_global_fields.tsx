@@ -96,7 +96,10 @@ export function GlobalFields() {
 
           {areFieldsVisible && <FormFields />}
 
-          <EuiButton onClick={() => setAreFieldsVisible((prev) => !prev)}>
+          <EuiButton
+            data-test-subj="pluginsGlobalFieldsToggleFieldsInDomButton"
+            onClick={() => setAreFieldsVisible((prev) => !prev)}
+          >
             Toggle fields in DOM
           </EuiButton>
           <EuiText size="s">
@@ -111,7 +114,10 @@ export function GlobalFields() {
       )}
       <div>
         <EuiSpacer />
-        <EuiButton onClick={() => setAreGlobalPresent((prev) => !prev)}>
+        <EuiButton
+          data-test-subj="pluginsGlobalFieldsToggleGlobalsFieldsButton"
+          onClick={() => setAreGlobalPresent((prev) => !prev)}
+        >
           Toggle globals fields
         </EuiButton>
         <EuiText size="s">
@@ -125,7 +131,12 @@ export function GlobalFields() {
 
       <div>
         <EuiSpacer />
-        <EuiButton onClick={() => submitForm(form)}>Send form</EuiButton>
+        <EuiButton
+          data-test-subj="pluginsGlobalFieldsSendFormButton"
+          onClick={() => submitForm(form)}
+        >
+          Send form
+        </EuiButton>
       </div>
     </Form>
   );

@@ -60,6 +60,7 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
     {fields.map(({ value, id, label, error }) => (
       <EuiFormRow key={id} id={id} fullWidth label={label} isInvalid={!!error} error={error}>
         <EuiFieldText
+          data-test-subj="cloudSecurityPostureIntegrationSettingsFieldText"
           isInvalid={!!error}
           fullWidth
           value={value}

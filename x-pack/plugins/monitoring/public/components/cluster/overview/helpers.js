@@ -50,7 +50,13 @@ export function HealthLabel(props) {
         {i18n.translate('xpack.monitoring.cluster.health.pluginIssues', {
           defaultMessage: 'Some plugins may be experiencing issues. Please check ',
         })}
-        <EuiLink href={`${Legacy.shims.getBasePath()}/status`}>the Kibana status page</EuiLink>.
+        <EuiLink
+          data-test-subj="monitoringHealthLabelTheKibanaStatusPageLink"
+          href={`${Legacy.shims.getBasePath()}/status`}
+        >
+          the Kibana status page
+        </EuiLink>
+        .
       </EuiText>
     );
   }
@@ -167,5 +173,9 @@ export function DisabledIfNoDataAndInSetupModeLink({
     return children;
   }
 
-  return <EuiLink {...props}>{children}</EuiLink>;
+  return (
+    <EuiLink data-test-subj="monitoringDisabledIfNoDataAndInSetupModeLinkLink" {...props}>
+      {children}
+    </EuiLink>
+  );
 }

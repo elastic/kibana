@@ -130,7 +130,10 @@ const CreatingCustomFieldFormat: React.FC<{ deps: Deps }> = (props) => {
         <p>
           Currency formatter that we&apos;ve just created is already integrated with data views. It
           can be applied to any <EuiCode>numeric</EuiCode> field of any data view.{' '}
-          <EuiLink onClick={() => props.deps.openDateViewNumberFieldEditor()}>
+          <EuiLink
+            data-test-subj="fieldFormatsExampleCreatingCustomFieldFormatOpenDataViewFieldEditorToGiveItATryLink"
+            onClick={() => props.deps.openDateViewNumberFieldEditor()}
+          >
             Open data view field editor to give it a try.
           </EuiLink>
         </p>
@@ -162,7 +165,10 @@ const CreatingCustomFieldFormatEditor: React.FC<{ deps: Deps }> = (props) => {
         <p>
           Currency formatter and its custom editor are integrated with data views. It can be applied
           to any <EuiCode>numeric</EuiCode> field of any data view.{' '}
-          <EuiLink onClick={() => props.deps.openDateViewNumberFieldEditor()}>
+          <EuiLink
+            data-test-subj="fieldFormatsExampleCreatingCustomFieldFormatEditorOpenDateViewFieldEditorToGiveItATryLink"
+            onClick={() => props.deps.openDateViewNumberFieldEditor()}
+          >
             Open date view field editor to give it a try.
           </EuiLink>
         </p>

@@ -165,7 +165,7 @@ export const AssetManager: FC<Props> = (props) => {
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
-        <EuiButton size="s" onClick={() => onClose()}>
+        <EuiButton data-test-subj="canvasAssetManagerButton" size="s" onClick={() => onClose()}>
           {strings.getModalCloseButtonLabel()}
         </EuiButton>
       </EuiModalFooter>

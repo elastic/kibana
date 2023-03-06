@@ -22,15 +22,27 @@ export const ElasticsearchPython: React.FC<{ cloudId?: string }> = ({ cloudId })
           interacting with Elasticsearch’s REST API. It’s designed to be unopinionated and
           extendable.
         </p>
-        <EuiLink target="_blank" href={docLinks.clientsPythonOverview}>
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchPythonLearnMoreAboutThePythonClientForElasticsearchLink"
+          target="_blank"
+          href={docLinks.clientsPythonOverview}
+        >
           Learn more about the Python client for Elasticsearch
         </EuiLink>
         <EuiSpacer size="m" />
-        <EuiLink target="_blank" href="https://elasticsearch-py.readthedocs.io/">
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchPythonThePythonClientForElasticsearchOnReadTheDocsLink"
+          target="_blank"
+          href="https://elasticsearch-py.readthedocs.io/"
+        >
           The Python client for Elasticsearch on Read the Docs
         </EuiLink>
         <EuiSpacer size="m" />
-        <EuiLink target="_blank" href="https://github.com/elastic/elasticsearch-py">
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchPythonElasticsearchPyOnGithubLink"
+          target="_blank"
+          href="https://github.com/elastic/elasticsearch-py"
+        >
           elasticsearch-py on Github
         </EuiLink>
       </EuiText>

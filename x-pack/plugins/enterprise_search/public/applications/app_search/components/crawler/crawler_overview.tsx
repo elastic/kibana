@@ -82,7 +82,12 @@ export const CrawlerOverview: React.FC = () => {
                 defaultMessage:
                   "Easily index your website's content. To get started, enter your domain name, provide optional entry points and crawl rules, and we will handle the rest.",
               })}{' '}
-              <EuiLink external target="_blank" href={WEB_CRAWLER_DOCS_URL}>
+              <EuiLink
+                data-test-subj="enterpriseSearchCrawlerOverviewLearnMoreAboutTheWebCrawlerLink"
+                external
+                target="_blank"
+                href={WEB_CRAWLER_DOCS_URL}
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.crawler.empty.crawlerDocumentationLinkDescription',
                   {
@@ -125,7 +130,12 @@ export const CrawlerOverview: React.FC = () => {
                 defaultMessage:
                   "Recent crawl requests are logged here. Using the request ID of each crawl, you can track progress and examine crawl events in Kibana's Discover or Logs user interfaces.",
               })}{' '}
-              <EuiLink href={WEB_CRAWLER_LOG_DOCS_URL} target="_blank" external>
+              <EuiLink
+                data-test-subj="enterpriseSearchCrawlerOverviewLearnMoreAboutConfiguringCrawlerLogsInKibanaLink"
+                href={WEB_CRAWLER_LOG_DOCS_URL}
+                target="_blank"
+                external
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.crawler.configurationDocumentationLinkDescription',
                   {

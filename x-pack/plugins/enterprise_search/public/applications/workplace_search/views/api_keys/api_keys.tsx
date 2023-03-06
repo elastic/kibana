@@ -51,7 +51,7 @@ export const ApiKeys: React.FC = () => {
   const hasApiKeys = apiTokens.length > 0;
 
   const addKeyButton = (
-    <EuiButton fill onClick={showApiKeyForm}>
+    <EuiButton data-test-subj="enterpriseSearchApiKeysButton" fill onClick={showApiKeyForm}>
       {CREATE_KEY_BUTTON_LABEL}
     </EuiButton>
   );
@@ -63,6 +63,7 @@ export const ApiKeys: React.FC = () => {
       body={API_KEYS_EMPTY_BODY}
       actions={
         <EuiButton
+          data-test-subj="enterpriseSearchApiKeysButton"
           size="s"
           target="_blank"
           iconType="popout"

@@ -159,7 +159,11 @@ export const GroupOverview: React.FC = () => {
   const hasContentSources = contentSources?.length > 0;
 
   const manageSourcesButton = (
-    <EuiButton color="primary" onClick={showOrgSourcesModal}>
+    <EuiButton
+      data-test-subj="enterpriseSearchGroupOverviewButton"
+      color="primary"
+      onClick={showOrgSourcesModal}
+    >
       {MANAGE_SOURCES_BUTTON_TEXT}
     </EuiButton>
   );
@@ -217,13 +221,18 @@ export const GroupOverview: React.FC = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiFieldText
+                data-test-subj="enterpriseSearchGroupOverviewFieldText"
                 isInvalid={false}
                 value={groupNameInputValue}
                 onChange={(e) => onGroupNameInputChange(e.target.value)}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton disabled={!groupNameInputValue} onClick={updateGroupName}>
+              <EuiButton
+                data-test-subj="enterpriseSearchGroupOverviewButton"
+                disabled={!groupNameInputValue}
+                onClick={updateGroupName}
+              >
                 {SAVE_NAME_BUTTON_TEXT}
               </EuiButton>
             </EuiFlexItem>

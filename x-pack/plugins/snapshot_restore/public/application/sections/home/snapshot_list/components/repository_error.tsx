@@ -34,7 +34,10 @@ export const RepositoryError: React.FunctionComponent = () => {
               defaultMessage="Go to {repositoryLink} to fix the errors."
               values={{
                 repositoryLink: (
-                  <EuiLink {...reactRouterNavigate(history, linkToRepositories())}>
+                  <EuiLink
+                    data-test-subj="snapshotRestoreRepositoryErrorRepositoriesLink"
+                    {...reactRouterNavigate(history, linkToRepositories())}
+                  >
                     <FormattedMessage
                       id="xpack.snapshotRestore.repositoryWarningLinkText"
                       defaultMessage="Repositories"

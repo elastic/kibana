@@ -124,7 +124,12 @@ export const TagFilterPanel: FC<Props> = ({
             <EuiFlexItem>Tags</EuiFlexItem>
             <EuiFlexItem grow={false}>
               {totalActiveFilters > 0 && (
-                <EuiButtonEmpty flush="both" onClick={clearTagSelection} css={clearSelectionBtnCSS}>
+                <EuiButtonEmpty
+                  data-test-subj="contentManagementTagFilterPanelClearSelectionButtonEmpty"
+                  flush="both"
+                  onClick={clearTagSelection}
+                  css={clearSelectionBtnCSS}
+                >
                   {i18n.translate(
                     'contentManagement.tableList.tagFilterPanel.clearSelectionButtonLabelLabel',
                     {
@@ -175,7 +180,12 @@ export const TagFilterPanel: FC<Props> = ({
             </EuiFlexItem>
 
             <EuiFlexItem css={saveBtnWrapperCSS}>
-              <EuiButton onClick={closePopover}>Save</EuiButton>
+              <EuiButton
+                data-test-subj="contentManagementTagFilterPanelSaveButton"
+                onClick={closePopover}
+              >
+                Save
+              </EuiButton>
             </EuiFlexItem>
 
             <EuiFlexItem>

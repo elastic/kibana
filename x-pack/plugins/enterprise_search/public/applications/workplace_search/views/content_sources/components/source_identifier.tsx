@@ -48,6 +48,7 @@ export const SourceIdentifier: React.FC<Props> = ({ id }) => (
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiFieldText
+          data-test-subj="enterpriseSearchSourceIdentifierFieldText"
           value={id}
           readOnly
           aria-label={i18n.translate(

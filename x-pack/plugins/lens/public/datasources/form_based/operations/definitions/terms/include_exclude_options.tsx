@@ -292,6 +292,7 @@ export const IncludeExcludeRow = ({
       >
         {isRegexUsed.exclude ? (
           <EuiFieldText
+            data-test-subj="lensIncludeExcludeRowFieldText"
             placeholder={i18n.translate(
               'xpack.lens.indexPattern.terms.includeExcludePatternPlaceholder',
               {

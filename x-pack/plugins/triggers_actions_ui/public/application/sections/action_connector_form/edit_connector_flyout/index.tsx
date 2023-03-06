@@ -59,7 +59,11 @@ const ReadOnlyConnectorMessage: React.FC<{ href: string }> = ({ href }) => {
           defaultMessage: 'This connector is readonly.',
         })}
       </EuiText>
-      <EuiLink href={href} target="_blank">
+      <EuiLink
+        data-test-subj="triggersActionsUiReadOnlyConnectorMessageLearnMoreAboutPreconfiguredConnectorsLink"
+        href={href}
+        target="_blank"
+      >
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel"
           defaultMessage="Learn more about preconfigured connectors."

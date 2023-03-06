@@ -39,6 +39,7 @@ export const Inspect: FC<InspectProps> = ({ object }) => {
           <EuiCopy textToCopy={objectAsJsonString}>
             {(copy) => (
               <EuiButtonEmpty
+                data-test-subj="pluginsInspectButtonEmpty"
                 aria-label={copyToClipboardLabel}
                 size="s"
                 flush="right"

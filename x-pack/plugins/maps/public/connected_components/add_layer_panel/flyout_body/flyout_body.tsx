@@ -38,7 +38,13 @@ export const FlyoutBody = (props: Props) => {
 
     const backButton = props.showBackButton ? (
       <Fragment>
-        <EuiButtonEmpty size="xs" flush="left" onClick={props.onClear} iconType="arrowLeft">
+        <EuiButtonEmpty
+          data-test-subj="mapsRenderContentChangeLayerButtonEmpty"
+          size="xs"
+          flush="left"
+          onClick={props.onClear}
+          iconType="arrowLeft"
+        >
           <FormattedMessage
             id="xpack.maps.addLayerPanel.changeDataSourceButtonLabel"
             defaultMessage="Change layer"

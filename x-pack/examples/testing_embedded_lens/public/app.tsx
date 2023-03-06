@@ -537,6 +537,7 @@ export const App = (props: {
                     ) : null}
                     <EuiFlexItem grow={false}>
                       <EuiButton
+                        data-test-subj="testingEmbeddedLensAppEditInLensNewTabButton"
                         aria-label="Open lens in new tab"
                         isDisabled={!props.plugins.lens.canUseEditor()}
                         onClick={() => {
@@ -665,6 +666,7 @@ export const App = (props: {
                   <EuiFlexGroup>
                     <EuiFlexItem grow={false}>
                       <EuiSelect
+                        data-test-subj="testingEmbeddedLensAppSelect"
                         options={charts.map(({ id }, i) => ({ value: i, text: id }))}
                         value={undefined}
                         onChange={(e) => switchChartPreset(Number(e.target.value))}

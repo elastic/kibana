@@ -104,11 +104,16 @@ export const GitHubViaApp: React.FC<GithubViaAppProps> = ({ isGithubEnterpriseSe
         )}
 
         <EuiFormRow label="GitHub App ID">
-          <EuiFieldText value={githubAppId} onChange={(e) => setGithubAppId(e.target.value)} />
+          <EuiFieldText
+            data-test-subj="enterpriseSearchGitHubViaAppFieldText"
+            value={githubAppId}
+            onChange={(e) => setGithubAppId(e.target.value)}
+          />
         </EuiFormRow>
         {isGithubEnterpriseServer && (
           <EuiFormRow label="Base URL">
             <EuiFieldText
+              data-test-subj="enterpriseSearchGitHubViaAppFieldText"
               value={githubEnterpriseServerUrl}
               onChange={(e) => setGithubEnterpriseServerUrl(e.target.value)}
             />
@@ -121,6 +126,7 @@ export const GitHubViaApp: React.FC<GithubViaAppProps> = ({ isGithubEnterpriseSe
           />
         </EuiFormRow>
         <EuiButton
+          data-test-subj="enterpriseSearchGitHubViaAppButton"
           fill
           type="submit"
           isLoading={isSubmitButtonLoading}

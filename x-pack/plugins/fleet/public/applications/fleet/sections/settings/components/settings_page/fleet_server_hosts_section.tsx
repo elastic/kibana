@@ -43,7 +43,12 @@ export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSe
           defaultMessage="Specify the URLs that your agents will use to connect to a Fleet Server. If multiple URLs exist, Fleet will show the first provided URL for enrollment purposes. For more information, see the {guideLink} ."
           values={{
             guideLink: (
-              <EuiLink href={docLinks.links.fleet.guide} target="_blank" external>
+              <EuiLink
+                data-test-subj="fleetFleetServerHostsSectionFleetAndElasticAgentGuideLink"
+                href={docLinks.links.fleet.guide}
+                target="_blank"
+                external
+              >
                 <FormattedMessage
                   id="xpack.fleet.settings.fleetUserGuideLink"
                   defaultMessage="Fleet and Elastic Agent Guide"

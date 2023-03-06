@@ -73,7 +73,12 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
               hostUrl: <EuiCode>{selectedFleetServerHost?.host_urls[0]}</EuiCode>,
               fleetSettingsLink: (
                 // eslint-disable-next-line @elastic/eui/href-or-on-click
-                <EuiButtonEmpty href={getHref('settings')} onClick={onClose} flush="left">
+                <EuiButtonEmpty
+                  data-test-subj="fleetGettingStartedStepContentFleetSettingsButtonEmpty"
+                  href={getHref('settings')}
+                  onClick={onClose}
+                  flush="left"
+                >
                   <FormattedMessage
                     id="xpack.fleet.fleetServerSetup.fleetSettingsLink"
                     defaultMessage="Fleet Settings"

@@ -107,6 +107,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           />
           <EuiSpacer />
           <EuiButton
+            data-test-subj="reportingReportDiagnosticCheckBrowserButton"
             disabled={isBusy || chromeStatus === 'complete'}
             onClick={apiWrapper(() => apiClient.verifyBrowser(), statuses.chromeStatus)}
             isLoading={isBusy && chromeStatus === 'incomplete'}
@@ -136,6 +137,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
           />
           <EuiSpacer />
           <EuiButton
+            data-test-subj="reportingReportDiagnosticCaptureScreenshotButton"
             disabled={isBusy || screenshotStatus === 'complete'}
             onClick={apiWrapper(() => apiClient.verifyScreenCapture(), statuses.screenshotStatus)}
             isLoading={isBusy && screenshotStatus === 'incomplete'}
@@ -232,7 +234,12 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
   return (
     <div>
       {flyout}
-      <EuiButtonEmpty size="xs" flush="left" onClick={showFlyout}>
+      <EuiButtonEmpty
+        data-test-subj="reportingReportDiagnosticRunReportingDiagnosticsButtonEmpty"
+        size="xs"
+        flush="left"
+        onClick={showFlyout}
+      >
         <FormattedMessage
           id="xpack.reporting.listing.diagnosticButton"
           defaultMessage="Run reporting diagnostics"

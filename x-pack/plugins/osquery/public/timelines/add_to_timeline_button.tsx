@@ -10,7 +10,9 @@ import { isArray } from 'lodash';
 import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useKibana } from '../common/lib/kibana';
 
-const TimelineComponent = React.memo((props) => <EuiButtonEmpty {...props} size="xs" />);
+const TimelineComponent = React.memo((props) => (
+  <EuiButtonEmpty data-test-subj="osqueryTimelineComponentButtonEmpty" {...props} size="xs" />
+));
 TimelineComponent.displayName = 'TimelineComponent';
 
 export interface AddToTimelineButtonProps {

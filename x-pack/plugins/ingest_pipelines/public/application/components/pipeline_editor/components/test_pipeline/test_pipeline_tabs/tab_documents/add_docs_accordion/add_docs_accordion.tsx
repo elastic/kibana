@@ -75,7 +75,12 @@ export const AddDocumentsAccordion: FunctionComponent<Props> = ({ onAddDocuments
                   defaultMessage="To explore your existing data, use {discoverLink}."
                   values={{
                     discoverLink: (
-                      <EuiLink href={discoverLink} target="_blank" external>
+                      <EuiLink
+                        data-test-subj="ingestPipelinesAddDocumentsAccordionDiscoverLink"
+                        href={discoverLink}
+                        target="_blank"
+                        external
+                      >
                         Discover
                       </EuiLink>
                     ),

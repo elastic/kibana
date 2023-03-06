@@ -145,6 +145,7 @@ export const CreateOrEditModal: FC<CreateOrEditModalProps> = ({
                 error={validation.errors.color}
                 labelAppend={
                   <EuiButtonEmpty
+                    data-test-subj="savedObjectsTaggingCreateOrEditModalRandomizeButtonEmpty"
                     onClick={() => setColor(getRandomColor())}
                     size="xs"
                     style={{ height: '18px', fontSize: '0.75rem' }}

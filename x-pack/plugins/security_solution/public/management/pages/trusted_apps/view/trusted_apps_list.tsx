@@ -75,7 +75,11 @@ const TRUSTED_APPS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
           id="xpack.securitySolution.trustedApps.flyoutDowngradedLicenseDocsInfo"
           defaultMessage="For more information, see our "
         />
-        <EuiLink target="_blank" href={`${securitySolutionDocsLinks.trustedApps}`}>
+        <EuiLink
+          data-test-subj="securitySolutionTRUSTED_APPS_PAGE_LABELSTrustedApplicationsDocumentationLink"
+          target="_blank"
+          href={`${securitySolutionDocsLinks.trustedApps}`}
+        >
           <FormattedMessage
             id="xpack.securitySolution.trustedApps.flyoutDowngradedLicenseDocsLink"
             defaultMessage="Trusted applications documentation"

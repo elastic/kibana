@@ -52,7 +52,7 @@ export class DateNanosFormatEditor extends DefaultFormatEditor<DateNanosFormatEd
           error={error}
           helpText={
             <span>
-              <EuiLink target="_blank" href="https://momentjs.com/">
+              <EuiLink data-test-subj="pluginsLink" target="_blank" href="https://momentjs.com/">
                 <FormattedMessage
                   id="indexPatternFieldEditor.date.documentationLabel"
                   defaultMessage="Documentation"

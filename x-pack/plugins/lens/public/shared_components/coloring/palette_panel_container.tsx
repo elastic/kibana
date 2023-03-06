@@ -94,7 +94,13 @@ export function PalettePanelContainer({
             {children && <div className="lnsPalettePanelContainer__content">{children}</div>}
 
             <EuiFlyoutFooter className="lnsPalettePanelContainer__footer">
-              <EuiButtonEmpty flush="left" size="s" iconType="sortLeft" onClick={closeFlyout}>
+              <EuiButtonEmpty
+                data-test-subj="lensPalettePanelContainerBackButtonEmpty"
+                flush="left"
+                size="s"
+                iconType="sortLeft"
+                onClick={closeFlyout}
+              >
                 {i18n.translate('xpack.lens.table.palettePanelContainer.back', {
                   defaultMessage: 'Back',
                 })}

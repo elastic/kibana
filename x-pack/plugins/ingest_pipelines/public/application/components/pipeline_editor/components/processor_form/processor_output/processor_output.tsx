@@ -182,6 +182,7 @@ export const ProcessorOutput: FunctionComponent<Props> = ({
 
       {/* Documents dropdown */}
       <EuiSelect
+        data-test-subj="ingestPipelinesProcessorOutputSelect"
         compressed
         options={documents.map((doc, index) => ({
           value: index,

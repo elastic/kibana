@@ -38,7 +38,7 @@ storiesOf('components/FlyoutFrame', module)
       <EuiFlyout onClose={() => {}}>
         <FlyoutFrame
           title="Create drilldown"
-          footer={<EuiButton>Save</EuiButton>}
+          footer={<EuiButton data-test-subj="pluginsSaveButton">Save</EuiButton>}
           onClose={() => console.log('onClose')}
         >
           test

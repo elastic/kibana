@@ -64,7 +64,9 @@ export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string 
     element = (
       <Fragment>
         {preString}
-        <EuiLink href={safeLink}>{linkPart[1]}</EuiLink>
+        <EuiLink data-test-subj="monitoringReplaceTokensLink" href={safeLink}>
+          {linkPart[1]}
+        </EuiLink>
         {postString}
       </Fragment>
     );
@@ -87,7 +89,7 @@ export function replaceTokens(alertMessage: AlertMessage): JSX.Element | string 
     element = (
       <Fragment>
         {preString}
-        <EuiLink href={url} target="_blank" external>
+        <EuiLink data-test-subj="monitoringReplaceTokensLink" href={url} target="_blank" external>
           {linkPart[1]}
         </EuiLink>
         {postString}

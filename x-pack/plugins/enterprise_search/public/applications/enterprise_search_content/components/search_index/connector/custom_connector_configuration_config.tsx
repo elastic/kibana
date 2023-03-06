@@ -22,6 +22,7 @@ export const ConnectorConfigurationConfig: React.FC = () => {
           values={{
             link: (
               <EuiLink
+                data-test-subj="enterpriseSearchConnectorConfigurationConfigExampleConnectorClientLink"
                 href="https://github.com/elastic/connectors-ruby/tree/main/lib/connectors/example"
                 target="_blank"
               >
@@ -48,7 +49,11 @@ export const ConnectorConfigurationConfig: React.FC = () => {
           defaultMessage="If you need help, you can always open an {issuesLink} in the repository or ask a question in our {discussLink} forum."
           values={{
             discussLink: (
-              <EuiLink href="https://discuss.elastic.co/c/enterprise-search/84" target="_blank">
+              <EuiLink
+                data-test-subj="enterpriseSearchConnectorConfigurationConfigDiscussLink"
+                href="https://discuss.elastic.co/c/enterprise-search/84"
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.configurationConnector.config.discussLink',
                   { defaultMessage: 'Discuss' }
@@ -56,7 +61,11 @@ export const ConnectorConfigurationConfig: React.FC = () => {
               </EuiLink>
             ),
             issuesLink: (
-              <EuiLink href="https://github.com/elastic/connectors-ruby/issues" target="_blank">
+              <EuiLink
+                data-test-subj="enterpriseSearchConnectorConfigurationConfigIssueLink"
+                href="https://github.com/elastic/connectors-ruby/issues"
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.configurationConnector.config.issuesLink',
                   { defaultMessage: 'issue' }

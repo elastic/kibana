@@ -14,7 +14,7 @@ import { InnerLinkPanel } from './inner_link_panel';
 describe('InnerLinkPanel', () => {
   const defaultProps = {
     body: 'test_body',
-    button: <EuiButton />,
+    button: <EuiButton data-test-subj="securitySolutionButton" />,
     dataTestSubj: 'custom_test_subj',
     title: 'test_title',
   };

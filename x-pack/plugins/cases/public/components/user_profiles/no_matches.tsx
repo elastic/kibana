@@ -40,6 +40,7 @@ const NoMatchesComponent: React.FC = () => {
             {i18n.MODIFY_SEARCH}
             <br />
             <EuiLink
+              data-test-subj="casesNoMatchesComponentLink"
               href="https://www.elastic.co/guide/en/security/current/case-permissions.html"
               target="_blank"
             >

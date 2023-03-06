@@ -107,7 +107,11 @@ export const DocViewerSource = ({
         defaultMessage: 'Could not fetch data at this time. Refresh the tab to try again.',
       })}
       <EuiSpacer size="s" />
-      <EuiButton iconType="refresh" onClick={requestData}>
+      <EuiButton
+        data-test-subj="pluginsDocViewerSourceRefreshButton"
+        iconType="refresh"
+        onClick={requestData}
+      >
         {i18n.translate('discover.sourceViewer.refresh', {
           defaultMessage: 'Refresh',
         })}

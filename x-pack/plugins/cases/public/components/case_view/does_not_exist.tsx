@@ -27,7 +27,13 @@ export const DoesNotExist = React.memo(({ caseId }: Props) => {
       titleSize="xs"
       body={<p>{i18n.DOES_NOT_EXIST_DESCRIPTION(caseId)}</p>}
       actions={
-        <EuiButton onClick={navigateToAllCases} size="s" color="primary" fill>
+        <EuiButton
+          data-test-subj="casesDoesNotExistButton"
+          onClick={navigateToAllCases}
+          size="s"
+          color="primary"
+          fill
+        >
           {i18n.DOES_NOT_EXIST_BUTTON}
         </EuiButton>
       }

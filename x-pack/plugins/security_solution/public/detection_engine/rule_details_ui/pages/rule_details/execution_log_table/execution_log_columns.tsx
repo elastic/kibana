@@ -102,7 +102,11 @@ export const GET_EXECUTION_LOG_METRICS_COLUMNS = (
                     id="xpack.securitySolution.detectionEngine.ruleDetails.ruleExecutionLog.gapDurationColumnTooltip"
                     values={{
                       seeDocs: (
-                        <EuiLink href={`${docLinks.links.siem.troubleshootGaps}`} target="_blank">
+                        <EuiLink
+                          data-test-subj="securitySolutionGET_EXECUTION_LOG_METRICS_COLUMNSLink"
+                          href={`${docLinks.links.siem.troubleshootGaps}`}
+                          target="_blank"
+                        >
                           {i18n.COLUMN_GAP_TOOLTIP_SEE_DOCUMENTATION}
                         </EuiLink>
                       ),

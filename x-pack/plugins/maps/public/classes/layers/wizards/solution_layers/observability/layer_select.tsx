@@ -49,7 +49,12 @@ export function LayerSelect(props: Props) {
         defaultMessage: 'Layer',
       })}
     >
-      <EuiSelect options={options} value={props.value ? props.value : ''} onChange={onChange} />
+      <EuiSelect
+        data-test-subj="mapsLayerSelectSelect"
+        options={options}
+        value={props.value ? props.value : ''}
+        onChange={onChange}
+      />
     </EuiFormRow>
   );
 }

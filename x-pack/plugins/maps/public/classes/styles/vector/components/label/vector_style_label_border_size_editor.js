@@ -55,6 +55,7 @@ export function VectorStyleLabelBorderSizeEditor({
   const labelBorderSizeForm = (
     <EuiFormRow label={getVectorStyleLabel(VECTOR_STYLES.LABEL_BORDER_SIZE)}>
       <EuiSelect
+        data-test-subj="mapsVectorStyleLabelBorderSizeEditorSelect"
         disabled={disabled}
         options={options}
         value={styleProperty.getOptions().size}

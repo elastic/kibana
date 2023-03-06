@@ -62,6 +62,7 @@ export const SimpleTemplate: FunctionComponent<Props> = (props) => {
           <EuiFlexItem grow={false}>
             <EuiText size="xs">
               <EuiLink
+                data-test-subj="canvasSimpleTemplateLink"
                 aria-label={`${strings.getColorLabel()}: ${strings.getColorValueDefault()}`}
                 onClick={() => handleChange('color', '#000000')}
               >

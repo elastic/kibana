@@ -65,7 +65,12 @@ export const TriggerPicker: React.FC<TriggerPickerProps> = ({
             <h5>
               <span>{txtTriggerPickerLabel}</span>{' '}
               <EuiToolTip content={txtTriggerPickerHelpTooltip}>
-                <EuiLink href={docs} target={'blank'} external>
+                <EuiLink
+                  data-test-subj="pluginsTriggerPickerLink"
+                  href={docs}
+                  target={'blank'}
+                  external
+                >
                   {txtTriggerPickerHelpText}
                 </EuiLink>
               </EuiToolTip>

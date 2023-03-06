@@ -193,6 +193,7 @@ export const ImportExceptionListFlyout = React.memo(
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="securitySolutionImportExceptionListFlyoutButtonEmpty"
                 iconType="cross"
                 onClick={() => setDisplayImportListFlyout(false)}
                 flush="left"

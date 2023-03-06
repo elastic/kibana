@@ -58,7 +58,12 @@ const UnverifiedCallout: React.FC = () => {
             defaultMessage="This integration contains an unsigned package of unknown authenticity. Learn more about {learnMoreLink}."
             values={{
               learnMoreLink: (
-                <EuiLink target="_blank" external href={docLinks.links.fleet.packageSignatures}>
+                <EuiLink
+                  data-test-subj="fleetUnverifiedCalloutPackageSignaturesLink"
+                  target="_blank"
+                  external
+                  href={docLinks.links.fleet.packageSignatures}
+                >
                   <FormattedMessage
                     id="xpack.fleet.epm.verificationWarningCalloutLearnMoreLink"
                     defaultMessage="package signatures"

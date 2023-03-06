@@ -28,15 +28,27 @@ export const ElasticsearchRust: React.FC = () => {
           <li>Proxy support with authentication</li>
           <li>Async support with Tokio</li>
         </ul>
-        <EuiLink target="_blank" href={docLinks.clientsRustOverview}>
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchRustLearnMoreAboutTheRustClientForElasticsearchLink"
+          target="_blank"
+          href={docLinks.clientsRustOverview}
+        >
           Learn more about the Rust client for Elasticsearch
         </EuiLink>
         <EuiSpacer size="m" />
-        <EuiLink target="_blank" href="https://github.com/elastic/elasticsearch-rs">
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchRustTheOfficialRustClientForElasticsearchOnGithubLink"
+          target="_blank"
+          href="https://github.com/elastic/elasticsearch-rs"
+        >
           The official Rust client for Elasticsearch on Github
         </EuiLink>
         <EuiSpacer size="m" />
-        <EuiLink target="_blank" href="https://docs.rs/elasticsearch">
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchRustViewTheDocumentationOnDocsRsLink"
+          target="_blank"
+          href="https://docs.rs/elasticsearch"
+        >
           View the documentation on docs.rs
         </EuiLink>
       </EuiText>

@@ -47,7 +47,14 @@ export const PanelEditWithDrilldowns: React.FC = () => {
 
   return (
     <EuiPopover
-      button={<EuiButton onClick={() => setOpen((x) => !x)}>Edit mode with drilldowns</EuiButton>}
+      button={
+        <EuiButton
+          data-test-subj="uiActionsExplorerPanelEditWithDrilldownsEditModeWithDrilldownsButton"
+          onClick={() => setOpen((x) => !x)}
+        >
+          Edit mode with drilldowns
+        </EuiButton>
+      }
       isOpen={open}
       panelPaddingSize="none"
       anchorPosition="downLeft"

@@ -42,7 +42,12 @@ function getInferenceConfigHelpText(documentationDocsLink: string): React.ReactN
       defaultMessage="Contains the inference type and its options. Refer to the {documentation} for the available configuration options."
       values={{
         documentation: (
-          <EuiLink external target="_blank" href={documentationDocsLink}>
+          <EuiLink
+            data-test-subj="ingestPipelinesGetInferenceConfigHelpTextLink"
+            external
+            target="_blank"
+            href={documentationDocsLink}
+          >
             {INFERENCE_CONFIG_DOCS.documentation.linkLabel}
           </EuiLink>
         ),

@@ -56,7 +56,12 @@ export const ConfirmIncomingData: React.FunctionComponent<Props> = ({
           defaultMessage="It may take a few minutes for data to arrive in Elasticsearch. If the system is not generating data, it may help to generate some to ensure data is being collected correctly. If you’re having trouble, see our {link}. You may close this dialog and check later by viewing your integration assets."
           values={{
             link: (
-              <EuiLink target="_blank" external href={troubleshootLink}>
+              <EuiLink
+                data-test-subj="fleetConfirmIncomingDataTroubleshootingGuideLink"
+                target="_blank"
+                external
+                href={troubleshootLink}
+              >
                 <FormattedMessage
                   id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
                   defaultMessage="troubleshooting guide"

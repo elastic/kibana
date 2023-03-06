@@ -22,6 +22,7 @@ export const AlertParamTextField: React.FC<Props> = (props: Props) => {
   return (
     <EuiFormRow label={label} error={errors} isInvalid={errors?.length > 0}>
       <EuiFieldText
+        data-test-subj="monitoringAlertParamTextFieldFieldText"
         compressed
         placeholder={placeholder}
         value={value}

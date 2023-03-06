@@ -75,7 +75,11 @@ export const InactiveLicenseSlate = () => {
                     defaultMessage="Please {registerLicenseLink} to continue using the Grok Debugger"
                     values={{
                       registerLicenseLink: (
-                        <EuiLink href="https://www.elastic.co/subscriptions" rel="noopener">
+                        <EuiLink
+                          data-test-subj="grokdebuggerInactiveLicenseSlateLink"
+                          href="https://www.elastic.co/subscriptions"
+                          rel="noopener"
+                        >
                           {registerLicenseLinkLabel}
                         </EuiLink>
                       ),

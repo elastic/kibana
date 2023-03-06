@@ -75,7 +75,11 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
   };
 
   const snapshotRepoDocLink = (
-    <EuiLink href={docLinks.links.plugins.snapshotRestoreRepos} target="_blank">
+    <EuiLink
+      data-test-subj="snapshotRestoreRepositoryFormStepOneLearnMoreAboutRepositoryTypesLink"
+      href={docLinks.links.plugins.snapshotRestoreRepos}
+      target="_blank"
+    >
       <FormattedMessage
         id="xpack.snapshotRestore.repositoryForm.fields.typePluginsDocLinkText"
         defaultMessage="Learn more about repository types."
@@ -143,6 +147,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
           description={<Fragment />} /* EuiCard requires `description` */
           footer={
             <EuiButtonEmpty
+              data-test-subj="snapshotRestoreRenderTypeCardLearnMoreButtonEmpty"
               href={getRepositoryTypeDocUrl(docLinks, type)}
               target="_blank"
               size="xs"
@@ -275,6 +280,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
             values={{
               docLink: (
                 <EuiLink
+                  data-test-subj="snapshotRestoreRenderSourceOnlyToggleLearnMoreAboutSourceOnlyRepositoriesLink"
                   href={getRepositoryTypeDocUrl(docLinks, REPOSITORY_TYPES.source)}
                   target="_blank"
                 >

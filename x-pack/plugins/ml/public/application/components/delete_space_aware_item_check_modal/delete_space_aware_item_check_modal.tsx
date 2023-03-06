@@ -356,6 +356,7 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
                   itemCheckRespSummary?.canRemoveFromSpace &&
                   itemCheckRespSummary?.canDelete && (
                     <EuiButtonEmpty
+                      data-test-subj="mlDeleteSpaceAwareItemCheckModalButtonEmpty"
                       isLoading={isUntagging}
                       color="primary"
                       size="s"
@@ -369,6 +370,7 @@ export const DeleteSpaceAwareItemCheckModal: FC<Props> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="mlDeleteSpaceAwareItemCheckModalButton"
                   size="s"
                   onClick={
                     itemCheckRespSummary?.canTakeAnyAction &&

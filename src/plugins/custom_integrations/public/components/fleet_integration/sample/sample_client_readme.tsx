@@ -145,7 +145,11 @@ export const SampleClientReadme = () => {
 
                 <EuiFlexGroup alignItems="center">
                   <EuiFlexItem grow={false}>
-                    <EuiButton onClick={() => setApiKey(cuid())} disabled={!!apiKey}>
+                    <EuiButton
+                      data-test-subj="pluginsSampleClientReadmeGenerateApiKeyButton"
+                      onClick={() => setApiKey(cuid())}
+                      disabled={!!apiKey}
+                    >
                       Generate API key
                     </EuiButton>
                   </EuiFlexItem>

@@ -170,7 +170,11 @@ export const SelectableSpacesControl = (props: Props) => {
             values={{
               hiddenCount,
               additionalPrivilegesLink: (
-                <EuiLink href={docLink} target="_blank">
+                <EuiLink
+                  data-test-subj="spacesGetUnknownSpacesLabelAdditionalPrivilegesLink"
+                  href={docLink}
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.spaces.shareToSpace.unknownSpacesLabel.additionalPrivilegesLink"
                     defaultMessage="additional privileges"

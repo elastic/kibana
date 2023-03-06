@@ -60,6 +60,7 @@ export const SearchIndexDocuments: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFieldSearch
+                data-test-subj="enterpriseSearchSearchIndexDocumentsFieldSearch"
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-documents-searchDocuments`}
                 placeholder={i18n.translate(
                   'xpack.enterpriseSearch.content.searchIndex.documents.searchField.placeholder',

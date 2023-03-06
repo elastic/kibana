@@ -173,6 +173,7 @@ export const App = (props: {
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="embeddedLensExampleAppEditInLensNewTabButton"
                   aria-label="Open lens in new tab"
                   isDisabled={!props.plugins.lens.canUseEditor()}
                   onClick={() => {

@@ -33,7 +33,7 @@ export const Description: FC<Props> = memo(({ children, validation }) => {
           defaultMessage="If the input data is {aggregated}, specify the field that contains the document count."
           values={{
             aggregated: (
-              <EuiLink href={docsUrl} target="_blank">
+              <EuiLink data-test-subj="mlDescriptionAggregatedLink" href={docsUrl} target="_blank">
                 <FormattedMessage
                   id="xpack.ml.newJob.wizard.pickFieldsStep.summaryCountField.aggregatedText"
                   defaultMessage="aggregated"

@@ -113,7 +113,12 @@ export class SetViewForm extends Component<Props, State> {
           isOpen={this.state.isPopoverOpen}
           closePopover={this._closePopover}
           button={
-            <EuiButtonEmpty iconType="controlsHorizontal" size="xs" onClick={this._togglePopover}>
+            <EuiButtonEmpty
+              data-test-subj="mapsCoordinateSystemButtonEmpty"
+              iconType="controlsHorizontal"
+              size="xs"
+              onClick={this._togglePopover}
+            >
               <FormattedMessage
                 id="xpack.maps.setViewControl.changeCoordinateSystemButtonLabel"
                 defaultMessage="Coordinate system"
@@ -122,6 +127,7 @@ export class SetViewForm extends Component<Props, State> {
           }
         >
           <EuiRadioGroup
+            data-test-subj="mapsRadioGroup"
             options={COORDINATE_SYSTEM_OPTIONS}
             idSelected={this.state.coordinateSystem}
             onChange={this._onCoordinateSystemChange}

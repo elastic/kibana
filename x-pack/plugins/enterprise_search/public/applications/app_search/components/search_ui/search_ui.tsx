@@ -47,7 +47,11 @@ export const SearchUI: React.FC = () => {
                 defaultMessage="Search UI is a free and open library for building search experiences with React. {link}."
                 values={{
                   link: (
-                    <EuiLink target="_blank" href="https://github.com/elastic/search-ui">
+                    <EuiLink
+                      data-test-subj="enterpriseSearchSearchUIViewTheGithubRepoLink"
+                      target="_blank"
+                      href="https://github.com/elastic/search-ui"
+                    >
                       <FormattedMessage
                         id="xpack.enterpriseSearch.appSearch.engine.searchUI.repositoryLinkText"
                         defaultMessage="View the Github repo"
@@ -63,7 +67,11 @@ export const SearchUI: React.FC = () => {
                 defaultMessage="Use the fields below to generate a sample search experience built with Search UI. Use the sample to preview search results, or build upon it to create your own custom search experience. {link}."
                 values={{
                   link: (
-                    <EuiLink target="_blank" href={SEARCH_UI_DOCS_URL}>
+                    <EuiLink
+                      data-test-subj="enterpriseSearchSearchUILearnMoreAboutSearchUiLink"
+                      target="_blank"
+                      href={SEARCH_UI_DOCS_URL}
+                    >
                       <FormattedMessage
                         id="xpack.enterpriseSearch.appSearch.engine.searchUI.guideLinkText"
                         defaultMessage="Learn more about Search UI"

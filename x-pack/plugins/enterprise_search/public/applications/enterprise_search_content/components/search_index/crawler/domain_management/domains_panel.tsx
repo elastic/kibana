@@ -44,6 +44,7 @@ export const DomainsPanel: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="enterpriseSearchDomainsPanelAddDomainButton"
             data-telemetry-id="entSearchContent-crawler-domainManagement-addDomain-addDomain"
             onClick={openFlyout}
             size="s"

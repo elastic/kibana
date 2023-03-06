@@ -32,7 +32,11 @@ const MlCardDescriptionComponent: React.FC<MlCardDescriptionProps> = ({
         defaultMessage="Access to ML requires a {subscriptionsLink}."
         values={{
           subscriptionsLink: (
-            <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+            <EuiLink
+              data-test-subj="securitySolutionMlCardDescriptionComponentPlatinumSubscriptionLink"
+              href="https://www.elastic.co/subscriptions"
+              target="_blank"
+            >
               <FormattedMessage
                 id="xpack.securitySolution.components.stepDefineRule.ruleTypeField.subscriptionsLink"
                 defaultMessage="Platinum subscription"

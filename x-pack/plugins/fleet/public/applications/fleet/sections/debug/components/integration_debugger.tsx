@@ -204,7 +204,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
             isDisabled={integrations.status === 'loading'}
             prepend={
               selectedOptions.length > 0 ? (
-                <EuiButtonEmpty>
+                <EuiButtonEmpty data-test-subj="fleetIntegrationDebuggerButtonEmpty">
                   <EuiIcon type={selectedOptions[0]?.icon ?? 'fleetApp'} />
                 </EuiButtonEmpty>
               ) : undefined
@@ -230,13 +230,21 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
         {selectedIntegration && (
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButton color="primary" onClick={() => setIsReinstallModalVisible(true)}>
+              <EuiButton
+                data-test-subj="fleetIntegrationDebuggerReinstallButton"
+                color="primary"
+                onClick={() => setIsReinstallModalVisible(true)}
+              >
                 Reinstall
               </EuiButton>
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButton color="danger" onClick={() => setIsUninstallModalVisible(true)}>
+              <EuiButton
+                data-test-subj="fleetIntegrationDebuggerUninstallButton"
+                color="danger"
+                onClick={() => setIsUninstallModalVisible(true)}
+              >
                 Uninstall
               </EuiButton>
             </EuiFlexItem>
@@ -294,6 +302,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
         <>
           <EuiSpacer size="m" />
           <EuiLink
+            data-test-subj="fleetIntegrationDebuggerViewIntegrationSettingsInIntegrationsUiLink"
             target="_blank"
             href={getHref('integration_details_overview', {
               pkgkey: pkgKeyFromPackageInfo({

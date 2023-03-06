@@ -100,7 +100,11 @@ export const DocumentExplorerCallout = () => {
           </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink href={docLinks.links.discover.documentExplorer} target="_blank">
+          <EuiLink
+            data-test-subj="pluginsDocumentExplorerCalloutLearnMoreLink"
+            href={docLinks.links.discover.documentExplorer}
+            target="_blank"
+          >
             <FormattedMessage
               id="discover.docExplorerCallout.learnMore"
               defaultMessage="Learn more"

@@ -79,7 +79,12 @@ export const SearchIndexIndexMappings: React.FC = () => {
               </p>
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiLink href={docLinks.elasticsearchMapping} target="_blank" external>
+            <EuiLink
+              data-test-subj="enterpriseSearchSearchIndexIndexMappingsLearnMoreLink"
+              href={docLinks.elasticsearchMapping}
+              target="_blank"
+              external
+            >
               {i18n.translate('xpack.enterpriseSearch.content.searchIndex.mappings.docLink', {
                 defaultMessage: 'Learn more',
               })}
@@ -112,7 +117,12 @@ export const SearchIndexIndexMappings: React.FC = () => {
               </p>
             </EuiText>
             <EuiSpacer size="s" />
-            <EuiLink href={docLinks.ingestPipelines} target="_blank" external>
+            <EuiLink
+              data-test-subj="enterpriseSearchSearchIndexIndexMappingsLearnMoreLink"
+              href={docLinks.ingestPipelines}
+              target="_blank"
+              external
+            >
               {i18n.translate('xpack.enterpriseSearch.content.searchIndex.transform.docLink', {
                 defaultMessage: 'Learn more',
               })}

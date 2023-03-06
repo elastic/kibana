@@ -64,7 +64,10 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
               />
             }
           >
-            <EuiLink onClick={() => updateCurrentStep(1)}>
+            <EuiLink
+              data-test-subj="snapshotRestoreRenderSummaryTabLink"
+              onClick={() => updateCurrentStep(1)}
+            >
               <EuiIcon type="pencil" />
             </EuiLink>
           </EuiToolTip>
@@ -207,7 +210,10 @@ export const RestoreSnapshotStepReview: React.FunctionComponent<StepProps> = ({
               />
             }
           >
-            <EuiLink onClick={() => updateCurrentStep(2)}>
+            <EuiLink
+              data-test-subj="snapshotRestoreRenderSummaryTabLink"
+              onClick={() => updateCurrentStep(2)}
+            >
               <EuiIcon type="pencil" />
             </EuiLink>
           </EuiToolTip>

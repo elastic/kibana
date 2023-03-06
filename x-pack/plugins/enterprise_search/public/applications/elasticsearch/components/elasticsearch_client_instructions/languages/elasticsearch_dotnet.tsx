@@ -38,11 +38,19 @@ export const ElasticsearchDotnet: React.FC<{ cloudId?: string }> = ({ cloudId })
           <li>Request retries and dead connections handling.</li>
         </ul>
 
-        <EuiLink target="_blank" href={docLinks.clientsNetIntroduction}>
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchDotnetLearnMoreAboutTheOfficialNetClientsForElasticsearchLink"
+          target="_blank"
+          href={docLinks.clientsNetIntroduction}
+        >
           Learn more about the official .NET clients for Elasticsearch
         </EuiLink>
         <EuiSpacer size="m" />
-        <EuiLink target="_blank" href="https://github.com/elastic/elasticsearch-net">
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchDotnetTheOfficialElasticsearchNetClientsOnGithubLink"
+          target="_blank"
+          href="https://github.com/elastic/elasticsearch-net"
+        >
           The official Elasticsearch .NET clients on Github
         </EuiLink>
       </EuiText>

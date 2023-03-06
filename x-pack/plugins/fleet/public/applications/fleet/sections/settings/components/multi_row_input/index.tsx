@@ -139,6 +139,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
             <EuiFlexItem>
               {multiline ? (
                 <EuiTextArea
+                  data-test-subj="fleetSortableTextFieldTextArea"
                   fullWidth
                   value={value}
                   onChange={onChange}
@@ -149,6 +150,7 @@ const SortableTextField: FunctionComponent<SortableTextFieldProps> = React.memo(
                 />
               ) : (
                 <EuiFieldText
+                  data-test-subj="fleetSortableTextFieldFieldText"
                   fullWidth
                   value={value}
                   onChange={onChange}
@@ -205,6 +207,7 @@ const NonSortableTextField: FunctionComponent<NonSortableTextFieldProps> = React
           <EuiFlexItem>
             {multiline ? (
               <EuiTextArea
+                data-test-subj="fleetNonSortableTextFieldTextArea"
                 fullWidth
                 value={value}
                 onChange={onChange}
@@ -215,6 +218,7 @@ const NonSortableTextField: FunctionComponent<NonSortableTextFieldProps> = React
               />
             ) : (
               <EuiFieldText
+                data-test-subj="fleetNonSortableTextFieldFieldText"
                 fullWidth
                 value={value}
                 onChange={onChange}

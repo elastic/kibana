@@ -74,10 +74,21 @@ export const UserFlyout: React.FC<Props> = ({
   const editingFooterActions = (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={closeUserFlyout}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchUserFlyoutButtonEmpty"
+          onClick={closeUserFlyout}
+        >
+          {CANCEL_BUTTON_LABEL}
+        </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton disabled={disabled} isLoading={formLoading} onClick={handleSaveUser} fill>
+        <EuiButton
+          data-test-subj="enterpriseSearchUserFlyoutButton"
+          disabled={disabled}
+          isLoading={formLoading}
+          onClick={handleSaveUser}
+          fill
+        >
           {isNew ? ADD_USER_LABEL : UPDATE_USER_LABEL}
         </EuiButton>
       </EuiFlexItem>
@@ -87,7 +98,7 @@ export const UserFlyout: React.FC<Props> = ({
   const completedFooterAction = (
     <EuiFlexGroup justifyContent="center">
       <EuiFlexItem grow={false}>
-        <EuiButton fill onClick={closeUserFlyout}>
+        <EuiButton data-test-subj="enterpriseSearchUserFlyoutButton" fill onClick={closeUserFlyout}>
           {CLOSE_BUTTON_LABEL}
         </EuiButton>
       </EuiFlexItem>

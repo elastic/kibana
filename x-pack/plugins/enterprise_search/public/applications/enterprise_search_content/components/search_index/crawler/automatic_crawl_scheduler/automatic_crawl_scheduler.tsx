@@ -166,6 +166,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                   <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiFieldNumber
+                        data-test-subj="enterpriseSearchAutomaticCrawlSchedulerFieldNumber"
                         data-telemetry-id="entSearchContent-crawler-scheduleCrawl-crawlAutomatically-scheduleFrequency"
                         aria-label={i18n.translate(
                           'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.scheduleFrequencyLabel',
@@ -184,6 +185,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiSelect
+                        data-test-subj="enterpriseSearchAutomaticCrawlSchedulerSelect"
                         data-telemetry-id="entSearchContent-crawler-scheduleCrawl-crawlAutomatically-scheduleUnits"
                         aria-label={i18n.translate(
                           'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.scheduleUnitsLabel',
@@ -231,7 +233,12 @@ export const AutomaticCrawlScheduler: React.FC = () => {
               }
             )}
             <EuiSpacer size="s" />
-            <EuiLink href={docLinks.crawlerManaging} target="_blank" external>
+            <EuiLink
+              data-test-subj="enterpriseSearchAutomaticCrawlSchedulerLearnMoreAboutSchedulingLink"
+              href={docLinks.crawlerManaging}
+              target="_blank"
+              external
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.crawler.automaticCrawlSchedule.readMoreLink',
                 {

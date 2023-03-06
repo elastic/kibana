@@ -176,7 +176,12 @@ export const ViewMenu: FunctionComponent<Props> = ({
   };
 
   const viewControl = (togglePopover: React.MouseEventHandler<any>) => (
-    <EuiButtonEmpty size="s" aria-label={strings.getViewMenuLabel()} onClick={togglePopover}>
+    <EuiButtonEmpty
+      data-test-subj="canvasViewControlButtonEmpty"
+      size="s"
+      aria-label={strings.getViewMenuLabel()}
+      onClick={togglePopover}
+    >
       {strings.getViewMenuButtonLabel()}
     </EuiButtonEmpty>
   );

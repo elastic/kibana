@@ -31,6 +31,7 @@ export const EmptyPrompt: React.FunctionComponent<{
       actions={
         hasFleetAllPrivileges ? (
           <EuiButton
+            data-test-subj="fleetEmptyPromptAddAgentButton"
             fill
             iconType="plusInCircle"
             onClick={() => setEnrollmentFlyoutState({ isOpen: true })}

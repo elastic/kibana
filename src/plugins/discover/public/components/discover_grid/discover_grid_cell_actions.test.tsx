@@ -60,7 +60,9 @@ describe('Discover cell actions ', function () {
       <DiscoverGridContext.Provider value={discoverGridContextMock}>
         <FilterInBtn
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Component={(props: any) => <EuiButton {...props} />}
+          Component={(props: any) => (
+            <EuiButton data-test-subj="pluginsComponentButton" {...props} />
+          )}
           rowIndex={1}
           colIndex={1}
           columnId="extension"
@@ -81,7 +83,9 @@ describe('Discover cell actions ', function () {
       <DiscoverGridContext.Provider value={discoverGridContextMock}>
         <FilterInBtn
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Component={(props: any) => <EuiButton {...props} />}
+          Component={(props: any) => (
+            <EuiButton data-test-subj="pluginsComponentButton" {...props} />
+          )}
           rowIndex={0}
           colIndex={1}
           columnId="extension"
@@ -102,7 +106,9 @@ describe('Discover cell actions ', function () {
       <DiscoverGridContext.Provider value={discoverGridContextMock}>
         <FilterInBtn
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Component={(props: any) => <EuiButton {...props} />}
+          Component={(props: any) => (
+            <EuiButton data-test-subj="pluginsComponentButton" {...props} />
+          )}
           rowIndex={4}
           colIndex={1}
           columnId="message"
@@ -123,7 +129,9 @@ describe('Discover cell actions ', function () {
       <DiscoverGridContext.Provider value={discoverGridContextMock}>
         <FilterOutBtn
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Component={(props: any) => <EuiButton {...props} />}
+          Component={(props: any) => (
+            <EuiButton data-test-subj="pluginsComponentButton" {...props} />
+          )}
           rowIndex={1}
           colIndex={1}
           columnId="extension"
@@ -144,7 +152,9 @@ describe('Discover cell actions ', function () {
       <DiscoverGridContext.Provider value={discoverGridContextMock}>
         <CopyBtn
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          Component={(props: any) => <EuiButton {...props} />}
+          Component={(props: any) => (
+            <EuiButton data-test-subj="pluginsComponentButton" {...props} />
+          )}
           rowIndex={1}
           colIndex={1}
           columnId="extension"

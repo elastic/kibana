@@ -20,7 +20,12 @@ export const EqlOverviewLink = () => {
   const overviewUrl = useKibana().services.docLinks.links.query.eql;
 
   return (
-    <EuiLink external href={overviewUrl} target="_blank">
+    <EuiLink
+      data-test-subj="securitySolutionEqlOverviewLinkLink"
+      external
+      href={overviewUrl}
+      target="_blank"
+    >
       <InlineText size="xs">{EQL_OVERVIEW_LINK_TEXT}</InlineText>
     </EuiLink>
   );

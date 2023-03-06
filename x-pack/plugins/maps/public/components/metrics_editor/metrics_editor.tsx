@@ -106,7 +106,12 @@ export class MetricsEditor extends Component<Props, State> {
       <Fragment>
         <EuiSpacer size="xs" />
         <EuiTextAlign textAlign="center">
-          <EuiButtonEmpty onClick={this._addMetric} size="xs" iconType="plusInCircleFilled">
+          <EuiButtonEmpty
+            data-test-subj="mapsAddMetricButtonEmpty"
+            onClick={this._addMetric}
+            size="xs"
+            iconType="plusInCircleFilled"
+          >
             <FormattedMessage
               id="xpack.maps.metricsEditor.addMetricButtonLabel"
               defaultMessage="Add metric"

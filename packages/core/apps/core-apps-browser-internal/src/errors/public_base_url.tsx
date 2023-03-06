@@ -73,6 +73,7 @@ export const setupPublicBaseUrlConfigWarning = ({
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="coreSetupPublicBaseUrlConfigWarningMuteWarningButton"
               size="s"
               onClick={() => {
                 notifications.toasts.remove(toast);

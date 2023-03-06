@@ -188,7 +188,13 @@ export const Controls: FC<Props> = React.memo(
     }
 
     const button = (
-      <EuiButton size="s" iconType="arrowDown" iconSide="right" onClick={onActionsButtonClick}>
+      <EuiButton
+        data-test-subj="mlControlsNodeActionsButton"
+        size="s"
+        iconType="arrowDown"
+        iconSide="right"
+        onClick={onActionsButtonClick}
+      >
         <FormattedMessage
           id="xpack.ml.dataframe.analyticsMap.flyout.nodeActionsButton"
           defaultMessage="Node actions"

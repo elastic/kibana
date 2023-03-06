@@ -140,7 +140,12 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           >
             {resourceLinks.map((resource, index) => (
               <EuiFlexItem key={index} grow={false}>
-                <EuiLink href={resource.to} target="_blank" external>
+                <EuiLink
+                  data-test-subj="enterpriseSearchProductCardLink"
+                  href={resource.to}
+                  target="_blank"
+                  external
+                >
                   {resource.label}
                 </EuiLink>
               </EuiFlexItem>

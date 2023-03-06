@@ -212,7 +212,12 @@ export const AnomalyDetectionTable: FC<Props> = ({ items, statsBarData, chartsSe
               <StatsBar stats={statsBarData} dataTestSub={'mlOverviewJobStatsBar'} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton size="m" fill href={manageJobsLink}>
+              <EuiButton
+                data-test-subj="mlAnomalyDetectionTableManageJobsButton"
+                size="m"
+                fill
+                href={manageJobsLink}
+              >
                 {i18n.translate('xpack.ml.overview.anomalyDetection.manageJobsButtonText', {
                   defaultMessage: 'Manage jobs',
                 })}

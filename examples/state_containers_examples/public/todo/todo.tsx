@@ -64,12 +64,20 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter, stateContainer }) => {
     <>
       <div>
         <Link to={{ ...location, pathname: '/' }} data-test-subj={'filterLinkAll'}>
-          <EuiButton size={'s'} color={!filter ? 'primary' : 'success'}>
+          <EuiButton
+            data-test-subj="stateContainersExamplesTodoAppAllButton"
+            size={'s'}
+            color={!filter ? 'primary' : 'success'}
+          >
             All
           </EuiButton>
         </Link>
         <Link to={{ ...location, pathname: '/completed' }} data-test-subj={'filterLinkCompleted'}>
-          <EuiButton size={'s'} color={filter === 'completed' ? 'primary' : 'success'}>
+          <EuiButton
+            data-test-subj="stateContainersExamplesTodoAppCompletedButton"
+            size={'s'}
+            color={filter === 'completed' ? 'primary' : 'success'}
+          >
             Completed
           </EuiButton>
         </Link>
@@ -77,7 +85,11 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter, stateContainer }) => {
           to={{ ...location, pathname: '/not-completed' }}
           data-test-subj={'filterLinkNotCompleted'}
         >
-          <EuiButton size={'s'} color={filter === 'not-completed' ? 'primary' : 'success'}>
+          <EuiButton
+            data-test-subj="stateContainersExamplesTodoAppNotCompletedButton"
+            size={'s'}
+            color={filter === 'not-completed' ? 'primary' : 'success'}
+          >
             Not Completed
           </EuiButton>
         </Link>
@@ -99,6 +111,7 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter, stateContainer }) => {
               data-test-subj={`todoCheckbox-${todo.id}`}
             />
             <EuiButton
+              data-test-subj="stateContainersExamplesTodoAppDeleteButton"
               style={{ marginLeft: '8px' }}
               size={'s'}
               onClick={() => {
@@ -125,7 +138,11 @@ const TodoApp: React.FC<TodoAppProps> = ({ filter, stateContainer }) => {
           e.preventDefault();
         }}
       >
-        <EuiFieldText placeholder="Type your todo and press enter to submit" name="newTodo" />
+        <EuiFieldText
+          data-test-subj="stateContainersExamplesTodoAppFieldText"
+          placeholder="Type your todo and press enter to submit"
+          name="newTodo"
+        />
       </form>
     </>
   );
@@ -230,7 +247,10 @@ export const TodoAppPage: React.FC<{
               <p>You can switch between these two mods:</p>
             </EuiText>
             <EuiSpacer />
-            <EuiButton onClick={() => setUseHashedUrl(!useHashedUrl)}>
+            <EuiButton
+              data-test-subj="stateContainersExamplesTodoAppPageButton"
+              onClick={() => setUseHashedUrl(!useHashedUrl)}
+            >
               {useHashedUrl ? 'Use Expanded State' : 'Use Hashed State'}
             </EuiButton>
           </EuiPageContentBody>

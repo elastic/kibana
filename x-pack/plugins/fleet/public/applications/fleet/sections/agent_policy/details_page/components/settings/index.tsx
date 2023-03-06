@@ -193,6 +193,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                   <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
+                        data-test-subj="fleetSettingsViewCancelButtonEmpty"
                         color="ghost"
                         onClick={() => {
                           setAgentPolicy({ ...originalAgentPolicy });
@@ -224,6 +225,7 @@ export const SettingsView = memo<{ agentPolicy: AgentPolicy }>(
                     ) : null}
                     <EuiFlexItem grow={false}>
                       <EuiButton
+                        data-test-subj="fleetSettingsViewButton"
                         onClick={onSubmit}
                         isLoading={isLoading}
                         isDisabled={

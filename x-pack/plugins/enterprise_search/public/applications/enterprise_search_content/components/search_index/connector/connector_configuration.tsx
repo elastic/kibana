@@ -104,7 +104,11 @@ export const ConnectorConfiguration: React.FC = () => {
                           }
                         )}
                       </EuiText>
-                      <EuiLink href="https://github.com/elastic/connectors" target="_blank">
+                      <EuiLink
+                        data-test-subj="enterpriseSearchConnectorConfigurationExploreTheConnectorsRepositoryLink"
+                        href="https://github.com/elastic/connectors"
+                        target="_blank"
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.button.label',
                           {
@@ -120,6 +124,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           values={{
                             link: (
                               <EuiLink
+                                data-test-subj="enterpriseSearchConnectorConfigurationConnectorClientExamplesLink"
                                 href="https://github.com/elastic/connectors-ruby/tree/main/lib/connectors"
                                 target="_blank"
                                 external
@@ -141,6 +146,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           values={{
                             link: (
                               <EuiLink
+                                data-test-subj="enterpriseSearchConnectorConfigurationConfigurationFileLink"
                                 href="https://github.com/elastic/connectors-ruby/tree/main/config"
                                 target="_blank"
                                 external
@@ -212,6 +218,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           )}
                           <EuiSpacer size="s" />
                           <EuiButton
+                            data-test-subj="enterpriseSearchConnectorConfigurationRecheckNowButton"
                             data-telemetry-id="entSearchContent-connector-configuration-recheckNow"
                             iconType="refresh"
                             onClick={() => recheckIndex()}
@@ -331,7 +338,11 @@ export const ConnectorConfiguration: React.FC = () => {
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiLink href={docLinks.connectors} target="_blank">
+                    <EuiLink
+                      data-test-subj="enterpriseSearchConnectorConfigurationViewDocumentationLink"
+                      href={docLinks.connectors}
+                      target="_blank"
+                    >
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.indices.configurationConnector.support.viewDocumentation.label',
                         {
@@ -352,6 +363,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiLink
+                      data-test-subj="enterpriseSearchConnectorConfigurationConnectorReadmeLink"
                       href="https://github.com/elastic/connectors-ruby#readme"
                       target="_blank"
                     >
@@ -365,6 +377,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiLink
+                      data-test-subj="enterpriseSearchConnectorConfigurationGetHelpLink"
                       href="https://discuss.elastic.co/c/enterprise-search/84"
                       target="_blank"
                     >
@@ -378,6 +391,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiLink
+                      data-test-subj="enterpriseSearchConnectorConfigurationFileAnIssueLink"
                       href="https://github.com/elastic/connectors-ruby/issues"
                       target="_blank"
                     >
@@ -401,6 +415,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem>
                     <EuiLink
+                      data-test-subj="enterpriseSearchConnectorConfigurationUseSearchUiForWorkplaceSearchLink"
                       href="https://docs.elastic.co/search-ui/tutorials/workplace-search"
                       target="_blank"
                     >
@@ -413,7 +428,11 @@ export const ConnectorConfiguration: React.FC = () => {
                     </EuiLink>
                   </EuiFlexItem>
                   <EuiFlexItem>
-                    <EuiLink href="https://www.elastic.co/kibana/feedback" target="_blank">
+                    <EuiLink
+                      data-test-subj="enterpriseSearchConnectorConfigurationConnectorFeedbackLink"
+                      href="https://www.elastic.co/kibana/feedback"
+                      target="_blank"
+                    >
                       {i18n.translate(
                         'xpack.enterpriseSearch.content.indices.configurationConnector.support.connectorFeedback.label',
                         {

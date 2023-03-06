@@ -218,7 +218,7 @@ export class EditLayerPanel extends Component<Props, State> {
                 function renderValue() {
                   if (link) {
                     return (
-                      <EuiLink href={link} target="_blank">
+                      <EuiLink data-test-subj="mapsRenderValueLink" href={link} target="_blank">
                         {value}
                       </EuiLink>
                     );

@@ -78,7 +78,12 @@ export const IndexTemplatesFlyout: FunctionComponent<Props> = ({
         />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
+        <EuiButtonEmpty
+          data-test-subj="indexLifecycleManagementIndexTemplatesFlyoutCloseButtonEmpty"
+          iconType="cross"
+          onClick={close}
+          flush="left"
+        >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.indexTemplatesFlyout.closeButtonLabel"
             defaultMessage="Close"

@@ -168,6 +168,7 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
         }),
         content: (
           <EuiLink
+            data-test-subj="indexManagementDataStreamDetailPanelLink"
             {...reactRouterNavigate(
               history,
               getIndexListUri(`data_stream="${dataStreamName}"`, true)

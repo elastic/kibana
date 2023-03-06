@@ -86,7 +86,12 @@ export function Basic() {
                 })}
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiButtonEmpty onClick={addItem}>Add employee</EuiButtonEmpty>
+                  <EuiButtonEmpty
+                    data-test-subj="pluginsBasicAddEmployeeButtonEmpty"
+                    onClick={addItem}
+                  >
+                    Add employee
+                  </EuiButtonEmpty>
                 </EuiFlexGroup>
               </>
             );

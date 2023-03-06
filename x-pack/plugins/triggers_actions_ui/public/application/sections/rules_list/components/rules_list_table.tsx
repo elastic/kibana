@@ -353,7 +353,11 @@ export const RulesListTable = (props: RulesListTableProps) => {
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="xs">
                     <EuiFlexItem grow={false}>
-                      <EuiLink title={name} onClick={() => onRuleClick(rule)}>
+                      <EuiLink
+                        data-test-subj="triggersActionsUiGetRulesTableColumnsLink"
+                        title={name}
+                        onClick={() => onRuleClick(rule)}
+                      >
                         {name}
                       </EuiLink>
                     </EuiFlexItem>

@@ -139,7 +139,12 @@ export const FieldTypesHelpPopover: FC<{
                 defaultMessage: 'Learn more about',
               })}
               &nbsp;
-              <EuiLink href={docLinks.links.discover.fieldTypeHelp} target="_blank" external>
+              <EuiLink
+                data-test-subj="dataVisualizerFieldTypesHelpPopoverFieldTypesLink"
+                href={docLinks.links.discover.fieldTypeHelp}
+                target="_blank"
+                external
+              >
                 <FormattedMessage
                   id="xpack.dataVisualizer.fieldTypesPopover.fieldTypesDocLinkLabel"
                   defaultMessage="field types"

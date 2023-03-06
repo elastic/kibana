@@ -74,6 +74,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent }> = memo(({ agent }) => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiSelect
+          data-test-subj="fleetSelectLogLevelSelect"
           disabled={isLoading}
           compressed={true}
           id="selectAgentLogLevel"
@@ -87,6 +88,7 @@ export const SelectLogLevel: React.FC<{ agent: Agent }> = memo(({ agent }) => {
       {agentLogLevel !== selectedLogLevel && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            data-test-subj="fleetSelectLogLevelButtonEmpty"
             flush="left"
             size="xs"
             isLoading={isLoading}

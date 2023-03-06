@@ -84,6 +84,7 @@ export const ValidationStepDetails: FC<{
       <EuiSpacer />
       {!isJobCreated && (
         <EuiButtonEmpty
+          data-test-subj="mlValidationStepDetailsViewButtonEmpty"
           size="s"
           onClick={() => {
             setCurrentStep(ANALYTICS_STEPS.VALIDATION);

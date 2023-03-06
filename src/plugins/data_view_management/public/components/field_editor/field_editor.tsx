@@ -359,6 +359,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
                   language: <EuiCode>{spec.lang}</EuiCode>,
                   painlessLink: (
                     <EuiLink
+                      data-test-subj="pluginsPainlessLink"
                       target="_blank"
                       href={this.context.services.docLinks.links.scriptedFields.painless}
                     >
@@ -741,7 +742,11 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
             <EuiFlexItem>
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty color="danger" onClick={this.showDeleteModal}>
+                  <EuiButtonEmpty
+                    data-test-subj="pluginsDeleteButtonEmpty"
+                    color="danger"
+                    onClick={this.showDeleteModal}
+                  >
                     <FormattedMessage
                       id="indexPatternManagement.actions.deleteButton"
                       defaultMessage="Delete"

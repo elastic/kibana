@@ -21,7 +21,12 @@ export const LearnMoreLink: React.FunctionComponent<Props> = ({ docPath, text })
     <FormattedMessage id="xpack.indexLifecycleMgmt.learnMore" defaultMessage="Learn more" />
   );
   return (
-    <EuiLink href={docPath} target="_blank" external={true}>
+    <EuiLink
+      data-test-subj="indexLifecycleManagementLearnMoreLinkLink"
+      href={docPath}
+      target="_blank"
+      external={true}
+    >
       {content}
     </EuiLink>
   );

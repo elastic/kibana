@@ -80,6 +80,7 @@ export class EditConditionLink extends Component {
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="condition-edit-value-field">
           <EuiFieldNumber
+            data-test-subj="mlFieldNumber"
             placeholder={i18n.translate(
               'xpack.ml.ruleEditor.editConditionLink.enterValuePlaceholder',
               {
@@ -99,7 +100,7 @@ export class EditConditionLink extends Component {
         </EuiFlexItem>
         {value !== '' && (
           <EuiFlexItem grow={false}>
-            <EuiLink size="s" onClick={() => this.onUpdateClick()}>
+            <EuiLink data-test-subj="mlUpdateLink" size="s" onClick={() => this.onUpdateClick()}>
               <FormattedMessage
                 id="xpack.ml.ruleEditor.editConditionLink.updateLinkText"
                 defaultMessage="Update"

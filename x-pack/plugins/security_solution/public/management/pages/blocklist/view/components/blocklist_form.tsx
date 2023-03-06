@@ -503,7 +503,12 @@ export const BlockListForm = memo<ArtifactFormComponentProps>(
             </EuiFlexItem>
             <EuiFlexItem grow={1}>
               <EuiFormRow label={OPERATOR_LABEL} fullWidth>
-                <EuiFieldText name="operator" value={isOneOfOperator.message} readOnly />
+                <EuiFieldText
+                  data-test-subj="securitySolutionBlockListFormFieldText"
+                  name="operator"
+                  value={isOneOfOperator.message}
+                  readOnly
+                />
               </EuiFormRow>
             </EuiFlexItem>
             <EuiFlexItem grow={2} />
