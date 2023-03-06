@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SupportedPath } from '../../routes/schemas/json_schema_schema';
+import type { SupportedPath } from '../../../common/api_schemas/json_schema_schema';
 import type { PropertyDefinition } from './types';
 
 /**

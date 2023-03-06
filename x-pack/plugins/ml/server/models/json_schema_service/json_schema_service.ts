@@ -7,7 +7,7 @@
 
 import Fs from 'fs';
 import Path from 'path';
-import { SupportedPath } from '../../routes/schemas/json_schema_schema';
+import { type SupportedPath } from '../../../common/api_schemas/json_schema_schema';
 import { jsonSchemaOverrides } from './schema_overrides';
 import { type PropertyDefinition } from './types';
 

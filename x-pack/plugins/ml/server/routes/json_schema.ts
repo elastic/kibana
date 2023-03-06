@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getJsonSchemaQuerySchema } from './schemas/json_schema_schema';
+import { getJsonSchemaQuerySchema } from '../../common/api_schemas/json_schema_schema';
 import { wrapError } from '../client/error_wrapper';
 import { RouteInitialization } from '../types';
 import { JsonSchemaService } from '../models/json_schema_service';
