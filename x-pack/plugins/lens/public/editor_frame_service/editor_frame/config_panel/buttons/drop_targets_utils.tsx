@@ -9,7 +9,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { EuiIcon, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DragDropIdentifier, DropType } from '@kbn/unified-field-list-plugin/public'; // drag & drop
+import { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import {
   FramePublicAPI,
   isOperation,

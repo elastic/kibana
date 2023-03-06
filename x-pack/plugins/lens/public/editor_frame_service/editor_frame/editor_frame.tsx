@@ -8,7 +8,7 @@
 import React, { useCallback, useRef } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
-import { DragDropIdentifier, RootDragDropProvider } from '@kbn/unified-field-list-plugin/public'; // drag & drop
+import { DragDropIdentifier, RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import {
   DatasourceMap,

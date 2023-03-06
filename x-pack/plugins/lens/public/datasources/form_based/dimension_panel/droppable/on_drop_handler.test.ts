@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DropType } from '@kbn/unified-field-list-plugin/public'; // drag & drop
+import { DropType } from '@kbn/dom-drag-drop';
 import { onDrop } from './on_drop_handler';
 import { FormBasedPrivateState } from '../../types';
 import { OperationMetadata, DatasourceDimensionDropHandlerProps } from '../../../../types';

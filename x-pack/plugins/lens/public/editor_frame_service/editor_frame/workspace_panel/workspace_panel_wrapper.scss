@@ -1,5 +1,5 @@
 @import '../../../mixins';
-@import '../../../../../../../src/plugins/unified_field_list/public/drag_drop/drag_drop_mixins';
+@import '../../../../../../../packages/kbn-dom-drag-drop/src/drag_drop_mixins';
 
 .lnsWorkspacePanelWrapper {
   margin-bottom: $euiSize;

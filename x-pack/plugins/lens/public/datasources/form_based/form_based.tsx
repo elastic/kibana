@@ -25,7 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { EuiButton } from '@elastic/eui';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { DraggingIdentifier } from '@kbn/unified-field-list-plugin/public'; // drag & drop
+import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
 import type {
   DatasourceDimensionEditorProps,
   DatasourceDimensionTriggerProps,

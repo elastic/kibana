@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DragContextState, DropType } from '@kbn/unified-field-list-plugin/public'; // drag & drop
+import { DragContextState, DropType } from '@kbn/dom-drag-drop';
 import {
   isOperation,
   DragDropOperation,

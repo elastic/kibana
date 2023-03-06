@@ -9,12 +9,7 @@ import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import {
-  DragDrop,
-  DragDropIdentifier,
-  DragContext,
-  DropType,
-} from '@kbn/unified-field-list-plugin/public'; // drag & drop
+import { DragDrop, DragDropIdentifier, DragContext, DropType } from '@kbn/dom-drag-drop';
 import { isDraggedField } from '../../../../utils';
 import { generateId } from '../../../../id_generator';
 

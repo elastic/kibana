@@ -21,7 +21,7 @@ import {
 } from '@kbn/charts-plugin/public';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { ISearchStart } from '@kbn/data-plugin/public';
-import type { DraggingIdentifier } from '@kbn/unified-field-list-plugin/public'; // drag & drop
+import type { DraggingIdentifier } from '@kbn/dom-drag-drop';
 import type { Document } from './persistence/saved_object_store';
 import {
   Datasource,

@@ -33,7 +33,7 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
-import { DragDrop, DragContext, DragDropIdentifier } from '@kbn/unified-field-list-plugin/public'; // drag & drop
+import { DragDrop, DragContext, DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 import { getSearchWarningMessages } from '../../../utils';
 import {

@@ -44,7 +44,7 @@ import type {
   DragDropIdentifier,
   DragContextState,
   DropType,
-} from '@kbn/unified-field-list-plugin/public'; // drag & drop
+} from '@kbn/dom-drag-drop';
 import type { DateRange, LayerType, SortingHint } from '../common';
 import type {
   LensSortActionData,

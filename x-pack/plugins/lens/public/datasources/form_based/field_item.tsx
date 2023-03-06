@@ -28,7 +28,7 @@ import {
   getFieldIconProps,
   wrapFieldNameOnDot,
 } from '@kbn/unified-field-list-plugin/public';
-import { DragDrop } from '@kbn/unified-field-list-plugin/public'; // drag & drop
+import { DragDrop } from '@kbn/dom-drag-drop';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { DatasourceDataPanelProps } from '../../types';
 import { DOCUMENT_FIELD_NAME } from '../../../common';

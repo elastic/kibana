@@ -27,7 +27,7 @@ import {
   FieldsGroupNames,
   useGroupedFields,
 } from '@kbn/unified-field-list-plugin/public';
-import { ChildDragDropProvider, DragDrop } from '@kbn/unified-field-list-plugin/public'; // drag & drop
+import { ChildDragDropProvider, DragDrop } from '@kbn/dom-drag-drop';
 import { FieldButton } from '@kbn/react-field';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';

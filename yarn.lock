@@ -3969,6 +3969,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dom-drag-drop@link:packages/kbn-dom-drag-drop":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ebt-tools@link:packages/kbn-ebt-tools":
   version "0.0.0"
   uid ""
@@ -4841,10 +4845,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-grouping@link:packages/kbn-securitysolution-grouping":
-  version "0.0.0"
-  uid ""
-
 "@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
   version "0.0.0"
   uid ""
@@ -4858,6 +4858,10 @@
   uid ""
 
 "@kbn/securitysolution-exception-list-components@link:packages/kbn-securitysolution-exception-list-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-grouping@link:packages/kbn-securitysolution-grouping":
   version "0.0.0"
   uid ""
 

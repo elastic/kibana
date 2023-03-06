@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { DragDropIdentifier } from '@kbn/unified-field-list-plugin/public'; // drag & drop
+import { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { DataPanelWrapper } from './data_panel_wrapper';
 import { Datasource, DatasourceDataPanelProps, VisualizationMap } from '../../types';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
