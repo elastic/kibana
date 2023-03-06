@@ -6,7 +6,4 @@
  * Side Public License, v 1.
  */
 
-/**
- * Fetch Telemetry Config
- */
-export const FetchTelemetryConfigRoute = '/api/telemetry/v2/config';
+export * from './v2';
