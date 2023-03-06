@@ -9,7 +9,13 @@ import React, { useMemo, useState, useEffect, useContext } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { DragDrop, DragDropIdentifier, DragContext, DropType } from '@kbn/dom-drag-drop';
+import {
+  DragDrop,
+  DragDropIdentifier,
+  DragContext,
+  DropType,
+  DropTargetSwapDuplicateCombine,
+} from '@kbn/dom-drag-drop';
 import { isDraggedField } from '../../../../utils';
 import { generateId } from '../../../../id_generator';
 
@@ -22,7 +28,6 @@ import {
   DragDropOperation,
   Visualization,
 } from '../../../../types';
-import { getCustomDropTarget, getAdditionalClassesOnDroppable } from './drop_targets_utils';
 
 interface EmptyButtonProps {
   columnId: string;
@@ -191,12 +196,14 @@ export function EmptyDimensionButton({
   return (
     <div className="lnsLayerPanel__dimensionContainer" data-test-subj={group.dataTestSubj}>
       <DragDrop
-        getAdditionalClassesOnDroppable={getAdditionalClassesOnDroppable}
+        getCustomDropTarget={DropTargetSwapDuplicateCombine.getCustomDropTarget}
+        getAdditionalClassesOnDroppable={
+          DropTargetSwapDuplicateCombine.getAdditionalClassesOnDroppable
+        }
         value={value}
         order={order}
         onDrop={handleOnDrop}
         dropTypes={dropTypes}
-        getCustomDropTarget={getCustomDropTarget}
       >
         <div className="lnsLayerPanel__dimension lnsLayerPanel__dimension--empty">
           {typeof group.suggestedValue?.() === 'number' ? (

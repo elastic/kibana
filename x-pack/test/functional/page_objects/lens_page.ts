@@ -380,7 +380,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await browser.pressKeys(browserKey);
         await find.existsByCssSelector(
-          `.domDragDrop__extraDrop > [data-test-subj="lnsDragDrop-${metaToAction[metaKey]}"].domDragDrop-isActiveDropTarget`
+          `.domDragDrop__extraDrop > [data-test-subj="domDragDrop-dropTarget-${metaToAction[metaKey]}"].domDragDrop-isActiveDropTarget`
         );
       });
     },

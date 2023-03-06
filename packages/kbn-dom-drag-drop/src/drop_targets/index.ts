@@ -6,16 +6,14 @@
  * Side Public License, v 1.
  */
 
-export {
-  type DragDropIdentifier,
-  type DragContextState,
-  type DropType,
-  type DraggingIdentifier,
-  DragDrop,
-  DragContext,
-  RootDragDropProvider,
-  ChildDragDropProvider,
-  ReorderProvider,
-} from './src';
+import {
+  getCustomDropTarget,
+  getAdditionalClassesOnDroppable,
+  getAdditionalClassesOnEnter,
+} from './swap_duplicate_combine';
 
-export { DropTargetSwapDuplicateCombine } from './src/drop_targets';
+export const DropTargetSwapDuplicateCombine = {
+  getCustomDropTarget,
+  getAdditionalClassesOnDroppable,
+  getAdditionalClassesOnEnter,
+};
