@@ -192,7 +192,7 @@ export const TRANSFORM_HEALTH_CHECK_NAMES: Record<
   },
   healthCheck: {
     name: i18n.translate('xpack.transform.alertTypes.transformHealth.healthCheckName', {
-      defaultMessage: 'Unhealthy transforms',
+      defaultMessage: 'Unhealthy transform',
     }),
     description: i18n.translate(
       'xpack.transform.alertTypes.transformHealth.healthCheckDescription',
