@@ -34,8 +34,8 @@ export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
         return dataViews.create(config);
       },
       onResolve: (response: DataView) => {
-        setHasError(false);
         setDataView(response);
+        setHasError(false);
       },
       onReject: () => {
         setHasError(true);
@@ -46,7 +46,9 @@ export const useDataView = ({ metricAlias }: { metricAlias: string }) => {
   );
 
   const loading = useMemo(
-    () => createAdhocDataViewRequest.state === 'pending',
+    () =>
+      createAdhocDataViewRequest.state === 'pending' ||
+      createAdhocDataViewRequest.state === 'uninitialized',
     [createAdhocDataViewRequest.state]
   );
 

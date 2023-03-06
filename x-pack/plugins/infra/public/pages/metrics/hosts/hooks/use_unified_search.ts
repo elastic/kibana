@@ -145,9 +145,6 @@ export const useUnifiedSearch = () => {
   }, [filterManager, dispatch]);
 
   const buildQuery = useCallback(() => {
-    if (!dataView) {
-      return null;
-    }
     return buildEsQuery(dataView, state.query, [...state.filters, ...(state.panelFilters ?? [])]);
   }, [dataView, state.query, state.filters, state.panelFilters]);
 
