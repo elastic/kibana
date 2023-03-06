@@ -54,9 +54,7 @@ Whenever we perform a data migration the body of this endpoint will change for a
 
 Therefore a persistence schema is the _shape_ of any data your code directly, or indirectly _persists_. Think carefully about any persisted schemas your code might be using and ensure that none of them are exposed directly over your HTTP APIs.
 
-#### Minimal changes to make the above endpoint versionable
-
-Consider the following changes to the code above:
+Let's make the minimal changes to prepare the endpoint above for versoning:
 
 ```ts
 interface MyObject {
