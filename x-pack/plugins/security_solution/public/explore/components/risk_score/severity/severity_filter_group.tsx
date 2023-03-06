@@ -62,10 +62,16 @@ export const SeverityFilterGroup: React.FC<{
   const updateSeverityFilter = useCallback(
     (selectedSeverity: RiskSeverity) => {
       const currentSelection = selectedSeverities ?? [];
-      const newSelection = currentSelection.includes(selectedSeverity)
-        ? currentSelection.filter((s) => s !== selectedSeverity)
-        : [...currentSelection, selectedSeverity];
-      track(METRIC_TYPE.COUNT, ENTITY_RISK_FILTERED(pageName, riskEntity, selectedSeverity));
+      const isAddingSeverity = !currentSelection.includes(selectedSeverity);
+
+      const newSelection = isAddingSeverity
+        ? [...currentSelection, selectedSeverity]
+        : currentSelection.filter((s) => s !== selectedSeverity);
+
+      if (isAddingSeverity) {
+        track(METRIC_TYPE.COUNT, ENTITY_RISK_FILTERED(pageName, riskEntity, selectedSeverity));
+      }
+
       onSelect(newSelection);
     },
     [selectedSeverities, pageName, onSelect, riskEntity]
