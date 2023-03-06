@@ -50,7 +50,7 @@ export const EditTransformIngestPipeline: FC = () => {
       {
         // If the list of ingest pipelines is not available
         // gracefully defaults to text input
-        ingestPipelineNames ? (
+        ingestPipelineNames.length > 0 ? (
           <EuiFormRow
             label={i18n.translate(
               'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
