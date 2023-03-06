@@ -178,7 +178,10 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     request,
     response,
     setQuery: setAlertsQuery,
-  } = useQueryAlerts<{}, GroupingAggregation & GroupingFieldTotalAggregation>({
+  } = useQueryAlerts<
+    {},
+    GroupingAggregation<AlertsGroupingAggregation> & GroupingFieldTotalAggregation
+  >({
     query: queryGroups,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,
@@ -225,12 +228,12 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       isNoneGroup(selectedGroup)
         ? renderChildComponent([])
         : getGrouping({
-            badgeMetricStats: (fieldBucket: RawBucket) =>
+            badgeMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
               getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket),
-            customMetricStats: (fieldBucket: RawBucket) =>
+            customMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
               getSelectedGroupCustomMetrics(selectedGroup, fieldBucket),
             data: alertsGroupsData?.aggregations,
-            groupPanelRenderer: (fieldBucket: RawBucket) =>
+            groupPanelRenderer: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
               getSelectedGroupButtonContent(selectedGroup, fieldBucket),
             inspectButton: inspect,
             isLoading: loading || isLoadingGroups,
