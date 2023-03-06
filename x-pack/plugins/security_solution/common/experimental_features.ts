@@ -90,6 +90,10 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables top charts on Alerts Page
    */
   alertsPageChartsEnabled: true,
+  /**
+   * Enables the new security flyout over the current alert details flyout
+   */
+  securityFlyoutEnabled: false,
 
   /**
    * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.

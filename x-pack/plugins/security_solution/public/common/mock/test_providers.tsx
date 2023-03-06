@@ -20,6 +20,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 import { ConsoleManager } from '../../management/components/console';
 import type { State } from '../store';
 import { createStore } from '../store';
@@ -66,13 +67,15 @@ export const TestProvidersComponent: React.FC<Props> = ({
         <ReduxStoreProvider store={store}>
           <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
             <QueryClientProvider client={queryClient}>
-              <ConsoleManager>
-                <CellActionsProvider
-                  getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
-                >
-                  <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
-                </CellActionsProvider>
-              </ConsoleManager>
+              <ExpandableFlyoutProvider>
+                <ConsoleManager>
+                  <CellActionsProvider
+                    getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
+                  >
+                    <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                  </CellActionsProvider>
+                </ConsoleManager>
+              </ExpandableFlyoutProvider>
             </QueryClientProvider>
           </ThemeProvider>
         </ReduxStoreProvider>

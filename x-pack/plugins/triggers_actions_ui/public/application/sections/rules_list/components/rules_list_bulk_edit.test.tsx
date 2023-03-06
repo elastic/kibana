@@ -157,6 +157,7 @@ describe('Rules list Bulk Edit', () => {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/152268
+  // FLAKY: https://github.com/elastic/kibana/issues/152267
   describe.skip('bulk actions', () => {
     beforeEach(async () => {
       renderWithProviders(<RulesList />);
