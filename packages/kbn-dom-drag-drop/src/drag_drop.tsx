@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import './drag_drop.scss';
 import React, { useContext, useCallback, useEffect, memo, useMemo, useState, useRef } from 'react';
 import type { KeyboardEvent, ReactElement } from 'react';
 import classNames from 'classnames';
@@ -25,6 +24,7 @@ import {
   Ghost,
 } from './providers';
 import { DropType } from './types';
+import './sass/drag_drop.scss';
 
 export type DroppableEvent = React.DragEvent<HTMLElement>;
 
