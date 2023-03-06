@@ -14,19 +14,19 @@ export const SLI_OPTIONS: Array<{
 }> = [
   {
     value: 'sli.kql.custom',
-    text: i18n.translate('xpack.observability.slos.sliTypes.kqlCustomIndicator', {
+    text: i18n.translate('xpack.observability.slo.sliTypes.kqlCustomIndicator', {
       defaultMessage: 'KQL custom',
     }),
   },
   {
     value: 'sli.apm.transactionDuration',
-    text: i18n.translate('xpack.observability.slos.sliTypes.apmLatencyIndicator', {
+    text: i18n.translate('xpack.observability.slo.sliTypes.apmLatencyIndicator', {
       defaultMessage: 'APM latency',
     }),
   },
   {
     value: 'sli.apm.transactionErrorRate',
-    text: i18n.translate('xpack.observability.slos.sliTypes.apmAvailabilityIndicator', {
+    text: i18n.translate('xpack.observability.slo.sliTypes.apmAvailabilityIndicator', {
       defaultMessage: 'APM availability',
     }),
   },
@@ -35,13 +35,13 @@ export const SLI_OPTIONS: Array<{
 export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: string }> = [
   {
     value: 'occurrences',
-    text: i18n.translate('xpack.observability.slos.sloEdit.budgetingMethod.occurrences', {
+    text: i18n.translate('xpack.observability.slo.sloEdit.budgetingMethod.occurrences', {
       defaultMessage: 'Occurrences',
     }),
   },
   {
     value: 'timeslices',
-    text: i18n.translate('xpack.observability.slos.sloEdit.budgetingMethod.timeslices', {
+    text: i18n.translate('xpack.observability.slo.sloEdit.budgetingMethod.timeslices', {
       defaultMessage: 'Timeslices',
     }),
   },
@@ -49,7 +49,7 @@ export const BUDGETING_METHOD_OPTIONS: Array<{ value: BudgetingMethod; text: str
 
 export const TIMEWINDOW_OPTIONS = [90, 30, 7].map((number) => ({
   value: `${number}d`,
-  text: i18n.translate('xpack.observability.slos.sloEdit.timeWindow.days', {
+  text: i18n.translate('xpack.observability.slo.sloEdit.timeWindow.days', {
     defaultMessage: '{number} days',
     values: { number },
   }),
