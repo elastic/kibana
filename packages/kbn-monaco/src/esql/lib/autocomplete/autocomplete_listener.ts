@@ -47,6 +47,7 @@ import {
   BooleanExpressionContext,
   LimitCommandContext,
   ValueExpressionContext,
+  ProjectCommandContext,
 } from '../../antlr/esql_parser';
 
 export class AutocompleteListener implements ESQLParserListener {
@@ -160,6 +161,16 @@ export class AutocompleteListener implements ESQLParserListener {
       this.suggestions = this.getEndCommandSuggestions([byOperatorDefinition]);
     }
     this.onlyCustomVars = true;
+  }
+
+  exitProjectCommand?(ctx: ProjectCommandContext) {
+    const qn = ctx.qualifiedNames();
+    // const qn = projectClause.qualifiedNames();
+    if (qn && qn.text) {
+      if (qn.text.slice(-1) !== ',') {
+        this.suggestions = this.getEndCommandSuggestions();
+      }
+    }
   }
 
   exitQualifiedName(ctx: QualifiedNameContext) {

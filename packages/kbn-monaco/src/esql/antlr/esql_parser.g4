@@ -165,12 +165,7 @@ orderExpression
     ;
 
 projectCommand
-    :  PROJECT projectClause (COMMA projectClause)*
-    ;
-
-projectClause
-    : sourceIdentifier
-    | newName=sourceIdentifier ASSIGN oldName=sourceIdentifier
+    :  PROJECT qualifiedNames
     ;
 
 booleanValue

@@ -44,7 +44,6 @@ import { LimitCommandContext } from "./esql_parser";
 import { SortCommandContext } from "./esql_parser";
 import { OrderExpressionContext } from "./esql_parser";
 import { ProjectCommandContext } from "./esql_parser";
-import { ProjectClauseContext } from "./esql_parser";
 import { BooleanValueContext } from "./esql_parser";
 import { NumberContext } from "./esql_parser";
 import { StringContext } from "./esql_parser";
@@ -513,17 +512,6 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitProjectCommand?: (ctx: ProjectCommandContext) => void;
-
-	/**
-	 * Enter a parse tree produced by `esql_parser.projectClause`.
-	 * @param ctx the parse tree
-	 */
-	enterProjectClause?: (ctx: ProjectClauseContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.projectClause`.
-	 * @param ctx the parse tree
-	 */
-	exitProjectClause?: (ctx: ProjectClauseContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.booleanValue`.
