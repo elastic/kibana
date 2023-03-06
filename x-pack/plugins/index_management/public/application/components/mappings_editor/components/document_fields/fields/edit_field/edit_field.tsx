@@ -18,6 +18,10 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiCallOut,
+  EuiText,
+  EuiToolTip,
+  EuiIcon,
+  EuiTextColor,
 } from '@elastic/eui';
 import SemVer from 'semver/classes/semver';
 
@@ -189,7 +193,28 @@ export const EditField = React.memo(
             </>
           )}
 
-          <EuiFlexGroup justifyContent="flexEnd">
+          <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+            {isFormModified && (
+              <>
+                <EuiFlexItem>
+                  <EuiText size="s">
+                    <p>
+                      <EuiToolTip
+                        content="Not updating all settings will apply default values to the settings you haven't changed."
+                        position="top"
+                      >
+                        <span>
+                          <EuiTextColor color="subdued">
+                            Review all settings before updating{' '}
+                          </EuiTextColor>
+                          <EuiIcon type="questionInCircle" />
+                        </span>
+                      </EuiToolTip>
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+              </>
+            )}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty onClick={exitEdit}>
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldCancelButtonLabel', {
