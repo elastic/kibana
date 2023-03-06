@@ -299,13 +299,11 @@ export class AttachmentService {
           }
         );
 
-      const injected = injectAttachmentSOAttributesFromRefsForPatch(
+      return injectAttachmentSOAttributesFromRefsForPatch(
         updatedAttributes,
         res,
         this.context.persistableStateAttachmentTypeRegistry
       );
-
-      return injected;
     } catch (error) {
       this.context.log.error(`Error on UPDATE comment ${attachmentId}: ${error}`);
       throw error;

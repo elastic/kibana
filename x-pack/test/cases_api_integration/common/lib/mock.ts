@@ -124,15 +124,15 @@ export const postExternalReferenceSOReq: CommentRequestExternalReferenceSOType =
   externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType: 'test-type' },
 };
 
+export const fileMetadata = () => ({
+  name: 'test_file',
+  extension: 'png',
+  mimeType: 'image/png',
+  createdAt: '2023-02-27T20:26:54.345Z',
+});
+
 export const fileAttachmentMetadata: FileAttachmentMetadata = {
-  files: [
-    {
-      name: 'test_file',
-      extension: 'png',
-      mimeType: 'image/png',
-      createdAt: '2023-02-27T20:26:54.345Z',
-    },
-  ],
+  files: [fileMetadata()],
 };
 
 export const getFilesAttachmentReq = (

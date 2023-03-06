@@ -26,6 +26,7 @@ import {
   getFilesAttachmentReq,
   fileAttachmentMetadata,
   postExternalReferenceSOReq,
+  fileMetadata,
 } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -170,6 +171,30 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(caseWithAttachments.totalComment).to.be(2);
           expect(firstFileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
           expect(secondFileAttachment.externalReferenceMetadata).to.eql(fileAttachmentMetadata);
+        });
+
+        it('should create a single file attachment with multiple file objects within it', async () => {
+          const postedCase = await createCase(supertest, getPostCaseRequest());
+
+          const files = [fileMetadata(), fileMetadata()];
+
+          const caseWithAttachments = await bulkCreateAttachments({
+            supertest,
+            caseId: postedCase.id,
+            params: [
+              getFilesAttachmentReq({
+                externalReferenceMetadata: {
+                  files,
+                },
+              }),
+            ],
+          });
+
+          const firstFileAttachment =
+            caseWithAttachments.comments![0] as CommentRequestExternalReferenceSOType;
+
+          expect(caseWithAttachments.totalComment).to.be(1);
+          expect(firstFileAttachment.externalReferenceMetadata).to.eql({ files });
         });
 
         it('should bulk create 100 file attachments', async () => {
