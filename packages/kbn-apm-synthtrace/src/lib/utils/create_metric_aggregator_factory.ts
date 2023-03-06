@@ -37,8 +37,11 @@ export function createMetricAggregatorFactory<TFields extends Fields>() {
   ) {
     let cb: (() => void) | undefined;
 
-    const { maxTransactionOverflowCount = 10_000, maxServiceOverflowCount = 10_000 } =
+    const { transactions = {}, service_transactions: serviceTransaction = {} } =
       scenarioOptions || {};
+
+    const maxTransactionOverflowCount = transactions?.max_groups ?? 10_000;
+    const maxServiceOverflowCount = serviceTransaction?.max_groups ?? 10_000;
 
     const metrics: Map<string, TMetric & { '@timestamp'?: number }> = new Map();
     const serviceListMap: Map<string, ServiceMapValue> = new Map();

@@ -210,7 +210,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ),
           ],
           {
-            maxTransactionOverflowCount: 2,
+            transactions: {
+              max_groups: 2,
+            },
           }
         );
       });

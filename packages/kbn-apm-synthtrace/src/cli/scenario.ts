@@ -18,9 +18,13 @@ type Generate<TFields> = (options: {
 
 export interface ScenarioOptions {
   // Equivalent of APM Server Setting - Transactions.MaxTransactionGroups
-  maxTransactionOverflowCount?: number;
-  // Equivalent of APM Server Setting - Transactions.MaxServices
-  maxServiceOverflowCount?: number;
+  transactions?: {
+    max_groups?: number;
+  };
+  // Equivalent of APM Server Setting - ServiceTransactions.MaxGroups
+  service_transactions?: {
+    max_groups?: number;
+  };
 }
 
 export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{

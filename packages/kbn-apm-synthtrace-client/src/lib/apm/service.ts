@@ -20,17 +20,37 @@ export class Service extends Entity<ApmFields> {
   }
 }
 
-export function service(options: {
-  name: string;
-  environment: string;
-  agentName: string;
-}): Service {
-  const { name, environment, agentName, ...rest } = options;
+/* eslint-disable @typescript-eslint/unified-signatures*/
+export function service(name: string): Service;
+export function service(name: string, environment: string, agentName: string): Service;
+export function service(options: { name: string; environment: string; agentName: string }): Service;
+export function service(
+  ...args:
+    | [{ name: string; environment: string; agentName: string }]
+    | [string, string, string]
+    | [string]
+) {
+  let serviceName: string;
+  let environment: string = 'production';
+  let agentName: string = 'opbeans-java';
+
+  if (args.length === 1) {
+    if (typeof args[0] !== 'string') {
+      [serviceName, environment, agentName] = [
+        args[0].name,
+        args[0].environment,
+        args[0].agentName,
+      ];
+    } else {
+      serviceName = args[0];
+    }
+  } else {
+    [serviceName, environment, agentName] = args;
+  }
 
   return new Service({
-    'service.name': name,
+    'service.name': serviceName,
     'service.environment': environment,
     'agent.name': agentName,
-    ...rest,
   });
 }
