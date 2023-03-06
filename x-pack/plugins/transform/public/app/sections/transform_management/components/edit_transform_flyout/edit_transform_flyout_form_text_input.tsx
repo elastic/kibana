@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { capitalize } from 'lodash';
 import React, { FC } from 'react';
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
@@ -16,6 +15,10 @@ import {
   useEditTransformFlyout,
   type EditTransformHookTextInputSelectors,
 } from './use_edit_transform_flyout';
+
+function capitalizeFirstLetter(str: string) {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
 
 interface EditTransformFlyoutFormTextInputProps {
   field: EditTransformHookTextInputSelectors;
@@ -32,7 +35,7 @@ export const EditTransformFlyoutFormTextInput: FC<EditTransformFlyoutFormTextInp
 }) => {
   const { defaultValue, errorMessages, value } = useEditTransformFlyout(field);
   const { formField } = useEditTransformFlyout('actions');
-  const upperCaseField = capitalize(field);
+  const upperCaseField = capitalizeFirstLetter(field);
 
   return (
     <EuiFormRow
