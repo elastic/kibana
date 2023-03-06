@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, type FC } from 'react';
 
-import { EuiComboBox, EuiFormRow, EuiSkeletonRectangle } from '@elastic/eui';
+import { useEuiTheme, EuiComboBox, EuiFormRow, EuiSkeletonRectangle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -26,6 +26,7 @@ const ingestPipelineLabel = i18n.translate(
 );
 
 export const EditTransformIngestPipeline: FC = () => {
+  const { euiTheme } = useEuiTheme();
   const { errorMessages, value } = useEditTransformFlyout('destinationIngestPipeline');
   const { formField } = useEditTransformFlyout('actions');
 
@@ -72,7 +73,7 @@ export const EditTransformIngestPipeline: FC = () => {
           >
             <EuiSkeletonRectangle
               width="100%"
-              height="40px"
+              height={euiTheme.size.xxl}
               isLoading={isLoading}
               contentAriaLabel={ingestPipelineLabel}
             >
