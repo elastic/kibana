@@ -6,6 +6,12 @@
  * Side Public License, v 1.
  */
 
-export { createContextMock, type MockedMigratorContext } from './context';
-export { createPostInitState } from './state';
-export { createType } from './saved_object_type';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+
+export const createType = (parts: Partial<SavedObjectsType>): SavedObjectsType => ({
+  name: 'test-type',
+  hidden: false,
+  namespaceType: 'single',
+  mappings: { properties: {} },
+  ...parts,
+});
