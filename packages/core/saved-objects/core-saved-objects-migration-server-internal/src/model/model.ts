@@ -10,7 +10,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
-import { isTypeof } from '../actions';
+import { isTypeof, UpdateSourceMappingsPropertiesResult } from '../actions';
 import type { AliasAction } from '../actions';
 import type { AllActionStates, State } from '../state';
 import type { ResponseType } from '../next';
@@ -43,7 +43,6 @@ import {
 } from './helpers';
 import { createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
-import { diffMappings } from '../core/build_active_mappings';
 import { CLUSTER_SHARD_LIMIT_EXCEEDED_REASON } from '../common/constants';
 
 export const FATAL_REASON_REQUEST_ENTITY_TOO_LARGE = `While indexing a batch of saved objects, Elasticsearch returned a 413 Request Entity Too Large exception. Ensure that the Kibana configuration option 'migrations.maxBatchSizeBytes' is set to a value that is lower than or equal to the Elasticsearch 'http.max_content_length' configuration option.`;
@@ -109,30 +108,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     };
 
     if (
-      // This version's migration has already been completed.
-      versionMigrationCompleted(stateP.currentAlias, stateP.versionAlias, aliases)
-    ) {
-      return {
-        ...stateP,
-        // in this scenario, a .kibana_X.Y.Z_001 index exists that matches the current kibana version
-        // aka we are NOT upgrading to a newer version
-        // we inject the source index's current mappings in the state, to check them later
-        ...postInitState,
-        // Skip to 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' so that if a new plugin was
-        // installed / enabled we can transform any old documents and update
-        // the mappings for this plugin's types.
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
-        // Source is a none because we didn't do any migration from a source
-        // index
-        sourceIndex: Option.none,
-        targetIndex: source!,
-        targetIndexMappings: mergeMigrationMappingPropertyHashes(
-          stateP.targetIndexMappings,
-          indices[source!].mappings
-        ),
-        versionIndexReadyActions: Option.none,
-      };
-    } else if (
       // Don't actively participate in this migration but wait for another instance to complete it
       stateP.waitForMigrationCompletion === true
     ) {
@@ -414,28 +389,10 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (
-        // source exists
-        Boolean(stateP.sourceIndexMappings.value._meta?.migrationMappingPropertyHashes) &&
-        // ...and mappings are unchanged
-        !diffMappings(
-          /* actual */
-          stateP.sourceIndexMappings.value,
-          /* expected */
-          stateP.targetIndexMappings
-        )
-      ) {
-        // the existing mappings match, we can avoid reindexing
-        return {
-          ...stateP,
-          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
-        };
-      } else {
-        return {
-          ...stateP,
-          controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
-        };
-      }
+      return {
+        ...stateP,
+        controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+      };
     } else if (Either.isLeft(res)) {
       const left = res.left;
       if (isTypeof(left, 'index_not_yellow_timeout')) {
@@ -455,16 +412,43 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'UPDATE_SOURCE_MAPPINGS_PROPERTIES') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
-      };
+      switch (res.right) {
+        case UpdateSourceMappingsPropertiesResult.Compatible:
+          return {
+            ...stateP,
+            controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+          };
+        case UpdateSourceMappingsPropertiesResult.Incompatible:
+          return {
+            ...stateP,
+            controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+          };
+        case UpdateSourceMappingsPropertiesResult.Updated:
+          return {
+            ...stateP,
+            // Skip to 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' so that if a new plugin was
+            // installed / enabled we can transform any old documents and update
+            // the mappings for this plugin's types.
+            controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+            // Source is a none because we didn't do any migration from a source index
+            sourceIndex: Option.none,
+            targetIndex: stateP.sourceIndex.value,
+            // in this scenario, a .kibana_X.Y.Z_001 index exists that matches the current kibana version
+            // aka we are NOT upgrading to a newer version
+            // we inject the source index's current mappings in the state, to check them later
+            targetIndexMappings: mergeMigrationMappingPropertyHashes(
+              stateP.targetIndexMappings,
+              stateP.sourceIndexMappings.value
+            ),
+          };
+      }
     } else if (Either.isLeft(res)) {
       const left = res.left;
       if (isTypeof(left, 'incompatible_mapping_exception')) {
         return {
           ...stateP,
-          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+          controlState: 'FATAL',
+          reason: 'Incompatible mappings change on already migrated Kibana instance.',
         };
       } else {
         return throwBadResponse(stateP, left as never);

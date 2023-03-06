@@ -76,11 +76,22 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
-    UPDATE_SOURCE_MAPPINGS_PROPERTIES: (state: UpdateSourceMappingsPropertiesState) =>
-      Actions.updateMappings({
+    UPDATE_SOURCE_MAPPINGS_PROPERTIES: ({
+      aliases,
+      currentAlias,
+      versionAlias,
+      sourceIndex,
+      sourceIndexMappings,
+      targetIndexMappings,
+    }: UpdateSourceMappingsPropertiesState) =>
+      Actions.updateSourceMappingsProperties({
         client,
-        index: state.sourceIndex.value, // attempt to update source mappings in-place
-        mappings: omit(state.targetIndexMappings, ['_meta']), // ._meta property will be updated on a later step
+        aliases,
+        currentAlias,
+        versionAlias,
+        sourceIndex: sourceIndex.value,
+        sourceMappings: sourceIndexMappings.value,
+        targetMappings: targetIndexMappings,
       }),
     CLEANUP_UNKNOWN_AND_EXCLUDED: (state: CleanupUnknownAndExcluded) =>
       Actions.cleanupUnknownAndExcluded({

@@ -53,7 +53,11 @@ import type {
   WaitForYellowSourceState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
-import type { AliasAction, RetryableEsClientError } from '../actions';
+import {
+  type AliasAction,
+  type RetryableEsClientError,
+  UpdateSourceMappingsPropertiesResult,
+} from '../actions';
 import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
@@ -281,59 +285,6 @@ describe('migrations v2 model', () => {
         const initState = Object.assign({}, initBaseState, {
           waitForMigrationCompletion: true,
         });
-        test('INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if .kibana is already pointing to the target index', () => {
-          const res: ResponseType<'INIT'> = Either.right(
-            chain(initResult)
-              .cloneDeep()
-              .set(['indices', '.kibana_7.11.0_001', 'mappings'], mappingsWithUnknownType)
-              .value()
-          );
-          const newState = model(initState, res) as OutdatedDocumentsSearchOpenPit;
-
-          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
-          // This snapshot asserts that we merge the
-          // migrationMappingPropertyHashes of the existing index, but we leave
-          // the mappings for the disabled_saved_object_type untouched. There
-          // might be another Kibana instance that knows about this type and
-          // needs these mappings in place.
-          expect(newState.targetIndexMappings).toMatchInlineSnapshot(`
-            Object {
-              "_meta": Object {
-                "migrationMappingPropertyHashes": Object {
-                  "disabled_saved_object_type": "7997cf5a56cc02bdc9c93361bde732b0",
-                  "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
-                },
-              },
-              "properties": Object {
-                "new_saved_object_type": Object {
-                  "properties": Object {
-                    "value": Object {
-                      "type": "text",
-                    },
-                  },
-                },
-              },
-            }
-          `);
-          expect(newState.sourceIndexMappings).toHaveProperty('value', {
-            _meta: {
-              migrationMappingPropertyHashes: {
-                disabled_saved_object_type: '7997cf5a56cc02bdc9c93361bde732b0',
-              },
-            },
-            properties: {
-              disabled_saved_object_type: {
-                properties: {
-                  value: {
-                    type: 'keyword',
-                  },
-                },
-              },
-            },
-          });
-          expect(newState.retryCount).toEqual(0);
-          expect(newState.retryDelay).toEqual(0);
-        });
         test('INIT -> INIT when cluster routing allocation is incompatible', () => {
           const res: ResponseType<'INIT'> = Either.left({
             type: 'incompatible_cluster_routing_allocation',
@@ -529,43 +480,6 @@ describe('migrations v2 model', () => {
       describe('if waitForMigrationCompletion=false', () => {
         const initState = Object.assign({}, initBaseState, {
           waitForMigrationCompletion: false,
-        });
-        test('INIT -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if .kibana is already pointing to the target index', () => {
-          const res: ResponseType<'INIT'> = Either.right(
-            chain(initResult)
-              .cloneDeep()
-              .set(['indices', '.kibana_7.11.0_001', 'mappings'], mappingsWithUnknownType)
-              .value()
-          );
-          const newState = model(initState, res);
-
-          expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
-          // This snapshot asserts that we merge the
-          // migrationMappingPropertyHashes of the existing index, but we leave
-          // the mappings for the disabled_saved_object_type untouched. There
-          // might be another Kibana instance that knows about this type and
-          // needs these mappings in place.
-          expect(newState.targetIndexMappings).toMatchInlineSnapshot(`
-            Object {
-              "_meta": Object {
-                "migrationMappingPropertyHashes": Object {
-                  "disabled_saved_object_type": "7997cf5a56cc02bdc9c93361bde732b0",
-                  "new_saved_object_type": "4a11183eee21e6fbad864f7a30b39ad0",
-                },
-              },
-              "properties": Object {
-                "new_saved_object_type": Object {
-                  "properties": Object {
-                    "value": Object {
-                      "type": "text",
-                    },
-                  },
-                },
-              },
-            }
-          `);
-          expect(newState.retryCount).toEqual(0);
-          expect(newState.retryDelay).toEqual(0);
         });
         test('INIT -> INIT when cluster routing allocation is incompatible', () => {
           const res: ResponseType<'INIT'> = Either.left({
@@ -1206,47 +1120,12 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(0);
         });
 
-        describe('and mappings match (diffMappings == false)', () => {
-          test('WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
-            const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
-            const newState = model(waitForYellowSourceState, res) as CleanupUnknownAndExcluded;
+        test('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES', () => {
+          const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
+          const newState = model(waitForYellowSourceState, res);
 
-            expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED');
-            expect(newState.targetIndex).toEqual(baseState.versionIndex);
-            expect(newState.versionIndexReadyActions).toEqual(Option.none);
-          });
-        });
-
-        describe('and mappings DO NOT match (diffMappings == true)', () => {
-          const actualMappings: IndexMapping = {
-            properties: {
-              new_saved_object_type: {
-                properties: {
-                  value: { type: 'integer' },
-                },
-              },
-            },
-            _meta: {
-              migrationMappingPropertyHashes: {
-                new_saved_object_type: '5b11183eee21e6fbad864f7a30b39be1',
-              },
-            },
-          };
-
-          const changedMappingsState: WaitForYellowSourceState = {
-            ...waitForYellowSourceState,
-            sourceIndexMappings: Option.some(actualMappings) as Option.Some<IndexMapping>,
-          };
-
-          test('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES', () => {
-            const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
-            const newState = model(changedMappingsState, res);
-
-            expect(newState).toMatchObject({
-              controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
-              sourceIndex: Option.some('.kibana_7.11.0_001'),
-              sourceIndexMappings: Option.some(actualMappings),
-            });
+          expect(newState).toMatchObject({
+            controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
           });
         });
       });
@@ -1270,37 +1149,70 @@ describe('migrations v2 model', () => {
     });
 
     describe('UPDATE_SOURCE_MAPPINGS_PROPERTIES', () => {
-      const checkCompatibleMappingsState: UpdateSourceMappingsPropertiesState = {
+      const updateSourceMappingsPropertiesState: UpdateSourceMappingsPropertiesState = {
         ...postInitState,
         controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
         sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
         sourceIndexMappings: Option.some(
-          baseState.targetIndexMappings
+          chain(baseState.targetIndexMappings)
+            .cloneDeep()
+            .set('_meta.migrationMappingPropertyHashes.something', 'some-hash')
+            .value()
         ) as Option.Some<IndexMapping>,
       };
 
       describe('if action succeeds', () => {
-        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED if mappings changes are compatible', () => {
           const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.right(
-            'update_mappings_succeeded' as const
+            UpdateSourceMappingsPropertiesResult.Compatible
           );
-          const newState = model(checkCompatibleMappingsState, res);
+          const newState = model(updateSourceMappingsPropertiesState, res);
 
           expect(newState).toMatchObject({
             controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
           });
         });
-      });
 
-      describe('if action fails', () => {
-        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CHECK_UNKNOWN_DOCUMENTS', () => {
-          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.left({
-            type: 'incompatible_mapping_exception',
-          });
-          const newState = model(checkCompatibleMappingsState, res);
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CHECK_UNKNOWN_DOCUMENTS if mappings changes are incompatible', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.right(
+            UpdateSourceMappingsPropertiesResult.Incompatible
+          );
+          const newState = model(updateSourceMappingsPropertiesState, res);
 
           expect(newState).toMatchObject({
             controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+          });
+        });
+
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if mappings changes are compatible and index is already migrated', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.right(
+            UpdateSourceMappingsPropertiesResult.Updated
+          );
+          const newState = model(updateSourceMappingsPropertiesState, res);
+
+          expect(newState).toEqual(
+            expect.objectContaining({
+              controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+              sourceIndex: Option.none,
+              targetIndex: '.kibana_7.11.0_001',
+              targetIndexMappings: chain(indexMapping)
+                .cloneDeep()
+                .set('_meta.migrationMappingPropertyHashes.something', 'some-hash')
+                .value(),
+            })
+          );
+        });
+      });
+
+      describe('if action fails', () => {
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> FATAL', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.left({
+            type: 'incompatible_mapping_exception',
+          });
+          const newState = model(updateSourceMappingsPropertiesState, res);
+
+          expect(newState).toMatchObject({
+            controlState: 'FATAL',
           });
         });
       });
