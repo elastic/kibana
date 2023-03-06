@@ -19,10 +19,11 @@ import {
   IDataViewsApiClient,
 } from '../types';
 import { stubbedSavedObjectIndexPattern } from '../data_view.stub';
+import { DataViewMissingIndices } from '../lib';
 
 const createFieldsFetcher = () =>
   ({
-    getFieldsForWildcard: jest.fn(async () => ({ fields: [], indices: [] })),
+    getFieldsForWildcard: jest.fn(async () => ({ fields: [], indices: ['test'] })),
   } as any as IDataViewsApiClient);
 
 const fieldFormats = fieldFormatsMock;
@@ -71,6 +72,7 @@ describe('IndexPatterns', () => {
   const indexPatternObj = { id: 'id', version: 'a', attributes: { title: 'title' } };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     savedObjectsClient = {} as SavedObjectsClientCommon;
     savedObjectsClient.find = jest.fn(
       () => Promise.resolve([indexPatternObj]) as Promise<Array<SavedObject<any>>>
@@ -218,6 +220,35 @@ describe('IndexPatterns', () => {
     });
 
     expect((await indexPatterns.get(id)).fields.length).toBe(1);
+  });
+
+  test('existing indices, so dataView.matchedIndices.length equals 1 ', async () => {
+    const id = '1';
+    setDocsourcePayload(id, {
+      id: 'foo',
+      version: 'foo',
+      attributes: {
+        title: 'something',
+      },
+    });
+    const dataView = await indexPatterns.get(id);
+    expect(dataView.matchedIndices.length).toBe(1);
+  });
+
+  test('missing indices, so dataView.matchedIndices.length equals 0 ', async () => {
+    const id = '1';
+    setDocsourcePayload(id, {
+      id: 'foo',
+      version: 'foo',
+      attributes: {
+        title: 'something',
+      },
+    });
+    apiClient.getFieldsForWildcard = jest.fn().mockImplementation(async () => {
+      throw new DataViewMissingIndices('Catch me if you can!');
+    });
+    const dataView = await indexPatterns.get(id);
+    expect(dataView.matchedIndices.length).toBe(0);
   });
 
   test('savedObjectCache pre-fetches title, type, typeMeta', async () => {
