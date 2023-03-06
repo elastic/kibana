@@ -1886,6 +1886,43 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.serviceMap",
+        "type": "Function",
+        "tags": [],
+        "label": "serviceMap",
+        "description": [],
+        "signature": [
+          "(options: ",
+          "ServiceMapOpts",
+          ") => (timestamp: number) => ",
+          "Transaction",
+          "[]"
+        ],
+        "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/service_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.serviceMap.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "ServiceMapOpts"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/service_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
         "id": "def-common.timerange",
         "type": "Function",
         "tags": [],
