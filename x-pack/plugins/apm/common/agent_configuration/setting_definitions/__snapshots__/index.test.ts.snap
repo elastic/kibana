@@ -88,6 +88,11 @@ Array [
     "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
+    "key": "enable_automatic_instrumentation",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
     "key": "enable_experimental_instrumentations",
     "type": "boolean",
     "validationName": "(\\"true\\" | \\"false\\")",
