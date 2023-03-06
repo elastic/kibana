@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { EuiBasicTableColumn, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
@@ -115,6 +115,9 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
     services: { telemetry },
   } = useKibanaContextForPlugin();
 
+  // @TODO:
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
       telemetry.reportHostEntryClicked({
@@ -129,6 +132,21 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
+      {
+        name: '',
+        width: '32px',
+        actions: [
+          {
+            name: '',
+            description: 'Expand',
+            icon: isFlyoutOpen ? 'minimize' : 'expand',
+            type: 'icon',
+            onClick: () => {
+              setIsFlyoutOpen(!isFlyoutOpen);
+            },
+          },
+        ],
+      },
       {
         name: titleLabel,
         field: 'title',
@@ -191,8 +209,8 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         align: 'right',
       },
     ],
-    [reportHostEntryClick, time]
+    [isFlyoutOpen, reportHostEntryClick, time]
   );
 
-  return { columns, items };
+  return { columns, items, isFlyoutOpen, setIsFlyoutOpen };
 };

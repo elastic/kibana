@@ -6,7 +6,14 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiInMemoryTable } from '@elastic/eui';
+import {
+  EuiPortal,
+  EuiFlyout,
+  EuiFlyoutHeader,
+  EuiTitle,
+  EuiFlyoutBody,
+  EuiInMemoryTable,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { NoData } from '../../../../components/empty_states';
@@ -21,7 +28,9 @@ export const HostsTable = () => {
   const { onSubmit, unifiedSearchDateRange } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
 
-  const { columns, items } = useHostsTable(hostNodes, { time: unifiedSearchDateRange });
+  const { columns, items, isFlyoutOpen, setIsFlyoutOpen } = useHostsTable(hostNodes, {
+    time: unifiedSearchDateRange,
+  });
 
   const noData = items.length === 0;
 
@@ -74,18 +83,37 @@ export const HostsTable = () => {
   }
 
   return (
-    <EuiInMemoryTable
-      data-test-subj="hostsView-table"
-      pagination={properties.pagination}
-      sorting={
-        typeof properties.sorting === 'boolean' ? properties.sorting : { sort: properties.sorting }
-      }
-      rowProps={{
-        'data-test-subj': 'hostsView-tableRow',
-      }}
-      items={items}
-      columns={columns}
-      onTableChange={onTableChange}
-    />
+    <>
+      <EuiInMemoryTable
+        data-test-subj="hostsView-table"
+        pagination={properties.pagination}
+        sorting={
+          typeof properties.sorting === 'boolean'
+            ? properties.sorting
+            : { sort: properties.sorting }
+        }
+        rowProps={{
+          'data-test-subj': 'hostsView-tableRow',
+        }}
+        items={items}
+        columns={columns}
+        onTableChange={onTableChange}
+      />
+      {/* @TODO Extract and add host name title */}
+      {isFlyoutOpen && (
+        <EuiPortal>
+          <EuiFlyout onClose={() => setIsFlyoutOpen(!isFlyoutOpen)}>
+            <EuiFlyoutHeader hasBorder>
+              <EuiTitle size="m">
+                <h2>Host</h2>
+              </EuiTitle>
+            </EuiFlyoutHeader>
+            <EuiFlyoutBody>
+              <p>Metadata</p>
+            </EuiFlyoutBody>
+          </EuiFlyout>
+        </EuiPortal>
+      )}
+    </>
   );
 };
