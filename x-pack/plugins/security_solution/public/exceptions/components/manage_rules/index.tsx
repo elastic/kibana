@@ -55,7 +55,7 @@ export const ManageRules: FC<ManageRulesProps> = memo(
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
-            <h2 id={complicatedFlyoutTitleId}>{i18n.MANAGE_RULES_HEADER}</h2>
+            <h2 id={complicatedFlyoutTitleId}>{i18n.LINK_RULES_HEADER}</h2>
           </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="s" color="subdued">

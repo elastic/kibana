@@ -28,6 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const security = getService('security');
   const panelActions = getService('dashboardPanelActions');
   const inspector = getService('inspector');
+  const queryBar = getService('queryBar');
 
   async function clickInChart(x: number, y: number) {
     const el = await elasticChart.getCanvas();
@@ -293,6 +294,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // remove the x dimension to trigger the validation error
       await PageObjects.lens.removeDimension('lnsXY_xDimensionPanel');
       await PageObjects.lens.expectSaveAndReturnButtonDisabled();
+    });
+
+    it('should recover lens panel in an error state when fixing search query', async () => {
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.clickNewDashboard();
+      await dashboardAddPanel.clickOpenAddPanel();
+      await dashboardAddPanel.filterEmbeddableNames('lnsXYvis');
+      await find.clickByButtonText('lnsXYvis');
+      await dashboardAddPanel.closeAddPanel();
+      await PageObjects.lens.goToTimeRange();
+      // type an invalid search query, hit refresh
+      await queryBar.setQuery('this is > not valid');
+      await queryBar.submitQuery();
+      // check the error state
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      const errors = await testSubjects.findAll('embeddableStackError');
+      expect(errors.length).to.be(1);
+      // now remove the query
+      await queryBar.setQuery('');
+      await queryBar.submitQuery();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      // check the success state
+      await PageObjects.dashboard.verifyNoRenderErrors();
     });
   });
 }

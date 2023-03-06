@@ -8,11 +8,11 @@ import { useCallback, useMemo, useState } from 'react';
 import createContainer from 'constate';
 import { getTime } from '@kbn/data-plugin/common';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
-import { BoolQuery, buildEsQuery, Filter, Query } from '@kbn/es-query';
+import { BoolQuery, buildEsQuery, Filter } from '@kbn/es-query';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { HostsState } from './use_unified_search_url_state';
-import { useHostsView } from './use_hosts_view';
+import { useHostsViewContext } from './use_hosts_view';
 import { AlertStatus } from '../types';
 import { ALERT_STATUS_QUERY } from '../constants';
 
@@ -21,7 +21,7 @@ export interface AlertsEsQuery {
 }
 
 export const useAlertsQueryImpl = () => {
-  const { hostNodes } = useHostsView();
+  const { hostNodes } = useHostsViewContext();
 
   const { unifiedSearchDateRange } = useUnifiedSearchContext();
 
@@ -65,22 +65,21 @@ const createAlertsEsQuery = ({
   hostNodes: SnapshotNode[];
   status?: AlertStatus;
 }): AlertsEsQuery => {
-  const alertStatusQuery = createAlertStatusQuery(status);
+  const alertStatusFilter = createAlertStatusFilter(status);
 
   const dateFilter = createDateFilter(dateRange);
   const hostsFilter = createHostsFilter(hostNodes);
 
-  const queries = alertStatusQuery ? [alertStatusQuery] : [];
-  const filters = [hostsFilter, dateFilter].filter(Boolean) as Filter[];
+  const filters = [alertStatusFilter, dateFilter, hostsFilter].filter(Boolean) as Filter[];
 
-  return buildEsQuery(undefined, queries, filters);
+  return buildEsQuery(undefined, [], filters);
 };
 
 const createDateFilter = (date: HostsState['dateRange']) =>
   getTime(undefined, date, { fieldName: TIMESTAMP });
 
-const createAlertStatusQuery = (status: AlertStatus = 'all'): Query | null =>
-  ALERT_STATUS_QUERY[status] ? { query: ALERT_STATUS_QUERY[status], language: 'kuery' } : null;
+const createAlertStatusFilter = (status: AlertStatus = 'all'): Filter | null =>
+  ALERT_STATUS_QUERY[status] ? { query: ALERT_STATUS_QUERY[status], meta: {} } : null;
 
 const createHostsFilter = (hosts: SnapshotNode[]): Filter => ({
   query: {
