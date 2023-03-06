@@ -46,7 +46,7 @@ export interface Asset extends ECSDocument {
   'asset.collection_version'?: string;
   'asset.ean': string;
   'asset.id': string;
-  'asset.kind': AssetKind;
+  'asset.kind'?: AssetKind;
   'asset.name'?: string;
   'asset.type': AssetType;
   'asset.status'?: AssetStatus;
@@ -54,6 +54,8 @@ export interface Asset extends ECSDocument {
   'asset.children'?: string | string[];
   'asset.namespace'?: string;
 }
+
+export type AssetWithoutTimestamp = Omit<Asset, '@timestamp'>;
 
 export interface K8sPod extends WithTimestamp {
   id: string;

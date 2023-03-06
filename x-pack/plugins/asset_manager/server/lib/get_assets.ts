@@ -8,7 +8,7 @@
 import { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { debug } from '../../common/debug_log';
 import { Asset, AssetFilters } from '../../common/types_api';
-import { ASSETS_INDEX } from '../constants';
+import { ASSETS_INDEX_PREFIX } from '../constants';
 import { ElasticsearchAccessorOptions } from '../types';
 
 interface GetAssetsOptions extends ElasticsearchAccessorOptions {
@@ -17,14 +17,10 @@ interface GetAssetsOptions extends ElasticsearchAccessorOptions {
   to?: string;
 }
 
-export async function getAssets({
-  esClient,
-  filters = {},
-  from = 'now-24h',
-  to = 'now',
-}: GetAssetsOptions): Promise<Asset[]> {
+export async function getAssets({ esClient, filters = {} }: GetAssetsOptions): Promise<Asset[]> {
+  const { from = 'now-24h', to = 'now' } = filters;
   const dsl: SearchRequest = {
-    index: ASSETS_INDEX,
+    index: ASSETS_INDEX_PREFIX + '*',
     query: {
       bool: {
         filter: [

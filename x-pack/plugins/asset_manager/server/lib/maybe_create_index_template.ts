@@ -10,7 +10,7 @@ import {
   IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { ASSETS_INDEX } from '../constants';
+import { ASSETS_INDEX_PREFIX } from '../constants';
 
 function templateExists(
   template: IndicesPutIndexTemplateRequest,
@@ -64,7 +64,7 @@ export async function maybeCreateTemplate({
   esClient: ElasticsearchClient;
   template: IndexPatternJson;
 }) {
-  const pattern = ASSETS_INDEX;
+  const pattern = ASSETS_INDEX_PREFIX + '*';
   template.index_patterns = [pattern];
   let existing: IndicesGetIndexTemplateResponse | null = null;
   try {
