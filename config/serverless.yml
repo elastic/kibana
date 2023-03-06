@@ -5,3 +5,4 @@ xpack.fleet.enableExperimental: ['fleetServerStandalone']
 xpack.upgrade_assistant.enabled: false
 xpack.rollup.enabled: false
 xpack.watcher.enabled: false
+xpack.ccr.enabled: false
