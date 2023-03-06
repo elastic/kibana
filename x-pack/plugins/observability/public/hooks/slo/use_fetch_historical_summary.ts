@@ -10,10 +10,10 @@ import { FetchHistoricalSummaryResponse } from '@kbn/slo-schema';
 
 import { useKibana } from '../../utils/kibana_react';
 
-const EMPTY_RESPONSE: FetchHistoricalSummaryResponse = {};
-
 export interface UseFetchHistoricalSummaryResponse {
-  sloHistoricalSummaryResponse: FetchHistoricalSummaryResponse;
+  sloHistoricalSummaryResponse: FetchHistoricalSummaryResponse | undefined;
+  isInitialLoading: boolean;
+  isRefetching: boolean;
   isLoading: boolean;
   isSuccess: boolean;
   isError: boolean;
@@ -49,8 +49,10 @@ export function useFetchHistoricalSummary({
   });
 
   return {
-    sloHistoricalSummaryResponse: isInitialLoading ? EMPTY_RESPONSE : data ?? EMPTY_RESPONSE,
-    isLoading: isInitialLoading || isLoading || isRefetching,
+    sloHistoricalSummaryResponse: data,
+    isLoading,
+    isRefetching,
+    isInitialLoading,
     isSuccess,
     isError,
   };

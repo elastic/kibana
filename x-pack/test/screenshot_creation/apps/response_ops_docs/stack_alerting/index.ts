@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   const browser = getService('browser');
   const actions = getService('actions');
+  const rules = getService('rules');
 
   describe('stack alerting', function () {
     before(async () => {
@@ -23,10 +24,12 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await rules.api.deleteAllRules();
       await actions.api.deleteAllConnectors();
     });
 
     loadTestFile(require.resolve('./list_view'));
     loadTestFile(require.resolve('./connector_types'));
+    loadTestFile(require.resolve('./index_threshold_rule'));
   });
 }

@@ -46,5 +46,6 @@ export const platformServiceFactory: CanvaPlatformServiceFactory = ({
     getSavedObjectsClient: () => coreStart.savedObjects.client,
     getUISettings: () => coreStart.uiSettings,
     getHttp: () => coreStart.http,
+    getSavedObjectsManagement: () => startPlugins.savedObjectsManagement,
   };
 };

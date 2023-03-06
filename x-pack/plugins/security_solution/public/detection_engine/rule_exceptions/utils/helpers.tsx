@@ -186,12 +186,13 @@ export const enrichNewExceptionItemsWithComments = (
  */
 export const enrichNewExceptionItemsWithExpireTime = (
   exceptionItems: ExceptionsBuilderReturnExceptionItem[],
-  expireTime: Moment
+  expireTime: Moment | undefined
 ): ExceptionsBuilderReturnExceptionItem[] => {
+  const expireTimeDateString = expireTime !== undefined ? expireTime.toISOString() : undefined;
   return exceptionItems.map((item: ExceptionsBuilderReturnExceptionItem) => {
     return {
       ...item,
-      expire_time: expireTime.toISOString(),
+      expire_time: expireTimeDateString,
     };
   });
 };
