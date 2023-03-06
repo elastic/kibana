@@ -590,9 +590,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/148468
-      // FLAKY: https://github.com/elastic/kibana/issues/148469
-      describe.skip('Severity', () => {
+      describe('Severity', () => {
         before(async () => {
           await cases.api.createNthRandomCases(1);
           await header.waitUntilLoadingHasFinished();
