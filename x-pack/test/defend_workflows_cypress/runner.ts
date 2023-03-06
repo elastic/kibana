@@ -14,9 +14,11 @@ import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';
 import { getLatestAvailableAgentVersion } from './utils';
 
+type RunnerEnv = Record<string, string | undefined>;
+
 async function withFleetAgent(
   { getService }: FtrProviderContext,
-  runner: (runnerEnv: Record<string, string>) => Promise<void>
+  runner: (runnerEnv: RunnerEnv) => Promise<void>
 ) {
   const log = getService('log');
   const config = getService('config');
@@ -40,9 +42,9 @@ async function withFleetAgent(
   const agentManager = new AgentManager(log);
 
   await fleetManager.setup();
-  await agentManager.setup();
+  const agentVmName = await agentManager.setup();
   try {
-    await runner({});
+    await runner({ agentVmName });
   } finally {
     agentManager.cleanup();
     fleetManager.cleanup();
@@ -58,10 +60,16 @@ export async function DefendWorkflowsCypressVisualTestRunner(context: FtrProvide
 }
 
 export async function DefendWorkflowsCypressEndpointTestRunner(context: FtrProviderContext) {
-  await withFleetAgent(context, () => startDefendWorkflowsCypress(context, 'dw:endpoint:open'));
+  await withFleetAgent(context, (runnerEnv) =>
+    startDefendWorkflowsCypress(context, 'dw:endpoint:open', runnerEnv)
+  );
 }
 
-function startDefendWorkflowsCypress(context: FtrProviderContext, cypressCommand: string) {
+function startDefendWorkflowsCypress(
+  context: FtrProviderContext,
+  cypressCommand: 'dw:endpoint:open' | 'dw:open' | 'dw:run',
+  runnerEnv?: RunnerEnv
+) {
   const log = context.getService('log');
   const config = context.getService('config');
   return withProcRunner(log, async (procs) => {
@@ -91,6 +99,7 @@ function startDefendWorkflowsCypress(context: FtrProviderContext, cypressCommand
           hostname: config.get('servers.kibana.hostname'),
           port: config.get('servers.kibana.port'),
         }),
+        CYPRESS_ENDPOINT_VM_NAME: runnerEnv?.agentVmName,
         ...process.env,
       },
       wait: true,

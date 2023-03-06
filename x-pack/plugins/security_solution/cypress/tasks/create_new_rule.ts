@@ -11,6 +11,7 @@ import type {
   ThreatSubtechnique,
   ThreatTechnique,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import { parseInt } from 'lodash';
 import type {
   CustomRule,
   MachineLearningRule,
@@ -114,12 +115,14 @@ import {
 } from '../screens/common/rule_actions';
 import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
-import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
+import { ALERTS_TABLE_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
-import { refreshPage } from './security_header';
 import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
 import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
+import { waitForAlerts } from './alerts';
+import { refreshPage } from './security_header';
+import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
@@ -670,17 +673,22 @@ export const selectNewTermsRuleType = () => {
 export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
+      cy.log('Waiting for alerts to appear');
       refreshPage();
-      return cy
-        .get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((countText) => {
-          const alertCount = parseInt(countText, 10) || 0;
-          return alertCount >= alertCountThreshold;
-        });
+      return cy.root().then(($el) => {
+        const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
+        if (emptyTableState.length > 0) {
+          cy.log('Table is empty', emptyTableState.length);
+          return false;
+        }
+        const countEl = $el.find(ALERTS_TABLE_COUNT);
+        const alertCount = parseInt(countEl.text(), 10) || 0;
+        return alertCount >= alertCountThreshold;
+      });
     },
     { interval: 500, timeout: 12000 }
   );
+  waitForAlerts();
 };
 
 export const waitForTheRuleToBeExecuted = () => {

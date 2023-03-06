@@ -15,9 +15,9 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiLoadingContent,
   EuiLoadingSpinner,
   EuiText,
+  EuiSkeletonText,
   formatDate,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
@@ -272,7 +272,7 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
       </FlexStartEuiFlexItem>
       <EuiFlexItem>
         {isLoading ? (
-          <EuiLoadingContent lines={3} />
+          <EuiSkeletonText lines={3} />
         ) : (
           <EuiBasicTable<AgentDiagnostics> items={diagnosticsEntries} columns={columns} />
         )}

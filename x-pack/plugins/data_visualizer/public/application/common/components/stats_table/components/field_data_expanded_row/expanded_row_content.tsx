@@ -14,7 +14,7 @@ interface Props {
 }
 export const ExpandedRowContent: FC<Props> = ({ children, dataTestSubj }) => {
   return (
-    <EuiFlexGroup data-test-subj={dataTestSubj} gutterSize={'s'}>
+    <EuiFlexGroup data-test-subj={dataTestSubj} gutterSize={'s'} wrap={true}>
       {children}
     </EuiFlexGroup>
   );

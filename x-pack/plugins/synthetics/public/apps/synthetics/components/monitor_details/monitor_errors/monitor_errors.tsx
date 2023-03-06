@@ -23,9 +23,9 @@ import { ErrorsTabContent } from './errors_tab_content';
 export const MonitorErrors = () => {
   const { errorStates, loading, data } = useMonitorErrors();
 
-  const initialLoading = loading && !data;
+  const initialLoading = !data;
 
-  const emptyState = !loading && errorStates.length === 0;
+  const emptyState = !loading && errorStates && errorStates?.length === 0;
 
   const redirect = useMonitorDetailsPage();
   if (redirect) {
@@ -39,7 +39,7 @@ export const MonitorErrors = () => {
       {initialLoading && <LoadingErrors />}
       {emptyState && <EmptyErrors />}
       <div style={{ visibility: initialLoading || emptyState ? 'collapse' : 'initial' }}>
-        <ErrorsTabContent errorStates={errorStates} loading={loading} />
+        <ErrorsTabContent errorStates={errorStates ?? []} loading={loading} />
       </div>
     </>
   );

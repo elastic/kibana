@@ -291,7 +291,7 @@ export const AlertsByStatus = ({
                         />
                       ) : (
                         <DonutChart
-                          data={donutData?.acknowledged?.severities}
+                          data={donutData?.closed?.severities}
                           fillColor={fillColor}
                           height={donutHeight}
                           label={STATUS_CLOSED}

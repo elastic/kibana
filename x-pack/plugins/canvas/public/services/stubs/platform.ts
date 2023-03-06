@@ -37,4 +37,5 @@ export const platformServiceFactory: CanvasPlatformServiceFactory = () => ({
   redirectLegacyUrl: noop,
   getLegacyUrlConflict: undefined,
   getHttp: noop,
+  getSavedObjectsManagement: noop,
 });

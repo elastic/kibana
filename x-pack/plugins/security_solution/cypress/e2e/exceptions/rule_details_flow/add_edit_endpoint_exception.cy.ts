@@ -43,9 +43,9 @@ import {
   CLOSE_SINGLE_ALERT_CHECKBOX,
   EXCEPTION_ITEM_CONTAINER,
   VALUES_INPUT,
-  FIELD_INPUT,
   EXCEPTION_CARD_ITEM_NAME,
   EXCEPTION_CARD_ITEM_CONDITIONS,
+  FIELD_INPUT_PARENT,
 } from '../../../screens/exceptions';
 import { createEndpointExceptionList } from '../../../tasks/api_calls/exceptions';
 
@@ -143,7 +143,11 @@ describe('Add endpoint exception from rule details', () => {
     editExceptionFlyoutItemName(NEW_ITEM_NAME);
 
     // check that the existing item's field is being populated
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(0).should('have.text', ITEM_FIELD);
+    cy.get(EXCEPTION_ITEM_CONTAINER)
+      .eq(0)
+      .find(FIELD_INPUT_PARENT)
+      .eq(0)
+      .should('have.text', ITEM_FIELD);
     cy.get(VALUES_INPUT).should('have.text', 'foo');
 
     // edit conditions

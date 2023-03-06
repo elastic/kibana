@@ -138,7 +138,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     const availableFields$ = stateContainer?.dataState.data$.availableFields$;
     const sub = embeddable?.getOutput$().subscribe((output: DataVisualizerGridEmbeddableOutput) => {
       if (output.showDistributions !== undefined && stateContainer) {
-        stateContainer.setAppState({ hideAggregatedPreview: !output.showDistributions });
+        stateContainer.appState.update({ hideAggregatedPreview: !output.showDistributions });
       }
     });
 
