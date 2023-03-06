@@ -145,5 +145,6 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/expandable-flyout",
     "@kbn/securitysolution-grouping",
+    "@kbn/saved-objects-management-plugin",
   ]
 }
