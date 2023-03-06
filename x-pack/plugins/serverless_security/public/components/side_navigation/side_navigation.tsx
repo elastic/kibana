@@ -36,7 +36,7 @@ export const SecuritySideNavigation: React.FC = () => {
     setIsOpen(!isOpen);
   }, [isOpen, setIsOpen]);
 
-  const isSideNavLoading = items.length === 0 && footerItems.length === 0;
+  const isLoading = items.length === 0 && footerItems.length === 0;
 
   return (
     <EuiThemeProvider colorMode={colorMode === 'DARK' ? 'LIGHT' : 'DARK'}>
@@ -65,7 +65,7 @@ export const SecuritySideNavigation: React.FC = () => {
         }
       >
         {isOpen &&
-          (isSideNavLoading ? (
+          (isLoading ? (
             <EuiLoadingSpinner size="m" data-test-subj="sideNavLoader" />
           ) : (
             <SolutionNav
