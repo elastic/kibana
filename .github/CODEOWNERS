@@ -533,6 +533,7 @@ packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-es-utils @elastic/security-solution-platform
 packages/kbn-securitysolution-exception-list-components @elastic/security-solution-platform
+packages/kbn-securitysolution-grouping @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-hook-utils @elastic/security-solution-platform
 packages/kbn-securitysolution-io-ts-alerting-types @elastic/security-solution-platform
 packages/kbn-securitysolution-io-ts-list-types @elastic/security-solution-platform
@@ -803,7 +804,12 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test/functional/services/uptime @elastic/uptime
 /x-pack/test/api_integration/apis/uptime @elastic/uptime
 /x-pack/plugins/observability/public/components/shared/exploratory_view @elastic/uptime
-
+/x-pack/plugins/observability/public/components/shared/field_value_suggestions @elastic/uptime
+/x-pack/plugins/observability/public/components/shared/core_web_vitals @elastic/uptime
+/x-pack/plugins/observability/public/components/shared/load_when_in_view @elastic/uptime
+/x-pack/plugins/observability/public/components/shared/filter_value_label @elastic/uptime
+/x-pack/plugins/observability/public/utils/observability_data_views @elastic/uptime
+/x-pack/plugins/observability/e2e @elastic/uptime
 
 # Client Side Monitoring / Uptime (lives in APM directories but owned by Uptime)
 /x-pack/plugins/apm/public/application/uxApp.tsx @elastic/uptime
@@ -875,14 +881,15 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /.buildkite/ @elastic/kibana-operations
 /kbn_pm/ @elastic/kibana-operations
 
-# Quality Assurance
+# Appex QA
 /src/dev/code_coverage @elastic/appex-qa
-/vars/*Coverage.groovy @elastic/appex-qa
 /test/functional/services/common @elastic/appex-qa
 /test/functional/services/lib @elastic/appex-qa
 /test/functional/services/remote @elastic/appex-qa
 /test/visual_regression @elastic/appex-qa
 /x-pack/test/visual_regression @elastic/appex-qa
+/x-pack/performance @elastic/appex-qa
+/packages/kbn-test/src/functional_test_runner @elastic/appex-qa
 
 # Core
 /config/kibana.yml @elastic/kibana-core
@@ -1007,7 +1014,6 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding_tour @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/charts @elastic/security-threat-hunting-explore
-/x-pack/plugins/security_solution/public/common/components/grouping @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/detections/components/alerts_table/grouping_settings @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_page @elastic/security-threat-hunting-explore
 /x-pack/plugins/security_solution/public/common/components/header_section @elastic/security-threat-hunting-explore
@@ -1199,8 +1205,6 @@ x-pack/test/threat_intelligence_cypress @elastic/protections-experience
 
 # Changes to translation files should not ping code reviewers
 x-pack/plugins/translations/translations
-
-x-pack/performance @elastic/appex-qa
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
