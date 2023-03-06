@@ -6,10 +6,8 @@
  */
 
 import { createAttachmentServiceMock } from '../../../services/mocks';
-import type { CommentRequestAlertType } from '../../../../common/api';
-import { CommentType } from '../../../../common/api';
 import { AlertLimiter } from './alerts';
-import { createUserRequests } from './test_utils';
+import { createAlertRequests, createUserRequests } from '../test_utils';
 
 describe('AlertLimiter', () => {
   const alert = new AlertLimiter();
@@ -103,23 +101,3 @@ describe('AlertLimiter', () => {
     });
   });
 });
-
-const createAlertRequests = (
-  numberOfRequests: number,
-  alertIds: string | string[]
-): CommentRequestAlertType[] => {
-  const requests = [...Array(numberOfRequests).keys()].map((value) => {
-    return {
-      type: CommentType.alert as const,
-      alertId: alertIds,
-      index: alertIds,
-      rule: {
-        id: null,
-        name: null,
-      },
-      owner: `${value}`,
-    };
-  });
-
-  return requests;
-};

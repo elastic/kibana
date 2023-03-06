@@ -6,15 +6,8 @@
  */
 
 import { createAttachmentServiceMock } from '../../../services/mocks';
-import type { FileAttachmentMetadata } from '../../../../common/api';
-import {
-  CommentType,
-  ExternalReferenceStorageType,
-  FILE_ATTACHMENT_TYPE,
-} from '../../../../common/api';
-import type { FileAttachmentRequest } from '../../types';
 import { FileLimiter } from './files';
-import { createUserRequests } from './test_utils';
+import { createFileRequests, createUserRequests } from '../test_utils';
 
 describe('FileLimiter', () => {
   const file = new FileLimiter();
@@ -123,36 +116,3 @@ describe('FileLimiter', () => {
     });
   });
 });
-
-const createFileRequests = ({
-  numRequests,
-  numFiles,
-}: {
-  numRequests: number;
-  numFiles: number;
-}): FileAttachmentRequest[] => {
-  const files: FileAttachmentMetadata['files'] = [...Array(numFiles).keys()].map((value) => {
-    return {
-      name: `${value}`,
-      createdAt: '2023-02-27T20:26:54.345Z',
-      extension: 'png',
-      mimeType: 'image/png',
-    };
-  });
-
-  const requests: FileAttachmentRequest[] = [...Array(numRequests).keys()].map((value) => {
-    return {
-      type: CommentType.externalReference as const,
-      externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
-      externalReferenceId: 'so-id',
-      externalReferenceMetadata: { files },
-      externalReferenceStorage: {
-        soType: `${value}`,
-        type: ExternalReferenceStorageType.savedObject,
-      },
-      owner: 'test',
-    };
-  });
-
-  return requests;
-};
