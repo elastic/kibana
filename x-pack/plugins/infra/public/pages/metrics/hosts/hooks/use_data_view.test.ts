@@ -75,27 +75,21 @@ describe('useDataView hook', () => {
     const { waitForNextUpdate } = renderHook(() => useDataView({ metricAlias: 'metrics' }));
 
     await waitForNextUpdate();
-    expect(dataViewMock.create).toHaveBeenCalledWith(
-      {
-        id: 'infra_metrics_212933f0-c55e-5a36-8b13-e724aed2f66d',
-        timeFieldName: '@timestamp',
-        title: 'metrics',
-      },
-      false
-    );
+    expect(dataViewMock.create).toHaveBeenCalledWith({
+      id: 'infra_metrics_212933f0-c55e-5a36-8b13-e724aed2f66d',
+      timeFieldName: '@timestamp',
+      title: 'metrics',
+    });
   });
 
   it('should create a dataview with unique id for metricAlias remote-metrics', async () => {
     const { waitForNextUpdate } = renderHook(() => useDataView({ metricAlias: 'remote-metrics' }));
 
     await waitForNextUpdate();
-    expect(dataViewMock.create).toHaveBeenCalledWith(
-      {
-        id: 'infra_metrics_e40bb657-0351-548e-8e73-093851d9bb6e',
-        timeFieldName: '@timestamp',
-        title: 'remote-metrics',
-      },
-      false
-    );
+    expect(dataViewMock.create).toHaveBeenCalledWith({
+      id: 'infra_metrics_e40bb657-0351-548e-8e73-093851d9bb6e',
+      timeFieldName: '@timestamp',
+      title: 'remote-metrics',
+    });
   });
 });
