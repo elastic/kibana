@@ -44,7 +44,7 @@ import { RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 
 const UUID_REGEX = '[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}';
 
-describe.skip('Alert Event Details', () => {
+describe('Alert Event Details', () => {
   beforeEach(() => {
     login(ROLE.soc_manager);
   });
