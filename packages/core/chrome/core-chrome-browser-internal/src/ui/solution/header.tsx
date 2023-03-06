@@ -7,16 +7,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonIcon,
-  EuiCollapsibleNav,
-  EuiHeader,
-  EuiHeaderLogo,
-  EuiHeaderSection,
-  EuiHeaderSectionItem,
-  EuiThemeProvider,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiHeader, EuiHeaderLogo, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
 import {
   ChromeBreadcrumb,
   ChromeGlobalHelpExtensionMenuLink,
@@ -48,8 +39,6 @@ export const SolutionHeader = ({
   navigation,
   ...observables
 }: Props) => {
-  const { euiTheme, colorMode } = useEuiTheme();
-
   const renderLogo = () => (
     <EuiHeaderLogo
       iconType="logoElastic"
@@ -84,30 +73,7 @@ export const SolutionHeader = ({
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
       </EuiHeader>
-      <EuiThemeProvider colorMode={colorMode === 'DARK' ? 'LIGHT' : 'DARK'}>
-        <EuiCollapsibleNav
-          css={{
-            borderInlineEndWidth: 1,
-            background: euiTheme.colors.darkestShade,
-            display: 'flex',
-            flexDirection: 'row',
-          }}
-          isOpen={true}
-          onClose={() => {}}
-          closeButtonProps={{ iconType: 'menuLeft' }}
-          showButtonIfDocked={true}
-          isDocked={true}
-          size={248}
-          hideCloseButton={false}
-          button={
-            <span css={{ marginLeft: -40, marginTop: 16, position: 'fixed', zIndex: 1000 }}>
-              <EuiButtonIcon iconType="menuLeft" aria-label="Open nav" color="text" />
-            </span>
-          }
-        >
-          {navigation}
-        </EuiCollapsibleNav>
-      </EuiThemeProvider>
+      {navigation}
     </>
   );
 };
