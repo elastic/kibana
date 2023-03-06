@@ -21,5 +21,9 @@ export type {
 
 export { procedureNames } from './rpc/constants';
 
+export { validateVersion } from './utils';
+
 // intentionally not exporting schemas to not include @kbn/schema in the public bundle
 // export { schemas as rpcSchemas } from './rpc';
+
+export type { Version } from './types';
