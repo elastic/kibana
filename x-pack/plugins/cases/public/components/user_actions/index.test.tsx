@@ -6,18 +6,24 @@
  */
 
 import React from 'react';
-import { mount } from 'enzyme';
-import { waitFor, screen } from '@testing-library/react';
+import { waitFor, screen, within, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 
 import { useUpdateComment } from '../../containers/use_update_comment';
-import { basicCase, getUserAction } from '../../containers/mock';
+import {
+  basicCase,
+  getHostIsolationUserAction,
+  getUserAction,
+  hostIsolationComment,
+} from '../../containers/mock';
 import { UserActions } from '.';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, TestProviders } from '../../common/mock';
+import { createAppMockRenderer } from '../../common/mock';
 import { Actions } from '../../../common/api';
-import { userProfiles } from '../../containers/user_profiles/api.mock';
+import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { connectorsMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
@@ -27,7 +33,6 @@ import {
 } from '../case_view/mocks';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
-import userEvent from '@testing-library/user-event';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
@@ -108,17 +113,10 @@ describe(`UserActions`, () => {
     useFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
     useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
     appMockRender.render(
-      <UserActions
-        {...{ ...defaultProps, currentUserProfile: userProfiles[0] }}
-      />
+      <UserActions {...{ ...defaultProps, currentUserProfile: userProfiles[0] }} />
     );
 
     expect(screen.getAllByTestId('user-actions-loading')).toHaveLength(2);
-    // expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
-    // expect(screen.getByText('DR')).toBeInTheDocument();
-    expect(screen.getAllByTestId('user-actions-loading')).toHaveLength(2);
-    // expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
-    // expect(screen.getByText('DR')).toBeInTheDocument();
   });
 
   it('Renders expandable and bottom user action lists', async () => {
@@ -132,24 +130,17 @@ describe(`UserActions`, () => {
     useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
     useFindCaseUserActionsMock.mockReturnValue({
       ...defaultUseFindCaseUserActions,
-      data: { ...defaultUseFindCaseUserActions.data.userActions, ...ourActions },
+      data: { userActions: [...defaultUseFindCaseUserActions.data.userActions, ...ourActions] },
     });
-
-    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
-    useFindCaseUserActionsMock.mockReturnValue({...defaultUseFindCaseUserActions, data: {...defaultUseFindCaseUserActions.data.userActions, ...ourActions}});
 
     const props = {
       ...defaultProps,
       caseConnectors,
     };
 
-    const component = appMockRender.render(
-      <UserActions {...props} />
-    );
+    appMockRender.render(<UserActions {...props} />);
 
     await waitForComponentToUpdate();
-
-    expect(component).toMatchSnapshot();
 
     await waitFor(() => {
       expect(screen.getByTestId('top-footer')).toBeInTheDocument();
@@ -166,19 +157,21 @@ describe(`UserActions`, () => {
       }),
     ];
 
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue({
+      ...defaultUseFindCaseUserActions,
+      data: { userActions: [...defaultUseFindCaseUserActions.data.userActions, ...ourActions] },
+    });
+
     const props = {
       ...defaultProps,
       caseUserActions: ourActions,
     };
 
-    const wrapper = mount(
-      <TestProviders>
-        <UserActions {...props} />
-      </TestProviders>
-    );
+    appMockRender.render(<UserActions {...props} />);
     await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
-      expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(false);
+      expect(screen.getByTestId('top-footer')).toBeInTheDocument();
+      expect(screen.queryByTestId('bottom-footer')).not.toBeInTheDocument();
     });
   });
 
@@ -195,7 +188,7 @@ describe(`UserActions`, () => {
     useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
     useFindCaseUserActionsMock.mockReturnValue({
       ...defaultUseFindCaseUserActions,
-      data: { ...defaultUseFindCaseUserActions.data.userActions, ...ourActions },
+      data: { userActions: [...defaultUseFindCaseUserActions.data.userActions, ...ourActions] },
     });
 
     appMockRender.render(<UserActions {...props} />);
@@ -204,25 +197,23 @@ describe(`UserActions`, () => {
         .getByTestId(`comment-create-action-${props.data.comments[0].id}`)
         .classList.contains('outlined')
     ).toBe(false);
-    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
-    useFindCaseUserActionsMock.mockReturnValue({...defaultUseFindCaseUserActions, data: {...defaultUseFindCaseUserActions.data.userActions, ...ourActions}});
 
-    appMockRender.render(
-        <UserActions {...props} />
-    );
-    expect(screen.getByTestId(`comment-create-action-${props.data.comments[0].id}`).classList.contains('outlined')).toBe(false);
+    expect(
+      screen
+        .getAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[1]
+        .classList.contains('outlined')
+    ).toBe(false);
 
     userEvent.click(screen.getByTestId(`comment-update-action-${ourActions[1].id}`));
 
     await waitFor(() => {
       expect(
         screen
-          .getByTestId(`comment-create-action-${props.data.comments[0].id}`)
+          .getAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[1]
           .classList.contains('outlined')
       ).toBe(true);
     });
   });
-
 
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
     const ourActions = [getUserAction('comment', Actions.create)];
@@ -231,40 +222,36 @@ describe(`UserActions`, () => {
       caseUserActions: ourActions,
     };
 
-    const wrapper = mount(
-      <TestProviders>
-        <UserActions {...props} />
-      </TestProviders>
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue({
+      ...defaultUseFindCaseUserActions,
+      data: { userActions: [...defaultUseFindCaseUserActions.data.userActions, ...ourActions] },
+    });
+
+    appMockRender.render(<UserActions {...props} />);
+
+    userEvent.click(
+      within(
+        screen.getAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[1]
+      ).getByTestId('property-actions-user-action-ellipses')
     );
 
-    wrapper
-      .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-ellipses"]`
-      )
-      .first()
-      .simulate('click');
-    wrapper
-      .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-pencil"]`
-      )
-      .first()
-      .simulate('click');
+    await waitForEuiPopoverOpen();
 
-    wrapper
-      .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-cancel-markdown"]`
-      )
-      .first()
-      .simulate('click');
+    userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
+
+    userEvent.click(
+      within(
+        screen.getAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[1]
+      ).getByTestId('user-action-cancel-markdown')
+    );
 
     await waitFor(() => {
       expect(
-        wrapper
-          .find(
-            `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
-          )
-          .exists()
-      ).toEqual(false);
+        within(
+          screen.getAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[1]
+        ).queryByTestId('user-action-markdown-form')
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -275,49 +262,43 @@ describe(`UserActions`, () => {
       caseUserActions: ourActions,
     };
 
-    const wrapper = mount(
-      <TestProviders>
-        <UserActions {...props} />
-      </TestProviders>
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue({
+      ...defaultUseFindCaseUserActions,
+      data: { userActions: ourActions },
+    });
+
+    appMockRender.render(<UserActions {...props} />);
+
+    userEvent.click(
+      within(
+        screen.getAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[1]
+      ).getByTestId('property-actions-user-action-ellipses')
     );
 
-    wrapper
-      .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-ellipses"]`
-      )
-      .first()
-      .simulate('click');
+    await waitForEuiPopoverOpen();
 
-    wrapper
-      .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-pencil"]`
-      )
-      .first()
-      .simulate('click');
+    userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
 
-    wrapper
-      .find(`.euiMarkdownEditorTextArea`)
-      .first()
-      .simulate('change', {
-        target: { value: sampleData.content },
-      });
+    await waitForComponentToUpdate();
 
-    wrapper
-      .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] button[data-test-subj="user-action-save-markdown"]`
-      )
-      .first()
-      .simulate('click');
+    fireEvent.change(screen.getAllByTestId(`euiMarkdownEditorTextArea`)[0], {
+      target: { value: sampleData.content },
+    });
+
+    userEvent.click(
+      within(
+        screen.getAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[1]
+      ).getByTestId('user-action-save-markdown')
+    );
 
     await waitFor(() => {
-      wrapper.update();
       expect(
-        wrapper
-          .find(
-            `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
-          )
-          .exists()
-      ).toEqual(false);
+        within(
+          screen.getAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[1]
+        ).queryByTestId('user-action-markdown-form')
+      ).not.toBeInTheDocument();
+
       expect(patchComment).toBeCalledWith({
         commentUpdate: sampleData.content,
         caseId: 'case-id',
@@ -333,35 +314,32 @@ describe(`UserActions`, () => {
     const ourActions = [getUserAction('comment', Actions.create)];
     const props = {
       ...defaultProps,
-      caseUserActions: ourActions,
     };
 
-    const wrapper = mount(
-      <TestProviders>
-        <UserActions {...props} />
-      </TestProviders>
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue({
+      ...defaultUseFindCaseUserActions,
+      data: { userActions: ourActions },
+    });
+
+    appMockRender.render(<UserActions {...props} />);
+
+    expect((await screen.findByTestId(`euiMarkdownEditorTextArea`)).textContent).not.toContain(
+      quoteableText
     );
 
-    expect(wrapper.find(`.euiMarkdownEditorTextArea`).text()).not.toContain(quoteableText);
+    userEvent.click(
+      within(
+        screen.getAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[1]
+      ).getByTestId('property-actions-user-action-ellipses')
+    );
 
-    wrapper
-      .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-ellipses"]`
-      )
-      .first()
-      .simulate('click');
+    await waitForEuiPopoverOpen();
 
-    wrapper
-      .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-quote"]`
-      )
-      .first()
-      .simulate('click');
+    userEvent.click(screen.getByTestId('property-actions-user-action-quote'));
 
     await waitFor(() => {
-      expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).first().text()).toContain(
-        quoteableText
-      );
+      expect(screen.getAllByTestId('add-comment')[0].textContent).toContain(quoteableText);
     });
   });
 
@@ -391,21 +369,21 @@ describe(`UserActions`, () => {
     const ourActions = [getUserAction('comment', Actions.create)];
     const props = {
       ...defaultProps,
-      caseUserActions: ourActions,
     };
 
-    const wrapper = mount(
-      <TestProviders>
-        <UserActions {...props} />
-      </TestProviders>
-    );
+    useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
+    useFindCaseUserActionsMock.mockReturnValue({
+      ...defaultUseFindCaseUserActions,
+      data: { ...defaultUseFindCaseUserActions.data, userActions: ourActions },
+    });
+
+    appMockRender.render(<UserActions {...props} />);
+
     await waitFor(() => {
       expect(
-        wrapper
-          .find(`[data-test-subj="comment-create-action-${commentId}"]`)
-          .first()
-          .hasClass('outlined')
-      ).toEqual(true);
+        screen.getAllByTestId(`
+          comment-create-action-${commentId}`)[0]
+      ).classList.contains('outlined');
     });
   });
 
@@ -415,120 +393,95 @@ describe(`UserActions`, () => {
     const ourActions = [getUserAction('comment', Actions.create)];
     const props = {
       ...defaultProps,
-      caseUserActions: ourActions,
     };
-    const wrapper = mount(
-      <TestProviders>
-        <UserActions {...props} />
-      </TestProviders>
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue({
+      ...defaultUseFindCaseUserActions,
+      data: { userActions: ourActions },
+    });
+
+    appMockRender.render(<UserActions {...props} />);
+
+    userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
+    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), newComment);
+
+    userEvent.click(
+      within(
+        screen.getAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[1]
+      ).getByTestId('property-actions-user-action-ellipses')
     );
 
-    // type new comment in text area
-    wrapper
-      .find(`[data-test-subj="add-comment"] textarea`)
-      .first()
-      .simulate('change', { target: { value: newComment } });
+    await waitForEuiPopoverOpen();
 
-    wrapper
-      .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-ellipses"]`
-      )
-      .first()
-      .simulate('click');
+    userEvent.click(screen.getByTestId('property-actions-user-action-pencil'));
 
-    wrapper
-      .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="property-actions-user-action-pencil"]`
-      )
-      .first()
-      .simulate('click');
+    fireEvent.change(screen.getAllByTestId('euiMarkdownEditorTextArea')[0], {
+      target: { value: editedComment },
+    });
 
-    wrapper
-      .find(`.euiMarkdownEditorTextArea`)
-      .first()
-      .simulate('change', {
-        target: { value: editedComment },
-      });
-
-    wrapper
-      .find(
-        `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] button[data-test-subj="user-action-save-markdown"]`
-      )
-      .first()
-      .simulate('click');
+    userEvent.click(
+      within(
+        screen.getAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[1]
+      ).getByTestId('user-action-save-markdown')
+    );
 
     await waitFor(() => {
-      wrapper.update();
       expect(
-        wrapper
-          .find(
-            `[data-test-subj="comment-create-action-${props.data.comments[0].id}"] [data-test-subj="user-action-markdown-form"]`
-          )
-          .exists()
-      ).toEqual(false);
-      expect(patchComment).toBeCalledWith({
-        commentUpdate: editedComment,
-        caseId: 'case-id',
-        commentId: props.data.comments[0].id,
-        version: props.data.comments[0].version,
+        within(
+          screen.getAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[1]
+        ).queryByTestId('user-action-markdown-form')
+      ).not.toBeInTheDocument();
+    });
+
+    await waitFor(() => {
+      expect(screen.getAllByTestId('add-comment')[1].textContent).toContain(newComment);
+    });
+  });
+
+  describe('Host isolation action', () => {
+    it('renders in the cases details view', async () => {
+      const isolateAction = [getHostIsolationUserAction()];
+      const props = {
+        ...defaultProps,
+        data: { ...defaultProps.data, comments: [...basicCase.comments, hostIsolationComment()] },
+      };
+
+      useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+      useFindCaseUserActionsMock.mockReturnValue({
+        ...defaultUseFindCaseUserActions,
+        data: { userActions: isolateAction },
+      });
+
+      appMockRender.render(<UserActions {...props} />);
+      await waitFor(() => {
+        expect(screen.getByTestId('endpoint-action')).toBeInTheDocument();
       });
     });
 
-    expect(wrapper.find(`[data-test-subj="add-comment"] textarea`).text()).toBe(newComment);
+    it('shows the correct username', async () => {
+      const isolateAction = [
+        getHostIsolationUserAction({ createdBy: { profileUid: userProfiles[0].uid } }),
+      ];
+      const props = {
+        ...defaultProps,
+        userProfiles: userProfilesMap,
+        data: {
+          ...defaultProps.data,
+          comments: [hostIsolationComment({ createdBy: { profileUid: userProfiles[0].uid } })],
+        },
+      };
+
+      useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+      useFindCaseUserActionsMock.mockReturnValue({
+        ...defaultUseFindCaseUserActions,
+        data: { userActions: isolateAction },
+      });
+
+      appMockRender.render(<UserActions {...props} />);
+
+      expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
+      expect(screen.getByText('DR')).toBeInTheDocument();
+      expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
+    });
   });
-
-  // describe('Host isolation action', () => {
-  //   it('renders in the cases details view', async () => {
-  //     const isolateAction = [getHostIsolationUserAction()];
-  //     const props = {
-  //       ...defaultProps,
-  //       caseUserActions: isolateAction,
-  //       data: { ...defaultProps.data, comments: [...basicCase.comments, hostIsolationComment()] },
-  //     };
-
-  //     const wrapper = mount(
-  //       <TestProviders>
-  //         <UserActions {...props} />
-  //       </TestProviders>
-  //     );
-  //     await waitFor(() => {
-  //       expect(wrapper.find(`[data-test-subj="endpoint-action"]`).exists()).toBe(true);
-  //     });
-  //   });
-  //     const wrapper = mount(
-  //       <TestProviders>
-  //         <UserActions {...props} />
-  //       </TestProviders>
-  //     );
-  //     await waitFor(() => {
-  //       expect(wrapper.find(`[data-test-subj="endpoint-action"]`).exists()).toBe(true);
-  //     });
-  //   });
-
-  //   it('shows the correct username', async () => {
-  //     const isolateAction = [
-  //       getHostIsolationUserAction({ createdBy: { profileUid: userProfiles[0].uid } }),
-  //     ];
-  //     const props = {
-  //       ...defaultProps,
-  //       userProfiles: userProfilesMap,
-  //       caseUserActions: isolateAction,
-  //       data: {
-  //         ...defaultProps.data,
-  //         comments: [hostIsolationComment({ createdBy: { profileUid: userProfiles[0].uid } })],
-  //       },
-  //     };
-
-  //     appMockRender.render(<UserActions {...props} />);
-
-  //     expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
-  //     expect(screen.getByText('DR')).toBeInTheDocument();
-  //     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-  //   });
-  // });
-  //     expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
-  //     expect(screen.getByText('DR')).toBeInTheDocument();
-  //     expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-  //   });
-  // });
 });

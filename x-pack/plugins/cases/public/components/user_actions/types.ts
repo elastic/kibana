@@ -40,7 +40,7 @@ export interface UserActionTreeProps {
   statusActionButton: JSX.Element | null;
   useFetchAlertData: UseFetchAlertData;
   userActivityQueryParams: UserActivityParams;
-  userActionsStats: CaseUserActionsStats | undefined;
+  userActionsStats: CaseUserActionsStats;
 }
 
 export interface AddCommentMarkdown {

@@ -76,9 +76,7 @@ describe('FilterActivity ', () => {
       />
     );
 
-    expect(
-      screen.getByLabelText(`${userActionsStats.total} active filters`)
-    ).toBeInTheDocument();
+    expect(screen.getByLabelText(`${userActionsStats.total} active filters`)).toBeInTheDocument();
     expect(
       screen.getByLabelText(`${userActionsStats.totalComments} available filters`)
     ).toBeInTheDocument();

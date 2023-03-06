@@ -189,7 +189,11 @@ export const CaseViewActivity = ({
   );
 
   const showUserActions =
-    !isLoadingUserActionsStats && !isLoadingCaseConnectors && caseConnectors && caseUsers;
+    !isLoadingUserActionsStats &&
+    !isLoadingCaseConnectors &&
+    caseConnectors &&
+    caseUsers &&
+    userActionsStats;
 
   const showConnectorSidebar =
     pushToServiceAuthorized && caseConnectors && supportedActionConnectors;

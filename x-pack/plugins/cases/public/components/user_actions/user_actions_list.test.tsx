@@ -11,7 +11,6 @@ import userEvent from '@testing-library/user-event';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 
-import { useUpdateComment } from '../../containers/use_update_comment';
 import { basicCase } from '../../containers/mock';
 import { UserActionsList } from './user_actions_list';
 import type { AppMockRenderer } from '../../common/mock';
@@ -89,20 +88,18 @@ jest.mock('../../common/lib/kibana');
 
 const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
-const useUpdateCommentMock = useUpdateComment as jest.Mock;
-const patchComment = jest.fn();
+const fetchNextPage = jest.fn();
 
 describe(`UserActionsList`, () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useUpdateCommentMock.mockReturnValue({
-      isLoadingIds: [],
-      patchComment,
-    });
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
-    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    useInfiniteFindCaseUserActionsMock.mockReturnValue({
+      ...defaultInfiniteUseFindCaseUserActions,
+      fetchNextPage,
+    });
 
     jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
     appMockRender = createAppMockRenderer();
@@ -196,6 +193,8 @@ describe(`UserActionsList`, () => {
     });
 
     userEvent.click(screen.getByTestId('show-more-user-actions'));
-    expect(defaultInfiniteUseFindCaseUserActions.fetchNextPage).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(fetchNextPage).toHaveBeenCalled();
+    });
   });
 });

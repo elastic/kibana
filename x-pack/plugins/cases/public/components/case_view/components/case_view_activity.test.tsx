@@ -323,7 +323,6 @@ describe.skip('Case View Page activity tab', () => {
         expect(screen.getByLabelText(`${userActionsStats.total} available filters`));
         expect(screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`));
       });
-
     });
 
     it('should show history filter as active', async () => {
