@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { IRouter, ISavedObjectsRepository } from '@kbn/core/server';
 import { storeReport, reportSchema } from '../report';
 import { UsageCounter } from '../usage_counters';
+import { v1 } from '../../common/types/ui_counters';
 
 export function registerUiCountersRoute(
   router: IRouter,
@@ -26,13 +27,14 @@ export function registerUiCountersRoute(
       },
     },
     async (context, req, res) => {
-      const { report } = req.body;
+      const requestBody: v1.UiCountersHTTPRequestBody = req.body;
+      // const { report } = req.body;
       try {
         const internalRepository = getSavedObjects();
         if (!internalRepository) {
           throw Error(`The saved objects client hasn't been initialised yet`);
         }
-        await storeReport(internalRepository, uiCountersUsageCounter, report);
+        await storeReport(internalRepository, uiCountersUsageCounter, requestBody.report);
         return res.ok({ body: { status: 'ok' } });
       } catch (error) {
         return res.ok({ body: { status: 'fail' } });

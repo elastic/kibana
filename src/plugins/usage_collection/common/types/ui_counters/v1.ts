@@ -13,24 +13,45 @@
 export interface UiCountersHTTPRequestBody {
   report: {
     reportVersion?: 3;
-    userAgent?: {
-      key: string;
-      type: string;
-      appName: string;
-      userAgent: string;
-    };
-    uiCounter?: {
-      key: string;
-      type: string;
-      appName: string;
-      eventName: string;
-      total: number;
-    };
-    application_usage?: {
-      minutesOnScreen: number;
-      numberOfClicks: number;
-      appId: string;
-      viewId: string;
-    };
+    userAgent?: Record<
+      string,
+      Readonly<
+        {} & {
+          key: string;
+          type: string;
+          appName: string;
+          userAgent: string;
+        }
+      >
+    >;
+    uiCounter?: Record<
+      string,
+      Readonly<
+        {} & {
+          key: string;
+          type: string;
+          appName: string;
+          eventName: string;
+          total: number;
+        }
+      >
+    >;
+    application_usage?: Record<
+      string,
+      Readonly<{
+        minutesOnScreen: number;
+        numberOfClicks: number;
+        appId: string;
+        viewId: string;
+      }>
+    >;
   };
+}
+
+export enum UiCountersHTTPResponseStatus {
+  ok = 'ok',
+  fail = 'fail',
+}
+export interface UiCountersHTTPResponseBody {
+  status: UiCountersHTTPResponseStatus;
 }
