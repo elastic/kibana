@@ -121,7 +121,6 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   const [endDate, setEndDate] = useState<any>(moment(end));
   const [isLoadingChartData, setIsLoadingChartData] = useState<boolean>(false);
   const [bucketData, setBucketData] = useState<ChartDataWithNullValues>([]);
-  const [allEmptyValues, setAllEmptyValues] = useState<boolean>(false);
   const [annotationData, setAnnotationData] = useState<{
     rect: RectAnnotationDatum[];
     line: LineAnnotationDatum[];
@@ -189,7 +188,6 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
           chartSourceData = fillMissingChartData(chartSourceData, chartBucketData);
         }
       }
-      setAllEmptyValues(!chartBucketData.some((datum) => datum[1] !== null && datum[1] !== 0));
       setSourceData(chartSourceData);
       setBucketData(chartBucketData);
       setAnnotationData({
@@ -261,6 +259,12 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
   const { datafeedConfig, bucketSpan, isInitialized } = data;
   const checkboxIdAnnotation = useMemo(() => htmlIdGenerator()(), []);
   const checkboxIdModelSnapshot = useMemo(() => htmlIdGenerator()(), []);
+  const hasOnlyEmptyValues = useMemo(
+    () =>
+      !bucketData.some((datum) => datum[1] !== null && datum[1] !== 0) &&
+      !sourceData.some((datum) => datum[1] !== null && datum[1] !== 0),
+    [bucketData, sourceData]
+  );
 
   return (
     <EuiPortal>
@@ -445,7 +449,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                           })}
                           position={Position.Left}
                           domain={
-                            allEmptyValues
+                            hasOnlyEmptyValues
                               ? {
                                   min: 0,
                                   max: 10,
