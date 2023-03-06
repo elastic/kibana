@@ -22,7 +22,11 @@ import type {
   EncryptedSavedObjectsPluginSetup,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 
-import type { SecurityPluginStart, SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type {
+  SecurityPluginStart,
+  SecurityPluginSetup,
+  AuditLogger,
+} from '@kbn/security-plugin/server';
 
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 
@@ -69,6 +73,7 @@ class AppContextService {
   private savedObjectsTagging: SavedObjectTaggingStart | undefined;
   private bulkActionsResolver: BulkActionsResolver | undefined;
   private messageSigningService: MessageSigningServiceInterface | undefined;
+  private auditLogger?: AuditLogger;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -118,6 +123,10 @@ class AppContextService {
 
   public getSecurity() {
     return this.securityStart!;
+  }
+
+  public getSecuritySetup() {
+    return this.securitySetup!;
   }
 
   public getSecurityLicense() {
@@ -249,6 +258,34 @@ class AppContextService {
 
   public getMessageSigningService() {
     return this.messageSigningService;
+  }
+
+  /**
+   * The audit logger must be set after the AppContextService class is instantiated, as it
+   * requires a `KibanaRequest` to provide user/session data in the audit log records
+   *
+   * @param request The request to use for user/session info included in audit logging
+   */
+  public setAuditLogger(request: KibanaRequest) {
+    this.auditLogger = this.getSecuritySetup().audit.asScoped(request);
+  }
+
+  /**
+   * Write a custom audit log record. If a current request is available, the log will include
+   * user/session data. If not, an unscoped audit logger will be used.
+   */
+  public writeCustomAuditLog(...args: Parameters<AuditLogger['log']>) {
+    let auditLogger = this.auditLogger;
+
+    // If there's no request-scoped audit logger available, log to an unscoped one.
+    // This should ideally be an infrequent occurence only called during preconfiguration
+    // contexts or other "Fleet system" operations.
+    if (!auditLogger) {
+      this.getLogger().debug('No request-scoped audit logger available, using unscoped logger');
+      auditLogger = this.getSecuritySetup().audit.withoutRequest;
+    }
+
+    auditLogger.log(...args);
   }
 }
 

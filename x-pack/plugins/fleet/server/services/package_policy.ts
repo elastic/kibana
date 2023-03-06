@@ -103,7 +103,6 @@ import { handleExperimentalDatastreamFeatureOptIn } from './package_policies';
 import { updateDatastreamExperimentalFeatures } from './epm/packages/update';
 import type { PackagePolicyClient, PackagePolicyService } from './package_policy_service';
 import { installAssetsForInputPackagePolicy } from './epm/packages/install';
-import { recordAuditLog } from './audit_logging';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -271,14 +270,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     const createdPackagePolicy = { id: newSo.id, version: newSo.version, ...newSo.attributes };
 
-    await recordAuditLog({
-      esClient,
-      username: options?.user?.username ?? 'system',
-      resourceType: 'PACKAGE_POLICY',
-      resourceIds: [newSo.id],
-      operation: 'CREATE',
-    });
-
     return packagePolicyService.runExternalCallbacks(
       'packagePolicyPostCreate',
       createdPackagePolicy,
@@ -364,14 +355,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         });
       }
     }
-
-    await recordAuditLog({
-      esClient,
-      resourceType: 'PACKAGE_POLICY',
-      resourceIds: newSos.map((so) => so.id),
-      operation: 'CREATE',
-      username: options?.user?.username ?? 'system',
-    });
 
     return newSos.map((newSo) => ({
       id: newSo.id,
@@ -673,13 +656,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     await Promise.all([bumpPromise, assetRemovePromise]);
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, [packagePolicyUpdate], [oldPackagePolicy]);
-    await recordAuditLog({
-      esClient,
-      resourceType: 'PACKAGE_POLICY',
-      resourceIds: [newPolicy.id],
-      operation: 'UPDATE',
-      username: options?.user?.username ?? 'system',
-    });
 
     return newPolicy;
   }
@@ -791,13 +767,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     await Promise.all([bumpPromise, removeAssetPromise]);
 
     sendUpdatePackagePolicyTelemetryEvent(soClient, packagePolicyUpdates, oldPackagePolicies);
-    await recordAuditLog({
-      esClient,
-      resourceType: 'PACKAGE_POLICY',
-      resourceIds: newPolicies.map((p) => p.id),
-      operation: 'UPDATE',
-      username: options?.user?.username ?? 'system',
-    });
 
     return newPolicies.map(
       (soPolicy) =>
@@ -954,14 +923,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       logger.error(`An error occurred executing "packagePolicyPostDelete" callback: ${error}`);
       logger.error(error);
     }
-
-    await recordAuditLog({
-      esClient,
-      resourceType: 'PACKAGE_POLICY',
-      resourceIds: result.map((r) => r.id),
-      operation: 'DELETE',
-      username: options?.user?.username ?? 'system',
-    });
 
     return result;
   }

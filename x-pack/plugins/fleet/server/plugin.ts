@@ -35,7 +35,11 @@ import type {
   EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
+  AuditLogger,
+  SecurityPluginSetup,
+  SecurityPluginStart,
+} from '@kbn/security-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
   TaskManagerSetupContract,
@@ -154,6 +158,7 @@ export interface FleetAppContext {
   telemetryEventsSender: TelemetryEventsSender;
   bulkActionsResolver: BulkActionsResolver;
   messageSigningService: MessageSigningServiceInterface;
+  auditLogger?: AuditLogger;
 }
 
 export type FleetSetupContract = void;
@@ -361,6 +366,8 @@ export class FleetPlugin
           appContextService
             .getSavedObjects()
             .getScopedClient(request, { excludedExtensions: [SECURITY_EXTENSION_ID] });
+
+        appContextService.setAuditLogger(request);
 
         return {
           get agentClient() {

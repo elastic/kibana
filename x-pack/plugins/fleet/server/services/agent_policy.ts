@@ -79,7 +79,6 @@ import { normalizeKuery, escapeSearchQueryPhrase } from './saved_object';
 import { appContextService } from './app_context';
 import { getFullAgentPolicy } from './agent_policies';
 import { validateOutputForPolicy } from './agent_policies';
-import { recordAuditLog } from './audit_logging';
 
 const SAVED_OBJECT_TYPE = AGENT_POLICY_SAVED_OBJECT_TYPE;
 
@@ -103,6 +102,16 @@ class AgentPolicyService {
     user?: AuthenticatedUser,
     options: { bumpRevision: boolean } = { bumpRevision: true }
   ): Promise<AgentPolicy> {
+    appContextService.writeCustomAuditLog({
+      message: `User is updating ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
+      event: {
+        action: 'saved_object_update',
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['access'],
+      },
+    });
+
     const existingAgentPolicy = await this.get(soClient, id, true);
 
     if (!existingAgentPolicy) {
@@ -134,14 +143,6 @@ class AgentPolicyService {
     if (options.bumpRevision) {
       await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'updated', id);
     }
-
-    await recordAuditLog({
-      esClient,
-      username: user?.username ?? 'system',
-      resourceType: 'AGENT_POLICY',
-      resourceIds: [id],
-      operation: 'UPDATE',
-    });
 
     return (await this.get(soClient, id)) as AgentPolicy;
   }
@@ -225,14 +226,6 @@ class AgentPolicyService {
       options
     );
 
-    await recordAuditLog({
-      esClient,
-      resourceType: 'AGENT_POLICY',
-      resourceIds: [newSo.id],
-      operation: 'CREATE',
-      username: options?.user?.username ?? 'system',
-    });
-
     await this.triggerAgentPolicyUpdatedEvent(soClient, esClient, 'created', newSo.id);
 
     return { id: newSo.id, ...newSo.attributes };
@@ -282,6 +275,16 @@ class AgentPolicyService {
         (await packagePolicyService.findAllForAgentPolicy(soClient, id)) || [];
     }
 
+    appContextService.writeCustomAuditLog({
+      message: `User has accessed ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
+      event: {
+        action: 'saved_object_find',
+        category: ['database'],
+        outcome: 'success',
+        type: ['access'],
+      },
+    });
+
     return agentPolicy;
   }
 
@@ -325,7 +328,29 @@ class AgentPolicyService {
       { concurrency: 50 }
     );
 
-    return agentPolicies.filter((agentPolicy): agentPolicy is AgentPolicy => agentPolicy !== null);
+    const result = agentPolicies.filter(
+      (agentPolicy): agentPolicy is AgentPolicy => agentPolicy !== null
+    );
+
+    for (const agentPolicy of result) {
+      appContextService.writeCustomAuditLog({
+        message: `User has accessed ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${agentPolicy.id}]`,
+        event: {
+          action: 'saved_object_find',
+          category: ['database'],
+          outcome: 'success',
+          type: ['access'],
+        },
+        kibana: {
+          saved_object: {
+            id: agentPolicy.id,
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          },
+        },
+      });
+    }
+
+    return result;
   }
 
   public async list(
@@ -397,6 +422,24 @@ class AgentPolicyService {
       },
       { concurrency: 50 }
     );
+
+    for (const agentPolicy of agentPolicies) {
+      appContextService.writeCustomAuditLog({
+        message: `User has accessed ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${agentPolicy.id}]`,
+        event: {
+          action: 'saved_object_find',
+          category: ['database'],
+          outcome: 'success',
+          type: ['access'],
+        },
+        kibana: {
+          saved_object: {
+            id: agentPolicy.id,
+            type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+          },
+        },
+      });
+    }
 
     return {
       items: agentPolicies,
@@ -673,6 +716,16 @@ class AgentPolicyService {
     id: string,
     options?: { force?: boolean; removeFleetServerDocuments?: boolean; user?: AuthenticatedUser }
   ): Promise<DeleteAgentPolicyResponse> {
+    appContextService.writeCustomAuditLog({
+      message: `User is deleting ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
+      event: {
+        action: 'saved_object_update',
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['access'],
+      },
+    });
+
     const agentPolicy = await this.get(soClient, id, false);
     if (!agentPolicy) {
       throw new Error('Agent policy not found');
@@ -728,14 +781,6 @@ class AgentPolicyService {
     if (options?.removeFleetServerDocuments) {
       await this.deleteFleetServerPoliciesForPolicyId(esClient, id);
     }
-
-    await recordAuditLog({
-      esClient,
-      resourceType: 'AGENT_POLICY',
-      resourceIds: [id],
-      operation: 'DELETE',
-      username: options?.user?.username ?? 'system',
-    });
 
     return {
       id,
