@@ -96,17 +96,17 @@ export const useUnifiedSearch = () => {
 
   useEffect(() => {
     const filters$ = filterManagerService.getUpdates$().pipe(
-      startWith(null),
+      startWith(undefined),
       map(() => filterManagerService.getFilters())
     );
 
     const query$ = queryStringService.getUpdates$().pipe(
-      startWith(null),
+      startWith(undefined),
       map(() => queryStringService.getQuery() as Query)
     );
 
     const dateRange$ = timeFilterService.timefilter.getTimeUpdate$().pipe(
-      startWith(null),
+      startWith(undefined),
       map(() => getTime())
     );
 
