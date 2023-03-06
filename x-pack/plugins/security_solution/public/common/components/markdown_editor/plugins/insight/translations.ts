@@ -12,7 +12,7 @@ export const LABEL = i18n.translate('xpack.securitySolution.markdown.insight.lab
 });
 
 export const LABEL_TEXT = i18n.translate('xpack.securitySolution.markdown.insight.labelText', {
-  defaultMessage: 'Label for the filter button rendered in the guide.',
+  defaultMessage: 'Label on the query button.',
 });
 
 export const DESCRIPTION = i18n.translate('xpack.securitySolution.markdown.insight.description', {
@@ -22,14 +22,14 @@ export const DESCRIPTION = i18n.translate('xpack.securitySolution.markdown.insig
 export const DESCRIPTION_TEXT = i18n.translate(
   'xpack.securitySolution.markdown.insight.descriptionText',
   {
-    defaultMessage: 'Description of the relevance of the query.',
+    defaultMessage: 'Additional description of the query.',
   }
 );
 
 export const FILTER_BUILDER = i18n.translate(
   'xpack.securitySolution.markdown.insight.filterBuilder',
   {
-    defaultMessage: 'Filter Creation',
+    defaultMessage: 'Filters',
   }
 );
 
@@ -37,7 +37,7 @@ export const FILTER_BUILDER_TEXT = i18n.translate(
   'xpack.securitySolution.markdown.insight.filterBuilderText',
   {
     defaultMessage:
-      'Create filters to be used for displaying matching document counts and to populate the timeline query builder when clicked. Parameters that are wrapped in double braces {example} are assumed to be keys in the alert associated with the investigation guide, and values from the alert document will be substituted in place at query time.',
+      'Create filters to populate the Timeline query builder. To use a value from the alert document, enter the field name in double braces {{kibana.alert.example}} as a custom option in the value field.',
     values: {
       example: '{{kibana.alert.example}}',
     },
@@ -54,7 +54,7 @@ export const RELATIVE_TIMERANGE = i18n.translate(
 export const RELATIVE_TIMERANGE_TEXT = i18n.translate(
   'xpack.securitySolution.markdown.insight.relativeTimerangeText',
   {
-    defaultMessage: 'Select a time range relative to the time of the alert (optional).',
+    defaultMessage: 'Select a time range to limit the query, relative to the alert's creation time (optional).',
   }
 );
 
