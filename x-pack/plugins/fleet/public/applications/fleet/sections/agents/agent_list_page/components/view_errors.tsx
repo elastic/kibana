@@ -7,6 +7,7 @@
 
 import { stringify } from 'querystring';
 
+import styled from 'styled-components';
 import React from 'react';
 import { encode } from '@kbn/rison';
 import {
@@ -24,6 +25,12 @@ import { buildQuery } from '../../agent_details_page/components/agent_logs/build
 
 import type { ActionStatus } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
+
+const TruncatedEuiText = styled(EuiText)`
+  overflow: hidden;
+  max-height: 3rem;
+  text-overflow: ellipsis;
+`;
 
 export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ action }) => {
   const coreStart = useStartServices();
@@ -53,17 +60,15 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
   return (
     <>
       <EuiAccordion id={action.actionId + '_errors'} buttonContent="Show errors">
-        <EuiFlexGroup direction="column" alignItems="flexStart">
+        <EuiFlexGroup direction="column" gutterSize="s">
           {(action.latestErrors ?? []).map((errorItem: any) => (
             <EuiFlexItem>
               <EuiFlexGroup>
                 <EuiFlexItem>
                   <EuiToolTip content={errorItem.error}>
-                    <EuiText color="red">
-                      {errorItem.error.length > 80
-                        ? errorItem.error.slice(0, 80) + '...'
-                        : errorItem.error}
-                    </EuiText>
+                    <TruncatedEuiText color="red" size="s">
+                      {errorItem.error}
+                    </TruncatedEuiText>
                   </EuiToolTip>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
