@@ -20,11 +20,7 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
 import * as utils from '@kbn/actions-plugin/server/lib/axios_utils';
-import type {
-  PostMessageSubActionParams,
-  PostMessageParams,
-  SlackConnectorType,
-} from '../../../common/slack/types';
+import type { PostMessageParams, SlackConnectorType } from '../../../common/slack/types';
 import { SLACK_CONNECTOR_ID } from '../../../common/slack/constants';
 import { SLACK_CONNECTOR_NAME } from './translations';
 
