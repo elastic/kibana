@@ -507,7 +507,11 @@ export function LayerPanel(
               >
                 <>
                   {group.accessors.length ? (
-                    <ReorderProvider id={group.groupId} className={'lnsLayerPanel__group'}>
+                    <ReorderProvider
+                      id={group.groupId}
+                      className={'lnsLayerPanel__group'}
+                      dataTestSubj="lnsDragDrop"
+                    >
                       {group.accessors.map((accessorConfig, accessorIndex) => {
                         const { columnId } = accessorConfig;
 
@@ -598,7 +602,7 @@ export function LayerPanel(
 
                   {group.fakeFinalAccessor && (
                     <div
-                      className="lnsLayerPanel__dimension lnsDragDrop-isDraggable"
+                      className="lnsLayerPanel__dimension domDragDrop-isDraggable"
                       css={css`
                         cursor: default !important;
                         border-color: transparent !important;

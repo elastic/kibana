@@ -16,8 +16,7 @@ import {
   RegisteredDropTargets,
   DragContextState,
 } from './types';
-
-const DEFAULT_DATA_TEST_SUBJ = 'domDragDrop';
+import { DEFAULT_DATA_TEST_SUBJ } from '../constants';
 
 /**
  * The drag / drop context singleton, used like so:

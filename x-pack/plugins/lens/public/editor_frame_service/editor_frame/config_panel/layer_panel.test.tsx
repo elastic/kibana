@@ -776,7 +776,7 @@ describe('LayerPanel', () => {
       );
 
       const dragDropElement = instance
-        .find('[data-test-subj="lnsGroup"] DragDrop .lnsDragDrop')
+        .find('[data-test-subj="lnsGroup"] DragDrop .domDragDrop')
         .first();
 
       dragDropElement.simulate('dragOver');
@@ -890,7 +890,7 @@ describe('LayerPanel', () => {
       // Simulate drop on the pre-populated dimension
 
       const dragDropElement = instance
-        .find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop')
+        .find('[data-test-subj="lnsGroupB"] DragDrop .domDragDrop')
         .at(0);
       dragDropElement.simulate('dragOver');
       dragDropElement.simulate('drop');
@@ -905,7 +905,7 @@ describe('LayerPanel', () => {
       // Simulate drop on the empty dimension
 
       const updatedDragDropElement = instance
-        .find('[data-test-subj="lnsGroupB"] DragDrop .lnsDragDrop')
+        .find('[data-test-subj="lnsGroupB"] DragDrop .domDragDrop')
         .at(2);
 
       updatedDragDropElement.simulate('dragOver');

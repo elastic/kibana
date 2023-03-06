@@ -2,11 +2,11 @@
 
 exports[`DragDrop defined dropTypes is reflected in the className 1`] = `
 <div
-  class="lnsDragDrop__container"
+  class="domDragDrop__container"
   data-test-subj="domDragDropContainer"
 >
   <button
-    class="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isDropTarget"
+    class="domDragDrop domDragDrop-isDroppable domDragDrop-isDropTarget"
     data-test-subj="domDragDrop"
   >
     Hello!
@@ -16,16 +16,16 @@ exports[`DragDrop defined dropTypes is reflected in the className 1`] = `
 
 exports[`DragDrop items that has dropTypes=undefined get special styling when another item is dragged 1`] = `
 <SingleDropInner
-  className="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isNotDroppable"
-  data-test-subj="lnsDragDrop"
+  className="domDragDrop domDragDrop-isDroppable domDragDrop-isNotDroppable"
+  data-test-subj="testDragDrop"
   onDragEnter={[Function]}
   onDragLeave={[Function]}
   onDragOver={[Function]}
   onDrop={[Function]}
 >
   <button
-    className="lnsDragDrop lnsDragDrop-isDroppable lnsDragDrop-isNotDroppable"
-    data-test-subj="lnsDragDrop"
+    className="domDragDrop domDragDrop-isDroppable domDragDrop-isNotDroppable"
+    data-test-subj="testDragDrop"
     onDragEnter={[Function]}
     onDragLeave={[Function]}
     onDragOver={[Function]}
@@ -44,11 +44,11 @@ exports[`DragDrop renders if nothing is being dragged 1`] = `
   <button
     aria-describedby="domDragDrop-keyboardInstructions"
     aria-label="hello"
-    class="lnsDragDrop__keyboardHandler emotion-euiScreenReaderOnly"
+    class="domDragDrop__keyboardHandler emotion-euiScreenReaderOnly"
     data-test-subj="domDragDrop-keyboardHandler"
   />
   <button
-    class="lnsDragDrop lnsDragDrop-isDraggable"
+    class="domDragDrop domDragDrop-isDraggable"
     data-test-subj="domDragDrop"
     draggable="true"
   >

@@ -380,7 +380,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await retry.try(async () => {
         await browser.pressKeys(browserKey);
         await find.existsByCssSelector(
-          `.lnsDragDrop__extraDrop > [data-test-subj="lnsDragDrop-${metaToAction[metaKey]}"].lnsDragDrop-isActiveDropTarget`
+          `.domDragDrop__extraDrop > [data-test-subj="lnsDragDrop-${metaToAction[metaKey]}"].domDragDrop-isActiveDropTarget`
         );
       });
     },
@@ -405,7 +405,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await field.focus();
       await retry.try(async () => {
         await browser.pressKeys(browser.keys.ENTER);
-        await testSubjects.exists('.lnsDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
+        await testSubjects.exists('.domDragDrop-isDropTarget'); // checks if we're in dnd mode and there's any drop target active
       });
       for (let i = 0; i < steps; i++) {
         await browser.pressKeys(reverse ? browser.keys.LEFT : browser.keys.RIGHT);
@@ -477,7 +477,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async waitForLensDragDropToFinish() {
       await retry.try(async () => {
-        const exists = await find.existsByCssSelector('.lnsDragDrop-isActiveGroup');
+        const exists = await find.existsByCssSelector('.domDragDrop-isActiveGroup');
         if (exists) {
           throw new Error('UI still in drag/drop mode');
         }
@@ -525,7 +525,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
      * @param endIndex - the index of drop starting from 1
      * */
     async reorderDimensions(dimension: string, startIndex: number, endIndex: number) {
-      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .lnsDragDrop`;
+      const dragging = `[data-test-subj='${dimension}']:nth-of-type(${startIndex}) .domDragDrop`;
       const dropping = `[data-test-subj='${dimension}']:nth-of-type(${endIndex}) [data-test-subj='lnsDragDrop-reorderableDropLayer'`;
       await find.existsByCssSelector(dragging);
       await browser.html5DragAndDrop(dragging, dropping);
@@ -1469,8 +1469,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       const from = `lnsFieldListPanelField-${field}`;
       await this.dragEnterDrop(
         testSubjects.getCssSelector(from),
-        testSubjects.getCssSelector(`${to} > lnsDragDrop`),
-        testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
+        testSubjects.getCssSelector(`${to} > domDragDrop`),
+        testSubjects.getCssSelector(`${to} > domDragDrop-${type}`)
       );
       await this.waitForVisualization(visDataTestSubj);
     },
@@ -1490,8 +1490,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     ) {
       await this.dragEnterDrop(
         testSubjects.getCssSelector(from),
-        testSubjects.getCssSelector(`${to} > lnsDragDrop`),
-        testSubjects.getCssSelector(`${to} > lnsDragDrop-${type}`)
+        testSubjects.getCssSelector(`${to} > domDragDrop`),
+        testSubjects.getCssSelector(`${to} > domDragDrop-${type}`)
       );
       await this.waitForVisualization(visDataTestSubj);
     },

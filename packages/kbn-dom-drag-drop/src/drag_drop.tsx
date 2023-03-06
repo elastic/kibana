@@ -412,7 +412,7 @@ const DragInner = memo(function DragInner({
   return (
     <div
       className={classNames(className, {
-        'lnsDragDrop-isHidden':
+        'domDragDrop-isHidden':
           (activeDraggingProps && dragType === 'move' && !keyboardMode) ||
           shouldShowGhostImageInstead,
       })}
@@ -422,7 +422,7 @@ const DragInner = memo(function DragInner({
         <button
           aria-label={value.humanData.label}
           aria-describedby={ariaDescribedBy || `${dataTestSubjPrefix}-keyboardInstructions`}
-          className="lnsDragDrop__keyboardHandler"
+          className="domDragDrop__keyboardHandler"
           data-test-subj={`${dataTestSubjPrefix}-keyboardHandler`}
           onBlur={(e) => {
             if (activeDraggingProps) {
@@ -464,7 +464,7 @@ const DragInner = memo(function DragInner({
 
       {React.cloneElement(children, {
         'data-test-subj': dataTestSubj || dataTestSubjPrefix,
-        className: classNames(children.props.className, 'lnsDragDrop', 'lnsDragDrop-isDraggable'),
+        className: classNames(children.props.className, 'domDragDrop', 'domDragDrop-isDraggable'),
         draggable: true,
         onDragEnd: dragEnd,
         onDragStart: dragStart,
@@ -620,13 +620,13 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
     const classesOnDroppable = getAdditionalClassesOnDroppable?.(dropType);
 
     const classes = classNames(
-      'lnsDragDrop',
+      'domDragDrop',
       {
-        'lnsDragDrop-isDraggable': draggable,
-        'lnsDragDrop-isDroppable': !draggable,
-        'lnsDragDrop-isDropTarget': dropType,
-        'lnsDragDrop-isActiveDropTarget': dropType && isActiveDropTarget,
-        'lnsDragDrop-isNotDroppable': isNotDroppable,
+        'domDragDrop-isDraggable': draggable,
+        'domDragDrop-isDroppable': !draggable,
+        'domDragDrop-isDropTarget': dropType,
+        'domDragDrop-isActiveDropTarget': dropType && isActiveDropTarget,
+        'domDragDrop-isNotDroppable': isNotDroppable,
       },
       classesOnDroppable && { [classesOnDroppable]: dropType }
     );
@@ -658,8 +658,8 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
   return (
     <div
       data-test-subj={`${dataTestSubjPrefix}Container`}
-      className={classNames('lnsDragDrop__container', {
-        'lnsDragDrop__container-active': isInZone || activeDropTarget?.id === value.id,
+      className={classNames('domDragDrop__container', {
+        'domDragDrop__container-active': isInZone || activeDropTarget?.id === value.id,
       })}
       onDragEnter={dragEnter}
       ref={mainTargetRef}
@@ -672,7 +672,7 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
       {dropTypes && dropTypes.length > 1 && (
         <>
           <div
-            className="lnsDragDrop__diamondPath"
+            className="domDragDrop__diamondPath"
             style={extraDropStyles}
             onDragEnter={dragEnter}
           />
@@ -680,14 +680,14 @@ const DropsInner = memo(function DropsInner(props: DropsInnerProps) {
             gutterSize="none"
             direction="column"
             data-test-subj={`${dataTestSubjPrefix}ExtraDrops`}
-            className={classNames('lnsDragDrop__extraDrops', {
-              'lnsDragDrop__extraDrops-visible': isInZone || activeDropTarget?.id === value.id,
+            className={classNames('domDragDrop__extraDrops', {
+              'domDragDrop__extraDrops-visible': isInZone || activeDropTarget?.id === value.id,
             })}
           >
             {dropTypes.slice(1).map((dropType) => {
               const dropChildren = getCustomDropTarget?.(dropType);
               return dropChildren ? (
-                <EuiFlexItem key={dropType} className="lnsDragDrop__extraDropWrapper">
+                <EuiFlexItem key={dropType} className="domDragDrop__extraDropWrapper">
                   <SingleDropInner {...getProps(dropType, dropChildren)}>
                     {dropChildren}
                   </SingleDropInner>
@@ -716,7 +716,7 @@ const SingleDropInner = ({
       {React.cloneElement(children, rest)}
       {ghost
         ? React.cloneElement(ghost.children, {
-            className: classNames(ghost.children.props.className, 'lnsDragDrop_ghost'),
+            className: classNames(ghost.children.props.className, 'domDragDrop_ghost'),
             style: ghost.style,
           })
         : null}
@@ -860,8 +860,8 @@ const ReorderableDrag = memo(function ReorderableDrag(
       data-test-subj={`${dataTestSubjPrefix}-reorderableDrag`}
       className={
         isDragging
-          ? 'lnsDragDrop-reorderable lnsDragDrop-translatableDrag'
-          : 'lnsDragDrop-reorderable'
+          ? 'domDragDrop-reorderable domDragDrop-translatableDrag'
+          : 'domDragDrop-reorderable'
       }
       style={
         areItemsReordered
@@ -995,15 +995,15 @@ const ReorderableDrop = memo(function ReorderableDrop(
         }
         ref={heightRef}
         data-test-subj={`${dataTestSubjPrefix}-translatableDrop`}
-        className="lnsDragDrop-translatableDrop lnsDragDrop-reorderable"
+        className="domDragDrop-translatableDrop domDragDrop-reorderable"
       >
         <DropsInner {...props} />
       </div>
 
       <div
         data-test-subj={`${dataTestSubjPrefix}-reorderableDropLayer`}
-        className={classNames('lnsDragDrop', {
-          ['lnsDragDrop__reorderableDrop']: dragging,
+        className={classNames('domDragDrop', {
+          ['domDragDrop__reorderableDrop']: dragging,
         })}
         onDrop={onReorderableDrop}
         onDragOver={onReorderableDragOver}

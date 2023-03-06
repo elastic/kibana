@@ -1,16 +1,14 @@
 @import './drag_drop_mixins';
 
-// styles
-
-.lnsDragDrop {
+.domDragDrop {
   user-select: none;
   transition: $euiAnimSpeedFast ease-in-out;
   transition-property: background-color, border-color, opacity;
-  z-index: $lnsZLevel1;
+  z-index: $domDragDropZLevel1;
 }
 
-.lnsDragDrop_ghost {
-  @include lnsDraggable;
+.domDragDrop_ghost {
+  @include mixinDomDraggable;
   border: $euiBorderWidthThin dashed $euiBorderColor;
   position: absolute !important;  // sass-lint:disable-line no-important
   margin: 0 !important;  // sass-lint:disable-line no-important
@@ -19,16 +17,16 @@
   left: 0;
   opacity: .9;
   transform: translate(-12px, 8px);
-  z-index: $lnsZLevel3;
+  z-index: $domDragDropZLevel3;
   pointer-events: none;
   outline: $euiFocusRingSize solid currentColor; // Safari & Firefox
   outline-style: auto; // Chrome
 }
 
 // Draggable item
-.lnsDragDrop-isDraggable {
-  @include lnsDraggable;
-  @include lnsDragDropHover;
+.domDragDrop-isDraggable {
+  @include mixinDomDraggable;
+  @include mixinDomDragDropHover;
 
   // Include a possible nested button like when using FieldButton
   > .kbnFieldButton__button {
@@ -41,90 +39,91 @@
 }
 
 // Drop area
-.lnsDragDrop-isDroppable {
-  @include lnsDroppable;
+.domDragDrop-isDroppable {
+  @include mixinDomDroppable;
 }
 
 // Drop area when there's an item being dragged
-.lnsDragDrop-isDropTarget {
-  @include lnsDroppable;
-  @include lnsDroppableActive;
+.domDragDrop-isDropTarget {
+  @include mixinDomDroppable;
+  @include mixinDomDroppableActive;
   > * {
     pointer-events: none;
   }
 }
 
-.lnsDragDrop-isActiveGroup {
+.domDragDrop-isActiveGroup {
   background-color: transparentize($euiColorVis0, .75);
 }
 
 // Drop area while hovering with item
-.lnsDragDrop-isActiveDropTarget {
-  z-index: $lnsZLevel3;
-  @include lnsDroppableActiveHover;
+.domDragDrop-isActiveDropTarget {
+  z-index: $domDragDropZLevel3;
+  @include mixinDomDroppableActiveHover;
 }
 
 // Drop area that is not allowed for current item
-.lnsDragDrop-isNotDroppable {
-  @include lnsDroppableNotAllowed;
+.domDragDrop-isNotDroppable {
+  @include mixinDomDroppableNotAllowed;
 }
 
 // Drop area will be replacing existing content
-.lnsDragDrop-isReplacing {
+.domDragDrop-isReplacing {
   &,
   .lnsLayerPanel__triggerText {
     text-decoration: line-through;
   }
 }
 
-.lnsDragDrop-notCompatible {
+.domDragDrop-notCompatible {
   background-color: $euiColorHighlight !important;
   border: $euiBorderWidthThin dashed $euiBorderColor !important;
-  &.lnsDragDrop-isActiveDropTarget {
+  &.domDragDrop-isActiveDropTarget {
     background-color: rgba(251, 208, 17, .25) !important;
     border-color: $euiColorVis5 !important;
   }
 }
 
-.lnsDragDrop__container {
+.domDragDrop__container {
   position: relative;
   width: 100%;
   height: 100%;
 
-  &.lnsDragDrop__container-active {
-    z-index: $lnsZLevel3;
+  &.domDragDrop__container-active {
+    z-index: $domDragDropZLevel3;
   }
 }
 
-.lnsDragDrop__reorderableDrop {
+$lnsLayerPanelDimensionMargin: 8px;
+.domDragDrop__reorderableDrop {
   position: absolute;
   width: 100%;
   top: 0;
   height: calc(100% + #{$lnsLayerPanelDimensionMargin});
 }
 
-.lnsDragDrop-translatableDrop {
+.domDragDrop-translatableDrop {
   transform: translateY(0);
   transition: transform $euiAnimSpeedFast ease-in-out;
   pointer-events: none;
 
-  .lnsDragDrop-isDropTarget {
-    @include lnsDraggable;
+  .domDragDrop-isDropTarget {
+    @include mixinDomDraggable;
   }
 
-  .lnsDragDrop-isActiveDropTarget {
-    z-index: $lnsZLevel3;
+  .domDragDrop-isActiveDropTarget {
+    z-index: $domDragDropZLevel3;
   }
 }
 
-.lnsDragDrop-translatableDrag {
+.domDragDrop-translatableDrag {
   transform: translateY(0);
   transition: transform $euiAnimSpeedFast ease-in-out;
   position: relative;
-  z-index: $lnsZLevel1;
+  z-index: $domDragDropZLevel1;
 }
 
-.lnsDragDrop__keyboardHandler {
+.domDragDrop__keyboardHandler {
   top: 0;
   position: absolute;
   width: 100%;
@@ -135,14 +134,14 @@
   &:focus-within {
     @include euiFocusRing;
     pointer-events: none;
-    z-index: $lnsZLevel2;
+    z-index: $domDragDropZLevel2;
   }
 }
 
 // Draggable item when it is moving
-.lnsDragDrop-isHidden {
+.domDragDrop-isHidden {
   opacity: 0;
-  .lnsDragDrop__keyboardHandler {
+  .domDragDrop__keyboardHandler {
     &:focus,
     &:focus-within {
       animation: none;
@@ -150,59 +149,59 @@
   }
 }
 
-.lnsDragDrop__extraDrops {
+.domDragDrop__extraDrops {
   opacity: 0;
   visibility: hidden;
   position: absolute;
-  z-index: $lnsZLevel2;
+  z-index: $domDragDropZLevel2;
   right: calc(100% + #{$euiSizeS});
   top: 0;
   transition: opacity $euiAnimSpeedFast ease-in-out;
   width:100%;
 }
 
-.lnsDragDrop__extraDrops-visible {
+.domDragDrop__extraDrops-visible {
   opacity: 1;
   visibility: visible;
 }
 
-.lnsDragDrop__diamondPath {
+.domDragDrop__diamondPath {
   position: absolute;
   width: 30%;
   top: 0;
   left: -$euiSize;
-  z-index: $lnsZLevel0;
+  z-index: $domDragDropZLevel0;
 }
 
-.lnsDragDrop__extraDropWrapper {
+.domDragDrop__extraDropWrapper {
   position: relative;
   width: 100%;
   height: 100%;
   background: $euiColorLightestShade;
   padding: $euiSizeXS;
   border-radius: 0;
-  &:first-child, &:first-child .lnsDragDrop__extraDrop {
+  &:first-child, &:first-child .domDragDrop__extraDrop {
     border-top-left-radius: $euiSizeXS;
     border-top-right-radius: $euiSizeXS;
   }
-  &:last-child, &:last-child .lnsDragDrop__extraDrop {
+  &:last-child, &:last-child .domDragDrop__extraDrop {
     border-bottom-left-radius: $euiSizeXS;
     border-bottom-right-radius: $euiSizeXS;
   }
 }
 
 // collapse borders
-.lnsDragDrop__extraDropWrapper + .lnsDragDrop__extraDropWrapper {
+.domDragDrop__extraDropWrapper + .domDragDrop__extraDropWrapper {
   margin-top: -1px;
 }
 
-.lnsDragDrop__extraDrop {
+.domDragDrop__extraDrop {
   position: relative;
   height: $euiSizeXS * 10;
   min-width: $euiSize * 7;
   color: $euiColorSuccessText;
   padding: $euiSizeXS;
-  &.lnsDragDrop-incompatibleExtraDrop {
+  &.domDragDrop-incompatibleExtraDrop {
     color: $euiColorWarningText;
   }
 }

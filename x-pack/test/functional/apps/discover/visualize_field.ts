@@ -103,7 +103,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const breakdownLabel = await testSubjects.find(
-          'lnsDragDrop_draggable-Top 3 values of extension.raw'
+          'domDragDrop_draggable-Top 3 values of extension.raw'
         );
 
         const lnsWorkspace = await testSubjects.find('lnsWorkspace');

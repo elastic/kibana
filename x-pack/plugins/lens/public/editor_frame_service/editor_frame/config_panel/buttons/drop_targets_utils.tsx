@@ -69,8 +69,10 @@ const getExtraDrop = ({
       gutterSize="s"
       justifyContent="spaceBetween"
       alignItems="center"
-      className={classNames('lnsDragDrop__extraDrop', {
-        'lnsDragDrop-incompatibleExtraDrop': isIncompatible,
+      // TODO: how else can we pass styles from another package?
+      // Or should we move these utils to dom-drag-drop package?
+      className={classNames('domDragDrop__extraDrop', {
+        'domDragDrop-incompatibleExtraDrop': isIncompatible,
       })}
     >
       <EuiFlexItem grow={false}>
@@ -117,7 +119,7 @@ export const getAdditionalClassesOnEnter = (dropType?: string) => {
       'replace_duplicate_incompatible',
     ].includes(dropType)
   ) {
-    return 'lnsDragDrop-isReplacing';
+    return 'domDragDrop-isReplacing';
   }
 };
 
@@ -133,7 +135,7 @@ export const getAdditionalClassesOnDroppable = (dropType?: string) => {
       'combine_incompatible',
     ].includes(dropType)
   ) {
-    return 'lnsDragDrop-notCompatible';
+    return 'domDragDrop-notCompatible';
   }
 };
 

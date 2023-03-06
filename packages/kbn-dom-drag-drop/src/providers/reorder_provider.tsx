@@ -8,6 +8,7 @@
 
 import React, { useState, useMemo } from 'react';
 import classNames from 'classnames';
+import { DEFAULT_DATA_TEST_SUBJ } from '../constants';
 
 export interface ReorderState {
   /**
@@ -55,10 +56,12 @@ export function ReorderProvider({
   id,
   children,
   className,
+  dataTestSubj = DEFAULT_DATA_TEST_SUBJ,
 }: {
   id: string;
   children: React.ReactNode;
   className?: string;
+  dataTestSubj?: string;
 }) {
   const [state, setState] = useState<ReorderContextState['reorderState']>({
     reorderedItems: [],
@@ -72,11 +75,12 @@ export function ReorderProvider({
     () => (dispatch: SetReorderStateDispatch) => setState(dispatch),
     [setState]
   );
+
   return (
     <div
-      data-test-subj="lnsDragDrop-reorderableGroup"
+      data-test-subj={`${dataTestSubj}-reorderableGroup`}
       className={classNames(className, {
-        'lnsDragDrop-isActiveGroup': state.isReorderOn && React.Children.count(children) > 1,
+        'domDragDrop-isActiveGroup': state.isReorderOn && React.Children.count(children) > 1,
       })}
     >
       <ReorderContext.Provider value={{ reorderState: state, setReorderState }}>

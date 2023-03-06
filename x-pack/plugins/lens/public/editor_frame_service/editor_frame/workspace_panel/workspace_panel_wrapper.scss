@@ -47,7 +47,7 @@
 .lnsWorkspacePanel__dragDrop {
   border: $euiBorderWidthThin solid transparent;
 
-  &.lnsDragDrop-isDropTarget {
+  &.domDragDrop-isDropTarget {
     p {
       transition: filter $euiAnimSpeedFast ease-in-out;
       filter: blur(5px);
@@ -60,7 +60,7 @@
     }
   }
 
-  &.lnsDragDrop-isActiveDropTarget {
+  &.domDragDrop-isActiveDropTarget {
     .lnsDropIllustration__hand {
       animation: lnsWorkspacePanel__illustrationPulseContinuous 1.5s ease-in-out 0s infinite normal forwards;
     }
