@@ -76,8 +76,6 @@ export interface Storage<T = any, S = void> {
   removeItem: (key: string) => T | null;
   clear: () => void;
 }
-
-// TODO: Move to const.ts file
 export const EMPTY_GROUP_BY_ID: GroupsById = {};
 
 export const defaultGroup: GroupModel = {
