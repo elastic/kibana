@@ -408,7 +408,6 @@ describe('aggregate()', () => {
       const rulesClient = new RulesClient(rulesClientParams);
 
       await rulesClient.aggregate({
-        options: { maxTags: 1000 },
         aggs: getDefaultRuleAggregation({ maxTags: 1000 }),
       });
 
