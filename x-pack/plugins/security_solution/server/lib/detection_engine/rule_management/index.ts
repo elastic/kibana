@@ -9,7 +9,10 @@ export * from './api/register_routes';
 
 // TODO: https://github.com/elastic/kibana/pull/142950
 // eslint-disable-next-line no-restricted-imports
-export { legacyMigrate } from './logic/rule_actions/legacy_action_migration';
+export {
+  legacyMigrate,
+  legacyMigrateByRulesClient,
+} from './logic/rule_actions/legacy_action_migration';
 
 // TODO: https://github.com/elastic/kibana/pull/142950
 // TODO: Revisit and consider moving to the rule_schema subdomain

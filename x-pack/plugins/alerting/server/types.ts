@@ -136,12 +136,30 @@ export interface RuleTypeParamsValidator<Params extends RuleTypeParams> {
   validateMutatedParams?: (mutatedOject: Params, origObject?: Params) => Params;
 }
 
-export type MigrateRules = (
+interface MigrateHookContext {
+  logger: RulesClientContext['logger'];
+  savedObjectsClient: RulesClientContext['unsecuredSavedObjectsClient'];
+  find: RulesClient['find'];
+  delete: RulesClient['delete'];
+  update: RulesClient['update'];
+  get?: RulesClient['get'];
+}
+
+type FormatRulesContext = Omit<MigrateHookContext, 'delete' | 'update'>;
+
+export type FormatRules = (
   options: {
     rules: SanitizedRule[];
   },
-  context: RulesClientContext
+  context: FormatRulesContext
 ) => Promise<SanitizedRule[]>;
+
+export type MigrateRule = (
+  options: {
+    rule: SanitizedRule;
+  },
+  context: MigrateHookContext
+) => Promise<void>;
 
 export interface GetSummarizedAlertsFnOpts {
   start?: Date;
@@ -235,7 +253,8 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
-  migrateRules?: MigrateRules;
+  migrateRule?: MigrateRule;
+  formatRules?: FormatRules;
 }
 export type UntypedRuleType = RuleType<
   RuleTypeParams,

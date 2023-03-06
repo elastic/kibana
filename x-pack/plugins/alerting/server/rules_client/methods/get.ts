@@ -9,7 +9,7 @@ import { RawRule, SanitizedRule, RuleTypeParams, SanitizedRuleWithLegacyId } fro
 import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getAlertFromRaw } from '../lib/get_alert_from_raw';
-import { migrateRulesHook } from '../lib';
+import { formatRulesHook } from '../lib';
 import { RulesClientContext } from '../types';
 
 export interface GetParams {
@@ -63,7 +63,7 @@ export async function get<Params extends RuleTypeParams = never>(
     includeSnoozeData
   );
 
-  const [migratedRule] = await migrateRulesHook({ rules: [rule] }, context);
+  const [migratedRule] = await formatRulesHook(context, { rules: [rule] });
 
   return migratedRule;
 }

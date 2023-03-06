@@ -8,7 +8,7 @@
 import { RawRule, RuleTypeParams, ResolvedSanitizedRule } from '../../types';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
-import { migrateRulesHook } from '../lib';
+import { formatRulesHook } from '../lib';
 import { getAlertFromRaw } from '../lib/get_alert_from_raw';
 import { RulesClientContext } from '../types';
 
@@ -59,7 +59,7 @@ export async function resolve<Params extends RuleTypeParams = never>(
     includeSnoozeData
   );
 
-  const [migratedRule] = await migrateRulesHook({ rules: [rule] }, context);
+  const [migratedRule] = await formatRulesHook(context, { rules: [rule] });
 
   return {
     ...migratedRule,

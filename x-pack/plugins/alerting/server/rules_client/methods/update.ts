@@ -32,6 +32,7 @@ import {
   addUuid,
 } from '../lib';
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
+import { migrateRuleHook } from '../lib';
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
   id: string;
@@ -63,6 +64,8 @@ async function updateWithOCC<Params extends RuleTypeParams>(
   { id, data, allowMissingConnectorSecrets }: UpdateOptions<Params>
 ): Promise<PartialRule<Params>> {
   let alertSavedObject: SavedObject<RawRule>;
+
+  await migrateRuleHook(context, { ruleId: id });
 
   try {
     alertSavedObject =
