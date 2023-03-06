@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, type FC } from 'react';
 
-import { EuiComboBox, EuiFormRow } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow, EuiSkeletonRectangle } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -18,6 +18,13 @@ import { useApi } from '../../../../hooks/use_api';
 import { EditTransformFlyoutFormTextInput } from './edit_transform_flyout_form_text_input';
 import { useEditTransformFlyout } from './use_edit_transform_flyout';
 
+const ingestPipelineLabel = i18n.translate(
+  'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
+  {
+    defaultMessage: 'Ingest Pipeline',
+  }
+);
+
 export const EditTransformIngestPipeline: FC = () => {
   const { errorMessages, value } = useEditTransformFlyout('destinationIngestPipeline');
   const { formField } = useEditTransformFlyout('actions');
@@ -25,15 +32,22 @@ export const EditTransformIngestPipeline: FC = () => {
   const api = useApi();
 
   const [ingestPipelineNames, setIngestPipelineNames] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(function fetchPipelinesOnMount() {
     let unmounted = false;
 
     async function getIngestPipelineNames() {
-      const ingestPipelines = await api.getEsIngestPipelines();
+      try {
+        const ingestPipelines = await api.getEsIngestPipelines();
 
-      if (!unmounted && isEsIngestPipelines(ingestPipelines)) {
-        setIngestPipelineNames(ingestPipelines.map(({ name }) => name));
+        if (!unmounted && isEsIngestPipelines(ingestPipelines)) {
+          setIngestPipelineNames(ingestPipelines.map(({ name }) => name));
+        }
+      } finally {
+        if (!unmounted) {
+          setIsLoading(false);
+        }
       }
     }
 
@@ -50,48 +64,45 @@ export const EditTransformIngestPipeline: FC = () => {
       {
         // If the list of ingest pipelines is not available
         // gracefully defaults to text input
-        ingestPipelineNames.length > 0 ? (
+        ingestPipelineNames.length > 0 || isLoading ? (
           <EuiFormRow
-            label={i18n.translate(
-              'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
-              {
-                defaultMessage: 'Ingest Pipeline',
-              }
-            )}
+            label={ingestPipelineLabel}
             isInvalid={errorMessages.length > 0}
             error={errorMessages}
           >
-            <EuiComboBox
-              data-test-subj="transformEditFlyoutDestinationIngestPipelineFieldSelect"
-              aria-label={i18n.translate(
-                'xpack.transform.stepDetailsForm.editFlyoutFormDestinationIngestPipelineFieldSelectAriaLabel',
-                {
-                  defaultMessage: 'Select an ingest pipeline',
+            <EuiSkeletonRectangle
+              width="100%"
+              height="40px"
+              isLoading={isLoading}
+              contentAriaLabel={ingestPipelineLabel}
+            >
+              <EuiComboBox
+                data-test-subj="transformEditFlyoutDestinationIngestPipelineFieldSelect"
+                aria-label={i18n.translate(
+                  'xpack.transform.stepDetailsForm.editFlyoutFormDestinationIngestPipelineFieldSelectAriaLabel',
+                  {
+                    defaultMessage: 'Select an ingest pipeline',
+                  }
+                )}
+                placeholder={i18n.translate(
+                  'xpack.transform.stepDetailsForm.editFlyoutFormDestinationIngestPipelineFieldSelectPlaceholder',
+                  {
+                    defaultMessage: 'Select an ingest pipeline',
+                  }
+                )}
+                singleSelection={{ asPlainText: true }}
+                options={ingestPipelineNames.map((label: string) => ({ label }))}
+                selectedOptions={[{ label: value }]}
+                onChange={(o) =>
+                  formField({ field: 'destinationIngestPipeline', value: o[0]?.label ?? '' })
                 }
-              )}
-              placeholder={i18n.translate(
-                'xpack.transform.stepDetailsForm.editFlyoutFormDestinationIngestPipelineFieldSelectPlaceholder',
-                {
-                  defaultMessage: 'Select an ingest pipeline',
-                }
-              )}
-              singleSelection={{ asPlainText: true }}
-              options={ingestPipelineNames.map((label: string) => ({ label }))}
-              selectedOptions={[{ label: value }]}
-              onChange={(o) =>
-                formField({ field: 'destinationIngestPipeline', value: o[0]?.label ?? '' })
-              }
-            />
+              />
+            </EuiSkeletonRectangle>
           </EuiFormRow>
         ) : (
           <EditTransformFlyoutFormTextInput
             field="destinationIngestPipeline"
-            label={i18n.translate(
-              'xpack.transform.transformList.editFlyoutFormDestinationIngestPipelineLabel',
-              {
-                defaultMessage: 'Ingest Pipeline',
-              }
-            )}
+            label={ingestPipelineLabel}
           />
         )
       }
