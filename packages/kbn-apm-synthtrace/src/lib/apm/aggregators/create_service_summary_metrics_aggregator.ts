@@ -40,10 +40,25 @@ export function createServiceSummaryMetricsAggregator(
           'processor.name': 'metric',
         };
       },
-      metricName: 'service_summary',
+      group: (set, key, serviceListMap) => {
+        const { service_transactions: serviceTransaction = {} } = options || {};
+        const maxServiceOverflowCount = serviceTransaction?.max_groups ?? 10_000;
+        let service = serviceListMap.get(set['service.name']);
+        if (!service) {
+          service = {
+            transactionCount: 0,
+            overflowKey: null,
+          };
+          const hasServiceBucketOverflown = serviceListMap.size >= maxServiceOverflowCount;
+          if (hasServiceBucketOverflown) {
+            set['service.name'] = '_other';
+            service.overflowKey = key;
+          }
+          serviceListMap.set(set['service.name'], service);
+        }
+      },
     },
     noop,
-    identity,
-    options
+    identity
   );
 }

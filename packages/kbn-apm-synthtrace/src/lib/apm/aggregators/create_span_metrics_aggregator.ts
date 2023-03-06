@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { pick } from 'lodash';
+import { identity, pick } from 'lodash';
 import { ApmFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
 import { ScenarioOptions } from '../../../cli/scenario';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
@@ -45,7 +45,7 @@ export function createSpanMetricsAggregator(flushInterval: string, options?: Sce
           'span.destination.service.response_time.sum.us': 0,
         };
       },
-      metricName: 'span',
+      group: identity,
     },
     (metric, event) => {
       metric['span.destination.service.response_time.count'] += 1;
@@ -55,7 +55,6 @@ export function createSpanMetricsAggregator(flushInterval: string, options?: Sce
       // @ts-expect-error
       metric._doc_count = metric['span.destination.service.response_time.count'];
       return metric;
-    },
-    options
+    }
   );
 }

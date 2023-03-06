@@ -32,14 +32,13 @@ export function createBreakdownMetricsAggregator(flushInterval: string, options?
           'span.self_time.sum.us': 0,
         };
       },
-      metricName: 'breakdown',
+      group: identity,
     },
     (metric, event) => {
       metric['span.self_time.count'] += event['span.self_time.count']!;
       metric['span.self_time.sum.us'] += event['span.self_time.sum.us']!;
     },
-    identity,
-    options
+    identity
   );
 
   const mergedStreams = fork(dropProcessedEventsStream, aggregatorStream);

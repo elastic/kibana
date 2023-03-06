@@ -49,7 +49,28 @@ export function createServiceMetricsAggregator(flushInterval: string, options?: 
           'service_transaction.aggregation.overflow_count': 0,
         };
       },
-      metricName: 'service_transaction',
+      group: (set, key, serviceListMap) => {
+        const { service_transactions: serviceTransaction = {} } = options || {};
+        const maxServiceOverflowCount = serviceTransaction?.max_groups ?? 10_000;
+        let service = serviceListMap.get(set['service.name']);
+        if (!service) {
+          service = {
+            transactionCount: 0,
+            overflowKey: null,
+          };
+          const hasServiceBucketOverflown = serviceListMap.size >= maxServiceOverflowCount;
+
+          if (hasServiceBucketOverflown) {
+            set['service.name'] = '_other';
+            service.overflowKey = key;
+          }
+          serviceListMap.set(set['service.name'], service);
+        }
+
+        if (set['service.name'] === '_other') {
+          set['service_transaction.aggregation.overflow_count'] += 1;
+        }
+      },
     },
     (metric, event) => {
       const duration = event['transaction.duration.us']!;
@@ -72,15 +93,12 @@ export function createServiceMetricsAggregator(flushInterval: string, options?: 
     (metric) => {
       const serialized = metric['transaction.duration.histogram'].serialize();
       metric['transaction.duration.histogram'] = {
-        // @ts-expect-error
         values: serialized.values,
         counts: serialized.counts,
       };
-      // @ts-expect-error
       metric._doc_count = serialized.total;
 
       return metric;
-    },
-    options
+    }
   );
 }

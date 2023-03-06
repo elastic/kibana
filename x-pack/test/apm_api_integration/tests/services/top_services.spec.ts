@@ -597,7 +597,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         it('should have the correct value for serviceOverflowCount', function () {
-          expect(response.body.serviceOverflowCount).to.be(19200);
+          expect(response.body.serviceOverflowCount).to.be(320);
         });
       });
     }
