@@ -12,12 +12,14 @@
     "server/**/*.json",
     "scripts/**/*.json",
     "public/**/*.json",
-    "../../../typings/**/*"
+    "../../../typings/**/*",
+    "./public/management/cypress/cypress.d.ts"
   ],
   "exclude": [
     "target/**/*",
     "**/cypress/**",
     "public/management/cypress_endpoint.config.ts",
+    "public/management/cypress.config.ts",
   ],
   "kbn_references": [
     "@kbn/core",

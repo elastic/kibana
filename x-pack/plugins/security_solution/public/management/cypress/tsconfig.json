@@ -2,7 +2,9 @@
   "extends": "../../../../../../tsconfig.base.json",
   "include": [
     "**/*",
-    "../cypress_endpoint.config.ts"
+    "../cypress_endpoint.config.ts",
+    "../cypress.config.ts",
+    "./cypress.d.ts"
   ],
   "exclude": [
     "target/**/*"

@@ -22,41 +22,12 @@
 // https://on.cypress.io/configuration
 // ***********************************************************
 
-// force ESM in this module
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 
+// force ESM in this module
 export {};
 
 import 'cypress-react-selector';
-
-declare global {
-  // eslint-disable-next-line @typescript-eslint/no-namespace
-  namespace Cypress {
-    interface Chainable {
-      /**
-       * Get Elements by `data-test-subj`
-       * @param args
-       */
-      getByTestSubj<E extends Node = HTMLElement>(
-        ...args: Parameters<Cypress.Chainable<E>['get']>
-      ): Chainable<JQuery<E>>;
-
-      /**
-       * Finds elements by `data-test-subj` from within another. Can not be used directly from `cy`.
-       *
-       * @example
-       * // Correct:
-       * cy.get('someElement').findByTestSubj('some-subject);
-       *
-       * // Incorrect:
-       * cy.findByTestSubj('some-subject);
-       */
-      findByTestSubj<E extends Node = HTMLElement>(
-        ...args: Parameters<Cypress.Chainable<E>['find']>
-      ): Chainable<JQuery<E>>;
-    }
-  }
-}
 
 Cypress.Commands.addQuery<'getByTestSubj'>(
   'getByTestSubj',
