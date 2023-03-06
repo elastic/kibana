@@ -8,6 +8,7 @@
 import React, { Fragment, FC, useState, useContext, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { memoize } from 'lodash';
 import {
   EuiFlyout,
   EuiFlyoutFooter,
@@ -43,6 +44,16 @@ interface Props {
   jobEditorMode: EDITOR_MODE;
   datafeedEditorMode: EDITOR_MODE;
 }
+
+const fetchSchemas = memoize(
+  async (jsonSchemaApi, path: string, method: string) =>
+    jsonSchemaApi.getSchemaDefinition({
+      path,
+      method,
+    }),
+  (jsonSchemaApi, path, method) => path + method
+);
+
 export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafeedEditorMode }) => {
   const { jobCreator, jobCreatorUpdate, jobCreatorUpdated } = useContext(JobCreatorContext);
   const { displayErrorToast } = useToastNotificationService();
@@ -57,8 +68,8 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
   );
   const [saveable, setSaveable] = useState(false);
   const [tempCombinedJob, setTempCombinedJob] = useState<CombinedJob | null>(null);
-  const [jobSchema, setJobSchema] = useState();
-  const [datafeedSchema, setDatefeedSchema] = useState();
+  const [jobSchema, setJobSchema] = useState<object>();
+  const [datafeedSchema, setDatefeedSchema] = useState<object>();
 
   useEffect(() => {
     setJobConfigString(jobCreator.formattedJobJson);
@@ -85,17 +96,13 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
 
   useEffect(
     function fetchSchemasOnMount() {
-      jsonSchemaApi
-        .getSchemaDefinition({ path: '/_ml/anomaly_detectors/{job_id}', method: 'put' })
-        .then((result) => {
-          setJobSchema(result);
-        });
+      fetchSchemas(jsonSchemaApi, '/_ml/anomaly_detectors/{job_id}', 'put').then((result) => {
+        setJobSchema(result);
+      });
 
-      jsonSchemaApi
-        .getSchemaDefinition({ path: '/_ml/datafeeds/{datafeed_id}', method: 'put' })
-        .then((result) => {
-          setDatefeedSchema(result);
-        });
+      fetchSchemas(jsonSchemaApi, '/_ml/datafeeds/{datafeed_id}', 'put').then((result) => {
+        setDatefeedSchema(result);
+      });
     },
     [jsonSchemaApi]
   );
