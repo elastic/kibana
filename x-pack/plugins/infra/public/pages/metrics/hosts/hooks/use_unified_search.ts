@@ -8,8 +8,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
 import { useCallback, useEffect } from 'react';
 import { buildEsQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
-import { debounceTime, filter as rxFilter, map, startWith, tap } from 'rxjs/operators';
-import { combineLatest, MonoTypeOperatorFunction, defer } from 'rxjs';
+import { debounceTime, map, skip, startWith, tap } from 'rxjs/operators';
+import { combineLatest } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import type { InfraClientStartDeps } from '../../../../types';
@@ -19,14 +19,6 @@ import {
   type HostsState,
   type StringDateRangeTimestamp,
 } from './use_unified_search_url_state';
-
-const filterFirst = <T>(n: number): MonoTypeOperatorFunction<T> => {
-  return (s) =>
-    defer(() => {
-      let count = 0;
-      return s.pipe(rxFilter((_) => n <= count++));
-    });
-};
 
 const buildQuerySubmittedPayload = (
   hostState: HostsState & { dateRangeTimestamp: StringDateRangeTimestamp }
@@ -104,17 +96,17 @@ export const useUnifiedSearch = () => {
 
   useEffect(() => {
     const filters$ = filterManagerService.getUpdates$().pipe(
-      startWith(undefined),
+      startWith(null),
       map(() => filterManagerService.getFilters())
     );
 
     const query$ = queryStringService.getUpdates$().pipe(
-      startWith(undefined),
+      startWith(null),
       map(() => queryStringService.getQuery() as Query)
     );
 
     const dateRange$ = timeFilterService.timefilter.getTimeUpdate$().pipe(
-      startWith(undefined),
+      startWith(null),
       map(() => getTime())
     );
 
@@ -125,7 +117,7 @@ export const useUnifiedSearch = () => {
     })
       .pipe(
         debounceTime(100),
-        filterFirst(1),
+        skip(1),
         tap(({ filters, query, dateRange }) => {
           onSubmit({
             query,

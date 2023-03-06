@@ -52,7 +52,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   };
 
   const handleRefresh = (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => {
-    // this will not call onQueryChange if fields values have been changed, only on submit button is clicked
+    // This makes sure `onQueryChange` is only called when the submit button is clicked
     if (isUpdate === false) {
       onQueryChange({ payload });
     }
