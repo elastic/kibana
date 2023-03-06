@@ -14,6 +14,7 @@ import { ExpressionChart } from './expression_chart';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
+// TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 interface AppSectionProps {
   rule: Rule<{
     filterQueryText?: string;
