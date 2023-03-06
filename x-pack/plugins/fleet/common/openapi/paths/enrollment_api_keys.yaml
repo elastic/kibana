@@ -1,6 +1,7 @@
 get:
-  summary: Enrollment API Keys - List
-  tags: []
+  summary: List enrollment API keys
+  tags:
+    - Enrollment API keys
   responses:
     '200':
       description: OK
@@ -34,8 +35,9 @@ get:
   operationId: get-enrollment-api-keys
   parameters: []
 post:
-  summary: Enrollment API Key - Create
-  tags: []
+  summary: Create enrollment API key
+  tags:
+    - Enrollment API keys
   responses:
     '200':
       description: OK

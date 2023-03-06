@@ -6,6 +6,7 @@
  */
 
 import { TOGGLE_NAVIGATION_BTN } from '../screens/navigation';
+import { closeToastIfVisible } from './integrations';
 
 export const INTEGRATIONS = 'app/integrations#/';
 export const FLEET = 'app/fleet/';
@@ -20,7 +21,7 @@ export const navigateTo = (page: string, opts?: Partial<Cypress.VisitOptions>) =
   cy.contains('Loading Elastic').should('not.exist');
 
   // There's a security warning toast that seemingly makes ui elements in the bottom right unavailable, so we close it
-  cy.get('[data-test-subj="toastCloseButton"]', { timeout: 30000 }).click();
+  closeToastIfVisible();
   cy.waitForReact();
 };
 

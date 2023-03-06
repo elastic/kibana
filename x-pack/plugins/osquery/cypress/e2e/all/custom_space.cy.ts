@@ -29,6 +29,7 @@ describe('ALL - Custom space', () => {
         id: CUSTOM_SPACE,
         name: CUSTOM_SPACE,
       },
+      failOnStatusCode: false,
       headers: { 'kbn-xsrf': 'create-space' },
     });
   });

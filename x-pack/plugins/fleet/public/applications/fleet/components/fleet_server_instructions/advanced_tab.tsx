@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiLoadingContent, EuiSteps } from '@elastic/eui';
+import { EuiSkeletonText, EuiSteps } from '@elastic/eui';
 
 import { useAdvancedForm } from './hooks';
 import { useLatestFleetServers } from './hooks/use_latest_fleet_servers';
@@ -83,7 +83,7 @@ export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({
   ];
 
   return isSelectFleetServerPolicyLoading ? (
-    <EuiLoadingContent />
+    <EuiSkeletonText />
   ) : (
     <EuiSteps steps={steps} className="eui-textLeft" />
   );
