@@ -11,7 +11,7 @@ import {
   SavedObjectsManagementActionService,
   SavedObjectsManagementActionServiceSetup,
   SavedObjectsManagementActionServiceStart,
-} from './action_service';
+} from '../../public/services';
 
 const createSetupMock = (): jest.Mocked<SavedObjectsManagementActionServiceSetup> => {
   const mock = {
