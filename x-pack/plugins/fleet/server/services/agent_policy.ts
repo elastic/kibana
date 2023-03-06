@@ -208,6 +208,16 @@ class AgentPolicyService {
     agentPolicy: NewAgentPolicy,
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
+    appContextService.writeCustomAuditLog({
+      message: `User is creating ${AGENT_POLICY_SAVED_OBJECT_TYPE} [name=${agentPolicy.name}]`,
+      event: {
+        action: 'saved_object_update',
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['access'],
+      },
+    });
+
     await this.requireUniqueName(soClient, agentPolicy);
 
     await validateOutputForPolicy(soClient, agentPolicy);
