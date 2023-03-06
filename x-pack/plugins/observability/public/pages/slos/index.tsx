@@ -81,7 +81,7 @@ export function SlosPage() {
             fill
             onClick={handleClickCreateSlo}
           >
-            {i18n.translate('xpack.observability.slos.sloList.pageHeader.createNewButtonLabel', {
+            {i18n.translate('xpack.observability.slo.sloList.pageHeader.createNewButtonLabel', {
               defaultMessage: 'Create new SLO',
             })}
           </EuiButton>,
