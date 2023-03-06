@@ -3,7 +3,6 @@ xpack.canvas.enabled: false
 xpack.cloudSecurityPosture.enabled: false
 xpack.reporting.enabled: false
 xpack.securitySolution.enabled: false
-xpack.watcher.enabled: false
 
 xpack.serverless.observability.enabled: true
 
