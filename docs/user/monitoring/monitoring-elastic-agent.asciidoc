@@ -94,5 +94,5 @@ deploy an {agent}:
 .. Follow the steps in the **Add agent** flyout to download, install,
 and enroll the {agent}. Make sure you choose the agent policy you created
 earlier.
-. Wait a minuter or two until incoming data is confirmed.
+. Wait a minute or two until incoming data is confirmed.
 . <<monitoring-data,View the monitoring data in {kib}>>.
