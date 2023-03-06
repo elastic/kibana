@@ -9,6 +9,7 @@ import React, { useMemo, useReducer } from 'react';
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
+import { act } from 'react-dom/test-utils';
 import {
   ALERT_RULE_NAME,
   ALERT_REASON,
@@ -175,7 +176,6 @@ const mockedUseCellActions: UseCellActions = () => {
   };
 };
 
-// FAILING: https://github.com/elastic/kibana/issues/151688
 describe('AlertsTable', () => {
   const fetchAlertsData = {
     activePage: 0,
@@ -469,79 +469,83 @@ describe('AlertsTable', () => {
         expect(queryByTestId('expandColumnHeaderLabel')).toBe(null);
         expect(queryByTestId('expandColumnCellOpenFlyoutButton')).toBe(null);
       });
+    });
 
-      describe('row loading state on action', () => {
-        let mockedFn: jest.Mock;
-        let customTableProps: AlertsTableProps;
+    describe('action column - row loading state on action', () => {
+      let mockedFn: jest.Mock;
+      let customTableProps: AlertsTableProps;
 
-        beforeEach(() => {
-          mockedFn = jest.fn();
-          customTableProps = {
-            ...tableProps,
-            pageSize: 2,
-            alertsTableConfiguration: {
-              ...alertsTableConfiguration,
-              useActionsColumn: () => {
-                return {
-                  renderCustomActionsRow: mockedFn.mockReturnValue(
-                    <>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonIcon
-                          iconType="analyzeEvent"
-                          color="primary"
-                          onClick={() => {}}
-                          size="s"
-                          data-test-subj="testActionColumn"
-                          aria-label="testActionLabel"
-                        />
-                      </EuiFlexItem>
-                    </>
-                  ),
-                  width: 124,
-                };
-              },
+      beforeEach(() => {
+        mockedFn = jest.fn();
+        customTableProps = {
+          ...tableProps,
+          pageSize: 2,
+          alertsTableConfiguration: {
+            ...alertsTableConfiguration,
+            useActionsColumn: () => {
+              return {
+                renderCustomActionsRow: mockedFn.mockReturnValue(
+                  <>
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonIcon
+                        iconType="analyzeEvent"
+                        color="primary"
+                        onClick={() => {}}
+                        size="s"
+                        data-test-subj="testActionColumn"
+                        aria-label="testActionLabel"
+                      />
+                    </EuiFlexItem>
+                  </>
+                ),
+                width: 124,
+              };
             },
-          };
-        });
+          },
+        };
+      });
 
-        it('should show the row loader when callback triggered', async () => {
-          render(<AlertsTableWithProviders {...customTableProps} />);
-          fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
+      it('should show the row loader when callback triggered', async () => {
+        render(<AlertsTableWithProviders {...customTableProps} />);
+        fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
 
-          // the callback given to our clients to run when they want to update the loading state
+        // the callback given to our clients to run when they want to update the loading state
+        await act(async () => {
           mockedFn.mock.calls[0][0].setIsActionLoading(true);
-
-          expect(await screen.findAllByTestId('row-loader')).toHaveLength(1);
-          const selectedOptions = await screen.findAllByTestId('dataGridRowCell');
-
-          // first row, first column
-          expect(within(selectedOptions[0]).getByLabelText('Loading')).toBeDefined();
-          expect(within(selectedOptions[0]).queryByRole('checkbox')).not.toBeInTheDocument();
-
-          // second row, first column
-          expect(within(selectedOptions[6]).queryByLabelText('Loading')).not.toBeInTheDocument();
-          expect(within(selectedOptions[6]).getByRole('checkbox')).toBeDefined();
         });
 
-        it('should show the row loader when callback triggered with false', async () => {
-          const initialBulkActionsState = {
-            ...defaultBulkActionsState,
-            rowSelection: new Map([[0, { isLoading: true }]]),
-          };
+        expect(await screen.findAllByTestId('row-loader')).toHaveLength(1);
+        const selectedOptions = await screen.findAllByTestId('dataGridRowCell');
 
-          render(
-            <AlertsTableWithProviders
-              {...customTableProps}
-              initialBulkActionsState={initialBulkActionsState}
-            />
-          );
-          fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
+        // first row, first column
+        expect(within(selectedOptions[0]).getByLabelText('Loading')).toBeDefined();
+        expect(within(selectedOptions[0]).queryByRole('checkbox')).not.toBeInTheDocument();
 
-          // the callback given to our clients to run when they want to update the loading state
+        // second row, first column
+        expect(within(selectedOptions[6]).queryByLabelText('Loading')).not.toBeInTheDocument();
+        expect(within(selectedOptions[6]).getByRole('checkbox')).toBeDefined();
+      });
+
+      it('should show the row loader when callback triggered with false', async () => {
+        const initialBulkActionsState = {
+          ...defaultBulkActionsState,
+          rowSelection: new Map([[0, { isLoading: true }]]),
+        };
+
+        render(
+          <AlertsTableWithProviders
+            {...customTableProps}
+            initialBulkActionsState={initialBulkActionsState}
+          />
+        );
+        fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
+
+        // the callback given to our clients to run when they want to update the loading state
+        await act(async () => {
           mockedFn.mock.calls[0][0].setIsActionLoading(false);
-
-          expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
         });
+
+        expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
       });
     });
 
