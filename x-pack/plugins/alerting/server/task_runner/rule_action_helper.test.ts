@@ -148,6 +148,9 @@ describe('rule_action_helper', () => {
     });
     const logger = { debug: jest.fn } as unknown as Logger;
     const summaryActions = { '111-111': { date: new Date('2020-01-01T00:00:00.000Z') } };
+    const summaryActionsWithHash = {
+      'slack:summary:1d': { date: new Date('2020-01-01T00:00:00.000Z') },
+    };
 
     test('should return false if the action does not have throttle filed', () => {
       const result = isSummaryActionThrottled({
@@ -214,6 +217,15 @@ describe('rule_action_helper', () => {
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
         summaryActions,
+        logger,
+      });
+      expect(result).toBe(true);
+    });
+
+    test('should check both the uuid and the hash', () => {
+      const result = isSummaryActionThrottled({
+        action: mockSummaryAction,
+        summaryActions: summaryActionsWithHash,
         logger,
       });
       expect(result).toBe(true);
