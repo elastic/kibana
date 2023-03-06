@@ -35,7 +35,7 @@ export const RedirectToNodeLogs = ({
 }: RedirectToNodeLogsType) => {
   const { services } = useKibanaContextForPlugin();
   const { isLoading, load } = useLogView({
-    logViewId: sourceId,
+    initialLogViewReference: { type: 'log-view-reference', logViewId: sourceId },
     logViews: services.logViews.client,
   });
 

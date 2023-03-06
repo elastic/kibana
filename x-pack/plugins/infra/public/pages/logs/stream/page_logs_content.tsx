@@ -10,6 +10,7 @@ import type { Query } from '@kbn/es-query';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
+import { persistedLogViewReferenceRT } from '../../../../common/log_views';
 import { LogEntry } from '../../../../common/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
@@ -52,7 +53,7 @@ export const StreamPageLogsContent = React.memo<{
       query: { queryString },
     },
   } = useKibanaContextForPlugin().services;
-  const { resolvedLogView, logView, logViewId } = useLogViewContext();
+  const { resolvedLogView, logView, logViewReference } = useLogViewContext();
   const { textScale, textWrap } = useLogViewConfigurationContext();
   const {
     surroundingLogsId,
@@ -228,10 +229,16 @@ export const StreamPageLogsContent = React.memo<{
           logEntryId={flyoutLogEntryId}
           onCloseFlyout={closeLogEntryFlyout}
           onSetFieldFilter={setFilter}
-          sourceId={logViewId}
+          logViewReference={logViewReference}
         />
       ) : null}
-      <PageContent key={`${logViewId}-${logView?.version}`}>
+      <PageContent
+        key={`${
+          persistedLogViewReferenceRT.is(logViewReference)
+            ? logViewReference.logViewId
+            : logViewReference.id
+        }-${logView?.version}`}
+      >
         <ScrollableLogTextStreamView
           columnConfigurations={(resolvedLogView && resolvedLogView.columns) || []}
           hasMoreAfterEnd={hasMoreAfterEnd}

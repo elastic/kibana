@@ -32,7 +32,9 @@ describe('useLogSummary hook', () => {
   });
 
   it('provides an empty list of buckets by default', () => {
-    const { result } = renderHook(() => useLogSummary('SOURCE_ID', null, null, null));
+    const { result } = renderHook(() =>
+      useLogSummary({ type: 'log-view-reference', logViewId: 'SOURCE_ID' }, null, null, null)
+    );
     expect(result.current.buckets).toEqual([]);
   });
 
@@ -51,9 +53,15 @@ describe('useLogSummary hook', () => {
       .mockResolvedValueOnce(secondMockResponse);
 
     const { result, waitForNextUpdate, rerender } = renderHook(
-      ({ sourceId }) => useLogSummary(sourceId, startTimestamp, endTimestamp, null),
+      ({ logViewReference }) =>
+        useLogSummary(
+          { type: 'log-view-reference', logViewId: 'SOURCE_ID' },
+          startTimestamp,
+          endTimestamp,
+          null
+        ),
       {
-        initialProps: { sourceId: 'INITIAL_SOURCE_ID' },
+        initialProps: { logViewReference: { type: 'log-view-reference', logViewId: 'SOURCE_ID' } },
       }
     );
 
@@ -68,7 +76,7 @@ describe('useLogSummary hook', () => {
     );
     expect(result.current.buckets).toEqual(firstMockResponse.data.buckets);
 
-    rerender({ sourceId: 'CHANGED_SOURCE_ID' });
+    rerender({ logViewReference: { type: 'log-view-reference', logViewId: 'SOURCE_ID' } });
     await waitForNextUpdate();
 
     expect(fetchLogSummaryMock).toHaveBeenCalledTimes(2);
@@ -96,7 +104,13 @@ describe('useLogSummary hook', () => {
       .mockResolvedValueOnce(secondMockResponse);
 
     const { result, waitForNextUpdate, rerender } = renderHook(
-      ({ filterQuery }) => useLogSummary('SOURCE_ID', startTimestamp, endTimestamp, filterQuery),
+      ({ filterQuery }) =>
+        useLogSummary(
+          { type: 'log-view-reference', logViewId: 'SOURCE_ID' },
+          startTimestamp,
+          endTimestamp,
+          filterQuery
+        ),
       {
         initialProps: { filterQuery: 'INITIAL_FILTER_QUERY' },
       }
@@ -134,7 +148,12 @@ describe('useLogSummary hook', () => {
     const firstRange = createMockDateRange();
     const { waitForNextUpdate, rerender } = renderHook(
       ({ startTimestamp, endTimestamp }) =>
-        useLogSummary('SOURCE_ID', startTimestamp, endTimestamp, null),
+        useLogSummary(
+          { type: 'log-view-reference', logViewId: 'SOURCE_ID' },
+          startTimestamp,
+          endTimestamp,
+          null
+        ),
       {
         initialProps: firstRange,
       }
@@ -171,7 +190,12 @@ describe('useLogSummary hook', () => {
     const firstRange = createMockDateRange();
     const { waitForNextUpdate, rerender } = renderHook(
       ({ startTimestamp, endTimestamp }) =>
-        useLogSummary('SOURCE_ID', startTimestamp, endTimestamp, null),
+        useLogSummary(
+          { type: 'log-view-reference', logViewId: 'SOURCE_ID' },
+          startTimestamp,
+          endTimestamp,
+          null
+        ),
       {
         initialProps: firstRange,
       }

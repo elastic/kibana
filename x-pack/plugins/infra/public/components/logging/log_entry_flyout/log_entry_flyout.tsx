@@ -23,6 +23,7 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { LogViewReference } from '../../../../common/log_views';
 import { TimeKey } from '../../../../common/time';
 import { useLogEntry } from '../../../containers/logs/log_entry';
 import { CenteredEuiFlyoutBody } from '../../centered_flyout_body';
@@ -35,10 +36,10 @@ export interface LogEntryFlyoutProps {
   logEntryId: string | null | undefined;
   onCloseFlyout: () => void;
   onSetFieldFilter?: (filter: Query, logEntryId: string, timeKey?: TimeKey) => void;
-  sourceId: string | null | undefined;
+  logViewReference: LogViewReference | null | undefined;
 }
 
-export const useLogEntryFlyout = (sourceId: string) => {
+export const useLogEntryFlyout = (logViewReference: LogViewReference) => {
   const flyoutRef = useRef<OverlayRef>();
   const {
     services: { http, data, uiSettings, application },
@@ -63,12 +64,12 @@ export const useLogEntryFlyout = (sourceId: string) => {
           <LogEntryFlyout
             logEntryId={logEntryId}
             onCloseFlyout={closeLogEntryFlyout}
-            sourceId={sourceId}
+            logViewReference={logViewReference}
           />
         </KibanaReactContextProvider>
       );
     },
-    [http, data, uiSettings, application, openFlyout, sourceId, closeLogEntryFlyout]
+    [http, data, uiSettings, application, openFlyout, logViewReference, closeLogEntryFlyout]
   );
 
   useEffect(() => {
@@ -87,7 +88,7 @@ export const LogEntryFlyout = ({
   logEntryId,
   onCloseFlyout,
   onSetFieldFilter,
-  sourceId,
+  logViewReference,
 }: LogEntryFlyoutProps) => {
   const {
     cancelRequest: cancelLogEntryRequest,
@@ -98,15 +99,15 @@ export const LogEntryFlyout = ({
     logEntry,
     total: logEntryRequestTotal,
   } = useLogEntry({
-    sourceId,
+    logViewReference,
     logEntryId,
   });
 
   useEffect(() => {
-    if (sourceId && logEntryId) {
+    if (logViewReference && logEntryId) {
       fetchLogEntry();
     }
-  }, [fetchLogEntry, sourceId, logEntryId]);
+  }, [fetchLogEntry, logViewReference, logEntryId]);
 
   return (
     <EuiFlyout onClose={onCloseFlyout} size="m">

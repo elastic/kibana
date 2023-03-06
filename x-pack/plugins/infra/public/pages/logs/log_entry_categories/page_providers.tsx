@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { persistedLogViewReferenceRT } from '../../../../common/log_views';
 import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { LogEntryCategoriesModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
@@ -14,9 +15,13 @@ import { useLogViewContext } from '../../../hooks/use_log_view';
 import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
 
 export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ children }) => {
-  const { hasFailedLoading, isLoading, isUninitialized, resolvedLogView, logViewId } =
+  const { hasFailedLoading, isLoading, isUninitialized, resolvedLogView, logViewReference } =
     useLogViewContext();
   const { space } = useActiveKibanaSpace();
+
+  if (!persistedLogViewReferenceRT.is(logViewReference)) {
+    throw new Error('Logs ML features only support persisted Log View references');
+  }
 
   // This is a rather crude way of guarding the dependent providers against
   // arguments that are only made available asynchronously. Ideally, we'd use
@@ -31,7 +36,7 @@ export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ child
     return (
       <LogEntryCategoriesModuleProvider
         indexPattern={resolvedLogView.indices}
-        sourceId={logViewId}
+        logViewId={logViewReference.logViewId}
         spaceId={space.id}
         timestampField={resolvedLogView.timestampField}
         runtimeMappings={resolvedLogView.runtimeMappings}

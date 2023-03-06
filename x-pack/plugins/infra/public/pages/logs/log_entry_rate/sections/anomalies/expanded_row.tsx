@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useMount from 'react-use/lib/useMount';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { persistedLogViewReferenceRT } from '../../../../../../common/log_views';
 import { isCategoryAnomaly, LogEntryAnomaly } from '../../../../../../common/log_analysis';
 import { TimeRange } from '../../../../../../common/time/time_range';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
@@ -28,7 +29,11 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
   anomaly: LogEntryAnomaly;
   timeRange: TimeRange;
 }> = ({ anomaly, timeRange }) => {
-  const { logViewId } = useLogViewContext();
+  const { logViewReference } = useLogViewContext();
+
+  if (!persistedLogViewReferenceRT.is(logViewReference)) {
+    throw new Error('Logs ML features only support persisted Log Views');
+  }
 
   const {
     getLogEntryExamples,
@@ -39,7 +44,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     dataset: anomaly.dataset,
     endTime: anomaly.startTime + anomaly.duration,
     exampleCount: EXAMPLE_COUNT,
-    sourceId: logViewId,
+    logViewReference,
     startTime: anomaly.startTime,
     categoryId: isCategoryAnomaly(anomaly) ? anomaly.categoryId : undefined,
   });

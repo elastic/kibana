@@ -12,6 +12,7 @@ import React, { useMemo, useCallback } from 'react';
 import useSet from 'react-use/lib/useSet';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { PersistedLogViewReference } from '../../../../../../common/log_views';
 import {
   LogEntryCategory,
   LogEntryCategoryDataset,
@@ -31,7 +32,7 @@ export const TopCategoriesTable = euiStyled(
   ({
     categorizationJobId,
     className,
-    sourceId,
+    logViewReference,
     timeRange,
     topCategories,
     sortOptions,
@@ -39,7 +40,7 @@ export const TopCategoriesTable = euiStyled(
   }: {
     categorizationJobId: string;
     className?: string;
-    sourceId: string;
+    logViewReference: PersistedLogViewReference;
     timeRange: TimeRange;
     topCategories: LogEntryCategory[];
     sortOptions: SortOptions;
@@ -80,14 +81,14 @@ export const TopCategoriesTable = euiStyled(
             [categoryId]: (
               <CategoryDetailsRow
                 categoryId={categoryId}
-                sourceId={sourceId}
+                logViewReference={logViewReference}
                 timeRange={timeRange}
               />
             ),
           }),
           {}
         ),
-      [expandedCategories, sourceId, timeRange]
+      [expandedCategories, logViewReference, timeRange]
     );
 
     return (

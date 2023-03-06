@@ -14,6 +14,7 @@ import { encode } from '@kbn/rison';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { persistedLogViewReferenceRT } from '../../../../common/log_views';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { TimeKey } from '../../../../common/time';
 import {
@@ -52,7 +53,11 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
 
   const navigateToApp = useKibana().services.application?.navigateToApp;
 
-  const { logViewId, logViewStatus } = useLogViewContext();
+  const { logViewReference, logViewStatus } = useLogViewContext();
+
+  if (!persistedLogViewReferenceRT.is(logViewReference)) {
+    throw new Error('Logs ML features only support persisted Log Views');
+  }
 
   const { hasLogAnalysisSetupCapabilities } = useLogAnalysisCapabilitiesContext();
 
@@ -142,7 +147,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
     datasets,
     isLoadingDatasets,
   } = useLogEntryAnomaliesResults({
-    sourceId: logViewId,
+    logViewReference,
     startTime: timeRange.value.startTime,
     endTime: timeRange.value.endTime,
     defaultSortOptions: SORT_DEFAULTS,
@@ -272,7 +277,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
           logEntryId={flyoutLogEntryId}
           onCloseFlyout={closeLogEntryFlyout}
           onSetFieldFilter={linkToLogStream}
-          sourceId={logViewId}
+          logViewReference={logViewReference}
         />
       ) : null}
     </LogsPageTemplate>

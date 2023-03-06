@@ -12,7 +12,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
 import useSetState from 'react-use/lib/useSetState';
 import { LogEntry, LogEntryCursor } from '../../../../common/log_entry';
-import { LogViewColumnConfiguration } from '../../../../common/log_views';
+import { LogViewColumnConfiguration, LogViewReference } from '../../../../common/log_views';
 import { useSubscription } from '../../../utils/use_observable';
 import { useFetchLogEntriesAfter } from './use_fetch_log_entries_after';
 import { useFetchLogEntriesAround } from './use_fetch_log_entries_around';
@@ -21,7 +21,7 @@ import { useFetchLogEntriesBefore } from './use_fetch_log_entries_before';
 export type BuiltEsQuery = ReturnType<typeof buildEsQuery>;
 
 interface LogStreamProps {
-  sourceId: string;
+  logViewReference: LogViewReference;
   startTimestamp: number;
   endTimestamp: number;
   query?: BuiltEsQuery;
@@ -52,7 +52,7 @@ const INITIAL_STATE: LogStreamState = {
 const LOG_ENTRIES_CHUNK_SIZE = 200;
 
 export function useLogStream({
-  sourceId,
+  logViewReference,
   startTimestamp,
   endTimestamp,
   query,
@@ -85,13 +85,13 @@ export function useLogStream({
 
   const commonFetchArguments = useMemo(
     () => ({
-      sourceId,
+      logViewReference,
       startTimestamp,
       endTimestamp,
       query: cachedQuery,
       columnOverrides: columns,
     }),
-    [columns, endTimestamp, cachedQuery, sourceId, startTimestamp]
+    [columns, endTimestamp, cachedQuery, logViewReference, startTimestamp]
   );
 
   const {

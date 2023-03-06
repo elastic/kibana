@@ -7,6 +7,7 @@
 
 import { useMemo, useState } from 'react';
 
+import { PersistedLogViewReference } from '../../../../common/log_views';
 import {
   GetLogEntryCategoriesSuccessResponsePayload,
   GetLogEntryCategoryDatasetsSuccessResponsePayload,
@@ -30,7 +31,7 @@ export const useLogEntryCategoriesResults = ({
   endTime,
   onGetLogEntryCategoryDatasetsError,
   onGetTopLogEntryCategoriesError,
-  sourceId,
+  logViewReference,
   startTime,
 }: {
   categoriesCount: number;
@@ -38,7 +39,7 @@ export const useLogEntryCategoriesResults = ({
   endTime: number;
   onGetLogEntryCategoryDatasetsError?: (error: Error) => void;
   onGetTopLogEntryCategoriesError?: (error: Error) => void;
-  sourceId: string;
+  logViewReference: PersistedLogViewReference;
   startTime: number;
 }) => {
   const [sortOptions, setSortOptions] = useState<SortOptions>({
@@ -56,7 +57,7 @@ export const useLogEntryCategoriesResults = ({
       createPromise: async () => {
         return await callGetTopLogEntryCategoriesAPI(
           {
-            sourceId,
+            logViewReference,
             startTime,
             endTime,
             categoryCount: categoriesCount,
@@ -79,7 +80,7 @@ export const useLogEntryCategoriesResults = ({
         }
       },
     },
-    [categoriesCount, endTime, filteredDatasets, sourceId, startTime, sortOptions]
+    [categoriesCount, endTime, filteredDatasets, logViewReference, startTime, sortOptions]
   );
 
   const [getLogEntryCategoryDatasetsRequest, getLogEntryCategoryDatasets] = useTrackedPromise(
@@ -87,7 +88,7 @@ export const useLogEntryCategoriesResults = ({
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         return await callGetLogEntryCategoryDatasetsAPI(
-          { sourceId, startTime, endTime },
+          { logViewReference, startTime, endTime },
           services.http.fetch
         );
       },
@@ -104,7 +105,7 @@ export const useLogEntryCategoriesResults = ({
         }
       },
     },
-    [categoriesCount, endTime, sourceId, startTime]
+    [categoriesCount, endTime, logViewReference, startTime]
   );
 
   const isLoadingTopLogEntryCategories = useMemo(

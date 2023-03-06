@@ -21,9 +21,11 @@ import { useKbnUrlStateStorageFromRouterContext } from '../utils/kbn_url_state_c
 import { useKibanaContextForPlugin } from './use_kibana';
 
 export const useLogView = ({
+  initialLogViewReference,
   logViews,
   useDevTools = isDevMode(),
 }: {
+  initialLogViewReference?: LogViewReference | null;
   logViews: ILogViewsClient;
   useDevTools?: boolean;
 }) => {
@@ -41,7 +43,7 @@ export const useLogView = ({
     () =>
       createLogViewStateMachine({
         initialContext: {
-          logViewReference: DEFAULT_LOG_VIEW,
+          logViewReference: initialLogViewReference ?? DEFAULT_LOG_VIEW,
         },
         logViews,
         notificationChannel: logViewStateNotifications,
