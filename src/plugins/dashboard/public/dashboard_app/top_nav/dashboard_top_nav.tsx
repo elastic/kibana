@@ -49,7 +49,6 @@ export function DashboardTopNav({
 }: DashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const [isLabsShown, setIsLabsShown] = useState(false);
-  const [currentHeight, setCurrentHeight] = useState(0);
 
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
@@ -130,11 +129,8 @@ export function DashboardTopNav({
   const resizeRef = useRef<HTMLDivElement>(null);
   const dimensions = useResizeObserver(resizeRef.current);
   useEffect(() => {
-    if (dimensions.height !== currentHeight) {
-      onHeightChange(dimensions.height);
-      setCurrentHeight(dimensions.height);
-    }
-  }, [dimensions, currentHeight, onHeightChange]);
+    onHeightChange(dimensions.height);
+  }, [dimensions, onHeightChange]);
 
   /**
    * populate recently accessed, and set is chrome visible.
