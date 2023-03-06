@@ -298,7 +298,7 @@ const Contents: FC<{
   editJson: boolean;
   onChange(s: string): void;
   heightOffset?: number;
-  schema?: any;
+  schema?: object;
 }> = ({ title, value, editJson, onChange, heightOffset = 0, schema }) => {
   // the ace editor requires a fixed height
   const editorHeight = useMemo(
