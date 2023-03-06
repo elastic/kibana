@@ -226,57 +226,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           );
           expect(endpointDetailTitleNew).to.equal(endpointDetailTitleInitial);
         });
-<<<<<<< HEAD
-
-        // Failing: See https://github.com/elastic/kibana/issues/148111
-        it.skip('for the kql query: na, table shows an empty list', async () => {
-          await pageObjects.endpoint.navigateToEndpointList();
-          await browser.refresh();
-          const adminSearchBar = await testSubjects.find('adminSearchBar');
-          await adminSearchBar.clearValueWithKeyboard();
-          await adminSearchBar.type('na');
-          const querySubmitButton = await testSubjects.find('querySubmitButton');
-          await querySubmitButton.click();
-          const expectedDataFromQuery = [
-            [
-              'Endpoint',
-              'Agent status',
-              'Policy',
-              'Policy status',
-              'OS',
-              'IP address',
-              'Version',
-              'Last active',
-              'Actions',
-            ],
-            ['No items found'],
-          ];
-
-          await pageObjects.endpoint.waitForTableToNotHaveData('endpointListTable');
-          const tableData = await pageObjects.endpointPageUtils.tableData('endpointListTable');
-          expect(tableData).to.eql(expectedDataFromQuery);
-        });
-
-        it.skip('for the kql filtering for united.endpoint.host.hostname, table shows 1 item', async () => {
-          const expectedDataFromQuery = [...expectedData.slice(0, 2).map((row) => [...row])];
-          const hostName = expectedDataFromQuery[1][0];
-          const adminSearchBar = await testSubjects.find('adminSearchBar');
-          await adminSearchBar.clearValueWithKeyboard();
-          await adminSearchBar.type(
-            `united.endpoint.host.hostname : "${hostName}" or host.hostname : "${hostName}" `
-          );
-          const querySubmitButton = await testSubjects.find('querySubmitButton');
-          await querySubmitButton.click();
-          await pageObjects.endpoint.waitForTableToHaveNumberOfEntries(
-            'endpointListTable',
-            1,
-            90000
-          );
-          const tableData = await formattedTableData();
-          expect(tableData.sort()).to.eql(expectedDataFromQuery.sort());
-        });
-=======
->>>>>>> be430bc107a4c6fae3ac5d9cc565f93bada999a8
       });
     });
   });
