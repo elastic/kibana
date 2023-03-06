@@ -27,7 +27,7 @@ export function SloEditFormDescription() {
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
         <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.description.sloName', {
+          {i18n.translate('xpack.observability.slo.sloEdit.description.sloName', {
             defaultMessage: 'SLO Name',
           })}
         </EuiFormLabel>
@@ -42,7 +42,7 @@ export function SloEditFormDescription() {
               id={sloNameId}
               data-test-subj="sloFormNameInput"
               placeholder={i18n.translate(
-                'xpack.observability.slos.sloEdit.description.sloNamePlaceholder',
+                'xpack.observability.slo.sloEdit.description.sloNamePlaceholder',
                 {
                   defaultMessage: 'Name for the SLO',
                 }
@@ -55,7 +55,7 @@ export function SloEditFormDescription() {
 
       <EuiFlexItem grow>
         <EuiFormLabel>
-          {i18n.translate('xpack.observability.slos.sloEdit.description.sloDescription', {
+          {i18n.translate('xpack.observability.slo.sloEdit.description.sloDescription', {
             defaultMessage: 'Description',
           })}
         </EuiFormLabel>
@@ -70,7 +70,7 @@ export function SloEditFormDescription() {
               id={descriptionId}
               data-test-subj="sloFormDescriptionTextArea"
               placeholder={i18n.translate(
-                'xpack.observability.slos.sloEdit.description.sloDescriptionPlaceholder',
+                'xpack.observability.slo.sloEdit.description.sloDescriptionPlaceholder',
                 {
                   defaultMessage: 'A short description of the SLO',
                 }
