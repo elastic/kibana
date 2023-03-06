@@ -28,7 +28,6 @@ export function registerUiCountersRoute(
     },
     async (context, req, res) => {
       const requestBody: v1.UiCountersHTTPRequestBody = req.body;
-      // const { report } = req.body;
       try {
         const internalRepository = getSavedObjects();
         if (!internalRepository) {

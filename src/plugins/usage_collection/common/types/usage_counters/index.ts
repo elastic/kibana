@@ -6,6 +6,5 @@
  * Side Public License, v 1.
  */
 
-export * as v1Stats from './stats';
-export * as v1UiCounters from './ui_counters';
-export * as v1UsageCounters from './usage_counters';
+export * as v1 from './v1';
+export * from './latest';

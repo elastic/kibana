@@ -47,10 +47,12 @@ export interface UiCountersHTTPRequestBody {
     >;
   };
 }
-
+/** explicit response type for store report success. The status value is hardcoded. */
 export interface UiCountersResponseOk {
   status: 'ok';
 }
+
+/** explicit response type for store report fail. The status value is hardcoded. */
 export interface UiCountersResponseFail {
   status: 'fail';
 }
