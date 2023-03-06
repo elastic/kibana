@@ -11,7 +11,8 @@ import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/brea
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IBasePath } from '@kbn/core-http-browser';
-import type { SLOResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
@@ -20,29 +21,26 @@ import { useLicense } from '../../hooks/use_license';
 import PageNotFound from '../404';
 import { isSloFeatureEnabled } from '../slos/helpers/is_slo_feature_enabled';
 import { SloDetails } from './components/slo_details';
-import { PageTitle } from './components/page_title';
+import { HeaderTitle } from './components/header_title';
 import { paths } from '../../config';
 import type { SloDetailsPathParams } from './types';
 import type { ObservabilityAppServices } from '../../application/types';
+import { HeaderControl } from './components/header_control';
 
 export function SloDetailsPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana<ObservabilityAppServices>().services;
-
   const { ObservabilityPageTemplate, config } = usePluginContext();
-  const { sloId } = useParams<SloDetailsPathParams>();
-
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
 
+  const { sloId } = useParams<SloDetailsPathParams>();
   const { isLoading, slo } = useFetchSloDetails(sloId);
-
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
   const isSloNotFound = !isLoading && slo === undefined;
-
   if (!isSloFeatureEnabled(config) || isSloNotFound) {
     return <PageNotFound />;
   }
@@ -54,19 +52,22 @@ export function SloDetailsPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <PageTitle isLoading={isLoading} slo={slo} />,
-        rightSideItems: [],
-        bottomBorder: true,
+        pageTitle: <HeaderTitle isLoading={isLoading} slo={slo} />,
+        rightSideItems: [<HeaderControl isLoading={isLoading} slo={slo} />],
+        bottomBorder: false,
       }}
       data-test-subj="sloDetailsPage"
     >
-      {isLoading && <EuiLoadingSpinner data-test-subj="loadingDetails" />}
+      {isLoading && <EuiLoadingSpinner data-test-subj="sloDetailsLoading" />}
       {!isLoading && <SloDetails slo={slo!} />}
     </ObservabilityPageTemplate>
   );
 }
 
-function getBreadcrumbs(basePath: IBasePath, slo: SLOResponse | undefined): EuiBreadcrumbProps[] {
+function getBreadcrumbs(
+  basePath: IBasePath,
+  slo: SLOWithSummaryResponse | undefined
+): EuiBreadcrumbProps[] {
   return [
     {
       href: basePath.prepend(paths.observability.slos),

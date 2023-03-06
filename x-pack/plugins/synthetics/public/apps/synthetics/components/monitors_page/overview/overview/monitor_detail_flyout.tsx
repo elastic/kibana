@@ -325,6 +325,7 @@ export function MonitorDetailFlyout(props: Props) {
           <EuiFlyoutBody>
             <DetailFlyoutDurationChart {...props} location={props.location} />
             <MonitorDetailsPanel
+              hasBorder={false}
               hideEnabled
               latestPing={monitorDetail.data}
               configId={configId}
