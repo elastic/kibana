@@ -1,16 +1,5 @@
-@import '../../../../../../../packages/kbn-dom-drag-drop/src/sass/drag_drop_mixins';
-
 .lnsVisualizeGeoFieldWorkspacePanel__dragDrop {
   padding: $euiSizeXXL ($euiSizeXL * 2);
   border: $euiBorderThin;
   border-radius: $euiBorderRadius;
-
-  &.lnsDragDrop-isDropTarget {
-    @include lnsDroppable;
-    @include lnsDroppableActive;
-  }
-
-  &.lnsDragDrop-isActiveDropTarget {
-    @include lnsDroppableActiveHover;
-  }
 }

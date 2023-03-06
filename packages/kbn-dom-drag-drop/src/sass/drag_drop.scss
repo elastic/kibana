@@ -78,11 +78,11 @@
 }
 
 .lnsDragDrop-notCompatible {
-  background-color: $euiColorHighlight;
-  border: $euiBorderWidthThin dashed $euiBorderColor;
+  background-color: $euiColorHighlight !important;
+  border: $euiBorderWidthThin dashed $euiBorderColor !important;
   &.lnsDragDrop-isActiveDropTarget {
-    background-color: rgba(251, 208, 17, .25);
-    border-color: $euiColorVis5;
+    background-color: rgba(251, 208, 17, .25) !important;
+    border-color: $euiColorVis5 !important;
   }
 }
 

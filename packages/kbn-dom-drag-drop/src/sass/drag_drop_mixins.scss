@@ -21,25 +21,25 @@ $lnsZLevel3: 3;
 
 // Static styles for a drop area
 @mixin lnsDroppable {
-  border: $euiBorderWidthThin dashed $euiBorderColor;
+  border: $euiBorderWidthThin dashed $euiBorderColor !important;
 }
 
 // Hovering state for drag item and drop area
 @mixin lnsDragDropHover {
   &:hover {
-    border: $euiBorderWidthThin dashed $euiColorMediumShade;
+    border: $euiBorderWidthThin dashed $euiColorMediumShade !important;
   }
 }
 
 // Style for drop area when there's an item being dragged
 @mixin lnsDroppableActive {
-  background-color: transparentize($euiColorVis0, .9);
+  background-color: transparentize($euiColorVis0, .9) !important;
 }
 
 // Style for drop area while hovering with item
 @mixin lnsDroppableActiveHover {
-  background-color: transparentize($euiColorVis0, .75);
-  border: $euiBorderWidthThin dashed $euiColorVis0;
+  background-color: transparentize($euiColorVis0, .75) !important;
+  border: $euiBorderWidthThin dashed $euiColorVis0 !important;
 }
 
 // Style for drop area that is not allowed for current item
