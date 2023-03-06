@@ -9,6 +9,10 @@ import { IToasts } from '@kbn/core/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { catchError, from, map, of, throwError } from 'rxjs';
 import { createMachine, actions, assign } from 'xstate';
+import {
+  inlineLogViewReferenceRT,
+  persistedLogViewReferenceRT,
+} from '../../../../common/log_views';
 import { ILogViewsClient } from '../../../services/log_views';
 import { NotificationChannel } from '../../xstate_helpers';
 import { LogViewNotificationEvent, logViewNotificationEventSelectors } from './notifications';
@@ -90,17 +94,56 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
               target: 'checkingStatusFailed',
               actions: 'storeError',
             },
-            CHECKING_STATUS_SUCCEEDED: {
-              target: 'resolved',
-              actions: 'storeStatus',
+            CHECKING_STATUS_SUCCEEDED: [
+              {
+                target: 'resolvedPersistedLogView',
+                actions: 'storeStatus',
+                cond: 'isPersistedLogView',
+              },
+              {
+                target: 'resolvedInlineLogView',
+                actions: 'storeStatus',
+              },
+            ],
+          },
+        },
+        resolvedPersistedLogView: {
+          entry: 'notifyLoadingSucceeded',
+          on: {
+            PERSIST_INLINE_LOG_VIEW: undefined,
+            RELOAD_LOG_VIEW: {
+              target: 'loading',
             },
           },
         },
-        resolved: {
+        resolvedInlineLogView: {
           entry: 'notifyLoadingSucceeded',
           on: {
-            RELOAD_LOG_VIEW: {
-              target: 'loading',
+            PERSIST_INLINE_LOG_VIEW: {
+              target: 'persistingInlineLogView',
+            },
+          },
+        },
+        persistingInlineLogView: {
+          invoke: {
+            src: 'persistInlineLogView',
+          },
+          on: {
+            PERSISTING_INLINE_LOG_VIEW_FAILED: {
+              target: 'persistingInlineLogViewFailed',
+              actions: 'storeError',
+            },
+            PERSISTING_INLINE_LOG_VIEW_SUCCEEDED: {
+              target: 'resolving',
+              actions: ['convertInlineLogViewReferenceToPersistedLogViewReference', 'storeLogView'],
+            },
+          },
+        },
+        persistingInlineLogViewFailed: {
+          entry: 'notifyPersistingInlineLogViewFailed',
+          on: {
+            RETRY_PERSISTING_INLINE_LOG_VIEW: {
+              target: 'persistingInlineLogView',
             },
           },
         },
@@ -140,7 +183,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
             },
             UPDATING_SUCCEEDED: {
               target: 'resolving',
-              actions: 'storeLogView',
+              actions: ['updateLogViewReference', 'storeLogView'],
             },
           },
         },
@@ -154,10 +197,9 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
         },
       },
       on: {
-        LOG_VIEW_ID_CHANGED: {
+        LOG_VIEW_REFERENCE_CHANGED: {
           target: '.loading',
-          actions: 'storeLogViewId',
-          cond: 'isLogViewIdDifferent',
+          actions: 'storeLogViewReference',
         },
         UPDATE: {
           target: '.updating',
@@ -204,10 +246,33 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
               } as LogViewContextWithError)
             : {}
         ),
+        convertInlineLogViewReferenceToPersistedLogViewReference: assign((context, event) =>
+          'logView' in event && inlineLogViewReferenceRT.is(context.logViewReference)
+            ? ({
+                logViewReference: {
+                  type: 'log-view-reference',
+                  logViewId: context.logViewReference.id,
+                },
+              } as LogViewContextWithReference)
+            : {}
+        ),
+        updateLogViewReference: assign((context, event) =>
+          'attributes' in event && inlineLogViewReferenceRT.is(context.logViewReference)
+            ? ({
+                logViewReference: {
+                  ...context.logViewReference,
+                  attributes: {
+                    ...context.logViewReference.attributes,
+                    ...event.attributes,
+                  },
+                },
+              } as LogViewContextWithReference)
+            : {}
+        ),
       },
       guards: {
-        isLogViewIdDifferent: (context, event) =>
-          'logViewId' in event ? event.logViewId !== context.logViewId : false,
+        isPersistedLogView: (context, event) =>
+          persistedLogViewReferenceRT.is(context.logViewReference),
       },
     }
   );
@@ -265,8 +330,8 @@ export const createLogViewStateMachine = ({
         ),
       updateLogView: (context, event) =>
         from(
-          'logViewId' in context && event.type === 'UPDATE'
-            ? logViews.putLogView(context.logViewId, event.attributes)
+          'logViewReference' in context && event.type === 'UPDATE'
+            ? logViews.putLogView(context.logViewReference, event.attributes)
             : throwError(
                 () =>
                   new Error(

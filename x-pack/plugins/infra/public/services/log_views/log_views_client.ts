@@ -21,6 +21,7 @@ import {
   inlineLogViewReferenceRT,
   LogView,
   LogViewAttributes,
+  logViewAttributesRT,
   LogViewReference,
   LogViewsStaticConfig,
   LogViewStatus,
@@ -108,24 +109,41 @@ export class LogViewsClient implements ILogViewsClient {
   }
 
   public async putLogView(
-    logViewId: string,
+    logViewReference: LogViewReference,
     logViewAttributes: Partial<LogViewAttributes>
   ): Promise<LogView> {
-    const response = await this.http
-      .put(getLogViewUrl(logViewId), {
-        body: JSON.stringify(putLogViewRequestPayloadRT.encode({ attributes: logViewAttributes })),
-      })
-      .catch((error) => {
-        throw new PutLogViewError(`Failed to write log view "${logViewId}": ${error}`);
-      });
+    if (inlineLogViewReferenceRT.is(logViewReference)) {
+      const { id } = logViewReference;
+      const attributes = decodeOrThrow(
+        logViewAttributesRT,
+        (message: string) =>
+          new PutLogViewError(`Failed to decode inline log view "${id}": ${message}"`)
+      )(logViewAttributes);
+      return {
+        id,
+        attributes,
+        origin: 'inline',
+      };
+    } else {
+      const { logViewId } = logViewReference;
+      const response = await this.http
+        .put(getLogViewUrl(logViewId), {
+          body: JSON.stringify(
+            putLogViewRequestPayloadRT.encode({ attributes: logViewAttributes })
+          ),
+        })
+        .catch((error) => {
+          throw new PutLogViewError(`Failed to write log view "${logViewId}": ${error}`);
+        });
 
-    const { data } = decodeOrThrow(
-      getLogViewResponsePayloadRT,
-      (message: string) =>
-        new PutLogViewError(`Failed to decode written log view "${logViewId}": ${message}"`)
-    )(response);
+      const { data } = decodeOrThrow(
+        getLogViewResponsePayloadRT,
+        (message: string) =>
+          new PutLogViewError(`Failed to decode written log view "${logViewId}": ${message}"`)
+      )(response);
 
-    return data;
+      return data;
+    }
   }
 
   public async resolveLogView(

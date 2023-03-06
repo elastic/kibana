@@ -112,7 +112,7 @@ export const ExpressionEditor: React.FC<
           <Editor {...props} />
         </SourceStatusWrapper>
       ) : (
-        <LogViewProvider logViewId={logViewId} logViews={logViews.client}>
+        <LogViewProvider logViews={logViews.client}>
           <SourceStatusWrapper {...props}>
             <Editor {...props} />
           </SourceStatusWrapper>

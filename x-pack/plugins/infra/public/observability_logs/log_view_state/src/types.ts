@@ -89,8 +89,8 @@ export type LogViewStateValue = LogViewTypestate['value'];
 
 export type LogViewEvent =
   | {
-      type: 'LOG_VIEW_ID_CHANGED';
-      logViewId: string;
+      type: 'LOG_VIEW_REFERENCE_CHANGED';
+      logViewReference: LogViewReference;
     }
   | {
       type: 'INITIALIZED_FROM_URL';
@@ -137,6 +137,14 @@ export type LogViewEvent =
     }
   | {
       type: 'RELOAD_LOG_VIEW';
+    }
+  | {
+      type: 'PERSIST_INLINE_LOG_VIEW';
+    }
+  | { type: 'PERSISTING_INLINE_LOG_VIEW_FAILED'; error: Error }
+  | { type: 'PERSISTING_INLINE_LOG_VIEW_SUCCEEDED'; logView: LogView }
+  | {
+      type: 'RETRY_PERSISTING_INLINE_LOG_VIEW';
     };
 
 export type LogViewActorRef = ActorRef<LogViewEvent, LogViewContext>;

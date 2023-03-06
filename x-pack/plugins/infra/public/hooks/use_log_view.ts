@@ -7,9 +7,9 @@
 
 import { useInterpret, useSelector } from '@xstate/react';
 import createContainer from 'constate';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { waitFor } from 'xstate/lib/waitFor';
-import { LogViewAttributes } from '../../common/log_views';
+import { LogViewAttributes, LogViewReference } from '../../common/log_views';
 import {
   createLogViewNotificationChannel,
   createLogViewStateMachine,
@@ -21,11 +21,9 @@ import { useKbnUrlStateStorageFromRouterContext } from '../utils/kbn_url_state_c
 import { useKibanaContextForPlugin } from './use_kibana';
 
 export const useLogView = ({
-  logViewId,
   logViews,
   useDevTools = isDevMode(),
 }: {
-  logViewId: string;
   logViews: ILogViewsClient;
   useDevTools?: boolean;
 }) => {
@@ -55,12 +53,20 @@ export const useLogView = ({
     }
   );
 
-  useEffect(() => {
-    logViewStateService.send({
-      type: 'LOG_VIEW_ID_CHANGED',
-      logViewId,
-    });
-  }, [logViewId, logViewStateService]);
+  const changeLogViewReference = useCallback(
+    (logViewReference: LogViewReference) => {
+      logViewStateService.send({
+        type: 'LOG_VIEW_REFERENCE_CHANGED',
+        logViewReference,
+      });
+    },
+    [logViewStateService]
+  );
+
+  const logViewReference = useSelector(
+    logViewStateService,
+    (state) => state.context.logViewReference
+  );
 
   const logView = useSelector(logViewStateService, (state) =>
     state.matches('resolving') || state.matches('checkingStatus') || state.matches('resolved')
@@ -142,7 +148,7 @@ export const useLogView = ({
   );
 
   return {
-    // underlying state machine
+    // Underlying state machine
     logViewStateService,
     logViewStateNotifications,
 
@@ -160,17 +166,18 @@ export const useLogView = ({
     isLoadingLogViewStatus,
     isResolvingLogView,
 
-    // data
-    logViewId,
+    // Data
+    logViewReference,
     logView,
     resolvedLogView,
     logViewStatus,
     derivedDataView: resolvedLogView?.dataViewReference,
 
-    // actions
+    // Actions
     load: retry,
     retry,
     update,
+    changeLogViewReference,
   };
 };
 

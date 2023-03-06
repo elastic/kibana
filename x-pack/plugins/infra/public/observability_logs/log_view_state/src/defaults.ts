@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export const DEFAULT_LOG_VIEW = { type: 'log-view-reference' as const, logViewId: 'default' };
+const DEFAULT_LOG_VIEW_ID = 'default';
+export const DEFAULT_LOG_VIEW = {
+  type: 'log-view-reference' as const,
+  logViewId: DEFAULT_LOG_VIEW_ID,
+};
