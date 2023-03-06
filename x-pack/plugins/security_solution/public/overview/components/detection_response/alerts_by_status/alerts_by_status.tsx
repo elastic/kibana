@@ -20,6 +20,7 @@ import type { ShapeTreeNode } from '@elastic/charts';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import styled from 'styled-components';
 
+import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import type { ESBoolQuery } from '../../../../../common/typed_json';
 import type { FillColor } from '../../../../common/components/charts/donutchart';
 import { DonutChart } from '../../../../common/components/charts/donutchart';
@@ -80,6 +81,13 @@ interface AlertsByStatusProps {
   signalIndexName: string | null;
 }
 
+enum Statuses {
+  OPEN = 'open',
+  CLOSED = 'closed',
+  ACKNOWLEDGED = 'acknowledged',
+}
+
+const KIBANA_WORKFLOW_STATUS = 'kibana.alert.workflow_status';
 const legendField = 'kibana.alert.severity';
 const chartConfigs: Array<{ key: Severity; label: string; color: string }> = [
   { key: 'critical', label: STATUS_CRITICAL_LABEL, color: SEVERITY_COLOR.critical },
@@ -105,6 +113,7 @@ export const AlertsByStatus = ({
 }: AlertsByStatusProps) => {
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
   const { openTimelineWithFilters } = useNavigateToTimeline();
+  const navigateToAlerts = useNavigateToAlertsPageWithFilters();
   const { onClick: goToAlerts, href } = useGetSecuritySolutionLinkProps()({
     deepLinkId: SecurityPageName.alerts,
   });
@@ -149,6 +158,54 @@ export const AlertsByStatus = ({
         value: d.label,
       })),
     []
+  );
+
+  const onDonutPartitionClick = useCallback(
+    (level: string, status: Status) => {
+      if (level && status) {
+        navigateToAlerts([
+          {
+            title: 'Severity',
+            selectedOptions: [level],
+            fieldName: legendField,
+          },
+          {
+            title: 'Status',
+            selectedOptions: [status],
+            fieldName: KIBANA_WORKFLOW_STATUS,
+          },
+          ...(entityFilter
+            ? [
+                {
+                  selectedOptions: [entityFilter.value],
+                  fieldName: entityFilter.field,
+                },
+              ]
+            : []),
+        ]);
+      }
+    },
+    [entityFilter, navigateToAlerts]
+  );
+
+  const navigateToAlertsWithStatus = useCallback(
+    (status: Status) =>
+      navigateToAlerts([
+        {
+          title: 'Status',
+          selectedOptions: [status],
+          fieldName: KIBANA_WORKFLOW_STATUS,
+        },
+        ...(entityFilter
+          ? [
+              {
+                selectedOptions: [entityFilter.value],
+                fieldName: entityFilter.field,
+              },
+            ]
+          : []),
+      ]),
+    [entityFilter, navigateToAlerts]
   );
 
   const openCount = donutData?.open?.total ?? 0;
@@ -230,17 +287,25 @@ export const AlertsByStatus = ({
                           isDonut={true}
                           label={STATUS_OPEN}
                           scopeId={SourcererScopeName.detections}
-                          stackByField="kibana.alert.workflow_status"
+                          stackByField={KIBANA_WORKFLOW_STATUS}
                           timerange={timerange}
                           width={ChartSize}
                         />
                       ) : (
                         <DonutChart
+                          onDonutPartitionClicked={(level) =>
+                            onDonutPartitionClick(level, Statuses.OPEN)
+                          }
                           data={donutData?.open?.severities}
                           fillColor={fillColor}
                           height={donutHeight}
                           label={STATUS_OPEN}
-                          title={<ChartLabel count={openCount} />}
+                          title={
+                            <ChartLabel
+                              onClick={() => navigateToAlertsWithStatus(Statuses.OPEN)}
+                              count={openCount}
+                            />
+                          }
                           totalCount={openCount}
                         />
                       )}
@@ -259,7 +324,7 @@ export const AlertsByStatus = ({
                           isDonut={true}
                           label={STATUS_ACKNOWLEDGED}
                           scopeId={SourcererScopeName.detections}
-                          stackByField="kibana.alert.workflow_status"
+                          stackByField={KIBANA_WORKFLOW_STATUS}
                           timerange={timerange}
                           width={ChartSize}
                         />
@@ -269,7 +334,15 @@ export const AlertsByStatus = ({
                           fillColor={fillColor}
                           height={donutHeight}
                           label={STATUS_ACKNOWLEDGED}
-                          title={<ChartLabel count={acknowledgedCount} />}
+                          onDonutPartitionClicked={(level) =>
+                            onDonutPartitionClick(level, Statuses.ACKNOWLEDGED)
+                          }
+                          title={
+                            <ChartLabel
+                              onClick={() => navigateToAlertsWithStatus(Statuses.ACKNOWLEDGED)}
+                              count={acknowledgedCount}
+                            />
+                          }
                           totalCount={acknowledgedCount}
                         />
                       )}
@@ -285,17 +358,25 @@ export const AlertsByStatus = ({
                           isDonut={true}
                           label={STATUS_CLOSED}
                           scopeId={SourcererScopeName.detections}
-                          stackByField="kibana.alert.workflow_status"
+                          stackByField={KIBANA_WORKFLOW_STATUS}
                           timerange={timerange}
                           width={ChartSize}
                         />
                       ) : (
                         <DonutChart
-                          data={donutData?.acknowledged?.severities}
+                          data={donutData?.closed?.severities}
                           fillColor={fillColor}
                           height={donutHeight}
                           label={STATUS_CLOSED}
-                          title={<ChartLabel count={closedCount} />}
+                          onDonutPartitionClicked={(level) =>
+                            onDonutPartitionClick(level, Statuses.CLOSED)
+                          }
+                          title={
+                            <ChartLabel
+                              onClick={() => navigateToAlertsWithStatus(Statuses.CLOSED)}
+                              count={closedCount}
+                            />
+                          }
                           totalCount={closedCount}
                         />
                       )}
