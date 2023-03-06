@@ -17,6 +17,7 @@ import type {
   Logger,
   RequestHandlerContext,
 } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import { v4 as uuidv4 } from 'uuid';
 import { safeLoad } from 'js-yaml';
 
@@ -138,6 +139,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PackagePolicy> {
+    appContextService.writeCustomAuditLog({
+      message: `User is creating ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [name=${packagePolicy.name}]`,
+      event: {
+        action: 'saved_object_create',
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id: '',
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        },
+      },
+    });
+
     const logger = appContextService.getLogger();
 
     const enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
@@ -288,6 +305,28 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       force?: true;
     }
   ): Promise<PackagePolicy[]> {
+    for (const packagePolicy of packagePolicies) {
+      if (!packagePolicy.id) {
+        packagePolicy.id = SavedObjectsUtils.generateId();
+      }
+
+      appContextService.writeCustomAuditLog({
+        message: `User is creating ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
+        event: {
+          action: 'saved_object_create',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['access'],
+        },
+        kibana: {
+          saved_object: {
+            id: packagePolicy.id,
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        },
+      });
+    }
+
     const agentPolicyIds = new Set(packagePolicies.map((pkgPolicy) => pkgPolicy.policy_id));
 
     for (const agentPolicyId of agentPolicyIds) {
@@ -400,6 +439,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       response.package.experimental_data_stream_features = experimentalFeatures;
     }
 
+    appContextService.writeCustomAuditLog({
+      message: `User accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
+      event: {
+        action: 'saved_object_get',
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id,
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        },
+      },
+    });
+
     return response;
   }
 
@@ -416,11 +471,31 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return [];
     }
 
-    return packagePolicySO.saved_objects.map((so) => ({
+    const packagePolicies = packagePolicySO.saved_objects.map((so) => ({
       id: so.id,
       version: so.version,
       ...so.attributes,
     }));
+
+    for (const packagePolicy of packagePolicies) {
+      appContextService.writeCustomAuditLog({
+        message: `User accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
+        event: {
+          action: 'saved_object_find',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['access'],
+        },
+        kibana: {
+          saved_object: {
+            id: packagePolicy.id,
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        },
+      });
+    }
+
+    return packagePolicies;
   }
 
   public async getByIDs(
@@ -438,7 +513,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       return null;
     }
 
-    return packagePolicySO.saved_objects
+    const packagePolicies = packagePolicySO.saved_objects
       .map((so): PackagePolicy | null => {
         if (so.error) {
           if (options.ignoreMissing && so.error.statusCode === 404) {
@@ -457,6 +532,26 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         };
       })
       .filter((packagePolicy): packagePolicy is PackagePolicy => packagePolicy !== null);
+
+    for (const packagePolicy of packagePolicies) {
+      appContextService.writeCustomAuditLog({
+        message: `User accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
+        event: {
+          action: 'saved_object_get',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['access'],
+        },
+        kibana: {
+          saved_object: {
+            id: packagePolicy.id,
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        },
+      });
+    }
+
+    return packagePolicies;
   }
 
   public async list(
@@ -473,6 +568,24 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       perPage,
       filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
     });
+
+    for (const packagePolicy of packagePolicies.saved_objects) {
+      appContextService.writeCustomAuditLog({
+        message: `User accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
+        event: {
+          action: 'saved_object_find',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['access'],
+        },
+        kibana: {
+          saved_object: {
+            id: packagePolicy.id,
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        },
+      });
+    }
 
     return {
       items: packagePolicies?.saved_objects.map((packagePolicySO) => ({
@@ -502,6 +615,24 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       filter: kuery ? normalizeKuery(SAVED_OBJECT_TYPE, kuery) : undefined,
     });
 
+    for (const packagePolicy of packagePolicies.saved_objects) {
+      appContextService.writeCustomAuditLog({
+        message: `User accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
+        event: {
+          action: 'saved_object_find',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['access'],
+        },
+        kibana: {
+          saved_object: {
+            id: packagePolicy.id,
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        },
+      });
+    }
+
     return {
       items: packagePolicies.saved_objects.map((packagePolicySO) => packagePolicySO.id),
       total: packagePolicies.total,
@@ -517,6 +648,22 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     packagePolicyUpdate: UpdatePackagePolicy,
     options?: { user?: AuthenticatedUser; force?: boolean; skipUniqueNameVerification?: boolean }
   ): Promise<PackagePolicy> {
+    appContextService.writeCustomAuditLog({
+      message: `User is updating ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
+      event: {
+        action: 'saved_object_update',
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id,
+          type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+        },
+      },
+    });
+
     let enrichedPackagePolicy: UpdatePackagePolicy;
 
     try {

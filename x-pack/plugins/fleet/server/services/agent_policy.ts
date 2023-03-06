@@ -15,6 +15,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsBulkUpdateResponse,
 } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 
 import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -109,6 +110,12 @@ class AgentPolicyService {
         category: ['database'],
         outcome: 'unknown',
         type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id,
+          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        },
       },
     });
 
@@ -208,13 +215,21 @@ class AgentPolicyService {
     agentPolicy: NewAgentPolicy,
     options?: { id?: string; user?: AuthenticatedUser }
   ): Promise<AgentPolicy> {
+    const id = SavedObjectsUtils.generateId();
+
     appContextService.writeCustomAuditLog({
-      message: `User is creating ${AGENT_POLICY_SAVED_OBJECT_TYPE} [name=${agentPolicy.name}]`,
+      message: `User is creating ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${agentPolicy.id}]`,
       event: {
-        action: 'saved_object_update',
+        action: 'saved_object_create',
         category: ['database'],
         outcome: 'unknown',
         type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id,
+          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        },
       },
     });
 
@@ -226,6 +241,7 @@ class AgentPolicyService {
       SAVED_OBJECT_TYPE,
       {
         ...agentPolicy,
+        id,
         status: 'active',
         is_managed: agentPolicy.is_managed ?? false,
         revision: 1,
@@ -288,10 +304,16 @@ class AgentPolicyService {
     appContextService.writeCustomAuditLog({
       message: `User has accessed ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
       event: {
-        action: 'saved_object_find',
+        action: 'saved_object_get',
         category: ['database'],
         outcome: 'success',
         type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id,
+          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        },
       },
     });
 
@@ -733,6 +755,12 @@ class AgentPolicyService {
         category: ['database'],
         outcome: 'unknown',
         type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id,
+          type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+        },
       },
     });
 
