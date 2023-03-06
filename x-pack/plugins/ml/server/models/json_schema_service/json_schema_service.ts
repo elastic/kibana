@@ -56,12 +56,8 @@ export class JsonSchemaService {
 
           this._requiredComponents.add(refKey);
 
-          for (const k in schemaComponent) {
-            if (schemaComponent.hasOwnProperty(k)) {
-              // @ts-ignore
-              propertyDef[k] = schemaComponent[k] as PropertyDefinition[typeof k];
-            }
-          }
+          Object.assign(propertyDef, schemaComponent);
+
           this.extractProperties(propertyDef);
         }
 
