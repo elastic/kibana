@@ -35,9 +35,15 @@ export function registerUiCountersRoute(
           throw Error(`The saved objects client hasn't been initialised yet`);
         }
         await storeReport(internalRepository, uiCountersUsageCounter, requestBody.report);
-        return res.ok({ body: { status: 'ok' } });
+        const bodyOk: v1.UiCountersResponseOk = {
+          status: 'ok',
+        };
+        return res.ok({ body: bodyOk });
       } catch (error) {
-        return res.ok({ body: { status: 'fail' } });
+        const bodyFail: v1.UiCountersResponseFail = {
+          status: 'fail',
+        };
+        return res.ok({ body: bodyFail });
       }
     }
   );

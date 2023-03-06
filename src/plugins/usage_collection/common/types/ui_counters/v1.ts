@@ -48,10 +48,9 @@ export interface UiCountersHTTPRequestBody {
   };
 }
 
-export enum UiCountersHTTPResponseStatus {
-  ok = 'ok',
-  fail = 'fail',
+export interface UiCountersResponseOk {
+  status: 'ok';
 }
-export interface UiCountersHTTPResponseBody {
-  status: UiCountersHTTPResponseStatus;
+export interface UiCountersResponseFail {
+  status: 'fail';
 }
