@@ -16,10 +16,10 @@ import { useGetGroupSelector } from './use_get_group_selector';
 import { defaultGroup, GroupOption } from './types';
 import { Grouping as GroupingComponent } from '../components/grouping';
 
-interface Grouping {
+interface Grouping<T> {
   getGrouping: (
-    props: Omit<GroupingProps, 'groupSelector' | 'pagination' | 'selectedGroup'>
-  ) => React.ReactElement<GroupingProps>;
+    props: Omit<GroupingProps<T>, 'groupSelector' | 'pagination' | 'selectedGroup'>
+  ) => React.ReactElement<GroupingProps<T>>;
   groupSelector: React.ReactElement<GroupSelectorProps>;
   pagination: {
     pageIndex: number;
@@ -34,11 +34,11 @@ interface GroupingArgs {
   fields: FieldSpec[];
   groupingId: string;
 }
-export const useGrouping = ({
+export const useGrouping = <T,>({
   defaultGroupingOptions,
   fields,
   groupingId,
-}: GroupingArgs): Grouping => {
+}: GroupingArgs): Grouping<T> => {
   const [groupingState, dispatch] = useReducer(groupsReducerWithStorage, initialState);
 
   const { activeGroup: selectedGroup } = useMemo(
@@ -58,8 +58,8 @@ export const useGrouping = ({
 
   const getGrouping = useCallback(
     (
-      props: Omit<GroupingProps, 'groupSelector' | 'pagination' | 'selectedGroup'>
-    ): React.ReactElement<GroupingProps> => (
+      props: Omit<GroupingProps<T>, 'groupSelector' | 'pagination' | 'selectedGroup'>
+    ): React.ReactElement<GroupingProps<T>> => (
       <GroupingComponent
         {...props}
         groupSelector={groupSelector}
