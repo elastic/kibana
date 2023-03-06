@@ -53,7 +53,7 @@ const EventCountsComponent: React.FC<Props> = ({
 
   const [networkFilterQuery] = useMemo(
     () =>
-      convertToBuildEsQuery({
+      buildQueryFromFilters({
         config: getEsQueryConfig(uiSettings),
         indexPattern,
         queries: [query],
