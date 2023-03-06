@@ -102,7 +102,7 @@ export class JsonSchemaService {
     const definition = fileContent.paths[path][method];
 
     if (!definition) {
-      throw new Error('Definition is not defined');
+      throw new Error('Schema definition is not defined');
     }
 
     const bodySchema = definition.requestBody.content['application/json'].schema;
@@ -115,7 +115,7 @@ export class JsonSchemaService {
   }
 
   /**
-   * Generates openapi filed, removing redundant content.
+   * Generates openapi file, removing redundant content.
    * Only used internally via a node command to generate the file.
    */
   public async generateSchemaFile() {
