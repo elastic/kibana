@@ -90,9 +90,7 @@ export interface RuleAction {
   };
 }
 
-type IndexType = Record<string, unknown>;
-
-export interface AggregateOptions extends IndexType {
+export interface AggregateOptions {
   search?: string;
   defaultSearchOperator?: 'AND' | 'OR';
   searchFields?: string[];

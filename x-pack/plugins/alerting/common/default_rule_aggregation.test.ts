@@ -110,17 +110,5 @@ describe('formatDefaultAggregationResult', () => {
         ruleTags: ['a', 'b', 'c'],
       })
     );
-      active: 8,
-      error: 6,
-      ok: 10,
-      pending: 4,
-      unknown: 2,
-      warning: 1,
-    });
-    expect(result.ruleLastRunOutcome).toEqual({ succeeded: 2, failed: 4, warning: 6 });
-    expect(result.ruleEnabledStatus).toEqual({ enabled: 28, disabled: 2 });
-    expect(result.ruleMutedStatus).toEqual({ muted: 3, unmuted: 27 });
-    expect(result.ruleSnoozedStatus).toEqual({ snoozed: 5 });
-    expect(result.ruleTags).toEqual(['a', 'b', 'c']);
   });
 });

@@ -22,9 +22,9 @@ const ALLOW_FIELDS = [
 
 const ALLOW_AGG_TYPES = ['terms', 'composite', 'nested', 'filter'];
 
-const aggTypesoVerify = ['field', 'path'];
+const AGG_TYPES_TO_VERIFY = ['field', 'path'];
 
-const aggregationKeys = ['aggs', 'aggregations'];
+const AGG_KEYS = ['aggs', 'aggregations'];
 
 export const validateRuleAggregationFields = (
   aggs: Record<string, AggregationsAggregationContainer>
@@ -46,7 +46,7 @@ export const validateRuleAggregationFields = (
 const validateTypes = (container: AggregationsAggregationContainer) => {
   Object.entries(container).forEach(([aggType, aggContainer]) => {
     // Do not try to validate aggs/aggregations, as the above function is already doing that
-    if (aggregationKeys.includes(aggType)) {
+    if (AGG_KEYS.includes(aggType)) {
       return;
     }
 
@@ -61,7 +61,7 @@ const validateTypes = (container: AggregationsAggregationContainer) => {
 const validateFields = (container: AggregationsAggregationContainer) => {
   Object.entries(container).forEach(([aggType, aggContainer]) => {
     // Found field, check field against blocklist
-    if (aggTypesoVerify.includes(aggType) && !ALLOW_FIELDS.includes(aggContainer)) {
+    if (AGG_TYPES_TO_VERIFY.includes(aggType) && !ALLOW_FIELDS.includes(aggContainer)) {
       throw Boom.badRequest(`Invalid aggregation term: ${aggContainer}`);
     }
 

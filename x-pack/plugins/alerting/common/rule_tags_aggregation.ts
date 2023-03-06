@@ -21,7 +21,7 @@ export interface RuleTagsAggregationFormattedResult {
   ruleTags: string[];
 }
 
-export interface RuleTagsAggregationResult extends Record<string, unknown> {
+export interface RuleTagsAggregationResult {
   tags: {
     buckets: Array<{
       key: {

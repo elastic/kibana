@@ -11,7 +11,7 @@ import {
   RuleAggregationFormattedResult,
 } from './rule';
 
-export interface DefaultRuleAggregationResult extends Record<string, unknown> {
+export interface DefaultRuleAggregationResult {
   status: {
     buckets: Array<{
       key: string;

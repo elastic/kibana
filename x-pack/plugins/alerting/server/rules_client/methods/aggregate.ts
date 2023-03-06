@@ -15,14 +15,14 @@ import { RulesClientContext } from '../types';
 import { RawRule, AggregateOptions } from '../../types';
 import { validateRuleAggregationFields } from '../lib/validate_rule_aggregation_fields';
 
-export interface AggregateParams {
+export interface AggregateParams<AggregationResult> {
   options?: AggregateOptions;
-  aggs: Record<string, AggregationsAggregationContainer>;
+  aggs: Record<keyof AggregationResult, AggregationsAggregationContainer>;
 }
 
-export async function aggregate<T extends Record<string, unknown>>(
+export async function aggregate<T = Record<string, unknown>>(
   context: RulesClientContext,
-  params: AggregateParams
+  params: AggregateParams<T>
 ): Promise<T> {
   const { options = {}, aggs } = params;
   const { filter, page = 1, perPage = 0, ...restOptions } = options;
