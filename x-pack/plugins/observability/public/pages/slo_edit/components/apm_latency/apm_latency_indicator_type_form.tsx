@@ -27,11 +27,11 @@ export function ApmLatencyIndicatorTypeForm() {
       <EuiFlexGroup direction="row" gutterSize="l">
         <FieldSelector
           allowAllOption={false}
-          label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.serviceName', {
+          label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.serviceName', {
             defaultMessage: 'Service name',
           })}
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmLatency.serviceName.placeholder',
+            'xpack.observability.slo.sloEdit.apmLatency.serviceName.placeholder',
             {
               defaultMessage: 'Select the APM service',
             }
@@ -41,11 +41,11 @@ export function ApmLatencyIndicatorTypeForm() {
           dataTestSubj="apmLatencyServiceSelector"
         />
         <FieldSelector
-          label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.serviceEnvironment', {
+          label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.serviceEnvironment', {
             defaultMessage: 'Service environment',
           })}
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmLatency.serviceEnvironment.placeholder',
+            'xpack.observability.slo.sloEdit.apmLatency.serviceEnvironment.placeholder',
             {
               defaultMessage: 'Select the environment',
             }
@@ -58,11 +58,11 @@ export function ApmLatencyIndicatorTypeForm() {
 
       <EuiFlexGroup direction="row" gutterSize="l">
         <FieldSelector
-          label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.transactionType', {
+          label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.transactionType', {
             defaultMessage: 'Transaction type',
           })}
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmLatency.transactionType.placeholder',
+            'xpack.observability.slo.sloEdit.apmLatency.transactionType.placeholder',
             {
               defaultMessage: 'Select the transaction type',
             }
@@ -72,11 +72,11 @@ export function ApmLatencyIndicatorTypeForm() {
           dataTestSubj="apmLatencyTransactionTypeSelector"
         />
         <FieldSelector
-          label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.transactionName', {
+          label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.transactionName', {
             defaultMessage: 'Transaction name',
           })}
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmLatency.transactionName.placeholder',
+            'xpack.observability.slo.sloEdit.apmLatency.transactionName.placeholder',
             {
               defaultMessage: 'Select the transaction name',
             }
@@ -90,7 +90,7 @@ export function ApmLatencyIndicatorTypeForm() {
       <EuiFlexGroup direction="row" gutterSize="l">
         <EuiFlexItem>
           <EuiFormLabel>
-            {i18n.translate('xpack.observability.slos.sloEdit.apmLatency.threshold.placeholder', {
+            {i18n.translate('xpack.observability.slo.sloEdit.apmLatency.threshold.placeholder', {
               defaultMessage: 'Threshold (ms)',
             })}
           </EuiFormLabel>
@@ -119,12 +119,12 @@ export function ApmLatencyIndicatorTypeForm() {
             control={control}
             dataTestSubj="apmLatencyFilterInput"
             indexPatternString={watch('indicator.params.index')}
-            label={i18n.translate('xpack.observability.slos.sloEdit.apmLatency.filter', {
+            label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.filter', {
               defaultMessage: 'Query filter',
             })}
             name="indicator.params.filter"
             placeholder={i18n.translate(
-              'xpack.observability.slos.sloEdit.apmLatency.filter.placeholder',
+              'xpack.observability.slo.sloEdit.apmLatency.filter.placeholder',
               {
                 defaultMessage: 'Custom filter to apply on the index',
               }
