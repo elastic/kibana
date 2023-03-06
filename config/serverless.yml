@@ -1,3 +1,5 @@
 
 xpack.serverless.plugin.enabled: true
 xpack.fleet.enableExperimental: ['fleetServerStandalone']
+
+xpack.upgrade_assistant.enabled: false
