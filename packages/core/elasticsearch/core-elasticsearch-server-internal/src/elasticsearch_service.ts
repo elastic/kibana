@@ -66,7 +66,7 @@ export class ElasticsearchService
     this.config$ = coreContext.configService
       .atPath<ElasticsearchConfigType>('elasticsearch')
       .pipe(map((rawConfig) => new ElasticsearchConfig(rawConfig)));
-    this.agentManager = new AgentManager();
+    this.agentManager = new AgentManager(this.log.get('agent-manager'));
   }
 
   public async preboot(): Promise<InternalElasticsearchServicePreboot> {
@@ -120,7 +120,9 @@ export class ElasticsearchService
         }
         this.unauthorizedErrorHandler = handler;
       },
-      agentStore: this.agentManager,
+      agentStatsProvider: {
+        getAgentsStats: this.agentManager.getAgentsStats.bind(this.agentManager),
+      },
     };
   }
 
