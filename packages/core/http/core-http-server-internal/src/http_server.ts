@@ -527,10 +527,8 @@ export class HttpServer {
       xsrfRequired: route.options.xsrfRequired ?? !isSafeMethod(route.method),
       access: route.options.access ?? (route.path.startsWith('/internal') ? 'internal' : 'public'),
     };
-    // Log HTTP API target consumer. Warning: may log sensitive information on paths including secrets
-    optionsLogger.debug(
-      `kibanaRouteOptions [${kibanaRouteOptions.access}] for path [${route.path}]`
-    );
+    // Log HTTP API target consumer.
+    optionsLogger.debug(`access [${kibanaRouteOptions.access}] for path [${route.path}]`);
 
     this.server!.route({
       handler: route.handler,
