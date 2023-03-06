@@ -89,6 +89,8 @@ export const EQL_QUERY_INPUT = '[data-test-subj="eqlQueryBarTextInput"]';
 
 export const EQL_QUERY_VALIDATION_SPINNER = '[data-test-subj="eql-validation-loading"]';
 
+export const EQL_QUERY_VALIDATION_ERROR = '[data-test-subj="eql-validation-errors-popover-button"]';
+
 export const IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK =
   '[data-test-subj="importQueryFromSavedTimeline"]';
 
