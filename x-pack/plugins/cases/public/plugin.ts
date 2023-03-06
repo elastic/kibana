@@ -115,6 +115,7 @@ export class CasesUiPlugin
     const getCasesContext = getCasesContextLazy({
       externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+      filesPlugin: plugins.files,
     });
 
     return {
@@ -125,6 +126,7 @@ export class CasesUiPlugin
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            filesPlugin: plugins.files,
           }),
         getCasesContext,
         getRecentCases: (props) =>
@@ -132,6 +134,7 @@ export class CasesUiPlugin
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            filesPlugin: plugins.files,
           }),
         // @deprecated Please use the hook getUseCasesAddToNewCaseFlyout
         getCreateCaseFlyout: (props) =>
@@ -139,6 +142,7 @@ export class CasesUiPlugin
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            filesPlugin: plugins.files,
           }),
         // @deprecated Please use the hook getUseCasesAddToExistingCaseModal
         getAllCasesSelectorModal: (props) =>
@@ -146,6 +150,7 @@ export class CasesUiPlugin
             ...props,
             externalReferenceAttachmentTypeRegistry: this.externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry: this.persistableStateAttachmentTypeRegistry,
+            filesPlugin: plugins.files,
           }),
       },
       hooks: {

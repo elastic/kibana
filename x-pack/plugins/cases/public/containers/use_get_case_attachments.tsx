@@ -5,32 +5,33 @@
  * 2.0.
  */
 
+// eslint-disable-next-line import/no-extraneous-dependencies
 import faker from 'faker';
-import { Attachments } from './types';
+import type { Attachments } from './types';
 
-const files: Attachments = [];
+const fakeFiles: Attachments = [];
 
 for (let i = 0; i < 15; i++) {
-  files.push({
+  fakeFiles.push({
     fileName: faker.system.fileName(),
     fileType: faker.system.fileType(),
     dateAdded: faker.date.past().toString(),
   });
 }
 
-export type GetCaseAttachmentsParams = {
+export interface GetCaseAttachmentsParams {
   page: number;
   perPage: number;
   extension?: string[];
   mimeType?: string[];
   searchTerm?: string;
-};
+}
 
-type GetCaseAttachmentsResponse = {
+interface GetCaseAttachmentsResponse {
   pageOfItems: Attachments;
   availableTypes: string[];
   totalItemCount: number;
-};
+}
 
 // Manually handle pagination of data
 const findFiles = (files: Attachments, pageIndex: number, pageSize: number) => {
@@ -59,11 +60,11 @@ export const useGetCaseAttachments = ({
   data: GetCaseAttachmentsResponse;
   isLoading: boolean;
 } => {
-  const availableTypes = [...new Set(files.map((item) => item.fileType))];
+  const availableTypes = [...new Set(fakeFiles.map((item) => item.fileType))];
 
   return {
     data: {
-      ...findFiles(files, page, perPage),
+      ...findFiles(fakeFiles, page, perPage),
       availableTypes,
     },
     isLoading: false,

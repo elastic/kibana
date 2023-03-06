@@ -6,12 +6,10 @@
  */
 import React, { useMemo } from 'react';
 
+import type { EuiBasicTableColumn, Pagination, EuiBasicTableProps } from '@elastic/eui';
 import {
   EuiLink,
   EuiBasicTable,
-  EuiBasicTableColumn,
-  Pagination,
-  EuiBasicTableProps,
   EuiLoadingContent,
   EuiSpacer,
   EuiText,
@@ -91,10 +89,11 @@ export const AttachmentsTable = ({
     () => (
       <>
         <strong>
-          {pagination.pageSize * pagination.pageIndex + 1}-
+          {pagination.pageSize * pagination.pageIndex + 1}
+          {'-'}
           {pagination.pageSize * pagination.pageIndex + pagination.pageSize}
         </strong>{' '}
-        of <strong>{pagination.totalItemCount}</strong>
+        {'of'} <strong>{pagination.totalItemCount}</strong>
       </>
     ),
     [pagination.pageIndex, pagination.pageSize, pagination.totalItemCount]
@@ -108,7 +107,7 @@ export const AttachmentsTable = ({
         <>
           <EuiSpacer size="xl" />
           <EuiText size="xs" data-test-subj="attachments-table-results-count">
-            Showing {resultsCount}
+            {`Showing ${resultsCount}`}
           </EuiText>
         </>
       )}
@@ -122,7 +121,7 @@ export const AttachmentsTable = ({
         data-test-subj="attachments-table"
         noItemsMessage={
           <EuiEmptyPrompt
-            title={<h3>No attachments available</h3>}
+            title={<h3>{'No attachments available'}</h3>}
             data-test-subj="attachments-table-empty"
             titleSize="xs"
             actions={
@@ -131,7 +130,7 @@ export const AttachmentsTable = ({
                 iconType="plusInCircle"
                 data-test-subj="case-detail-attachments-table-upload-file"
               >
-                Upload File
+                {'Upload File'}
               </EuiButton>
             }
           />
@@ -140,3 +139,5 @@ export const AttachmentsTable = ({
     </>
   );
 };
+
+AttachmentsTable.displayName = 'AttachmentsTable';

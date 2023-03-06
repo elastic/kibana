@@ -103,11 +103,11 @@ export interface ResolvedCase {
   aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 }
 
-export type Attachment = {
+export interface Attachment {
   fileName: string | null | undefined;
   fileType: string;
   dateAdded: string;
-};
+}
 
 export type Attachments = Attachment[];
 

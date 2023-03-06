@@ -6,15 +6,8 @@
  */
 import React, { useMemo, useState } from 'react';
 
-import {
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiButton,
-  Criteria,
-  EuiFieldSearch,
-  EuiSelect,
-  EuiButtonGroup,
-} from '@elastic/eui';
+import type { Criteria } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiFieldSearch, EuiSelect, EuiButtonGroup } from '@elastic/eui';
 import type { Case, Attachment } from '../../../../common/ui/types';
 
 import { CaseViewTabs } from '../case_view_tabs';
@@ -22,6 +15,7 @@ import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { GetCaseAttachmentsParams } from '../../../containers/use_get_case_attachments';
 import { useGetCaseAttachments } from '../../../containers/use_get_case_attachments';
 import { AttachmentsTable } from '../../attachments/attachments_table';
+import { AddFile } from '../../add_file';
 
 interface CaseViewAttachmentsProps {
   caseData: Case;
@@ -80,6 +74,8 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
     },
   ];
 
+  const refreshAttachmentsTable = () => {};
+
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -88,14 +84,7 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
           <EuiFlexItem style={{ maxHeight: 300 }}>
             <EuiFlexGroup alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  size="s"
-                  iconType="plusInCircle"
-                  disabled={isLoading}
-                  data-test-subj="case-detail-upload-file"
-                >
-                  Upload File
-                </EuiButton>
+                <AddFile caseId={caseData.id} onFileAdded={refreshAttachmentsTable} />
               </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ minWidth: 400 }}>
                 <EuiFieldSearch

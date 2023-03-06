@@ -23,6 +23,7 @@ const AllCasesSelectorModalLazy: React.FC<AllCasesSelectorModalProps> = lazy(
 export const getAllCasesSelectorModalLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  filesPlugin,
   owner,
   permissions,
   hiddenStatuses,
@@ -33,6 +34,7 @@ export const getAllCasesSelectorModalLazy = ({
     value={{
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
+      filesPlugin,
       owner,
       permissions,
     }}

@@ -8,6 +8,9 @@
 import type { Dispatch } from 'react';
 import React, { useState, useEffect, useReducer } from 'react';
 import { merge } from 'lodash';
+
+import type { FilesStart } from '@kbn/files-plugin/public';
+import { FilesContext } from '@kbn/shared-ux-file-context';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { DEFAULT_BASE_PATH } from '../../common/navigation';
@@ -37,6 +40,7 @@ export interface CasesContextValue {
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
+  filesPlugin: FilesStart;
 }
 
 export interface CasesContextProps
@@ -46,6 +50,7 @@ export interface CasesContextProps
     | 'permissions'
     | 'externalReferenceAttachmentTypeRegistry'
     | 'persistableStateAttachmentTypeRegistry'
+    | 'filesPlugin'
   > {
   basePath?: string;
   features?: CasesFeatures;
@@ -69,6 +74,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     basePath = DEFAULT_BASE_PATH,
     features = {},
     releasePhase = 'ga',
+    filesPlugin,
   },
 }) => {
   const { appId, appTitle } = useApplication();
@@ -90,6 +96,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     ),
     releasePhase,
     dispatch,
+    filesPlugin,
   }));
 
   /**
@@ -116,8 +123,11 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
 
   return isCasesContextValue(value) ? (
     <CasesContext.Provider value={value}>
-      <CasesGlobalComponents state={state} />
-      {children}
+      {/* need to check if owner exists */}
+      <FilesContext client={filesPlugin.filesClientFactory.asScoped(owner[0])}>
+        <CasesGlobalComponents state={state} />
+        {children}
+      </FilesContext>
     </CasesContext.Provider>
   ) : null;
 };
