@@ -169,17 +169,21 @@ router.get(
 
 The above code follows guidelines from steps 1 and 2, but it allows clients to specify ANY string by which to sort. This is a far "wider" API than we need for this endpoint.
 
+Without telemetry it is impossible to know what values clients might be passing through &mdash; and what type of sort behaviour they are expecting.
+
+Additionally, the `sortField` is leaking information about our persistence schema. As with step 1, we want to remove direct knowledge of persistence schema from clients. Consider the following changes:
+
 ```ts
 import { escapeKuery } from '@kbn/es-query';
 const nameSchema = schema.string({ minLength: 1, });
 // 1.
 // A stricter schema for the sort by field. Now it is a small, known set of values
-const sortBySchema = schema.oneOf([schema.literal('foo'), schema.literal('bar')]);
+const sortSchema = schema.oneOf([schema.literal('foo'), schema.literal('bar')]);
 
 router.get(
   {
     path: '/api/myobject/find',
-    validate: { query: schema.object({ name: nameSchema, sort: schema.string() }) },
+    validate: { query: schema.object({ name: nameSchema, sort: sortSchema }) },
   },
   (ctx, req, res) => {
     const { savedObjects } = await ctx.core;
@@ -197,5 +201,10 @@ router.get(
   }
 );
 ```
+
+The changes are:
+
+1. New input validation accepts a known set of values. This makes our HTTP API far _narrower_ and specific to our use case. It does not matter that our `sortSchema` has the same values as our persistence schema, what matters is that we created a **translation layer** between our HTTP API and our internal schema. This faclitates easily versioning this endpoint.
+2. **Bonus point**: we use the `escapeKuery` utility to defend against KQL injection attacks.
 
 ### 4. Use the versioned API spec
