@@ -25,11 +25,11 @@ import { groupingContainerCss, groupsUnitCountCss } from './styles';
 import { GROUPS_UNIT } from './translations';
 import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } from './types';
 
-export interface GroupingProps {
-  badgeMetricStats?: (fieldBucket: RawBucket) => BadgeMetric[];
-  customMetricStats?: (fieldBucket: RawBucket) => CustomMetric[];
-  data?: GroupingAggregation & GroupingFieldTotalAggregation;
-  groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element | undefined;
+export interface GroupingProps<T> {
+  badgeMetricStats?: (fieldBucket: RawBucket<T>) => BadgeMetric[];
+  customMetricStats?: (fieldBucket: RawBucket<T>) => CustomMetric[];
+  data?: GroupingAggregation<T> & GroupingFieldTotalAggregation;
+  groupPanelRenderer?: (fieldBucket: RawBucket<T>) => JSX.Element | undefined;
   groupsSelector?: JSX.Element;
   inspectButton?: JSX.Element;
   isLoading: boolean;
@@ -46,7 +46,7 @@ export interface GroupingProps {
   unit?: (n: number) => string;
 }
 
-const GroupingComponent = ({
+const GroupingComponent = <T,>({
   badgeMetricStats,
   customMetricStats,
   data,
@@ -59,9 +59,9 @@ const GroupingComponent = ({
   selectedGroup,
   takeActionItems,
   unit = defaultUnit,
-}: GroupingProps) => {
+}: GroupingProps<T>) => {
   const [trigger, setTrigger] = useState<
-    Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket }>
+    Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket<T> }>
   >({});
 
   const groupsNumber = data?.groupsNumber?.value ?? 0;
@@ -196,4 +196,4 @@ const GroupingComponent = ({
   );
 };
 
-export const Grouping = React.memo(GroupingComponent);
+export const Grouping = React.memo(GroupingComponent) as typeof GroupingComponent;
