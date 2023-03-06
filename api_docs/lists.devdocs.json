@@ -698,7 +698,7 @@
               "\nThis is the same as \"createListItem\" except it applies specifically to the agnostic endpoint list and will\nauto-call the \"createEndpointList\" for you so that you have the best chance of the agnostic endpoint\nbeing there and existing before the item is inserted into the agnostic endpoint list."
             ],
             "signature": [
-              "({ comments, description, entries, expireTime, itemId, meta, name, osTypes, tags, type, }: ",
+              "({ comments, description, entries, itemId, meta, name, osTypes, tags, type, }: ",
               "CreateEndpointListItemOptions",
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; }>"
             ],
@@ -711,7 +711,7 @@
                 "id": "def-server.ExceptionListClient.createEndpointListItem.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    comments,\n    description,\n    entries,\n    expireTime,\n    itemId,\n    meta,\n    name,\n    osTypes,\n    tags,\n    type,\n  }",
+                "label": "{\n    comments,\n    description,\n    entries,\n    itemId,\n    meta,\n    name,\n    osTypes,\n    tags,\n    type,\n  }",
                 "description": [],
                 "signature": [
                   "CreateEndpointListItemOptions"
@@ -774,7 +774,7 @@
               "\nThis is the same as \"updateExceptionListItem\" except it applies specifically to the endpoint list and will\nauto-call the \"createEndpointList\" for you so that you have the best chance of the endpoint\nbeing there if it did not exist before. If the list did not exist before, then creating it here will still cause a\nreturn of null but at least the list exists again."
             ],
             "signature": [
-              "({ _version, comments, description, entries, expireTime, id, itemId, meta, name, osTypes, tags, type, }: ",
+              "({ _version, comments, description, entries, id, itemId, meta, name, osTypes, tags, type, }: ",
               "UpdateEndpointListItemOptions",
               ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
             ],
@@ -787,7 +787,7 @@
                 "id": "def-server.ExceptionListClient.updateEndpointListItem.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n    _version,\n    comments,\n    description,\n    entries,\n    expireTime,\n    id,\n    itemId,\n    meta,\n    name,\n    osTypes,\n    tags,\n    type,\n  }",
+                "label": "{\n    _version,\n    comments,\n    description,\n    entries,\n    id,\n    itemId,\n    meta,\n    name,\n    osTypes,\n    tags,\n    type,\n  }",
                 "description": [],
                 "signature": [
                   "UpdateEndpointListItemOptions"
@@ -1011,7 +1011,7 @@
             "tags": [],
             "label": "updateExceptionListItem",
             "description": [
-              "\nUpdate an existing exception list item"
+              "\nUpdate an existing exception list item\n\nNOTE: This method will PATCH the targeted exception list item, not fully overwrite it.\nAny undefined fields passed in will not be changed in the existing record. To unset any\nfields use the `updateOverwriteExceptionListItem` method\n"
             ],
             "signature": [
               "({ _version, comments, description, entries, expireTime, id, itemId, meta, name, namespaceType, osTypes, tags, type, }: ",
@@ -1031,6 +1031,56 @@
               {
                 "parentPluginId": "lists",
                 "id": "def-server.ExceptionListClient.updateExceptionListItem.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{\n    _version,\n    comments,\n    description,\n    entries,\n    expireTime,\n    id,\n    itemId,\n    meta,\n    name,\n    namespaceType,\n    osTypes,\n    tags,\n    type,\n  }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "lists",
+                    "scope": "server",
+                    "docId": "kibListsPluginApi",
+                    "section": "def-server.UpdateExceptionListItemOptions",
+                    "text": "UpdateExceptionListItemOptions"
+                  }
+                ],
+                "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": [
+              "the updated exception list item or null if none exists"
+            ]
+          },
+          {
+            "parentPluginId": "lists",
+            "id": "def-server.ExceptionListClient.updateOverwriteExceptionListItem",
+            "type": "Function",
+            "tags": [],
+            "label": "updateOverwriteExceptionListItem",
+            "description": [
+              "\nUpdate an existing exception list item using the overwrite method in order to behave\nmore like a PUT request rather than a PATCH request.\n\nThis was done in order to correctly unset types via update which cannot be accomplished\nusing the regular `updateExceptionItem` method. All other results of the methods are identical\n"
+            ],
+            "signature": [
+              "({ _version, comments, description, entries, expireTime, id, itemId, meta, name, namespaceType, osTypes, tags, type, }: ",
+              {
+                "pluginId": "lists",
+                "scope": "server",
+                "docId": "kibListsPluginApi",
+                "section": "def-server.UpdateExceptionListItemOptions",
+                "text": "UpdateExceptionListItemOptions"
+              },
+              ") => Promise<{ _version: string | undefined; comments: ({ comment: string; created_at: string; created_by: string; id: string; } & { updated_at?: string | undefined; updated_by?: string | undefined; })[]; created_at: string; created_by: string; description: string; entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; list: { id: string; type: \"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"double\" | \"integer_range\" | \"float_range\" | \"long_range\" | \"double_range\" | \"date_range\" | \"ip_range\" | \"shape\"; }; operator: \"excluded\" | \"included\"; type: \"list\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; } | { entries: ({ field: string; operator: \"excluded\" | \"included\"; type: \"match\"; value: string; } | { field: string; operator: \"excluded\" | \"included\"; type: \"match_any\"; value: string[]; } | { field: string; operator: \"excluded\" | \"included\"; type: \"exists\"; })[]; field: string; type: \"nested\"; } | { field: string; operator: \"excluded\" | \"included\"; type: \"wildcard\"; value: string; })[]; expire_time: string | undefined; id: string; item_id: string; list_id: string; meta: object | undefined; name: string; namespace_type: \"single\" | \"agnostic\"; os_types: (\"windows\" | \"linux\" | \"macos\")[]; tags: string[]; tie_breaker_id: string; type: \"simple\"; updated_at: string; updated_by: string; } | null>"
+            ],
+            "path": "x-pack/plugins/lists/server/services/exception_lists/exception_list_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lists",
+                "id": "def-server.ExceptionListClient.updateOverwriteExceptionListItem.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{\n    _version,\n    comments,\n    description,\n    entries,\n    expireTime,\n    id,\n    itemId,\n    meta,\n    name,\n    namespaceType,\n    osTypes,\n    tags,\n    type,\n  }",

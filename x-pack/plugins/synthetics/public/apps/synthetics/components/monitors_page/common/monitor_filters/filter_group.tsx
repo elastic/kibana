@@ -9,15 +9,32 @@ import React from 'react';
 import { EuiFilterGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
+import { useGetUrlParams } from '../../../../hooks';
 import { selectServiceLocationsState } from '../../../../state';
 
 import {
   SyntheticsMonitorFilterItem,
   getSyntheticsFilterDisplayValues,
   SyntheticsMonitorFilterChangeHandler,
+  LabelWithCountValue,
 } from './filter_fields';
 import { useFilters } from './use_filters';
 import { FilterButton } from './filter_button';
+
+const mixUrlValues = (
+  values?: LabelWithCountValue[],
+  urlLabels?: string[]
+): LabelWithCountValue[] => {
+  const urlValues = urlLabels?.map((label) => ({ label, count: 0 })) ?? [];
+  const newValues = [...(values ?? [])];
+  // add url values that are not in the values
+  urlValues.forEach((urlValue) => {
+    if (!newValues.find((value) => value.label === urlValue.label)) {
+      newValues.push(urlValue);
+    }
+  });
+  return newValues;
+};
 
 export const FilterGroup = ({
   handleFilterChange,
@@ -28,26 +45,44 @@ export const FilterGroup = ({
 
   const { locations } = useSelector(selectServiceLocationsState);
 
+  const urlParams = useGetUrlParams();
+
   const filters: SyntheticsMonitorFilterItem[] = [
     {
       label: TYPE_LABEL,
       field: 'monitorTypes',
-      values: getSyntheticsFilterDisplayValues(data.monitorTypes, 'monitorTypes', locations),
+      values: getSyntheticsFilterDisplayValues(
+        mixUrlValues(data.monitorTypes, urlParams.monitorTypes),
+        'monitorTypes',
+        locations
+      ),
     },
     {
       label: LOCATION_LABEL,
       field: 'locations',
-      values: getSyntheticsFilterDisplayValues(data.locations, 'locations', locations),
+      values: getSyntheticsFilterDisplayValues(
+        mixUrlValues(data.locations, urlParams.locations),
+        'locations',
+        locations
+      ),
     },
     {
       label: TAGS_LABEL,
       field: 'tags',
-      values: getSyntheticsFilterDisplayValues(data.tags, 'tags', locations),
+      values: getSyntheticsFilterDisplayValues(
+        mixUrlValues(data.tags, urlParams.tags),
+        'tags',
+        locations
+      ),
     },
     {
       label: SCHEDULE_LABEL,
       field: 'schedules',
-      values: getSyntheticsFilterDisplayValues(data.schedules, 'schedules', locations),
+      values: getSyntheticsFilterDisplayValues(
+        mixUrlValues(data.schedules, urlParams.schedules),
+        'schedules',
+        locations
+      ),
     },
   ];
 
@@ -55,7 +90,11 @@ export const FilterGroup = ({
     filters.push({
       label: PROJECT_LABEL,
       field: 'projects',
-      values: getSyntheticsFilterDisplayValues(data.projects, 'projects', locations),
+      values: getSyntheticsFilterDisplayValues(
+        mixUrlValues(data.projects, urlParams.projects),
+        'projects',
+        locations
+      ),
     });
   }
 
