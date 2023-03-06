@@ -228,7 +228,7 @@ export const CaseViewActivity = ({
           <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
             <EuiFlexItem>
               <UserActions
-                key={`${userActivityQueryParams.type}-${userActivityQueryParams.sortOrder}-${userActivityQueryParams.page}`}
+                key={`user-actions-${userActivityQueryParams.type}-${userActivityQueryParams.sortOrder}`}
                 userProfiles={userProfiles}
                 currentUserProfile={currentUserProfile}
                 getRuleDetailsHref={ruleDetailsNavigation?.href}

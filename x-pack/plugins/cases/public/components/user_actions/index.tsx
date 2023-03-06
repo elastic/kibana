@@ -120,7 +120,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     <>
       <UserActionsList
         {...props}
-        key={`top-${userActivityQueryParams.type}-${userActivityQueryParams.sortOrder}`}
+        key={`top-user-actions-${userActivityQueryParams.type}-${userActivityQueryParams.sortOrder}`}
         loadingAlertData={loadingAlertData}
         manualAlertsData={manualAlertsData}
         loadingCommentIds={loadingCommentIds}

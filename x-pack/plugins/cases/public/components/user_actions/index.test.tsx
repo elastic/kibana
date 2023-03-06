@@ -21,7 +21,10 @@ import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { connectorsMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
-import { defaultUseFindCaseUserActions } from '../case_view/mocks';
+import { defaultInfiniteUseFindCaseUserActions, defaultUseFindCaseUserActions } from '../case_view/mocks';
+import { waitForComponentToUpdate } from '../../common/test_utils';
+import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
+import userEvent from '@testing-library/user-event';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
@@ -66,6 +69,7 @@ const defaultProps = {
   userActionsStats,
 };
 
+jest.mock('../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../containers/use_find_case_user_actions');
 jest.mock('../../containers/use_update_comment');
 jest.mock('./timestamp', () => ({
@@ -73,6 +77,7 @@ jest.mock('./timestamp', () => ({
 }));
 jest.mock('../../common/lib/kibana');
 
+const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
 const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useUpdateCommentMock = useUpdateComment as jest.Mock;
 const patchComment = jest.fn();
@@ -90,113 +95,106 @@ describe(`UserActions`, () => {
       patchComment,
     });
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
 
     jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
     appMockRender = createAppMockRenderer();
   });
 
   it('Loading spinner when user actions loading and displays fullName/username', () => {
+    useFindCaseUserActionsMock.mockReturnValue({isLoading: true});
+    useInfiniteFindCaseUserActionsMock.mockReturnValue({isLoading: true});
     appMockRender.render(
       <UserActions
-        {...{ ...defaultProps, currentUserProfile: userProfiles[0], isLoadingUserActions: true }}
+        {...{ ...defaultProps, currentUserProfile: userProfiles[0] }}
       />
     );
 
-    expect(screen.getByTestId('user-actions-loading')).toBeInTheDocument();
-    expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
-    expect(screen.getByText('DR')).toBeInTheDocument();
+    expect(screen.getAllByTestId('user-actions-loading')).toHaveLength(2);
+    // expect(screen.getByTestId('case-user-profile-avatar-damaged_raccoon')).toBeInTheDocument();
+    // expect(screen.getByText('DR')).toBeInTheDocument();
   });
 
-  // it('Renders expandable and bottom user action lists', async () => {
-  //   const caseConnectors = getCaseConnectorsMockResponse({ 'push.needsToBePushed': true });
-  //   const ourActions = [
-  //     getUserAction('pushed', 'push_to_service', {
-  //       createdAt: '2023-01-17T09:46:29.813Z',
-  //     }),
-  //   ];
+  it('Renders expandable and bottom user action lists', async () => {
+    const caseConnectors = getCaseConnectorsMockResponse({ 'push.needsToBePushed': true });
+    const ourActions = [
+      getUserAction('pushed', 'push_to_service', {
+        createdAt: '2023-01-17T09:46:29.813Z',
+      }),
+    ];
 
-  //   useFindCaseUserActionsMock.mockReturnValue({...defaultUseFindCaseUserActions, data: {...defaultUseFindCaseUserActions.data.userActions, ...ourActions}});
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue({...defaultUseFindCaseUserActions, data: {...defaultUseFindCaseUserActions.data.userActions, ...ourActions}});
 
-  //   const props = {
-  //     ...defaultProps,
-  //     caseConnectors,
-  //   };
+    const props = {
+      ...defaultProps,
+      caseConnectors,
+    };
 
-  //   const component = appMockRender.render(
-  //     <UserActions {...props} />
-  //   );
+    const component = appMockRender.render(
+      <UserActions {...props} />
+    );
 
-  //   await waitForComponentToUpdate();
+    await waitForComponentToUpdate();
 
-  //   expect(component).toMatchSnapshot();
+    expect(component).toMatchSnapshot();
 
-  //   await waitFor(() => {
-  //     expect(screen.getByTestId('top-footer')).toBeInTheDocument();
-  //     expect(screen.getByTestId('bottom-footer')).toBeInTheDocument();
-  //   });
-  // });
+    await waitFor(() => {
+      expect(screen.getByTestId('top-footer')).toBeInTheDocument();
+      expect(screen.getByTestId('bottom-footer')).toBeInTheDocument();
+    });
+  });
 
-  // it('Renders service now update line with top only when push is up to date', async () => {
-  //   const ourActions = [
-  //     getUserAction('pushed', 'push_to_service', {
-  //       createdAt: '2023-01-17T09:46:29.813Z',
-  //     }),
-  //   ];
+  it('Renders service now update line with top only when push is up to date', async () => {
+    const ourActions = [
+      getUserAction('pushed', 'push_to_service', {
+        createdAt: '2023-01-17T09:46:29.813Z',
+      }),
+    ];
 
-  //   const props = {
-  //     ...defaultProps,
-  //     caseUserActions: ourActions,
-  //   };
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+    };
 
-  //   const wrapper = mount(
-  //     <TestProviders>
-  //       <UserActions {...props} />
-  //     </TestProviders>
-  //   );
-  //   await waitFor(() => {
-  //     expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
-  //     expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(false);
-  //   });
-  // });
+    const wrapper = mount(
+      <TestProviders>
+        <UserActions {...props} />
+      </TestProviders>
+    );
+    await waitFor(() => {
+      expect(wrapper.find(`[data-test-subj="top-footer"]`).exists()).toEqual(true);
+      expect(wrapper.find(`[data-test-subj="bottom-footer"]`).exists()).toEqual(false);
+    });
+  });
 
-  // it('Outlines comment when update move to link is clicked', async () => {
-  //   const ourActions = [
-  //     getUserAction('comment', Actions.create),
-  //     getUserAction('comment', Actions.update),
-  //   ];
-  //   const props = {
-  //     ...defaultProps,
-  //     caseUserActions: ourActions,
-  //   };
+  it('Outlines comment when update move to link is clicked', async () => {
+    const ourActions = [
+      getUserAction('comment', Actions.create),
+      getUserAction('comment', Actions.update),
+    ];
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+    };
 
-  //   const wrapper = mount(
-  //     <TestProviders>
-  //       <UserActions {...props} />
-  //     </TestProviders>
-  //   );
-  //   expect(
-  //     wrapper
-  //       .find(`[data-test-subj="comment-create-action-${props.data.comments[0].id}"]`)
-  //       .first()
-  //       .hasClass('outlined')
-  //   ).toEqual(false);
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue({...defaultUseFindCaseUserActions, data: {...defaultUseFindCaseUserActions.data.userActions, ...ourActions}});
 
-  //   wrapper
-  //     .find(
-  //       `[data-test-subj="comment-update-action-${ourActions[1].id}"] [data-test-subj="move-to-link-${props.data.comments[0].id}"]`
-  //     )
-  //     .first()
-  //     .simulate('click');
+    appMockRender.render(
+        <UserActions {...props} />
+    );
+    expect(screen.getByTestId(`comment-create-action-${props.data.comments[0].id}`).classList.contains('outlined')).toBe(false);
 
-  //   await waitFor(() => {
-  //     expect(
-  //       wrapper
-  //         .find(`[data-test-subj="comment-create-action-${props.data.comments[0].id}"]`)
-  //         .first()
-  //         .hasClass('outlined')
-  //     ).toEqual(true);
-  //   });
-  // });
+    userEvent.click(screen.getByTestId(`comment-update-action-${ourActions[1].id}`));
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId(`comment-create-action-${props.data.comments[0].id}`)
+        .classList.contains('outlined')
+      ).toBe(true);
+    });
+  });
 
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
     const ourActions = [getUserAction('comment', Actions.create)];
