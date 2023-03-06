@@ -335,7 +335,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
             http,
             savedObjectsManagement,
           }}
-          leftButton={createLensButton}
+          leftChildren={createLensButton}
           helpText={i18n.translate(
             'xpack.cases.markdownEditor.plugins.lens.savedObjects.finder.searchInputHelpText',
             {

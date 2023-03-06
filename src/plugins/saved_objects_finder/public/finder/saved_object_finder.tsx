@@ -8,7 +8,7 @@
 
 import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
-import React, { ReactNode } from 'react';
+import React, { ReactElement, ReactNode } from 'react';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 
 import {
@@ -72,10 +72,10 @@ interface BaseSavedObjectFinder {
     name: string,
     savedObject: SavedObjectCommon
   ) => void;
-  noItemsMessage?: React.ReactNode;
+  noItemsMessage?: ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   showFilter?: boolean;
-  leftButton?: ReactNode;
+  leftChildren?: ReactElement | ReactElement[];
   helpText?: string;
 }
 
@@ -360,7 +360,7 @@ export class SavedObjectFinderUi extends React.Component<
           ]
         : undefined,
       toolsRight: this.props.children ? <>{this.props.children}</> : undefined,
-      toolsLeft: this.props.leftButton ? <>{this.props.leftButton}</> : undefined,
+      toolsLeft: this.props.leftChildren ? <>{this.props.leftChildren}</> : undefined,
     };
 
     return (
