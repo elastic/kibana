@@ -104,12 +104,14 @@ const loadNewSavedSearch = async (
     internalStateContainer: InternalStateContainer;
     savedSearchContainer: SavedSearchContainer;
     services: DiscoverServices;
-    loadAndResolveDataView: () => Promise<{ dataView: DataView }>;
+    loadAndResolveDataView: (id: string | undefined) => Promise<{ dataView: DataView }>;
   }
 ) => {
   addLog('🧭 [discoverState] loadNewSavedSearch', { nextDataView });
   const isEmptyURL = appStateContainer.isEmptyURL();
-  let { dataView } = nextDataView ? { dataView: nextDataView } : await loadAndResolveDataView();
+  let { dataView } = nextDataView
+    ? { dataView: nextDataView }
+    : await loadAndResolveDataView(appStateContainer.getState().index);
   const nextSavedSearch = await savedSearchContainer.new(
     dataView,
     !isEmptyURL ? appStateContainer.getState() : undefined
