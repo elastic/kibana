@@ -11,6 +11,7 @@ import classNames from 'classnames';
 import { EuiIcon, EuiFlexItem, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DropType } from '../types';
+import { DEFAULT_DATA_TEST_SUBJ } from '../constants';
 
 function getPropsForDropType(type: 'swap' | 'duplicate' | 'combine') {
   switch (type) {
@@ -72,7 +73,7 @@ const getExtraDrop = ({
           <EuiFlexItem grow={false}>
             <EuiIcon size="m" type={icon} />
           </EuiFlexItem>
-          <EuiFlexItem grow={false} data-test-subj={`domDragDrop-dropTarget-${type}`}>
+          <EuiFlexItem grow={false} data-test-subj={`${DEFAULT_DATA_TEST_SUBJ}-dropTarget-${type}`}>
             <EuiText size="s">{label}</EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>
