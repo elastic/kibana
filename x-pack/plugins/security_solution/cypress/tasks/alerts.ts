@@ -42,6 +42,7 @@ import {
   CELL_FILTER_OUT_BUTTON,
   SHOW_TOP_N_CLOSE_BUTTON,
   ALERTS_HISTOGRAM_LEGEND,
+  LEGEND_ACTIONS,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -319,6 +320,18 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
 
 export const clickAlertsHistogramLegend = () => {
   cy.get(ALERTS_HISTOGRAM_LEGEND).click();
+};
+
+export const clickAlertsHistogramLegendAddToTimeline = (ruleName: string) => {
+  cy.get(LEGEND_ACTIONS.ADD_TO_TIMELINE(ruleName)).click();
+};
+
+export const clickAlertsHistogramLegendFilterOut = (ruleName: string) => {
+  cy.get(LEGEND_ACTIONS.FILTER_OUT(ruleName)).click();
+};
+
+export const clickAlertsHistogramLegendFilterFor = (ruleName: string) => {
+  cy.get(LEGEND_ACTIONS.FILTER_FOR(ruleName)).click();
 };
 
 const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {

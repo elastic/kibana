@@ -7,7 +7,13 @@
 
 import { getNewRule } from '../../objects/rule';
 import { ALERTS_COUNT, LEGEND_ACTIONS } from '../../screens/alerts';
-import { clickAlertsHistogramLegend, selectAlertsHistogram } from '../../tasks/alerts';
+import {
+  clickAlertsHistogramLegend,
+  clickAlertsHistogramLegendAddToTimeline,
+  clickAlertsHistogramLegendFilterFor,
+  clickAlertsHistogramLegendFilterOut,
+  selectAlertsHistogram,
+} from '../../tasks/alerts';
 import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
@@ -32,7 +38,7 @@ describe('Histogram legend hover actions', { testIsolation: false }, () => {
   it('Filter in/out should add a filter to KQL bar', function () {
     const expectedNumberOfAlerts = 2;
     clickAlertsHistogramLegend();
-    cy.get(LEGEND_ACTIONS.FILTER_FOR(ruleConfigs.name)).click();
+    clickAlertsHistogramLegendFilterFor(ruleConfigs.name);
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
       'have.text',
       `kibana.alert.rule.name: ${ruleConfigs.name}`
@@ -40,7 +46,7 @@ describe('Histogram legend hover actions', { testIsolation: false }, () => {
     cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
 
     clickAlertsHistogramLegend();
-    cy.get(LEGEND_ACTIONS.FILTER_OUT(ruleConfigs.name)).click();
+    clickAlertsHistogramLegendFilterOut(ruleConfigs.name);
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
       'have.text',
       `NOT kibana.alert.rule.name: ${ruleConfigs.name}`
@@ -53,7 +59,7 @@ describe('Histogram legend hover actions', { testIsolation: false }, () => {
 
   it('Add To Timeline', function () {
     clickAlertsHistogramLegend();
-    cy.get(LEGEND_ACTIONS.ADD_TO_TIMELINE(ruleConfigs.name)).click();
+    clickAlertsHistogramLegendAddToTimeline(ruleConfigs.name);
     cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('be.visible');
     cy.get(TIMELINE_DATA_PROVIDERS_CONTAINER).should('contain.text', getNewRule().name);
     closeTimelineUsingCloseButton();
