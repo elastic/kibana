@@ -53,11 +53,6 @@ export interface ExpressionChartRow {
 
 export type ExpressionChartSeries = ExpressionChartRow[][];
 
-export interface ExpressionChartData {
-  id: string;
-  series: ExpressionChartSeries;
-}
-
 export interface AlertParams {
   criteria: MetricExpression[];
   groupBy?: string | string[];

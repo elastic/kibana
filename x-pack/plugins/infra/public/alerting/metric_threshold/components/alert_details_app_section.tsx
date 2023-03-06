@@ -1,0 +1,58 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { Rule } from '@kbn/alerting-plugin/common';
+import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import { MetricExpression } from '../types';
+import { ExpressionChart } from './expression_chart';
+import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+
+interface AppSectionProps {
+  rule: Rule<{
+    filterQueryText?: string;
+    groupBy?: string | string[];
+    criteria?: MetricExpression[];
+  }>;
+}
+
+export function AlertDetailsAppSection({ rule }: AppSectionProps) {
+  const { http, notifications } = useKibanaContextForPlugin().services;
+  const { source, createDerivedIndexPattern } = useSourceViaHttp({
+    sourceId: 'default',
+    fetch: http.fetch,
+    toastWarning: notifications.toasts.addWarning,
+  });
+  const derivedIndexPattern = useMemo(
+    () => createDerivedIndexPattern(),
+    [createDerivedIndexPattern]
+  );
+
+  return !!rule.params.criteria ? (
+    <EuiFlexGroup direction="column">
+      {rule.params.criteria.map((criterion) => (
+        <EuiFlexItem key={criterion.aggType + criterion.comparator + criterion.threshold[0]}>
+          <EuiPanel hasBorder hasShadow={false}>
+            <ExpressionChart
+              expression={criterion}
+              derivedIndexPattern={derivedIndexPattern}
+              source={source}
+              filterQuery={rule.params.filterQueryText}
+              groupBy={rule.params.groupBy}
+              chartType={MetricsExplorerChartType.line}
+            />
+          </EuiPanel>
+        </EuiFlexItem>
+      ))}
+    </EuiFlexGroup>
+  ) : null;
+}
+
+// eslint-disable-next-line import/no-default-export
+export default AlertDetailsAppSection;

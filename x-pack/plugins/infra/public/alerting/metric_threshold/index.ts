@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import { lazy } from 'react';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import {
@@ -30,7 +30,7 @@ export function createMetricThresholdRuleType(): ObservabilityRuleTypeModel<Metr
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.metricsThreshold}`;
     },
-    ruleParamsExpression: React.lazy(() => import('./components/expression')),
+    ruleParamsExpression: lazy(() => import('./components/expression')),
     validate: validateMetricThreshold,
     defaultActionMessage: i18n.translate(
       'xpack.infra.metrics.alerting.threshold.defaultActionMessage',
@@ -44,5 +44,6 @@ Reason:
     ),
     requiresAppContext: false,
     format: formatReason,
+    alertDetailsAppSection: lazy(() => import('./components/alert_details_app_section')),
   };
 }
