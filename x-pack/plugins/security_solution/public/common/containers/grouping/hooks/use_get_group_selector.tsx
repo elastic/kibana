@@ -15,6 +15,7 @@ import type { State } from '../../../store';
 import { defaultGroup } from '../../../store/grouping/defaults';
 import type { GroupOption } from '../../../store/grouping';
 import { groupActions, groupSelectors } from '../../../store/grouping';
+import { track } from '../../../lib/telemetry';
 
 export interface UseGetGroupSelectorArgs {
   fields: FieldSpec[];
@@ -72,6 +73,7 @@ export const useGetGroupSelector = ({ fields, groupingId, tableId }: UseGetGroup
   }, [defaultGroupingOptions, selectedGroup, setOptions, options]);
 
   const groupsSelector = getGroupSelector({
+    groupingId,
     groupSelected: selectedGroup,
     'data-test-subj': 'alerts-table-group-selector',
     onGroupChange: (groupSelection: string) => {
@@ -95,6 +97,7 @@ export const useGetGroupSelector = ({ fields, groupingId, tableId }: UseGetGroup
     },
     fields,
     options,
+    tracker: track,
   });
 
   return groupsSelector;

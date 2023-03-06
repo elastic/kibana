@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import React, { useMemo, useState } from 'react';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { defaultUnit, firstNonNullValue } from '../helpers';
 import { createGroupFilter } from './accordion_panel/helpers';
 import type { BadgeMetric, CustomMetric } from './accordion_panel';
@@ -24,11 +25,13 @@ import { EmptyGroupingComponent } from './empty_resuls_panel';
 import { groupingContainerCss, groupsUnitCountCss } from './styles';
 import { GROUPS_UNIT } from './translations';
 import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } from './types';
+import { getTelemetryEvent } from '../telemetry/const';
 
 export interface GroupingProps {
   badgeMetricStats?: (fieldBucket: RawBucket) => BadgeMetric[];
   customMetricStats?: (fieldBucket: RawBucket) => CustomMetric[];
   data?: GroupingAggregation & GroupingFieldTotalAggregation;
+  groupingId: string;
   groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element | undefined;
   groupsSelector?: JSX.Element;
   inspectButton?: JSX.Element;
@@ -42,7 +45,12 @@ export interface GroupingProps {
   };
   renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
   selectedGroup: string;
-  takeActionItems: (groupFilters: Filter[]) => JSX.Element[];
+  takeActionItems: (groupFilters: Filter[], groupNumber: number) => JSX.Element[];
+  tracker?: (
+    type: UiCounterMetricType,
+    event: string | string[],
+    count?: number | undefined
+  ) => void;
   unit?: (n: number) => string;
 }
 
@@ -50,6 +58,7 @@ const GroupingComponent = ({
   badgeMetricStats,
   customMetricStats,
   data,
+  groupingId,
   groupPanelRenderer,
   groupsSelector,
   inspectButton,
@@ -58,6 +67,7 @@ const GroupingComponent = ({
   renderChildComponent,
   selectedGroup,
   takeActionItems,
+  tracker,
   unit = defaultUnit,
 }: GroupingProps) => {
   const [trigger, setTrigger] = useState<
@@ -77,9 +87,9 @@ const GroupingComponent = ({
 
   const groupPanels = useMemo(
     () =>
-      data?.stackByMultipleFields0?.buckets?.map((groupBucket) => {
+      data?.stackByMultipleFields0?.buckets?.map((groupBucket, groupNumber) => {
         const group = firstNonNullValue(groupBucket.key);
-        const groupKey = `group0-${group}`;
+        const groupKey = `group-${groupNumber}-${group}`;
 
         return (
           <span key={groupKey}>
@@ -87,7 +97,10 @@ const GroupingComponent = ({
               extraAction={
                 <GroupStats
                   bucket={groupBucket}
-                  takeActionItems={takeActionItems(createGroupFilter(selectedGroup, group))}
+                  takeActionItems={takeActionItems(
+                    createGroupFilter(selectedGroup, group),
+                    groupNumber
+                  )}
                   badgeMetricStats={badgeMetricStats && badgeMetricStats(groupBucket)}
                   customMetricStats={customMetricStats && customMetricStats(groupBucket)}
                 />
@@ -97,6 +110,10 @@ const GroupingComponent = ({
               groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
               isLoading={isLoading}
               onToggleGroup={(isOpen) => {
+                tracker?.(
+                  METRIC_TYPE.CLICK,
+                  getTelemetryEvent.groupToggled({ isOpen, groupingId, groupNumber })
+                );
                 setTrigger({
                   // ...trigger, -> this change will keep only one group at a time expanded and one table displayed
                   [groupKey]: {
@@ -120,11 +137,13 @@ const GroupingComponent = ({
       badgeMetricStats,
       customMetricStats,
       data?.stackByMultipleFields0?.buckets,
+      groupingId,
       groupPanelRenderer,
       isLoading,
       renderChildComponent,
       selectedGroup,
       takeActionItems,
+      tracker,
       trigger,
     ]
   );

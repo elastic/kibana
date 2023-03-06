@@ -48,6 +48,7 @@ import {
 } from './grouping_settings';
 import { initGrouping } from '../../../common/store/grouping/actions';
 import { useGroupingPagination } from '../../../common/containers/grouping/hooks/use_grouping_pagination';
+import { track } from '../../../common/lib/telemetry';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 
@@ -226,9 +227,13 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   });
 
   const getTakeActionItems = useCallback(
-    (groupFilters: Filter[]) =>
-      takeActionItems(getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery),
-    [defaultFilters, getGlobalQuery, takeActionItems]
+    (groupFilters: Filter[], groupNumber: number) =>
+      takeActionItems(
+        getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
+        tableId,
+        groupNumber
+      ),
+    [defaultFilters, getGlobalQuery, tableId, takeActionItems]
   );
 
   const groupedAlerts = useMemo(
@@ -241,6 +246,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
             customMetricStats: (fieldBucket: RawBucket) =>
               getSelectedGroupCustomMetrics(selectedGroup, fieldBucket),
             data: alertsGroupsData?.aggregations,
+            groupingId,
             groupPanelRenderer: (fieldBucket: RawBucket) =>
               getSelectedGroupButtonContent(selectedGroup, fieldBucket),
             groupsSelector,
@@ -250,11 +256,13 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
             renderChildComponent,
             selectedGroup,
             takeActionItems: getTakeActionItems,
+            tracker: track,
             unit: defaultUnit,
           }),
     [
       alertsGroupsData?.aggregations,
       getTakeActionItems,
+      groupingId,
       groupsSelector,
       inspect,
       isLoadingGroups,

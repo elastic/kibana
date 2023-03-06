@@ -9,6 +9,7 @@ import type { UiCounterMetricType } from '@kbn/analytics';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import type { SetupPlugins } from '../../../types';
+import type { AlertWorkflowStatus } from '../../types';
 export { telemetryMiddleware } from './middleware';
 
 export { METRIC_TYPE };
@@ -40,8 +41,6 @@ export enum TELEMETRY_EVENT {
   SIEM_RULE_DISABLED = 'siem_rule_disabled',
   CUSTOM_RULE_ENABLED = 'custom_rule_enabled',
   CUSTOM_RULE_DISABLED = 'custom_rule_disabled',
-  GROUP_ALERTS = 'group_alerts_',
-
   // ML
   SIEM_JOB_ENABLED = 'siem_job_enabled',
   SIEM_JOB_DISABLED = 'siem_job_disabled',
@@ -68,3 +67,15 @@ export enum TELEMETRY_EVENT {
   BREADCRUMB = 'breadcrumb_',
   LEGACY_NAVIGATION = 'legacy_navigation_',
 }
+
+export const getTelemetryEvent = {
+  groupedAlertsTakeAction: ({
+    tableId,
+    groupNumber,
+    status,
+  }: {
+    tableId: string;
+    groupNumber: number;
+    status: AlertWorkflowStatus;
+  }) => `alerts_table_${tableId}_group-${groupNumber}_mark-${status}`,
+};
