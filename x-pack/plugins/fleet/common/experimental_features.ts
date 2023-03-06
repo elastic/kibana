@@ -19,7 +19,7 @@ export const allowedExperimentalValues = Object.freeze({
   experimentalDataStreamSettings: false,
   displayAgentMetrics: true,
   showIntegrationsSubcategories: false,
-  agentFqdnMode: true,
+  agentFqdnMode: false,
   showExperimentalShipperOptions: false,
   fleetServerStandalone: false,
 });

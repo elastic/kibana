@@ -1,6 +1,7 @@
 get:
-  summary: Packages - Info
-  tags: []
+  summary: Get package
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -36,17 +37,18 @@ get:
       name: pkgkey
       in: path
       required: true
-    - in: query 
+    - in: query
       name: prerelease
       schema:
         type: boolean
         default: false
       description: >-
-        Whether to return prerelease versions of packages (e.g. beta, rc, preview) 
+        Whether to return prerelease versions of packages (e.g. beta, rc, preview)
   deprecated: true
 post:
-  summary: Packages - Install
-  tags: []
+  summary: Install package
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
@@ -92,8 +94,9 @@ post:
               type: boolean
   deprecated: true
 delete:
-  summary: Packages - Delete
-  tags: []
+  summary: Delete ackage
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK
