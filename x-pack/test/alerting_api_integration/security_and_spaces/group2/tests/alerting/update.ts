@@ -127,6 +127,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                     connector_type_id: 'test.noop',
                     group: 'default',
                     params: {},
+                    uuid: response.body.actions[0].uuid,
                   },
                 ],
                 scheduled_task_id: createdAlert.scheduled_task_id,

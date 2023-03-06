@@ -6,11 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CspBenchmarksPage, CspPage, CspPageNavigationItem } from './types';
+import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
+import { PosturePolicyTemplate } from '../../../common/types';
+import type {
+  CspBenchmarksPage,
+  CspIntegrationDocNavigationItem,
+  CspPage,
+  CspPageNavigationItem,
+} from './types';
 
 const NAV_ITEMS_NAMES = {
   DASHBOARD: i18n.translate('xpack.csp.navigation.dashboardNavItemLabel', {
-    defaultMessage: 'Cloud Posture',
+    defaultMessage: 'Cloud Security Posture',
   }),
   FINDINGS: i18n.translate('xpack.csp.navigation.findingsNavItemLabel', {
     defaultMessage: 'Findings',
@@ -67,5 +74,21 @@ export const findingsNavigation = {
     name: NAV_ITEMS_NAMES.FINDINGS,
     path: `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/resource/:resourceId`,
     id: 'cloud_security_posture-findings-resourceId',
+  },
+};
+
+const ELASTIC_BASE_SHORT_URL = 'https://ela.st';
+
+export const cspIntegrationDocsNavigation: Record<
+  PosturePolicyTemplate,
+  CspIntegrationDocNavigationItem
+> = {
+  kspm: {
+    overviewPath: `${ELASTIC_BASE_SHORT_URL}/${KSPM_POLICY_TEMPLATE}`,
+    getStartedPath: `${ELASTIC_BASE_SHORT_URL}/${KSPM_POLICY_TEMPLATE}-get-started`,
+  },
+  cspm: {
+    overviewPath: `${ELASTIC_BASE_SHORT_URL}/${CSPM_POLICY_TEMPLATE}`,
+    getStartedPath: `${ELASTIC_BASE_SHORT_URL}/${CSPM_POLICY_TEMPLATE}-get-started`,
   },
 };

@@ -124,7 +124,7 @@ export const TRANSFORM_HEALTH_LABEL = {
     defaultMessage: 'Degraded',
   }),
   red: i18n.translate('xpack.transform.transformHealth.redLabel', {
-    defaultMessage: 'Outage',
+    defaultMessage: 'Unavailable',
   }),
 } as const;
 

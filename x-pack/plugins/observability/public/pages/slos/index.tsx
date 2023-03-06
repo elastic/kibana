@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -13,14 +13,15 @@ import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useLicense } from '../../hooks/use_license';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
 import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
+import { AutoRefreshButton } from './components/auto_refresh_button';
 import PageNotFound from '../404';
 import { paths } from '../../config';
 import { isSloFeatureEnabled } from './helpers/is_slo_feature_enabled';
 import type { ObservabilityAppServices } from '../../application/types';
-import { useCapabilities } from '../../hooks/slo/use_capabilities';
 
 export function SlosPage() {
   const {
@@ -31,10 +32,11 @@ export function SlosPage() {
   const { hasWriteCapabilities } = useCapabilities();
   const { hasAtLeast } = useLicense();
 
-  const {
-    loading,
-    sloList: { total },
-  } = useFetchSloList({ refetch: false });
+  const { isInitialLoading, isLoading, sloList } = useFetchSloList();
+
+  const { total } = sloList || {};
+
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(true);
 
   useBreadcrumbs([
     {
@@ -49,15 +51,19 @@ export function SlosPage() {
     navigateToUrl(basePath.prepend(paths.observability.sloCreate));
   };
 
+  const handleToggleAutoRefresh = () => {
+    setIsAutoRefreshing(!isAutoRefreshing);
+  };
+
   if (!isSloFeatureEnabled(config)) {
     return <PageNotFound />;
   }
 
-  if (loading) {
+  if (isInitialLoading) {
     return null;
   }
 
-  if (total === 0 || !hasAtLeast('platinum')) {
+  if ((!isLoading && total === 0) || !hasAtLeast('platinum')) {
     return <SloListWelcomePrompt />;
   }
 
@@ -69,22 +75,26 @@ export function SlosPage() {
         }),
         rightSideItems: [
           <EuiButton
-            disabled={!hasWriteCapabilities}
             color="primary"
+            data-test-subj="slosPage-createNewSloButton"
+            disabled={!hasWriteCapabilities}
             fill
             onClick={handleClickCreateSlo}
-            data-test-subj="slosPage-createNewSloButton"
           >
             {i18n.translate('xpack.observability.slos.sloList.pageHeader.createNewButtonLabel', {
               defaultMessage: 'Create new SLO',
             })}
           </EuiButton>,
+          <AutoRefreshButton
+            isAutoRefreshing={isAutoRefreshing}
+            onClick={handleToggleAutoRefresh}
+          />,
         ],
         bottomBorder: false,
       }}
       data-test-subj="slosPage"
     >
-      <SloList />
+      <SloList autoRefresh={isAutoRefreshing} />
     </ObservabilityPageTemplate>
   );
 }

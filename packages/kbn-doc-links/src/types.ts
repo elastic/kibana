@@ -355,6 +355,7 @@ export interface DocLinks {
     createAlerts: string;
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
+    syntheticsMigrateFromIntegration: string;
   }>;
   readonly alerting: Readonly<{
     guide: string;

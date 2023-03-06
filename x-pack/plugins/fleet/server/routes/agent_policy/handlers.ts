@@ -358,7 +358,7 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
         const body = fullAgentConfigMap;
         const headers: ResponseHeaders = {
           'content-type': 'text/x-yaml',
-          'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yaml"`,
+          'content-disposition': `attachment; filename="elastic-agent-standalone-kubernetes.yml"`,
         };
         return response.ok({
           body,
@@ -438,7 +438,7 @@ export const downloadK8sManifest: FleetRequestHandler<
       const body = fullAgentManifest;
       const headers: ResponseHeaders = {
         'content-type': 'text/x-yaml',
-        'content-disposition': `attachment; filename="elastic-agent-managed-kubernetes.yaml"`,
+        'content-disposition': `attachment; filename="elastic-agent-managed-kubernetes.yml"`,
       };
       return response.ok({
         body,

@@ -11,13 +11,13 @@ import { createQueryObservable } from './query_observable';
 import type { CrudClient } from '../crud_client';
 import type { CreateIn, GetIn, UpdateIn, DeleteIn, SearchIn } from '../../common';
 
-const queryKeyBuilder = {
+export const queryKeyBuilder = {
   all: (type: string) => [type] as const,
   item: (type: string, id: string) => {
     return [...queryKeyBuilder.all(type), id] as const;
   },
-  search: (type: string, params: unknown) => {
-    return [...queryKeyBuilder.all(type), 'search', params] as const;
+  search: (type: string, query: unknown) => {
+    return [...queryKeyBuilder.all(type), 'search', query] as const;
   },
 };
 
@@ -30,13 +30,13 @@ const createQueryOptionBuilder = ({
     get: <I extends GetIn = GetIn, O = unknown>(input: I) => {
       return {
         queryKey: queryKeyBuilder.item(input.contentTypeId, input.id),
-        queryFn: () => crudClientProvider(input.contentTypeId).get<I, O>(input),
+        queryFn: () => crudClientProvider(input.contentTypeId).get(input) as Promise<O>,
       };
     },
     search: <I extends SearchIn = SearchIn, O = unknown>(input: I) => {
       return {
         queryKey: queryKeyBuilder.search(input.contentTypeId, input.query),
-        queryFn: () => crudClientProvider(input.contentTypeId).search<I, O>(input),
+        queryFn: () => crudClientProvider(input.contentTypeId).search(input) as Promise<O>,
       };
     },
   };
@@ -62,19 +62,19 @@ export class ContentClient {
   }
 
   create<I extends CreateIn, O = unknown>(input: I): Promise<O> {
-    return this.crudClientProvider(input.contentTypeId).create(input);
+    return this.crudClientProvider(input.contentTypeId).create(input) as Promise<O>;
   }
 
   update<I extends UpdateIn, O = unknown>(input: I): Promise<O> {
-    return this.crudClientProvider(input.contentTypeId).update(input);
+    return this.crudClientProvider(input.contentTypeId).update(input) as Promise<O>;
   }
 
   delete<I extends DeleteIn, O = unknown>(input: I): Promise<O> {
-    return this.crudClientProvider(input.contentTypeId).delete(input);
+    return this.crudClientProvider(input.contentTypeId).delete(input) as Promise<O>;
   }
 
   search<I extends SearchIn, O = unknown>(input: I): Promise<O> {
-    return this.crudClientProvider(input.contentTypeId).search(input);
+    return this.crudClientProvider(input.contentTypeId).search(input) as Promise<O>;
   }
 
   search$<I extends SearchIn, O = unknown>(input: I) {

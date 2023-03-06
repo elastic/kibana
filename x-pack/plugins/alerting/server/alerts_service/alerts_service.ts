@@ -13,8 +13,14 @@ import {
 import { get, isEmpty, isEqual } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
-import { FieldMap } from '../../common/alert_schema/field_maps/types';
-import { alertFieldMap } from '../../common/alert_schema';
+import {
+  alertFieldMap,
+  ecsFieldMap,
+  legacyAlertFieldMap,
+  type FieldMap,
+} from '@kbn/alerts-as-data-utils';
+import { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { asyncForEach } from '@kbn/std';
 import {
   DEFAULT_ALERTS_ILM_POLICY_NAME,
   DEFAULT_ALERTS_ILM_POLICY,
@@ -34,7 +40,9 @@ import {
 
 const TOTAL_FIELDS_LIMIT = 2500;
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
-
+const LEGACY_ALERT_CONTEXT = 'legacy-alert';
+export const ECS_CONTEXT = `ecs`;
+export const ECS_COMPONENT_TEMPLATE_NAME = getComponentTemplateName(ECS_CONTEXT);
 interface AlertsServiceParams {
   logger: Logger;
   pluginStop$: Observable<void>;
@@ -107,6 +115,16 @@ export class AlertsService implements IAlertsService {
         const initFns = [
           () => this.createOrUpdateIlmPolicy(esClient),
           () => this.createOrUpdateComponentTemplate(esClient, getComponentTemplate(alertFieldMap)),
+          () =>
+            this.createOrUpdateComponentTemplate(
+              esClient,
+              getComponentTemplate(legacyAlertFieldMap, LEGACY_ALERT_CONTEXT)
+            ),
+          () =>
+            this.createOrUpdateComponentTemplate(
+              esClient,
+              getComponentTemplate(ecsFieldMap, ECS_CONTEXT)
+            ),
         ];
 
         for (const fn of initFns) {
@@ -127,7 +145,8 @@ export class AlertsService implements IAlertsService {
     });
   }
 
-  public register({ context, fieldMap }: IRuleTypeAlerts, timeoutMs?: number) {
+  public register(opts: IRuleTypeAlerts, timeoutMs?: number) {
+    const { context, fieldMap } = opts;
     // check whether this context has been registered before
     if (this.registeredContexts.has(context)) {
       const registeredFieldMap = this.registeredContexts.get(context);
@@ -140,37 +159,54 @@ export class AlertsService implements IAlertsService {
 
     this.options.logger.info(`Registering resources for context "${context}".`);
     this.registeredContexts.set(context, fieldMap);
-    this.resourceInitializationHelper.add({ context, fieldMap }, timeoutMs);
+    this.resourceInitializationHelper.add(opts, timeoutMs);
   }
 
-  private async initializeContext({ context, fieldMap }: IRuleTypeAlerts, timeoutMs?: number) {
+  private async initializeContext(
+    { context, fieldMap, useEcs, useLegacyAlerts }: IRuleTypeAlerts,
+    timeoutMs?: number
+  ) {
     const esClient = await this.options.elasticsearchClientPromise;
 
     const indexTemplateAndPattern = getIndexTemplateAndPattern(context);
 
-    // Context specific initialization installs component template, index template and write index
-    // If fieldMap is empty, don't create context specific component template
-    const initFns = isEmpty(fieldMap)
-      ? [
-          async () =>
-            await this.createOrUpdateIndexTemplate(esClient, indexTemplateAndPattern, [
-              getComponentTemplateName(),
-            ]),
-          async () => await this.createConcreteWriteIndex(esClient, indexTemplateAndPattern),
-        ]
-      : [
-          async () =>
-            await this.createOrUpdateComponentTemplate(
-              esClient,
-              getComponentTemplate(fieldMap, context)
-            ),
-          async () =>
-            await this.createOrUpdateIndexTemplate(esClient, indexTemplateAndPattern, [
-              getComponentTemplateName(),
-              getComponentTemplateName(context),
-            ]),
-          async () => await this.createConcreteWriteIndex(esClient, indexTemplateAndPattern),
-        ];
+    let initFns: Array<() => Promise<void>> = [];
+
+    // List of component templates to reference
+    const componentTemplateRefs: string[] = [];
+
+    // If fieldMap is not empty, create a context specific component template
+    if (!isEmpty(fieldMap)) {
+      const componentTemplate = getComponentTemplate(fieldMap, context);
+      initFns.push(
+        async () => await this.createOrUpdateComponentTemplate(esClient, componentTemplate)
+      );
+      componentTemplateRefs.push(componentTemplate.name);
+    }
+
+    // If useLegacy is set to true, add the legacy alert component template to the references
+    if (useLegacyAlerts) {
+      componentTemplateRefs.push(getComponentTemplateName(LEGACY_ALERT_CONTEXT));
+    }
+
+    // If useEcs is set to true, add the ECS component template to the references
+    if (useEcs) {
+      componentTemplateRefs.push(getComponentTemplateName(ECS_CONTEXT));
+    }
+
+    // Add framework component template to the references
+    componentTemplateRefs.push(getComponentTemplateName());
+
+    // Context specific initialization installs index template and write index
+    initFns = initFns.concat([
+      async () =>
+        await this.createOrUpdateIndexTemplate(
+          esClient,
+          indexTemplateAndPattern,
+          componentTemplateRefs
+        ),
+      async () => await this.createConcreteWriteIndex(esClient, indexTemplateAndPattern),
+    ]);
 
     for (const fn of initFns) {
       await this.installWithTimeout(async () => await fn(), timeoutMs);
@@ -200,6 +236,62 @@ export class AlertsService implements IAlertsService {
     }
   }
 
+  private async getIndexTemplatesUsingComponentTemplate(
+    esClient: ElasticsearchClient,
+    componentTemplateName: string
+  ) {
+    // Get all index templates and filter down to just the ones referencing this component template
+    const { index_templates: indexTemplates } = await esClient.indices.getIndexTemplate();
+    const indexTemplatesUsingComponentTemplate = (indexTemplates ?? []).filter(
+      (indexTemplate: IndicesGetIndexTemplateIndexTemplateItem) =>
+        indexTemplate.index_template.composed_of.includes(componentTemplateName)
+    );
+    await asyncForEach(
+      indexTemplatesUsingComponentTemplate,
+      async (template: IndicesGetIndexTemplateIndexTemplateItem) => {
+        await esClient.indices.putIndexTemplate({
+          name: template.name,
+          body: {
+            ...template.index_template,
+            template: {
+              ...template.index_template.template,
+              settings: {
+                ...template.index_template.template?.settings,
+                'index.mapping.total_fields.limit': TOTAL_FIELDS_LIMIT,
+              },
+            },
+          },
+        });
+      }
+    );
+  }
+
+  private async createOrUpdateComponentTemplateHelper(
+    esClient: ElasticsearchClient,
+    template: ClusterPutComponentTemplateRequest
+  ) {
+    try {
+      await esClient.cluster.putComponentTemplate(template);
+    } catch (error) {
+      const reason = error?.meta?.body?.error?.caused_by?.caused_by?.caused_by?.reason;
+      if (reason && reason.match(/Limit of total fields \[\d+\] has been exceeded/) != null) {
+        // This error message occurs when there is an index template using this component template
+        // that contains a field limit setting that using this component template exceeds
+        // Specifically, this can happen for the ECS component template when we add new fields
+        // to adhere to the ECS spec. Individual index templates specify field limits so if the
+        // number of new ECS fields pushes the composed mapping above the limit, this error will
+        // occur. We have to update the field limit inside the index template now otherwise we
+        // can never update the component template
+        await this.getIndexTemplatesUsingComponentTemplate(esClient, template.name);
+
+        // Try to update the component template again
+        await esClient.cluster.putComponentTemplate(template);
+      } else {
+        throw error;
+      }
+    }
+  }
+
   private async createOrUpdateComponentTemplate(
     esClient: ElasticsearchClient,
     template: ClusterPutComponentTemplateRequest
@@ -207,9 +299,12 @@ export class AlertsService implements IAlertsService {
     this.options.logger.info(`Installing component template ${template.name}`);
 
     try {
-      await retryTransientEsErrors(() => esClient.cluster.putComponentTemplate(template), {
-        logger: this.options.logger,
-      });
+      await retryTransientEsErrors(
+        () => this.createOrUpdateComponentTemplateHelper(esClient, template),
+        {
+          logger: this.options.logger,
+        }
+      );
     } catch (err) {
       this.options.logger.error(
         `Error installing component template ${template.name} - ${err.message}`

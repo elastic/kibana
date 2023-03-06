@@ -1,6 +1,5 @@
-[role="xpack"]
 [[resilient-action-type]]
-=== IBM Resilient connector and action
+== IBM Resilient connector and action
 ++++
 <titleabbrev>IBM Resilient</titleabbrev>
 ++++
@@ -8,10 +7,20 @@
 The IBM Resilient connector uses the https://developer.ibm.com/security/resilient/rest/[RESILIENT REST v2] to create IBM Resilient incidents.
 
 [float]
+[[define-resilient-ui]]
+=== Create connectors in {kib}
+
+You can create connectors in *{stack-manage-app} > {connectors-ui}*
+or as needed when you're creating a rule. For example:
+
+[role="screenshot"]
+image::management/connectors/images/resilient-connector.png[IBM Resilient connector]
+
+[float]
 [[resilient-connector-configuration]]
 ==== Connector configuration
 
-IBM Resilient connectors have the following configuration properties.
+IBM Resilient connectors have the following configuration properties:
 
 Name::      The name of the connector.
 URL::       IBM Resilient instance URL.
@@ -20,26 +29,25 @@ API key ID::  The authentication key ID for HTTP Basic authentication.
 API key secret::  The authentication key secret for HTTP Basic authentication.
 
 [float]
-[[resilient-connector-networking-configuration]]
-==== Connector networking configuration
+[[preconfigured-resilient-configuration]]
+=== Create preconfigured connectors
 
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-[float]
-[[Preconfigured-resilient-configuration]]
-==== Preconfigured connector type
+If you are running {kib} on-prem, you can define connectors by
+adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
+For example:
 
 [source,text]
 --
- my-resilient:
-   name: preconfigured-resilient-connector-type
-   actionTypeId: .resilient
-   config:
-     apiUrl: https://elastic.resilient.net
-     orgId: ES
-   secrets:
-     apiKeyId: testuser
-     apiKeySecret: tokenkeystorevalue
+xpack.actions.preconfigured:
+  my-resilient:
+    name: preconfigured-resilient-connector-type
+    actionTypeId: .resilient
+    config:
+      apiUrl: https://elastic.resilient.net
+      orgId: ES
+    secrets:
+      apiKeyId: testuser
+      apiKeySecret: tokenkeystorevalue
 --
 
 Config defines information for the connector type.
@@ -53,22 +61,15 @@ Secrets defines sensitive information for the connector type.
 `apiKeySecret`:: A string that corresponds to *API Key secret*. Should be stored in the <<creating-keystore, {kib} keystore>>.
 
 [float]
-[[define-resilient-ui]]
-==== Define connector in {stack-manage-app}
+[[resilient-action-configuration]]
+=== Test connectors
 
-Define IBM Resilient connector properties.
-
-[role="screenshot"]
-image::management/connectors/images/resilient-connector.png[IBM Resilient connector]
-
-Test IBM Resilient action parameters.
+You can test connectors with the <<execute-connector-api,run connector API>> or
+as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/resilient-params-test.png[IBM Resilient params test]
 
-[float]
-[[resilient-action-configuration]]
-==== Action configuration
 
 IBM Resilient actions have the following configuration properties.
 
@@ -79,7 +80,13 @@ Description:: The details about the incident.
 Additional comments:: Additional information for the client, such as how to troubleshoot the issue.
 
 [float]
+[[resilient-connector-networking-configuration]]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+[float]
 [[configuring-resilient]]
-==== Configure IBM Resilient
+=== Configure IBM Resilient
 
 IBM Resilient offers https://www.ibm.com/security/intelligent-orchestration/resilient[Instances], which you can use to test incidents.

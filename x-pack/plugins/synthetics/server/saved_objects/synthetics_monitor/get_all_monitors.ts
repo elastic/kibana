@@ -87,11 +87,11 @@ export const processMonitors = async (
 
   const getLocationLabel = async (locationId: string) => {
     if (!allLocations) {
-      const { publicLocations, privateLocations } = await getAllLocations(
+      const { publicLocations, privateLocations } = await getAllLocations({
         server,
         syntheticsMonitorClient,
-        soClient
-      );
+        savedObjectsClient: soClient,
+      });
 
       allLocations = [...publicLocations, ...privateLocations];
     }

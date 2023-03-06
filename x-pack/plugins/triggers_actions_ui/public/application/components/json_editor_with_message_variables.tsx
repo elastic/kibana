@@ -37,7 +37,7 @@ interface Props {
   buttonTitle?: string;
   messageVariables?: ActionVariable[];
   paramsProperty: string;
-  inputTargetValue?: string;
+  inputTargetValue?: string | null;
   label: string;
   errors?: string[];
   areaLabel?: string;
@@ -74,6 +74,13 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   const [showErrorMessage, setShowErrorMessage] = useState(false);
 
   const { convertToJson, setXJson, xJson } = useXJsonMode(inputTargetValue ?? null);
+
+  useEffect(() => {
+    if (!xJson && inputTargetValue) {
+      setXJson(inputTargetValue);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inputTargetValue]);
 
   const onSelectMessageVariable = (variable: ActionVariable) => {
     const editor = editorRef.current;

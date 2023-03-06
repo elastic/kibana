@@ -70,3 +70,12 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
     selectCaseModal,
   ]);
 };
+
+/*
+ * Wrapper hook to support trigger actions
+ * registry props for the alert table
+ *
+ * */
+export const useBulkAddToCaseTriggerActions = () => {
+  return useBulkAddToCaseActions({});
+};

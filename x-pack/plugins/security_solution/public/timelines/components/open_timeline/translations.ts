@@ -119,7 +119,14 @@ export const ONLY_FAVORITES = i18n.translate(
 export const CREATE_RULE_FROM_TIMELINE = i18n.translate(
   'xpack.securitySolution.open.timeline.createRuleFromTimelineTooltip',
   {
-    defaultMessage: 'Create rule from timeline',
+    defaultMessage: 'Create query rule from timeline',
+  }
+);
+
+export const CREATE_RULE_FROM_TIMELINE_CORRELATION = i18n.translate(
+  'xpack.securitySolution.open.timeline.createRuleFromTimelineEqlTooltip',
+  {
+    defaultMessage: 'Create EQL rule from timeline',
   }
 );
 

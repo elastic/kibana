@@ -107,7 +107,7 @@ async function mountComponent(
 
   session.getSession$.mockReturnValue(new BehaviorSubject('123'));
 
-  stateContainer.setAppState({ interval: 'auto', query });
+  stateContainer.appState.update({ interval: 'auto', query });
   stateContainer.internalState.transitions.setDataView(dataView);
 
   const props = {
@@ -124,9 +124,9 @@ async function mountComponent(
     setExpandedDoc: jest.fn(),
     persistDataView: jest.fn(),
     updateAdHocDataViewId: jest.fn(),
-    searchSessionManager: createSearchSessionMock(session).searchSessionManager,
     updateDataViewList: jest.fn(),
   };
+  stateContainer.searchSessionManager = createSearchSessionMock(session).searchSessionManager;
 
   const component = mountWithIntl(
     <KibanaContextProvider services={services}>

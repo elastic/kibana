@@ -14,7 +14,7 @@ import { isThresholdRule } from '../../../../../../common/detection_engine/utils
 import { expandDottedObject } from '../../../../../../common/utils/expand_dotted';
 import type { RuleParams } from '../../../rule_schema';
 import aadFieldConversion from '../../../routes/index/signal_aad_mapping.json';
-import { isDetectionAlert } from '../../../signals/utils';
+import { isDetectionAlert } from '../../../rule_types/utils/utils';
 import type { DetectionAlert } from '../../../../../../common/detection_engine/schemas/alerts';
 
 export type NotificationRuleTypeParams = RuleParams & {

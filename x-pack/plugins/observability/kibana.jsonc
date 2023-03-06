@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-plugin",
-  "owner": "@elastic/observability-ui",
+  "owner": "@elastic/actionable-observability",
   "plugin": {
     "id": "observability",
     "server": true,
@@ -17,6 +17,7 @@
       "data",
       "dataViews",
       "features",
+      "files",
       "inspector",
       "ruleRegistry",
       "triggersActionsUi",
@@ -25,7 +26,6 @@
       "security",
       "guidedOnboarding",
       "share",
-      "spaces"
     ],
     "optionalPlugins": [
       "discover",

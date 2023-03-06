@@ -32,7 +32,7 @@ journey('OverviewSorting', async ({ page, params }) => {
   });
 
   step('Go to monitor-management', async () => {
-    await syntheticsApp.navigateToOverview(true);
+    await syntheticsApp.navigateToOverview(true, 15);
   });
 
   step('sort alphabetical asc', async () => {

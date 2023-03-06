@@ -45,7 +45,7 @@ describe('Case View Page activity tab', () => {
     await waitFor(async () => {
       expect(getAlertsStateTableMock).toHaveBeenCalledWith({
         alertsTableConfigurationRegistry: expect.anything(),
-        configurationId: 'securitySolution',
+        configurationId: 'securitySolution-case',
         featureIds: ['siem', 'observability'],
         id: 'case-details-alerts-securitySolution',
         query: {

@@ -77,6 +77,7 @@ export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
 export interface RuleAction {
+  uuid?: string;
   group: string;
   id: string;
   actionTypeId: string;

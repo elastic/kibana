@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { calculatePostureScore } from '../../../common/utils/helpers';
 import type { ComplianceDashboardData } from '../../../common/types';
 
@@ -41,10 +42,14 @@ const uniqueResourcesCountQuery = {
 
 export const getEvaluationsQuery = (
   query: QueryDslQueryContainer,
-  pitId: string
+  pitId: string,
+  runtimeMappings: MappingRuntimeFields
 ): SearchRequest => ({
-  query,
   size: 0,
+  // creates the `safe_posture_type` runtime fields,
+  // `safe_posture_type` is used by the `query` to filter by posture type for older findings without this field
+  runtime_mappings: runtimeMappings,
+  query,
   aggs: {
     ...findingsEvaluationAggsQuery,
     ...uniqueResourcesCountQuery,
@@ -75,10 +80,11 @@ export const getStatsFromFindingsEvaluationsAggs = (
 export const getStats = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
-  pitId: string
+  pitId: string,
+  runtimeMappings: MappingRuntimeFields
 ): Promise<ComplianceDashboardData['stats']> => {
   const evaluationsQueryResult = await esClient.search<unknown, FindingsEvaluationsQueryResult>(
-    getEvaluationsQuery(query, pitId)
+    getEvaluationsQuery(query, pitId, runtimeMappings)
   );
 
   const findingsEvaluations = evaluationsQueryResult.aggregations;

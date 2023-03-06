@@ -7,20 +7,23 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, throwIfTypeNotVisibleByAPI } from './utils';
 
 interface RouteDependencies {
+  config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
 }
 
 export const registerGetRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData, logger }: RouteDependencies
+  { config, coreUsageData, logger }: RouteDependencies
 ) => {
+  const { allowHttpApiAccess } = config;
   router.get(
     {
       path: '/{type}/{id}',
@@ -39,7 +42,10 @@ export const registerGetRoute = (
       usageStatsClient.incrementSavedObjectsGet({ request: req }).catch(() => {});
 
       const { savedObjects } = await context.core;
-      throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
+
+      if (!allowHttpApiAccess) {
+        throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
+      }
 
       const object = await savedObjects.client.get(type, id);
       return res.ok({ body: object });

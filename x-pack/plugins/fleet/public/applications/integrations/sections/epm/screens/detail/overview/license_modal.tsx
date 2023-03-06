@@ -8,13 +8,13 @@
 import React from 'react';
 import {
   EuiCodeBlock,
-  EuiLoadingContent,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
   EuiModalFooter,
   EuiModalHeaderTitle,
   EuiButton,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -34,7 +34,12 @@ export const LicenseModal: React.FunctionComponent<Props> = ({
 }) => {
   const { notifications } = useStartServices();
 
-  const { data: licenseText, error: licenseError } = useGetFileByPathQuery(licensePath);
+  const {
+    data: licenseResponse,
+    error: licenseError,
+    isLoading,
+  } = useGetFileByPathQuery(licensePath);
+  const licenseText = licenseResponse?.data;
 
   if (licenseError) {
     notifications.toasts.addError(licenseError, {
@@ -50,21 +55,9 @@ export const LicenseModal: React.FunctionComponent<Props> = ({
         <EuiModalHeaderTitle>{licenseName}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiCodeBlock overflowHeight={360}>
-          {licenseText ? (
-            licenseText
-          ) : (
-            // Simulate a long text while loading
-            <>
-              <p>
-                <EuiLoadingContent lines={5} />
-              </p>
-              <p>
-                <EuiLoadingContent lines={6} />
-              </p>
-            </>
-          )}
-        </EuiCodeBlock>
+        <EuiSkeletonText lines={10} size="s" isLoading={isLoading} contentAriaLabel="License text">
+          <EuiCodeBlock overflowHeight={360}>{licenseText}</EuiCodeBlock>
+        </EuiSkeletonText>
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButton color="primary" fill onClick={onClose}>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ObservabilityAlertSearchBar } from '@kbn/observability-plugin/public';
 import { AlertStatus } from '@kbn/observability-plugin/common/typings';
@@ -25,7 +25,7 @@ export function AlertsOverview() {
   const history = useHistory();
   const {
     path: { serviceName },
-    query: { environment, rangeFrom, rangeTo, kuery },
+    query: { environment, rangeFrom, rangeTo, kuery, alertStatus },
   } = useAnyOfApmParams(
     '/services/{serviceName}/alerts',
     '/mobile-services/{serviceName}/alerts'
@@ -34,6 +34,12 @@ export function AlertsOverview() {
   const [alertStatusFilter, setAlertStatusFilter] =
     useState<AlertStatus>(ALERT_STATUS_ALL);
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
+
+  useEffect(() => {
+    if (alertStatus) {
+      setAlertStatusFilter(alertStatus as AlertStatus);
+    }
+  }, [alertStatus]);
 
   const {
     triggersActionsUi: {

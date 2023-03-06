@@ -18,8 +18,8 @@ export const getBelongsToRuntimeMapping = (): MappingRuntimeFields => ({
       source: `
         if (!doc.containsKey('rule.benchmark.posture_type'))
           {
-            def identifier = doc["cluster_id"].value;
-            emit(identifier);
+            def belongs_to = doc["cluster_id"].value;
+            emit(belongs_to);
             return
           }
         else
@@ -29,21 +29,21 @@ export const getBelongsToRuntimeMapping = (): MappingRuntimeFields => ({
               def policy_template_type = doc["rule.benchmark.posture_type"].value;
               if (policy_template_type == "cspm")
               {
-                def identifier = doc["cloud.account.name"].value;
-                emit(identifier);
+                def belongs_to = doc["cloud.account.name"].value;
+                emit(belongs_to);
                 return
               }
 
               if (policy_template_type == "kspm")
               {
-                def identifier = doc["cluster_id"].value;
-                emit(identifier);
+                def belongs_to = doc["cluster_id"].value;
+                emit(belongs_to);
                 return
               }
             }
 
-            def identifier = doc["cluster_id"].value;
-            emit(identifier);
+            def belongs_to = doc["cluster_id"].value;
+            emit(belongs_to);
             return
         }
       `,

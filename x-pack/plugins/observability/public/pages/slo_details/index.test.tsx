@@ -66,7 +66,7 @@ describe('SLO Details Page', () => {
     it('renders the not found page', async () => {
       const slo = buildSlo();
       useParamsMock.mockReturnValue(slo.id);
-      useFetchSloDetailsMock.mockReturnValue({ loading: false, slo });
+      useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
       render(<SloDetailsPage />, { unsafe: { slo: { enabled: false } } });
@@ -80,7 +80,7 @@ describe('SLO Details Page', () => {
       it('navigates to the SLO List page', async () => {
         const slo = buildSlo();
         useParamsMock.mockReturnValue(slo.id);
-        useFetchSloDetailsMock.mockReturnValue({ loading: false, slo });
+        useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
         useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
 
         render(<SloDetailsPage />, { unsafe: { slo: { enabled: true } } });
@@ -91,8 +91,8 @@ describe('SLO Details Page', () => {
 
     describe('when the correct license is found', () => {
       it('renders the not found page when the SLO cannot be found', async () => {
-        useParamsMock.mockReturnValue('inexistant');
-        useFetchSloDetailsMock.mockReturnValue({ loading: false, slo: undefined });
+        useParamsMock.mockReturnValue('nonexistent');
+        useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo: undefined });
         useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
         render(<SloDetailsPage />, config);
@@ -103,7 +103,7 @@ describe('SLO Details Page', () => {
       it('renders the loading spinner when fetching the SLO', async () => {
         const slo = buildSlo();
         useParamsMock.mockReturnValue(slo.id);
-        useFetchSloDetailsMock.mockReturnValue({ loading: true, slo: undefined });
+        useFetchSloDetailsMock.mockReturnValue({ isLoading: true, slo: undefined });
         useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
         render(<SloDetailsPage />, config);
@@ -116,7 +116,7 @@ describe('SLO Details Page', () => {
       it('renders the SLO details page', async () => {
         const slo = buildSlo();
         useParamsMock.mockReturnValue(slo.id);
-        useFetchSloDetailsMock.mockReturnValue({ loading: false, slo });
+        useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
         useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
 
         render(<SloDetailsPage />, config);
