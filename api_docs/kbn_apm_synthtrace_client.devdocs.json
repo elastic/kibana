@@ -1886,13 +1886,50 @@
       },
       {
         "parentPluginId": "@kbn/apm-synthtrace-client",
+        "id": "def-common.serviceMap",
+        "type": "Function",
+        "tags": [],
+        "label": "serviceMap",
+        "description": [],
+        "signature": [
+          "(options: ",
+          "ServiceMapOpts",
+          ") => (timestamp: number) => ",
+          "Transaction",
+          "[]"
+        ],
+        "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/service_map.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace-client",
+            "id": "def-common.serviceMap.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "ServiceMapOpts"
+            ],
+            "path": "packages/kbn-apm-synthtrace-client/src/lib/dsl/service_map.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace-client",
         "id": "def-common.timerange",
         "type": "Function",
         "tags": [],
         "label": "timerange",
         "description": [],
         "signature": [
-          "(from: number | Date | moment.Moment, to: number | Date | moment.Moment) => ",
+          "(from: DateLike, to: DateLike) => ",
           {
             "pluginId": "@kbn/apm-synthtrace-client",
             "scope": "common",
@@ -1913,7 +1950,7 @@
             "label": "from",
             "description": [],
             "signature": [
-              "number | Date | moment.Moment"
+              "DateLike"
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/timerange.ts",
             "deprecated": false,
@@ -1928,7 +1965,7 @@
             "label": "to",
             "description": [],
             "signature": [
-              "number | Date | moment.Moment"
+              "DateLike"
             ],
             "path": "packages/kbn-apm-synthtrace-client/src/lib/timerange.ts",
             "deprecated": false,
@@ -2299,7 +2336,7 @@
             "section": "def-common.ApmFields",
             "text": "ApmFields"
           },
-          ", \"@timestamp\" | \"metricset.name\" | \"ecs.version\" | \"event.ingested\" | \"observer.type\" | \"observer.version\" | \"observer.version_major\" | \"processor.event\" | \"processor.name\"> & Partial<{ 'labels.etag': string; agent_config_applied: number; 'event.agent_id_status': string; }>"
+          ", \"@timestamp\" | \"metricset.name\" | \"ecs.version\" | \"event.ingested\" | \"observer.type\" | \"observer.version_major\" | \"observer.version\" | \"processor.event\" | \"processor.name\"> & Partial<{ 'labels.etag': string; agent_config_applied: number; 'event.agent_id_status': string; }>"
         ],
         "path": "packages/kbn-apm-synthtrace-client/src/lib/agent_config/agent_config_fields.ts",
         "deprecated": false,

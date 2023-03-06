@@ -18,7 +18,7 @@ import type {
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import { errors } from '@elastic/elasticsearch';
-import { PosturePolicyTemplate } from '../../common/types';
+import type { CloudSecurityPolicyTemplate } from '../../common/types';
 import { SUPPORTED_POLICY_TEMPLATES } from '../../common/constants';
 import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
 import {
@@ -31,7 +31,7 @@ export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 const isFleetMissingAgentHttpError = (error: unknown) =>
   error instanceof errors.ResponseError && error.statusCode === 404;
 
-const isPolicyTemplate = (input: any): input is PosturePolicyTemplate =>
+const isPolicyTemplate = (input: any): input is CloudSecurityPolicyTemplate =>
   SUPPORTED_POLICY_TEMPLATES.includes(input);
 
 const getPackageNameQuery = (packageName: string, benchmarkFilter?: string): string => {

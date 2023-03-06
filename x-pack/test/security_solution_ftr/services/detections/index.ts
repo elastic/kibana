@@ -21,7 +21,7 @@ import { wrapErrorIfNeeded } from '@kbn/security-solution-plugin/common/endpoint
 import { FtrService } from '../../../functional/ftr_provider_context';
 import { EndpointRuleAlertGenerator } from './endpoint_rule_alert_generator';
 import { getAlertsIndexMappings } from './alerts_security_index_mappings';
-import { ELASTIC_SECURITY_RULE_ID } from '../../../detection_engine_api_integration/utils/create_prebuilt_rule_saved_objects';
+import { ELASTIC_SECURITY_RULE_ID } from '../../../detection_engine_api_integration/utils/prebuilt_rules/create_prebuilt_rule_saved_objects';
 
 export interface IndexedEndpointRuleAlerts {
   alerts: estypes.WriteResponseBase[];

@@ -141,7 +141,7 @@ const SessionsViewComponent: React.FC<SessionsComponentsProps> = ({
     return {
       alertStatusActions: false,
       customBulkActions: [addBulkToTimelineAction],
-    };
+    } as BulkActionsProp;
   }, [addBulkToTimelineAction]);
 
   const unit = (c: number) =>

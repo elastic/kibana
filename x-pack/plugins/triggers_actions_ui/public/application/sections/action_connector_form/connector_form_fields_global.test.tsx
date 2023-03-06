@@ -7,7 +7,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import { render, act } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { FormTestProvider } from '../../components/test_utils';
 import { ConnectorFormFieldsGlobal } from './connector_form_fields_global';
 
@@ -25,31 +25,31 @@ describe('ConnectorFormFieldsGlobal', () => {
   });
 
   it('submits correctly', async () => {
-    const { getByTestId } = render(
+    render(
       <FormTestProvider onSubmit={onSubmit} defaultValue={defaultValue}>
         <ConnectorFormFieldsGlobal canSave={true} />
       </FormTestProvider>
     );
 
-    expect(getByTestId('nameInput')).toBeInTheDocument();
+    expect(screen.getByTestId('nameInput')).toBeInTheDocument();
 
-    await act(async () => {
-      userEvent.click(getByTestId('form-test-provide-submit'));
-    });
+    userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-    expect(onSubmit).toHaveBeenCalledWith({
-      data: {
-        actionTypeId: '.test',
-        id: 'test-id',
-        isDeprecated: 'false',
-        name: 'My test connector',
-      },
-      isValid: true,
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: {
+          actionTypeId: '.test',
+          id: 'test-id',
+          isDeprecated: 'false',
+          name: 'My test connector',
+        },
+        isValid: true,
+      });
     });
   });
 
   it('validates the name correctly', async () => {
-    const { getByTestId, getByText } = render(
+    render(
       /**
        * By removing the default value we initiate the form
        * with an empty state. Submitting the form
@@ -61,14 +61,15 @@ describe('ConnectorFormFieldsGlobal', () => {
       </FormTestProvider>
     );
 
-    await act(async () => {
-      userEvent.click(getByTestId('form-test-provide-submit'));
-    });
+    userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-    expect(getByText('Name is required.')).toBeInTheDocument();
-    expect(onSubmit).toHaveBeenCalledWith({
-      data: {},
-      isValid: false,
+    expect(await screen.findByText('Name is required.')).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: {},
+        isValid: false,
+      });
     });
   });
 });

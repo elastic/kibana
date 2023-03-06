@@ -58,7 +58,7 @@ describe('loadActions hooks', () => {
       mockGetActions.mockResolvedValue([actionEnabled, actionDisabled]);
 
       const { result, waitForNextUpdate } = renderHook(() =>
-        useLoadActions(actionContext, { disabledActions: [actionDisabled.id] })
+        useLoadActions(actionContext, { disabledActionTypes: [actionDisabled.type] })
       );
 
       await waitForNextUpdate();
@@ -110,13 +110,13 @@ describe('loadActions hooks', () => {
       expect(result.error?.message).toEqual(message);
     });
 
-    it('filters out disabled actions', async () => {
+    it('filters out disabled actions types', async () => {
       const actionEnabled = makeAction('action-enabled');
       const actionDisabled = makeAction('action-disabled');
       mockGetActions.mockResolvedValue([actionEnabled, actionDisabled]);
 
       const { result, waitForNextUpdate } = renderHook(() =>
-        useLoadActionsFn({ disabledActions: [actionDisabled.id] })
+        useLoadActionsFn({ disabledActionTypes: [actionDisabled.type] })
       );
       const [_, loadActions] = result.current;
 
@@ -163,18 +163,41 @@ describe('loadActions hooks', () => {
       expect(result.error?.message).toEqual(message);
     });
 
-    it('filters out disabled actions', async () => {
+    it('filters out disabled actions types', async () => {
       const actionEnabled = makeAction('action-enabled');
       const actionDisabled = makeAction('action-disabled');
       mockGetActions.mockResolvedValue([actionEnabled, actionDisabled]);
 
       const { result, waitForNextUpdate } = renderHook(() =>
-        useBulkLoadActions(actionContexts, { disabledActions: [actionDisabled.id] })
+        useBulkLoadActions(actionContexts, { disabledActionTypes: [actionDisabled.type] })
       );
 
       await waitForNextUpdate();
 
       expect(result.current.value).toEqual([[actionEnabled], [actionEnabled]]);
+    });
+
+    it('should re-render when contexts is changed', async () => {
+      const { result, rerender, waitForNextUpdate } = renderHook(useBulkLoadActions, {
+        initialProps: [actionContext],
+      });
+
+      await waitForNextUpdate();
+      expect(mockGetActions).toHaveBeenCalledWith(actionContext);
+
+      rerender([actionContext2]);
+      await waitForNextUpdate();
+      expect(mockGetActions).toHaveBeenCalledWith(actionContext2);
+
+      mockGetActions.mockClear();
+
+      rerender([]);
+      await waitForNextUpdate();
+      expect(mockGetActions).toHaveBeenCalledTimes(0);
+
+      expect(result.current.value).toBeInstanceOf(Array);
+      expect(result.current.value).toHaveLength(0);
+      expect(result.current.loading).toBe(false);
     });
   });
 });

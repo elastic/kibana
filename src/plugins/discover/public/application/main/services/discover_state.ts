@@ -6,50 +6,37 @@
  * Side Public License, v 1.
  */
 
-import { cloneDeep, isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { History } from 'history';
-import { COMPARE_ALL_OPTIONS, compareFilters, Filter, FilterStateStore } from '@kbn/es-query';
 import {
   createKbnUrlStateStorage,
-  createStateContainer,
   IKbnUrlStateStorage,
-  ReduxLikeStateContainer,
   StateContainer,
-  syncState,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 import {
-  connectToQueryState,
   DataPublicPluginStart,
   FilterManager,
   QueryState,
   SearchSessionInfoProvider,
-  syncQueryStateWithUrl,
 } from '@kbn/data-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
 import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
-import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../../common';
-import { AppState } from './discover_app_state_container';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
+import {
+  AppState,
+  DiscoverAppStateContainer,
+  getDiscoverAppStateContainer,
+  GLOBAL_STATE_URL_KEY,
+} from './discover_app_state_container';
 import {
   getInternalStateContainer,
   InternalStateContainer,
 } from './discover_internal_state_container';
-import { getStateDefaults } from '../utils/get_state_defaults';
 import { DiscoverServices } from '../../../build_services';
-import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { cleanupUrlState } from '../utils/cleanup_url_state';
-import { getValidFilters } from '../../../utils/get_valid_filters';
-
-export interface AppStateUrl extends Omit<AppState, 'sort'> {
-  /**
-   * Necessary to take care of legacy links [fieldName,direction]
-   */
-  sort?: string[][] | [string, string];
-}
-
 interface DiscoverStateContainerParams {
   /**
    * Browser history
@@ -73,7 +60,7 @@ export interface DiscoverStateContainer {
   /**
    * App state, the _a part of the URL
    */
-  appState: ReduxLikeStateContainer<AppState>;
+  appState: DiscoverAppStateContainer;
   /**
    * Internal state that's used at several places in the UI
    */
@@ -87,57 +74,28 @@ export interface DiscoverStateContainer {
    **/
   dataState: DataStateContainer;
   /**
-   * Initialize state with filters and query,  start state syncing
-   */
-  initializeAndSync: (
-    dataView: DataView,
-    filterManager: FilterManager,
-    data: DataPublicPluginStart
-  ) => () => void;
-  /**
-   * Start sync between state and URL -- only used for testing
-   */
-  startSync: () => () => void;
-  /**
-   * Set app state to with a partial new app state
-   */
-  setAppState: (newState: Partial<AppState>) => void;
-  /**
-   * Set state in Url using history.replace
-   */
-  replaceUrlAppState: (newState: Partial<AppState>) => Promise<void>;
-  /**
-   * Sync state to URL, used for testing
-   */
-  flushToUrl: () => void;
-  /**
-   * Reset initial state to the current app state
-   */
-  resetInitialAppState: () => void;
-  /**
-   * Return the Appstate before the current app state, useful for diffing changes
-   */
-  getPreviousAppState: () => AppState;
-  /**
-   * Returns whether the current app state is different to the initial state
-   */
-  isAppStateDirty: () => boolean;
-  /**
-   * Reset AppState by the given savedSearch discarding all changes
-   */
-  resetAppState: (nextSavedSearch: SavedSearch) => void;
-  /**
-   * Pause the auto refresh interval without pushing an entry to history
-   */
-  pauseAutoRefreshInterval: () => Promise<void>;
-  /**
    * functions executed by UI
    */
   actions: {
     /**
+     * Pause the auto refresh interval without pushing an entry to history
+     */
+    pauseAutoRefreshInterval: () => Promise<void>;
+    /**
      * Set the currently selected data view
      */
     setDataView: (dataView: DataView) => void;
+    /**
+     * Load the data view of the given id
+     * A fallback data view is returned, given there's no match
+     * This is usually the default data view
+     * @param dataViewId
+     * @param savedSearch
+     */
+    loadAndResolveDataView: (
+      dataViewId: string,
+      savedSearch: SavedSearch
+    ) => Promise<{ fallback: boolean; dataView: DataView }>;
     /**
      * Load current list of data views, add them to internal state
      */
@@ -162,11 +120,16 @@ export interface DiscoverStateContainer {
      * @param dataView
      */
     replaceAdHocDataViewWithId: (id: string, dataView: DataView) => void;
+    /**
+     * Initialize state with filters and query,  start state syncing
+     */
+    initializeAndSync: (
+      dataView: DataView,
+      filterManager: FilterManager,
+      data: DataPublicPluginStart
+    ) => () => void;
   };
 }
-
-const APP_STATE_URL_KEY = '_a';
-const GLOBAL_STATE_URL_KEY = '_g';
 
 /**
  * Builds and returns appState and globalState containers and helper functions
@@ -179,10 +142,6 @@ export function getDiscoverStateContainer({
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
-  const defaultAppState = getStateDefaults({
-    savedSearch,
-    services,
-  });
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
@@ -196,48 +155,10 @@ export function getDiscoverStateContainer({
     history,
     session: services.data.search.session,
   });
-
-  const appStateFromUrl = cleanupUrlState(stateStorage.get(APP_STATE_URL_KEY) as AppStateUrl);
-
-  let initialAppState = handleSourceColumnState(
-    {
-      ...defaultAppState,
-      ...appStateFromUrl,
-    },
-    services.uiSettings
-  );
-
-  // todo filter source depending on fields fetching flag (if no columns remain and source fetching is enabled, use default columns)
-  let previousAppState: AppState;
-  const appStateContainer = createStateContainer<AppState>(initialAppState);
-
-  const appStateContainerModified = {
-    ...appStateContainer,
-    set: (value: AppState | null) => {
-      if (value) {
-        previousAppState = appStateContainer.getState();
-        appStateContainer.set(value);
-      }
-    },
-  };
-
-  // Calling syncState from within initializeAndSync causes state syncing issues.
-  // syncState takes a snapshot of the initial state when it's called to compare
-  // against before syncing state updates. When syncState is called from outside
-  // of initializeAndSync, the snapshot doesn't get reset when the data view is
-  // changed. Then when the user presses the back button, the new state appears
-  // to be the same as the initial state, so syncState ignores the update.
-  const syncAppState = () =>
-    syncState({
-      storageKey: APP_STATE_URL_KEY,
-      stateContainer: appStateContainerModified,
-      stateStorage,
-    });
-
-  const replaceUrlAppState = async (newPartial: AppState = {}) => {
-    const state = { ...appStateContainer.getState(), ...newPartial };
-    await stateStorage.set(APP_STATE_URL_KEY, state, { replace: true });
-  };
+  /**
+   * App State Container, synced with URL
+   */
+  const appStateContainer = getDiscoverAppStateContainer({ stateStorage, savedSearch, services });
 
   const internalStateContainer = getInternalStateContainer();
 
@@ -280,144 +201,35 @@ export function getDiscoverStateContainer({
     internalStateContainer.transitions.setSavedDataViews(dataViewList);
   };
 
+  const loadAndResolveDataView = async (id: string, actualSavedSearch: SavedSearch) => {
+    const nextDataViewData = await loadDataView(services.dataViews, services.uiSettings, id);
+    const nextDataView = resolveDataView(
+      nextDataViewData,
+      actualSavedSearch.searchSource,
+      services.toastNotifications
+    );
+    return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
+  };
+  const initializeAndSync = () => appStateContainer.initAndSync(savedSearch);
+
   return {
     kbnUrlStateStorage: stateStorage,
-    appState: appStateContainerModified,
+    appState: appStateContainer,
     internalState: internalStateContainer,
     dataState: dataStateContainer,
     searchSessionManager,
-    startSync: () => {
-      const { start, stop } = syncAppState();
-      start();
-      return stop;
-    },
-    setAppState: (newPartial: AppState) => setState(appStateContainerModified, newPartial),
-    replaceUrlAppState,
-    resetInitialAppState: () => {
-      initialAppState = appStateContainer.getState();
-    },
-    resetAppState: (nextSavedSearch: SavedSearch) => {
-      const defaultState = handleSourceColumnState(
-        getStateDefaults({ savedSearch: nextSavedSearch, services }),
-        services.uiSettings
-      );
-      setState(appStateContainerModified, defaultState);
-    },
-    getPreviousAppState: () => previousAppState,
-    flushToUrl: () => stateStorage.kbnUrlControls.flush(),
-    isAppStateDirty: () => !isEqualState(initialAppState, appStateContainer.getState()),
-    pauseAutoRefreshInterval,
-    initializeAndSync: (
-      dataView: DataView,
-      filterManager: FilterManager,
-      data: DataPublicPluginStart
-    ) => {
-      if (appStateContainer.getState().index !== dataView.id) {
-        // used data view is different than the given by url/state which is invalid
-        setState(appStateContainerModified, { index: dataView.id });
-      }
-      // sync initial app filters from state to filterManager
-      const filters = appStateContainer.getState().filters || [];
-      if (filters) {
-        filterManager.setAppFilters(cloneDeep(filters));
-      }
-      const query = appStateContainer.getState().query;
-      if (query) {
-        data.query.queryString.setQuery(query);
-      }
-
-      const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
-        data.query,
-        appStateContainer,
-        {
-          filters: FilterStateStore.APP_STATE,
-          query: true,
-        }
-      );
-
-      // syncs `_g` portion of url with query services
-      const { stop: stopSyncingGlobalStateWithUrl } = syncQueryStateWithUrl(
-        data.query,
-        stateStorage
-      );
-
-      // some filters may not be valid for this context, so update
-      // the filter manager with a modified list of valid filters
-      const currentFilters = filterManager.getFilters();
-      const validFilters = getValidFilters(dataView, currentFilters);
-      if (!isEqual(currentFilters, validFilters)) {
-        filterManager.setFilters(validFilters);
-      }
-
-      const { start, stop } = syncAppState();
-
-      replaceUrlAppState({}).then(() => {
-        start();
-      });
-
-      return () => {
-        stopSyncingQueryAppStateWithStateContainer();
-        stopSyncingGlobalStateWithUrl();
-        stop();
-      };
-    },
     actions: {
+      pauseAutoRefreshInterval,
       setDataView,
+      loadAndResolveDataView,
       loadDataViewList,
       setAdHocDataViews,
       appendAdHocDataViews,
       replaceAdHocDataViewWithId,
       removeAdHocDataViewById,
+      initializeAndSync,
     },
   };
-}
-
-/**
- * Helper function to merge a given new state with the existing state and to set the given state
- * container
- */
-export function setState(stateContainer: ReduxLikeStateContainer<AppState>, newState: AppState) {
-  const oldState = stateContainer.getState();
-  const mergedState = { ...oldState, ...newState };
-  if (!isEqualState(oldState, mergedState)) {
-    stateContainer.set(mergedState);
-  }
-}
-
-/**
- * Helper function to compare 2 different filter states
- */
-export function isEqualFilters(filtersA?: Filter[] | Filter, filtersB?: Filter[] | Filter) {
-  if (!filtersA && !filtersB) {
-    return true;
-  } else if (!filtersA || !filtersB) {
-    return false;
-  }
-  return compareFilters(filtersA, filtersB, COMPARE_ALL_OPTIONS);
-}
-
-/**
- * helper function to extract filters of the given state
- * returns a state object without filters and an array of filters
- */
-export function splitState(state: AppState = {}) {
-  const { filters = [], ...statePartial } = state;
-  return { filters, state: statePartial };
-}
-
-/**
- * Helper function to compare 2 different state, is needed since comparing filters
- * works differently
- */
-export function isEqualState(stateA: AppState, stateB: AppState) {
-  if (!stateA && !stateB) {
-    return true;
-  } else if (!stateA || !stateB) {
-    return false;
-  }
-  const { filters: stateAFilters = [], ...stateAPartial } = stateA;
-  const { filters: stateBFilters = [], ...stateBPartial } = stateB;
-  return isEqual(stateAPartial, stateBPartial) && isEqualFilters(stateAFilters, stateBFilters);
 }
 
 export function createSearchSessionRestorationDataProvider(deps: {

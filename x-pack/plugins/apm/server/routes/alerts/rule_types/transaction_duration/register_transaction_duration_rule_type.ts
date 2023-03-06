@@ -6,41 +6,46 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { schema } from '@kbn/config-schema';
+import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
+import {
+  formatDurationFromTimeUnitChar,
+  ProcessorEvent,
+  TimeUnitChar,
+} from '@kbn/observability-plugin/common';
+import { asDuration } from '@kbn/observability-plugin/common/utils/formatters';
+import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { firstValueFrom } from 'rxjs';
-import { asDuration } from '@kbn/observability-plugin/common/utils/formatters';
-import { termQuery } from '@kbn/observability-plugin/server';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { getAlertDetailsUrl } from '@kbn/infra-plugin/server/lib/alerting/common/utils';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { getAlertUrlTransaction } from '../../../../../common/utils/formatters';
+import { firstValueFrom } from 'rxjs';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
-import {
-  ApmRuleType,
-  AggregationType,
-  RULE_TYPES_CONFIG,
-  APM_SERVER_FEATURE_ID,
-  formatTransactionDurationReason,
-} from '../../../../../common/rules/apm_rule_types';
-import {
-  PROCESSOR_EVENT,
-  SERVICE_NAME,
-  TRANSACTION_TYPE,
-  SERVICE_ENVIRONMENT,
-} from '../../../../../common/es_fields/apm';
 import {
   ENVIRONMENT_NOT_DEFINED,
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
+import {
+  PROCESSOR_EVENT,
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_TYPE,
+} from '../../../../../common/es_fields/apm';
+import {
+  ApmRuleType,
+  APM_SERVER_FEATURE_ID,
+  formatTransactionDurationReason,
+  RULE_TYPES_CONFIG,
+} from '../../../../../common/rules/apm_rule_types';
+import { transactionDurationParamsSchema } from '../../../../../common/rules/schema';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { getDurationFormatter } from '../../../../../common/utils/formatters';
+import {
+  getAlertUrlTransaction,
+  getDurationFormatter,
+} from '../../../../../common/utils/formatters';
 import {
   getDocumentTypeFilterForTransactions,
   getDurationFieldForTransactions,
@@ -50,27 +55,13 @@ import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
 import {
-  averageOrPercentileAgg,
-  getMultiTermsSortOrder,
-} from './average_or_percentile_agg';
-import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
 } from '../get_service_group_fields';
-
-const paramsSchema = schema.object({
-  serviceName: schema.maybe(schema.string()),
-  transactionType: schema.maybe(schema.string()),
-  windowSize: schema.number(),
-  windowUnit: schema.string(),
-  threshold: schema.number(),
-  aggregationType: schema.oneOf([
-    schema.literal(AggregationType.Avg),
-    schema.literal(AggregationType.P95),
-    schema.literal(AggregationType.P99),
-  ]),
-  environment: schema.string(),
-});
+import {
+  averageOrPercentileAgg,
+  getMultiTermsSortOrder,
+} from './average_or_percentile_agg';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.TransactionDuration];
 
@@ -92,9 +83,7 @@ export function registerTransactionDurationRuleType({
     name: ruleTypeConfig.name,
     actionGroups: ruleTypeConfig.actionGroups,
     defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
-    validate: {
-      params: paramsSchema,
-    },
+    validate: { params: transactionDurationParamsSchema },
     actionVariables: {
       context: [
         ...(observability.getAlertDetailsConfig()?.apm.enabled
@@ -289,7 +278,10 @@ export function registerTransactionDurationRuleType({
           .scheduleActions(ruleTypeConfig.defaultActionGroupId, {
             alertDetailsUrl,
             environment: environmentLabel,
-            interval: `${ruleParams.windowSize}${ruleParams.windowUnit}`,
+            interval: formatDurationFromTimeUnitChar(
+              ruleParams.windowSize,
+              ruleParams.windowUnit as TimeUnitChar
+            ),
             reason,
             serviceName,
             threshold: ruleParams.threshold,

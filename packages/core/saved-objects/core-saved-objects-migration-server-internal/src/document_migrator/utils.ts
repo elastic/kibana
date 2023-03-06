@@ -21,7 +21,7 @@ import { type Transform, type TransformFn, TransformType } from './types';
  * If a specific transform function fails, this tacks on a bit of information
  * about the document and transform that caused the failure.
  */
-export function wrapWithTry(
+export function convertMigrationFunction(
   version: string,
   type: SavedObjectsType,
   migrationFn: SavedObjectMigrationFn,

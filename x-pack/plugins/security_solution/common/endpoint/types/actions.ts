@@ -203,6 +203,11 @@ export interface EndpointAction extends ActionRequestFields {
   // wait to send back an action result before it will timeout
   timeout?: number;
   data: EndpointActionData;
+  // signature of the endpoint action
+  signed?: {
+    data: string;
+    signature: string;
+  };
 }
 
 export interface EndpointActionResponse {
@@ -371,6 +376,10 @@ export interface ActionDetailsApiResponse<
 > {
   data: ActionDetails<TOutputType, TParameters>;
 }
+
+/** Action Details normally returned by Action List API response  */
+export type ActionDetailsNoOutputs = Omit<ActionDetails, 'outputs'>;
+
 export interface ActionListApiResponse {
   page: number | undefined;
   pageSize: number | undefined;
@@ -380,11 +389,13 @@ export interface ActionListApiResponse {
   userIds: string[] | undefined; // users that requested the actions
   commands: string[] | undefined; // type of actions
   /**
-   * The `outputs` is not currently part of the list response due to possibly large amounts of
+   * Introduced in 8.8, outputs are visible for specific actions like `execute`.
+   * The `outputs` are part the list response for given set of actions.
+   * `outputs` for all actions are restricted due to possibly large amounts of
    * data, especially for cases (in the future) where we might support actions being sent to
    * multiple agents
    */
-  data: Array<Omit<ActionDetails, 'outputs'>>;
+  data: Array<ActionDetails | ActionDetailsNoOutputs>;
   statuses: ResponseActionStatus[] | undefined;
   total: number;
 }

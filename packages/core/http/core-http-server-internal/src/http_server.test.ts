@@ -817,6 +817,56 @@ test('allows attaching metadata to attach meta-data tag strings to a route', asy
   await supertest(innerServer.listener).get('/without-tags').expect(200, { tags: [] });
 });
 
+test('allows declaring route access to flag a route as public or internal', async () => {
+  const access = 'internal';
+  const { registerRouter, server: innerServer } = await server.setup(config);
+
+  const router = new Router('', logger, enhanceWithContext);
+  router.get({ path: '/with-access', validate: false, options: { access } }, (context, req, res) =>
+    res.ok({ body: { access: req.route.options.access } })
+  );
+  router.get({ path: '/without-access', validate: false }, (context, req, res) =>
+    res.ok({ body: { access: req.route.options.access } })
+  );
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener).get('/with-access').expect(200, { access });
+
+  await supertest(innerServer.listener).get('/without-access').expect(200, { access: 'public' });
+});
+
+test('infers access flag from path if not defined', async () => {
+  const { registerRouter, server: innerServer } = await server.setup(config);
+
+  const router = new Router('', logger, enhanceWithContext);
+  router.get({ path: '/internal/foo', validate: false }, (context, req, res) =>
+    res.ok({ body: { access: req.route.options.access } })
+  );
+  router.get({ path: '/random/foo', validate: false }, (context, req, res) =>
+    res.ok({ body: { access: req.route.options.access } })
+  );
+  router.get({ path: '/random/internal/foo', validate: false }, (context, req, res) =>
+    res.ok({ body: { access: req.route.options.access } })
+  );
+
+  router.get({ path: '/api/foo/internal/my-foo', validate: false }, (context, req, res) =>
+    res.ok({ body: { access: req.route.options.access } })
+  );
+  registerRouter(router);
+
+  await server.start();
+  await supertest(innerServer.listener).get('/internal/foo').expect(200, { access: 'internal' });
+
+  await supertest(innerServer.listener).get('/random/foo').expect(200, { access: 'public' });
+  await supertest(innerServer.listener)
+    .get('/random/internal/foo')
+    .expect(200, { access: 'public' });
+  await supertest(innerServer.listener)
+    .get('/api/foo/internal/my-foo')
+    .expect(200, { access: 'public' });
+});
+
 test('exposes route details of incoming request to a route handler', async () => {
   const { registerRouter, server: innerServer } = await server.setup(config);
 
@@ -833,6 +883,7 @@ test('exposes route details of incoming request to a route handler', async () =>
       options: {
         authRequired: true,
         xsrfRequired: false,
+        access: 'public',
         tags: [],
         timeout: {},
       },
@@ -1010,6 +1061,7 @@ test('exposes route details of incoming request to a route handler (POST + paylo
       options: {
         authRequired: true,
         xsrfRequired: true,
+        access: 'public',
         tags: [],
         timeout: {
           payload: 10000,

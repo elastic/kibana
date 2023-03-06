@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Query } from '@kbn/es-query';
 import { ISearchSource } from '@kbn/data-plugin/public';
@@ -42,7 +41,7 @@ type ESTermSourceSyncMeta = Pick<ESTermSourceDescriptor, 'indexPatternId' | 'siz
 
 export function extractPropertiesMap(rawEsData: any, countPropertyName: string): PropertiesMap {
   const propertiesMap: PropertiesMap = new Map<string, BucketProperties>();
-  const buckets: any[] = _.get(rawEsData, ['aggregations', TERMS_AGG_NAME, 'buckets'], []);
+  const buckets: any[] = rawEsData?.aggregations?.[TERMS_AGG_NAME]?.buckets ?? [];
   buckets.forEach((termBucket: any) => {
     const properties = extractPropertiesFromBucket(termBucket, TERMS_BUCKET_KEYS_TO_IGNORE);
     if (countPropertyName) {
@@ -83,7 +82,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
   }
 
   hasCompleteConfig(): boolean {
-    return _.has(this._descriptor, 'indexPatternId') && _.has(this._descriptor, 'term');
+    return this._descriptor.indexPatternId !== undefined && this._descriptor.term !== undefined;
   }
 
   getTermField(): ESDocField {

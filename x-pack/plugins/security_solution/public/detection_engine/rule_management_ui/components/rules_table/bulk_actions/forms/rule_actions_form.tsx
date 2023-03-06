@@ -41,7 +41,7 @@ import {
 import { getAllActionMessageParams } from '../../../../../../detections/pages/detection_engine/rules/helpers';
 
 import { RuleActionsField } from '../../../../../../detections/components/rules/rule_actions_field';
-import { validateRuleActionsField } from '../../../../../../detections/containers/detection_engine/rules/validate_rule_actions_field';
+import { debouncedValidateRuleActionsField } from '../../../../../../detections/containers/detection_engine/rules/validate_rule_actions_field';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -61,7 +61,10 @@ const getFormSchema = (
   actions: {
     validations: [
       {
-        validator: validateRuleActionsField(actionTypeRegistry),
+        // Debounced validator not explicitly necessary here as the `RuleActionsFormData` form doesn't exhibit the same
+        // behavior as the `ActionsStepRule` form outlined in https://github.com/elastic/kibana/issues/142217, however
+        // additional renders are prevented so using for consistency
+        validator: debouncedValidateRuleActionsField(actionTypeRegistry),
       },
     ],
   },

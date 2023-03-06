@@ -17,7 +17,7 @@ export class ContentTypeRegistry {
       throw new Error(`Content type with id "${definition.id}" already registered.`);
     }
     const type = new ContentType(definition);
-    this.types.set(type.id(), type);
+    this.types.set(type.id, type);
 
     return type;
   }

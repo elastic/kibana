@@ -68,6 +68,11 @@ export const getCreateVisualizationButtonTitle = () =>
     defaultMessage: 'Create visualization',
   });
 
+export const getQuickCreateButtonGroupLegend = () =>
+  i18n.translate('dashboard.solutionToolbar.quickCreateButtonGroupLegend', {
+    defaultMessage: 'Shortcuts to popular visualization types',
+  });
+
 export const getNewDashboardTitle = () =>
   i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
     defaultMessage: 'New Dashboard',

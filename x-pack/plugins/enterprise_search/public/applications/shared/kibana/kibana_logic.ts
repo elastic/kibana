@@ -30,6 +30,7 @@ type RequiredFieldsOnly<T> = {
   [K in keyof T as T[K] extends Required<T>[K] ? K : never]: T[K];
 };
 interface KibanaLogicProps {
+  application: ApplicationStart;
   config: { host?: string };
   productAccess: ProductAccess;
   // Kibana core
@@ -57,6 +58,7 @@ export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
 export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
   path: ['enterprise_search', 'kibana_logic'],
   reducers: ({ props }) => ({
+    application: [props.application || {}, {}],
     capabilities: [props.capabilities || {}, {}],
     config: [props.config || {}, {}],
     charts: [props.charts, {}],

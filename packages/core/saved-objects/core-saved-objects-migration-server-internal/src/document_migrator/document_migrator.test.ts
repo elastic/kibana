@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { mockGetConvertedObjectId } from './document_migrator.test.mock';
+import {
+  mockGetConvertedObjectId,
+  validateTypeMigrationsMock,
+} from './document_migrator.test.mock';
 import { set } from '@kbn/safer-lodash-set';
 import _ from 'lodash';
 import type { SavedObjectUnsanitizedDoc, SavedObjectsType } from '@kbn/core-saved-objects-server';
@@ -48,6 +51,7 @@ const createRegistry = (...types: Array<Partial<SavedObjectsType>>) => {
 
 beforeEach(() => {
   mockGetConvertedObjectId.mockClear();
+  validateTypeMigrationsMock.mockReset();
 });
 
 describe('DocumentMigrator', () => {
@@ -60,69 +64,47 @@ describe('DocumentMigrator', () => {
   }
 
   describe('validation', () => {
-    const createDefinition = (migrations: any) => ({
-      kibanaVersion: '3.2.3',
-      convertVersion: '8.0.0',
-      typeRegistry: createRegistry({
-        name: 'foo',
-        migrations: migrations as any,
-      }),
-      log: mockLogger,
-    });
+    describe('during #prepareMigrations', () => {
+      it('calls validateMigrationsMapObject with the correct parameters', () => {
+        const ops = {
+          ...testOpts(),
+          typeRegistry: createRegistry(
+            {
+              name: 'foo',
+              migrations: {
+                '1.2.3': setAttr('attributes.name', 'Chris'),
+              },
+            },
+            {
+              name: 'bar',
+              migrations: {
+                '1.2.3': setAttr('attributes.name', 'Chris'),
+              },
+            }
+          ),
+        };
 
-    describe('#prepareMigrations', () => {
-      it('validates individual migration definitions', () => {
-        const invalidMigrator = new DocumentMigrator(createDefinition(() => 123));
-        const voidMigrator = new DocumentMigrator(createDefinition(() => {}));
-        const emptyObjectMigrator = new DocumentMigrator(createDefinition(() => ({})));
+        const migrator = new DocumentMigrator(ops);
 
-        expect(invalidMigrator.prepareMigrations).toThrow(
-          /Migrations map for type foo should be an object/i
+        expect(validateTypeMigrationsMock).not.toHaveBeenCalled();
+
+        migrator.prepareMigrations();
+
+        expect(validateTypeMigrationsMock).toHaveBeenCalledTimes(3);
+        expect(validateTypeMigrationsMock).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({
+            type: expect.objectContaining({ name: 'foo' }),
+            kibanaVersion,
+          })
         );
-        expect(voidMigrator.prepareMigrations).not.toThrow();
-        expect(emptyObjectMigrator.prepareMigrations).not.toThrow();
-      });
-
-      it('validates individual migrations are valid semvers', () => {
-        const withInvalidVersion = {
-          bar: (doc: any) => doc,
-          '1.2.3': (doc: any) => doc,
-        };
-        const migrationFn = new DocumentMigrator(createDefinition(() => withInvalidVersion));
-        const migrationObj = new DocumentMigrator(createDefinition(withInvalidVersion));
-
-        expect(migrationFn.prepareMigrations).toThrow(/Expected all properties to be semvers/i);
-        expect(migrationObj.prepareMigrations).toThrow(/Expected all properties to be semvers/i);
-      });
-
-      it('validates individual migrations are not greater than the current Kibana version', () => {
-        const withGreaterVersion = {
-          '3.2.4': (doc: any) => doc,
-        };
-        const migrationFn = new DocumentMigrator(createDefinition(() => withGreaterVersion));
-        const migrationObj = new DocumentMigrator(createDefinition(withGreaterVersion));
-
-        const expectedError = `Invalid migration for type foo. Property '3.2.4' cannot be greater than the current Kibana version '3.2.3'.`;
-        expect(migrationFn.prepareMigrations).toThrowError(expectedError);
-        expect(migrationObj.prepareMigrations).toThrowError(expectedError);
-      });
-
-      it('validates the migration function', () => {
-        const invalidVersionFunction = { '1.2.3': 23 as any };
-        const migrationFn = new DocumentMigrator(createDefinition(() => invalidVersionFunction));
-        const migrationObj = new DocumentMigrator(createDefinition(invalidVersionFunction));
-
-        expect(migrationFn.prepareMigrations).toThrow(/expected a function, but got 23/i);
-        expect(migrationObj.prepareMigrations).toThrow(/expected a function, but got 23/i);
-      });
-      it('validates definitions with migrations: Function | Objects', () => {
-        const validMigrationMap = {
-          '1.2.3': () => {},
-        };
-        const migrationFn = new DocumentMigrator(createDefinition(() => validMigrationMap));
-        const migrationObj = new DocumentMigrator(createDefinition(validMigrationMap));
-        expect(migrationFn.prepareMigrations).not.toThrow();
-        expect(migrationObj.prepareMigrations).not.toThrow();
+        expect(validateTypeMigrationsMock).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({
+            type: expect.objectContaining({ name: 'bar' }),
+            kibanaVersion,
+          })
+        );
       });
     });
 
@@ -154,81 +136,6 @@ describe('DocumentMigrator', () => {
           migrationVersion: {},
         })
       ).toThrow(/Migrations are not ready. Make sure prepareMigrations is called first./i);
-    });
-
-    it(`validates convertToMultiNamespaceTypeVersion can only be used with namespaceType 'multiple' or 'multiple-isolated'`, () => {
-      const invalidDefinition = {
-        kibanaVersion: '3.2.3',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          convertToMultiNamespaceTypeVersion: 'bar',
-        }),
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Expected namespaceType to be 'multiple' or 'multiple-isolated', but got 'single'.`
-      );
-    });
-
-    it(`validates convertToMultiNamespaceTypeVersion must be a semver`, () => {
-      const invalidDefinition = {
-        kibanaVersion: '3.2.3',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          convertToMultiNamespaceTypeVersion: 'bar',
-          namespaceType: 'multiple',
-        }),
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(invalidDefinition)).toThrow(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Expected value to be a semver, but got 'bar'.`
-      );
-    });
-
-    it('validates convertToMultiNamespaceTypeVersion matches the convertVersion, if specified', () => {
-      const invalidDefinition = {
-        kibanaVersion: '3.2.3',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          convertToMultiNamespaceTypeVersion: '3.2.4',
-          namespaceType: 'multiple',
-        }),
-        convertVersion: '3.2.3',
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.2.4' cannot be any other than '3.2.3'.`
-      );
-    });
-
-    it('validates convertToMultiNamespaceTypeVersion is not greater than the current Kibana version', () => {
-      const invalidDefinition = {
-        kibanaVersion: '3.2.3',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          convertToMultiNamespaceTypeVersion: '3.2.4',
-          namespaceType: 'multiple',
-        }),
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.2.4' cannot be greater than the current Kibana version '3.2.3'.`
-      );
-    });
-
-    it('validates convertToMultiNamespaceTypeVersion is not used on a patch version', () => {
-      const invalidDefinition = {
-        kibanaVersion: '3.2.3',
-        typeRegistry: createRegistry({
-          name: 'foo',
-          convertToMultiNamespaceTypeVersion: '3.1.1',
-          namespaceType: 'multiple',
-        }),
-        log: mockLogger,
-      };
-      expect(() => new DocumentMigrator(invalidDefinition)).toThrowError(
-        `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.1.1' cannot be used on a patch version (must be like 'x.y.0').`
-      );
     });
   });
 

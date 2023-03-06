@@ -8,13 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 export const RANDOM_SAMPLER_PROBABILITIES = [
-  0.5, 0.25, 0.1, 0.05, 0.025, 0.01, 0.005, 0.0025, 0.001, 0.0005, 0.00025, 0.0001, 0.00005,
-  0.00001,
-]
-  .reverse()
-  .map((n) => n * 100);
+  0.00001, 0.00005, 0.0001, 0.0005, 0.001, 0.005, 0.01, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5,
+].map((n) => n * 100);
 
-export const RANDOM_SAMPLER_STEP = 0.00001 * 100;
+export const MIN_SAMPLER_PROBABILITY = 0.00001;
+export const RANDOM_SAMPLER_STEP = MIN_SAMPLER_PROBABILITY * 100;
 
 export const RANDOM_SAMPLER_OPTION = {
   ON_AUTOMATIC: 'on_automatic',

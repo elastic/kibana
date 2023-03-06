@@ -20,6 +20,7 @@ import type { Filter, Query } from '@kbn/es-query';
 import { usePageUrlState } from '@kbn/ml-url-state';
 import { useTimefilter, useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import moment from 'moment';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { DEFAULT_AGG_FUNCTION } from './constants';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
 import {
@@ -163,7 +164,9 @@ export const ChangePointDetectionContextProvider: FC = ({ children }) => {
       ({ aggregatable, esTypes, displayName }) =>
         aggregatable &&
         esTypes &&
-        esTypes.includes('keyword') &&
+        esTypes.some((el) =>
+          [ES_FIELD_TYPES.KEYWORD, ES_FIELD_TYPES.IP].includes(el as ES_FIELD_TYPES)
+        ) &&
         !['_id', '_index'].includes(displayName)
     );
   }, [dataView]);

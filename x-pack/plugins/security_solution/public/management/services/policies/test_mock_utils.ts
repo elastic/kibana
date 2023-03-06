@@ -7,17 +7,21 @@
 import { FleetPackagePolicyGenerator } from '../../../../common/endpoint/data_generators/fleet_package_policy_generator';
 import type { GetPolicyListResponse } from '../../pages/policy/types';
 
-export const sendGetEndpointSpecificPackagePoliciesMock = (
-  params: {
-    page: number;
-    perPage: number;
-    count: number;
-  } = { page: 1, perPage: 20, count: 5 }
-): GetPolicyListResponse => {
-  const { page, perPage, count } = params;
+export const sendGetEndpointSpecificPackagePoliciesMock = ({
+  page = 1,
+  perPage = 20,
+  count = 5,
+  agentsPerPolicy,
+}: {
+  page?: number;
+  perPage?: number;
+  count?: number;
+  agentsPerPolicy?: number;
+} = {}): GetPolicyListResponse => {
   const generator = new FleetPackagePolicyGenerator();
   const items = Array.from({ length: count }, (_, index) => {
-    const policy = generator.generateEndpointPackagePolicy();
+    const overrides = agentsPerPolicy !== undefined ? { agents: agentsPerPolicy } : undefined;
+    const policy = generator.generateEndpointPackagePolicy(overrides);
     policy.name += ` ${index}`;
     return policy;
   });

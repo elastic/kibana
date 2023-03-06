@@ -8,7 +8,13 @@
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
-import { checkResults, inputQuery, selectAllAgents, submitQuery } from '../../tasks/live_query';
+import {
+  checkActionItemsInResults,
+  checkResults,
+  inputQuery,
+  selectAllAgents,
+  submitQuery,
+} from '../../tasks/live_query';
 import { ROLES } from '../../test';
 
 describe('ALL - Custom space', () => {
@@ -23,6 +29,7 @@ describe('ALL - Custom space', () => {
         id: CUSTOM_SPACE,
         name: CUSTOM_SPACE,
       },
+      failOnStatusCode: false,
       headers: { 'kbn-xsrf': 'create-space' },
     });
   });
@@ -57,7 +64,12 @@ describe('ALL - Custom space', () => {
         inputQuery('select * from uptime; ');
         submitQuery();
         checkResults();
-        cy.contains('View in Lens').should('exist');
+        checkActionItemsInResults({
+          lens: true,
+          discover: true,
+          cases: true,
+          timeline: false,
+        });
         cy.contains('View in Discover')
           .should('exist')
           .should('have.attr', 'href')
@@ -65,9 +77,9 @@ describe('ALL - Custom space', () => {
             // @ts-expect-error-next-line href string - check types
             cy.visit($href);
             cy.getBySel('breadcrumbs').contains('Discover').should('exist');
-            cy.getBySel('discoverDocTable', { timeout: 60000 }).contains(
-              'action_data.queryselect * from uptime'
-            );
+            cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
+              cy.contains('action_data.queryselect * from uptime');
+            });
           });
       });
       it(`runs packs normally on ${space}`, () => {

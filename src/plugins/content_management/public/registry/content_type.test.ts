@@ -12,10 +12,10 @@ import type { ContentTypeDefinition } from './content_type_definition';
 test('create a content type with just an id', () => {
   const type = new ContentType({ id: 'test' });
 
-  expect(type.id()).toBe('test');
-  expect(type.name()).toBe('test');
-  expect(type.icon()).toBe('questionInCircle');
-  expect(type.description()).toBe('');
+  expect(type.id).toBe('test');
+  expect(type.name).toBe('test');
+  expect(type.icon).toBe('questionInCircle');
+  expect(type.description).toBe('');
 });
 
 test('create a content type with all the full definition', () => {
@@ -27,9 +27,9 @@ test('create a content type with all the full definition', () => {
   };
   const type = new ContentType(definition);
 
-  expect(type.id()).toBe(definition.id);
-  expect(type.name()).toBe(definition.name);
-  expect(type.icon()).toBe(definition.icon);
-  expect(type.description()).toBe(definition.description);
+  expect(type.id).toBe(definition.id);
+  expect(type.name).toBe(definition.name);
+  expect(type.icon).toBe(definition.icon);
+  expect(type.description).toBe(definition.description);
   expect(type.definition).toEqual(definition);
 });

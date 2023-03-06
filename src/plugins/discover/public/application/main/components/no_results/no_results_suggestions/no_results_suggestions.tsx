@@ -111,7 +111,7 @@ export const NoResultsSuggestions: React.FC<NoResultsSuggestionProps> = ({
       </ul>
     </>
   ) : (
-    <NoResultsSuggestionDefault />
+    <NoResultsSuggestionDefault dataView={dataView} />
   );
 
   return (

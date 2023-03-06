@@ -14,6 +14,7 @@ import {
   Settings,
   XYBrushEvent,
 } from '@elastic/charts';
+import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup, EuiFlexItem, euiPaletteColorBlind, EuiSpacer, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -83,7 +84,9 @@ export function LogsSection({ bucketSize }: Props) {
   const min = moment.utc(absoluteStart).valueOf();
   const max = moment.utc(absoluteEnd).valueOf();
 
-  const formatter = niceTimeFormatter([min, max]);
+  const formatter = bucketSize?.dateFormat
+    ? timeFormatter(bucketSize?.dateFormat)
+    : niceTimeFormatter([min, max]);
 
   const { appLink, stats, series } = data || {};
 

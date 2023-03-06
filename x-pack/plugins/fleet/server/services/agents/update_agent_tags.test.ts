@@ -16,14 +16,11 @@ import { updateAgentTags } from './update_agent_tags';
 import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tags_action_runner';
 
 jest.mock('../app_context', () => {
+  const { loggerMock } = jest.requireActual('@kbn/logging-mocks');
   return {
     appContextService: {
-      getLogger: jest.fn().mockReturnValue({
-        debug: jest.fn(),
-        warn: jest.fn(),
-        info: jest.fn(),
-        error: jest.fn(),
-      } as any),
+      getLogger: () => loggerMock.create(),
+      getConfig: () => {},
     },
   };
 });
@@ -113,7 +110,7 @@ describe('update_agent_tags', () => {
     expect(agentAction?.body).toEqual(
       expect.objectContaining({
         action_id: expect.anything(),
-        agents: ['agent1'],
+        agents: [expect.any(String)],
         type: 'UPDATE_TAGS',
         total: 1,
       })
@@ -123,7 +120,7 @@ describe('update_agent_tags', () => {
     const agentIds = actionResults?.body
       ?.filter((i: any) => i.agent_id)
       .map((i: any) => i.agent_id);
-    expect(agentIds).toEqual(['agent1']);
+    expect(agentIds.length).toEqual(1);
     expect(actionResults.body[1].error).not.toBeDefined();
   });
 
@@ -145,7 +142,7 @@ describe('update_agent_tags', () => {
     expect(agentAction?.body).toEqual(
       expect.objectContaining({
         action_id: expect.anything(),
-        agents: [agentInRegularDoc._id],
+        agents: [expect.any(String)],
         type: 'UPDATE_TAGS',
         total: 1,
       })
@@ -155,11 +152,22 @@ describe('update_agent_tags', () => {
   it('should write error action results when failures are returned', async () => {
     esClient.updateByQuery.mockReset();
     esClient.updateByQuery.mockResolvedValue({
-      failures: [{ cause: { reason: 'error reason' } }],
+      failures: [{ id: 'failure1', cause: { reason: 'error reason' } }],
       updated: 0,
+      total: 1,
     } as any);
 
     await updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], []);
+
+    const agentAction = esClient.create.mock.calls[0][0] as any;
+    expect(agentAction?.body).toEqual(
+      expect.objectContaining({
+        action_id: expect.anything(),
+        agents: ['failure1'],
+        type: 'UPDATE_TAGS',
+        total: 1,
+      })
+    );
 
     const errorResults = esClient.bulk.mock.calls[0][0] as any;
     expect(errorResults.body[1].error).toEqual('error reason');
@@ -184,6 +192,7 @@ describe('update_agent_tags', () => {
       failures: [],
       updated: 0,
       version_conflicts: 100,
+      total: 100,
     } as any);
 
     await expect(
@@ -201,8 +210,41 @@ describe('update_agent_tags', () => {
         }
       )
     ).rejects.toThrowError('version conflict of 100 agents');
+
+    const agentAction = esClient.create.mock.calls[0][0] as any;
+    expect(agentAction?.body.agents.length).toEqual(100);
+
     const errorResults = esClient.bulk.mock.calls[0][0] as any;
     expect(errorResults.body[1].error).toEqual('version conflict on last retry');
+  });
+
+  it('should combine action agents from updated, failures and version conflicts on last retry', async () => {
+    esClient.updateByQuery.mockReset();
+    esClient.updateByQuery.mockResolvedValue({
+      failures: [{ id: 'failure1', cause: { reason: 'error reason' } }],
+      updated: 1,
+      version_conflicts: 1,
+      total: 3,
+    } as any);
+
+    await expect(
+      updateTagsBatch(
+        soClient,
+        esClient,
+        [{ id: 'agent1' } as Agent],
+        {},
+        {
+          tagsToAdd: ['new'],
+          tagsToRemove: [],
+          kuery: '',
+          total: 3,
+          retryCount: MAX_RETRY_COUNT,
+        }
+      )
+    ).rejects.toThrowError('version conflict of 1 agents');
+
+    const agentAction = esClient.create.mock.calls[0][0] as any;
+    expect(agentAction?.body.agents.length).toEqual(3);
   });
 
   it('should run add tags async when actioning more agents than batch size', async () => {
@@ -304,7 +346,7 @@ describe('update_agent_tags', () => {
 
   it('should write total from total param if updateByQuery returns less results', async () => {
     esClient.updateByQuery.mockReset();
-    esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 0, total: 50 } as any);
+    esClient.updateByQuery.mockResolvedValue({ failures: [], updated: 1, total: 50 } as any);
 
     await updateTagsBatch(
       soClient,
@@ -323,7 +365,7 @@ describe('update_agent_tags', () => {
     expect(agentAction?.body).toEqual(
       expect.objectContaining({
         action_id: expect.anything(),
-        agents: ['agent1'],
+        agents: [expect.any(String)],
         type: 'UPDATE_TAGS',
         total: 100,
       })

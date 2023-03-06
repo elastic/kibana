@@ -37,7 +37,7 @@ export function IntegrationDeprecationCallout({
                 link: (
                   <EuiLink
                     target="_blank"
-                    href={getDocLinks()?.links?.observability?.syntheticsProjectMonitors}
+                    href={getDocLinks()?.links?.observability?.syntheticsMigrateFromIntegration}
                     external
                   >
                     <FormattedMessage

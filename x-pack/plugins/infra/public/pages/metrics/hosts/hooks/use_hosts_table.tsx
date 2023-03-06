@@ -24,7 +24,7 @@ import type {
  */
 export type CloudProvider = 'gcp' | 'aws' | 'azure' | 'unknownProvider';
 
-type HostMetric = 'cpuCores' | 'diskLatency' | 'rx' | 'tx' | 'memory' | 'memoryTotal';
+type HostMetric = 'cpu' | 'diskLatency' | 'rx' | 'tx' | 'memory' | 'memoryTotal';
 
 type HostMetrics = Record<HostMetric, SnapshotNodeMetric>;
 
@@ -74,9 +74,12 @@ const osLabel = i18n.translate('xpack.infra.hostsViewPage.table.operatingSystemC
   defaultMessage: 'Operating System',
 });
 
-const cpuCountLabel = i18n.translate('xpack.infra.hostsViewPage.table.numberOfCpusColumnHeader', {
-  defaultMessage: '# of CPUs',
-});
+const averageCpuUsageLabel = i18n.translate(
+  'xpack.infra.hostsViewPage.table.averageCpuUsageColumnHeader',
+  {
+    defaultMessage: 'CPU usage (avg.)',
+  }
+);
 
 const diskLatencyLabel = i18n.translate('xpack.infra.hostsViewPage.table.diskLatencyColumnHeader', {
   defaultMessage: 'Disk Latency (avg.)',
@@ -146,11 +149,10 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         render: (os: string) => <EuiText size="s">{os}</EuiText>,
       },
       {
-        name: cpuCountLabel,
-        field: 'cpuCores',
+        name: averageCpuUsageLabel,
+        field: 'cpu.avg',
         sortable: true,
-        render: (cpuCores: SnapshotNodeMetric) =>
-          formatMetric('cpuCores', cpuCores?.value ?? cpuCores?.max),
+        render: (avg: number) => formatMetric('cpu', avg),
         align: 'right',
       },
       {
@@ -161,17 +163,17 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         align: 'right',
       },
       {
-        name: averageTXLabel,
-        field: 'tx.avg',
-        sortable: true,
-        render: (avg: number) => formatMetric('tx', avg),
-        align: 'right',
-      },
-      {
         name: averageRXLabel,
         field: 'rx.avg',
         sortable: true,
         render: (avg: number) => formatMetric('rx', avg),
+        align: 'right',
+      },
+      {
+        name: averageTXLabel,
+        field: 'tx.avg',
+        sortable: true,
+        render: (avg: number) => formatMetric('tx', avg),
         align: 'right',
       },
       {

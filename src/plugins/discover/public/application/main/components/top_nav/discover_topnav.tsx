@@ -186,19 +186,22 @@ export const DiscoverTopNav = ({
   );
 
   const onEditDataView = async (editedDataView: DataView) => {
-    if (!editedDataView.isPersisted()) {
-      await updateAdHocDataViewId(editedDataView);
+    if (editedDataView.isPersisted()) {
+      // Clear the current data view from the cache and create a new instance
+      // of it, ensuring we have a new object reference to trigger a re-render
+      dataViews.clearInstanceCache(editedDataView.id);
+      stateContainer.actions.setDataView(await dataViews.create(editedDataView.toSpec(), true));
     } else {
-      stateContainer.actions.setDataView(editedDataView);
+      await updateAdHocDataViewId(editedDataView);
     }
     stateContainer.actions.loadDataViewList();
     stateContainer.dataState.fetch();
   };
 
   const updateSavedQueryId = (newSavedQueryId: string | undefined) => {
-    const { appState, setAppState } = stateContainer;
+    const { appState } = stateContainer;
     if (newSavedQueryId) {
-      setAppState({ savedQuery: newSavedQueryId });
+      appState.update({ savedQuery: newSavedQueryId });
     } else {
       // remove savedQueryId from state
       const newState = {

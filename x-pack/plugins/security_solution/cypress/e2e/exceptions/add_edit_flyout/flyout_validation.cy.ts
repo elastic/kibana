@@ -46,6 +46,7 @@ import {
   CONFIRM_BTN,
   VALUES_INPUT,
   EXCEPTION_FLYOUT_TITLE,
+  FIELD_INPUT_PARENT,
 } from '../../../screens/exceptions';
 
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
@@ -74,7 +75,7 @@ describe('Exceptions flyout', () => {
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
       createCustomRule({
         ...getNewRule(),
-        dataSource: { index: ['exceptions-*'], type: 'indexPatterns' },
+        dataSource: { index: ['auditbeat-*', 'exceptions-*'], type: 'indexPatterns' },
         exceptionLists: [
           {
             id: response.body.id,
@@ -157,8 +158,9 @@ describe('Exceptions flyout', () => {
 
     // delete second item, invalid values 'a' and 'c' should remain
     cy.get(ENTRY_DELETE_BTN).eq(1).click();
-    cy.get(FIELD_INPUT).eq(0).should('have.text', 'agent.name');
-    cy.get(FIELD_INPUT).eq(1).should('have.text', 'c');
+    cy.get(LOADING_SPINNER).should('not.exist');
+    cy.get(FIELD_INPUT_PARENT).eq(0).should('have.text', 'agent.name');
+    cy.get(FIELD_INPUT_PARENT).eq(1).should('have.text', 'c');
 
     closeExceptionBuilderFlyout();
   });
@@ -187,32 +189,32 @@ describe('Exceptions flyout', () => {
     cy.get(ENTRY_DELETE_BTN).eq(3).click();
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(1)
       .should('have.text', 'user.id.keyword');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'user.first');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(1).should('have.text', 'e');
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT_PARENT).eq(1).should('have.text', 'e');
 
     // delete remaining entries in exception item 2
     cy.get(ENTRY_DELETE_BTN).eq(2).click();
     cy.get(ENTRY_DELETE_BTN).eq(2).click();
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(1)
       .should('have.text', 'user.id.keyword');
     cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).should('not.exist');
@@ -245,20 +247,28 @@ describe('Exceptions flyout', () => {
     cy.get(ENTRY_DELETE_BTN).eq(4).click();
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(1).should('have.text', 'b');
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT_PARENT).eq(1).should('have.text', 'b');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(1).should('have.text', 'user');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(1).find(FIELD_INPUT).eq(2).should('have.text', 'last');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
+      .eq(1)
+      .should('have.text', 'user');
+    cy.get(EXCEPTION_ITEM_CONTAINER)
+      .eq(1)
+      .find(FIELD_INPUT_PARENT)
+      .eq(2)
+      .should('have.text', 'last');
+    cy.get(EXCEPTION_ITEM_CONTAINER)
+      .eq(1)
+      .find(FIELD_INPUT_PARENT)
       .eq(3)
       .should('have.text', '@timestamp');
 
@@ -266,18 +276,18 @@ describe('Exceptions flyout', () => {
     cy.get(ENTRY_DELETE_BTN).eq(4).click();
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(0)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
-    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT).eq(1).should('have.text', 'b');
+    cy.get(EXCEPTION_ITEM_CONTAINER).eq(0).find(FIELD_INPUT_PARENT).eq(1).should('have.text', 'b');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(0)
       .should('have.text', 'agent.name');
     cy.get(EXCEPTION_ITEM_CONTAINER)
       .eq(1)
-      .find(FIELD_INPUT)
+      .find(FIELD_INPUT_PARENT)
       .eq(1)
       .should('have.text', '@timestamp');
 
@@ -289,7 +299,24 @@ describe('Exceptions flyout', () => {
     openExceptionFlyoutFromEmptyViewerPrompt();
 
     cy.get(FIELD_INPUT).eq(0).click({ force: true });
+    cy.get(FIELD_INPUT).eq(0).type('unique');
     cy.get(EXCEPTION_FIELD_LIST).contains('unique_value.test');
+
+    closeExceptionBuilderFlyout();
+  });
+
+  it('Validates auto-suggested fields correctly', () => {
+    // open add exception modal
+    openExceptionFlyoutFromEmptyViewerPrompt();
+
+    // add exception item name
+    addExceptionFlyoutItemName('My item name');
+
+    // add an entry with a value and submit button should enable
+    addExceptionEntryFieldValue('agent.type', 0);
+    cy.get(VALUES_INPUT).eq(0).type(`{enter}`);
+    cy.get(VALUES_INPUT).eq(0).type(`{downarrow}{enter}`);
+    cy.get(CONFIRM_BTN).should('be.enabled');
 
     closeExceptionBuilderFlyout();
   });

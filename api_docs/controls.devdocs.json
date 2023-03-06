@@ -699,6 +699,22 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainer.Unnamed.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "settings",
+                "description": [],
+                "signature": [
+                  "ControlGroupSettings",
+                  " | undefined"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -1412,7 +1428,9 @@
                 "section": "def-public.ContainerOutput",
                 "text": "ContainerOutput"
               },
-              "> | undefined) => Promise<",
+              "> | undefined, settings?: ",
+              "ControlGroupSettings",
+              " | undefined) => Promise<",
               {
                 "pluginId": "controls",
                 "scope": "public",
@@ -1479,6 +1497,22 @@
                     "text": "ContainerOutput"
                   },
                   "> | undefined"
+                ],
+                "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlGroupContainerFactory.create.$3",
+                "type": "Object",
+                "tags": [],
+                "label": "settings",
+                "description": [],
+                "signature": [
+                  "ControlGroupSettings",
+                  " | undefined"
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
                 "deprecated": false,
@@ -3315,7 +3349,7 @@
             "section": "def-public.ControlGroupRendererProps",
             "text": "ControlGroupRendererProps"
           },
-          "> & { readonly _result: ({ onLoadComplete, getInitialInput, filters, timeRange, query, }: ",
+          "> & { readonly _result: ({ onLoadComplete, getCreationOptions, filters, timeRange, query, }: ",
           {
             "pluginId": "controls",
             "scope": "public",
@@ -3403,29 +3437,13 @@
           "ControlGroupReduxState",
           ">, action: { payload: { ids: string[]; }; type: string; }) => void; }, ",
           {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.Embeddable",
-            "text": "Embeddable"
-          },
-          "<",
-          {
-            "pluginId": "controls",
-            "scope": "common",
-            "docId": "kibControlsPluginApi",
-            "section": "def-common.ControlGroupInput",
-            "text": "ControlGroupInput"
-          },
-          ", ",
-          {
             "pluginId": "controls",
             "scope": "public",
             "docId": "kibControlsPluginApi",
-            "section": "def-public.ControlGroupOutput",
-            "text": "ControlGroupOutput"
+            "section": "def-public.ControlGroupContainer",
+            "text": "ControlGroupContainer"
           },
-          ", any>>"
+          ">"
         ],
         "path": "src/plugins/controls/public/control_group/control_group_renderer.tsx",
         "deprecated": false,
@@ -3829,10 +3847,10 @@
           },
           {
             "parentPluginId": "controls",
-            "id": "def-public.ControlGroupRendererProps.getInitialInput",
+            "id": "def-public.ControlGroupRendererProps.getCreationOptions",
             "type": "Function",
             "tags": [],
-            "label": "getInitialInput",
+            "label": "getCreationOptions",
             "description": [],
             "signature": [
               "(initialInput: Partial<",
@@ -3893,15 +3911,9 @@
                 "section": "def-common.ControlGroupInput",
                 "text": "ControlGroupInput"
               },
-              ">) => void; }) => Promise<Partial<",
-              {
-                "pluginId": "controls",
-                "scope": "common",
-                "docId": "kibControlsPluginApi",
-                "section": "def-common.ControlGroupInput",
-                "text": "ControlGroupInput"
-              },
-              ">>"
+              ">) => void; }) => Promise<",
+              "ControlGroupCreationOptions",
+              ">"
             ],
             "path": "src/plugins/controls/public/control_group/control_group_renderer.tsx",
             "deprecated": false,
@@ -3909,7 +3921,7 @@
             "children": [
               {
                 "parentPluginId": "controls",
-                "id": "def-public.ControlGroupRendererProps.getInitialInput.$1",
+                "id": "def-public.ControlGroupRendererProps.getCreationOptions.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "initialInput",
@@ -3932,7 +3944,7 @@
               },
               {
                 "parentPluginId": "controls",
-                "id": "def-public.ControlGroupRendererProps.getInitialInput.$2",
+                "id": "def-public.ControlGroupRendererProps.getCreationOptions.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "builder",

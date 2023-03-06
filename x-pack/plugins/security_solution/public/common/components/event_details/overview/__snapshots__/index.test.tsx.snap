@@ -116,19 +116,18 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                data-test-subj="cellActions-renderContent-kibana.alert.workflow_status"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 />
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
-                  data-test-subj="cellActions-renderContent-kibana.alert.workflow_status"
                 >
                   <div
                     class="euiFlexGroup inlineActions  emotion-euiFlexGroup-none-flexStart-flexStart-row"
                     data-test-subj="inlineActions"
                   />
-                  <div />
                 </div>
               </div>
             </div>
@@ -163,19 +162,18 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                data-test-subj="cellActions-renderContent-kibana.alert.risk_score"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 />
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
-                  data-test-subj="cellActions-renderContent-kibana.alert.risk_score"
                 >
                   <div
                     class="euiFlexGroup inlineActions  emotion-euiFlexGroup-none-flexStart-flexStart-row"
                     data-test-subj="inlineActions"
                   />
-                  <div />
                 </div>
               </div>
             </div>
@@ -222,19 +220,18 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
             >
               <div
                 class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
+                data-test-subj="cellActions-renderContent-kibana.alert.rule.name"
               >
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
                 />
                 <div
                   class="euiFlexItem emotion-euiFlexItem-growZero"
-                  data-test-subj="cellActions-renderContent-kibana.alert.rule.name"
                 >
                   <div
                     class="euiFlexGroup inlineActions  emotion-euiFlexGroup-none-flexStart-flexStart-row"
                     data-test-subj="inlineActions"
                   />
-                  <div />
                 </div>
               </div>
             </div>

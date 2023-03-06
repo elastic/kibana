@@ -10,14 +10,13 @@ import { get } from 'lodash';
 import memoizeOne from 'memoize-one';
 import React from 'react';
 import styled from 'styled-components';
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
+import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 import type { BrowserFields } from '../../containers/source';
 import * as i18n from './translations';
 import type { EventFieldsData } from './types';
 import type { BrowserField } from '../../../../common/search_strategy';
 import { FieldValueCell } from './table/field_value_cell';
 import { FieldNameCell } from './table/field_name_cell';
-import { CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER } from '../../../../common/constants';
 
 const HoverActionsContainer = styled(EuiPanel)`
   align-items: center;
@@ -74,14 +73,14 @@ export const getColumns = ({
             );
 
             return (
-              <CellActions
+              <SecurityCellActions
                 field={{
                   name: data.field,
                   value: values,
                   type: data.type,
                   aggregatable: fieldFromBrowserField?.aggregatable,
                 }}
-                triggerId={CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER}
+                triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
                 mode={CellActionsMode.INLINE}
                 visibleCellActions={3}
                 metadata={{ scopeId, isObjectArray: data.isObjectArray }}

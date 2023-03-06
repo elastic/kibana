@@ -20,6 +20,7 @@ import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 
+import { mlCapabilities } from './capabilities/check_capabilities';
 import { ML_STORAGE_KEYS } from '../../common/types/storage';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 import type { MlSetupDependencies, MlStartDependencies } from '../plugin';
@@ -61,6 +62,7 @@ export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: Usag
     mlApiServices: mlApiServicesProvider(httpService),
     mlUsageCollection: mlUsageCollectionProvider(usageCollection),
     isServerless,
+    mlCapabilities,
   };
 }
 

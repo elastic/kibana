@@ -47,6 +47,7 @@ import {
   ExperimentalFeatures,
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
+import { LazyLoadProps } from './types';
 
 import type {
   ActionTypeModel,
@@ -111,7 +112,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
-  getAlertsStateTable: (props: AlertsTableStateProps) => ReactElement<AlertsTableStateProps>;
+  getAlertsStateTable: (
+    props: AlertsTableStateProps & LazyLoadProps
+  ) => ReactElement<AlertsTableStateProps>;
   getAlertsSearchBar: (props: AlertsSearchBarProps) => ReactElement<AlertsSearchBarProps>;
   getFieldBrowser: (props: FieldBrowserProps) => ReactElement<FieldBrowserProps>;
   getRuleStatusDropdown: (props: RuleStatusDropdownProps) => ReactElement<RuleStatusDropdownProps>;
@@ -381,7 +384,7 @@ export class Plugin
           connectorServices: this.connectorServices!,
         });
       },
-      getAlertsStateTable: (props: AlertsTableStateProps) => {
+      getAlertsStateTable: (props: AlertsTableStateProps & LazyLoadProps) => {
         return getAlertsTableStateLazy(props);
       },
       getAlertsSearchBar: (props: AlertsSearchBarProps) => {
