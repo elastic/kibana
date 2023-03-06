@@ -18,7 +18,7 @@ import {
 } from './src';
 import type { NamedAggregation, GroupingFieldTotalAggregation, GroupingAggregation } from './src';
 
-export const getGrouping = (props: GroupingProps): React.ReactElement<GroupingProps> => (
+export const getGrouping = <T,>(props: GroupingProps<T>): React.ReactElement<GroupingProps<T>> => (
   <Grouping {...props} />
 );
 

@@ -49,7 +49,7 @@ export const addComment = async (
     externalReferenceAttachmentTypeRegistry,
   } = clientArgs;
 
-  decodeCommentRequest(comment);
+  decodeCommentRequest(comment, externalReferenceAttachmentTypeRegistry);
   try {
     const savedObjectID = SavedObjectsUtils.generateId();
 
