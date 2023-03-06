@@ -483,6 +483,9 @@ export class Embeddable
     this.inputReloadSubscriptions.push(
       shouldFetch$<LensEmbeddableInput>(this.getUpdated$(), () => this.getInput()).subscribe(
         (input) => {
+          // reset removable messages
+          // Dashboard search/context changes are detected here
+          this.additionalUserMessages = {};
           this.reload();
         }
       )
@@ -567,11 +570,10 @@ export class Embeddable
       })
     );
 
-    const mergedSearchContext = this.getMergedSearchContext();
-
     if (!this.savedVis) {
       return userMessages;
     }
+    const mergedSearchContext = this.getMergedSearchContext();
 
     const frameDatasourceAPI: FrameDatasourceAPI = {
       dataViews: {
@@ -623,13 +625,9 @@ export class Embeddable
     }
 
     return () => {
-      const withMessagesRemoved = {
-        ...this.additionalUserMessages,
-      };
-
-      messages.map(({ uniqueId }) => uniqueId).forEach((id) => delete withMessagesRemoved[id]);
-
-      this.additionalUserMessages = withMessagesRemoved;
+      messages.forEach(({ uniqueId }) => {
+        delete this.additionalUserMessages[uniqueId];
+      });
     };
   };
 

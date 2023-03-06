@@ -6,16 +6,15 @@
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import React, { useCallback, useEffect, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { GROUP_BY } from '../../../components/grouping/translations';
+import { getGroupSelector, isNoneGroup } from '@kbn/securitysolution-grouping';
 import type { TableId } from '../../../../../common/types';
 import { getDefaultGroupingOptions } from '../../../../detections/components/alerts_table/grouping_settings';
 import type { State } from '../../../store';
 import { defaultGroup } from '../../../store/grouping/defaults';
 import type { GroupOption } from '../../../store/grouping';
 import { groupActions, groupSelectors } from '../../../store/grouping';
-import { GroupsSelector, isNoneGroup } from '../../../components/grouping';
 
 export interface UseGetGroupSelectorArgs {
   fields: FieldSpec[];
@@ -23,11 +22,7 @@ export interface UseGetGroupSelectorArgs {
   tableId: TableId;
 }
 
-export const useGetGroupingSelector = ({
-  fields,
-  groupingId,
-  tableId,
-}: UseGetGroupSelectorArgs) => {
+export const useGetGroupSelector = ({ fields, groupingId, tableId }: UseGetGroupSelectorArgs) => {
   const dispatch = useDispatch();
 
   const getGroupByIdSelector = groupSelectors.getGroupByIdSelector();
@@ -76,45 +71,31 @@ export const useGetGroupingSelector = ({
     );
   }, [defaultGroupingOptions, selectedGroup, setOptions, options]);
 
-  const groupsSelector = useMemo(
-    () => (
-      <GroupsSelector
-        groupSelected={selectedGroup}
-        data-test-subj="alerts-table-group-selector"
-        onGroupChange={(groupSelection: string) => {
-          if (groupSelection === selectedGroup) {
-            return;
-          }
-          setGroupsActivePage(0);
-          setSelectedGroup(groupSelection);
+  const groupsSelector = getGroupSelector({
+    groupSelected: selectedGroup,
+    'data-test-subj': 'alerts-table-group-selector',
+    onGroupChange: (groupSelection: string) => {
+      if (groupSelection === selectedGroup) {
+        return;
+      }
+      setGroupsActivePage(0);
+      setSelectedGroup(groupSelection);
 
-          if (!isNoneGroup(groupSelection) && !options.find((o) => o.key === groupSelection)) {
-            setOptions([
-              ...defaultGroupingOptions,
-              {
-                label: groupSelection,
-                key: groupSelection,
-              },
-            ]);
-          } else {
-            setOptions(defaultGroupingOptions);
-          }
-        }}
-        fields={fields}
-        options={options}
-        title={GROUP_BY}
-      />
-    ),
-    [
-      defaultGroupingOptions,
-      fields,
-      options,
-      selectedGroup,
-      setGroupsActivePage,
-      setOptions,
-      setSelectedGroup,
-    ]
-  );
+      if (!isNoneGroup(groupSelection) && !options.find((o) => o.key === groupSelection)) {
+        setOptions([
+          ...defaultGroupingOptions,
+          {
+            label: groupSelection,
+            key: groupSelection,
+          },
+        ]);
+      } else {
+        setOptions(defaultGroupingOptions);
+      }
+    },
+    fields,
+    options,
+  });
 
   return groupsSelector;
 };

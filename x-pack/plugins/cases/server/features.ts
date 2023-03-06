@@ -8,10 +8,11 @@
 import { i18n } from '@kbn/i18n';
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 import { APP_ID, FEATURE_ID } from '../common/constants';
-import { createUICapabilities } from '../common';
+import { createUICapabilities, getApiTags } from '../common';
 
 /**
  * The order of appearance in the feature privilege page
@@ -23,6 +24,7 @@ const FEATURE_ORDER = 3100;
 
 export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
   const capabilities = createUICapabilities();
+  const apiTags = getApiTags(APP_ID);
 
   return {
     id: FEATURE_ID,
@@ -38,7 +40,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
     cases: [APP_ID],
     privileges: {
       all: {
-        api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+        api: apiTags.all,
         cases: {
           create: [APP_ID],
           read: [APP_ID],
@@ -49,13 +51,13 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
           insightsAndAlerting: [APP_ID],
         },
         savedObject: {
-          all: [],
-          read: [],
+          all: [...filesSavedObjectTypes],
+          read: [...filesSavedObjectTypes],
         },
         ui: capabilities.all,
       },
       read: {
-        api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+        api: apiTags.read,
         cases: {
           read: [APP_ID],
         },
@@ -64,7 +66,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
         },
         savedObject: {
           all: [],
-          read: [],
+          read: [...filesSavedObjectTypes],
         },
         ui: capabilities.read,
       },
@@ -79,7 +81,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
             groupType: 'independent',
             privileges: [
               {
-                api: [],
+                api: apiTags.delete,
                 id: 'cases_delete',
                 name: i18n.translate('xpack.cases.features.deleteSubFeatureDetails', {
                   defaultMessage: 'Delete cases and comments',

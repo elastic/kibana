@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { CSSProperties, ReactElement, useState } from 'react';
+import React, { CSSProperties, ReactElement, useCallback, useEffect, useState } from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -62,25 +62,38 @@ export const BrowserStepsList = ({
     Record<string, ReactElement>
   >({});
 
-  const toggleDetails = (item: JourneyStep) => {
-    const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
-    if (itemIdToExpandedRowMapValues[item._id]) {
-      delete itemIdToExpandedRowMapValues[item._id];
-    } else {
-      if (testNowMode) {
-        itemIdToExpandedRowMapValues[item._id] = (
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <StepTabs step={item} loading={false} stepsList={steps} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      } else {
-        itemIdToExpandedRowMapValues[item._id] = <></>;
-      }
+  const toggleDetails = useCallback(
+    (item: JourneyStep) => {
+      setItemIdToExpandedRowMap((prevState) => {
+        const itemIdToExpandedRowMapValues = { ...prevState };
+        if (itemIdToExpandedRowMapValues[item._id]) {
+          delete itemIdToExpandedRowMapValues[item._id];
+        } else {
+          if (testNowMode) {
+            itemIdToExpandedRowMapValues[item._id] = (
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <StepTabs step={item} loading={false} stepsList={steps} />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          } else {
+            itemIdToExpandedRowMapValues[item._id] = <></>;
+          }
+        }
+        return itemIdToExpandedRowMapValues;
+      });
+    },
+    [steps, testNowMode]
+  );
+
+  const failedStep = stepEnds?.find((step) => step.synthetics.step?.status === 'failed');
+
+  useEffect(() => {
+    if (failedStep && showExpand) {
+      toggleDetails(failedStep);
     }
-    setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
-  };
+  }, [failedStep, showExpand, toggleDetails]);
 
   const columns: Array<EuiBasicTableColumn<JourneyStep>> = [
     ...(showExpand
