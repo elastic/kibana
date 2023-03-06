@@ -17,7 +17,7 @@ export const isSummaryAction = (action: RuleAction) => {
   return action.frequency?.summary || false;
 };
 
-export const isSummaryActionOnInterval = (action: RuleAction) => {
+export const isActionOnInterval = (action: RuleAction) => {
   if (!action.frequency) {
     return false;
   }
@@ -46,7 +46,7 @@ export const isSummaryActionThrottled = ({
   summaryActions?: ThrottledActions;
   logger: Logger;
 }) => {
-  if (!isSummaryActionOnInterval(action)) {
+  if (!isActionOnInterval(action)) {
     return false;
   }
   if (!summaryActions) {

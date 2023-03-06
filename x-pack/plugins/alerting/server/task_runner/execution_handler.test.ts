@@ -1000,7 +1000,7 @@ describe('Execution Handler', () => {
       excludedAlertInstanceIds: ['foo'],
     });
     expect(result).toEqual({
-      throttledActions: {
+      throttledSummaryActions: {
         '111-111': {
           date: new Date(),
         },
@@ -1145,7 +1145,7 @@ describe('Execution Handler', () => {
 
     const result = await executionHandler.run({});
     expect(result).toEqual({
-      throttledActions: {
+      throttledSummaryActions: {
         '111-111': {
           date: new Date(),
         },

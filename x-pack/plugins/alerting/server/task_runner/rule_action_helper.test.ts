@@ -10,7 +10,7 @@ import { RuleAction } from '../types';
 import {
   generateActionHash,
   getSummaryActionsFromTaskState,
-  isSummaryActionOnInterval,
+  isActionOnInterval,
   isSummaryAction,
   isSummaryActionThrottled,
 } from './rule_action_helper';
@@ -66,14 +66,14 @@ describe('rule_action_helper', () => {
     });
   });
 
-  describe('isSummaryActionOnInterval', () => {
+  describe('isActionOnInterval', () => {
     test('should return false if the action does not have frequency field', () => {
-      const result = isSummaryActionOnInterval(mockOldAction);
+      const result = isActionOnInterval(mockOldAction);
       expect(result).toBe(false);
     });
 
     test('should return false if notifyWhen is not onThrottleInterval', () => {
-      const result = isSummaryActionOnInterval({
+      const result = isActionOnInterval({
         ...mockAction,
         frequency: { ...mockAction.frequency, notifyWhen: 'onActiveAlert' },
       } as RuleAction);
@@ -81,7 +81,7 @@ describe('rule_action_helper', () => {
     });
 
     test('should return false if throttle is not a valid interval string', () => {
-      const result = isSummaryActionOnInterval({
+      const result = isActionOnInterval({
         ...mockAction,
         frequency: { ...mockAction.frequency, throttle: null },
       } as RuleAction);
@@ -89,7 +89,7 @@ describe('rule_action_helper', () => {
     });
 
     test('should return true if the action is a throttling action', () => {
-      const result = isSummaryActionOnInterval(mockSummaryAction);
+      const result = isActionOnInterval(mockSummaryAction);
       expect(result).toBe(true);
     });
   });
@@ -148,9 +148,6 @@ describe('rule_action_helper', () => {
     });
     const logger = { debug: jest.fn } as unknown as Logger;
     const summaryActions = { '111-111': { date: new Date('2020-01-01T00:00:00.000Z') } };
-    const summaryActionsWithHash = {
-      'slack:summary:1d': { date: new Date('2020-01-01T00:00:00.000Z') },
-    };
 
     test('should return false if the action does not have throttle filed', () => {
       const result = isSummaryActionThrottled({
