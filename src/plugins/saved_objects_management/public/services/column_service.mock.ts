@@ -11,7 +11,7 @@ import {
   SavedObjectsManagementColumnService,
   SavedObjectsManagementColumnServiceSetup,
   SavedObjectsManagementColumnServiceStart,
-} from '../../public/services';
+} from '.';
 
 const createSetupMock = (): jest.Mocked<SavedObjectsManagementColumnServiceSetup> => {
   const mock = {

@@ -8,7 +8,7 @@
 
 import { actionServiceMock } from './services/action_service.mock';
 import { columnServiceMock } from './services/column_service.mock';
-import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from '../public';
+import { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './plugin';
 
 const createSetupContractMock = (): jest.Mocked<SavedObjectsManagementPluginSetup> => {
   const mock = {

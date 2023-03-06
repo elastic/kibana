@@ -13,7 +13,7 @@ import NewVisModal from './new_vis_modal';
 import { ApplicationStart, DocLinksStart } from '@kbn/core/public';
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/mocks';
+import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
 
 describe('NewVisModal', () => {
   const defaultVisTypeParams = {
