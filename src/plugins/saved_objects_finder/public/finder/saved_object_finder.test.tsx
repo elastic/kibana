@@ -10,7 +10,7 @@ const nextTick = () => new Promise((res) => process.nextTick(res));
 
 import lodash from 'lodash';
 jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
-import { EuiInMemoryTable, EuiLink, EuiSearchBarProps, Query } from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink, EuiSearchBarProps, EuiText, Query } from '@elastic/eui';
 import { IconType } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
 import React from 'react';
@@ -189,6 +189,33 @@ describe('SavedObjectsFinder', () => {
     findTestSubject(wrapper, 'savedObjectTitleExample-title').simulate('click');
     expect(chooseStub.calledWith('1', 'search', `${doc.attributes.title} (Search)`, doc)).toEqual(
       true
+    );
+  });
+
+  it('should render help text', async () => {
+    const core = coreMock.createStart();
+    (core.http.get as any as jest.SpyInstance).mockImplementation(() =>
+      Promise.resolve({ saved_objects: [doc] })
+    );
+    core.uiSettings.get.mockImplementation(() => 10);
+
+    const wrapper = shallow(
+      <SavedObjectFinder
+        services={{
+          http: core.http,
+          uiSettings: core.uiSettings,
+          savedObjectsManagement,
+          savedObjectsTagging,
+        }}
+        savedObjectMetaData={searchMetaData}
+        helpText="This is some description about the action"
+      />
+    );
+
+    wrapper.instance().componentDidMount!();
+    await nextTick();
+    expect(wrapper.find(EuiText).childAt(0).text()).toEqual(
+      'This is some description about the action'
     );
   });
 

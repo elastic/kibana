@@ -159,6 +159,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         securityLayout: {
           getPluginWrapper: () => SecuritySolutionTemplateWrapper,
         },
+        savedObjectsManagement: startPluginsDeps.savedObjectsManagement,
       };
       return services;
     };
