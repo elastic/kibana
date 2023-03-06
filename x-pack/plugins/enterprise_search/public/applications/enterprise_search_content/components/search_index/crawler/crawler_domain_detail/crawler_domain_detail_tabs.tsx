@@ -43,14 +43,20 @@ export const CrawlerDomainDetailTabs: React.FC<CrawlerDomainDetailTabsProps> = (
       content: (
         <>
           <EuiSpacer />
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.title', {
-                defaultMessage: 'Entry points',
-              })}
-            </h2>
-          </EuiTitle>
-          <EntryPointsTable domain={domain} indexName={indexName} items={domain.entryPoints} />
+          <EntryPointsTable
+            domain={domain}
+            indexName={indexName}
+            items={domain.entryPoints}
+            title={
+              <EuiTitle size="s">
+                <h2>
+                  {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.title', {
+                    defaultMessage: 'Entry points',
+                  })}
+                </h2>
+              </EuiTitle>
+            }
+          />
         </>
       ),
       id: CrawlerDomainTabId.ENTRY_POINTS,
@@ -74,14 +80,20 @@ export const CrawlerDomainDetailTabs: React.FC<CrawlerDomainDetailTabsProps> = (
       content: (
         <>
           <EuiSpacer />
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.enterpriseSearch.crawler.sitemapsTable.title', {
-                defaultMessage: 'Sitemaps',
-              })}
-            </h2>
-          </EuiTitle>
-          <SitemapsTable domain={domain} indexName={indexName} items={domain.sitemaps} />
+          <SitemapsTable
+            domain={domain}
+            indexName={indexName}
+            items={domain.sitemaps}
+            title={
+              <EuiTitle size="s">
+                <h2>
+                  {i18n.translate('xpack.enterpriseSearch.crawler.sitemapsTable.title', {
+                    defaultMessage: 'Sitemaps',
+                  })}
+                </h2>
+              </EuiTitle>
+            }
+          />
         </>
       ),
       id: CrawlerDomainTabId.SITE_MAPS,
@@ -93,18 +105,20 @@ export const CrawlerDomainDetailTabs: React.FC<CrawlerDomainDetailTabsProps> = (
       content: (
         <>
           <EuiSpacer />
-          <EuiTitle size="s">
-            <h2>
-              {i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.title', {
-                defaultMessage: 'Crawl rules',
-              })}
-            </h2>
-          </EuiTitle>
           <CrawlRulesTable
             domainId={domain.id}
             indexName={indexName}
             crawlRules={domain.crawlRules}
             defaultCrawlRule={domain.defaultCrawlRule}
+            title={
+              <EuiTitle size="s">
+                <h2>
+                  {i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.title', {
+                    defaultMessage: 'Crawl rules',
+                  })}
+                </h2>
+              </EuiTitle>
+            }
           />
         </>
       ),

@@ -17,6 +17,7 @@
       "data",
       "dataViews",
       "features",
+      "files",
       "inspector",
       "ruleRegistry",
       "triggersActionsUi",
@@ -25,7 +26,6 @@
       "security",
       "guidedOnboarding",
       "share",
-      "spaces"
     ],
     "optionalPlugins": [
       "discover",
