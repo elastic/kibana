@@ -6,7 +6,7 @@
  */
 
 import type { ActionTypeExecutorResult as ConnectorTypeExecutorResult } from '@kbn/actions-plugin/server/types';
-import type { SlackSecrets, PostMessageSubActionParams } from '../../../common/slack/types';
+import type { PostMessageSubActionParams } from '../../../common/slack/types';
 
 export interface PostMessageResponse {
   ok: boolean;
@@ -15,10 +15,6 @@ export interface PostMessageResponse {
   message?: {
     text: string;
   };
-}
-
-export interface SlackServiceCredentials {
-  secrets: SlackSecrets;
 }
 
 export interface SlackService {

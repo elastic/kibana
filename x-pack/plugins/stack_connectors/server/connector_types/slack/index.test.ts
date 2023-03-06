@@ -8,7 +8,12 @@
 import axios from 'axios';
 import { Logger } from '@kbn/core/server';
 import { Services } from '@kbn/actions-plugin/server/types';
-import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
+import {
+  validateParams,
+  validateSecrets,
+  validateConnector,
+  validateConfig,
+} from '@kbn/actions-plugin/server/lib';
 import { getConnectorType } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -102,8 +107,8 @@ describe('validate params', () => {
   });
 });
 
-describe('validateConnectorTypeSecrets', () => {
-  test('should validate and throw error when config is invalid', () => {
+describe('validate config, secrets and connector', () => {
+  test('should validate and throw error when secrets is invalid', () => {
     expect(() => {
       validateSecrets(connectorType, {}, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
@@ -113,8 +118,37 @@ describe('validateConnectorTypeSecrets', () => {
     `);
   });
 
+  test('should validate and pass when config is valid', () => {
+    validateConfig(connectorType, { type: 'web_api' }, { configurationUtilities });
+  });
+
+  test('should validate and pass when config is empty', () => {
+    validateConfig(connectorType, {}, { configurationUtilities });
+  });
+
+  test('should validate and pass when config is invalid', () => {
+    expect(() => {
+      validateConfig(connectorType, { type: 'not_webhook' }, { configurationUtilities });
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type config: [type]: types that failed validation:
+      - [type.0]: expected value to equal [webhook]
+      - [type.1]: expected value to equal [web_api]"
+    `);
+  });
+
   describe('Webhook', () => {
-    test('should validate and pass when config is valid', () => {
+    test('should validate and pass when config and secrets are invalid together', () => {
+      expect(() => {
+        validateConnector(connectorType, {
+          config: { type: 'webhook' },
+          secrets: { token: 'fake_token' },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: Secrets of Slack type webhook should contain webhookUrl field"`
+      );
+    });
+
+    test('should validate and pass when secrets is valid', () => {
       validateSecrets(
         connectorType,
         { webhookUrl: 'https://example.com' },
@@ -122,7 +156,45 @@ describe('validateConnectorTypeSecrets', () => {
       );
     });
 
-    test('should validate and throw error when config is invalid', () => {
+    test('should validate and pass when the slack webhookUrl is added to allowedHosts', () => {
+      const configUtils = {
+        ...actionsConfigMock.create(),
+        ensureUriAllowed: (url: string) => {
+          expect(url).toEqual('https://api.slack.com/');
+        },
+      };
+      actionsConfigMock.create();
+      expect(
+        validateSecrets(
+          connectorType,
+          { webhookUrl: 'https://api.slack.com/' },
+          { configurationUtilities: configUtils }
+        )
+      ).toEqual({
+        webhookUrl: 'https://api.slack.com/',
+      });
+    });
+
+    test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
+      const configUtils = {
+        ...actionsConfigMock.create(),
+        ensureUriAllowed: () => {
+          throw new Error(`target hostname is not added to allowedHosts`);
+        },
+      };
+
+      expect(() => {
+        validateSecrets(
+          connectorType,
+          { webhookUrl: 'https://api.slack.com/' },
+          { configurationUtilities: configUtils }
+        );
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type secrets: error configuring slack action: target hostname is not added to allowedHosts"`
+      );
+    });
+
+    test('should validate and throw error when secrets is invalid', () => {
       expect(() => {
         validateSecrets(connectorType, { webhookUrl: 1 }, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(`
@@ -140,7 +212,18 @@ describe('validateConnectorTypeSecrets', () => {
   });
 
   describe('Web API', () => {
-    test('should validate and pass when config is valid 2', () => {
+    test('should validate and pass when config and secrets are invalid together', () => {
+      expect(() => {
+        validateConnector(connectorType, {
+          config: { type: 'web_api' },
+          secrets: { webhookUrl: 'https://fake_url' },
+        });
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"error validating action type connector: Secrets of Slack type web_api should contain token field"`
+      );
+    });
+
+    test('should validate and pass when secrets is valid', () => {
       validateSecrets(
         connectorType,
         {
@@ -150,7 +233,7 @@ describe('validateConnectorTypeSecrets', () => {
       );
     });
 
-    test('should validate and throw error when config is invalid', () => {
+    test('should validate and throw error when secrets is invalid', () => {
       expect(() => {
         validateSecrets(connectorType, { token: 1 }, { configurationUtilities });
       }).toThrowErrorMatchingInlineSnapshot(`
@@ -159,44 +242,6 @@ describe('validateConnectorTypeSecrets', () => {
         - [1.token]: expected value of type [string] but got [number]"
       `);
     });
-  });
-
-  test('should validate and pass when the slack webhookUrl is added to allowedHosts', () => {
-    const configUtils = {
-      ...actionsConfigMock.create(),
-      ensureUriAllowed: (url: string) => {
-        expect(url).toEqual('https://api.slack.com/');
-      },
-    };
-    actionsConfigMock.create();
-    expect(
-      validateSecrets(
-        connectorType,
-        { webhookUrl: 'https://api.slack.com/' },
-        { configurationUtilities: configUtils }
-      )
-    ).toEqual({
-      webhookUrl: 'https://api.slack.com/',
-    });
-  });
-
-  test('config validation returns an error if the specified URL isnt added to allowedHosts', () => {
-    const configUtils = {
-      ...actionsConfigMock.create(),
-      ensureUriAllowed: () => {
-        throw new Error(`target hostname is not added to allowedHosts`);
-      },
-    };
-
-    expect(() => {
-      validateSecrets(
-        connectorType,
-        { webhookUrl: 'https://api.slack.com/' },
-        { configurationUtilities: configUtils }
-      );
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: error configuring slack action: target hostname is not added to allowedHosts"`
-    );
   });
 });
 
@@ -207,6 +252,32 @@ describe('execute', () => {
     connectorType = getConnectorType();
   });
   describe('Webhook', () => {
+    test('should fail if type is webhook, but params does not include message', async () => {
+      jest.mock('@kbn/actions-plugin/server/lib/get_custom_agents', () => ({
+        getCustomAgents: () => ({ httpsAgent: jest.fn(), httpAgent: jest.fn() }),
+      }));
+      configurationUtilities = actionsConfigMock.create();
+      IncomingWebhook.mockImplementation(() => ({
+        send: () => ({
+          text: 'ok',
+        }),
+      }));
+
+      await expect(
+        connectorType.executor({
+          actionId: '.slack',
+          services,
+          config: { type: 'webhook' },
+          secrets: { webhookUrl: 'http://example.com' },
+          params: { subAction: 'getChannels' },
+          configurationUtilities,
+          logger: mockedLogger,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Slack connector parameters with type Webhook should include message field in parameters"`
+      );
+    });
+
     test('should execute with success', async () => {
       jest.mock('@kbn/actions-plugin/server/lib/get_custom_agents', () => ({
         getCustomAgents: () => ({ httpsAgent: jest.fn(), httpAgent: jest.fn() }),
@@ -461,6 +532,58 @@ describe('execute', () => {
   });
 
   describe('Web API', () => {
+    test('should fail if type is web_api, but params does not include subAction', async () => {
+      requestMock.mockImplementation(() => ({
+        data: {
+          ok: true,
+          message: { text: 'some text' },
+          channel: 'general',
+        },
+      }));
+
+      await expect(
+        connectorType.executor({
+          actionId: '.slack',
+          services,
+          config: { type: 'web_api' },
+          secrets: { token: 'some token' },
+          params: {
+            message: 'post message',
+          },
+          configurationUtilities,
+          logger: mockedLogger,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Slack connector parameters with type Web API should include subAction field in parameters"`
+      );
+    });
+
+    test('should fail if type is web_api, but subAction is not postMessage/getChannels', async () => {
+      requestMock.mockImplementation(() => ({
+        data: {
+          ok: true,
+          message: { text: 'some text' },
+          channel: 'general',
+        },
+      }));
+
+      await expect(
+        connectorType.executor({
+          actionId: '.slack',
+          services,
+          config: { type: 'web_api' },
+          secrets: { token: 'some token' },
+          params: {
+            subAction: 'getMessage' as 'getChannels',
+          },
+          configurationUtilities,
+          logger: mockedLogger,
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"subAction can be only postMesage or getChannels"`
+      );
+    });
+
     test('renders parameter templates as expected', async () => {
       expect(connectorType.renderParameterTemplates).toBeTruthy();
       const paramsWithTemplates = {
@@ -571,23 +694,6 @@ describe('execute', () => {
         },
         status: 'ok',
       });
-    });
-
-    test('should fail if subAction is not known', async () => {
-      await expect(
-        connectorType.executor({
-          actionId: '.slack',
-          services,
-          config: { type: 'web_api' },
-          secrets: { token: 'some token' },
-          params: {
-            subAction: 'weirdAcrion' as 'postMessage',
-            subActionParams: {} as PostMessageSubActionParams,
-          },
-          configurationUtilities,
-          logger: mockedLogger,
-        })
-      ).rejects.toThrowError('[Action][ExternalService] Unsupported subAction type weirdAcrion.');
     });
   });
 });

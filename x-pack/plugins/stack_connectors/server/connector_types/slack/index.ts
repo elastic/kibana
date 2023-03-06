@@ -63,11 +63,15 @@ export function getConnectorType(): SlackConnectorType {
       connector: validate.connector,
     },
     renderParameterTemplates,
-    executor: (execOptions: SlackExecutorOptions) => {
+    executor: async (execOptions: SlackExecutorOptions) => {
+      const slackType =
+        !execOptions.config?.type || execOptions.config?.type === 'webhook' ? 'webhook' : 'web_api';
+      validate.validateTypeParamsCombination(slackType, execOptions.params);
+
       const res =
-        execOptions.config.type === 'webhook'
-          ? slackWebhookExecutor(execOptions as SlackWebhookExecutorOptions)
-          : slackWebApiExecutor(execOptions as SlackWebApiExecutorOptions);
+        slackType === 'webhook'
+          ? await slackWebhookExecutor(execOptions as SlackWebhookExecutorOptions)
+          : await slackWebApiExecutor(execOptions as SlackWebApiExecutorOptions);
       return res;
     },
   };

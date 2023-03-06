@@ -8,7 +8,7 @@
 import { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { i18n } from '@kbn/i18n';
 import { URL } from 'url';
-import type { SlackSecrets, SlackConfig } from '../../../common/slack/types';
+import type { SlackSecrets, SlackConfig, SlackActionParams } from '../../../common/slack/types';
 
 const SECRETS_DO_NOT_MATCH_SLACK_TYPE = (slackType: 'webhook' | 'web_api', secretsField: string) =>
   i18n.translate(
@@ -19,6 +19,30 @@ const SECRETS_DO_NOT_MATCH_SLACK_TYPE = (slackType: 'webhook' | 'web_api', secre
         slackType,
         secretsField,
       },
+    }
+  );
+
+const SLACK_CONNECTOR_WITH_TYPE_SHOULD_INCLUDE_FIELD = (
+  slackTypeName: 'Webhook' | 'Web API',
+  paramsField: string
+) =>
+  i18n.translate(
+    'xpack.stackConnectors.slack.configuration.slackConnectorWithTypeShouldIncludeField',
+    {
+      defaultMessage:
+        'Slack connector parameters with type {slackTypeName} should include {paramsField} field in parameters',
+      values: {
+        slackTypeName,
+        paramsField,
+      },
+    }
+  );
+
+const WRONG_SUBACTION = () =>
+  i18n.translate(
+    'xpack.stackConnectors.slack.configuration.slackConnectorWithTypeShouldIncludeField',
+    {
+      defaultMessage: 'subAction can be only postMesage or getChannels',
     }
   );
 
@@ -63,7 +87,26 @@ const validateConnector = (config: SlackConfig, secrets: SlackSecrets) => {
   return null;
 };
 
+const validateTypeParamsCombination = (type: 'webhook' | 'web_api', params: SlackActionParams) => {
+  if (type === 'webhook') {
+    if (!('message' in params)) {
+      throw new Error(SLACK_CONNECTOR_WITH_TYPE_SHOULD_INCLUDE_FIELD('Webhook', 'message'));
+    }
+    return true;
+  }
+  if (type === 'web_api') {
+    if (!('subAction' in params)) {
+      throw new Error(SLACK_CONNECTOR_WITH_TYPE_SHOULD_INCLUDE_FIELD('Web API', 'subAction'));
+    }
+    if (params.subAction !== 'postMessage' && params.subAction !== 'getChannels') {
+      throw new Error(WRONG_SUBACTION());
+    }
+  }
+  return;
+};
+
 export const validate = {
   secrets: validateSecrets,
   connector: validateConnector,
+  validateTypeParamsCombination,
 };
