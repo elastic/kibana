@@ -69,11 +69,12 @@ const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   box-shadow: none;
   display: flex;
   flex-direction: column;
+  margin-top: ${({ theme }) => theme.eui.euiSizeM}
   padding: 0;
 
   &.euiFlyoutHeader {
     ${({ theme }) =>
-      `padding: 0 ${theme.eui.euiSizeS} ${theme.eui.euiSizeS} ${theme.eui.euiSizeS};`}
+      `padding: 0 ${theme.eui.euiSizeM} ${theme.eui.euiSizeS} ${theme.eui.euiSizeS};`}
   }
 `;
 

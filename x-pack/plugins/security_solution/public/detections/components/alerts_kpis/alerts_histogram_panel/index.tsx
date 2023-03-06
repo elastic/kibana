@@ -391,7 +391,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             alignHeader={alignHeader}
             id={uniqueQueryId}
             inspectTitle={inspectTitle}
-            outerDirection="row"
+            outerDirection="column"
             title={titleText}
             titleSize={titleSize}
             toggleStatus={showHistogram}
@@ -399,7 +399,6 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
             showInspectButton={isChartEmbeddablesEnabled ? false : chartOptionsContextMenu == null}
             subtitle={!isInitialLoading && showTotalAlertsCount && totalAlerts}
             isInspectDisabled={isInspectDisabled}
-            hideSubtitle
           >
             <EuiFlexGroup alignItems="flexStart" data-test-subj="panelFlexGroup" gutterSize="none">
               <EuiFlexItem grow={false}>
