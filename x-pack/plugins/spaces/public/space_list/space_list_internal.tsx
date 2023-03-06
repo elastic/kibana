@@ -106,6 +106,7 @@ export const SpaceListInternal = ({
     if (displayLimit && authorizedSpaceTargets.length > displayLimit) {
       button = isExpanded ? (
         <EuiButtonEmpty
+          data-test-subj="spacesSpaceListInternalShowLessButtonEmpty"
           size="xs"
           onClick={() => setIsExpanded(false)}
           style={{ alignSelf: 'center' }}
@@ -117,6 +118,7 @@ export const SpaceListInternal = ({
         </EuiButtonEmpty>
       ) : (
         <EuiButtonEmpty
+          data-test-subj="spacesSpaceListInternalCountMoreButtonEmpty"
           size="xs"
           onClick={() => setIsExpanded(true)}
           style={{ alignSelf: 'center' }}

@@ -143,7 +143,12 @@ export const DFAnalyticsJobIdLink = ({ jobId }: { jobId: string }) => {
   });
 
   return (
-    <EuiLink href={href} css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }} title={jobId}>
+    <EuiLink
+      data-test-subj="mlDFAnalyticsJobIdLinkLink"
+      href={href}
+      css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }}
+      title={jobId}
+    >
       {jobId}
     </EuiLink>
   );

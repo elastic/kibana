@@ -258,7 +258,10 @@ export const Page: FC = () => {
               defaultMessage="Anomaly detection can only be run over indices which are time based."
             />
             <br />
-            <EuiLink onClick={onSelectDifferentIndex}>
+            <EuiLink
+              data-test-subj="mlPageSelectADifferentDataViewOrSavedSearchLink"
+              onClick={onSelectDifferentIndex}
+            >
               <FormattedMessage
                 id="xpack.ml.newJob.wizard.jobType.selectDifferentIndexLinkText"
                 defaultMessage="Select a different data view or saved search"

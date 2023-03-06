@@ -107,7 +107,11 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({ sourceData }) 
                       defaultMessage="{link} to learn more about Custom API Sources."
                       values={{
                         link: (
-                          <EuiLink href={docLinks.workplaceSearchCustomSources} target="_blank">
+                          <EuiLink
+                            data-test-subj="enterpriseSearchConfigureCustomLink"
+                            href={docLinks.workplaceSearchCustomSources}
+                            target="_blank"
+                          >
                             {CONFIG_CUSTOM_LINK_TEXT}
                           </EuiLink>
                         ),
@@ -133,7 +137,11 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({ sourceData }) 
                       values={{
                         name,
                         deploymentGuideLink: (
-                          <EuiLink target="_blank" href={documentationUrl}>
+                          <EuiLink
+                            data-test-subj="enterpriseSearchConfigureCustomDocumentationLink"
+                            target="_blank"
+                            href={documentationUrl}
+                          >
                             <FormattedMessage
                               id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.linkLabel"
                               defaultMessage="documentation"
@@ -144,7 +152,11 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({ sourceData }) 
                     />
                   </p>
                   <p>
-                    <EuiLink target="_blank" href={`https://github.com/${githubRepository}`}>
+                    <EuiLink
+                      data-test-subj="enterpriseSearchConfigureCustomCustomizeTheConnectorHereLink"
+                      target="_blank"
+                      href={`https://github.com/${githubRepository}`}
+                    >
                       <FormattedMessage
                         id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.githubRepoLinkLabel"
                         defaultMessage="Customize the connector here."
@@ -153,6 +165,7 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({ sourceData }) 
                   </p>
                   <p>
                     <EuiLink
+                      data-test-subj="enterpriseSearchConfigureCustomQuestionsDiscussHereLink"
                       target="_blank"
                       href={'https://discuss.elastic.co/c/enterprise-search/84'}
                     >
@@ -163,7 +176,11 @@ export const ConfigureCustom: React.FC<ConfigureCustomProps> = ({ sourceData }) 
                     </EuiLink>
                   </p>
                   <p>
-                    <EuiLink target="_blank" href={'https://www.elastic.co/kibana/feedback'}>
+                    <EuiLink
+                      data-test-subj="enterpriseSearchConfigureCustomWereAlwaysLookingToImproveShareYourFeedbackLink"
+                      target="_blank"
+                      href={'https://www.elastic.co/kibana/feedback'}
+                    >
                       <FormattedMessage
                         id="xpack.enterpriseSearch.workplaceSearch.contentSource.configCustom.deploymentGuide.feedbackLinkLabel"
                         defaultMessage="We're always looking to improve. Share your feedback  "

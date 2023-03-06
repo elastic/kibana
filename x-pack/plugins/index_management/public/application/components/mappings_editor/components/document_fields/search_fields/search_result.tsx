@@ -44,7 +44,10 @@ export const SearchResult = React.memo(
           </h3>
         }
         actions={
-          <EuiButton onClick={clearSearch}>
+          <EuiButton
+            data-test-subj="indexManagementSearchResultClearSearchButton"
+            onClick={clearSearch}
+          >
             <FormattedMessage
               id="xpack.idxMgmt.mappingsEditor.searchResult.emptyPrompt.clearSearchButtonLabel"
               defaultMessage="Clear search"

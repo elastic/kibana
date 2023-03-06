@@ -169,6 +169,7 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
               {currentStep > 1 ? (
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
+                    data-test-subj="snapshotRestorePolicyFormBackButtonEmpty"
                     iconType="arrowLeft"
                     onClick={() => onBack()}
                     disabled={!validation.isValid}
@@ -230,7 +231,10 @@ export const PolicyForm: React.FunctionComponent<Props> = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onCancel()}>
+            <EuiButtonEmpty
+              data-test-subj="snapshotRestorePolicyFormCancelButtonEmpty"
+              onClick={() => onCancel()}
+            >
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.cancelButtonLabel"
                 defaultMessage="Cancel"

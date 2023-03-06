@@ -39,6 +39,7 @@ export const ControlledDefaultInput = ({
 
   return (
     <EuiFieldText
+      data-test-subj="securitySolutionControlledDefaultInputFieldText"
       className={VALUE_INPUT_CLASS_NAME}
       onChange={onValueChange}
       placeholder={i18n.VALUE}

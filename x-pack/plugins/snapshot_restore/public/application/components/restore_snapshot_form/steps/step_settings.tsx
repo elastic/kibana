@@ -63,7 +63,11 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
 
   // Index settings doc link
   const indexSettingsDocLink = (
-    <EuiLink href={docLinks.links.elasticsearch.indexModules} target="_blank">
+    <EuiLink
+      data-test-subj="snapshotRestoreRestoreSnapshotStepSettingsLearnMoreLink"
+      href={docLinks.links.elasticsearch.indexModules}
+      target="_blank"
+    >
       <FormattedMessage
         id="xpack.snapshotRestore.restoreForm.stepSettings.indexSettingsDocLinkText"
         defaultMessage="Learn more."
@@ -88,6 +92,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
 
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            data-test-subj="snapshotRestoreRestoreSnapshotStepSettingsIndexSettingsDocsButtonEmpty"
             size="s"
             flush="right"
             href={docLinks.links.snapshotRestore.changeIndexSettings}

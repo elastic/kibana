@@ -25,7 +25,11 @@ export const Reason = ({ reason }) => {
       defaultMessage="We did not find any log data and we are unable to diagnose why. {link}"
       values={{
         link: (
-          <EuiLink target="_blank" href={filebeatUrl}>
+          <EuiLink
+            data-test-subj="monitoringReasonPleaseVerifyYourSetupIsCorrectLink"
+            target="_blank"
+            href={filebeatUrl}
+          >
             <FormattedMessage
               id="xpack.monitoring.logs.reason.defaultMessageLink"
               defaultMessage="Please verify your setup is correct."
@@ -46,7 +50,11 @@ export const Reason = ({ reason }) => {
         defaultMessage="Set up {link}, then configure your Elasticsearch output to your monitoring cluster."
         values={{
           link: (
-            <EuiLink target="_blank" href={filebeatUrl}>
+            <EuiLink
+              data-test-subj="monitoringReasonFilebeatLink"
+              target="_blank"
+              href={filebeatUrl}
+            >
               {i18n.translate('xpack.monitoring.logs.reason.noIndexPatternLink', {
                 defaultMessage: 'Filebeat',
               })}
@@ -78,7 +86,11 @@ export const Reason = ({ reason }) => {
         defaultMessage="Follow {link} to set up Elasticsearch."
         values={{
           link: (
-            <EuiLink target="_blank" href={elasticsearchUrl}>
+            <EuiLink
+              data-test-subj="monitoringReasonTheseDirectionsLink"
+              target="_blank"
+              href={elasticsearchUrl}
+            >
               {i18n.translate('xpack.monitoring.logs.reason.noTypeLink', {
                 defaultMessage: 'these directions',
               })}
@@ -98,7 +110,11 @@ export const Reason = ({ reason }) => {
         values={{
           varPaths: <Monospace>var.paths</Monospace>,
           link: (
-            <EuiLink target="_blank" href={elasticsearchUrl}>
+            <EuiLink
+              data-test-subj="monitoringReasonPointsToJsonLogsLink"
+              target="_blank"
+              href={elasticsearchUrl}
+            >
               {i18n.translate('xpack.monitoring.logs.reason.notUsingStructuredLogsLink', {
                 defaultMessage: 'points to JSON logs',
               })}
@@ -117,7 +133,11 @@ export const Reason = ({ reason }) => {
         defaultMessage="Check that your {link} is correct."
         values={{
           link: (
-            <EuiLink target="_blank" href={elasticsearchUrl}>
+            <EuiLink
+              data-test-subj="monitoringReasonSetupLink"
+              target="_blank"
+              href={elasticsearchUrl}
+            >
               {i18n.translate('xpack.monitoring.logs.reason.noClusterLink', {
                 defaultMessage: 'setup',
               })}
@@ -136,7 +156,11 @@ export const Reason = ({ reason }) => {
         defaultMessage="Check that your {link} is correct."
         values={{
           link: (
-            <EuiLink target="_blank" href={elasticsearchUrl}>
+            <EuiLink
+              data-test-subj="monitoringReasonSetupLink"
+              target="_blank"
+              href={elasticsearchUrl}
+            >
               {i18n.translate('xpack.monitoring.logs.reason.noNodeLink', {
                 defaultMessage: 'setup',
               })}
@@ -155,7 +179,11 @@ export const Reason = ({ reason }) => {
         defaultMessage="We found logs, but none for this index. If this problem continues, check that your {link} is correct."
         values={{
           link: (
-            <EuiLink target="_blank" href={elasticsearchUrl}>
+            <EuiLink
+              data-test-subj="monitoringReasonSetupLink"
+              target="_blank"
+              href={elasticsearchUrl}
+            >
               {i18n.translate('xpack.monitoring.logs.reason.noIndexLink', {
                 defaultMessage: 'setup',
               })}
@@ -174,7 +202,11 @@ export const Reason = ({ reason }) => {
         defaultMessage="There is an issue reading from your filebeat indices.  {link}."
         values={{
           link: (
-            <EuiLink target="_blank" href={troubleshootUrl}>
+            <EuiLink
+              data-test-subj="monitoringReasonClickHereForMoreInformationLink"
+              target="_blank"
+              href={troubleshootUrl}
+            >
               {i18n.translate('xpack.monitoring.logs.reason.correctIndexNameLink', {
                 defaultMessage: 'Click here for more information',
               })}

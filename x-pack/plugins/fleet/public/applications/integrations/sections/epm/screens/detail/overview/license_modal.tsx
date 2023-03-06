@@ -60,7 +60,12 @@ export const LicenseModal: React.FunctionComponent<Props> = ({
         </EuiSkeletonText>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButton color="primary" fill onClick={onClose}>
+        <EuiButton
+          data-test-subj="fleetLicenseModalCloseButton"
+          color="primary"
+          fill
+          onClick={onClose}
+        >
           <FormattedMessage id="xpack.fleet.epm.licenseModalCloseBtn" defaultMessage="Close" />
         </EuiButton>
       </EuiModalFooter>

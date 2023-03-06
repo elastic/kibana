@@ -55,6 +55,7 @@ export const AuthenticationPanelEditContent: React.FC = () => {
             <EuiForm>
               <EuiFormRow label={USERNAME_LABEL}>
                 <EuiFieldText
+                  data-test-subj="enterpriseSearchAuthenticationPanelEditContentFieldText"
                   value={username}
                   onChange={(event) => setUsername(event.target.value)}
                   disabled={selectedAuthOption !== 'basic'}

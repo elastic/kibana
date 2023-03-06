@@ -229,7 +229,11 @@ export const CalendarForm = ({
       <EuiSpacer size="l" />
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
-          <EuiButton isDisabled={saving} onClick={redirectToCalendarsManagementPage}>
+          <EuiButton
+            data-test-subj="mlCalendarFormCancelButton"
+            isDisabled={saving}
+            onClick={redirectToCalendarsManagementPage}
+          >
             <FormattedMessage
               id="xpack.ml.calendarsEdit.calendarForm.cancelButtonLabel"
               defaultMessage="Cancel"

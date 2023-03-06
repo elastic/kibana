@@ -104,7 +104,12 @@ const DEFAULT_DESCRIPTION = (
       defaultMessage="Create a crawl rule to include or exclude pages whose URL matches the rule. Rules run in sequential order, and each URL is evaluated according to the first match."
     />
     <EuiSpacer size="s" />
-    <EuiLink href={docLinks.crawlerManaging} target="_blank" external>
+    <EuiLink
+      data-test-subj="enterpriseSearchLearnMoreAboutCrawlRulesLink"
+      href={docLinks.crawlerManaging}
+      target="_blank"
+      external
+    >
       {i18n.translate('xpack.enterpriseSearch.crawler.crawlRulesTable.descriptionLinkText', {
         defaultMessage: 'Learn more about crawl rules',
       })}
@@ -126,6 +131,7 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
     {
       editingRender: (crawlRule, onChange, { isInvalid, isLoading }) => (
         <EuiSelect
+          data-test-subj="enterpriseSearchColumnsSelect"
           data-telemetry-id="entSearchContent-crawler-domainDetail-crawlRules-policy"
           fullWidth
           hasNoInitialSelection
@@ -152,6 +158,7 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
     {
       editingRender: (crawlRule, onChange, { isInvalid, isLoading }) => (
         <EuiSelect
+          data-test-subj="enterpriseSearchColumnsSelect"
           data-telemetry-id="entSearchContent-crawler-domainDetail-crawlRules-rule"
           fullWidth
           hasNoInitialSelection
@@ -183,6 +190,7 @@ export const CrawlRulesTable: React.FC<CrawlRulesTableProps> = ({
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
             <EuiFieldText
+              data-test-subj="enterpriseSearchColumnsFieldText"
               fullWidth
               value={(crawlRule as CrawlRule).pattern}
               onChange={(e) => onChange(e.target.value)}

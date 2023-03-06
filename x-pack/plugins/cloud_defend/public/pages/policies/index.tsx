@@ -110,6 +110,7 @@ const SearchField = ({
     <EuiFlexGroup>
       <EuiFlexItem grow={true} style={{ alignItems: 'flex-end' }}>
         <EuiFieldSearch
+          data-test-subj="cloudDefendSearchFieldFieldSearch"
           fullWidth
           onSearch={setLocalValue}
           isLoading={isLoading}

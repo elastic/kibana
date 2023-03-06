@@ -53,7 +53,10 @@ export const PolicyStepReview: React.FunctionComponent<StepProps> = ({
         />
       }
     >
-      <EuiLink onClick={() => updateCurrentStep(step)}>
+      <EuiLink
+        data-test-subj="snapshotRestoreEditStepTooltipLink"
+        onClick={() => updateCurrentStep(step)}
+      >
         <EuiIcon
           type="pencil"
           aria-label={i18n.translate(

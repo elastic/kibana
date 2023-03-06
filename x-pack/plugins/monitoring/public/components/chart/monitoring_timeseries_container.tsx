@@ -59,6 +59,7 @@ const zoomOutBtn = (zoomInfo?: ZoomInfo) => {
     <EuiFlexItem className="monRhythmChart__zoom">
       <EuiTextAlign textAlign="right">
         <EuiButtonEmpty
+          data-test-subj="monitoringZoomOutBtnZoomOutButtonEmpty"
           color="primary"
           size="s"
           iconType="magnifyWithMinus"

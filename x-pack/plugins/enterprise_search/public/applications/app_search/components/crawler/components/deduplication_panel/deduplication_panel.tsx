@@ -62,6 +62,7 @@ export const DeduplicationPanel: React.FC = () => {
       }
       action={
         <EuiButton
+          data-test-subj="enterpriseSearchDeduplicationPanelResetToDefaultsButton"
           color="warning"
           iconType="refresh"
           size="s"
@@ -84,7 +85,12 @@ export const DeduplicationPanel: React.FC = () => {
           documents on this domain. {documentationLink}."
           values={{
             documentationLink: (
-              <EuiLink href={DUPLICATE_DOCS_URL} target="_blank" external>
+              <EuiLink
+                data-test-subj="enterpriseSearchDeduplicationPanelLearnMoreAboutContentHashingLink"
+                href={DUPLICATE_DOCS_URL}
+                target="_blank"
+                external
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.crawler.deduplicationPanel.learnMoreMessage',
                   {
@@ -124,6 +130,7 @@ export const DeduplicationPanel: React.FC = () => {
                   <EuiPopover
                     button={
                       <EuiButtonEmpty
+                        data-test-subj="enterpriseSearchDeduplicationPanelButtonEmpty"
                         size="xs"
                         iconType="arrowDown"
                         iconSide="right"

@@ -56,6 +56,7 @@ export const ConnectorConfigurationForm = () => {
               />
             ) : (
               <EuiFieldText
+                data-test-subj="enterpriseSearchConnectorConfigurationFormFieldText"
                 value={value}
                 disabled={status === Status.LOADING}
                 onChange={(event) => {
@@ -70,6 +71,7 @@ export const ConnectorConfigurationForm = () => {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="enterpriseSearchConnectorConfigurationFormSaveConfigurationButton"
               data-telemetry-id="entSearchContent-connector-configuration-saveConfiguration"
               type="submit"
               isLoading={status === Status.LOADING}
@@ -84,6 +86,7 @@ export const ConnectorConfigurationForm = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="enterpriseSearchConnectorConfigurationFormCancelButtonEmpty"
               data-telemetry-id="entSearchContent-connector-configuration-cancelEdit"
               isDisabled={status === Status.LOADING}
               onClick={() => {

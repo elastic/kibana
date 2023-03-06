@@ -63,6 +63,7 @@ const Row: FunctionComponent<RowProps> = ({
     <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
       <EuiFlexItem>
         <EuiFieldText
+          data-test-subj="fleetRowFieldText"
           fullWidth
           value={value}
           onChange={onChangeHandler}
@@ -157,6 +158,7 @@ export const MultiTextInput: FunctionComponent<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiButtonEmpty
+        data-test-subj="fleetMultiTextInputAddRowButtonEmpty"
         disabled={isDisabled}
         size="xs"
         flush="left"

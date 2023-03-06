@@ -29,7 +29,11 @@ export const ErrorContent: FunctionComponent<Props> = ({ error }) => {
       title={<h3>{i18nTexts.loadingFilesErrorTitle}</h3>}
       body={error.message}
       actions={
-        <EuiButton disabled={isLoading} onClick={state.retry}>
+        <EuiButton
+          data-test-subj="sharedUxErrorContentButton"
+          disabled={isLoading}
+          onClick={state.retry}
+        >
           {i18nTexts.retryButtonLabel}
         </EuiButton>
       }

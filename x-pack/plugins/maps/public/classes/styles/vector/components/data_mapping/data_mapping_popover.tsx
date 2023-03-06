@@ -39,6 +39,7 @@ export class DataMappingPopover extends Component<Props, State> {
   _renderButton() {
     return (
       <EuiButtonEmpty
+        data-test-subj="mapsDataMappingButtonEmpty"
         onClick={this._togglePopover}
         size="xs"
         iconType="controlsHorizontal"

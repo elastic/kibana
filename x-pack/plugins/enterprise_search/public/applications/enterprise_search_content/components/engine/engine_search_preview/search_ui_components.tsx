@@ -157,6 +157,7 @@ export const InputView: React.FC<InputViewProps> = ({ getInputProps }) => {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFieldSearch
+        data-test-subj="enterpriseSearchInputViewFieldSearch"
         fullWidth
         placeholder={i18n.translate(
           'xpack.enterpriseSearch.content.engine.searchPreview.inputView.placeholder',
@@ -169,7 +170,12 @@ export const InputView: React.FC<InputViewProps> = ({ getInputProps }) => {
           { defaultMessage: 'Search Input' }
         )}
       />
-      <EuiButton type="submit" color="primary" fill>
+      <EuiButton
+        data-test-subj="enterpriseSearchInputViewSearchButton"
+        type="submit"
+        color="primary"
+        fill
+      >
         Search
       </EuiButton>
     </EuiFlexGroup>
@@ -205,6 +211,7 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
         </label>
       </EuiTitle>
       <EuiSelect
+        data-test-subj="enterpriseSearchResultsPerPageViewSelect"
         id="results-per-page"
         options={
           options?.map((option) => ({

@@ -16,7 +16,12 @@ export const RecoveryIndex = (props) => {
 
   return (
     <div>
-      <EuiLink href={getSafeForExternalLink(`#/elasticsearch/indices/${name}`)}>{name}</EuiLink>
+      <EuiLink
+        data-test-subj="monitoringRecoveryIndexLink"
+        href={getSafeForExternalLink(`#/elasticsearch/indices/${name}`)}
+      >
+        {name}
+      </EuiLink>
       <br />
       <FormattedMessage
         id="xpack.monitoring.elasticsearch.shardActivity.recoveryIndex.shardDescription"

@@ -149,6 +149,7 @@ function MetricSeriesUi(props) {
 
         <EuiFlexItem>
           <EuiFieldText
+            data-test-subj="pluginsMetricSeriesUiFieldText"
             fullWidth
             onChange={handleChange('label')}
             placeholder={intl.formatMessage({

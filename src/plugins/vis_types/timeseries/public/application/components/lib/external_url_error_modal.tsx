@@ -49,7 +49,11 @@ export const ExternalUrlErrorModal = ({ url, handleClose }: ExternalUrlErrorModa
       />
     </EuiModalBody>
     <EuiModalFooter>
-      <EuiButton onClick={handleClose} fill>
+      <EuiButton
+        data-test-subj="pluginsExternalUrlErrorModalCloseButton"
+        onClick={handleClose}
+        fill
+      >
         <FormattedMessage
           id="visTypeTimeseries.externalUrlErrorModal.closeButtonLabel"
           defaultMessage="Close"

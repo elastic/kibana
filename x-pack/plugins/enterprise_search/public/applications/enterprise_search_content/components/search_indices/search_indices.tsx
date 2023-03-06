@@ -95,7 +95,12 @@ export const SearchIndices: React.FC = () => {
             ? []
             : [
                 <EuiLinkTo data-test-subj="create-new-index-button" to={NEW_INDEX_PATH}>
-                  <EuiButton iconType="plusInCircle" color="primary" fill>
+                  <EuiButton
+                    data-test-subj="enterpriseSearchSearchIndicesCreateNewIndexButton"
+                    iconType="plusInCircle"
+                    color="primary"
+                    fill
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.content.searchIndices.create.buttonTitle',
                       {
@@ -141,7 +146,11 @@ export const SearchIndices: React.FC = () => {
                       }}
                     />
                   </p>
-                  <EuiButton fill onClick={() => setCalloutDismissed(true)}>
+                  <EuiButton
+                    data-test-subj="enterpriseSearchSearchIndicesDismissButton"
+                    fill
+                    onClick={() => setCalloutDismissed(true)}
+                  >
                     {i18n.translate('xpack.enterpriseSearch.content.callout.dismissButton', {
                       defaultMessage: 'Dismiss',
                     })}

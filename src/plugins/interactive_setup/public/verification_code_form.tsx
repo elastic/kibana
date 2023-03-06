@@ -146,6 +146,7 @@ export const VerificationCodeForm: FunctionComponent<VerificationCodeFormProps> 
         }
         actions={
           <EuiButton
+            data-test-subj="pluginsVerificationCodeFormIsSubmittingSelectTrueVerifyingOtherVerifyButton"
             type="submit"
             isLoading={form.isSubmitting}
             isDisabled={form.isSubmitted && form.isInvalid}

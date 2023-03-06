@@ -74,12 +74,20 @@ export const FlyoutBody: React.FC = () => {
             defaultMessage="The {documentsApiLink} can be used to add new documents to your engine, update documents, retrieve documents by id, and delete documents. There are a variety of {clientLibrariesLink} to help you get started."
             values={{
               documentsApiLink: (
-                <EuiLink target="_blank" href={INDEXING_DOCS_URL}>
+                <EuiLink
+                  data-test-subj="enterpriseSearchFlyoutBodyDocumentsApiLink"
+                  target="_blank"
+                  href={INDEXING_DOCS_URL}
+                >
                   documents API
                 </EuiLink>
               ),
               clientLibrariesLink: (
-                <EuiLink target="_blank" href={API_CLIENTS_DOCS_URL}>
+                <EuiLink
+                  data-test-subj="enterpriseSearchFlyoutBodyClientLibrariesLink"
+                  target="_blank"
+                  href={API_CLIENTS_DOCS_URL}
+                >
                   client libraries
                 </EuiLink>
               ),
@@ -131,7 +139,12 @@ export const FlyoutFooter: React.FC = () => {
 
   return (
     <EuiFlyoutFooter>
-      <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+      <EuiButtonEmpty
+        data-test-subj="enterpriseSearchFlyoutFooterButtonEmpty"
+        onClick={closeDocumentCreation}
+      >
+        {CANCEL_BUTTON_LABEL}
+      </EuiButtonEmpty>
     </EuiFlyoutFooter>
   );
 };

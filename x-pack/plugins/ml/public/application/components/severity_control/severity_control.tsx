@@ -64,6 +64,7 @@ export const SeverityControl: FC<SeveritySelectorProps> = React.memo(({ value, o
       <EuiFlexGroup gutterSize={'s'}>
         <EuiFlexItem grow={false}>
           <EuiFieldNumber
+            data-test-subj="mlSeverityControlFieldNumber"
             id="severityControl"
             style={{ width: '70px' }}
             compressed

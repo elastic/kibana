@@ -263,7 +263,7 @@ function statusIndicator(status, someStatusIsStale, instancesHref, staleStatusTh
           </EuiBadge>
         </EuiToolTip>
       </div>
-      <EuiLink href={instancesHref}>
+      <EuiLink data-test-subj="monitoringStatusIndicatorViewAllInstancesLink" href={instancesHref}>
         {i18n.translate(
           'xpack.monitoring.cluster.overview.kibanaPanel.staleStatusLinkToInstancesLabel',
           {

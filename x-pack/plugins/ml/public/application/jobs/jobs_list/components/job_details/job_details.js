@@ -86,6 +86,7 @@ export class JobDetailsUI extends Component {
       if (job.blocked === undefined) {
         datafeed.titleAction = (
           <EuiButtonEmpty
+            data-test-subj="mlViewDatafeedCountsButtonEmpty"
             onClick={() =>
               this.setState({
                 datafeedChartFlyoutVisible: true,

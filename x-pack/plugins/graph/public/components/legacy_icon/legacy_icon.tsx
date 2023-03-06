@@ -35,6 +35,7 @@ export function LegacyIcon(props: LegacyIconProps) {
   if (props.onClick) {
     return (
       <EuiButtonEmpty
+        data-test-subj="graphLegacyIconButtonEmpty"
         role="option"
         aria-selected={props.selected}
         color={props.selected ? 'primary' : 'text'}

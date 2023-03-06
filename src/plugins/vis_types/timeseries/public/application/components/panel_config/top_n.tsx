@@ -107,6 +107,7 @@ export class TopNPanelConfig extends Component<
               }
             >
               <EuiFieldText
+                data-test-subj="pluginsFieldText"
                 onChange={this.handleTextChange('drilldown_url')}
                 value={model.drilldown_url ?? ''}
               />

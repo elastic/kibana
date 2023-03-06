@@ -91,7 +91,9 @@ const getDetailsList = (data: CspFinding, discoverIndexLink: string | undefined)
       defaultMessage: 'Index',
     }),
     description: discoverIndexLink ? (
-      <EuiLink href={discoverIndexLink}>{LATEST_FINDINGS_INDEX_DEFAULT_NS}</EuiLink>
+      <EuiLink data-test-subj="cloudSecurityPostureGetDetailsListLink" href={discoverIndexLink}>
+        {LATEST_FINDINGS_INDEX_DEFAULT_NS}
+      </EuiLink>
     ) : (
       LATEST_FINDINGS_INDEX_DEFAULT_NS
     ),

@@ -27,7 +27,11 @@ export const MultipleMappingsWarning = () => (
         defaultMessage="The mappings for this template uses types, which have been removed. {docsLink}"
         values={{
           docsLink: (
-            <EuiLink href={documentationService.getAlternativeToMappingTypesLink()} target="_blank">
+            <EuiLink
+              data-test-subj="indexManagementMultipleMappingsWarningConsiderTheseAlternativesToMappingTypesLink"
+              href={documentationService.getAlternativeToMappingTypesLink()}
+              target="_blank"
+            >
               {i18n.translate(
                 'xpack.idxMgmt.mappingsEditor.mappingTypesDetectedCallOutDocumentationLink',
                 {

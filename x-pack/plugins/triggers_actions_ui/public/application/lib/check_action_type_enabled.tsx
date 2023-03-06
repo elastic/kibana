@@ -55,7 +55,11 @@ const getLicenseCheckResult = (actionType: ActionType) => {
         )}
         className="actCheckActionTypeEnabled__disabledActionWarningCard"
         children={
-          <EuiLink href={VIEW_LICENSE_OPTIONS_LINK} target="_blank">
+          <EuiLink
+            data-test-subj="triggersActionsUiGetLicenseCheckResultViewLicenseOptionsLink"
+            href={VIEW_LICENSE_OPTIONS_LINK}
+            target="_blank"
+          >
             <FormattedMessage
               defaultMessage="View license options"
               id="xpack.triggersActionsUI.licenseCheck.actionTypeDisabledByLicenseLinkTitle"

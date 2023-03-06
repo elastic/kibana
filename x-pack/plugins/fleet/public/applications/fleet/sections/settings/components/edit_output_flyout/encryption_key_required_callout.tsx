@@ -29,7 +29,12 @@ export const EncryptionKeyRequiredCallout: React.FunctionComponent = () => {
         defaultMessage="You must configure an encryption key before configuring this output. {link}"
         values={{
           link: (
-            <EuiLink href={docLinks.links.kibana.secureSavedObject} target="_blank" external>
+            <EuiLink
+              data-test-subj="fleetEncryptionKeyRequiredCalloutLearnMoreLink"
+              href={docLinks.links.kibana.secureSavedObject}
+              target="_blank"
+              external
+            >
               <FormattedMessage
                 id="xpack.fleet.encryptionKeyRequired.link"
                 defaultMessage="Learn more"

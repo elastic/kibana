@@ -329,6 +329,7 @@ export function FieldEditor({
                   }
                 >
                   <EuiFieldNumber
+                    data-test-subj="graphFieldEditorFieldNumber"
                     step={1}
                     min={1}
                     value={isDisabled ? lastValidHopSize : hopSize}
@@ -345,6 +346,7 @@ export function FieldEditor({
                 <EuiFlexGroup direction="row" justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj="graphFieldEditorCancelButtonEmpty"
                       size="s"
                       onClick={() => {
                         setCurrentField(initialField);
@@ -358,6 +360,7 @@ export function FieldEditor({
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButton
+                      data-test-subj="graphFieldEditorSaveChangesButton"
                       size="s"
                       fill
                       disabled={isEqual(initialField, currentField) || currentField.name === ''}

@@ -31,7 +31,11 @@ export const LocaleParameter = ({ defaultToggleValue }: Props) => (
         defaultMessage="The locale to use when parsing dates. This is useful because months might not have the same name or abbreviation in all languages. Defaults to the {root} locale."
         values={{
           root: (
-            <EuiLink href={documentationService.getRootLocaleLink()} target="_blank">
+            <EuiLink
+              data-test-subj="indexManagementLocaleParameterRootLink"
+              href={documentationService.getRootLocaleLink()}
+              target="_blank"
+            >
               ROOT
             </EuiLink>
           ),

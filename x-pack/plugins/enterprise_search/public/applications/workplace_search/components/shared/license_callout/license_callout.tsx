@@ -21,7 +21,12 @@ export const LicenseCallout: React.FC<LicenseCalloutProps> = ({ message }) => {
   const title = (
     <>
       {message}{' '}
-      <EuiLink target="_blank" external href={docLinks.licenseManagement}>
+      <EuiLink
+        data-test-subj="enterpriseSearchLicenseCalloutLink"
+        target="_blank"
+        external
+        href={docLinks.licenseManagement}
+      >
         <strong>{EXPLORE_PLATINUM_FEATURES_LINK}</strong>
       </EuiLink>
     </>

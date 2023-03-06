@@ -159,7 +159,11 @@ export class RoleMappingsGridPage extends Component<Props, State> {
               defaultMessage="Role mappings define which roles are assigned to users from an external identity provider. {learnMoreLink}"
               values={{
                 learnMoreLink: (
-                  <EuiLink href={this.props.docLinks.links.security.mappingRoles} external={true}>
+                  <EuiLink
+                    data-test-subj="securityLearnMoreLink"
+                    href={this.props.docLinks.links.security.mappingRoles}
+                    external={true}
+                  >
                     <FormattedMessage
                       id="xpack.security.management.roleMappings.learnMoreLinkText"
                       defaultMessage="Learn more."

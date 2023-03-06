@@ -246,6 +246,7 @@ export const LogCategorizationPage: FC = () => {
         <EuiFlexItem grow={false} css={{ marginTop: 'auto' }}>
           {loading === false ? (
             <EuiButton
+              data-test-subj="aiopsLogCategorizationPageRunCategorizationButton"
               disabled={selectedField === undefined}
               onClick={() => {
                 loadCategories();
@@ -257,7 +258,12 @@ export const LogCategorizationPage: FC = () => {
               />
             </EuiButton>
           ) : (
-            <EuiButton onClick={() => cancelRequest()}>Cancel</EuiButton>
+            <EuiButton
+              data-test-subj="aiopsLogCategorizationPageCancelButton"
+              onClick={() => cancelRequest()}
+            >
+              Cancel
+            </EuiButton>
           )}
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ marginTop: 'auto' }} />

@@ -29,7 +29,11 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           defaultMessage="Text fields support full-text search by breaking strings into individual, searchable terms. To index structured content, such as an email address, use the {keyword}."
           values={{
             keyword: (
-              <EuiLink href={documentationService.getTypeDocLink('keyword')} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementTYPE_DEFINITIONKeywordDataTypeLink"
+                href={documentationService.getTypeDocLink('keyword')}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.dataType.textLongDescription.keywordTypeLink',
                   {
@@ -58,7 +62,11 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           defaultMessage="A variant of {text} that trades scoring and efficiency of positional queries for space efficiency. This field effectively stores data the same way as a text field that only indexes documents (index_options: docs) and disables norms (norms: false). Term queries perform as fast if not faster as on text fields, however queries that need positions such as the match_phrase query perform slower as they need to look at the _source document to verify whether a phrase matches. All queries return constant scores that are equal to 1.0."
           values={{
             text: (
-              <EuiLink href={documentationService.getTypeDocLink('text')} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementTYPE_DEFINITIONTextLink"
+                href={documentationService.getTypeDocLink('text')}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.dataType.matchOnlyTextLongDescription.textTypeLink',
                   {
@@ -87,7 +95,11 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           defaultMessage="Keyword fields support searching for an exact value and are useful for filtering, sorting, and aggregations. To index full-text content, such as an email body, use the {textType}."
           values={{
             textType: (
-              <EuiLink href={documentationService.getTypeDocLink('text')} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementTYPE_DEFINITIONTextDataTypeLink"
+                href={documentationService.getTypeDocLink('text')}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.dataType.keywordLongDescription.textTypeLink',
                   {
@@ -316,7 +328,11 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           defaultMessage="Date nanoseconds fields store dates in nanosecond resolution. Aggregations remain in millisecond resolution. To store dates in millisecond resolution, use the {date}."
           values={{
             date: (
-              <EuiLink href={documentationService.getTypeDocLink('date')} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementTYPE_DEFINITIONDateDataTypeLink"
+                href={documentationService.getTypeDocLink('date')}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.dataType.dateNanosLongDescription.dateTypeLink',
                   {
@@ -362,7 +378,11 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           defaultMessage="IP fields accept IPv4 or IPv6 addresses. If you need to store IP ranges in a single field, use the {ipRange}."
           values={{
             ipRange: (
-              <EuiLink href={documentationService.getTypeDocLink('range')} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementTYPE_DEFINITIONIpRangeDataTypeLink"
+                href={documentationService.getTypeDocLink('range')}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.dataType.ipLongDescription.ipRangeTypeLink',
                   {
@@ -434,7 +454,11 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           defaultMessage="Object fields can contain children, which are queried as a flattened list. To query child objects independently, use the {nested}."
           values={{
             nested: (
-              <EuiLink href={documentationService.getTypeDocLink('nested')} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementTYPE_DEFINITIONNestedDataTypeLink"
+                href={documentationService.getTypeDocLink('nested')}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.dataType.objectLongDescription.nestedTypeLink',
                   {
@@ -463,7 +487,11 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           defaultMessage="Like {objects}, nested fields can contain children. The difference is that you can query their child objects independently."
           values={{
             objects: (
-              <EuiLink href={documentationService.getTypeDocLink('object')} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementTYPE_DEFINITIONObjectsLink"
+                href={documentationService.getTypeDocLink('object')}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.dataType.nestedLongDescription.objectTypeLink',
                   {
@@ -492,7 +520,11 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           defaultMessage="The rank feature field accepts a number that will boost documents in {rankFeatureQuery}."
           values={{
             rankFeatureQuery: (
-              <EuiLink href={documentationService.getRankFeatureQueryLink()} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementTYPE_DEFINITIONRankFeatureQueriesLink"
+                href={documentationService.getRankFeatureQueryLink()}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.dataType.rankFeatureLongDescription.queryLink',
                   {
@@ -521,7 +553,11 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           defaultMessage="The rank features field accepts numeric vectors that will boost documents in {rankFeatureQuery}."
           values={{
             rankFeatureQuery: (
-              <EuiLink href={documentationService.getRankFeatureQueryLink()} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementTYPE_DEFINITIONRankFeatureQueriesLink"
+                href={documentationService.getRankFeatureQueryLink()}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.dataType.rankFeaturesLongDescription.queryLink',
                   {
@@ -670,6 +706,7 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           values={{
             docsLink: (
               <EuiLink
+                data-test-subj="indexManagementTYPE_DEFINITIONLearnMoreLink"
                 href={documentationService.getTypeDocLink('geo_shape', 'learnMore')}
                 target="_blank"
               >
@@ -735,7 +772,11 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           defaultMessage="The percolator data type enables {percolator}."
           values={{
             percolator: (
-              <EuiLink href={documentationService.getPercolatorQueryLink()} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementTYPE_DEFINITIONPercolatorQueriesLink"
+                href={documentationService.getPercolatorQueryLink()}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.dataType.percolatorLongDescription.learnMoreLink',
                   {
@@ -886,7 +927,11 @@ export const TYPE_DEFINITION: { [key in DataType]: DataTypeDefinition } = {
           defaultMessage="Version fields are helpful to handle software version values. This field isn’t optimized for heavy wildcard, regex, or fuzzy searches. For these query types, use the {keywordType}."
           values={{
             keywordType: (
-              <EuiLink href={documentationService.getTypeDocLink('keyword')} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementTYPE_DEFINITIONKeywordDataTypeLink"
+                href={documentationService.getTypeDocLink('keyword')}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.dataType.versionLongDescription.keywordTypeLink',
                   {

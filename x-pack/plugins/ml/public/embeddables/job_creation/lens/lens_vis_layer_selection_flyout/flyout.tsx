@@ -80,7 +80,12 @@ export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="mlLensLayerSelectionFlyoutCloseButtonEmpty"
+              iconType="cross"
+              onClick={onClose}
+              flush="left"
+            >
               <FormattedMessage
                 id="xpack.ml.embeddables.lensLayerFlyout.closeButton"
                 defaultMessage="Close"

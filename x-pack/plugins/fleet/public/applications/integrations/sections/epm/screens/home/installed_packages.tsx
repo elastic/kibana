@@ -41,7 +41,11 @@ const AnnouncementLink = () => {
   const { docLinks } = useStartServices();
 
   return (
-    <EuiLink href={docLinks.links.fleet.learnMoreBlog} target="_blank">
+    <EuiLink
+      data-test-subj="fleetAnnouncementLinkAnnouncementBlogPostLink"
+      href={docLinks.links.fleet.learnMoreBlog}
+      target="_blank"
+    >
       {i18n.translate('xpack.fleet.epmList.availableCalloutBlogText', {
         defaultMessage: 'announcement blog post',
       })}
@@ -106,7 +110,12 @@ const VerificationWarningCallout: React.FC = () => {
           defaultMessage="One or more of the installed integrations contain an unsigned package of unknown authenticity. Learn more about {learnMoreLink}."
           values={{
             learnMoreLink: (
-              <EuiLink target="_blank" external href={docLinks.links.fleet.packageSignatures}>
+              <EuiLink
+                data-test-subj="fleetVerificationWarningCalloutPackageSignaturesLink"
+                target="_blank"
+                external
+                href={docLinks.links.fleet.packageSignatures}
+              >
                 <FormattedMessage
                   id="xpack.fleet.ConfirmForceInstallModal.learnMoreLink"
                   defaultMessage="package signatures"

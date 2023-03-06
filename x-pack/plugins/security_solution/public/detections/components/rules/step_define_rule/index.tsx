@@ -522,6 +522,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   const GroupByChildren = useCallback(
     ({ groupByRadioSelection, groupByDurationUnit, groupByDurationValue }) => (
       <EuiRadioGroup
+        data-test-subj="securitySolutionGroupByChildrenRadioGroup"
         disabled={
           !license.isAtLeast(minimumLicenseForSuppression) ||
           groupByFields == null ||

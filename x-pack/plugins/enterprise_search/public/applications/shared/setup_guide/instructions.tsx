@@ -107,6 +107,7 @@ export const SetupInstructions: React.FC<Props> = ({ productName }) => (
                     values={{
                       link: (
                         <EuiLink
+                          data-test-subj="enterpriseSearchSetupInstructionsTroubleshootEnterpriseSearchSetupLink"
                           href={docLinks.enterpriseSearchTroubleshootSetup}
                           target="_blank"
                           external

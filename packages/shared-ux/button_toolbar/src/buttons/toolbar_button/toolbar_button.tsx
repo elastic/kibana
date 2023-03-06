@@ -36,7 +36,12 @@ export const ToolbarButton: React.FunctionComponent<Props> = ({
       : { color: 'text', css: ToolbarButtonStyles(euiTheme).emptyButton };
 
   return (
-    <EuiButton size="m" {...toolbarButtonStyleProps} {...{ iconSide, ...rest }}>
+    <EuiButton
+      data-test-subj="sharedUxToolbarButtonButton"
+      size="m"
+      {...toolbarButtonStyleProps}
+      {...{ iconSide, ...rest }}
+    >
       {label}
     </EuiButton>
   );

@@ -225,6 +225,7 @@ export const Main = (props: MainProps) => {
             return (
               <EuiFlexItem>
                 <EuiButton
+                  data-test-subj="guidedOnboardingExampleMainButton"
                   onClick={() => activateGuide(guideId, guideState)}
                   fill
                   disabled={guideState?.status === 'complete'}
@@ -279,6 +280,7 @@ export const Main = (props: MainProps) => {
           <EuiFlexItem>
             <EuiFormRow label="Guide" helpText="Select a guide">
               <EuiSelect
+                data-test-subj="guidedOnboardingExampleMainSelect"
                 id="guideSelect"
                 options={selectOptions}
                 value={selectedGuide}
@@ -298,6 +300,7 @@ export const Main = (props: MainProps) => {
           <EuiFlexItem>
             <EuiFormRow label="Step ID">
               <EuiFieldText
+                data-test-subj="guidedOnboardingExampleMainFieldText"
                 value={selectedStep}
                 onChange={(e) => setSelectedStep(e.target.value as GuideStepIds)}
               />
@@ -305,7 +308,12 @@ export const Main = (props: MainProps) => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFormRow hasEmptyLabelSpace>
-              <EuiButton onClick={updateGuideState}>Save</EuiButton>
+              <EuiButton
+                data-test-subj="guidedOnboardingExampleMainSaveButton"
+                onClick={updateGuideState}
+              >
+                Save
+              </EuiButton>
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -322,7 +330,10 @@ export const Main = (props: MainProps) => {
         <EuiSpacer />
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => history.push('stepOne')}>
+            <EuiButton
+              data-test-subj="guidedOnboardingExampleMainStep1Button"
+              onClick={() => history.push('stepOne')}
+            >
               <FormattedMessage
                 id="guidedOnboardingExample.main.examplePages.stepOne.link"
                 defaultMessage="Step 1"
@@ -330,7 +341,10 @@ export const Main = (props: MainProps) => {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => history.push('stepTwo')}>
+            <EuiButton
+              data-test-subj="guidedOnboardingExampleMainStep2Button"
+              onClick={() => history.push('stepTwo')}
+            >
               <FormattedMessage
                 id="guidedOnboardingExample.main.examplePages.stepTwo.link"
                 defaultMessage="Step 2"
@@ -338,7 +352,10 @@ export const Main = (props: MainProps) => {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={() => history.push('stepThree')}>
+            <EuiButton
+              data-test-subj="guidedOnboardingExampleMainStep3Button"
+              onClick={() => history.push('stepThree')}
+            >
               <FormattedMessage
                 id="guidedOnboardingExample.main.examplePages.stepThree.link"
                 defaultMessage="Step 3"

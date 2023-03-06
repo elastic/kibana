@@ -37,7 +37,10 @@ export const EnterpriseSearchOverviewHeaderActions: React.FC = () => {
     <EuiHeaderLinks>
       <EuiPopover
         button={
-          <EuiButtonEmpty onClick={() => setIsPopoverOpen(!isPopoverOpen)}>
+          <EuiButtonEmpty
+            data-test-subj="enterpriseSearchEnterpriseSearchOverviewHeaderActionsDeploymentDetailsButtonEmpty"
+            onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+          >
             <EuiIcon type="iInCircle" />
             &nbsp;
             {i18n.translate('xpack.enterpriseSearch.overview.deploymentDetails', {
@@ -70,7 +73,12 @@ export const EnterpriseSearchOverviewHeaderActions: React.FC = () => {
         >
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow>
-              <EuiFieldText readOnly value={clientId} fullWidth />
+              <EuiFieldText
+                data-test-subj="enterpriseSearchEnterpriseSearchOverviewHeaderActionsFieldText"
+                readOnly
+                value={clientId}
+                fullWidth
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiCopy
@@ -103,7 +111,7 @@ export const EnterpriseSearchOverviewHeaderActions: React.FC = () => {
         </EuiFormRow>
         <EuiPopoverFooter>
           {/* TODO need link to Create and manage API keys*/}
-          <EuiButton>
+          <EuiButton data-test-subj="enterpriseSearchEnterpriseSearchOverviewHeaderActionsCreateAndManageApiKeysButton">
             {i18n.translate('xpack.enterpriseSearch.overview.createAndManageButton', {
               defaultMessage: 'Create and manage API keys',
             })}

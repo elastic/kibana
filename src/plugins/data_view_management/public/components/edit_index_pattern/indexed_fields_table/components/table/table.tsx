@@ -322,7 +322,7 @@ export const getConflictModalContent = ({
       </EuiText>
     </EuiModalBody>
     <EuiModalFooter>
-      <EuiButton onClick={closeFn} fill>
+      <EuiButton data-test-subj="pluginsGetConflictModalContentCloseButton" onClick={closeFn} fill>
         <FormattedMessage
           id="indexPatternManagement.editIndexPattern.fields.conflictModal.closeBtn"
           defaultMessage="Close"

@@ -32,7 +32,14 @@ export const PanelView: React.FC = () => {
 
   return (
     <EuiPopover
-      button={<EuiButton onClick={() => setOpen((x) => !x)}>View mode</EuiButton>}
+      button={
+        <EuiButton
+          data-test-subj="uiActionsExplorerPanelViewViewModeButton"
+          onClick={() => setOpen((x) => !x)}
+        >
+          View mode
+        </EuiButton>
+      }
       isOpen={open}
       panelPaddingSize="none"
       anchorPosition="downLeft"

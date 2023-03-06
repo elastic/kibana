@@ -72,7 +72,11 @@ const getExamples = (
           defaultMessage="Learn more about {luceneLink}"
           values={{
             luceneLink: (
-              <EuiLink href={docLinks.links.query.luceneQuerySyntax} target="_blank">
+              <EuiLink
+                data-test-subj="pluginsGetExamplesQueryStringSyntaxLink"
+                href={docLinks.links.query.luceneQuerySyntax}
+                target="_blank"
+              >
                 <FormattedMessage
                   id="discover.noResults.luceneExamples.footerLuceneLink"
                   defaultMessage="query string syntax"
@@ -140,7 +144,11 @@ const getExamples = (
           defaultMessage="Learn more about {kqlLink}"
           values={{
             kqlLink: (
-              <EuiLink href={docLinks.links.query.kueryQuerySyntax} target="_blank">
+              <EuiLink
+                data-test-subj="pluginsGetExamplesKqlLink"
+                href={docLinks.links.query.kueryQuerySyntax}
+                target="_blank"
+              >
                 <FormattedMessage
                   id="discover.noResults.kqlExamples.footerKQLLink"
                   defaultMessage="KQL"

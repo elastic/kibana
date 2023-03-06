@@ -116,6 +116,7 @@ export class ImportCompleteView extends Component<Props, {}> {
             })}
           </p>
           <EuiLink
+            data-test-subj="fileUploadViewFileImportPermissionsLink"
             href={getDocLinks().links.maps.importGeospatialPrivileges}
             target="_blank"
             external

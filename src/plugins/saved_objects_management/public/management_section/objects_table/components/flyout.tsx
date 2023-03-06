@@ -589,7 +589,10 @@ export class Flyout extends Component<FlyoutProps, FlyoutState> {
               them. You can {indexPatternLink} if necessary."
               values={{
                 indexPatternLink: (
-                  <EuiLink href={this.props.newIndexPatternUrl}>
+                  <EuiLink
+                    data-test-subj="pluginsCreateANewDataViewLink"
+                    href={this.props.newIndexPatternUrl}
+                  >
                     <FormattedMessage
                       id="savedObjectsManagement.objectsTable.flyout.indexPatternConflictsCalloutLinkText"
                       defaultMessage="create a new data view"

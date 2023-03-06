@@ -89,6 +89,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
         case 'textarea':
           return (
             <EuiTextArea
+              data-test-subj="fleetFieldTextArea"
               isInvalid={isInvalid}
               value={value === undefined ? '' : value}
               onChange={(e) => onChange(e.target.value)}
@@ -157,6 +158,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
         default:
           return (
             <EuiFieldText
+              data-test-subj="fleetFieldFieldText"
               isInvalid={isInvalid}
               value={value === undefined ? '' : value}
               onChange={(e) => onChange(e.target.value)}

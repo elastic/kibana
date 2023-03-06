@@ -130,6 +130,7 @@ export class RemoteClusterEdit extends Component {
             }
             actions={
               <EuiButton
+                data-test-subj="remoteClustersViewRemoteClustersButton"
                 {...reactRouterNavigate(this.props.history, '/list')}
                 color="danger"
                 iconType="arrowLeft"
@@ -171,7 +172,13 @@ export class RemoteClusterEdit extends Component {
               </p>
             }
             actions={
-              <EuiButton color="primary" iconType="arrowLeft" flush="left" onClick={this.cancel}>
+              <EuiButton
+                data-test-subj="remoteClustersBackToRemoteClustersButton"
+                color="primary"
+                iconType="arrowLeft"
+                flush="left"
+                onClick={this.cancel}
+              >
                 <FormattedMessage
                   id="xpack.remoteClusters.edit.backToRemoteClustersButtonLabel"
                   defaultMessage="Back to remote clusters"

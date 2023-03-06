@@ -43,7 +43,12 @@ export const PanelViewWithSharing: React.FC = () => {
   return (
     <EuiPopover
       button={
-        <EuiButton onClick={() => setOpen((x) => !x)}>View mode with few sharing options</EuiButton>
+        <EuiButton
+          data-test-subj="uiActionsExplorerPanelViewWithSharingViewModeWithFewSharingOptionsButton"
+          onClick={() => setOpen((x) => !x)}
+        >
+          View mode with few sharing options
+        </EuiButton>
       }
       isOpen={open}
       panelPaddingSize="none"

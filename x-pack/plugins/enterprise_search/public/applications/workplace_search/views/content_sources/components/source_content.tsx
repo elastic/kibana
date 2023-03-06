@@ -110,7 +110,11 @@ export const SourceContent: React.FC = () => {
                 defaultMessage="Learn more about adding content in our {documentationLink}"
                 values={{
                   documentationLink: (
-                    <EuiLink target="_blank" href={docLinks.workplaceSearchCustomSources}>
+                    <EuiLink
+                      data-test-subj="enterpriseSearchSourceContentLink"
+                      target="_blank"
+                      href={docLinks.workplaceSearchCustomSources}
+                    >
                       {CUSTOM_DOCUMENTATION_LINK}
                     </EuiLink>
                   ),
@@ -138,7 +142,11 @@ export const SourceContent: React.FC = () => {
             <TruncatedContent tooltipType="title" content={url.toString()} length={MAX_LENGTH} />
           )}
           {urlFieldIsLinkable && (
-            <EuiLink target="_blank" href={url.toString()}>
+            <EuiLink
+              data-test-subj="enterpriseSearchContentItemLink"
+              target="_blank"
+              href={url.toString()}
+            >
               <TruncatedContent tooltipType="title" content={url.toString()} length={MAX_LENGTH} />
             </EuiLink>
           )}
@@ -175,6 +183,7 @@ export const SourceContent: React.FC = () => {
     <>
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj="enterpriseSearchSourceContentButton"
           disabled={!searchTerm}
           fill
           color="primary"
@@ -184,7 +193,11 @@ export const SourceContent: React.FC = () => {
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty disabled={!searchTerm} onClick={resetFederatedSearchTerm}>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchSourceContentButtonEmpty"
+          disabled={!searchTerm}
+          onClick={resetFederatedSearchTerm}
+        >
           {RESET_BUTTON}
         </EuiButtonEmpty>
       </EuiFlexItem>

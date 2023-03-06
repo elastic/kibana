@@ -79,7 +79,12 @@ export const LegacyUrlConflictInternal = (props: InternalProps & LegacyUrlConfli
         values={{
           objectNoun,
           documentationLink: (
-            <EuiLink external href={docLink} target="_blank">
+            <EuiLink
+              data-test-subj="spacesLegacyUrlConflictInternalLearnMoreLink"
+              external
+              href={docLink}
+              target="_blank"
+            >
               {i18n.translate('xpack.spaces.legacyUrlConflict.documentationLinkText', {
                 defaultMessage: 'Learn more',
               })}

@@ -56,6 +56,7 @@ export const RadioGroup = ({ idSelected, size, options, disabled, onChange }: Pr
             }}
           >
             <EuiButton
+              data-test-subj="cloudSecurityPostureRadioGroupButton"
               disabled={option.disabled || disabled}
               style={{
                 border: `1px solid ${

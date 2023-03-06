@@ -120,7 +120,10 @@ export const IndexPatternSelect = ({
       }
       labelAppend={
         !useKibanaIndices && fetchedIndex.indexPatternString && !fetchedIndex.indexPattern ? (
-          <EuiLink onClick={navigateToCreateIndexPatternPage}>
+          <EuiLink
+            data-test-subj="pluginsIndexPatternSelectLink"
+            onClick={navigateToCreateIndexPatternPage}
+          >
             <EuiText size="xs">
               <FormattedMessage
                 id="visTypeTimeseries.indexPatternSelect.createDataViewText"

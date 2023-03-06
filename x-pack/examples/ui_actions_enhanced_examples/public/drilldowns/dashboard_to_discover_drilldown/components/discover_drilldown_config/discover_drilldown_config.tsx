@@ -62,6 +62,7 @@ export const DiscoverDrilldownConfig: React.FC<DiscoverDrilldownConfigProps> = (
           {!!customIndexPattern && (
             <EuiFormRow fullWidth label={txtChooseDestinationIndexPattern}>
               <EuiSelect
+                data-test-subj="uiActionsEnhancedExamplesDiscoverDrilldownConfigSelect"
                 name="selectDashboard"
                 hasNoInitialSelection={true}
                 fullWidth

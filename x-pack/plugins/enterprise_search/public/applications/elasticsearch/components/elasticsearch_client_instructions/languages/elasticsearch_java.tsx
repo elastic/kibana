@@ -33,11 +33,19 @@ export const ElasticsearchJava: React.FC = () => {
             any JSON-B implementation.
           </li>
         </ul>
-        <EuiLink target="_blank" href={docLinks.clientsJavaIntroduction}>
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchJavaLearnMoreAboutTheElasticsearchJavaApiClientLink"
+          target="_blank"
+          href={docLinks.clientsJavaIntroduction}
+        >
           Learn more about the Elasticsearch JAVA API client
         </EuiLink>
         <EuiSpacer size="m" />
-        <EuiLink target="_blank" href="https://github.com/elastic/elasticsearch-java">
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchJavaTheElasticsearchJavaApiClientOnGithubLink"
+          target="_blank"
+          href="https://github.com/elastic/elasticsearch-java"
+        >
           The Elasticsearch JAVA API client on Github
         </EuiLink>
       </EuiText>

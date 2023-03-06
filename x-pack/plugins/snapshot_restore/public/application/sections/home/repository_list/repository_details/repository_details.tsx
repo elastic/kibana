@@ -165,7 +165,10 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
       );
     }
     return (
-      <EuiLink {...reactRouterNavigate(history, linkToSnapshots(repositoryName))}>
+      <EuiLink
+        data-test-subj="snapshotRestoreRenderSnapshotCountCountCountPluralOneSnapshotOtherSnapshotsFoundLink"
+        {...reactRouterNavigate(history, linkToSnapshots(repositoryName))}
+      >
         <FormattedMessage
           id="xpack.snapshotRestore.repositoryDetails.snapshotsDescription"
           defaultMessage="{count} {count, plural, one {snapshot} other {snapshots}} found"
@@ -289,7 +292,12 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
             </EuiCodeBlock>
           ) : null}
           <EuiSpacer size="m" />
-          <EuiButton onClick={verifyRepository} color="primary" isLoading={isLoadingVerification}>
+          <EuiButton
+            data-test-subj="snapshotRestoreRenderVerificationVerifyRepositoryButton"
+            onClick={verifyRepository}
+            color="primary"
+            isLoading={isLoadingVerification}
+          >
             <FormattedMessage
               id="xpack.snapshotRestore.repositoryDetails.verifyButtonLabel"
               defaultMessage="Verify repository"
@@ -436,6 +444,7 @@ export const RepositoryDetails: React.FunctionComponent<Props> = ({
 
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="snapshotRestoreRenderFooterEditButton"
                   {...reactRouterNavigate(history, linkToEditRepository(repositoryName))}
                   fill
                   color="primary"

@@ -354,7 +354,9 @@ export class IndexTable extends Component {
             <EuiText>
               {message}
               {filter ? (
-                <EuiLink onClick={() => filterChanged(filter)}>{filterLabel}</EuiLink>
+                <EuiLink data-test-subj="indexManagementLink" onClick={() => filterChanged(filter)}>
+                  {filterLabel}
+                </EuiLink>
               ) : null}
             </EuiText>
           </EuiCallOut>
@@ -507,6 +509,7 @@ export class IndexTable extends Component {
                       values={{
                         learnMoreLink: (
                           <EuiLink
+                            data-test-subj="indexManagementLearnMoreLink"
                             href={documentationService.getIdxMgmtDocumentationLink()}
                             target="_blank"
                             external

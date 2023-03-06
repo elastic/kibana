@@ -115,6 +115,7 @@ export function MathAgg(props) {
                 values={{
                   link: (
                     <EuiLink
+                      data-test-subj="pluginsMathAggTinyMathLink"
                       href="https://github.com/elastic/kibana/blob/main/packages/kbn-tinymath/docs/functions.md"
                       target="_blank"
                     >

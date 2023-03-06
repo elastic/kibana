@@ -179,7 +179,11 @@ export const ConfigCompleted: React.FC<ConfigCompletedProps> = ({
               color="primary"
               iconType="email"
               title={
-                <EuiLink href="https://www.elastic.co/kibana/feedback" external>
+                <EuiLink
+                  data-test-subj="enterpriseSearchConfigCompletedHaveFeedbackAboutDeployingANameConnectorPackageLetUsKnowLink"
+                  href="https://www.elastic.co/kibana/feedback"
+                  external
+                >
                   {i18n.translate(
                     'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.configCompleted.feedbackCallOutText',
                     {

@@ -39,7 +39,10 @@ export function LoggedOutPage({ basePath, customBranding }: Props) {
       }
       logo={customBrandingValue?.logo}
     >
-      <EuiButton href={parseNext(window.location.href, basePath.serverBasePath)}>
+      <EuiButton
+        data-test-subj="securityLoggedOutPageLogInButton"
+        href={parseNext(window.location.href, basePath.serverBasePath)}
+      >
         <FormattedMessage id="xpack.security.loggedOut.login" defaultMessage="Log in" />
       </EuiButton>
     </AuthenticationStatePage>

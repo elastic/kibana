@@ -151,7 +151,11 @@ export const PositiveRateAgg = (props) => {
             defaultMessage="This aggregation should only be applied to {link}, it is a shortcut for applying max, derivative and positive only to a field."
             values={{
               link: (
-                <EuiLink href="https://en.wikipedia.org/wiki/Monotonic_function" target="_BLANK">
+                <EuiLink
+                  data-test-subj="pluginsPositiveRateAggMonotonicallyIncreasingNumbersLink"
+                  href="https://en.wikipedia.org/wiki/Monotonic_function"
+                  target="_BLANK"
+                >
                   <FormattedMessage
                     id="visTypeTimeseries.positiveRate.helpTextLink"
                     defaultMessage="monotonically increasing numbers"

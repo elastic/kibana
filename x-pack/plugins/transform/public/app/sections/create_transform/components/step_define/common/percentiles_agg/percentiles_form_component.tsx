@@ -31,6 +31,7 @@ export const PercentilesAggForm: IPivotAggsConfigPercentiles['AggFormComponent']
         isInvalid={!isValid}
       >
         <EuiFieldText
+          data-test-subj="transformPercentilesAggFormFieldText"
           value={aggConfig.percents}
           onChange={(e) => {
             onChange({

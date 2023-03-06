@@ -82,7 +82,11 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
               values={{
                 addedSourceName,
                 externalIdentitiesLink: (
-                  <EuiLink target="_blank" href={docLinks.workplaceSearchExternalIdentities}>
+                  <EuiLink
+                    data-test-subj="enterpriseSearchPermissionsModalLink"
+                    target="_blank"
+                    href={docLinks.workplaceSearchExternalIdentities}
+                  >
                     {EXTERNAL_IDENTITIES_LINK}
                   </EuiLink>
                 ),
@@ -96,7 +100,11 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
               defaultMessage="Documents will not be searchable from Workplace Search until user and group mappings have been configured. {documentPermissionsLink}."
               values={{
                 documentPermissionsLink: (
-                  <EuiLink target="_blank" href={docLinks.workplaceSearchDocumentPermissions}>
+                  <EuiLink
+                    data-test-subj="enterpriseSearchPermissionsModalLink"
+                    target="_blank"
+                    href={docLinks.workplaceSearchDocumentPermissions}
+                  >
                     {DOCUMENT_PERMISSIONS_LINK}
                   </EuiLink>
                 ),
@@ -106,7 +114,11 @@ export const SourcesView: React.FC<SourcesViewProps> = ({ children }) => {
         </EuiText>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButton onClick={resetPermissionsModal} fill>
+        <EuiButton
+          data-test-subj="enterpriseSearchPermissionsModalButton"
+          onClick={resetPermissionsModal}
+          fill
+        >
           {UNDERSTAND_BUTTON}
         </EuiButton>
       </EuiModalFooter>

@@ -60,7 +60,13 @@ const PackDetailsPageComponent = () => {
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...packsListProps} flush="left" size="xs">
+          <EuiButtonEmpty
+            data-test-subj="osqueryLeftColumnViewAllPacksButtonEmpty"
+            iconType="arrowLeft"
+            {...packsListProps}
+            flush="left"
+            size="xs"
+          >
             <FormattedMessage
               id="xpack.osquery.packDetails.viewAllPackListTitle"
               defaultMessage="View all packs"
@@ -116,6 +122,7 @@ const PackDetailsPageComponent = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false} key="edit_button">
           <EuiButton
+            data-test-subj="osqueryRightColumnEditButton"
             fill
             {...editQueryLinkProps}
             iconType="pencil"

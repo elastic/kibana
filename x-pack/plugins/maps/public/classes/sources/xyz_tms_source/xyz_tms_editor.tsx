@@ -46,6 +46,7 @@ export class XYZTMSEditor extends Component<Props, State> {
       <EuiPanel>
         <EuiFormRow label="Url">
           <EuiFieldText
+            data-test-subj="mapsFieldText"
             placeholder={'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png'}
             onChange={this._onUrlChange}
           />

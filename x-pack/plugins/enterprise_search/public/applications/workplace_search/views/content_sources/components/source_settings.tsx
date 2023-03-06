@@ -231,6 +231,7 @@ export const SourceSettings: React.FC = () => {
               </>
             </EuiFormRow>
             <EuiButton
+              data-test-subj="enterpriseSearchSourceSettingsButton"
               type="submit"
               isLoading={isConfigurationUpdateButtonLoading}
               disabled={!stagedPrivateKey}

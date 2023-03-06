@@ -22,7 +22,13 @@ const BackToAlertDetailsLinkComponent = ({
 }) => {
   return (
     <>
-      <EuiButtonEmpty iconType="arrowLeft" iconSide="left" flush="left" onClick={showAlertDetails}>
+      <EuiButtonEmpty
+        data-test-subj="securitySolutionBackToAlertDetailsLinkComponentButtonEmpty"
+        iconType="arrowLeft"
+        iconSide="left"
+        flush="left"
+        onClick={showAlertDetails}
+      >
         <EuiText size="xs">
           <p>{ALERT_DETAILS}</p>
         </EuiText>

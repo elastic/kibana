@@ -303,7 +303,12 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
           defaultMessage="Adds enrich data to incoming documents based on an {enrichPolicyLink}."
           values={{
             enrichPolicyLink: (
-              <EuiLink external target="_blank" href={esDocUrl + '/ingest-enriching-data.html'}>
+              <EuiLink
+                data-test-subj="ingestPipelinesMapProcessorTypeToDescriptorLink"
+                external
+                target="_blank"
+                href={esDocUrl + '/ingest-enriching-data.html'}
+              >
                 {'enrich policy'}
               </EuiLink>
             ),
@@ -399,7 +404,12 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
           defaultMessage="Uses {grokLink} expressions to extract matches from a field."
           values={{
             grokLink: (
-              <EuiLink external target="_blank" href={esDocUrl + '/grok-processor.html'}>
+              <EuiLink
+                data-test-subj="ingestPipelinesMapProcessorTypeToDescriptorLink"
+                external
+                target="_blank"
+                href={esDocUrl + '/grok-processor.html'}
+              >
                 {'grok'}
               </EuiLink>
             ),

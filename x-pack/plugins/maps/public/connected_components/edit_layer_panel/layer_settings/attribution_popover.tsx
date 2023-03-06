@@ -75,6 +75,7 @@ export class AttributionPopover extends Component<Props, State> {
   _renderPopoverButton() {
     return (
       <EuiButtonEmpty
+        data-test-subj="mapsButtonEmpty"
         className={this.props.popoverButtonClassName}
         aria-label={this.props.popoverButtonAriaLabel}
         onClick={this._togglePopover}
@@ -105,6 +106,7 @@ export class AttributionPopover extends Component<Props, State> {
           fullWidth
         >
           <EuiFieldText
+            data-test-subj="mapsFieldText"
             compressed
             fullWidth
             value={this.state.label}
@@ -117,12 +119,19 @@ export class AttributionPopover extends Component<Props, State> {
           })}
           fullWidth
         >
-          <EuiFieldText compressed fullWidth value={this.state.url} onChange={this._onUrlChange} />
+          <EuiFieldText
+            data-test-subj="mapsFieldText"
+            compressed
+            fullWidth
+            value={this.state.url}
+            onChange={this._onUrlChange}
+          />
         </EuiFormRow>
         <EuiSpacer size="xs" />
         <EuiPopoverFooter>
           <EuiTextAlign textAlign="right">
             <EuiButton
+              data-test-subj="mapsApplyButton"
               fill
               isDisabled={!isComplete || !hasChanges}
               onClick={this._onApply}

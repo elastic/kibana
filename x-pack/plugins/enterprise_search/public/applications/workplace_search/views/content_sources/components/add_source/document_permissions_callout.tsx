@@ -45,7 +45,12 @@ export const DocumentPermissionsCallout: React.FC = () => {
         </EuiText>
         <EuiSpacer size="s" />
         <EuiText size="xs">
-          <EuiLink external target="_blank" href={docLinks.licenseManagement}>
+          <EuiLink
+            data-test-subj="enterpriseSearchDocumentPermissionsCalloutLink"
+            external
+            target="_blank"
+            href={docLinks.licenseManagement}
+          >
             {EXPLORE_PLATINUM_FEATURES_LINK}
           </EuiLink>
         </EuiText>

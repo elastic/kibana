@@ -89,6 +89,7 @@ export class NewGroupInput extends Component {
               className="new-group-input"
             >
               <EuiFieldText
+                data-test-subj="mlFieldText"
                 compressed
                 placeholder={i18n.translate(
                   'xpack.ml.jobsList.multiJobActions.groupSelector.addNewGroupPlaceholder',

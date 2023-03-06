@@ -325,7 +325,12 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
         </>
       }
       actions={
-        <EuiButton color="primary" fill href="/">
+        <EuiButton
+          data-test-subj="enterpriseSearchProductSelectorGoToTheKibanaDashboardButton"
+          color="primary"
+          fill
+          href="/"
+        >
           {i18n.translate('xpack.enterpriseSearch.overview.insufficientPermissionsButtonLabel', {
             defaultMessage: 'Go to the Kibana dashboard',
           })}
@@ -340,7 +345,11 @@ export const ProductSelector: React.FC<ProductSelectorProps> = ({
               })}
             </span>
           </EuiTitle>{' '}
-          <EuiLink href={docLinks.kibanaSecurity} target="_blank">
+          <EuiLink
+            data-test-subj="enterpriseSearchProductSelectorReadDocumentationLink"
+            href={docLinks.kibanaSecurity}
+            target="_blank"
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.overview.insufficientPermissionsFooterLinkLabel',
               {

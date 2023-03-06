@@ -117,6 +117,7 @@ export const EngineSearchPreview: React.FC = () => {
         rightSideItems: [
           <>
             <EuiButton
+              data-test-subj="enterpriseSearchEngineSearchPreviewViewThisApiCallButton"
               color="primary"
               iconType="eye"
               onClick={() => setShowAPICallFlyout(true)}
@@ -141,7 +142,11 @@ export const EngineSearchPreview: React.FC = () => {
             <EuiFlexItem grow={false} css={{ minWidth: '240px' }}>
               <ResultsPerPage view={ResultsPerPageView} options={RESULTS_PER_PAGE_OPTIONS} />
               <EuiSpacer size="m" />
-              <EuiLink href={docLinks.enterpriseSearchEngines} target="_blank">
+              <EuiLink
+                data-test-subj="enterpriseSearchEngineSearchPreviewImproveTheseResultsLink"
+                href={docLinks.enterpriseSearchEngines}
+                target="_blank"
+              >
                 <FormattedMessage
                   id="xpack.enterpriseSearch.content.engine.searchPreview.improveResultsLink"
                   defaultMessage="Improve these results"

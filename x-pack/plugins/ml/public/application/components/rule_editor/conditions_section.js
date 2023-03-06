@@ -49,7 +49,10 @@ export function ConditionsSection({
     <React.Fragment>
       {expressions}
       <EuiSpacer size="s" />
-      <EuiButtonEmpty onClick={() => addCondition()}>
+      <EuiButtonEmpty
+        data-test-subj="mlConditionsSectionAddNewConditionButtonEmpty"
+        onClick={() => addCondition()}
+      >
         <FormattedMessage
           id="xpack.ml.ruleEditor.conditionsSection.addNewConditionButtonLabel"
           defaultMessage="Add new condition"

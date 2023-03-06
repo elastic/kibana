@@ -61,7 +61,11 @@ export const PackagePolicyEditorDatastreamMappings: React.FunctionComponent<
             defaultMessage="Mapping is the process of defining how a document, and the fields it contains, are stored and indexed. If you are adding new fields through custom ingest pipeline, we recommend addition of a mapping for those in the component template. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink href={docLinks.links.fleet.datastreams} external={true}>
+                <EuiLink
+                  data-test-subj="fleetPackagePolicyEditorDatastreamMappingsLearnMoreLink"
+                  href={docLinks.links.fleet.datastreams}
+                  external={true}
+                >
                   <FormattedMessage
                     id="xpack.fleet.packagePolicyEditor.datastreamMappings.learnMoreLink"
                     defaultMessage="Learn more"

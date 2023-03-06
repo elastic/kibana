@@ -80,6 +80,7 @@ export const AddLocationFlyout = ({
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
+                data-test-subj="syntheticsAddLocationFlyoutButtonEmpty"
                 iconType="cross"
                 onClick={closeFlyout}
                 flush="left"
@@ -89,7 +90,12 @@ export const AddLocationFlyout = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={handleSubmit(onSubmit)} isLoading={isLoading}>
+              <EuiButton
+                data-test-subj="syntheticsAddLocationFlyoutButton"
+                fill
+                onClick={handleSubmit(onSubmit)}
+                isLoading={isLoading}
+              >
                 {SAVE_LABEL}
               </EuiButton>
             </EuiFlexItem>

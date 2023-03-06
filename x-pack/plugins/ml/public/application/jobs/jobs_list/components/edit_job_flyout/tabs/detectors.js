@@ -58,7 +58,11 @@ export class Detectors extends Component {
         <EuiForm>
           {detectorDescriptions.map((d, i) => (
             <EuiFormRow label={detectorToString(detectors[i])} key={i}>
-              <EuiFieldText value={d} onChange={(e) => this.onDescriptionChange(e, i)} />
+              <EuiFieldText
+                data-test-subj="mlFieldText"
+                value={d}
+                onChange={(e) => this.onDescriptionChange(e, i)}
+              />
             </EuiFormRow>
           ))}
         </EuiForm>

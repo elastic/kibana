@@ -205,6 +205,7 @@ export const RecurrenceScheduler: React.FC<ComponentOpts> = ({
           })}
         >
           <EuiSelect
+            data-test-subj="triggersActionsUiRecurrenceSchedulerSelect"
             options={repeatOptions}
             value={frequency}
             onChange={(e) =>

@@ -65,6 +65,7 @@ function NumberRow({
     <EuiFlexGroup responsive={false} alignItems="center" gutterSize="s">
       <EuiFlexItem>
         <EuiFieldNumber
+          data-test-subj="pluginsNumberRowFieldNumber"
           aria-labelledby={labelledbyId}
           autoFocus={autoFocus}
           compressed={true}

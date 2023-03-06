@@ -54,7 +54,11 @@ export const EuiMonitoringTable: FunctionComponent<Record<any, any>> = ({
     footerContent = (
       <Fragment>
         <EuiSpacer size="m" />
-        <EuiButton iconType="flag" onClick={() => setupMode.openFlyout({}, true)}>
+        <EuiButton
+          data-test-subj="monitoringEuiMonitoringTableMonitorAnotherIdentifierWithMetricbeatButton"
+          iconType="flag"
+          onClick={() => setupMode.openFlyout({}, true)}
+        >
           {i18n.translate('xpack.monitoring.euiTable.setupNewButtonLabel', {
             defaultMessage: 'Monitor another {identifier} with Metricbeat',
             values: {

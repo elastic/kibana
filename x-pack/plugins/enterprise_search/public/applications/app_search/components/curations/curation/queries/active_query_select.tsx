@@ -32,6 +32,7 @@ export const ActiveQuerySelect: React.FC = () => {
       fullWidth
     >
       <EuiSelect
+        data-test-subj="enterpriseSearchActiveQuerySelectSelect"
         options={queries.map((query) => ({
           value: query,
           text: query,

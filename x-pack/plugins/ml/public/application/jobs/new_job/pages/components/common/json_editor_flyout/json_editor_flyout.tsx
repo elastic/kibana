@@ -218,6 +218,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="mlJsonEditorFlyoutCloseButtonEmpty"
                   iconType="cross"
                   onClick={() => setShowJsonFlyout(false)}
                   flush="left"
@@ -230,7 +231,12 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
               </EuiFlexItem>
               {readOnlyMode === false && (
                 <EuiFlexItem grow={false}>
-                  <EuiButton onClick={onSave} fill isDisabled={saveable === false}>
+                  <EuiButton
+                    data-test-subj="mlJsonEditorFlyoutSaveButton"
+                    onClick={onSave}
+                    fill
+                    isDisabled={saveable === false}
+                  >
                     <FormattedMessage
                       id="xpack.ml.newJob.wizard.jsonFlyout.saveButton"
                       defaultMessage="Save"

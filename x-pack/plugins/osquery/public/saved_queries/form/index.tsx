@@ -98,7 +98,11 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
       {!viewMode && hasPlayground && (
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="play" onClick={handleTogglePlayground}>
+            <EuiButtonEmpty
+              data-test-subj="osquerySavedQueryFormComponentTestConfigurationButtonEmpty"
+              iconType="play"
+              onClick={handleTogglePlayground}
+            >
               <FormattedMessage
                 id="xpack.osquery.savedQueries.form.packConfigSection.testConfigButtonLabel"
                 defaultMessage="Test configuration"

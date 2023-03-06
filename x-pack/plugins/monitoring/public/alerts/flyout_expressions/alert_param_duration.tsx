@@ -75,6 +75,7 @@ export const AlertParamDuration: React.FC<Props> = (props: Props) => {
       <EuiFlexGroup>
         <EuiFlexItem grow={2}>
           <EuiFieldNumber
+            data-test-subj="monitoringAlertParamDurationFieldNumber"
             compressed
             value={value}
             onChange={(e) => {
@@ -88,6 +89,7 @@ export const AlertParamDuration: React.FC<Props> = (props: Props) => {
         </EuiFlexItem>
         <EuiFlexItem grow={4}>
           <EuiSelect
+            data-test-subj="monitoringAlertParamDurationSelect"
             compressed
             value={unit}
             onChange={(e) => setUnit(e.target.value)}

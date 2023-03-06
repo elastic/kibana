@@ -136,7 +136,11 @@ const SwimlaneActionConnectorFields: React.FunctionComponent<ActionConnectorFiel
         </div>
         <div style={{ display: currentStep === 2 ? 'block' : 'none' }}>
           <SwimlaneFields fields={fields} readOnly={readOnly} />
-          <EuiButton onClick={resetConnection} iconType="arrowLeft">
+          <EuiButton
+            data-test-subj="stackConnectorsSwimlaneActionConnectorFieldsButton"
+            onClick={resetConnection}
+            iconType="arrowLeft"
+          >
             {i18n.SW_BACK}
           </EuiButton>
         </div>

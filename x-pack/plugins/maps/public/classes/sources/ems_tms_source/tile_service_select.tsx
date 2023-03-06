@@ -98,6 +98,7 @@ export class TileServiceSelect extends Component<Props, State> {
         display="columnCompressed"
       >
         <EuiSelect
+          data-test-subj="mapsSelect"
           hasNoInitialSelection={!selectedId}
           value={selectedId}
           options={this.state.emsTmsOptions}

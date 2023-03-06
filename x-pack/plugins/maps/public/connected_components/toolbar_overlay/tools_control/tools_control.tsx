@@ -240,7 +240,12 @@ export class ToolsControl extends Component<Props, State> {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>{toolsPopoverButton}</EuiFlexItem>
         <EuiFlexItem>
-          <EuiButton size="s" fill onClick={this.props.cancelDraw}>
+          <EuiButton
+            data-test-subj="mapsCancelButton"
+            size="s"
+            fill
+            onClick={this.props.cancelDraw}
+          >
             <FormattedMessage
               id="xpack.maps.tooltip.toolsControl.cancelDrawButtonLabel"
               defaultMessage="Cancel"

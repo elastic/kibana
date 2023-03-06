@@ -42,7 +42,11 @@ export const ParametersTab: FunctionComponent = () => {
         fullWidth
         labelAppend={
           <EuiText size="xs">
-            <EuiLink href={links.modulesScriptingPreferParams} target="_blank">
+            <EuiLink
+              data-test-subj="painlessLabParametersTabParametersDocsLink"
+              href={links.modulesScriptingPreferParams}
+              target="_blank"
+            >
               {i18n.translate('xpack.painlessLab.parametersFieldDocLinkText', {
                 defaultMessage: 'Parameters docs',
               })}

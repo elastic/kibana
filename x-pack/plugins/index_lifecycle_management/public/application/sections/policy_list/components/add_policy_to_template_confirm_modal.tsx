@@ -98,7 +98,12 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
           <p>
             {message} ({statusCode})
           </p>
-          <EuiButton isLoading={isLoading} color="danger" onClick={resendRequest}>
+          <EuiButton
+            data-test-subj="indexLifecycleManagementRenderUnableToLoadTemplatesCalloutTryAgainButton"
+            isLoading={isLoading}
+            color="danger"
+            onClick={resendRequest}
+          >
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyToTemplateConfirmModal.errorLoadingTemplatesButton"
               defaultMessage="Try again"
@@ -125,6 +130,7 @@ export const AddPolicyToTemplateConfirmModal: React.FunctionComponent<Props> = (
         }
       >
         <EuiFieldText
+          data-test-subj="indexLifecycleManagementRenderAliasFormElementFieldText"
           value={aliasName}
           onChange={(e) => {
             setAliasName(e.target.value);

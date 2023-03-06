@@ -22,6 +22,7 @@ const ExampleCurrencyFormatEditor: FieldFormatEditor<{ currency: string }> = (pr
   return (
     <EuiFormRow label={'Currency'}>
       <EuiSelect
+        data-test-subj="fieldFormatsExampleExampleCurrencyFormatEditorSelect"
         defaultValue={props.formatParams.currency}
         options={[
           { text: 'EUR', value: 'EUR' },

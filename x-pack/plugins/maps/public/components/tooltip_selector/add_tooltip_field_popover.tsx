@@ -133,6 +133,7 @@ export class AddTooltipFieldPopover extends Component<Props, State> {
   _renderAddButton() {
     return (
       <EuiButtonEmpty
+        data-test-subj="mapsAddButtonEmpty"
         onClick={this._togglePopover}
         size="xs"
         iconType="plusInCircleFilled"
@@ -174,6 +175,7 @@ export class AddTooltipFieldPopover extends Component<Props, State> {
         <EuiPopoverFooter paddingSize="s">
           <EuiTextAlign textAlign="right">
             <EuiButton
+              data-test-subj="mapsButton"
               fill
               isDisabled={this.state.checkedFields.length === 0}
               onClick={this._onAdd}

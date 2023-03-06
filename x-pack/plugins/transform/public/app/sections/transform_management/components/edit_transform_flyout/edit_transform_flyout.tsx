@@ -133,7 +133,12 @@ export const EditTransformFlyout: FC<EditTransformFlyoutProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="transformEditTransformFlyoutCancelButtonEmpty"
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+            >
               {i18n.translate('xpack.transform.transformList.editFlyoutCancelButtonText', {
                 defaultMessage: 'Cancel',
               })}

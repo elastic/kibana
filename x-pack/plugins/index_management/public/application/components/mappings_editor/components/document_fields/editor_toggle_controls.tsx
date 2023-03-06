@@ -38,6 +38,7 @@ export const EditorToggleControls = ({ editor }: Props) => {
     clearWarnings();
     return (
       <EuiButton
+        data-test-subj="indexManagementEditorToggleControlsUseJsonEditorButton"
         onClick={() => {
           dispatch({ type: 'documentField.changeEditor', value: 'json' });
         }}
@@ -50,6 +51,7 @@ export const EditorToggleControls = ({ editor }: Props) => {
   return (
     <>
       <EuiButton
+        data-test-subj="indexManagementEditorToggleControlsUseMappingsEditorButton"
         onClick={() => {
           clearWarnings();
           const { isValid } = fieldsJsonEditor;

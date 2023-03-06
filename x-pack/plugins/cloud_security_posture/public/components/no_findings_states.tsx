@@ -66,7 +66,12 @@ const NotDeployed = () => {
         </p>
       }
       actions={[
-        <EuiButton fill href={integrationPoliciesLink} isDisabled={!integrationPoliciesLink}>
+        <EuiButton
+          data-test-subj="cloudSecurityPostureNotDeployedInstallAgentButton"
+          fill
+          href={integrationPoliciesLink}
+          isDisabled={!integrationPoliciesLink}
+        >
           <FormattedMessage
             id="xpack.csp.noFindingsStates.noAgentsDeployed.noAgentsDeployedButtonTitle"
             defaultMessage="Install Agent"
@@ -121,7 +126,11 @@ const IndexTimeout = () => (
           defaultMessage="Collecting findings is taking longer than expected, please review our {docs} or reach out to support"
           values={{
             docs: (
-              <EuiLink href="https://ela.st/findings" target="_blank">
+              <EuiLink
+                data-test-subj="cloudSecurityPostureIndexTimeoutDocsLink"
+                href="https://ela.st/findings"
+                target="_blank"
+              >
                 <FormattedMessage
                   id="xpack.csp.noFindingsStates.indexTimeout.indexTimeoutDocLink"
                   defaultMessage="docs"

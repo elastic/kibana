@@ -61,6 +61,7 @@ export const ContentFieldsPanel: React.FC<ContentFieldsPanelProps> = ({
       }
       actions={
         <EuiButton
+          data-test-subj="enterpriseSearchContentFieldsPanelAddContentFieldsButton"
           data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-addContentFirstContentField"
           iconType="plusInCircle"
           onClick={editNewField}
@@ -92,6 +93,7 @@ export const ContentFieldsPanel: React.FC<ContentFieldsPanelProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="enterpriseSearchContentFieldsPanelAddContentFieldRuleButton"
             data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-addContentFieldRule"
             iconType="plusInCircle"
             onClick={editNewField}

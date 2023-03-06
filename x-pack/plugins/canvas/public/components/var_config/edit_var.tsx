@@ -193,6 +193,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
             error={hasDupeName && strings.getDuplicateNameError()}
           >
             <EuiFieldText
+              data-test-subj="canvasEditVarFieldText"
               name="name"
               value={name}
               compressed={true}
@@ -209,6 +210,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="canvasEditVarButton"
                 color="success"
                 size="s"
                 fill
@@ -226,7 +228,11 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="s" onClick={() => onCancel()}>
+              <EuiButtonEmpty
+                data-test-subj="canvasEditVarButtonEmpty"
+                size="s"
+                onClick={() => onCancel()}
+              >
                 {strings.getCancelButtonLabel()}
               </EuiButtonEmpty>
             </EuiFlexItem>

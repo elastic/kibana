@@ -35,7 +35,10 @@ export function InvalidLicenseNotification() {
         </p>
       }
       actions={[
-        <EuiButton href={manageLicenseURL}>
+        <EuiButton
+          data-test-subj="apmInvalidLicenseNotificationManageYourLicenseButton"
+          href={manageLicenseURL}
+        >
           {i18n.translate('xpack.apm.invalidLicense.licenseManagementLink', {
             defaultMessage: 'Manage your license',
           })}

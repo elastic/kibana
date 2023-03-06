@@ -87,7 +87,11 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onClose} flush="left">
+              <EuiButtonEmpty
+                data-test-subj="fleetAgentPolicyYamlFlyoutCloseButtonEmpty"
+                onClick={onClose}
+                flush="left"
+              >
                 <FormattedMessage
                   id="xpack.fleet.policyDetails.yamlFlyoutCloseButtonLabel"
                   defaultMessage="Close"
@@ -96,6 +100,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="fleetAgentPolicyYamlFlyoutDownloadPolicyButton"
                 href={downloadLink}
                 iconType="download"
                 isDisabled={Boolean(isLoadingYaml && !yamlData)}

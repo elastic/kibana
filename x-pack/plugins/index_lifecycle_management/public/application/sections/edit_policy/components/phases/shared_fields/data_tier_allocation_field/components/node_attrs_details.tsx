@@ -48,7 +48,12 @@ export const NodeAttrsDetails: React.FunctionComponent<Props> = ({ close, select
         <p>
           {message} ({statusCode})
         </p>
-        <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
+        <EuiButton
+          data-test-subj="indexLifecycleManagementNodeAttrsDetailsTryAgainButton"
+          onClick={resendRequest}
+          iconType="refresh"
+          color="danger"
+        >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.nodeDetailsReloadButton"
             defaultMessage="Try again"

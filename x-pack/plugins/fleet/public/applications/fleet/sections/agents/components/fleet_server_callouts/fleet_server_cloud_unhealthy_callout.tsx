@@ -35,7 +35,12 @@ export const FleetServerCloudUnhealthyCallout: React.FunctionComponent<
         defaultMessage="A healthy Fleet server is required to enroll agents with Fleet. Enable Fleet Server in your {cloudDeploymentLink}. For more information see the {guideLink}."
         values={{
           cloudDeploymentLink: (
-            <EuiLink href={deploymentUrl} target="_blank" external>
+            <EuiLink
+              data-test-subj="fleetFleetServerCloudUnhealthyCalloutCloudDeploymentLink"
+              href={deploymentUrl}
+              target="_blank"
+              external
+            >
               <FormattedMessage
                 id="xpack.fleet.fleetServerCloudRequiredCallout.cloudDeploymentLink"
                 defaultMessage="cloud deployment"
@@ -43,7 +48,12 @@ export const FleetServerCloudUnhealthyCallout: React.FunctionComponent<
             </EuiLink>
           ),
           guideLink: (
-            <EuiLink href={docLinks.links.fleet.fleetServerAddFleetServer} target="_blank" external>
+            <EuiLink
+              data-test-subj="fleetFleetServerCloudUnhealthyCalloutFleetAndElasticAgentGuideLink"
+              href={docLinks.links.fleet.fleetServerAddFleetServer}
+              target="_blank"
+              external
+            >
               <FormattedMessage
                 id="xpack.fleet.fleetServerCloudRequiredCallout.guideLink"
                 defaultMessage="Fleet and Elastic Agent Guide"
@@ -53,7 +63,13 @@ export const FleetServerCloudUnhealthyCallout: React.FunctionComponent<
         }}
       />
       <EuiSpacer size="m" />
-      <EuiButton href={deploymentUrl} target="_blank" color="warning" fill>
+      <EuiButton
+        data-test-subj="fleetFleetServerCloudUnhealthyCalloutEditDeploymentButton"
+        href={deploymentUrl}
+        target="_blank"
+        color="warning"
+        fill
+      >
         <FormattedMessage
           id="xpack.fleet.fleetServerCloudRequiredCallout.editDeploymentButtonLabel"
           defaultMessage="Edit deployment"

@@ -487,6 +487,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
               </EuiTextColor>
               <p className="lnsWorkspacePanel__actions">
                 <EuiLink
+                  data-test-subj="lensRenderDragDropPromptMakeRequestsAndGiveFeedbackLink"
                   href="https://www.elastic.co/products/kibana/feedback"
                   target="_blank"
                   external
@@ -748,6 +749,7 @@ export const VisualizationWrapper = ({
                   actions={
                     visibleErrorMessages.length && !localState.expandError ? (
                       <EuiButtonEmpty
+                        data-test-subj="lensVisualizationWrapperShowDetailsOfErrorButtonEmpty"
                         onClick={() => {
                           setLocalState((prevState: WorkspaceState) => ({
                             ...prevState,

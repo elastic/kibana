@@ -53,7 +53,12 @@ export const AddAgentHelpPopover = ({
             values={{
               elasticAgent: <strong>Elastic Agent</strong>,
               learnMoreLink: (
-                <EuiLink target="_blank" external href={docLinks.links.fleet.elasticAgent}>
+                <EuiLink
+                  data-test-subj="fleetAddAgentHelpPopoverLearnMoreAboutElasticAgentLink"
+                  target="_blank"
+                  external
+                  href={docLinks.links.fleet.elasticAgent}
+                >
                   <FormattedMessage
                     id="xpack.fleet.addAgentHelpPopover.documentationLink"
                     defaultMessage="Learn more about Elastic Agent."
@@ -81,6 +86,7 @@ export const AddAgentHelpPopover = ({
       data-test-subj="addAgentHelpPopover"
       footerAction={
         <EuiLink
+          data-test-subj="fleetAddAgentHelpPopoverGotItLink"
           onClick={() => {
             closePopover();
           }}

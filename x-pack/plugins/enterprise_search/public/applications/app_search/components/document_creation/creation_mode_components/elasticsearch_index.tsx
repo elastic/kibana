@@ -68,7 +68,11 @@ export const FlyoutBody: React.FC = () => {
             defaultMessage="'You can now connect directly to an existing Elasticsearch index to make its data searchable and tunable through Enterprise Search Uls. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink target="_blank" href={'TODO'}>
+                <EuiLink
+                  data-test-subj="enterpriseSearchFlyoutBodyLearnMoreAboutUsingAnExistingIndexLink"
+                  target="_blank"
+                  href={'TODO'}
+                >
                   {i18n.translate(
                     'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.link',
                     {
@@ -97,10 +101,21 @@ export const FlyoutFooter: React.FC = () => {
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+          <EuiButtonEmpty
+            data-test-subj="enterpriseSearchFlyoutFooterButtonEmpty"
+            onClick={closeDocumentCreation}
+          >
+            {CANCEL_BUTTON_LABEL}
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton fill onClick={onSubmitJson} isLoading={isUploading} isDisabled={!textInput}>
+          <EuiButton
+            data-test-subj="enterpriseSearchFlyoutFooterConnectToIndexButton"
+            fill
+            onClick={onSubmitJson}
+            isLoading={isUploading}
+            isDisabled={!textInput}
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.documentCreation.elasticsearchIndex.button',
               {

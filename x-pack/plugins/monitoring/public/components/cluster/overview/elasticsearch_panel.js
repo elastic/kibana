@@ -254,7 +254,10 @@ export function ElasticsearchPanel(props) {
         <EuiDescriptionListDescription data-test-subj="esLicenseType">
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiLink href={getSafeForExternalLink('#/license')}>
+              <EuiLink
+                data-test-subj="monitoringShowLicenseLink"
+                href={getSafeForExternalLink('#/license')}
+              >
                 {capitalize(props.license.type)}
               </EuiLink>
             </EuiFlexItem>

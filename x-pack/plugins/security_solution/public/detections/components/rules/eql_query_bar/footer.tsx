@@ -203,6 +203,7 @@ export const EqlQueryBarFooter: FC<Props> = ({
                       helpText={i18n.EQL_OPTIONS_SIZE_HELPER}
                     >
                       <EuiFieldNumber
+                        data-test-subj="securitySolutionEqlQueryBarFooterFieldNumber"
                         value={localSize}
                         onChange={handleSizeField}
                         min={1}

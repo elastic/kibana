@@ -49,10 +49,20 @@ export const DeploymentDetails = ({ cloudId, learnMoreUrl, managementUrl }: Prop
     <EuiFormRow label="API keys" fullWidth>
       <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem>
-          <EuiButton href={managementUrl}>Create and manage API keys</EuiButton>
+          <EuiButton
+            data-test-subj="fleetDeploymentDetailsCreateAndManageApiKeysButton"
+            href={managementUrl}
+          >
+            Create and manage API keys
+          </EuiButton>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiLink external href={learnMoreUrl} target="_blank">
+          <EuiLink
+            data-test-subj="fleetDeploymentDetailsLearnMoreLink"
+            external
+            href={learnMoreUrl}
+            target="_blank"
+          >
             Learn more
           </EuiLink>
         </EuiFlexItem>
@@ -78,7 +88,12 @@ export const DeploymentDetails = ({ cloudId, learnMoreUrl, managementUrl }: Prop
           <EuiFormRow label="Cloud ID" fullWidth>
             <EuiFlexGroup gutterSize="s">
               <EuiFlexItem>
-                <EuiFieldText value={cloudId} fullWidth disabled />
+                <EuiFieldText
+                  data-test-subj="fleetDeploymentDetailsFieldText"
+                  value={cloudId}
+                  fullWidth
+                  disabled
+                />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiCopy textToCopy={cloudId}>

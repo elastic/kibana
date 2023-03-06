@@ -163,6 +163,7 @@ const CasesWebhookActionConnectorFields: React.FunctionComponent<ActionConnector
     <>
       <EuiStepsHorizontal steps={horizontalSteps} />
       <EuiLink
+        data-test-subj="stackConnectorsCasesWebhookActionConnectorFieldsLink"
         href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/cases-webhook-action-type.html`}
         target="_blank"
       >

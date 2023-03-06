@@ -107,6 +107,7 @@ export const App = ({
                 </p>
               </EuiText>
               <EuiFieldText
+                data-test-subj="stateContainersExamplesAppFieldText"
                 placeholder="Additional example applications state: My name is..."
                 value={appState.name}
                 onChange={(e) => appStateContainer.set({ ...appState, name: e.target.value })}

@@ -44,6 +44,7 @@ export const RejectedCurationsHistoryPanel: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
             <EuiButtonEmpty
+              data-test-subj="enterpriseSearchRejectedCurationsHistoryPanelRefreshButtonEmpty"
               iconType="refresh"
               size="xs"
               onClick={() => setEndTimestamp(Date.now())}

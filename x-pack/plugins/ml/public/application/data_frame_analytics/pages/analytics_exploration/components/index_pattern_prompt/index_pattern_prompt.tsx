@@ -47,6 +47,7 @@ export const IndexPatternPrompt: FC<Props> = ({ destIndex, color }) => {
               destIndex: destIndex ? ` for ${destIndex}` : '',
               linkToDataViewManagement: (
                 <EuiLink
+                  data-test-subj="mlIndexPatternPromptCreateADataViewLink"
                   href={`${basePath.get()}/app/management/kibana/dataViews/create`}
                   target="_blank"
                 >

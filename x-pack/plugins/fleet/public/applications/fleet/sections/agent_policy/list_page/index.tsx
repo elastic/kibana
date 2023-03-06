@@ -263,7 +263,12 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton color="primary" iconType="refresh" onClick={() => resendRequest()}>
+          <EuiButton
+            data-test-subj="fleetAgentPolicyListPageReloadButton"
+            color="primary"
+            iconType="refresh"
+            onClick={() => resendRequest()}
+          >
             <FormattedMessage
               id="xpack.fleet.agentPolicyList.reloadAgentPoliciesButtonText"
               defaultMessage="Reload"
@@ -291,7 +296,10 @@ export const AgentPolicyListPage: React.FunctionComponent<{}> = () => {
               defaultMessage="No agent policies found. {clearFiltersLink}"
               values={{
                 clearFiltersLink: (
-                  <EuiLink onClick={() => setSearch('')}>
+                  <EuiLink
+                    data-test-subj="fleetAgentPolicyListPageClearFiltersLink"
+                    onClick={() => setSearch('')}
+                  >
                     <FormattedMessage
                       id="xpack.fleet.agentPolicyList.clearFiltersLinkText"
                       defaultMessage="Clear filters"

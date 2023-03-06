@@ -150,6 +150,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
             }
           >
             <EuiFieldText
+              data-test-subj="mlJobSettingsFormFieldText"
               name="jobPrefix"
               value={jobPrefix}
               onChange={({ target: { value } }) => setJobPrefix(value)}
@@ -251,6 +252,7 @@ export const JobSettingsForm: FC<JobSettingsFormProps> = ({
       </EuiForm>
       <EuiTextAlign textAlign="right">
         <EuiButton
+          data-test-subj="mlJobSettingsFormCreateNumberOfJobsPluralZeroJobOneJobOtherJobsButton"
           fill
           type="submit"
           isLoading={saveState === SAVE_STATE.SAVING}

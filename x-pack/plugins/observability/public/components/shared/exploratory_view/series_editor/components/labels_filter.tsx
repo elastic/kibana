@@ -73,6 +73,7 @@ export function LabelsFieldFilter(props: FilterProps) {
         <>
           <EuiPopoverTitle>
             <EuiButtonEmpty
+              data-test-subj="o11yLabelsFieldFilterButtonEmpty"
               iconType="arrowLeft"
               iconSide="left"
               onClick={() => setSelectedLabel('')}

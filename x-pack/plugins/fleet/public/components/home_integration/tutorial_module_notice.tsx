@@ -51,6 +51,7 @@ const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }
                 ),
                 availableAsIntegrationLink: (
                   <EuiLink
+                    data-test-subj="fleetTutorialModuleNoticeAvailableAsAnElasticAgentIntegrationLink"
                     href={getHref('integration_details_overview', {
                       pkgkey: pkgKeyFromPackageInfo(pkgInfo),
                     })}
@@ -63,6 +64,7 @@ const TutorialModuleNotice: TutorialModuleNoticeComponent = memo(({ moduleName }
                 ),
                 blogPostLink: (
                   <EuiLink
+                    data-test-subj="fleetTutorialModuleNoticeAnnouncementBlogPostLink"
                     href="https://ela.st/elastic-agent-ga-announcement"
                     external
                     target="_blank"

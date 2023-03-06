@@ -155,6 +155,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
           onBlur={() => setTouched({ ...touched, description: true })}
         >
           <EuiFieldText
+            data-test-subj="graphUrlTemplateFormFieldText"
             fullWidth
             value={currentTemplate.description}
             isInvalid={touched.description && !currentTemplate.description}
@@ -178,7 +179,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
                     {i18n.translate('xpack.graph.settings.drillDowns.kibanaUrlWarningText', {
                       defaultMessage: 'Possible Kibana URL pasted, ',
                     })}
-                    <EuiLink onClick={convertUrl}>
+                    <EuiLink data-test-subj="graphUrlTemplateFormLink" onClick={convertUrl}>
                       <strong>
                         {i18n.translate(
                           'xpack.graph.settings.drillDowns.kibanaUrlWarningConvertOptionLinkText',
@@ -210,6 +211,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
           }
         >
           <EuiFieldText
+            data-test-subj="graphUrlTemplateFormFieldText"
             fullWidth
             placeholder="https://www.google.co.uk/#q={{gquery}}"
             value={currentTemplate.url}
@@ -309,14 +311,23 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
           </EuiFlexItem>
           <EuiFlexItem />
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={reset} disabled={formUntouched}>
+            <EuiButtonEmpty
+              data-test-subj="graphUrlTemplateFormResetButtonEmpty"
+              onClick={reset}
+              disabled={formUntouched}
+            >
               {i18n.translate('xpack.graph.settings.drillDowns.resetButtonLabel', {
                 defaultMessage: 'Reset',
               })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton type="submit" fill isDisabled={urlPlaceholderMissing || formIncomplete}>
+            <EuiButton
+              data-test-subj="graphUrlTemplateFormButton"
+              type="submit"
+              fill
+              isDisabled={urlPlaceholderMissing || formIncomplete}
+            >
               {isUpdateForm(props)
                 ? i18n.translate('xpack.graph.settings.drillDowns.updateSaveButtonLabel', {
                     defaultMessage: 'Update drilldown',

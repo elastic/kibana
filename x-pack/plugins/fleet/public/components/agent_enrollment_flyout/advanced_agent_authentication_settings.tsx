@@ -75,6 +75,7 @@ const NoEnrollmentKeysCallout: React.FunctionComponent<{
       </div>
       <EuiSpacer size="m" />
       <EuiButton
+        data-test-subj="fleetNoEnrollmentKeysCalloutCreateEnrollmentTokenButton"
         iconType="plusInCircle"
         isLoading={isLoadingEnrollmentKey}
         fill
@@ -184,6 +185,7 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
   return (
     <>
       <EuiButtonEmpty
+        data-test-subj="fleetAdvancedAgentAuthenticationSettingsAuthenticationSettingsButtonEmpty"
         iconSide="left"
         iconType={isAuthenticationSettingsOpen ? 'arrowDown' : 'arrowRight'}
         onClick={() => setIsAuthenticationSettingsOpen(!isAuthenticationSettingsOpen)}
@@ -198,6 +200,7 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
           <EuiSpacer size="m" />
           {enrollmentAPIKeys.length && selectedApiKeyId ? (
             <EuiSelect
+              data-test-subj="fleetAdvancedAgentAuthenticationSettingsSelect"
               fullWidth
               options={enrollmentAPIKeys.map((key) => ({
                 value: key.id,

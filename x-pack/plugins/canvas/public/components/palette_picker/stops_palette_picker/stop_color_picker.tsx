@@ -95,6 +95,7 @@ export const StopColorPicker: FC<Props> = (props) => {
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem>
         <EuiFieldNumber
+          data-test-subj="canvasStopColorPickerFieldNumber"
           compressed
           value={colorStop.stop}
           min={-Infinity}

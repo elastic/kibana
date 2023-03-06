@@ -64,6 +64,7 @@ export class HistogramFormatEditor extends DefaultFormatEditor<HistogramFormatEd
           })}
         >
           <EuiSelect
+            data-test-subj="pluginsSelect"
             options={numberOptions}
             value={formatParams.id || 'number'}
             onChange={(e) => {
@@ -77,7 +78,11 @@ export class HistogramFormatEditor extends DefaultFormatEditor<HistogramFormatEd
           })}
           helpText={
             <span>
-              <EuiLink target="_blank" href="https://adamwdraper.github.io/Numeral-js/">
+              <EuiLink
+                data-test-subj="pluginsLink"
+                target="_blank"
+                href="https://adamwdraper.github.io/Numeral-js/"
+              >
                 <FormattedMessage
                   id="indexPatternFieldEditor.number.documentationLabel"
                   defaultMessage="Documentation"
@@ -91,6 +96,7 @@ export class HistogramFormatEditor extends DefaultFormatEditor<HistogramFormatEd
           error={error}
         >
           <EuiFieldText
+            data-test-subj="pluginsFieldText"
             value={formatParams?.params?.pattern ?? ''}
             onChange={(e) => {
               this.onChange({

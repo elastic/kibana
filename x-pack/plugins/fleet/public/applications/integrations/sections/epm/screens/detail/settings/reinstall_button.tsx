@@ -32,6 +32,7 @@ export function ReinstallButton(props: ReinstallationButtonProps) {
 
   const reinstallButton = (
     <EuiButton
+      data-test-subj="fleetReinstallButtonButton"
       iconType="refresh"
       isLoading={isReinstalling}
       onClick={handleClickReinstall}

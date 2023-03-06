@@ -34,7 +34,10 @@ export const MonitoringWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
         title={<h1>{pageTitle}</h1>}
         body={<p>{systemWatchMessage}</p>}
         actions={[
-          <EuiLink {...reactRouterNavigate(history, `/watches/watch/${watch.id}/status`)}>
+          <EuiLink
+            data-test-subj="watcherMonitoringWatchEditViewWatchStatusLink"
+            {...reactRouterNavigate(history, `/watches/watch/${watch.id}/status`)}
+          >
             <FormattedMessage
               id="xpack.watcher.sections.watchEdit.monitoring.header.watchLinkTitle"
               defaultMessage="View watch status"

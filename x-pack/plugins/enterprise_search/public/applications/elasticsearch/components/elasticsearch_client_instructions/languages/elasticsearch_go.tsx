@@ -27,15 +27,27 @@ export const ElasticsearchGo: React.FC<{ cloudId?: string }> = ({ cloudId }) => 
           <li>Helpers for convenience</li>
           <li>A rich set of examples in the documentation</li>
         </ul>
-        <EuiLink target="_blank" href={docLinks.clientsGoIndex}>
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchGoLearnMoreAboutTheGoClientForElasticsearchLink"
+          target="_blank"
+          href={docLinks.clientsGoIndex}
+        >
           Learn more about the Go client for Elasticsearch
         </EuiLink>
         <EuiSpacer size="m" />
-        <EuiLink target="_blank" href="https://github.com/elastic/go-elasticsearch">
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchGoTheGoClientForElasticsearchOnGithubLink"
+          target="_blank"
+          href="https://github.com/elastic/go-elasticsearch"
+        >
           The Go client for Elasticsearch on Github
         </EuiLink>
         <EuiSpacer size="m" />
-        <EuiLink target="_blank" href="https://godoc.org/github.com/elastic/go-elasticsearch">
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchGoViewTheDocumentationOnGoDocLink"
+          target="_blank"
+          href="https://godoc.org/github.com/elastic/go-elasticsearch"
+        >
           View the documentation on GoDoc
         </EuiLink>
       </EuiText>

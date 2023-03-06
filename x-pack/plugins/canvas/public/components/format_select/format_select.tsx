@@ -69,6 +69,7 @@ export class FormatSelect extends PureComponent<Props> {
     return (
       <Fragment>
         <EuiSelect
+          data-test-subj="canvasSelect"
           compressed
           id={argId}
           value={isCustomFormat ? 'custom' : argValue}
@@ -79,6 +80,7 @@ export class FormatSelect extends PureComponent<Props> {
           <Fragment>
             <EuiSpacer size="s" />
             <EuiFieldText
+              data-test-subj="canvasFieldText"
               placeholder={defaultCustomFormat}
               value={argValue}
               compressed

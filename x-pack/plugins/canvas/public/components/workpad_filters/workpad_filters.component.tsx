@@ -83,6 +83,7 @@ export const WorkpadFilters: FC<Props> = ({
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiSelect
+              data-test-subj="canvasWorkpadFiltersSelect"
               compressed
               options={groupByOptions}
               value={groupFiltersByField}

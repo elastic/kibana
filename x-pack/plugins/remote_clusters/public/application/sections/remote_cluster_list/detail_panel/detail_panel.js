@@ -142,7 +142,11 @@ export class DetailPanel extends Component {
               defaultMessage="Edit the cluster to update the settings. {helpLink}"
               values={{
                 helpLink: (
-                  <EuiLink href={proxyModeUrl} target="_blank">
+                  <EuiLink
+                    data-test-subj="remoteClustersLearnMoreLink"
+                    href={proxyModeUrl}
+                    target="_blank"
+                  >
                     <FormattedMessage
                       id="xpack.remoteClusters.detailPanel.deprecatedSettingsLearnMoreLinkLabel"
                       defaultMessage="Learn more."
@@ -157,7 +161,10 @@ export class DetailPanel extends Component {
               defaultMessage="{editLink} to update the settings."
               values={{
                 editLink: (
-                  <EuiLink {...reactRouterNavigate(history, `/edit/${clusterName}`)}>
+                  <EuiLink
+                    data-test-subj="remoteClustersEditTheClusterLink"
+                    {...reactRouterNavigate(history, `/edit/${clusterName}`)}
+                  >
                     <FormattedMessage
                       id="xpack.remoteClusters.detailPanel.deprecatedSettingsEditLinkLabel"
                       defaultMessage="Edit the cluster"

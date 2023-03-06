@@ -21,11 +21,19 @@ export const ElasticsearchPhp: React.FC<{ cloudId?: string }> = ({ cloudId }) =>
           This official PHP client for Elasticsearch is designed to be a low-level client that does
           not stray from the Elasticsearch REST API.
         </p>
-        <EuiLink target="_blank" href={docLinks.clientsPhpOverview}>
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchPhpLearnMoreAboutTheOfficialPhpClientForElasticsearchLink"
+          target="_blank"
+          href={docLinks.clientsPhpOverview}
+        >
           Learn more about the official PHP client for Elasticsearch
         </EuiLink>
         <EuiSpacer size="m" />
-        <EuiLink target="_blank" href="https://github.com/elastic/elasticsearch-php">
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchPhpTheOfficialPhpClientForElasticsearchOnGithubLink"
+          target="_blank"
+          href="https://github.com/elastic/elasticsearch-php"
+        >
           The official PHP client for Elasticsearch on Github
         </EuiLink>
       </EuiText>

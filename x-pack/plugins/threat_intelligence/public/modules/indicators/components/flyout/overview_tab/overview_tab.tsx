@@ -107,7 +107,10 @@ export const IndicatorsFlyoutOverview: VFC<IndicatorsFlyoutOverviewProps> = ({
           </EuiTitle>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onViewAllFieldsInTable}>
+          <EuiButtonEmpty
+            data-test-subj="threatIntelligenceIndicatorsFlyoutOverviewViewAllFieldsInTableButtonEmpty"
+            onClick={onViewAllFieldsInTable}
+          >
             <FormattedMessage
               id="xpack.threatIntelligence.indicator.flyoutOverviewTable.viewAllFieldsInTable"
               defaultMessage="View all fields in table"

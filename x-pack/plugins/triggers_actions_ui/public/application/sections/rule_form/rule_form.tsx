@@ -761,6 +761,7 @@ export const RuleForm = ({
               hasDisabledByLicenseRuleTypes && (
                 <EuiTitle size="xxs">
                   <EuiLink
+                    data-test-subj="triggersActionsUiRuleFormGetMoreRuleTypesLink"
                     href={VIEW_LICENSE_OPTIONS_LINK}
                     target="_blank"
                     external

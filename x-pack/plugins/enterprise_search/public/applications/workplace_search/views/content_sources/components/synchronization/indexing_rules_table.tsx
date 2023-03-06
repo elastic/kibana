@@ -91,7 +91,11 @@ export const IndexingRulesTable: React.FC = () => {
         }
       )}
       <EuiSpacer />
-      <EuiLink href={docLinks.workplaceSearchSynch} external>
+      <EuiLink
+        data-test-subj="enterpriseSearchIndexingRulesTableLearnMoreAboutCustomizingYourIndexRulesLink"
+        href={docLinks.workplaceSearchSynch}
+        external
+      >
         {i18n.translate(
           'xpack.enterpriseSearch.workplaceSearch.sources.sourceAssetsAndObjectsSyncLearnMoreLink',
           {
@@ -130,6 +134,7 @@ export const IndexingRulesTable: React.FC = () => {
     {
       editingRender: (indexingRule, onChange, { isInvalid, isLoading }) => (
         <EuiSelect
+          data-test-subj="enterpriseSearchColumnsSelect"
           fullWidth
           value={indexingRule.valueType}
           onChange={(e) => onChange(e.target.value)}
@@ -150,6 +155,7 @@ export const IndexingRulesTable: React.FC = () => {
     {
       editingRender: (indexingRule, onChange, { isInvalid, isLoading }) => (
         <EuiSelect
+          data-test-subj="enterpriseSearchColumnsSelect"
           fullWidth
           value={indexingRule.filterType}
           onChange={(e) => onChange(e.target.value)}
@@ -178,6 +184,7 @@ export const IndexingRulesTable: React.FC = () => {
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
           <EuiFlexItem>
             <EuiFieldText
+              data-test-subj="enterpriseSearchColumnsFieldText"
               fullWidth
               value={indexingRule.value}
               onChange={(e) => onChange(e.target.value)}

@@ -142,7 +142,12 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ onClose, job }) => 
           <EuiFlyoutFooter>
             <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="cross" flush="left" onClick={onClose}>
+                <EuiButtonEmpty
+                  data-test-subj="reportingReportInfoFlyoutCloseButtonEmpty"
+                  iconType="cross"
+                  flush="left"
+                  onClick={onClose}
+                >
                   {i18n.translate('xpack.reporting.listing.flyout.closeButtonLabel', {
                     defaultMessage: 'Close',
                   })}

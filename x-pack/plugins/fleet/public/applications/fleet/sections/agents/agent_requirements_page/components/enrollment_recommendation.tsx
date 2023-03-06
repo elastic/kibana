@@ -63,7 +63,12 @@ export const EnrollmentRecommendation: React.FunctionComponent<{
               defaultMessage="To learn more, see the {userGuideLink}."
               values={{
                 userGuideLink: (
-                  <EuiLink href={docLinks.links.fleet.guide} target="_blank" external>
+                  <EuiLink
+                    data-test-subj="fleetEnrollmentRecommendationFleetAndElasticAgentGuideLink"
+                    href={docLinks.links.fleet.guide}
+                    target="_blank"
+                    external
+                  >
                     <FormattedMessage
                       id="xpack.fleet.enrollment.fleetUserGuideLink"
                       defaultMessage="Fleet and Elastic Agent Guide"
@@ -80,7 +85,10 @@ export const EnrollmentRecommendation: React.FunctionComponent<{
 
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
-          <EuiButton onClick={flyoutContext?.openFleetServerFlyout}>
+          <EuiButton
+            data-test-subj="fleetEnrollmentRecommendationAddFleetServerButton"
+            onClick={flyoutContext?.openFleetServerFlyout}
+          >
             <FormattedMessage
               id="xpack.fleet.enrollment.addFleetServerButton"
               defaultMessage="Add Fleet Server"
@@ -89,7 +97,10 @@ export const EnrollmentRecommendation: React.FunctionComponent<{
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={showStandaloneTab}>
+          <EuiButtonEmpty
+            data-test-subj="fleetEnrollmentRecommendationRunStandaloneButtonEmpty"
+            onClick={showStandaloneTab}
+          >
             <FormattedMessage
               id="xpack.fleet.enrollment.runStandaloneButton"
               defaultMessage="Run standalone"

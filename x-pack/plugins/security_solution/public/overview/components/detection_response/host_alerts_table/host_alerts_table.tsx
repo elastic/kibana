@@ -164,7 +164,11 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_HIGH_LABEL,
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
-        <EuiLink disabled={count === 0} onClick={() => handleClick({ hostName, severity: 'high' })}>
+        <EuiLink
+          data-test-subj="securitySolutionGetTableColumnsLink"
+          disabled={count === 0}
+          onClick={() => handleClick({ hostName, severity: 'high' })}
+        >
           <FormattedCount count={count} />
         </EuiLink>
       </EuiHealth>
@@ -176,6 +180,7 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
         <EuiLink
+          data-test-subj="securitySolutionGetTableColumnsLink"
           disabled={count === 0}
           onClick={() => handleClick({ hostName, severity: 'medium' })}
         >
@@ -189,7 +194,11 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_LOW_LABEL,
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
-        <EuiLink disabled={count === 0} onClick={() => handleClick({ hostName, severity: 'low' })}>
+        <EuiLink
+          data-test-subj="securitySolutionGetTableColumnsLink"
+          disabled={count === 0}
+          onClick={() => handleClick({ hostName, severity: 'low' })}
+        >
           <FormattedCount count={count} />
         </EuiLink>
       </EuiHealth>

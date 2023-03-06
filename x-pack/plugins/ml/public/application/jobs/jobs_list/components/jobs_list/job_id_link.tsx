@@ -59,13 +59,14 @@ export const AnomalyDetectionJobIdLink = (props: AnomalyDetectionJobIdLinkProps)
 
   if (isGroupIdLink(props)) {
     return (
-      <EuiLink key={props.groupId} href={href}>
+      <EuiLink data-test-subj="mlAnomalyDetectionJobIdLinkLink" key={props.groupId} href={href}>
         <JobGroup name={props.groupId} />
       </EuiLink>
     );
   } else {
     return (
       <EuiLink
+        data-test-subj="mlAnomalyDetectionJobIdLinkLink"
         key={props.id}
         href={href}
         css={{ overflow: 'hidden', 'text-overflow': 'ellipsis' }}

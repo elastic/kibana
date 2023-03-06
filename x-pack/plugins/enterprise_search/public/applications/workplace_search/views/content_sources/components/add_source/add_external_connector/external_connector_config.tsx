@@ -64,7 +64,14 @@ export const ExternalConnectorConfig: React.FC = () => {
   } = sourceData;
 
   const saveButton = (
-    <EuiButton color="primary" fill isLoading={buttonLoading} disabled={formDisabled} type="submit">
+    <EuiButton
+      data-test-subj="enterpriseSearchExternalConnectorConfigRegisterDeploymentButton"
+      color="primary"
+      fill
+      isLoading={buttonLoading}
+      disabled={formDisabled}
+      type="submit"
+    >
       {i18n.translate(
         'xpack.enterpriseSearch.workplaceSearch.contentSource.addSource.externalConnectorConfig.registerButtonLabel',
         {
@@ -138,7 +145,11 @@ export const ExternalConnectorConfig: React.FC = () => {
             color="primary"
             iconType="email"
             title={
-              <EuiLink href="https://www.elastic.co/kibana/feedback" external>
+              <EuiLink
+                data-test-subj="enterpriseSearchExternalConnectorConfigHaveFeedbackAboutDeployingAConnectorPackageLetUsKnowLink"
+                href="https://www.elastic.co/kibana/feedback"
+                external
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.workplaceSearch.sources.feedbackCallOutText',
                   {

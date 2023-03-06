@@ -27,6 +27,7 @@ export const ExperimentalMapLayerInfo = () => (
         values={{
           githubLink: (
             <EuiLink
+              data-test-subj="pluginsExperimentalMapLayerInfoGitHubLink"
               external
               href="https://github.com/elastic/kibana/issues/new/choose"
               target="_blank"

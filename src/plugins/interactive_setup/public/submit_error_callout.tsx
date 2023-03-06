@@ -48,6 +48,7 @@ export const SubmitErrorCallout: FunctionComponent<SubmitErrorCalloutProps> = (p
         }
       >
         <EuiButton
+          data-test-subj="pluginsSubmitErrorCalloutContinueToKibanaButton"
           onClick={() => {
             const url = new URL(window.location.href);
             url.searchParams.delete('code');

@@ -130,7 +130,12 @@ export const SchemaAddFieldModal: React.FC<Props> = ({
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={closeAddFieldModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchSchemaAddFieldModalButtonEmpty"
+          onClick={closeAddFieldModal}
+        >
+          {CANCEL_BUTTON_LABEL}
+        </EuiButtonEmpty>
         <EuiButton
           fill
           type="submit"

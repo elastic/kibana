@@ -22,7 +22,11 @@ interface Props {
 export const TitleComponent: FC<Props> = ({ title }) => (
   <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
     <EuiFlexItem grow={false} style={{ flexShrink: 0 }}>
-      <EuiLink href="https://www.elastic.co" title="Powered by Elastic.co">
+      <EuiLink
+        data-test-subj="canvasTitleComponentLink"
+        href="https://www.elastic.co"
+        title="Powered by Elastic.co"
+      >
         <EuiIcon type="logoElastic" size="l" />
       </EuiLink>
     </EuiFlexItem>

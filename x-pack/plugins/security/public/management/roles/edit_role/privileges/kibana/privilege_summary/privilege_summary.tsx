@@ -70,7 +70,10 @@ export const PrivilegeSummary = (props: Props) => {
             />
           </EuiFlyoutBody>
           <EuiFlyoutFooter>
-            <EuiButton onClick={() => setIsOpen(false)}>
+            <EuiButton
+              data-test-subj="securityPrivilegeSummaryCloseButton"
+              onClick={() => setIsOpen(false)}
+            >
               <FormattedMessage
                 id="xpack.security.management.editRole.privilegeSummary.closeSummaryButtonText"
                 defaultMessage="Close"

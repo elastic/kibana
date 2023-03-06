@@ -39,6 +39,7 @@ const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const popoverButton = (
     <EuiButtonEmpty
+      data-test-subj="pluginsControlFrameErrorAnErrorOccurredViewMoreButtonEmpty"
       color="danger"
       iconSize="m"
       iconType={'alert'}

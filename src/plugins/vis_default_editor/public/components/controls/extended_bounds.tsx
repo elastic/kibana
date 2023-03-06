@@ -66,6 +66,7 @@ function ExtendedBoundsParamEditor({
       <EuiFlexGroup gutterSize="s" responsive={false}>
         <EuiFlexItem>
           <EuiFieldNumber
+            data-test-subj="pluginsExtendedBoundsParamEditorFieldNumber"
             value={isUndefined(value.min) ? '' : value.min}
             onChange={(ev) => handleChange(ev, 'min')}
             onBlur={setTouched}
@@ -78,6 +79,7 @@ function ExtendedBoundsParamEditor({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFieldNumber
+            data-test-subj="pluginsExtendedBoundsParamEditorFieldNumber"
             value={isUndefined(value.max) ? '' : value.max}
             onChange={(ev) => handleChange(ev, 'max')}
             onBlur={setTouched}

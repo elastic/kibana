@@ -170,6 +170,7 @@ export const FullTimeRangeSelector: FC<FullTimeRangeSelectorProps> = (props) => 
     () => (
       <EuiPanel>
         <EuiRadioGroup
+          data-test-subj="mlPopoverContentRadioGroup"
           options={sortOptions}
           idSelected={frozenDataPreference}
           onChange={setPreference}

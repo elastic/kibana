@@ -18,7 +18,11 @@ export const getAdvancedSettingsFields = (documentationLinks) => {
       defaultMessage="Example values: 10b, 1024kb, 1mb, 5gb, 2tb, 1pb. {link}"
       values={{
         link: (
-          <EuiLink href={documentationLinks.apis.byteSizeUnits} target="_blank">
+          <EuiLink
+            data-test-subj="crossClusterReplicationGetAdvancedSettingsFieldsLearnMoreLink"
+            href={documentationLinks.apis.byteSizeUnits}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.byteUnitsHelpTextLinkMessage"
               defaultMessage="Learn more"
@@ -35,7 +39,11 @@ export const getAdvancedSettingsFields = (documentationLinks) => {
       defaultMessage="Example values: 2d, 24h, 20m, 30s, 500ms, 10000micros, 80000nanos. {link}"
       values={{
         link: (
-          <EuiLink href={documentationLinks.apis.timeUnits} target="_blank">
+          <EuiLink
+            data-test-subj="crossClusterReplicationGetAdvancedSettingsFieldsLearnMoreLink"
+            href={documentationLinks.apis.timeUnits}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.crossClusterReplication.followerIndexForm.advancedSettings.timeUnitsHelpTextLinkMessage"
               defaultMessage="Learn more"

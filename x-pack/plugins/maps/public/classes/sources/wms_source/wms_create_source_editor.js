@@ -176,7 +176,7 @@ export class WMSCreateSourceEditor extends Component {
               defaultMessage: 'Use comma separated list of layer names',
             })}
           >
-            <EuiFieldText onChange={this._handleLayersChange} />
+            <EuiFieldText data-test-subj="mapsFieldText" onChange={this._handleLayersChange} />
           </EuiFormRow>
 
           <EuiFormRow
@@ -185,7 +185,7 @@ export class WMSCreateSourceEditor extends Component {
               defaultMessage: 'Use comma separated list of style names',
             })}
           >
-            <EuiFieldText onChange={this._handleStylesChange} />
+            <EuiFieldText data-test-subj="mapsFieldText" onChange={this._handleStylesChange} />
           </EuiFormRow>
         </Fragment>
       );
@@ -219,6 +219,7 @@ export class WMSCreateSourceEditor extends Component {
     return (
       <Fragment>
         <EuiButton
+          data-test-subj="mapsLoadCapabilitiesButton"
           onClick={this._loadCapabilities}
           isDisabled={!this.state.serviceUrl}
           isLoading={this.state.isLoadingCapabilities}
@@ -240,7 +241,11 @@ export class WMSCreateSourceEditor extends Component {
             defaultMessage: 'Url',
           })}
         >
-          <EuiFieldText value={this.state.serviceUrl} onChange={this._handleServiceUrlChange} />
+          <EuiFieldText
+            data-test-subj="mapsFieldText"
+            value={this.state.serviceUrl}
+            onChange={this._handleServiceUrlChange}
+          />
         </EuiFormRow>
 
         {this._renderGetCapabilitiesButton()}

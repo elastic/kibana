@@ -52,7 +52,12 @@ export const DatafeedPreviewFlyout: FC<Props> = ({ isDisabled }) => {
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty iconType="cross" onClick={() => setShowFlyout(false)} flush="left">
+                <EuiButtonEmpty
+                  data-test-subj="mlDatafeedPreviewFlyoutCloseButtonEmpty"
+                  iconType="cross"
+                  onClick={() => setShowFlyout(false)}
+                  flush="left"
+                >
                   <FormattedMessage
                     id="xpack.ml.newJob.wizard.datafeedPreviewFlyout.closeButton"
                     defaultMessage="Close"

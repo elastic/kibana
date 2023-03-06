@@ -52,7 +52,11 @@ export const CustomSourceDeployment: React.FC<Props> = ({
               defaultMessage="Set up your connector by cloning the {githubRepositoryLink}"
               values={{
                 githubRepositoryLink: (
-                  <EuiLink target="_blank" href={`https://github.com/${githubRepository}`}>
+                  <EuiLink
+                    data-test-subj="enterpriseSearchCustomSourceDeploymentNameConnectorRepositoryLink"
+                    target="_blank"
+                    href={`https://github.com/${githubRepository}`}
+                  >
                     <FormattedMessage
                       id="xpack.enterpriseSearch.workplaceSearch.customSourceDeployment.repositoryLinkLabel"
                       defaultMessage="{name} connector repository"
@@ -69,7 +73,11 @@ export const CustomSourceDeployment: React.FC<Props> = ({
               defaultMessage="Review the {documentationLink} and deploy the connector package to be self managed on the infrastructure of your choice."
               values={{
                 documentationLink: (
-                  <EuiLink target="_blank" href={documentationUrl}>
+                  <EuiLink
+                    data-test-subj="enterpriseSearchCustomSourceDeploymentNameConnectorDocumentationLink"
+                    target="_blank"
+                    href={documentationUrl}
+                  >
                     <FormattedMessage
                       id="xpack.enterpriseSearch.workplaceSearch.customSourceDeployment.documentationLinkLabel"
                       defaultMessage="{name} connector documentation"
@@ -87,7 +95,11 @@ export const CustomSourceDeployment: React.FC<Props> = ({
             defaultMessage="Review the {documentationLink} to learn how to build and deploy your own connector on the self managed infrastructure of your choice."
             values={{
               documentationLink: (
-                <EuiLink target="_blank" href={documentationUrl}>
+                <EuiLink
+                  data-test-subj="enterpriseSearchCustomSourceDeploymentCustomApiSourceDocumentationLink"
+                  target="_blank"
+                  href={documentationUrl}
+                >
                   <FormattedMessage
                     id="xpack.enterpriseSearch.workplaceSearch.customSourceDeployment.genericDocumentationLabel"
                     defaultMessage="Custom API source documentation"

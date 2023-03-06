@@ -137,6 +137,7 @@ export const BrandingSection: React.FC<Props> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="enterpriseSearchBrandingSectionButton"
               isLoading={buttonLoading}
               disabled={!stagedImage}
               color="primary"

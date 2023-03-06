@@ -27,7 +27,12 @@ export const MissingFleetServerHostCallout: React.FunctionComponent = () => {
         defaultMessage="A URL for your Fleet Server host is required to enroll agents with Fleet. You can add this information in Fleet Settings. For more information, see the {link}."
         values={{
           link: (
-            <EuiLink href={docLinks.links.fleet.guide} target="_blank" external>
+            <EuiLink
+              data-test-subj="fleetMissingFleetServerHostCalloutFleetAndElasticAgentGuideLink"
+              href={docLinks.links.fleet.guide}
+              target="_blank"
+              external
+            >
               <FormattedMessage
                 id="xpack.fleet.agentEnrollment.missingFleetHostGuideLink"
                 defaultMessage="Fleet and Elastic Agent Guide"
@@ -37,7 +42,12 @@ export const MissingFleetServerHostCallout: React.FunctionComponent = () => {
         }}
       />
       <EuiSpacer size="m" />
-      <EuiButton fill iconType="gear" href={getHref('settings')}>
+      <EuiButton
+        data-test-subj="fleetMissingFleetServerHostCalloutFleetSettingsButton"
+        fill
+        iconType="gear"
+        href={getHref('settings')}
+      >
         <FormattedMessage
           id="xpack.fleet.agentEnrollment.fleetSettingsLink"
           defaultMessage="Fleet Settings"

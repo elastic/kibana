@@ -265,6 +265,7 @@ export class JobTable extends Component {
       if (fieldName === 'id') {
         content = (
           <EuiLink
+            data-test-subj="rollupLink"
             onClick={() => {
               trackUiMetric(METRIC_TYPE.CLICK, UIM_SHOW_DETAILS_CLICK);
               openDetailPanel(encodeURIComponent(job.id));
@@ -374,7 +375,11 @@ export class JobTable extends Component {
             />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton fill {...getRouterLinkProps('/create')}>
+            <EuiButton
+              data-test-subj="rollupCreateRollupJobButton"
+              fill
+              {...getRouterLinkProps('/create')}
+            >
               <FormattedMessage
                 id="xpack.rollupJobs.jobList.createButtonLabel"
                 defaultMessage="Create rollup job"

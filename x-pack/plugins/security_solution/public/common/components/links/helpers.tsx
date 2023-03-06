@@ -30,10 +30,16 @@ export interface ReputationLinkSetting {
 }
 export const LinkButton: React.FC<
   PropsForButton<EuiButtonProps> | PropsForAnchor<EuiButtonProps>
-> = ({ children, ...props }) => <EuiButton {...props}>{children}</EuiButton>;
+> = ({ children, ...props }) => (
+  <EuiButton data-test-subj="securitySolutionLinkButtonButton" {...props}>
+    {children}
+  </EuiButton>
+);
 
 export const LinkAnchor: React.FC<EuiLinkProps> = ({ children, ...props }) => (
-  <EuiLink {...props}>{children}</EuiLink>
+  <EuiLink data-test-subj="securitySolutionLinkAnchorLink" {...props}>
+    {children}
+  </EuiLink>
 );
 
 export const Comma = styled('span')`
@@ -97,7 +103,11 @@ export const ReputationLinksOverflow = React.memo<ReputationLinkOverflowProps>(
       () => (
         <>
           {' ,'}
-          <EuiButtonEmpty size="xs" onClick={togglePopover}>
+          <EuiButtonEmpty
+            data-test-subj="securitySolutionButtonMoreButtonEmpty"
+            size="xs"
+            onClick={togglePopover}
+          >
             {`+${rowItems.length - overflowIndexStart} `}
             <FormattedMessage
               id="xpack.securitySolution.reputationLinks.moreLabel"

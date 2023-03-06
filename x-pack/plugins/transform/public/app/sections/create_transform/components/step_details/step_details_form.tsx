@@ -462,7 +462,11 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                     defaultMessage: 'Invalid destination index name.',
                   })}
                   <br />
-                  <EuiLink href={esIndicesCreateIndex} target="_blank">
+                  <EuiLink
+                    data-test-subj="transformStepDetailsFormLearnMoreAboutIndexNameLimitationsLink"
+                    href={esIndicesCreateIndex}
+                    target="_blank"
+                  >
                     {i18n.translate(
                       'xpack.transform.stepDetailsForm.destinationIndexInvalidErrorLink',
                       {
@@ -531,7 +535,11 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
                     defaultMessage="Before you start the transform, use index templates or the {docsLink} to ensure the mappings for your destination index match the source index. Otherwise, the destination index is created with dynamic mappings. If the transform fails, check the messages tab on the Stack Management page for errors."
                     values={{
                       docsLink: (
-                        <EuiLink href={esIndicesCreateIndex} target="_blank">
+                        <EuiLink
+                          data-test-subj="transformStepDetailsFormCreateIndexApiLink"
+                          href={esIndicesCreateIndex}
+                          target="_blank"
+                        >
                           {i18n.translate('xpack.transform.stepDetailsForm.createIndexAPI', {
                             defaultMessage: 'Create index API',
                           })}

@@ -23,11 +23,24 @@ export const StandaloneModeWarningCallout: React.FC<{
         <FormattedMessage
           id="xpack.fleet.addIntegration.standaloneWarning"
           defaultMessage="Setting up integrations by running Elastic Agent in standalone mode is advanced. When possible, we recommend using {link} instead. "
-          values={{ link: <EuiLink href="#">Fleet-managed agents</EuiLink> }}
+          values={{
+            link: (
+              <EuiLink
+                data-test-subj="fleetStandaloneModeWarningCalloutFleetManagedAgentsLink"
+                href="#"
+              >
+                Fleet-managed agents
+              </EuiLink>
+            ),
+          }}
         />
       </EuiText>
       <EuiSpacer size="m" />
-      <EuiButton onClick={() => setIsManaged(true)} color="primary">
+      <EuiButton
+        data-test-subj="fleetStandaloneModeWarningCalloutEnrollInFleetInsteadRecommendedButton"
+        onClick={() => setIsManaged(true)}
+        color="primary"
+      >
         <FormattedMessage
           id="xpack.fleet.addIntegration.switchToManagedButton"
           defaultMessage="Enroll in Fleet instead (recommended)"

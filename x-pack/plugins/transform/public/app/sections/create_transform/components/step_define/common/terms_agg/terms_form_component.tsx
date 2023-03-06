@@ -31,6 +31,7 @@ export const TermsAggForm: IPivotAggsConfigTerms['AggFormComponent'] = ({
         isInvalid={!isValid}
       >
         <EuiFieldNumber
+          data-test-subj="transformTermsAggFormFieldNumber"
           value={aggConfig.size}
           onChange={(e) => {
             onChange({ size: Number(e.target.value) });

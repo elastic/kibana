@@ -185,7 +185,12 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
       render: (value: string[], policy: PolicyFromES) => {
         return value && value.length > 0 ? (
           <EuiToolTip content={actionTooltips.viewIndices} position="left">
-            <EuiLink href={getIndicesListPath(policy.name, getUrlForApp)}>{value.length}</EuiLink>
+            <EuiLink
+              data-test-subj="indexLifecycleManagementColumnsLink"
+              href={getIndicesListPath(policy.name, getUrlForApp)}
+            >
+              {value.length}
+            </EuiLink>
           </EuiToolTip>
         ) : (
           '0'

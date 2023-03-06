@@ -68,6 +68,7 @@ const DeploymentModeStepContent = ({
       </EuiText>
       <EuiSpacer size="m" />
       <EuiRadioGroup
+        data-test-subj="fleetDeploymentModeStepContentRadioGroup"
         options={[
           {
             id: `quickstart_${radioSuffix}`,

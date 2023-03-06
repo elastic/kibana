@@ -296,7 +296,11 @@ const ExecutionLogTableComponent: React.FC<ExecutionLogTableProps> = ({
                 <p>{i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_DESCRIPTION}</p>
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                   <EuiFlexItem grow={false}>
-                    <EuiButton size="s" onClick={resetGlobalQueryState}>
+                    <EuiButton
+                      data-test-subj="securitySolutionOnFilterByExecutionIdCallbackButton"
+                      size="s"
+                      onClick={resetGlobalQueryState}
+                    >
                       {i18n.ACTIONS_SEARCH_FILTERS_HAVE_BEEN_UPDATED_RESTORE_BUTTON}
                     </EuiButton>
                   </EuiFlexItem>

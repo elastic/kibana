@@ -25,7 +25,10 @@ const i18nTexts = {
       defaultMessage="Check the {overviewButton} for other Stack deprecations."
       values={{
         overviewButton: (
-          <EuiLink onClick={navigateToOverviewPage}>
+          <EuiLink
+            data-test-subj="upgradeAssistantI18nTextsOverviewPageLink"
+            onClick={navigateToOverviewPage}
+          >
             {i18n.translate('xpack.upgradeAssistant.noDeprecationsPrompt.overviewLinkText', {
               defaultMessage: 'Overview page',
             })}

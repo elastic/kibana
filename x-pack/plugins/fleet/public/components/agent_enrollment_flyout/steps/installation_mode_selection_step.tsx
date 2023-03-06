@@ -40,6 +40,7 @@ export const InstallationModeSelectionStep = ({
     }),
     children: selectedPolicyId ? (
       <EuiRadioGroup
+        data-test-subj="fleetInstallationModeSelectionStepRadioGroup"
         options={[
           {
             id: `managed_${radioSuffix}`,

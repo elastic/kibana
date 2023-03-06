@@ -116,6 +116,7 @@ export const PlotByFunctionControls = ({
         })}
       >
         <EuiSelect
+          data-test-subj="mlPlotByFunctionControlsSelect"
           options={plotByFunctionOptions}
           value={functionDescription}
           onChange={(e) => setFunctionDescription(e.target.value)}

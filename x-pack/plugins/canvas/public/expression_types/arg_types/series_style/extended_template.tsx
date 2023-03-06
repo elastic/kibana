@@ -84,6 +84,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
         <Fragment>
           <EuiFormRow label={strings.getSeriesIdentifierLabel()} display="columnCompressed">
             <EuiSelect
+              data-test-subj="canvasExtendedTemplateSelect"
               compressed
               value={selectedSeries}
               options={labelOptions}
@@ -101,6 +102,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
               <EuiFlexItem>
                 <EuiFormRow label={strings.getLineLabel()} display="rowCompressed">
                   <EuiSelect
+                    data-test-subj="canvasExtendedTemplateSelect"
                     value={get(chainArgs, 'lines.0', 0)}
                     options={values}
                     compressed
@@ -113,6 +115,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
               <EuiFlexItem>
                 <EuiFormRow label={strings.getBarLabel()} display="rowCompressed">
                   <EuiSelect
+                    data-test-subj="canvasExtendedTemplateSelect"
                     value={get(chainArgs, 'bars.0', 0)}
                     options={values}
                     compressed
@@ -125,6 +128,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = (props) => {
               <EuiFlexItem>
                 <EuiFormRow label={strings.getPointLabel()} display="rowCompressed">
                   <EuiSelect
+                    data-test-subj="canvasExtendedTemplateSelect"
                     value={get(chainArgs, 'points.0', 0)}
                     options={values}
                     compressed

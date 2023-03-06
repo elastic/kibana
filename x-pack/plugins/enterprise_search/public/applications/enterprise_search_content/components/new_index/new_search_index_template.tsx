@@ -142,6 +142,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                   fullWidth
                 >
                   <EuiFieldText
+                    data-test-subj="enterpriseSearchNewSearchIndexTemplateFieldText"
                     data-telemetry-id={`entSearchContent-${type}-newIndex-editName`}
                     placeholder={i18n.translate(
                       'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputPlaceholder',
@@ -185,6 +186,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                   )}
                 >
                   <EuiSelect
+                    data-test-subj="enterpriseSearchNewSearchIndexTemplateSelect"
                     data-telemetry-id={`entSearchContent-${type}-newIndex-languageAnalyzer`}
                     disabled={disabled}
                     options={SUPPORTED_LANGUAGES}
@@ -200,6 +202,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
         <EuiFlexGroup direction="row" alignItems="center" justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="enterpriseSearchNewSearchIndexTemplateCreateIndexButton"
               data-telemetry-id={`entSearchContent-${type}-newIndex-createIndex`}
               fill
               isDisabled={!rawName || buttonLoading || formInvalid || disabled}
@@ -216,7 +219,11 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
           </EuiFlexItem>
           {!!docsUrl && (
             <EuiFlexItem grow={false}>
-              <EuiLink target="_blank" href={docsUrl}>
+              <EuiLink
+                data-test-subj="enterpriseSearchNewSearchIndexTemplateViewTheDocumentationLink"
+                target="_blank"
+                href={docsUrl}
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.viewDocumentation.linkText',
                   {

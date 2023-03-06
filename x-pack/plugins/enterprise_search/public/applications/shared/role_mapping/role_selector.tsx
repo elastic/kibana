@@ -35,6 +35,7 @@ export const RoleSelector: React.FC<Props> = ({ label, roleType, roleOptions, on
   return (
     <EuiFormRow>
       <EuiRadioGroup
+        data-test-subj="enterpriseSearchRoleSelectorRadioGroup"
         options={options}
         idSelected={roleOptions.filter((r) => r.id === roleType)[0].id}
         onChange={(id) => {

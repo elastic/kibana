@@ -208,6 +208,7 @@ export const JsonWatchEditSimulate = ({
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiSelect
+                  data-test-subj="watcherJsonWatchEditSimulateSelect"
                   value={scheduledTimeUnit}
                   options={getScheduleTimeOptions(scheduledTimeValue)}
                   onChange={(e) => {
@@ -308,7 +309,11 @@ export const JsonWatchEditSimulate = ({
               defaultMessage="Allow the watch to execute or skip actions. {actionsLink}"
               values={{
                 actionsLink: (
-                  <EuiLink href={executeWatchApiUrl} target="_blank">
+                  <EuiLink
+                    data-test-subj="watcherJsonWatchEditSimulateLearnAboutActionsLink"
+                    href={executeWatchApiUrl}
+                    target="_blank"
+                  >
                     {i18n.translate(
                       'xpack.watcher.sections.watchEdit.simulate.form.actionOverridesDescription.linkLabel',
                       {

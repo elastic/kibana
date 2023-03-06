@@ -148,6 +148,7 @@ export class StopInput extends Component<Props, State> {
   _renderTextInput() {
     return (
       <EuiFieldText
+        data-test-subj="mapsFieldText"
         value={this.state.localFieldTextValue}
         onChange={this._onFieldTextChange}
         compressed

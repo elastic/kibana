@@ -126,6 +126,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
                   values={{
                     link: (
                       <EuiLink
+                        data-test-subj="fleetFleetServerHostsFlyoutFleetAndElasticAgentGuideLink"
                         href={docLinks.links.fleet.settingsFleetServerHostSettings}
                         target="_blank"
                         external
@@ -200,7 +201,11 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => onClose()} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="fleetFleetServerHostsFlyoutCancelButtonEmpty"
+              onClick={() => onClose()}
+              flush="left"
+            >
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.cancelButtonLabel"
                 defaultMessage="Cancel"

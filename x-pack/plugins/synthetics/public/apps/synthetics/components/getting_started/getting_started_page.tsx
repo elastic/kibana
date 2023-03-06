@@ -37,6 +37,7 @@ export const GettingStartedPage = () => {
             <EuiText size="s">
               {OR_LABEL}{' '}
               <EuiLink
+                data-test-subj="syntheticsGettingStartedPageLink"
                 href={history.createHref({
                   pathname: MONITOR_ADD_ROUTE,
                 })}

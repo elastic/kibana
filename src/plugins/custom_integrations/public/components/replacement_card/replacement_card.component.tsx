@@ -67,6 +67,7 @@ export const ReplacementCard = ({ replacements }: Props) => {
     <EuiFlexItem grow={false} key={`button-${index}`}>
       <span>
         <EuiButton
+          data-test-subj="pluginsButtonsButton"
           key={replacement.id}
           href={getAbsolutePath(replacement.uiInternalPath)}
           fullWidth={false}

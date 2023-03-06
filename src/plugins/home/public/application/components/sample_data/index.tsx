@@ -50,7 +50,12 @@ export function SampleDataCard({ urlBasePath, onDecline, onConfirm }: Props) {
       }
       footer={
         <footer>
-          <EuiButton fill className="homWelcome__footerAction" onClick={onConfirm}>
+          <EuiButton
+            data-test-subj="pluginsSampleDataCardAddIntegrationsButton"
+            fill
+            className="homWelcome__footerAction"
+            onClick={onConfirm}
+          >
             <FormattedMessage id="home.tryButtonLabel" defaultMessage="Add integrations" />
           </EuiButton>
           <EuiButtonEmpty

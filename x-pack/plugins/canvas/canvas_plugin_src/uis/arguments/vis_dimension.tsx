@@ -76,11 +76,21 @@ const VisDimensionArgInput: React.FC<VisDimensionArgInputProps> = ({
   return (
     <EuiFlexGroup gutterSize="s" direction="column">
       <EuiFlexItem>
-        <EuiSelect compressed options={options} value={columnId} onChange={onChange} />
+        <EuiSelect
+          data-test-subj="canvasVisDimensionArgInputSelect"
+          compressed
+          options={options}
+          value={columnId}
+          onChange={onChange}
+        />
       </EuiFlexItem>
       {confirm && (
         <EuiFlexItem grow={false}>
-          <EuiButton size="s" onClick={() => onValueChange(value)}>
+          <EuiButton
+            data-test-subj="canvasVisDimensionArgInputButton"
+            size="s"
+            onClick={() => onValueChange(value)}
+          >
             {confirm}
           </EuiButton>
         </EuiFlexItem>

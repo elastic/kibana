@@ -220,7 +220,11 @@ export class StepDateHistogram extends Component {
                     defaultMessage="Define how {link} will operate on your rollup data."
                     values={{
                       link: (
-                        <EuiLink href={documentationLinks.aggs.date_histogram} target="_blank">
+                        <EuiLink
+                          data-test-subj="rollupDateHistogramAggregationsLink"
+                          href={documentationLinks.aggs.date_histogram}
+                          target="_blank"
+                        >
                           <FormattedMessage
                             id="xpack.rollupJobs.create.stepDateHistogramDescription.aggregationsLinkLabel"
                             defaultMessage="date histogram aggregations"

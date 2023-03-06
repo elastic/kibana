@@ -23,7 +23,12 @@ interface Props {
 export const ShapePickerPopover: FC<Props> = ({ shapes, onChange, value, ariaLabel }) => {
   const button = (handleClick: React.MouseEventHandler<any>) => (
     <EuiPanel paddingSize="s" hasShadow={false}>
-      <EuiLink aria-label={ariaLabel} style={{ fontSize: 0 }} onClick={handleClick}>
+      <EuiLink
+        data-test-subj="canvasButtonLink"
+        aria-label={ariaLabel}
+        style={{ fontSize: 0 }}
+        onClick={handleClick}
+      >
         <ShapePreview shape={value} />
       </EuiLink>
     </EuiPanel>

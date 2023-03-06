@@ -57,7 +57,12 @@ export const useRequestErrorHandler = () => {
             <div>
               {formattedError}
               <EuiSpacer />
-              <EuiButton size="s" color="danger" onClick={() => window.location.reload()}>
+              <EuiButton
+                data-test-subj="monitoringUseRequestErrorHandlerRetryButton"
+                size="s"
+                color="danger"
+                onClick={() => window.location.reload()}
+              >
                 <FormattedMessage
                   id="xpack.monitoring.ajaxErrorHandler.requestFailedNotification.retryButtonLabel"
                   defaultMessage="Retry"

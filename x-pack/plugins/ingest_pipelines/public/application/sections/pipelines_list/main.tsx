@@ -94,7 +94,12 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
           }
           body={<p>{error.message}</p>}
           actions={
-            <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
+            <EuiButton
+              data-test-subj="ingestPipelinesPipelinesListTryAgainButton"
+              onClick={resendRequest}
+              iconType="refresh"
+              color="danger"
+            >
               <FormattedMessage
                 id="xpack.ingestPipelines.list.loadPipelineReloadButton"
                 defaultMessage="Try again"

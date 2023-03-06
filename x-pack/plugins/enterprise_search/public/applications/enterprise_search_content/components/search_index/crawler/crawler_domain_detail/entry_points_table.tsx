@@ -43,6 +43,7 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
     {
       editingRender: (entryPoint, onChange, { isInvalid, isLoading }) => (
         <EuiFieldText
+          data-test-subj="enterpriseSearchColumnsFieldText"
           data-telemetry-id="entSearchContent-crawler-domainDetail-entryPoints-editEntryPoint"
           fullWidth
           value={(entryPoint as EntryPoint)[field]}
@@ -84,7 +85,12 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
               'Include the most important URLs for your website here. Entry point URLs will be the first pages to be indexed and processed for links to other pages.',
           })}
           <EuiSpacer size="s" />
-          <EuiLink href={docLinks.crawlerManaging} target="_blank" external>
+          <EuiLink
+            data-test-subj="enterpriseSearchEntryPointsTableLearnMoreAboutEntryPointsLink"
+            href={docLinks.crawlerManaging}
+            target="_blank"
+            external
+          >
             {i18n.translate('xpack.enterpriseSearch.crawler.entryPointsTable.learnMoreLinkText', {
               defaultMessage: 'Learn more about entry points.',
             })}
@@ -116,7 +122,10 @@ export const EntryPointsTable: React.FC<EntryPointsTableProps> = ({
               for the crawler"
               values={{
                 link: (
-                  <EuiLink onClick={editNewItem}>
+                  <EuiLink
+                    data-test-subj="enterpriseSearchEntryPointsTableAddAnEntryPointLink"
+                    onClick={editNewItem}
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.crawler.entryPointsTable.emptyMessageLinkText',
                       { defaultMessage: 'Add an entry point' }

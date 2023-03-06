@@ -58,7 +58,12 @@ function getZeroClassesMessage(elasticUrl: string) {
       defaultMessage="To evaluate the {wikiLink}, select all classes or a value greater than the total number of categories."
       values={{
         wikiLink: (
-          <EuiLink href={elasticUrl} target="_blank" external>
+          <EuiLink
+            data-test-subj="mlGetZeroClassesMessageAucRocLink"
+            href={elasticUrl}
+            target="_blank"
+            external
+          >
             {i18n.translate('xpack.ml.dataframe.analytics.create.aucRocLabel', {
               defaultMessage: 'AUC ROC',
             })}

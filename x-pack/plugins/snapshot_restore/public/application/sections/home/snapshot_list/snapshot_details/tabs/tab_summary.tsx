@@ -232,7 +232,10 @@ export const TabSummary: React.FC<Props> = ({ snapshotDetails }) => {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              <EuiLink {...reactRouterNavigate(history, linkToPolicy(policyName))}>
+              <EuiLink
+                data-test-subj="snapshotRestoreTabSummaryLink"
+                {...reactRouterNavigate(history, linkToPolicy(policyName))}
+              >
                 {policyName}
               </EuiLink>
             </EuiDescriptionListDescription>

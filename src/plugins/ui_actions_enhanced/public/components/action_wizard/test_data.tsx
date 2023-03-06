@@ -40,6 +40,7 @@ function DashboardDrilldownCollectConfig(props: CollectConfigProps<DashboardDril
     <>
       <EuiFormRow label="Choose destination dashboard:">
         <EuiSelect
+          data-test-subj="pluginsDashboardDrilldownCollectConfigSelect"
           name="selectDashboard"
           hasNoInitialSelection={true}
           options={dashboards.map(({ id, title }) => ({ value: id, text: title }))}
@@ -132,6 +133,7 @@ function UrlDrilldownCollectConfig(props: CollectConfigProps<UrlDrilldownConfig>
     <>
       <EuiFormRow label="Enter target URL">
         <EuiFieldText
+          data-test-subj="pluginsUrlDrilldownCollectConfigFieldText"
           placeholder="Enter URL"
           name="url"
           value={config.url}

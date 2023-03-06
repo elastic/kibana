@@ -275,7 +275,9 @@ export class Table extends PureComponent<TableProps, TableState> {
             return <EuiText size="s">{title || getDefaultTitle(object)}</EuiText>;
           }
           return (
-            <EuiLink href={basePath.prepend(path)}>{title || getDefaultTitle(object)}</EuiLink>
+            <EuiLink data-test-subj="pluginsColumnsLink" href={basePath.prepend(path)}>
+              {title || getDefaultTitle(object)}
+            </EuiLink>
           );
         },
       } as EuiTableFieldDataColumnType<SavedObjectWithMetadata<any>>,
@@ -373,6 +375,7 @@ export class Table extends PureComponent<TableProps, TableState> {
 
     const button = (
       <EuiButton
+        data-test-subj="pluginsExportButton"
         iconType="arrowDown"
         iconSide="right"
         onClick={this.toggleExportPopoverVisibility}
@@ -446,7 +449,13 @@ export class Table extends PureComponent<TableProps, TableState> {
                 />
               </EuiFormRow>
               <EuiFormRow>
-                <EuiButton key="exportSO" iconType="exportAction" onClick={this.onExportClick} fill>
+                <EuiButton
+                  data-test-subj="pluginsExportButton"
+                  key="exportSO"
+                  iconType="exportAction"
+                  onClick={this.onExportClick}
+                  fill
+                >
                   <FormattedMessage
                     id="savedObjectsManagement.objectsTable.table.exportButtonLabel"
                     defaultMessage="Export"

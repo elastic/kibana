@@ -63,7 +63,11 @@ export const LicenseWarningNotice = () => {
               defaultMessage="Please {registerLicenseLink} to continue using the Search Profiler"
               values={{
                 registerLicenseLink: (
-                  <EuiLink href="https://www.elastic.co/subscriptions" rel="noopener">
+                  <EuiLink
+                    data-test-subj="searchprofilerLicenseWarningNoticeLink"
+                    href="https://www.elastic.co/subscriptions"
+                    rel="noopener"
+                  >
                     {registerLicenseLinkLabel}
                   </EuiLink>
                 ),

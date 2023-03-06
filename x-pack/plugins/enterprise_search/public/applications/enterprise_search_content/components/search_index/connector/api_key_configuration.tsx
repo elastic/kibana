@@ -112,7 +112,11 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
       <EuiFlexItem>
         <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButton onClick={clickGenerateApiKey} isLoading={status === Status.LOADING}>
+            <EuiButton
+              data-test-subj="enterpriseSearchApiKeyConfigGenerateApiKeyButton"
+              onClick={clickGenerateApiKey}
+              isLoading={status === Status.LOADING}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.button.label',
                 {

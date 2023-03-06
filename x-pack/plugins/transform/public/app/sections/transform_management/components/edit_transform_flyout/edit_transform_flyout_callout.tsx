@@ -35,7 +35,11 @@ export const EditTransformFlyoutCallout: FC = () => {
                 'This form allows you to update a transform. The list of properties that you can update is a subset of the list that you can define when you create a transform.',
             })}
           </EuiTextColor>
-          <EuiLink href={esTransformUpdate} target="_BLANK">
+          <EuiLink
+            data-test-subj="transformEditTransformFlyoutCalloutViewDocsLink"
+            href={esTransformUpdate}
+            target="_BLANK"
+          >
             {i18n.translate('xpack.transform.transformList.editFlyoutCalloutDocs', {
               defaultMessage: 'View docs',
             })}

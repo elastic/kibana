@@ -31,6 +31,7 @@ const Toaster = () => {
   return (
     <>
       <EuiButton
+        data-test-subj="cloudIntegrationsToasterShowToastButton"
         onClick={() =>
           setToasts([
             {
@@ -82,6 +83,7 @@ export const Component = ({ id, email, chatURL, jwt }: Params) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="cloudIntegrationsComponentResetButton"
             onClick={() => {
               setIsHidden(false);
               forceReRender();

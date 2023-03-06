@@ -12,7 +12,13 @@ import React, { memo, useEffect, useRef } from 'react';
 
 export const AutoFocusButton: FC<PropsForButton<EuiButtonProps>> = memo((props) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const button = <EuiButton buttonRef={buttonRef} {...props} />;
+  const button = (
+    <EuiButton
+      data-test-subj="securitySolutionAutoFocusButtonButton"
+      buttonRef={buttonRef}
+      {...props}
+    />
+  );
 
   useEffect(() => {
     if (buttonRef.current) {

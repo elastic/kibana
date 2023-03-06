@@ -127,6 +127,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
                     values={{
                       link: (
                         <EuiLink
+                          data-test-subj="mlMLJobsAwaitingNodeWarningElasticCloudAdminConsoleLink"
                           href={`https://cloud.elastic.co/deployments?q=${cloudInfo.deploymentId}`}
                         >
                           <FormattedMessage
@@ -146,6 +147,7 @@ const MLJobsAwaitingNodeWarning: FC<Props> = ({ jobIds }) => {
                 values={{
                   link: (
                     <EuiLink
+                      data-test-subj="mlMLJobsAwaitingNodeWarningLearnMoreLink"
                       href={
                         'https://www.elastic.co/guide/en/elasticsearch/reference/master/modules-node.html#ml-node'
                       }

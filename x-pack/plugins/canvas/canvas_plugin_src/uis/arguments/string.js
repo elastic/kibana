@@ -37,11 +37,21 @@ const StringArgInput = ({ argValue, typeInstance, onValueChange, argId }) => {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
-        <EuiFieldText compressed id={argId} value={value} onChange={onChange} />
+        <EuiFieldText
+          data-test-subj="canvasStringArgInputFieldText"
+          compressed
+          id={argId}
+          value={value}
+          onChange={onChange}
+        />
       </EuiFlexItem>
       {confirm && (
         <EuiFlexItem grow={false} className="canvasSidebar__panel-noMinWidth">
-          <EuiButton size="s" onClick={() => onValueChange(value)}>
+          <EuiButton
+            data-test-subj="canvasStringArgInputButton"
+            size="s"
+            onClick={() => onValueChange(value)}
+          >
             {confirm}
           </EuiButton>
         </EuiFlexItem>

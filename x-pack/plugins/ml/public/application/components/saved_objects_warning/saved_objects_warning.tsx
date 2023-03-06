@@ -107,7 +107,10 @@ export const SavedObjectsWarning: FC<Props> = ({
               defaultMessage=" {link}"
               values={{
                 link: (
-                  <EuiLink onClick={setShowSyncFlyout.bind(null, true)}>
+                  <EuiLink
+                    data-test-subj="mlSavedObjectsWarningSynchronizeYourJobsAndTrainedModelsLink"
+                    onClick={setShowSyncFlyout.bind(null, true)}
+                  >
                     <FormattedMessage
                       id="xpack.ml.jobsList.missingSavedObjectWarning.linkToManagement.link"
                       defaultMessage="Synchronize your jobs and trained models."

@@ -74,7 +74,12 @@ const FormWithDeSerializer = ({ endPoint, ...args }: Args) => {
         config={{ label: 'Port', formatters: [fieldFormatters.toInt] }}
       />
       <UseField<string> path="pathname" component={TextField} config={{ label: 'Pathname' }} />
-      <EuiButton onClick={() => submitForm(form)}>Send</EuiButton>
+      <EuiButton
+        data-test-subj="pluginsFormWithDeSerializerSendButton"
+        onClick={() => submitForm(form)}
+      >
+        Send
+      </EuiButton>
     </Form>
   );
 };

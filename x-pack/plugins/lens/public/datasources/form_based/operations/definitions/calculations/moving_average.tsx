@@ -204,6 +204,7 @@ function MovingAverageParamEditor({
       isInvalid={!isValidNumber(inputValue)}
     >
       <EuiFieldNumber
+        data-test-subj="lensMovingAverageParamEditorFieldNumber"
         fullWidth
         compressed
         value={inputValue}

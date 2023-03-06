@@ -87,7 +87,11 @@ export const ConnectorSyncRules: React.FC = () => {
                   })}
                 </p>
                 <p>
-                  <EuiLink href={docLinks.syncRules} external>
+                  <EuiLink
+                    data-test-subj="enterpriseSearchConnectorSyncRulesLearnMoreAboutSyncRulesLink"
+                    href={docLinks.syncRules}
+                    external
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.index.connector.syncRules.syncRulesLabel',
                       {
@@ -100,6 +104,7 @@ export const ConnectorSyncRules: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="enterpriseSearchConnectorSyncRulesButton"
                 data-telemetry-id="entSearchContent-connector-syncRules-editRules-editDraftRules"
                 color="primary"
                 onClick={() => setIsEditing(!isEditing)}
@@ -181,7 +186,11 @@ export const ConnectorSyncRules: React.FC = () => {
                       )}
                     </p>
                     <p>
-                      <EuiLink external href={docLinks.syncRules}>
+                      <EuiLink
+                        data-test-subj="enterpriseSearchConnectorSyncRulesLearnMoreAboutAdvancedSyncRulesLink"
+                        external
+                        href={docLinks.syncRules}
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.content.index.connector.syncRules.advancedFiltersLinkTitle',
                           {

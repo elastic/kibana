@@ -267,7 +267,11 @@ export function JobSelectorTable({
           iconType="iInCircle"
         >
           <EuiText textAlign="center">
-            <EuiButton color="primary" onClick={navigateToWizard}>
+            <EuiButton
+              data-test-subj="mlJobSelectorTableCreateJobButton"
+              color="primary"
+              onClick={navigateToWizard}
+            >
               <FormattedMessage
                 id="xpack.ml.jobSelector.createJobButtonLabel"
                 defaultMessage="Create job"

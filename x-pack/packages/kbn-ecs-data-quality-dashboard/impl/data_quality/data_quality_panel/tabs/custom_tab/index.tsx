@@ -82,7 +82,12 @@ const CustomTabComponent: React.FC<Props> = ({
           <CustomCallout enrichedFieldMetadata={partitionedFieldMetadata.custom}>
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty aria-label={i18n.COPY_TO_CLIPBOARD} flush="both" onClick={onCopy}>
+                <EuiButtonEmpty
+                  data-test-subj="kbnEcsDataQualityDashboardCustomTabComponentButtonEmpty"
+                  aria-label={i18n.COPY_TO_CLIPBOARD}
+                  flush="both"
+                  onClick={onCopy}
+                >
                   {i18n.COPY_TO_CLIPBOARD}
                 </EuiButtonEmpty>
               </EuiFlexItem>

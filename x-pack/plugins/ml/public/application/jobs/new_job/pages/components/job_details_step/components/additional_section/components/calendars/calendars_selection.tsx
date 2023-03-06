@@ -112,7 +112,12 @@ export const CalendarsSelection: FC = () => {
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
       <EuiText size="s">
-        <EuiLink href={manageCalendarsHref} target="_blank" external>
+        <EuiLink
+          data-test-subj="mlCalendarsSelectionManageCalendarsLink"
+          href={manageCalendarsHref}
+          target="_blank"
+          external
+        >
           <FormattedMessage
             id="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.calendarsSelection.manageCalendarsButtonLabel"
             defaultMessage="Manage calendars"

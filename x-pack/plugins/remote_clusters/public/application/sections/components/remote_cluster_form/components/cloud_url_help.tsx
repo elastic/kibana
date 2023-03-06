@@ -18,6 +18,7 @@ export const CloudUrlHelp: FunctionComponent = () => {
       button={
         <EuiText size="xs">
           <EuiLink
+            data-test-subj="remoteClustersCloudUrlHelpNeedHelpLink"
             onClick={() => {
               setIsOpen(!isOpen);
             }}
@@ -45,7 +46,12 @@ export const CloudUrlHelp: FunctionComponent = () => {
           defaultMessage="Open the {deploymentsLink}, select the remote deployment and copy the {elasticsearch} endpoint URL."
           values={{
             deploymentsLink: (
-              <EuiLink external={true} href={`${cloudBaseUrl}/deployments`} target="_blank">
+              <EuiLink
+                data-test-subj="remoteClustersCloudUrlHelpDeploymentsPageLink"
+                external={true}
+                href={`${cloudBaseUrl}/deployments`}
+                target="_blank"
+              >
                 <FormattedMessage
                   id="xpack.remoteClusters.remoteClusterForm.cloudUrlHelpModal.deploymentsLink"
                   defaultMessage="deployments page"

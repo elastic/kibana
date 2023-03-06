@@ -67,7 +67,9 @@ export const CustomAssetsAccordion: FunctionComponent<CustomAssetsAccordionProps
                 <EuiText size="m">
                   <p>
                     <RedirectAppLinks application={application}>
-                      <EuiLink href={view.url}>{view.name}</EuiLink>
+                      <EuiLink data-test-subj="fleetCustomAssetsAccordionLink" href={view.url}>
+                        {view.name}
+                      </EuiLink>
                     </RedirectAppLinks>
                   </p>
                 </EuiText>

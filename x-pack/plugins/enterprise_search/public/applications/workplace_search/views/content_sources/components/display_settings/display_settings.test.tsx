@@ -91,7 +91,7 @@ describe('DisplaySettings', () => {
     it('renders button when hasDocuments', () => {
       const wrapper = shallow(<DisplaySettings tabId={0} />);
       const button = (
-        <EuiButton type="submit" disabled fill>
+        <EuiButton data-test-subj="enterpriseSearchSaveButton" type="submit" disabled fill>
           Save
         </EuiButton>
       );

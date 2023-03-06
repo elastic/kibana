@@ -44,6 +44,7 @@ const statDescriptions = {
       values={{
         wikiLink: (
           <EuiLink
+            data-test-subj="mlPseudoHuberLossFunctionLink"
             href="https://en.wikipedia.org/wiki/Huber_loss#Pseudo-Huber_loss_function"
             target="_blank"
             external

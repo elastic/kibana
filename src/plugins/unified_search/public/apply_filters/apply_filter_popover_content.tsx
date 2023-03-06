@@ -97,7 +97,7 @@ export default class ApplyFiltersPopoverContent extends Component<Props, State> 
         <EuiModalBody>{form}</EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={this.props.onCancel}>
+          <EuiButtonEmpty data-test-subj="pluginsCancelButtonEmpty" onClick={this.props.onCancel}>
             <FormattedMessage
               id="unifiedSearch.filter.applyFiltersPopup.cancelButtonLabel"
               defaultMessage="Cancel"

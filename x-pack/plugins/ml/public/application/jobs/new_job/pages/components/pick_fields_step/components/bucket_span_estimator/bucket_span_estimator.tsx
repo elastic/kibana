@@ -52,6 +52,7 @@ export const BucketSpanEstimator: FC<Props> = ({ setEstimating }) => {
 
   return (
     <EuiButton
+      data-test-subj="mlBucketSpanEstimatorEstimateBucketSpanButton"
       disabled={
         status === ESTIMATE_STATUS.RUNNING || noDetectors === true || isUsingMlCategory === true
       }

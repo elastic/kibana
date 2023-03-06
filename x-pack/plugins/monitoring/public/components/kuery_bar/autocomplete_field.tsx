@@ -60,6 +60,7 @@ export class AutocompleteField extends React.Component<
       <EuiOutsideClickDetector onOutsideClick={this.handleBlur}>
         <AutocompleteContainer>
           <EuiFieldSearch
+            data-test-subj="monitoringFieldSearch"
             fullWidth
             disabled={disabled}
             inputRef={this.handleChangeInputRef}

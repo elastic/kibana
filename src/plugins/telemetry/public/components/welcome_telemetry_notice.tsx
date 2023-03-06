@@ -30,7 +30,12 @@ export const WelcomeTelemetryNotice: React.FC<Props> = ({
           id="telemetry.dataManagementDisclaimerPrivacy"
           defaultMessage="To learn about how usage data helps us manage and improve our products and services, see our "
         />
-        <EuiLink href={telemetryConstants.getPrivacyStatementUrl()} target="_blank" rel="noopener">
+        <EuiLink
+          data-test-subj="pluginsWelcomeTelemetryNoticePrivacyStatementLink"
+          href={telemetryConstants.getPrivacyStatementUrl()}
+          target="_blank"
+          rel="noopener"
+        >
           <FormattedMessage
             id="telemetry.dataManagementDisclaimerPrivacyLink"
             defaultMessage="Privacy Statement."
@@ -60,7 +65,10 @@ function renderTelemetryEnabledOrDisabledText(
           id="telemetry.dataManagementDisableCollection"
           defaultMessage=" To stop collection, "
         />
-        <EuiLink href={addBasePath('management/kibana/settings')}>
+        <EuiLink
+          data-test-subj="pluginsRenderTelemetryEnabledOrDisabledTextDisableUsageDataHereLink"
+          href={addBasePath('management/kibana/settings')}
+        >
           <FormattedMessage
             id="telemetry.dataManagementDisableCollectionLink"
             defaultMessage="disable usage data here."
@@ -75,7 +83,10 @@ function renderTelemetryEnabledOrDisabledText(
           id="telemetry.dataManagementEnableCollection"
           defaultMessage=" To start collection, "
         />
-        <EuiLink href={addBasePath('management/kibana/settings')}>
+        <EuiLink
+          data-test-subj="pluginsRenderTelemetryEnabledOrDisabledTextEnableUsageDataHereLink"
+          href={addBasePath('management/kibana/settings')}
+        >
           <FormattedMessage
             id="telemetry.dataManagementEnableCollectionLink"
             defaultMessage="enable usage data here."

@@ -39,6 +39,7 @@ export const CrawlCustomSettingsFlyoutCrawlDepthPanel: React.FC = () => {
             )}
           >
             <EuiFieldNumber
+              data-test-subj="enterpriseSearchCrawlCustomSettingsFlyoutCrawlDepthPanelFieldNumber"
               data-telemetry-id="entSearchContent-crawler-customCrawlSettings-maxCrawlDepth"
               min={1}
               value={maxCrawlDepth}

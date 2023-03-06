@@ -211,6 +211,7 @@ export const SplitByTermsUI = ({
             }
           >
             <EuiFieldNumber
+              data-test-subj="pluginsSplitByTermsUIFieldNumber"
               placeholder={intl.formatMessage({
                 id: 'visTypeTimeseries.splits.terms.sizePlaceholder',
                 defaultMessage: 'Size',

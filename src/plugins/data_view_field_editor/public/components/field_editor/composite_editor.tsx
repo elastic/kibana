@@ -61,7 +61,12 @@ export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="right" iconType="refresh" onClick={onReset}>
+            <EuiButtonEmpty
+              data-test-subj="pluginsCompositeEditorResetButtonEmpty"
+              flush="right"
+              iconType="refresh"
+              onClick={onReset}
+            >
               <FormattedMessage
                 id="indexPatternFieldEditor.editor.compositeRefreshTypes"
                 defaultMessage="Reset"
@@ -74,7 +79,11 @@ export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
             <div>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem>
-                  <EuiFieldText value={key} disabled={true} />
+                  <EuiFieldText
+                    data-test-subj="pluginsCompositeEditorFieldText"
+                    value={key}
+                    disabled={true}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiFormRow fullWidth>

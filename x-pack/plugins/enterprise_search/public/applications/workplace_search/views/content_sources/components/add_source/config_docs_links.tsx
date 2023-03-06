@@ -31,13 +31,25 @@ export const ConfigDocsLinks: React.FC<ConfigDocsLinksProps> = ({
 }) => (
   <EuiFlexGroup justifyContent="flexStart" responsive={false}>
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty flush="left" iconType="popout" href={documentationUrl} target="_blank">
+      <EuiButtonEmpty
+        data-test-subj="enterpriseSearchConfigDocsLinksButtonEmpty"
+        flush="left"
+        iconType="popout"
+        href={documentationUrl}
+        target="_blank"
+      >
         {DOCUMENTATION_LINK_TITLE}
       </EuiButtonEmpty>
     </EuiFlexItem>
     {applicationPortalUrl && (
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty flush="left" iconType="popout" href={applicationPortalUrl} target="_blank">
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchConfigDocsLinksButtonEmpty"
+          flush="left"
+          iconType="popout"
+          href={applicationPortalUrl}
+          target="_blank"
+        >
           {applicationLinkTitle ||
             i18n.translate(
               'xpack.enterpriseSearch.workplaceSearch.contentSource.configDocs.applicationPortal.button',
@@ -51,7 +63,13 @@ export const ConfigDocsLinks: React.FC<ConfigDocsLinksProps> = ({
     )}
     {discussUrl && (
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty flush="left" iconType="popout" target="_blank" href={discussUrl}>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchConfigDocsLinksQuestionsDiscussHereButtonEmpty"
+          flush="left"
+          iconType="popout"
+          target="_blank"
+          href={discussUrl}
+        >
           <FormattedMessage
             id="xpack.enterpriseSearch.workplaceSearch.contentSource.configDocs.discuss.buttonLabel"
             defaultMessage="Questions? Discuss here."

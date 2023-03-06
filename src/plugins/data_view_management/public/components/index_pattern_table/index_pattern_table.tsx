@@ -213,7 +213,10 @@ export const IndexPatternTable = ({
       width: '70%',
       render: (name: string, dataView: IndexPatternTableItem) => (
         <div>
-          <EuiLink {...reactRouterNavigate(history, `patterns/${dataView.id}`)}>
+          <EuiLink
+            data-test-subj="pluginsColumnsLink"
+            {...reactRouterNavigate(history, `patterns/${dataView.id}`)}
+          >
             {dataView.getName()}
             {dataView.name ? (
               <>

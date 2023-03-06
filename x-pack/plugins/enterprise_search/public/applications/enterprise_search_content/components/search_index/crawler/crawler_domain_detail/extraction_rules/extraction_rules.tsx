@@ -100,7 +100,11 @@ export const ExtractionRules: React.FC = () => {
             </p>
           }
           links={
-            <EuiLink href={docLinks.crawlerExtractionRules} external>
+            <EuiLink
+              data-test-subj="enterpriseSearchExtractionRulesLearnMoreAboutContentExtractionRulesLink"
+              href={docLinks.crawlerExtractionRules}
+              external
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.crawler.extractionRules.learnMoreLink',
                 {
@@ -114,6 +118,7 @@ export const ExtractionRules: React.FC = () => {
               ? []
               : [
                   <EuiButton
+                    data-test-subj="enterpriseSearchExtractionRulesAddExtractionRuleButton"
                     size="s"
                     data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-addContentExtractionRule"
                     iconType="plusInCircle"
@@ -164,6 +169,7 @@ export const ExtractionRules: React.FC = () => {
           }
           actions={
             <EuiButton
+              data-test-subj="enterpriseSearchExtractionRulesAddContentExtractionRuleButton"
               data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-addContentExtractionRule"
               iconType="plusInCircle"
               onClick={editNewExtractionRule}

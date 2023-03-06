@@ -361,7 +361,12 @@ export class TOCEntry extends Component<Props, State> {
                 defaultMessage="Edit features"
               />
             </span>
-            <EuiButtonEmpty size="xs" flush="both" onClick={this.props.cancelEditing}>
+            <EuiButtonEmpty
+              data-test-subj="mapsExitButtonEmpty"
+              size="xs"
+              flush="both"
+              onClick={this.props.cancelEditing}
+            >
               <FormattedMessage
                 id="xpack.maps.layerControl.tocEntry.exitEditModeAriaLabel"
                 defaultMessage="Exit"

@@ -108,6 +108,7 @@ const IncompatibleTabComponent: React.FC<Props> = ({
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="kbnEcsDataQualityDashboardIncompatibleTabComponentButton"
                   aria-label={i18n.ADD_TO_NEW_CASE}
                   disabled={addToNewCaseDisabled}
                   onClick={onClickAddToCase}

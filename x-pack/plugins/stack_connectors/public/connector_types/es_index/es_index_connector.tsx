@@ -55,7 +55,11 @@ const getIndexConfig = (docLinks: DocLinksStart): FieldConfig => ({
         defaultMessage="Use * to broaden your query."
       />
       <EuiSpacer size="s" />
-      <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
+      <EuiLink
+        data-test-subj="stackConnectorsGetIndexConfigConfiguringIndexConnectorLink"
+        href={docLinks.links.alerting.indexAction}
+        target="_blank"
+      >
         <FormattedMessage
           id="xpack.stackConnectors.components.index.configureIndexHelpLabel"
           defaultMessage="Configuring index connector."
@@ -176,7 +180,11 @@ const IndexActionConnectorFields: React.FunctionComponent<ActionConnectorFieldsP
                     defaultMessage="Use * to broaden your query."
                   />
                   <EuiSpacer size="s" />
-                  <EuiLink href={docLinks.links.alerting.indexAction} target="_blank">
+                  <EuiLink
+                    data-test-subj="stackConnectorsIndexActionConnectorFieldsConfiguringIndexConnectorLink"
+                    href={docLinks.links.alerting.indexAction}
+                    target="_blank"
+                  >
                     <FormattedMessage
                       id="xpack.stackConnectors.components.index.configureIndexHelpLabel"
                       defaultMessage="Configuring index connector."

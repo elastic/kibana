@@ -231,6 +231,7 @@ export class SpaceSelector extends Component<Props, State> {
       <>
         <div className="spcSpaceSelector__searchHolder">
           <EuiFieldSearch
+            data-test-subj="spacesFieldSearch"
             placeholder={inputLabel}
             aria-label={inputLabel}
             incremental={true}

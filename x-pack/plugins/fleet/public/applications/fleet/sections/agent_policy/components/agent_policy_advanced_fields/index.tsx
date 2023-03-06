@@ -124,6 +124,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isInvalid={Boolean(touchedFields.description && validation.description)}
         >
           <EuiFieldText
+            data-test-subj="fleetAgentPolicyAdvancedOptionsContentFieldText"
             disabled={agentPolicy.is_managed === true}
             fullWidth
             value={agentPolicy.description}
@@ -151,7 +152,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
             defaultMessage="Namespaces are a user-configurable arbitrary grouping that makes it easier to search for data and manage user permissions. A policy namespace is used to name its integration's data streams. {fleetUserGuide}."
             values={{
               fleetUserGuide: (
-                <EuiLink href={docLinks.links.fleet.datastreamsNamingScheme} target="_blank">
+                <EuiLink
+                  data-test-subj="fleetAgentPolicyAdvancedOptionsContentLearnMoreLink"
+                  href={docLinks.links.fleet.datastreamsNamingScheme}
+                  target="_blank"
+                >
                   {i18n.translate(
                     'xpack.fleet.agentPolicyForm.nameSpaceFieldDescription.fleetUserGuideLabel',
                     { defaultMessage: 'Learn more' }
@@ -327,6 +332,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isInvalid={Boolean(touchedFields.inactivity_timeout && validation.inactivity_timeout)}
         >
           <EuiFieldNumber
+            data-test-subj="fleetAgentPolicyAdvancedOptionsContentFieldNumber"
             fullWidth
             disabled={agentPolicy.is_managed === true}
             value={agentPolicy.inactivity_timeout || ''}
@@ -539,6 +545,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isInvalid={Boolean(touchedFields.unenroll_timeout && validation.unenroll_timeout)}
         >
           <EuiFieldNumber
+            data-test-subj="fleetAgentPolicyAdvancedOptionsContentFieldNumber"
             fullWidth
             disabled={agentPolicy.is_managed === true}
             value={agentPolicy.unenroll_timeout || ''}
@@ -574,6 +581,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
         >
           <EuiFormRow fullWidth>
             <EuiRadioGroup
+              data-test-subj="fleetAgentPolicyAdvancedOptionsContentRadioGroup"
               options={[
                 {
                   id: 'hostname',

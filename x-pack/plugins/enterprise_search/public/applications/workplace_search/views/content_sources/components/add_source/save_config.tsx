@@ -118,18 +118,34 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
   };
 
   const saveButton = (
-    <EuiButton color="primary" fill isLoading={buttonLoading} type="submit">
+    <EuiButton
+      data-test-subj="enterpriseSearchSaveConfigButton"
+      color="primary"
+      fill
+      isLoading={buttonLoading}
+      type="submit"
+    >
       {OAUTH_SAVE_CONFIG_BUTTON}
     </EuiButton>
   );
 
   const deleteButton = (
-    <EuiButton color="danger" fill disabled={buttonLoading} onClick={onDeleteConfig}>
+    <EuiButton
+      data-test-subj="enterpriseSearchSaveConfigButton"
+      color="danger"
+      fill
+      disabled={buttonLoading}
+      onClick={onDeleteConfig}
+    >
       {REMOVE_BUTTON}
     </EuiButton>
   );
 
-  const backButton = <EuiButtonEmpty onClick={goBackStep}>{OAUTH_BACK_BUTTON}</EuiButtonEmpty>;
+  const backButton = (
+    <EuiButtonEmpty data-test-subj="enterpriseSearchSaveConfigButtonEmpty" onClick={goBackStep}>
+      {OAUTH_BACK_BUTTON}
+    </EuiButtonEmpty>
+  );
   const showSaveButton = hasPlatinumLicense || !accountContextOnly;
 
   const formActions = (
@@ -191,6 +207,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
             {formFields.map(({ key, label }, index) => (
               <EuiFormRow key={index} label={label}>
                 <EuiFieldText
+                  data-test-subj="enterpriseSearchConfigurationStepFieldText"
                   value={configuredFields[key]}
                   required
                   type="text"

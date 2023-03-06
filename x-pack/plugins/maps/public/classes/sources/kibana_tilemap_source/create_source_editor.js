@@ -36,7 +36,11 @@ export function CreateSourceEditor({ onSourceConfigChange }) {
               })
         }
       >
-        <EuiFieldText readOnly value={tilemap.url ? tilemap.url : ''} />
+        <EuiFieldText
+          data-test-subj="mapsCreateSourceEditorFieldText"
+          readOnly
+          value={tilemap.url ? tilemap.url : ''}
+        />
       </EuiFormRow>
     </EuiPanel>
   );

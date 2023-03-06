@@ -111,6 +111,7 @@ export const CreateAnalyticsAdvancedEditor: FC<CreateAnalyticsFormProps> = (prop
         ]}
       >
         <EuiFieldText
+          data-test-subj="mlCreateAnalyticsAdvancedEditorFieldText"
           inputRef={(input) => {
             if (input) {
               forceInput.current = input;

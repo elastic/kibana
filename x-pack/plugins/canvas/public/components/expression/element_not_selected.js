@@ -25,7 +25,7 @@ export const ElementNotSelected = ({ done }) => (
   <div>
     <div>{strings.getSelectDescription()}</div>
     {done && (
-      <EuiButton size="s" onClick={done}>
+      <EuiButton data-test-subj="canvasElementNotSelectedButton" size="s" onClick={done}>
         {' '}
         {strings.getCloseButtonLabel()}
       </EuiButton>

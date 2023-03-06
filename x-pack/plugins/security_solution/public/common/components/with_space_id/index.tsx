@@ -33,7 +33,7 @@ export const withSpaceId = <P extends WithSpaceIdArgs>(
     if (!spaceId) {
       return (
         fallback ?? (
-          <EuiButton color="text">
+          <EuiButton data-test-subj="securitySolutionComponentWithSpaceIdButton" color="text">
             <EuiLoadingSpinner data-test-subj="filter-group__loading" />
           </EuiButton>
         )

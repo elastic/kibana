@@ -111,6 +111,7 @@ export const SerialDiffAgg = (props) => {
             }
           >
             <EuiFieldNumber
+              data-test-subj="pluginsSerialDiffAggFieldNumber"
               placeholder={SERIAL_DIFF_DEFAULT_VALUE}
               onChange={handleNumberChange('lag', { isClearable: true })}
               value={model.lag}

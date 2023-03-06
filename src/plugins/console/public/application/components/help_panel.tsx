@@ -56,12 +56,22 @@ export function HelpPanel(props: Props) {
               defaultMessage="Learn about {console} and {queryDsl}"
               values={{
                 console: (
-                  <EuiLink href={docLinks.console.guide} target="_blank" external>
+                  <EuiLink
+                    data-test-subj="pluginsHelpPanelConsoleLink"
+                    href={docLinks.console.guide}
+                    target="_blank"
+                    external
+                  >
                     Console
                   </EuiLink>
                 ),
                 queryDsl: (
-                  <EuiLink href={docLinks.query.queryDsl} target="_blank" external>
+                  <EuiLink
+                    data-test-subj="pluginsHelpPanelQueryDslLink"
+                    href={docLinks.query.queryDsl}
+                    target="_blank"
+                    external
+                  >
                     Query DSL
                   </EuiLink>
                 ),

@@ -29,7 +29,12 @@ export class LogTextStreamJumpToTail extends React.PureComponent<LogTextStreamJu
             />
           </EuiText>
         </MessageWrapper>
-        <EuiButtonEmpty size="xs" onClick={onClickJump} iconType="arrowDown">
+        <EuiButtonEmpty
+          data-test-subj="infraJumpToMostRecentEntriesButtonEmpty"
+          size="xs"
+          onClick={onClickJump}
+          iconType="arrowDown"
+        >
           <FormattedMessage
             id="xpack.infra.logs.jumpToTailText"
             defaultMessage="Jump to most recent entries"

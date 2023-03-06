@@ -60,6 +60,7 @@ export const Ccr = (props) => {
               render: (shardId) => {
                 return (
                   <EuiLink
+                    data-test-subj="monitoringToggleShardsLink"
                     href={getSafeForExternalLink(`#/elasticsearch/ccr/${index}/shard/${shardId}`)}
                   >
                     {shardId}
@@ -209,7 +210,10 @@ export const Ccr = (props) => {
             render: (index, { shards }) => {
               const expanded = !!itemIdToExpandedRowMap[index];
               return (
-                <EuiLink onClick={() => toggleShards(index, shards)}>
+                <EuiLink
+                  data-test-subj="monitoringRenderTableLink"
+                  onClick={() => toggleShards(index, shards)}
+                >
                   {index}
                   &nbsp;
                   {expanded ? <EuiIcon type="arrowUp" /> : <EuiIcon type="arrowDown" />}

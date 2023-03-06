@@ -35,6 +35,7 @@ export const LinkedAgentCount = memo<
   );
   return count > 0 ? (
     <EuiLink
+      data-test-subj="fleetLinkedAgentCountLink"
       {...otherEuiLinkProps}
       href={getHref('agent_list', {
         kuery: `${AGENTS_PREFIX}.policy_id : ${agentPolicyId}`,

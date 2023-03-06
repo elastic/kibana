@@ -38,7 +38,9 @@ export const FormWrapper: FC<FormWrapperProps> = ({ formConfig, children }) => {
       <>
         {children}
         <EuiSpacer />
-        <EuiButton onClick={() => submitForm(form)}>Send</EuiButton>
+        <EuiButton data-test-subj="pluginsFormWrapperSendButton" onClick={() => submitForm(form)}>
+          Send
+        </EuiButton>
       </>
     </Form>
   );

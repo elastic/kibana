@@ -56,6 +56,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
   const modelTitle = getModelDisplayTitle(modelType);
   const actionButton = (
     <EuiButtonEmpty
+      data-test-subj="enterpriseSearchInferencePipelineCardActionsButtonEmpty"
       iconSide="right"
       flush="both"
       iconType="boxesVertical"
@@ -92,6 +93,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   <EuiFlexItem>
                     <div>
                       <EuiButtonEmpty
+                        data-test-subj="enterpriseSearchInferencePipelineCardViewInStackManagementButtonEmpty"
                         data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-stackManagement`}
                         size="s"
                         flush="both"
@@ -111,6 +113,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                   <EuiFlexItem>
                     <div>
                       <EuiButtonEmpty
+                        data-test-subj="enterpriseSearchInferencePipelineCardDetachPipelineButtonEmpty"
                         data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-inferencePipeline-detachPipeline`}
                         size="s"
                         flush="both"

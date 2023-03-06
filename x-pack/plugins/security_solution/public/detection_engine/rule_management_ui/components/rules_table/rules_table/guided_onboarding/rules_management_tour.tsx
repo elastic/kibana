@@ -153,7 +153,13 @@ export const RulesManagementTour = () => {
           anchor={`#${SEARCH_FIRST_RULE_ANCHOR}`}
           anchorPosition="upCenter"
           footerAction={
-            <EuiButtonEmpty size="xs" color="text" flush="right" onClick={findDemoRule}>
+            <EuiButtonEmpty
+              data-test-subj="securitySolutionRulesManagementTourButtonEmpty"
+              size="xs"
+              color="text"
+              flush="right"
+              onClick={findDemoRule}
+            >
               {i18n.NEXT_BUTTON}
             </EuiButtonEmpty>
           }
@@ -170,7 +176,13 @@ export const RulesManagementTour = () => {
           anchor={`#${ruleSwitchAnchor}`}
           anchorPosition="upCenter"
           footerAction={
-            <EuiButtonEmpty size="xs" color="text" flush="right" onClick={enableDemoRule}>
+            <EuiButtonEmpty
+              data-test-subj="securitySolutionRulesManagementTourButtonEmpty"
+              size="xs"
+              color="text"
+              flush="right"
+              onClick={enableDemoRule}
+            >
               {i18n.NEXT_BUTTON}
             </EuiButtonEmpty>
           }

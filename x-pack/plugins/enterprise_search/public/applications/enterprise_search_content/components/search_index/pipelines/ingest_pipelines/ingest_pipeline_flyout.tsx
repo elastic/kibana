@@ -127,7 +127,11 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
               </EuiFlexItem>
               <EuiSpacer />
               <EuiFlexItem>
-                <EuiLink href={docLinks.ingestPipelines} external>
+                <EuiLink
+                  data-test-subj="enterpriseSearchIngestPipelineFlyoutLearnMoreAboutEnterpriseSearchIngestPipelinesLink"
+                  href={docLinks.ingestPipelines}
+                  external
+                >
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.modalIngestLinkLabel',
                     {
@@ -190,7 +194,11 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         {displayOnly ? (
-          <EuiButton fill onClick={closeFlyout}>
+          <EuiButton
+            data-test-subj="enterpriseSearchIngestPipelineFlyoutCloseButton"
+            fill
+            onClick={closeFlyout}
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.closeButtonLabel',
               {
@@ -201,7 +209,10 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
         ) : (
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={closeFlyout}>
+              <EuiButtonEmpty
+                data-test-subj="enterpriseSearchIngestPipelineFlyoutCancelButtonEmpty"
+                onClick={closeFlyout}
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.cancelButtonLabel',
                   {
@@ -211,7 +222,12 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={savePipeline} isLoading={isLoading}>
+              <EuiButton
+                data-test-subj="enterpriseSearchIngestPipelineFlyoutSaveButton"
+                fill
+                onClick={savePipeline}
+                isLoading={isLoading}
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.index.pipelines.ingestFlyout.saveButtonLabel',
                   {

@@ -24,6 +24,7 @@ export const EditSyncRulesTab: React.FC<{ revertAction: () => void }> = ({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="enterpriseSearchEditSyncRulesTabRevertToActiveRulesButton"
                 data-telemetry-id="entSearchContent-connector-syncRules-editRules-revert"
                 onClick={revertAction}
               >

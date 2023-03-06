@@ -60,7 +60,12 @@ const NoSourceFieldsError: React.FC = () => (
     defaultMessage="Selecting a source field is required for pipeline configuration, but this index does not have a field mapping. {learnMore}"
     values={{
       learnMore: (
-        <EuiLink href={docLinks.elasticsearchMapping} target="_blank" color="danger">
+        <EuiLink
+          data-test-subj="enterpriseSearchNoSourceFieldsErrorLearnMoreAboutFieldMappingLink"
+          href={docLinks.elasticsearchMapping}
+          target="_blank"
+          color="danger"
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.sourceField.error.docLink',
             { defaultMessage: 'Learn more about field mapping' }
@@ -143,7 +148,11 @@ export const ConfigurePipeline: React.FC = () => {
             }
           )}
         </p>
-        <EuiLink href={docLinks.deployTrainedModels} target="_blank">
+        <EuiLink
+          data-test-subj="enterpriseSearchConfigurePipelineLearnMoreAboutUsingMlModelsInEnterpriseSearchLink"
+          href={docLinks.deployTrainedModels}
+          target="_blank"
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.docsLink',
             {
@@ -163,6 +172,7 @@ export const ConfigurePipeline: React.FC = () => {
               )}
             >
               <EuiSelect
+                data-test-subj="enterpriseSearchConfigurePipelineSelect"
                 options={[
                   {
                     disabled: true,
@@ -244,6 +254,7 @@ export const ConfigurePipeline: React.FC = () => {
                 isInvalid={nameError}
               >
                 <EuiFieldText
+                  data-test-subj="enterpriseSearchConfigurePipelineFieldText"
                   data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-uniqueName`}
                   disabled={inputsDisabled}
                   fullWidth
@@ -308,6 +319,7 @@ export const ConfigurePipeline: React.FC = () => {
               isInvalid={emptySourceFields}
             >
               <EuiSelect
+                data-test-subj="enterpriseSearchConfigurePipelineSelect"
                 fullWidth
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectSchemaField`}
                 disabled={inputsDisabled}
@@ -358,6 +370,7 @@ export const ConfigurePipeline: React.FC = () => {
               fullWidth
             >
               <EuiFieldText
+                data-test-subj="enterpriseSearchConfigurePipelineFieldText"
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-targetField`}
                 disabled={inputsDisabled}
                 placeholder="custom_field_name"

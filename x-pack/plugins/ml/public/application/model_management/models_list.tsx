@@ -411,6 +411,7 @@ export const ModelsList: FC<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButton
+            data-test-subj="mlModelsListDeleteButton"
             color="danger"
             onClick={setModelIdsToDelete.bind(
               null,

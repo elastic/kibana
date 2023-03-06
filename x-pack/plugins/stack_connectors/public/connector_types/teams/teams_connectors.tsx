@@ -21,7 +21,11 @@ const { urlField } = fieldValidators;
 const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
   label: i18n.WEBHOOK_URL_LABEL,
   helpText: (
-    <EuiLink href={docLinks.links.alerting.teamsAction} target="_blank">
+    <EuiLink
+      data-test-subj="stackConnectorsGetWebhookUrlConfigCreateAMicrosoftTeamsWebhookUrlLink"
+      href={docLinks.links.alerting.teamsAction}
+      target="_blank"
+    >
       <FormattedMessage
         id="xpack.stackConnectors.components.teams.webhookUrlHelpLabel"
         defaultMessage="Create a Microsoft Teams Webhook URL"

@@ -127,6 +127,7 @@ export class Table extends Component<TableProps, TableState> {
           if (this.state.editingFilterId && this.state.editingFilterId === filter.clientId) {
             return (
               <EuiFieldText
+                data-test-subj="pluginsFieldText"
                 autoFocus
                 value={this.state.editingFilterValue}
                 onChange={this.onEditingFilterChange}

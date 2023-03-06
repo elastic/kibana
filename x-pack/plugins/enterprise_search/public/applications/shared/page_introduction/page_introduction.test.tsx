@@ -62,7 +62,7 @@ describe('PageIntroduction component', () => {
         description="some description"
         title="some title"
         links={
-          <EuiLink href="testlink" external>
+          <EuiLink data-test-subj="enterpriseSearchTestLinkToNowhereLink" href="testlink" external>
             test link to nowhere
           </EuiLink>
         }
@@ -81,10 +81,14 @@ describe('PageIntroduction component', () => {
         description="some description"
         title="some title"
         links={[
-          <EuiLink href="testlink" external>
+          <EuiLink data-test-subj="enterpriseSearchTestLinkToNowhereLink" href="testlink" external>
             test link to nowhere
           </EuiLink>,
-          <EuiLink href="testlink2" external>
+          <EuiLink
+            data-test-subj="enterpriseSearchTestLinkToNowhere2Link"
+            href="testlink2"
+            external
+          >
             test link to nowhere2
           </EuiLink>,
         ]}

@@ -223,6 +223,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
 
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="snapshotRestoreRenderFooterRestoreButton"
                   {...reactRouterNavigate(
                     history,
                     linkToRestoreSnapshot(repositoryName, snapshotId)

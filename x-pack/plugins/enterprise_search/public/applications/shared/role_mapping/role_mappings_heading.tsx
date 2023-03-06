@@ -43,14 +43,23 @@ export const RoleMappingsHeading: React.FC<Props> = ({ productName, docsLink, on
         <EuiText color="subdued">
           <p>
             {ROLE_MAPPINGS_HEADING_DESCRIPTION(productName)}{' '}
-            <EuiLink external href={docsLink} target="_blank">
+            <EuiLink
+              data-test-subj="enterpriseSearchRoleMappingsHeadingLink"
+              external
+              href={docsLink}
+              target="_blank"
+            >
               {ROLE_MAPPINGS_HEADING_DOCS_LINK}
             </EuiLink>
           </p>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton fill onClick={onClick}>
+        <EuiButton
+          data-test-subj="enterpriseSearchRoleMappingsHeadingButton"
+          fill
+          onClick={onClick}
+        >
           {ROLE_MAPPINGS_HEADING_BUTTON}
         </EuiButton>
       </EuiFlexItem>

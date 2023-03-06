@@ -35,6 +35,7 @@ export const TableFilters: React.FC = () => {
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem className="user-groups-filters__search-bar">
             <EuiFieldSearch
+              data-test-subj="enterpriseSearchTableFiltersFieldSearch"
               value={filterValue}
               onChange={handleSearchChange}
               fullWidth

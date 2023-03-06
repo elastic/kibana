@@ -58,6 +58,7 @@ export const MainNavigation = () => {
           <EuiFlexGroup gutterSize="s" direction="row">
             <EuiFlexItem>
               <EuiButtonEmpty
+                data-test-subj="osqueryMainNavigationSendFeedbackButtonEmpty"
                 iconType="popout"
                 href="https://ela.st/osquery-feedback"
                 target="_blank"

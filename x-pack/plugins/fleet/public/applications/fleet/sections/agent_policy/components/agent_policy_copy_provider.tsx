@@ -137,6 +137,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
           fullWidth
         >
           <EuiFieldText
+            data-test-subj="fleetRenderModalFieldText"
             fullWidth
             value={newAgentPolicy.name}
             onChange={(e) => setNewAgentPolicy({ ...newAgentPolicy, name: e.target.value })}
@@ -152,6 +153,7 @@ export const AgentPolicyCopyProvider: React.FunctionComponent<Props> = ({ childr
           fullWidth
         >
           <EuiFieldText
+            data-test-subj="fleetRenderModalFieldText"
             fullWidth
             value={newAgentPolicy.description}
             onChange={(e) => setNewAgentPolicy({ ...newAgentPolicy, description: e.target.value })}

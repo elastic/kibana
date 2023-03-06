@@ -68,6 +68,7 @@ const SwimlaneConnectionComponent: React.FunctionComponent<Props> = ({ readOnly 
         readOnly={readOnly}
         helpText={
           <EuiLink
+            data-test-subj="stackConnectorsSwimlaneConnectionComponentProvideASwimlaneApiTokenLink"
             href={`${docLinks.ELASTIC_WEBSITE_URL}guide/en/kibana/${docLinks.DOC_LINK_VERSION}/swimlane-action-type.html`}
             target="_blank"
           >

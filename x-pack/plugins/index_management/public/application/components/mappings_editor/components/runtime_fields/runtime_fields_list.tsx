@@ -121,7 +121,12 @@ export const RuntimeFieldsList = () => {
           defaultMessage="Define the runtime fields accessible at search time. {docsLink}"
           values={{
             docsLink: (
-              <EuiLink href={runtimeFieldsDocsUri} target="_blank" external>
+              <EuiLink
+                data-test-subj="indexManagementRuntimeFieldsListLearnMoreLink"
+                href={runtimeFieldsDocsUri}
+                target="_blank"
+                external
+              >
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.runtimeFieldsDocumentationLink', {
                   defaultMessage: 'Learn more.',
                 })}

@@ -419,6 +419,7 @@ const InsightEditorComponent = ({
               fullWidth
             >
               <EuiFieldText
+                data-test-subj="securitySolutionInsightEditorComponentFieldText"
                 {...{
                   ...formMethods.register('label'),
                   ref: null,
@@ -433,6 +434,7 @@ const InsightEditorComponent = ({
               fullWidth
             >
               <EuiFieldText
+                data-test-subj="securitySolutionInsightEditorComponentFieldText"
                 {...{ ...formMethods.register('description'), ref: null }}
                 name="description"
                 onChange={descriptionController.field.onChange}
@@ -452,6 +454,7 @@ const InsightEditorComponent = ({
               fullWidth
             >
               <EuiSelect
+                data-test-subj="securitySolutionInsightEditorComponentSelect"
                 {...{ ...formMethods.register('relativeTimerange'), ref: null }}
                 onChange={selectOnChange}
                 options={dateRangeChoices}
@@ -462,12 +465,20 @@ const InsightEditorComponent = ({
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>
+        <EuiButtonEmpty
+          data-test-subj="securitySolutionInsightEditorComponentCancelButtonEmpty"
+          onClick={onCancel}
+        >
           {i18n.translate('xpack.securitySolution.markdown.insight.modalCancelButtonLabel', {
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
-        <EuiButton onClick={formMethods.handleSubmit(onSubmit)} fill disabled={disableSubmit}>
+        <EuiButton
+          data-test-subj="securitySolutionInsightEditorComponentButton"
+          onClick={formMethods.handleSubmit(onSubmit)}
+          fill
+          disabled={disableSubmit}
+        >
           {isEditMode ? (
             <FormattedMessage
               id="xpack.securitySolution.markdown.insight.addModalConfirmButtonLabel"

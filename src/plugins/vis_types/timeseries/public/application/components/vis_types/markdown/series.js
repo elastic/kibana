@@ -132,6 +132,7 @@ function MarkdownSeriesUi(props) {
 
         <EuiFlexItem>
           <EuiFieldText
+            data-test-subj="pluginsMarkdownSeriesUiFieldText"
             fullWidth
             onChange={handleChange('label')}
             placeholder={intl.formatMessage({
@@ -144,6 +145,7 @@ function MarkdownSeriesUi(props) {
 
         <EuiFlexItem>
           <EuiFieldText
+            data-test-subj="pluginsMarkdownSeriesUiFieldText"
             fullWidth
             onChange={handleChange('var_name')}
             placeholder={intl.formatMessage({

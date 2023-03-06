@@ -74,7 +74,11 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
           )}
         </EuiText>
         <EuiSpacer size="s" />
-        <EuiLink target="_blank" href={documentationUrl}>
+        <EuiLink
+          data-test-subj="enterpriseSearchConnectorCheckableDocumentationLink"
+          target="_blank"
+          href={documentationUrl}
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.content.indices.selectConnector.connectorCheckable.documentationLinkLabel',
             {

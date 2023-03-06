@@ -31,6 +31,7 @@ export const DrilldownsWithoutEmbeddableSingleButtonExample: React.FC = () => {
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="uiActionsEnhancedExamplesDrilldownsWithoutEmbeddableSingleButtonExampleClickThisElementButton"
             color="success"
             fill
             iconType="play"

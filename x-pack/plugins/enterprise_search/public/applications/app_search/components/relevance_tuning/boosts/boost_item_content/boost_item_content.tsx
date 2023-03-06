@@ -71,7 +71,13 @@ export const BoostItemContent: React.FC<Props> = ({ boost, index, name }) => {
           fullWidth
         />
       </EuiFormRow>
-      <EuiButton color="danger" iconType="cross" size="s" onClick={() => deleteBoost(name, index)}>
+      <EuiButton
+        data-test-subj="enterpriseSearchBoostItemContentDeleteBoostButton"
+        color="danger"
+        iconType="cross"
+        size="s"
+        onClick={() => deleteBoost(name, index)}
+      >
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.relevanceTuning.boosts.deleteBoostButtonLabel',
           {

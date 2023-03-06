@@ -22,7 +22,9 @@ interface LinkProps {
 }
 
 export const Link = styled(({ iconSide, children, ...rest }) => (
-  <EuiLink {...rest}>{children}</EuiLink>
+  <EuiLink data-test-subj="securitySolutionLinkLink" {...rest}>
+    {children}
+  </EuiLink>
 ))<LinkProps>`
   ${({ iconSide, theme }) => css`
     align-items: center;

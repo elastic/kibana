@@ -32,6 +32,7 @@ const QuestionInput: FC<{
       )}
     >
       <EuiFieldText
+        data-test-subj="mlQuestionInputFieldText"
         value={questionText}
         disabled={runningState === RUNNING_STATE.RUNNING}
         fullWidth

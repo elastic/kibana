@@ -219,7 +219,11 @@ export const ColorPicker = ({
       ) &&
         colorIsOverwritten && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" onClick={(e: any) => onChange(null, e)}>
+            <EuiButtonEmpty
+              data-test-subj="pluginsColorPickerResetColorButtonEmpty"
+              size="s"
+              onClick={(e: any) => onChange(null, e)}
+            >
               <FormattedMessage id="charts.colorPicker.clearColor" defaultMessage="Reset color" />
             </EuiButtonEmpty>
           </EuiFlexItem>

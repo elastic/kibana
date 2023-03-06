@@ -77,6 +77,7 @@ export const ValuesInput = ({
       }
     >
       <EuiFieldNumber
+        data-test-subj="lensValuesInputFieldNumber"
         fullWidth
         min={minValue}
         max={maxValue}

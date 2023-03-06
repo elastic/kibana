@@ -155,7 +155,11 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
                 </EuiButton>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty color="primary" onClick={onCancel}>
+                <EuiButtonEmpty
+                  data-test-subj="ingestPipelinesPipelineFormCancelButtonEmpty"
+                  color="primary"
+                  onClick={onCancel}
+                >
                   <FormattedMessage
                     id="xpack.ingestPipelines.form.cancelButtonLabel"
                     defaultMessage="Cancel"

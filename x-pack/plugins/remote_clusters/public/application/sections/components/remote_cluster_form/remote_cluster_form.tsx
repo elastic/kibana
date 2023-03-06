@@ -251,7 +251,11 @@ export class RemoteClusterForm extends Component<Props, State> {
                     </strong>
                   ),
                   learnMoreLink: (
-                    <EuiLink href={skippingDisconnectedClustersUrl} target="_blank">
+                    <EuiLink
+                      data-test-subj="remoteClustersLearnMoreLink"
+                      href={skippingDisconnectedClustersUrl}
+                      target="_blank"
+                    >
                       <FormattedMessage
                         id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLinkLabel"
                         defaultMessage="Learn more."
@@ -273,6 +277,7 @@ export class RemoteClusterForm extends Component<Props, State> {
           helpText={
             skipUnavailable !== defaultClusterValues.skipUnavailable ? (
               <EuiLink
+                data-test-subj="remoteClustersResetToDefaultLink"
                 onClick={() => {
                   this.resetToDefault('skipUnavailable');
                 }}
@@ -329,7 +334,11 @@ export class RemoteClusterForm extends Component<Props, State> {
     if (cancel) {
       cancelButton = (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty color="primary" onClick={cancel}>
+          <EuiButtonEmpty
+            data-test-subj="remoteClustersCancelButtonEmpty"
+            color="primary"
+            onClick={cancel}
+          >
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.cancelButtonLabel"
               defaultMessage="Cancel"

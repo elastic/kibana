@@ -258,6 +258,7 @@ export const RuleErrorLog = (props: RuleErrorLogProps) => {
         {runId && (
           <EuiFlexItem grow={false}>
             <EuiFieldSearch
+              data-test-subj="triggersActionsUiRuleErrorLogFieldSearch"
               fullWidth
               isClearable
               value={search}

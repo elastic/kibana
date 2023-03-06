@@ -35,7 +35,12 @@ const showApiKeyAndEncryptionError = (theme$?: Observable<CoreTheme>) => {
           })}
         </p>
         <EuiSpacer size="xs" />
-        <EuiLink href={settingsUrl} external target="_blank">
+        <EuiLink
+          data-test-subj="monitoringShowApiKeyAndEncryptionErrorLearnHowLink"
+          href={settingsUrl}
+          external
+          target="_blank"
+        >
           {i18n.translate('xpack.monitoring.healthCheck.encryptionErrorAction', {
             defaultMessage: 'Learn how.',
           })}
@@ -62,7 +67,12 @@ const showUnableToDisableWatcherClusterAlertsError = (theme$?: Observable<CoreTh
           })}
         </p>
         <EuiSpacer size="xs" />
-        <EuiLink href={settingsUrl} external target="_blank">
+        <EuiLink
+          data-test-subj="monitoringShowUnableToDisableWatcherClusterAlertsErrorLearnMoreLink"
+          href={settingsUrl}
+          external
+          target="_blank"
+        >
           {i18n.translate('xpack.monitoring.healthCheck.unableToDisableWatches.action', {
             defaultMessage: 'Learn more.',
           })}

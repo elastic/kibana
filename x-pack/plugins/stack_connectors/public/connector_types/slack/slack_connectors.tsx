@@ -21,7 +21,11 @@ const { urlField } = fieldValidators;
 const getWebhookUrlConfig = (docLinks: DocLinksStart): FieldConfig => ({
   label: i18n.WEBHOOK_URL_LABEL,
   helpText: (
-    <EuiLink href={docLinks.links.alerting.slackAction} target="_blank">
+    <EuiLink
+      data-test-subj="stackConnectorsGetWebhookUrlConfigCreateASlackWebhookUrlLink"
+      href={docLinks.links.alerting.slackAction}
+      target="_blank"
+    >
       <FormattedMessage
         id="xpack.stackConnectors.components.slack.webhookUrlHelpLabel"
         defaultMessage="Create a Slack Webhook URL"

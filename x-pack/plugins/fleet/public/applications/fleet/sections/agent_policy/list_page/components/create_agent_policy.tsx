@@ -110,7 +110,11 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={() => onClose()} flush="left">
+          <EuiButtonEmpty
+            data-test-subj="fleetCreateAgentPolicyFlyoutCancelButtonEmpty"
+            onClick={() => onClose()}
+            flush="left"
+          >
             <FormattedMessage
               id="xpack.fleet.createAgentPolicy.cancelButtonLabel"
               defaultMessage="Cancel"

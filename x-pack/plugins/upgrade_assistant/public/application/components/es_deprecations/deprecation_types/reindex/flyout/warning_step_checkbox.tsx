@@ -49,7 +49,12 @@ const WarningCheckbox: React.FunctionComponent<{
         </EuiFlexItem>
         {documentationUrl !== undefined && (
           <EuiFlexItem grow={false}>
-            <EuiLink href={documentationUrl} target="_blank" external={false}>
+            <EuiLink
+              data-test-subj="upgradeAssistantWarningCheckboxLink"
+              href={documentationUrl}
+              target="_blank"
+              external={false}
+            >
               <EuiIconTip
                 content={
                   <FormattedMessage

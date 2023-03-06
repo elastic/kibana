@@ -103,6 +103,7 @@ export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
             <EuiFlexGroup direction={'column'}>
               <EuiFlexItem>
                 <EuiFieldText
+                  data-test-subj="prebootExampleAppFieldText"
                   placeholder="Config key"
                   value={configKeyValue.key}
                   onChange={(e) => {
@@ -112,6 +113,7 @@ export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFieldText
+                  data-test-subj="prebootExampleAppFieldText"
                   placeholder="Config value"
                   value={configKeyValue.value}
                   onChange={(e) => {
@@ -121,6 +123,7 @@ export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiButton
+                  data-test-subj="prebootExampleAppWriteConfigButton"
                   size="m"
                   color={'danger'}
                   onClick={onWriteToken}
@@ -138,6 +141,7 @@ export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiButton
+                  data-test-subj="prebootExampleAppReloadConfigAndProceedToSetupButton"
                   size="m"
                   color={'danger'}
                   onClick={() => onCompleteSetup({ shouldReloadConfig: true })}
@@ -147,6 +151,7 @@ export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiButton
+                  data-test-subj="prebootExampleAppDoNotReloadConfigAndProceedToSetupButton"
                   size="m"
                   color={'primary'}
                   onClick={() => onCompleteSetup({ shouldReloadConfig: false })}
@@ -160,6 +165,7 @@ export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
             <EuiFlexGroup direction={'column'}>
               <EuiFlexItem>
                 <EuiFieldText
+                  data-test-subj="prebootExampleAppFieldText"
                   placeholder="elasticsearch.hosts"
                   value={elasticsearchConfig.host}
                   onChange={(e) => {
@@ -169,6 +175,7 @@ export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFieldText
+                  data-test-subj="prebootExampleAppFieldText"
                   placeholder="elasticsearch.username"
                   value={elasticsearchConfig.username}
                   onChange={(e) => {
@@ -181,6 +188,7 @@ export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiFieldText
+                  data-test-subj="prebootExampleAppFieldText"
                   placeholder="elasticsearch.password"
                   value={elasticsearchConfig.password}
                   onChange={(e) => {
@@ -193,6 +201,7 @@ export const App = ({ http, token }: { http: HttpSetup; token?: string }) => {
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiButton
+                  data-test-subj="prebootExampleAppConnectButton"
                   size="m"
                   color={'danger'}
                   onClick={onConnect}

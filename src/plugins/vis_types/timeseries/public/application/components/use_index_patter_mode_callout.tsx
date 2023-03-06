@@ -46,7 +46,12 @@ export const UseIndexPatternModeCallout = () => {
           defaultMessage="Great news! You can visualize the data from Kibana data views (recommended) or Elasticsearch indices. {indexPatternModeLink}."
           values={{
             indexPatternModeLink: (
-              <EuiLink href={indexPatternModeLink} target="_blank" external>
+              <EuiLink
+                data-test-subj="pluginsUseIndexPatternModeCalloutCheckItOutLink"
+                href={indexPatternModeLink}
+                target="_blank"
+                external
+              >
                 <FormattedMessage
                   id="visTypeTimeseries.visEditorVisualization.dataViewMode.link"
                   defaultMessage="Check it out."
@@ -57,7 +62,11 @@ export const UseIndexPatternModeCallout = () => {
         />
       </p>
       <EuiFlexGroup gutterSize="none">
-        <EuiButton size="s" onClick={dismissNotice}>
+        <EuiButton
+          data-test-subj="pluginsUseIndexPatternModeCalloutDismissButton"
+          size="s"
+          onClick={dismissNotice}
+        >
           <FormattedMessage
             id="visTypeTimeseries.visEditorVisualization.dataViewMode.dismissNoticeButtonText"
             defaultMessage="Dismiss"

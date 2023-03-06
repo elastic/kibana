@@ -33,11 +33,14 @@ const mockedActionParamsFields = lazy(async () => ({
           label="Select (with no initial selection)"
           labelAppend={
             <EuiText size="xs">
-              <EuiLink>Link to some help</EuiLink>
+              <EuiLink data-test-subj="triggersActionsUiMockedActionParamsFieldsLinkToSomeHelpLink">
+                Link to some help
+              </EuiLink>
             </EuiText>
           }
         >
           <EuiSelect
+            data-test-subj="triggersActionsUiMockedActionParamsFieldsSelect"
             hasNoInitialSelection
             options={[
               { value: 'option_one', text: 'Option one' },

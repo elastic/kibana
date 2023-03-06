@@ -65,6 +65,7 @@ export const MultiValueRow = ({
         )}
         <EuiFlexItem>
           <EuiFieldNumber
+            data-test-subj="pluginsMultiValueRowFieldNumber"
             value={model.value === '' ? '' : Number(model.value)}
             placeholder="0"
             onChange={onFieldNumberChange}

@@ -124,6 +124,7 @@ export class GeoPointForm extends Component<Props, State> {
           })}
         >
           <EuiSelect
+            data-test-subj="dataVisualizerSelect"
             options={this.state.latFields}
             value={this.state.latField}
             onChange={this.onLatFieldChange}
@@ -136,6 +137,7 @@ export class GeoPointForm extends Component<Props, State> {
           })}
         >
           <EuiSelect
+            data-test-subj="dataVisualizerSelect"
             options={this.state.lonFields}
             value={this.state.lonField}
             onChange={this.onLonFieldChange}
@@ -150,6 +152,7 @@ export class GeoPointForm extends Component<Props, State> {
           error={[this.state.geoPointFieldError]}
         >
           <EuiFieldText
+            data-test-subj="dataVisualizerFieldText"
             value={this.state.geoPointField}
             onChange={this.onGeoPointFieldChange}
             isInvalid={this.state.geoPointFieldError !== ''}
@@ -168,6 +171,7 @@ export class GeoPointForm extends Component<Props, State> {
 
         <EuiTextAlign textAlign="right">
           <EuiButton
+            data-test-subj="dataVisualizerAddButton"
             size="s"
             fill
             disabled={

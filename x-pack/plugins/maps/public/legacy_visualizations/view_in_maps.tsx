@@ -39,7 +39,7 @@ export function ViewInMaps(props: Props) {
         />
       </p>
       <div>
-        <EuiButton onClick={props.onClick} size="s">
+        <EuiButton data-test-subj="mapsViewInMapsViewInMapsButton" onClick={props.onClick} size="s">
           <FormattedMessage
             id="xpack.maps.legacyVisualizations.openInMapsButtonLabel"
             defaultMessage="View in Maps"

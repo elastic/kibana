@@ -87,6 +87,7 @@ export const SelectIntervalUI: FC<SelectIntervalUIProps> = ({ interval, onChange
 
   return (
     <EuiSelect
+      data-test-subj="mlSelectIntervalUISelect"
       prepend={i18n.translate('xpack.ml.explorer.intervalLabel', {
         defaultMessage: 'Interval',
       })}

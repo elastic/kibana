@@ -75,7 +75,11 @@ export class RevertToBasic extends React.PureComponent {
           machine learning, advanced security, and other {subscriptionFeaturesLinkText}."
           values={{
             subscriptionFeaturesLinkText: (
-              <EuiLink href={EXTERNAL_LINKS.SUBSCRIPTIONS} target="_blank">
+              <EuiLink
+                data-test-subj="licenseManagementSubscriptionFeaturesLink"
+                href={EXTERNAL_LINKS.SUBSCRIPTIONS}
+                target="_blank"
+              >
                 <FormattedMessage
                   id="xpack.licenseMgmt.licenseDashboard.revertToBasic.subscriptionFeaturesLinkText"
                   defaultMessage="subscription features"

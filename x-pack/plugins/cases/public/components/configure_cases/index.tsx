@@ -225,7 +225,11 @@ export const ConfigureCases: React.FC = React.memo(() => {
                     id="xpack.cases.configure.connectorDeletedOrLicenseWarning"
                     values={{
                       appropriateLicense: (
-                        <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                        <EuiLink
+                          data-test-subj="casesConfigureCasesLink"
+                          href="https://www.elastic.co/subscriptions"
+                          target="_blank"
+                        >
                           {i18n.LINK_APPROPRIATE_LICENSE}
                         </EuiLink>
                       ),

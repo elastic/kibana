@@ -192,6 +192,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
         })}
       >
         <EuiFieldText
+          data-test-subj="transformPopoverFormFieldText"
           defaultValue={aggName}
           isInvalid={!validAggName}
           onChange={(e) => setAggName(e.target.value)}
@@ -204,6 +205,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           })}
         >
           <EuiSelect
+            data-test-subj="transformPopoverFormSelect"
             options={availableAggs}
             value={agg}
             onChange={(e) => setAgg(e.target.value as PivotSupportedGroupByAggs)}
@@ -217,6 +219,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           })}
         >
           <EuiSelect
+            data-test-subj="transformPopoverFormSelect"
             options={availableFields}
             value={field}
             onChange={(e) => setField(e.target.value)}
@@ -240,6 +243,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
           <>
             {isGroupByHistogram(defaultData) && (
               <EuiFieldText
+                data-test-subj="transformPopoverFormFieldText"
                 defaultValue={interval}
                 isInvalid={!validInterval}
                 onChange={(e) => setInterval(e.target.value)}
@@ -247,6 +251,7 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
             )}
             {isGroupByDateHistogram(defaultData) && (
               <EuiSelect
+                data-test-subj="transformPopoverFormSelect"
                 options={[
                   { value: '1m', text: '1m' },
                   { value: '1h', text: '1h' },
@@ -271,7 +276,11 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
                 defaultMessage: 'Select to include documents without a value.',
               })}
               <br />
-              <EuiLink href={esAggsCompositeMissingBucket} target="_blank">
+              <EuiLink
+                data-test-subj="transformPopoverFormLink"
+                href={esAggsCompositeMissingBucket}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.transform.stepDetailsForm.missingBucketCheckboxHelpTextLink',
                   {
@@ -312,7 +321,11 @@ export const PopoverForm: React.FC<Props> = ({ defaultData, otherAggNames, onCha
         </>
       )}
       <EuiFormRow hasEmptyLabelSpace>
-        <EuiButton isDisabled={!formValid} onClick={() => onChange(getUpdatedItem())}>
+        <EuiButton
+          data-test-subj="transformPopoverFormApplyButton"
+          isDisabled={!formValid}
+          onClick={() => onChange(getUpdatedItem())}
+        >
           {i18n.translate('xpack.transform.groupBy.popoverForm.submitButtonLabel', {
             defaultMessage: 'Apply',
           })}

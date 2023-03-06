@@ -20,13 +20,23 @@ const ChartLegendItemComponent: React.FC<Props> = ({ color, count, onClick, text
     <EuiFlexGroup alignItems="center" gutterSize="none" justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <EuiHealth color={color}>
-          <EuiButtonEmpty aria-label={text} color="text" onClick={onClick}>
+          <EuiButtonEmpty
+            data-test-subj="kbnEcsDataQualityDashboardChartLegendItemComponentButtonEmpty"
+            aria-label={text}
+            color="text"
+            onClick={onClick}
+          >
             {text}
           </EuiButtonEmpty>
         </EuiHealth>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty aria-label={String(count)} color="text" onClick={onClick}>
+        <EuiButtonEmpty
+          data-test-subj="kbnEcsDataQualityDashboardChartLegendItemComponentButtonEmpty"
+          aria-label={String(count)}
+          color="text"
+          onClick={onClick}
+        >
           <div>{count}</div>
         </EuiButtonEmpty>
       </EuiFlexItem>

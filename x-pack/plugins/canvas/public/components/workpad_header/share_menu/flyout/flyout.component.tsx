@@ -138,6 +138,7 @@ export const ShareWebsiteFlyout: FC<Props> = ({
 
   const link = (
     <EuiLink
+      data-test-subj="canvasShareWebsiteFlyoutDownloadAnExampleZipFileLink"
       style={{ textDecoration: 'underline' }}
       onClick={() => {
         onDownload('shareZip');

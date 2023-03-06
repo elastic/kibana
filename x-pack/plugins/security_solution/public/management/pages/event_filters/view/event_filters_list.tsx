@@ -100,7 +100,11 @@ const EVENT_FILTERS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
           id="xpack.securitySolution.eventFilters.flyoutDowngradedLicenseDocsInfo"
           defaultMessage="For more information, see our "
         />
-        <EuiLink target="_blank" href={`${securitySolutionDocsLinks.eventFilters}`}>
+        <EuiLink
+          data-test-subj="securitySolutionEVENT_FILTERS_PAGE_LABELSEventFiltersDocumentationLink"
+          target="_blank"
+          href={`${securitySolutionDocsLinks.eventFilters}`}
+        >
           <FormattedMessage
             id="xpack.securitySolution.eventFilters.flyoutDowngradedLicenseDocsLink"
             defaultMessage="Event filters documentation"

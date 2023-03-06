@@ -85,7 +85,12 @@ export const EmptyEngineOverview: React.FC = () => {
           { defaultMessage: 'Engine setup' }
         ),
         rightSideItems: [
-          <EuiButton href={DOCS_URL} target="_blank" iconType="popout">
+          <EuiButton
+            data-test-subj="enterpriseSearchEmptyEngineOverviewViewDocumentationButton"
+            href={DOCS_URL}
+            target="_blank"
+            iconType="popout"
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.overview.empty.headingAction',
               { defaultMessage: 'View documentation' }

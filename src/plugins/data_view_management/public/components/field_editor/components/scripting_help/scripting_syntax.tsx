@@ -30,7 +30,11 @@ export const ScriptingSyntax = () => {
           specifically for use with Elasticsearch, to access values in the document use the following format:"
             values={{
               painless: (
-                <EuiLink target="_blank" href={docLinksScriptedFields.painless}>
+                <EuiLink
+                  data-test-subj="pluginsScriptingSyntaxLink"
+                  target="_blank"
+                  href={docLinksScriptedFields.painless}
+                >
                   <FormattedMessage
                     id="indexPatternManagement.syntax.defaultLabel.painlessLink"
                     defaultMessage="Painless"
@@ -56,7 +60,11 @@ export const ScriptingSyntax = () => {
           you'll be up to speed in no time!"
             values={{
               javaAPIs: (
-                <EuiLink target="_blank" href={docLinksScriptedFields.painlessApi}>
+                <EuiLink
+                  data-test-subj="pluginsScriptingSyntaxLink"
+                  target="_blank"
+                  href={docLinksScriptedFields.painlessApi}
+                >
                   <FormattedMessage
                     id="indexPatternManagement.syntax.painlessLabel.javaAPIsLink"
                     defaultMessage="native Java APIs"
@@ -66,7 +74,11 @@ export const ScriptingSyntax = () => {
                 </EuiLink>
               ),
               syntax: (
-                <EuiLink target="_blank" href={docLinksScriptedFields.painlessSyntax}>
+                <EuiLink
+                  data-test-subj="pluginsScriptingSyntaxLink"
+                  target="_blank"
+                  href={docLinksScriptedFields.painlessSyntax}
+                >
                   <FormattedMessage
                     id="indexPatternManagement.syntax.painlessLabel.syntaxLink"
                     defaultMessage="syntax"
@@ -92,7 +104,11 @@ export const ScriptingSyntax = () => {
           are a lot like JavaScript, but limited to basic arithmetic, bitwise and comparison operations."
             values={{
               lucene: (
-                <EuiLink target="_blank" href={docLinksScriptedFields.luceneExpressions}>
+                <EuiLink
+                  data-test-subj="pluginsScriptingSyntaxLink"
+                  target="_blank"
+                  href={docLinksScriptedFields.luceneExpressions}
+                >
                   <FormattedMessage
                     id="indexPatternManagement.syntax.lucene.commonLabel.luceneLink"
                     defaultMessage="Lucene Expressions"

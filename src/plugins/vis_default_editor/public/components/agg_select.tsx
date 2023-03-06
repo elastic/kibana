@@ -69,7 +69,12 @@ function DefaultEditorAggSelect({
 
   const helpLink = value && aggHelpLink && (
     <EuiText size="xs">
-      <EuiLink href={aggHelpLink} target="_blank" rel="noopener">
+      <EuiLink
+        data-test-subj="pluginsDefaultEditorAggSelectAggTitleHelpLink"
+        href={aggHelpLink}
+        target="_blank"
+        rel="noopener"
+      >
         <FormattedMessage
           id="visDefaultEditor.aggSelect.helpLinkLabel"
           defaultMessage="{aggTitle} help"

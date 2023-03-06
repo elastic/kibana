@@ -34,7 +34,13 @@ export const ManageKeysPopover: React.FC = () => {
       isOpen={isManageKeysPopoverOpen}
       closePopover={toggleManageApiKeyPopover}
       button={
-        <EuiButton fill iconType="arrowDown" iconSide="right" onClick={toggleManageApiKeyPopover}>
+        <EuiButton
+          data-test-subj="enterpriseSearchManageKeysPopoverManageApiKeysButton"
+          fill
+          iconType="arrowDown"
+          iconSide="right"
+          onClick={toggleManageApiKeyPopover}
+        >
           {i18n.translate(
             'xpack.enterpriseSearch.content.overview.documentExample.generateApiKeyButton.label',
             { defaultMessage: 'Manage API keys' }

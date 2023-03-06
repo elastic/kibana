@@ -88,6 +88,7 @@ export class FlyoutFooter extends Component<Props, State> {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="mapsSaveCloseButton"
               disabled={!this.props.hasStateChanged}
               iconType="check"
               onClick={this.props.saveLayerEdits}

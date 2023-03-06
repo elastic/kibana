@@ -163,7 +163,11 @@ export const LogRetentionPanel: React.FC = () => {
             defaultMessage: 'Log retention is determined by the ILM policies for your deployment.',
           })}
           <br />
-          <EuiLink href={LOG_SETTINGS_DOCS_URL} target="_blank">
+          <EuiLink
+            data-test-subj="enterpriseSearchLogRetentionPanelLearnMoreAboutLogRetentionForEnterpriseSearchLink"
+            href={LOG_SETTINGS_DOCS_URL}
+            target="_blank"
+          >
             {i18n.translate('xpack.enterpriseSearch.appSearch.settings.logRetention.learnMore', {
               defaultMessage: 'Learn more about log retention for Enterprise Search.',
             })}

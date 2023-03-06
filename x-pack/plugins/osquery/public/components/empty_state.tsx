@@ -67,6 +67,7 @@ const OsqueryAppEmptyStateComponent = () => {
       rightSideItems: [
         // eslint-disable-next-line @elastic/eui/href-or-on-click
         <EuiButton
+          data-test-subj="osqueryPageHeaderAddOsqueryManagerButton"
           key="button"
           fill
           href={integrationHref}

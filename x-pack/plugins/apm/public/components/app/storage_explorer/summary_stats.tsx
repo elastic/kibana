@@ -186,7 +186,10 @@ export function SummaryStats() {
         <EuiFlexItem grow={false}>
           <EuiFlexGroup direction="column" justifyContent="spaceBetween">
             <EuiFlexItem>
-              <EuiLink href={serviceInventoryLink}>
+              <EuiLink
+                data-test-subj="apmSummaryStatsGoToServiceInventoryLink"
+                href={serviceInventoryLink}
+              >
                 {i18n.translate(
                   'xpack.apm.storageExplorer.summary.serviceInventoryLink',
                   {
@@ -196,7 +199,10 @@ export function SummaryStats() {
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink href={getIndexManagementHref(core)}>
+              <EuiLink
+                data-test-subj="apmSummaryStatsGoToIndexManagementLink"
+                href={getIndexManagementHref(core)}
+              >
                 {i18n.translate(
                   'xpack.apm.storageExplorer.summary.indexManagementLink',
                   {

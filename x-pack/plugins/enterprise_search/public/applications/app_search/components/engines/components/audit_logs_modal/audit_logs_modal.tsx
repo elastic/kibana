@@ -112,7 +112,11 @@ export const AuditLogsModal: React.FC = () => {
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButton onClick={hideModal} fill>
+        <EuiButton
+          data-test-subj="enterpriseSearchAuditLogsModalCloseButton"
+          onClick={hideModal}
+          fill
+        >
           {i18n.translate('xpack.enterpriseSearch.appSearch.engines.auditLogsModal.closeButton', {
             defaultMessage: 'Close',
           })}

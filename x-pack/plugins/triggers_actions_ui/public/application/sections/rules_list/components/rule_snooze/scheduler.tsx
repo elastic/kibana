@@ -80,7 +80,12 @@ export const RuleSnoozeScheduler: React.FunctionComponent<ComponentOpts> = ({
               <EuiIcon type="arrowLeft" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink color="text" style={{ fontWeight: 'bold' }} onClick={onClose}>
+              <EuiLink
+                data-test-subj="triggersActionsUiRuleSnoozeSchedulerLink"
+                color="text"
+                style={{ fontWeight: 'bold' }}
+                onClick={onClose}
+              >
                 {title}
               </EuiLink>
             </EuiFlexItem>
@@ -366,7 +371,12 @@ const RuleSnoozeSchedulerPanel: React.FunctionComponent<PanelOpts> = ({
             {!inPopover && <EuiSpacer size="s" />}
             <EuiFlexGroup>
               <EuiFlexItem grow>
-                <EuiButton isLoading={isLoading} color="danger" onClick={onCancelSchedule}>
+                <EuiButton
+                  data-test-subj="triggersActionsUiRuleSnoozeSchedulerPanelDeleteScheduleButton"
+                  isLoading={isLoading}
+                  color="danger"
+                  onClick={onCancelSchedule}
+                >
                   {i18n.translate('xpack.triggersActionsUI.sections.rulesList.deleteSchedule', {
                     defaultMessage: 'Delete schedule',
                   })}

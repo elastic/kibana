@@ -50,6 +50,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
   const renderToolsRight = () => {
     return [
       <EuiButton
+        data-test-subj="filesExampleRenderToolsRightSelectAFileButton"
         onClick={() => setShowFilePickerModal(true)}
         isDisabled={isLoading || isDeletingFile}
         iconType="eye"
@@ -57,6 +58,7 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
         Select a file
       </EuiButton>,
       <EuiButton
+        data-test-subj="filesExampleRenderToolsRightUploadImageButton"
         onClick={() => setShowUploadModal(true)}
         isDisabled={isLoading || isDeletingFile}
         iconType="exportAction"
@@ -73,7 +75,11 @@ export const FilesExampleApp = ({ files, notifications }: FilesExampleAppDeps) =
       field: 'name',
       name: 'Name',
       render: (name, item) => (
-        <EuiLink disabled={isDeletingFile} onClick={() => setSelectedItem(item)}>
+        <EuiLink
+          data-test-subj="filesExampleColumnsLink"
+          disabled={isDeletingFile}
+          onClick={() => setSelectedItem(item)}
+        >
           {name}
         </EuiLink>
       ),

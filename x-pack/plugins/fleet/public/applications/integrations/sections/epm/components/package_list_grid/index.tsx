@@ -200,6 +200,7 @@ export const PackageListGrid: FunctionComponent<Props> = ({
               return (
                 <EuiFlexItem grow={false} key={subCategory.id}>
                   <EuiButton
+                    data-test-subj="fleetPackageListGridSubcategoryButton"
                     css={isSelected ? 'color: white' : ''}
                     color={isSelected ? 'accent' : 'text'}
                     fill={isSelected}

@@ -26,7 +26,12 @@ const AgentEnrollmentPrePollInstructions: React.FC<{ troubleshootLink: string }>
         defaultMessage="After the agent starts up, the Elastic Stack listens for the agent and confirms the enrollment in Fleet. If you're having trouble connecting, check out the {link}."
         values={{
           link: (
-            <EuiLink target="_blank" external href={troubleshootLink}>
+            <EuiLink
+              data-test-subj="fleetAgentEnrollmentPrePollInstructionsTroubleshootingGuideLink"
+              target="_blank"
+              external
+              href={troubleshootLink}
+            >
               <FormattedMessage
                 id="xpack.fleet.enrollmentInstructions.troubleshootingLink"
                 defaultMessage="troubleshooting guide"

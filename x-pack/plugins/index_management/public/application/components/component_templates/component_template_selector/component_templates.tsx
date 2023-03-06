@@ -140,7 +140,10 @@ export const ComponentTemplates = ({ isLoading, components, listItemProps }: Pro
           </h3>
         }
         actions={
-          <EuiButton onClick={clearSearch}>
+          <EuiButton
+            data-test-subj="indexManagementRenderEmptyResultClearSearchButton"
+            onClick={clearSearch}
+          >
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplatesSelector.searchResult.emptyPrompt.clearSearchButtonLabel"
               defaultMessage="Clear search"

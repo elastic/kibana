@@ -246,7 +246,12 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         }
       ),
       labelAppend: (
-        <EuiButtonEmpty onClick={handleCreateInLensClick} color="primary" size="xs">
+        <EuiButtonEmpty
+          data-test-subj="casesEuiFormRowPropsCreateVisualizationButtonEmpty"
+          onClick={handleCreateInLensClick}
+          color="primary"
+          size="xs"
+        >
           <FormattedMessage
             id="xpack.cases.markdownEditor.plugins.lens.createVisualizationButtonLabel"
             defaultMessage="Create visualization"
@@ -368,7 +373,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
         />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButton onClick={handleClose} fill>
+        <EuiButton data-test-subj="casesLensEditorComponentCloseButton" onClick={handleClose} fill>
           <FormattedMessage
             id="xpack.cases.markdownEditor.plugins.lens.closeButtonLabel"
             defaultMessage="Close"

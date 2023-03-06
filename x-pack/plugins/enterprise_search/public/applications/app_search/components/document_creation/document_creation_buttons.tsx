@@ -106,7 +106,11 @@ export const DocumentCreationButtons: React.FC<Props> = ({
                 )}
               </span>
             </EuiTitle>{' '}
-            <EuiLink href={INDEXING_DOCS_URL} target="_blank">
+            <EuiLink
+              data-test-subj="enterpriseSearchDocumentCreationButtonsReadDocumentationLink"
+              href={INDEXING_DOCS_URL}
+              target="_blank"
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.appSearch.documentCreation.buttons.emptyStateFooterLink',
                 { defaultMessage: 'Read documentation' }

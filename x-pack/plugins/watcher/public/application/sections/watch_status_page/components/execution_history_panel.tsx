@@ -363,6 +363,7 @@ export const ExecutionHistoryPanel = () => {
       <EuiFlexGroup gutterSize="s" justifyContent="flexStart" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiSelect
+            data-test-subj="watcherExecutionHistoryPanelSelect"
             options={watchHistoryTimeSpanOptions}
             value={watchHistoryTimeSpan}
             onChange={onTimespanChange}

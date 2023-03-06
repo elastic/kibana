@@ -80,6 +80,7 @@ export const ExternalConnectorFormFields: React.FC = () => {
         }
       >
         <EuiFieldText
+          data-test-subj="enterpriseSearchExternalConnectorFormFieldsFieldText"
           value={externalConnectorUrl}
           disabled={formDisabled}
           onBlur={validateUrl}
@@ -99,6 +100,7 @@ export const ExternalConnectorFormFields: React.FC = () => {
         )}
       >
         <EuiFieldText
+          data-test-subj="enterpriseSearchExternalConnectorFormFieldsFieldText"
           value={externalConnectorApiKey}
           disabled={formDisabled}
           required

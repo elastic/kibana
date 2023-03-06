@@ -75,6 +75,7 @@ export function RunExpressionsExample({ expressions, inspector }: Props) {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButton
+                data-test-subj="expressionsExplorerRunExpressionsExampleOpenInspectorButton"
                 onClick={() => {
                   inspector.open(inspectorAdapters);
                 }}

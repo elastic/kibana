@@ -123,6 +123,7 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
     <>
       <EuiFormRow label="Subdomain">
         <EuiFieldText
+          data-test-subj="enterpriseSearchConnectInstanceFieldText"
           required
           name="subdomain"
           value={subdomainValue}
@@ -149,7 +150,13 @@ export const ConnectInstance: React.FC<ConnectInstanceProps> = ({
       {permissionsExcluded && !hasPlatinumLicense && <DocumentPermissionsCallout />}
 
       <EuiFormRow>
-        <EuiButton color="primary" type="submit" fill isLoading={buttonLoading}>
+        <EuiButton
+          data-test-subj="enterpriseSearchConnectInstanceConnectNameButton"
+          color="primary"
+          type="submit"
+          fill
+          isLoading={buttonLoading}
+        >
           {i18n.translate('xpack.enterpriseSearch.workplaceSearch.contentSource.connect.button', {
             defaultMessage: 'Connect {name}',
             values: { name },

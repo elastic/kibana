@@ -28,7 +28,7 @@ export function Footer({ url, label }) {
       </EuiFlexItem>
 
       <EuiFlexItem grow={false}>
-        <EuiButton fill href={url}>
+        <EuiButton data-test-subj="pluginsFooterButton" fill href={url}>
           {label}
         </EuiButton>
       </EuiFlexItem>

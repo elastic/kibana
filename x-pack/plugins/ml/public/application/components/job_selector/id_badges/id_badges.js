@@ -56,7 +56,7 @@ export function IdBadges({ limit, maps, onLinkClick, selectedIds, showAllBarBadg
   if (showAllBarBadges || badges.length <= limit) {
     if (badges.length > limit) {
       badges.push(
-        <EuiLink key="more-badges-bar-link" onClick={onLinkClick}>
+        <EuiLink data-test-subj="mlIdBadgesLink" key="more-badges-bar-link" onClick={onLinkClick}>
           <EuiText grow={false} size="xs">
             {i18n.translate('xpack.ml.jobSelector.hideBarBadges', {
               defaultMessage: 'Hide',
@@ -72,7 +72,7 @@ export function IdBadges({ limit, maps, onLinkClick, selectedIds, showAllBarBadg
 
     badges.splice(limit);
     badges.push(
-      <EuiLink key="more-badges-bar-link" onClick={onLinkClick}>
+      <EuiLink data-test-subj="mlIdBadgesLink" key="more-badges-bar-link" onClick={onLinkClick}>
         <EuiText grow={false} size="xs">
           {i18n.translate('xpack.ml.jobSelector.showBarBadges', {
             defaultMessage: `And {overFlow} more`,

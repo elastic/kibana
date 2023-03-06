@@ -181,6 +181,7 @@ export class Footer extends Component<Props, State> {
         <EuiFlexItem key="layerSelect">
           <EuiFormRow display="rowCompressed">
             <EuiSelect
+              data-test-subj="mapsSelect"
               options={[
                 {
                   value: ALL_LAYERS,

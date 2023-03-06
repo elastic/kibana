@@ -81,7 +81,11 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ modelIds, onClos
       </EuiModalHeader>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose.bind(null, false)} name="cancelModelDeletion">
+        <EuiButtonEmpty
+          data-test-subj="mlDeleteModelsModalCancelButtonEmpty"
+          onClick={onClose.bind(null, false)}
+          name="cancelModelDeletion"
+        >
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.deleteModal.cancelButtonLabel"
             defaultMessage="Cancel"

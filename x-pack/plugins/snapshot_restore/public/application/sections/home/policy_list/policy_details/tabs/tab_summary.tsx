@@ -190,7 +190,10 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              <EuiLink {...reactRouterNavigate(history, linkToSnapshots(undefined, name))}>
+              <EuiLink
+                data-test-subj="snapshotRestoreTabSummaryLink"
+                {...reactRouterNavigate(history, linkToSnapshots(undefined, name))}
+              >
                 {snapshotName}
               </EuiLink>
             </EuiDescriptionListDescription>
@@ -207,7 +210,10 @@ export const TabSummary: React.FunctionComponent<Props> = ({ policy }) => {
             </EuiDescriptionListTitle>
 
             <EuiDescriptionListDescription className="eui-textBreakWord" data-test-subj="value">
-              <EuiLink {...reactRouterNavigate(history, linkToRepository(repository))}>
+              <EuiLink
+                data-test-subj="snapshotRestoreTabSummaryLink"
+                {...reactRouterNavigate(history, linkToRepository(repository))}
+              >
                 {repository}
               </EuiLink>
             </EuiDescriptionListDescription>

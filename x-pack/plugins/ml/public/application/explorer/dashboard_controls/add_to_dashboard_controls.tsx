@@ -113,7 +113,10 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
         </EuiFormRow>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose.bind(null, undefined)}>
+        <EuiButtonEmpty
+          data-test-subj="mlAddToDashboardControlCancelButtonEmpty"
+          onClick={onClose.bind(null, undefined)}
+        >
           <FormattedMessage
             id="xpack.ml.explorer.addToDashboard.cancelButtonLabel"
             defaultMessage="Cancel"

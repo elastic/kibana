@@ -49,7 +49,11 @@ export const NewSelectionIdBadges: FC<NewSelectionIdBadgesProps> = ({
 
   if (showAllBadges === false && newSelection.length > limit) {
     badges.push(
-      <EuiLink key="more-badges-link" onClick={onLinkClick}>
+      <EuiLink
+        data-test-subj="mlNewSelectionIdBadgesLink"
+        key="more-badges-link"
+        onClick={onLinkClick}
+      >
         <EuiText grow={false} size="xs">
           {i18n.translate('xpack.ml.jobSelector.showFlyoutBadges', {
             defaultMessage: `And {overFlow} more`,
@@ -60,7 +64,11 @@ export const NewSelectionIdBadges: FC<NewSelectionIdBadgesProps> = ({
     );
   } else if (showAllBadges === true && newSelection.length > limit) {
     badges.push(
-      <EuiLink key="hide-badges-link" onClick={onLinkClick}>
+      <EuiLink
+        data-test-subj="mlNewSelectionIdBadgesLink"
+        key="hide-badges-link"
+        onClick={onLinkClick}
+      >
         <EuiText grow={false} size="xs">
           {i18n.translate('xpack.ml.jobSelector.hideFlyoutBadges', {
             defaultMessage: 'Hide',

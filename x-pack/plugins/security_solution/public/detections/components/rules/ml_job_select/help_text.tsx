@@ -25,7 +25,11 @@ const HelpTextComponent: React.FC<{ href: string; notRunningJobIds: string[] }> 
       defaultMessage="We've provided a few common jobs to get you started. To add your own custom jobs, assign a group of 'security' to those jobs in the {machineLearning} application to make them appear here."
       values={{
         machineLearning: (
-          <EuiLink href={href} target="_blank">
+          <EuiLink
+            data-test-subj="securitySolutionHelpTextComponentMachineLearningLink"
+            href={href}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.securitySolution.components.mlJobSelect.machineLearningLink"
               defaultMessage="Machine Learning"

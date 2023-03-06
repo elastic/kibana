@@ -178,7 +178,11 @@ export class JobDetails extends Component {
               />
             }
           >
-            <EuiFieldText value={description} onChange={this.onDescriptionChange} />
+            <EuiFieldText
+              data-test-subj="mlFieldText"
+              value={description}
+              onChange={this.onDescriptionChange}
+            />
           </EuiFormRow>
           <EuiFormRow
             label={
@@ -218,6 +222,7 @@ export class JobDetails extends Component {
             error={mmlValidationError}
           >
             <EuiFieldText
+              data-test-subj="mlFieldText"
               value={mml}
               onChange={this.onMmlChange}
               isInvalid={mmlValidationError !== ''}
@@ -234,6 +239,7 @@ export class JobDetails extends Component {
             }
           >
             <EuiFieldNumber
+              data-test-subj="mlFieldNumber"
               min={0}
               value={modelSnapshotRetentionDays}
               onChange={this.onModelSnapshotRetentionDaysChange}
@@ -248,6 +254,7 @@ export class JobDetails extends Component {
             }
           >
             <EuiFieldNumber
+              data-test-subj="mlFieldNumber"
               min={0}
               max={modelSnapshotRetentionDays}
               value={dailyModelSnapshotRetentionAfterDays}

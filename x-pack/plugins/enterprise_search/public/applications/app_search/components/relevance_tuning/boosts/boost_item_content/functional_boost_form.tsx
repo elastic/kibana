@@ -56,6 +56,7 @@ export const FunctionalBoostForm: React.FC<Props> = ({ boost, index, name }) => 
         fullWidth
       >
         <EuiSelect
+          data-test-subj="enterpriseSearchFunctionalBoostFormSelect"
           name={`function-${BoostType.Functional}${index}`}
           options={functionOptions}
           value={boost.function}
@@ -75,6 +76,7 @@ export const FunctionalBoostForm: React.FC<Props> = ({ boost, index, name }) => 
         fullWidth
       >
         <EuiSelect
+          data-test-subj="enterpriseSearchFunctionalBoostFormSelect"
           name={`operation-${BoostType.Functional}${index}`}
           options={operationOptions}
           value={boost.operation}

@@ -89,6 +89,7 @@ export class GeometryFilterForm extends Component<Props> {
         display="rowCompressed"
       >
         <EuiSelect
+          data-test-subj="mapsSelect"
           compressed
           options={options}
           value={this.state.relation}
@@ -112,6 +113,7 @@ export class GeometryFilterForm extends Component<Props> {
           display="rowCompressed"
         >
           <EuiFieldText
+            data-test-subj="mapsFieldText"
             compressed
             value={this.state.geometryLabel}
             onChange={this._onGeometryLabelChange}
@@ -133,6 +135,7 @@ export class GeometryFilterForm extends Component<Props> {
 
         <EuiTextAlign textAlign="right">
           <EuiButton
+            data-test-subj="mapsButton"
             size="s"
             fill
             onClick={this._onSubmit}

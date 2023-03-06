@@ -76,6 +76,7 @@ export const StepOne = ({ guidedOnboarding }: GuidedOnboardingExampleAppDeps) =>
           anchorPosition="rightUp"
         >
           <EuiButton
+            data-test-subj="guidedOnboardingExampleStepOneCompleteStep1Button"
             onClick={async () => {
               await guidedOnboardingApi?.completeGuideStep('testGuide', 'step1');
             }}

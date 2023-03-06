@@ -29,7 +29,15 @@ export const SimpleMathFunction = ({ onChange, value, onlymath }) => {
     options.unshift({ text: strings.getOptionValue(), value: '' });
   }
 
-  return <EuiSelect compressed options={options} value={value} onChange={onChange} />;
+  return (
+    <EuiSelect
+      data-test-subj="canvasSimpleMathFunctionSelect"
+      compressed
+      options={options}
+      value={value}
+      onChange={onChange}
+    />
+  );
 };
 
 SimpleMathFunction.propTypes = {

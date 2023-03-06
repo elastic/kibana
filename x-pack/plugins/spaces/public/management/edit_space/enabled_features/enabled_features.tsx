@@ -54,6 +54,7 @@ export const EnabledFeatures: FunctionComponent<Props> = (props) => {
                 values={{
                   manageRolesLink: canManageRoles ? (
                     <EuiLink
+                      data-test-subj="spacesEnabledFeaturesManageSecurityRolesLink"
                       href={services.application?.getUrlForApp('management', {
                         path: '/security/roles',
                       })}

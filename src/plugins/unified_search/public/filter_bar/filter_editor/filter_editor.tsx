@@ -206,6 +206,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
             <EuiSpacer size="l" />
             <EuiFormRow label={strings.getCustomLabel()} fullWidth>
               <EuiFieldText
+                data-test-subj="pluginsFieldText"
                 value={`${this.state.customLabel}`}
                 onChange={this.onCustomLabelChange}
                 placeholder={strings.getAddCustomLabel()}

@@ -370,7 +370,10 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
                   defaultMessage="All new indices that you create will use this template."
                 />{' '}
                 {/* Edit link navigates back to step 1 (logistics) */}
-                <EuiLink onClick={navigateToStep.bind(null, 'logistics')}>
+                <EuiLink
+                  data-test-subj="indexManagementStepReviewEditIndexPatternsLink"
+                  onClick={navigateToStep.bind(null, 'logistics')}
+                >
                   <FormattedMessage
                     id="xpack.idxMgmt.templateForm.stepReview.summaryTab.indexPatternsWarningLinkText"
                     defaultMessage="Edit index patterns."

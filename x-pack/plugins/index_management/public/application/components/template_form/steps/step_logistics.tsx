@@ -68,6 +68,7 @@ function getFieldsMeta(esDocsBase: string) {
           values={{
             docsLink: (
               <EuiLink
+                data-test-subj="indexManagementGetFieldsMetaLearnMoreLink"
                 href={documentationService.getDataStreamsDocumentationLink()}
                 target="_blank"
                 external
@@ -206,6 +207,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="indexManagementStepLogisticsIndexTemplatesDocsButtonEmpty"
               size="s"
               flush="right"
               href={documentationService.getTemplatesDocumentationLink(isLegacy)}

@@ -30,6 +30,7 @@ export const StepDetailsLinkIcon = ({
   if (asButton) {
     return (
       <EuiButtonEmpty
+        data-test-subj="syntheticsStepDetailsLinkIconButtonEmpty"
         flush="left"
         iconType="apmTrace"
         href={`${basePath}/app/synthetics/monitor/${configId}/test-run/${checkGroup}/step/${stepIndex}?locationId=${selectedLocation?.id}`}

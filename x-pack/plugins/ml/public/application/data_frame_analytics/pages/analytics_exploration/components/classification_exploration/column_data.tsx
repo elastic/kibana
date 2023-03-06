@@ -115,7 +115,10 @@ export function getTrailingControlColumns(
             closePopover={() => setIsPopoverOpen(false)}
             ownFocus={true}
           >
-            <EuiButtonEmpty onClick={() => setShowFullColumns(true)}>
+            <EuiButtonEmpty
+              data-test-subj="mlGetTrailingControlColumnsButtonEmpty"
+              onClick={() => setShowFullColumns(true)}
+            >
               <EuiText size="s" grow={false} textAlign="center">
                 {i18n.translate(
                   'xpack.ml.dataframe.analytics.classificationExploration.showAllColumns',

@@ -15,7 +15,13 @@ export const FleetServerFlyout = () => {
 
   return (
     <div style={{ width: 900 }}>
-      <EuiButton size="m" fill color="primary" onClick={() => setIsOpen(true)}>
+      <EuiButton
+        data-test-subj="fleetFleetServerFlyoutShowFlyoutButton"
+        size="m"
+        fill
+        color="primary"
+        onClick={() => setIsOpen(true)}
+      >
         Show flyout
       </EuiButton>
       {isOpen && <FleetServerFlyoutComponent onClose={() => setIsOpen(false)} />}

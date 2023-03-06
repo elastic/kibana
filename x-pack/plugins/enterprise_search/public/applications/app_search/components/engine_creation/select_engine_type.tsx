@@ -97,6 +97,7 @@ export const SelectEngineType: React.FC = () => {
             }
           )}
           <EuiLink
+            data-test-subj="enterpriseSearchSelectEngineTypeLearnMoreLink"
             href="https://www.elastic.co/guide/en/app-search/current/elasticsearch-engines.html"
             external
           >
@@ -170,6 +171,7 @@ export const SelectEngineType: React.FC = () => {
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="enterpriseSearchSelectEngineTypeContinueButton"
               fill
               iconType="arrowRight"
               iconSide="right"

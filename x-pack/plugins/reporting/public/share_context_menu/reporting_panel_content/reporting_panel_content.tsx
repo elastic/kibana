@@ -135,7 +135,13 @@ class ReportingPanelContentUi extends Component<Props, State> {
     return (
       <EuiCopy textToCopy={this.state.absoluteUrl} anchorClassName="eui-displayBlock">
         {(copy) => (
-          <EuiButton color={isUnsaved ? 'warning' : 'primary'} fullWidth onClick={copy} size="s">
+          <EuiButton
+            data-test-subj="reportingCopyPostUrlButton"
+            color={isUnsaved ? 'warning' : 'primary'}
+            fullWidth
+            onClick={copy}
+            size="s"
+          >
             <FormattedMessage
               id="xpack.reporting.panelContent.copyUrlButtonLabel"
               defaultMessage="Copy POST URL"

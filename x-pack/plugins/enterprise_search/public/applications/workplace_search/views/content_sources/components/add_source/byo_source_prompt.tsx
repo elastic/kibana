@@ -98,6 +98,7 @@ export const BYOSourcePrompt: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButton
+                data-test-subj="enterpriseSearchBYOSourcePromptLearnMoreButton"
                 href={''} // TODO Update this when we have a doclink
                 color="primary"
               >

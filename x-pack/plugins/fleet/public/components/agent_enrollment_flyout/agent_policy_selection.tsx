@@ -83,7 +83,11 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
             defaultMessage="Type of hosts are controlled by an {agentPolicy}. Choose an agent policy or create a new one."
             values={{
               agentPolicy: (
-                <EuiLink href={docLinks.links.fleet.agentPolicy} target="_blank">
+                <EuiLink
+                  data-test-subj="fleetAgentPolicySelectionAgentPolicyLink"
+                  href={docLinks.links.fleet.agentPolicy}
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.fleet.agentPolicyForm.createAgentPolicyDocLink"
                     defaultMessage="agent policy"
@@ -101,7 +105,11 @@ export const AgentPolicySelection: React.FC<Props> = (props) => {
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <div>
-                <EuiLink disabled={!hasFleetAllPrivileges} onClick={onClickCreatePolicy}>
+                <EuiLink
+                  data-test-subj="fleetAgentPolicySelectionCreateNewAgentPolicyLink"
+                  disabled={!hasFleetAllPrivileges}
+                  onClick={onClickCreatePolicy}
+                >
                   <FormattedMessage
                     id="xpack.fleet.enrollmentStepAgentPolicy.addPolicyButton"
                     defaultMessage="Create new agent policy"

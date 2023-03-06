@@ -49,6 +49,7 @@ export class NumberFormatEditor extends DefaultFormatEditor<NumberFormatEditorPa
           helpText={
             <span>
               <EuiLink
+                data-test-subj="pluginsLink"
                 target="_blank"
                 href={this.context.services.docLinks?.links.indexPatterns.fieldFormattersNumber}
               >

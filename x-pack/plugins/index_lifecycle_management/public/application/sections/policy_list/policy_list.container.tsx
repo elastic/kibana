@@ -62,7 +62,12 @@ export const PolicyList: React.FunctionComponent = () => {
             </p>
           }
           actions={
-            <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
+            <EuiButton
+              data-test-subj="indexLifecycleManagementPolicyListTryAgainButton"
+              onClick={resendRequest}
+              iconType="refresh"
+              color="danger"
+            >
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.policyTable.policiesReloadButton"
                 defaultMessage="Try again"

@@ -80,7 +80,13 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     () => (
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" href={getHref('agent_list')} flush="left" size="xs">
+          <EuiButtonEmpty
+            data-test-subj="fleetHeaderLeftContentViewAllAgentsButtonEmpty"
+            iconType="arrowLeft"
+            href={getHref('agent_list')}
+            flush="left"
+            size="xs"
+          >
             <FormattedMessage
               id="xpack.fleet.agentDetails.viewAgentListTitle"
               defaultMessage="View all agents"

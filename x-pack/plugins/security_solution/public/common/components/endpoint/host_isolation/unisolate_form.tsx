@@ -71,7 +71,13 @@ export const EndpointUnisolateForm = memo<EndpointIsolatedFormProps>(
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton fill onClick={onConfirm} disabled={isLoading} isLoading={isLoading}>
+              <EuiButton
+                data-test-subj="securitySolutionEndpointUnisolateFormButton"
+                fill
+                onClick={onConfirm}
+                disabled={isLoading}
+                isLoading={isLoading}
+              >
                 {CONFIRM}
               </EuiButton>
             </EuiFlexItem>

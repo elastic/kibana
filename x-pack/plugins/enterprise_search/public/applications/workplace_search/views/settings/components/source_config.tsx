@@ -101,7 +101,11 @@ export const SourceConfig: React.FC = () => {
                 color="primary"
                 iconType="email"
                 title={
-                  <EuiLink href="https://www.elastic.co/kibana/feedback" external>
+                  <EuiLink
+                    data-test-subj="enterpriseSearchSourceConfigHaveFeedbackAboutDeployingANameConnectorPackageLetUsKnowLink"
+                    href="https://www.elastic.co/kibana/feedback"
+                    external
+                  >
                     {i18n.translate(
                       'xpack.enterpriseSearch.workplaceSearch.settings.feedbackCallOutText',
                       {

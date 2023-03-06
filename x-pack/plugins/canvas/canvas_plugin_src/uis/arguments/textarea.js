@@ -42,6 +42,7 @@ const TextAreaArgInput = ({ argValue, typeInstance, onValueChange, renderError, 
     <div>
       <EuiFormRow display="rowCompressed">
         <EuiTextArea
+          data-test-subj="canvasTextAreaArgInputTextArea"
           className="canvasTextArea__code"
           id={argId}
           compressed
@@ -52,7 +53,11 @@ const TextAreaArgInput = ({ argValue, typeInstance, onValueChange, renderError, 
         />
       </EuiFormRow>
       <EuiSpacer size="s" />
-      <EuiButton size="s" onClick={() => onValueChange(value)}>
+      <EuiButton
+        data-test-subj="canvasTextAreaArgInputButton"
+        size="s"
+        onClick={() => onValueChange(value)}
+      >
         {confirm}
       </EuiButton>
       <EuiSpacer size="xs" />

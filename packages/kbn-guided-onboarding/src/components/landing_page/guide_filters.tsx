@@ -42,6 +42,7 @@ export const GuideFilters = ({ activeFilter, setActiveFilter }: GuideFiltersProp
     <EuiFlexGroup justifyContent="center" gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj="kbnGuidedOnboardingGuideFiltersAllButton"
           onClick={() => setActiveFilter('all')}
           color="text"
           css={[filterButtonCss, activeFilter === 'all' && activeFilterFill]}
@@ -54,6 +55,7 @@ export const GuideFilters = ({ activeFilter, setActiveFilter }: GuideFiltersProp
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj="kbnGuidedOnboardingGuideFiltersSearchButton"
           onClick={() => setActiveFilter('search')}
           color="text"
           css={[filterButtonCss, activeFilter === 'search' && activeFilterFill]}
@@ -66,6 +68,7 @@ export const GuideFilters = ({ activeFilter, setActiveFilter }: GuideFiltersProp
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj="kbnGuidedOnboardingGuideFiltersObservabilityButton"
           onClick={() => setActiveFilter('observability')}
           color="text"
           css={[filterButtonCss, activeFilter === 'observability' && activeFilterFill]}
@@ -78,6 +81,7 @@ export const GuideFilters = ({ activeFilter, setActiveFilter }: GuideFiltersProp
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj="kbnGuidedOnboardingGuideFiltersSecurityButton"
           onClick={() => setActiveFilter('security')}
           color="text"
           css={[filterButtonCss, activeFilter === 'security' && activeFilterFill]}

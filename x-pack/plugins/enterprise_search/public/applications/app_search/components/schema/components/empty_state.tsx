@@ -40,7 +40,13 @@ export const EmptyState: React.FC = () => {
           </p>
         }
         actions={
-          <EuiButton size="s" target="_blank" iconType="popout" href={INDEXING_SCHEMA_DOCS_URL}>
+          <EuiButton
+            data-test-subj="enterpriseSearchEmptyStateReadTheIndexingSchemaGuideButton"
+            size="s"
+            target="_blank"
+            iconType="popout"
+            href={INDEXING_SCHEMA_DOCS_URL}
+          >
             {i18n.translate('xpack.enterpriseSearch.appSearch.engine.schema.empty.buttonLabel', {
               defaultMessage: 'Read the indexing schema guide',
             })}

@@ -57,7 +57,7 @@ export const META_ENGINE_CREATION_FORM_DOCUMENTATION_DESCRIPTION = (
     defaultMessage="{documentationLink} for information about how to get started."
     values={{
       documentationLink: (
-        <EuiLink href={META_ENGINES_DOCS_URL} target="_blank">
+        <EuiLink data-test-subj="enterpriseSearchLink" href={META_ENGINES_DOCS_URL} target="_blank">
           {META_ENGINE_CREATION_FORM_DOCUMENTATION_LINK}
         </EuiLink>
       ),

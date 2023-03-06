@@ -151,6 +151,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
             values={{
               learnMoreLink: (
                 <EuiLink
+                  data-test-subj="indexManagementRenderHeaderLearnMoreLink"
                   href={documentationService.getTemplatesDocumentationLink()}
                   target="_blank"
                   external
@@ -282,6 +283,7 @@ export const TemplateList: React.FunctionComponent<RouteComponentProps<MatchPara
         }
         actions={
           <EuiButton
+            data-test-subj="indexManagementTemplateListCreateTemplateButton"
             {...reactRouterNavigate(history, '/create_template')}
             fill
             iconType="plusInCircle"

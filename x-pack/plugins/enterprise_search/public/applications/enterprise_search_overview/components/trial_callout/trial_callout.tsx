@@ -29,7 +29,11 @@ export const TrialCallout: React.FC = () => {
           days: moment(license?.expiryDateInMillis).diff(moment({ hours: 0 }), 'days'),
         }}
       />{' '}
-      <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+      <EuiLink
+        data-test-subj="enterpriseSearchTrialCalloutLink"
+        href="https://www.elastic.co/subscriptions"
+        target="_blank"
+      >
         <u>
           <FormattedMessage
             id="xpack.enterpriseSearch.trialCalloutLink"

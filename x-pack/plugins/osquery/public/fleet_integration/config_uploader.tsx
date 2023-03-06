@@ -14,6 +14,7 @@ const SUPPORTED_CONFIG_EXTENSIONS = ['application/json', 'text/plain'];
 
 const ExampleConfigLink = React.memo(() => (
   <EuiLink
+    data-test-subj="osqueryExampleConfigLinkExampleConfigLink"
     href="https://github.com/osquery/osquery/blob/master/tools/deployment/osquery.example.conf"
     target="_blank"
   >

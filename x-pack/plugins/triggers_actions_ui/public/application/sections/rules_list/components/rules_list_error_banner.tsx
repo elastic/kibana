@@ -47,7 +47,11 @@ export const RulesListErrorBanner = (props: RulesListErrorBannerProps) => {
             }}
           />
           &nbsp;
-          <EuiLink color="primary" onClick={onClick}>
+          <EuiLink
+            data-test-subj="triggersActionsUiRulesListErrorBannerShowTotalStatusesErrorPluralOneRuleOtherRulesWithErrorLink"
+            color="primary"
+            onClick={onClick}
+          >
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.rulesList.viewBannerButtonLabel"
               defaultMessage="Show {totalStatusesError, plural, one {rule} other {rules}} with error"

@@ -65,7 +65,11 @@ const ErrorDetailsLink = ({ error }: { error: ResponseError }) => {
   }
 
   const button = (
-    <EuiLink color="danger" onClick={onButtonClick}>
+    <EuiLink
+      data-test-subj="upgradeAssistantErrorDetailsLinkLink"
+      color="danger"
+      onClick={onButtonClick}
+    >
       {i18nTexts.errorLabel} {error.statusCode}
     </EuiLink>
   );
@@ -124,7 +128,11 @@ export const DeprecationLoggingToggle: FunctionComponent<Props> = ({
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="refresh" onClick={resendRequest}>
+          <EuiButtonEmpty
+            data-test-subj="upgradeAssistantDeprecationLoggingToggleButtonEmpty"
+            iconType="refresh"
+            onClick={resendRequest}
+          >
             {i18nTexts.reloadButtonLabel}
           </EuiButtonEmpty>
         </EuiFlexItem>

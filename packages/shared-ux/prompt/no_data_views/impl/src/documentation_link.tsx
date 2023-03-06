@@ -27,7 +27,12 @@ export function DocumentationLink({ href }: Props) {
       </EuiTitle>
       &emsp;
       <dd className="eui-displayInline">
-        <EuiLink href={href} target="_blank" external>
+        <EuiLink
+          data-test-subj="sharedUxDocumentationLinkReadTheDocsLink"
+          href={href}
+          target="_blank"
+          external
+        >
           <FormattedMessage
             id="sharedUXPackages.noDataViewsPrompt.readDocumentation"
             defaultMessage="Read the docs"

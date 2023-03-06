@@ -184,13 +184,18 @@ export class TelemetryManagementSection extends Component<Props, State> {
     const { docLinks } = this.props;
 
     const clusterDataLink = (
-      <EuiLink onClick={this.toggleExample} data-test-id="cluster_data_example">
+      <EuiLink
+        data-test-subj="pluginsClusterDataLink"
+        onClick={this.toggleExample}
+        data-test-id="cluster_data_example"
+      >
         <FormattedMessage id="telemetry.clusterData" defaultMessage="cluster data" />
       </EuiLink>
     );
 
     const securityDataLink = (
       <EuiLink
+        data-test-subj="pluginsSecurityDataLink"
         href="https://www.elastic.co/guide/en/security/current/advanced-settings.html#telemetry-settings"
         data-test-id="endpoint_security_example"
         target="_blank"
@@ -208,7 +213,11 @@ export class TelemetryManagementSection extends Component<Props, State> {
             See our {privacyStatementLink} for more details."
             values={{
               privacyStatementLink: (
-                <EuiLink href={docLinks.legal.privacyStatement} target="_blank">
+                <EuiLink
+                  data-test-subj="pluginsPrivacyStatementLink"
+                  href={docLinks.legal.privacyStatement}
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="telemetry.readOurUsageDataPrivacyStatementLinkText"
                     defaultMessage="Privacy Statement"

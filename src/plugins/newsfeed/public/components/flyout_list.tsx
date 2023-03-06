@@ -65,7 +65,12 @@ export const NewsfeedFlyout = (props: Partial<EuiFlyoutProps> & { showPlainSpinn
                   text={item.description}
                   data-test-subj="newsHeadAlert"
                   action={
-                    <EuiLink target="_blank" href={item.linkUrl} external>
+                    <EuiLink
+                      data-test-subj="pluginsNewsfeedFlyoutLink"
+                      target="_blank"
+                      href={item.linkUrl}
+                      external
+                    >
                       {item.linkText}
                     </EuiLink>
                   }
@@ -81,7 +86,12 @@ export const NewsfeedFlyout = (props: Partial<EuiFlyoutProps> & { showPlainSpinn
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+              <EuiButtonEmpty
+                data-test-subj="pluginsNewsfeedFlyoutCloseButtonEmpty"
+                iconType="cross"
+                onClick={closeFlyout}
+                flush="left"
+              >
                 <FormattedMessage
                   id="newsfeed.flyoutList.closeButtonLabel"
                   defaultMessage="Close"

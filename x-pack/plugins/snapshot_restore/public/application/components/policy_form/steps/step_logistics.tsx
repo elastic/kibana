@@ -312,7 +312,11 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
             defaultMessage="Supports date math expressions. {docLink}"
             values={{
               docLink: (
-                <EuiLink href={docLinks.links.date.dateMathIndexNames} target="_blank">
+                <EuiLink
+                  data-test-subj="snapshotRestoreRenderSnapshotNameFieldLearnMoreLink"
+                  href={docLinks.links.date.dateMathIndexNames}
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.snapshotRestore.policyForm.stepLogistics.policySnapshotNameHelpTextDocLink"
                     defaultMessage="Learn more."
@@ -384,7 +388,11 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
                 defaultMessage="Use cron expression. {docLink}"
                 values={{
                   docLink: (
-                    <EuiLink href={docLinks.links.apis.cronExpressions} target="_blank">
+                    <EuiLink
+                      data-test-subj="snapshotRestoreRenderScheduleFieldLearnMoreLink"
+                      href={docLinks.links.apis.cronExpressions}
+                      target="_blank"
+                    >
                       <FormattedMessage
                         id="xpack.snapshotRestore.policyForm.stepLogistics.policyScheduleHelpTextDocLink"
                         defaultMessage="Learn more."
@@ -489,6 +497,7 @@ export const PolicyStepLogistics: React.FunctionComponent<StepProps> = ({
 
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            data-test-subj="snapshotRestorePolicyStepLogisticsLogisticsDocsButtonEmpty"
             size="s"
             flush="right"
             href={docLinks.links.apis.putSnapshotLifecyclePolicy}

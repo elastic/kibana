@@ -126,6 +126,7 @@ export const BlockedWindowItem: React.FC<Props> = ({ blockedWindow, index }) => 
         </EuiFlexItem>
         <EuiFlexItem style={{ minWidth: 130 }}>
           <EuiSelect
+            data-test-subj="enterpriseSearchBlockedWindowItemSelect"
             value={blockedWindow.day}
             onChange={(e) => setBlockedTimeWindow(index, 'day', e.target.value)}
             options={daySelectOptions}

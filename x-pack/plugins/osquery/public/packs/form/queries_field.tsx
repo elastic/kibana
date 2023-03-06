@@ -163,14 +163,24 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               {!tableSelectedItems.length ? (
-                <EuiButton fill onClick={handleShowAddFlyout} iconType="plusInCircle">
+                <EuiButton
+                  data-test-subj="osqueryQueriesFieldComponentAddQueryButton"
+                  fill
+                  onClick={handleShowAddFlyout}
+                  iconType="plusInCircle"
+                >
                   <FormattedMessage
                     id="xpack.osquery.pack.queriesForm.addQueryButtonLabel"
                     defaultMessage="Add query"
                   />
                 </EuiButton>
               ) : (
-                <EuiButton color="danger" onClick={handleDeleteQueries} iconType="trash">
+                <EuiButton
+                  data-test-subj="osqueryQueriesFieldComponentDeleteQueriesCountPluralOneQueryOtherQueriesButton"
+                  color="danger"
+                  onClick={handleDeleteQueries}
+                  iconType="trash"
+                >
                   <FormattedMessage
                     id="xpack.osquery.pack.table.deleteQueriesButtonLabel"
                     defaultMessage="Delete {queriesCount, plural, one {# query} other {# queries}}"

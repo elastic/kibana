@@ -63,6 +63,7 @@ export const EngineAPI: React.FC = () => {
                   "Elastic does not store API keys. Once generated, you'll only be able to view the key one time. Make sure you save it somewhere secure. If you lose access to it you'll need to generate a new API key from this screen.",
               })}{' '}
               <EuiLink
+                data-test-subj="enterpriseSearchEngineAPILearnMoreAboutApiKeysLink"
                 href={docLinks.apiKeys}
                 data-telemetry-id="entSearchContent-engines-api-step1-learnMoreLink"
                 external
@@ -78,6 +79,7 @@ export const EngineAPI: React.FC = () => {
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="enterpriseSearchEngineAPICreateApiKeyButton"
                 iconSide="left"
                 iconType="plusInCircleFilled"
                 onClick={openGenerateModal}
@@ -93,6 +95,7 @@ export const EngineAPI: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="enterpriseSearchEngineAPIViewKeysButton"
                 iconSide="left"
                 iconType="popout"
                 data-telemetry-id="entSearchContent-engines-api-step1-viewKeysButton"
@@ -162,6 +165,7 @@ export const EngineAPI: React.FC = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="enterpriseSearchEngineAPILearnHowButton"
                 data-telemetry-id="entSearchContent-engines-api-step4-learnHowLink"
                 onClick={() =>
                   navigateToUrl(

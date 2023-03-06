@@ -168,7 +168,12 @@ export const EditPolicy: React.FunctionComponent = () => {
         }
         bottomBorder
         rightSideItems={[
-          <EuiButtonEmpty href={docLinks.links.elasticsearch.ilm} target="_blank" iconType="help">
+          <EuiButtonEmpty
+            data-test-subj="indexLifecycleManagementEditPolicyDocumentationButtonEmpty"
+            href={docLinks.links.elasticsearch.ilm}
+            target="_blank"
+            iconType="help"
+          >
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"
               defaultMessage="Documentation"

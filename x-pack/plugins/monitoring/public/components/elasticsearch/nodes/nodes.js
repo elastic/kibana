@@ -405,7 +405,13 @@ export function ElasticsearchNodes({ clusterStatus, showCgroupMetricsElasticsear
                       }
                     )}
                   </p>
-                  <EuiButton onClick={finishMigrationAction} size="s" color="warning" fill>
+                  <EuiButton
+                    data-test-subj="monitoringElasticsearchNodesDisableSelfMonitoringButton"
+                    onClick={finishMigrationAction}
+                    size="s"
+                    color="warning"
+                    fill
+                  >
                     {i18n.translate(
                       'xpack.monitoring.elasticsearch.nodes.metricbeatMigration.disableInternalCollectionMigrationButtonLabel',
                       {

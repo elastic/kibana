@@ -217,6 +217,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({ job, customUrls, setCust
               isInvalid={isInvalidTimeRange}
             >
               <EuiFieldText
+                data-test-subj="mlCustomUrlRowsFieldText"
                 value={(customUrl as KibanaUrlConfig).time_range || ''}
                 isInvalid={isInvalidTimeRange}
                 placeholder={TIME_RANGE_TYPE.AUTO}

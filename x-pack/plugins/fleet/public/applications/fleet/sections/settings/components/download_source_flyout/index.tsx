@@ -100,7 +100,12 @@ export const EditDownloadSourceFlyout: React.FunctionComponent<EditDownloadSourc
                 defaultMessage="Address that your agents will use to download their binary from. Specify the path to the directory containing the binary. {guideLink}"
                 values={{
                   guideLink: (
-                    <EuiLink href={docLinks.links.fleet.settings} target="_blank" external>
+                    <EuiLink
+                      data-test-subj="fleetEditDownloadSourceFlyoutLearnMoreLink"
+                      href={docLinks.links.fleet.settings}
+                      target="_blank"
+                      external
+                    >
                       <FormattedMessage
                         id="xpack.fleet.settings.fleetSettingsLink"
                         defaultMessage="Learn more"

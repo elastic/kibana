@@ -37,6 +37,7 @@ export class DashboardHelloWorldOnlyRangeSelectDrilldown
   public readonly CollectConfig = ({ config, onConfig }: CollectConfigProps<Config>) => (
     <EuiFormRow label="Enter your name" fullWidth>
       <EuiFieldText
+        data-test-subj="uiActionsEnhancedExamplesFieldText"
         fullWidth
         value={config.name}
         onChange={(event) => onConfig({ ...config, name: event.target.value })}

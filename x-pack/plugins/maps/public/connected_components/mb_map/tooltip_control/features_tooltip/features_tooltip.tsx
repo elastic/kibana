@@ -104,6 +104,7 @@ export class FeaturesTooltip extends Component<Props, State> {
     return this.state.currentFeature.actions.map((action) => {
       return (
         <EuiLink
+          data-test-subj="mapsLink"
           className="mapFeatureTooltip_actionLinks"
           onClick={() => {
             if (action.onClick) {

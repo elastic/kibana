@@ -205,7 +205,11 @@ const WebhookActionConnectorFields: React.FunctionComponent<ActionConnectorField
                   </EuiFlexGroup>
                 ))}
                 <EuiSpacer size="m" />
-                <EuiButtonEmpty iconType="plusInCircle" onClick={addItem}>
+                <EuiButtonEmpty
+                  data-test-subj="stackConnectorsWebhookActionConnectorFieldsButtonEmpty"
+                  iconType="plusInCircle"
+                  onClick={addItem}
+                >
                   {i18n.ADD_HEADER_BTN}
                 </EuiButtonEmpty>
                 <EuiSpacer />

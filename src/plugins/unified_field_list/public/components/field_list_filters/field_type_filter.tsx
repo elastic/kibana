@@ -257,7 +257,12 @@ export function FieldTypeFilter<T extends FieldListItem = DataViewField>({
                   defaultMessage: 'Learn more about',
                 })}
                 &nbsp;
-                <EuiLink href={docLinks.links.discover.fieldTypeHelp} target="_blank" external>
+                <EuiLink
+                  data-test-subj="pluginsFieldTypeFilterFieldTypesLink"
+                  href={docLinks.links.discover.fieldTypeHelp}
+                  target="_blank"
+                  external
+                >
                   <FormattedMessage
                     id="unifiedFieldList.fieldTypeFilter.fieldTypesDocLinkLabel"
                     defaultMessage="field types"

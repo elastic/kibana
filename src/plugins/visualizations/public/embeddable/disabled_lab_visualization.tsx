@@ -34,7 +34,12 @@ export function DisabledLabVisualization({ title }: { title: string }) {
           />
         }
         actions={
-          <EuiLink target="_blank" external href={advancedSettingsLink}>
+          <EuiLink
+            data-test-subj="pluginsDisabledLabVisualizationReadDocumentationLink"
+            target="_blank"
+            external
+            href={advancedSettingsLink}
+          >
             <FormattedMessage
               id="visualizations.disabledLabVisualizationLink"
               defaultMessage="Read documentation"

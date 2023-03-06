@@ -172,6 +172,7 @@ export class NewEventModal extends Component {
               helpText={TIME_FORMAT}
             >
               <EuiFieldText
+                data-test-subj="mlFieldText"
                 name="startTime"
                 onChange={this.handleTimeStartChange}
                 placeholder={TIME_FORMAT}
@@ -190,6 +191,7 @@ export class NewEventModal extends Component {
               helpText={TIME_FORMAT}
             >
               <EuiFieldText
+                data-test-subj="mlFieldText"
                 name="endTime"
                 onChange={this.handleTimeEndChange}
                 placeholder={TIME_FORMAT}

@@ -107,7 +107,11 @@ export const ElasticsearchGuide: React.FC = () => {
                           }
                         )}
                       </p>
-                      <EuiLink href={docLinks.clientsGuide} target="_blank">
+                      <EuiLink
+                        data-test-subj="enterpriseSearchElasticsearchGuideLearnMoreAboutElasticsearchClientsLink"
+                        href={docLinks.clientsGuide}
+                        target="_blank"
+                      >
                         {i18n.translate(
                           'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchClientsLink',
                           { defaultMessage: 'Learn more about Elasticsearch clients' }
@@ -118,6 +122,7 @@ export const ElasticsearchGuide: React.FC = () => {
                     <EuiSpacer />
 
                     <EuiSelect
+                      data-test-subj="enterpriseSearchElasticsearchGuideSelect"
                       prepend={i18n.translate(
                         'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchClientsSelectLabel',
                         { defaultMessage: 'Select a client' }
@@ -159,6 +164,7 @@ export const ElasticsearchGuide: React.FC = () => {
                       <EuiFlexItem grow={false}>
                         <EuiText>
                           <EuiLink
+                            data-test-subj="enterpriseSearchElasticsearchGuideLearnMoreAboutSearchUiLink"
                             href="https://www.elastic.co/enterprise-search/search-ui"
                             target="_blank"
                           >
@@ -171,7 +177,11 @@ export const ElasticsearchGuide: React.FC = () => {
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
                         <EuiText>
-                          <EuiLink href="https://github.com/elastic/search-ui" target="_blank">
+                          <EuiLink
+                            data-test-subj="enterpriseSearchElasticsearchGuideSearchUiOnGitHubLink"
+                            href="https://github.com/elastic/search-ui"
+                            target="_blank"
+                          >
                             {i18n.translate(
                               'xpack.enterpriseSearch.overview.elasticsearchGuide.elasticsearchSearchUIGitHubLink',
                               { defaultMessage: 'Search UI on GitHub' }

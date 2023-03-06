@@ -129,7 +129,12 @@ const CounterLink = ({
 
   return (
     <EuiToolTip content={tooltipContent}>
-      <EuiLink color="text" onClick={onClick} css={{ display: 'flex' }}>
+      <EuiLink
+        data-test-subj="cloudSecurityPostureCounterLinkLink"
+        color="text"
+        onClick={onClick}
+        css={{ display: 'flex' }}
+      >
         <EuiText color={color} style={{ fontWeight: euiTheme.font.weight.medium }} size="s">
           <CompactFormattedNumber number={count} abbreviateAbove={999} />
           &nbsp;

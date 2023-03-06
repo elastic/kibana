@@ -25,15 +25,27 @@ export const ElasticsearchRuby: React.FC<{ cloudId?: string }> = ({ cloudId }) =
           provides a low-level client for communicating with an Elasticsearch cluster, fully
           compatible with other official clients.
         </p>
-        <EuiLink target="_blank" href={docLinks.clientsRubyOverview}>
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchRubyLearnMoreAboutTheRubyClientForElasticsearchLink"
+          target="_blank"
+          href={docLinks.clientsRubyOverview}
+        >
           Learn more about the Ruby client for Elasticsearch
         </EuiLink>
         <EuiSpacer size="m" />
-        <EuiLink target="_blank" href="https://github.com/elastic/elasticsearch-ruby">
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchRubyTheElasticsearchRubyClientOnGithubLink"
+          target="_blank"
+          href="https://github.com/elastic/elasticsearch-ruby"
+        >
           The Elasticsearch Ruby client on Github
         </EuiLink>
         <EuiSpacer size="m" />
-        <EuiLink target="_blank" href="http://rubydoc.info/gems/elasticsearch">
+        <EuiLink
+          data-test-subj="enterpriseSearchElasticsearchRubyTheElasticsearchRubyClientOnRubyDocLink"
+          target="_blank"
+          href="http://rubydoc.info/gems/elasticsearch"
+        >
           The Elasticsearch Ruby client on RubyDoc
         </EuiLink>
 

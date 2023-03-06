@@ -67,6 +67,7 @@ export const DeduplicationPanel: React.FC = () => {
         }
         actions={
           <EuiButton
+            data-test-subj="enterpriseSearchDeduplicationPanelResetToDefaultsButton"
             data-telemetry-id="entSearchContent-crawler-domainDetail-deduplication-reset"
             color="warning"
             iconType="refresh"
@@ -93,7 +94,11 @@ export const DeduplicationPanel: React.FC = () => {
           </p>
         }
         links={
-          <EuiLink href={docLinks.crawlerManaging} external>
+          <EuiLink
+            data-test-subj="enterpriseSearchDeduplicationPanelLearnMoreAboutContentHashingLink"
+            href={docLinks.crawlerManaging}
+            external
+          >
             {i18n.translate('xpack.enterpriseSearch.crawler.deduplicationPanel.learnMoreMessage', {
               defaultMessage: 'Learn more about content hashing',
             })}
@@ -134,6 +139,7 @@ export const DeduplicationPanel: React.FC = () => {
                   <EuiPopover
                     button={
                       <EuiButtonEmpty
+                        data-test-subj="enterpriseSearchDeduplicationPanelButtonEmpty"
                         data-telemetry-id="entSearchContent-crawler-domainDetail-deduplication-selectFields"
                         size="xs"
                         iconType="arrowDown"

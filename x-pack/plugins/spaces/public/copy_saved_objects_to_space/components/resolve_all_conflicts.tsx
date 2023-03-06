@@ -54,7 +54,11 @@ export class ResolveAllConflicts extends Component<ResolveAllConflictsProps, Sta
 
   public render() {
     const button = (
-      <EuiLink onClick={this.onButtonClick} className={'spcCopyToSpace__resolveAllConflictsLink'}>
+      <EuiLink
+        data-test-subj="spacesResolveAllLink"
+        onClick={this.onButtonClick}
+        className={'spcCopyToSpace__resolveAllConflictsLink'}
+      >
         <FormattedMessage
           id="xpack.spaces.management.copyToSpace.resolveAllConflictsLink"
           defaultMessage="(resolve all)"

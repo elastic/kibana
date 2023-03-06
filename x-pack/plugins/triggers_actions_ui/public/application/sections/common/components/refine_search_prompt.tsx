@@ -47,7 +47,10 @@ export const RefineSearchPrompt = (props: RefineSearchFooterProps) => {
         values={{ visibleDocumentSize }}
       />
       &nbsp;
-      <EuiLink href={`#${backToTopAnchor}`}>
+      <EuiLink
+        data-test-subj="triggersActionsUiRefineSearchPromptBackToTopLink"
+        href={`#${backToTopAnchor}`}
+      >
         <FormattedMessage
           id="xpack.triggersActionsUI.sections.refineSearchPrompt.backToTop"
           defaultMessage="Back to top."

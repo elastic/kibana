@@ -96,6 +96,7 @@ export const WithGuidedOnboardingTour: FunctionComponent<{
       anchorPosition={tourPosition ? tourPosition : 'rightUp'}
       footerAction={
         <EuiButtonEmpty
+          data-test-subj="fleetWithGuidedOnboardingTourContinueButtonEmpty"
           onClick={() => setIsGuidedOnboardingTourOpen(false)}
           size="xs"
           color="text"

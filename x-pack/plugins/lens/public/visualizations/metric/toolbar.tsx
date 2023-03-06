@@ -50,6 +50,7 @@ export function Toolbar(props: VisualizationToolbarProps<MetricVisualizationStat
             display="columnCompressed"
           >
             <EuiFieldText
+              data-test-subj="lensToolbarFieldText"
               value={subtitleInputVal}
               onChange={({ target: { value } }) => handleSubtitleChange(value)}
             />

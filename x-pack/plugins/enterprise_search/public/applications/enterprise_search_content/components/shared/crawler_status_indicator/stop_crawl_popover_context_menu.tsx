@@ -35,6 +35,7 @@ export const StopCrawlPopoverContextMenu: React.FC = () => {
     <EuiPopover
       button={
         <EuiButton
+          data-test-subj="enterpriseSearchStopCrawlPopoverContextMenuButton"
           iconType="arrowDown"
           iconSide="right"
           onClick={togglePopover}

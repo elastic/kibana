@@ -82,6 +82,7 @@ export const AutomatedCuration: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="enterpriseSearchAutomatedCurationButton"
                 color="primary"
                 fill
                 iconType="exportAction"

@@ -30,7 +30,12 @@ export const LabsBeakerButton = ({ solutions, ...props }: Props) => {
 
   return (
     <>
-      <EuiButton {...props} onClick={onButtonClick} minWidth={0}>
+      <EuiButton
+        data-test-subj="pluginsLabsBeakerButtonButton"
+        {...props}
+        onClick={onButtonClick}
+        minWidth={0}
+      >
         <EuiIcon type="beaker" />
         {overrideCount > 0 ? (
           <EuiNotificationBadge color="subdued" style={{ marginLeft: 2 }}>

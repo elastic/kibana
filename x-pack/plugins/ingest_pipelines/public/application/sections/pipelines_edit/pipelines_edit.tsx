@@ -127,7 +127,12 @@ export const PipelinesEdit: React.FunctionComponent<RouteComponentProps<MatchPar
           }
           body={<p>{error.message}</p>}
           actions={
-            <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
+            <EuiButton
+              data-test-subj="ingestPipelinesPipelinesEditTryAgainButton"
+              onClick={resendRequest}
+              iconType="refresh"
+              color="danger"
+            >
               <FormattedMessage
                 id="xpack.ingestPipelines.edit.fetchPipelineReloadButton"
                 defaultMessage="Try again"

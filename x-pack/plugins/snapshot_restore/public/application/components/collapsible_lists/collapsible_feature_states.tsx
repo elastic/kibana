@@ -54,6 +54,7 @@ export const CollapsibleFeatureStatesList: React.FunctionComponent<Props> = ({ f
         <>
           <EuiSpacer size="xs" />
           <EuiLink
+            data-test-subj="snapshotRestoreCollapsibleFeatureStatesListLink"
             onClick={() =>
               isShowingFullList ? setIsShowingFullList(false) : setIsShowingFullList(true)
             }

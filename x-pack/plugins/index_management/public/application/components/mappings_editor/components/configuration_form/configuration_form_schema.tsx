@@ -154,7 +154,11 @@ export const configurationFormSchema: FormSchema = {
           defaultMessage="Strings in these formats will be mapped as dates. You can use built-in formats or custom formats. {docsLink}"
           values={{
             docsLink: (
-              <EuiLink href={documentationService.getDateFormatLink()} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementConfigurationFormSchemaLearnMoreLink"
+                href={documentationService.getDateFormatLink()}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.configuration.dynamicDatesFieldDocumentionLink',
                   {

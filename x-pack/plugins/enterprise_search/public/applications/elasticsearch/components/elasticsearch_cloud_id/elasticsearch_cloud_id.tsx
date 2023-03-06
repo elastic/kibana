@@ -93,6 +93,7 @@ export const ElasticsearchCloudId: React.FC = () => {
               )}
             >
               <EuiFieldText
+                data-test-subj="enterpriseSearchElasticsearchCloudIdFieldText"
                 onFocus={onFocusHandler}
                 value={cloud.cloudId}
                 compressed
@@ -121,7 +122,10 @@ export const ElasticsearchCloudId: React.FC = () => {
         </EuiFlexItem>
 
         <EuiFlexItem>
-          <EuiButton href={`${http.basePath.publicBaseUrl}/app/management/security/api_keys`}>
+          <EuiButton
+            data-test-subj="enterpriseSearchElasticsearchCloudIdManageApiKeysButton"
+            href={`${http.basePath.publicBaseUrl}/app/management/security/api_keys`}
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.overview.elasticsearchCloudId.manageApiKeysLink',
               {

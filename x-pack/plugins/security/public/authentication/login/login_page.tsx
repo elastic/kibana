@@ -253,6 +253,7 @@ export class LoginPage extends Component<Props, State> {
             </EuiText>
             <EuiSpacer />
             <EuiButton
+              data-test-subj="securityOpenInNewWindowButton"
               href={window.location.href}
               target="_blank"
               iconType="popout"

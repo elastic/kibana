@@ -42,7 +42,11 @@ const getApiURLConfig = (): FieldConfig => ({
 const getRoutingKeyConfig = (docLinks: DocLinksStart): FieldConfig => ({
   label: i18n.INTEGRATION_KEY_LABEL,
   helpText: (
-    <EuiLink href={docLinks.links.alerting.pagerDutyAction} target="_blank">
+    <EuiLink
+      data-test-subj="stackConnectorsGetRoutingKeyConfigConfigureAPagerDutyAccountLink"
+      href={docLinks.links.alerting.pagerDutyAction}
+      target="_blank"
+    >
       <FormattedMessage
         id="xpack.stackConnectors.components.pagerDuty.routingKeyNameHelpLabel"
         defaultMessage="Configure a PagerDuty account"

@@ -108,6 +108,7 @@ export class ConditionExpression extends Component {
         </EuiPopoverTitle>
         <div className="euiExpression" style={{ width: 200 }}>
           <EuiSelect
+            data-test-subj="mlSelect"
             value={this.props.appliesTo}
             onChange={this.changeAppliesTo}
             options={[
@@ -137,6 +138,7 @@ export class ConditionExpression extends Component {
           <EuiFlexGroup style={{ maxWidth: 450 }}>
             <EuiFlexItem grow={false} style={{ width: 250 }}>
               <EuiSelect
+                data-test-subj="mlSelect"
                 value={this.props.operator}
                 onChange={this.changeOperator}
                 options={[
@@ -155,7 +157,11 @@ export class ConditionExpression extends Component {
             </EuiFlexItem>
 
             <EuiFlexItem grow={false} style={{ width: 200 }}>
-              <EuiFieldNumber value={+this.props.value} onChange={this.changeValue} />
+              <EuiFieldNumber
+                data-test-subj="mlFieldNumber"
+                value={+this.props.value}
+                onChange={this.changeValue}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </div>

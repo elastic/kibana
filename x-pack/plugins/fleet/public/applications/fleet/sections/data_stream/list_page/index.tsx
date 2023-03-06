@@ -221,6 +221,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
       search={{
         toolsRight: [
           <EuiButton
+            data-test-subj="fleetDataStreamListPageReloadButton"
             key="reloadButton"
             color="primary"
             iconType="refresh"

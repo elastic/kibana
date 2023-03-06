@@ -58,7 +58,13 @@ export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
 
   if (type === 'number') {
     return (
-      <EuiFieldNumber compressed name="value" value={value as number} onChange={onNumberChange} />
+      <EuiFieldNumber
+        data-test-subj="canvasVarValueFieldFieldNumber"
+        compressed
+        name="value"
+        value={value as number}
+        onChange={onNumberChange}
+      />
     );
   }
 
@@ -81,6 +87,7 @@ export const VarValueField: FC<Props> = ({ type, value, onChange }) => {
 
   return (
     <EuiFieldText
+      data-test-subj="canvasVarValueFieldFieldText"
       compressed
       name="value"
       value={String(value)}

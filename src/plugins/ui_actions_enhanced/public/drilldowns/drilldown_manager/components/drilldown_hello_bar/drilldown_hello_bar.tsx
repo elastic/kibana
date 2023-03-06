@@ -41,7 +41,12 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({ docsLink, 
           {docsLink && (
             <>
               <EuiSpacer size={'xs'} />
-              <EuiLink href={docsLink} target="_blank" external>
+              <EuiLink
+                data-test-subj="pluginsDrilldownHelloBarLink"
+                href={docsLink}
+                target="_blank"
+                external
+              >
                 {txtViewDocsLinkLabel}
               </EuiLink>
             </>
@@ -49,7 +54,11 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({ docsLink, 
         </EuiFlexItem>
         {!!onHideClick && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="xs" onClick={onHideClick}>
+            <EuiButtonEmpty
+              data-test-subj="pluginsDrilldownHelloBarButtonEmpty"
+              size="xs"
+              onClick={onHideClick}
+            >
               {txtHideHelpButtonLabel}
             </EuiButtonEmpty>
           </EuiFlexItem>

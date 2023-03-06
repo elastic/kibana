@@ -164,7 +164,12 @@ function GroupSelection(props: GroupSelectionProps) {
               />
             </EuiDescriptionListTitle>
             <EuiDescriptionListDescription>
-              <EuiLink href={visualizeGuideLink} target="_blank" external>
+              <EuiLink
+                data-test-subj="pluginsGroupSelectionReadDocumentationLink"
+                href={visualizeGuideLink}
+                target="_blank"
+                external
+              >
                 <FormattedMessage
                   id="visualizations.newVisWizard.readDocumentationLink"
                   defaultMessage="Read documentation"

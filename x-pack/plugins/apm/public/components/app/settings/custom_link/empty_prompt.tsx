@@ -39,6 +39,7 @@ export function EmptyPrompt({
               values={{
                 customLinkDocLinkText: (
                   <EuiLink
+                    data-test-subj="apmEmptyPromptDocsLink"
                     target="_blank"
                     href={docLinks.links.apm.customLinks}
                   >

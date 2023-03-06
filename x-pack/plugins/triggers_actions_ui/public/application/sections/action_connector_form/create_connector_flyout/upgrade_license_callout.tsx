@@ -38,6 +38,7 @@ const UpgradeLicenseCallOutComponent: React.FC = () => {
       <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem grow={false}>
           <EuiButton
+            data-test-subj="triggersActionsUiUpgradeLicenseCallOutComponentManageLicenseButton"
             href={`${http.basePath.get()}/app/management/stack/license_management`}
             iconType="gear"
             target="_blank"
@@ -50,6 +51,7 @@ const UpgradeLicenseCallOutComponent: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
+            data-test-subj="triggersActionsUiUpgradeLicenseCallOutComponentSubscriptionPlansButtonEmpty"
             href={VIEW_LICENSE_OPTIONS_LINK}
             iconType="popout"
             iconSide="right"

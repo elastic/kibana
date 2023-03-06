@@ -68,6 +68,7 @@ const RenameDialog = ({
         <EuiForm>
           <EuiFormRow label={label}>
             <EuiFieldText
+              data-test-subj="pluginsRenameDialogFieldText"
               name="newName"
               placeholder={originalName}
               value={newName}
@@ -83,6 +84,7 @@ const RenameDialog = ({
         </EuiButtonEmpty>
 
         <EuiButton
+          data-test-subj="pluginsRenameDialogButton"
           disabled={!isNewNameValid}
           onClick={async () => {
             if (!isNewNameValid) return;

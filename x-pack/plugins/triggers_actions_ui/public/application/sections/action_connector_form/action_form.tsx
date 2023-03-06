@@ -423,6 +423,7 @@ export const ActionForm = ({
                 <EuiTitle size="xs">
                   <h5>
                     <EuiLink
+                      data-test-subj="triggersActionsUiActionFormGetMoreConnectorsLink"
                       href={VIEW_LICENSE_OPTIONS_LINK}
                       target="_blank"
                       external

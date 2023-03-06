@@ -289,6 +289,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
               <EuiFlexItem grow={false}>
                 {stackByOptions.length > 1 && (
                   <EuiSelect
+                    data-test-subj="securitySolutionMatrixHistogramComponentSelect"
                     onChange={setSelectedChartOptionCallback}
                     options={stackByOptions}
                     prepend={i18n.STACK_BY}

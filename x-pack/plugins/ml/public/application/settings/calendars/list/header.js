@@ -83,7 +83,11 @@ function CalendarsListHeaderUI({ totalCount, refreshCalendars, kibana }) {
               values={{
                 br: <br />,
                 learnMoreLink: (
-                  <EuiLink href={docsUrl} target="_blank">
+                  <EuiLink
+                    data-test-subj="mlCalendarsListHeaderUILearnMoreLink"
+                    href={docsUrl}
+                    target="_blank"
+                  >
                     <FormattedMessage
                       id="xpack.ml.settings.calendars.listHeader.calendarsDescription.learnMoreLinkText"
                       defaultMessage="Learn more"

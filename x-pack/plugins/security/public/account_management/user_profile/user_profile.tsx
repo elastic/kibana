@@ -332,6 +332,7 @@ function UserAvatarEditor({
               labelAppend={
                 !isReservedUser ? (
                   <EuiButtonEmpty
+                    data-test-subj="securityUserAvatarEditorRandomizeButtonEmpty"
                     onClick={() => formik.setFieldValue('data.avatar.color', getRandomColor())}
                     size="xs"
                     flush="right"
@@ -709,7 +710,11 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={formik.handleReset} color="ghost">
+        <EuiButtonEmpty
+          data-test-subj="securitySaveChangesBottomBarDiscardButtonEmpty"
+          onClick={formik.handleReset}
+          color="ghost"
+        >
           <FormattedMessage
             id="xpack.security.accountManagement.userProfile.discardChangesButton"
             defaultMessage="Discard"
@@ -718,6 +723,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
+          data-test-subj="securitySaveChangesBottomBarIsSubmittingSelectTrueSavingChangesOtherSaveChangesButton"
           onClick={formik.submitForm}
           isLoading={formik.isSubmitting}
           isDisabled={formik.submitCount > 0 && !formik.isValid}

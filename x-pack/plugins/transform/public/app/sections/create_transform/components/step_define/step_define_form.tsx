@@ -410,7 +410,11 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                               'The advanced editor allows you to edit the source query clause of the transform configuration.',
                           }
                         )}
-                        <EuiLink href={esQueryDsl} target="_blank">
+                        <EuiLink
+                          data-test-subj="transformStepDefineFormLearnMoreAboutAvailableOptionsLink"
+                          href={esQueryDsl}
+                          target="_blank"
+                        >
                           {i18n.translate(
                             'xpack.transform.stepDefineForm.advancedEditorHelpTextLink',
                             {
@@ -421,6 +425,7 @@ export const StepDefineForm: FC<StepDefineFormProps> = React.memo((props) => {
                       </EuiText>
                       <EuiSpacer size="s" />
                       <EuiButton
+                        data-test-subj="transformStepDefineFormApplyChangesButton"
                         style={{ width: 'fit-content' }}
                         size="s"
                         fill

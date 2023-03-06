@@ -56,6 +56,7 @@ export function LabelPositionEditor({ hasLabel, handlePropertyChange, stylePrope
   const form = (
     <EuiFormRow label={getVectorStyleLabel(VECTOR_STYLES.LABEL_POSITION)}>
       <EuiSelect
+        data-test-subj="mapsLabelPositionEditorSelect"
         disabled={disabled}
         options={options}
         value={disabled ? LABEL_POSITIONS.CENTER : styleProperty.getOptions().position}

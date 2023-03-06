@@ -98,6 +98,7 @@ export class ExtendedTemplate extends PureComponent<Props> {
       <Fragment>
         <EuiFormRow label={strings.getPositionLabel()} display="columnCompressed">
           <EuiSelect
+            data-test-subj="canvasSelect"
             compressed
             value={position}
             options={options}

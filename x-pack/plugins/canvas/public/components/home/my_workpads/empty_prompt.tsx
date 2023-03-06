@@ -25,7 +25,10 @@ export const HomeEmptyPrompt = () => (
               <p>{strings.getEmptyPromptGettingStartedDescription()}</p>
               <p>
                 {strings.getEmptyPromptNewUserDescription()}{' '}
-                <EuiLink href="home#/tutorial_directory/sampleData">
+                <EuiLink
+                  data-test-subj="canvasHomeEmptyPromptLink"
+                  href="home#/tutorial_directory/sampleData"
+                >
                   {strings.getSampleDataLinkLabel()}
                 </EuiLink>
                 .

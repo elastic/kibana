@@ -163,6 +163,7 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
 
     return (
       <EuiFieldText
+        data-test-subj="mapsFieldText"
         value={mvtFieldConfig.name}
         onChange={onChange}
         aria-label={'Fieldname'}
@@ -197,7 +198,12 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
         <EuiSpacer size={'s'} />
         <EuiFlexGroup justifyContent="spaceAround" alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={this._addField} size="xs" iconType="plusInCircleFilled">
+            <EuiButtonEmpty
+              data-test-subj="mapsAddButtonEmpty"
+              onClick={this._addField}
+              size="xs"
+              iconType="plusInCircleFilled"
+            >
               {i18n.translate('xpack.maps.mvtSource.addFieldLabel', {
                 defaultMessage: 'Add',
               })}

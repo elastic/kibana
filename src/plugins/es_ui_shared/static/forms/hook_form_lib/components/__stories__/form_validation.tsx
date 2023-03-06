@@ -43,7 +43,9 @@ export const Validation = (args: FormArgs) => {
   return (
     <Form form={form} {...args}>
       <UseField<string> path="title" component={TextField} config={titleConfigWithValidation} />
-      <EuiButton onClick={() => submitForm(form)}>Send</EuiButton>
+      <EuiButton data-test-subj="pluginsValidationSendButton" onClick={() => submitForm(form)}>
+        Send
+      </EuiButton>
     </Form>
   );
 };

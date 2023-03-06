@@ -83,6 +83,7 @@ export const MissingESRequirementsPage: React.FunctionComponent<{
               values={{
                 esSecurityLink: (
                   <EuiLink
+                    data-test-subj="fleetMissingESRequirementsPageElasticsearchSecurityLink"
                     href={docLinks.links.security.elasticsearchEnableSecurity}
                     target="_blank"
                     external
@@ -108,6 +109,7 @@ export const MissingESRequirementsPage: React.FunctionComponent<{
                 true: <EuiCode>true</EuiCode>,
                 apiKeyLink: (
                   <EuiLink
+                    data-test-subj="fleetMissingESRequirementsPageApiKeyServiceLink"
                     href={docLinks.links.security.apiKeyServiceSettings}
                     target="_blank"
                     external
@@ -132,7 +134,12 @@ xpack.security.authc.api_key.enabled: true`}
             defaultMessage="For more information, read our {link} guide."
             values={{
               link: (
-                <EuiLink href={docLinks.links.fleet.guide} target="_blank" external>
+                <EuiLink
+                  data-test-subj="fleetMissingESRequirementsPageGettingStartedLink"
+                  href={docLinks.links.fleet.guide}
+                  target="_blank"
+                  external
+                >
                   <FormattedMessage
                     id="xpack.fleet.setupPage.gettingStartedLink"
                     defaultMessage="Getting Started"

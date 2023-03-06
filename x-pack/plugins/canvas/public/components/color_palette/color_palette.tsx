@@ -58,6 +58,7 @@ export const ColorPalette: FC<Props> = ({
 
           return (
             <EuiLink
+              data-test-subj="canvasColorPaletteLink"
               style={{ fontSize: 0 }}
               key={color}
               onClick={() => !match && onChange(color)}

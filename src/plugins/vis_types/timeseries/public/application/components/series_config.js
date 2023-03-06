@@ -89,6 +89,7 @@ export const SeriesConfig = (props) => {
             fullWidth
           >
             <EuiFieldText
+              data-test-subj="pluginsSeriesConfigFieldText"
               onChange={handleTextChange('value_template')}
               value={model.value_template}
               disabled={model.formatter === DATA_FORMATTERS.DEFAULT}

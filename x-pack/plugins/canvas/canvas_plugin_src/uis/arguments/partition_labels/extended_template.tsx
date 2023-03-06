@@ -109,6 +109,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = ({ onValueChange, argV
     <>
       <EuiFormRow label={strings.getPositionLabel()} display="columnCompressed">
         <EuiSelect
+          data-test-subj="canvasExtendedTemplateSelect"
           compressed
           value={getFieldValue(argValue, POSITION_FIELD)}
           options={positions}
@@ -127,6 +128,7 @@ export const ExtendedTemplate: FunctionComponent<Props> = ({ onValueChange, argV
       {showValues && (
         <EuiFormRow label={strings.getValuesFormatLabel()} display="columnCompressed">
           <EuiSelect
+            data-test-subj="canvasExtendedTemplateSelect"
             compressed
             value={valueFormat}
             options={valuesFormats}

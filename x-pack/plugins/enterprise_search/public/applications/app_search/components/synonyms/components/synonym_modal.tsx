@@ -82,7 +82,12 @@ export const SynonymModal: React.FC = () => {
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={closeModal}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+            <EuiButtonEmpty
+              data-test-subj="enterpriseSearchSynonymModalButtonEmpty"
+              onClick={closeModal}
+            >
+              {CANCEL_BUTTON_LABEL}
+            </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton

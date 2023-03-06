@@ -172,6 +172,7 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
         <EuiFlexItem grow={false}>
           <div>
             <EuiButton
+              data-test-subj="fleetOrphanedIntegrationPolicyDebuggerDeleteButton"
               color="warning"
               isDisabled={!selectedPolicyId}
               onClick={() => setIsDeleteModalVisible(true)}
@@ -187,6 +188,7 @@ export const OrphanedIntegrationPolicyDebugger: React.FunctionComponent = () => 
         <EuiFlexItem grow={false}>
           <div>
             <EuiButton
+              data-test-subj="fleetOrphanedIntegrationPolicyDebuggerDeleteAllButton"
               color="danger"
               isDisabled={!orphanedPolicies?.length}
               onClick={() => setIsDeleteAllModalVisible(true)}

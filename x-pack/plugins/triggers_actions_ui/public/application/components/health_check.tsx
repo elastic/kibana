@@ -145,7 +145,12 @@ const EncryptionError = ({ docLinks, className }: PromptErrorProps) => (
               defaultMessage: 'You must configure an encryption key to use Alerting. ',
             }
           )}
-          <EuiLink href={docLinks.links.alerting.generalSettings} external target="_blank">
+          <EuiLink
+            data-test-subj="triggersActionsUiEncryptionErrorLearnMoreLink"
+            href={docLinks.links.alerting.generalSettings}
+            external
+            target="_blank"
+          >
             {i18n.translate(
               'xpack.triggersActionsUI.components.healthCheck.encryptionErrorAction',
               {
@@ -180,6 +185,7 @@ const ApiKeysDisabledError = ({ docLinks, className }: PromptErrorProps) => (
             defaultMessage: 'You must enable API keys to use Alerting. ',
           })}
           <EuiLink
+            data-test-subj="triggersActionsUiApiKeysDisabledErrorLearnMoreLink"
             href={docLinks.links.security.elasticsearchEnableApiKeys}
             external
             target="_blank"
@@ -217,7 +223,12 @@ const AlertsError = ({ docLinks, className }: PromptErrorProps) => (
           {i18n.translate('xpack.triggersActionsUI.components.healthCheck.alertsError', {
             defaultMessage: 'To create a rule, you must enable the alerting and actions plugins. ',
           })}
-          <EuiLink href={docLinks.links.alerting.generalSettings} external target="_blank">
+          <EuiLink
+            data-test-subj="triggersActionsUiAlertsErrorLearnHowLink"
+            href={docLinks.links.alerting.generalSettings}
+            external
+            target="_blank"
+          >
             {i18n.translate('xpack.triggersActionsUI.components.healthCheck.alertsErrorAction', {
               defaultMessage: 'Learn how.',
             })}
@@ -252,7 +263,12 @@ const ApiKeysAndEncryptionError = ({ docLinks, className }: PromptErrorProps) =>
                 'You must enable API keys and configure an encryption key to use Alerting. ',
             }
           )}
-          <EuiLink href={docLinks.links.alerting.setupPrerequisites} external target="_blank">
+          <EuiLink
+            data-test-subj="triggersActionsUiApiKeysAndEncryptionErrorLearnMoreLink"
+            href={docLinks.links.alerting.setupPrerequisites}
+            external
+            target="_blank"
+          >
             {i18n.translate(
               'xpack.triggersActionsUI.components.healthCheck.apiKeysAndEncryptionErrorAction',
               {

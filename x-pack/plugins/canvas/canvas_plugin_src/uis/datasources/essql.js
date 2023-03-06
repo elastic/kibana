@@ -71,7 +71,7 @@ class EssqlDatasource extends PureComponent {
         label={strings.getLabel()}
         labelAppend={
           <EuiText size="xs">
-            <EuiLink href={SQL_URL} target="_blank">
+            <EuiLink data-test-subj="canvasLink" href={SQL_URL} target="_blank">
               {strings.getLabelAppend()}
             </EuiLink>
           </EuiText>

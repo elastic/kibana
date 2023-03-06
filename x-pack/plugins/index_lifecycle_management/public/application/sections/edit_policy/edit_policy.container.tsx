@@ -77,7 +77,12 @@ export const EditPolicy: React.FunctionComponent<RouteComponentProps<RouterProps
             </p>
           }
           actions={
-            <EuiButton onClick={resendRequest} iconType="refresh" color="danger">
+            <EuiButton
+              data-test-subj="indexLifecycleManagementEditPolicyTryAgainButton"
+              onClick={resendRequest}
+              iconType="refresh"
+              color="danger"
+            >
               <FormattedMessage
                 id="xpack.indexLifecycleMgmt.editPolicy.lifecyclePoliciesReloadButton"
                 defaultMessage="Try again"

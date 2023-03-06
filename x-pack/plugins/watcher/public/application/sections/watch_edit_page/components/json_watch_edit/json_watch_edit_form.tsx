@@ -155,7 +155,11 @@ export const JsonWatchEditForm = () => {
                 defaultMessage: 'Watch JSON',
               })}{' '}
               (
-              <EuiLink href={putWatchApiUrl} target="_blank">
+              <EuiLink
+                data-test-subj="watcherJsonWatchEditFormApiSyntaxLink"
+                href={putWatchApiUrl}
+                target="_blank"
+              >
                 {i18n.translate('xpack.watcher.sections.watchEdit.json.form.watchJsonDocLink', {
                   defaultMessage: 'API syntax',
                 })}
@@ -243,7 +247,10 @@ export const JsonWatchEditForm = () => {
           </EuiFlexGroup>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={() => setIsRequestVisible(!isRequestVisible)}>
+            <EuiButtonEmpty
+              data-test-subj="watcherJsonWatchEditFormButtonEmpty"
+              onClick={() => setIsRequestVisible(!isRequestVisible)}
+            >
               {isRequestVisible ? (
                 <FormattedMessage
                   id="xpack.watcher.sections.watchEdit.json.hideRequestButtonLabel"

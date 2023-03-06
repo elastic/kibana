@@ -115,7 +115,11 @@ export const SaveCustom: React.FC<SaveCustomProps> = ({ sourceData }) => {
                 heading="h3"
                 size="s"
                 title={
-                  <EuiLink href="https://www.elastic.co/kibana/feedback" external>
+                  <EuiLink
+                    data-test-subj="enterpriseSearchSaveCustomHaveFeedbackAboutDeployingANameConnectorLetUsKnowLink"
+                    href="https://www.elastic.co/kibana/feedback"
+                    external
+                  >
                     <FormattedMessage
                       id="xpack.enterpriseSearch.workplaceSearch.sources.feedbackLinkLabel"
                       defaultMessage="Have feedback about deploying a {name} connector? Let us know."

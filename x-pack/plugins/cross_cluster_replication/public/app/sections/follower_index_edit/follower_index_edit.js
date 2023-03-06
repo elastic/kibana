@@ -145,6 +145,7 @@ export class FollowerIndexEdit extends PureComponent {
           body={<p>{errorMessage}</p>}
           actions={
             <EuiButton
+              data-test-subj="crossClusterReplicationViewFollowerIndicesButton"
               {...reactRouterNavigate(this.props.history, `/follower_indices`)}
               color="danger"
               flush="left"

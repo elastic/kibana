@@ -265,7 +265,11 @@ export const DataFormatPicker = ({
           }
           helpText={
             <span>
-              <EuiLink target="_blank" href="http://numeraljs.com/#format">
+              <EuiLink
+                data-test-subj="pluginsDataFormatPickerDocumentationLink"
+                target="_blank"
+                href="http://numeraljs.com/#format"
+              >
                 <FormattedMessage
                   id="visTypeTimeseries.dataFormatPicker.formatPatternHelpText"
                   defaultMessage="Documentation"
@@ -275,6 +279,7 @@ export const DataFormatPicker = ({
           }
         >
           <EuiFieldText
+            data-test-subj="pluginsDataFormatPickerFieldText"
             placeholder={DEFAULT_CUSTOM_FORMAT_PATTERN}
             value={customFormatPattern}
             onChange={handleCustomFormatStringChange}

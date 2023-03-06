@@ -99,6 +99,7 @@ export const PipelinesCsvUploader: FC<Props> = ({
         }
       >
         <EuiRadioGroup
+          data-test-subj="ingestPipelinesPipelinesCsvUploaderRadioGroup"
           options={options}
           idSelected={action}
           onChange={(id) => setAction(id as FieldCopyAction)}

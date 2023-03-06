@@ -295,6 +295,7 @@ export function getColumns(
         const examples = get(examplesByJobId, [item.jobId, item.entityValue], []);
         return (
           <EuiLink
+            data-test-subj="mlGetColumnsLink"
             className="mlAnomalyCategoryExamples__link"
             onClick={() => toggleRow(item, ANOMALIES_TABLE_TABS.CATEGORY_EXAMPLES)}
           >

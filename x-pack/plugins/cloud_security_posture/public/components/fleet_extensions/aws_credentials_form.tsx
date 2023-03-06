@@ -53,7 +53,11 @@ const AWSSetupInfoContent = ({ policyTemplate }: AWSSetupInfoContentProps) => {
           defaultMessage="The integration will require certain read-only AWS permissions to detect security misconfigurations. Select your preferred method of providing the AWS credentials this integration will use. You can follow these {stepByStepInstructionsLink} to generate the necessary credentials."
           values={{
             stepByStepInstructionsLink: (
-              <EuiLink href={integrationLink} target="_blank">
+              <EuiLink
+                data-test-subj="cloudSecurityPostureAWSSetupInfoContentStepByStepInstructionsLink"
+                href={integrationLink}
+                target="_blank"
+              >
                 <FormattedMessage
                   id="xpack.csp.awsIntegration.setupInfoContentLink"
                   defaultMessage="step-by-step instructions"
@@ -297,6 +301,7 @@ const AwsInputVarFields = ({
           )}
           {field.type === 'text' && (
             <EuiFieldText
+              data-test-subj="cloudSecurityPostureAwsInputVarFieldsFieldText"
               id={field.id}
               fullWidth
               value={field.value || ''}

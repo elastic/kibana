@@ -48,13 +48,20 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
           />
         </p>
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click*/}
-        <EuiButton onClick={handleGetStartedClick} href={endpointsLink}>
+        <EuiButton
+          data-test-subj="securitySolutionEndpointNoticeTryEndpointSecurityButton"
+          onClick={handleGetStartedClick}
+          href={endpointsLink}
+        >
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.tryButton"
             defaultMessage="Try Endpoint Security"
           />
         </EuiButton>
-        <EuiButtonEmpty onClick={onDismiss}>
+        <EuiButtonEmpty
+          data-test-subj="securitySolutionEndpointNoticeDismissMessageButtonEmpty"
+          onClick={onDismiss}
+        >
           <FormattedMessage
             id="xpack.securitySolution.overview.endpointNotice.dismiss"
             defaultMessage="Dismiss message"

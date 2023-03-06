@@ -115,7 +115,10 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       render: (host: string, agent: Agent) => (
         <EuiFlexGroup gutterSize="none" direction="column">
           <EuiFlexItem grow={false}>
-            <EuiLink href={getHref('agent_details', { agentId: agent.id })}>
+            <EuiLink
+              data-test-subj="fleetColumnsLink"
+              href={getHref('agent_details', { agentId: agent.id })}
+            >
               {safeMetadata(host)}
             </EuiLink>
           </EuiFlexItem>

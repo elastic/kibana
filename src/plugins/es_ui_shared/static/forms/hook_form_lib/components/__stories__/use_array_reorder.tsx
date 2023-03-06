@@ -135,7 +135,12 @@ export function Reorder() {
 
                 <EuiSpacer size="m" />
                 <EuiFlexGroup justifyContent="flexEnd">
-                  <EuiButtonEmpty onClick={addItem}>Add employee</EuiButtonEmpty>
+                  <EuiButtonEmpty
+                    data-test-subj="pluginsReorderAddEmployeeButtonEmpty"
+                    onClick={addItem}
+                  >
+                    Add employee
+                  </EuiButtonEmpty>
                 </EuiFlexGroup>
               </>
             );

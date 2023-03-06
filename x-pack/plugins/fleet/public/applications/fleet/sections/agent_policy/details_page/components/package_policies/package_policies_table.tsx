@@ -110,6 +110,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
         }),
         render: (value: string, packagePolicy: InMemoryPackagePolicy) => (
           <EuiLink
+            data-test-subj="fleetColumnsLink"
             title={value}
             {...(canReadIntegrationPolicies
               ? {
@@ -148,6 +149,7 @@ export const PackagePoliciesTable: React.FunctionComponent<Props> = ({
             <EuiFlexGroup gutterSize="s" alignItems="center">
               <EuiFlexItem data-test-subj="PackagePoliciesTableLink" grow={false}>
                 <EuiLink
+                  data-test-subj="fleetColumnsLink"
                   href={
                     packagePolicy.package &&
                     getHref('integration_details_overview', {

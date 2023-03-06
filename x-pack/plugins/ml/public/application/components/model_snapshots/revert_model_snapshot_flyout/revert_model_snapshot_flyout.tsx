@@ -348,7 +348,12 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+              <EuiButtonEmpty
+                data-test-subj="mlRevertModelSnapshotFlyoutCloseButtonEmpty"
+                iconType="cross"
+                onClick={closeFlyout}
+                flush="left"
+              >
                 <FormattedMessage
                   id="xpack.ml.newJob.wizard.revertModelSnapshotFlyout.closeButton"
                   defaultMessage="Close"
@@ -359,6 +364,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
 
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="mlRevertModelSnapshotFlyoutApplyButton"
                 onClick={showRevertModal}
                 disabled={createCalendar === true && calendarEventsValid === false}
                 fill

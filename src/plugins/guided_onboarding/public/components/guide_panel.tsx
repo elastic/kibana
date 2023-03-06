@@ -86,6 +86,7 @@ const errorSection = (
         </EuiText>
         <EuiSpacer />
         <EuiButton
+          data-test-subj="pluginsReloadButton"
           iconSide="right"
           onClick={() => window.location.reload()}
           iconType="refresh"
@@ -230,6 +231,7 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
 
   const backToGuidesButton = (
     <EuiButtonEmpty
+      data-test-subj="pluginsGuidePanelBackToGuidesButtonEmpty"
       onClick={navigateToLandingPage}
       iconSide="left"
       iconType="arrowLeft"
@@ -318,7 +320,12 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
                     <>
                       <EuiSpacer size="l" />
                       <EuiText size="m">
-                        <EuiLink external target="_blank" href={guideConfig.docs.url}>
+                        <EuiLink
+                          data-test-subj="pluginsGuidePanelLink"
+                          external
+                          target="_blank"
+                          href={guideConfig.docs.url}
+                        >
                           {guideConfig.docs.text}
                         </EuiLink>
                       </EuiText>
@@ -412,6 +419,7 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
                 >
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj="pluginsGuidePanelNeedHelpButtonEmpty"
                       iconType="questionInCircle"
                       iconSide="right"
                       href="https://cloud.elastic.co/support "
@@ -431,6 +439,7 @@ export const GuidePanel = ({ api, application, notifications, uiSettings }: Guid
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj="pluginsGuidePanelGiveFeedbackButtonEmpty"
                       iconType="faceHappy"
                       iconSide="right"
                       href="https://www.elastic.co/kibana/feedback"

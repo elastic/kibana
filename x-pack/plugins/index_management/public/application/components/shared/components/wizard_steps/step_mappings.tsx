@@ -88,6 +88,7 @@ export const StepMappings: React.FunctionComponent<Props> = React.memo(
 
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="indexManagementStepMappingsMappingDocsButtonEmpty"
                   size="s"
                   flush="right"
                   href={`${esDocsBase}/mapping.html`}

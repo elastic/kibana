@@ -119,13 +119,19 @@ const ActionsExplorer = ({ share }: Props) => {
               <p>Create new links using the most recent version of a locator.</p>
             </EuiText>
             <EuiFieldText
+              data-test-subj="locatorExplorerActionsExplorerFieldText"
               prepend="First name"
               onChange={(e) => {
                 setFirstName(e.target.value);
               }}
             />
-            <EuiFieldText prepend="Last name" onChange={(e) => setLastName(e.target.value)} />
+            <EuiFieldText
+              data-test-subj="locatorExplorerActionsExplorerFieldText"
+              prepend="Last name"
+              onChange={(e) => setLastName(e.target.value)}
+            />
             <EuiButton
+              data-test-subj="locatorExplorerActionsExplorerAddNewLinkButton"
               onClick={() =>
                 setPersistedLinks([
                   ...persistedLinks,

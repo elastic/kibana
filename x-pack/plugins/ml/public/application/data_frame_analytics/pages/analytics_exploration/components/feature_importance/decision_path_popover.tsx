@@ -111,7 +111,11 @@ export const DecisionPathPopover: FC<DecisionPathPopoverProps> = ({
               values={{
                 predictionFieldName,
                 linkedFeatureImportanceValues: (
-                  <EuiLink href={docLink} target="_blank">
+                  <EuiLink
+                    data-test-subj="mlDecisionPathPopoverFeatureImportanceValuesLink"
+                    href={docLink}
+                    target="_blank"
+                  >
                     <FormattedMessage
                       id="xpack.ml.dataframe.analytics.explorationResults.linkedFeatureImportanceValues"
                       defaultMessage="feature importance values"

@@ -78,7 +78,7 @@ export class AttributionControl extends Component<Props, State> {
     return !url || isScreenshotMode() ? (
       label
     ) : (
-      <EuiLink color="text" href={url} target="_blank">
+      <EuiLink data-test-subj="mapsLink" color="text" href={url} target="_blank">
         {label}
       </EuiLink>
     );

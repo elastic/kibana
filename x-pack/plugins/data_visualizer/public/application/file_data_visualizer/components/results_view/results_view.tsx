@@ -68,7 +68,11 @@ export const ResultsView: FC<Props> = ({
 
           <EuiFlexGroup gutterSize="s" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={() => showEditFlyout()} disabled={disableButtons}>
+              <EuiButton
+                data-test-subj="dataVisualizerResultsViewOverrideSettingsButton"
+                onClick={() => showEditFlyout()}
+                disabled={disableButtons}
+              >
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.resultsView.overrideSettingsButtonLabel"
                   defaultMessage="Override settings"
@@ -76,7 +80,11 @@ export const ResultsView: FC<Props> = ({
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={() => showExplanationFlyout()} disabled={disableButtons}>
+              <EuiButtonEmpty
+                data-test-subj="dataVisualizerResultsViewAnalysisExplanationButtonEmpty"
+                onClick={() => showExplanationFlyout()}
+                disabled={disableButtons}
+              >
                 <FormattedMessage
                   id="xpack.dataVisualizer.file.resultsView.analysisExplanationButtonLabel"
                   defaultMessage="Analysis explanation"

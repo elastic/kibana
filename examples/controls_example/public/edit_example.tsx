@@ -75,6 +75,7 @@ export const EditExample = () => {
         <EuiFlexGroup gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="controlsExampleEditExampleAddControlButtonEmpty"
               color="primary"
               iconType="plusInCircle"
               isDisabled={controlGroup === undefined}
@@ -87,6 +88,7 @@ export const EditExample = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="controlsExampleEditExampleSaveButton"
               color="primary"
               isDisabled={controlGroup === undefined || isSaving}
               fill

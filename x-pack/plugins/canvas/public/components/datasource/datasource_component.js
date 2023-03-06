@@ -184,7 +184,11 @@ export class DatasourceComponent extends PureComponent {
               <EuiHorizontalRule margin="m" />
               <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                 <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty size="s" onClick={() => setPreviewing(true)}>
+                  <EuiButtonEmpty
+                    data-test-subj="canvasButtonEmpty"
+                    size="s"
+                    onClick={() => setPreviewing(true)}
+                  >
                     {strings.getPreviewButtonLabel()}
                   </EuiButtonEmpty>
                 </EuiFlexItem>

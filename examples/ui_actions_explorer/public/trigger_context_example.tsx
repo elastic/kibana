@@ -35,6 +35,7 @@ const createRowData = (
   countryOfResidence: (
     <Fragment>
       <EuiButtonEmpty
+        data-test-subj="uiActionsExplorerCreateRowDataButtonEmpty"
         onClick={() => {
           uiActionsApi.executeTriggerActions(COUNTRY_TRIGGER, { country: user.countryOfResidence });
         }}
@@ -46,6 +47,7 @@ const createRowData = (
   phone: (
     <Fragment>
       <EuiButtonEmpty
+        data-test-subj="uiActionsExplorerCreateRowDataButtonEmpty"
         disabled={user.phone === undefined}
         onClick={() => {
           uiActionsApi.executeTriggerActions(PHONE_TRIGGER, { phone: user.phone! });
@@ -58,6 +60,7 @@ const createRowData = (
   rowActions: (
     <Fragment>
       <EuiButtonEmpty
+        data-test-subj="uiActionsExplorerCreateRowDataActionsButtonEmpty"
         onClick={() => {
           uiActionsApi.executeTriggerActions(USER_TRIGGER, {
             user,

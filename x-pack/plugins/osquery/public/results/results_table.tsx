@@ -164,7 +164,14 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           // @ts-expect-error update types
           const agentIdValue = data[rowIndex % pagination.pageSize]?.fields['agent.id'];
 
-          return <EuiLink href={getFleetAppUrl(agentIdValue)}>{value}</EuiLink>;
+          return (
+            <EuiLink
+              data-test-subj="osqueryRenderCellValueLink"
+              href={getFleetAppUrl(agentIdValue)}
+            >
+              {value}
+            </EuiLink>
+          );
         }
 
         if (ecsMappingColumns.includes(columnId)) {

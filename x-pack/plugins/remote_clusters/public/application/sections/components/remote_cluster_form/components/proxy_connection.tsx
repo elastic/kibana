@@ -114,7 +114,11 @@ export const ProxyConnection: FunctionComponent<Props> = (props) => {
                 defaultMessage="A string sent in the server_name field of the TLS Server Name Indication extension if TLS is enabled. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
-                    <EuiLink href={proxySettingsUrl} target="_blank">
+                    <EuiLink
+                      data-test-subj="remoteClustersProxyConnectionLearnMoreLink"
+                      href={proxySettingsUrl}
+                      target="_blank"
+                    >
                       <FormattedMessage
                         id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
                         defaultMessage="Learn more."
@@ -127,6 +131,7 @@ export const ProxyConnection: FunctionComponent<Props> = (props) => {
             fullWidth
           >
             <EuiFieldText
+              data-test-subj="remoteClustersProxyConnectionFieldText"
               value={serverName}
               onChange={(e) => onFieldsChange({ serverName: e.target.value })}
               isInvalid={Boolean(areErrorsVisible && serverNameError)}
@@ -152,6 +157,7 @@ export const ProxyConnection: FunctionComponent<Props> = (props) => {
         fullWidth
       >
         <EuiFieldNumber
+          data-test-subj="remoteClustersProxyConnectionFieldNumber"
           value={proxySocketConnections || ''}
           onChange={(e) => onFieldsChange({ proxySocketConnections: Number(e.target.value) })}
           fullWidth

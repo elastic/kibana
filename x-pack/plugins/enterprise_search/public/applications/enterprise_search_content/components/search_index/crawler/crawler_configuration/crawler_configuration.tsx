@@ -89,6 +89,7 @@ export const CrawlerConfiguration: React.FC = () => {
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiLink
+                data-test-subj="enterpriseSearchCrawlerConfigurationLearnMoreAboutStoringFullHtmlLink"
                 href={`${docLinks.crawlerManaging}#crawler-managing-html-storage`}
                 data-telemetry-id="entSearchContent-crawler-configuration-learnMoreExtraction"
               >

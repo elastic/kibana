@@ -199,6 +199,7 @@ export const getTableColumns: GetTableColumns = (openRuleInTimelineWithAdditiona
     align: 'right',
     render: (count: number, { ruleName }) => (
       <EuiLink
+        data-test-subj="securitySolutionGetTableColumnsLink"
         disabled={count === 0}
         onClick={() => openRuleInTimelineWithAdditionalFields(ruleName)}
       >

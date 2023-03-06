@@ -26,7 +26,11 @@ export const MapperSizePluginSection = () => {
           defaultMessage="The Mapper Size plugin can index the size of the original {_source} field. {docsLink}"
           values={{
             docsLink: (
-              <EuiLink href={documentationService.docLinks.plugins.mapperSize} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementMapperSizePluginSectionLearnMoreLink"
+                href={documentationService.docLinks.plugins.mapperSize}
+                target="_blank"
+              >
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.sizeDocumentionLink', {
                   defaultMessage: 'Learn more.',
                 })}

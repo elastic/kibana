@@ -108,6 +108,7 @@ export const RuleConditions = <ConditionProps extends any, ActionGroupIds extend
                 {withoutConditions.map((actionGroup) => (
                   <EuiFlexItem key={`condition-add-${actionGroup.id}`} grow={false}>
                     <EuiButtonEmpty
+                      data-test-subj="triggersActionsUiRuleConditionsButtonEmpty"
                       flush="left"
                       size="s"
                       onClick={() => onInitializeConditionsFor(actionGroup)}

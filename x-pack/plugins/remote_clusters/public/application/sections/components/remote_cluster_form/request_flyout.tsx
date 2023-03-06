@@ -74,7 +74,12 @@ export class RequestFlyout extends PureComponent<Props> {
         </EuiFlyoutBody>
 
         <EuiFlyoutFooter>
-          <EuiButtonEmpty iconType="cross" onClick={close} flush="left">
+          <EuiButtonEmpty
+            data-test-subj="remoteClustersCloseButtonEmpty"
+            iconType="cross"
+            onClick={close}
+            flush="left"
+          >
             <FormattedMessage
               id="xpack.remoteClusters.requestFlyout.closeButtonLabel"
               defaultMessage="Close"

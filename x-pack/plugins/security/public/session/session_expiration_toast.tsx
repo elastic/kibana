@@ -58,7 +58,13 @@ export const SessionExpirationToast: FunctionComponent<SessionExpirationToastPro
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" color="warning" isLoading={loading} onClick={extend}>
+            <EuiButton
+              data-test-subj="securitySessionExpirationToastStayLoggedInButton"
+              size="s"
+              color="warning"
+              isLoading={loading}
+              onClick={extend}
+            >
               <FormattedMessage
                 id="xpack.security.sessionExpirationToast.extendButton"
                 defaultMessage="Stay logged in"

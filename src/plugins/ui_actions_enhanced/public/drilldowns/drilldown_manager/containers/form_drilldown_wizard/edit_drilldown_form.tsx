@@ -50,6 +50,7 @@ export const EditDrilldownForm: React.FC<EditDrilldownFormProps> = ({ state }) =
       </DrilldownForm>
       <EuiSpacer size={'xl'} />
       <EuiButton
+        data-test-subj="pluginsEditDrilldownFormButton"
         onClick={() => {
           alert('DELETE!');
         }}

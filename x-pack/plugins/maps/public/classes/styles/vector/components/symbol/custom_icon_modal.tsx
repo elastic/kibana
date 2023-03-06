@@ -242,7 +242,11 @@ export class CustomIconModal extends Component<Props, State> {
         <EuiPanel color="subdued" paddingSize="s">
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="xs">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty size="xs" onClick={this._resetAdvancedOptions}>
+              <EuiButtonEmpty
+                data-test-subj="mapsButtonEmpty"
+                size="xs"
+                onClick={this._resetAdvancedOptions}
+              >
                 {strings.getResetButtonLabel()}
               </EuiButtonEmpty>
             </EuiFlexItem>
@@ -358,7 +362,9 @@ export class CustomIconModal extends Component<Props, State> {
         <EuiModalFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty onClick={onCancel}>{strings.getCancelButtonLabel()}</EuiButtonEmpty>
+              <EuiButtonEmpty data-test-subj="mapsButtonEmpty" onClick={onCancel}>
+                {strings.getCancelButtonLabel()}
+              </EuiButtonEmpty>
             </EuiFlexItem>
             {onDelete && symbolId ? (
               <EuiFlexItem grow={false}>

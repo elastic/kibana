@@ -97,7 +97,11 @@ export const KubernetesInstructions: React.FunctionComponent<Props> = ({
   const k8sCopyYaml = (
     <EuiCopy textToCopy={yaml}>
       {(copy) => (
-        <EuiButton onClick={() => onCopyButtonClick(copy)} iconType="copyClipboard">
+        <EuiButton
+          data-test-subj="fleetK8sCopyYamlButton"
+          onClick={() => onCopyButtonClick(copy)}
+          iconType="copyClipboard"
+        >
           {copyButtonClicked ? (
             <FormattedMessage
               id="xpack.fleet.enrollmentInstructions.copyPolicyButtonClicked"
@@ -121,6 +125,7 @@ export const KubernetesInstructions: React.FunctionComponent<Props> = ({
   const k8sDownloadYaml = (
     <>
       <EuiButton
+        data-test-subj="fleetKubernetesInstructionsButton"
         target="_blank"
         iconSide="right"
         iconType="popout"

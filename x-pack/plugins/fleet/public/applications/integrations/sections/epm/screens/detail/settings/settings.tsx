@@ -88,7 +88,9 @@ const UpdatesAvailableMsg = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <p>
-          <EuiLink onClick={toggleChangelogModal}>{'View changelog.'}</EuiLink>
+          <EuiLink data-test-subj="fleetUpdatesAvailableMsgLink" onClick={toggleChangelogModal}>
+            {'View changelog.'}
+          </EuiLink>
         </p>
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -101,7 +103,7 @@ const LatestVersionLink = ({ name, version }: { name: string; version: string })
     pkgkey: `${name}-${version}`,
   });
   return (
-    <EuiLink href={settingsPath}>
+    <EuiLink data-test-subj="fleetLatestVersionLinkLatestVersionLink" href={settingsPath}>
       <FormattedMessage
         id="xpack.fleet.integrations.settings.packageLatestVersionLink"
         defaultMessage="latest version"

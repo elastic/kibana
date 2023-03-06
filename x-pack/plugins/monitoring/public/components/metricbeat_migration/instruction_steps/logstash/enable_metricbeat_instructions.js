@@ -29,7 +29,11 @@ export function getLogstashInstructionsForEnablingMetricbeat(product, _meta, { e
     children: (
       <EuiText>
         <p>
-          <EuiLink href={metricbeatInstallUrl} target="_blank">
+          <EuiLink
+            data-test-subj="monitoringGetLogstashInstructionsForEnablingMetricbeatFollowTheInstructionsHereLink"
+            href={metricbeatInstallUrl}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.logstashInstructions.installMetricbeatLinkText"
               defaultMessage="Follow the instructions here."
@@ -114,7 +118,11 @@ export function getLogstashInstructionsForEnablingMetricbeat(product, _meta, { e
     children: (
       <EuiText>
         <p>
-          <EuiLink href={metricbeatStartUrl} target="_blank">
+          <EuiLink
+            data-test-subj="monitoringGetLogstashInstructionsForEnablingMetricbeatFollowTheInstructionsHereLink"
+            href={metricbeatStartUrl}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.logstashInstructions.startMetricbeatLinkText"
               defaultMessage="Follow the instructions here."

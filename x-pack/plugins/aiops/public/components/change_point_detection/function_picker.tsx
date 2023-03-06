@@ -26,6 +26,7 @@ export const FunctionPicker: FC<FunctionPickerProps> = React.memo(({ value, onCh
   return (
     <EuiFormRow>
       <EuiSelect
+        data-test-subj="aiopsFunctionPickerSelect"
         options={options}
         value={value}
         onChange={(e) => onChange(e.target.value)}

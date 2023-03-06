@@ -150,7 +150,10 @@ const columns = [
       if (job.node) {
         if ('id' in job.node) {
           return (
-            <EuiLink href={getSafeForExternalLink(`#/elasticsearch/nodes/${job.node.id}`)}>
+            <EuiLink
+              data-test-subj="monitoringColumnsLink"
+              href={getSafeForExternalLink(`#/elasticsearch/nodes/${job.node.id}`)}
+            >
               {name}
             </EuiLink>
           );

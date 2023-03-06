@@ -158,6 +158,7 @@ export class DurationFormatEditor extends DefaultFormatEditor<
               error={hasDecimalError ? error : null}
             >
               <EuiFieldNumber
+                data-test-subj="pluginsFieldNumber"
                 value={formatParams.outputPrecision ?? undefined}
                 min={0}
                 max={20}

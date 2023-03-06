@@ -32,6 +32,7 @@ export const SubscriptionNotAllowed = () => {
               values={{
                 link: (
                   <EuiLink
+                    data-test-subj="cloudDefendSubscriptionNotAllowedStartATrialOrUpgradeYourSubscriptionLink"
                     href={application.getUrlForApp('management', {
                       path: 'stack/license_management/home',
                     })}

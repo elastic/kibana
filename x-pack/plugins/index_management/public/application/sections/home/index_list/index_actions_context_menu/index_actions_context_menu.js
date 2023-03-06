@@ -374,6 +374,7 @@ export class IndexActionsContextMenu extends Component {
             helpText={helpText}
           >
             <EuiFieldNumber
+              data-test-subj="indexManagementFieldNumber"
               onChange={(event) => {
                 this.setState({ forcemergeSegments: event.target.value });
               }}

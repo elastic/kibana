@@ -77,7 +77,11 @@ function ProxyLink() {
   const { docLinks } = useStartServices();
 
   return (
-    <EuiLink href={docLinks.links.fleet.settingsFleetServerProxySettings} target="_blank">
+    <EuiLink
+      data-test-subj="fleetProxyLinkProxyServerLink"
+      href={docLinks.links.fleet.settingsFleetServerProxySettings}
+      target="_blank"
+    >
       {i18n.translate('xpack.fleet.epmList.proxyLinkSnippedText', {
         defaultMessage: 'proxy server',
       })}
@@ -89,7 +93,11 @@ function OnPremLink() {
   const { docLinks } = useStartServices();
 
   return (
-    <EuiLink href={docLinks.links.fleet.onPremRegistry} target="_blank">
+    <EuiLink
+      data-test-subj="fleetOnPremLinkYourOwnRegistryLink"
+      href={docLinks.links.fleet.onPremRegistry}
+      target="_blank"
+    >
       {i18n.translate('xpack.fleet.epmList.onPremLinkSnippetText', {
         defaultMessage: 'your own registry',
       })}

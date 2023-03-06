@@ -100,6 +100,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
         <EuiFlexGroup justifyContent="spaceBetween" direction="rowReverse">
           <EuiFlexItem grow={false}>
             <EuiButton
+              data-test-subj="enterpriseSearchAddIndicesFlyoutAddSelectedButton"
               fill
               data-telemetry-id="entSearchContent-engines-indices-addNewIndices-submit"
               iconType="plusInCircle"
@@ -113,6 +114,7 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
+              data-test-subj="enterpriseSearchAddIndicesFlyoutCancelButtonEmpty"
               data-telemetry-id="entSearchContent-engines-indices-addNewIndices-cancel"
               flush="left"
               onClick={onClose}

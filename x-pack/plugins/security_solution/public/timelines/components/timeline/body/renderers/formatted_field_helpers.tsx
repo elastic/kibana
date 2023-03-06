@@ -248,7 +248,11 @@ export const renderEventModule = ({
               </>
             }
           >
-            <EuiLink href={endpointRefUrl} target="_blank">
+            <EuiLink
+              data-test-subj="securitySolutionRenderEventModuleLink"
+              href={endpointRefUrl}
+              target="_blank"
+            >
               <EuiIcon type={endPointSvg} size="m" />
             </EuiLink>
           </EuiToolTip>

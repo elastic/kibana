@@ -58,6 +58,7 @@ export function DiscoverNoResults({
         data-test-subj="discoverNoResultsError"
       >
         <EuiButton
+          data-test-subj="pluginsDiscoverNoResultsShowErrorMessageButton"
           size="s"
           color="danger"
           onClick={() => (data ? data.search.showError(error) : void 0)}

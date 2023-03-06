@@ -657,7 +657,11 @@ export class AutoFollowPatternForm extends PureComponent {
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty color="primary" onClick={this.cancelForm}>
+              <EuiButtonEmpty
+                data-test-subj="crossClusterReplicationRenderActionsCancelButtonEmpty"
+                color="primary"
+                onClick={this.cancelForm}
+              >
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternForm.cancelButtonLabel"
                   defaultMessage="Cancel"
@@ -667,7 +671,10 @@ export class AutoFollowPatternForm extends PureComponent {
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={this.toggleRequest}>
+            <EuiButtonEmpty
+              data-test-subj="crossClusterReplicationRenderActionsButtonEmpty"
+              onClick={this.toggleRequest}
+            >
               {isRequestVisible ? (
                 <FormattedMessage
                   id="xpack.crossClusterReplication.autoFollowPatternForm.hideRequestButtonLabel"

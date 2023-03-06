@@ -148,6 +148,7 @@ export const CreateSharedListFlyout = memo(
         <EuiFlyoutBody>
           <EuiText>{CREATE_SHARED_LIST_NAME_FIELD}</EuiText>
           <EuiFieldText
+            data-test-subj="securitySolutionCreateSharedListFlyoutFieldText"
             placeholder={CREATE_SHARED_LIST_NAME_FIELD_PLACEHOLDER}
             value={newListDetails.name}
             onChange={(e) => onChange(e, DetailProperty.name)}
@@ -156,6 +157,7 @@ export const CreateSharedListFlyout = memo(
           <EuiSpacer />
           <EuiText>{CREATE_SHARED_LIST_DESCRIPTION}</EuiText>
           <EuiTextArea
+            data-test-subj="securitySolutionCreateSharedListFlyoutTextArea"
             placeholder={CREATE_SHARED_LIST_DESCRIPTION_PLACEHOLDER}
             value={newListDetails.description}
             onChange={(e) => onChange(e, DetailProperty.description)}
@@ -165,7 +167,12 @@ export const CreateSharedListFlyout = memo(
         <EuiFlyoutFooter>
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty iconType="cross" onClick={handleCloseFlyout} flush="left">
+              <EuiButtonEmpty
+                data-test-subj="securitySolutionCreateSharedListFlyoutButtonEmpty"
+                iconType="cross"
+                onClick={handleCloseFlyout}
+                flush="left"
+              >
                 {CLOSE_FLYOUT}
               </EuiButtonEmpty>
             </EuiFlexItem>

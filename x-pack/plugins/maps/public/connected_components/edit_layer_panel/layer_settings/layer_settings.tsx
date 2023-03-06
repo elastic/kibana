@@ -146,7 +146,12 @@ export function LayerSettings(props: Props) {
         })}
         display="columnCompressed"
       >
-        <EuiFieldText value={props.layer.getLabel()} onChange={onLabelChange} compressed />
+        <EuiFieldText
+          data-test-subj="mapsRenderLabelFieldText"
+          value={props.layer.getLabel()}
+          onChange={onLabelChange}
+          compressed
+        />
       </EuiFormRow>
     );
   };
@@ -235,6 +240,7 @@ export function LayerSettings(props: Props) {
         })}
       >
         <EuiSelect
+          data-test-subj="mapsRenderShowLocaleSelectorSelect"
           options={options}
           value={props.layer.getLocale() ?? NO_EMS_LOCALE}
           onChange={onLocaleChange}

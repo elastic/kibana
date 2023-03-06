@@ -69,6 +69,7 @@ export const KubernetesManifestApplyStep = ({
           <EuiCopy textToCopy="kubectl apply -f elastic-agent-managed-kubernetes.yml">
             {(copy) => (
               <EuiButton
+                data-test-subj="fleetKubernetesManifestApplyStepButton"
                 color="primary"
                 iconType="copyClipboard"
                 size="m"

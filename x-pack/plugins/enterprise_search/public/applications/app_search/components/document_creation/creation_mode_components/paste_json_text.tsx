@@ -52,6 +52,7 @@ export const PasteJsonTextTabContent: React.FC = () => {
       </EuiText>
       <EuiSpacer />
       <EuiTextArea
+        data-test-subj="enterpriseSearchPasteJsonTextTabContentTextArea"
         value={textInput}
         onChange={(e) => setTextInput(e.target.value)}
         isInvalid={errors.length > 0}
@@ -74,10 +75,21 @@ export const PasteJsonTextFooterContent: React.FC = () => {
   return (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchPasteJsonTextFooterContentButtonEmpty"
+          onClick={closeDocumentCreation}
+        >
+          {CANCEL_BUTTON_LABEL}
+        </EuiButtonEmpty>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton fill onClick={onSubmitJson} isLoading={isUploading} isDisabled={!textInput}>
+        <EuiButton
+          data-test-subj="enterpriseSearchPasteJsonTextFooterContentButton"
+          fill
+          onClick={onSubmitJson}
+          isLoading={isUploading}
+          isDisabled={!textInput}
+        >
           {CONTINUE_BUTTON_LABEL}
         </EuiButton>
       </EuiFlexItem>

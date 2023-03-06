@@ -72,7 +72,7 @@ export const FieldStatsFlyout: FC<{
           />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
-          <EuiButton onClick={closeFlyout}>
+          <EuiButton data-test-subj="mlFieldStatsFlyoutCloseButton" onClick={closeFlyout}>
             <FormattedMessage
               id="xpack.ml.newJob.wizard.fieldContextFlyoutCloseButton"
               defaultMessage="Close"

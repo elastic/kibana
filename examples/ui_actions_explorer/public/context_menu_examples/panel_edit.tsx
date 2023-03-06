@@ -36,7 +36,14 @@ export const PanelEdit: React.FC = () => {
 
   return (
     <EuiPopover
-      button={<EuiButton onClick={() => setOpen((x) => !x)}>Edit mode</EuiButton>}
+      button={
+        <EuiButton
+          data-test-subj="uiActionsExplorerPanelEditEditModeButton"
+          onClick={() => setOpen((x) => !x)}
+        >
+          Edit mode
+        </EuiButton>
+      }
       isOpen={open}
       panelPaddingSize="none"
       anchorPosition="downLeft"

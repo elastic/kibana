@@ -72,6 +72,7 @@ function _InlineTextInput({
   return isShowingTextInput && !disabled ? (
     <div className={`pipelineProcessorsEditor__item__textContainer ${containerClasses}`}>
       <EuiFieldText
+        data-test-subj="ingestPipelines_InlineTextInputFieldText"
         controlOnly
         onBlur={submitChange}
         fullWidth

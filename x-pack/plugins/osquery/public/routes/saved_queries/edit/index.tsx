@@ -70,7 +70,13 @@ const EditSavedQueryPageComponent = () => {
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...savedQueryListProps} flush="left" size="xs">
+          <EuiButtonEmpty
+            data-test-subj="osqueryLeftColumnViewAllSavedQueriesButtonEmpty"
+            iconType="arrowLeft"
+            {...savedQueryListProps}
+            flush="left"
+            size="xs"
+          >
             <FormattedMessage
               id="xpack.osquery.editSavedQuery.viewSavedQueriesListTitle"
               defaultMessage="View all saved queries"
@@ -119,7 +125,12 @@ const EditSavedQueryPageComponent = () => {
 
   const RightColumn = useMemo(
     () => (
-      <EuiButton color="danger" onClick={handleDeleteClick} iconType="trash">
+      <EuiButton
+        data-test-subj="osqueryRightColumnDeleteQueryButton"
+        color="danger"
+        onClick={handleDeleteClick}
+        iconType="trash"
+      >
         <FormattedMessage
           id="xpack.osquery.editSavedQuery.deleteSavedQueryButtonLabel"
           defaultMessage="Delete query"

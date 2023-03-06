@@ -49,7 +49,12 @@ export const Paywall: VFC<PaywallProps> = ({ licenseManagementHref }) => {
         <EuiFlexGroup direction="column">
           <EuiFlexItem>
             <div>
-              <EuiButton color="primary" fill href="https://www.elastic.co/subscriptions">
+              <EuiButton
+                data-test-subj="threatIntelligencePaywallUpgradeButton"
+                color="primary"
+                fill
+                href="https://www.elastic.co/subscriptions"
+              >
                 <FormattedMessage
                   id="xpack.threatIntelligence.paywall.upgrade"
                   defaultMessage="Upgrade"
@@ -59,7 +64,10 @@ export const Paywall: VFC<PaywallProps> = ({ licenseManagementHref }) => {
           </EuiFlexItem>
           <EuiFlexItem>
             <div>
-              <EuiButtonEmpty href={licenseManagementHref}>
+              <EuiButtonEmpty
+                data-test-subj="threatIntelligencePaywallStartAFreeTrialButtonEmpty"
+                href={licenseManagementHref}
+              >
                 <FormattedMessage
                   id="xpack.threatIntelligence.paywall.trial"
                   defaultMessage="Start a free trial"

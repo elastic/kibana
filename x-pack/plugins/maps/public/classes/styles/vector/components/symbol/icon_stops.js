@@ -132,6 +132,7 @@ export function IconStops({
       const stopInput =
         index === 0 ? (
           <EuiFieldText
+            data-test-subj="mapsIconStopsFieldText"
             aria-label={OTHER_CATEGORY_LABEL}
             placeholder={OTHER_CATEGORY_LABEL}
             disabled

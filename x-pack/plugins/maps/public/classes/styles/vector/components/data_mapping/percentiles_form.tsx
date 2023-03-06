@@ -105,6 +105,7 @@ export class PercentilesForm extends Component<Props, State> {
       return (
         <EuiFormRow key={index} display="rowCompressed" isInvalid={isInvalid} error={error}>
           <EuiFieldNumber
+            data-test-subj="mapsRowsFieldNumber"
             isInvalid={isInvalid}
             value={percentile}
             onChange={onPercentileChange}

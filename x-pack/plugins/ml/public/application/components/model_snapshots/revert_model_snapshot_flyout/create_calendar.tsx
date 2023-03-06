@@ -215,6 +215,7 @@ export const CreateCalendar: FC<Props> = ({
                       )}
                     >
                       <EuiFieldText
+                        data-test-subj="mlCreateCalendarFieldText"
                         fullWidth
                         value={c.description}
                         onChange={(e) => setDescription(e.target.value, i)}

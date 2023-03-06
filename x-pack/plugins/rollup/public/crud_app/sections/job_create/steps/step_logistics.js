@@ -149,7 +149,11 @@ export class StepLogistics extends Component {
             isInvalid={Boolean(areStepErrorsVisible && errorRollupCron)}
             helpText={
               <p>
-                <EuiLink href={documentationLinks.apis.cronExpressions} target="_blank">
+                <EuiLink
+                  data-test-subj="rollupLearnMoreAboutCronExpressionsLink"
+                  href={documentationLinks.apis.cronExpressions}
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.rollupJobs.create.stepLogistics.fieldCron.helpReferenceLinkLabel"
                     defaultMessage="Learn more about cron expressions"
@@ -172,7 +176,7 @@ export class StepLogistics extends Component {
           <EuiSpacer size="m" />
 
           <EuiText size="s">
-            <EuiLink onClick={this.hideAdvancedCron}>
+            <EuiLink data-test-subj="rollupCreateBasicIntervalLink" onClick={this.hideAdvancedCron}>
               <FormattedMessage
                 id="xpack.rollupJobs.create.stepLogistics.sectionSchedule.buttonBasicLabel"
                 defaultMessage="Create basic interval"

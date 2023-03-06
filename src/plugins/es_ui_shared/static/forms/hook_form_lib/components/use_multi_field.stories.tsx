@@ -46,7 +46,9 @@ export default {
             <>
               <Story />
               <EuiSpacer />
-              <EuiButton onClick={() => submitForm(form)}>Send</EuiButton>
+              <EuiButton data-test-subj="pluginsSendButton" onClick={() => submitForm(form)}>
+                Send
+              </EuiButton>
             </>
           </Form>
         </div>

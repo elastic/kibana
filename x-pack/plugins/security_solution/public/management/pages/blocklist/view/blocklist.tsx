@@ -70,7 +70,11 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
           id="xpack.securitySolution.blocklist.flyoutDowngradedLicenseDocsInfo"
           defaultMessage="For more information, see our "
         />
-        <EuiLink target="_blank" href={`${securitySolutionDocsLinks.blocklist}`}>
+        <EuiLink
+          data-test-subj="securitySolutionBLOCKLIST_PAGE_LABELSBlocklistDocumentationLink"
+          target="_blank"
+          href={`${securitySolutionDocsLinks.blocklist}`}
+        >
           <FormattedMessage
             id="xpack.securitySolution.blocklist.flyoutDowngradedLicenseDocsLink"
             defaultMessage="blocklist documentation."

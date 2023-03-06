@@ -24,6 +24,7 @@ export const DeleteCurationButton: React.FC = () => {
 
   return (
     <EuiButton
+      data-test-subj="enterpriseSearchDeleteCurationButtonButton"
       color="danger"
       iconType="trash"
       onClick={() => {

@@ -161,6 +161,7 @@ export const Enrich: FunctionComponent = () => {
               values={{
                 enrichPolicyLink: (
                   <EuiLink
+                    data-test-subj="ingestPipelinesEnrichEnrichPolicyLink"
                     external
                     target="_blank"
                     href={services.documentation.getEnrichDataUrl()}
@@ -216,7 +217,12 @@ export const Enrich: FunctionComponent = () => {
               defaultMessage="Operator used to match the geo-shape of incoming documents to enrich documents. Only used for {geoMatchPolicyLink}."
               values={{
                 geoMatchPolicyLink: (
-                  <EuiLink external target="_blank" href={services.documentation.getGeoMatchUrl()}>
+                  <EuiLink
+                    data-test-subj="ingestPipelinesEnrichGeoMatchEnrichPoliciesLink"
+                    external
+                    target="_blank"
+                    href={services.documentation.getGeoMatchUrl()}
+                  >
                     {i18n.translate(
                       'xpack.ingestPipelines.pipelineEditor.enrichForm.shapeRelationFieldHelpText.geoMatchPoliciesLink',
                       { defaultMessage: 'geo-match enrich policies' }

@@ -97,6 +97,7 @@ export const ViewButton = ({ id, name, overviewDashboard, appLinks }: Props) => 
 
   const popoverButton = (
     <EuiButton
+      data-test-subj="homeViewButtonButton"
       aria-label={viewDataButtonAriaLabel}
       onClick={togglePopover}
       iconType="arrowDown"

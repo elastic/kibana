@@ -185,6 +185,7 @@ export const WatchActionsAccordion: React.FunctionComponent<Props> = ({
                             accountType: action.typeName,
                             docLink: (
                               <EuiLink
+                                data-test-subj="watcherWatchActionsAccordionLearnMoreLink"
                                 href={watchActionsConfigurationMap[action.type]}
                                 target="_blank"
                               >

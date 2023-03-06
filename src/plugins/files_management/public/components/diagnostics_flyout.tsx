@@ -53,7 +53,12 @@ export const DiagnosticsFlyout: FunctionComponent<Props> = ({ onClose }) => {
             body={(error as Error)?.message ?? ''}
             color="danger"
             actions={[
-              <EuiButton isLoading={isLoading} color="danger" onClick={() => refetch()}>
+              <EuiButton
+                data-test-subj="pluginsDiagnosticsFlyoutButton"
+                isLoading={isLoading}
+                color="danger"
+                onClick={() => refetch()}
+              >
                 {i18nTexts.retry}
               </EuiButton>,
             ]}

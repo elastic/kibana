@@ -145,6 +145,7 @@ export const SavedObjectDebugger: React.FunctionComponent = () => {
         >
           <EuiFormRow>
             <EuiSelect
+              data-test-subj="fleetSavedObjectDebuggerSelect"
               prepend="Type"
               id="soType"
               options={types}

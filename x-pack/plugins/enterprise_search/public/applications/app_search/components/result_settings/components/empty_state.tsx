@@ -30,7 +30,13 @@ export const EmptyState: React.FC = () => (
       }
     )}
     actions={
-      <EuiButton size="s" target="_blank" iconType="popout" href={RESULT_SETTINGS_DOCS_URL}>
+      <EuiButton
+        data-test-subj="enterpriseSearchEmptyStateReadTheResultSettingsGuideButton"
+        size="s"
+        target="_blank"
+        iconType="popout"
+        href={RESULT_SETTINGS_DOCS_URL}
+      >
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.resultSettings.empty.buttonLabel',
           { defaultMessage: 'Read the result settings guide' }

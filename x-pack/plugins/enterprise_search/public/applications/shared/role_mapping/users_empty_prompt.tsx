@@ -32,7 +32,12 @@ export const UsersEmptyPrompt: React.FC = () => (
           title={<h2>{NO_USERS_TITLE}</h2>}
           body={<p>{NO_USERS_DESCRIPTION}</p>}
           actions={
-            <EuiLink href={USERS_DOCS_URL} target="_blank" external>
+            <EuiLink
+              data-test-subj="enterpriseSearchUsersEmptyPromptLink"
+              href={USERS_DOCS_URL}
+              target="_blank"
+              external
+            >
               {ENABLE_USERS_LINK}
             </EuiLink>
           }

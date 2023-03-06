@@ -65,6 +65,7 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
           {saveState !== SAVE_STATE.SAVING && (
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="mlCreateResultCalloutResetButton"
                 color="primary"
                 fill={false}
                 aria-label={i18n.translate(
@@ -83,6 +84,7 @@ export const CreateResultCallout: FC<CreateResultCalloutProps> = memo(
           {(saveState === SAVE_STATE.SAVED || saveState === SAVE_STATE.PARTIAL_FAILURE) && (
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="mlCreateResultCalloutViewResultsButton"
                 color="primary"
                 fill={true}
                 href={resultsUrl}

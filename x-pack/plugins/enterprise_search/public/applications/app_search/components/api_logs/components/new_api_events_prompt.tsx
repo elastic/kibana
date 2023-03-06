@@ -25,7 +25,12 @@ export const NewApiEventsPrompt: React.FC = () => {
       {i18n.translate('xpack.enterpriseSearch.appSearch.engines.apiLogs.newEventsMessage', {
         defaultMessage: 'New events have been logged.',
       })}
-      <EuiButtonEmpty iconType="refresh" size="xs" onClick={onUserRefresh}>
+      <EuiButtonEmpty
+        data-test-subj="enterpriseSearchNewApiEventsPromptRefreshButtonEmpty"
+        iconType="refresh"
+        size="xs"
+        onClick={onUserRefresh}
+      >
         {i18n.translate('xpack.enterpriseSearch.appSearch.engines.apiLogs.newEventsButtonLabel', {
           defaultMessage: 'Refresh',
         })}

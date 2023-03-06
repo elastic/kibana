@@ -79,7 +79,11 @@ const indexOptionsConfig = {
       defaultMessage="Information to store in the index. {docsLink}"
       values={{
         docsLink: (
-          <EuiLink href={documentationService.getIndexOptionsLink()} target="_blank">
+          <EuiLink
+            data-test-subj="indexManagementIndexOptionsConfigLearnMoreLink"
+            href={documentationService.getIndexOptionsLink()}
+            target="_blank"
+          >
             {i18n.translate(
               'xpack.idxMgmt.mappingsEditor.configuration.indexOptionsdDocumentationLink',
               {
@@ -350,7 +354,11 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
           defaultMessage="Geo-points can be expressed as an object, string, geohash, array or {docsLink} POINT."
           values={{
             docsLink: (
-              <EuiLink href={documentationService.getWellKnownTextLink()} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementPARAMETERS_DEFINITIONWellKnownTextLink"
+                href={documentationService.getWellKnownTextLink()}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.parameters.wellKnownTextDocumentationLink',
                   {
@@ -394,7 +402,11 @@ export const PARAMETERS_DEFINITION: { [key in ParameterName]: ParameterDefinitio
           defaultMessage="Points can be expressed as an object, string, array or {docsLink} POINT."
           values={{
             docsLink: (
-              <EuiLink href={documentationService.getWellKnownTextLink()} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementPARAMETERS_DEFINITIONWellKnownTextLink"
+                href={documentationService.getWellKnownTextLink()}
+                target="_blank"
+              >
                 {i18n.translate(
                   'xpack.idxMgmt.mappingsEditor.parameters.pointWellKnownTextDocumentationLink',
                   {

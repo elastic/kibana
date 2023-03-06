@@ -132,7 +132,11 @@ const packageNotInstalledRenderer = ({
               defaultMessage="Detect and remediate potential configuration risks in your cloud infrastructure, like publicly accessible S3 buckets, with our Cloud and Kubernetes Security Posture Management solutions. {learnMore}"
               values={{
                 learnMore: (
-                  <EuiLink href={cspIntegrationDocsNavigation.cspm.overviewPath} target="_blank">
+                  <EuiLink
+                    data-test-subj="cloudSecurityPosturePackageNotInstalledRendererLearnMoreAboutCloudSecurityPostureLink"
+                    href={cspIntegrationDocsNavigation.cspm.overviewPath}
+                    target="_blank"
+                  >
                     <FormattedMessage
                       id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.learnMoreTitle"
                       defaultMessage="Learn more about Cloud Security Posture"
@@ -146,7 +150,12 @@ const packageNotInstalledRenderer = ({
         actions={
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill href={cspmIntegrationLink}>
+              <EuiButton
+                data-test-subj="cloudSecurityPosturePackageNotInstalledRendererAddCspmIntegrationButton"
+                color="primary"
+                fill
+                href={cspmIntegrationLink}
+              >
                 <FormattedMessage
                   id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addCspmIntegrationButtonTitle"
                   defaultMessage="Add CSPM Integration"
@@ -154,7 +163,12 @@ const packageNotInstalledRenderer = ({
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill href={kspmIntegrationLink}>
+              <EuiButton
+                data-test-subj="cloudSecurityPosturePackageNotInstalledRendererAddKspmIntegrationButton"
+                color="primary"
+                fill
+                href={kspmIntegrationLink}
+              >
                 <FormattedMessage
                   id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.addKspmIntegrationButtonTitle"
                   defaultMessage="Add KSPM Integration"

@@ -142,7 +142,10 @@ export const MissingIntegrationContent = ({
           defaultMessage="Don't see an integration? Collect any logs or metrics using our {customInputsLink}. Request new integrations in our {forumLink}."
           values={{
             customInputsLink: (
-              <EuiLink onClick={handleCustomInputsLinkClick}>
+              <EuiLink
+                data-test-subj="fleetMissingIntegrationContentCustomInputsLink"
+                onClick={handleCustomInputsLinkClick}
+              >
                 <FormattedMessage
                   id="xpack.fleet.integrations.customInputsLink"
                   defaultMessage="custom inputs"
@@ -150,7 +153,12 @@ export const MissingIntegrationContent = ({
               </EuiLink>
             ),
             forumLink: (
-              <EuiLink href="https://discuss.elastic.co/tag/integrations" external target="_blank">
+              <EuiLink
+                data-test-subj="fleetMissingIntegrationContentForumLink"
+                href="https://discuss.elastic.co/tag/integrations"
+                external
+                target="_blank"
+              >
                 <FormattedMessage
                   id="xpack.fleet.integrations.discussForumLink"
                   defaultMessage="forum"

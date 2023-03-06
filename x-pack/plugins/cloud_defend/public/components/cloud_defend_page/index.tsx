@@ -131,7 +131,10 @@ const packageNotInstalledRenderer = ({
               defaultMessage="Add the Defend for containers (D4C) integration to begin. {learnMore}."
               values={{
                 learnMore: (
-                  <EuiLink href={docsLink}>
+                  <EuiLink
+                    data-test-subj="cloudDefendPackageNotInstalledRendererLearnMoreAboutDefendForContainersD4CLink"
+                    href={docsLink}
+                  >
                     <FormattedMessage
                       id="xpack.cloudDefend.cloudDefendPage.packageNotInstalledRenderer.learnMoreTitle"
                       defaultMessage="Learn more about Defend for containers (D4C)"
@@ -145,7 +148,12 @@ const packageNotInstalledRenderer = ({
         actions={
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
-              <EuiButton color="primary" fill href={addIntegrationLink}>
+              <EuiButton
+                data-test-subj="cloudDefendPackageNotInstalledRendererAddD4CIntegrationButton"
+                color="primary"
+                fill
+                href={addIntegrationLink}
+              >
                 <FormattedMessage
                   id="xpack.cloudDefend.cloudDefendPage.packageNotInstalledRenderer.addCloudDefendmIntegrationButtonTitle"
                   defaultMessage="Add D4C Integration"

@@ -222,6 +222,7 @@ export const AddInferencePipelineFooter: React.FC<
       <EuiFlexItem grow={false}>
         {previousStep !== undefined ? (
           <EuiButtonEmpty
+            data-test-subj="enterpriseSearchAddInferencePipelineFooterButtonEmpty"
             flush="both"
             iconType="arrowLeft"
             onClick={() => setAddInferencePipelineStep(previousStep as AddInferencePipelineSteps)}
@@ -233,6 +234,7 @@ export const AddInferencePipelineFooter: React.FC<
       <EuiFlexItem />
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
+          data-test-subj="enterpriseSearchAddInferencePipelineFooterButtonEmpty"
           data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-cancel`}
           onClick={onClose}
         >
@@ -242,6 +244,7 @@ export const AddInferencePipelineFooter: React.FC<
       <EuiFlexItem grow={false}>
         {nextStep !== undefined ? (
           <EuiButton
+            data-test-subj="enterpriseSearchAddInferencePipelineFooterButton"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-continue`}
             iconType="arrowRight"
             iconSide="right"
@@ -253,6 +256,7 @@ export const AddInferencePipelineFooter: React.FC<
           </EuiButton>
         ) : attachExistingPipeline ? (
           <EuiButton
+            data-test-subj="enterpriseSearchAddInferencePipelineFooterAttachButton"
             color="primary"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-attach`}
             disabled={!isPipelineDataValid}
@@ -268,6 +272,7 @@ export const AddInferencePipelineFooter: React.FC<
           </EuiButton>
         ) : (
           <EuiButton
+            data-test-subj="enterpriseSearchAddInferencePipelineFooterCreatePipelineButton"
             color="success"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-create`}
             disabled={!isPipelineDataValid}

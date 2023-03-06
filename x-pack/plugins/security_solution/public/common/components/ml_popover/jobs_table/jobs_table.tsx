@@ -204,6 +204,7 @@ export const NoItemsMessage = React.memo(({ basePath }: { basePath: string }) =>
       titleSize="xs"
       actions={
         <EuiButton
+          data-test-subj="securitySolutionNoItemsMessageButton"
           href={createNewAnomalyDetectionJoUrl}
           iconType="popout"
           iconSide="right"

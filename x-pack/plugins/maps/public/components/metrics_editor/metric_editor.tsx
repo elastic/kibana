@@ -170,6 +170,7 @@ export function MetricEditor({
         display="columnCompressed"
       >
         <EuiFieldText
+          data-test-subj="mapsMetricEditorFieldText"
           onChange={onLabelChange}
           value={metric.label ? metric.label : ''}
           compressed
@@ -183,6 +184,7 @@ export function MetricEditor({
     removeButton = (
       <div className="mapMetricEditorPanel__metricRemoveButton">
         <EuiButtonEmpty
+          data-test-subj="mapsMetricEditorDeleteMetricButtonEmpty"
           iconType="trash"
           size="xs"
           color="danger"

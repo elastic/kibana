@@ -37,7 +37,11 @@ export const ExternalConnectorDocumentation: React.FC<ExternalConnectorDocumenta
           defaultMessage="To be prepared for configuration, review our {deploymentGuideLink} for all prerequisites needed to quickly deploy the connector package. Finalize your configuration in Enterprise Search by setting the connector's URL and API key in the next step."
           values={{
             deploymentGuideLink: (
-              <EuiLink target="_blank" href={documentationUrl}>
+              <EuiLink
+                data-test-subj="enterpriseSearchExternalConnectorDocumentationDocumentationLink"
+                target="_blank"
+                href={documentationUrl}
+              >
                 <FormattedMessage
                   id="xpack.enterpriseSearch.workplaceSearch.contentSource.addExternalConnector.documentation.linkLabel"
                   defaultMessage="documentation"

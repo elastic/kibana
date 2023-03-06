@@ -214,7 +214,13 @@ export const License: FunctionComponent<LicenseProps> = (props) => {
         <EuiText size="s" textAlign="center">
           <p>
             For more license options please visit&nbsp;
-            <EuiLink href={licenseManagement}>License Management</EuiLink>.
+            <EuiLink
+              data-test-subj="monitoringLicenseLicenseManagementLink"
+              href={licenseManagement}
+            >
+              License Management
+            </EuiLink>
+            .
           </p>
         </EuiText>
       </EuiPageBody>

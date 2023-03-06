@@ -39,7 +39,12 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ history }) => {
             defaultMessage="For example, you can create a component template for index settings that can be reused across index templates."
           />
           <br />
-          <EuiLink href={documentation.componentTemplates} target="_blank" external>
+          <EuiLink
+            data-test-subj="indexManagementEmptyPromptLearnMoreLink"
+            href={documentation.componentTemplates}
+            target="_blank"
+            external
+          >
             {i18n.translate('xpack.idxMgmt.home.componentTemplates.emptyPromptDocumentionLink', {
               defaultMessage: 'Learn more.',
             })}
@@ -48,6 +53,7 @@ export const EmptyPrompt: FunctionComponent<Props> = ({ history }) => {
       }
       actions={
         <EuiButton
+          data-test-subj="indexManagementEmptyPromptCreateAComponentTemplateButton"
           {...reactRouterNavigate(history, '/create_component_template')}
           iconType="plusInCircle"
           fill

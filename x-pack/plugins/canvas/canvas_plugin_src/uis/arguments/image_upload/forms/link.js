@@ -17,6 +17,7 @@ export const LinkForm = ({ url, inputRef, onSubmit }) => (
     <EuiFlexGroup gutterSize="xs">
       <EuiFlexItem>
         <EuiFieldText
+          data-test-subj="canvasLinkFormFieldText"
           compressed
           defaultValue={url}
           inputRef={inputRef}
@@ -25,7 +26,12 @@ export const LinkForm = ({ url, inputRef, onSubmit }) => (
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton type="submit" size="s" onClick={onSubmit}>
+        <EuiButton
+          data-test-subj="canvasLinkFormSetButton"
+          type="submit"
+          size="s"
+          onClick={onSubmit}
+        >
           Set
         </EuiButton>
       </EuiFlexItem>

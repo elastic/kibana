@@ -83,6 +83,7 @@ export class IndexPatternSelect extends Component<Props, State> {
     return (
       <EuiFormRow label={getDataViewLabel()}>
         <EuiSelect
+          data-test-subj="mapsSelect"
           options={this.state.options}
           value={this.props.value ? this.props.value : ''}
           onChange={this._onChange}

@@ -84,7 +84,11 @@ You can use the same filter list in multiple jobs.{br}{learnMoreLink}"
               values={{
                 br: <br />,
                 learnMoreLink: (
-                  <EuiLink href={docsUrl} target="_blank">
+                  <EuiLink
+                    data-test-subj="mlFilterListsHeaderUILearnMoreLink"
+                    href={docsUrl}
+                    target="_blank"
+                  >
                     <FormattedMessage
                       id="xpack.ml.settings.filterLists.listHeader.filterListsContainsNotAllowedValuesDescription.learnMoreLinkText"
                       defaultMessage="Learn more"

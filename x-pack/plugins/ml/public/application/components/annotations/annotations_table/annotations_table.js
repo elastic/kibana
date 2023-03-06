@@ -379,7 +379,10 @@ class AnnotationsTableUI extends Component {
                 defaultMessage="To create an annotation, open the {linkToSingleMetricView}"
                 values={{
                   linkToSingleMetricView: (
-                    <EuiLink onClick={() => this.openSingleMetricView()}>
+                    <EuiLink
+                      data-test-subj="mlSingleMetricViewerLink"
+                      onClick={() => this.openSingleMetricView()}
+                    >
                       <FormattedMessage
                         id="xpack.ml.annotationsTable.howToCreateAnnotationDescription.singleMetricViewerLinkText"
                         defaultMessage="Single Metric Viewer"

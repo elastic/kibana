@@ -33,7 +33,12 @@ const EditDescription: React.FC<{
   <EuiFlexGroup justifyContent="spaceBetween">
     <EuiFlexItem grow={false}>{label}</EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty onClick={onClick}>Edit</EuiButtonEmpty>
+      <EuiButtonEmpty
+        data-test-subj="enterpriseSearchEditDescriptionEditButtonEmpty"
+        onClick={onClick}
+      >
+        Edit
+      </EuiButtonEmpty>
     </EuiFlexItem>
   </EuiFlexGroup>
 );

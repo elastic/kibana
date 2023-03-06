@@ -36,7 +36,12 @@ export const ManageQueriesModal: React.FC = () => {
 
   return (
     <>
-      <EuiButton fill onClick={showModal} isLoading={queriesLoading}>
+      <EuiButton
+        data-test-subj="enterpriseSearchManageQueriesModalManageQueriesButton"
+        fill
+        onClick={showModal}
+        isLoading={queriesLoading}
+      >
         {i18n.translate(
           'xpack.enterpriseSearch.appSearch.engine.curations.manageQueryButtonLabel',
           { defaultMessage: 'Manage queries' }

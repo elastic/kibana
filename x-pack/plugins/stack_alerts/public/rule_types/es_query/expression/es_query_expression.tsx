@@ -236,7 +236,11 @@ export const EsQueryExpression: React.FC<
         isInvalid={errors.esQuery.length > 0}
         error={errors.esQuery}
         helpText={
-          <EuiLink href={docLinks.links.query.queryDsl} target="_blank">
+          <EuiLink
+            data-test-subj="stackAlertsEsQueryExpressionElasticsearchQueryDslDocumentationLink"
+            href={docLinks.links.query.queryDsl}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.stackAlerts.esQuery.ui.queryPrompt.help"
               defaultMessage="Elasticsearch Query DSL documentation"

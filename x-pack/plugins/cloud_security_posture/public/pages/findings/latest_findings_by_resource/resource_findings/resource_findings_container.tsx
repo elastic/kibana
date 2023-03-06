@@ -55,7 +55,10 @@ const getDefaultQuery = ({
 
 const BackToResourcesButton = () => (
   <Link to={generatePath(findingsNavigation.findings_by_resource.path)}>
-    <EuiButtonEmpty iconType={'arrowLeft'}>
+    <EuiButtonEmpty
+      data-test-subj="cloudSecurityPostureBackToResourcesButtonBackToResourcesButtonEmpty"
+      iconType={'arrowLeft'}
+    >
       <FormattedMessage
         id="xpack.csp.findings.resourceFindings.backToResourcesPageButtonLabel"
         defaultMessage="Back to resources"

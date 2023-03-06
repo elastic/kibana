@@ -64,7 +64,12 @@ export const ComponentTemplatesListItem = ({
             )}
             <EuiFlexItem grow={false} data-test-subj="name">
               {/* <EuiText>{component.name}</EuiText> */}
-              <EuiLink onClick={() => onViewDetail(component)}>{component.name}</EuiLink>
+              <EuiLink
+                data-test-subj="indexManagementComponentTemplatesListItemLink"
+                onClick={() => onViewDetail(component)}
+              >
+                {component.name}
+              </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem grow={false} className="componentTemplatesListItem__contentIndicator">
               <TemplateContentIndicator

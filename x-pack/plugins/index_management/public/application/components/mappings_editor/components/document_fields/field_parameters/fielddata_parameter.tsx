@@ -123,6 +123,7 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
                     values={{
                       docsLink: (
                         <EuiLink
+                          data-test-subj="indexManagementFieldDataParameterLearnMoreLink"
                           href={documentationService.getEnablingFielddataLink()}
                           target="_blank"
                         >
@@ -161,6 +162,7 @@ export const FieldDataParameter = ({ field, defaultToggleValue }: Props) => {
                   values={{
                     docsLink: (
                       <EuiLink
+                        data-test-subj="indexManagementFieldDataParameterLearnMoreLink"
                         href={documentationService.getFielddataFrequencyLink()}
                         target="_blank"
                       >

@@ -333,6 +333,7 @@ export const SharedLists = React.memo(() => {
 
   const rowSizeButton = (
     <EuiButtonEmpty
+      data-test-subj="securitySolutionSharedListsButtonEmpty"
       size="xs"
       color="text"
       iconType="arrowDown"
@@ -441,7 +442,11 @@ export const SharedLists = React.memo(() => {
           <EuiPopover
             data-test-subj="manageExceptionListCreateButton"
             button={
-              <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
+              <EuiButton
+                data-test-subj="securitySolutionSharedListsButton"
+                iconType={'arrowDown'}
+                onClick={onCreateButtonClick}
+              >
                 {i18n.CREATE_BUTTON}
               </EuiButton>
             }
@@ -472,7 +477,11 @@ export const SharedLists = React.memo(() => {
               ]}
             />
           </EuiPopover>,
-          <EuiButton iconType={'importAction'} onClick={() => setDisplayImportListFlyout(true)}>
+          <EuiButton
+            data-test-subj="securitySolutionSharedListsButton"
+            iconType={'importAction'}
+            onClick={() => setDisplayImportListFlyout(true)}
+          >
             {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
           </EuiButton>,
         ]}

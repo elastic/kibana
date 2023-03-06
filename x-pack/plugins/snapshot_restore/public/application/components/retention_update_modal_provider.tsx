@@ -185,7 +185,11 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
                     defaultMessage="Use cron expression. {docLink}"
                     values={{
                       docLink: (
-                        <EuiLink href={docLinks.links.watcher.cronSchedule} target="_blank">
+                        <EuiLink
+                          data-test-subj="snapshotRestoreRenderModalLearnMoreLink"
+                          href={docLinks.links.watcher.cronSchedule}
+                          target="_blank"
+                        >
                           <FormattedMessage
                             id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionHelpTextDocLinkText"
                             defaultMessage="Learn more."
@@ -198,6 +202,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
                 fullWidth
               >
                 <EuiFieldText
+                  data-test-subj="snapshotRestoreRenderModalFieldText"
                   defaultValue={retentionSchedule}
                   fullWidth
                   onChange={(e) => setRetentionSchedule(e.target.value)}
@@ -261,14 +266,22 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty onClick={closeModal}>
+          <EuiButtonEmpty
+            data-test-subj="snapshotRestoreRenderModalCancelButtonEmpty"
+            onClick={closeModal}
+          >
             <FormattedMessage
               id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionCancelButtonLabel"
               defaultMessage="Cancel"
             />
           </EuiButtonEmpty>
 
-          <EuiButton onClick={updateRetentionSetting} fill isLoading={isSaving}>
+          <EuiButton
+            data-test-subj="snapshotRestoreRenderModalButton"
+            onClick={updateRetentionSetting}
+            fill
+            isLoading={isSaving}
+          >
             {isEditing ? (
               <FormattedMessage
                 id="xpack.snapshotRestore.policyForm.stepRetention.policyUpdateRetentionEditButtonLabel"

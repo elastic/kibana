@@ -43,6 +43,7 @@ function MarkdownOptions({ stateParams, setValue }: VisEditorOptionsProps<Markdo
             <EuiFlexItem grow={false}>
               <EuiText size="xs">
                 <EuiLink
+                  data-test-subj="pluginsMarkdownOptionsHelpLink"
                   href="https://docs.github.com/en/get-started/writing-on-github/"
                   target="_blank"
                 >

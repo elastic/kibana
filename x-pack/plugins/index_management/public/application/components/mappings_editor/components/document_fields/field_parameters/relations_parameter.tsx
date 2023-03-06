@@ -103,6 +103,7 @@ export const RelationsParameter = () => {
           values={{
             docsLink: (
               <EuiLink
+                data-test-subj="indexManagementRenderWarningDenormalizeYourDataLink"
                 href={documentationService.getJoinMultiLevelsPerformanceLink()}
                 target="_blank"
               >

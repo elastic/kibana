@@ -36,7 +36,11 @@ export const HiddenDocuments: React.FC = () => {
         hasDocuments && (
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             <EuiFlexItem>
-              <EuiButtonEmpty onClick={clearHiddenIds} size="s">
+              <EuiButtonEmpty
+                data-test-subj="enterpriseSearchHiddenDocumentsUnhideAllButtonEmpty"
+                onClick={clearHiddenIds}
+                size="s"
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.engine.curations.hiddenDocuments.removeAllButtonLabel',
                   { defaultMessage: 'Unhide all' }

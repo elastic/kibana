@@ -41,6 +41,7 @@ export const Settings: React.FC = () => {
         }),
         rightSideItems: [
           <EuiButton
+            data-test-subj="enterpriseSearchSettingsSaveButton"
             fill
             disabled={hasNoChanges}
             isLoading={isLoading}
@@ -51,6 +52,7 @@ export const Settings: React.FC = () => {
             })}
           </EuiButton>,
           <EuiButton
+            data-test-subj="enterpriseSearchSettingsResetButton"
             disabled={hasNoChanges}
             isLoading={isLoading}
             onClick={() => setPipeline(defaultPipeline)}
@@ -76,7 +78,11 @@ export const Settings: React.FC = () => {
           defaultMessage: 'Content extraction',
         })}
         link={
-          <EuiLink href={docLinks.ingestPipelines} target="_blank">
+          <EuiLink
+            data-test-subj="enterpriseSearchSettingsLearnMoreAboutContentExtractionLink"
+            href={docLinks.ingestPipelines}
+            target="_blank"
+          >
             {i18n.translate('xpack.enterpriseSearch.content.settings.contactExtraction.link', {
               defaultMessage: 'Learn more about content extraction',
             })}
@@ -106,7 +112,11 @@ export const Settings: React.FC = () => {
           defaultMessage: 'Whitespace reduction',
         })}
         link={
-          <EuiLink href={docLinks.ingestPipelines} external>
+          <EuiLink
+            data-test-subj="enterpriseSearchSettingsLearnMoreAboutWhitespaceReductionLink"
+            href={docLinks.ingestPipelines}
+            external
+          >
             {i18n.translate('xpack.enterpriseSearch.content.settings.whitespaceReduction.link', {
               defaultMessage: 'Learn more about whitespace reduction',
             })}
@@ -139,7 +149,11 @@ export const Settings: React.FC = () => {
           defaultMessage: 'ML Inference',
         })}
         link={
-          <EuiLink href={docLinks.ingestPipelines} target="_blank">
+          <EuiLink
+            data-test-subj="enterpriseSearchSettingsLearnMoreAboutContentExtractionLink"
+            href={docLinks.ingestPipelines}
+            target="_blank"
+          >
             {i18n.translate('xpack.enterpriseSearch.content.settings.mlInference.link', {
               defaultMessage: 'Learn more about content extraction',
             })}

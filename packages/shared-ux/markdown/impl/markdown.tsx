@@ -47,7 +47,9 @@ export const Markdown = ({
 
   // openLinksInNewTab functionality from https://codesandbox.io/s/relaxed-yalow-hy69r4?file=/demo.js:482-645
   const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
-  processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
+  processingPlugins[1][1].components.a = (props) => (
+    <EuiLink data-test-subj="sharedUxMarkdownLink" {...props} target="_blank" />
+  );
 
   // Render EuiMarkdownFormat when readOnly set to true
   if (readOnly) {

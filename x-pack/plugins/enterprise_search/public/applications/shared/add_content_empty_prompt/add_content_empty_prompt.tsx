@@ -78,7 +78,11 @@ export const AddContentEmptyPrompt: React.FC<EmptyPromptProps> = ({ title, butto
                     to={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_INDEX_PATH)}
                     shouldNotCreateHref
                   >
-                    <EuiButton color="primary" fill>
+                    <EuiButton
+                      data-test-subj="enterpriseSearchAddContentEmptyPromptButton"
+                      color="primary"
+                      fill
+                    >
                       {buttonLabel ||
                         i18n.translate('xpack.enterpriseSearch.overview.emptyState.buttonTitle', {
                           defaultMessage: 'Add content to Enterprise Search',
@@ -87,7 +91,11 @@ export const AddContentEmptyPrompt: React.FC<EmptyPromptProps> = ({ title, butto
                   </EuiLinkTo>
                 </EuiFlexItem>
                 <EuiFlexItem>
-                  <EuiLink href={docLinks.start} target="_blank">
+                  <EuiLink
+                    data-test-subj="enterpriseSearchAddContentEmptyPromptLearnMoreLink"
+                    href={docLinks.start}
+                    target="_blank"
+                  >
                     {i18n.translate('xpack.enterpriseSearch.overview.emptyState.footerLinkTitle', {
                       defaultMessage: 'Learn more',
                     })}

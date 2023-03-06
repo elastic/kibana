@@ -462,6 +462,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
                                 isInvalid={jobId.destIndexValid === false}
                               >
                                 <EuiFieldText
+                                  data-test-subj="mlImportJobsFlyoutFieldText"
                                   prepend={i18n.translate(
                                     'xpack.ml.importExport.importFlyout.destIndex',
                                     {
@@ -493,6 +494,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="mlImportJobsFlyoutCloseButtonEmpty"
                   iconType="cross"
                   onClick={setShowFlyout.bind(null, false)}
                   flush="left"

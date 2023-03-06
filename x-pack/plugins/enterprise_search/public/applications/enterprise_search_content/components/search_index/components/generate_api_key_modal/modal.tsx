@@ -68,7 +68,11 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                   "Before you can start posting documents to your Elasticsearch index you'll need to create at least one API key.",
               })}
               &nbsp;
-              <EuiLink href={docLinks.apiKeys} external>
+              <EuiLink
+                data-test-subj="enterpriseSearchGenerateApiKeyModalLearnMoreAboutApiKeysLink"
+                href={docLinks.apiKeys}
+                external
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.overview.generateApiKeyModal.learnMore',
                   { defaultMessage: 'Learn more about API keys' }
@@ -86,6 +90,7 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
                       <EuiFlexItem>
                         <EuiFormRow label="Name your API key" fullWidth>
                           <EuiFieldText
+                            data-test-subj="enterpriseSearchGenerateApiKeyModalFieldText"
                             data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-editName`}
                             fullWidth
                             placeholder="Type a name for your API key"
@@ -175,6 +180,7 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
+          data-test-subj="enterpriseSearchGenerateApiKeyModalCancelButtonEmpty"
           data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-cancel`}
           onClick={onClose}
         >

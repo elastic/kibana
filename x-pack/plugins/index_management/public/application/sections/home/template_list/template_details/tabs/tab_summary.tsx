@@ -159,7 +159,9 @@ export const TabSummary: React.FunctionComponent<Props> = ({ templateDetails }) 
                 </EuiDescriptionListTitle>
                 <EuiDescriptionListDescription>
                   {ilmPolicy?.name && ilmPolicyLink ? (
-                    <EuiLink href={ilmPolicyLink}>{ilmPolicy!.name}</EuiLink>
+                    <EuiLink data-test-subj="indexManagementTabSummaryLink" href={ilmPolicyLink}>
+                      {ilmPolicy!.name}
+                    </EuiLink>
                   ) : (
                     ilmPolicy?.name || i18nTexts.none
                   )}

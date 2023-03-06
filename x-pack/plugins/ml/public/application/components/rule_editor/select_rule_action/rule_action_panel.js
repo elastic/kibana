@@ -74,7 +74,7 @@ export class RuleActionPanel extends Component {
   getEditRuleLink = () => {
     const { ruleIndex, setEditRuleIndex } = this.props;
     return (
-      <EuiLink onClick={() => setEditRuleIndex(ruleIndex)}>
+      <EuiLink data-test-subj="mlEditRuleLink" onClick={() => setEditRuleIndex(ruleIndex)}>
         <FormattedMessage
           id="xpack.ml.ruleEditor.ruleActionPanel.editRuleLinkText"
           defaultMessage="Edit rule"

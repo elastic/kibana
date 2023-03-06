@@ -59,6 +59,7 @@ export const AssetsAndObjects: React.FC = () => {
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiButton
+          data-test-subj="enterpriseSearchAssetsAndObjectsButton"
           fill
           onClick={updateAssetsAndObjectsSettings}
           disabled={!hasUnsavedAssetsAndObjectsChanges}
@@ -67,7 +68,11 @@ export const AssetsAndObjects: React.FC = () => {
         </EuiButton>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiButtonEmpty onClick={resetSyncSettings} disabled={!hasUnsavedAssetsAndObjectsChanges}>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchAssetsAndObjectsButtonEmpty"
+          onClick={resetSyncSettings}
+          disabled={!hasUnsavedAssetsAndObjectsChanges}
+        >
           {RESET_BUTTON}
         </EuiButtonEmpty>
       </EuiFlexItem>
@@ -87,7 +92,11 @@ export const AssetsAndObjects: React.FC = () => {
       <ViewContentHeader title={NAV.SYNCHRONIZATION_ASSETS_AND_OBJECTS} action={actions} />
       {SOURCE_ASSETS_AND_OBJECTS_DESCRIPTION}
       <EuiSpacer />
-      <EuiLink href={docLinks.workplaceSearchSynch} external>
+      <EuiLink
+        data-test-subj="enterpriseSearchAssetsAndObjectsLink"
+        href={docLinks.workplaceSearchSynch}
+        external
+      >
         {SOURCE_ASSETS_AND_OBJECTS_LEARN_MORE_LINK}
       </EuiLink>
       <EuiHorizontalRule />

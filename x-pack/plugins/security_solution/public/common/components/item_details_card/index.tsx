@@ -94,7 +94,11 @@ ItemDetailsPropertySummary.displayName = 'ItemPropertySummary';
 export const ItemDetailsAction: FC<PropsForButton<EuiButtonProps>> = memo(
   ({ children, className = '', ...rest }) => (
     <div>
-      <EuiButton className={`eui-fullWidth ${className}`} {...rest}>
+      <EuiButton
+        data-test-subj="securitySolutionItemDetailsActionButton"
+        className={`eui-fullWidth ${className}`}
+        {...rest}
+      >
         {children}
       </EuiButton>
     </div>

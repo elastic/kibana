@@ -843,6 +843,7 @@ export function FormulaEditor({
                       position="top"
                     >
                       <EuiLink
+                        data-test-subj="lensFormulaEditorLink"
                         aria-label={i18n.translate('xpack.lens.formula.editorHelpInlineHideLabel', {
                           defaultMessage: 'Hide function reference',
                         })}
@@ -881,6 +882,7 @@ export function FormulaEditor({
                       closePopover={() => setIsWarningOpen(false)}
                       button={
                         <EuiButtonEmpty
+                          data-test-subj="lensFormulaEditorButtonEmpty"
                           color={errorCount ? 'danger' : 'warning'}
                           className="lnsFormula__editorError"
                           iconType="alert"

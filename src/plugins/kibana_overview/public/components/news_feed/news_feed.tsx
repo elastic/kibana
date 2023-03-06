@@ -33,7 +33,7 @@ export const NewsFeed: FC<Props> = ({ newsFetchResult }) => (
             <header>
               <EuiTitle size="xxs">
                 <h3 id={`kbnOverviewNews__title${index}`}>
-                  <EuiLink href={linkUrl} target="_blank">
+                  <EuiLink data-test-subj="pluginsNewsFeedLink" href={linkUrl} target="_blank">
                     {title}
                   </EuiLink>
                 </h3>

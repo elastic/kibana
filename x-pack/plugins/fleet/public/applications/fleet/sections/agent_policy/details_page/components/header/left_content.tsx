@@ -38,7 +38,13 @@ export const HeaderLeftContent: React.FunctionComponent<HeaderLeftContentProps> 
   return (
     <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
       <EuiFlexItem>
-        <EuiButtonEmpty iconType="arrowLeft" href={getHref('policies_list')} flush="left" size="xs">
+        <EuiButtonEmpty
+          data-test-subj="fleetHeaderLeftContentViewAllAgentPoliciesButtonEmpty"
+          iconType="arrowLeft"
+          href={getHref('policies_list')}
+          flush="left"
+          size="xs"
+        >
           <FormattedMessage
             id="xpack.fleet.policyDetails.viewAgentListTitle"
             defaultMessage="View all agent policies"

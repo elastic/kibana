@@ -130,7 +130,10 @@ export const RestoreList: React.FunctionComponent = () => {
                     defaultMessage="Go to {snapshotsLink} to start a restore."
                     values={{
                       snapshotsLink: (
-                        <EuiLink {...reactRouterNavigate(history, linkToSnapshots())}>
+                        <EuiLink
+                          data-test-subj="snapshotRestoreRestoreListSnapshotsLink"
+                          {...reactRouterNavigate(history, linkToSnapshots())}
+                        >
                           <FormattedMessage
                             id="xpack.snapshotRestore.restoreList.emptyPromptDescriptionLink"
                             defaultMessage="Snapshots"
@@ -155,6 +158,7 @@ export const RestoreList: React.FunctionComponent = () => {
                 id="srRestoreListIntervalMenu"
                 button={
                   <EuiButtonEmpty
+                    data-test-subj="snapshotRestoreRestoreListRefreshDataEveryIntervalButtonEmpty"
                     size="xs"
                     iconType="arrowDown"
                     iconSide="right"

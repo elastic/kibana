@@ -185,7 +185,11 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               defaultMessage="The index will be read-only during reindexing. You won't be able to add, update, or delete documents until reindexing is complete. If you need to reindex to a new cluster, use the reindex API. {docsLink}"
               values={{
                 docsLink: (
-                  <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.remoteReindex}>
+                  <EuiLink
+                    data-test-subj="upgradeAssistantChecklistFlyoutStepLearnMoreLink"
+                    target="_blank"
+                    href={docLinks.links.upgradeAssistant.remoteReindex}
+                  >
                     {i18n.translate(
                       'xpack.upgradeAssistant.checkupTab.reindexing.flyout.learnMoreLinkLabel',
                       {
@@ -210,7 +214,12 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="upgradeAssistantChecklistFlyoutStepCloseButtonEmpty"
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+            >
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.closeButtonLabel"
                 defaultMessage="Close"

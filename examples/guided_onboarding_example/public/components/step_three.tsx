@@ -85,6 +85,7 @@ export const StepThree = (props: StepThreeProps) => {
           anchorPosition="rightUp"
         >
           <EuiButton
+            data-test-subj="guidedOnboardingExampleStepThreeCompleteStep3Button"
             onClick={async () => {
               await guidedOnboardingApi?.completeGuideStep('testGuide', 'step3');
             }}

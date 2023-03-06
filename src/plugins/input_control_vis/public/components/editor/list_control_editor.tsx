@@ -155,6 +155,7 @@ export class ListControlEditor extends PureComponent<
           key="parentSelect"
         >
           <EuiSelect
+            data-test-subj="pluginsSelect"
             options={parentCandidatesOptions}
             value={this.props.controlParams.parent}
             onChange={(event) => {

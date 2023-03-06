@@ -41,7 +41,11 @@ export const Header = withRouter(({ indexPatternId, history }: HeaderProps) => {
               defaultMessage="Scripted fields are deprecated. Use {runtimeDocs} instead."
               values={{
                 runtimeDocs: (
-                  <EuiLink target="_blank" href={links.runtimeFields.overview}>
+                  <EuiLink
+                    data-test-subj="pluginsHeaderRuntimeFieldsLink"
+                    target="_blank"
+                    href={links.runtimeFields.overview}
+                  >
                     <FormattedMessage
                       id="indexPatternManagement.header.runtimeLink"
                       defaultMessage="runtime fields"

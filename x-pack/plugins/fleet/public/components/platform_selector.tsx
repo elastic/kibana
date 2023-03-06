@@ -175,6 +175,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               <EuiCopy textToCopy={commandsByPlatform[platform]}>
                 {(copy) => (
                   <EuiButton
+                    data-test-subj="fleetPlatformSelectorButton"
                     color="primary"
                     iconType="copyClipboard"
                     size="m"

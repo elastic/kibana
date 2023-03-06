@@ -55,7 +55,12 @@ export const DevtoolsRequestFlyoutButton: React.FunctionComponent<
   }, []);
 
   return (
-    <EuiButtonEmpty onClick={onClick} isDisabled={isDisabled} {...btnProps}>
+    <EuiButtonEmpty
+      data-test-subj="fleetDevtoolsRequestFlyoutButtonPreviewApiRequestButtonEmpty"
+      onClick={onClick}
+      isDisabled={isDisabled}
+      {...btnProps}
+    >
       <FormattedMessage
         id="xpack.fleet.apiRequestFlyout.openFlyoutButton"
         defaultMessage="Preview API request"

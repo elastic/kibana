@@ -354,7 +354,10 @@ export const OsqueryManagedPolicyCreateImportExtension = React.memo<
                 <p>
                   {`Fleet has detected that you have not assigned yet any agent to the `}
                   {
-                    <EuiLink href={agentsLinkHref}>
+                    <EuiLink
+                      data-test-subj="osqueryOsqueryManagedPolicyCreateImportExtensionLink"
+                      href={agentsLinkHref}
+                    >
                       {agentPolicy?.name ?? policy?.policy_id}
                     </EuiLink>
                   }

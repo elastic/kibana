@@ -43,7 +43,11 @@ const AutoSaveWarningMsgComponent = () => {
         <p>{i18n.DESCRIPTION}</p>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButton size="s" onClick={handleClick}>
+            <EuiButton
+              data-test-subj="securitySolutionTextComponentButton"
+              size="s"
+              onClick={handleClick}
+            >
               {i18n.REFRESH_TIMELINE}
             </EuiButton>
           </EuiFlexItem>

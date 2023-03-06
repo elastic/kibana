@@ -47,6 +47,7 @@ export const SitemapsTable: React.FC<SitemapsTableProps> = ({
     {
       editingRender: (sitemap, onChange, { isInvalid, isLoading }) => (
         <EuiFieldText
+          data-test-subj="enterpriseSearchColumnsFieldText"
           data-telemetry-id="entSearchContent-crawler-domainDetail-siteMaps-editSitemap"
           fullWidth
           value={(sitemap as Sitemap)[field]}
@@ -94,7 +95,11 @@ export const SitemapsTable: React.FC<SitemapsTableProps> = ({
             }
             titleSize="s"
             body={<EuiText>Add a sitemap to specify an entry point for the crawler.</EuiText>}
-            actions={<EuiButton onClick={editNewItem}>{ADD_BUTTON_LABEL}</EuiButton>}
+            actions={
+              <EuiButton data-test-subj="enterpriseSearchSitemapsTableButton" onClick={editNewItem}>
+                {ADD_BUTTON_LABEL}
+              </EuiButton>
+            }
           />
         </>
       )}

@@ -190,6 +190,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
           text: toMountPoint(
             wrapWithTheme(
               <EuiButton
+                data-test-subj="mlDatePickerWrapperSetToDefaultIntervalButton"
                 onClick={setRefreshInterval.bind(null, {
                   pause: refreshInterval.pause,
                   value: DEFAULT_REFRESH_INTERVAL_MS,

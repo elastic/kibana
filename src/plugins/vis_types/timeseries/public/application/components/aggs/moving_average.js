@@ -196,6 +196,7 @@ export const MovingAverageAgg = (props) => {
             }
           >
             <EuiFieldNumber
+              data-test-subj="pluginsMovingAverageAggFieldNumber"
               onChange={handleNumberChange('window', { isClearable: true })}
               value={model.window}
               min={1}
@@ -221,6 +222,7 @@ export const MovingAverageAgg = (props) => {
                   })}
                 >
                   <EuiFieldNumber
+                    data-test-subj="pluginsMovingAverageAggFieldNumber"
                     step={0.1}
                     onChange={handleNumberChange('alpha')}
                     value={model.alpha}
@@ -238,6 +240,7 @@ export const MovingAverageAgg = (props) => {
                   })}
                 >
                   <EuiFieldNumber
+                    data-test-subj="pluginsMovingAverageAggFieldNumber"
                     step={0.1}
                     onChange={handleNumberChange('beta')}
                     value={model.beta}
@@ -255,6 +258,7 @@ export const MovingAverageAgg = (props) => {
                     })}
                   >
                     <EuiFieldNumber
+                      data-test-subj="pluginsMovingAverageAggFieldNumber"
                       step={0.1}
                       onChange={handleNumberChange('gamma')}
                       value={model.gamma}
@@ -269,6 +273,7 @@ export const MovingAverageAgg = (props) => {
                     })}
                   >
                     <EuiFieldNumber
+                      data-test-subj="pluginsMovingAverageAggFieldNumber"
                       step={1}
                       onChange={handleNumberChange('period')}
                       value={model.period}

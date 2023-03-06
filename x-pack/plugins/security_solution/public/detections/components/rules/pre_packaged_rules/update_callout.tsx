@@ -47,7 +47,11 @@ const UpdatePrePackagedRulesCallOutComponent = () => {
       <p>
         {prepackagedRulesOrTimelines?.callOutMessage}
         <br />
-        <EuiLink href={`${services.docLinks.links.siem.ruleChangeLog}`} target="_blank">
+        <EuiLink
+          data-test-subj="securitySolutionUpdatePrePackagedRulesCallOutComponentLink"
+          href={`${services.docLinks.links.siem.ruleChangeLog}`}
+          target="_blank"
+        >
           {i18n.RELEASE_NOTES_HELP}
         </EuiLink>
       </p>

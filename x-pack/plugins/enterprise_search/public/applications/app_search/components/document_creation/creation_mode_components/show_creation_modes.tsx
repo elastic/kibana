@@ -41,7 +41,12 @@ export const ShowCreationModes: React.FC = () => {
         <DocumentCreationButtons isFlyout />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
-        <EuiButtonEmpty onClick={closeDocumentCreation}>{CANCEL_BUTTON_LABEL}</EuiButtonEmpty>
+        <EuiButtonEmpty
+          data-test-subj="enterpriseSearchShowCreationModesButtonEmpty"
+          onClick={closeDocumentCreation}
+        >
+          {CANCEL_BUTTON_LABEL}
+        </EuiButtonEmpty>
       </EuiFlyoutFooter>
     </>
   );

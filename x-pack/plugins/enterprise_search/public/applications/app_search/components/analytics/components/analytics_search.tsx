@@ -31,6 +31,7 @@ export const AnalyticsSearch: React.FC = () => {
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem>
           <EuiFieldSearch
+            data-test-subj="enterpriseSearchAnalyticsSearchFieldSearch"
             value={searchValue}
             onChange={(e) => setSearchValue(e.target.value)}
             placeholder={i18n.translate(
@@ -41,7 +42,10 @@ export const AnalyticsSearch: React.FC = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButton type="submit">
+          <EuiButton
+            data-test-subj="enterpriseSearchAnalyticsSearchViewDetailsButton"
+            type="submit"
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.appSearch.engine.analytics.queryDetailSearchButtonLabel',
               { defaultMessage: 'View details' }

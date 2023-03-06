@@ -86,6 +86,7 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
       render: (drilldown: DrilldownTemplateTableItem) =>
         !!onCreate && (
           <EuiButtonEmpty
+            data-test-subj="pluginsColumnsButtonEmpty"
             size="xs"
             disabled={!!selected.length}
             onClick={() => onCreate(drilldown.id)}
@@ -129,7 +130,11 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
       />
       <EuiSpacer />
       {!!onClone && !!selected.length && (
-        <EuiButton fill onClick={() => onClone(selected)}>
+        <EuiButton
+          data-test-subj="pluginsDrilldownTemplateTableButton"
+          fill
+          onClick={() => onClone(selected)}
+        >
           {txtCopyButtonLabel(selected.length)}
         </EuiButton>
       )}

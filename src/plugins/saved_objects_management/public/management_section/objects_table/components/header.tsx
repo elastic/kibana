@@ -61,7 +61,12 @@ export const Header = ({
           defaultMessage="Import"
         />
       </EuiButtonEmpty>,
-      <EuiButtonEmpty size="s" iconType="refresh" onClick={onRefresh}>
+      <EuiButtonEmpty
+        data-test-subj="pluginsHeaderRefreshButtonEmpty"
+        size="s"
+        iconType="refresh"
+        onClick={onRefresh}
+      >
         <FormattedMessage
           id="savedObjectsManagement.objectsTable.header.refreshButtonLabel"
           defaultMessage="Refresh"

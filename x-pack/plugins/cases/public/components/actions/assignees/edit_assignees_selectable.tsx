@@ -261,7 +261,12 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
                   gutterSize="xs"
                 >
                   <EuiFlexItem grow={false}>
-                    <EuiButtonEmpty size="xs" flush="right" onClick={onSelectNone}>
+                    <EuiButtonEmpty
+                      data-test-subj="casesEditAssigneesSelectableComponentButtonEmpty"
+                      size="xs"
+                      flush="right"
+                      onClick={onSelectNone}
+                    >
                       {i18n.REMOVE_ASSIGNEES}
                     </EuiButtonEmpty>
                   </EuiFlexItem>

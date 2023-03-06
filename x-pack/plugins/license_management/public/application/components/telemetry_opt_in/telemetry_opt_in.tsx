@@ -91,7 +91,7 @@ export class TelemetryOptIn extends React.Component<Props, State> {
     }
 
     const readMoreButton = (
-      <EuiLink onClick={this.onClickReadMore}>
+      <EuiLink data-test-subj="licenseManagementReadMoreLink" onClick={this.onClickReadMore}>
         <FormattedMessage
           id="xpack.licenseMgmt.telemetryOptIn.readMoreLinkText"
           defaultMessage="Read more"
@@ -118,7 +118,10 @@ export class TelemetryOptIn extends React.Component<Props, State> {
               You can disable this feature any time."
               values={{
                 exampleLink: (
-                  <EuiLink onClick={this.onClickExample}>
+                  <EuiLink
+                    data-test-subj="licenseManagementExampleLink"
+                    onClick={this.onClickExample}
+                  >
                     <FormattedMessage
                       id="xpack.licenseMgmt.telemetryOptIn.exampleLinkText"
                       defaultMessage="example"
@@ -127,6 +130,7 @@ export class TelemetryOptIn extends React.Component<Props, State> {
                 ),
                 telemetryPrivacyStatementLink: (
                   <EuiLink
+                    data-test-subj="licenseManagementTelemetryPrivacyStatementLink"
                     href={telemetry.telemetryConstants.getPrivacyStatementUrl()}
                     target="_blank"
                   >

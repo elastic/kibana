@@ -39,6 +39,7 @@ export class App1HelloWorldDrilldown implements Drilldown<Config, Context> {
   public readonly CollectConfig: React.FC<CollectConfigProps> = ({ config, onConfig }) => (
     <EuiFormRow label="Enter your name" fullWidth>
       <EuiFieldText
+        data-test-subj="uiActionsEnhancedExamplesFieldText"
         fullWidth
         value={config.name}
         onChange={(event) => onConfig({ ...config, name: event.target.value })}

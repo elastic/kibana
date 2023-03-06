@@ -344,6 +344,7 @@ export function CollapsibleNav({
           <span />
           <EuiCollapsibleNavGroup>
             <EuiButton
+              data-test-subj="coreCollapsibleNavAddIntegrationsButton"
               {...createEuiButtonItem({
                 link: integrationsLink,
                 navigateToUrl,

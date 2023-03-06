@@ -28,6 +28,7 @@ export const InfoComponent = () => {
       values={{
         githubLink: (
           <EuiLink
+            data-test-subj="pluginsInfoComponentGitHubLink"
             external
             href="https://github.com/elastic/kibana/issues/new/choose"
             target="_blank"

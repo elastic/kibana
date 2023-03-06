@@ -29,7 +29,11 @@ const configFormSchema: ConfigFieldSchema[] = [
         id="xpack.stackConnectors.components.opsgenie.apiUrlDocumentation"
         values={{
           opsgenieAPIUrlDocs: (
-            <EuiLink href="https://docs.opsgenie.com/docs/alert-api" target="_blank">
+            <EuiLink
+              data-test-subj="stackConnectorsLink"
+              href="https://docs.opsgenie.com/docs/alert-api"
+              target="_blank"
+            >
               {i18n.OPSGENIE_DOCUMENTATION}
             </EuiLink>
           ),
@@ -51,6 +55,7 @@ const secretsFormSchema: SecretsFieldSchema[] = [
         values={{
           opsgenieAPIKeyDocs: (
             <EuiLink
+              data-test-subj="stackConnectorsLink"
               href="https://support.atlassian.com/opsgenie/docs/create-a-default-api-integration"
               target="_blank"
             >

@@ -37,7 +37,11 @@ export const LabsControl = () => {
 
   return (
     <>
-      <EuiButtonEmpty onClick={() => setIsShown(!isShown)} size="xs">
+      <EuiButtonEmpty
+        data-test-subj="canvasLabsControlButtonEmpty"
+        onClick={() => setIsShown(!isShown)}
+        size="xs"
+      >
         {strings.getLabsButtonLabel()}
         {overrideCount > 0 ? (
           <EuiNotificationBadge color="subdued" style={{ marginLeft: 4 }}>

@@ -26,7 +26,9 @@ export const RecentTimelineHeader = React.memo<{
 
   return (
     <EuiText size="s">
-      <EuiLink onClick={onClick}>{isUntitled(timeline) ? i18n.UNTITLED_TIMELINE : title}</EuiLink>
+      <EuiLink data-test-subj="securitySolutionRecentTimelineHeaderLink" onClick={onClick}>
+        {isUntitled(timeline) ? i18n.UNTITLED_TIMELINE : title}
+      </EuiLink>
     </EuiText>
   );
 });

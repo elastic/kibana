@@ -35,7 +35,11 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, { esMo
     children: (
       <EuiText>
         <p>
-          <EuiLink href={metricbeatInstallUrl} target="_blank">
+          <EuiLink
+            data-test-subj="monitoringGetBeatsInstructionsForEnablingMetricbeatFollowTheInstructionsHereLink"
+            href={metricbeatInstallUrl}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.beatsInstructions.installMetricbeatLinkText"
               defaultMessage="Follow the instructions here."
@@ -84,7 +88,11 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, { esMo
                   defaultMessage="In order for Metricbeat to collect metrics from the running {beatType}, you need to {link}."
                   values={{
                     link: (
-                      <EuiLink href={httpEndpointUrl} target="_blank">
+                      <EuiLink
+                        data-test-subj="monitoringGetBeatsInstructionsForEnablingMetricbeatEnableAnHttpEndpointForTheBeatTypeInstanceBeingMonitoredLink"
+                        href={httpEndpointUrl}
+                        target="_blank"
+                      >
                         <FormattedMessage
                           id="xpack.monitoring.metricbeatMigration.beatsInstructions.enableMetricbeatModuleHttpEnabledDirectionsLinkText"
                           defaultMessage="enable an HTTP endpoint for the {beatType} instance being monitored"
@@ -150,7 +158,11 @@ export function getBeatsInstructionsForEnablingMetricbeat(product, _meta, { esMo
     children: (
       <EuiText>
         <p>
-          <EuiLink href={metricbeatStartUrl} target="_blank">
+          <EuiLink
+            data-test-subj="monitoringGetBeatsInstructionsForEnablingMetricbeatFollowTheInstructionsHereLink"
+            href={metricbeatStartUrl}
+            target="_blank"
+          >
             <FormattedMessage
               id="xpack.monitoring.metricbeatMigration.beatsInstructions.startMetricbeatLinkText"
               defaultMessage="Follow the instructions here."

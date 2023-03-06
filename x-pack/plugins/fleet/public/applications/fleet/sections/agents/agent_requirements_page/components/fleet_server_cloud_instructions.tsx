@@ -54,6 +54,7 @@ export const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploym
             values={{
               link: (
                 <EuiLink
+                  data-test-subj="fleetCloudInstructionsFleetAndElasticAgentGuideLink"
                   href={docLinks.links.fleet.fleetServerAddFleetServer}
                   target="_blank"
                   external
@@ -70,6 +71,7 @@ export const CloudInstructions: React.FC<{ deploymentUrl: string }> = ({ deploym
         actions={
           <>
             <EuiButton
+              data-test-subj="fleetCloudInstructionsEditDeploymentButton"
               iconSide="right"
               iconType="popout"
               fill

@@ -49,7 +49,11 @@ export class LayerGroupWizard extends Component<RenderWizardArguments, State> {
             defaultMessage: 'Name',
           })}
         >
-          <EuiFieldText value={this.state.label} onChange={this._onLabelChange} />
+          <EuiFieldText
+            data-test-subj="mapsFieldText"
+            value={this.state.label}
+            onChange={this._onLabelChange}
+          />
         </EuiFormRow>
       </EuiPanel>
     );

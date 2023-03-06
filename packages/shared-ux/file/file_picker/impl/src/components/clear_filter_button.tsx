@@ -34,7 +34,11 @@ export const ClearFilterButton: FunctionComponent<Props> = ({ onClick }) => {
         place-items: center;
       `}
     >
-      <EuiLink disabled={isUploading} onClick={onClick}>
+      <EuiLink
+        data-test-subj="sharedUxClearFilterButtonLink"
+        disabled={isUploading}
+        onClick={onClick}
+      >
         {i18nTexts.clearFilterButton}
       </EuiLink>
     </div>

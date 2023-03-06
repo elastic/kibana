@@ -79,7 +79,11 @@ const generateId = htmlIdGenerator();
 export const AutoRefreshControls = ({ refreshInterval, setRefresh, disableInterval }: Props) => {
   const RefreshItem = ({ duration, label, descriptionId }: RefreshItemProps) => (
     <li>
-      <EuiLink onClick={() => setRefresh(duration)} aria-describedby={descriptionId}>
+      <EuiLink
+        data-test-subj="canvasRefreshItemLink"
+        onClick={() => setRefresh(duration)}
+        aria-describedby={descriptionId}
+      >
         {label}
       </EuiLink>
     </li>

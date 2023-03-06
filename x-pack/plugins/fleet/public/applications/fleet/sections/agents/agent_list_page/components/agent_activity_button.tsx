@@ -56,7 +56,11 @@ export const AgentActivityButton: React.FC<{
           />
         }
         anchorPosition="upCenter"
-        footerAction={<EuiButtonEmpty onClick={onFinish}>OK</EuiButtonEmpty>}
+        footerAction={
+          <EuiButtonEmpty data-test-subj="fleetAgentActivityButtonOkButtonEmpty" onClick={onFinish}>
+            OK
+          </EuiButtonEmpty>
+        }
         anchor="#agentActivityButton"
       />
       <EuiButtonEmpty

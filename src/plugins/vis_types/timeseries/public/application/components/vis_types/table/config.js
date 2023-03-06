@@ -167,6 +167,7 @@ class TableSeriesConfigUi extends Component {
               fullWidth
             >
               <EuiFieldText
+                data-test-subj="pluginsFieldText"
                 onChange={this.handleTextChange('value_template')}
                 value={model.value_template}
                 disabled={model.formatter === DATA_FORMATTERS.DEFAULT}

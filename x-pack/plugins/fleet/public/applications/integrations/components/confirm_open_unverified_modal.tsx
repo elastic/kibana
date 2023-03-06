@@ -60,7 +60,12 @@ export const ConfirmOpenUnverifiedModal: React.FC<{
             defaultMessage="This integration contains an unsigned package of unknown authenticity and could contain malicious files. Learn more about {learnMoreLink}."
             values={{
               learnMoreLink: (
-                <EuiLink target="_blank" external href={docLinks.links.fleet.packageSignatures}>
+                <EuiLink
+                  data-test-subj="fleetConfirmOpenUnverifiedModalPackageSignaturesLink"
+                  target="_blank"
+                  external
+                  href={docLinks.links.fleet.packageSignatures}
+                >
                   <FormattedMessage
                     id="xpack.fleet.ConfirmOpenUnverifiedModal.learnMoreLink"
                     defaultMessage="package signatures"

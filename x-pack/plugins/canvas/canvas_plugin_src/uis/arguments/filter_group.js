@@ -53,6 +53,7 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFieldText
+            data-test-subj="canvasFilterGroupInputFieldText"
             autoFocus
             compressed
             type="text"
@@ -61,13 +62,24 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false} className="canvasSidebar__panel-noMinWidth">
-          <EuiButton type="submit" size="s" onClick={handleAddGroup}>
+          <EuiButton
+            data-test-subj="canvasFilterGroupInputButton"
+            type="submit"
+            size="s"
+            onClick={handleAddGroup}
+          >
             {strings.getButtonSet()}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <EuiButtonEmpty color="danger" size="xs" onClick={() => setAddMode(!addMode)} flush="left">
+      <EuiButtonEmpty
+        data-test-subj="canvasFilterGroupInputButtonEmpty"
+        color="danger"
+        size="xs"
+        onClick={() => setAddMode(!addMode)}
+        flush="left"
+      >
         {strings.getButtonCancel()}
       </EuiButtonEmpty>
     </form>
@@ -76,6 +88,7 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
   const selectForm = (
     <Fragment>
       <EuiSelect
+        data-test-subj="canvasFilterGroupInputSelect"
         compressed
         id={argId}
         value={argValue || ''}
@@ -83,7 +96,12 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
         onChange={handleSelectGroup}
       />
       <EuiSpacer size="s" />
-      <EuiButtonEmpty size="xs" onClick={() => setAddMode(!addMode)} flush="left">
+      <EuiButtonEmpty
+        data-test-subj="canvasFilterGroupInputButtonEmpty"
+        size="xs"
+        onClick={() => setAddMode(!addMode)}
+        flush="left"
+      >
         {strings.getCreateNewGroup()}
       </EuiButtonEmpty>
     </Fragment>

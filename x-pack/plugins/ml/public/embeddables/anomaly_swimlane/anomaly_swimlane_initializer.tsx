@@ -112,6 +112,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
             isInvalid={!isPanelTitleValid}
           >
             <EuiFieldText
+              data-test-subj="mlAnomalySwimlaneInitializerFieldText"
               id="panelTitle"
               name="panelTitle"
               value={panelTitle}
@@ -150,6 +151,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
                 }
               >
                 <EuiSelect
+                  data-test-subj="mlAnomalySwimlaneInitializerSelect"
                   id="selectViewBy"
                   name="selectViewBy"
                   options={viewBySwimlaneOptions}
@@ -163,14 +165,22 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onCancel}>
+        <EuiButtonEmpty
+          data-test-subj="mlAnomalySwimlaneInitializerCancelButtonEmpty"
+          onClick={onCancel}
+        >
           <FormattedMessage
             id="xpack.ml.swimlaneEmbeddable.setupModal.cancelButtonLabel"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
 
-        <EuiButton isDisabled={!isFormValid} onClick={onCreate.bind(null, resultInput)} fill>
+        <EuiButton
+          data-test-subj="mlAnomalySwimlaneInitializerConfirmButton"
+          isDisabled={!isFormValid}
+          onClick={onCreate.bind(null, resultInput)}
+          fill
+        >
           <FormattedMessage
             id="xpack.ml.swimlaneEmbeddable.setupModal.confirmButtonLabel"
             defaultMessage="Confirm"

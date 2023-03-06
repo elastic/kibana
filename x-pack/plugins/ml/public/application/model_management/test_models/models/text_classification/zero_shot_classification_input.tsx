@@ -40,6 +40,7 @@ const ClassNameInput: FC<{
         )}
       >
         <EuiFieldText
+          data-test-subj="mlClassNameInputFieldText"
           value={labelsText}
           disabled={runningState === RUNNING_STATE.RUNNING}
           fullWidth

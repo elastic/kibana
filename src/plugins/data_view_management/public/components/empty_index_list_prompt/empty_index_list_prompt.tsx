@@ -161,7 +161,12 @@ export const EmptyIndexListPrompt = ({
                         />
                       ),
                       description: (
-                        <EuiLink href={addDataUrl} target="_blank" external>
+                        <EuiLink
+                          data-test-subj="pluginsEmptyIndexListPromptReadDocumentationLink"
+                          href={addDataUrl}
+                          target="_blank"
+                          external
+                        >
                           <FormattedMessage
                             id="indexPatternManagement.createDataView.emptyState.readDocs"
                             defaultMessage="Read documentation"

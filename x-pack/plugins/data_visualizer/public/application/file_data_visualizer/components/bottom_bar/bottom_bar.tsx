@@ -59,7 +59,11 @@ export const BottomBar: FC<BottomBarProps> = ({ mode, onChangeMode, onCancel, di
             </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="ghost" onClick={() => onCancel()}>
+            <EuiButtonEmpty
+              data-test-subj="dataVisualizerBottomBarCancelButtonEmpty"
+              color="ghost"
+              onClick={() => onCancel()}
+            >
               <FormattedMessage
                 id="xpack.dataVisualizer.file.bottomBar.readMode.cancelButtonLabel"
                 defaultMessage="Cancel"
@@ -74,7 +78,11 @@ export const BottomBar: FC<BottomBarProps> = ({ mode, onChangeMode, onCancel, di
       <EuiBottomBar>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButton color="ghost" onClick={() => onChangeMode(DATAVISUALIZER_MODE.READ)}>
+            <EuiButton
+              data-test-subj="dataVisualizerBottomBarBackButton"
+              color="ghost"
+              onClick={() => onChangeMode(DATAVISUALIZER_MODE.READ)}
+            >
               <FormattedMessage
                 id="xpack.dataVisualizer.file.bottomBar.backButtonLabel"
                 defaultMessage="Back"
@@ -82,7 +90,11 @@ export const BottomBar: FC<BottomBarProps> = ({ mode, onChangeMode, onCancel, di
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="ghost" onClick={() => onCancel()}>
+            <EuiButtonEmpty
+              data-test-subj="dataVisualizerBottomBarCancelButtonEmpty"
+              color="ghost"
+              onClick={() => onCancel()}
+            >
               <FormattedMessage
                 id="xpack.dataVisualizer.file.bottomBar.cancelButtonLabel"
                 defaultMessage="Cancel"

@@ -54,7 +54,12 @@ export const ContextMenuActions = React.memo<Props>(({ button, onChange, isOpen,
   }, [isOpenState, onChange, isOpen]);
 
   const actionButton = button ? (
-    <EuiButton {...button.props} onClick={handleToggleMenu} isDisabled={props.isManaged}>
+    <EuiButton
+      data-test-subj="fleetContextMenuActionsButton"
+      {...button.props}
+      onClick={handleToggleMenu}
+      isDisabled={props.isManaged}
+    >
       {button.children}
     </EuiButton>
   ) : (

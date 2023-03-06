@@ -26,7 +26,13 @@ export const NoPrivilegesPage = React.memo(({ pageName }: NoPrivilegesPageProps)
       titleSize="xs"
       body={<p>{i18n.NO_PRIVILEGES_MSG(pageName)}</p>}
       actions={
-        <EuiButton onClick={navigateToAllCases} size="s" color="primary" fill>
+        <EuiButton
+          data-test-subj="casesNoPrivilegesPageButton"
+          onClick={navigateToAllCases}
+          size="s"
+          color="primary"
+          fill
+        >
           {i18n.NO_PRIVILEGES_BUTTON}
         </EuiButton>
       }

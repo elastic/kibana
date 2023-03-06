@@ -39,6 +39,7 @@ function OrderParamEditor({
       display="rowCompressed"
     >
       <EuiSelect
+        data-test-subj="pluginsOrderParamEditorSelect"
         options={aggParam.options}
         value={value && value.value}
         onChange={(ev) =>

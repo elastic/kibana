@@ -21,6 +21,7 @@ interface Props {
 const SNStoreButtonComponent: React.FC<Props> = ({ color, appId = '' }) => {
   return (
     <EuiButton
+      data-test-subj="stackConnectorsSNStoreButtonComponentButton"
       href={getStoreURL(appId)}
       color={color}
       iconSide="right"
@@ -35,7 +36,11 @@ const SNStoreButtonComponent: React.FC<Props> = ({ color, appId = '' }) => {
 export const SNStoreButton = memo(SNStoreButtonComponent);
 
 const SNStoreLinkComponent: React.FC<Pick<Props, 'appId'>> = ({ appId = '' }) => (
-  <EuiLink href={getStoreURL(appId)} target="_blank">
+  <EuiLink
+    data-test-subj="stackConnectorsSNStoreLinkComponentLink"
+    href={getStoreURL(appId)}
+    target="_blank"
+  >
     {i18n.VISIT_SN_STORE}
   </EuiLink>
 );

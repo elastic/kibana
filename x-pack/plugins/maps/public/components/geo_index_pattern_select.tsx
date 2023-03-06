@@ -93,7 +93,10 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
               id="xpack.maps.noIndexPattern.doThisPrefixDescription"
               defaultMessage="You'll need to "
             />
-            <EuiLink href={getHttp().basePath.prepend(`/app/management/kibana/dataViews`)}>
+            <EuiLink
+              data-test-subj="mapsCreateADataViewLink"
+              href={getHttp().basePath.prepend(`/app/management/kibana/dataViews`)}
+            >
               <FormattedMessage
                 id="xpack.maps.noIndexPattern.doThisLinkTextDescription"
                 defaultMessage="Create a data view."
@@ -105,7 +108,10 @@ export class GeoIndexPatternSelect extends Component<Props, State> {
               id="xpack.maps.noIndexPattern.hintDescription"
               defaultMessage="Don't have any data? "
             />
-            <EuiLink href={getHttp().basePath.prepend('/app/home#/tutorial_directory/sampleData')}>
+            <EuiLink
+              data-test-subj="mapsGetStartedWithSomeSampleDataSetsLink"
+              href={getHttp().basePath.prepend('/app/home#/tutorial_directory/sampleData')}
+            >
               <FormattedMessage
                 id="xpack.maps.noIndexPattern.getStartedLinkText"
                 defaultMessage="Get started with some sample data sets."

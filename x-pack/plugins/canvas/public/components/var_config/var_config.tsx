@@ -226,6 +226,7 @@ export const VarConfig: FC<Props> = ({
               </EuiText>
               <EuiSpacer size="m" />
               <EuiButton
+                data-test-subj="canvasVarConfigButton"
                 size="s"
                 iconType="plusInCircle"
                 onClick={() => setPanelMode(PanelMode.Edit)}

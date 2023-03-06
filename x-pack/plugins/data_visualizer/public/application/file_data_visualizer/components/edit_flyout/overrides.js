@@ -309,7 +309,11 @@ class OverridesUI extends Component {
 
     const timestampFormatHelp = (
       <EuiText size="xs">
-        <EuiLink href={docsUrl} target="_blank">
+        <EuiLink
+          data-test-subj="dataVisualizerSeeMoreOnAcceptedFormatsLink"
+          href={docsUrl}
+          target="_blank"
+        >
           {i18n.translate(
             'xpack.dataVisualizer.file.editFlyout.overrides.timestampFormatHelpText',
             {
@@ -333,6 +337,7 @@ class OverridesUI extends Component {
           }
         >
           <EuiFieldNumber
+            data-test-subj="dataVisualizerFieldNumber"
             value={linesToSample}
             onChange={this.onLinesToSampleChange}
             isInvalid={linesToSampleValid === false}
@@ -382,7 +387,11 @@ class OverridesUI extends Component {
                   />
                 }
               >
-                <EuiFieldText value={customDelimiter} onChange={this.onCustomDelimiterChange} />
+                <EuiFieldText
+                  data-test-subj="dataVisualizerFieldText"
+                  value={customDelimiter}
+                  onChange={this.onCustomDelimiterChange}
+                />
               </EuiFormRow>
             )}
 
@@ -443,6 +452,7 @@ class OverridesUI extends Component {
               }
             >
               <EuiTextArea
+                data-test-subj="dataVisualizerTextArea"
                 placeholder={grokPattern}
                 value={grokPattern}
                 onChange={this.grokPatternChange}
@@ -496,6 +506,7 @@ class OverridesUI extends Component {
                 }
               >
                 <EuiFieldText
+                  data-test-subj="dataVisualizerFieldText"
                   value={customTimestampFormat}
                   onChange={this.onCustomTimestampFormatChange}
                   isInvalid={timestampFormatValid === false}
@@ -536,6 +547,7 @@ class OverridesUI extends Component {
             {originalColumnNames.map((f, i) => (
               <EuiFormRow label={f} key={f}>
                 <EuiFieldText
+                  data-test-subj="dataVisualizerFieldText"
                   value={columnNames[i]}
                   onChange={(e) => this.onColumnNameChange(e, i)}
                 />
@@ -559,6 +571,7 @@ class OverridesUI extends Component {
             {originalGrokFieldNames.map((f, i) => (
               <EuiFormRow label={f} key={f}>
                 <EuiFieldText
+                  data-test-subj="dataVisualizerFieldText"
                   value={grokFieldNames[i]}
                   onChange={(e) => this.onGrokPatternFieldChange(e, i, grokPattern)}
                 />

@@ -43,6 +43,7 @@ export const InstallationMessage: React.FunctionComponent<Props> = ({
             values={{
               downloadLink: (
                 <EuiLink
+                  data-test-subj="fleetInstallationMessageDownloadsPageLink"
                   target="_blank"
                   external
                   href={`https://www.elastic.co/downloads/past-releases/elastic-agent-${kibanaVersionURLString}`}
@@ -55,6 +56,7 @@ export const InstallationMessage: React.FunctionComponent<Props> = ({
               ),
               installationLink: (
                 <EuiLink
+                  data-test-subj="fleetInstallationMessageInstallationDocsLink"
                   target="_blank"
                   external
                   href={

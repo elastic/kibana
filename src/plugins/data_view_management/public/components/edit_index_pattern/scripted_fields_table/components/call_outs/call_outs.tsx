@@ -41,7 +41,7 @@ export const CallOuts = ({ deprecatedLangsInUse, painlessDocLink }: CallOutsProp
             values={{
               deprecatedLangsInUse: deprecatedLangsInUse.join(', '),
               link: (
-                <EuiLink href={painlessDocLink}>
+                <EuiLink data-test-subj="pluginsCallOutsPainlessLink" href={painlessDocLink}>
                   <FormattedMessage
                     id="indexPatternManagement.editIndexPattern.scripted.deprecationLangLabel.painlessDescription"
                     defaultMessage="Painless"

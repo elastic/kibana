@@ -61,6 +61,7 @@ export const NoConnectorRecord: React.FC = () => {
         }
         actions={[
           <EuiButton
+            data-test-subj="enterpriseSearchNoConnectorRecordRecreateConnectorRecordButton"
             color="danger"
             disabled={buttonsDisabled}
             isLoading={status === Status.LOADING}
@@ -74,6 +75,7 @@ export const NoConnectorRecord: React.FC = () => {
             )}
           </EuiButton>,
           <EuiButton
+            data-test-subj="enterpriseSearchNoConnectorRecordDeleteIndexButton"
             color="danger"
             disabled={buttonsDisabled}
             isLoading={isDeleteLoading}

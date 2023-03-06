@@ -46,7 +46,12 @@ export const ExplanationFlyout: FC<Props> = ({ results, closeFlyout }) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={closeFlyout} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="dataVisualizerExplanationFlyoutCloseButtonEmpty"
+              iconType="cross"
+              onClick={closeFlyout}
+              flush="left"
+            >
               <FormattedMessage
                 id="xpack.dataVisualizer.file.explanationFlyout.closeButton"
                 defaultMessage="Close"

@@ -60,7 +60,13 @@ const EditPackPageComponent = () => {
     () => (
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
-          <EuiButtonEmpty iconType="arrowLeft" {...queryDetailsLinkProps} flush="left" size="xs">
+          <EuiButtonEmpty
+            data-test-subj="osqueryLeftColumnViewQueryNameDetailsButtonEmpty"
+            iconType="arrowLeft"
+            {...queryDetailsLinkProps}
+            flush="left"
+            size="xs"
+          >
             <FormattedMessage
               id="xpack.osquery.editPack.viewPackListTitle"
               defaultMessage="View {queryName} details"
@@ -90,7 +96,12 @@ const EditPackPageComponent = () => {
 
   const RightColumn = useMemo(
     () => (
-      <EuiButton color="danger" onClick={handleDeleteClick} iconType="trash">
+      <EuiButton
+        data-test-subj="osqueryRightColumnDeletePackButton"
+        color="danger"
+        onClick={handleDeleteClick}
+        iconType="trash"
+      >
         <FormattedMessage
           id="xpack.osquery.editPack.deletePackButtonLabel"
           defaultMessage="Delete pack"

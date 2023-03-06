@@ -131,6 +131,7 @@ export const AddSourceBYOIntro: React.FC = () => {
                               values={{
                                 repositoryLink: (
                                   <EuiLink
+                                    data-test-subj="enterpriseSearchAddSourceBYOIntroRepositoryLink"
                                     external
                                     target="_blank"
                                     href="https://github.com/elastic/connectors"
@@ -183,6 +184,7 @@ export const AddSourceBYOIntro: React.FC = () => {
                               values={{
                                 documentationLink: (
                                   <EuiLink
+                                    data-test-subj="enterpriseSearchAddSourceBYOIntroDocumentationLink"
                                     external
                                     target="_blank"
                                     href={docLinks.workplaceSearchCustomConnectorPackage}

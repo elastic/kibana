@@ -222,7 +222,10 @@ const getColumns = (
 
         // there is no license!
         return (
-          <EuiLink onClick={() => handleClickInvalidLicense(cluster.cluster_name)}>
+          <EuiLink
+            data-test-subj="monitoringGetColumnsLink"
+            onClick={() => handleClickInvalidLicense(cluster.cluster_name)}
+          >
             <EuiHealth color="subdued" data-test-subj="alertIcon">
               N/A
             </EuiHealth>
@@ -283,7 +286,11 @@ const handleClickIncompatibleLicense = (scope, theme$, clusterName) => {
             defaultMessage="Need to monitor multiple clusters? {getLicenseInfoLink} to enjoy multi-cluster monitoring."
             values={{
               getLicenseInfoLink: (
-                <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                <EuiLink
+                  data-test-subj="monitoringHandleClickIncompatibleLicenseGetALicenseWithFullFunctionalityLink"
+                  href="https://www.elastic.co/subscriptions"
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.monitoring.cluster.listing.incompatibleLicense.getLicenseLinkLabel"
                     defaultMessage="Get a license with full functionality"
@@ -321,7 +328,10 @@ const handleClickInvalidLicense = (scope, theme$, clusterName) => {
             defaultMessage="Need a license? {getBasicLicenseLink} or {getLicenseInfoLink} to enjoy multi-cluster monitoring."
             values={{
               getBasicLicenseLink: (
-                <EuiLink href={licensingPath}>
+                <EuiLink
+                  data-test-subj="monitoringHandleClickInvalidLicenseGetAFreeBasicLicenseLink"
+                  href={licensingPath}
+                >
                   <FormattedMessage
                     id="xpack.monitoring.cluster.listing.invalidLicense.getBasicLicenseLinkLabel"
                     defaultMessage="Get a free Basic license"
@@ -329,7 +339,11 @@ const handleClickInvalidLicense = (scope, theme$, clusterName) => {
                 </EuiLink>
               ),
               getLicenseInfoLink: (
-                <EuiLink href="https://www.elastic.co/subscriptions" target="_blank">
+                <EuiLink
+                  data-test-subj="monitoringHandleClickInvalidLicenseGetALicenseWithFullFunctionalityLink"
+                  href="https://www.elastic.co/subscriptions"
+                  target="_blank"
+                >
                   <FormattedMessage
                     id="xpack.monitoring.cluster.listing.invalidLicense.getLicenseLinkLabel"
                     defaultMessage="Get a license with full functionality"
@@ -378,6 +392,7 @@ const StandaloneClusterCallout = ({ changeCluster, storage }) => {
         </p>
         <p>
           <EuiLink
+            data-test-subj="monitoringStandaloneClusterCalloutDismissLink"
             onClick={() => {
               storage.set(STANDALONE_CLUSTER_STORAGE_KEY, true);
             }}

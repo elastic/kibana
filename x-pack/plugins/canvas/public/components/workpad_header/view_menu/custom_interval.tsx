@@ -65,6 +65,7 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
             display="rowCompressed"
           >
             <EuiFieldText
+              data-test-subj="canvasCustomIntervalFieldText"
               isInvalid={isInvalid}
               value={customInterval}
               onChange={handleChange}
@@ -75,7 +76,13 @@ export const CustomInterval = ({ gutterSize, buttonSize, onSubmit, defaultValue 
 
         <EuiFlexItem grow={false}>
           <EuiFormRow hasEmptyLabelSpace={true} display="rowCompressed">
-            <EuiButton disabled={isInvalid} size={buttonSize} type="submit" minWidth="auto">
+            <EuiButton
+              data-test-subj="canvasCustomIntervalButton"
+              disabled={isInvalid}
+              size={buttonSize}
+              type="submit"
+              minWidth="auto"
+            >
               {strings.getButtonLabel()}
             </EuiButton>
           </EuiFormRow>

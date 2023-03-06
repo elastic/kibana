@@ -511,6 +511,7 @@ export const ConnectorEventLogListTable = <T extends ConnectorEventLogListOption
         <EuiFlexGroup alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiFieldSearch
+              data-test-subj="triggersActionsUiConnectorEventLogListTableFieldSearch"
               fullWidth
               isClearable
               value={search}

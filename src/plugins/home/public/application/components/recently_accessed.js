@@ -62,6 +62,7 @@ export class RecentlyAccessed extends Component {
           data-test-subj={`moreRecentlyAccessedItem${this.props.recentlyAccessed[i].id}`}
         >
           <EuiLink
+            data-test-subj="pluginsLink"
             className="homRecentlyAccessed__dropdownLink"
             href={this.props.recentlyAccessed[i].link}
           >
@@ -125,7 +126,11 @@ export class RecentlyAccessed extends Component {
             position="bottom"
             content={recentlyAccessedItem.label}
           >
-            <EuiLink className="homRecentlyAccessed__longLink" href={recentlyAccessedItem.link}>
+            <EuiLink
+              data-test-subj="pluginsLink"
+              className="homRecentlyAccessed__longLink"
+              href={recentlyAccessedItem.link}
+            >
               {recentlyAccessedItem.label}
             </EuiLink>
           </EuiToolTip>

@@ -28,6 +28,7 @@ export const ResultsPerPageView: React.FC<Props> = ({ onChange, options = [], va
   return (
     <div>
       <EuiSelect
+        data-test-subj="enterpriseSearchResultsPerPageViewSelect"
         options={options.map(wrapResultsPerPageOptionForEuiSelect)}
         value={selectedValue}
         prepend={i18n.translate(

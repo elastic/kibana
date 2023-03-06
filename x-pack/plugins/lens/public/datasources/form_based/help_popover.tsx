@@ -28,7 +28,7 @@ export const HelpPopoverButton = ({
 }) => {
   return (
     <EuiText size="xs">
-      <EuiLink onClick={onClick}>
+      <EuiLink data-test-subj="lensHelpPopoverButtonLink" onClick={onClick}>
         <EuiIcon className="lnsHelpPopover__buttonIcon" size="s" type="help" />
 
         {children}

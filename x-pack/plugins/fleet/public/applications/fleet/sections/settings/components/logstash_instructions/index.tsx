@@ -46,7 +46,11 @@ export const LogstashInstructions = () => {
           {documentationLink}."
           values={{
             documentationLink: (
-              <EuiLink external={true} href={docLinks.links.logstash.inputElasticAgent}>
+              <EuiLink
+                data-test-subj="fleetLogstashInstructionsLearnMoreLink"
+                external={true}
+                href={docLinks.links.logstash.inputElasticAgent}
+              >
                 <FormattedMessage
                   id="xpack.fleet.settings.logstashInstructions.documentationLink"
                   defaultMessage="Learn more"
@@ -69,14 +73,21 @@ const CollapsibleCallout: React.FunctionComponent<EuiCallOutProps> = ({ children
     <EuiCallOut {...props}>
       <EuiSpacer size="s" />
       {isOpen ? (
-        <EuiButton onClick={() => setIsOpen(false)}>
+        <EuiButton
+          data-test-subj="fleetCollapsibleCalloutCollapseStepsButton"
+          onClick={() => setIsOpen(false)}
+        >
           <FormattedMessage
             id="xpack.fleet.settings.logstashInstructions.collapseInstructionsButtonLabel"
             defaultMessage="Collapse steps"
           />
         </EuiButton>
       ) : (
-        <EuiButton onClick={() => setIsOpen(true)} fill={true}>
+        <EuiButton
+          data-test-subj="fleetCollapsibleCalloutViewStepsButton"
+          onClick={() => setIsOpen(true)}
+          fill={true}
+        >
           <FormattedMessage
             id="xpack.fleet.settings.logstashInstructions.viewInstructionButtonLabel"
             defaultMessage="View steps"
@@ -134,6 +145,7 @@ const LogstashInstructionSteps = () => {
               </EuiCodeBlock>
             ) : (
               <EuiButton
+                data-test-subj="fleetStepsGenerateApiKeyButton"
                 isLoading={logstashApiKey.isLoading}
                 onClick={logstashApiKey.generateApiKey}
               >
@@ -189,7 +201,11 @@ const LogstashInstructionSteps = () => {
               defaultMessage="Replace the parts between the brackets with your generated SSL certificate file paths. View {documentationLink} to generate the certificates."
               values={{
                 documentationLink: (
-                  <EuiLink external={true} href={docLinks.links.fleet.secureLogstash}>
+                  <EuiLink
+                    data-test-subj="fleetStepsOurDocumentationLink"
+                    external={true}
+                    href={docLinks.links.fleet.secureLogstash}
+                  >
                     <FormattedMessage
                       id="xpack.fleet.settings.logstashInstructions.ourDocumentationLink"
                       defaultMessage="our documentation"

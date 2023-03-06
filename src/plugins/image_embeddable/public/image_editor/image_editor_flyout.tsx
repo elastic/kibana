@@ -313,6 +313,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
           fullWidth
         >
           <EuiSelect
+            data-test-subj="pluginsImageEditorFlyoutSelect"
             fullWidth
             options={[
               {
@@ -405,7 +406,12 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={props.onCancel} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="pluginsImageEditorFlyoutCloseButtonEmpty"
+              iconType="cross"
+              onClick={props.onCancel}
+              flush="left"
+            >
               <FormattedMessage
                 id="imageEmbeddable.imageEditor.imageBackgroundCloseButtonText"
                 defaultMessage="Close"

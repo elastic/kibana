@@ -60,6 +60,7 @@ export const AddDomainForm: React.FC = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow>
               <EuiFieldText
+                data-test-subj="enterpriseSearchAddDomainFormFieldText"
                 autoFocus
                 placeholder="https://"
                 value={addDomainFormInputValue}
@@ -68,7 +69,12 @@ export const AddDomainForm: React.FC = () => {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton type="submit" fill disabled={addDomainFormInputValue.length === 0}>
+              <EuiButton
+                data-test-subj="enterpriseSearchAddDomainFormValidateDomainButton"
+                type="submit"
+                fill
+                disabled={addDomainFormInputValue.length === 0}
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.appSearch.crawler.addDomainForm.validateButtonLabel',
                   {

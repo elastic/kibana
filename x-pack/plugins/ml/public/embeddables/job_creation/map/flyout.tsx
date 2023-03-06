@@ -75,7 +75,12 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="mlGeoJobFlyoutCloseButtonEmpty"
+              iconType="cross"
+              onClick={onClose}
+              flush="left"
+            >
               <FormattedMessage
                 id="xpack.ml.embeddables.geoJobFlyout.closeButton"
                 defaultMessage="Close"

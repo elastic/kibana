@@ -77,6 +77,7 @@ export const ToolBarPagination = ({
         <EuiPopover
           button={
             <EuiButtonEmpty
+              data-test-subj="pluginsToolBarPaginationRowsPerPagePageSizeButtonEmpty"
               size="xs"
               color="text"
               iconType="arrowDown"

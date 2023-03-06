@@ -66,7 +66,12 @@ export class PainlessError extends EsError {
         <EuiSpacer size="s" />
         <EuiSpacer size="s" />
         <EuiText textAlign="right">
-          <EuiButton color="danger" onClick={() => onClick(indexPatternId)} size="s">
+          <EuiButton
+            data-test-subj="pluginsEditScriptButton"
+            color="danger"
+            onClick={() => onClick(indexPatternId)}
+            size="s"
+          >
             <FormattedMessage id="data.painlessError.buttonTxt" defaultMessage="Edit script" />
           </EuiButton>
         </EuiText>

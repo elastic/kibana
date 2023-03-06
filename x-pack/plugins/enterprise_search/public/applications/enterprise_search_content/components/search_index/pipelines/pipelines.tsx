@@ -98,7 +98,12 @@ export const SearchIndexPipelines: React.FC = () => {
               }
             )}
           </p>
-          <EuiButton color="danger" fill onClick={() => revertPipeline({ indexName })}>
+          <EuiButton
+            data-test-subj="enterpriseSearchSearchIndexPipelinesRevertPipelineToDefaultButton"
+            color="danger"
+            fill
+            onClick={() => revertPipeline({ indexName })}
+          >
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.missingPipeline.buttonLabel',
               {
@@ -114,7 +119,12 @@ export const SearchIndexPipelines: React.FC = () => {
           <DataPanel
             hasBorder
             footerDocLink={
-              <EuiLink href={docLinks.ingestPipelines} target="_blank" color="subdued">
+              <EuiLink
+                data-test-subj="enterpriseSearchSearchIndexPipelinesLearnMoreAboutUsingPipelinesInEnterpriseSearchLink"
+                href={docLinks.ingestPipelines}
+                target="_blank"
+                color="subdued"
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.ingestionPipeline.docLink',
                   {
@@ -158,7 +168,12 @@ export const SearchIndexPipelines: React.FC = () => {
           <DataPanel
             hasBorder
             footerDocLink={
-              <EuiLink href={docLinks.deployTrainedModels} target="_blank" color="subdued">
+              <EuiLink
+                data-test-subj="enterpriseSearchSearchIndexPipelinesLearnMoreAboutDeployingMachineLearningModelsInElasticLink"
+                href={docLinks.deployTrainedModels}
+                target="_blank"
+                color="subdued"
+              >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.mlInferencePipelines.docLink',
                   {

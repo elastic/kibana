@@ -33,7 +33,13 @@ export const EmptyState: React.FC = () => (
       </p>
     }
     actions={
-      <EuiButton size="s" target="_blank" iconType="popout" href={CURATIONS_DOCS_URL}>
+      <EuiButton
+        data-test-subj="enterpriseSearchEmptyStateReadTheCurationsGuideButton"
+        size="s"
+        target="_blank"
+        iconType="popout"
+        href={CURATIONS_DOCS_URL}
+      >
         {i18n.translate('xpack.enterpriseSearch.appSearch.engine.curations.empty.buttonLabel', {
           defaultMessage: 'Read the curations guide',
         })}

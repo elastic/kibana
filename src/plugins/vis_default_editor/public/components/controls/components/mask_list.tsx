@@ -67,6 +67,7 @@ function MaskList({ showValidation, onBlur, ...rest }: MaskListProps) {
     ({ mask }: MaskModel, index, onChangeValue) => (
       <EuiFlexItem>
         <EuiFieldText
+          data-test-subj="pluginsRenderInputRowFieldText"
           aria-label={i18n.translate('visDefaultEditor.controls.ipRanges.cidrMaskAriaLabel', {
             defaultMessage: 'CIDR mask: {mask}',
             values: { mask: mask.value || '*' },

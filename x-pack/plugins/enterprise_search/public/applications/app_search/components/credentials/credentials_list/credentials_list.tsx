@@ -141,7 +141,13 @@ export const CredentialsList: React.FC = () => {
             defaultMessage: 'Allow applications to access Elastic App Search on your behalf.',
           })}
           actions={
-            <EuiButton size="s" target="_blank" iconType="popout" href={API_KEYS_DOCS_URL}>
+            <EuiButton
+              data-test-subj="enterpriseSearchCredentialsListLearnAboutApiKeysButton"
+              size="s"
+              target="_blank"
+              iconType="popout"
+              href={API_KEYS_DOCS_URL}
+            >
               {i18n.translate('xpack.enterpriseSearch.appSearch.credentials.empty.buttonLabel', {
                 defaultMessage: 'Learn about API keys',
               })}

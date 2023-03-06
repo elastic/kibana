@@ -51,6 +51,7 @@ export class AssetPicker extends PureComponent<Props> {
             className="canvasCheckered"
           >
             <EuiLink
+              data-test-subj="canvasLink"
               className={`canvasAssetPicker__link`}
               disabled={asset.id === selected}
               onClick={() => onChange(asset)}

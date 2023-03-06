@@ -243,7 +243,10 @@ class TutorialDirectoryUi extends React.Component {
               defaultMessage="In addition to adding {integrationsLink}, you can try our sample data or upload your own data."
               values={{
                 integrationsLink: (
-                  <EuiLink href={this.props.addBasePath(`/app/integrations/browse`)}>
+                  <EuiLink
+                    data-test-subj="pluginsIntegrationsLink"
+                    href={this.props.addBasePath(`/app/integrations/browse`)}
+                  >
                     <FormattedMessage
                       id="home.tutorial.addDataToKibanaDescription.integrations"
                       defaultMessage="integrations"

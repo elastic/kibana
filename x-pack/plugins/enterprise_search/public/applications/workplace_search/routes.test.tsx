@@ -27,7 +27,11 @@ import {
 
 const TestComponent = ({ id, isOrg }: { id: string; isOrg?: boolean }) => {
   const href = getContentSourcePath(SOURCE_DETAILS_PATH, id, !!isOrg);
-  return <EuiLink href={href}>test</EuiLink>;
+  return (
+    <EuiLink data-test-subj="enterpriseSearchTestComponentTestLink" href={href}>
+      test
+    </EuiLink>
+  );
 };
 
 describe('getContentSourcePath', () => {

@@ -202,7 +202,12 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
                   defaultMessage="Specify the addresses that your agents will use to connect to Logstash. {guideLink}."
                   values={{
                     guideLink: (
-                      <EuiLink href={docLinks.links.fleet.settings} target="_blank" external>
+                      <EuiLink
+                        data-test-subj="fleetEditOutputFlyoutLearnMoreLink"
+                        href={docLinks.links.fleet.settings}
+                        target="_blank"
+                        external
+                      >
                         <FormattedMessage
                           id="xpack.fleet.settings.fleetSettingsLink"
                           defaultMessage="Learn more"
@@ -233,6 +238,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               {...inputs.caTrustedFingerprintInput.formRowProps}
             >
               <EuiFieldText
+                data-test-subj="fleetEditOutputFlyoutFieldText"
                 fullWidth
                 {...inputs.caTrustedFingerprintInput.props}
                 placeholder={i18n.translate(
@@ -275,6 +281,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               {...inputs.sslCertificateInput.formRowProps}
             >
               <EuiTextArea
+                data-test-subj="fleetEditOutputFlyoutTextArea"
                 fullWidth
                 rows={5}
                 {...inputs.sslCertificateInput.props}
@@ -299,6 +306,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               {...inputs.sslKeyInput.formRowProps}
             >
               <EuiTextArea
+                data-test-subj="fleetEditOutputFlyoutTextArea"
                 fullWidth
                 rows={5}
                 {...inputs.sslKeyInput.props}
@@ -410,7 +418,11 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={onClose} flush="left">
+            <EuiButtonEmpty
+              data-test-subj="fleetEditOutputFlyoutCancelButtonEmpty"
+              onClick={onClose}
+              flush="left"
+            >
               <FormattedMessage
                 id="xpack.fleet.settings.fleetServerHostsFlyout.cancelButtonLabel"
                 defaultMessage="Cancel"

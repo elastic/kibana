@@ -103,7 +103,11 @@ export const TemplatesForm = React.memo(({ value }: Props) => {
           defaultMessage="Use dynamic templates to define custom mappings that can be applied to dynamically added fields. {docsLink}"
           values={{
             docsLink: (
-              <EuiLink href={documentationService.getDynamicTemplatesLink()} target="_blank">
+              <EuiLink
+                data-test-subj="indexManagementTemplatesFormLearnMoreLink"
+                href={documentationService.getDynamicTemplatesLink()}
+                target="_blank"
+              >
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.dynamicTemplatesDocumentationLink', {
                   defaultMessage: 'Learn more.',
                 })}

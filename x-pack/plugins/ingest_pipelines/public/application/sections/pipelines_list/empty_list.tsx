@@ -65,7 +65,12 @@ export const EmptyList: FunctionComponent = () => {
               id="xpack.ingestPipelines.list.table.emptyPromptDescription"
               defaultMessage="Use pipelines to remove or transform fields, extract values from text, and enrich your data before indexing."
             />{' '}
-            <EuiLink href={services.documentation.getIngestNodeUrl()} target="_blank" external>
+            <EuiLink
+              data-test-subj="ingestPipelinesEmptyListLearnMoreLink"
+              href={services.documentation.getIngestNodeUrl()}
+              target="_blank"
+              external
+            >
               {i18n.translate('xpack.ingestPipelines.list.table.emptyPromptDocumentionLink', {
                 defaultMessage: 'Learn more',
               })}

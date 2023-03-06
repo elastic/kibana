@@ -75,7 +75,12 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
         >
           <EuiFlexGroup alignItems="flexStart">
             <EuiFlexItem>
-              <EuiFieldNumber {...maxBatchBytes.props} placeholder="Batching Bytes" min={0} />
+              <EuiFieldNumber
+                data-test-subj="fleetAdvancedOptionsSectionFieldNumber"
+                {...maxBatchBytes.props}
+                placeholder="Batching Bytes"
+                min={0}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s" color="subdued">
@@ -100,7 +105,12 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
         >
           <EuiFlexGroup alignItems="flexStart">
             <EuiFlexItem>
-              <EuiFieldNumber {...queueFlushTimeout.props} placeholder="Seconds" min={0} />
+              <EuiFieldNumber
+                data-test-subj="fleetAdvancedOptionsSectionFieldNumber"
+                {...queueFlushTimeout.props}
+                placeholder="Seconds"
+                min={0}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s" color="subdued">
@@ -125,7 +135,12 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
         >
           <EuiFlexGroup alignItems="flexStart">
             <EuiFlexItem>
-              <EuiFieldNumber {...memQueueEvents.props} placeholder="Events" min={0} />
+              <EuiFieldNumber
+                data-test-subj="fleetAdvancedOptionsSectionFieldNumber"
+                {...memQueueEvents.props}
+                placeholder="Events"
+                min={0}
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText size="s" color="subdued">
@@ -228,7 +243,12 @@ export const AdvancedOptionsSection: React.FunctionComponent<AdvancedOptionsSect
             >
               <EuiFlexGroup alignItems="flexStart">
                 <EuiFlexItem>
-                  <EuiFieldNumber {...diskQueueMaxSizeInput.props} placeholder="Bytes" min={0} />
+                  <EuiFieldNumber
+                    data-test-subj="fleetAdvancedOptionsSectionFieldNumber"
+                    {...diskQueueMaxSizeInput.props}
+                    placeholder="Bytes"
+                    min={0}
+                  />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <EuiText size="s" color="subdued">

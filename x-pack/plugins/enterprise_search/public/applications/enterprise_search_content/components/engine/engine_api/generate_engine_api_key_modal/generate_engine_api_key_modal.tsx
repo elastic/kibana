@@ -75,6 +75,7 @@ export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps>
                       <EuiFlexItem>
                         <EuiFormRow label="Name your API key" fullWidth>
                           <EuiFieldText
+                            data-test-subj="enterpriseSearchGenerateEngineApiKeyModalFieldText"
                             data-telemetry-id="entSearchContent-engines-api-generateEngineApiKeyModal-editName"
                             fullWidth
                             placeholder="Type a name for your API key"
@@ -166,6 +167,7 @@ export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps>
       <EuiModalFooter>
         {apiKey ? (
           <EuiButton
+            data-test-subj="enterpriseSearchGenerateEngineApiKeyModalDoneButton"
             data-telemetry-id="entSearchContent-engines-api-generateEngineApiKeyModal-done"
             fill
             onClick={onClose}
@@ -179,6 +181,7 @@ export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps>
           </EuiButton>
         ) : (
           <EuiButtonEmpty
+            data-test-subj="enterpriseSearchGenerateEngineApiKeyModalCancelButtonEmpty"
             data-telemetry-id="entSearchContent-engines-api-generateEngineApiKeyModal-cancel"
             onClick={onClose}
           >

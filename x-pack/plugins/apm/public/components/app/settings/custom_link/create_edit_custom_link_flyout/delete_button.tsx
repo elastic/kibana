@@ -25,6 +25,7 @@ export function DeleteButton({ onDelete, customLinkId }: Props) {
 
   return (
     <EuiButtonEmpty
+      data-test-subj="apmDeleteButtonDeleteButtonEmpty"
       color="danger"
       isLoading={isDeleting}
       iconSide="right"

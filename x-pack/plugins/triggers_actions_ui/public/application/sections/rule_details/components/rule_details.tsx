@@ -424,6 +424,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   {rule.executionStatus.error?.message}
                   &nbsp;
                   <EuiLink
+                    data-test-subj="triggersActionsUiRuleDetailsManageLicenseLink"
                     href={`${http.basePath.get()}/app/management/stack/license_management`}
                     color="primary"
                     target="_blank"

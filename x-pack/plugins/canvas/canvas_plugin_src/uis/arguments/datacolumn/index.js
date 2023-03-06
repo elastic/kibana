@@ -135,6 +135,7 @@ const DatacolumnArgInput = ({
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiSelect
+          data-test-subj="canvasDatacolumnArgInputSelect"
           compressed
           options={[firstColumnOption, ...options]}
           value={mathValue.column}

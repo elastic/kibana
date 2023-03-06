@@ -36,7 +36,12 @@ export const LoadingError: FunctionComponent<Props> = ({
         <p>
           {message} ({statusCode})
         </p>
-        <EuiButton onClick={onResendRequest} iconType="refresh" color="danger">
+        <EuiButton
+          data-test-subj="indexLifecycleManagementLoadingErrorTryAgainButton"
+          onClick={onResendRequest}
+          iconType="refresh"
+          color="danger"
+        >
           <FormattedMessage
             id="xpack.indexLifecycleMgmt.editPolicy.nodeAttributesReloadButton"
             defaultMessage="Try again"

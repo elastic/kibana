@@ -46,7 +46,10 @@ const SwitchToOldLibraryMessage: FC<WarningMessageProps> = ({
           defaultMessage="Switch to the {type} library in {link}"
           values={{
             link: (
-              <EuiLink href={advancedSettingsLink}>
+              <EuiLink
+                data-test-subj="pluginsSwitchToOldLibraryMessageAdvancedSettingsLink"
+                href={advancedSettingsLink}
+              >
                 <FormattedMessage
                   id="visualizations.newChart.conditionalMessage.advancedSettingsLink"
                   defaultMessage="Advanced Settings."
