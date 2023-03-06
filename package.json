@@ -1252,7 +1252,7 @@
     "@types/redux-logger": "^3.0.8",
     "@types/resolve": "^1.20.1",
     "@types/seedrandom": ">=2.0.0 <4.0.0",
-    "@types/selenium-webdriver": "^4.1.11",
+    "@types/selenium-webdriver": "^4.1.12",
     "@types/semver": "^7",
     "@types/set-value": "^2.0.0",
     "@types/sharp": "^0.30.4",
