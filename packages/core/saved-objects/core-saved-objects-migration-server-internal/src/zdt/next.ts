@@ -18,6 +18,7 @@ import type {
 } from './state';
 import type { MigratorContext } from './context';
 import * as Actions from './actions';
+import { createDelayFn } from '../common/utils';
 
 export type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -95,13 +96,3 @@ export const next = (context: MigratorContext) => {
     }
   };
 };
-
-const createDelayFn =
-  (state: State) =>
-  <F extends (...args: any) => any>(fn: F): (() => ReturnType<F>) => {
-    return () => {
-      return state.retryDelay > 0
-        ? new Promise((resolve) => setTimeout(resolve, state.retryDelay)).then(fn)
-        : fn();
-    };
-  };
