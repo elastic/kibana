@@ -39,12 +39,9 @@ const SLACK_CONNECTOR_WITH_TYPE_SHOULD_INCLUDE_FIELD = (
   );
 
 const WRONG_SUBACTION = () =>
-  i18n.translate(
-    'xpack.stackConnectors.slack.configuration.slackConnectorWithTypeShouldIncludeField',
-    {
-      defaultMessage: 'subAction can be only postMesage or getChannels',
-    }
-  );
+  i18n.translate('xpack.stackConnectors.slack.configuration.slackConnectorWrongSubAction', {
+    defaultMessage: 'subAction can be only postMesage or getChannels',
+  });
 
 export const validateSecrets = (secrets: SlackSecrets, validatorServices: ValidatorServices) => {
   if (!('webhookUrl' in secrets)) return;
