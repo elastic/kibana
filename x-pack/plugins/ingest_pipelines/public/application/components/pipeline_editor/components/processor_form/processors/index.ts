@@ -31,6 +31,7 @@ export { Kv } from './kv';
 export { Lowercase } from './lowercase';
 export { NetworkDirection } from './network_direction';
 export { Pipeline } from './pipeline';
+export { Redact } from './redact';
 export { RegisteredDomain } from './registered_domain';
 export { Remove } from './remove';
 export { Rename } from './rename';
