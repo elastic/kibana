@@ -34,7 +34,6 @@ const GroupSelectorComponent = ({
   options,
   title = i18n.GROUP_BY,
 }: GroupSelectorProps) => {
-  console.log('OPTIONS???', options);
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(

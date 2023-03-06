@@ -74,8 +74,28 @@ describe('useGetGroupSelector', () => {
     });
   });
 
-  it('On group change, sets new selectedOptions', async () => {
-    const realGroup = {
+  it('On group change, does nothing when set to prev selected group', () => {
+    const testGroup = {
+      [groupingId]: {
+        ...defaultGroup,
+        options: defaultGroupingOptions,
+        activeGroup: 'host.name',
+      },
+    };
+    const { result } = renderHook((props) => useGetGroupSelector(props), {
+      initialProps: {
+        ...defaultArgs,
+        groupingState: {
+          groupById: testGroup,
+        },
+      },
+    });
+    act(() => result.current.props.onGroupChange('host.name'));
+    expect(dispatch).toHaveBeenCalledTimes(1);
+  });
+
+  it('On group change, resets active page, sets active group, and sets new selectedOptions', () => {
+    const testGroup = {
       [groupingId]: {
         ...defaultGroup,
         options: defaultGroupingOptions,
@@ -86,7 +106,7 @@ describe('useGetGroupSelector', () => {
       initialProps: {
         ...defaultArgs,
         groupingState: {
-          groupById: realGroup,
+          groupById: testGroup,
         },
       },
     });
@@ -111,7 +131,7 @@ describe('useGetGroupSelector', () => {
       ...defaultArgs,
       groupingState: {
         groupById: {
-          [groupingId]: { ...realGroup[groupingId], itemsPerPage: 99, activeGroup: 'user.name' },
+          [groupingId]: { ...testGroup[groupingId], itemsPerPage: 99, activeGroup: 'user.name' },
         },
       },
     });

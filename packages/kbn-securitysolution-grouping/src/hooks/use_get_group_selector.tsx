@@ -65,7 +65,6 @@ export const useGetGroupSelector = ({
   );
 
   useEffect(() => {
-    // condition ensures setOptions is only called for initial state
     if (defaultGroupingOptions.length === 0) return;
     const newOptions = defaultGroupingOptions.find((o) => o.key === selectedGroup)
       ? defaultGroupingOptions

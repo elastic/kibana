@@ -9,7 +9,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useReducer } from 'react';
 import { groupActions, groupsReducerWithStorage, initialState } from '.';
-import { defaultGroup } from '@kbn/securitysolution-grouping/src';
+import { defaultGroup, LOCAL_STORAGE_GROUPING_KEY } from '@kbn/securitysolution-grouping/src';
 
 const groupingOptions = [
   { label: 'ruleName', key: 'kibana.alert.rule.name' },
@@ -18,24 +18,84 @@ const groupingOptions = [
   { label: 'sourceIP', key: 'source.ip' },
 ];
 
-const setItem = jest.spyOn(global.localStorage, 'setItem');
-const getItem = jest.spyOn(global.localStorage, 'getItem');
+const groupingId = 'test-table';
+
+const groupById = {
+  [groupingId]: {
+    ...defaultGroup,
+    options: groupingOptions,
+    activeGroup: 'host.name',
+  },
+};
+
+const setItem = jest.spyOn(window.localStorage.__proto__, 'setItem');
+const getItem = jest.spyOn(window.localStorage.__proto__, 'getItem');
+
 describe('grouping reducer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  describe('updateGroupOptions', () => {
-    it('Creates a new default', () => {
-      const { result } = renderHook(() => useReducer(groupsReducerWithStorage, initialState));
-      let [groupingState, dispatch] = result.current;
-      console.log({ groupingState });
-      expect(true).toBeTruthy();
-      act(() => {
-        dispatch(groupActions.updateGroupOptions({ id: 'testId', newOptionList: groupingOptions }));
-      });
-      [groupingState, dispatch] = result.current;
-      expect(groupingState.groupById.testId).toEqual({ ...defaultGroup, options: groupingOptions });
-      console.log('after', { groupingState });
+  it('updateGroupOptions, initializes group with defaults and provided newOptionList', () => {
+    const { result } = renderHook(() => useReducer(groupsReducerWithStorage, initialState));
+    let [groupingState, dispatch] = result.current;
+    expect(groupingState.groupById).toEqual({});
+    act(() => {
+      dispatch(groupActions.updateGroupOptions({ id: groupingId, newOptionList: groupingOptions }));
     });
+    [groupingState, dispatch] = result.current;
+    expect(groupingState.groupById[groupingId]).toEqual({
+      ...defaultGroup,
+      options: groupingOptions,
+    });
+
+    expect(getItem).toHaveBeenCalledTimes(2);
+    expect(setItem).toHaveBeenCalledWith(
+      LOCAL_STORAGE_GROUPING_KEY,
+      JSON.stringify(groupingState.groupById)
+    );
+  });
+  it('updateActiveGroup', () => {
+    const { result } = renderHook(() =>
+      useReducer(groupsReducerWithStorage, {
+        ...initialState,
+        groupById,
+      })
+    );
+    let [groupingState, dispatch] = result.current;
+    expect(groupingState.groupById[groupingId].activeGroup).toEqual('host.name');
+    act(() => {
+      dispatch(groupActions.updateActiveGroup({ id: groupingId, activeGroup: 'user.name' }));
+    });
+    [groupingState, dispatch] = result.current;
+    expect(groupingState.groupById[groupingId].activeGroup).toEqual('user.name');
+  });
+  it('updateGroupActivePage', () => {
+    const { result } = renderHook(() =>
+      useReducer(groupsReducerWithStorage, {
+        ...initialState,
+        groupById,
+      })
+    );
+    let [groupingState, dispatch] = result.current;
+    expect(groupingState.groupById[groupingId].activePage).toEqual(0);
+    act(() => {
+      dispatch(groupActions.updateGroupActivePage({ id: groupingId, activePage: 12 }));
+    });
+    [groupingState, dispatch] = result.current;
+    expect(groupingState.groupById[groupingId].activePage).toEqual(12);
+  });
+  it('updateGroupItemsPerPage', () => {
+    const { result } = renderHook(() => useReducer(groupsReducerWithStorage, initialState));
+    let [groupingState, dispatch] = result.current;
+    act(() => {
+      dispatch(groupActions.updateGroupOptions({ id: groupingId, newOptionList: groupingOptions }));
+    });
+    [groupingState, dispatch] = result.current;
+    expect(groupingState.groupById[groupingId].itemsPerPage).toEqual(25);
+    act(() => {
+      dispatch(groupActions.updateGroupItemsPerPage({ id: groupingId, itemsPerPage: 12 }));
+    });
+    [groupingState, dispatch] = result.current;
+    expect(groupingState.groupById[groupingId].itemsPerPage).toEqual(12);
   });
 });
