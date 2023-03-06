@@ -52,8 +52,7 @@ export const isSummaryActionThrottled = ({
   if (!summaryActions) {
     return false;
   }
-  const triggeredSummaryAction =
-    summaryActions[action.uuid!] || summaryActions[generateActionHash(action)];
+  const triggeredSummaryAction = summaryActions[action.uuid!];
   if (!triggeredSummaryAction) {
     return false;
   }

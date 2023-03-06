@@ -221,14 +221,5 @@ describe('rule_action_helper', () => {
       });
       expect(result).toBe(true);
     });
-
-    test('should check both the uuid and the hash', () => {
-      const result = isSummaryActionThrottled({
-        action: mockSummaryAction,
-        summaryActions: summaryActionsWithHash,
-        logger,
-      });
-      expect(result).toBe(true);
-    });
   });
 });

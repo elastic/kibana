@@ -129,11 +129,11 @@ export class ExecutionHandler<
   public async run(
     alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
   ): Promise<RunResult> {
-    const executables = this.generateExecutables(alerts);
     const throttledActions: ThrottledActions = getSummaryActionsFromTaskState({
       actions: this.rule.actions,
       summaryActions: this.taskInstance.state?.summaryActions,
     });
+    const executables = this.generateExecutables(alerts);
 
     if (!!executables.length) {
       const {
