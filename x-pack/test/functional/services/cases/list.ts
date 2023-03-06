@@ -204,7 +204,7 @@ export function CasesTableServiceProvider(
     async changeStatus(status: CaseStatuses, index: number) {
       await this.openRowActions(index);
 
-      await retry.waitFor('severity panel exists', async () => {
+      await retry.waitFor('status panel exists', async () => {
         return find.existsByCssSelector('[data-test-subj*="case-action-status-panel-"');
       });
 
