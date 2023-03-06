@@ -424,7 +424,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      // check the existing mappings to see if we can avoid reindexing
       if (
         // source exists
         Boolean(stateP.sourceIndexMappings._meta?.migrationMappingPropertyHashes) &&
@@ -434,9 +433,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           stateP.sourceIndexMappings,
           /* expected */
           stateP.targetIndexMappings
-        ) &&
-        Math.random() < 10
+        )
       ) {
+        // the existing mappings match, we can avoid reindexing
         return {
           ...stateP,
           controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
@@ -446,7 +445,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         return {
           ...stateP,
-          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+          controlState: 'UPDATE_SOURCE_MAPPINGS',
         };
       }
     } else if (Either.isLeft(res)) {
@@ -461,6 +460,28 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         return throwBadResponse(stateP, left);
+      }
+    } else {
+      return throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'UPDATE_SOURCE_MAPPINGS') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+        targetIndex: stateP.sourceIndex.value!, // We preserve the same index, source == target (E.g: ".xx8.7.0_001")
+        versionIndexReadyActions: Option.none,
+      };
+    } else if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isTypeof(left, 'incompatible_mapping_exception')) {
+        return {
+          ...stateP,
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+        };
+      } else {
+        return throwBadResponse(stateP, left as never);
       }
     } else {
       return throwBadResponse(stateP, res);

@@ -20,9 +20,8 @@ export const getUserInfo = (user: User): UserInfo => ({
 
 export const createSpaces = async (getService: CommonFtrProviderContext['getService']) => {
   const spacesService = getService('spaces');
-  for (const space of spaces) {
-    await spacesService.create(space);
-  }
+
+  await Promise.all(spaces.map((space) => spacesService.create(space)));
 };
 
 /**
@@ -51,23 +50,16 @@ export const createUsersAndRoles = async (
     });
   };
 
-  for (const role of rolesToCreate) {
-    await createRole(role);
-  }
-
-  for (const user of usersToCreate) {
-    await createUser(user);
-  }
+  await Promise.all(rolesToCreate.map((role) => createRole(role)));
+  await Promise.all(usersToCreate.map((user) => createUser(user)));
 };
 
 export const deleteSpaces = async (getService: CommonFtrProviderContext['getService']) => {
   const spacesService = getService('spaces');
-  for (const space of spaces) {
-    try {
-      await spacesService.delete(space.id);
-    } catch (error) {
-      // ignore errors because if a migration is run it will delete the .kibana index which remove the spaces and users
-    }
+  try {
+    await Promise.allSettled(spaces.map((space) => spacesService.delete(space.id)));
+  } catch (error) {
+    // ignore errors because if a migration is run it will delete the .kibana index which remove the spaces and users
   }
 };
 
@@ -78,20 +70,16 @@ export const deleteUsersAndRoles = async (
 ) => {
   const security = getService('security');
 
-  for (const user of usersToDelete) {
-    try {
-      await security.user.delete(user.username);
-    } catch (error) {
-      // ignore errors because if a migration is run it will delete the .kibana index which remove the spaces and users
-    }
+  try {
+    await Promise.allSettled(usersToDelete.map((user) => security.user.delete(user.username)));
+  } catch (error) {
+    // ignore errors because if a migration is run it will delete the .kibana index which remove the spaces and users
   }
 
-  for (const role of rolesToDelete) {
-    try {
-      await security.role.delete(role.name);
-    } catch (error) {
-      // ignore errors because if a migration is run it will delete the .kibana index which remove the spaces and users
-    }
+  try {
+    await Promise.allSettled(rolesToDelete.map((role) => security.role.delete(role.name)));
+  } catch (error) {
+    // ignore errors because if a migration is run it will delete the .kibana index which remove the spaces and users
   }
 };
 
