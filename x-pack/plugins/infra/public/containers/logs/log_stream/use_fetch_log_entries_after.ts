@@ -58,7 +58,7 @@ export const useLogEntriesAfterRequest = ({
                     highlightPhrase,
                     query: query as JsonObject,
                     size: params.size,
-                    sourceId,
+                    logView: { type: 'log-view-reference', logViewId: sourceId },
                     startTimestamp,
                   }),
                 },

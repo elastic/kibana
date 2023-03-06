@@ -476,9 +476,8 @@ describe('ALL - Packs', () => {
       navigateTo('/app/osquery/packs');
     });
 
-    it('add global packs to polciies', () => {
+    it('add global packs to policies', () => {
       const globalPack = 'globalPack';
-      cy.contains('Packs').click();
       findAndClickButton('Add pack');
       findFormFieldByRowsLabelAndType('Name', globalPack);
       cy.getBySel('policyIdsComboBox').should('exist');
@@ -517,9 +516,9 @@ describe('ALL - Packs', () => {
           cy.contains('rev. 2').click();
         });
     });
+
     it('add proper shard to policies packs config', () => {
       const shardPack = 'shardPack';
-      cy.contains('Packs').click();
       cy.getBySel('pagination-button-next').click();
 
       findAndClickButton('Add pack');
