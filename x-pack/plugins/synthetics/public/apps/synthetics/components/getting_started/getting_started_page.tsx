@@ -51,6 +51,20 @@ export const GettingStartedPage = () => {
             <SimpleMonitorForm />
           </>
         }
+        footer={
+          <>
+            <EuiText size="s" color="subdued" className="eui-displayInlineBlock">
+              {FOR_MORE_INFO_LABEL}
+            </EuiText>{' '}
+            <EuiLink
+              href="https://www.elastic.co/guide/en/observability/current/synthetics-get-started.html"
+              target="_blank"
+              className="eui-displayInline"
+            >
+              {GETTING_STARTED_LABEL}
+            </EuiLink>
+          </>
+        }
       />
     </Wrapper>
   );
@@ -64,6 +78,17 @@ const Wrapper = styled.div`
     }
   }
 `;
+
+const FOR_MORE_INFO_LABEL = i18n.translate('xpack.synthetics.gettingStarted.forMoreInfo', {
+  defaultMessage: 'For more information, read our',
+});
+
+const GETTING_STARTED_LABEL = i18n.translate(
+  'xpack.synthetics.gettingStarted.gettingStartedLabel',
+  {
+    defaultMessage: 'Getting Started Guide',
+  }
+);
 
 const CREATE_SINGLE_PAGE_LABEL = i18n.translate(
   'xpack.synthetics.gettingStarted.createSinglePageLabel',
