@@ -50,7 +50,7 @@ export function SloTimeWindowBadge({ slo }: Props) {
   return (
     <div>
       <EuiBadge color={euiLightVars.euiColorDisabled} iconType="calendar" iconSide="left">
-        {i18n.translate('xpack.observability.slos.slo.timeWindow.calendar', {
+        {i18n.translate('xpack.observability.slo.slo.timeWindow.calendar', {
           defaultMessage: '{elapsed}/{total} days',
           values: {
             elapsed: Math.min(elapsedDurationInDays, totalDurationInDays),
@@ -65,27 +65,27 @@ export function SloTimeWindowBadge({ slo }: Props) {
 function toDurationLabel(duration: number, durationUnit: string) {
   switch (durationUnit) {
     case 'd':
-      return i18n.translate('xpack.observability.slos.slo.timeWindow.days', {
+      return i18n.translate('xpack.observability.slo.slo.timeWindow.days', {
         defaultMessage: '{duration} days',
         values: { duration },
       });
     case 'w':
-      return i18n.translate('xpack.observability.slos.slo.timeWindow.weeks', {
+      return i18n.translate('xpack.observability.slo.slo.timeWindow.weeks', {
         defaultMessage: '{duration} weeks',
         values: { duration },
       });
     case 'M':
-      return i18n.translate('xpack.observability.slos.slo.timeWindow.months', {
+      return i18n.translate('xpack.observability.slo.slo.timeWindow.months', {
         defaultMessage: '{duration} months',
         values: { duration },
       });
     case 'Q':
-      return i18n.translate('xpack.observability.slos.slo.timeWindow.quarterss', {
+      return i18n.translate('xpack.observability.slo.slo.timeWindow.quarterss', {
         defaultMessage: '{duration} quarters',
         values: { duration },
       });
     case 'Y':
-      return i18n.translate('xpack.observability.slos.slo.timeWindow.years', {
+      return i18n.translate('xpack.observability.slo.slo.timeWindow.years', {
         defaultMessage: '{duration} years',
         values: { duration },
       });

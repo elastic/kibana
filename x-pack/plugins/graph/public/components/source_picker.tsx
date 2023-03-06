@@ -9,22 +9,28 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 import { CoreStart } from '@kbn/core/public';
-import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { IndexPatternSavedObject } from '../types';
 
 export interface SourcePickerProps {
   onIndexPatternSelected: (indexPattern: IndexPatternSavedObject) => void;
   http: CoreStart['http'];
   uiSettings: CoreStart['uiSettings'];
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
 }
 
 const fixedPageSize = 8;
 
-export function SourcePicker({ http, uiSettings, onIndexPatternSelected }: SourcePickerProps) {
+export function SourcePicker({
+  http,
+  uiSettings,
+  savedObjectsManagement,
+  onIndexPatternSelected,
+}: SourcePickerProps) {
   return (
-    <SavedObjectFinderUi
-      http={http}
-      uiSettings={uiSettings}
+    <SavedObjectFinder
+      services={{ http, uiSettings, savedObjectsManagement }}
       onChoose={(_id, _type, _name, indexPattern) => {
         onIndexPatternSelected(indexPattern as IndexPatternSavedObject);
       }}
