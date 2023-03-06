@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreStart, Plugin } from '@kbn/core/public';
 import {
   ContentManagementPublicStart,
   ContentManagementPublicSetup,
@@ -26,17 +26,16 @@ export class ContentManagementPlugin
       StartDependencies
     >
 {
-  public setup(core: CoreSetup, deps: SetupDependencies) {
-    return {
-      registry: {} as ContentTypeRegistry,
-    };
+  public setup() {
+    return {};
   }
 
   public start(core: CoreStart, deps: StartDependencies) {
     const rpcClient = new RpcClient(core.http);
     const contentTypeRegistry = new ContentTypeRegistry();
     const contentClient = new ContentClient(
-      (contentType) => contentTypeRegistry.get(contentType)?.crud ?? rpcClient
+      (contentType) => contentTypeRegistry.get(contentType)?.crud ?? rpcClient,
+      contentTypeRegistry
     );
     return { client: contentClient, registry: contentTypeRegistry };
   }

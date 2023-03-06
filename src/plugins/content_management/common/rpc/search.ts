@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
+import type { Version } from '../types';
 
 import type { ProcedureSchemas } from './types';
 
@@ -32,5 +33,6 @@ export interface SearchIn<
 > {
   contentTypeId: T;
   query: Query;
+  version?: Version;
   options?: Options;
 }

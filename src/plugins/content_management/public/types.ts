@@ -15,9 +15,8 @@ export interface SetupDependencies {}
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface StartDependencies {}
 
-export interface ContentManagementPublicSetup {
-  registry: Pick<ContentTypeRegistry, 'register'>;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ContentManagementPublicSetup {}
 
 export interface ContentManagementPublicStart {
   client: ContentClient;

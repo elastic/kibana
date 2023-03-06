@@ -9,7 +9,9 @@
 import { QueryClient } from '@tanstack/react-query';
 import { createQueryObservable } from './query_observable';
 import type { CrudClient } from '../crud_client';
-import type { CreateIn, GetIn, UpdateIn, DeleteIn, SearchIn } from '../../common';
+import type { CreateIn, GetIn, UpdateIn, DeleteIn, SearchIn, Version } from '../../common';
+import { validateVersion } from '../../common';
+import { ContentTypeRegistry } from '../registry';
 
 export const queryKeyBuilder = {
   all: (type: string) => [type] as const,
@@ -19,6 +21,32 @@ export const queryKeyBuilder = {
   search: (type: string, query: unknown) => {
     return [...queryKeyBuilder.all(type), 'search', query] as const;
   },
+};
+
+const addVersion = <I extends { contentTypeId: string; version?: Version }>(
+  input: I,
+  contentTypeRegistry: ContentTypeRegistry
+): I & { version: Version } => {
+  const contentType = contentTypeRegistry.get(input.contentTypeId);
+
+  if (!contentType) {
+    throw new Error(`Unknown content type [${input.contentTypeId}]`);
+  }
+
+  const version = input.version ?? contentType.version.latest;
+
+  const versionNumber = validateVersion(version);
+
+  if (versionNumber > parseInt(contentType.version.latest.substring(1), 10)) {
+    throw new Error(
+      `Invalid version [${version}]. Latest version is [${contentType.version.latest}]`
+    );
+  }
+
+  return {
+    ...input,
+    version,
+  };
 };
 
 const createQueryOptionBuilder = ({
@@ -46,7 +74,10 @@ export class ContentClient {
   readonly queryClient: QueryClient;
   readonly queryOptionBuilder: ReturnType<typeof createQueryOptionBuilder>;
 
-  constructor(private readonly crudClientProvider: (contentType: string) => CrudClient) {
+  constructor(
+    private readonly crudClientProvider: (contentType: string) => CrudClient,
+    private readonly contentTypeRegistry: ContentTypeRegistry
+  ) {
     this.queryClient = new QueryClient();
     this.queryOptionBuilder = createQueryOptionBuilder({
       crudClientProvider: this.crudClientProvider,
@@ -54,30 +85,46 @@ export class ContentClient {
   }
 
   get<I extends GetIn = GetIn, O = unknown>(input: I): Promise<O> {
-    return this.queryClient.fetchQuery(this.queryOptionBuilder.get(input));
+    return this.queryClient.fetchQuery(
+      this.queryOptionBuilder.get(addVersion(input, this.contentTypeRegistry))
+    );
   }
 
   get$<I extends GetIn = GetIn, O = unknown>(input: I) {
-    return createQueryObservable(this.queryClient, this.queryOptionBuilder.get<I, O>(input));
+    return createQueryObservable(
+      this.queryClient,
+      this.queryOptionBuilder.get<I, O>(addVersion(input, this.contentTypeRegistry))
+    );
   }
 
   create<I extends CreateIn, O = unknown>(input: I): Promise<O> {
-    return this.crudClientProvider(input.contentTypeId).create(input) as Promise<O>;
+    return this.crudClientProvider(input.contentTypeId).create(
+      addVersion(input, this.contentTypeRegistry)
+    ) as Promise<O>;
   }
 
   update<I extends UpdateIn, O = unknown>(input: I): Promise<O> {
-    return this.crudClientProvider(input.contentTypeId).update(input) as Promise<O>;
+    return this.crudClientProvider(input.contentTypeId).update(
+      addVersion(input, this.contentTypeRegistry)
+    ) as Promise<O>;
   }
 
   delete<I extends DeleteIn, O = unknown>(input: I): Promise<O> {
-    return this.crudClientProvider(input.contentTypeId).delete(input) as Promise<O>;
+    return this.crudClientProvider(input.contentTypeId).delete(
+      addVersion(input, this.contentTypeRegistry)
+    ) as Promise<O>;
   }
 
   search<I extends SearchIn, O = unknown>(input: I): Promise<O> {
-    return this.crudClientProvider(input.contentTypeId).search(input) as Promise<O>;
+    return this.crudClientProvider(input.contentTypeId).search(
+      addVersion(input, this.contentTypeRegistry)
+    ) as Promise<O>;
   }
 
   search$<I extends SearchIn, O = unknown>(input: I) {
-    return createQueryObservable(this.queryClient, this.queryOptionBuilder.search<I, O>(input));
+    return createQueryObservable(
+      this.queryClient,
+      this.queryOptionBuilder.search<I, O>(addVersion(input, this.contentTypeRegistry))
+    );
   }
 }
