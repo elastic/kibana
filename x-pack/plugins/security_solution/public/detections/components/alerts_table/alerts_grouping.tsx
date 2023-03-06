@@ -81,7 +81,6 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   renderChildComponent,
 }) => {
   const dispatch = useDispatch();
-  const groupingId = tableId;
   const { browserFields, indexPattern, selectedPatterns } = useSourcererDataView(
     SourcererScopeName.detections
   );
@@ -110,13 +109,11 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     [browserFields, defaultFilters, globalFilters, globalQuery, indexPattern, kibana, to, from]
   );
 
-  const { groupSelector, getGrouping, initializeGrouping, selectedGroup, pagination } = useGrouping(
-    {
-      defaultGroupingOptions: getDefaultGroupingOptions(tableId),
-      groupingId,
-      fields: indexPattern.fields,
-    }
-  );
+  const { groupSelector, getGrouping, selectedGroup, pagination } = useGrouping({
+    defaultGroupingOptions: getDefaultGroupingOptions(tableId),
+    groupingId: tableId,
+    fields: indexPattern.fields,
+  });
 
   useEffect(() => {
     dispatch(updateGroupSelector({ groupSelector }));
@@ -134,10 +131,6 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     startDate: from,
     endDate: to,
   });
-
-  useEffect(() => {
-    initializeGrouping(tableId);
-  }, [initializeGrouping, tableId]);
 
   const { deleteQuery, setQuery } = useGlobalTime(false);
   // create a unique, but stable (across re-renders) query id

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { GroupModel, GroupsById, Storage } from './hooks/types';
+import { EMPTY_GROUP_BY_ID, GroupModel, GroupsById, Storage } from './hooks/types';
 import * as i18n from './components/translations';
 
 /**
@@ -33,11 +33,10 @@ export function firstNonNullValue<T>(valueOrCollection: ECSField<T>): T | undefi
 export const defaultUnit = (n: number) => i18n.ALERTS_UNIT(n);
 
 const LOCAL_STORAGE_GROUPING_KEY = 'groups';
-const EMPTY_GROUP = {} as GroupsById;
 export const getAllGroupsInStorage = (storage: Storage): GroupsById => {
   const allGroups = storage.getItem(LOCAL_STORAGE_GROUPING_KEY);
   if (!allGroups) {
-    return EMPTY_GROUP;
+    return EMPTY_GROUP_BY_ID;
   }
   return JSON.parse(allGroups);
 };

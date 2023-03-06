@@ -8,10 +8,10 @@
 
 import { FieldSpec } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useMemo, useReducer } from 'react';
-import { groupsReducer, initialState } from './state/reducer';
+import { groupsReducerWithStorage, initialState } from './state/reducer';
 import { GroupingProps, GroupSelectorProps } from '..';
 import { useGroupingPagination } from './use_grouping_pagination';
-import { groupActions, groupByIdSelector } from './state';
+import { groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
 import { defaultGroup, GroupOption } from './types';
 import { Grouping as GroupingComponent } from '../components/grouping';
@@ -21,7 +21,6 @@ interface Grouping {
     props: Omit<GroupingProps, 'groupSelector' | 'pagination' | 'selectedGroup'>
   ) => React.ReactElement<GroupingProps>;
   groupSelector: React.ReactElement<GroupSelectorProps>;
-  initializeGrouping: (groupId: string) => void;
   pagination: {
     pageIndex: number;
     pageSize: number;
@@ -40,7 +39,8 @@ export const useGrouping = ({
   fields,
   groupingId,
 }: GroupingArgs): Grouping => {
-  const [groupingState, dispatch] = useReducer(groupsReducer, initialState);
+  const [groupingState, dispatch] = useReducer(groupsReducerWithStorage, initialState);
+
   const { activeGroup: selectedGroup } = useMemo(
     () => groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup,
     [groupingId, groupingState]
@@ -70,29 +70,16 @@ export const useGrouping = ({
     [groupSelector, pagination, selectedGroup]
   );
 
-  const initializeGrouping = useCallback(
-    (id: string) => dispatch(groupActions.initGrouping({ id })),
-    [dispatch]
-  );
-
   return useMemo(
     () => ({
       getGrouping,
       groupSelector,
-      initializeGrouping,
       selectedGroup,
       pagination: {
         pageIndex: pagination.pageIndex,
         pageSize: pagination.pageSize,
       },
     }),
-    [
-      getGrouping,
-      groupSelector,
-      initializeGrouping,
-      pagination.pageIndex,
-      pagination.pageSize,
-      selectedGroup,
-    ]
+    [getGrouping, groupSelector, pagination.pageIndex, pagination.pageSize, selectedGroup]
   );
 };

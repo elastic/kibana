@@ -12,7 +12,6 @@ export enum ActionType {
   updateGroupActivePage = 'UPDATE_GROUP_ACTIVE_PAGE',
   updateGroupItemsPerPage = 'UPDATE_GROUP_ITEMS_PER_PAGE',
   updateGroupOptions = 'UPDATE_GROUP_OPTIONS',
-  initGrouping = 'INIT_GROUPING',
 }
 
 export interface UpdateActiveGroup {
@@ -32,17 +31,12 @@ export interface UpdateGroupOptions {
   type: ActionType.updateGroupOptions;
   payload: { newOptionList: GroupOption[]; id: string };
 }
-export interface InitGrouping {
-  type: ActionType.initGrouping;
-  payload: { id: string };
-}
 
 export type Action =
   | UpdateActiveGroup
   | UpdateGroupActivePage
   | UpdateGroupItemsPerPage
-  | UpdateGroupOptions
-  | InitGrouping;
+  | UpdateGroupOptions;
 
 // state
 

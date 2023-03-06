@@ -46,22 +46,10 @@ jest.mock('../../../common/containers/use_global_time', () => ({
 jest.mock('./grouping_settings', () => ({
   getAlertsGroupingQuery: jest.fn(),
   getDefaultGroupingOptions: () => [
-    {
-      label: 'ruleName',
-      key: 'kibana.alert.rule.name',
-    },
-    {
-      label: 'userName',
-      key: 'user.name',
-    },
-    {
-      label: 'hostName',
-      key: 'host.name',
-    },
-    {
-      label: 'sourceIP',
-      key: 'source.ip',
-    },
+    { label: 'ruleName', key: 'kibana.alert.rule.name' },
+    { label: 'userName', key: 'user.name' },
+    { label: 'hostName', key: 'host.name' },
+    { label: 'sourceIP', key: 'source.ip' },
   ],
   getSelectedGroupBadgeMetrics: jest.fn(),
   getSelectedGroupButtonContent: jest.fn(),
@@ -202,7 +190,6 @@ const testProps: AlertsTableComponentProps = {
 
 describe('GroupedAlertsTable', () => {
   const getGrouping = jest.fn().mockReturnValue(<span data-test-subj={'grouping-table'} />);
-  const initializeGrouping = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
     (useSourcererDataView as jest.Mock).mockReturnValue({
@@ -213,7 +200,6 @@ describe('GroupedAlertsTable', () => {
     (useGrouping as jest.Mock).mockReturnValue({
       groupSelector: <></>,
       getGrouping,
-      initializeGrouping,
       selectedGroup: 'host.name',
       pagination: { pageSize: 1, pageIndex: 0 },
     });
@@ -225,7 +211,6 @@ describe('GroupedAlertsTable', () => {
         <GroupedAlertsTableComponent {...testProps} />
       </TestProviders>
     );
-    expect(initializeGrouping).toHaveBeenCalledWith(TableId.test);
     expect(mockDispatch).toHaveBeenCalledTimes(2);
     expect(mockDispatch.mock.calls[0][0].type).toEqual(
       'x-pack/security_solution/groups/UPDATE_GROUP_SELECTOR'

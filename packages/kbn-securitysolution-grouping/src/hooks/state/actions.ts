@@ -9,7 +9,6 @@
 import {
   ActionType,
   GroupOption,
-  InitGrouping,
   UpdateActiveGroup,
   UpdateGroupActivePage,
   UpdateGroupItemsPerPage,
@@ -72,17 +71,9 @@ const updateGroupOptions = ({
   type: ActionType.updateGroupOptions,
 });
 
-const initGrouping = ({ id }: { id: string }): InitGrouping => ({
-  payload: {
-    id,
-  },
-  type: ActionType.initGrouping,
-});
-
 export const groupActions = {
   updateActiveGroup,
   updateGroupActivePage,
   updateGroupItemsPerPage,
   updateGroupOptions,
-  initGrouping,
 };
