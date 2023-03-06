@@ -135,6 +135,7 @@ export const importRulesRoute = (
           success: actionConnectorSuccess,
           warnings: actionConnectorWarnings,
           errors: actionConnectorErrors,
+          rulesWithMigratedActions,
         } = await importRuleActionConnectors({
           actionConnectors,
           actionsClient,
@@ -142,9 +143,12 @@ export const importRulesRoute = (
           rules: migratedParsedObjectsWithoutDuplicateErrors,
           overwrite: request.query.overwrite_action_connectors,
         });
+
+        // rulesWithMigratedActions: Is returened only in case connectors were exorted from different namesapce and the
+        // original rules actions' ids were replaced with new destinationIds
         const parsedRules = actionConnectorErrors.length
           ? []
-          : migratedParsedObjectsWithoutDuplicateErrors;
+          : rulesWithMigratedActions || migratedParsedObjectsWithoutDuplicateErrors;
 
         // gather all exception lists that the imported rules reference
         const foundReferencedExceptionLists = await getReferencedExceptionLists({
@@ -166,7 +170,6 @@ export const importRulesRoute = (
           existingLists: foundReferencedExceptionLists,
           allowMissingConnectorSecrets: !!actionConnectors.length,
         });
-
         const errorsResp = importRuleResponse.filter((resp) => isBulkError(resp)) as BulkError[];
         const successes = importRuleResponse.filter((resp) => {
           if (isImportRegular(resp)) {

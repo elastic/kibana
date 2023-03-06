@@ -13,6 +13,7 @@ import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal'
 import type {
   BaseState,
   CalculateExcludeFiltersState,
+  UpdateSourceMappingsState,
   CheckTargetMappingsState,
   CheckUnknownDocumentsState,
   CheckVersionIndexReadyActions,
@@ -1298,13 +1299,12 @@ describe('migrations v2 model', () => {
             sourceIndexMappings: actualMappings,
           };
 
-          test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS', () => {
+          test('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS', () => {
             const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
             const newState = model(changedMappingsState, res);
-            expect(newState.controlState).toEqual('CHECK_UNKNOWN_DOCUMENTS');
 
             expect(newState).toMatchObject({
-              controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+              controlState: 'UPDATE_SOURCE_MAPPINGS',
               sourceIndex: Option.some('.kibana_7.11.0_001'),
               sourceIndexMappings: actualMappings,
             });
@@ -1327,6 +1327,49 @@ describe('migrations v2 model', () => {
             "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
           }
         `);
+      });
+    });
+
+    describe('UPDATE_SOURCE_MAPPINGS', () => {
+      const checkCompatibleMappingsState: UpdateSourceMappingsState = {
+        ...baseState,
+        controlState: 'UPDATE_SOURCE_MAPPINGS',
+        sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+        sourceIndexMappings: baseState.targetIndexMappings,
+        aliases: {
+          '.kibana': '.kibana_7.11.0_001',
+          '.kibana_7.11.0': '.kibana_7.11.0_001',
+        },
+      };
+
+      describe('if action succeeds', () => {
+        test('UPDATE_SOURCE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS'> = Either.right(
+            'update_mappings_succeeded' as const
+          );
+          const newState = model(checkCompatibleMappingsState, res);
+
+          expect(newState).toMatchObject({
+            controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+            targetIndex: '.kibana_7.11.0_001',
+            versionIndexReadyActions: Option.none,
+          });
+        });
+      });
+
+      describe('if action fails', () => {
+        test('UPDATE_SOURCE_MAPPINGS -> CHECK_UNKNOWN_DOCUMENTS', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS'> = Either.left({
+            type: 'incompatible_mapping_exception',
+          });
+          const newState = model(checkCompatibleMappingsState, res);
+
+          expect(newState).toMatchObject({
+            controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+            sourceIndex: Option.some('.kibana_7.11.0_001'),
+            sourceIndexMappings: baseState.targetIndexMappings,
+          });
+        });
       });
     });
 
@@ -2693,7 +2736,7 @@ describe('migrations v2 model', () => {
 
       test('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS if the mapping _meta information is successfully updated', () => {
         const res: ResponseType<'UPDATE_TARGET_MAPPINGS_META'> = Either.right(
-          'update_mappings_meta_succeeded'
+          'update_mappings_succeeded'
         );
         const newState = model(updateTargetMappingsMetaState, res) as CheckVersionIndexReadyActions;
         expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');
