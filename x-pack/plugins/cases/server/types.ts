@@ -45,7 +45,7 @@ export type RegisterActionType = <
 /**
  * Cases server exposed contract for interacting with cases entities.
  */
-export interface PluginStartContract {
+export interface CasesStart {
   /**
    * Returns a client which can be used to interact with the cases backend entities.
    *
@@ -57,7 +57,7 @@ export interface PluginStartContract {
   getPersistableStateAttachmentTypeRegistry(): PersistableStateAttachmentTypeRegistry;
 }
 
-export interface PluginSetupContract {
+export interface CasesSetup {
   attachmentFramework: AttachmentFramework;
 }
 

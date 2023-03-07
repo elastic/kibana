@@ -9,8 +9,7 @@ import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { PluginStartContract as CasesPluginStart } from '@kbn/cases-plugin/server';
-import { PluginSetupContract as CasesSetup } from '@kbn/cases-plugin/server/types';
+import type { CasesStart, CasesSetup } from '@kbn/cases-plugin/server';
 import { getPersistableStateAttachment } from './attachments/persistable_state';
 import { getExternalReferenceAttachment } from './attachments/external_reference';
 import { registerRoutes } from './routes';
@@ -23,7 +22,7 @@ export interface FixtureSetupDeps {
 export interface FixtureStartDeps {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  cases: CasesPluginStart;
+  cases: CasesStart;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
