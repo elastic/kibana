@@ -23,8 +23,8 @@ import {
 } from '@kbn/core/server';
 import { RunContext } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { ActionExecutorContract } from './action_executor';
-import { ExecutorError } from './executor_error';
 import {
   ActionTaskParams,
   ActionTypeRegistryContract,
@@ -105,7 +105,6 @@ export class TaskRunnerFactory {
         const request = getFakeRequest(apiKey);
         basePathService.set(request, path);
 
-        // Throwing an executor error means we will attempt to retry the task
         // TM will treat a task as a failure if `attempts >= maxAttempts`
         // so we need to handle that here to avoid TM persisting the failed task
         const isRetryableBasedOnAttempts = taskInfo.attempts < maxAttempts;
@@ -133,9 +132,8 @@ export class TaskRunnerFactory {
             }: ${e.message}`
           );
           if (isRetryableBasedOnAttempts) {
-            // In order for retry to work, we need to indicate to task manager this task
-            // failed
-            throw new ExecutorError(e.message, {}, true);
+            // To retry, we will throw a Task Manager RetryableError
+            throw throwRetryableError(new Error(e.message), true);
           }
         }
 
@@ -152,11 +150,9 @@ export class TaskRunnerFactory {
               !!executorResult.retry ? willRetryMessage : willNotRetryMessage
             }: ${executorResult.message}`
           );
-          // Task manager error handler only kicks in when an error thrown (at this time)
-          // So what we have to do is throw when the return status is `error`.
-          throw new ExecutorError(
-            executorResult.message,
-            executorResult.data,
+          // When the return status is `error`, we will throw a Task Manager RetryableError
+          throw throwRetryableError(
+            new Error(executorResult.message),
             executorResult.retry as boolean | Date
           );
         } else if (executorResult && executorResult?.status === 'error') {

@@ -94,7 +94,7 @@ export class AttachmentService {
       const res = await this.executeCaseAggregations<{ alerts: { value: number } }>({
         ...params,
         attachmentType: CommentType.alert,
-        aggregations: this.buildAlertsAggs('cardinality'),
+        aggregations: this.buildAlertsAggs(),
       });
 
       return res?.alerts?.value;
@@ -104,32 +104,14 @@ export class AttachmentService {
     }
   }
 
-  private buildAlertsAggs(agg: string): Record<string, estypes.AggregationsAggregationContainer> {
+  private buildAlertsAggs(): Record<string, estypes.AggregationsAggregationContainer> {
     return {
       alerts: {
-        [agg]: {
+        cardinality: {
           field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.alertId`,
         },
       },
     };
-  }
-
-  public async valueCountAlertsAttachedToCase(params: AlertsAttachedToCaseArgs): Promise<number> {
-    try {
-      this.context.log.debug(`Attempting to value count alerts for case id ${params.caseId}`);
-      const res = await this.executeCaseAggregations<{ alerts: { value: number } }>({
-        ...params,
-        attachmentType: CommentType.alert,
-        aggregations: this.buildAlertsAggs('value_count'),
-      });
-
-      return res?.alerts?.value ?? 0;
-    } catch (error) {
-      this.context.log.error(
-        `Error while value counting alerts for case id ${params.caseId}: ${error}`
-      );
-      throw error;
-    }
   }
 
   /**

@@ -25,6 +25,11 @@ Array [
     "validationName": "durationRt",
   },
   Object {
+    "key": "application_packages",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
     "key": "capture_body",
     "options": Array [
       Object {
@@ -73,6 +78,26 @@ Array [
     "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
+    "key": "disable_instrumentations",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
+    "key": "disable_outgoing_tracecontext_headers",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "enable_experimental_instrumentations",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "enable_instrumentations",
+    "type": "text",
+    "validationName": "string",
+  },
+  Object {
     "key": "enable_log_correlation",
     "type": "boolean",
     "validationName": "(\\"true\\" | \\"false\\")",
@@ -97,6 +122,29 @@ Array [
     "key": "ignore_message_queues",
     "type": "text",
     "validationName": "string",
+  },
+  Object {
+    "key": "log_ecs_reformatting",
+    "options": Array [
+      Object {
+        "text": "off",
+        "value": "off",
+      },
+      Object {
+        "text": "shade",
+        "value": "shade",
+      },
+      Object {
+        "text": "replace",
+        "value": "replace",
+      },
+      Object {
+        "text": "override",
+        "value": "override",
+      },
+    ],
+    "type": "select",
+    "validationName": "(\\"off\\" | \\"shade\\" | \\"replace\\" | \\"override\\")",
   },
   Object {
     "key": "log_level",
@@ -132,6 +180,16 @@ Array [
     ],
     "type": "select",
     "validationName": "(\\"trace\\" | \\"debug\\" | \\"info\\" | \\"warning\\" | \\"error\\" | \\"critical\\" | \\"off\\")",
+  },
+  Object {
+    "key": "log_sending",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
+    "key": "mongodb_capture_statement_commands",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
     "key": "profiling_inferred_spans_enabled",
@@ -221,6 +279,28 @@ Array [
   },
   Object {
     "key": "span_frames_min_duration",
+    "min": "-1ms",
+    "type": "duration",
+    "units": Array [
+      "ms",
+      "s",
+      "m",
+    ],
+    "validationName": "durationRt",
+  },
+  Object {
+    "key": "span_min_duration",
+    "min": "0ms",
+    "type": "duration",
+    "units": Array [
+      "ms",
+      "s",
+      "m",
+    ],
+    "validationName": "durationRt",
+  },
+  Object {
+    "key": "span_stack_trace_min_duration",
     "min": "-1ms",
     "type": "duration",
     "units": Array [

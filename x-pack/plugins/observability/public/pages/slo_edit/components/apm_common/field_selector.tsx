@@ -51,7 +51,7 @@ export function FieldSelector({
       ? [
           {
             value: '*',
-            label: i18n.translate('xpack.observability.slos.sloEdit.fieldSelector.all', {
+            label: i18n.translate('xpack.observability.slo.sloEdit.fieldSelector.all', {
               defaultMessage: 'All',
             }),
           },
