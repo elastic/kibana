@@ -60,7 +60,7 @@ describe('migration v2 - CHECK_TARGET_MAPPINGS', () => {
   });
 
   describe('when the indices are aligned with the stack version', () => {
-    it('skips UPDATE_TARGET_MAPPINGS if there are no changes in the mappings', async () => {
+    it('skips UPDATE_TARGET_MAPPINGS_PROPERTIES if there are no changes in the mappings', async () => {
       const { startES } = createTestServers({
         adjustTimeout: (t: number) => jest.setTimeout(t),
         settings: {
@@ -92,8 +92,8 @@ describe('migration v2 - CHECK_TARGET_MAPPINGS', () => {
       logs = await fs.readFile(logFilePath, 'utf-8');
       expect(logs).not.toMatch('CREATE_NEW_TARGET');
       expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS');
-      expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS');
-      expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK');
+      expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS_PROPERTIES');
+      expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK');
       expect(logs).not.toMatch('UPDATE_TARGET_MAPPINGS_META');
     });
   });
@@ -101,7 +101,7 @@ describe('migration v2 - CHECK_TARGET_MAPPINGS', () => {
   describe('when upgrading to a newer stack version', () => {
     const currentVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 
-    it('runs UPDATE_TARGET_MAPPINGS when mappings have changed', async () => {
+    it('runs UPDATE_TARGET_MAPPINGS_PROPERTIES when mappings have changed', async () => {
       const { startES } = createTestServers({
         adjustTimeout: (t: number) => jest.setTimeout(t),
         settings: {
@@ -123,9 +123,13 @@ describe('migration v2 - CHECK_TARGET_MAPPINGS', () => {
       // Check for migration steps present in the logs
       logs = await fs.readFile(logFilePath, 'utf-8');
       expect(logs).not.toMatch('CREATE_NEW_TARGET');
-      expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS');
-      expect(logs).toMatch('UPDATE_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK');
-      expect(logs).toMatch('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META');
+      expect(logs).toMatch('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES');
+      expect(logs).toMatch(
+        'UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'
+      );
+      expect(logs).toMatch(
+        'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META'
+      );
       expect(logs).toMatch('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS');
       expect(logs).toMatch('Migration completed');
     });
