@@ -197,6 +197,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
     references,
     severity,
     false_positives: falsePositives,
+    custom_highlighted_fields: customHighlightedFields,
     risk_score: riskScore,
     tags,
     threat,
@@ -228,6 +229,7 @@ export const getAboutStepsData = (rule: Rule, detailsView: boolean): AboutStepRu
       isMappingChecked: riskScoreMapping.length > 0,
     },
     falsePositives,
+    customHighlightedFields,
     threat: threat as Threats,
     threatIndicatorPath,
   };
@@ -380,6 +382,7 @@ const commonRuleParamsKeys = [
   'name',
   'description',
   'false_positives',
+  'custom_highlighted_fields',
   'rule_id',
   'max_signals',
   'risk_score',

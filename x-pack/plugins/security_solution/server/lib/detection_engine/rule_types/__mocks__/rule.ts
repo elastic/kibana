@@ -20,6 +20,7 @@ export const createRuleMock = (params: Partial<RuleParams>) => ({
   tiebreakerField: undefined,
   exceptionsList: [],
   falsePositives: [],
+  customHighlightedFields: [],
   filters: [],
   from: 'now-300s',
   id: 'cf1f6a49-18a3-4794-aad7-0e8482e075e9',

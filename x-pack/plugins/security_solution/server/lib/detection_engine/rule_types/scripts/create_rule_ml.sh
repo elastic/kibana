@@ -19,6 +19,7 @@ curl -X POST ${KIBANA_URL}${SPACE_URL}/api/alerts/alert \
      "description": "Basic Machine Learning Rule",
      "exceptionsList": [],
      "falsePositives": [],
+     "customHighlightedFields": [],
      "from": "now-45m",
      "immutable": false,
      "machineLearningJobId": ["test-ml-job"],

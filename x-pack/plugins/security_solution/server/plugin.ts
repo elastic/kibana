@@ -151,10 +151,11 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     const { appClientFactory, pluginContext, config, logger } = this;
     const experimentalFeatures = config.experimentalFeatures;
+    const customHighlightedFields = config.customHighlightedFields;
     this.kibanaIndex = core.savedObjects.getKibanaIndex();
 
     initSavedObjects(core.savedObjects);
-    initUiSettings(core.uiSettings, experimentalFeatures);
+    initUiSettings(core.uiSettings, experimentalFeatures, customHighlightedFields);
 
     const ruleExecutionLogService = createRuleExecutionLogService(config, logger, core, plugins);
     ruleExecutionLogService.registerEventLogProvider();

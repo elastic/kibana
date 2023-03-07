@@ -82,6 +82,7 @@ You should see the new rules created like so:
       "description": "Detecting root and admin users",
       "enabled": true,
       "false_positives": [],
+      "custom_highlighted_fields": [],
       "from": "now-6m",
       "id": "a556065c-0656-4ba1-ad64-a77ca9d2013b",
       "immutable": false,

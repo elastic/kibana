@@ -21,6 +21,11 @@ export const rulesFieldMap = {
     array: true,
     required: true,
   },
+  'kibana.alert.rule.custom_highlighted_fields': {
+    type: 'keyword',
+    array: true,
+    required: false,
+  },
   'kibana.alert.rule.immutable': {
     type: 'keyword',
     array: true,

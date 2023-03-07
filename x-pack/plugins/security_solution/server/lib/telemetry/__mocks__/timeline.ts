@@ -218,6 +218,7 @@ export const stubEndpointAlertResponse = () => {
               },
             ],
             'kibana.alert.rule.false_positives': [],
+            'kibana.alert.rule.custom_highlighted_fields': [],
             'kibana.alert.rule.from': 'now-10m',
             'kibana.alert.rule.immutable': true,
             'kibana.alert.rule.interval': '5m',

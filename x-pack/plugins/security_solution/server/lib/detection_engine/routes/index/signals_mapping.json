@@ -94,6 +94,9 @@
               "false_positives": {
                 "type": "keyword"
               },
+              "custom_highlighted_fields": {
+                "type": "keyword"
+              },
               "saved_id": {
                 "type": "keyword"
               },

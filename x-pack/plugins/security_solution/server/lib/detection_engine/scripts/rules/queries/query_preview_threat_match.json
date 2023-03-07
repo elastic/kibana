@@ -5,6 +5,10 @@
     "https://www.example.com/some-article-about-a-false-positive",
     "some text string about why another condition could be a false positive"
   ],
+  "custom_highlighted_fields": [
+    "custom.field1",
+    "custom.field2"
+  ],
   "rule_id": "preview-placeholder-rule-id",
   "filters": [
     {

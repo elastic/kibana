@@ -15,6 +15,7 @@
   "query": "host.name: *",
   "author": [],
   "false_positives": [],
+  "custom_highlighted_fields": [],
   "references": [],
   "risk_score": 50,
   "risk_score_mapping": [],
