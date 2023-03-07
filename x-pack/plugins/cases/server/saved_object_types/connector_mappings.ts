@@ -9,6 +9,11 @@ import type { SavedObjectsType } from '@kbn/core/server';
 import { CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT } from '../../common/constants';
 import { connectorMappingsMigrations } from './migrations';
 
+/**
+ * The comments in the mapping indicate the additional properties that are stored in Elasticsearch but are not indexed.
+ * Remove these comments when https://github.com/elastic/kibana/issues/152756 is resolved.
+ */
+
 export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
   name: CASE_CONNECTOR_MAPPINGS_SAVED_OBJECT,
   hidden: true,
@@ -17,6 +22,21 @@ export const caseConnectorMappingsSavedObjectType: SavedObjectsType = {
   mappings: {
     dynamic: false,
     properties: {
+      /*
+      mappings: {
+        properties: {
+          source: {
+            type: 'keyword',
+          },
+          target: {
+            type: 'keyword',
+          },
+          action_type: {
+            type: 'keyword',
+          },
+        },
+      },
+      */
       owner: {
         type: 'keyword',
       },
