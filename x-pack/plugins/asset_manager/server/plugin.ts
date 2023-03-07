@@ -6,24 +6,57 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Plugin, CoreSetup, RequestHandlerContext, CoreStart } from '@kbn/core/server';
+import {
+  Plugin,
+  CoreSetup,
+  RequestHandlerContext,
+  CoreStart,
+  PluginInitializerContext,
+  PluginConfigDescriptor,
+  Logger,
+} from '@kbn/core/server';
 import { debug } from '../common/debug_log';
 import { AssetFilters } from '../common/types_api';
 import { ASSET_MANAGER_API_BASE } from './constants';
 import { getAssets } from './lib/get_assets';
-import { maybeCreateTemplate } from './lib/maybe_create_index_template';
+import { upsertTemplate } from './lib/manage_index_templates';
 import { getSampleAssetDocs, sampleAssets } from './lib/sample-assets';
 import { writeAssets } from './lib/write_assets';
-import assetsTemplate from './templates/assets-template.json';
+import { assetsIndexTemplateConfig } from './templates/assets-template';
 
 export type AssetManagerServerPluginSetup = ReturnType<AssetManagerServerPlugin['setup']>;
+export interface AssetManagerConfig {
+  alphaEnabled?: boolean;
+}
+
+export const config: PluginConfigDescriptor<AssetManagerConfig> = {
+  schema: schema.object({
+    alphaEnabled: schema.maybe(schema.boolean()),
+  }),
+};
 
 async function getEsClientFromContext(context: RequestHandlerContext) {
   return (await context.core).elasticsearch.client.asCurrentUser;
 }
 
 export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPluginSetup> {
-  public async setup(core: CoreSetup) {
+  public config: AssetManagerConfig;
+  public logger: Logger;
+
+  constructor(context: PluginInitializerContext<AssetManagerConfig>) {
+    this.config = context.config.get();
+    this.logger = context.logger.get();
+  }
+
+  public setup(core: CoreSetup) {
+    // Check for config value and bail out if not "alpha-enabled"
+    if (!this.config.alphaEnabled) {
+      this.logger.info('Asset manager plugin [tech preview] is NOT enabled');
+      return;
+    }
+
+    this.logger.info('Asset manager plugin [tech preview] is enabled');
+
     const router = core.http.createRouter();
 
     router.get(
@@ -117,11 +150,17 @@ export class AssetManagerServerPlugin implements Plugin<AssetManagerServerPlugin
     return {};
   }
 
-  public async start(core: CoreStart) {
-    // create assets-* index template if it doeesn't already exist
-    await maybeCreateTemplate({
+  public start(core: CoreStart) {
+    // Check for config value and bail out if not "alpha-enabled"
+    if (!this.config.alphaEnabled) {
+      return;
+    }
+
+    // create/update assets-* index template
+    upsertTemplate({
       esClient: core.elasticsearch.client.asInternalUser,
-      template: assetsTemplate,
+      template: assetsIndexTemplateConfig,
+      logger: this.logger,
     });
   }
 

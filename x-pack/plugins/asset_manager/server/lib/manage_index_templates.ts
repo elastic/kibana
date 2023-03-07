@@ -9,7 +9,7 @@ import {
   IndicesGetIndexTemplateResponse,
   IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ASSETS_INDEX_PREFIX } from '../constants';
 
 function templateExists(
@@ -40,7 +40,6 @@ function templateExists(
       : [t.index_template.index_patterns];
 
     if (checkPatterns.every((p) => p && existingPatterns.includes(p))) {
-      console.log(`${template.name} template already exists`);
       return true;
     }
 
@@ -48,22 +47,26 @@ function templateExists(
   });
 }
 
-interface IndexPatternJson {
-  index_patterns: string[];
-  name: string;
-  template: {
-    mappings: Record<string, any>;
-    settings: Record<string, any>;
-  };
+// interface IndexPatternJson {
+//   index_patterns: string[];
+//   name: string;
+//   template: {
+//     mappings: Record<string, any>;
+//     settings: Record<string, any>;
+//   };
+// }
+
+interface TemplateManagementOptions {
+  esClient: ElasticsearchClient;
+  template: IndicesPutIndexTemplateRequest;
+  logger: Logger;
 }
 
 export async function maybeCreateTemplate({
   esClient,
   template,
-}: {
-  esClient: ElasticsearchClient;
-  template: IndexPatternJson;
-}) {
+  logger,
+}: TemplateManagementOptions) {
   const pattern = ASSETS_INDEX_PREFIX + '*';
   template.index_patterns = [pattern];
   let existing: IndicesGetIndexTemplateResponse | null = null;
@@ -71,7 +74,7 @@ export async function maybeCreateTemplate({
     existing = await esClient.indices.getIndexTemplate({ name: template.name });
   } catch (error: any) {
     if (error?.name !== 'ResponseError' || error?.statusCode !== 404) {
-      throw error;
+      logger.warn(`Asset manager index template lookup failed: ${error.message}`);
     }
   }
   try {
@@ -79,7 +82,29 @@ export async function maybeCreateTemplate({
       await esClient.indices.putIndexTemplate(template);
     }
   } catch (error: any) {
-    console.log('[Asset Collection: ES Setup] Error creating template');
-    throw error;
+    logger.error(`Asset manager index template creation failed: ${error.message}`);
+    return;
   }
+
+  logger.info(
+    `Asset manager index template is up to date (use debug logging to see what was installed)`
+  );
+  logger.debug(`Asset manager index template: ${JSON.stringify(template)}`);
+}
+
+export async function upsertTemplate({ esClient, template, logger }: TemplateManagementOptions) {
+  const pattern = ASSETS_INDEX_PREFIX + '*';
+  template.index_patterns = [pattern];
+
+  try {
+    await esClient.indices.putIndexTemplate(template);
+  } catch (error: any) {
+    logger.error(`Error updating asset manager index template: ${error.message}`);
+    return;
+  }
+
+  logger.info(
+    `Asset manager index template is up to date (use debug logging to see what was installed)`
+  );
+  logger.debug(`Asset manager index template: ${JSON.stringify(template)}`);
 }

@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-import { AssetManagerServerPlugin } from './plugin';
+import { PluginInitializerContext } from '@kbn/core-plugins-server';
+import { AssetManagerServerPlugin, config, AssetManagerConfig } from './plugin';
 
-export const plugin = () => new AssetManagerServerPlugin();
+export type { AssetManagerConfig };
+export { config };
+
+export const plugin = (context: PluginInitializerContext<AssetManagerConfig>) =>
+  new AssetManagerServerPlugin(context);
