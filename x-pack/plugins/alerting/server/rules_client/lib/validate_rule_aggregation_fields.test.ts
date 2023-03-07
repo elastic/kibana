@@ -181,6 +181,56 @@ describe('validateAggregationTerms', () => {
     }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.consumer"`);
   });
 
+  it('should throw for both aggs and aggregations at the same nesting level with invalid fields', () => {
+    expect(() => {
+      validateRuleAggregationFields({
+        name1: {
+          terms: {
+            field: 'alert.attributes.snoozeSchedule',
+          },
+          aggs: {
+            nestedAggs1: {
+              terms: {
+                field: 'alert.attributes.enabled',
+              },
+            },
+          },
+          aggregations: {
+            nestedAggs2: {
+              terms: {
+                field: 'alert.attributes.consumer',
+              },
+            },
+          },
+        },
+      });
+    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.consumer"`);
+
+    expect(() => {
+      validateRuleAggregationFields({
+        name1: {
+          terms: {
+            field: 'alert.attributes.snoozeSchedule',
+          },
+          aggs: {
+            nestedAggs1: {
+              terms: {
+                field: 'alert.attributes.consumer',
+              },
+            },
+          },
+          aggregations: {
+            nestedAggs2: {
+              terms: {
+                field: 'alert.attributes.enabled',
+              },
+            },
+          },
+        },
+      });
+    }).toThrowErrorMatchingInlineSnapshot(`"Invalid aggregation term: alert.attributes.consumer"`);
+  });
+
   it('should throw for nested aggregations with invalid root level aggs types', () => {
     expect(() => {
       validateRuleAggregationFields({
