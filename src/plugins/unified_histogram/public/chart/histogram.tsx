@@ -105,7 +105,10 @@ export function Histogram({
         return;
       }
 
-      const totalHits = adapters?.tables?.tables?.unifiedHistogram?.meta?.statistics?.totalCount;
+      const adapterTables = adapters?.tables?.tables;
+      const totalHits = isPlainRecord
+        ? Object.values(adapterTables ?? {})?.[0]?.rows?.length
+        : adapterTables?.unifiedHistogram?.meta?.statistics?.totalCount;
 
       onTotalHitsChange?.(
         isLoading ? UnifiedHistogramFetchStatus.loading : UnifiedHistogramFetchStatus.complete,

@@ -218,7 +218,7 @@ export const useDiscoverHistogram = ({
   }, [breakdownField, unifiedHistogram]);
 
   const columns = useAppStateSelector((state) => state.columns);
-  const documentState = useDataState(savedSearchData$.documents$);
+
 
   useEffect(() => {
     const currentQueryIsTextBased = query && isOfAggregateQueryType(query);
@@ -236,15 +236,6 @@ export const useDiscoverHistogram = ({
       prev.current.columns = columns;
     }
   }, [columns, query, unifiedHistogram]);
-
-  useEffect(() => {
-    if (isPlainRecord) {
-      unifiedHistogram?.setTotalHits({
-        totalHitsResult: documentState.result?.length,
-        totalHitsStatus: documentState.fetchStatus.toString() as UnifiedHistogramFetchStatus,
-      });
-    }
-  }, [documentState.fetchStatus, documentState.result, isPlainRecord, unifiedHistogram]);
 
   /**
    * Total hits
