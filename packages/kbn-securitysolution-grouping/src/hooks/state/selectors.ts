@@ -6,10 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { NONE_GROUP_KEY } from './types';
+import { GroupsById, GroupState } from '../types';
 
-export * from './group_selector';
-export * from './types';
-export * from './grouping';
+const selectGroupById = (state: GroupState): GroupsById => state.groups.groupById;
 
-export const isNoneGroup = (groupKey: string | null) => groupKey === NONE_GROUP_KEY;
+export const groupByIdSelector = (state: GroupState, id: string) => selectGroupById(state)[id];
