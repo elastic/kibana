@@ -11,6 +11,7 @@ import type { DeepPartial } from 'utility-types';
 import { BaseDataGenerator } from './base_data_generator';
 import { EndpointMetadataGenerator } from './endpoint_metadata_generator';
 import type { HostMetadata } from '../types';
+import { ELASTIC_SECURITY_RULE_ID } from '../../detection_engine/constants';
 
 const mergeAndReplaceArrays = <T, S>(destinationObj: T, srcObj: S): T => {
   const customizer = (objValue: T[keyof T], srcValue: S[keyof S]) => {
@@ -276,7 +277,7 @@ export class EndpointRuleAlertGenerator extends BaseDataGenerator {
               value: '',
             },
           ],
-          rule_id: '9a1a2dae-0b5f-4c3d-8305-a268d404c306',
+          rule_id: ELASTIC_SECURITY_RULE_ID,
           rule_name_override: 'message',
           severity: 'medium',
           severity_mapping: [
@@ -320,7 +321,7 @@ export class EndpointRuleAlertGenerator extends BaseDataGenerator {
             value: '',
           },
         ],
-        'kibana.alert.rule.rule_id': '9a1a2dae-0b5f-4c3d-8305-a268d404c306',
+        'kibana.alert.rule.rule_id': ELASTIC_SECURITY_RULE_ID,
         'kibana.alert.rule.rule_name_override': 'message',
         'kibana.alert.rule.rule_type_id': 'siem.queryRule',
         'kibana.alert.rule.severity': 'medium',
