@@ -178,13 +178,15 @@ export function ObservabilityPageTemplate({
                   : undefined
               }
             >
-              <KibanaPageTemplate.Section
-                component="div"
-                alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
-                {...pageSectionProps}
-              >
-                <EuiErrorBoundary>{children}</EuiErrorBoundary>
-              </KibanaPageTemplate.Section>
+              <EuiErrorBoundary>
+                <KibanaPageTemplate.Section
+                  component="div"
+                  alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
+                  {...pageSectionProps}
+                >
+                  {children}
+                </KibanaPageTemplate.Section>
+              </EuiErrorBoundary>
               {bottomBar && (
                 <KibanaPageTemplate.BottomBar {...bottomBarProps}>
                   {bottomBar}
