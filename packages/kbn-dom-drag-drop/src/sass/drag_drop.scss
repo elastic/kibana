@@ -69,10 +69,7 @@
 
 // Drop area will be replacing existing content
 .domDragDrop-isReplacing {
-  &,
-  .lnsLayerPanel__triggerText { // TODO: deprecate if possible
-    text-decoration: line-through;
-  }
+  text-decoration: line-through;
 }
 
 .domDragDrop-notCompatible {

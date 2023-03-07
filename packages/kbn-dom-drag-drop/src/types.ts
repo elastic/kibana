@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+/**
+ * Types of drop action
+ */
 export type DropType =
   | 'field_add'
   | 'field_replace'

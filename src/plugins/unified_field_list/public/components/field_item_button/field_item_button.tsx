@@ -17,6 +17,9 @@ import { wrapFieldNameOnDot } from '../../utils/wrap_field_name_on_dot';
 import { FieldIcon, getFieldIconProps } from '../field_icon';
 import './field_item_button.scss';
 
+/**
+ * Props of FieldItemButton component
+ */
 export interface FieldItemButtonProps<T extends FieldListItem> {
   field: T;
   fieldSearchHighlight?: string;
@@ -27,6 +30,18 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
   onClick: FieldButtonProps['onClick'];
 }
 
+/**
+ * Inner part of field list item
+ * @param field
+ * @param fieldSearchHighlight
+ * @param isActive
+ * @param isEmpty
+ * @param className
+ * @param getCustomFieldType
+ * @param onClick
+ * @param otherProps
+ * @constructor
+ */
 export function FieldItemButton<T extends FieldListItem = DataViewField>({
   field,
   fieldSearchHighlight,

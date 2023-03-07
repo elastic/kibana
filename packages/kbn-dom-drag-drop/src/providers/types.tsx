@@ -24,6 +24,9 @@ export interface Ghost {
   style: React.CSSProperties;
 }
 
+/**
+ * Drag Drop base identifier
+ */
 export type DragDropIdentifier = Record<string, unknown> & {
   id: string;
   /**
@@ -32,10 +35,16 @@ export type DragDropIdentifier = Record<string, unknown> & {
   humanData: HumanData;
 };
 
+/**
+ * Dragging identifier
+ */
 export type DraggingIdentifier = DragDropIdentifier & {
   ghost?: Ghost;
 };
 
+/**
+ * Drop identifier
+ */
 export type DropIdentifier = DragDropIdentifier & {
   dropType: DropType;
   onDrop: DropHandler;
@@ -51,7 +60,6 @@ export type RegisteredDropTargets = Record<string, DropIdentifier | undefined> |
 /**
  * The shape of the drag / drop context.
  */
-
 export interface DragContextState {
   /**
    * The item being dragged or undefined.

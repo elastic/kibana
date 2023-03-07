@@ -26,6 +26,9 @@ import {
 import { DropType } from './types';
 import './sass/drag_drop.scss';
 
+/**
+ * Droppable event
+ */
 export type DroppableEvent = React.DragEvent<HTMLElement>;
 
 const noop = () => {};
@@ -151,6 +154,11 @@ interface DropsInnerProps extends BaseProps {
 
 const lnsLayerPanelDimensionMargin = 8;
 
+/**
+ * DragDrop component
+ * @param props
+ * @constructor
+ */
 export const DragDrop = (props: BaseProps) => {
   const {
     dragging,

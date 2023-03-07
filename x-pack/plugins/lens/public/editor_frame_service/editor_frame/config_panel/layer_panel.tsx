@@ -600,7 +600,7 @@ export function LayerPanel(
                     </ReorderProvider>
                   ) : null}
 
-                  {group.fakeFinalAccessor && ( // TODO: refactor usage of domDragDrop-isDraggable css class too?
+                  {group.fakeFinalAccessor && (
                     <div
                       className="lnsLayerPanel__dimension domDragDrop-isDraggable"
                       css={css`

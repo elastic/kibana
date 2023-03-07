@@ -7,5 +7,3 @@
  */
 
 export { FieldItemButton, type FieldItemButtonProps } from './field_item_button';
-
-// TODO: use lazy module loading?

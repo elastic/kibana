@@ -10,6 +10,9 @@ import React, { useState, useMemo } from 'react';
 import classNames from 'classnames';
 import { DEFAULT_DATA_TEST_SUBJ } from '../constants';
 
+/**
+ * Reorder state
+ */
 export interface ReorderState {
   /**
    * Ids of the elements that are translated up or down
@@ -36,11 +39,17 @@ export interface ReorderState {
 
 type SetReorderStateDispatch = (prevState: ReorderState) => ReorderState;
 
+/**
+ * Reorder context state
+ */
 export interface ReorderContextState {
   reorderState: ReorderState;
   setReorderState: (dispatch: SetReorderStateDispatch) => void;
 }
 
+/**
+ * Reorder context
+ */
 export const ReorderContext = React.createContext<ReorderContextState>({
   reorderState: {
     reorderedItems: [],
@@ -52,6 +61,14 @@ export const ReorderContext = React.createContext<ReorderContextState>({
   setReorderState: () => () => {},
 });
 
+/**
+ * To create a reordering group, surround the elements from the same group with a `ReorderProvider`
+ * @param id
+ * @param children
+ * @param className
+ * @param dataTestSubj
+ * @constructor
+ */
 export function ReorderProvider({
   id,
   children,
