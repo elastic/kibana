@@ -12,7 +12,7 @@ import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hoo
 import { SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { getUiCommand } from '../../../management/components/endpoint_response_actions_list/components/hooks';
-import { getRbacControl } from '../../../management/components/endpoint_responder/lib/utils';
+import { getRbacControl } from '../../../management/components/endpoint_responder/lib/console_commands_definition';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 

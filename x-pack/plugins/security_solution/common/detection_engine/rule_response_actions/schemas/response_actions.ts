@@ -17,21 +17,17 @@ export enum RESPONSE_ACTION_TYPES {
 export const SUPPORTED_RESPONSE_ACTION_TYPES = Object.values(RESPONSE_ACTION_TYPES);
 
 // When we create new response action types, create a union of types
-export const OsqueryResponseActionRuleParam = t.exact(
-  t.type({
-    actionTypeId: t.literal(RESPONSE_ACTION_TYPES.OSQUERY),
-    params: OsqueryParamsCamelCase,
-  })
-);
+export const OsqueryResponseActionRuleParam = t.strict({
+  actionTypeId: t.literal(RESPONSE_ACTION_TYPES.OSQUERY),
+  params: OsqueryParamsCamelCase,
+});
 
 export type RuleResponseOsqueryAction = t.TypeOf<typeof OsqueryResponseActionRuleParam>;
 
-export const EndpointResponseActionRuleParam = t.exact(
-  t.type({
-    actionTypeId: t.literal(RESPONSE_ACTION_TYPES.ENDPOINT),
-    params: EndpointParams,
-  })
-);
+export const EndpointResponseActionRuleParam = t.strict({
+  actionTypeId: t.literal(RESPONSE_ACTION_TYPES.ENDPOINT),
+  params: EndpointParams,
+});
 
 export type RuleResponseEndpointAction = t.TypeOf<typeof EndpointResponseActionRuleParam>;
 
@@ -47,19 +43,15 @@ export const ResponseActionRuleParamsOrUndefined = t.union([
 ]);
 
 // When we create new response action types, create a union of types
-const OsqueryResponseAction = t.exact(
-  t.type({
-    action_type_id: t.literal(RESPONSE_ACTION_TYPES.OSQUERY),
-    params: OsqueryParams,
-  })
-);
+const OsqueryResponseAction = t.strict({
+  action_type_id: t.literal(RESPONSE_ACTION_TYPES.OSQUERY),
+  params: OsqueryParams,
+});
 
-const EndpointResponseAction = t.exact(
-  t.type({
-    action_type_id: t.literal(RESPONSE_ACTION_TYPES.ENDPOINT),
-    params: EndpointParams,
-  })
-);
+const EndpointResponseAction = t.strict({
+  action_type_id: t.literal(RESPONSE_ACTION_TYPES.ENDPOINT),
+  params: EndpointParams,
+});
 
 const ResponseAction = t.union([OsqueryResponseAction, EndpointResponseAction]);
 
