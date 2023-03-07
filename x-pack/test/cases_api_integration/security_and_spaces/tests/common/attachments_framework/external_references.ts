@@ -487,6 +487,8 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(types).to.eql({
           '.files': '559a37324c84f1f2eadcc5bce43115d09501ffe4',
           '.test': 'ab2204830c67f5cf992c9aa2f7e3ead752cc60a1',
+          indicator: 'e1ea6f0518f2e0e4b0b5c0739efe805598cf2516',
+          osquery: '99bee68fce8ee84e81d67c536e063d3e1a2cee96',
         });
       });
     });

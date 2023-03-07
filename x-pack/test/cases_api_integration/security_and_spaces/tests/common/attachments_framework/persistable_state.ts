@@ -334,7 +334,11 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should check changes on all registered persistable state attachment types', async () => {
         const types = await getRegisteredTypes();
 
-        expect(types).to.eql({ '.test': 'dde5bd7492d266a0d54b77b5eddbeca95e19651c' });
+        expect(types).to.eql({
+          '.test': 'dde5bd7492d266a0d54b77b5eddbeca95e19651c',
+          ml_anomaly_charts: 'f9bab0d17e31b89ae52a1b0d25fe117d9f23b38d',
+          ml_anomaly_swimlane: 'cf30664ea040f8e4190c816d093566ae22df54fe',
+        });
       });
     });
   });
