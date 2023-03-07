@@ -13,6 +13,8 @@ export const checkDependencies = async () => {
 
   log.info(`Checking dependencies`);
 
+  // TODO:PT validate that ES / KBN is reachable
+
   await Promise.all([checkDocker(), checkVmRunner()]);
 };
 
