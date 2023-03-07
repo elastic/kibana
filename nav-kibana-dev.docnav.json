@@ -129,6 +129,10 @@
           "id": "kibDevTutorialSavedObject"
         },
         {
+          "id": "kibDevTutorialVersioningHTTPAPIs",
+          "label": "Versioning HTTP APIs"
+        },
+        {
           "id": "kibDevTutorialVersioningInterfaces",
           "label": "Versioning interfaces"
         },

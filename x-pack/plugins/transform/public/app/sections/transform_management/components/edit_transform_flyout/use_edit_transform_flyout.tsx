@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import constate from 'constate';
 import { isEqual, merge } from 'lodash';
-import { useReducer } from 'react';
+import { useMemo, useReducer } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { numberValidator } from '@kbn/ml-agg-utils';
 import { getNestedProperty, setNestedProperty } from '@kbn/ml-nested-property';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import { PostTransformsUpdateRequestSchema } from '../../../../../../common/api_schemas/update_transforms';
 import {
@@ -35,16 +35,16 @@ import {
 // The outer most level reducer defines a flat structure of names for form fields.
 // This is a flat structure regardless of whether the final request object will be nested.
 // For example, `destinationIndex` and `destinationIngestPipeline` will later be nested under `dest`.
-type EditTransformFormFields =
+export type EditTransformFormFields =
   | 'description'
   | 'destinationIndex'
   | 'destinationIngestPipeline'
-  | 'frequency'
   | 'docsPerSecond'
+  | 'frequency'
   | 'maxPageSearchSize'
+  | 'numFailureRetries'
   | 'retentionPolicyField'
-  | 'retentionPolicyMaxAge'
-  | 'numFailureRetries';
+  | 'retentionPolicyMaxAge';
 
 type EditTransformFlyoutFieldsState = Record<EditTransformFormFields, FormField>;
 
@@ -278,28 +278,33 @@ export const initializeSection = (
 };
 
 export interface EditTransformFlyoutState {
+  apiErrorMessage?: string;
   formFields: EditTransformFlyoutFieldsState;
   formSections: EditTransformFlyoutSectionsState;
   isFormTouched: boolean;
   isFormValid: boolean;
 }
 
-// Actions for fields and sections
-interface FormFieldAction {
-  field: EditTransformFormFields;
-  value: string;
+// Actions
+interface ApiErrorAction {
+  name: 'api_error';
+  payload: string | undefined;
 }
-function isFormFieldAction(action: unknown): action is FormFieldAction {
-  return isPopulatedObject(action, ['field']);
+interface FormFieldAction {
+  name: 'form_field';
+  payload: {
+    field: EditTransformFormFields;
+    value: string;
+  };
 }
 interface FormSectionAction {
-  section: EditTransformFormSections;
-  enabled: boolean;
+  name: 'form_section';
+  payload: {
+    section: EditTransformFormSections;
+    enabled: boolean;
+  };
 }
-function isFormSectionAction(action: unknown): action is FormSectionAction {
-  return isPopulatedObject(action, ['section']);
-}
-type Action = FormFieldAction | FormSectionAction;
+type Action = ApiErrorAction | FormFieldAction | FormSectionAction;
 
 // Takes a value from form state and applies it to the structure
 // of the expected final configuration request object.
@@ -512,22 +517,31 @@ export const formReducerFactory = (config: TransformConfigUnion) => {
   const defaultSectionValues = getSectionValues(defaultState.formSections);
 
   return (state: EditTransformFlyoutState, action: Action): EditTransformFlyoutState => {
-    const formFields = isFormFieldAction(action)
-      ? {
-          ...state.formFields,
-          [action.field]: formFieldReducer(state.formFields[action.field], action.value),
-        }
-      : state.formFields;
+    const formFields =
+      action.name === 'form_field'
+        ? {
+            ...state.formFields,
+            [action.payload.field]: formFieldReducer(
+              state.formFields[action.payload.field],
+              action.payload.value
+            ),
+          }
+        : state.formFields;
 
-    const formSections = isFormSectionAction(action)
-      ? {
-          ...state.formSections,
-          [action.section]: formSectionReducer(state.formSections[action.section], action.enabled),
-        }
-      : state.formSections;
+    const formSections =
+      action.name === 'form_section'
+        ? {
+            ...state.formSections,
+            [action.payload.section]: formSectionReducer(
+              state.formSections[action.payload.section],
+              action.payload.enabled
+            ),
+          }
+        : state.formSections;
 
     return {
       ...state,
+      apiErrorMessage: action.name === 'api_error' ? action.payload : state.apiErrorMessage,
       formFields,
       formSections,
       isFormTouched:
@@ -538,8 +552,93 @@ export const formReducerFactory = (config: TransformConfigUnion) => {
   };
 };
 
-export const useEditTransformFlyout = (config: TransformConfigUnion) => {
-  return useReducer(formReducerFactory(config), getDefaultState(config));
+interface EditTransformFlyoutOptions {
+  config: TransformConfigUnion;
+  dataViewId?: string;
+}
+
+const useEditTransformFlyoutInternal = ({ config, dataViewId }: EditTransformFlyoutOptions) => {
+  const [formState, dispatch] = useReducer(formReducerFactory(config), getDefaultState(config));
+
+  const actions = useMemo(
+    () => ({
+      apiError: (payload: ApiErrorAction['payload']) => dispatch({ name: 'api_error', payload }),
+      formField: (payload: FormFieldAction['payload']) =>
+        dispatch({
+          name: 'form_field',
+          payload,
+        }),
+      formSection: (payload: FormSectionAction['payload']) =>
+        dispatch({ name: 'form_section', payload }),
+    }),
+    []
+  );
+
+  const requestConfig = useMemo(
+    () => applyFormStateToTransformConfig(config, formState),
+    [config, formState]
+  );
+
+  const isUpdateButtonDisabled = useMemo(
+    () => !formState.isFormValid || !formState.isFormTouched,
+    [formState.isFormValid, formState.isFormTouched]
+  );
+
+  return { config, dataViewId, formState, actions, requestConfig, isUpdateButtonDisabled };
 };
 
-export type UseEditTransformFlyoutReturnType = ReturnType<typeof useEditTransformFlyout>;
+// wrap hook with the constate factory to create context provider and custom hooks based on selectors
+const [EditTransformFlyoutProvider, ...editTransformHooks] = constate(
+  useEditTransformFlyoutInternal,
+  (d) => d.config,
+  (d) => d.dataViewId,
+  (d) => d.actions,
+  (d) => d.formState.apiErrorMessage,
+  (d) => d.formState.formSections,
+  (d) => d.formState.formFields.description,
+  (d) => d.formState.formFields.destinationIndex,
+  (d) => d.formState.formFields.docsPerSecond,
+  (d) => d.formState.formFields.frequency,
+  (d) => d.formState.formFields.destinationIngestPipeline,
+  (d) => d.formState.formFields.maxPageSearchSize,
+  (d) => d.formState.formFields.numFailureRetries,
+  (d) => d.formState.formFields.retentionPolicyField,
+  (d) => d.formState.formFields.retentionPolicyMaxAge,
+  (d) => d.requestConfig,
+  (d) => d.isUpdateButtonDisabled
+);
+
+export enum EDIT_TRANSFORM_HOOK_SELECTORS {
+  config,
+  dataViewId,
+  actions,
+  apiErrorMessage,
+  stateFormSection,
+  description,
+  destinationIndex,
+  docsPerSecond,
+  frequency,
+  destinationIngestPipeline,
+  maxPageSearchSize,
+  numFailureRetries,
+  retentionPolicyField,
+  retentionPolicyMaxAge,
+  requestConfig,
+  isUpdateButtonDisabled,
+}
+
+export type EditTransformHookTextInputSelectors = Extract<
+  keyof typeof EDIT_TRANSFORM_HOOK_SELECTORS,
+  EditTransformFormFields
+>;
+
+type EditTransformHookSelectors = keyof typeof EDIT_TRANSFORM_HOOK_SELECTORS;
+type EditTransformHooks = typeof editTransformHooks;
+
+export const useEditTransformFlyout = <K extends EditTransformHookSelectors>(hookKey: K) => {
+  return editTransformHooks[EDIT_TRANSFORM_HOOK_SELECTORS[hookKey]]() as ReturnType<
+    EditTransformHooks[typeof EDIT_TRANSFORM_HOOK_SELECTORS[K]]
+  >;
+};
+
+export { EditTransformFlyoutProvider };

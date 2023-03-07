@@ -24,7 +24,7 @@ import {
   OWNER_INFO,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
-import type { AlertInfo, CaseSavedObject } from './types';
+import type { AlertInfo, CaseSavedObject, FileAttachmentRequest } from './types';
 
 import type {
   CaseAttributes,
@@ -47,6 +47,8 @@ import {
   CommentType,
   ConnectorTypes,
   ExternalReferenceStorageType,
+  ExternalReferenceSORt,
+  FileAttachmentMetadataRt,
 } from '../../common/api';
 import type { UpdateAlertStatusRequest } from '../client/alerts/types';
 import {
@@ -261,6 +263,18 @@ export const isCommentRequestTypeExternalReferenceSO = (
   return (
     context.type === CommentType.externalReference &&
     context.externalReferenceStorage?.type === ExternalReferenceStorageType.savedObject
+  );
+};
+
+/**
+ * A type narrowing function for file attachments.
+ */
+export const isFileAttachmentRequest = (
+  context: Partial<CommentRequest>
+): context is FileAttachmentRequest => {
+  return (
+    ExternalReferenceSORt.is(context) &&
+    FileAttachmentMetadataRt.is(context.externalReferenceMetadata)
   );
 };
 
