@@ -49,10 +49,6 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   filters?: Filter[];
   /**
-   * The selected columns
-   */
-  columns?: string[];
-  /**
    * The current Lens suggestion
    */
   currentSuggestion?: Suggestion;
@@ -161,7 +157,6 @@ export const UnifiedHistogramLayout = ({
   dataView,
   query,
   filters,
-  columns,
   currentSuggestion,
   allSuggestions,
   isPlainRecord,
@@ -239,7 +234,6 @@ export const UnifiedHistogramLayout = ({
           timeRange={timeRange}
           request={request}
           hits={hits}
-          columns={columns}
           currentSuggestion={currentSuggestion}
           allSuggestions={allSuggestions}
           isPlainRecord={isPlainRecord}

@@ -251,7 +251,6 @@ export const useDiscoverHistogram = ({
         }
 
         if (isPlainRecord) {
-          firstLoadComplete.current = true;
           return;
         }
 

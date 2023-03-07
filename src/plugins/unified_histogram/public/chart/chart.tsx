@@ -52,7 +52,6 @@ export interface ChartProps {
   dataView: DataView;
   query?: Query | AggregateQuery;
   filters?: Filter[];
-  columns?: string[];
   isPlainRecord?: boolean;
   currentSuggestion?: Suggestion;
   allSuggestions?: Suggestion[];
