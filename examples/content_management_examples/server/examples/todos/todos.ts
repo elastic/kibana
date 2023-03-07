@@ -73,6 +73,9 @@ export const registerTodoContentType = ({
       },
     },
     storage: new TodosStorage(),
+    version: {
+      latest: 'v1',
+    },
   });
 };
 
