@@ -7,6 +7,12 @@
   flex-direction: column;
 }
 
+.dashboardViewportWrapper {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+}
+
 .dshUnsavedListingItem {
   margin-top: $euiSizeM;
 }

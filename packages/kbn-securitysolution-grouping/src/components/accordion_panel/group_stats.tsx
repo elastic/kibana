@@ -21,21 +21,21 @@ import { statsContainerCss } from '../styles';
 import { TAKE_ACTION } from '../translations';
 import type { RawBucket } from '../types';
 
-interface GroupStatsProps {
+interface GroupStatsProps<T> {
   badgeMetricStats?: BadgeMetric[];
-  bucket: RawBucket;
+  bucket: RawBucket<T>;
   customMetricStats?: CustomMetric[];
   onTakeActionsOpen?: () => void;
   takeActionItems: JSX.Element[];
 }
 
-const GroupStatsComponent = ({
+const GroupStatsComponent = <T,>({
   badgeMetricStats,
   bucket,
   customMetricStats,
   onTakeActionsOpen,
   takeActionItems,
-}: GroupStatsProps) => {
+}: GroupStatsProps<T>) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const onButtonClick = useCallback(
