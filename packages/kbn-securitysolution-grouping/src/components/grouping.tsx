@@ -20,7 +20,7 @@ import { createGroupFilter } from './accordion_panel/helpers';
 import type { BadgeMetric, CustomMetric } from './accordion_panel';
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
-import { EmptyGroupingComponent } from './empty_resuls_panel';
+import { EmptyGroupingComponent } from './empty_results_panel';
 import { groupingContainerCss, groupsUnitCountCss } from './styles';
 import { GROUPS_UNIT } from './translations';
 import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } from './types';
@@ -30,7 +30,7 @@ export interface GroupingProps<T> {
   customMetricStats?: (fieldBucket: RawBucket<T>) => CustomMetric[];
   data?: GroupingAggregation<T> & GroupingFieldTotalAggregation;
   groupPanelRenderer?: (fieldBucket: RawBucket<T>) => JSX.Element | undefined;
-  groupsSelector?: JSX.Element;
+  groupSelector?: JSX.Element;
   inspectButton?: JSX.Element;
   isLoading: boolean;
   pagination: {
@@ -51,7 +51,7 @@ const GroupingComponent = <T,>({
   customMetricStats,
   data,
   groupPanelRenderer,
-  groupsSelector,
+  groupSelector,
   inspectButton,
   isLoading,
   pagination,
@@ -163,7 +163,7 @@ const GroupingComponent = <T,>({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs">
             {inspectButton && <EuiFlexItem>{inspectButton}</EuiFlexItem>}
-            <EuiFlexItem>{groupsSelector}</EuiFlexItem>
+            <EuiFlexItem>{groupSelector}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
