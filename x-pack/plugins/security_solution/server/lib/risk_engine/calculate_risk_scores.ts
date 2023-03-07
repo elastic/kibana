@@ -121,6 +121,7 @@ export const calculateRiskScores = async ({
         },
         aggs: {
           riskiest_inputs: {
+            // TODO top_metrics would be faster if enrichInputs is false
             top_hits: {
               size: 30,
               sort: [
