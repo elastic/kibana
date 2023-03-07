@@ -81,7 +81,7 @@ const loadPersistedSavedSearch = async (
     dataViewList: internalStateContainer.getState().savedDataViews,
     appState: !isEmptyURL ? appStateContainer.getState() : undefined,
   });
-  if (dataView?.id !== currentSavedSearch.searchSource.getField('index')?.id) {
+  if (dataView?.id && dataView?.id !== currentSavedSearch.searchSource.getField('index')?.id) {
     savedSearchContainer.update({
       nextDataView: dataView,
       nextState: appStateContainer.getState(),
@@ -171,7 +171,7 @@ export interface DiscoverStateContainer {
      */
     loadAndResolveDataView: (
       dataViewId: string,
-      savedSearch: SavedSearch
+      dataViewSpec?: DataViewSpec
     ) => Promise<{ fallback: boolean; dataView: DataView }>;
     /**
      * Load current list of data views, add them to internal state

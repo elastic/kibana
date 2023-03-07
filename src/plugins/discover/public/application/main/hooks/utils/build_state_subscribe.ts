@@ -55,10 +55,7 @@ export const buildStateSubscribe =
     let savedSearchDataView;
     // NOTE: this is also called when navigating from discover app to context app
     if (nextState.index && dataViewChanged) {
-      const { dataView: nextDataView, fallback } = await loadAndResolveDataView(
-        nextState.index,
-        savedSearch
-      );
+      const { dataView: nextDataView, fallback } = await loadAndResolveDataView(nextState.index);
 
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view

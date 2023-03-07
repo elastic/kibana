@@ -171,11 +171,14 @@ export function getSavedSearchContainer({
     addLog('🔎 [savedSearch] update', { nextDataView, nextState, resetSavedSearch });
 
     const previousSavedSearch = get();
+    const dataView = nextDataView
+      ? nextDataView
+      : previousSavedSearch.searchSource.getField('index')!;
 
     const nextSavedSearch = updateSavedSearch(
       {
         savedSearch: { ...previousSavedSearch },
-        dataView: nextDataView ? nextDataView : previousSavedSearch.searchSource.getField('index')!,
+        dataView,
         state: nextState,
         services,
       },
