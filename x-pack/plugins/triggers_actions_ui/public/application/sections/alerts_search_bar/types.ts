@@ -6,6 +6,7 @@
  */
 
 import { ValidFeatureId } from '@kbn/rule-data-utils';
+import { DataView } from '@kbn/data-views-plugin/common';
 
 export type QueryLanguageType = 'lucene' | 'kuery';
 
@@ -15,6 +16,7 @@ export interface AlertsSearchBarProps {
   rangeFrom?: string;
   rangeTo?: string;
   query?: string;
+  setDataView?: (dataView: DataView) => void;
   onQueryChange: (query: {
     dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
     query?: string;

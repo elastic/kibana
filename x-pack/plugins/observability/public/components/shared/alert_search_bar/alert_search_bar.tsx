@@ -35,6 +35,7 @@ export function ObservabilityAlertSearchBar({
   rangeFrom,
   rangeTo,
   services: { AlertsSearchBar, timeFilterService, useToasts },
+  setDataView,
   status,
 }: ObservabilityAlertSearchBarProps) {
   const toasts = useToasts();
@@ -112,6 +113,7 @@ export function ObservabilityAlertSearchBar({
           rangeTo={rangeTo}
           query={kuery}
           onQueryChange={onSearchBarParamsChange}
+          setDataView={setDataView}
         />
       </EuiFlexItem>
 

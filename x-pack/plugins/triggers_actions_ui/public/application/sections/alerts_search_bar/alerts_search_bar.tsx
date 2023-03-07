@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { Query, TimeRange } from '@kbn/es-query';
 import { NO_INDEX_PATTERNS } from './constants';
@@ -22,6 +22,7 @@ export function AlertsSearchBar({
   onQueryChange,
   rangeFrom,
   rangeTo,
+  setDataView,
 }: AlertsSearchBarProps) {
   const {
     unifiedSearch: {
@@ -31,6 +32,12 @@ export function AlertsSearchBar({
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { value: dataView, loading, error } = useAlertDataView(featureIds);
+
+  useEffect(() => {
+    if (setDataView != null && dataView != null) {
+      setDataView(dataView);
+    }
+  }, [dataView]);
 
   const onQuerySubmit = useCallback(
     ({ dateRange, query: nextQuery }: { dateRange: TimeRange; query?: Query }) => {

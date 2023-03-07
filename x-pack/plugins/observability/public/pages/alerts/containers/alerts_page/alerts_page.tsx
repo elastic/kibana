@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { AlertsGrouping } from './alerts_grouping';
 import { calculateTimeRangeBucketSize } from '../../../overview/containers/overview_page/helpers/calculate_bucket_size';
 import {
@@ -67,7 +68,8 @@ function InternalAlertsPage() {
     },
   } = useKibana<ObservabilityAppServices>().services;
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY);
-
+  const [dataView, setDataView] = useState<DataView | null>(null);
+  const [groupSelector, setGroupSelector] = useState<React.ReactElement | null>(null);
   const chartThemes = {
     theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
@@ -165,6 +167,7 @@ function InternalAlertsPage() {
 
   const renderAlertsTable = useCallback(
     (groupingFilters: Filter[]) => {
+      console.log('esQuery', esQuery);
       return esQuery ? (
         <AlertsStateTable
           alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
@@ -175,6 +178,7 @@ function InternalAlertsPage() {
           query={{
             ...esQuery,
             bool: {
+              ...esQuery.bool,
               filter: [
                 ...esQuery.bool.filter,
                 ...groupingFilters.map((f) => ({ ...(f.query ? f.query : {}) })),
@@ -221,6 +225,7 @@ function InternalAlertsPage() {
             appName={ALERTS_SEARCH_BAR_ID}
             onEsQueryChange={setEsQuery}
             services={{ timeFilterService, AlertsSearchBar, useToasts }}
+            setDataView={setDataView}
           />
         </EuiFlexItem>
         <EuiFlexItem>
@@ -238,7 +243,20 @@ function InternalAlertsPage() {
             permissions={userCasesPermissions}
             features={{ alerts: { sync: false } }}
           >
-            <AlertsGrouping renderChildComponent={renderAlertsTable} />
+            {esQuery && (
+              <>
+                <>{groupSelector}</>
+                <AlertsGrouping
+                  dataView={dataView}
+                  esQuery={esQuery}
+                  renderChildComponent={renderAlertsTable}
+                  from={alertSearchBarStateProps.rangeFrom}
+                  setGroupSelector={setGroupSelector}
+                  tableId={ALERTS_TABLE_ID}
+                  to={alertSearchBarStateProps.rangeTo}
+                />
+              </>
+            )}
           </CasesContext>
         </EuiFlexItem>
       </EuiFlexGroup>

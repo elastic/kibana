@@ -10,6 +10,7 @@ import { ToastsStart } from '@kbn/core-notifications-browser';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { AlertsSearchBarProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_search_bar';
 import { BoolQuery, Query } from '@kbn/es-query';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { AlertStatus } from '../../../../common/typings';
 
 export interface AlertStatusFilterProps {
@@ -50,6 +51,7 @@ interface AlertSearchBarContainerState {
   rangeFrom: string;
   rangeTo: string;
   kuery: string;
+  setDataView?: (dataView: DataView) => void;
   status: AlertStatus;
 }
 
