@@ -196,7 +196,7 @@ export const getXyChartRenderer = ({
   }),
   validate: () => undefined,
   reuseDomNode: true,
-  render: async (domNode: Element, config: XYChartProps, handlers) => {
+  render: async (domNode: Element, config: XYChartProps, handlers, childrenFn) => {
     const deps = await getStartDeps();
 
     // Lazy loaded parts
@@ -249,6 +249,7 @@ export const getXyChartRenderer = ({
       width: '100%',
       height: '100%',
     });
+    console.log({ childrenFn });
 
     ReactDOM.render(
       <KibanaThemeProvider theme$={deps.kibanaTheme.theme$}>
@@ -277,7 +278,9 @@ export const getXyChartRenderer = ({
               syncCursor={config.syncCursor}
               uiState={handlers.uiState as PersistedState}
               renderComplete={renderComplete}
-            />
+            >
+              {childrenFn}
+            </XYChartReportable>
           </div>
         </I18nProvider>
       </KibanaThemeProvider>,

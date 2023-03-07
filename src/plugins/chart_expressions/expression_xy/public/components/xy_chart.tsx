@@ -31,11 +31,12 @@ import {
   Tooltip,
   XYChartSeriesIdentifier,
   TooltipValue,
+  SettingsProps,
 } from '@elastic/charts';
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
 import { PaletteRegistry } from '@kbn/coloring';
-import { Datatable, RenderMode } from '@kbn/expressions-plugin/common';
+import { datatable, Datatable, RenderMode } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
@@ -142,6 +143,7 @@ export type XYChartRenderProps = Omit<XYChartProps, 'canNavigateToLens'> & {
   renderComplete: () => void;
   uiState?: PersistedState;
   timeFormat: string;
+  children: ((props: unknown) => JSX.Element) | undefined;
 };
 
 function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -205,6 +207,8 @@ function createSplitPoint(
 
 export const XYChartReportable = React.memo(XYChart);
 
+type OverrideSettingsKeys = keyof SettingsProps;
+
 export function XYChart({
   args,
   data,
@@ -226,6 +230,8 @@ export function XYChart({
   renderComplete,
   uiState,
   timeFormat,
+  overrides = {},
+  children,
 }: XYChartRenderProps) {
   const {
     legend,
@@ -310,6 +316,16 @@ export function XYChart({
     },
     [renderComplete]
   );
+
+  const hasOverride = <T extends OverrideSettingsKeys>(setting: T): boolean => {
+    return overrides.settings ? setting in overrides.settings : false;
+  };
+
+  const getOverride = <T extends OverrideSettingsKeys>(
+    setting: T
+  ): SettingsProps[T] | undefined => {
+    return hasOverride(setting) ? overrides.settings?.[setting] : undefined;
+  };
 
   const dataLayers: CommonXYDataLayerConfig[] = filteredLayers.filter(isDataLayer);
   const formattedDatatables = useMemo(
@@ -918,7 +934,9 @@ export function XYChart({
             onBrushEnd={interactive ? (brushHandler as BrushEndListener) : undefined}
             onElementClick={interactive ? clickHandler : undefined}
             legendAction={
-              interactive
+              hasOverride('legendAction' as const)
+                ? getOverride('legendAction')
+                : interactive
                 ? getLegendAction(
                     dataLayers,
                     onClickValue,
@@ -1076,6 +1094,7 @@ export function XYChart({
               }
             />
           ) : null}
+          {children?.({ datatables: dataLayers.map(({ table }) => table) })}
         </Chart>
       </LegendColorPickerWrapperContext.Provider>
     </div>

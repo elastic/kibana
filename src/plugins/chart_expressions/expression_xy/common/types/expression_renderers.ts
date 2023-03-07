@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CustomAnnotationTooltip } from '@elastic/charts';
+import type { CustomAnnotationTooltip, SettingsProps } from '@elastic/charts';
 import {
   AvailableAnnotationIcon,
   ManualPointEventAnnotationArgs,
@@ -20,6 +20,7 @@ export interface XYChartProps {
   syncCursor: boolean;
   syncColors: boolean;
   canNavigateToLens?: boolean;
+  overrides: Partial<Record<'settings', SettingsProps>> | undefined;
 }
 
 export interface XYRender {

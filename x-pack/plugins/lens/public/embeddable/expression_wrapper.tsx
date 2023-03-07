@@ -46,6 +46,7 @@ export interface ExpressionWrapperProps {
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
+  children?: (props: unknown) => JSX.Element;
 }
 
 export function ExpressionWrapper({
@@ -71,6 +72,7 @@ export function ExpressionWrapper({
   executionContext,
   lensInspector,
   noPadding,
+  children,
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
@@ -108,6 +110,7 @@ export function ExpressionWrapper({
 
             return <></>; // the embeddable will take care of displaying the messages
           }}
+          renderChildren={children}
           onEvent={handleEvent}
           hasCompatibleActions={hasCompatibleActions}
           getCompatibleCellValueActions={getCompatibleCellValueActions}

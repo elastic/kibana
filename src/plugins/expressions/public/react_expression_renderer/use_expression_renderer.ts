@@ -36,6 +36,7 @@ export interface ExpressionRendererParams extends IExpressionLoaderParams {
    * An observable which can be used to re-run the expression without destroying the component
    */
   reload$?: Observable<unknown>;
+  renderChildren?: (props: unknown) => JSX.Element;
 }
 
 interface ExpressionRendererState {
@@ -54,6 +55,7 @@ export function useExpressionRenderer(
     onEvent,
     onRender$,
     reload$,
+    renderChildren,
     ...loaderParams
   }: ExpressionRendererParams
 ): ExpressionRendererState {
@@ -84,6 +86,7 @@ export function useExpressionRenderer(
       nodeRef.current &&
       new ExpressionLoader(nodeRef.current, debouncedExpression, {
         ...debouncedLoaderParams,
+        onChildrenRender: renderChildren,
         // react component wrapper provides different
         // error handling api which is easier to work with from react
         // if custom renderError is not provided then we fallback to default error handling from ExpressionLoader

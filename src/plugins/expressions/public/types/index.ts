@@ -67,6 +67,8 @@ export interface IExpressionLoaderParams {
    * By default, it equals 1000.
    */
   throttle?: number;
+
+  onChildrenRender?: (props: unknown) => JSX.Element;
 }
 
 export interface ExpressionRenderError extends Error {

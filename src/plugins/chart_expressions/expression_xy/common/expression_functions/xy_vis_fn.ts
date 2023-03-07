@@ -9,6 +9,7 @@
 import { validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common/expression_functions';
+import type { SettingsProps } from '@elastic/charts';
 import { LayerTypes, XY_VIS_RENDERER, DATA_LAYER } from '../constants';
 import { appendLayerIds, getAccessors, getShowLines, normalizeTable } from '../helpers';
 import { DataLayerConfigResult, XYLayerConfig, XyVisFn, XYArgs } from '../types';
@@ -137,6 +138,9 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
       syncColors: handlers?.isSyncColorsEnabled?.() ?? false,
       syncTooltips: handlers?.isSyncTooltipsEnabled?.() ?? false,
       syncCursor: handlers?.isSyncCursorEnabled?.() ?? true,
+      overrides: handlers.variables.overrides
+        ? (handlers.variables.overrides as Partial<Record<'settings', SettingsProps>>)
+        : undefined,
     },
   };
 };

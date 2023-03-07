@@ -46,7 +46,8 @@ export interface ExpressionRenderDefinition<Config = unknown> {
   render: (
     domNode: HTMLElement,
     config: Config,
-    handlers: IInterpreterRenderHandlers
+    handlers: IInterpreterRenderHandlers,
+    children?: (props: unknown) => JSX.Element
   ) => void | Promise<void>;
 }
 

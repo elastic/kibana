@@ -30,6 +30,7 @@ import {
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
+import type { SettingsProps } from '@elastic/charts';
 import { Subscription } from 'rxjs';
 import { toExpression, Ast } from '@kbn/interpreter';
 import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
@@ -131,6 +132,19 @@ export interface LensUnwrapResult {
   metaInfo?: LensUnwrapMetaInfo;
 }
 
+export type Prettify<T> = T extends Function
+  ? T
+  : T extends object
+  ? { [K in keyof T]: T[K] } & {}
+  : T;
+
+interface PreventableEvent {
+  /**
+   * Calling this function will prevent default actions to be executed
+   */
+  preventDefault: () => void;
+}
+
 interface LensBaseEmbeddableInput extends EmbeddableInput {
   filters?: Filter[];
   query?: Query;
@@ -141,10 +155,18 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   style?: React.CSSProperties;
   className?: string;
   noPadding?: boolean;
-  onBrushEnd?: (data: BrushTriggerEvent['data']) => void | false;
-  onLoad?: (isLoading: boolean, adapters?: Partial<DefaultInspectorAdapters>) => void;
-  onFilter?: (data: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => void | false;
-  onTableRowClick?: (data: LensTableRowContextMenuEvent['data']) => void | false;
+  onBrushEnd?: (data: Prettify<BrushTriggerEvent['data'] & PreventableEvent>) => void;
+  onLoad?: (isLoading: boolean, adapters?: Prettify<Partial<DefaultInspectorAdapters>>) => void;
+  onFilter?: (
+    data:
+      | Prettify<ClickTriggerEvent['data'] & PreventableEvent>
+      | Prettify<MultiClickTriggerEvent['data'] & PreventableEvent>
+  ) => void;
+  onTableRowClick?: (
+    data: Prettify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
+  ) => void;
+  overrides?: Record<'settings', Prettify<SettingsProps>>;
+  children?: (props: unknown) => JSX.Element;
 }
 
 export type LensByValueInput = {
@@ -937,6 +959,7 @@ export class Embeddable
               variables={{
                 embeddableTitle: this.getTitle(),
                 ...(input.palette ? { theme: { palette: input.palette } } : {}),
+                overrides: input.overrides,
               }}
               searchSessionId={this.externalSearchContext.searchSessionId}
               handleEvent={this.handleEvent}
@@ -958,7 +981,9 @@ export class Embeddable
                 this.logError('runtime');
               }}
               noPadding={this.visDisplayOptions.noPadding}
-            />
+            >
+              {input.children}
+            </ExpressionWrapper>
           </KibanaThemeProvider>
           <MessagesBadge
             onMount={(el) => {
@@ -1116,7 +1141,10 @@ export class Embeddable
     if (isLensBrushEvent(event)) {
       let shouldExecuteDefaultAction = true;
       if (this.input.onBrushEnd) {
-        shouldExecuteDefaultAction = this.input.onBrushEnd(event.data) !== false;
+        this.input.onBrushEnd({
+          ...event.data,
+          preventDefault: () => (shouldExecuteDefaultAction = false),
+        });
       }
       if (shouldExecuteDefaultAction) {
         this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
@@ -1133,7 +1161,10 @@ export class Embeddable
     if (isLensFilterEvent(event) || isLensMultiFilterEvent(event)) {
       let shouldExecuteDefaultAction = true;
       if (this.input.onFilter) {
-        shouldExecuteDefaultAction = this.input.onFilter(event.data) !== false;
+        this.input.onFilter({
+          ...event.data,
+          preventDefault: () => (shouldExecuteDefaultAction = false),
+        });
       }
       if (shouldExecuteDefaultAction) {
         this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec({
@@ -1151,10 +1182,10 @@ export class Embeddable
     if (isLensTableRowContextMenuClickEvent(event)) {
       let shouldExecuteDefaultAction = true;
       if (this.input.onTableRowClick) {
-        shouldExecuteDefaultAction =
-          this.input.onTableRowClick(
-            event.data as unknown as LensTableRowContextMenuEvent['data']
-          ) !== false;
+        this.input.onTableRowClick({
+          ...event.data,
+          preventDefault: () => (shouldExecuteDefaultAction = false),
+        });
       }
       if (shouldExecuteDefaultAction) {
         this.deps.getTrigger(VIS_EVENT_TO_TRIGGER[event.name]).exec(

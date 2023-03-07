@@ -28,6 +28,7 @@ export type IExpressionRendererExtraHandlers = Record<string, unknown>;
 
 export interface ExpressionRenderHandlerParams {
   onRenderError?: RenderErrorHandlerFnType;
+  onChildrenRender?: (props: unknown) => JSX.Element;
   renderMode?: RenderMode;
   syncColors?: boolean;
   syncCursor?: boolean;
@@ -53,11 +54,13 @@ export class ExpressionRenderHandler {
   private updateSubject: Rx.Subject<UpdateValue | null>;
   private handlers: IInterpreterRenderHandlers;
   private onRenderError: RenderErrorHandlerFnType;
+  private onChildrenRender: undefined | ((props: unknown) => JSX.Element);
 
   constructor(
     element: HTMLElement,
     {
       onRenderError,
+      onChildrenRender,
       renderMode,
       syncColors,
       syncTooltips,
@@ -74,6 +77,7 @@ export class ExpressionRenderHandler {
     this.events$ = this.eventsSubject.asObservable() as Observable<ExpressionRendererEvent>;
 
     this.onRenderError = onRenderError || defaultRenderErrorHandler;
+    this.onChildrenRender = onChildrenRender;
 
     this.renderSubject = new Rx.BehaviorSubject<number | null>(null);
     this.render$ = this.renderSubject.asObservable().pipe(filter(isNumber));
@@ -144,10 +148,15 @@ export class ExpressionRenderHandler {
       // Rendering is asynchronous, completed by handlers.done()
       await getRenderersRegistry()
         .get(value.as as string)!
-        .render(this.element, value.value, {
-          ...this.handlers,
-          uiState,
-        });
+        .render(
+          this.element,
+          value.value,
+          {
+            ...this.handlers,
+            uiState,
+          },
+          this.onChildrenRender
+        );
     } catch (e) {
       return this.handleRenderError(e as ExpressionRenderError);
     }
