@@ -65,6 +65,16 @@ const TableIdLiteralRt = runtimeTypes.union([
   runtimeTypes.literal(TableId.test),
   runtimeTypes.literal(TableId.rulePreview),
   runtimeTypes.literal(TableId.kubernetesPageSessions),
+  runtimeTypes.literal(TableId.alertsOnCasePage),
 ]);
 
 export type TableIdLiteral = runtimeTypes.TypeOf<typeof TableIdLiteralRt>;
+
+export const VIEW_SELECTION = {
+  gridView: 'gridView',
+  eventRenderedView: 'eventRenderedView',
+} as const;
+
+export type ViewSelectionTypes = keyof typeof VIEW_SELECTION;
+
+export type ViewSelection = typeof VIEW_SELECTION[ViewSelectionTypes];

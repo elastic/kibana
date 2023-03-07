@@ -16,3 +16,5 @@ export const FILTER_ACKNOWLEDGED = 'acknowledged' as const;
 
 export type SetEventsLoading = (params: { eventIds: string[]; isLoading: boolean }) => void;
 export type SetEventsDeleted = (params: { eventIds: string[]; isDeleted: boolean }) => void;
+
+export { TimelineTabs } from './detail_panel';

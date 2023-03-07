@@ -20,10 +20,7 @@ import {
 import { mockDataTableModel, createSecuritySolutionStorageMock } from '../../../common/mock';
 import { useKibana } from '../../../common/lib/kibana';
 import { VIEW_SELECTION } from '../../../../common/constants';
-import type {
-  DataTableModel,
-  DataTableState,
-} from '@kbn/securitysolution-data-table';
+import type { DataTableModel, DataTableState } from '@kbn/securitysolution-data-table';
 import { TableId } from '@kbn/securitysolution-data-table';
 
 jest.mock('../../../common/lib/kibana');

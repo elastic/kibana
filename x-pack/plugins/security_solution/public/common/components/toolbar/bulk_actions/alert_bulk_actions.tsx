@@ -11,7 +11,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConnectedProps } from 'react-redux';
 import { connect, useDispatch } from 'react-redux';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { dataTableSelectors, dataTableActions } from '@kbn/securitysolution-data-table';
+import {
+  dataTableSelectors,
+  dataTableActions,
+  tableEntity,
+} from '@kbn/securitysolution-data-table';
 import type { DataTableModel, DataTableState, TableId } from '@kbn/securitysolution-data-table';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
 import type {

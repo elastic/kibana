@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { VIEW_SELECTION } from '../../common/constants';
-import { ColumnHeaderOptions, ColumnHeaderType } from '../../common/types';
+import { ColumnHeaderOptions, ColumnHeaderType, VIEW_SELECTION } from '../../common/types';
 import {
   DEFAULT_TABLE_COLUMN_MIN_WIDTH,
   DEFAULT_TABLE_DATE_COLUMN_MIN_WIDTH,
