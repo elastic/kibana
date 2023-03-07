@@ -8,13 +8,11 @@
 import type { UserActionFindResponse } from '@kbn/cases-plugin/common/api';
 import { getCaseFindUserActionsUrl } from '@kbn/cases-plugin/common/api';
 import { INTERNAL_BULK_CREATE_ATTACHMENTS_URL } from '@kbn/cases-plugin/common/constants';
+import { ELASTIC_SECURITY_RULE_ID } from '../../../../common';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { DEFAULT_ALERTS_INDEX, DETECTION_ENGINE_RULES_URL } from '../../../../common/constants';
 import { request } from './common';
-// import { ELASTIC_SECURITY_RULE_ID } from '../../../../../../test/detection_engine_api_integration/utils';
 import type { Rule } from '../../../detection_engine/rule_management/logic';
-
-const ELASTIC_SECURITY_RULE_ID = '9a1a2dae-0b5f-4c3d-8305-a268d404c306';
 
 export interface AddAlertsToCaseOptions {
   caseId: string;
