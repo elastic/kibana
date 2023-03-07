@@ -27,7 +27,7 @@ const getResponseBaseParams = (anchorDate: string = ANCHOR_DATE): SharedResponse
   description: 'some description',
   enabled: true,
   false_positives: ['false positive 1', 'false positive 2'],
-  custom_highlighted_fields: [],
+  custom_highlighted_fields: ['test.field1', 'test.field2'],
   from: 'now-6m',
   immutable: false,
   name: 'Query with a rule id',
