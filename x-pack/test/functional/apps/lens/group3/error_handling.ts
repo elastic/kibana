@@ -129,5 +129,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/test/functional/fixtures/kbn_archiver/lens/missing_fields'
       );
     });
+
+    it('displays fundamental configuration issues on dashboard', async () => {
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/fundamental_config_errors_on_dashboard'
+      );
+
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.loadSavedDashboard('lens fundamental config errors dash');
+
+      const failureElements = await testSubjects.findAll('errorMessageMarkdown');
+      const errorMessages = await Promise.all(failureElements.map((el) => el.getVisibleText()));
+
+      expect(errorMessages).to.eql([
+        'Visualization type not found.',
+        'The visualization type lnsUNKNOWN could not be resolved.',
+        'Could not find datasource for the visualization',
+      ]);
+
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/fundamental_config_errors_on_dashboard'
+      );
+    });
   });
 }

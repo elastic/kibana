@@ -513,25 +513,23 @@ export class Embeddable
   private loadUserMessages() {
     const userMessages: UserMessage[] = [];
 
-    if (this.activeVisualizationState && this.activeDatasource) {
-      userMessages.push(
-        ...getApplicationUserMessages({
-          visualizationType: this.savedVis?.visualizationType,
-          visualization: {
-            state: this.activeVisualizationState,
-            activeId: this.activeVisualizationId,
-          },
-          visualizationMap: this.deps.visualizationMap,
-          activeDatasource: this.activeDatasource,
-          activeDatasourceState: { state: this.activeDatasourceState },
-          dataViews: {
-            indexPatterns: this.indexPatterns,
-            indexPatternRefs: this.indexPatternRefs, // TODO - are these actually used?
-          },
-          core: this.deps.coreStart,
-        })
-      );
-    }
+    userMessages.push(
+      ...getApplicationUserMessages({
+        visualizationType: this.savedVis?.visualizationType,
+        visualization: {
+          state: this.activeVisualizationState,
+          activeId: this.activeVisualizationId,
+        },
+        visualizationMap: this.deps.visualizationMap,
+        activeDatasource: this.activeDatasource,
+        activeDatasourceState: { state: this.activeDatasourceState },
+        dataViews: {
+          indexPatterns: this.indexPatterns,
+          indexPatternRefs: this.indexPatternRefs, // TODO - are these actually used?
+        },
+        core: this.deps.coreStart,
+      })
+    );
 
     const mergedSearchContext = this.getMergedSearchContext();
 
@@ -634,14 +632,18 @@ export class Embeddable
       savedObjectId: (input as LensByReferenceInput)?.savedObjectId,
     };
 
-    const { ast, indexPatterns, indexPatternRefs } = await getExpressionFromDocument(
-      this.savedVis,
-      this.deps.documentToExpression
-    );
+    try {
+      const { ast, indexPatterns, indexPatternRefs } = await getExpressionFromDocument(
+        this.savedVis,
+        this.deps.documentToExpression
+      );
 
-    this.expression = ast;
-    this.indexPatterns = indexPatterns;
-    this.indexPatternRefs = indexPatternRefs;
+      this.expression = ast;
+      this.indexPatterns = indexPatterns;
+      this.indexPatternRefs = indexPatternRefs;
+    } catch {
+      // nothing, errors should be reported via getUserMessages
+    }
 
     if (metaInfo?.sharingSavedObjectProps?.outcome === 'conflict' && !!this.deps.spaces) {
       this.addUserMessages([
