@@ -43,12 +43,12 @@ export const getAlertsGroupingQuery = ({
     additionalFilters,
     additionalAggregationsRoot: [
       {
-        alertsCount: { value_count: { field: selectedGroup } },
+        unitCount0: { value_count: { field: selectedGroup } },
       },
       ...(selectedGroup !== 'none'
         ? [
             {
-              groupsNumber: {
+              groupCount0: {
                 cardinality: {
                   field: selectedGroup,
                 },

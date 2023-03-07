@@ -22,7 +22,10 @@ export interface GroupingAggregation<T> {
   stackByMultipleFields0?: {
     buckets?: Array<RawBucket<T>>;
   };
-  groupsCount0?: {
+  groupCount0?: {
+    value?: number | null;
+  };
+  unitCount0?: {
     value?: number | null;
   };
 }
