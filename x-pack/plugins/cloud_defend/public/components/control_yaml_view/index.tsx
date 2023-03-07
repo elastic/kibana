@@ -45,14 +45,17 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
         return error;
       });
 
-      onChange({ isValid: actionsValid && errs.length === 0, updatedPolicy: policy });
-      setErrors(errs);
+      // prevents infinite loop
+      if (JSON.stringify(errs) !== JSON.stringify(errors)) {
+        onChange({ isValid: actionsValid && errs.length === 0, updatedPolicy: policy });
+        setErrors(errs);
+      }
     });
 
     return () => {
       listener.dispose();
     };
-  }, [actionsValid, onChange, policy]);
+  }, [actionsValid, errors, onChange, policy]);
 
   // for now we force 'alert' action on all responses. This restriction may be removed in future when we have a plan to record all responses. e.g. audit
   const validateActions = useCallback((value) => {

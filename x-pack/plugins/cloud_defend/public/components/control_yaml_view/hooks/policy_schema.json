@@ -1,26 +1,60 @@
 {
   "$id": "https://elastic.co/cloud-defend/policy-schema.json",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
-  "required": ["selectors", "responses"],
+  "anyOf": [
+    {
+      "required": ["file"]
+    },
+    {
+      "required": ["process"]
+    }
+  ],
   "additionalProperties": false,
   "properties": {
-    "selectors": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "$ref": "#/$defs/selector"
+    "file": {
+      "type": "object",
+      "required": ["selectors", "responses"],
+      "properties": {
+        "selectors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/fileSelector"
+          }
+        },
+        "responses": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/fileResponse"
+          }
+        }
       }
     },
-    "responses": {
-      "type": "array",
-      "minItems": 1,
-      "items": {
-        "$ref": "#/$defs/response"
+    "process": {
+      "type": "object",
+      "required": ["selectors", "responses"],
+      "properties": {
+        "selectors": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/processSelector"
+          }
+        },
+        "responses": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/processResponse"
+          }
+        }
       }
     }
   },
   "$defs": {
-    "selector": {
+    "fileSelector": {
       "type": "object",
       "required": ["name"],
       "additionalProperties": false,
@@ -66,19 +100,6 @@
         "name": {
           "type": "string"
         },
-        "operation": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "enum": [
-              "createExecutable",
-              "modifyExecutable",
-              "createFile",
-              "modifyFile",
-              "deleteFile"
-            ]
-          }
-        },
         "containerImageName": {
           "type": "array",
           "minItems": 1,
@@ -87,13 +108,6 @@
           }
         },
         "containerImageTag": {
-          "type": "array",
-          "minItems": 1,
-          "items": {
-            "type": "string"
-          }
-        },
-        "targetFilePath": {
           "type": "array",
           "minItems": 1,
           "items": {
@@ -142,6 +156,26 @@
             "enum": ["kubernetes"]
           }
         },
+        "operation": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": [
+              "createExecutable",
+              "modifyExecutable",
+              "createFile",
+              "modifyFile",
+              "deleteFile"
+            ]
+          }
+        },
+        "targetFilePath": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
         "ignoreVolumeMounts": {
           "type": "boolean",
           "description": "Ignore all volume mounts. e.g directories, files, configMaps, secrets etc...\nNote: should not be used with ignoreVolumeFiles"
@@ -159,7 +193,155 @@
         }
       }
     },
-    "response": {
+    "processSelector": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "required": ["operation"]
+        },
+        {
+          "required": ["containerImageName"]
+        },
+        {
+          "required": ["containerImageTag"]
+        },
+        {
+          "required": ["orchestratorClusterId"]
+        },
+        {
+          "required": ["orchestratorClusterName"]
+        },
+        {
+          "required": ["orchestratorNamespace"]
+        },
+        {
+          "required": ["orchestratorResourceLabel"]
+        },
+        {
+          "required": ["orchestratorResourceName"]
+        },
+        {
+          "required": ["orchestratorType"]
+        },
+        {
+          "required": ["processExecutable"]
+        },
+        {
+          "required": ["processName"]
+        },
+        {
+          "required": ["processUserName"]
+        },
+        {
+          "required": ["processUserId"]
+        },
+        {
+          "required": ["sessionLeaderInteractive"]
+        }
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "containerImageName": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "containerImageTag": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "orchestratorClusterId": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "orchestratorClusterName": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "orchestratorNamespace": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "orchestratorResourceLabel": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "orchestratorResourceName": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "orchestratorType": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": ["kubernetes"]
+          }
+        },
+        "operation": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": ["fork", "exec"]
+          }
+        },
+        "processExecutable": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "processName": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "processUserName": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "processUserId": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "sessionLeaderInteractive": {
+          "type": "boolean"
+        }
+      }
+    },
+    "fileResponse": {
       "type": "object",
       "required": ["match", "actions"],
       "additionalProperties": false,
@@ -181,7 +363,34 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "enum": ["alert", "block"]
+            "enum": ["alert", "block", "log"]
+          }
+        }
+      }
+    },
+    "processResponse": {
+      "type": "object",
+      "required": ["match", "actions"],
+      "additionalProperties": false,
+      "properties": {
+        "match": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "exclude": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "actions": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "enum": ["alert", "log"]
           }
         }
       }

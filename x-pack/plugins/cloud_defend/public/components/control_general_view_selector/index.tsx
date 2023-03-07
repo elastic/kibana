@@ -6,6 +6,10 @@
  */
 import React, { useState, useMemo, useCallback, FormEvent } from 'react';
 import {
+  EuiBadge,
+  EuiFormLabel,
+  EuiIcon,
+  EuiToolTip,
   EuiAccordion,
   EuiButtonIcon,
   EuiPopover,
@@ -26,9 +30,11 @@ import {
   ControlGeneralViewSelectorDeps,
   ControlFormErrorMap,
   ControlSelectorCondition,
+  ControlFileSelectorCondition,
   ControlSelectorConditionUIOptionsMap,
   ControlSelectorBooleanConditions,
   ControlSelector,
+  TelemetryType,
 } from '../../types';
 import * as i18n from '../control_general_view/translations';
 import {
@@ -144,6 +150,10 @@ export const ControlGeneralViewSelector = ({
   onDuplicate,
   onChange,
 }: ControlGeneralViewSelectorDeps) => {
+  // ensure most recently added is open by default
+  const [accordionState, setAccordionState] = useState<'open' | 'closed'>(
+    selectors.length - 1 === index ? 'open' : 'closed'
+  );
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const [isAddConditionOpen, setAddConditionOpen] = useState(false);
   const [errorMap, setErrorMap] = useState<ControlFormErrorMap>({});
@@ -165,9 +175,9 @@ export const ControlGeneralViewSelector = ({
   }, []);
 
   const remainingProps = useMemo(() => {
-    return Object.keys(ControlSelectorCondition).filter(
-      (condition) => !selector.hasOwnProperty(condition)
-    );
+    const keys = Object.keys(typeof selector);
+
+    return keys.filter((condition) => !selector.hasOwnProperty(condition));
   }, [selector]);
 
   const conditionsAdded = Object.keys(ControlSelectorCondition).length - remainingProps.length;
@@ -233,7 +243,7 @@ export const ControlGeneralViewSelector = ({
       values.forEach((value) => {
         const bytes = new Blob([value]).size;
 
-        if (prop === ControlSelectorCondition.targetFilePath) {
+        if (prop === ControlFileSelectorCondition.targetFilePath) {
           if (bytes > MAX_FILE_PATH_VALUE_LENGTH_BYTES) {
             errors.push(i18n.errorValueLengthExceeded);
           }
@@ -316,53 +326,95 @@ export const ControlGeneralViewSelector = ({
     return errs;
   }, [errorMap, conditionsAdded]);
 
+  const selectorTypeIcon = useMemo(() => {
+    switch (selector.type) {
+      case TelemetryType.process:
+        return 'gear';
+      case TelemetryType.file:
+      default:
+        return 'document';
+    }
+  }, [selector.type]);
+
+  const onToggleAccordion = useCallback((isOpen: boolean) => {
+    setAccordionState(isOpen ? 'open' : 'closed');
+  }, []);
+
   return (
     <EuiAccordion
       id={selector.name}
+      forceState={accordionState}
+      onToggle={onToggleAccordion}
       data-test-subj="cloud-defend-selector"
       paddingSize="m"
-      buttonContent={selector.name}
+      buttonContent={
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem>
+            <EuiToolTip title={i18n.getSelectorIconTooltip(selector.type)}>
+              <EuiIcon color="primary" type={selectorTypeIcon} />
+            </EuiToolTip>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <b>{selector.name}</b>
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
       css={styles.accordion}
       initialIsOpen={index === 0}
       extraAction={
-        <EuiPopover
-          id={selector.name}
-          button={
-            <EuiButtonIcon
-              iconType="boxesHorizontal"
-              onClick={onTogglePopover}
-              aria-label="Selector options"
-              data-test-subj="cloud-defend-btnselectorpopover"
-            />
-          }
-          isOpen={isPopoverOpen}
-          closePopover={closePopover}
-          panelPaddingSize="none"
-          anchorPosition="downLeft"
-        >
-          <EuiContextMenuPanel
-            size="s"
-            items={[
-              <EuiContextMenuItem
-                key="duplicate"
-                icon="copy"
-                onClick={onDuplicateClicked}
-                data-test-subj="cloud-defend-btnduplicateselector"
-              >
-                {i18n.duplicate}
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                key="remove"
-                icon="trash"
-                disabled={selectors.length < 2}
-                onClick={onRemoveClicked}
-                data-test-subj="cloud-defend-btndeleteselector"
-              >
-                {i18n.remove}
-              </EuiContextMenuItem>,
-            ]}
-          />
-        </EuiPopover>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          {accordionState === 'closed' && (
+            <div>
+              <EuiText css={styles.conditionsBadge} size="xs">
+                <b>{i18n.conditions}</b>
+              </EuiText>
+              <EuiBadge color="hollow">{conditionsAdded}</EuiBadge>
+              <div css={styles.verticalDivider} />
+            </div>
+          )}
+          <EuiFlexItem>
+            <EuiPopover
+              id={selector.name}
+              button={
+                <EuiButtonIcon
+                  iconType="boxesHorizontal"
+                  onClick={onTogglePopover}
+                  aria-label="Selector options"
+                  data-test-subj="cloud-defend-btnselectorpopover"
+                />
+              }
+              isOpen={isPopoverOpen}
+              closePopover={closePopover}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+            >
+              <EuiContextMenuPanel
+                size="s"
+                items={[
+                  <EuiContextMenuItem
+                    key="duplicate"
+                    icon="copy"
+                    onClick={onDuplicateClicked}
+                    data-test-subj="cloud-defend-btnduplicateselector"
+                  >
+                    {i18n.duplicate}
+                  </EuiContextMenuItem>,
+                  <EuiContextMenuItem
+                    key="remove"
+                    icon="trash"
+                    disabled={selectors.length < 2}
+                    onClick={onRemoveClicked}
+                    data-test-subj="cloud-defend-btndeleteselector"
+                  >
+                    {i18n.remove}
+                  </EuiContextMenuItem>,
+                ]}
+              />
+            </EuiPopover>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     >
       <EuiForm component="form" error={errors} isInvalid={errors.length > 0}>
@@ -382,7 +434,7 @@ export const ControlGeneralViewSelector = ({
           />
         </EuiFormRow>
         {Object.keys(selector).map((prop: string) => {
-          if (['name', 'hasErrors'].indexOf(prop) === -1) {
+          if (['name', 'type', 'hasErrors'].indexOf(prop) === -1) {
             const label = i18n.getConditionLabel(prop);
 
             if (prop in ControlSelectorBooleanConditions) {

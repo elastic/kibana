@@ -60,9 +60,6 @@ export enum ControlSelectorCondition {
   operation = 'operation',
   containerImageName = 'containerImageName',
   containerImageTag = 'containerImageTag',
-  targetFilePath = 'targetFilePath',
-  ignoreVolumeFiles = 'ignoreVolumeFiles',
-  ignoreVolumeMounts = 'ignoreVolumeMounts',
   orchestratorClusterId = 'orchestratorClusterId',
   orchestratorClusterName = 'orchestratorClusterName',
   orchestratorNamespace = 'orchestratorNamespace',
@@ -72,15 +69,33 @@ export enum ControlSelectorCondition {
   orchestratorType = 'orchestratorType',
 }
 
-export enum ControlSelectorBooleanConditions {
+export enum ControlFileSelectorCondition {
+  targetFilePath = 'targetFilePath',
   ignoreVolumeFiles = 'ignoreVolumeFiles',
   ignoreVolumeMounts = 'ignoreVolumeMounts',
 }
 
+export enum ControlProcessSelectorCondition {
+  processExecutable = 'processExecutable',
+  processName = 'processName',
+  processUserName = 'processUserName',
+  processUserId = 'processUserId',
+  sessionLeaderInteractive = 'sessionLeaderInteractive',
+  sessionLeaderExecutable = 'sessionLeaderExecutable',
+}
+
+export enum ControlSelectorBooleanConditions {
+  ignoreVolumeFiles = 'ignoreVolumeFiles',
+  ignoreVolumeMounts = 'ignoreVolumeMounts',
+  sessionLeaderInteractive = 'sessionLeaderInteractive',
+}
+
 export enum ControlSelectorOperation {
+  createFile = 'createFile',
+  modifyFile = 'modifyFile',
+  deleteFile = 'deleteFile',
   createExecutable = 'createExecutable',
   modifyExecutable = 'modifyExecutable',
-  execMemFd = 'execMemFd',
 }
 
 export enum ControlSelectorOrchestratorType {
@@ -98,14 +113,27 @@ export const ControlSelectorConditionUIOptionsMap: ControlSelectorConditionUIOpt
   orchestratorType: { values: Object.values(ControlSelectorOrchestratorType) },
 };
 
+export enum TelemetryType {
+  file = 'file',
+  process = 'process',
+}
+
+export interface ControlSchema {
+  file?: {
+    selectors: ControlSelector[];
+    responses: ControlResponse[];
+  };
+  process?: {
+    selectors: ControlSelector[];
+    responses: ControlResponse[];
+  };
+}
+
 export interface ControlSelector {
   name: string;
   operation?: string[];
   containerImageName?: string[];
   containerImageTag?: string[];
-  targetFilePath?: string[];
-  ignoreVolumeFiles?: boolean;
-  ignoreVolumeMounts?: boolean;
   orchestratorClusterId?: string[];
   orchestratorClusterName?: string[];
   orchestratorNamespace?: string[];
@@ -114,7 +142,22 @@ export interface ControlSelector {
   orchestratorResourceType?: string[];
   orchestratorType?: string[];
 
-  // ephemeral, used to track selector error state in UI
+  // selector properties
+  targetFilePath?: string[];
+  ignoreVolumeFiles?: boolean;
+  ignoreVolumeMounts?: boolean;
+
+  // process selector properties
+  processExecutable?: string[];
+  processName?: string[];
+  processUserName?: string[];
+  processUserId?: string[];
+  sessionLeaderInteractive?: string[];
+
+  // ephemeral props (used only in UI)
+  type?: TelemetryType;
+
+  // used to track selector error state in UI
   hasErrors?: boolean;
 }
 
@@ -123,7 +166,10 @@ export interface ControlResponse {
   exclude?: string[];
   actions: ControlResponseAction[];
 
-  // ephemeral, used to track response error state in UI
+  // ephemeral props (used only in UI)
+  type?: TelemetryType;
+
+  // used to track response error state in UI
   hasErrors?: boolean;
 }
 

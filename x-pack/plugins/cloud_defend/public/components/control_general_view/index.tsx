@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import {
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
+  EuiPopover,
   EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,11 +22,15 @@ import {
   euiDragDropReorder,
   EuiSpacer,
 } from '@elastic/eui';
-import yaml from 'js-yaml';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { useStyles } from './styles';
-import { getInputFromPolicy } from '../../common/utils';
 import {
+  getInputFromPolicy,
+  getYamlFromSelectorsAndResponses,
+  getSelectorsAndResponsesFromYaml,
+} from '../../common/utils';
+import {
+  TelemetryType,
   ControlSelector,
   ControlResponse,
   DefaultSelector,
@@ -34,44 +41,90 @@ import * as i18n from './translations';
 import { ControlGeneralViewSelector } from '../control_general_view_selector';
 import { ControlGeneralViewResponse } from '../control_general_view_response';
 
+interface AddSelectorButtonProps {
+  onSelectType(type: TelemetryType): void;
+}
+
+const AddSelectorButton = ({ onSelectType }: AddSelectorButtonProps) => {
+  const [isPopoverOpen, setPopover] = useState(false);
+  const onButtonClick = () => {
+    setPopover(!isPopoverOpen);
+  };
+
+  const closePopover = () => {
+    setPopover(false);
+  };
+
+  const addFileSelector = useCallback(() => {
+    closePopover();
+    onSelectType(TelemetryType.file);
+  }, [onSelectType]);
+
+  const addProcessSelector = useCallback(() => {
+    closePopover();
+    onSelectType(TelemetryType.process);
+  }, [onSelectType]);
+
+  const items = [
+    <EuiContextMenuItem key="addFileSelector" icon="document" onClick={addFileSelector}>
+      {i18n.fileSelector}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem key="addProcessSelector" icon="gear" onClick={addProcessSelector}>
+      {i18n.processSelector}
+    </EuiContextMenuItem>,
+    <EuiContextMenuItem key="addNetworkSelector" icon="globe" disabled>
+      {i18n.networkSelector}
+    </EuiContextMenuItem>,
+  ];
+
+  return (
+    <EuiPopover
+      id="addSelectorBtn"
+      button={
+        <EuiButton
+          fullWidth
+          color="primary"
+          iconType="plusInCircle"
+          onClick={onButtonClick}
+          data-test-subj="cloud-defend-btnaddselector"
+        >
+          {i18n.addSelector}
+        </EuiButton>
+      }
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenuPanel size="s" items={items} />
+    </EuiPopover>
+  );
+};
+
 export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   const styles = useStyles();
   const input = getInputFromPolicy(policy, INPUT_CONTROL);
   const configuration = input?.vars?.configuration?.value || '';
-  const json = useMemo<{ selectors: ControlSelector[]; responses: ControlResponse[] }>(() => {
-    try {
-      const result = yaml.load(configuration);
-
-      if (result && result.hasOwnProperty('selectors') && result.hasOwnProperty('responses')) {
-        return result;
-      }
-    } catch {
-      // noop
-    }
-
-    return { selectors: [], responses: [] };
+  const { selectors, responses } = useMemo(() => {
+    return getSelectorsAndResponsesFromYaml(configuration);
   }, [configuration]);
-
-  const { selectors, responses } = json;
 
   const onUpdateYaml = useCallback(
     (newSelectors: ControlSelector[], newResponses: ControlResponse[]) => {
       if (input?.vars?.configuration) {
         const isValid =
-          !newSelectors.find((selector) => selector.hasErrors) &&
-          !newResponses.find((response) => response.hasErrors);
+          !selectors.find((selector) => selector.hasErrors) &&
+          !responses.find((response) => response.hasErrors);
 
-        // remove hasErrors prop prior to yaml conversion
-        newSelectors.forEach((selector) => delete selector.hasErrors);
-        newResponses.forEach((response) => delete response.hasErrors);
-
-        const yml = yaml.dump({ selectors: newSelectors, responses: newResponses });
-        input.vars.configuration.value = yml;
+        input.vars.configuration.value = getYamlFromSelectorsAndResponses(
+          newSelectors,
+          newResponses
+        );
 
         onChange({ isValid, updatedPolicy: { ...policy } });
       }
     },
-    [input?.vars?.configuration, onChange, policy]
+    [input?.vars?.configuration, onChange, policy, responses, selectors]
   );
 
   const incrementName = useCallback(
@@ -93,7 +146,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
     [selectors]
   );
 
-  const onAddSelector = useCallback(() => {
+  const onAddSelector = useCallback((type: TelemetryType) => {
     const newSelector = { ...DefaultSelector };
     const dupe = selectors.find((selector) => selector.name === newSelector.name);
 
@@ -259,15 +312,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
         );
       })}
 
-      <EuiButton
-        fullWidth
-        color="primary"
-        iconType="plusInCircle"
-        onClick={onAddSelector}
-        data-test-subj="cloud-defend-btnaddselector"
-      >
-        {i18n.addSelector}
-      </EuiButton>
+      <AddSelectorButton onSelectType={onAddSelector} />
 
       <EuiSpacer size="m" />
 

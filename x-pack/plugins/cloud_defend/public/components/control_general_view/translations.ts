@@ -6,7 +6,28 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ControlSelectorCondition } from '../../types';
+import {
+  ControlSelectorCondition,
+  ControlFileSelectorCondition,
+  ControlProcessSelectorCondition,
+  TelemetryType,
+} from '../../types';
+
+export const fileSelector = i18n.translate('xpack.cloudDefend.fileSelector', {
+  defaultMessage: 'File selector',
+});
+
+export const processSelector = i18n.translate('xpack.cloudDefend.processSelector', {
+  defaultMessage: 'Process selector',
+});
+
+export const networkSelector = i18n.translate('xpack.cloudDefend.networkSelector', {
+  defaultMessage: 'Network selector (coming soon)',
+});
+
+export const conditions = i18n.translate('xpack.cloudDefend.conditions', {
+  defaultMessage: 'Conditions: ',
+});
 
 export const duplicate = i18n.translate('xpack.cloudDefend.controlDuplicate', {
   defaultMessage: 'Duplicate',
@@ -99,13 +120,27 @@ export const errorValueLengthExceeded = i18n.translate(
   }
 );
 
+export const getSelectorIconTooltip = (telemetryType?: TelemetryType) => {
+  switch (telemetryType) {
+    case TelemetryType.process:
+      return i18n.translate('xpack.cloudDefend.processSelectorIconTooltip', {
+        defaultMessage: 'A process selector. Matches only on process operations.',
+      });
+    case TelemetryType.file:
+    default:
+      return i18n.translate('xpack.cloudDefend.fileSelectorIconTooltip', {
+        defaultMessage: 'A file selector. Matches only on file operations.',
+      });
+  }
+};
+
 export const getConditionHelpLabel = (prop: string) => {
   switch (prop) {
-    case ControlSelectorCondition.ignoreVolumeMounts:
+    case ControlFileSelectorCondition.ignoreVolumeMounts:
       return i18n.translate('xpack.cloudDefend.ignoreVolumeMountsHelp', {
         defaultMessage: 'Ignore operations on all volume mounts.',
       });
-    case ControlSelectorCondition.ignoreVolumeFiles:
+    case ControlFileSelectorCondition.ignoreVolumeFiles:
       return i18n.translate('xpack.cloudDefend.ignoreVolumeFilesHelp', {
         defaultMessage:
           'Ignore operations on file mounts only. e.g mounted files, configMaps, secrets etc...',
@@ -128,18 +163,6 @@ export const getConditionLabel = (prop: string) => {
     case ControlSelectorCondition.containerImageTag:
       return i18n.translate('xpack.cloudDefend.containerImageTag', {
         defaultMessage: 'Container image tag',
-      });
-    case ControlSelectorCondition.targetFilePath:
-      return i18n.translate('xpack.cloudDefend.targetFilePath', {
-        defaultMessage: 'Target file path',
-      });
-    case ControlSelectorCondition.ignoreVolumeFiles:
-      return i18n.translate('xpack.cloudDefend.ignoreVolumeFiles', {
-        defaultMessage: 'Ignore volume files',
-      });
-    case ControlSelectorCondition.ignoreVolumeMounts:
-      return i18n.translate('xpack.cloudDefend.ignoreVolumeMounts', {
-        defaultMessage: 'Ignore volume mounts',
       });
     case ControlSelectorCondition.orchestratorClusterId:
       return i18n.translate('xpack.cloudDefend.orchestratorClusterId', {
@@ -165,6 +188,47 @@ export const getConditionLabel = (prop: string) => {
       return i18n.translate('xpack.cloudDefend.orchestratorResourceType', {
         defaultMessage: 'Orchestrator resource type',
       });
+
+    // file selector specific
+    case ControlFileSelectorCondition.targetFilePath:
+      return i18n.translate('xpack.cloudDefend.targetFilePath', {
+        defaultMessage: 'Target file path',
+      });
+    case ControlFileSelectorCondition.ignoreVolumeFiles:
+      return i18n.translate('xpack.cloudDefend.ignoreVolumeFiles', {
+        defaultMessage: 'Ignore volume files',
+      });
+    case ControlFileSelectorCondition.ignoreVolumeMounts:
+      return i18n.translate('xpack.cloudDefend.ignoreVolumeMounts', {
+        defaultMessage: 'Ignore volume mounts',
+      });
+
+    // process selector specific
+    case ControlProcessSelectorCondition.processExecutable:
+      return i18n.translate('xpack.cloudDefend.processExecutableLbl', {
+        defaultMessage: 'Process executable',
+      });
+    case ControlProcessSelectorCondition.processName:
+      return i18n.translate('xpack.cloudDefend.processNameLbl', {
+        defaultMessage: 'Process name',
+      });
+    case ControlProcessSelectorCondition.processUserName:
+      return i18n.translate('xpack.cloudDefend.processUserNameLbl', {
+        defaultMessage: 'Process user name',
+      });
+    case ControlProcessSelectorCondition.processUserId:
+      return i18n.translate('xpack.cloudDefend.processUserIdLbl', {
+        defaultMessage: 'Process user ID',
+      });
+    case ControlProcessSelectorCondition.sessionLeaderInteractive:
+      return i18n.translate('xpack.cloudDefend.sessionLeaderInteractiveLbl', {
+        defaultMessage: 'Session leader interactive',
+      });
+    case ControlProcessSelectorCondition.sessionLeaderExecutable:
+      return i18n.translate('xpack.cloudDefend.sessionLeaderExecutableLbl', {
+        defaultMessage: 'Session leader executable',
+      });
+
     default:
       return '';
   }
