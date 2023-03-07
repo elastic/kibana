@@ -5,6 +5,11 @@ get:
   parameters:
     - $ref: ../components/parameters/page_size.yaml
     - $ref: ../components/parameters/page_index.yaml
+    - schema:
+        type: integer
+        default: 5
+      in: query  
+      name: errorSize
   responses:
     '200':
       description: OK

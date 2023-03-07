@@ -1705,6 +1705,14 @@
           },
           {
             "$ref": "#/components/parameters/page_index"
+          },
+          {
+            "schema": {
+              "type": "integer",
+              "default": 5
+            },
+            "in": "query",
+            "name": "errorSize"
           }
         ],
         "responses": {

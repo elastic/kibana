@@ -139,6 +139,7 @@ export interface ActionErrorResult {
   agentId: string;
   error: string;
   timestamp: string;
+  hostname?: string;
 }
 
 export interface ActionStatus {

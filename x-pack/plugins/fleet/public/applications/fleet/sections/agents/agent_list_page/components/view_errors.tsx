@@ -7,30 +7,21 @@
 
 import { stringify } from 'querystring';
 
-import styled from 'styled-components';
 import React from 'react';
 import { encode } from '@kbn/rison';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton,
-  EuiAccordion,
-  EuiToolTip,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiBasicTableProps } from '@elastic/eui';
+import { EuiButton, EuiAccordion, EuiToolTip, EuiText, EuiBasicTable } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+
+import { i18n } from '@kbn/i18n';
+
+import type { ActionErrorResult } from '../../../../../../../common/types';
 
 import { buildQuery } from '../../agent_details_page/components/agent_logs/build_query';
 
 import type { ActionStatus } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
-
-const TruncatedEuiText = styled(EuiText)`
-  overflow: hidden;
-  max-height: 3rem;
-  text-overflow: ellipsis;
-`;
 
 export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ action }) => {
   const coreStart = useStartServices();
@@ -57,39 +48,62 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
     return coreStart.http.basePath.prepend(`/app/logs/stream?${queryParams}`);
   };
 
+  const columns: EuiBasicTableProps<ActionErrorResult>['columns'] = [
+    {
+      field: 'hostname',
+      name: i18n.translate('xpack.fleet.agentList.viewErrors.hostnameColumnTitle', {
+        defaultMessage: 'Host Name',
+      }),
+      render: (hostname: string) => (
+        <EuiText size="s" data-test-subj="hostText">
+          {hostname}
+        </EuiText>
+      ),
+    },
+    {
+      field: 'error',
+      name: i18n.translate('xpack.fleet.agentList.viewErrors.errorColumnTitle', {
+        defaultMessage: 'Error Message',
+      }),
+      render: (error: string) => (
+        <EuiToolTip content={error}>
+          <EuiText size="s" color="red" data-test-subj="errorText">
+            {error}
+          </EuiText>
+        </EuiToolTip>
+      ),
+      truncateText: true,
+    },
+    {
+      field: 'agentId',
+      name: i18n.translate('xpack.fleet.agentList.viewErrors.actionColumnTitle', {
+        defaultMessage: 'Action',
+      }),
+      render: (agentId: string) => {
+        const errorItem = (action.latestErrors ?? []).find((item) => item.agentId === agentId);
+        return (
+          <RedirectAppLinks coreStart={coreStart}>
+            <EuiButton
+              href={getErrorLogsUrl(agentId, errorItem!.timestamp)}
+              iconType="popout"
+              color="danger"
+              data-test-subj="viewLogsBtn"
+            >
+              <FormattedMessage
+                id="xpack.fleet.agentActivityFlyout.reviewErrorLogs"
+                defaultMessage="Review error logs"
+              />
+            </EuiButton>
+          </RedirectAppLinks>
+        );
+      },
+    },
+  ];
+
   return (
     <>
       <EuiAccordion id={action.actionId + '_errors'} buttonContent="Show errors">
-        <EuiFlexGroup direction="column" gutterSize="s">
-          {(action.latestErrors ?? []).map((errorItem: any) => (
-            <EuiFlexItem key={errorItem.agentId}>
-              <EuiFlexGroup>
-                <EuiFlexItem>
-                  <EuiToolTip content={errorItem.error}>
-                    <TruncatedEuiText color="red" size="s" data-test-subj="errorText">
-                      {errorItem.error}
-                    </TruncatedEuiText>
-                  </EuiToolTip>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <RedirectAppLinks coreStart={coreStart}>
-                    <EuiButton
-                      data-test-subj="viewLogsBtn"
-                      href={getErrorLogsUrl(errorItem.agentId, errorItem.timestamp)}
-                      iconType="popout"
-                      color="danger"
-                    >
-                      <FormattedMessage
-                        id="xpack.fleet.agentActivityFlyout.reviewErrorLogs"
-                        defaultMessage="Review error logs"
-                      />
-                    </EuiButton>
-                  </RedirectAppLinks>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+        <EuiBasicTable items={action.latestErrors ?? []} columns={columns} />
       </EuiAccordion>
     </>
   );
