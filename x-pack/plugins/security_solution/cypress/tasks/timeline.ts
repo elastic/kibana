@@ -79,6 +79,8 @@ import {
   TIMELINE_LUCENELANGUAGE_BUTTON,
   TIMELINE_KQLLANGUAGE_BUTTON,
   TIMELINE_QUERY,
+  PROVIDER_BADGE,
+  PROVIDER_BADGE_DELETE,
 } from '../screens/timeline';
 import { REFRESH_BUTTON, TIMELINE } from '../screens/timelines';
 import { drag, drop } from './common';
@@ -290,6 +292,12 @@ export const closeTimeline = () => {
       return $el.find(QUERY_TAB_BUTTON);
     })
     .should('not.be.visible');
+};
+
+export const removeDataProvider = () => {
+  cy.get(PROVIDER_BADGE)
+    .click()
+    .then(() => cy.get(PROVIDER_BADGE_DELETE).click());
 };
 
 export const createNewTimeline = () => {

@@ -9,15 +9,15 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '../../../common/constants';
-import type { PostureInput, PosturePolicyTemplate } from '../../../common/types';
+import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
 import { getPolicyTemplateInputOptions, type NewPackagePolicyPostureInput } from './utils';
 import { RadioGroup } from './csp_boxed_radio_group';
 import { AwsCredentialsForm } from './aws_credentials_form';
 
 interface PolicyTemplateSelectorProps {
-  selectedTemplate: PosturePolicyTemplate;
+  selectedTemplate: CloudSecurityPolicyTemplate;
   policy: NewPackagePolicy;
-  setPolicyTemplate(template: PosturePolicyTemplate): void;
+  setPolicyTemplate(template: CloudSecurityPolicyTemplate): void;
   disabled: boolean;
 }
 
@@ -41,7 +41,7 @@ export const PolicyTemplateSelector = ({
       <RadioGroup
         options={Array.from(policyTemplates, (v) => ({ id: v, label: v.toUpperCase() }))}
         idSelected={selectedTemplate}
-        onChange={(id) => setPolicyTemplate(id as PosturePolicyTemplate)}
+        onChange={(id) => setPolicyTemplate(id as CloudSecurityPolicyTemplate)}
         disabled={disabled}
       />
     </div>
@@ -65,7 +65,7 @@ export const PolicyTemplateVarsForm = ({ input, ...props }: PolicyTemplateVarsFo
 };
 
 interface PolicyTemplateInfoProps {
-  postureType: PosturePolicyTemplate;
+  postureType: CloudSecurityPolicyTemplate;
 }
 
 export const PolicyTemplateInfo = ({ postureType }: PolicyTemplateInfoProps) => (

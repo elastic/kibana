@@ -31,6 +31,7 @@ export function openAddDataControlFlyout(this: ControlGroupContainer) {
     theme: { theme$ },
   } = pluginServices.getServices();
   const ControlsServicesProvider = pluginServices.getContextProvider();
+  const ReduxWrapper = this.getReduxEmbeddableTools().Wrapper;
 
   let controlInput: Partial<DataControlInput> = {};
   const onCancel = () => {
@@ -54,43 +55,45 @@ export function openAddDataControlFlyout(this: ControlGroupContainer) {
   const flyoutInstance = openFlyout(
     toMountPoint(
       <ControlsServicesProvider>
-        <ControlEditor
-          setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
-          getRelevantDataViewId={this.getMostRelevantDataViewId}
-          isCreate={true}
-          width={this.getInput().defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
-          grow={this.getInput().defaultControlGrow ?? DEFAULT_CONTROL_GROW}
-          updateTitle={(newTitle) => (controlInput.title = newTitle)}
-          updateWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
-          updateGrow={(defaultControlGrow: boolean) => this.updateInput({ defaultControlGrow })}
-          onSave={(type) => {
-            this.closeAllFlyouts();
-            if (!type) {
-              return;
-            }
+        <ReduxWrapper>
+          <ControlEditor
+            setLastUsedDataViewId={(newId) => this.setLastUsedDataViewId(newId)}
+            getRelevantDataViewId={this.getMostRelevantDataViewId}
+            isCreate={true}
+            width={this.getInput().defaultControlWidth ?? DEFAULT_CONTROL_WIDTH}
+            grow={this.getInput().defaultControlGrow ?? DEFAULT_CONTROL_GROW}
+            updateTitle={(newTitle) => (controlInput.title = newTitle)}
+            updateWidth={(defaultControlWidth) => this.updateInput({ defaultControlWidth })}
+            updateGrow={(defaultControlGrow: boolean) => this.updateInput({ defaultControlGrow })}
+            onSave={(type) => {
+              this.closeAllFlyouts();
+              if (!type) {
+                return;
+              }
 
-            const factory = getControlFactory(type) as IEditableControlFactory;
-            if (factory.presaveTransformFunction) {
-              controlInput = factory.presaveTransformFunction(controlInput);
-            }
+              const factory = getControlFactory(type) as IEditableControlFactory;
+              if (factory.presaveTransformFunction) {
+                controlInput = factory.presaveTransformFunction(controlInput);
+              }
 
-            if (type === OPTIONS_LIST_CONTROL) {
-              this.addOptionsListControl(controlInput as AddOptionsListControlProps);
-              return;
-            }
+              if (type === OPTIONS_LIST_CONTROL) {
+                this.addOptionsListControl(controlInput as AddOptionsListControlProps);
+                return;
+              }
 
-            if (type === RANGE_SLIDER_CONTROL) {
-              this.addRangeSliderControl(controlInput as AddRangeSliderControlProps);
-              return;
-            }
+              if (type === RANGE_SLIDER_CONTROL) {
+                this.addRangeSliderControl(controlInput as AddRangeSliderControlProps);
+                return;
+              }
 
-            this.addDataControlFromField(controlInput as AddDataControlProps);
-          }}
-          onCancel={onCancel}
-          onTypeEditorChange={(partialInput) =>
-            (controlInput = { ...controlInput, ...partialInput })
-          }
-        />
+              this.addDataControlFromField(controlInput as AddDataControlProps);
+            }}
+            onCancel={onCancel}
+            onTypeEditorChange={(partialInput) =>
+              (controlInput = { ...controlInput, ...partialInput })
+            }
+          />
+        </ReduxWrapper>
       </ControlsServicesProvider>,
       { theme$ }
     ),

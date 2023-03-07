@@ -163,17 +163,17 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         align: 'right',
       },
       {
-        name: averageTXLabel,
-        field: 'tx.avg',
-        sortable: true,
-        render: (avg: number) => formatMetric('tx', avg),
-        align: 'right',
-      },
-      {
         name: averageRXLabel,
         field: 'rx.avg',
         sortable: true,
         render: (avg: number) => formatMetric('rx', avg),
+        align: 'right',
+      },
+      {
+        name: averageTXLabel,
+        field: 'tx.avg',
+        sortable: true,
+        render: (avg: number) => formatMetric('tx', avg),
         align: 'right',
       },
       {

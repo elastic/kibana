@@ -6,15 +6,22 @@
  */
 import { schema } from '@kbn/config-schema';
 
+import { EnterpriseSearchEngineDetails } from '../../../common/types/engines';
+import { ErrorCode } from '../../../common/types/error_codes';
 import { createApiKey } from '../../lib/engines/create_api_key';
 
+import { fetchEngineFieldCapabilities } from '../../lib/engines/field_capabilities';
 import { RouteDependencies } from '../../plugin';
+
+import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
+import { fetchEnterpriseSearch, isResponseError } from '../../utils/fetch_enterprise_search';
 
 export function registerEnginesRoutes({
-  router,
+  config,
   enterpriseSearchRequestHandler,
   log,
+  router,
 }: RouteDependencies) {
   router.get(
     {
@@ -134,8 +141,37 @@ export function registerEnginesRoutes({
       path: '/internal/enterprise_search/engines/{engine_name}/field_capabilities',
       validate: { params: schema.object({ engine_name: schema.string() }) },
     },
-    enterpriseSearchRequestHandler.createRequest({
-      path: '/api/engines/:engine_name/field_capabilities',
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const engineName = decodeURIComponent(request.params.engine_name);
+      const { client } = (await context.core).elasticsearch;
+
+      const engine = await fetchEnterpriseSearch<EnterpriseSearchEngineDetails>(
+        config,
+        request,
+        `/api/engines/${engineName}`
+      );
+      if (!engine || (isResponseError(engine) && engine.responseStatus === 404)) {
+        return createError({
+          errorCode: ErrorCode.ENGINE_NOT_FOUND,
+          message: 'Could not find engine',
+          response,
+          statusCode: 404,
+        });
+      }
+      if (isResponseError(engine)) {
+        return createError({
+          errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
+          message: 'Error fetching engine',
+          response,
+          statusCode: engine.responseStatus,
+        });
+      }
+
+      const data = await fetchEngineFieldCapabilities(client, engine);
+      return response.ok({
+        body: data,
+        headers: { 'content-type': 'application/json' },
+      });
     })
   );
 }
