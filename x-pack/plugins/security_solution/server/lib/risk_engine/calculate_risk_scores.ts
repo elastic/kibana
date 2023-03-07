@@ -69,7 +69,7 @@ export const calculateRiskScores = async ({
     Collections.sort(scores, Collections.reverseOrder());
     double max_score = scores[0];
     double total_score = 0;
-    for (int i = 0; i < scores.length; i++) {
+    for (int i = 0; i < Math.min(scores.length, 999999); i++) {
       total_score += scores[i] / Math.pow(i + 1, params.p)
     }
     double score_norm = 100 * total_score / params.risk_cap;
