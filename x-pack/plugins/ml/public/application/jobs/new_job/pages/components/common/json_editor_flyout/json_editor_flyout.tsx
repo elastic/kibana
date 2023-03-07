@@ -69,7 +69,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
   const [saveable, setSaveable] = useState(false);
   const [tempCombinedJob, setTempCombinedJob] = useState<CombinedJob | null>(null);
   const [jobSchema, setJobSchema] = useState<object>();
-  const [datafeedSchema, setDatefeedSchema] = useState<object>();
+  const [datafeedSchema, setDatafeedSchema] = useState<object>();
 
   useEffect(() => {
     setJobConfigString(jobCreator.formattedJobJson);
@@ -107,7 +107,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
 
       fetchSchemas(jsonSchemaApi, '/_ml/datafeeds/{datafeed_id}', 'put')
         .then((result) => {
-          setDatefeedSchema(result);
+          setDatafeedSchema(result);
         })
         .catch((e) => {
           // eslint-disable-next-line no-console
