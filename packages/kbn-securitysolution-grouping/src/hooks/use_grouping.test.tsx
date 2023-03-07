@@ -47,6 +47,7 @@ describe('useGrouping', () => {
     expect(result.current.selectedGroup).toEqual('none');
     expect(result.current.getGrouping(groupingArgs).props.selectedGroup).toEqual('none');
     expect(result.current.groupSelector.props.options).toEqual(defaultGroupingOptions);
-    expect(result.current.pagination).toEqual({ pageIndex: 0, pageSize: 25 });
+    const { reset, ...withoutReset } = result.current.pagination;
+    expect(withoutReset).toEqual({ pageIndex: 0, pageSize: 25 });
   });
 });

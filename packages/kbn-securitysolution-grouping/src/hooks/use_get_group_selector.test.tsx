@@ -26,14 +26,10 @@ const defaultArgs = {
   groupingId,
   groupingState: initialState,
 };
+const customField = 'custom.field';
 describe('useGetGroupSelector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-  });
-
-  it('Does not initialize a group with no options', () => {
-    renderHook(() => useGetGroupSelector({ ...defaultArgs, defaultGroupingOptions: [] }));
-    expect(dispatch).not.toHaveBeenCalled();
   });
 
   it('Initializes a group with options', () => {
@@ -49,7 +45,6 @@ describe('useGetGroupSelector', () => {
   });
 
   it('Initializes a group with custom selected group', () => {
-    const customField = 'custom.field';
     renderHook(() =>
       useGetGroupSelector({
         ...defaultArgs,
@@ -91,10 +86,10 @@ describe('useGetGroupSelector', () => {
       },
     });
     act(() => result.current.props.onGroupChange('host.name'));
-    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(dispatch).toHaveBeenCalledTimes(0);
   });
 
-  it('On group change, resets active page, sets active group, and sets new selectedOptions', () => {
+  it('On group change, resets active page, sets active group, and leaves options alone', () => {
     const testGroup = {
       [groupingId]: {
         ...defaultGroup,
@@ -102,7 +97,7 @@ describe('useGetGroupSelector', () => {
         activeGroup: 'host.name',
       },
     };
-    const { result, rerender } = renderHook((props) => useGetGroupSelector(props), {
+    const { result } = renderHook((props) => useGetGroupSelector(props), {
       initialProps: {
         ...defaultArgs,
         groupingState: {
@@ -111,34 +106,51 @@ describe('useGetGroupSelector', () => {
       },
     });
     act(() => result.current.props.onGroupChange('user.name'));
-
-    expect(dispatch).toHaveBeenNthCalledWith(2, {
+    expect(dispatch).toHaveBeenNthCalledWith(1, {
       payload: {
         id: groupingId,
         activePage: 0,
       },
       type: ActionType.updateGroupActivePage,
     });
-    expect(dispatch).toHaveBeenNthCalledWith(3, {
+    expect(dispatch).toHaveBeenNthCalledWith(2, {
       payload: {
         id: groupingId,
         activeGroup: 'user.name',
       },
       type: ActionType.updateActiveGroup,
     });
+    expect(dispatch).toHaveBeenCalledTimes(2);
+  });
 
-    rerender({
-      ...defaultArgs,
-      groupingState: {
-        groupById: {
-          [groupingId]: { ...testGroup[groupingId], itemsPerPage: 99, activeGroup: 'user.name' },
+  it('On group change to custom field, updates options', () => {
+    const testGroup = {
+      [groupingId]: {
+        ...defaultGroup,
+        options: defaultGroupingOptions,
+        activeGroup: 'host.name',
+      },
+    };
+    const { result } = renderHook((props) => useGetGroupSelector(props), {
+      initialProps: {
+        ...defaultArgs,
+        groupingState: {
+          groupById: testGroup,
         },
       },
     });
-    expect(dispatch).toHaveBeenNthCalledWith(4, {
+    act(() => result.current.props.onGroupChange(customField));
+    expect(dispatch).toHaveBeenCalledTimes(3);
+    expect(dispatch).toHaveBeenNthCalledWith(3, {
       payload: {
         id: groupingId,
-        newOptionList: defaultGroupingOptions,
+        newOptionList: [
+          ...defaultGroupingOptions,
+          {
+            label: customField,
+            key: customField,
+          },
+        ],
       },
       type: ActionType.updateGroupOptions,
     });
