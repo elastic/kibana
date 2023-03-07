@@ -7,11 +7,8 @@
 
 import { EuiIcon } from '@elastic/eui';
 import React from 'react';
-import type {
-  BadgeMetric,
-  CustomMetric,
-} from '../../../../common/components/grouping/accordion_panel';
-import type { RawBucket } from '../../../../common/components/grouping';
+import type { RawBucket } from '@kbn/securitysolution-grouping';
+import type { AlertsGroupingAggregation } from './types';
 import * as i18n from '../translations';
 
 const getSingleGroupSeverity = (severity?: string) => {
@@ -69,8 +66,8 @@ const multiSeverity = (
 
 export const getSelectedGroupBadgeMetrics = (
   selectedGroup: string,
-  bucket: RawBucket
-): BadgeMetric[] => {
+  bucket: RawBucket<AlertsGroupingAggregation>
+) => {
   const defaultBadges = [
     {
       title: i18n.STATS_GROUP_ALERTS,
@@ -140,8 +137,8 @@ export const getSelectedGroupBadgeMetrics = (
 
 export const getSelectedGroupCustomMetrics = (
   selectedGroup: string,
-  bucket: RawBucket
-): CustomMetric[] => {
+  bucket: RawBucket<AlertsGroupingAggregation>
+) => {
   const singleSeverityComponent =
     bucket.severitiesSubAggregation?.buckets && bucket.severitiesSubAggregation?.buckets?.length
       ? getSingleGroupSeverity(bucket.severitiesSubAggregation?.buckets[0].key.toString())

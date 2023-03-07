@@ -1060,6 +1060,8 @@
       "@kbn/securitysolution-es-utils/*": ["packages/kbn-securitysolution-es-utils/*"],
       "@kbn/securitysolution-exception-list-components": ["packages/kbn-securitysolution-exception-list-components"],
       "@kbn/securitysolution-exception-list-components/*": ["packages/kbn-securitysolution-exception-list-components/*"],
+      "@kbn/securitysolution-grouping": ["packages/kbn-securitysolution-grouping"],
+      "@kbn/securitysolution-grouping/*": ["packages/kbn-securitysolution-grouping/*"],
       "@kbn/securitysolution-hook-utils": ["packages/kbn-securitysolution-hook-utils"],
       "@kbn/securitysolution-hook-utils/*": ["packages/kbn-securitysolution-hook-utils/*"],
       "@kbn/securitysolution-io-ts-alerting-types": ["packages/kbn-securitysolution-io-ts-alerting-types"],

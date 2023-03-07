@@ -16,7 +16,9 @@
       "navigation",
       "savedObjects",
       "unifiedSearch",
-      "inspector"
+      "inspector",
+      "savedObjectsManagement",
+      "savedObjectsFinder",
     ],
     "optionalPlugins": [
       "home",
