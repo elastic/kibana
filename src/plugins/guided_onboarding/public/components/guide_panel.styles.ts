@@ -37,6 +37,8 @@ export const getGuidePanelStyles = ({
   const euiTheme = euiThemeContext.euiTheme;
   const flyoutContainerBase = css`
     position: fixed;
+    height: 100%;
+    max-height: 76vh;
     max-inline-size: 480px;
     max-block-size: auto;
     inset-inline-end: 0;
@@ -60,7 +62,8 @@ export const getGuidePanelStyles = ({
     flyoutOverrides: {
       flyoutContainer: css`
         ${flyoutContainerBase};
-        background: #ffffff url(${isDarkTheme ? panelBgTopDark : panelBgTop}) top right no-repeat;
+        background: ${euiTheme.colors.emptyShade} url(${isDarkTheme ? panelBgTopDark : panelBgTop})
+          top right no-repeat;
         padding: 0;
       `,
       flyoutContainerError: css`
@@ -95,7 +98,6 @@ export const getGuidePanelStyles = ({
         ${euiYScrollWithShadows(euiThemeContext, {
           side: 'end',
         })}
-        height: 455px;
         padding: 16px 10px 0 16px;
       `,
       flyoutBodyError: css`
