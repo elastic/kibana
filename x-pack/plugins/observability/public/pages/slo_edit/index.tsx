@@ -16,15 +16,13 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import { SloEditForm } from './components/slo_edit_form';
-import PageNotFound from '../404';
-import { isSloFeatureEnabled } from '../slos/helpers/is_slo_feature_enabled';
 
 export function SloEditPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana().services;
-  const { ObservabilityPageTemplate, config } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
 
   const { sloId } = useParams<{ sloId: string | undefined }>();
 
@@ -41,10 +39,6 @@ export function SloEditPage() {
   ]);
 
   const { slo, isLoading } = useFetchSloDetails(sloId || '');
-
-  if (!isSloFeatureEnabled(config)) {
-    return <PageNotFound />;
-  }
 
   if (hasRightLicense === false) {
     navigateToUrl(basePath.prepend(paths.observability.slos));
