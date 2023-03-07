@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { BoolQuery } from '@kbn/es-query';
+import { BoolQuery, Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AlertsGrouping } from './alerts_grouping';
 import { calculateTimeRangeBucketSize } from '../../../overview/containers/overview_page/helpers/calculate_bucket_size';
 import {
   DEFAULT_DATE_FORMAT,
@@ -162,6 +163,35 @@ function InternalAlertsPage() {
   const CasesContext = cases.ui.getCasesContext();
   const userCasesPermissions = useGetUserCasesPermissions();
 
+  const renderAlertsTable = useCallback(
+    (groupingFilters: Filter[]) => {
+      return esQuery ? (
+        <AlertsStateTable
+          alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+          configurationId={AlertConsumers.OBSERVABILITY}
+          id={ALERTS_TABLE_ID}
+          flyoutSize="s"
+          featureIds={observabilityAlertFeatureIds}
+          query={{
+            ...esQuery,
+            bool: {
+              filter: [
+                ...esQuery.bool.filter,
+                ...groupingFilters.map((f) => ({ ...(f.query ? f.query : {}) })),
+              ],
+            },
+          }}
+          showExpandToDetails={false}
+          showAlertStatusWithFlapping
+          pageSize={ALERTS_PER_PAGE}
+        />
+      ) : (
+        <></>
+      );
+    },
+    [AlertsStateTable, alertsTableConfigurationRegistry, esQuery]
+  );
+
   if (!hasAnyData && !isAllRequestsComplete) {
     return <LoadingObservability />;
   }
@@ -208,19 +238,7 @@ function InternalAlertsPage() {
             permissions={userCasesPermissions}
             features={{ alerts: { sync: false } }}
           >
-            {esQuery && (
-              <AlertsStateTable
-                alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-                configurationId={AlertConsumers.OBSERVABILITY}
-                id={ALERTS_TABLE_ID}
-                flyoutSize="s"
-                featureIds={observabilityAlertFeatureIds}
-                query={esQuery}
-                showExpandToDetails={false}
-                showAlertStatusWithFlapping
-                pageSize={ALERTS_PER_PAGE}
-              />
-            )}
+            <AlertsGrouping renderChildComponent={renderAlertsTable} />
           </CasesContext>
         </EuiFlexItem>
       </EuiFlexGroup>
