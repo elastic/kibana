@@ -7,7 +7,7 @@
 
 import { random } from 'lodash';
 import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
-import { throwRetryError } from '@kbn/task-manager-plugin/server/task_running';
+import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';
 import {
@@ -150,7 +150,7 @@ export class SampleTaskManagerFixturePlugin
         maxAttempts: 3,
         createTaskRunner: () => ({
           async run() {
-            throwRetryError(new Error('Error'), new Date(Date.now() + random(2, 5) * 1000));
+            throwRetryableError(new Error('Error'), new Date(Date.now() + random(2, 5) * 1000));
           },
         }),
       },

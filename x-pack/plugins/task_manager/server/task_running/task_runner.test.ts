@@ -22,7 +22,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import moment from 'moment';
 import { TaskDefinitionRegistry, TaskTypeDictionary } from '../task_type_dictionary';
 import { mockLogger } from '../test_utils';
-import { throwRetryError, throwUnrecoverableError } from './errors';
+import { throwRetryableError, throwUnrecoverableError } from './errors';
 import { taskStoreMock } from '../task_store.mock';
 import apm from 'elastic-apm-node';
 import { executionContextServiceMock } from '@kbn/core/server/mocks';
@@ -1029,7 +1029,7 @@ describe('TaskManagerRunner', () => {
             title: 'Bar!',
             createTaskRunner: () => ({
               async run() {
-                throw throwRetryError(error, nextRetry);
+                throw throwRetryableError(error, nextRetry);
               },
             }),
           },
@@ -1060,7 +1060,7 @@ describe('TaskManagerRunner', () => {
             title: 'Bar!',
             createTaskRunner: () => ({
               run: async () => {
-                throwRetryError(error, true);
+                throwRetryableError(error, true);
               },
             }),
           },
@@ -1092,7 +1092,7 @@ describe('TaskManagerRunner', () => {
             title: 'Bar!',
             createTaskRunner: () => ({
               async run() {
-                throwRetryError(error, false);
+                throwRetryableError(error, false);
               },
             }),
           },
