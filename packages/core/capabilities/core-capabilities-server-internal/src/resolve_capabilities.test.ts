@@ -150,49 +150,4 @@ describe('resolveCapabilities', () => {
       },
     });
   });
-
-  it('does not allow re-enabling', async () => {
-    const caps = {
-      ...defaultCaps,
-      catalogue: {
-        A: false,
-        B: false,
-      },
-    };
-    const switcher = (req: KibanaRequest, capabilities: Capabilities) => ({
-      catalogue: {
-        A: true,
-      },
-    });
-    const result = await resolveCapabilities(caps, [switcher], request, [], false);
-    expect(result.catalogue).toEqual({
-      A: false,
-      B: false,
-    });
-  });
-
-  it('does not allow re-enabling from another switcher', async () => {
-    const caps = {
-      ...defaultCaps,
-      catalogue: {
-        A: true,
-        B: true,
-      },
-    };
-    const switcherA = (req: KibanaRequest, capabilities: Capabilities) => ({
-      catalogue: {
-        A: false,
-      },
-    });
-    const switcherB = (req: KibanaRequest, capabilities: Capabilities) => ({
-      catalogue: {
-        A: true,
-      },
-    });
-    const result = await resolveCapabilities(caps, [switcherA, switcherB], request, [], false);
-    expect(result.catalogue).toEqual({
-      A: false,
-      B: true,
-    });
-  });
 });

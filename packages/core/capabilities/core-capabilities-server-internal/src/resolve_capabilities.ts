@@ -48,24 +48,17 @@ export const resolveCapabilities = async (
 ): Promise<Capabilities> => {
   const mergedCaps: Capabilities = cloneDeep({
     ...capabilities,
-    navLinks: applications.reduce(
-      (acc, app) => ({
-        ...acc,
-        [app]: true,
-      }),
-      capabilities.navLinks
-    ),
+    navLinks: applications.reduce((acc, app) => {
+      acc[app] = true;
+      return acc;
+    }, capabilities.navLinks),
   });
 
-  const switcherChanges = await Promise.all(
-    switchers.map((switcher) => {
-      return switcher(request, mergedCaps, useDefaultCapabilities);
-    })
-  );
-
-  return switcherChanges.reduce<Capabilities>((caps, changes) => {
-    return recursiveApplyChanges(caps, changes);
-  }, mergedCaps);
+  return switchers.reduce(async (caps, switcher) => {
+    const resolvedCaps = await caps;
+    const changes = await switcher(request, resolvedCaps, useDefaultCapabilities);
+    return recursiveApplyChanges(resolvedCaps, changes);
+  }, Promise.resolve(mergedCaps));
 };
 
 function recursiveApplyChanges<
@@ -79,15 +72,10 @@ function recursiveApplyChanges<
       if (changed == null) {
         return [key, orig];
       }
-      if (typeof orig === typeof changed) {
-        if (typeof orig === 'object') {
-          return [key, recursiveApplyChanges(orig, changed)];
-        }
-        if (typeof orig === 'boolean') {
-          return [key, orig && changed];
-        }
+      if (typeof orig === 'object' && typeof changed === 'object') {
+        return [key, recursiveApplyChanges(orig, changed)];
       }
-      return [key, orig];
+      return [key, typeof orig === typeof changed ? changed : orig];
     })
     .reduce((acc, [key, value]) => {
       acc[key as keyof TDestination] = value;
