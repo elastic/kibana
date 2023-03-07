@@ -161,7 +161,15 @@ export const calculateRiskScores = async ({
     index,
     query: {
       bool: {
-        filter,
+        must: [
+          filter,
+          {
+            bool: {
+              must: [{ exists: { field: ALERT_RISK_SCORE } }],
+              filter: filterFromRange(range),
+            },
+          },
+        ],
       },
     },
     aggs: identifierTypes.reduce(
