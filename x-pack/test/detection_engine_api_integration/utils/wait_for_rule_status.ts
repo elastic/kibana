@@ -47,15 +47,8 @@ export const waitForRuleStatus = async (
         const response = await supertest
           .get(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .query(query);
-
-        if (response.status !== 200) {
-          log.debug(
-            `Did not get an expected 200 "ok" when waiting for a rule success or status (waitForRuleStatus). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
-              response.body
-            )}, status: ${JSON.stringify(response.status)}`
-          );
-        }
+          .query(query)
+          .expect(200);
 
         // TODO: https://github.com/elastic/kibana/pull/121644 clean up, make type-safe
         const rule = response.body;
