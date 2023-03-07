@@ -60,13 +60,13 @@ export interface AuditKibana {
    */
   delete_from_spaces?: readonly string[];
   /**
-   * Set of types that are being requested for an action.
+   * Set of space IDs that are not authorized for an action.
    */
-  requested_types?: readonly string[];
+  unauthorized_spaces?: readonly string[];
   /**
-   * Set of space IDs that are being requested for an action.
+   * Set of types that are not authorized for an action.
    */
-  requested_spaces?: readonly string[];
+  unauthorized_types?: readonly string[];
 }
 
 type EcsHttp = Required<LogMeta>['http'];
@@ -383,8 +383,8 @@ export function savedObjectEvent({
   savedObject,
   addToSpaces,
   deleteFromSpaces,
-  requestedTypes,
-  requestedSpaces,
+  unauthorizedSpaces,
+  unauthorizedTypes,
   outcome,
   error,
 }: SavedObjectEventParams): AuditEvent | undefined {
@@ -417,8 +417,8 @@ export function savedObjectEvent({
       saved_object: savedObject,
       add_to_spaces: addToSpaces,
       delete_from_spaces: deleteFromSpaces,
-      requested_types: requestedTypes,
-      requested_spaces: requestedSpaces,
+      unauthorized_spaces: unauthorizedSpaces,
+      unauthorized_types: unauthorizedTypes,
     },
     error: error && {
       code: error.name,

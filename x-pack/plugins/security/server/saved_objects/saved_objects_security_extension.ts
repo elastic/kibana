@@ -133,11 +133,11 @@ export interface AddAuditEventParams {
    * Used with actions that do not audit per object
    * (FIND and OPEN_POINT_IN_TIME_FOR_TYPE actions)
    */
-  requestedTypes?: readonly string[];
+  unauthorizedTypes?: readonly string[];
   /**
    * Array of spaces being requested for authorization.
    */
-  requestedSpaces?: readonly string[];
+  unauthorizedSpaces?: readonly string[];
   /**
    * Relevant error information to add to
    * the audit event
@@ -229,9 +229,15 @@ interface AuditHelperParams {
    */
   deleteFromSpaces?: string[];
   /**
-   * The spaces requested for the action per type
+   * The spaces unauthorized for the action
+   * Used with AuditAction.FIND and AuditAction.OPEN_POINT_IN_TIME
    */
-  typesAndSpaces: Map<string, Set<string>>;
+  unauthorizedSpaces?: string[];
+  /**
+   * The types unauthorized for the action
+   * Used with AuditAction.FIND and AuditAction.OPEN_POINT_IN_TIME
+   */
+  unauthorizedTypes?: string[];
   /** Error information produced by the action */
   error?: Error;
 }
@@ -491,19 +497,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       error,
       addToSpaces,
       deleteFromSpaces,
-      typesAndSpaces,
+      unauthorizedSpaces,
+      unauthorizedTypes,
     } = params;
 
     // If there are no objects, we at least want to add a single audit log for the action
     const toAudit = !!objects && objects?.length > 0 ? objects : ([undefined] as undefined[]);
-    const masterSpaceList = new Set<string>();
-    for (const [, spaces] of typesAndSpaces) {
-      spaces.forEach((space) => masterSpaceList.add(space));
-    }
 
     for (const obj of toAudit) {
-      const spacesForType =
-        obj && typesAndSpaces.has(obj.type) ? typesAndSpaces.get(obj.type)! : masterSpaceList;
       this.addAuditEvent({
         action,
         ...(!!obj && { savedObject: { type: obj.type, id: obj.id } }),
@@ -513,8 +514,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         ...(!error && { outcome: useSuccessOutcome ? 'success' : 'unknown' }),
         addToSpaces,
         deleteFromSpaces,
-        requestedSpaces: spacesForType.size > 0 ? [...spacesForType] : undefined,
-        requestedTypes: obj ? undefined : [...typesAndSpaces.keys()],
+        unauthorizedSpaces,
+        unauthorizedTypes,
       });
     }
   }
@@ -558,7 +559,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           useSuccessOutcome,
           addToSpaces,
           deleteFromSpaces,
-          typesAndSpaces,
           error,
         });
       }
@@ -572,7 +572,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         useSuccessOutcome,
         addToSpaces,
         deleteFromSpaces,
-        typesAndSpaces,
       });
     }
   }
@@ -911,7 +910,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         action: auditAction,
         objects: successAuditObjects.length ? successAuditObjects : undefined,
         useSuccessOutcome: true,
-        typesAndSpaces: enforceMap,
       });
     }
 
@@ -975,16 +973,14 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       this.addAuditEvent({
         action: AuditAction.OPEN_POINT_IN_TIME,
         error: new Error('User is unauthorized for any requested types/spaces'),
-        requestedTypes: [...types],
-        requestedSpaces: [...namespaces],
+        unauthorizedTypes: [...types],
+        unauthorizedSpaces: [...namespaces],
       });
       throw SavedObjectsErrorHelpers.decorateForbiddenError(new Error('unauthorized'));
     }
     this.addAuditEvent({
       action: AuditAction.OPEN_POINT_IN_TIME,
       outcome: 'unknown',
-      requestedTypes: [...types],
-      requestedSpaces: [...namespaces],
     });
 
     return preAuthorizationResult;
@@ -1093,7 +1089,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
           this.addAuditEvent({
             action: AuditAction.COLLECT_MULTINAMESPACE_REFERENCES,
             savedObject: { type, id },
-            requestedSpaces: spaces,
           });
         }
         filteredObjectsMap.set(objKey, obj);
@@ -1297,8 +1292,8 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       this.addAuditEvent({
         action: AuditAction.FIND,
         error: new Error(`User is unauthorized for any requested types/spaces`),
-        requestedTypes: [...types],
-        requestedSpaces: [...namespaces],
+        unauthorizedTypes: [...types],
+        unauthorizedSpaces: [...namespaces],
       });
     }
     return preAuthorizationResult;
@@ -1317,7 +1312,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       this.addAuditEvent({
         action: AuditAction.FIND,
         savedObject: { type, id },
-        requestedSpaces: existingNamespaces,
       });
     }
     if (spacesToAuthorize.size > authorizeNamespaces.size) {

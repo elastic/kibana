@@ -48,12 +48,12 @@ describe('#savedObjectEvent', () => {
         "kibana": Object {
           "add_to_spaces": undefined,
           "delete_from_spaces": undefined,
-          "requested_spaces": undefined,
-          "requested_types": undefined,
           "saved_object": Object {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
           },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
         },
         "message": "User is creating dashboard [id=SAVED_OBJECT_ID]",
       }
@@ -82,12 +82,12 @@ describe('#savedObjectEvent', () => {
         "kibana": Object {
           "add_to_spaces": undefined,
           "delete_from_spaces": undefined,
-          "requested_spaces": undefined,
-          "requested_types": undefined,
           "saved_object": Object {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
           },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
         },
         "message": "User has created dashboard [id=SAVED_OBJECT_ID]",
       }
@@ -120,12 +120,12 @@ describe('#savedObjectEvent', () => {
         "kibana": Object {
           "add_to_spaces": undefined,
           "delete_from_spaces": undefined,
-          "requested_spaces": undefined,
-          "requested_types": undefined,
           "saved_object": Object {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
           },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
         },
         "message": "Failed attempt to create dashboard [id=SAVED_OBJECT_ID]",
       }
@@ -229,12 +229,12 @@ describe('#savedObjectEvent', () => {
         "kibana": Object {
           "add_to_spaces": undefined,
           "delete_from_spaces": undefined,
-          "requested_spaces": undefined,
-          "requested_types": undefined,
           "saved_object": Object {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
           },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
         },
         "message": "User has removed references to dashboard [id=SAVED_OBJECT_ID]",
       }
@@ -273,12 +273,12 @@ describe('#savedObjectEvent', () => {
             "space4",
             "space6",
           ],
-          "requested_spaces": undefined,
-          "requested_types": undefined,
           "saved_object": Object {
             "id": "SAVED_OBJECT_ID",
             "type": "dashboard",
           },
+          "unauthorized_spaces": undefined,
+          "unauthorized_types": undefined,
         },
         "message": "User has updated spaces of dashboard [id=SAVED_OBJECT_ID]",
       }
@@ -290,8 +290,8 @@ describe('#savedObjectEvent', () => {
       savedObjectEvent({
         action: AuditAction.FIND,
         savedObject: undefined,
-        requestedSpaces: ['space1', 'space2', 'space3'],
-        requestedTypes: ['x', 'y', 'z'],
+        unauthorizedSpaces: ['space1', 'space2', 'space3'],
+        unauthorizedTypes: ['x', 'y', 'z'],
       })
     ).toMatchInlineSnapshot(`
       Object {
@@ -309,17 +309,17 @@ describe('#savedObjectEvent', () => {
         "kibana": Object {
           "add_to_spaces": undefined,
           "delete_from_spaces": undefined,
-          "requested_spaces": Array [
+          "saved_object": undefined,
+          "unauthorized_spaces": Array [
             "space1",
             "space2",
             "space3",
           ],
-          "requested_types": Array [
+          "unauthorized_types": Array [
             "x",
             "y",
             "z",
           ],
-          "saved_object": undefined,
         },
         "message": "User has accessed saved objects",
       }
