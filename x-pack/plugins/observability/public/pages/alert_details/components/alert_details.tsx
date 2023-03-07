@@ -99,8 +99,6 @@ export function AlertDetails() {
     );
   const AlertDetailsAppSection = ruleTypeModel ? ruleTypeModel.alertDetailsAppSection : null;
   const timeZone = getTimeZone(uiSettings);
-  console.log('timeZone', timeZone);
-
   return (
     <ObservabilityPageTemplate
       pageHeader={{
