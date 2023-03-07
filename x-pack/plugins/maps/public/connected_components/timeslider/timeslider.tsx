@@ -42,15 +42,17 @@ export class Timeslider extends Component<Props, {}> {
     this._isMounted = true;
   }
 
-  _getInitialInput = async (
+  _getCreationOptions = async (
     initialInput: Partial<ControlGroupInput>,
     builder: typeof controlGroupInputBuilder
   ) => {
     builder.addTimeSliderControl(initialInput);
     return {
-      ...initialInput,
-      viewMode: ViewMode.VIEW,
-      timeRange: this.props.timeRange,
+      initialInput: {
+        ...initialInput,
+        viewMode: ViewMode.VIEW,
+        timeRange: this.props.timeRange,
+      },
     };
   };
 
@@ -91,7 +93,7 @@ export class Timeslider extends Component<Props, {}> {
       <div className="mapTimeslider mapTimeslider--animation">
         <ControlGroupRenderer
           onLoadComplete={this._onLoadComplete}
-          getInitialInput={this._getInitialInput}
+          getCreationOptions={this._getCreationOptions}
           timeRange={this.props.timeRange}
         />
       </div>

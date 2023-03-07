@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { APP_PATH } from '../../../../../../common/constants';
-import type { SignalSearchResponse } from '../../../signals/types';
+import type { SignalSearchResponse } from '../../../rule_types/types';
 
 export const getNotificationResultsLink = ({
   kibanaSiemAppUrl = APP_PATH,

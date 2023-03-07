@@ -298,6 +298,39 @@
       },
       {
         "parentPluginId": "ml",
+        "id": "def-public.MlNodeAvailableWarningShared",
+        "type": "Function",
+        "tags": [],
+        "label": "MlNodeAvailableWarningShared",
+        "description": [],
+        "signature": [
+          "({ nodeAvailableCallback, size }: React.PropsWithChildren<Props>) => JSX.Element | null"
+        ],
+        "path": "x-pack/plugins/ml/public/application/components/node_available_warning/node_available_warning_shared.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "ml",
+            "id": "def-public.MlNodeAvailableWarningShared.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ nodeAvailableCallback, size }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<Props>"
+            ],
+            "path": "x-pack/plugins/ml/public/application/components/node_available_warning/node_available_warning_shared.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
         "id": "def-public.useMlHref",
         "type": "Function",
         "tags": [],
@@ -379,6 +412,23 @@
             "isRequired": false
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ml",
+        "id": "def-public.useMlNodeAvailableCheck",
+        "type": "Function",
+        "tags": [],
+        "label": "useMlNodeAvailableCheck",
+        "description": [],
+        "signature": [
+          "() => { mlNodesAvailable: boolean; isCloud: boolean; deploymentId: string | null; isCloudTrial: boolean; }"
+        ],
+        "path": "x-pack/plugins/ml/public/application/components/node_available_warning/hooks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }

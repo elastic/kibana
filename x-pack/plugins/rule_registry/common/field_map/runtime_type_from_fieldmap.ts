@@ -8,7 +8,7 @@ import { Optional } from 'utility-types';
 import { mapValues, pickBy } from 'lodash';
 import { either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts';
-import { FieldMap } from './types';
+import type { FieldMap } from '@kbn/alerts-as-data-utils';
 
 const NumberFromString = new t.Type(
   'NumberFromString',

@@ -1,6 +1,7 @@
 post:
-  summary: Setup
-  tags: []
+  summary: Initiate Fleet setup
+  tags:
+    - Fleet internals
   responses:
     '200':
       description: OK

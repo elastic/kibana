@@ -10,16 +10,16 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type { BaseHit, SearchTypes } from '../../../../../../common/detection_engine/types';
 import type { ConfigType } from '../../../../../config';
-import type { BuildReasonMessage } from '../../../signals/reason_formatters';
-import { getMergeStrategy } from '../../../signals/source_fields_merging/strategies';
-import type { BaseSignalHit, SignalSource, SignalSourceHit } from '../../../signals/types';
+import type { BuildReasonMessage } from '../../utils/reason_formatters';
+import { getMergeStrategy } from '../../utils/source_fields_merging/strategies';
+import type { BaseSignalHit, SignalSource, SignalSourceHit } from '../../types';
 import { additionalAlertFields, buildAlert } from './build_alert';
 import { filterSource } from './filter_source';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
-import { buildRuleNameFromMapping } from '../../../signals/mappings/build_rule_name_from_mapping';
-import { buildSeverityFromMapping } from '../../../signals/mappings/build_severity_from_mapping';
-import { buildRiskScoreFromMapping } from '../../../signals/mappings/build_risk_score_from_mapping';
+import { buildRuleNameFromMapping } from '../../utils/mappings/build_rule_name_from_mapping';
+import { buildSeverityFromMapping } from '../../utils/mappings/build_severity_from_mapping';
+import { buildRiskScoreFromMapping } from '../../utils/mappings/build_risk_score_from_mapping';
 import type { BaseFieldsLatest } from '../../../../../../common/detection_engine/schemas/alerts';
 import { stripNonEcsFields } from './strip_non_ecs_fields';
 

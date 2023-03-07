@@ -15,6 +15,7 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
@@ -41,9 +42,9 @@ import {
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
+import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../shared/list_metric';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
-import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { HealthBadge } from './health_badge';
 
 type ServicesDetailedStatisticsAPIResponse =
@@ -104,7 +105,10 @@ export function getServiceColumns({
                     color="danger"
                     href={link('/services/{serviceName}/alerts', {
                       path: { serviceName },
-                      query,
+                      query: {
+                        ...query,
+                        alertStatus: ALERT_STATUS_ACTIVE,
+                      },
                     })}
                   >
                     {alertsCount}
