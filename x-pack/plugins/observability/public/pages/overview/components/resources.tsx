@@ -9,6 +9,23 @@ import { EuiFlexGrid, EuiFlexItem, EuiListGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
+export function Resources() {
+  return (
+    <EuiFlexGrid direction="row">
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xs">
+          <h4>
+            {i18n.translate('xpack.observability.resources.title', {
+              defaultMessage: 'Resources',
+            })}
+          </h4>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiListGroup flush listItems={resources} data-test-subj="listGroup" size="s" />
+    </EuiFlexGrid>
+  );
+}
+
 const resources = [
   {
     iconType: 'documents',
@@ -39,20 +56,3 @@ const resources = [
     href: 'https://ela.st/observability-training',
   },
 ];
-
-export function Resources() {
-  return (
-    <EuiFlexGrid direction="row">
-      <EuiFlexItem grow={false}>
-        <EuiTitle size="xs">
-          <h4>
-            {i18n.translate('xpack.observability.resources.title', {
-              defaultMessage: 'Resources',
-            })}
-          </h4>
-        </EuiTitle>
-      </EuiFlexItem>
-      <EuiListGroup flush listItems={resources} data-test-subj="listGroup" size="s" />
-    </EuiFlexGrid>
-  );
-}

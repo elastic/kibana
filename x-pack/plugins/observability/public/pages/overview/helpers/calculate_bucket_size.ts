@@ -7,10 +7,19 @@
 
 import { TimeBuckets } from '@kbn/data-plugin/common';
 import { TimeRange } from '@kbn/es-query';
-import { getAbsoluteTime } from '../../../../../utils/date';
-import { DEFAULT_INTERVAL } from '../constants';
-import { Bucket, BucketSize } from '../types';
-import { getBucketSize } from '../../../../../utils/get_bucket_size';
+import { getAbsoluteTime } from '../../../utils/date';
+import { DEFAULT_INTERVAL } from '../../constants';
+import { getBucketSize } from '../../../utils/get_bucket_size';
+
+export type BucketSize =
+  | { bucketSize: number; intervalString: string; dateFormat: string }
+  | undefined;
+
+interface Bucket {
+  start?: number;
+  end?: number;
+  timeBuckets: TimeBuckets;
+}
 
 export function calculateBucketSize({ start, end, timeBuckets }: Bucket): BucketSize {
   if (start && end) {

@@ -20,7 +20,7 @@ import { truncate } from 'lodash';
 import React, { useContext } from 'react';
 import { ThemeContext } from 'styled-components';
 import { NewsItem as INewsItem } from '../../../services/get_news_feed';
-import './index.scss';
+import './news_feed.scss';
 
 interface Props {
   items: INewsItem[];
