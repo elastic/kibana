@@ -29,11 +29,7 @@ export class SettingsStorage<TSettingsDef extends object = object> {
   private readonly settingsFileFullPath: string;
   private dirExists: boolean = false;
 
-  constructor(
-    /** The settings file name (no path) including file extension */
-    fileName: string,
-    options: SettingStorageOptions<TSettingsDef> = {}
-  ) {
+  constructor(fileName: string, options: SettingStorageOptions<TSettingsDef> = {}) {
     const { directory = DEFAULT_DIRECTORY_PATH, defaultSettings = {} as TSettingsDef } = options;
 
     this.options = {

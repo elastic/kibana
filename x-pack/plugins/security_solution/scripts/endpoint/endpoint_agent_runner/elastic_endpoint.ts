@@ -51,7 +51,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
     log,
     kbnClient,
     options: { version, policy },
-    settings,
+    localSettingsDirPath,
   } = getRuntimeServices();
 
   log.info(`Creating VM and enrolling Elastic Agent`);
@@ -169,10 +169,10 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
     const runAgentCommand = `ssh ubuntu@${vmInfo.info[vmName].ipv4[0]} -o StrictHostKeyChecking=no -i multipass_ssh_key -tt nohup bash -c 'sudo /home/ubuntu/${vmDirName}/elastic-agent &>/dev/null &'`;
 
     log.info(`Running elastic agent`);
-    log.verbose(`Command: ${runAgentCommand}\nCWD: ${settings.getDirectoryPath()}`);
+    log.verbose(`Command: ${runAgentCommand}`);
 
     await execa
-      .command(runAgentCommand, { timeout: 5000, cwd: settings.getDirectoryPath() })
+      .command(runAgentCommand, { timeout: 5000, cwd: localSettingsDirPath })
       .catch((error) => {
         if (error.originalMessage !== 'Timed out') {
           throw error;
