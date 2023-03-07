@@ -470,6 +470,19 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     });
 
+    it('400s when bulk creating a non registered external reference attachment type', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      await bulkCreateAttachments({
+        supertest,
+        caseId: postedCase.id,
+        params: [
+          postExternalReferenceSOReq,
+          { ...postExternalReferenceSOReq, externalReferenceAttachmentTypeId: 'not-exists' },
+        ],
+        expectedHttpCode: 400,
+      });
+    });
+
     // This test is intended to fail when new external reference attachment types are registered.
     // To resolve, add the new external reference attachment types ID to this list. This will trigger
     // a CODEOWNERS review by Response Ops.
