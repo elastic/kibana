@@ -1,0 +1,27 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "k9V5UIYBpykOpthsKsB8",
+    "index": "conflicts-0001",
+    "source": {
+      "@timestamp": "2023-02-14T00:45:06.527Z",
+      "doc_id": 11111,
+      "my_field": "Value 1",
+      "title" : "Document 1"
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "id": "o9WEUIYBpykOpthswsA9",
+    "index": "conflicts-0001",
+    "source": {
+      "@timestamp": "2023-02-14T02:45:06.527Z",
+      "doc_id": 2222,
+      "my_field": "Value 2",
+      "title" : "Document 2"
+    }
+  }
+}
