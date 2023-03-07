@@ -524,8 +524,9 @@ export class ActionsPlugin implements Plugin<PluginSetupContract, PluginStartCon
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
-      getUnsecuredSavedObjectsClient: (request: KibanaRequest) =>
-        this.getUnsecuredSavedObjectsClient(core.savedObjects, request),
+      savedObjectsRepository: core.savedObjects.createInternalRepository([
+        ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+      ]),
     });
 
     this.eventLogService!.isEsContextReady().then(() => {

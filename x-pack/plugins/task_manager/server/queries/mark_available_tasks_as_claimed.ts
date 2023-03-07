@@ -143,6 +143,7 @@ export const updateFieldsAndMarkAsFailed = ({
     .join(' ')}`;
   const setScheduledAtAndMarkAsClaimed = `${setScheduledAtScript}
     ${markAsClaimingScript}`;
+  // TODO: Remove section updating status to "failed" and rather let Kibana process the task and it's related cleanup
   return {
     source: `
     if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {

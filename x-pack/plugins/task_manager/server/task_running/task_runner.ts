@@ -545,7 +545,16 @@ export class TaskManagerRunner implements TaskRunner {
     } else if (fieldUpdates.status === TaskStatus.Failed) {
       // Delete the SO instead so it doesn't remain in the index forever
       await this.bufferedTaskStore.remove(this.id);
-      asRan(this.instance.task);
+      this.instance = asRan(this.instance.task);
+      if (this.task?.cleanup) {
+        try {
+          await this.task.cleanup();
+        } catch (e) {
+          this.logger.error(
+            `Error encountered when running onTaskRemoved() hook for ${this}: ${e.message}`
+          );
+        }
+      }
     } else {
       this.instance = asRan(
         await this.bufferedTaskStore.update(
@@ -575,6 +584,15 @@ export class TaskManagerRunner implements TaskRunner {
     try {
       await this.bufferedTaskStore.remove(this.id);
       this.instance = asRan(this.instance.task);
+      if (this.task?.cleanup) {
+        try {
+          await this.task.cleanup();
+        } catch (e) {
+          this.logger.error(
+            `Error encountered when running onTaskRemoved() hook for ${this}: ${e.message}`
+          );
+        }
+      }
     } catch (err) {
       if (err.statusCode === 404) {
         this.logger.warn(`Task cleanup of ${this} failed in processing. Was remove called twice?`);
