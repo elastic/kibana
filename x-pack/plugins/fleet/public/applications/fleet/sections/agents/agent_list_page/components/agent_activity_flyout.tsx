@@ -40,6 +40,7 @@ import { SO_SEARCH_LIMIT } from '../../../../constants';
 import { Loading } from '../../components';
 
 import { getTodayActions, getOtherDaysActions } from './agent_activity_helper';
+import { ViewErrors } from './view_errors';
 
 const FullHeightFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
@@ -526,6 +527,11 @@ const ActivityItem: React.FunctionComponent<{
           <EuiText color="subdued" data-test-subj="statusDescription">
             {displayByStatus[action.status].description}
           </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {action.status === 'FAILED' && action.latestErrors && action.latestErrors.length > 0 ? (
+            <ViewErrors action={action} />
+          ) : null}
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
