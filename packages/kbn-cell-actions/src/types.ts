@@ -5,12 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import type {
   Action,
   ActionExecutionContext,
   UiActionsService,
 } from '@kbn/ui-actions-plugin/public';
+import type { CellActionsMode } from './constants';
 
 export interface CellActionsProviderProps {
   /**
@@ -46,10 +46,7 @@ export interface CellActionField {
   aggregatable?: boolean;
 }
 
-export enum CellActionsMode {
-  HOVER = 'hover',
-  INLINE = 'inline',
-}
+type Metadata = Record<string, unknown>;
 
 export interface CellActionsProps {
   /**
@@ -80,18 +77,16 @@ export interface CellActionsProps {
   /**
    * List of Actions ids that shouldn't be displayed inside cell actions.
    */
-  disabledActions?: string[];
+  disabledActionTypes?: string[];
   /**
    * Custom set of properties used by some actions.
    * An action might require a specific set of metadata properties to render.
    * This data is sent directly to actions.
    */
-  metadata?: Record<string, unknown>;
+  metadata?: Metadata;
 
   className?: string;
 }
-
-type Metadata = Record<string, unknown> | undefined;
 
 export interface CellActionExecutionContext extends ActionExecutionContext {
   field: CellActionField;
@@ -102,19 +97,24 @@ export interface CellActionExecutionContext extends ActionExecutionContext {
   /**
    * Extra configurations for actions.
    */
-  metadata?: Metadata;
+  metadata: Metadata | undefined;
 }
 
-export interface CellActionCompatibilityContext<M extends Metadata = Metadata>
-  extends ActionExecutionContext {
+/**
+ * Subset of `CellActionExecutionContext` used only for the compatibility check in the `isCompatible` function.
+ * It omits the references and the `field.value`.
+ */
+export interface CellActionCompatibilityContext<
+  C extends CellActionExecutionContext = CellActionExecutionContext
+> extends ActionExecutionContext {
   /**
    * The object containing the field name and type, needed for the compatibility check
    */
-  field: Pick<CellActionField, 'name' | 'type' | 'aggregatable'>;
+  field: Omit<C['field'], 'value'>;
   /**
    * Extra configurations for actions.
    */
-  metadata?: M;
+  metadata: C['metadata'] | undefined;
 }
 
 export interface CellAction<C extends CellActionExecutionContext = CellActionExecutionContext>
@@ -123,7 +123,7 @@ export interface CellAction<C extends CellActionExecutionContext = CellActionExe
    * Returns a promise that resolves to true if this action is compatible given the context,
    * otherwise resolves to false.
    */
-  isCompatible(context: CellActionCompatibilityContext<C['metadata']>): Promise<boolean>;
+  isCompatible(context: CellActionCompatibilityContext<C>): Promise<boolean>;
 }
 
 export type GetActions = (context: CellActionCompatibilityContext) => Promise<CellAction[]>;
@@ -131,4 +131,21 @@ export type GetActions = (context: CellActionCompatibilityContext) => Promise<Ce
 export interface PartitionedActions {
   extraActions: CellAction[];
   visibleActions: CellAction[];
+}
+
+/**
+ * Cell action factory template with optional `id`.
+ * The id override is required when using the action factory so it
+ * can be omitted in the original action creator
+ */
+export type CellActionTemplate<C extends CellAction = CellAction> = Omit<C, 'id'>;
+/**
+ * Action factory extend parameter type,
+ */
+export type CellActionExtend<C extends CellAction = CellAction> = Partial<C> & { id: string };
+export interface CellActionFactory<C extends CellAction = CellAction> {
+  <A extends C = C>(extend: CellActionExtend<A>): A;
+  combine: <A extends C = C>(
+    partialActionTemplate: Partial<CellActionTemplate<A>>
+  ) => CellActionFactory<A>;
 }

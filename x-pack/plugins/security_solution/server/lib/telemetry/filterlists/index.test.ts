@@ -25,6 +25,7 @@ describe('Security Telemetry filters', () => {
       'event.outcome': true,
       'event.provider': true,
       'event.type': true,
+      'powershell.file.script_block_text': true,
       package_version: true,
     };
 
@@ -144,10 +145,12 @@ describe('Security Telemetry filters', () => {
         'kibana.random.long.alert.string': {
           info: 'data',
         },
+        'powershell.file.script_block_text': 'h1rY5xI2hC8S#Gv&CB**7hlYV7o',
       };
       expect(copyAllowlistedFields(allowlist, event)).toStrictEqual({
         'kibana.alert.ancestors': 'a',
         'kibana.alert.original_event.module': 'b',
+        'powershell.file.script_block_text': 'h1rY5xI2hC8S#Gv&CB**7hlYV7o',
       });
     });
 

@@ -7,7 +7,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Route, Switch } from 'react-router-dom';
+import { Router, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { CaptureTest } from './containers/capture_test';

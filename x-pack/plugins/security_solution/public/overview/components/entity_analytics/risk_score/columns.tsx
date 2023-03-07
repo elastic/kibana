@@ -9,7 +9,6 @@ import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { get } from 'lodash/fp';
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
 import styled from 'styled-components';
 import { UsersTableType } from '../../../../explore/users/store/model';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
@@ -24,14 +23,16 @@ import type {
 import { RiskScoreEntity, RiskScoreFields } from '../../../../../common/search_strategy';
 import * as i18n from './translations';
 import { FormattedCount } from '../../../../common/components/formatted_number';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
-import { ACTION_ID as FILTER_IN_ACTION_ID } from '../../../../actions/filter/default/filter_in';
-import { ACTION_ID as FILTER_OUT_ACTION_ID } from '../../../../actions/filter/default/filter_out';
-import { ACTION_ID as SHOW_TOP_N_ACTION_ID } from '../../../../actions/show_top_n/default/show_top_n';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+  SecurityCellActionType,
+} from '../../../../common/components/cell_actions';
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
 
-const StyledCellActions = styled(CellActions)`
+const StyledCellActions = styled(SecurityCellActions)`
   padding-left: ${({ theme }) => theme.eui.euiSizeS};
 `;
 
@@ -55,10 +56,13 @@ export const getRiskScoreColumns = (
                 value: entityName,
                 type: 'keyword',
               }}
-              triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
               mode={CellActionsMode.INLINE}
               visibleCellActions={2}
-              disabledActions={[SHOW_TOP_N_ACTION_ID, FILTER_IN_ACTION_ID, FILTER_OUT_ACTION_ID]}
+              disabledActionTypes={[
+                SecurityCellActionType.FILTER,
+                SecurityCellActionType.SHOW_TOP_N,
+              ]}
             />
           </>
         ) : (
@@ -70,9 +74,12 @@ export const getRiskScoreColumns = (
                 value: entityName,
                 type: 'keyword',
               }}
-              triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+              triggerId={SecurityCellActionsTrigger.DEFAULT}
               mode={CellActionsMode.INLINE}
-              disabledActions={[SHOW_TOP_N_ACTION_ID, FILTER_IN_ACTION_ID, FILTER_OUT_ACTION_ID]}
+              disabledActionTypes={[
+                SecurityCellActionType.FILTER,
+                SecurityCellActionType.SHOW_TOP_N,
+              ]}
             />
           </>
         );

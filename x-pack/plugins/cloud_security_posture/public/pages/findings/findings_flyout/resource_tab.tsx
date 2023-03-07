@@ -6,19 +6,21 @@
  */
 
 import {
-  EuiAccordion,
   EuiCode,
   EuiCodeBlock,
-  EuiDescriptionList,
-  EuiPanel,
-  EuiSpacer,
+  EuiInMemoryTable,
+  EuiInMemoryTableProps,
   EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React from 'react';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
+
+interface ResourceItem {
+  key: string; // flattened dot notation object path for CspFinding['resource'];
+  value: unknown;
+}
 
 const getDescriptionDisplay = (value: unknown) => {
   if (value === undefined) return 'undefined';
@@ -37,71 +39,46 @@ const getDescriptionDisplay = (value: unknown) => {
   return <EuiText size="s">{value as string}</EuiText>;
 };
 
-export const prepareDescriptionList = (data: any) =>
-  Object.entries(getFlattenedObject(data))
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .map(([key, value]) => ({
-      title: (
-        <EuiText size="s">
-          <strong>{key}</strong>
-        </EuiText>
-      ),
-      description: getDescriptionDisplay(value),
-    }));
-
-export const ResourceTab = ({ data }: { data: CspFinding }) => {
-  const { euiTheme } = useEuiTheme();
-
-  const accordions = useMemo(
-    () => [
-      {
-        title: i18n.translate(
-          'xpack.csp.findings.findingsFlyout.resourceTab.resourceAccordionTitle',
-          { defaultMessage: 'Resource' }
-        ),
-        id: 'resourceAccordion',
-        listItems: prepareDescriptionList(data.resource),
-      },
-      {
-        title: i18n.translate('xpack.csp.findings.findingsFlyout.resourceTab.hostAccordionTitle', {
-          defaultMessage: 'Host',
-        }),
-        id: 'hostAccordion',
-        listItems: prepareDescriptionList(data.host),
-      },
-    ],
-    [data.host, data.resource]
-  );
-
-  return (
-    <>
-      {accordions.map((accordion) => (
-        <React.Fragment key={accordion.id}>
-          <EuiPanel hasShadow={false} hasBorder>
-            <EuiAccordion
-              id={accordion.id}
-              buttonContent={
-                <EuiText>
-                  <strong>{accordion.title}</strong>
-                </EuiText>
-              }
-              arrowDisplay="left"
-              initialIsOpen
-            >
-              <EuiDescriptionList
-                listItems={accordion.listItems}
-                type="column"
-                style={{
-                  paddingTop: euiTheme.size.l,
-                }}
-                titleProps={{ style: { width: '35%' } }}
-                descriptionProps={{ style: { width: '65%' } }}
-              />
-            </EuiAccordion>
-          </EuiPanel>
-          <EuiSpacer size="m" />
-        </React.Fragment>
-      ))}
-    </>
-  );
+const search: EuiInMemoryTableProps<ResourceItem>['search'] = {
+  box: {
+    incremental: true,
+  },
 };
+
+const sorting: EuiInMemoryTableProps<ResourceItem>['sorting'] = {
+  sort: {
+    field: 'key',
+    direction: 'asc',
+  },
+};
+
+const pagination: EuiInMemoryTableProps<ResourceItem>['pagination'] = {
+  initialPageSize: 100,
+  showPerPageOptions: false,
+};
+
+const columns: EuiInMemoryTableProps<ResourceItem>['columns'] = [
+  {
+    field: 'key',
+    name: i18n.translate('xpack.csp.flyout.resource.fieldLabel', { defaultMessage: 'Field' }),
+    width: '25%',
+  },
+  {
+    field: 'value',
+    name: i18n.translate('xpack.csp.flyout.resource.fieldValueLabel', { defaultMessage: 'Value' }),
+    render: (value, record) => <div style={{ width: '100%' }}>{getDescriptionDisplay(value)}</div>,
+  },
+];
+
+const getFlattenedItems = (resource: CspFinding['resource']) =>
+  Object.entries(getFlattenedObject(resource)).map(([key, value]) => ({ key, value }));
+
+export const ResourceTab = ({ data }: { data: CspFinding }) => (
+  <EuiInMemoryTable
+    items={getFlattenedItems(data.resource)}
+    columns={columns}
+    sorting={sorting}
+    search={search}
+    pagination={pagination}
+  />
+);

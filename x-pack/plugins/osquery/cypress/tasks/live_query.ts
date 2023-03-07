@@ -17,13 +17,14 @@ export const selectAllAgents = () => {
   }).click();
   cy.react('EuiFilterSelectItem').contains('All agents').should('exist');
   cy.react('AgentsTable EuiComboBox').type('{downArrow}{enter}{esc}');
-  cy.contains('1 agent selected.');
+  cy.contains('2 agents selected.');
 };
 
 export const clearInputQuery = () =>
   cy.get(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
 
-export const inputQuery = (query: string) => cy.get(LIVE_QUERY_EDITOR).type(query);
+export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
+  cy.get(LIVE_QUERY_EDITOR).type(query, options);
 
 export const submitQuery = () => {
   cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
@@ -43,9 +44,21 @@ export const checkResults = () => {
   });
 };
 
-export const typeInECSFieldInput = (text: string) => cy.getBySel('ECS-field-input').type(text);
-export const typeInOsqueryFieldInput = (text: string) =>
-  cy.react('OsqueryColumnFieldComponent').first().react('ResultComboBox').type(text);
+export const typeInECSFieldInput = (text: string, index = 0) =>
+  cy.getBySel('ECS-field-input').eq(index).type(text);
+export const typeInOsqueryFieldInput = (text: string, index = 0) =>
+  cy.react('OsqueryColumnFieldComponent').eq(index).react('ResultComboBox').type(text);
+
+export const getOsqueryFieldTypes = (value: 'Osquery value' | 'Static value', index = 0) => {
+  cy.getBySel(`osquery-result-type-select-${index}`).click();
+  cy.contains(value).click();
+
+  if (value === 'Static value') {
+    cy.contains('Osquery value').should('not.exist');
+  } else {
+    cy.contains('Static value').should('not.exist');
+  }
+};
 
 export const findFormFieldByRowsLabelAndType = (label: string, text: string) => {
   cy.react('EuiFormRow', { props: { label } }).type(text);
@@ -89,4 +102,63 @@ export const loadAlertsEvents = () => {
     .within(() => {
       cy.get(`[data-is-loading="true"]`).should('not.exist');
     });
+};
+
+export const addToCase = () => {
+  cy.contains('Add to Case').click();
+  cy.contains('Select case');
+  cy.getBySelContains('cases-table-row-');
+  cy.getBySelContains('cases-table-row-select-').click();
+};
+
+export const addLastLiveQueryToCase = () => {
+  cy.waitForReact();
+  cy.react('CustomItemAction', {
+    props: { index: 1 },
+  })
+    .first()
+    .click();
+  cy.contains('Live query details');
+  addToCase();
+};
+
+const casesOsqueryResultRegex = /attached Osquery results[\s]?[\d]+[\s]?seconds ago/;
+export const viewRecentCaseAndCheckResults = () => {
+  cy.contains('View case').click();
+  cy.contains(casesOsqueryResultRegex);
+  checkResults();
+};
+
+export const checkActionItemsInResults = ({
+  lens,
+  discover,
+  timeline,
+  cases,
+}: {
+  discover: boolean;
+  lens: boolean;
+  cases: boolean;
+  timeline: boolean;
+}) => {
+  cy.contains('View in Discover').should(discover ? 'exist' : 'not.exist');
+  cy.contains('View in Lens').should(lens ? 'exist' : 'not.exist');
+  cy.contains('Add to Case').should(cases ? 'exist' : 'not.exist');
+  cy.contains('Add to timeline investigation').should(timeline ? 'exist' : 'not.exist');
+};
+
+export const takeOsqueryActionWithParams = () => {
+  cy.getBySel('take-action-dropdown-btn').click();
+  cy.getBySel('osquery-action-item').click();
+  cy.contains('1 agent selected.');
+  inputQuery("SELECT * FROM os_version where name='{{host.os.name}}';", {
+    parseSpecialCharSequences: false,
+  });
+  cy.contains('Advanced').click();
+  typeInECSFieldInput('tags{downArrow}{enter}');
+  cy.getBySel('osqueryColumnValueSelect').type('platform_like{downArrow}{enter}');
+  cy.wait(1000);
+  submitQuery();
+  cy.getBySel('dataGridHeader').within(() => {
+    cy.contains('tags');
+  });
 };

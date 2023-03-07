@@ -56,6 +56,10 @@ export interface Props<Kind extends string = string> {
    */
   onUpload?: (done: DoneNotification[]) => void;
   /**
+   * `meta` value to be used for file uploads
+   */
+  uploadMeta?: FileJSON['meta'];
+  /**
    * The number of results to show per page.
    */
   pageSize?: number;
@@ -151,12 +155,14 @@ export const FilePicker: FunctionComponent<Props> = ({
   kind,
   shouldAllowDelete,
   multiple = false,
+  uploadMeta,
   onUpload = () => {},
   ...rest
 }) => (
   <FilePickerContext
     pageSize={pageSize}
     kind={kind}
+    uploadMeta={uploadMeta}
     multiple={multiple}
     shouldAllowDelete={shouldAllowDelete}
   >

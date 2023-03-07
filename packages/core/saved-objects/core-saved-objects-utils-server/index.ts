@@ -7,7 +7,6 @@
  */
 
 export { mergeSavedObjectMigrationMaps } from './src/merge_migration_maps';
-export { SavedObjectsErrorHelpers, type DecoratedError } from './src/saved_objects_error_helpers';
 export {
   SavedObjectsUtils,
   ALL_NAMESPACES_STRING,

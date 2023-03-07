@@ -22,7 +22,6 @@ import type {
   SavedObjectsBulkDeleteResponse,
   SavedObjectsBulkDeleteOptions,
 } from './apis';
-
 import type { SimpleSavedObject } from './simple_saved_object';
 
 /**

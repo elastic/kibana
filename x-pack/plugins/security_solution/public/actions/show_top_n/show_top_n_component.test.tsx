@@ -35,6 +35,7 @@ const context = {
   nodeRef: {
     current: element,
   },
+  metadata: undefined,
 } as CellActionExecutionContext;
 
 describe('TopNAction', () => {

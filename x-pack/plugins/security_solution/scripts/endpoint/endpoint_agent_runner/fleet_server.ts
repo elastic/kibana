@@ -44,7 +44,8 @@ import {
 } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
-export const runFleetServerIfNeeded = async () => {
+export const runFleetServerIfNeeded = async (): Promise<string | undefined> => {
+  let fleetServerContainerId;
   const {
     log,
     kibana: { isLocalhost: isKibanaOnLocalhost },
@@ -69,7 +70,7 @@ export const runFleetServerIfNeeded = async () => {
       await configureFleetIfNeeded();
     }
 
-    await startFleetServerWithDocker({
+    fleetServerContainerId = await startFleetServerWithDocker({
       policyId: fleetServerAgentPolicyId,
       serviceToken,
     });
@@ -80,6 +81,8 @@ export const runFleetServerIfNeeded = async () => {
   }
 
   log.indent(-4);
+
+  return fleetServerContainerId;
 };
 
 const isFleetServerEnrolled = async () => {
@@ -178,13 +181,14 @@ const generateFleetServiceToken = async (): Promise<string> => {
   return serviceToken;
 };
 
-const startFleetServerWithDocker = async ({
+export const startFleetServerWithDocker = async ({
   policyId,
   serviceToken,
 }: {
   policyId: string;
   serviceToken: string;
 }) => {
+  let containerId;
   const {
     log,
     localhostRealIp,
@@ -256,15 +260,15 @@ const startFleetServerWithDocker = async ({
 (This is ok if one was not running already)`);
       });
 
+    await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:8220`);
+
     log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
 
-    const containerId = (await execa('docker', dockerArgs)).stdout;
+    containerId = (await execa('docker', dockerArgs)).stdout;
 
     const fleetServerAgent = await waitForHostToEnroll(kbnClient, containerName);
 
     log.verbose(`Fleet server enrolled agent:\n${JSON.stringify(fleetServerAgent, null, 2)}`);
-
-    await addFleetServerHostToFleetSettings(`https://${localhostRealIp}:8220`);
 
     log.info(`Done. Fleet Server is running and connected to Fleet.
   Container Name: ${containerName}
@@ -280,6 +284,8 @@ const startFleetServerWithDocker = async ({
   }
 
   log.indent(-4);
+
+  return containerId;
 };
 
 const configureFleetIfNeeded = async () => {

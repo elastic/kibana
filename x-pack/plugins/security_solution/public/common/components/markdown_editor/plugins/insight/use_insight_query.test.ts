@@ -34,6 +34,7 @@ describe('useInsightQuery', () => {
         useInsightQuery({
           dataProviders: [mockProvider],
           filters: [],
+          relativeTimerange: null,
         }),
       {
         wrapper: TestProviders,

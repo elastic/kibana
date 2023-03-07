@@ -7,6 +7,7 @@
 
 import { pickBy, isEmpty } from 'lodash';
 import type { Plugin } from 'unified';
+import moment from 'moment';
 import React, { useContext, useMemo, useCallback, useState } from 'react';
 import type { RemarkTokenizer } from '@elastic/eui';
 import {
@@ -35,17 +36,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
-import {
-  FILTERS,
-  isCombinedFilter,
-  isRangeFilter,
-  isPhraseFilter,
-  isPhrasesFilter,
-  isExistsFilter,
-  BooleanRelation,
-  FilterStateStore,
-} from '@kbn/es-query';
-import type { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
+import { FilterStateStore } from '@kbn/es-query';
 import { useForm, FormProvider, useController } from 'react-hook-form';
 import { useAppToasts } from '../../../../hooks/use_app_toasts';
 import { useKibana } from '../../../../lib/kibana';
@@ -63,6 +54,7 @@ import type { TimeRange } from '../../../../store/inputs/model';
 import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/constants';
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
+import { filtersToInsightProviders } from './provider';
 
 interface InsightComponentProps {
   label?: string;
@@ -143,78 +135,6 @@ export const parser: Plugin = function () {
   methods.splice(methods.indexOf('text'), 0, 'insight');
 };
 
-const buildPrimitiveProvider = (filter: Filter): Provider => {
-  const field = filter.meta?.key ?? '';
-  const excluded = filter.meta?.negate ?? false;
-  const queryType = filter.meta?.type ?? FILTERS.PHRASE;
-  const baseFilter = {
-    field,
-    excluded,
-    queryType,
-  };
-  if (isRangeFilter(filter)) {
-    const gte = filter.query.range[field].gte;
-    const lt = filter.query.range[field].lt;
-    const value = JSON.stringify({ gte, lt });
-    return {
-      ...baseFilter,
-      value,
-      queryType: filter.meta.type ?? FILTERS.RANGE,
-    };
-  } else if (isPhrasesFilter(filter)) {
-    const typeOfParams: PhraseFilterValue = typeof filter.meta?.params[0];
-    return {
-      ...baseFilter,
-      value: JSON.stringify(filter.meta?.params ?? []),
-      valueType: typeOfParams,
-      queryType: filter.meta.type ?? FILTERS.PHRASES,
-    };
-  } else if (isExistsFilter(filter)) {
-    return {
-      ...baseFilter,
-      value: '',
-      queryType: filter.meta.type ?? FILTERS.EXISTS,
-    };
-  } else if (isPhraseFilter(filter)) {
-    const valueType: PhraseFilterValue = typeof filter.meta?.params?.query;
-    return {
-      ...baseFilter,
-      value: filter.meta?.params?.query ?? '',
-      valueType,
-      queryType: filter.meta.type ?? FILTERS.PHRASE,
-    };
-  } else {
-    return {
-      ...baseFilter,
-      value: '',
-      queryType: FILTERS.PHRASE,
-    };
-  }
-};
-
-const filtersToInsightProviders = (filters: Filter[]): Provider[][] => {
-  const providers = [];
-  for (let index = 0; index < filters.length; index++) {
-    const filter = filters[index];
-    if (isCombinedFilter(filter)) {
-      if (filter.meta.relation === BooleanRelation.AND) {
-        return filtersToInsightProviders(filter.meta?.params);
-      } else {
-        return filter.meta?.params.map((innerFilter) => {
-          if (isCombinedFilter(innerFilter)) {
-            return filtersToInsightProviders([innerFilter]).map(([provider]) => provider);
-          } else {
-            return [buildPrimitiveProvider(innerFilter)];
-          }
-        });
-      }
-    } else {
-      providers.push([buildPrimitiveProvider(filter)]);
-    }
-  }
-  return providers;
-};
-
 const resultFormat = '0,0.[000]a';
 
 // receives the configuration from the parser and renders
@@ -238,28 +158,46 @@ const InsightComponent = ({
       }),
     });
   }
-  const { data: alertData } = useContext(BasicAlertDataContext);
+  const { data: alertData, timestamp } = useContext(BasicAlertDataContext);
   const { dataProviders, filters } = useInsightDataProviders({
     providers: parsedProviders,
     alertData,
   });
+  const relativeTimerange: TimeRange | null = useMemo(() => {
+    if (relativeFrom && relativeTo) {
+      const alertRelativeDate = timestamp ? moment(timestamp) : moment();
+      const from = parseDateWithDefault(
+        relativeFrom,
+        DEFAULT_FROM_MOMENT,
+        false,
+        moment,
+        alertRelativeDate.toDate()
+      ).toISOString();
+      const to = parseDateWithDefault(
+        relativeTo,
+        DEFAULT_TO_MOMENT,
+        true,
+        moment,
+        alertRelativeDate.toDate()
+      ).toISOString();
+      return {
+        kind: 'absolute',
+        from,
+        to,
+      };
+    } else {
+      return null;
+    }
+  }, [relativeFrom, relativeTo, timestamp]);
+
   const { totalCount, isQueryLoading, oldestTimestamp, hasError } = useInsightQuery({
     dataProviders,
     filters,
+    relativeTimerange,
   });
   const timerange: TimeRange = useMemo(() => {
-    if (relativeFrom && relativeTo) {
-      const fromStr = relativeFrom;
-      const toStr = relativeTo;
-      const from = parseDateWithDefault(fromStr, DEFAULT_FROM_MOMENT).toISOString();
-      const to = parseDateWithDefault(toStr, DEFAULT_TO_MOMENT, true).toISOString();
-      return {
-        kind: 'relative',
-        from,
-        to,
-        fromStr,
-        toStr,
-      };
+    if (relativeTimerange) {
+      return relativeTimerange;
     } else if (oldestTimestamp != null) {
       return {
         kind: 'absolute',
@@ -276,7 +214,8 @@ const InsightComponent = ({
         toStr,
       };
     }
-  }, [oldestTimestamp, relativeFrom, relativeTo]);
+  }, [oldestTimestamp, relativeTimerange]);
+
   if (isQueryLoading) {
     return <EuiLoadingSpinner size="l" />;
   } else {
@@ -416,6 +355,10 @@ const InsightEditorComponent = ({
     },
     [relativeTimerangeController.field]
   );
+  const disableSubmit = useMemo(() => {
+    const labelOrEmpty = labelController.field.value ? labelController.field.value : '';
+    return labelOrEmpty.trim() === '' || providers.length === 0;
+  }, [labelController.field.value, providers]);
   const filtersStub = useMemo(() => {
     const index = indexPattern && indexPattern.getName ? indexPattern.getName() : '*';
     return [
@@ -524,7 +467,7 @@ const InsightEditorComponent = ({
             defaultMessage: 'Cancel',
           })}
         </EuiButtonEmpty>
-        <EuiButton onClick={formMethods.handleSubmit(onSubmit)} fill>
+        <EuiButton onClick={formMethods.handleSubmit(onSubmit)} fill disabled={disableSubmit}>
           {isEditMode ? (
             <FormattedMessage
               id="xpack.securitySolution.markdown.insight.addModalConfirmButtonLabel"

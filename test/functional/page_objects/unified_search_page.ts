@@ -12,6 +12,7 @@ export class UnifiedSearchPageObject extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly find = this.ctx.getService('find');
+  private readonly comboBox = this.ctx.getService('comboBox');
 
   public async switchDataView(
     switchButtonSelector: string,
@@ -90,13 +91,21 @@ export class UnifiedSearchPageObject extends FtrService {
     await this.testSubjects.click(adHoc ? 'exploreIndexPatternButton' : 'saveIndexPatternButton');
   }
 
-  public async editDataView(newPattern: string) {
-    await this.clickCreateNewDataView();
-    await this.testSubjects.setValue('createIndexPatternTitleInput', newPattern, {
-      clearWithKeyboard: true,
-      typeCharByChar: true,
-    });
+  public async editDataView(newPattern?: string, newTimeField?: string) {
+    await this.clickEditDataView();
+    if (newPattern) {
+      await this.testSubjects.setValue('createIndexPatternTitleInput', newPattern, {
+        clearWithKeyboard: true,
+        typeCharByChar: true,
+      });
+    }
+    if (newTimeField) {
+      await this.comboBox.set('timestampField', newTimeField);
+    }
     await this.testSubjects.click('saveIndexPatternButton');
+    if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+      await this.testSubjects.click('confirmModalConfirmButton');
+    }
   }
 
   public async isAdHocDataView() {

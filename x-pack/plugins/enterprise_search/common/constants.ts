@@ -100,10 +100,10 @@ export const WORKPLACE_SEARCH_PLUGIN = {
 export const SEARCH_EXPERIENCES_PLUGIN = {
   ID: 'searchExperiences',
   NAME: i18n.translate('xpack.enterpriseSearch.searchExperiences.productName', {
-    defaultMessage: 'Enterprise Search',
+    defaultMessage: 'Search Experiences',
   }),
   NAV_TITLE: i18n.translate('xpack.enterpriseSearch.searchExperiences.navTitle', {
-    defaultMessage: 'Search experiences',
+    defaultMessage: 'Search Experiences',
   }),
   DESCRIPTION: i18n.translate('xpack.enterpriseSearch.searchExperiences.productDescription', {
     defaultMessage: 'Build an intuitive, engaging search experience without reinventing the wheel.',

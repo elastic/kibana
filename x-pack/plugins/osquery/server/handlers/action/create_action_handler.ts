@@ -9,8 +9,9 @@ import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { filter, flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
-import type { Ecs, SavedObjectsClientContract } from '@kbn/core/server';
-import { createDynamicQueries, createQueries } from './create_queries';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import { createDynamicQueries, replacedQueries } from './create_queries';
 import { getInternalSavedObjectsClient } from '../../routes/utils';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
@@ -28,7 +29,7 @@ interface Metadata {
 interface CreateActionHandlerOptions {
   soClient?: SavedObjectsClientContract;
   metadata?: Metadata;
-  ecsData?: Ecs;
+  alertData?: ParsedTechnicalFields;
 }
 
 export const createActionHandler = async (
@@ -41,7 +42,7 @@ export const createActionHandler = async (
   const internalSavedObjectsClient = await getInternalSavedObjectsClient(
     osqueryContext.getStartServices
   );
-  const { soClient, metadata, ecsData } = options;
+  const { soClient, metadata, alertData } = options;
   const savedObjectsClient = soClient ?? coreStartServices.savedObjects.createInternalRepository();
 
   // eslint-disable-next-line @typescript-eslint/naming-convention
@@ -88,23 +89,23 @@ export const createActionHandler = async (
       ? !!some(packSO?.references, ['type', 'osquery-pack-asset'])
       : undefined,
     queries: packSO
-      ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) =>
-          pickBy(
+      ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
+          const replacedQuery = replacedQueries(packQuery.query, alertData);
+
+          return pickBy(
             {
               action_id: uuidv4(),
               id: packQueryId,
-              query: packQuery.query,
+              ...replacedQuery,
               ecs_mapping: packQuery.ecs_mapping,
               version: packQuery.version,
               platform: packQuery.platform,
               agents: selectedAgents,
             },
             (value) => !isEmpty(value)
-          )
-        )
-      : ecsData
-      ? await createDynamicQueries(params, ecsData, osqueryContext)
-      : await createQueries(params, selectedAgents, osqueryContext),
+          );
+        })
+      : await createDynamicQueries({ params, alertData, agents: selectedAgents, osqueryContext }),
   };
 
   const fleetActions = map(
@@ -120,31 +121,33 @@ export const createActionHandler = async (
       data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
     })
   );
-
-  await esClientInternal.bulk({
-    refresh: 'wait_for',
-    body: flatten(
-      fleetActions.map((action) => [{ index: { _index: AGENT_ACTIONS_INDEX } }, action])
-    ),
-  });
-
-  const actionsComponentTemplateExists = await esClientInternal.indices.exists({
-    index: `${ACTIONS_INDEX}*`,
-  });
-
-  if (actionsComponentTemplateExists) {
+  if (fleetActions.length) {
     await esClientInternal.bulk({
       refresh: 'wait_for',
-      body: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
+      body: flatten(
+        fleetActions.map((action) => [{ index: { _index: AGENT_ACTIONS_INDEX } }, action])
+      ),
+    });
+
+    const actionsComponentTemplateExists = await esClientInternal.indices.exists({
+      index: `${ACTIONS_INDEX}*`,
+    });
+
+    if (actionsComponentTemplateExists) {
+      await esClientInternal.bulk({
+        refresh: 'wait_for',
+        body: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
+      });
+    }
+
+    osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
+      ...omit(osqueryAction, ['type', 'input_type', 'user_id']),
+      agents: osqueryAction.agents.length,
     });
   }
 
-  osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
-    ...omit(osqueryAction, ['type', 'input_type', 'user_id']),
-    agents: osqueryAction.agents.length,
-  });
-
   return {
     response: osqueryAction,
+    fleetActionsCount: fleetActions.length,
   };
 };

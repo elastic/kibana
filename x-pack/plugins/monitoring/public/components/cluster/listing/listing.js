@@ -230,6 +230,14 @@ const getColumns = (
         );
       },
     },
+    {
+      name: i18n.translate('xpack.monitoring.cluster.listing.versionColumnTitle', {
+        defaultMessage: 'Version',
+      }),
+      field: 'version',
+      'data-test-subj': 'clusterVersion',
+      sortable: true,
+    },
   ];
 };
 
@@ -389,17 +397,21 @@ const StandaloneClusterCallout = ({ changeCluster, storage }) => {
 };
 
 export const Listing = ({ angular, clusters, sorting, pagination, onTableChange }) => {
+  const { scope, globalState, storage, showLicenseExpiration } = angular;
+  const {
+    sort: { direction, field },
+  } = sorting;
   const { services } = useKibana();
 
-  const _changeCluster = partial(changeCluster, angular.scope, angular.globalState);
+  const _changeCluster = partial(changeCluster, scope, globalState);
   const _handleClickIncompatibleLicense = partial(
     handleClickIncompatibleLicense,
-    angular.scope,
+    scope,
     services.theme.theme$
   );
   const _handleClickInvalidLicense = partial(
     handleClickInvalidLicense,
-    angular.scope,
+    scope,
     services.theme.theme$
   );
   const hasStandaloneCluster = !!clusters.find(
@@ -411,13 +423,13 @@ export const Listing = ({ angular, clusters, sorting, pagination, onTableChange 
       <EuiPageBody>
         <EuiPageContent>
           {hasStandaloneCluster ? (
-            <StandaloneClusterCallout changeCluster={_changeCluster} storage={angular.storage} />
+            <StandaloneClusterCallout changeCluster={_changeCluster} storage={storage} />
           ) : null}
           <EuiMonitoringTable
             className="clusterTable"
             rows={clusters}
             columns={getColumns(
-              angular.showLicenseExpiration,
+              showLicenseExpiration,
               _changeCluster,
               _handleClickIncompatibleLicense,
               _handleClickInvalidLicense
@@ -428,17 +440,16 @@ export const Listing = ({ angular, clusters, sorting, pagination, onTableChange 
               };
             }}
             sorting={{
-              ...sorting,
               sort: {
-                ...sorting.sort,
-                field: 'cluster_name',
+                direction,
+                field: field || 'cluster_name',
               },
             }}
             pagination={pagination}
             search={{
               box: {
                 incremental: true,
-                placeholder: angular.scope.filterText,
+                placeholder: scope.filterText,
               },
             }}
             onTableChange={onTableChange}

@@ -72,6 +72,8 @@
     "@kbn/core-saved-objects-api-server-mocks",
     "@kbn/core-saved-objects-server",
     "@kbn/shared-ux-prompt-not-found",
+    "@kbn/safer-lodash-set",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",

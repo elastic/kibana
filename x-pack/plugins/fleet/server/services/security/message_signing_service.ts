@@ -22,8 +22,11 @@ interface MessageSigningKeys {
 }
 
 export interface MessageSigningServiceInterface {
-  generateKeyPair(providedPassphrase?: string): Promise<void>;
-  sign(serializedMessage: Buffer | object): Promise<{ data: Buffer; signature: string }>;
+  get isEncryptionAvailable(): boolean;
+  generateKeyPair(
+    providedPassphrase?: string
+  ): Promise<{ privateKey: string; publicKey: string; passphrase: string }>;
+  sign(message: Buffer | Record<string, unknown>): Promise<{ data: Buffer; signature: string }>;
   getPublicKey(): Promise<string>;
 }
 
@@ -32,12 +35,18 @@ export class MessageSigningService implements MessageSigningServiceInterface {
 
   constructor(private esoClient: EncryptedSavedObjectsClient) {}
 
-  public async generateKeyPair(providedPassphrase?: string) {
+  public get isEncryptionAvailable(): boolean {
+    return appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt ?? false;
+  }
+
+  public async generateKeyPair(
+    providedPassphrase?: string
+  ): Promise<{ privateKey: string; publicKey: string; passphrase: string }> {
     this.checkForEncryptionKey();
 
     const currentKeyPair = await this.getCurrentKeyPair();
     if (currentKeyPair.privateKey && currentKeyPair.publicKey && currentKeyPair.passphrase) {
-      return;
+      return currentKeyPair;
     }
 
     const passphrase = providedPassphrase || this.generatePassphrase();
@@ -56,19 +65,25 @@ export class MessageSigningService implements MessageSigningServiceInterface {
       },
     });
 
+    const privateKey = keyPair.privateKey.toString('base64');
+    const publicKey = keyPair.publicKey.toString('base64');
     await this.soClient.create<MessageSigningKeys>(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
-      private_key: keyPair.privateKey.toString('base64'),
-      public_key: keyPair.publicKey.toString('base64'),
+      private_key: privateKey,
+      public_key: publicKey,
       passphrase,
     });
 
-    return;
+    return {
+      privateKey,
+      publicKey,
+      passphrase,
+    };
   }
 
   public async sign(
     message: Buffer | Record<string, unknown>
   ): Promise<{ data: Buffer; signature: string }> {
-    this.checkForEncryptionKey();
+    const { privateKey: serializedPrivateKey, passphrase } = await this.generateKeyPair();
 
     const msgBuffer = Buffer.isBuffer(message)
       ? message
@@ -77,8 +92,6 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     const signer = createSign('SHA256');
     signer.update(msgBuffer);
     signer.end();
-
-    const { privateKey: serializedPrivateKey, passphrase } = await this.getCurrentKeyPair();
 
     if (!serializedPrivateKey) {
       throw new Error('unable to find private key');
@@ -99,9 +112,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
   }
 
   public async getPublicKey(): Promise<string> {
-    this.checkForEncryptionKey();
-
-    const { publicKey } = await this.getCurrentKeyPair();
+    const { publicKey } = await this.generateKeyPair();
 
     if (!publicKey) {
       throw new Error('unable to find public key');
@@ -170,7 +181,7 @@ export class MessageSigningService implements MessageSigningServiceInterface {
   }
 
   private checkForEncryptionKey(): void {
-    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+    if (!this.isEncryptionAvailable) {
       throw new Error('encryption key not set, message signing service is disabled');
     }
   }

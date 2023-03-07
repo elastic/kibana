@@ -77,7 +77,7 @@ export const createDataProviders = ({
 }: CreateDataProviderParams) => {
   if (field == null) return null;
 
-  const arrayValues = Array.isArray(values) ? values : [values];
+  const arrayValues = Array.isArray(values) ? (values.length > 0 ? values : [null]) : [values];
 
   return arrayValues.reduce<DataProvider[]>((dataProviders, value, index) => {
     let id: string = '';
@@ -85,7 +85,7 @@ export const createDataProviders = ({
       value ? `-${value}` : ''
     }`;
 
-    if (fieldType === GEO_FIELD_TYPE || field === MESSAGE_FIELD_NAME) {
+    if (!isValidDataProviderField(field, fieldType)) {
       return dataProviders;
     }
 
@@ -130,6 +130,9 @@ export const createDataProviders = ({
     return dataProviders;
   }, []);
 };
+
+export const isValidDataProviderField = (fieldName: string, fieldType: string | undefined) =>
+  fieldType !== GEO_FIELD_TYPE && fieldName !== MESSAGE_FIELD_NAME;
 
 const getIdForField = ({
   field,

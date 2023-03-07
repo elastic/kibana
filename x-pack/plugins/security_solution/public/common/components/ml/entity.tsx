@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
-import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../common/constants';
+import { SecurityCellActions, CellActionsMode, SecurityCellActionsTrigger } from '../cell_actions';
 
 interface Props {
   entityName: string;
@@ -16,19 +15,19 @@ interface Props {
 
 export const EntityComponent: React.FC<Props> = ({ entityName, entityValue }) => {
   return (
-    <CellActions
+    <SecurityCellActions
       field={{
         name: entityName,
         value: entityValue,
         type: 'keyword',
         aggregatable: true,
       }}
-      triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+      triggerId={SecurityCellActionsTrigger.DEFAULT}
       mode={CellActionsMode.HOVER}
       visibleCellActions={5}
     >
       {`${entityName}: "${entityValue}"`}
-    </CellActions>
+    </SecurityCellActions>
   );
 };
 

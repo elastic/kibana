@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Route, useHistory } from 'react-router-dom';
+import { useHistory } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import React from 'react';
 import { fireEvent, act, waitFor } from '@testing-library/react';
 

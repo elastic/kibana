@@ -29,7 +29,7 @@
           "\nA presentational component that renders a button designed to exit \"full screen\" mode."
         ],
         "signature": [
-          "({ onClick, className }: ",
+          "({ onClick, className, customLogo }: ",
           "ExitFullScreenButtonComponentProps",
           ") => JSX.Element"
         ],
@@ -42,7 +42,7 @@
             "id": "def-common.ExitFullScreenButton.$1",
             "type": "Object",
             "tags": [],
-            "label": "{ onClick, className }",
+            "label": "{ onClick, className, customLogo }",
             "description": [],
             "signature": [
               "ExitFullScreenButtonComponentProps"

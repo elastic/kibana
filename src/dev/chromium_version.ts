@@ -46,7 +46,7 @@ async function getChromiumRevision(
   kibanaPuppeteerVersion: PuppeteerRelease,
   log: ToolingLog
 ): Promise<ChromiumRevision> {
-  const url = `https://raw.githubusercontent.com/puppeteer/puppeteer/v${kibanaPuppeteerVersion}/src/revisions.ts`;
+  const url = `https://raw.githubusercontent.com/puppeteer/puppeteer/puppeteer-v${kibanaPuppeteerVersion}/packages/puppeteer-core/src/revisions.ts`;
   let body: string;
   try {
     log.info(`Fetching code from Puppeteer source: ${url}`);

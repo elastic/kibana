@@ -10,7 +10,11 @@ import { get } from 'lodash/fp';
 import React, { useMemo } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { partition } from 'lodash';
-import { CellActions, CellActionsMode } from '@kbn/cell-actions';
+import {
+  SecurityCellActions,
+  CellActionsMode,
+  SecurityCellActionsTrigger,
+} from '../../cell_actions';
 import * as i18n from './translations';
 import type { CtiEnrichment } from '../../../../../common/search_strategy/security_solution/cti';
 import { getEnrichmentIdentifiers, isInvestigationTimeEnrichment } from './helpers';
@@ -23,7 +27,6 @@ import type {
 } from '../../../../../common/search_strategy';
 import { FormattedFieldValue } from '../../../../timelines/components/timeline/body/renderers/formatted_field';
 import { EnrichedDataRow, ThreatSummaryPanelHeader } from './threat_summary_view';
-import { CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER } from '../../../../../common/constants';
 
 export interface ThreatSummaryDescription {
   browserField: BrowserField;
@@ -111,9 +114,9 @@ const EnrichmentDescription: React.FC<ThreatSummaryDescription> = ({
       </EuiFlexItem>
       <EuiFlexItem>
         {value && !isReadOnly && (
-          <CellActions
+          <SecurityCellActions
             field={field}
-            triggerId={CELL_ACTIONS_DETAILS_FLYOUT_TRIGGER}
+            triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
             mode={CellActionsMode.INLINE}
             metadata={metadata}
             visibleCellActions={3}

@@ -15,6 +15,7 @@ import {
   inputQuery,
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
+  checkActionItemsInResults,
 } from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 
@@ -73,8 +74,12 @@ describe('T2 Analyst - READ + Write Live/Saved + runSavedQueries ', () => {
     // checking submit by clicking cmd+enter
     inputQuery(cmd);
     checkResults();
-    cy.contains('View in Discover').should('not.exist');
-    cy.contains('View in Lens').should('not.exist');
+    checkActionItemsInResults({
+      lens: false,
+      discover: false,
+      cases: true,
+      timeline: false,
+    });
     cy.react('EuiDataGridHeaderCellWrapper', {
       props: { id: 'osquery.days.number', index: 1 },
     }).should('exist');

@@ -29,7 +29,6 @@ import {
   ValidatorServices,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
-import { ActionsClient } from '../actions_client';
 import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
@@ -42,10 +41,6 @@ export interface ActionExecutorContext {
   logger: Logger;
   spaces?: SpacesServiceStart;
   getServices: GetServicesFunction;
-  getActionsClientWithRequest: (
-    request: KibanaRequest,
-    authorizationContext?: ActionExecutionSource<unknown>
-  ) => Promise<PublicMethodsOf<ActionsClient>>;
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
@@ -95,7 +90,6 @@ export class ActionExecutor {
     actionId,
     params,
     request,
-    source,
     isEphemeral,
     taskInfo,
     executionId,
@@ -123,7 +117,6 @@ export class ActionExecutor {
           actionTypeRegistry,
           eventLogger,
           preconfiguredActions,
-          getActionsClientWithRequest,
         } = this.actionExecutorContext!;
 
         const services = getServices(request);
@@ -131,14 +124,11 @@ export class ActionExecutor {
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
 
         const actionInfo = await getActionInfoInternal(
-          getActionsClientWithRequest,
-          request,
           this.isESOCanEncrypt,
           encryptedSavedObjectsClient,
           preconfiguredActions,
           actionId,
-          namespace.namespace,
-          source
+          namespace.namespace
         );
 
         const { actionTypeId, name, config, secrets } = actionInfo;
@@ -313,26 +303,18 @@ export class ActionExecutor {
     source?: ActionExecutionSource<Source>;
     consumer?: string;
   }) {
-    const {
-      spaces,
-      encryptedSavedObjectsClient,
-      preconfiguredActions,
-      eventLogger,
-      getActionsClientWithRequest,
-    } = this.actionExecutorContext!;
+    const { spaces, encryptedSavedObjectsClient, preconfiguredActions, eventLogger } =
+      this.actionExecutorContext!;
 
     const spaceId = spaces && spaces.getSpaceId(request);
     const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
     if (!this.actionInfo || this.actionInfo.actionId !== actionId) {
       this.actionInfo = await getActionInfoInternal(
-        getActionsClientWithRequest,
-        request,
         this.isESOCanEncrypt,
         encryptedSavedObjectsClient,
         preconfiguredActions,
         actionId,
-        namespace.namespace,
-        source
+        namespace.namespace
       );
     }
     const task = taskInfo
@@ -382,17 +364,11 @@ interface ActionInfo {
 }
 
 async function getActionInfoInternal<Source = unknown>(
-  getActionsClientWithRequest: (
-    request: KibanaRequest,
-    authorizationContext?: ActionExecutionSource<unknown>
-  ) => Promise<PublicMethodsOf<ActionsClient>>,
-  request: KibanaRequest,
   isESOCanEncrypt: boolean,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],
   actionId: string,
-  namespace: string | undefined,
-  source?: ActionExecutionSource<Source>
+  namespace: string | undefined
 ): Promise<ActionInfo> {
   // check to see if it's a pre-configured action first
   const pcAction = preconfiguredActions.find(
@@ -415,14 +391,8 @@ async function getActionInfoInternal<Source = unknown>(
     );
   }
 
-  const actionsClient = await getActionsClientWithRequest(request, source);
-
-  // if not pre-configured action, should be a saved object
-  // ensure user can read the action before processing
-  const { actionTypeId, config, name } = await actionsClient.get({ id: actionId });
-
   const {
-    attributes: { secrets },
+    attributes: { secrets, actionTypeId, config, name },
   } = await encryptedSavedObjectsClient.getDecryptedAsInternalUser<RawAction>('action', actionId, {
     namespace: namespace === 'default' ? undefined : namespace,
   });

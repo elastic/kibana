@@ -13,7 +13,7 @@ import {
   ForLastExpression,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { LogViewReference, ResolvedLogViewField } from '../../../../../common/log_views';
+import { PersistedLogViewReference, ResolvedLogViewField } from '../../../../../common/log_views';
 import {
   Comparator,
   isOptimizableGroupedThreshold,
@@ -54,7 +54,7 @@ const DEFAULT_BASE_EXPRESSION = {
 
 const DEFAULT_FIELD = 'log.level';
 
-const createLogViewReference = (logViewId: string): LogViewReference => ({
+const createLogViewReference = (logViewId: string): PersistedLogViewReference => ({
   logViewId,
   type: 'log-view-reference',
 });
@@ -69,7 +69,7 @@ const createDefaultCriterion = (
 
 const createDefaultCountRuleParams = (
   availableFields: ResolvedLogViewField[],
-  logView: LogViewReference
+  logView: PersistedLogViewReference
 ): PartialCountRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   logView,
@@ -82,7 +82,7 @@ const createDefaultCountRuleParams = (
 
 const createDefaultRatioRuleParams = (
   availableFields: ResolvedLogViewField[],
-  logView: LogViewReference
+  logView: PersistedLogViewReference
 ): PartialRatioRuleParams => ({
   ...DEFAULT_BASE_EXPRESSION,
   logView,
@@ -226,11 +226,11 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
     [setRuleParams]
   );
 
-  const logViewReferemnce = useMemo(() => createLogViewReference(logViewId), [logViewId]);
+  const logViewReference = useMemo(() => createLogViewReference(logViewId), [logViewId]);
 
   const defaultCountAlertParams = useMemo(
-    () => createDefaultCountRuleParams(supportedFields, logViewReferemnce),
-    [supportedFields, logViewReferemnce]
+    () => createDefaultCountRuleParams(supportedFields, logViewReference),
+    [supportedFields, logViewReference]
   );
 
   const updateType = useCallback(
@@ -238,12 +238,12 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
       const defaults =
         type === 'count'
           ? defaultCountAlertParams
-          : createDefaultRatioRuleParams(supportedFields, logViewReferemnce);
+          : createDefaultRatioRuleParams(supportedFields, logViewReference);
       // Reset properties that don't make sense switching from one context to the other
       setRuleParams('count', defaults.count);
       setRuleParams('criteria', defaults.criteria);
     },
-    [defaultCountAlertParams, setRuleParams, supportedFields, logViewReferemnce]
+    [defaultCountAlertParams, setRuleParams, supportedFields, logViewReference]
   );
 
   useMount(() => {

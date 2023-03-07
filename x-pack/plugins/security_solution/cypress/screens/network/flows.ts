@@ -9,15 +9,16 @@ export const IPS_TABLE_LOADED = '[data-test-subj="table-topNFlowSource-loading-f
 
 export const EXPAND_OVERFLOW_ITEMS = '[data-test-subj="overflow-button"]';
 
-export const FILTER_IN = '[data-test-subj="actionItem-security_filterIn"]';
+export const FILTER_IN = '[data-test-subj="actionItem-security-default-cellActions-filterIn"]';
 
-export const FILTER_OUT = '[data-test-subj="actionItem-security_filterOut"]';
+export const FILTER_OUT = '[data-test-subj="actionItem-security-default-cellActions-filterOut"]';
 
-export const ADD_TO_TIMELINE = '[data-test-subj="actionItem-security_addToTimeline"]';
+export const ADD_TO_TIMELINE =
+  '[data-test-subj="actionItem-security-default-cellActions-addToTimeline"]';
 
-export const SHOW_TOP_FIELD = '[data-test-subj="actionItem-security_showTopN"]';
+export const SHOW_TOP_FIELD = '[data-test-subj="actionItem-security-default-cellActions-showTopN"]';
 
-export const COPY = '[data-test-subj="actionItem-security_copyToClipboard"]';
+export const COPY = '[data-test-subj="actionItem-security-default-cellActions-copyToClipboard"]';
 
 export const TOP_N_CONTAINER = '[data-test-subj="topN-container"]';
 

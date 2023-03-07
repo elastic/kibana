@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import {
@@ -26,6 +27,7 @@ import {
   ControlFormErrorMap,
   ControlSelectorCondition,
   ControlSelectorConditionUIOptionsMap,
+  ControlSelectorBooleanConditions,
   ControlSelector,
 } from '../../types';
 import * as i18n from '../control_general_view/translations';
@@ -36,6 +38,104 @@ import {
   MAX_FILE_PATH_VALUE_LENGTH_BYTES,
 } from '../../common/constants';
 
+interface ConditionProps {
+  label: string;
+  prop: string;
+  onRemoveCondition(prop: string): void;
+}
+
+interface StringArrayConditionProps extends ConditionProps {
+  selector: ControlSelector;
+  errorMap: ControlFormErrorMap;
+  onAddValueToCondition(prop: string, value: string): void;
+  onChangeStringArrayCondition(prop: string, value: string[]): void;
+}
+
+const BooleanCondition = ({ label, prop, onRemoveCondition }: ConditionProps) => {
+  return (
+    <EuiFormRow label={label} fullWidth={true} key={prop}>
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexItem>
+          <EuiText size="s">
+            <p>
+              <small>{i18n.getConditionHelpLabel(prop)}</small>
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="cross"
+            onClick={() => onRemoveCondition(prop)}
+            aria-label="Remove condition"
+            data-test-subj={'cloud-defend-btnremovecondition-' + prop}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
+};
+
+const StringArrayCondition = ({
+  label,
+  prop,
+  selector,
+  errorMap,
+  onRemoveCondition,
+  onAddValueToCondition,
+  onChangeStringArrayCondition,
+}: StringArrayConditionProps) => {
+  const values = selector[prop as keyof ControlSelector] as string[];
+  const selectedOptions =
+    values?.map((option) => {
+      return { label: option, value: option };
+    }) || [];
+
+  const restrictedValues = ControlSelectorConditionUIOptionsMap[prop]?.values;
+
+  return (
+    <EuiFormRow
+      label={label}
+      fullWidth={true}
+      key={prop}
+      isInvalid={!!errorMap.hasOwnProperty(prop)}
+    >
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexItem>
+          <EuiComboBox
+            aria-label={label}
+            fullWidth={true}
+            onCreateOption={
+              !restrictedValues
+                ? (searchValue) => onAddValueToCondition(prop, searchValue)
+                : undefined
+            }
+            selectedOptions={selectedOptions}
+            options={
+              restrictedValues
+                ? restrictedValues.map((value: string) => ({ label: value, value }))
+                : selectedOptions
+            }
+            onChange={(options) =>
+              onChangeStringArrayCondition(prop, options.map((option) => option.value) as string[])
+            }
+            isClearable
+            data-test-subj={'cloud-defend-selectorcondition-' + prop}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="cross"
+            onClick={() => onRemoveCondition(prop)}
+            aria-label="Remove condition"
+            data-test-subj={'cloud-defend-btnremovecondition-' + prop}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
+};
+
+/** main component */
 export const ControlGeneralViewSelector = ({
   selector,
   selectors,
@@ -121,7 +221,7 @@ export const ControlGeneralViewSelector = ({
     [errorMap, index, conditionsAdded, onChange, selector, selectors]
   );
 
-  const onChangeCondition = useCallback(
+  const onChangeStringArrayCondition = useCallback(
     (prop: string, values: string[]) => {
       const updatedSelector = { ...selector, [prop]: values };
       const errors = [];
@@ -156,12 +256,25 @@ export const ControlGeneralViewSelector = ({
     [errorMap, index, conditionsAdded, onChange, selector]
   );
 
+  const onChangeBooleanCondition = useCallback(
+    (prop: string, value: boolean) => {
+      const updatedSelector = { ...selector, [prop]: value };
+
+      onChange(updatedSelector, index);
+    },
+    [index, onChange, selector]
+  );
+
   const onAddCondition = useCallback(
     (prop: string) => {
-      onChangeCondition(prop, []);
+      if (prop in ControlSelectorBooleanConditions) {
+        onChangeBooleanCondition(prop, true);
+      } else {
+        onChangeStringArrayCondition(prop, []);
+      }
       closeAddCondition();
     },
-    [closeAddCondition, onChangeCondition]
+    [closeAddCondition, onChangeBooleanCondition, onChangeStringArrayCondition]
   );
 
   const onRemoveCondition = useCallback(
@@ -185,10 +298,10 @@ export const ControlGeneralViewSelector = ({
       const values = selector[prop as keyof ControlSelector] as string[];
 
       if (values && values.indexOf(value) === -1) {
-        onChangeCondition(prop, [...values, value]);
+        onChangeStringArrayCondition(prop, [...values, value]);
       }
     },
-    [onChangeCondition, selector]
+    [onChangeStringArrayCondition, selector]
   );
 
   const errors = useMemo(() => {
@@ -270,56 +383,31 @@ export const ControlGeneralViewSelector = ({
         </EuiFormRow>
         {Object.keys(selector).map((prop: string) => {
           if (['name', 'hasErrors'].indexOf(prop) === -1) {
-            const values = selector[prop as keyof ControlSelector] as string[];
-            const selectedOptions =
-              values?.map((option) => {
-                return { label: option, value: option };
-              }) || [];
-
             const label = i18n.getConditionLabel(prop);
-            const restrictedValues = ControlSelectorConditionUIOptionsMap[prop]?.values;
 
-            return (
-              <EuiFormRow
-                label={label}
-                fullWidth={true}
-                key={prop}
-                isInvalid={!!errorMap.hasOwnProperty(prop)}
-              >
-                <EuiFlexGroup alignItems="center" gutterSize="m">
-                  <EuiFlexItem>
-                    <EuiComboBox
-                      aria-label={label}
-                      fullWidth={true}
-                      onCreateOption={
-                        !restrictedValues
-                          ? (searchValue) => onAddValueToCondition(prop, searchValue)
-                          : undefined
-                      }
-                      selectedOptions={selectedOptions}
-                      options={
-                        restrictedValues
-                          ? restrictedValues.map((value: string) => ({ label: value, value }))
-                          : selectedOptions
-                      }
-                      onChange={(options) =>
-                        onChangeCondition(prop, options.map((option) => option.value) as string[])
-                      }
-                      isClearable
-                      data-test-subj={'cloud-defend-selectorcondition-' + prop}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="cross"
-                      onClick={() => onRemoveCondition(prop)}
-                      aria-label="Remove condition"
-                      data-test-subj={'cloud-defend-btnremovecondition-' + prop}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFormRow>
-            );
+            if (prop in ControlSelectorBooleanConditions) {
+              return (
+                <BooleanCondition
+                  key={prop}
+                  label={label}
+                  prop={prop}
+                  onRemoveCondition={onRemoveCondition}
+                />
+              );
+            } else {
+              return (
+                <StringArrayCondition
+                  key={prop}
+                  label={label}
+                  prop={prop}
+                  selector={selector}
+                  errorMap={errorMap}
+                  onAddValueToCondition={onAddValueToCondition}
+                  onChangeStringArrayCondition={onChangeStringArrayCondition}
+                  onRemoveCondition={onRemoveCondition}
+                />
+              );
+            }
           }
         })}
       </EuiForm>
@@ -345,7 +433,11 @@ export const ControlGeneralViewSelector = ({
           size="s"
           items={remainingProps.map((prop) => {
             return (
-              <EuiContextMenuItem key={prop} onClick={() => onAddCondition(prop)}>
+              <EuiContextMenuItem
+                data-test-subj={`cloud-defend-addmenu-${prop}`}
+                key={prop}
+                onClick={() => onAddCondition(prop)}
+              >
                 {i18n.getConditionLabel(prop)}
               </EuiContextMenuItem>
             );

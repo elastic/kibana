@@ -65,7 +65,8 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
   validate: {
     query: QuerySchema,
   },
-  handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
+  handler: async (routeContext): Promise<any> => {
+    const { request, savedObjectsClient, syntheticsMonitorClient } = routeContext;
     const totalCountQuery = async () => {
       if (isMonitorsQueryFiltered(request.query)) {
         return savedObjectsClient.find({
@@ -77,7 +78,7 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
     };
 
     const [queryResult, totalCount] = await Promise.all([
-      getMonitors(request.query, syntheticsMonitorClient.syntheticsService, savedObjectsClient),
+      getMonitors(routeContext),
       totalCountQuery(),
     ]);
 
@@ -101,7 +102,9 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
   validate: {
     query: QuerySchema,
   },
-  handler: async ({ request, savedObjectsClient, syntheticsMonitorClient }): Promise<any> => {
+  handler: async (routeContext): Promise<any> => {
+    const { request, savedObjectsClient } = routeContext;
+
     const {
       sortField,
       sortOrder,
@@ -109,9 +112,9 @@ export const getSyntheticsMonitorOverviewRoute: SyntheticsRestApiRouteFactory = 
       locations: queriedLocations,
     } = request.query as MonitorsQuery;
 
-    const filtersStr = getMonitorFilters({
+    const filtersStr = await getMonitorFilters({
       ...request.query,
-      serviceLocations: syntheticsMonitorClient.syntheticsService.locations,
+      context: routeContext,
     });
 
     const allMonitorConfigs = await getAllMonitors({

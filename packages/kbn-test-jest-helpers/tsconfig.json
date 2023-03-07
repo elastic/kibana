@@ -11,6 +11,7 @@
   "kbn_references": [
     "@kbn/i18n-react",
     "@kbn/axe-config",
+    "@kbn/shared-ux-router",
   ],
   "exclude": [
     "target/**/*",
