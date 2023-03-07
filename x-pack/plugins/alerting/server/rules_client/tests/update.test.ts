@@ -22,6 +22,13 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { migrateRuleHook } from '../lib';
+
+jest.mock('../lib/migrate_rule_hook', () => {
+  return {
+    migrateRuleHook: jest.fn(),
+  };
+});
 
 jest.mock('@kbn/core-saved-objects-utils-server', () => {
   const actual = jest.requireActual('@kbn/core-saved-objects-utils-server');
@@ -2703,5 +2710,46 @@ describe('update()', () => {
         version: '123',
       }
     );
+  });
+
+  test('should call migrateRuleHook', async () => {
+    actionsClient.getBulk.mockReset();
+    actionsClient.isPreconfigured.mockReset();
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: 'alert',
+      attributes: {
+        enabled: true,
+        schedule: { interval: '1m' },
+        params: {
+          bar: true,
+        },
+        actions: [],
+        notifyWhen: 'onActiveAlert',
+        scheduledTaskId: 'task-123',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      references: [],
+    });
+
+    await rulesClient.update({
+      id: '1',
+      data: {
+        schedule: { interval: '1m' },
+        name: 'abc',
+        tags: ['foo'],
+        params: {
+          bar: true,
+          risk_score: 40,
+          severity: 'low',
+        },
+        throttle: null,
+        notifyWhen: 'onActiveAlert',
+        actions: [],
+      },
+    });
+
+    expect(migrateRuleHook).toHaveBeenCalledWith(expect.any(Object), { ruleId: '1' });
   });
 });
