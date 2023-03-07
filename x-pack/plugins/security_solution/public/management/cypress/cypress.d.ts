@@ -27,17 +27,6 @@ import type {
 
 declare global {
   namespace Cypress {
-    // // This is just so that we can reference them from our own definitions below
-    // interface Loggable {
-    //   log: boolean;
-    // }
-    //
-    // // This is just so that we can reference them from our own definitions below
-    // // noinspection SpellCheckingInspection
-    // interface Timeoutable {
-    //   timeout: number;
-    // }
-
     interface Chainable<Subject = any> {
       /**
        * Get Elements by `data-test-subj`
