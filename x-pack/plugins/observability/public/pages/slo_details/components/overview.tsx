@@ -26,7 +26,7 @@ export function Overview({ slo }: Props) {
   const hasNoData = slo.summary.status === 'NO_DATA';
 
   return (
-    <EuiPanel paddingSize="none" color="transparent">
+    <EuiPanel paddingSize="none" color="transparent" data-test-subj="overview">
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexGroup direction="row" alignItems="flexStart">
           <OverviewItem

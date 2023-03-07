@@ -24,7 +24,7 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
 
   return (
-    <EuiPanel paddingSize="m" color="transparent" hasBorder>
+    <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="errorBudgetChartPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>

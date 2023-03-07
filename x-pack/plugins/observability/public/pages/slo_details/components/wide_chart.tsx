@@ -6,10 +6,12 @@
  */
 
 import {
+  AnnotationDomainType,
   AreaSeries,
   Axis,
   Chart,
   Fit,
+  LineAnnotation,
   LineSeries,
   Position,
   ScaleType,
@@ -45,7 +47,7 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
   const ChartComponent = chart === 'area' ? AreaSeries : LineSeries;
 
   if (isLoading) {
-    return <EuiLoadingChart size="m" mono />;
+    return <EuiLoadingChart size="m" mono data-test-subj="wideChartLoading" />;
   }
 
   return (

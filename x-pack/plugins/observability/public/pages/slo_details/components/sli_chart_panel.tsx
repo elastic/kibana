@@ -25,7 +25,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
   const hasNoData = slo.summary.status === 'NO_DATA';
 
   return (
-    <EuiPanel paddingSize="m" color="transparent" hasBorder>
+    <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="sliChartPanel">
       <EuiFlexGroup direction="column" gutterSize="l">
         <EuiFlexGroup direction="column" gutterSize="none">
           <EuiFlexItem>
