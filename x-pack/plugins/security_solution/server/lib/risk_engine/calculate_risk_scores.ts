@@ -33,6 +33,7 @@ const bucketToResponse = ({
   calculatedLevel: bucket.risk_details.value.level,
   calculatedScore: bucket.risk_details.value.score,
   calculatedScoreNorm: bucket.risk_details.value.normalized_score,
+  notes: bucket.risk_details.value.notes,
   riskiestInputs: enrichInputs
     ? bucket.riskiest_inputs.hits.hits
     : bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
@@ -67,10 +68,16 @@ export const calculateRiskScores = async ({
       scores.addAll(state.scores)
     }
     Collections.sort(scores, Collections.reverseOrder());
-    double max_score = scores[0];
+
+    double num_inputs_to_score = Math.min(scores.length, params.max_risk_inputs_per_identity);
+    results['notes'] = [];
+    if (num_inputs_to_score == params.max_risk_inputs_per_identity) {
+      results['notes'].add('Number of risk inputs (' + scores.length + ') exceeded the maximum allowed (' + params.max_risk_inputs_per_identity + ').');
+    }
+
     double total_score = 0;
-    for (int i = 0; i < Math.min(scores.length, 999999); i++) {
-      total_score += scores[i] / Math.pow(i + 1, params.p)
+    for (int i = 0; i < num_inputs_to_score; i++) {
+      total_score += scores[i] / Math.pow(i + 1, params.p);
     }
     double score_norm = 100 * total_score / params.risk_cap;
     results['score'] = total_score;
@@ -132,6 +139,7 @@ export const calculateRiskScores = async ({
               map_script: `state.scores.add(doc['${ALERT_RISK_SCORE}'].value)`,
               combine_script: 'return state',
               params: {
+                max_risk_inputs_per_identity: 999999,
                 p: 1.5,
                 risk_cap: 261.2,
               },
@@ -165,6 +173,7 @@ export const calculateRiskScores = async ({
               map_script: `state.scores.add(doc['${ALERT_RISK_SCORE}'].value)`,
               combine_script: 'return state',
               params: {
+                max_risk_inputs_per_identity: 999999,
                 p: 1.5,
                 risk_cap: 261.2,
               },
