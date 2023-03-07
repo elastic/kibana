@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { alertFieldMap } from './field_maps/alert_field_map';
+export { mappingFromFieldMap } from './field_maps/mapping_from_field_map';
 export { getComponentTemplateFromFieldMap } from './field_maps/component_template_from_field_map';

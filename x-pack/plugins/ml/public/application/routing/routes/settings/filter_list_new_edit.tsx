@@ -12,13 +12,12 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 
 import { ML_PAGES } from '../../../../../common/constants/locator';
 
-import { useCreateAndNavigateToMlLink } from '../../../contexts/kibana/use_create_url';
 import { checkFullLicense } from '../../../license';
 import {
   checkGetJobsCapabilitiesResolver,
   checkPermission,
 } from '../../../capabilities/check_capabilities';
-import { checkMlNodesAvailable } from '../../../ml_nodes_check/check_ml_nodes';
+import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 import { EditFilterList } from '../../../settings/filter_lists';
 import { NavigateToPath } from '../../../contexts/kibana';
 
@@ -85,9 +84,6 @@ const PageWrapper: FC<NewFilterPageProps> = ({ location, mode, deps }) => {
     filterId = pathMatch && pathMatch.length > 1 ? pathMatch[1] : undefined;
   }
   const { redirectToMlAccessDeniedPage } = deps;
-  const redirectToJobsManagementPage = useCreateAndNavigateToMlLink(
-    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE
-  );
 
   const { context } = useResolver(
     undefined,
@@ -99,7 +95,7 @@ const PageWrapper: FC<NewFilterPageProps> = ({ location, mode, deps }) => {
       checkFullLicense,
       checkGetJobsCapabilities: () =>
         checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-      checkMlNodesAvailable: () => checkMlNodesAvailable(redirectToJobsManagementPage),
+      getMlNodeCount,
     }
   );
 

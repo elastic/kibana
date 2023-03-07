@@ -10,7 +10,7 @@ import type { ContentStorage, StorageContext } from './types';
 
 export interface GetResponse<T = any> {
   contentTypeId: string;
-  item?: T;
+  item: T;
 }
 
 export interface BulkGetResponse<T = any> {
@@ -29,6 +29,11 @@ export interface UpdateItemResponse<T = any> {
 }
 
 export interface DeleteItemResponse<T = any> {
+  contentTypeId: string;
+  result: T;
+}
+
+export interface SearchResponse<T = any> {
   contentTypeId: string;
   result: T;
 }
@@ -245,7 +250,7 @@ export class ContentCrud implements ContentStorage {
     ctx: StorageContext,
     query: Query,
     options?: Options
-  ): Promise<CreateItemResponse<O>> {
+  ): Promise<SearchResponse<O>> {
     this.eventBus.emit({
       type: 'searchItemStart',
       contentTypeId: this.contentTypeId,

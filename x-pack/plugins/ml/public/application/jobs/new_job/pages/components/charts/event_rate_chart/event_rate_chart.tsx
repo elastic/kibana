@@ -15,6 +15,7 @@ import {
   BrushEndListener,
   PartialTheme,
 } from '@elastic/charts';
+import { css } from '@emotion/react';
 import { Axes } from '../common/axes';
 import { LineChartPoint } from '../../../../common/chart_loader';
 import { Anomaly } from '../../../../common/results_loader';
@@ -58,13 +59,18 @@ export const EventRateChart: FC<Props> = ({
     scales: { histogramPadding: 0.2 },
   };
 
+  const cssOverride = css({
+    // fix for the annotation label being hidden inside the bounds of the chart container
+    '.echContainer': { overflow: 'visible' },
+  });
+
   return (
     <div
       style={{ width, height }}
       data-test-subj={`mlEventRateChart ${eventRateChartData.length ? 'withData' : 'empty'}`}
     >
       <LoadingWrapper height={height} hasData={eventRateChartData.length > 0} loading={loading}>
-        <Chart>
+        <Chart css={overlayRanges !== undefined ? cssOverride : undefined}>
           {showAxis === true && <Axes />}
           <Settings
             tooltip={TooltipType.None}

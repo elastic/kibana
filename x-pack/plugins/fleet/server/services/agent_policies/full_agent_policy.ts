@@ -227,11 +227,19 @@ export function generateFleetConfig(
     if (fleetServerHostproxy.proxy_headers) {
       config.proxy_headers = fleetServerHostproxy.proxy_headers;
     }
-    if (fleetServerHostproxy.certificate_authorities) {
+    if (
+      fleetServerHostproxy.certificate_authorities ||
+      fleetServerHostproxy.certificate ||
+      fleetServerHostproxy.certificate_key
+    ) {
       config.ssl = {
-        certificate_authorities: [fleetServerHostproxy.certificate_authorities],
         renegotiation: 'never',
         verification_mode: '',
+        ...(fleetServerHostproxy.certificate_authorities && {
+          certificate_authorities: [fleetServerHostproxy.certificate_authorities],
+        }),
+        ...(fleetServerHostproxy.certificate && { certificate: fleetServerHostproxy.certificate }),
+        ...(fleetServerHostproxy.certificate_key && { key: fleetServerHostproxy.certificate_key }),
       };
     }
   }

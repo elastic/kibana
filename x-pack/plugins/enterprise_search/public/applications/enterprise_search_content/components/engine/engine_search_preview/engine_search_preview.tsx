@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { SearchProvider, SearchBox, Results } from '@elastic/react-search-ui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
+import {
+  PagingInfo,
+  Results,
+  ResultsPerPage,
+  SearchBox,
+  SearchProvider,
+} from '@elastic/react-search-ui';
 import { SearchDriverOptions } from '@elastic/search-ui';
 import EnginesAPIConnector, {
   Transporter,
@@ -19,7 +25,9 @@ import EnginesAPIConnector, {
 } from '@elastic/search-ui-engines-connector';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
+import { docLinks } from '../../../../shared/doc_links';
 import { HttpLogic } from '../../../../shared/http';
 import { EngineViewTabs } from '../../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_template';
@@ -27,14 +35,26 @@ import { EnterpriseSearchEnginesPageTemplate } from '../../layout/engines_page_t
 import { EngineIndicesLogic } from '../engine_indices_logic';
 import { EngineViewLogic } from '../engine_view_logic';
 
+import { APICallFlyout, APICallData } from './api_call_flyout';
 import { DocumentProvider } from './document_context';
 import { DocumentFlyout } from './document_flyout';
 import { EngineSearchPreviewLogic } from './engine_search_preview_logic';
 
-import { InputView, ResultView, ResultsView } from './search_ui_components';
+import {
+  InputView,
+  PagingInfoView,
+  RESULTS_PER_PAGE_OPTIONS,
+  ResultView,
+  ResultsPerPageView,
+  ResultsView,
+} from './search_ui_components';
 
 class InternalEngineTransporter implements Transporter {
-  constructor(private http: HttpSetup, private engineName: string) {}
+  constructor(
+    private http: HttpSetup,
+    private engineName: string,
+    private setLastAPICall: (apiCallData: APICallData) => void
+  ) {}
 
   async performRequest(request: SearchRequest) {
     const url = `/internal/enterprise_search/engines/${this.engineName}/search`;
@@ -42,6 +62,8 @@ class InternalEngineTransporter implements Transporter {
     const response = await this.http.post<SearchResponse>(url, {
       body: JSON.stringify(request),
     });
+
+    this.setLastAPICall({ request, response });
 
     const withUniqueIds = {
       ...response,
@@ -60,25 +82,28 @@ class InternalEngineTransporter implements Transporter {
 
 export const EngineSearchPreview: React.FC = () => {
   const { http } = useValues(HttpLogic);
+  const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
+  const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null);
   const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
   const { resultFields, searchableFields } = useValues(EngineSearchPreviewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
 
+  const config: SearchDriverOptions = useMemo(() => {
+    const transporter = new InternalEngineTransporter(http, engineName, setLastAPICall);
+    const connector = new EnginesAPIConnector(transporter);
+
+    return {
+      alwaysSearchOnInitialLoad: true,
+      apiConnector: connector,
+      hasA11yNotifications: true,
+      searchQuery: {
+        result_fields: resultFields,
+        search_fields: searchableFields,
+      },
+    };
+  }, [http, engineName, setLastAPICall]);
+
   if (!engineData) return null;
-
-  const transporter = new InternalEngineTransporter(http, engineName);
-
-  const connector = new EnginesAPIConnector(transporter);
-
-  const config: SearchDriverOptions = {
-    alwaysSearchOnInitialLoad: true,
-    apiConnector: connector,
-    hasA11yNotifications: true,
-    searchQuery: {
-      result_fields: resultFields,
-      search_fields: searchableFields,
-    },
-  };
 
   return (
     <EnterpriseSearchEnginesPageTemplate
@@ -89,7 +114,18 @@ export const EngineSearchPreview: React.FC = () => {
         pageTitle: i18n.translate('xpack.enterpriseSearch.content.engine.searchPreview.pageTitle', {
           defaultMessage: 'Search Preview',
         }),
-        rightSideItems: [],
+        rightSideItems: [
+          <>
+            <EuiButton
+              color="primary"
+              iconType="eye"
+              onClick={() => setShowAPICallFlyout(true)}
+              isLoading={lastAPICall == null}
+            >
+              View this API call
+            </EuiButton>
+          </>,
+        ],
       }}
       engineName={engineName}
     >
@@ -102,13 +138,31 @@ export const EngineSearchPreview: React.FC = () => {
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiFlexGroup>
-            <EuiFlexItem grow={false} css={{ minWidth: '240px' }} />
+            <EuiFlexItem grow={false} css={{ minWidth: '240px' }}>
+              <ResultsPerPage view={ResultsPerPageView} options={RESULTS_PER_PAGE_OPTIONS} />
+              <EuiSpacer size="m" />
+              <EuiLink href={docLinks.enterpriseSearchEngines} target="_blank">
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.engine.searchPreview.improveResultsLink"
+                  defaultMessage="Improve these results"
+                />
+              </EuiLink>
+            </EuiFlexItem>
             <EuiFlexItem>
+              <PagingInfo view={PagingInfoView} />
+              <EuiSpacer size="m" />
               <Results view={ResultsView} resultView={ResultView} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </SearchProvider>
         <DocumentFlyout />
+        {showAPICallFlyout && lastAPICall && (
+          <APICallFlyout
+            onClose={() => setShowAPICallFlyout(false)}
+            lastAPICall={lastAPICall}
+            engineName={engineName}
+          />
+        )}
       </DocumentProvider>
     </EnterpriseSearchEnginesPageTemplate>
   );

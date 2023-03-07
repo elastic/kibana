@@ -8,13 +8,17 @@ import { useCallback, useMemo, useState } from 'react';
 import createContainer from 'constate';
 import { getTime } from '@kbn/data-plugin/common';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
-import { buildEsQuery, Filter, Query } from '@kbn/es-query';
+import { BoolQuery, buildEsQuery, Filter, Query } from '@kbn/es-query';
 import { SnapshotNode } from '../../../../../common/http_api';
 import { useUnifiedSearchContext } from './use_unified_search';
 import { HostsState } from './use_unified_search_url_state';
 import { useHostsView } from './use_hosts_view';
 import { AlertStatus } from '../types';
 import { ALERT_STATUS_QUERY } from '../constants';
+
+export interface AlertsEsQuery {
+  bool: BoolQuery;
+}
 
 export const useAlertsQueryImpl = () => {
   const { hostNodes } = useHostsView();
@@ -60,7 +64,7 @@ const createAlertsEsQuery = ({
   dateRange: HostsState['dateRange'];
   hostNodes: SnapshotNode[];
   status?: AlertStatus;
-}) => {
+}): AlertsEsQuery => {
   const alertStatusQuery = createAlertStatusQuery(status);
 
   const dateFilter = createDateFilter(dateRange);

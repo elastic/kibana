@@ -18,7 +18,7 @@ export function useServiceTransactionTypesFetcher({
   start?: string;
   end?: string;
 }) {
-  const { data = INITIAL_DATA } = useFetcher(
+  const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
       if (serviceName && start && end) {
         return callApmApi(
@@ -35,5 +35,5 @@ export function useServiceTransactionTypesFetcher({
     [serviceName, start, end]
   );
 
-  return data.transactionTypes;
+  return { transactionTypes: data.transactionTypes, status };
 }

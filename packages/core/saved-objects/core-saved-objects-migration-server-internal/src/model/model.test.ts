@@ -11,48 +11,52 @@ import * as Option from 'fp-ts/lib/Option';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 import type {
+  BaseState,
+  CalculateExcludeFiltersState,
+  UpdateSourceMappingsState,
+  CheckTargetMappingsState,
+  CheckUnknownDocumentsState,
+  CheckVersionIndexReadyActions,
+  CleanupUnknownAndExcluded,
+  CleanupUnknownAndExcludedWaitForTaskState,
+  CloneTempToSource,
+  CreateNewTargetState,
+  CreateReindexTempState,
   FatalState,
-  State,
-  LegacySetWriteBlockState,
-  SetSourceWriteBlockState,
   LegacyCreateReindexTargetState,
+  LegacyDeleteState,
   LegacyReindexState,
   LegacyReindexWaitForTaskState,
-  LegacyDeleteState,
-  ReindexSourceToTempOpenPit,
-  ReindexSourceToTempRead,
-  ReindexSourceToTempClosePit,
-  ReindexSourceToTempTransform,
-  RefreshTarget,
-  UpdateTargetMappingsState,
-  UpdateTargetMappingsWaitForTaskState,
+  LegacySetWriteBlockState,
+  MarkVersionIndexReady,
+  MarkVersionIndexReadyConflict,
+  OutdatedDocumentsSearchClosePit,
   OutdatedDocumentsSearchOpenPit,
   OutdatedDocumentsSearchRead,
-  OutdatedDocumentsSearchClosePit,
   OutdatedDocumentsTransform,
-  MarkVersionIndexReady,
-  BaseState,
-  CreateReindexTempState,
-  MarkVersionIndexReadyConflict,
-  CreateNewTargetState,
-  CloneTempToSource,
-  SetTempWriteBlock,
-  WaitForYellowSourceState,
-  TransformedDocumentsBulkIndex,
-  ReindexSourceToTempIndexBulk,
-  CheckUnknownDocumentsState,
-  CalculateExcludeFiltersState,
   PostInitState,
-  CheckVersionIndexReadyActions,
-  UpdateTargetMappingsMeta,
-  CheckTargetMappingsState,
   PrepareCompatibleMigration,
+  RefreshTarget,
+  ReindexSourceToTempClosePit,
+  ReindexSourceToTempIndexBulk,
+  ReindexSourceToTempOpenPit,
+  ReindexSourceToTempRead,
+  ReindexSourceToTempTransform,
+  SetSourceWriteBlockState,
+  SetTempWriteBlock,
+  State,
+  TransformedDocumentsBulkIndex,
+  UpdateTargetMappingsMeta,
+  UpdateTargetMappingsState,
+  UpdateTargetMappingsWaitForTaskState,
+  WaitForYellowSourceState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
 import type { AliasAction, RetryableEsClientError } from '../actions';
 import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
+import type { BulkIndexOperationTuple, BulkOperation } from './create_batches';
 
 describe('migrations v2 model', () => {
   const indexMapping: IndexMapping = {
@@ -111,6 +115,26 @@ describe('migrations v2 model', () => {
     },
     waitForMigrationCompletion: false,
   };
+
+  const aProcessedDoc = {
+    _id: 'a:b',
+    _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+  };
+
+  const processedDocs: SavedObjectsRawDoc[] = [aProcessedDoc];
+
+  const bulkOperationBatches: BulkOperation[][] = [
+    [
+      [
+        {
+          index: {
+            _id: aProcessedDoc._id,
+          },
+        },
+        aProcessedDoc._source,
+      ],
+    ],
+  ];
 
   describe('exponential retry delays for retryable_es_client_error', () => {
     let state: State = {
@@ -1235,16 +1259,7 @@ describe('migrations v2 model', () => {
         });
 
         describe('and mappings match (diffMappings == false)', () => {
-          const unchangedMappingsState: State = {
-            ...waitForYellowSourceState,
-            controlState: 'WAIT_FOR_YELLOW_SOURCE',
-            kibanaVersion: '7.12.0', // new version!
-            currentAlias: '.kibana',
-            versionAlias: '.kibana_7.12.0',
-            versionIndex: '.kibana_7.11.0_001',
-          };
-
-          test('WAIT_FOR_YELLOW_SOURCE -> PREPARE_COMPATIBLE_MIGRATION', () => {
+          test('WAIT_FOR_YELLOW_SOURCE -> CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
             const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({
               '.kibana_7.11.0_001': {
                 aliases: {
@@ -1255,44 +1270,11 @@ describe('migrations v2 model', () => {
                 settings: {},
               },
             });
-            const newState = model(unchangedMappingsState, res) as PrepareCompatibleMigration;
+            const newState = model(waitForYellowSourceState, res) as CleanupUnknownAndExcluded;
 
-            expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
-            expect(newState.targetIndexRawMappings).toEqual({
-              _meta: {
-                migrationMappingPropertyHashes: {
-                  new_saved_object_type: '4a11183eee21e6fbad864f7a30b39ad0',
-                },
-              },
-              properties: {
-                new_saved_object_type: {
-                  properties: {
-                    value: {
-                      type: 'text',
-                    },
-                  },
-                },
-              },
-            });
-            expect(newState.versionAlias).toEqual('.kibana_7.12.0');
-            expect(newState.currentAlias).toEqual('.kibana');
-            // will point to
-            expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
-            expect(newState.preTransformDocsActions).toEqual([
-              {
-                add: {
-                  alias: '.kibana_7.12.0',
-                  index: '.kibana_7.11.0_001',
-                },
-              },
-              {
-                remove: {
-                  alias: '.kibana_7.11.0',
-                  index: '.kibana_7.11.0_001',
-                  must_exist: true,
-                },
-              },
-            ]);
+            expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED');
+            expect(newState.targetIndex).toEqual(baseState.versionIndex);
+            expect(newState.versionIndexReadyActions).toEqual(Option.none);
           });
         });
 
@@ -1312,23 +1294,17 @@ describe('migrations v2 model', () => {
             },
           };
 
-          const changedMappingsState: State = {
+          const changedMappingsState: WaitForYellowSourceState = {
             ...waitForYellowSourceState,
-            controlState: 'WAIT_FOR_YELLOW_SOURCE',
-            kibanaVersion: '7.12.0', // new version!
-            currentAlias: '.kibana',
-            versionAlias: '.kibana_7.12.0',
-            versionIndex: '.kibana_7.11.0_001',
             sourceIndexMappings: actualMappings,
           };
 
-          test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS', () => {
+          test('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS', () => {
             const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
             const newState = model(changedMappingsState, res);
-            expect(newState.controlState).toEqual('CHECK_UNKNOWN_DOCUMENTS');
 
             expect(newState).toMatchObject({
-              controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+              controlState: 'UPDATE_SOURCE_MAPPINGS',
               sourceIndex: Option.some('.kibana_7.11.0_001'),
               sourceIndexMappings: actualMappings,
             });
@@ -1351,6 +1327,221 @@ describe('migrations v2 model', () => {
             "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
           }
         `);
+      });
+    });
+
+    describe('UPDATE_SOURCE_MAPPINGS', () => {
+      const checkCompatibleMappingsState: UpdateSourceMappingsState = {
+        ...baseState,
+        controlState: 'UPDATE_SOURCE_MAPPINGS',
+        sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+        sourceIndexMappings: baseState.targetIndexMappings,
+        aliases: {
+          '.kibana': '.kibana_7.11.0_001',
+          '.kibana_7.11.0': '.kibana_7.11.0_001',
+        },
+      };
+
+      describe('if action succeeds', () => {
+        test('UPDATE_SOURCE_MAPPINGS -> CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS'> = Either.right(
+            'update_mappings_succeeded' as const
+          );
+          const newState = model(checkCompatibleMappingsState, res);
+
+          expect(newState).toMatchObject({
+            controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+            targetIndex: '.kibana_7.11.0_001',
+            versionIndexReadyActions: Option.none,
+          });
+        });
+      });
+
+      describe('if action fails', () => {
+        test('UPDATE_SOURCE_MAPPINGS -> CHECK_UNKNOWN_DOCUMENTS', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS'> = Either.left({
+            type: 'incompatible_mapping_exception',
+          });
+          const newState = model(checkCompatibleMappingsState, res);
+
+          expect(newState).toMatchObject({
+            controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+            sourceIndex: Option.some('.kibana_7.11.0_001'),
+            sourceIndexMappings: baseState.targetIndexMappings,
+          });
+        });
+      });
+    });
+
+    describe('CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
+      const cleanupUnknownAndExcluded: CleanupUnknownAndExcluded = {
+        ...baseState,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+        sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+        sourceIndexMappings: baseState.targetIndexMappings,
+        targetIndex: baseState.versionIndex,
+        kibanaVersion: '7.12.0', // new version!
+        currentAlias: '.kibana',
+        versionAlias: '.kibana_7.12.0',
+        aliases: {
+          '.kibana': '.kibana_7.11.0_001',
+          '.kibana_7.11.0': '.kibana_7.11.0_001',
+        },
+        versionIndexReadyActions: Option.none,
+      };
+
+      describe('if action succeeds', () => {
+        test('CLEANUP_UNKNOWN_AND_EXCLUDED -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK', () => {
+          const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.right({
+            type: 'cleanup_started' as const,
+            taskId: '1234',
+            unknownDocs: [],
+            errorsByType: {},
+          });
+          const newState = model(cleanupUnknownAndExcluded, res) as PrepareCompatibleMigration;
+
+          expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK');
+          // expect(newState.targetIndexRawMappings).toEqual(indexMapping);
+          // expect(newState.targetIndexMappings).toEqual(indexMapping);
+          // expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
+          // expect(newState.preTransformDocsActions).toEqual([
+          //   {
+          //     add: {
+          //       alias: '.kibana_7.12.0',
+          //       index: '.kibana_7.11.0_001',
+          //     },
+          //   },
+          //   {
+          //     remove: {
+          //       alias: '.kibana_7.11.0',
+          //       index: '.kibana_7.11.0_001',
+          //       must_exist: true,
+          //     },
+          //   },
+          // ]);
+        });
+      });
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED -> FATAL if discardUnknownObjects=false', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED'> = Either.left({
+          type: 'unknown_docs_found' as const,
+          unknownDocs: [
+            { id: 'dashboard:12', type: 'dashboard' },
+            { id: 'foo:17', type: 'foo' },
+          ],
+        });
+
+        const newState = model(cleanupUnknownAndExcluded, res);
+
+        expect(newState).toMatchObject({
+          controlState: 'FATAL',
+          reason: expect.stringContaining(
+            'Migration failed because some documents were found which use unknown saved object types'
+          ),
+        });
+      });
+    });
+
+    describe('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK', () => {
+      const cleanupUnknownAndExcludedWaitForTask: CleanupUnknownAndExcludedWaitForTaskState = {
+        ...baseState,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK',
+        deleteByQueryTaskId: '1234',
+        sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+        sourceIndexMappings: baseState.targetIndexMappings,
+        targetIndex: baseState.versionIndex,
+        kibanaVersion: '7.12.0', // new version!
+        currentAlias: '.kibana',
+        versionAlias: '.kibana_7.12.0',
+        aliases: {
+          '.kibana': '.kibana_7.11.0_001',
+          '.kibana_7.11.0': '.kibana_7.11.0_001',
+        },
+        versionIndexReadyActions: Option.none,
+      };
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK when response is left wait_for_task_completion_timeout', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.left({
+          message: '[timeout_exception] Timeout waiting for ...',
+          type: 'wait_for_task_completion_timeout',
+        });
+        const newState = model(cleanupUnknownAndExcludedWaitForTask, res);
+        expect(newState.controlState).toEqual('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK');
+        expect(newState.retryCount).toEqual(1);
+        expect(newState.retryDelay).toEqual(2000);
+      });
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> PREPARE_COMPATIBLE_MIGRATION if action succeeds', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'> = Either.right({
+          type: 'cleanup_successful' as const,
+        });
+        const newState = model(
+          cleanupUnknownAndExcludedWaitForTask,
+          res
+        ) as PrepareCompatibleMigration;
+
+        expect(newState.controlState).toEqual('PREPARE_COMPATIBLE_MIGRATION');
+        expect(newState.targetIndexRawMappings).toEqual(indexMapping);
+        expect(newState.targetIndexMappings).toEqual(indexMapping);
+        expect(newState.targetIndex).toEqual('.kibana_7.11.0_001');
+        expect(newState.preTransformDocsActions).toEqual([
+          {
+            add: {
+              alias: '.kibana_7.12.0',
+              index: '.kibana_7.11.0_001',
+            },
+          },
+          {
+            remove: {
+              alias: '.kibana_7.11.0',
+              index: '.kibana_7.11.0_001',
+              must_exist: true,
+            },
+          },
+        ]);
+      });
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> CLEANUP_UNKNOWN_AND_EXCLUDED if the deleteQuery fails and we have some attempts left', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'> = Either.left({
+          type: 'cleanup_failed' as const,
+          failures: ['Failed to delete dashboard:12345', 'Failed to delete dashboard:67890'],
+          versionConflicts: 12,
+        });
+
+        const newState = model(cleanupUnknownAndExcludedWaitForTask, res);
+
+        expect(newState).toMatchObject({
+          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+          logs: [
+            {
+              level: 'warning',
+              message:
+                'Errors occurred whilst deleting unwanted documents. Another instance is probably updating or deleting documents in the same index. Retrying attempt 1.',
+            },
+          ],
+        });
+      });
+
+      test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> FAIL if the deleteQuery fails after N retries', () => {
+        const res: ResponseType<'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK'> = Either.left({
+          type: 'cleanup_failed' as const,
+          failures: ['Failed to delete dashboard:12345', 'Failed to delete dashboard:67890'],
+        });
+
+        const newState = model(
+          {
+            ...cleanupUnknownAndExcludedWaitForTask,
+            retryCount: cleanupUnknownAndExcludedWaitForTask.retryAttempts,
+          },
+          res
+        );
+
+        expect(newState).toMatchObject({
+          controlState: 'FATAL',
+          reason: expect.stringContaining(
+            'Migration failed because it was unable to delete unwanted documents from the .kibana_7.11.0_001 system index'
+          ),
+        });
       });
     });
 
@@ -1536,7 +1727,7 @@ describe('migrations v2 model', () => {
       });
       it('CALCULATE_EXCLUDE_FILTERS -> CREATE_REINDEX_TEMP if action succeeds with filters', () => {
         const res: ResponseType<'CALCULATE_EXCLUDE_FILTERS'> = Either.right({
-          mustNotClauses: [{ term: { fieldA: 'abc' } }],
+          filterClauses: [{ term: { fieldA: 'abc' } }],
           errorsByType: { type1: new Error('an error!') },
         });
         const newState = model(state, res);
@@ -1784,12 +1975,6 @@ describe('migrations v2 model', () => {
         transformErrors: [],
         progress: { processed: undefined, total: 1 },
       };
-      const processedDocs = [
-        {
-          _id: 'a:b',
-          _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-        },
-      ] as SavedObjectsRawDoc[];
 
       it('REINDEX_SOURCE_TO_TEMP_TRANSFORM -> REINDEX_SOURCE_TO_TEMP_INDEX_BULK if action succeeded', () => {
         const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_TRANSFORM'> = Either.right({
@@ -1798,7 +1983,7 @@ describe('migrations v2 model', () => {
         const newState = model(state, res) as ReindexSourceToTempIndexBulk;
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_INDEX_BULK');
         expect(newState.currentBatch).toEqual(0);
-        expect(newState.transformedDocBatches).toEqual([processedDocs]);
+        expect(newState.bulkOperationBatches).toEqual(bulkOperationBatches);
         expect(newState.progress.processed).toBe(0); // Result of `(undefined ?? 0) + corruptDocumentsId.length`
       });
 
@@ -1854,18 +2039,10 @@ describe('migrations v2 model', () => {
     });
 
     describe('REINDEX_SOURCE_TO_TEMP_INDEX_BULK', () => {
-      const transformedDocBatches = [
-        [
-          {
-            _id: 'a:b',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-          },
-        ],
-      ] as [SavedObjectsRawDoc[]];
       const reindexSourceToTempIndexBulkState: ReindexSourceToTempIndexBulk = {
         ...baseState,
         controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK',
-        transformedDocBatches,
+        bulkOperationBatches,
         currentBatch: 0,
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
@@ -2024,12 +2201,37 @@ describe('migrations v2 model', () => {
         preTransformDocsActions: [someAliasAction],
       };
 
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> REFRESH_TARGET if action succeeds  and we must refresh the index', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.right(
+          'update_aliases_succeeded'
+        );
+        const newState = model(
+          { ...state, mustRefresh: true },
+          res
+        ) as OutdatedDocumentsSearchOpenPit;
+        expect(newState.controlState).toEqual('REFRESH_TARGET');
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
+      });
+
       it('PREPARE_COMPATIBLE_MIGRATIONS -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action succeeds', () => {
         const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.right(
           'update_aliases_succeeded'
         );
         const newState = model(state, res) as OutdatedDocumentsSearchOpenPit;
         expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
+        expect(newState.versionIndexReadyActions).toEqual(Option.none);
+      });
+
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> REFRESH_TARGET if action fails because the alias is not found', () => {
+        const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.left({
+          type: 'alias_not_found_exception',
+        });
+
+        const newState = model(
+          { ...state, mustRefresh: true },
+          res
+        ) as OutdatedDocumentsSearchOpenPit;
+        expect(newState.controlState).toEqual('REFRESH_TARGET');
         expect(newState.versionIndexReadyActions).toEqual(Option.none);
       });
 
@@ -2268,12 +2470,6 @@ describe('migrations v2 model', () => {
         progress: createInitialProgress(),
       };
       describe('OUTDATED_DOCUMENTS_TRANSFORM if action succeeds', () => {
-        const processedDocs = [
-          {
-            _id: 'a:b',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-          },
-        ] as SavedObjectsRawDoc[];
         test('OUTDATED_DOCUMENTS_TRANSFORM -> TRANSFORMED_DOCUMENTS_BULK_INDEX if action succeeds', () => {
           const res: ResponseType<'OUTDATED_DOCUMENTS_TRANSFORM'> = Either.right({ processedDocs });
           const newState = model(
@@ -2281,7 +2477,7 @@ describe('migrations v2 model', () => {
             res
           ) as TransformedDocumentsBulkIndex;
           expect(newState.controlState).toEqual('TRANSFORMED_DOCUMENTS_BULK_INDEX');
-          expect(newState.transformedDocBatches).toEqual([processedDocs]);
+          expect(newState.bulkOperationBatches).toEqual(bulkOperationBatches);
           expect(newState.currentBatch).toEqual(0);
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
@@ -2367,30 +2563,28 @@ describe('migrations v2 model', () => {
     });
 
     describe('TRANSFORMED_DOCUMENTS_BULK_INDEX', () => {
-      const transformedDocBatches = [
-        [
-          // batch 0
-          {
-            _id: 'a:b',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
+      const idToIndexOperation = (_id: string): BulkIndexOperationTuple => [
+        // "index" operations have a first part with the operation and the SO id
+        {
+          index: {
+            _id,
           },
-          {
-            _id: 'a:c',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-          },
-        ],
-        [
-          // batch 1
-          {
-            _id: 'a:d',
-            _source: { type: 'a', a: { name: 'HOI!' }, migrationVersion: {}, references: [] },
-          },
-        ],
-      ] as SavedObjectsRawDoc[][];
+        },
+        // and a second part with the object _source
+        { type: 'a', a: { name: `HOI ${_id}!` }, migrationVersion: {}, references: [] },
+        // these two parts are then serialized to NDJSON by esClient and sent over with POST _bulk
+      ];
+
+      const customBulkOperationBatches: BulkOperation[][] = [
+        // batch 0
+        ['a:b', 'a:c'].map(idToIndexOperation),
+        // batch 1
+        ['a:d'].map(idToIndexOperation),
+      ];
       const transformedDocumentsBulkIndexState: TransformedDocumentsBulkIndex = {
         ...baseState,
         controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
-        transformedDocBatches,
+        bulkOperationBatches: customBulkOperationBatches,
         currentBatch: 0,
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
@@ -2542,7 +2736,7 @@ describe('migrations v2 model', () => {
 
       test('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS if the mapping _meta information is successfully updated', () => {
         const res: ResponseType<'UPDATE_TARGET_MAPPINGS_META'> = Either.right(
-          'update_mappings_meta_succeeded'
+          'update_mappings_succeeded'
         );
         const newState = model(updateTargetMappingsMetaState, res) as CheckVersionIndexReadyActions;
         expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');
