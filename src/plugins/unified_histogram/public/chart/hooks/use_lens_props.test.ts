@@ -80,7 +80,6 @@ describe('useLensProps', () => {
         refetch$,
         attributes,
         onLoad,
-        isPlainRecord: true,
       });
     });
     expect(lensProps.result.current).toEqual(
