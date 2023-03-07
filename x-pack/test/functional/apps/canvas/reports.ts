@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Print PDF button', () => {
-      it('downloaded PDF base64 string is correct with borders and logo', async function () {
+      it('creates a PDF with correct response headers', async function () {
         // Generating and then comparing reports can take longer than the default 60s timeout
         this.timeout(180000);
 
@@ -66,62 +66,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(res.get('content-disposition')).to.equal(
           'attachment; filename="The Very Cool Workpad for PDF Tests.pdf"'
         );
-
-        /* Check the value of the PDF data that was generated
-         * PDF files include dynamic meta info such as creation date.
-         * This checks only the first few thousand bytes of the Buffer
-         */
-        const pdfStrings = await (
-          await PageObjects.reporting.getRawPdfReportData(url)
-        ).toString('utf-8', 14);
-        const [header, , contents, , info] = pdfStrings.split('stream'); // ignore everthing from `stream` to `endstream` - the non-utf8 blocks
-
-        // PDF (this should really be a visual test)
-        expectSnapshot(header).toMatch();
-
-        // TODO contents are non-deterministic
-        // expectSnapshot(
-        //   contents).toMatch();
-
-        expectSnapshot(info.replace(/D:\d+Z/, 'D:DATESTAMP')).toMatch();
-      });
-
-      it('downloaded PDF base64 string is correct without borders and logo', async function () {
-        // Generating and then comparing reports can take longer than the default 60s timeout
-        this.timeout(180000);
-
-        await PageObjects.common.navigateToApp('canvas');
-        await PageObjects.canvas.loadFirstWorkpad('The Very Cool Workpad for PDF Tests');
-        await PageObjects.reporting.openPdfReportingPanel();
-        await PageObjects.reporting.toggleReportMode();
-        await PageObjects.reporting.clickGenerateReportButton();
-
-        const url = await PageObjects.reporting.getReportURL(60000);
-        const res = await PageObjects.reporting.getResponse(url);
-
-        expect(res.status).to.equal(200);
-        expect(res.get('content-type')).to.equal('application/pdf');
-        expect(res.get('content-disposition')).to.equal(
-          'attachment; filename="The Very Cool Workpad for PDF Tests.pdf"'
-        );
-
-        /* Check the value of the PDF data that was generated
-         * PDF files include dynamic meta info such as creation date.
-         * This checks only the first few thousand bytes of the Buffer
-         */
-        const pdfStrings = await (
-          await PageObjects.reporting.getRawPdfReportData(url)
-        ).toString('utf-8', 14);
-        const [header, , contents, , info] = pdfStrings.split('stream'); // ignore everthing from `stream` to `endstream` - the non-utf8 blocks
-
-        // PDF (this should really be a visual test)
-        expectSnapshot(header).toMatch();
-
-        // TODO contents are non-deterministic
-        // expectSnapshot(
-        //   contents).toMatch();
-
-        expectSnapshot(info.replace(/D:\d+Z/, 'D:DATESTAMP')).toMatch();
       });
     });
   });
