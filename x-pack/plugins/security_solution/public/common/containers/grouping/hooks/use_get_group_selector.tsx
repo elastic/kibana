@@ -16,6 +16,7 @@ import { defaultGroup } from '../../../store/grouping/defaults';
 import type { GroupOption } from '../../../store/grouping';
 import { groupActions, groupSelectors } from '../../../store/grouping';
 import { track } from '../../../lib/telemetry';
+import { useKibana } from '../../../lib/kibana';
 
 export interface UseGetGroupSelectorArgs {
   fields: FieldSpec[];
@@ -25,7 +26,9 @@ export interface UseGetGroupSelectorArgs {
 
 export const useGetGroupSelector = ({ fields, groupingId, tableId }: UseGetGroupSelectorArgs) => {
   const dispatch = useDispatch();
-
+  const {
+    services: { telemetry },
+  } = useKibana();
   const getGroupByIdSelector = groupSelectors.getGroupByIdSelector();
 
   const { activeGroup: selectedGroup, options } =
@@ -82,6 +85,8 @@ export const useGetGroupSelector = ({ fields, groupingId, tableId }: UseGetGroup
       }
       setGroupsActivePage(0);
       setSelectedGroup(groupSelection);
+      console.log({ groupByField: groupSelection, tableId: groupingId });
+      telemetry.reportAlertsGroupingChanged({ groupByField: groupSelection, tableId: groupingId });
 
       if (!isNoneGroup(groupSelection) && !options.find((o) => o.key === groupSelection)) {
         setOptions([

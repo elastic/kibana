@@ -13,6 +13,9 @@ import type { AlertWorkflowStatus } from '../../types';
 export { telemetryMiddleware } from './middleware';
 
 export { METRIC_TYPE };
+export * from './telemetry_client';
+export * from './telemetry_service';
+export * from './types';
 
 type TrackFn = (type: UiCounterMetricType, event: string | string[], count?: number) => void;
 

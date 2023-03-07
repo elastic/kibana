@@ -36,6 +36,12 @@ export interface GroupingProps {
   groupsSelector?: JSX.Element;
   inspectButton?: JSX.Element;
   isLoading: boolean;
+  onToggleCallback?: (params: {
+    isOpen: boolean;
+    groupName?: string | undefined;
+    groupNumber: number;
+    tableId: string;
+  }) => void;
   pagination: {
     pageIndex: number;
     pageSize: number;
@@ -63,6 +69,7 @@ const GroupingComponent = ({
   groupsSelector,
   inspectButton,
   isLoading,
+  onToggleCallback,
   pagination,
   renderChildComponent,
   selectedGroup,
@@ -121,6 +128,7 @@ const GroupingComponent = ({
                     selectedBucket: groupBucket,
                   },
                 });
+                onToggleCallback?.({ isOpen, groupName: group, groupNumber, tableId: groupingId });
               }}
               renderChildComponent={
                 trigger[groupKey] && trigger[groupKey].state === 'open'
@@ -140,6 +148,7 @@ const GroupingComponent = ({
       groupingId,
       groupPanelRenderer,
       isLoading,
+      onToggleCallback,
       renderChildComponent,
       selectedGroup,
       takeActionItems,

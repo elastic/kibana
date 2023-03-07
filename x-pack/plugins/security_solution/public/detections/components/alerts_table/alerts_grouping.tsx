@@ -96,13 +96,15 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   const { browserFields, indexPattern, selectedPatterns } = useSourcererDataView(
     SourcererScopeName.detections
   );
-  const kibana = useKibana();
+  const {
+    services: { uiSettings, telemetry },
+  } = useKibana();
 
   const getGlobalQuery = useCallback(
     (customFilters: Filter[]) => {
       if (browserFields != null && indexPattern != null) {
         return combineQueries({
-          config: getEsQueryConfig(kibana.services.uiSettings),
+          config: getEsQueryConfig(uiSettings),
           dataProviders: [],
           indexPattern,
           browserFields,
@@ -118,7 +120,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       }
       return null;
     },
-    [browserFields, defaultFilters, globalFilters, globalQuery, indexPattern, kibana, to, from]
+    [browserFields, indexPattern, uiSettings, defaultFilters, globalFilters, from, to, globalQuery]
   );
 
   useInvalidFilterQuery({
@@ -228,12 +230,13 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
 
   const getTakeActionItems = useCallback(
     (groupFilters: Filter[], groupNumber: number) =>
-      takeActionItems(
-        getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
+      takeActionItems({
+        query: getGlobalQuery([...(defaultFilters ?? []), ...groupFilters])?.filterQuery,
         tableId,
-        groupNumber
-      ),
-    [defaultFilters, getGlobalQuery, tableId, takeActionItems]
+        groupNumber,
+        selectedGroup,
+      }),
+    [defaultFilters, getGlobalQuery, selectedGroup, tableId, takeActionItems]
   );
 
   const groupedAlerts = useMemo(
@@ -252,6 +255,10 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
             groupsSelector,
             inspectButton: inspect,
             isLoading: loading || isLoadingGroups,
+            onToggleCallback: (params) => {
+              console.log(params);
+              telemetry.reportAlertsGroupingToggled(params);
+            },
             pagination,
             renderChildComponent,
             selectedGroup,
@@ -266,6 +273,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       groupsSelector,
       inspect,
       isLoadingGroups,
+      telemetry,
       loading,
       pagination,
       renderChildComponent,

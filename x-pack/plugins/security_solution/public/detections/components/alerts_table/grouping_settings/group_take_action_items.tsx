@@ -7,11 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
-import {
-  createKibanaReactContext,
-  KibanaReactContextValue,
-  useKibana,
-} from '@kbn/kibana-react-plugin/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Status } from '../../../../../common/detection_engine/schemas/common';
 import type { inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
@@ -33,6 +29,7 @@ import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import * as i18n from '../translations';
 import { getTelemetryEvent, METRIC_TYPE, track } from '../../../../common/lib/telemetry';
+import type { StartServices } from '../../../../types';
 export interface TakeActionsProps {
   currentStatus?: Status;
   indexName: string;
@@ -54,13 +51,14 @@ export const useGroupTakeActionsItems = ({
   }, [globalQueries]);
   const {
     services: { telemetry },
-  } = useKibana();
+  } = useKibana<StartServices>();
 
   const reportAlertsGroupingTakeActionClick = useCallback(
     (params: {
-      groupingId: string;
+      tableId: string;
       groupNumber: number;
       status: 'open' | 'closed' | 'acknowledged';
+      groupByField: string;
     }) => {
       console.log(params);
       telemetry.reportAlertsGroupingTakeAction(params);
@@ -133,20 +131,35 @@ export const useGroupTakeActionsItems = ({
   );
 
   const onClickUpdate = useCallback(
-    async (status: AlertWorkflowStatus, query?: string, tableId?: string, groupNumber?: number) => {
+    async ({
+      groupNumber,
+      query,
+      status,
+      tableId,
+      selectedGroup,
+    }: {
+      groupNumber: number;
+      query?: string;
+      status: AlertWorkflowStatus;
+      tableId: string;
+      selectedGroup: string;
+    }) => {
       if (query) {
         startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
       } else {
         startTransaction({ name: APM_USER_INTERACTIONS.STATUS_UPDATE });
       }
 
-      if (tableId != null && groupNumber != null) {
-        track(
-          METRIC_TYPE.CLICK,
-          getTelemetryEvent.groupedAlertsTakeAction({ tableId, groupNumber, status })
-        );
-        reportAlertsGroupingTakeActionClick({ groupingId: tableId, groupNumber, status });
-      }
+      track(
+        METRIC_TYPE.CLICK,
+        getTelemetryEvent.groupedAlertsTakeAction({ tableId, groupNumber, status })
+      );
+      reportAlertsGroupingTakeActionClick({
+        tableId,
+        groupNumber,
+        status,
+        groupByField: selectedGroup,
+      });
 
       try {
         const response = await updateAlertStatus({
@@ -171,7 +184,17 @@ export const useGroupTakeActionsItems = ({
   );
 
   const items = useMemo(() => {
-    const getActionItems = (query?: string, tableId?: string, groupNumber?: number) => {
+    const getActionItems = ({
+      query,
+      tableId,
+      groupNumber,
+      selectedGroup,
+    }: {
+      query?: string;
+      tableId: string;
+      groupNumber: number;
+      selectedGroup: string;
+    }) => {
       const actionItems: JSX.Element[] = [];
       if (showAlertStatusActions) {
         if (currentStatus !== FILTER_OPEN) {
@@ -180,7 +203,13 @@ export const useGroupTakeActionsItems = ({
               key="open"
               data-test-subj="open-alert-status"
               onClick={() =>
-                onClickUpdate(FILTER_OPEN as AlertWorkflowStatus, query, tableId, groupNumber)
+                onClickUpdate({
+                  groupNumber,
+                  query,
+                  selectedGroup,
+                  status: FILTER_OPEN as AlertWorkflowStatus,
+                  tableId,
+                })
               }
             >
               {BULK_ACTION_OPEN_SELECTED}
@@ -193,12 +222,13 @@ export const useGroupTakeActionsItems = ({
               key="acknowledge"
               data-test-subj="acknowledged-alert-status"
               onClick={() =>
-                onClickUpdate(
-                  FILTER_ACKNOWLEDGED as AlertWorkflowStatus,
+                onClickUpdate({
+                  groupNumber,
                   query,
+                  selectedGroup,
+                  status: FILTER_ACKNOWLEDGED as AlertWorkflowStatus,
                   tableId,
-                  groupNumber
-                )
+                })
               }
             >
               {BULK_ACTION_ACKNOWLEDGED_SELECTED}
@@ -211,7 +241,13 @@ export const useGroupTakeActionsItems = ({
               key="close"
               data-test-subj="close-alert-status"
               onClick={() =>
-                onClickUpdate(FILTER_CLOSED as AlertWorkflowStatus, query, tableId, groupNumber)
+                onClickUpdate({
+                  groupNumber,
+                  query,
+                  selectedGroup,
+                  status: FILTER_CLOSED as AlertWorkflowStatus,
+                  tableId,
+                })
               }
             >
               {BULK_ACTION_CLOSE_SELECTED}
