@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexItem } from '@elastic/eui';
-import React, { useMemo, useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { AddComment } from '../add_comment';
@@ -34,8 +34,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     userActivityQueryParams,
     userActionsStats,
   } = props;
-  const { detailName: caseId, commentId } = useCaseViewParams();
-  const [initLoading, setInitLoading] = useState(true);
+  const { detailName: caseId } = useCaseViewParams();
 
   const lastPage = useMemo(() => {
     if (!userActionsStats) {
@@ -63,27 +62,8 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
 
   const showCommentEditor = permissions.create && userActivityQueryParams.type !== 'action'; // add-comment markdown is not visible in History filter
 
-  const {
-    loadingCommentIds,
-    commentRefs,
-    selectedOutlineCommentId,
-    manageMarkdownEditIds,
-    handleManageMarkdownEditId,
-    handleOutlineComment,
-    handleSaveComment,
-    handleManageQuote,
-    handleDeleteComment,
-    handleUpdate,
-  } = useUserActionsHandler();
-
-  useEffect(() => {
-    if (initLoading && loadingCommentIds.length === 0) {
-      setInitLoading(false);
-      if (commentId != null) {
-        handleOutlineComment(commentId);
-      }
-    }
-  }, [commentId, initLoading, loadingCommentIds, handleOutlineComment]);
+  const { commentRefs, handleManageMarkdownEditId, handleManageQuote, handleUpdate } =
+    useUserActionsHandler();
 
   const MarkdownNewComment = useMemo(
     () => (
@@ -123,15 +103,8 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
         key={`top-user-actions-${userActivityQueryParams.type}-${userActivityQueryParams.sortOrder}`}
         loadingAlertData={loadingAlertData}
         manualAlertsData={manualAlertsData}
-        loadingCommentIds={loadingCommentIds}
         commentRefs={commentRefs}
-        selectedOutlineCommentId={selectedOutlineCommentId}
-        manageMarkdownEditIds={manageMarkdownEditIds}
-        handleManageMarkdownEditId={handleManageMarkdownEditId}
-        handleOutlineComment={handleOutlineComment}
-        handleSaveComment={handleSaveComment}
         handleManageQuote={handleManageQuote}
-        handleDeleteComment={handleDeleteComment}
         isExpandable
       />
       {lastPage > 0 && (
@@ -141,15 +114,8 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
             loadingAlertData={loadingAlertData}
             manualAlertsData={manualAlertsData}
             bottomActions={bottomActions}
-            loadingCommentIds={loadingCommentIds}
             commentRefs={commentRefs}
-            selectedOutlineCommentId={selectedOutlineCommentId}
-            manageMarkdownEditIds={manageMarkdownEditIds}
-            handleManageMarkdownEditId={handleManageMarkdownEditId}
-            handleOutlineComment={handleOutlineComment}
-            handleSaveComment={handleSaveComment}
             handleManageQuote={handleManageQuote}
-            handleDeleteComment={handleDeleteComment}
             userActivityQueryParams={{ ...userActivityQueryParams, page: lastPage }}
           />
         </BottomUserActionsListWrapper>

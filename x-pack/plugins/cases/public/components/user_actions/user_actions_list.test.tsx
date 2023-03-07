@@ -11,10 +11,11 @@ import userEvent from '@testing-library/user-event';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 
-import { basicCase } from '../../containers/mock';
+import { basicCase, getUserAction } from '../../containers/mock';
 import { UserActionsList } from './user_actions_list';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
+import { Actions } from '../../../common/api';
 import { connectorsMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
 import type { UserActivityParams } from '../user_actions_activity_bar/types';
 import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
@@ -23,6 +24,7 @@ import {
   defaultInfiniteUseFindCaseUserActions,
 } from '../case_view/mocks';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
+import { useUpdateComment } from '../../containers/use_update_comment';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
@@ -88,6 +90,8 @@ jest.mock('../../common/lib/kibana');
 
 const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
+const useUpdateCommentMock = useUpdateComment as jest.Mock;
+const patchComment = jest.fn();
 const fetchNextPage = jest.fn();
 
 describe(`UserActionsList`, () => {
@@ -99,6 +103,10 @@ describe(`UserActionsList`, () => {
     useInfiniteFindCaseUserActionsMock.mockReturnValue({
       ...defaultInfiniteUseFindCaseUserActions,
       fetchNextPage,
+    });
+    useUpdateCommentMock.mockReturnValue({
+      isLoadingIds: [],
+      patchComment,
     });
 
     jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
@@ -179,22 +187,54 @@ describe(`UserActionsList`, () => {
     });
   });
 
-  it('show more button click calls to fetch next user actions', async () => {
-    useInfiniteFindCaseUserActionsMock.mockReturnValue({
-      hasNextPage: true,
+  it('Outlines comment when url param is provided', async () => {
+    const commentId = 'basic-comment-id';
+    jest.spyOn(routeData, 'useParams').mockReturnValue({ commentId });
+
+    const ourActions = [getUserAction('comment', Actions.create)];
+
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue({
       isLoading: false,
-      fetchNextPage: jest.fn(),
-    });
-    appMockRender.render(<UserActionsList {...defaultProps} isExpandable />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
-      expect(screen.getByTestId('show-more-user-actions')).toBeInTheDocument();
+      data: { ...defaultUseFindCaseUserActions.data, userActions: ourActions },
     });
 
-    userEvent.click(screen.getByTestId('show-more-user-actions'));
-    await waitFor(() => {
-      expect(fetchNextPage).toHaveBeenCalled();
+    appMockRender.render(<UserActionsList {...defaultProps} />);
+
+    expect(
+      await screen.findAllByTestId(`comment-create-action-${commentId}`)
+    )[0]?.classList.contains('outlined');
+  });
+
+  it('Outlines comment when update move to link is clicked', async () => {
+    const ourActions = [
+      getUserAction('comment', Actions.create),
+      getUserAction('comment', Actions.update),
+    ];
+
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
+    useFindCaseUserActionsMock.mockReturnValue({
+      ...defaultUseFindCaseUserActions,
+      data: { userActions: ourActions },
     });
+
+    appMockRender.render(<UserActionsList {...defaultProps} />);
+    expect(
+      screen
+        .queryAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[0]
+        ?.classList.contains('outlined')
+    ).toBe(false);
+
+    expect(
+      screen
+        .queryAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[0]
+        ?.classList.contains('outlined')
+    ).toBe(false);
+
+    userEvent.click(screen.getByTestId(`comment-update-action-${ourActions[1].id}`));
+
+    expect(
+      await screen.findAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)
+    )[0]?.classList.contains('outlined');
   });
 });

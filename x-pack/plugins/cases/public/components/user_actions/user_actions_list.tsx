@@ -8,7 +8,7 @@
 import type { EuiCommentProps } from '@elastic/eui';
 import { EuiCommentList, EuiBadge, EuiButton, EuiSkeletonText } from '@elastic/eui';
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
@@ -20,6 +20,8 @@ import { NEW_COMMENT_ID } from './constants';
 import { isUserActionTypeSupported } from './helpers';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { builderMap } from './builder';
+import { useCaseViewParams } from '../../common/navigation';
+import { useUserActionsHandler } from './use_user_actions_handler';
 
 const MyEuiButton = styled(EuiButton)`
   margin-top: 16px;
@@ -77,18 +79,7 @@ const MyEuiCommentList = styled(EuiCommentList)`
 `;
 
 export type UserActionListProps = UserActionTreeProps &
-  Pick<
-    UserActionBuilderArgs,
-    | 'loadingCommentIds'
-    | 'commentRefs'
-    | 'manageMarkdownEditIds'
-    | 'handleManageMarkdownEditId'
-    | 'selectedOutlineCommentId'
-    | 'handleOutlineComment'
-    | 'handleSaveComment'
-    | 'handleDeleteComment'
-    | 'handleManageQuote'
-  > & {
+  Pick<UserActionBuilderArgs, 'commentRefs' | 'handleManageQuote'> & {
     loadingAlertData: boolean;
     manualAlertsData: Record<string, unknown>;
     bottomActions?: AddCommentMarkdown[];
@@ -108,14 +99,7 @@ export const UserActionsList = React.memo(
     loadingAlertData,
     manualAlertsData,
     commentRefs,
-    manageMarkdownEditIds,
-    handleManageMarkdownEditId,
-    handleSaveComment,
-    handleDeleteComment,
     handleManageQuote,
-    handleOutlineComment,
-    selectedOutlineCommentId,
-    loadingCommentIds,
     userActivityQueryParams,
     bottomActions,
     isExpandable = false,
@@ -125,6 +109,18 @@ export const UserActionsList = React.memo(
       persistableStateAttachmentTypeRegistry,
       appId,
     } = useCasesContext();
+    const { commentId } = useCaseViewParams();
+    const [initLoading, setInitLoading] = useState(true);
+
+    const {
+      loadingCommentIds,
+      selectedOutlineCommentId,
+      manageMarkdownEditIds,
+      handleManageMarkdownEditId,
+      handleOutlineComment,
+      handleSaveComment,
+      handleDeleteComment,
+    } = useUserActionsHandler();
 
     const {
       data: caseInfiniteUserActionsData,
@@ -138,6 +134,24 @@ export const UserActionsList = React.memo(
       userActivityQueryParams,
       !isExpandable
     );
+
+    useEffect(() => {
+      if (
+        !isLoadingInfiniteUserActions &&
+        !isLoadingUserActions &&
+        commentId != null &&
+        initLoading
+      ) {
+        setInitLoading(false);
+        handleOutlineComment(commentId);
+      }
+    }, [
+      commentId,
+      initLoading,
+      handleOutlineComment,
+      isLoadingInfiniteUserActions,
+      isLoadingUserActions,
+    ]);
 
     const caseUserActions = useMemo<CaseUserActions[]>(() => {
       if (!isExpandable) {

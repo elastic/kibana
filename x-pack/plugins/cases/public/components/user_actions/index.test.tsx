@@ -175,46 +175,6 @@ describe(`UserActions`, () => {
     });
   });
 
-  it('Outlines comment when update move to link is clicked', async () => {
-    const ourActions = [
-      getUserAction('comment', Actions.create),
-      getUserAction('comment', Actions.update),
-    ];
-    const props = {
-      ...defaultProps,
-      caseUserActions: ourActions,
-    };
-
-    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
-    useFindCaseUserActionsMock.mockReturnValue({
-      ...defaultUseFindCaseUserActions,
-      data: { userActions: [...defaultUseFindCaseUserActions.data.userActions, ...ourActions] },
-    });
-
-    appMockRender.render(<UserActions {...props} />);
-    expect(
-      screen
-        .getByTestId(`comment-create-action-${props.data.comments[0].id}`)
-        .classList.contains('outlined')
-    ).toBe(false);
-
-    expect(
-      screen
-        .getAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[1]
-        .classList.contains('outlined')
-    ).toBe(false);
-
-    userEvent.click(screen.getByTestId(`comment-update-action-${ourActions[1].id}`));
-
-    await waitFor(() => {
-      expect(
-        screen
-          .getAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[1]
-          .classList.contains('outlined')
-      ).toBe(true);
-    });
-  });
-
   it('Switches to markdown when edit is clicked and back to panel when canceled', async () => {
     const ourActions = [getUserAction('comment', Actions.create)];
     const props = {
@@ -359,31 +319,6 @@ describe(`UserActions`, () => {
 
     await waitFor(() => {
       expect(screen.queryByTestId('add-comment')).not.toBeInTheDocument();
-    });
-  });
-
-  it('Outlines comment when url param is provided', async () => {
-    const commentId = 'basic-comment-id';
-    jest.spyOn(routeData, 'useParams').mockReturnValue({ commentId });
-
-    const ourActions = [getUserAction('comment', Actions.create)];
-    const props = {
-      ...defaultProps,
-    };
-
-    useInfiniteFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
-    useFindCaseUserActionsMock.mockReturnValue({
-      ...defaultUseFindCaseUserActions,
-      data: { ...defaultUseFindCaseUserActions.data, userActions: ourActions },
-    });
-
-    appMockRender.render(<UserActions {...props} />);
-
-    await waitFor(() => {
-      expect(
-        screen.getAllByTestId(`
-          comment-create-action-${commentId}`)[0]
-      ).classList.contains('outlined');
     });
   });
 
