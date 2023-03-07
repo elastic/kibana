@@ -190,6 +190,17 @@ export const TRANSFORM_HEALTH_CHECK_NAMES: Record<
       }
     ),
   },
+  healthCheck: {
+    name: i18n.translate('xpack.transform.alertTypes.transformHealth.healthCheckName', {
+      defaultMessage: 'Unhealthy transform',
+    }),
+    description: i18n.translate(
+      'xpack.transform.alertTypes.transformHealth.healthCheckDescription',
+      {
+        defaultMessage: 'Get alerts if a transform health status is not green.',
+      }
+    ),
+  },
 };
 
 // Transform API default values https://www.elastic.co/guide/en/elasticsearch/reference/current/put-transform.html
