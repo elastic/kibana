@@ -11,7 +11,10 @@ import { useDispatch } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import styled from 'styled-components';
-import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import type { RangeFilterParams } from '@kbn/es-query';
+import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
+import type { XYState } from '@kbn/lens-plugin/public';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -25,11 +28,16 @@ import { getRequestsAndResponses } from './utils';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { VisualizationActions } from './actions';
 
-const LensComponentWrapper = styled.div<{ height?: string; width?: string }>`
+const LensComponentWrapper = styled.div<{
+  height?: string;
+  width?: string;
+  $addHoverActionsPadding?: boolean;
+}>`
   height: ${({ height }) => height ?? 'auto'};
   width: ${({ width }) => width ?? 'auto'};
   > div {
     background-color: transparent;
+    ${({ $addHoverActionsPadding }) => ($addHoverActionsPadding ? `padding: 20px 0 0 0;` : ``)}
   }
   .expExpressionRenderer__expression {
     padding: 2px 0 0 0 !important;
@@ -74,7 +82,12 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     }),
     [wrapperHeight, wrapperWidth]
   );
-  const { lens } = useKibana().services;
+  const {
+    lens,
+    data: {
+      actions: { createFiltersFromValueClickAction },
+    },
+  } = useKibana().services;
   const dispatch = useDispatch();
   const [isShowingModal, setIsShowingModal] = useState(false);
   const [visualizationData, setVisualizationData] = useState(initVisualizationData);
@@ -89,6 +102,10 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     stackByField,
     title: '',
   });
+  const preferredSeriesType = (attributes?.state?.visualization as XYState)?.preferredSeriesType;
+  const addHoverActionsPadding =
+    attributes?.visualizationType !== 'lnsLegacyMetric' &&
+    attributes?.visualizationType !== 'lnsPie';
   const LensComponent = lens.EmbeddableComponent;
   const inspectActionProps = useMemo(
     () => ({
@@ -136,7 +153,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     return { response, additionalResponses };
   }, [visualizationData.responses]);
 
-  const callback = useCallback(
+  const onLoadCallback = useCallback(
     (isLoading, adapters) => {
       if (!adapters) {
         return;
@@ -157,6 +174,25 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
       }
     },
     [onLoad]
+  );
+
+  const onFilterCallback = useCallback(
+    async (e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => {
+      if (!Array.isArray(e.data) || preferredSeriesType !== 'area') {
+        return;
+      }
+      const [{ query }] = await createFiltersFromValueClickAction({
+        data: e.data,
+        negate: e.negate,
+      });
+      const rangeFilter: RangeFilterParams = query?.range['@timestamp'];
+      if (rangeFilter?.gte && rangeFilter?.lt) {
+        updateDateRange({
+          range: [rangeFilter.gte, rangeFilter.lt],
+        });
+      }
+    },
+    [createFiltersFromValueClickAction, updateDateRange, preferredSeriesType]
   );
 
   const adHocDataViews = useMemo(
@@ -185,10 +221,12 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
         <EuiFlexItem grow={1}>
           <EuiEmptyPrompt
             body={
-              <FormattedMessage
-                id="xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title"
-                defaultMessage="No data to display"
-              />
+              <EuiText size="xs">
+                <FormattedMessage
+                  id="xpack.securitySolution.lensEmbeddable.NoDataToDisplay.title"
+                  defaultMessage="No data to display"
+                />
+              </EuiText>
             }
           />
         </EuiFlexItem>
@@ -213,14 +251,19 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   return (
     <>
       {attributes && searchSessionId && (
-        <LensComponentWrapper height={wrapperHeight} width={wrapperWidth}>
+        <LensComponentWrapper
+          height={wrapperHeight}
+          width={wrapperWidth}
+          $addHoverActionsPadding={addHoverActionsPadding}
+        >
           <LensComponent
             id={id}
             style={style}
             timeRange={timerange}
             attributes={attributes}
-            onLoad={callback}
+            onLoad={onLoadCallback}
             onBrushEnd={updateDateRange}
+            onFilter={onFilterCallback}
             viewMode={ViewMode.VIEW}
             withDefaultActions={false}
             extraActions={actions}

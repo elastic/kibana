@@ -10,10 +10,12 @@ import Url from 'url';
 
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
+import { startRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/runtime';
 import { FtrProviderContext } from './ftr_provider_context';
 
-import { AgentManager, AgentManagerParams } from './agent';
+import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';
+import { getLatestAvailableAgentVersion } from '../defend_workflows_cypress/utils';
 
 async function withFleetAgent(
   { getService }: FtrProviderContext,
@@ -21,37 +23,24 @@ async function withFleetAgent(
 ) {
   const log = getService('log');
   const config = getService('config');
+  const kbnClient = getService('kibanaServer');
 
-  const esHost = Url.format(config.get('servers.elasticsearch'));
-  const params: AgentManagerParams = {
-    user: config.get('servers.elasticsearch.username'),
-    password: config.get('servers.elasticsearch.password'),
-    esHost,
-    esPort: config.get('servers.elasticsearch.port'),
-    kibanaUrl: Url.format({
-      protocol: config.get('servers.kibana.protocol'),
-      hostname: config.get('servers.kibana.hostname'),
-      port: config.get('servers.kibana.port'),
-    }),
-  };
-  const requestOptions = {
-    headers: {
-      'kbn-xsrf': 'kibana',
-    },
-    auth: {
-      username: params.user,
-      password: params.password,
-    },
-  };
-  const fleetManager = new FleetManager(params, log, requestOptions);
-  const agentManager = new AgentManager(params, log, requestOptions);
+  const elasticUrl = Url.format(config.get('servers.elasticsearch'));
+  const kibanaUrl = Url.format(config.get('servers.kibana'));
+  const username = config.get('servers.elasticsearch.username');
+  const password = config.get('servers.elasticsearch.password');
 
-  // Since the managers will create uncaughtException event handlers we need to exit manually
-  process.on('uncaughtException', (err) => {
-    // eslint-disable-next-line no-console
-    console.error('Encountered error; exiting after cleanup.', err);
-    process.exit(1);
+  await startRuntimeServices({
+    log,
+    elasticUrl,
+    kibanaUrl,
+    username,
+    password,
+    version: await getLatestAvailableAgentVersion(kbnClient),
   });
+
+  const fleetManager = new FleetManager(kbnClient, log);
+  const agentManager = new AgentManager(kbnClient, log);
 
   await fleetManager.setup();
   await agentManager.setup();
