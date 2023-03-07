@@ -51,3 +51,23 @@ export const addGroupsToStorage = (storage: Storage, groupingId: string, group: 
     })
   );
 };
+
+const LOCAL_STORAGE_GROUPING_KEY = 'groups';
+export const getAllGroupsInStorage = (storage: Storage): GroupsById => {
+  const allGroups = storage.getItem(LOCAL_STORAGE_GROUPING_KEY);
+  if (!allGroups) {
+    return EMPTY_GROUP_BY_ID;
+  }
+  return JSON.parse(allGroups);
+};
+
+export const addGroupsToStorage = (storage: Storage, groupingId: string, group: GroupModel) => {
+  const groups = getAllGroupsInStorage(storage);
+  storage.setItem(
+    LOCAL_STORAGE_GROUPING_KEY,
+    JSON.stringify({
+      ...groups,
+      [groupingId]: group,
+    })
+  );
+};
