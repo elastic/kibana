@@ -179,6 +179,35 @@ const mockedUseCellActions: UseCellActions = () => {
   };
 };
 
+// The JSDOM implementation is too slow
+// Especially for dropdowns that try to position themselves
+// perf issue - https://github.com/jsdom/jsdom/issues/3234
+Object.defineProperty(window, 'getComputedStyle', {
+  value: (el: HTMLElement) => {
+    /**
+     * This is based on the jsdom implementation of getComputedStyle
+     * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+     *
+     * It is missing global style parsing and will only return styles applied directly to an element.
+     * Will not return styles that are global or from emotion
+     */
+    const declaration = new CSSStyleDeclaration();
+    const { style } = el;
+
+    Array.prototype.forEach.call(style, (property: string) => {
+      declaration.setProperty(
+        property,
+        style.getPropertyValue(property),
+        style.getPropertyPriority(property)
+      );
+    });
+
+    return declaration;
+  },
+  configurable: true,
+  writable: true,
+});
+
 describe('AlertsTable', () => {
   const fetchAlertsData = {
     activePage: 0,
@@ -511,7 +540,7 @@ describe('AlertsTable', () => {
       it('should show the row loader when callback triggered', async () => {
         const start = performance.now();
         render(<AlertsTableWithProviders {...customTableProps} />);
-        const step1 = performance.now();
+        const step1 = performance.now(); // 2.921s
         console.log('step1', step1 - start);
         fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
         const step2 = performance.now();
@@ -525,10 +554,11 @@ describe('AlertsTable', () => {
         console.log('step3', step3 - step2);
         expect(await screen.findAllByTestId('row-loader')).toHaveLength(1);
         const step4 = performance.now();
-        console.log('step4', step4 - step3);
+        console.log('step4', step4 - step3); // 1.674s
         const selectedOptions = await screen.findAllByTestId('dataGridRowCell');
         const end = performance.now();
-        console.log('end', end - step4);
+        console.log('end', end - step4); // 1.463s
+
         // first row, first column
         expect(within(selectedOptions[0]).getByLabelText('Loading')).toBeDefined();
         expect(within(selectedOptions[0]).queryByRole('checkbox')).not.toBeInTheDocument();
@@ -624,7 +654,7 @@ describe('AlertsTable', () => {
       });
     });
 
-    describe.skip('cases column', () => {
+    describe('cases column', () => {
       const props = {
         ...tableProps,
         pageSize: alerts.length,
