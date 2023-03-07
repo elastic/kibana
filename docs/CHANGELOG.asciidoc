@@ -191,6 +191,16 @@ When you attempt to create an APM latency threshold rule in **Observability** > 
 This known issue only impacts the Observability Rules page. To work around this issue, create APM latency threshold rules in the APM Alerts and Rules dialog. See {kibana-ref}/apm-alerts.html[Alerts and rules] for detailed instructions.
 ====
 
+[[known-issue-tofillin]]
+.Metric visualization progress bars get turned off on upgrade
+[%collapsible]
+====
+*Details* +
+When upgrading to 8.6, progress bars on existing Lens metric visualizations get hidden.
+
+To show the progress bar again, open the visualization in the Lens editor. Click the dimension button for the primary metric to open the dimension editor. Then, under "Supporting visualization," select "Bar."
+====
+
 [float]
 [[breaking-changes-8.6.0]]
 === Breaking changes
