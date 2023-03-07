@@ -42,5 +42,8 @@ export const alertsGroupingAggregations = (stackByField: GroupBySelection) => {
         size: 10,
       },
     },
+    missingFields: {
+      missing: { field: stackByField },
+    },
   };
 };
