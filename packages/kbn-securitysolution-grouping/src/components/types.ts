@@ -15,41 +15,12 @@ export interface GenericBuckets {
 
 export const NONE_GROUP_KEY = 'none';
 
-export type RawBucket = GenericBuckets & {
-  alertsCount?: {
-    value?: number | null; // Elasticsearch returns `null` when a sub-aggregation cannot be computed
-  };
-  severitiesSubAggregation?: {
-    buckets?: GenericBuckets[];
-  };
-  countSeveritySubAggregation?: {
-    value?: number | null; // Elasticsearch returns `null` when a sub-aggregation cannot be computed
-  };
-  usersCountAggregation?: {
-    value?: number | null; // Elasticsearch returns `null` when a sub-aggregation cannot be computed
-  };
-  hostsCountAggregation?: {
-    value?: number | null; // Elasticsearch returns `null` when a sub-aggregation cannot be computed
-  };
-  rulesCountAggregation?: {
-    value?: number | null; // Elasticsearch returns `null` when a sub-aggregation cannot be computed
-  };
-  ruleTags?: {
-    doc_count_error_upper_bound?: number;
-    sum_other_doc_count?: number;
-    buckets?: GenericBuckets[];
-  };
-  stackByMultipleFields1?: {
-    buckets?: GenericBuckets[];
-    doc_count_error_upper_bound?: number;
-    sum_other_doc_count?: number;
-  };
-};
+export type RawBucket<T> = GenericBuckets & T;
 
 /** Defines the shape of the aggregation returned by Elasticsearch */
-export interface GroupingAggregation {
+export interface GroupingAggregation<T> {
   stackByMultipleFields0?: {
-    buckets?: RawBucket[];
+    buckets?: Array<RawBucket<T>>;
   };
   groupsCount0?: {
     value?: number | null;
@@ -60,11 +31,3 @@ export type GroupingFieldTotalAggregation = Record<
   string,
   { value?: number | null; buckets?: Array<{ doc_count?: number | null }> }
 >;
-
-export type FlattenedBucket = Pick<
-  RawBucket,
-  'doc_count' | 'key' | 'key_as_string' | 'alertsCount'
-> & {
-  stackByMultipleFields1Key?: string;
-  stackByMultipleFields1DocCount?: number;
-};

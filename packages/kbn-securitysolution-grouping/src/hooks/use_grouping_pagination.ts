@@ -1,28 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useMemo } from 'react';
-import { tableDefaults } from '../../../store/data_table/defaults';
-import { groupActions, groupSelectors } from '../../../store/grouping';
-import type { State } from '../../../store';
-import { defaultGroup } from '../../../store/grouping/defaults';
+import { groupActions, groupByIdSelector } from './state';
+import { Action, defaultGroup, GroupMap } from './types';
 
 export interface UseGroupingPaginationArgs {
+  dispatch: React.Dispatch<Action>;
   groupingId: string;
+  groupingState: GroupMap;
 }
 
-export const useGroupingPagination = ({ groupingId }: UseGroupingPaginationArgs) => {
-  const dispatch = useDispatch();
-
-  const getGroupByIdSelector = groupSelectors.getGroupByIdSelector();
-
+export const useGroupingPagination = ({
+  groupingId,
+  groupingState,
+  dispatch,
+}: UseGroupingPaginationArgs) => {
   const { activePage, itemsPerPage } =
-    useSelector((state: State) => getGroupByIdSelector(state, groupingId)) ?? defaultGroup;
+    groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
 
   const setGroupsActivePage = useCallback(
     (newActivePage: number) => {
@@ -40,16 +40,14 @@ export const useGroupingPagination = ({ groupingId }: UseGroupingPaginationArgs)
     [dispatch, groupingId]
   );
 
-  const pagination = useMemo(
+  return useMemo(
     () => ({
       pageIndex: activePage,
       pageSize: itemsPerPage,
       onChangeItemsPerPage: setGroupsItemsPerPage,
       onChangePage: setGroupsActivePage,
-      itemsPerPageOptions: tableDefaults.itemsPerPageOptions,
+      itemsPerPageOptions: [10, 25, 50, 100],
     }),
     [activePage, itemsPerPage, setGroupsActivePage, setGroupsItemsPerPage]
   );
-
-  return pagination;
 };
