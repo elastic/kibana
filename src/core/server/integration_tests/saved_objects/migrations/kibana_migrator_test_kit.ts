@@ -43,7 +43,6 @@ import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
-import { delay } from './test_utils';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
