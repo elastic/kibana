@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
-export * as Stats from './stats';
-export * as UiCounters from './ui_counters';
-export * as UsageCounters from './usage_counters';
+export interface CounterMetric {
+  domainId: string;
+  counterName: string;
+  counterType: string;
+  incrementBy: number;
+}

@@ -18,7 +18,7 @@ import {
   ServiceStatusLevels,
 } from '@kbn/core/server';
 import { CollectorSet } from '../../collector';
-import { v1Stats } from '../../../common/types';
+import { Stats } from '../../../common/types';
 const SNAPSHOT_REGEX = /-snapshot/i;
 
 export function registerStatsRoute({
@@ -68,7 +68,7 @@ export function registerStatsRoute({
       },
     },
     async (context, req, res) => {
-      const requestQuery: v1Stats.StatsHTTPQuery = req.query;
+      const requestQuery: Stats.v1.StatsHTTPQuery = req.query;
       const isExtended = requestQuery.extended === '' || requestQuery.extended;
       const isLegacy = requestQuery.legacy === '' || requestQuery.legacy;
 
@@ -109,7 +109,7 @@ export function registerStatsRoute({
         collection_interval_in_millis: metrics.collectionInterval,
       });
 
-      const body: v1Stats.StatsHTTPBodyTyped = {
+      const body: Stats.v1.StatsHTTPBodyTyped = {
         ...kibanaStats,
         ...extended,
       };
@@ -121,7 +121,7 @@ export function registerStatsRoute({
   );
 }
 
-const ServiceStatusToLegacyState: v1Stats.KibanaServiceStatus = {
+const ServiceStatusToLegacyState: Stats.v1.KibanaServiceStatus = {
   [ServiceStatusLevels.critical.toString()]: 'red',
   [ServiceStatusLevels.unavailable.toString()]: 'red',
   [ServiceStatusLevels.degraded.toString()]: 'yellow',

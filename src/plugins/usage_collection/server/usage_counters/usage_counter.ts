@@ -7,17 +7,17 @@
  */
 
 import * as Rx from 'rxjs';
-
-export interface CounterMetric {
-  domainId: string;
-  counterName: string;
-  counterType: string;
-  incrementBy: number;
-}
+import { UsageCounters } from '../../common/types';
+// export interface CounterMetric {
+//   domainId: string;
+//   counterName: string;
+//   counterType: string;
+//   incrementBy: number;
+// }
 
 export interface UsageCounterDeps {
   domainId: string;
-  counter$: Rx.Subject<CounterMetric>;
+  counter$: Rx.Subject<UsageCounters.v1.CounterMetric>;
 }
 
 /**
@@ -47,7 +47,7 @@ export interface IUsageCounter {
 
 export class UsageCounter implements IUsageCounter {
   private domainId: string;
-  private counter$: Rx.Subject<CounterMetric>;
+  private counter$: Rx.Subject<UsageCounters.v1.CounterMetric>;
 
   constructor({ domainId, counter$ }: UsageCounterDeps) {
     this.domainId = domainId;
