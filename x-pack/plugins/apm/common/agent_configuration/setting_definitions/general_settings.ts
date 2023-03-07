@@ -28,7 +28,15 @@ export const generalSettings: RawSettingDefinition[] = [
           'The maximum total compressed size of the request body which is sent to the APM Server intake api via a chunked encoding (HTTP streaming).\nNote that a small overshoot is possible.\n\nAllowed byte units are `b`, `kb` and `mb`. `1kb` is equal to `1024b`.',
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'dotnet', 'go', 'nodejs', 'php', 'android/java'],
+    excludeAgents: [
+      'js-base',
+      'rum-js',
+      'dotnet',
+      'go',
+      'nodejs',
+      'php',
+      'android/java',
+    ],
   },
 
   // API Request Time
@@ -46,7 +54,15 @@ export const generalSettings: RawSettingDefinition[] = [
           "Maximum time to keep an HTTP request to the APM Server open for.\n\nNOTE: This value has to be lower than the APM Server's `read_timeout` setting.",
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'dotnet', 'go', 'nodejs', 'php', 'android/java'],
+    excludeAgents: [
+      'js-base',
+      'rum-js',
+      'dotnet',
+      'go',
+      'nodejs',
+      'php',
+      'android/java',
+    ],
   },
 
   // Capture body
