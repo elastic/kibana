@@ -103,7 +103,6 @@ export interface SignalSource {
       id: string;
       description?: string;
       false_positives?: string[];
-      custom_highlighted_fields?: string[];
       immutable?: boolean;
     };
     /** signal.depth was introduced in 7.10 and pre-7.10 signals do not have it. */
