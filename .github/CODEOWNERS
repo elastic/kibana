@@ -530,6 +530,7 @@ x-pack/test/cases_api_integration/common/plugins/security_solution @elastic/resp
 x-pack/plugins/security_solution @elastic/security-solution
 x-pack/test/security_functional/plugins/test_endpoints @elastic/kibana-security
 packages/kbn-securitysolution-autocomplete @elastic/security-solution-platform
+packages/kbn-securitysolution-data-table @elastic/security-threat-hunting-investigations
 packages/kbn-securitysolution-ecs @elastic/security-threat-hunting-explore
 packages/kbn-securitysolution-es-utils @elastic/security-solution-platform
 packages/kbn-securitysolution-exception-list-components @elastic/security-solution-platform
