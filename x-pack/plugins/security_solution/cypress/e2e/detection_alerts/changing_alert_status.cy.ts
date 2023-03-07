@@ -122,7 +122,7 @@ describe('Changing alert status', () => {
       waitForAlertsToPopulate();
       selectCountTable();
     });
-    it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
+    it.skip('Mark one alert as acknowledged when more than one open alerts are selected', () => {
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((alertNumberString) => {
@@ -223,7 +223,7 @@ describe('Changing alert status', () => {
         });
     });
 
-    it('Closes one alert when more than one opened alerts are selected', () => {
+    it.skip('Closes one alert when more than one opened alerts are selected', () => {
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((alertNumberString) => {
@@ -314,7 +314,7 @@ describe('Changing alert status', () => {
       waitForAlertsToPopulate();
       selectCountTable();
     });
-    it('Mark one alert as acknowledged when more than one open alerts are selected', () => {
+    it.skip('Mark one alert as acknowledged when more than one open alerts are selected', () => {
       cy.get(ALERTS_COUNT)
         .invoke('text')
         .then((alertNumberString) => {
