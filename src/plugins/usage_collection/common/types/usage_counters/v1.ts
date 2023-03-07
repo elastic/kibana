@@ -12,3 +12,15 @@ export interface CounterMetric {
   counterType: string;
   incrementBy: number;
 }
+
+/**
+ * Details about the counter to be incremented
+ */
+export interface IncrementCounterParams {
+  /** The name of the counter **/
+  counterName: string;
+  /** The counter type ("count" by default) **/
+  counterType?: string;
+  /** Increment the counter by this number (1 if not specified) **/
+  incrementBy?: number;
+}

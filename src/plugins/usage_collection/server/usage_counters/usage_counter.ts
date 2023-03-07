@@ -8,28 +8,10 @@
 
 import * as Rx from 'rxjs';
 import { UsageCounters } from '../../common/types';
-// export interface CounterMetric {
-//   domainId: string;
-//   counterName: string;
-//   counterType: string;
-//   incrementBy: number;
-// }
 
 export interface UsageCounterDeps {
   domainId: string;
   counter$: Rx.Subject<UsageCounters.v1.CounterMetric>;
-}
-
-/**
- * Details about the counter to be incremented
- */
-export interface IncrementCounterParams {
-  /** The name of the counter **/
-  counterName: string;
-  /** The counter type ("count" by default) **/
-  counterType?: string;
-  /** Increment the counter by this number (1 if not specified) **/
-  incrementBy?: number;
 }
 
 /**
@@ -42,7 +24,7 @@ export interface IUsageCounter {
    * Notifies the counter about a new event happening so it can increase the count internally.
    * @param params {@link IncrementCounterParams}
    */
-  incrementCounter: (params: IncrementCounterParams) => void;
+  incrementCounter: (params: UsageCounters.v1.IncrementCounterParams) => void;
 }
 
 export class UsageCounter implements IUsageCounter {
@@ -54,7 +36,7 @@ export class UsageCounter implements IUsageCounter {
     this.counter$ = counter$;
   }
 
-  public incrementCounter = (params: IncrementCounterParams) => {
+  public incrementCounter = (params: UsageCounters.v1.IncrementCounterParams) => {
     const { counterName, counterType = 'count', incrementBy = 1 } = params;
 
     this.counter$.next({
