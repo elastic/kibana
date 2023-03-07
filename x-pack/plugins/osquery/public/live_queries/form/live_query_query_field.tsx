@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash';
 import type { EuiAccordionProps } from '@elastic/eui';
 import { EuiCodeBlock, EuiFormRow, EuiAccordion, EuiSpacer } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import styled from 'styled-components';
 import { useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
@@ -42,7 +42,7 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
   const [advancedContentState, setAdvancedContentState] =
     useState<EuiAccordionProps['forceState']>('closed');
   const permissions = useKibana().services.application.capabilities.osquery;
-  const [ecsMapping, queryType] = watch(['ecs_mapping', 'queryType']);
+  const [queryType] = watch(['queryType']);
 
   const {
     field: { onChange, value },
@@ -59,12 +59,6 @@ const LiveQueryQueryFieldComponent: React.FC<LiveQueryQueryFieldProps> = ({
     },
     defaultValue: '',
   });
-
-  useEffect(() => {
-    if (!isEmpty(ecsMapping) && advancedContentState === 'closed') {
-      setAdvancedContentState('open');
-    }
-  }, [advancedContentState, ecsMapping]);
 
   const handleSavedQueryChange: SavedQueriesDropdownProps['onChange'] = useCallback(
     (savedQuery) => {
