@@ -20,6 +20,7 @@ import { useKibanaContextForPluginProvider } from '../hooks/use_kibana';
 import { InfraClientStartDeps, InfraClientStartExports } from '../types';
 import { HeaderActionMenuProvider } from '../utils/header_action_menu_provider';
 import { TriggersActionsProvider } from '../utils/triggers_actions_context';
+import { SourceProvider } from '../containers/metrics_source';
 
 export const CommonInfraProviders: React.FC<{
   appName: string;
@@ -35,7 +36,9 @@ export const CommonInfraProviders: React.FC<{
       <EuiThemeProvider darkMode={darkMode}>
         <DataUIProviders appName={appName} storage={storage}>
           <HeaderActionMenuProvider setHeaderActionMenu={setHeaderActionMenu} theme$={theme$}>
-            <NavigationWarningPromptProvider>{children}</NavigationWarningPromptProvider>
+            <NavigationWarningPromptProvider>
+              <SourceProvider sourceId="default">{children}</SourceProvider>
+            </NavigationWarningPromptProvider>
           </HeaderActionMenuProvider>
         </DataUIProviders>
       </EuiThemeProvider>
