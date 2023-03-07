@@ -32,6 +32,7 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
         groupById: {
           ...groupsById,
           [id]: {
+            ...defaultGroup,
             ...groupsById[id],
             activeGroup,
           },
@@ -45,6 +46,7 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
         groupById: {
           ...groupsById,
           [id]: {
+            ...defaultGroup,
             ...groupsById[id],
             activePage,
           },
@@ -58,6 +60,7 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
         groupById: {
           ...groupsById,
           [id]: {
+            ...defaultGroup,
             ...groupsById[id],
             itemsPerPage,
           },
