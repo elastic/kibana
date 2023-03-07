@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import {
   EuiPopover,
   EuiButtonIcon,
@@ -20,10 +19,12 @@ import {
   EuiFlexItem,
   EuiPopoverFooter,
   EuiToolTip,
+  EuiSelectableOption,
 } from '@elastic/eui';
-import './add_message_variables.scss';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
+import './add_message_variables.scss';
 import { TruncatedText } from '../../common/truncated_text';
+import * as i18n from './translations';
 
 interface Props {
   buttonTitle?: string;
@@ -32,49 +33,6 @@ interface Props {
   onSelectEventHandler: (variable: ActionVariable) => void;
   showButtonTitle?: boolean;
 }
-
-const LOADING_VARIABLES = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.loadingMessage',
-  {
-    defaultMessage: 'Loading variables',
-  }
-);
-const NO_VARIABLES_FOUND = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.noVariablesFound',
-  {
-    defaultMessage: 'No variables found',
-  }
-);
-const NO_VARIABLES_AVAILABLE = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.noVariablesAvailable',
-  {
-    defaultMessage: 'No variables available',
-  }
-);
-const DEPRICATED_VARIABLES_ARE_SHOWN = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.deprecatedVariablesAreShown',
-  {
-    defaultMessage: 'Depricated variables are shown',
-  }
-);
-const DEPRICATED_VARIABLES_ARE_HIDDEN = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.deprecatedVariablesAreHidden',
-  {
-    defaultMessage: 'Depricated variables are hidden',
-  }
-);
-const HIDE = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.hideDeprecatedVariables',
-  {
-    defaultMessage: 'Hide',
-  }
-);
-const SHOW_ALL = i18n.translate(
-  'xpack.triggersActionsUI.components.addMessageVariables.ShowAllDeprecatedVariables',
-  {
-    defaultMessage: 'Show all',
-  }
-);
 
 export const AddMessageVariables: React.FunctionComponent<Props> = ({
   buttonTitle,
@@ -102,7 +60,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           label: variable.name,
           ...(variable.deprecated ? { disabled: true } : {}),
           data: {
-            secondaryContent: variable.description,
+            description: variable.description,
           },
           'data-test-subj': `${variable.name}-selectableOption`,
         }))
@@ -111,20 +69,13 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           .map((variable) => ({
             label: variable.name,
             data: {
-              secondaryContent: variable.description,
+              description: variable.description,
             },
             'data-test-subj': `${variable.name}-selectableOption`,
           }));
   }, [isShowAllPressed, messageVariables]);
 
-  const addVariableButtonTitle = buttonTitle
-    ? buttonTitle
-    : i18n.translate(
-        'xpack.triggersActionsUI.components.addMessageVariables.addRuleVariableTitle',
-        {
-          defaultMessage: 'Add variable',
-        }
-      );
+  const addVariableButtonTitle = buttonTitle ? buttonTitle : i18n.ADD_VARIABLE;
 
   const Button = useMemo(
     () =>
@@ -134,12 +85,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           data-test-subj={`${paramsProperty}AddVariableButton-Title`}
           size="xs"
           onClick={() => setIsVariablesPopoverOpen(true)}
-          aria-label={i18n.translate(
-            'xpack.triggersActionsUI.components.addMessageVariables.addVariablePopoverButton',
-            {
-              defaultMessage: 'Add variable',
-            }
-          )}
+          aria-label={i18n.ADD_VARIABLE}
         >
           {addVariableButtonTitle}
         </EuiButtonEmpty>
@@ -150,12 +96,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           title={addVariableButtonTitle}
           onClick={() => setIsVariablesPopoverOpen(true)}
           iconType="indexOpen"
-          aria-label={i18n.translate(
-            'xpack.triggersActionsUI.components.addMessageVariables.addVariablePopoverButton',
-            {
-              defaultMessage: 'Add variable',
-            }
-          )}
+          aria-label={i18n.ADD_VARIABLE}
         />
       ),
     [addVariableButtonTitle, paramsProperty, showButtonTitle]
@@ -183,7 +124,10 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     );
   };
 
-  const renderOption = (option: any, searchValue: string) => {
+  const renderOption = (
+    option: EuiSelectableOption<{ description?: string }>,
+    searchValue: string
+  ) => {
     return (
       <EuiFlexGroup data-test-subj={`variableMenuButton-${option.label}`}>
         <EuiFlexItem>
@@ -196,17 +140,15 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
             <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
           </EuiText>
           <EuiSpacer size="xs" />
-          {option.secondaryContent && (
+          {option.description && (
             <EuiText size="xs" color="subdued">
               <EuiToolTip
                 display="block"
                 position="top"
-                content={
-                  <ToolTipContent description={option.secondaryContent} label={option.label} />
-                }
+                content={<ToolTipContent description={option.description} label={option.label} />}
                 data-test-subj={`${option.label}-tooltip`}
               >
-                <TruncatedText text={option.secondaryContent || ''} />
+                <TruncatedText text={option.description || ''} />
               </EuiToolTip>
             </EuiText>
           )}
@@ -236,9 +178,9 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           paddingSize: 'none',
           textWrap: 'wrap',
         }}
-        loadingMessage={LOADING_VARIABLES}
-        noMatchesMessage={NO_VARIABLES_FOUND}
-        emptyMessage={NO_VARIABLES_AVAILABLE}
+        loadingMessage={i18n.LOADING_VARIABLES}
+        noMatchesMessage={i18n.NO_VARIABLES_FOUND}
+        emptyMessage={i18n.NO_VARIABLES_AVAILABLE}
         renderOption={renderOption}
         onChange={(variables) => {
           variables.map((variable) => {
@@ -267,8 +209,8 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
                 <EuiFlexItem grow={false}>
                   <EuiText color="grey" size="xs">
                     {isShowAllPressed
-                      ? DEPRICATED_VARIABLES_ARE_SHOWN
-                      : DEPRICATED_VARIABLES_ARE_HIDDEN}
+                      ? i18n.DEPRECATED_VARIABLES_ARE_SHOWN
+                      : i18n.DEPRECATED_VARIABLES_ARE_HIDDEN}
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -279,7 +221,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
                       isShowAllPressed ? setIsShowAllPressed(false) : setIsShowAllPressed(true)
                     }
                   >
-                    {isShowAllPressed ? HIDE : SHOW_ALL}
+                    {isShowAllPressed ? i18n.HIDE : i18n.SHOW_ALL}
                   </EuiButtonEmpty>
                 </EuiFlexItem>
               </EuiFlexGroup>
