@@ -8,8 +8,6 @@
 import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { EuiPanel, EuiTitle, EuiIconTip } from '@elastic/eui';
 import {
   ALERT_DURATION,
   ALERT_END,
@@ -21,17 +19,10 @@ import {
 import moment from 'moment';
 import { formatAlertEvaluationValue } from '@kbn/observability-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getDurationFormatter } from '@kbn/observability-plugin/common';
-import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
-import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
-import { getResponseTimeTickFormatter } from '../../../shared/charts/transaction_charts/helper';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
-import {
-  ChartType,
-  getTimeSeriesColor,
-} from '../../../shared/charts/helper/get_timeseries_color';
+
 import {
   AlertDetailsAppSectionProps,
   SERVICE_NAME,
@@ -43,6 +34,7 @@ import { LatencyAlertsHistoryChart } from './latency_alerts_history_chart';
 import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 import FailedTransactionChart from './failed_transaction_chart';
 import LatencyChart from './latency_chart/latency_chart';
+import ThroughputChart from './throughput_chart';
 
 export function AlertDetailsAppSection({
   rule,
@@ -140,65 +132,6 @@ export function AlertDetailsAppSection({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const transactionType = alert.fields[TRANSACTION_TYPE];
   const comparisonChartTheme = getComparisonChartTheme();
-  const INITIAL_STATE = {
-    currentPeriod: [],
-    previousPeriod: [],
-  };
-
-  const latencyFormatter = getDurationFormatter(latencyMaxY);
-
-  /* Throughput Chart */
-  const { data: dataThroughput = INITIAL_STATE, status: statusThroughput } =
-    useFetcher(
-      (callApmApi) => {
-        if (serviceName && transactionType && start && end) {
-          return callApmApi(
-            'GET /internal/apm/services/{serviceName}/throughput',
-            {
-              params: {
-                path: {
-                  serviceName,
-                },
-                query: {
-                  environment,
-                  kuery: '',
-                  start,
-                  end,
-                  transactionType,
-                  transactionName: undefined,
-                },
-              },
-            }
-          );
-        }
-      },
-      [environment, serviceName, start, end, transactionType]
-    );
-  const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-    ChartType.THROUGHPUT
-  );
-  const timeseriesThroughput = [
-    {
-      data: dataThroughput.currentPeriod,
-      type: 'linemark',
-      color: currentPeriodColor,
-      title: i18n.translate('xpack.apm.serviceOverview.throughtputChartTitle', {
-        defaultMessage: 'Throughput',
-      }),
-    },
-    ...(comparisonEnabled
-      ? [
-          {
-            data: dataThroughput.previousPeriod,
-            type: 'area',
-            color: previousPeriodColor,
-            title: '',
-          },
-        ]
-      : []),
-  ];
-
-  /* Throughput Chart */
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -219,51 +152,18 @@ export function AlertDetailsAppSection({
             setLatencyMaxY={setLatencyMaxY}
           />
           <EuiFlexGroup direction="row" gutterSize="s">
-            <EuiFlexItem>
-              <EuiPanel hasBorder={true}>
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="s"
-                  responsive={false}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xs">
-                      <h2>
-                        {i18n.translate(
-                          'xpack.apm.serviceOverview.throughtputChartTitle',
-                          { defaultMessage: 'Throughput' }
-                        )}
-                      </h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip
-                      content={i18n.translate(
-                        'xpack.apm.serviceOverview.tpmHelp',
-                        {
-                          defaultMessage:
-                            'Throughput is measured in transactions per minute (tpm).',
-                        }
-                      )}
-                      position="right"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <TimeseriesChart
-                  id="throughput"
-                  height={200}
-                  comparisonEnabled={comparisonEnabled}
-                  offset={offset}
-                  fetchStatus={statusThroughput}
-                  customTheme={comparisonChartTheme}
-                  timeseries={timeseriesThroughput}
-                  yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-                  timeZone={timeZone}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
+            <ThroughputChart
+              transactionType={transactionType}
+              serviceName={serviceName}
+              environment={environment}
+              start={start}
+              end={end}
+              comparisonChartTheme={comparisonChartTheme}
+              comparisonEnabled={comparisonEnabled}
+              latencyMaxY={latencyMaxY}
+              offset={offset}
+              timeZone={timeZone}
+            />
             <FailedTransactionChart
               transactionType={transactionType}
               serviceName={serviceName}
