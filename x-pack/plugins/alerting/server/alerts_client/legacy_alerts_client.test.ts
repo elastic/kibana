@@ -132,6 +132,10 @@ describe('Legacy Alerts Client', () => {
       maxAlerts: 1000,
       canSetRecoveryContext: false,
       autoRecoverAlerts: true,
+      alertUUIDMap: new Map([
+        ['1', expect.any(String)],
+        ['2', expect.any(String)],
+      ]),
     });
   });
 

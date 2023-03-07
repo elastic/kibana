@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { Logger } from '@kbn/core/server';
-import { cloneDeep, merge } from 'lodash';
+import { cloneDeep, merge, set } from 'lodash';
+import { v4 as uuidV4 } from 'uuid';
 import { Alert } from '../alert/alert';
 import {
   AlertFactory,
@@ -27,9 +28,11 @@ import {
   AlertInstanceContext,
   AlertInstanceState,
   RawAlertInstance,
+  RuleTypeState,
   WithoutReservedActionGroups,
 } from '../types';
 import { RulesSettingsFlappingProperties } from '../../common/rules_settings';
+import { WrappedLifecycleRuleState } from '../types_lifecycle_rules';
 
 interface ConstructorOpts {
   logger: Logger;
@@ -52,7 +55,6 @@ export class LegacyAlertsClient<
     recovered: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
     recoveredCurrent: Record<string, Alert<State, Context, RecoveryActionGroupId>>;
   };
-
   private alertFactory?: AlertFactory<
     State,
     Context,
@@ -72,8 +74,15 @@ export class LegacyAlertsClient<
 
   public initialize(
     activeAlertsFromState: Record<string, RawAlertInstance>,
-    recoveredAlertsFromState: Record<string, RawAlertInstance>
+    recoveredAlertsFromState: Record<string, RawAlertInstance>,
+    ruleTypeState?: RuleTypeState
   ) {
+    const alertUUIDMap = addAlertUUIDs(
+      activeAlertsFromState,
+      recoveredAlertsFromState,
+      ruleTypeState
+    );
+
     for (const id in activeAlertsFromState) {
       if (activeAlertsFromState.hasOwnProperty(id)) {
         this.activeAlertsFromPreviousExecution[id] = new Alert<State, Context>(
@@ -104,6 +113,7 @@ export class LegacyAlertsClient<
       maxAlerts: this.options.maxAlerts,
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
+      alertUUIDMap,
     });
   }
 
@@ -204,4 +214,44 @@ export class LegacyAlertsClient<
   public getExecutorServices() {
     return getPublicAlertFactory(this.alertFactory!);
   }
+}
+
+// mutate alerts in parameter collections, to add UUIDs
+function addAlertUUIDs(
+  activeAlertsFromState: Record<string, RawAlertInstance>,
+  recoveredAlertsFromState: Record<string, RawAlertInstance>,
+  ruleTypeState?: RuleTypeState
+): Map<string, string> {
+  const alertUUIDMap = new Map<string, string>();
+
+  // lifecycle rule state stores uuids, predating alerting persisting them
+  if (ruleTypeState?.wrapped) {
+    const ruleState = ruleTypeState as WrappedLifecycleRuleState<never>;
+
+    for (const [id, alert] of Object.entries(ruleState.trackedAlerts || {})) {
+      if (alert.alertUuid) alertUUIDMap.set(id, alert.alertUuid);
+    }
+
+    for (const [id, alert] of Object.entries(ruleState.trackedAlertsRecovered || {})) {
+      if (alert.alertUuid) alertUUIDMap.set(id, alert.alertUuid);
+    }
+  }
+
+  for (const [id, alert] of Object.entries(activeAlertsFromState)) {
+    if (!alert.meta?.uuid) {
+      const uuid = alertUUIDMap.get(id) || uuidV4();
+      alertUUIDMap.set(id, uuid);
+      set(alert, 'meta.uuid', uuid);
+    }
+  }
+
+  for (const [id, alert] of Object.entries(recoveredAlertsFromState)) {
+    if (!alert.meta?.uuid) {
+      const uuid = alertUUIDMap.get(id) || uuidV4();
+      alertUUIDMap.set(id, uuid);
+      set(alert, 'meta.uuid', uuid);
+    }
+  }
+
+  return alertUUIDMap;
 }

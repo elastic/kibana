@@ -304,7 +304,11 @@ export class TaskRunner<
     const { updatedRuleTypeState } = await this.timer.runWithTimer(
       TaskRunnerTimerSpan.RuleTypeRun,
       async () => {
-        this.legacyAlertsClient.initialize(alertRawInstances, alertRecoveredRawInstances);
+        this.legacyAlertsClient.initialize(
+          alertRawInstances,
+          alertRecoveredRawInstances,
+          ruleTypeState
+        );
 
         const checkHasReachedAlertLimit = () => {
           const reachedLimit = this.legacyAlertsClient.hasReachedAlertLimit();

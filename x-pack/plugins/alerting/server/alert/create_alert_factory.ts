@@ -55,6 +55,7 @@ export interface CreateAlertFactoryOpts<
   maxAlerts: number;
   autoRecoverAlerts: boolean;
   canSetRecoveryContext?: boolean;
+  alertUUIDMap?: Map<string, string>;
 }
 
 export function createAlertFactory<
@@ -67,6 +68,7 @@ export function createAlertFactory<
   maxAlerts,
   autoRecoverAlerts,
   canSetRecoveryContext = false,
+  alertUUIDMap,
 }: CreateAlertFactoryOpts<State, Context>): AlertFactory<State, Context, ActionGroupIds> {
   // Keep track of which alerts we started with so we can determine which have recovered
   const originalAlerts = cloneDeep(alerts);
@@ -96,7 +98,9 @@ export function createAlertFactory<
       }
 
       if (!alerts[id]) {
-        alerts[id] = new Alert<State, Context>(id);
+        const uuid = alertUUIDMap?.get(id);
+        const instance = uuid ? { meta: { uuid } } : undefined;
+        alerts[id] = new Alert<State, Context>(id, instance);
       }
 
       return alerts[id];
