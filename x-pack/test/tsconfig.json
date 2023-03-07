@@ -115,6 +115,10 @@
     "@kbn/cloud-security-posture-plugin",
     "@kbn/cloud-integration-saml-provider-plugin",
     "@kbn/security-api-integration-helpers",
+    "@kbn/alerts-as-data-utils",
     "@kbn/discover-plugin",
+    "@kbn/files-plugin",
+    "@kbn/shared-ux-file-types",
+    "@kbn/securitysolution-io-ts-alerting-types",
   ]
 }

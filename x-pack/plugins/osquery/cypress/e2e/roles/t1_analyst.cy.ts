@@ -8,7 +8,12 @@
 import { login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import { ROLES } from '../../test';
-import { checkResults, selectAllAgents, submitQuery } from '../../tasks/live_query';
+import {
+  checkActionItemsInResults,
+  checkResults,
+  selectAllAgents,
+  submitQuery,
+} from '../../tasks/live_query';
 import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
 import { getSavedQueriesDropdown, LIVE_QUERY_EDITOR } from '../../screens/live_query';
 
@@ -41,8 +46,12 @@ describe('T1 Analyst - READ + runSavedQueries ', () => {
     cy.contains('select * from uptime;');
     submitQuery();
     checkResults();
-    cy.contains('View in Discover').should('not.exist');
-    cy.contains('View in Lens').should('not.exist');
+    checkActionItemsInResults({
+      lens: false,
+      discover: false,
+      cases: true,
+      timeline: false,
+    });
   });
   it('should be able to play in live queries history', () => {
     navigateTo('/app/osquery/live_queries');

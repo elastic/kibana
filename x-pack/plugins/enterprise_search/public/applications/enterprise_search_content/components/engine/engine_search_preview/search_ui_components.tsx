@@ -7,26 +7,40 @@
 
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import {
   EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButton,
+  EuiComboBox,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
+  EuiSelect,
+  EuiSpacer,
   EuiText,
   EuiTextColor,
+  EuiTitle,
 } from '@elastic/eui';
+import { withSearch } from '@elastic/react-search-ui';
 import type {
   InputViewProps,
+  PagingInfoViewProps,
   ResultViewProps,
+  ResultsPerPageViewProps,
   ResultsViewProps,
 } from '@elastic/react-search-ui-views';
+import type { SearchContextState } from '@elastic/search-ui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
+
+import { indexHealthToHealthColor } from '../../../../shared/constants/health_colors';
+
+import { EngineViewLogic } from '../engine_view_logic';
 
 import { useSelectedDocument } from './document_context';
 
@@ -37,6 +51,7 @@ export const ResultsView: React.FC<ResultsViewProps> = ({ children }) => {
 const RESULT_FIELDS_TRUNCATE_AT = 4;
 
 export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
+  const { engineData } = useValues(EngineViewLogic);
   const { setSelectedDocument } = useSelectedDocument();
 
   const fields = Object.entries(result)
@@ -59,6 +74,10 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
   } = result;
 
   const [, id] = JSON.parse(atob(encodedId));
+
+  const indexHealth = engineData?.indices.find((i) => i.name === index)?.health;
+  const badgeColor =
+    !indexHealth || indexHealth === 'unknown' ? 'hollow' : indexHealthToHealthColor(indexHealth);
 
   const columns: Array<EuiBasicTableColumn<{ name: string; value: string }>> = [
     {
@@ -113,7 +132,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ result }) => {
                     defaultMessage="from"
                   />
                 </code>
-                <EuiBadge color="hollow">{index}</EuiBadge>
+                <EuiBadge color={badgeColor}>{index}</EuiBadge>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -160,3 +179,134 @@ export const InputView: React.FC<InputViewProps> = ({ getInputProps }) => {
     </EuiFlexGroup>
   );
 };
+
+export const PagingInfoView: React.FC<PagingInfoViewProps> = ({ start, end, totalResults }) => (
+  <EuiText size="s">
+    <FormattedHTMLMessage
+      tagName="p"
+      id="xpack.enterpriseSearch.content.engine.searchPreview.pagingInfo.text"
+      defaultMessage="Showing <strong>{start}-{end}</strong> of {totalResults}"
+      values={{ end, start, totalResults }}
+    />
+  </EuiText>
+);
+
+export const RESULTS_PER_PAGE_OPTIONS = [10, 20, 50];
+
+export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
+  onChange,
+  options,
+  value,
+}) => (
+  <EuiFlexItem grow={false}>
+    <EuiFlexGroup direction="column" gutterSize="s">
+      <EuiTitle size="xxxs">
+        <label htmlFor="results-per-page">
+          <FormattedMessage
+            id="xpack.enterpriseSearch.content.engine.searchPreview.resultsPerPage.label"
+            defaultMessage="Show"
+          />
+        </label>
+      </EuiTitle>
+      <EuiSelect
+        id="results-per-page"
+        options={
+          options?.map((option) => ({
+            text: i18n.translate(
+              'xpack.enterpriseSearch.content.engine.searchPreview.resultsPerPage.option.label',
+              {
+                defaultMessage: '{value} {value, plural, one {Result} other {Results}}',
+                values: { value: option },
+              }
+            ),
+            value: option,
+          })) ?? []
+        }
+        value={value}
+        onChange={(evt) => onChange(parseInt(evt.target.value, 10))}
+      />
+    </EuiFlexGroup>
+  </EuiFlexItem>
+);
+
+export const Sorting = withSearch<
+  { sortableFields: string[] },
+  Pick<SearchContextState, 'setSort' | 'sortList'>
+>(({ setSort, sortList }) => ({ setSort, sortList }))(({ sortableFields, sortList, setSort }) => {
+  const [{ direction, field }] = !sortList?.length ? [{ direction: '', field: '' }] : sortList;
+  const relevance = i18n.translate(
+    'xpack.enterpriseSearch.content.engine.searchPreivew.sortingView.relevanceLabel',
+    { defaultMessage: 'Relevance' }
+  );
+
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiTitle size="xxxs">
+          <label htmlFor="sorting-field">
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.engine.searchPreview.sortingView.fieldLabel"
+              defaultMessage="Sort By"
+            />
+          </label>
+        </EuiTitle>
+        <EuiComboBox
+          id="sorting-field"
+          isClearable={false}
+          singleSelection={{ asPlainText: true }}
+          options={[
+            { label: relevance, value: '' },
+            ...sortableFields.map((f: string) => ({ label: f, value: f })),
+          ]}
+          selectedOptions={[{ label: !!field ? field : relevance, value: field }]}
+          onChange={([{ value }]) =>
+            setSort(value === '' ? [] : [{ direction: 'asc', field: value }], 'asc')
+          }
+        />
+      </EuiFlexGroup>
+      {field !== '' && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiTitle size="xxxs">
+              <label htmlFor="sorting-direction">
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.engine.searchPreview.sortingView.directionLabel"
+                  defaultMessage="Order By"
+                />
+              </label>
+            </EuiTitle>
+            <EuiSelect
+              id="sorting-direction"
+              onChange={(evt) => {
+                switch (evt.target.value) {
+                  case 'asc':
+                    return setSort([{ direction: 'asc', field }], 'asc');
+                  case 'desc':
+                    return setSort([{ direction: 'desc', field }], 'desc');
+                }
+              }}
+              value={direction}
+              options={[
+                {
+                  text: i18n.translate(
+                    'xpack.enterpriseSearch.content.engine.searchPreview.sortingView.ascLabel',
+                    { defaultMessage: 'Ascending' }
+                  ),
+                  value: 'asc',
+                },
+                {
+                  text: i18n.translate(
+                    'xpack.enterpriseSearch.content.engine.searchPreview.sortingView.descLabel',
+                    { defaultMessage: 'Descending' }
+                  ),
+                  value: 'desc',
+                },
+              ]}
+            />
+          </EuiFlexGroup>
+        </>
+      )}
+    </EuiFlexItem>
+  );
+});

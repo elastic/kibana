@@ -94,11 +94,16 @@ describe('TelemetryEventsSender', () => {
           dll: {
             Ext: {
               device: {
-                volume_device_type: 'Disk File System',
+                bus_type: 'FileBackedVirtual',
+                dos_name: 'D:',
+                file_system_type: 'CDFS',
+                nt_name: 'CdRom0',
+                product_id: 'Virtual DVD-ROM',
+                vendor_id: 'Msft',
+                volume_device_type: 'CD-ROM File System',
               },
-              load_index: 1,
-              relative_file_creation_time: 48628704.4029488,
-              relative_file_name_modify_time: 48628704.4029488,
+              relative_file_creation_time: 35588490.2737149,
+              relative_file_name_modify_time: 35588490.2424634,
             },
           },
           file: {
@@ -177,6 +182,21 @@ describe('TelemetryEventsSender', () => {
               protection: 'PsProtectedSignerAntimalware-Light',
               relative_file_creation_time: 48628704.4029488,
               relative_file_name_modify_time: 48628704.4029488,
+              device: {
+                bus_type: 'FileBackedVirtual',
+                volume_device_type: 'CD-ROM File System',
+                dos_name: 'D:',
+                product_id: 'Virtual DVD-ROM',
+                vendor_id: 'Msft',
+                nt_name: 'CdRom0',
+                file_system_type: 'CDFS',
+              },
+              effective_parent: {
+                name: 'file.exe',
+                pid: 6792,
+                entity_id: 'some_entity_id',
+                executable: 'DeviceHarddiskVolume3WindowsSystem32file.exe',
+              },
               session_info: {
                 logon_type: 'Interactive',
                 client_address: '127.0.0.1',
@@ -271,16 +291,6 @@ describe('TelemetryEventsSender', () => {
             ruleset: 'Z',
             version: '100',
           },
-          dll: {
-            Ext: {
-              device: {
-                volume_device_type: 'Disk File System',
-              },
-              load_index: 1,
-              relative_file_creation_time: 48628704.4029488,
-              relative_file_name_modify_time: 48628704.4029488,
-            },
-          },
           file: {
             extension: '.exe',
             size: 3,
@@ -349,6 +359,21 @@ describe('TelemetryEventsSender', () => {
               protection: 'PsProtectedSignerAntimalware-Light',
               relative_file_creation_time: 48628704.4029488,
               relative_file_name_modify_time: 48628704.4029488,
+              device: {
+                bus_type: 'FileBackedVirtual',
+                volume_device_type: 'CD-ROM File System',
+                dos_name: 'D:',
+                product_id: 'Virtual DVD-ROM',
+                vendor_id: 'Msft',
+                nt_name: 'CdRom0',
+                file_system_type: 'CDFS',
+              },
+              effective_parent: {
+                name: 'file.exe',
+                pid: 6792,
+                entity_id: 'some_entity_id',
+                executable: 'DeviceHarddiskVolume3WindowsSystem32file.exe',
+              },
               session_info: {
                 logon_type: 'Interactive',
                 client_address: '127.0.0.1',
@@ -374,6 +399,21 @@ describe('TelemetryEventsSender', () => {
             path: '/foo/bar',
             runatload: true,
             args: ['foo', 'bar'],
+          },
+          dll: {
+            Ext: {
+              relative_file_creation_time: 35588490.2737149,
+              relative_file_name_modify_time: 35588490.2424634,
+              device: {
+                bus_type: 'FileBackedVirtual',
+                volume_device_type: 'CD-ROM File System',
+                dos_name: 'D:',
+                product_id: 'Virtual DVD-ROM',
+                vendor_id: 'Msft',
+                nt_name: 'CdRom0',
+                file_system_type: 'CDFS',
+              },
+            },
           },
         },
       ]);
