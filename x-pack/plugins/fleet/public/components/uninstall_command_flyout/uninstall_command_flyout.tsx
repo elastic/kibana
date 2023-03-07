@@ -16,22 +16,20 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { CommandsByPlatform } from '../applications/fleet/components/fleet_server_instructions/utils/install_command_utils';
-
-import { PlatformSelector } from './platform_selector';
+import type { Commands } from './commands_for_platforms';
+import { CommandsForPlatforms } from './commands_for_platforms';
 
 interface Props {
   onClose: () => void;
 }
 
 // todo
-const commands: CommandsByPlatform = {
+const commands: Commands = {
   linux: 'linux uninstall command',
   mac: 'mac uninstall command',
   windows: 'windows uninstall command',
   rpm: 'rpm uninstall command',
   deb: 'deb uninstall command',
-  kubernetes: 'kubernetes uninstall command',
 };
 
 export const UninstallCommandFlyout: React.FunctionComponent<Props> = ({ onClose }) => {
@@ -65,16 +63,7 @@ export const UninstallCommandFlyout: React.FunctionComponent<Props> = ({ onClose
 
         <EuiSpacer size="l" />
 
-        <PlatformSelector
-          linuxCommand={commands.linux}
-          macCommand={commands.mac}
-          windowsCommand={commands.windows}
-          linuxDebCommand={commands.deb}
-          linuxRpmCommand={commands.rpm}
-          k8sCommand={''}
-          hasK8sIntegration={false}
-          hasK8sIntegrationMultiPage={false}
-        />
+        <CommandsForPlatforms commands={commands} />
       </EuiFlyoutBody>
     </EuiFlyout>
   );
