@@ -11,9 +11,9 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 
-import { waitForRuleStatus } from './wait_for_rule_success_or_status';
 import { refreshIndex } from './refresh_index';
 import { getSignalsByIds } from './get_signals_by_ids';
+import { waitForRuleStatus } from './wait_for_rule_status';
 
 export const getOpenSignals = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,

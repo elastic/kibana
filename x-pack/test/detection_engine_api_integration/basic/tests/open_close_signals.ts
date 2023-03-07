@@ -104,7 +104,7 @@ export default ({ getService }: FtrProviderContext) => {
       it('should be able close 10 signals immediately and they all should be closed', async () => {
         const rule = getRuleForSignalTesting(['auditbeat-*']);
         const { id } = await createRule(supertest, log, rule);
-        await waitForRuleSuccessOrStatus(supertest, log, id);
+        await waitForRuleSuccess({ supertest, log, id });
         await waitForSignalsToBePresent(supertest, log, 10, [id]);
         const signalsOpen = await getSignalsByIds(supertest, log, [id]);
         const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
