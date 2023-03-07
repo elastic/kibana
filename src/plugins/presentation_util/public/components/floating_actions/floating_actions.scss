@@ -1,0 +1,23 @@
+.presentationUtil__floatingActionsWrapper {
+  position: relative;
+
+  .presentationUtil__floatingActions {
+    opacity: 0;
+    visibility: hidden;
+    // slower transition on hover leave in case the user accidentally stops hover
+    transition: visibility .3s, opacity .3s;
+
+    position: absolute;
+    right: $euiSizeXS;
+    top: (-$euiSizeL);
+    z-index: $euiZLevel9; // the highest possible z-level
+  }
+
+  &:hover, &:focus-within {
+    .presentationUtil__floatingActions {
+      opacity: 1;
+      visibility: visible;
+      transition: visibility .1s, opacity .1s;
+    }
+  }
+}
