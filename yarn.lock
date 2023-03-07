@@ -4841,10 +4841,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/securitysolution-grouping@link:packages/kbn-securitysolution-grouping":
-  version "0.0.0"
-  uid ""
-
 "@kbn/securitysolution-autocomplete@link:packages/kbn-securitysolution-autocomplete":
   version "0.0.0"
   uid ""
@@ -4858,6 +4854,10 @@
   uid ""
 
 "@kbn/securitysolution-exception-list-components@link:packages/kbn-securitysolution-exception-list-components":
+  version "0.0.0"
+  uid ""
+
+"@kbn/securitysolution-grouping@link:packages/kbn-securitysolution-grouping":
   version "0.0.0"
   uid ""
 
@@ -8960,10 +8960,10 @@
   resolved "https://registry.yarnpkg.com/@types/seedrandom/-/seedrandom-2.4.28.tgz#9ce8fa048c1e8c85cb71d7fe4d704e000226036f"
   integrity sha512-SMA+fUwULwK7sd/ZJicUztiPs8F1yCPwF3O23Z9uQ32ME5Ha0NmDK9+QTsYE4O2tHXChzXomSWWeIhCnoN1LqA==
 
-"@types/selenium-webdriver@^4.1.11":
-  version "4.1.11"
-  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.11.tgz#29ad053d04bf07c148dae36ba09baa3af5323cb0"
-  integrity sha512-KQ+TIvSTdpkUoW+fCLO3XyxlpnoD1PSZc0TBbuSbD/6gltB6gZ9q/VxhDGR7svhwA23G35uCAb5guAlVUaQKeA==
+"@types/selenium-webdriver@^4.1.12":
+  version "4.1.12"
+  resolved "https://registry.yarnpkg.com/@types/selenium-webdriver/-/selenium-webdriver-4.1.12.tgz#a2042f6bef044c48ca7a8b4caede4928242271a9"
+  integrity sha512-3DxuYHEbzIyUtuICRtxXtJomdOOkBeCbkXAlAPm/h8ArIn/ArWNnVSC6tIj/ECZ/sdxBoI0F/wuwcpxBew3hGw==
   dependencies:
     "@types/ws" "*"
 
@@ -12489,10 +12489,10 @@ core-js@^2.4.0, core-js@^2.5.0, core-js@^2.6.9:
   resolved "https://registry.yarnpkg.com/core-js/-/core-js-2.6.9.tgz#6b4b214620c834152e179323727fc19741b084f2"
   integrity sha512-HOpZf6eXmnl7la+cUdMnLvUxKNqLUzJvgIziQ0DiF3JwSImNphIqdGqzj6hIKyX04MmV0poclQ7+wjWvxQyR2A==
 
-core-js@^3.0.4, core-js@^3.28.0, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
-  version "3.28.0"
-  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.28.0.tgz#ed8b9e99c273879fdfff0edfc77ee709a5800e4a"
-  integrity sha512-GiZn9D4Z/rSYvTeg1ljAIsEqFm0LaN9gVtwDCrKL80zHtS31p9BAjmTxVqTQDMpwlMolJZOFntUG2uwyj7DAqw==
+core-js@^3.0.4, core-js@^3.29.0, core-js@^3.6.5, core-js@^3.8.2, core-js@^3.8.3:
+  version "3.29.0"
+  resolved "https://registry.yarnpkg.com/core-js/-/core-js-3.29.0.tgz#0273e142b67761058bcde5615c503c7406b572d6"
+  integrity sha512-VG23vuEisJNkGl6XQmFJd3rEG/so/CNatqeE+7uZAwTSwFeB/qaO0be8xZYUNWprJ/GIwL8aMt9cj1kvbpTZhg==
 
 core-util-is@1.0.2, core-util-is@^1.0.2, core-util-is@~1.0.0:
   version "1.0.2"
