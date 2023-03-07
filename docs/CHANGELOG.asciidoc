@@ -191,7 +191,7 @@ When you attempt to create an APM latency threshold rule in **Observability** > 
 This known issue only impacts the Observability Rules page. To work around this issue, create APM latency threshold rules in the APM Alerts and Rules dialog. See {kibana-ref}/apm-alerts.html[Alerts and rules] for detailed instructions.
 ====
 
-[[known-issue-tofillin]]
+[[known-issue-152847]]
 .Metric visualization progress bars get turned off on upgrade
 [%collapsible]
 ====
