@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
+import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { LayerAction, StateSetter } from '../../../../types';
 import { XYState, XYAnnotationLayerConfig } from '../../types';
 import { getUnlinkLayerAction } from './unlink_action';
@@ -28,6 +29,7 @@ export const createAnnotationActions = ({
   core,
   isSaveable,
   eventAnnotationService,
+  savedObjectsTagging,
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
@@ -36,6 +38,7 @@ export const createAnnotationActions = ({
   core: CoreStart;
   isSaveable?: boolean;
   eventAnnotationService: EventAnnotationServiceType;
+  savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }): LayerAction[] => {
   const actions = [];
 
@@ -56,6 +59,7 @@ export const createAnnotationActions = ({
           setState,
           eventAnnotationService,
           toasts: core.notifications.toasts,
+          savedObjectsTagging,
         });
         actions.push(saveAction);
       }
@@ -86,6 +90,7 @@ export const createAnnotationActions = ({
           setState,
           eventAnnotationService,
           toasts: core.notifications.toasts,
+          savedObjectsTagging,
         })
       );
     }

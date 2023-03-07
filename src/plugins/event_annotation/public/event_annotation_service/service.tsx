@@ -84,12 +84,12 @@ export function getEventAnnotationService(core: CoreStart): EventAnnotationServi
   const createAnnotationGroup = async (
     group: EventAnnotationGroupConfig
   ): Promise<{ id: string }> => {
-    const { title, ignoreGlobalFilters, indexPatternId, annotations } = group;
+    const { title, description, tags, ignoreGlobalFilters, indexPatternId, annotations } = group;
 
     const groupSavedObjectId = (
       await client.create(
         EVENT_ANNOTATION_GROUP_TYPE,
-        { title, ignoreGlobalFilters, annotations },
+        { title, description, tags, ignoreGlobalFilters, annotations },
         {
           references: [
             {

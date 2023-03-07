@@ -30,8 +30,10 @@ export class XyVisualization {
   ) {
     editorFrame.registerVisualization(async () => {
       const { getXyVisualization } = await import('../../async_services');
-      const [coreStart, { charts, data, fieldFormats, eventAnnotation, unifiedSearch }] =
-        await core.getStartServices();
+      const [
+        coreStart,
+        { charts, data, fieldFormats, eventAnnotation, unifiedSearch, savedObjectsTagging },
+      ] = await core.getStartServices();
       const [palettes, eventAnnotationService] = await Promise.all([
         charts.palettes.getPalettes(),
         eventAnnotation.getService(coreStart),
@@ -47,6 +49,7 @@ export class XyVisualization {
         useLegacyTimeAxis,
         kibanaTheme: core.theme,
         unifiedSearch,
+        savedObjectsTagging,
       });
     });
   }

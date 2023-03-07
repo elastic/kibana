@@ -21,6 +21,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
+import { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { generateId } from '../../id_generator';
 import {
   isDraggedDataViewField,
@@ -116,6 +117,7 @@ export const getXyVisualization = ({
   kibanaTheme,
   eventAnnotationService,
   unifiedSearch,
+  savedObjectsTagging,
 }: {
   core: CoreStart;
   storage: IStorageWrapper;
@@ -126,6 +128,7 @@ export const getXyVisualization = ({
   useLegacyTimeAxis: boolean;
   kibanaTheme: ThemeServiceStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
+  savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }): Visualization<State, PersistedState> => ({
   id: XY_ID,
   visualizationTypes,
@@ -272,6 +275,7 @@ export const getXyVisualization = ({
           core,
           isSaveable,
           eventAnnotationService,
+          savedObjectsTagging,
         })
       );
     }

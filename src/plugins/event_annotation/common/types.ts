@@ -95,6 +95,8 @@ export interface EventAnnotationGroupConfig {
   indexPatternId: string;
   ignoreGlobalFilters?: boolean; // TODO - can this be a required attribute?
   title?: string; // TODO - can this be a required attribute?
+  description?: string; // TODO - can this be a required attribute?
+  tags?: string[]; // TODO - can this be a required attribute?
 }
 
 export type EventAnnotationArgs =

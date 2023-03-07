@@ -486,12 +486,19 @@ describe('Event Annotation Service', () => {
       ];
       await eventAnnotationService.createAnnotationGroup({
         title: 'newGroupTitle',
+        description: 'my description',
+        tags: ['my', 'many', 'tags'],
         indexPatternId: 'ipid',
         annotations,
       });
       expect(core.savedObjects.client.create).toHaveBeenCalledWith(
         'event-annotation-group',
-        { title: 'newGroupTitle', annotations },
+        {
+          title: 'newGroupTitle',
+          description: 'my description',
+          tags: ['my', 'many', 'tags'],
+          annotations,
+        },
         {
           references: [
             {
