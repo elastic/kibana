@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -21,17 +21,12 @@ import {
 import moment from 'moment';
 import { formatAlertEvaluationValue } from '@kbn/observability-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getDurationFormatter } from '../../../../../common/utils/formatters/duration';
+import { getDurationFormatter } from '@kbn/observability-plugin/common';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
-import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { getComparisonChartTheme } from '../../../shared/time_comparison/get_comparison_chart_theme';
-import { getLatencyChartSelector } from '../../../../selectors/latency_chart_selectors';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
-import {
-  getMaxY,
-  getResponseTimeTickFormatter,
-} from '../../../shared/charts/transaction_charts/helper';
+import { getResponseTimeTickFormatter } from '../../../shared/charts/transaction_charts/helper';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import {
   ChartType,
@@ -42,17 +37,12 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from './types';
-import { getAggsTypeFromRule, isLatencyThresholdRuleType } from './helpers';
-import { filterNil } from '../../../shared/charts/latency_chart';
+import { getAggsTypeFromRule } from './helpers';
 import { LatencyAlertsHistoryChart } from './latency_alerts_history_chart';
-import {
-  AlertActiveRect,
-  AlertAnnotation,
-  AlertThresholdRect,
-  AlertThresholdAnnotation,
-} from './latency_chart_components';
+
 import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 import FailedTransactionChart from './failed_transaction_chart';
+import LatencyChart from './latency_chart/latency_chart';
 
 export function AlertDetailsAppSection({
   rule,
@@ -111,6 +101,7 @@ export function AlertDetailsAppSection({
   const params = rule.params;
   const environment = alert.fields[SERVICE_ENVIRONMENT];
   const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
+  const [latencyMaxY, setLatencyMaxY] = useState(0);
 
   // duration is us, convert it to MS
   const alertDurationMS = alert.fields[ALERT_DURATION]! / 1000;
@@ -154,67 +145,7 @@ export function AlertDetailsAppSection({
     previousPeriod: [],
   };
 
-  /* Latency Chart */
-  const { data, status } = useFetcher(
-    (callApmApi) => {
-      if (
-        serviceName &&
-        start &&
-        end &&
-        transactionType &&
-        latencyAggregationType
-      ) {
-        return callApmApi(
-          `GET /internal/apm/services/{serviceName}/transactions/charts/latency`,
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery: '',
-                start,
-                end,
-                transactionType,
-                transactionName: undefined,
-                latencyAggregationType,
-              },
-            },
-          }
-        );
-      }
-    },
-    [
-      end,
-      environment,
-      latencyAggregationType,
-      serviceName,
-      start,
-      transactionType,
-    ]
-  );
-
-  const memoizedData = useMemo(
-    () =>
-      getLatencyChartSelector({
-        latencyChart: data,
-        latencyAggregationType,
-        previousPeriodLabel: '',
-      }),
-    // It should only update when the data has changed
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data]
-  );
-  const { currentPeriod, previousPeriod } = memoizedData;
-
-  const timeseriesLatency = [
-    currentPeriod,
-    comparisonEnabled && isTimeComparison(offset) ? previousPeriod : undefined,
-  ].filter(filterNil);
-
-  const latencyMaxY = getMaxY(timeseriesLatency);
   const latencyFormatter = getDurationFormatter(latencyMaxY);
-
-  /* Latency Chart */
 
   /* Throughput Chart */
   const { data: dataThroughput = INITIAL_STATE, status: statusThroughput } =
@@ -269,65 +200,24 @@ export function AlertDetailsAppSection({
 
   /* Throughput Chart */
 
-  const getLatencyChartAdditionalData = () => {
-    if (isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID])) {
-      return [
-        <AlertThresholdRect
-          key={'alertThresholdRect'}
-          threshold={alert.fields[ALERT_EVALUATION_THRESHOLD]}
-          alertStarted={alert.start}
-        />,
-        <AlertAnnotation
-          key={'alertAnnotationStart'}
-          alertStarted={alert.start}
-        />,
-        <AlertActiveRect
-          key={'alertAnnotationActiveRect'}
-          alertStarted={alert.start}
-        />,
-        <AlertThresholdAnnotation
-          key={'alertThresholdAnnotation'}
-          threshold={alert.fields[ALERT_EVALUATION_THRESHOLD]}
-        />,
-      ];
-    }
-  };
-
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <ChartPointerEventContextProvider>
         <EuiFlexItem>
-          <EuiPanel hasBorder={true}>
-            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiTitle size="xs">
-                  <h2>
-                    {i18n.translate(
-                      'xpack.apm.dependencyLatencyChart.chartTitle',
-                      {
-                        defaultMessage: 'Latency',
-                      }
-                    )}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            <TimeseriesChart
-              id="latencyChart"
-              annotations={getLatencyChartAdditionalData()}
-              height={200}
-              comparisonEnabled={comparisonEnabled}
-              offset={offset}
-              fetchStatus={status}
-              customTheme={comparisonChartTheme}
-              timeseries={timeseriesLatency}
-              yLabelFormat={getResponseTimeTickFormatter(latencyFormatter)}
-              timeZone={timeZone}
-            />
-          </EuiPanel>
-        </EuiFlexItem>
-
-        <EuiFlexItem>
+          <LatencyChart
+            alert={alert}
+            transactionType={transactionType}
+            serviceName={serviceName}
+            environment={environment}
+            start={start}
+            end={end}
+            comparisonChartTheme={comparisonChartTheme}
+            timeZone={timeZone}
+            latencyAggregationType={latencyAggregationType}
+            comparisonEnabled={comparisonEnabled}
+            offset={offset}
+            setLatencyMaxY={setLatencyMaxY}
+          />
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem>
               <EuiPanel hasBorder={true}>

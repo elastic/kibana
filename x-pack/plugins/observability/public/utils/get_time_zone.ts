@@ -10,7 +10,7 @@ import { UI_SETTINGS } from '../hooks/use_kibana_ui_settings';
 
 export function getTimeZone(uiSettings?: IUiSettingsClient) {
   const kibanaTimeZone = uiSettings?.get<'Browser' | string>(UI_SETTINGS.DATEFORMAT_TZ);
-
+  console.log('kibanaTimeZone', kibanaTimeZone);
   if (!kibanaTimeZone || kibanaTimeZone === 'Browser') {
     return 'local';
   }
