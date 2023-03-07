@@ -12,6 +12,10 @@ import { useKibana } from '../common/lib/kibana';
 import { PACKS_ID } from './constants';
 import type { PackSavedObject } from './types';
 
+export type UsePacksResponse = Omit<SavedObjectsFindResponse, 'savedObjects'> & {
+  data: PackSavedObject[];
+};
+
 export const usePacks = ({
   isLive = false,
   pageIndex = 0,
@@ -21,11 +25,7 @@ export const usePacks = ({
 }) => {
   const { http } = useKibana().services;
 
-  return useQuery<
-    Omit<SavedObjectsFindResponse, 'savedObjects'> & {
-      data: PackSavedObject[];
-    }
-  >(
+  return useQuery<UsePacksResponse>(
     [PACKS_ID, { pageIndex, pageSize, sortField, sortOrder }],
     () =>
       http.get('/api/osquery/packs', {
