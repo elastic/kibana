@@ -13,7 +13,7 @@ export const riskScoresRequestSchema = t.exact(
   t.partial({
     data_view_id: DataViewId,
     enrich_inputs: t.boolean,
-    filters: t.array(t.unknown),
+    filters: t.unknown,
     identifier_type: t.string,
     range: t.type({
       start: t.string,
