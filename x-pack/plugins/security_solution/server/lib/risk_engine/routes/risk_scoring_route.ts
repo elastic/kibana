@@ -35,7 +35,7 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
       try {
         const result = await riskScoreService.getScores({
           enrichInputs: options.enrich_inputs,
-          filters: options.filters ?? [],
+          filters: options.filters,
           range: options.range ?? { start: 'now-15d', end: 'now' },
           identifierType: options.identifier_type as IdentifierType, // TODO validate
         });
