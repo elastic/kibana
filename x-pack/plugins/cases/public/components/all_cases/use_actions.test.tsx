@@ -7,7 +7,7 @@
 
 import userEvent from '@testing-library/user-event';
 import { waitFor } from '@testing-library/dom';
-import { act, renderHook } from '@testing-library/react-hooks';
+import { renderHook } from '@testing-library/react-hooks/dom';
 
 import { useActions } from './use_actions';
 import { basicCase } from '../../containers/mock';
@@ -22,6 +22,7 @@ import {
 } from '../../common/mock';
 
 jest.mock('../../containers/api');
+jest.mock('../../containers/user_profiles/api');
 
 describe('useActions', () => {
   let appMockRender: AppMockRenderer;
@@ -66,14 +67,13 @@ describe('useActions', () => {
     const comp = result.current.actions!.render(basicCase) as React.ReactElement;
     const res = appMockRender.render(comp);
 
-    act(() => {
-      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-    });
+    userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
 
     await waitFor(() => {
       expect(res.getByText('Actions')).toBeInTheDocument();
       expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
       expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+      expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
     });
   });
 
@@ -87,18 +87,14 @@ describe('useActions', () => {
     const comp = result.current.actions!.render(basicCase) as React.ReactElement;
     const res = appMockRender.render(comp);
 
-    act(() => {
-      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-    });
+    userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
 
     await waitFor(() => {
       expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
     });
 
-    act(() => {
-      userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`), undefined, {
-        skipPointerEventsCheck: true,
-      });
+    userEvent.click(res.getByTestId(`case-action-status-panel-${basicCase.id}`), undefined, {
+      skipPointerEventsCheck: true,
     });
 
     await waitFor(() => {
@@ -107,9 +103,7 @@ describe('useActions', () => {
       expect(res.getByTestId('cases-bulk-action-status-closed')).toBeInTheDocument();
     });
 
-    act(() => {
-      userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'));
-    });
+    userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'));
 
     await waitFor(() => {
       expect(updateCasesSpy).toHaveBeenCalled();
@@ -126,18 +120,14 @@ describe('useActions', () => {
     const comp = result.current.actions!.render(basicCase) as React.ReactElement;
     const res = appMockRender.render(comp);
 
-    act(() => {
-      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-    });
+    userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
 
     await waitFor(() => {
       expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
     });
 
-    act(() => {
-      userEvent.click(res.getByTestId(`case-action-severity-panel-${basicCase.id}`), undefined, {
-        skipPointerEventsCheck: true,
-      });
+    userEvent.click(res.getByTestId(`case-action-severity-panel-${basicCase.id}`), undefined, {
+      skipPointerEventsCheck: true,
     });
 
     await waitFor(() => {
@@ -147,12 +137,44 @@ describe('useActions', () => {
       expect(res.getByTestId('cases-bulk-action-severity-critical')).toBeInTheDocument();
     });
 
-    act(() => {
-      userEvent.click(res.getByTestId('cases-bulk-action-severity-medium'));
-    });
+    userEvent.click(res.getByTestId('cases-bulk-action-severity-medium'));
 
     await waitFor(() => {
       expect(updateCasesSpy).toHaveBeenCalled();
+    });
+  });
+
+  it('copies the case id to the clipboard', async () => {
+    const originalClipboard = global.window.navigator.clipboard;
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: {
+        writeText: jest.fn().mockImplementation(() => Promise.resolve()),
+      },
+      writable: true,
+    });
+
+    const { result } = renderHook(() => useActions({ disableActions: false }), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+    const res = appMockRender.render(comp);
+
+    userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+
+    await waitFor(() => {
+      expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
+    });
+
+    userEvent.click(res.getByTestId('cases-action-copy-id'), undefined, {
+      skipPointerEventsCheck: true,
+    });
+
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith(basicCase.id);
+
+    Object.defineProperty(navigator, 'clipboard', {
+      value: originalClipboard,
     });
   });
 
@@ -167,27 +189,21 @@ describe('useActions', () => {
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
-      act(() => {
-        userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-      });
+      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
 
       await waitFor(() => {
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
       });
 
-      act(() => {
-        userEvent.click(res.getByTestId('cases-bulk-action-delete'), undefined, {
-          skipPointerEventsCheck: true,
-        });
+      userEvent.click(res.getByTestId('cases-bulk-action-delete'), undefined, {
+        skipPointerEventsCheck: true,
       });
 
       await waitFor(() => {
         expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
       });
 
-      act(() => {
-        userEvent.click(res.getByTestId('confirmModalConfirmButton'));
-      });
+      userEvent.click(res.getByTestId('confirmModalConfirmButton'));
 
       await waitFor(() => {
         expect(deleteSpy).toHaveBeenCalled();
@@ -202,31 +218,107 @@ describe('useActions', () => {
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
-      act(() => {
-        userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-      });
+      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
 
       await waitFor(() => {
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
       });
 
-      act(() => {
-        userEvent.click(res.getByTestId('cases-bulk-action-delete'), undefined, {
-          skipPointerEventsCheck: true,
-        });
+      userEvent.click(res.getByTestId('cases-bulk-action-delete'), undefined, {
+        skipPointerEventsCheck: true,
       });
 
       await waitFor(() => {
         expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
       });
 
-      act(() => {
-        userEvent.click(res.getByTestId('confirmModalCancelButton'), undefined, {
-          skipPointerEventsCheck: true,
-        });
+      userEvent.click(res.getByTestId('confirmModalCancelButton'), undefined, {
+        skipPointerEventsCheck: true,
       });
 
       expect(res.queryByTestId('confirm-delete-case-modal')).toBeFalsy();
+    });
+  });
+
+  describe('Flyouts', () => {
+    it('change the tags of the case', async () => {
+      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+      const res = appMockRender.render(comp);
+
+      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+
+      await waitFor(() => {
+        expect(res.getByTestId('cases-bulk-action-tags')).toBeInTheDocument();
+      });
+
+      userEvent.click(res.getByTestId('cases-bulk-action-tags'), undefined, {
+        skipPointerEventsCheck: true,
+      });
+
+      await waitFor(() => {
+        expect(res.getByTestId('cases-edit-tags-flyout')).toBeInTheDocument();
+      });
+
+      await waitFor(() => {
+        expect(res.getByText('coke')).toBeInTheDocument();
+      });
+
+      userEvent.click(res.getByText('coke'));
+      userEvent.click(res.getByTestId('cases-edit-tags-flyout-submit'));
+
+      await waitFor(() => {
+        expect(updateCasesSpy).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(res.queryByTestId('cases-edit-tags-flyout')).toBeFalsy();
+      });
+    });
+
+    it('change the assignees of the case', async () => {
+      const updateCasesSpy = jest.spyOn(api, 'updateCases');
+
+      const { result } = renderHook(() => useActions({ disableActions: false }), {
+        wrapper: appMockRender.AppWrapper,
+      });
+
+      const comp = result.current.actions!.render(basicCase) as React.ReactElement;
+      const res = appMockRender.render(comp);
+
+      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
+
+      await waitFor(() => {
+        expect(res.getByTestId('cases-bulk-action-assignees')).toBeInTheDocument();
+      });
+
+      userEvent.click(res.getByTestId('cases-bulk-action-assignees'), undefined, {
+        skipPointerEventsCheck: true,
+      });
+
+      await waitFor(() => {
+        expect(res.getByTestId('cases-edit-assignees-flyout')).toBeInTheDocument();
+      });
+
+      await waitFor(() => {
+        expect(res.getByText('Damaged Raccoon')).toBeInTheDocument();
+      });
+
+      userEvent.click(res.getByText('Damaged Raccoon'));
+      userEvent.click(res.getByTestId('cases-edit-assignees-flyout-submit'));
+
+      await waitFor(() => {
+        expect(updateCasesSpy).toHaveBeenCalled();
+      });
+
+      await waitFor(() => {
+        expect(res.queryByTestId('cases-edit-assignees-flyout')).toBeFalsy();
+      });
     });
   });
 
@@ -240,15 +332,14 @@ describe('useActions', () => {
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
-      act(() => {
-        userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-      });
+      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
 
       await waitFor(() => {
         expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
         expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
         expect(res.getByTestId(`actions-separator-${basicCase.id}`)).toBeInTheDocument();
+        expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
       });
     });
 
@@ -261,13 +352,12 @@ describe('useActions', () => {
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
-      act(() => {
-        userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-      });
+      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
 
       await waitFor(() => {
         expect(res.getByTestId(`case-action-status-panel-${basicCase.id}`)).toBeInTheDocument();
         expect(res.getByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeInTheDocument();
+        expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
         expect(res.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
         expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
       });
@@ -282,13 +372,12 @@ describe('useActions', () => {
       const comp = result.current.actions!.render(basicCase) as React.ReactElement;
       const res = appMockRender.render(comp);
 
-      act(() => {
-        userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
-      });
+      userEvent.click(res.getByTestId(`case-action-popover-button-${basicCase.id}`));
 
       await waitFor(() => {
         expect(res.queryByTestId(`case-action-status-panel-${basicCase.id}`)).toBeFalsy();
         expect(res.queryByTestId(`case-action-severity-panel-${basicCase.id}`)).toBeFalsy();
+        expect(res.getByTestId('cases-action-copy-id')).toBeInTheDocument();
         expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
         expect(res.queryByTestId(`actions-separator-${basicCase.id}`)).toBeFalsy();
       });

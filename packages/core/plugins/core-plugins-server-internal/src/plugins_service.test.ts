@@ -11,7 +11,7 @@ import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 import { resolve, join } from 'path';
 import { BehaviorSubject, from } from 'rxjs';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
 import { ConfigPath, ConfigService, Env } from '@kbn/config';
 
@@ -722,15 +722,13 @@ describe('PluginsService', () => {
           additionalPluginPaths: [],
           initialize: true,
           pluginSearchPaths: [
-            resolve(process.cwd(), 'src', 'plugins'),
-            resolve(process.cwd(), 'x-pack', 'plugins'),
-            resolve(process.cwd(), 'plugins'),
-            resolve(process.cwd(), '..', 'kibana-extra'),
+            resolve(REPO_ROOT, '..', 'kibana-extra'),
+            resolve(REPO_ROOT, 'plugins'),
           ],
         },
         coreContext: { coreId, env, logger, configService },
         instanceInfo: { uuid: 'uuid' },
-        nodeInfo: { roles: { backgroundTasks: true, ui: true } },
+        nodeInfo: { roles: { backgroundTasks: true, ui: true, migrator: false } },
       });
 
       const logs = loggingSystemMock.collect(logger);

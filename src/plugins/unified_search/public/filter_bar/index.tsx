@@ -29,16 +29,6 @@ export const FilterItems = (props: React.ComponentProps<typeof LazyFilterItems>)
   </React.Suspense>
 );
 
-const LazyFilterLabel = React.lazy(() => import('./filter_label/filter_label'));
-/**
- * Renders the label for a single filter pill
- */
-export const FilterLabel = (props: React.ComponentProps<typeof LazyFilterLabel>) => (
-  <React.Suspense fallback={<Fallback />}>
-    <LazyFilterLabel {...props} />
-  </React.Suspense>
-);
-
 const LazyFilterItem = React.lazy(() => import('./filter_item/filter_item'));
 /**
  * Renders a single filter pill

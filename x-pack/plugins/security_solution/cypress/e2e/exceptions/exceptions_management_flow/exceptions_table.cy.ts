@@ -65,7 +65,9 @@ describe('Exceptions Table', () => {
     createExceptionList(getExceptionList1(), getExceptionList1().list_id).as(
       'exceptionListResponse'
     );
+  });
 
+  beforeEach(() => {
     visitWithoutDateRange(EXCEPTIONS_URL);
   });
 
@@ -81,7 +83,10 @@ describe('Exceptions Table', () => {
         expectedExportedExceptionList(this.exceptionListResponse)
       );
 
-      cy.get(TOASTER).should('have.text', 'Exception list export success');
+      cy.get(TOASTER).should(
+        'have.text',
+        `Exception list "${getExceptionList1().name}" exported successfully`
+      );
     });
   });
 

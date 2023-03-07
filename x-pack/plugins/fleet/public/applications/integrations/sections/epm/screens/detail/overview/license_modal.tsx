@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import {
   EuiCodeBlock,
-  EuiLoadingContent,
   EuiModal,
   EuiModalBody,
   EuiModalHeader,
   EuiModalFooter,
   EuiModalHeaderTitle,
   EuiButton,
+  EuiSkeletonText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { sendGetFileByPath, useStartServices } from '../../../../../hooks';
+import { useGetFileByPathQuery, useStartServices } from '../../../../../hooks';
 
 interface Props {
   licenseName?: string;
@@ -33,46 +33,31 @@ export const LicenseModal: React.FunctionComponent<Props> = ({
   onClose,
 }) => {
   const { notifications } = useStartServices();
-  const [licenseText, setLicenseText] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    async function fetchData() {
-      try {
-        const { data } = await sendGetFileByPath(licensePath);
-        setLicenseText(data || '');
-      } catch (err) {
-        notifications.toasts.addError(err, {
-          title: i18n.translate('xpack.fleet.epm.errorLoadingLicense', {
-            defaultMessage: 'Error loading license information',
-          }),
-        });
-      }
-    }
-    fetchData();
-  }, [licensePath, notifications]);
+  const {
+    data: licenseResponse,
+    error: licenseError,
+    isLoading,
+  } = useGetFileByPathQuery(licensePath);
+  const licenseText = licenseResponse?.data;
+
+  if (licenseError) {
+    notifications.toasts.addError(licenseError, {
+      title: i18n.translate('xpack.fleet.epm.errorLoadingLicense', {
+        defaultMessage: 'Error loading license information',
+      }),
+    });
+  }
+
   return (
     <EuiModal maxWidth={true} onClose={onClose}>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h1>{licenseName}</h1>
-        </EuiModalHeaderTitle>
+        <EuiModalHeaderTitle>{licenseName}</EuiModalHeaderTitle>
       </EuiModalHeader>
       <EuiModalBody>
-        <EuiCodeBlock overflowHeight={360}>
-          {licenseText ? (
-            licenseText
-          ) : (
-            // Simulate a long text while loading
-            <>
-              <p>
-                <EuiLoadingContent lines={5} />
-              </p>
-              <p>
-                <EuiLoadingContent lines={6} />
-              </p>
-            </>
-          )}
-        </EuiCodeBlock>
+        <EuiSkeletonText lines={10} size="s" isLoading={isLoading} contentAriaLabel="License text">
+          <EuiCodeBlock overflowHeight={360}>{licenseText}</EuiCodeBlock>
+        </EuiSkeletonText>
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButton color="primary" fill onClick={onClose}>

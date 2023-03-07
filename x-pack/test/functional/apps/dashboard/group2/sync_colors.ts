@@ -54,7 +54,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.setNewChartUiDebugFlag(true);
       await PageObjects.dashboard.clickCreateDashboardPrompt();
       await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.lens.goToTimeRange();
 
       await PageObjects.lens.configureDimension({
@@ -72,7 +71,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.save('vis1', false, true);
       await PageObjects.header.waitUntilLoadingHasFinished();
       await dashboardAddPanel.clickCreateNewLink();
-      await PageObjects.header.waitUntilLoadingHasFinished();
 
       await PageObjects.lens.configureDimension({
         dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
@@ -86,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'geo.src',
       });
 
-      await filterBar.addFilter('geo.src', 'is not', 'CN');
+      await filterBar.addFilter({ field: 'geo.src', operation: 'is not', value: 'CN' });
 
       await PageObjects.lens.save('vis2', false, true);
       await PageObjects.dashboard.useColorSync(true);

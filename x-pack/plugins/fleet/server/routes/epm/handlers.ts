@@ -24,6 +24,7 @@ import type {
   IBulkInstallPackageHTTPError,
   GetStatsResponse,
   UpdatePackageResponse,
+  GetVerificationKeyIdResponse,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -33,7 +34,7 @@ import type {
   InstallPackageFromRegistryRequestSchema,
   InstallPackageByUploadRequestSchema,
   DeletePackageRequestSchema,
-  BulkUpgradePackagesFromRegistryRequestSchema,
+  BulkInstallPackagesFromRegistryRequestSchema,
   GetStatsRequestSchema,
   FleetRequestHandler,
   UpdatePackageRequestSchema,
@@ -53,11 +54,12 @@ import {
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
-import { licenseService } from '../../services';
+import { checkAllowedPackages, licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
 import { updatePackage } from '../../services/epm/packages/update';
+import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -91,6 +93,7 @@ export const getListHandler: FleetRequestHandler<
       savedObjectsClient,
       ...request.query,
     });
+
     const body: GetPackagesResponse = {
       items: res,
       response: res,
@@ -209,7 +212,11 @@ export const getInfoHandler: FleetRequestHandler<
 > = async (context, request, response) => {
   try {
     const savedObjectsClient = (await context.fleet).internalSoClient;
+    const { limitedToPackages } = await context.fleet;
     const { pkgName, pkgVersion } = request.params;
+
+    checkAllowedPackages([pkgName], limitedToPackages);
+
     const { ignoreUnverified = false, full = false, prerelease } = request.query;
     if (pkgVersion && !semverValid(pkgVersion)) {
       throw new FleetError('Package version is not a valid semver');
@@ -268,7 +275,7 @@ export const getStatsHandler: FleetRequestHandler<
 
 export const installPackageFromRegistryHandler: FleetRequestHandler<
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.params>,
-  undefined,
+  TypeOf<typeof InstallPackageFromRegistryRequestSchema.query>,
   TypeOf<typeof InstallPackageFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -286,6 +293,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     spaceId,
     force: request.body?.force,
     ignoreConstraints: request.body?.ignore_constraints,
+    prerelease: request.query?.prerelease,
   });
 
   if (!res.error) {
@@ -318,8 +326,8 @@ const bulkInstallServiceResponseToHttpEntry = (
 
 export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   undefined,
-  TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.query>,
-  TypeOf<typeof BulkUpgradePackagesFromRegistryRequestSchema.body>
+  TypeOf<typeof BulkInstallPackagesFromRegistryRequestSchema.query>,
+  TypeOf<typeof BulkInstallPackagesFromRegistryRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
@@ -332,6 +340,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     packagesToInstall: request.body.packages,
     spaceId,
     prerelease: request.query.prerelease,
+    force: request.body.force,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
@@ -401,6 +410,22 @@ export const deletePackageHandler: FleetRequestHandler<
     });
     const body: DeletePackageResponse = {
       items: res,
+    };
+    return response.ok({ body });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getVerificationKeyIdHandler: FleetRequestHandler = async (
+  context,
+  request,
+  response
+) => {
+  try {
+    const packageVerificationKeyId = await getGpgKeyIdOrUndefined();
+    const body: GetVerificationKeyIdResponse = {
+      id: packageVerificationKeyId || null,
     };
     return response.ok({ body });
   } catch (error) {

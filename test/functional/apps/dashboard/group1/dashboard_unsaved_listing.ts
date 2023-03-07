@@ -21,8 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const unsavedDashboardTitle = 'New Dashboard';
   const newDashboartTitle = 'A Wild Dashboard';
 
-  // Failing: See https://github.com/elastic/kibana/issues/147634
-  describe.skip('dashboard unsaved listing', () => {
+  describe('dashboard unsaved listing', () => {
     const addSomePanels = async () => {
       // add an area chart by value
       await dashboardAddPanel.clickEditorMenuButton();
@@ -150,6 +149,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.dashboard.waitForRenderComplete();
+
+      // wait for the unsaved changes badge to appear.
+      await PageObjects.dashboard.expectUnsavedChangesBadge();
 
       // ensure that the unsaved listing exists
       await PageObjects.dashboard.gotoDashboardLandingPage();

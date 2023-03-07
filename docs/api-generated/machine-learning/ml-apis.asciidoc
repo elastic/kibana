@@ -7,4 +7,4 @@ preview::[]
 This file includes content that has been generated from https://github.com/elastic/kibana/tree/main/x-pack/plugins/ml/common/openapi. Any modifications required must be done in that open API specification.
 ////
 
-include::ml-apis-passthru.adoc[]
+include::ml-apis-passthru.asciidoc[]

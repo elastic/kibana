@@ -144,11 +144,12 @@ export function TopErroneousTransactions({ serviceName }: Props) {
         { occurrences, currentPeriodTimeseries, previousPeriodTimeseries }
       ) => {
         const { currentPeriodColor, previousPeriodColor } = getTimeSeriesColor(
-          ChartType.FAILED_TRANSACTION_RATE
+          ChartType.ERROR_OCCURRENCES
         );
 
         return (
           <SparkPlot
+            type="bar"
             isLoading={loading}
             valueLabel={i18n.translate(
               'xpack.apm.errorGroupTopTransactions.column.occurrences.valueLabel',

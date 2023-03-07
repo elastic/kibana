@@ -16,6 +16,7 @@ import {
   SPACE_IDS,
   ALERT_RULE_TAGS,
   TIMESTAMP,
+  ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
 
 import { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
@@ -25,6 +26,7 @@ export const getCommonAlertFields = (
   options: RuleExecutorOptions<any, any, any, any, any>
 ): CommonAlertFieldsLatest => {
   return {
+    [ALERT_RULE_PARAMETERS]: options.params,
     [ALERT_RULE_CATEGORY]: options.rule.ruleTypeName,
     [ALERT_RULE_CONSUMER]: options.rule.consumer,
     [ALERT_RULE_EXECUTION_UUID]: options.executionId,

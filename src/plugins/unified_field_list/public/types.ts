@@ -30,6 +30,9 @@ export interface FieldListItem {
   type?: DataViewField['type'];
   displayName?: DataViewField['displayName'];
   count?: DataViewField['count'];
+  timeSeriesMetric?: DataViewField['timeSeriesMetric'];
+  esTypes?: DataViewField['esTypes'];
+  scripted?: DataViewField['scripted'];
 }
 
 export enum FieldsGroupNames {
@@ -57,8 +60,16 @@ export interface FieldsGroupDetails {
 export interface FieldsGroup<T extends FieldListItem> extends FieldsGroupDetails {
   fields: T[];
   fieldCount: number;
+  fieldSearchHighlight?: string;
 }
 
 export type FieldListGroups<T extends FieldListItem> = {
   [key in FieldsGroupNames]?: FieldsGroup<T>;
 };
+
+export type FieldTypeKnown = Exclude<
+  DataViewField['timeSeriesMetric'] | DataViewField['type'],
+  undefined
+>;
+
+export type GetCustomFieldType<T extends FieldListItem> = (field: T) => FieldTypeKnown;

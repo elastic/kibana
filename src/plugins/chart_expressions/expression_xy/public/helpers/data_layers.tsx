@@ -47,6 +47,7 @@ type GetSeriesPropsFn = (config: {
   paletteService: PaletteRegistry;
   syncColors?: boolean;
   yAxis?: GroupsConfiguration[number];
+  xAxis?: GroupsConfiguration[number];
   timeZone?: string;
   emphasizeFitting?: boolean;
   fillOpacity?: number;
@@ -388,6 +389,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
   paletteService,
   syncColors,
   yAxis,
+  xAxis,
   timeZone,
   emphasizeFitting,
   fillOpacity,
@@ -546,5 +548,7 @@ export const getSeriesProps: GetSeriesPropsFn = ({
     name(d) {
       return getSeriesNameFn(d);
     },
+    yNice: Boolean(yAxis?.extent?.niceValues),
+    xNice: Boolean(xAxis?.extent?.niceValues),
   };
 };

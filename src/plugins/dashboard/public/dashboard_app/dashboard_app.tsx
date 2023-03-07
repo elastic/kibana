@@ -10,9 +10,11 @@ import { History } from 'history';
 import useMount from 'react-use/lib/useMount';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
+import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 
+import { css } from '@emotion/react';
 import {
   DashboardAppNoDataPage,
   isDashboardAppInNoDataState,
@@ -52,6 +54,12 @@ export function DashboardApp({
   history,
 }: DashboardAppProps) {
   const [showNoDataPage, setShowNoDataPage] = useState<boolean>(false);
+  /**
+   * This state keeps track of the height of the top navigation bar so that padding at the
+   * top of the viewport can be adjusted dynamically.
+   */
+  const [topNavHeight, setTopNavHeight] = useState(0);
+
   useMount(() => {
     (async () => setShowNoDataPage(await isDashboardAppInNoDataState()))();
   });
@@ -64,12 +72,14 @@ export function DashboardApp({
    * Unpack & set up dashboard services
    */
   const {
+    screenshotMode: { isScreenshotMode, getScreenshotContext },
     coreContext: { executionContext },
     embeddable: { getStateTransfer },
     notifications: { toasts },
     settings: { uiSettings },
     data: { search },
   } = pluginServices.getServices();
+
   const incomingEmbeddable = getStateTransfer().getIncomingEmbeddablePackage(
     DASHBOARD_APP_ID,
     true
@@ -112,10 +122,11 @@ export function DashboardApp({
    * Create options to pass into the dashboard renderer
    */
   const stateFromLocator = loadDashboardHistoryLocationState(getScopedHistory);
-  const getCreationOptions = useCallback((): DashboardCreationOptions => {
+  const getCreationOptions = useCallback((): Promise<DashboardCreationOptions> => {
     const initialUrlState = loadAndRemoveDashboardState(kbnUrlStateStorage);
     const searchSessionIdFromURL = getSearchSessionIdFromURL(history);
-    return {
+
+    return Promise.resolve({
       incomingEmbeddable,
 
       // integrations
@@ -139,11 +150,24 @@ export function DashboardApp({
         // State loaded from the dashboard app URL and from the locator overrides all other dashboard state.
         ...initialUrlState,
         ...stateFromLocator,
+
+        // if print mode is active, force viewMode.PRINT
+        ...(isScreenshotMode() && getScreenshotContext('layout') === 'print'
+          ? { viewMode: ViewMode.PRINT }
+          : {}),
       },
 
       validateLoadedSavedObject: validateOutcome,
-    };
-  }, [kbnUrlStateStorage, history, stateFromLocator, incomingEmbeddable, validateOutcome]);
+    });
+  }, [
+    history,
+    validateOutcome,
+    stateFromLocator,
+    isScreenshotMode,
+    kbnUrlStateStorage,
+    incomingEmbeddable,
+    getScreenshotContext,
+  ]);
 
   /**
    * Get the redux wrapper from the dashboard container. This is used to wrap the top nav so it can interact with the
@@ -167,7 +191,7 @@ export function DashboardApp({
   }, [dashboardContainer, kbnUrlStateStorage]);
 
   return (
-    <>
+    <div className={'dshAppWrapper'}>
       {showNoDataPage && (
         <DashboardAppNoDataPage onDataViewCreated={() => setShowNoDataPage(false)} />
       )}
@@ -175,18 +199,29 @@ export function DashboardApp({
         <>
           {DashboardReduxWrapper && (
             <DashboardReduxWrapper>
-              <DashboardTopNav redirectTo={redirectTo} embedSettings={embedSettings} />
+              <DashboardTopNav
+                onHeightChange={setTopNavHeight}
+                redirectTo={redirectTo}
+                embedSettings={embedSettings}
+              />
             </DashboardReduxWrapper>
           )}
 
           {getLegacyConflictWarning?.()}
-          <DashboardContainerRenderer
-            savedObjectId={savedDashboardId}
-            getCreationOptions={getCreationOptions}
-            onDashboardContainerLoaded={(container) => setDashboardContainer(container)}
-          />
+          <div
+            className="dashboardViewportWrapper"
+            css={css`
+              padding-top: ${topNavHeight}px;
+            `}
+          >
+            <DashboardContainerRenderer
+              savedObjectId={savedDashboardId}
+              getCreationOptions={getCreationOptions}
+              onDashboardContainerLoaded={(container) => setDashboardContainer(container)}
+            />
+          </div>
         </>
       )}
-    </>
+    </div>
   );
 }

@@ -9,7 +9,7 @@ import { useFetcher } from '@kbn/observability-plugin/public';
 import { useGenerateUpdatedKueryString } from '../../../../hooks';
 import { fetchSnapshotCount } from '../../../../state/api';
 
-export const useSnapShotCount = ({ query, filters }: { query: string; filters: [] | string }) => {
+export const useSnapShotCount = ({ query, filters }: { query: string; filters?: [] | string }) => {
   const parsedFilters =
     filters === undefined || typeof filters === 'string'
       ? ''

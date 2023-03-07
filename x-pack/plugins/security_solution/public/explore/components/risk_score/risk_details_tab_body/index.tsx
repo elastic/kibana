@@ -85,6 +85,7 @@ const RiskDetailsTabBodyComponent: React.FC<
     () => (entityName ? buildEntityNameFilter([entityName], riskEntity) : {}),
     [entityName, riskEntity]
   );
+
   const { data, loading, refetch, inspect, isDeprecated, isModuleEnabled } = useRiskScore({
     filterQuery,
     onlyLatest: false,
@@ -152,13 +153,14 @@ const RiskDetailsTabBodyComponent: React.FC<
         <EuiFlexItem grow={2}>
           <RiskScoreOverTime
             from={startDate}
-            to={endDate}
             loading={loading}
-            riskScore={data}
             queryId={queryId}
+            riskEntity={riskEntity}
+            riskScore={data}
             title={i18n.RISK_SCORE_OVER_TIME(riskEntity)}
-            toggleStatus={overTimeToggleStatus}
+            to={endDate}
             toggleQuery={toggleOverTimeQuery}
+            toggleStatus={overTimeToggleStatus}
           />
         </EuiFlexItem>
 

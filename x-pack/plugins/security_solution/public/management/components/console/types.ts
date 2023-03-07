@@ -9,41 +9,69 @@
 
 import type { ComponentType, ReactNode } from 'react';
 import type { CommonProps } from '@elastic/eui';
+import type { ParsedArgData, ParsedCommandInterface, PossibleArgDataTypes } from './service/types';
 import type { CommandExecutionResultComponent } from './components/command_execution_result';
-import type { CommandExecutionState } from './components/console_state/types';
+import type { CommandExecutionState, ArgSelectorState } from './components/console_state/types';
 import type { Immutable, MaybeImmutable } from '../../../../common/endpoint/types';
-import type {
-  ParsedArgData,
-  ParsedCommandInterface,
-  PossibleArgDataTypes,
-} from './service/parsed_command_input';
 
+/**
+ * Definition interface for a Command argument
+ */
+export interface CommandArgDefinition {
+  /**
+   * If the argument is required to be entered by the user. NOTE that this will only validate that
+   * the user has entered the argument name - it does not validate that the argument must have a
+   * value. Arguments that have no value entered by the user have (by default) a value of
+   * `true` boolean.
+   */
+  required: boolean;
+  allowMultiples: boolean;
+  about: string;
+  /**
+   * If argument (when used) should have a value defined by the user.
+   * Default is `false` which mean that argument can be entered without any value - internally the
+   * value for the argument will be a boolean `true`.
+   * When set to `true` the argument is expected to have a value that is non-boolean
+   * In addition, the following options can be used with this parameter to further validate the user's input:
+   *
+   * - `non-empty-string`: user's value must be a string whose length is greater than zero. Note that
+   *   the value entered will first be `trim()`'d.
+   * - `number`: user's value will be converted to a Number and ensured to be a `safe integer`
+   * - `number-greater-than-zero`: user's value must be a number greater than zero
+   */
+  mustHaveValue?: boolean | 'non-empty-string' | 'number' | 'number-greater-than-zero';
+  exclusiveOr?: boolean;
+  /**
+   * Validate the individual values given to this argument.
+   * Should return `true` if valid or a string with the error message
+   */
+  validate?: (argData: ParsedArgData) => true | string;
+
+  /**
+   * If defined, the provided Component will be rendered in place of this argument's value and
+   * it will be up to the Selector to provide the desired interface to the user for selecting
+   * the argument's value.
+   */
+  SelectorComponent?: CommandArgumentValueSelectorComponent;
+}
+
+/** List of arguments for a Command */
 export interface CommandArgs {
-  [longName: string]: {
-    required: boolean;
-    allowMultiples: boolean;
-    exclusiveOr?: boolean;
-    about: string;
-    /**
-     * Validate the individual values given to this argument.
-     * Should return `true` if valid or a string with the error message
-     */
-    validate?: (argData: ParsedArgData) => true | string;
-
-    // Selector: Idea is that the schema can plugin in a rich component for the
-    // user to select something (ex. a file)
-    // FIXME: implement selector
-    selector?: ComponentType;
-  };
+  [longName: string]: CommandArgDefinition;
 }
 
 export interface CommandDefinition<TMeta = any> {
+  /** Name of the command. This will be the value that the user will enter on the console to access this command */
   name: string;
+
+  /** Some information about the command */
   about: ReactNode;
+
   /**
    * The Component that will be used to render the Command
    */
   RenderComponent: CommandExecutionComponent;
+
   /** Will be used to sort the commands when building the output for the `help` command */
   helpCommandPosition?: number;
 
@@ -57,14 +85,17 @@ export interface CommandDefinition<TMeta = any> {
    * the console's built in output.
    */
   HelpComponent?: CommandExecutionComponent;
+
   /**
    * If defined, the button to add to the text bar will be disabled and the user will not be able to use this command if entered into the console.
    */
   helpDisabled?: boolean;
+
   /**
    * If defined, the command will be hidden from in the Help menu and help text. It will warn the user and not execute the command if manually typed in.
    */
   helpHidden?: boolean;
+
   /**
    * A store for any data needed when the command is executed.
    * The entire `CommandDefinition` is passed along to the component
@@ -116,6 +147,11 @@ export interface Command<
 > {
   /** The raw input entered by the user */
   input: string;
+  /**
+   * The input value for display on the UI. This could differ from
+   * `input` when Argument Value Selectors were used.
+   */
+  inputDisplay: string;
   /** An object with the arguments entered by the user and their value */
   args: ParsedCommandInterface<TArgs>;
   /** The command definition associated with this user command */
@@ -176,6 +212,55 @@ export type CommandExecutionComponent<
   /** The metadata defined on the Command Definition */
   TMeta = any
 > = ComponentType<CommandExecutionComponentProps<TArgs, TStore, TMeta>>;
+
+/**
+ * The component props for an argument `SelectorComponent`
+ */
+export interface CommandArgumentValueSelectorProps<TSelection = any, TState = any> {
+  /**
+   * The current value that was selected. This will not be displayed in the UI, but will
+   * be passed on to the command execution as part of the argument's value
+   */
+  value: TSelection | undefined;
+
+  /**
+   * A string value for display purposes only that describes the selected value. This
+   * will be used when the command is entered and displayed in the console as well as in
+   * the command input history popover
+   */
+  valueText: string;
+
+  /**
+   * The name of the Argument
+   */
+  argName: string;
+
+  /**
+   * The index (zero based) of the argument in the current command. This is a zero-based number indicating
+   * which instance of the argument is being rendered.
+   */
+  argIndex: number;
+
+  /**
+   * A store for the Argument Selector. Should be used for any component state that needs to be
+   * persisted across re-renders by the console.
+   */
+  store: TState;
+
+  /**
+   * callback for the Value Selector to call and provide the selection value.
+   * This selection value will then be passed along with the argument to the command execution
+   * component.
+   * @param newData
+   */
+  onChange: (newData: ArgSelectorState<TState>) => void;
+}
+
+/**
+ * Component for rendering an argument's value selector
+ */
+export type CommandArgumentValueSelectorComponent =
+  ComponentType<CommandArgumentValueSelectorProps>;
 
 export interface ConsoleProps extends CommonProps {
   /**

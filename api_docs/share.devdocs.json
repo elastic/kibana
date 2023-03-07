@@ -139,9 +139,9 @@
           "<P extends ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">(locator: ",
@@ -866,6 +866,20 @@
           },
           {
             "parentPluginId": "share",
+            "id": "def-public.ShareContext.shareableUrlForSavedObject",
+            "type": "string",
+            "tags": [],
+            "label": "shareableUrlForSavedObject",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "share",
             "id": "def-public.ShareContext.sharingData",
             "type": "Object",
             "tags": [],
@@ -950,6 +964,20 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.ShareContext.disabledShareUrl",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "disabledShareUrl",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1241,6 +1269,20 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "share",
+            "id": "def-public.ShowShareMenuOptions.objectTypeTitle",
+            "type": "string",
+            "tags": [],
+            "label": "objectTypeTitle",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/share/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1342,9 +1384,9 @@
         "<",
         {
           "pluginId": "@kbn/utility-types",
-          "scope": "server",
+          "scope": "common",
           "docId": "kibKbnUtilityTypesPluginApi",
-          "section": "def-server.SerializableRecord",
+          "section": "def-common.SerializableRecord",
           "text": "SerializableRecord"
         },
         ">): void; setAnonymousAccessServiceProvider: (provider: () => ",
@@ -1392,9 +1434,9 @@
         "<",
         {
           "pluginId": "@kbn/utility-types",
-          "scope": "server",
+          "scope": "common",
           "docId": "kibKbnUtilityTypesPluginApi",
-          "section": "def-server.SerializableRecord",
+          "section": "def-common.SerializableRecord",
           "text": "SerializableRecord"
         },
         ">): void; }"
@@ -1527,9 +1569,9 @@
           "<P extends ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.SerializableRecord",
+            "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
           ">(locator: ",

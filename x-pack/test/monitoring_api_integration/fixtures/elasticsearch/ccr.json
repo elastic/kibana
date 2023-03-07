@@ -1,0 +1,1 @@
+[{"id":"foo-follower","index":"foo-follower","follows":"foo-leader","shards":[{"shardId":0,"error":null,"opsSynced":0,"syncLagTime":47748,"syncLagOps":0,"syncLagOpsLeader":0,"syncLagOpsFollower":0}],"opsSynced":0,"syncLagTime":47748,"syncLagOps":0}]

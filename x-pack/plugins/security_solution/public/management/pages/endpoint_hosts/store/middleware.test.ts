@@ -53,7 +53,6 @@ jest.mock('../../../services/policies/ingest', () => ({
   sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
   sendBulkGetPackagePolicies: () => Promise.resolve({ items: [] }),
   sendGetEndpointSecurityPackage: () => Promise.resolve({ version: '1.1.1' }),
-  sendGetFleetAgentsWithEndpoint: () => Promise.resolve({ total: 0 }),
 }));
 
 jest.mock('../../../../common/lib/kibana');
@@ -141,11 +140,9 @@ describe('endpoint list middleware', () => {
     await Promise.all([
       waitForAction('serverReturnedEndpointList'),
       waitForAction('endpointPendingActionsStateChanged'),
-      waitForAction('serverReturnedEndpointsTotal'),
       waitForAction('serverReturnedMetadataPatterns'),
       waitForAction('serverCancelledPolicyItemsLoading'),
       waitForAction('serverReturnedEndpointExistValue'),
-      waitForAction('serverReturnedAgenstWithEndpointsTotal'),
     ]);
 
     expect(fakeHttpServices.get).toHaveBeenNthCalledWith(1, HOST_METADATA_LIST_ROUTE, {

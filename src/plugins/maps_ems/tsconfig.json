@@ -1,13 +1,16 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": ["common/**/*", "public/**/*", "server/**/*", "./config.ts"],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../../../x-pack/plugins/licensing/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/licensing-plugin",
+    "@kbn/i18n",
+    "@kbn/config-schema",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

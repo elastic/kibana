@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/shared-ux-link-redirect-app",
-  "owner": "@elastic/kibana-global-experience",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/appex-sharedux"
 }

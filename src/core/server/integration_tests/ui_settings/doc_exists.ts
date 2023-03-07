@@ -9,8 +9,13 @@
 import { getServices, chance } from './lib';
 
 export const docExistsSuite = (savedObjectsIndex: string) => () => {
-  async function setup(options: { initialSettings?: Record<string, any> } = {}) {
-    const { initialSettings } = options;
+  async function setup(
+    options: {
+      initialSettings?: Record<string, any>;
+      initialGlobalSettings?: Record<string, any>;
+    } = {}
+  ) {
+    const { initialSettings, initialGlobalSettings } = options;
 
     const { uiSettings, uiSettingsGlobal, esClient, supertest } = getServices();
 
@@ -27,7 +32,9 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
 
     if (initialSettings) {
       await uiSettings.setMany(initialSettings);
-      await uiSettingsGlobal.setMany(uiSettingsGlobal);
+    }
+    if (initialGlobalSettings) {
+      await uiSettingsGlobal.setMany(initialGlobalSettings);
     }
 
     return { uiSettings, uiSettingsGlobal, supertest };
@@ -198,7 +205,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
         const defaultIndex = chance.word({ length: 10 });
 
         const { supertest } = await setup({
-          initialSettings: {
+          initialGlobalSettings: {
             defaultIndex,
           },
         });
@@ -212,10 +219,6 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
             },
             defaultIndex: {
               userValue: defaultIndex,
-            },
-            foo: {
-              userValue: 'bar',
-              isOverridden: true,
             },
           },
         });
@@ -242,15 +245,12 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
             defaultIndex: {
               userValue: defaultIndex,
             },
-            foo: {
-              userValue: 'bar',
-              isOverridden: true,
-            },
           },
         });
       });
 
-      it('returns a 400 if trying to set overridden value', async () => {
+      // kbn server only created with uiSettings overrides. Global settings don't seem to support overrides from kibana.yml
+      it.skip('returns a 400 if trying to set overridden value', async () => {
         const { supertest } = await setup();
 
         const { body } = await supertest('delete', '/api/kibana/global_settings/foo')
@@ -288,15 +288,12 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
             defaultIndex: {
               userValue: defaultIndex,
             },
-            foo: {
-              userValue: 'bar',
-              isOverridden: true,
-            },
           },
         });
       });
 
-      it('returns a 400 if trying to set overridden value', async () => {
+      // kbn server only created with uiSettings overrides. Global settings don't seem to support overrides from kibana.yml
+      it.skip('returns a 400 if trying to set overridden value', async () => {
         const { supertest } = await setup();
 
         const { body } = await supertest('post', '/api/kibana/global_settings')
@@ -320,7 +317,7 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
         const defaultIndex = chance.word({ length: 10 });
 
         const { uiSettingsGlobal, supertest } = await setup({
-          initialSettings: { defaultIndex },
+          initialGlobalSettings: { defaultIndex },
         });
 
         expect(await uiSettingsGlobal.get('defaultIndex')).toBe(defaultIndex);
@@ -335,14 +332,11 @@ export const docExistsSuite = (savedObjectsIndex: string) => () => {
             buildNum: {
               userValue: expect.any(Number),
             },
-            foo: {
-              userValue: 'bar',
-              isOverridden: true,
-            },
           },
         });
       });
-      it('returns a 400 if deleting overridden value', async () => {
+      // kbn server only created with uiSettings overrides. Global settings don't seem to support overrides from kibana.yml
+      it.skip('returns a 400 if deleting overridden value', async () => {
         const { supertest } = await setup();
 
         const { body } = await supertest('delete', '/api/kibana/global_settings/foo').expect(400);

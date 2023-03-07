@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import type { InjectedMetadataSetup } from '@kbn/core-injected-metadata-browser';
 import type { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-browser';
@@ -15,6 +14,7 @@ import type { FatalErrorsSetup } from '@kbn/core-fatal-errors-browser';
 import type { IUiSettingsClient, SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { NotificationsSetup } from '@kbn/core-notifications-browser';
 import type { ApplicationSetup } from '@kbn/core-application-browser';
+import type { CustomBrandingSetup } from '@kbn/core-custom-branding-browser';
 import type { CoreStart } from './core_start';
 
 /**
@@ -36,6 +36,8 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   analytics: AnalyticsServiceSetup;
   /** {@link ApplicationSetup} */
   application: ApplicationSetup;
+  /** {@link CustomBrandingSetup} */
+  customBranding: CustomBrandingSetup;
   /** {@link FatalErrorsSetup} */
   fatalErrors: FatalErrorsSetup;
   /** {@link HttpSetup} */
@@ -49,8 +51,6 @@ export interface CoreSetup<TPluginsStart extends object = object, TStart = unkno
   settings: SettingsStart;
   /** {@link ExecutionContextSetup} */
   executionContext: ExecutionContextSetup;
-  /** {@link InjectedMetadataSetup} */
-  injectedMetadata: InjectedMetadataSetup;
   /** {@link ThemeServiceSetup} */
   theme: ThemeServiceSetup;
   /** {@link StartServicesAccessor} */

@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/aiops-utils",
-  "owner": "@elastic/ml-ui",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/ml-ui"
 }

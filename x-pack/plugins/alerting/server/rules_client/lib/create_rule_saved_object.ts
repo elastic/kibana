@@ -6,6 +6,7 @@
  */
 
 import { SavedObjectReference, SavedObject } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 import { RawRule, RuleTypeParams } from '../../types';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
@@ -41,14 +42,14 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
 
   let createdAlert: SavedObject<RawRule>;
   try {
-    createdAlert = await context.unsecuredSavedObjectsClient.create(
-      'alert',
-      updateMeta(context, rawRule),
-      {
-        ...options,
-        references,
-        id: ruleId,
-      }
+    createdAlert = await withSpan(
+      { name: 'unsecuredSavedObjectsClient.create', type: 'rules' },
+      () =>
+        context.unsecuredSavedObjectsClient.create('alert', updateMeta(context, rawRule), {
+          ...options,
+          references,
+          id: ruleId,
+        })
     );
   } catch (e) {
     // Avoid unused API key
@@ -61,15 +62,16 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
     throw e;
   }
   if (rawRule.enabled) {
-    let scheduledTask;
+    let scheduledTaskId: string;
     try {
-      scheduledTask = await scheduleTask(context, {
+      const scheduledTask = await scheduleTask(context, {
         id: createdAlert.id,
         consumer: rawRule.consumer,
         ruleTypeId: rawRule.alertTypeId,
         schedule: rawRule.schedule,
         throwOnConflict: true,
       });
+      scheduledTaskId = scheduledTask.id;
     } catch (e) {
       // Cleanup data, something went wrong scheduling the task
       try {
@@ -82,10 +84,13 @@ export async function createRuleSavedObject<Params extends RuleTypeParams = neve
       }
       throw e;
     }
-    await context.unsecuredSavedObjectsClient.update<RawRule>('alert', createdAlert.id, {
-      scheduledTaskId: scheduledTask.id,
-    });
-    createdAlert.attributes.scheduledTaskId = scheduledTask.id;
+
+    await withSpan({ name: 'unsecuredSavedObjectsClient.update', type: 'rules' }, () =>
+      context.unsecuredSavedObjectsClient.update<RawRule>('alert', createdAlert.id, {
+        scheduledTaskId,
+      })
+    );
+    createdAlert.attributes.scheduledTaskId = scheduledTaskId;
   }
 
   // Log warning if schedule interval is less than the minimum but we're not enforcing it

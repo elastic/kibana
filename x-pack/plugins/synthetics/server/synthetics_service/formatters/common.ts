@@ -17,6 +17,7 @@ export const commonFormatters: CommonFormatMap = {
   [ConfigKey.NAME]: null,
   [ConfigKey.LOCATIONS]: null,
   [ConfigKey.ENABLED]: null,
+  [ConfigKey.ALERT_CONFIG]: null,
   [ConfigKey.MONITOR_TYPE]: null,
   [ConfigKey.CONFIG_ID]: null,
   [ConfigKey.LOCATIONS]: null,

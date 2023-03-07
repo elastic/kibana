@@ -251,7 +251,8 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  describe('export jobs', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/150557
+  describe.skip('export jobs', function () {
     this.tags(['ml']);
     before(async () => {
       await ml.api.cleanMlIndices();

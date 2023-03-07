@@ -10,12 +10,10 @@ import React from 'react';
 
 import { EditPanelAction, isFilterableEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import { type IEmbeddable, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider, reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import { type AggregateQuery } from '@kbn/es-query';
-import { I18nProvider } from '@kbn/i18n-react';
 
 import { FiltersNotificationPopover } from './filters_notification_popover';
 import { dashboardFilterNotificationActionStrings } from './_dashboard_actions_strings';
@@ -46,7 +44,7 @@ export class FiltersNotificationAction implements Action<FiltersNotificationActi
     } = pluginServices.getServices());
   }
 
-  private FilterIconButton = ({ context }: { context: FiltersNotificationActionContext }) => {
+  public readonly MenuItem = ({ context }: { context: FiltersNotificationActionContext }) => {
     const { embeddable } = context;
 
     const editPanelAction = new EditPanelAction(
@@ -60,23 +58,17 @@ export class FiltersNotificationAction implements Action<FiltersNotificationActi
     });
 
     return (
-      <I18nProvider>
-        <KibanaThemeProvider theme$={this.settingsService.theme.theme$}>
-          <KibanaReactContextProvider>
-            <FiltersNotificationPopover
-              editPanelAction={editPanelAction}
-              displayName={this.displayName}
-              context={context}
-              icon={this.getIconType({ embeddable })}
-              id={this.id}
-            />
-          </KibanaReactContextProvider>
-        </KibanaThemeProvider>
-      </I18nProvider>
+      <KibanaReactContextProvider>
+        <FiltersNotificationPopover
+          editPanelAction={editPanelAction}
+          displayName={this.displayName}
+          context={context}
+          icon={this.getIconType({ embeddable })}
+          id={this.id}
+        />
+      </KibanaReactContextProvider>
     );
   };
-
-  public readonly MenuItem = reactToUiComponent(this.FilterIconButton);
 
   public getDisplayName({ embeddable }: FiltersNotificationActionContext) {
     if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {

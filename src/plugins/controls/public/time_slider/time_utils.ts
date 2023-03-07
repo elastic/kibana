@@ -7,7 +7,7 @@
  */
 
 import moment from 'moment-timezone';
-import { EuiRangeTick } from '@elastic/eui/src/components/form/range/range_ticks';
+import { EuiRangeTick } from '@elastic/eui';
 import { calcAutoIntervalNear } from '@kbn/data-plugin/common';
 
 const MAX_TICKS = 20; // eui range has hard limit of 20 ticks and throws when exceeded

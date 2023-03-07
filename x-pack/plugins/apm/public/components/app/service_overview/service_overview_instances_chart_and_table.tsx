@@ -8,7 +8,7 @@
 import { EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { orderBy } from 'lodash';
 import React, { useState } from 'react';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
@@ -67,7 +67,7 @@ export function ServiceOverviewInstancesChartAndTable({
   chartHeight,
   serviceName,
 }: ServiceOverviewInstancesChartAndTableProps) {
-  const { transactionType } = useApmServiceContext();
+  const { transactionType, transactionTypeStatus } = useApmServiceContext();
   const [tableOptions, setTableOptions] = useState<TableOptions>({
     pageIndex: 0,
     sort: DEFAULT_SORT,
@@ -95,6 +95,10 @@ export function ServiceOverviewInstancesChartAndTable({
     status: mainStatsStatus,
   } = useFetcher(
     (callApmApi) => {
+      if (!transactionType && transactionTypeStatus === FETCH_STATUS.SUCCESS) {
+        return Promise.resolve(INITIAL_STATE_MAIN_STATS);
+      }
+
       if (!start || !end || !transactionType || !latencyAggregationType) {
         return;
       }
@@ -124,10 +128,10 @@ export function ServiceOverviewInstancesChartAndTable({
       ).then((response) => {
         return {
           // Everytime the main statistics is refetched, updates the requestId making the detailed API to be refetched.
-          requestId: uuid(),
-          currentPeriodItems: response.currentPeriod,
-          currentPeriodItemsCount: response.currentPeriod.length,
-          previousPeriodItems: response.previousPeriod,
+          requestId: uuidv4(),
+          currentPeriodItems: response?.currentPeriod ?? [],
+          currentPeriodItemsCount: response?.currentPeriod.length,
+          previousPeriodItems: response?.previousPeriod,
         };
       });
     },
@@ -140,6 +144,7 @@ export function ServiceOverviewInstancesChartAndTable({
       end,
       serviceName,
       transactionType,
+      transactionTypeStatus,
       pageIndex,
       field,
       direction,

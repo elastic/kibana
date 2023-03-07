@@ -12,6 +12,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { TimelineType } from '../../../../../common/types/timeline';
+import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 import type { BrowserFields } from '../../../../common/containers/source';
 
 import type { OnDataProviderEdited } from '../events';
@@ -48,7 +49,7 @@ interface OwnProps {
   toggleEnabledProvider: () => void;
   toggleExcludedProvider: () => void;
   toggleTypeProvider: () => void;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
   type: DataProviderType;
 }
 
@@ -80,7 +81,7 @@ interface GetProviderActionsProps {
   toggleEnabled: () => void;
   toggleExcluded: () => void;
   toggleType: () => void;
-  value: string | number | Array<string | number>;
+  value: PrimitiveOrArrayOfPrimitives;
   type: DataProviderType;
 }
 

@@ -68,6 +68,12 @@ const unknownInfo: ExistingFieldsInfo = {
 const globalMap$ = new BehaviorSubject<ExistingFieldsByDataViewMap>(initialData); // for syncing between hooks
 let lastFetchId: string = ''; // persist last fetch id to skip older requests/responses if any
 
+/**
+ * Fetches info whether a field contains data or it's empty.
+ * Can be used in combination with `useQuerySubscriber` hook for gathering the required params.
+ * @param params
+ * @public
+ */
 export const useExistingFieldsFetcher = (
   params: ExistingFieldsFetcherParams
 ): ExistingFieldsFetcher => {
@@ -100,7 +106,13 @@ export const useExistingFieldsFetcher = (
       }
 
       const numberOfFetches = (currentInfo?.numberOfFetches ?? 0) + 1;
-      const dataView = await dataViews.get(dataViewId);
+      let dataView: DataView | null = null;
+
+      try {
+        dataView = await dataViews.get(dataViewId, false);
+      } catch (e) {
+        //
+      }
 
       if (!dataView?.title) {
         return;
@@ -149,8 +161,6 @@ export const useExistingFieldsFetcher = (
           info.existingFieldsByFieldNameMap = booleanMap(existingFieldNames);
           info.fetchStatus = ExistenceFetchStatus.succeeded;
         } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error(error);
           info.fetchStatus = ExistenceFetchStatus.failed;
         }
       }

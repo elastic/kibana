@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { ChangeEvent, MouseEvent, useMemo } from 'react';
-import { EuiRange, EuiToolTip } from '@elastic/eui';
+import React, { useMemo } from 'react';
+import { EuiRange, EuiRangeProps, EuiToolTip } from '@elastic/eui';
 import type { ProcessStartMarker } from '../../../../common/types/process_tree';
 import { useStyles } from './styles';
 import { PlayHead } from './play_head';
@@ -15,7 +15,7 @@ type Props = {
   processStartMarkers: ProcessStartMarker[];
   linesLength: number;
   currentLine: number;
-  onChange: (e: ChangeEvent<HTMLInputElement> | MouseEvent<HTMLButtonElement>) => void;
+  onChange: EuiRangeProps['onChange'];
   onSeekLine(line: number): void;
 };
 

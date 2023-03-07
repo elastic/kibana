@@ -7,30 +7,27 @@
  */
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-// @ts-expect-error
 import { fieldCalculator } from './field_calculator';
 import { DataTableRecord } from '../../../../../types';
+import { ErrorFieldDetails, FieldDetails, ValidFieldDetails } from './types';
+
+export const isValidFieldDetails = (details: FieldDetails): details is ValidFieldDetails =>
+  !(details as ErrorFieldDetails).error;
 
 export function getDetails(
   field: DataViewField,
   hits: DataTableRecord[] | undefined,
-  dataView?: DataView
+  dataView: DataView
 ) {
-  if (!dataView || !hits) {
-    return {};
+  if (!hits) {
+    return undefined;
   }
-  const details = {
-    ...fieldCalculator.getFieldValueCounts({
-      hits,
-      field,
-      count: 5,
-      grouped: false,
-    }),
-  };
-  if (details.buckets) {
-    for (const bucket of details.buckets) {
-      bucket.display = dataView.getFormatterForField(field).convert(bucket.value);
-    }
-  }
-  return details;
+
+  return fieldCalculator.getFieldValueCounts({
+    hits,
+    field,
+    count: 5,
+    grouped: false,
+    dataView,
+  });
 }

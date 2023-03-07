@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/apm-config-loader",
-        "id": "def-server.ApmConfiguration",
+        "id": "def-common.ApmConfiguration",
         "type": "Class",
         "tags": [],
         "label": "ApmConfiguration",
@@ -23,7 +31,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.ApmConfiguration.Unnamed",
+            "id": "def-common.ApmConfiguration.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -37,7 +45,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-config-loader",
-                "id": "def-server.ApmConfiguration.Unnamed.$1",
+                "id": "def-common.ApmConfiguration.Unnamed.$1",
                 "type": "string",
                 "tags": [],
                 "label": "rootDir",
@@ -52,7 +60,7 @@
               },
               {
                 "parentPluginId": "@kbn/apm-config-loader",
-                "id": "def-server.ApmConfiguration.Unnamed.$2",
+                "id": "def-common.ApmConfiguration.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
                 "label": "rawKibanaConfig",
@@ -67,7 +75,7 @@
               },
               {
                 "parentPluginId": "@kbn/apm-config-loader",
-                "id": "def-server.ApmConfiguration.Unnamed.$3",
+                "id": "def-common.ApmConfiguration.Unnamed.$3",
                 "type": "boolean",
                 "tags": [],
                 "label": "isDistributable",
@@ -85,7 +93,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.ApmConfiguration.getConfig",
+            "id": "def-common.ApmConfiguration.getConfig",
             "type": "Function",
             "tags": [],
             "label": "getConfig",
@@ -100,7 +108,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/apm-config-loader",
-                "id": "def-server.ApmConfiguration.getConfig.$1",
+                "id": "def-common.ApmConfiguration.getConfig.$1",
                 "type": "string",
                 "tags": [],
                 "label": "serviceName",
@@ -123,7 +131,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/apm-config-loader",
-        "id": "def-server.getConfiguration",
+        "id": "def-common.getConfiguration",
         "type": "Function",
         "tags": [],
         "label": "getConfiguration",
@@ -139,7 +147,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.getConfiguration.$1",
+            "id": "def-common.getConfiguration.$1",
             "type": "string",
             "tags": [],
             "label": "serviceName",
@@ -158,7 +166,7 @@
       },
       {
         "parentPluginId": "@kbn/apm-config-loader",
-        "id": "def-server.initApm",
+        "id": "def-common.initApm",
         "type": "Function",
         "tags": [],
         "label": "initApm",
@@ -172,7 +180,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.initApm.$1",
+            "id": "def-common.initApm.$1",
             "type": "Array",
             "tags": [],
             "label": "argv",
@@ -187,7 +195,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.initApm.$2",
+            "id": "def-common.initApm.$2",
             "type": "string",
             "tags": [],
             "label": "rootDir",
@@ -202,7 +210,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.initApm.$3",
+            "id": "def-common.initApm.$3",
             "type": "boolean",
             "tags": [],
             "label": "isDistributable",
@@ -217,7 +225,7 @@
           },
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.initApm.$4",
+            "id": "def-common.initApm.$4",
             "type": "string",
             "tags": [],
             "label": "serviceName",
@@ -236,7 +244,7 @@
       },
       {
         "parentPluginId": "@kbn/apm-config-loader",
-        "id": "def-server.shouldInstrumentClient",
+        "id": "def-common.shouldInstrumentClient",
         "type": "Function",
         "tags": [],
         "label": "shouldInstrumentClient",
@@ -252,7 +260,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/apm-config-loader",
-            "id": "def-server.shouldInstrumentClient.$1",
+            "id": "def-common.shouldInstrumentClient.$1",
             "type": "Object",
             "tags": [],
             "label": "config",
@@ -277,7 +285,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/apm-config-loader",
-        "id": "def-server.apmConfigSchema",
+        "id": "def-common.apmConfigSchema",
         "type": "Object",
         "tags": [],
         "label": "apmConfigSchema",
@@ -285,41 +293,41 @@
         "signature": [
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
+            "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
           "<{ active: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<boolean | undefined>; serverUrl: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; secretToken: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.Type",
+            "section": "def-common.Type",
             "text": "Type"
           },
           "<string | undefined>; globalLabels: ",
           {
             "pluginId": "@kbn/config-schema",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigSchemaPluginApi",
-            "section": "def-server.ObjectType",
+            "section": "def-common.ObjectType",
             "text": "ObjectType"
           },
           "<{}>; }>"
@@ -330,13 +338,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

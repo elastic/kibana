@@ -294,7 +294,6 @@ export class SyntheticsService {
   async pushConfigs() {
     const service = this;
     const subject = new Subject<SyntheticsMonitorWithId[]>();
-    const output = await this.getOutput();
 
     subject.subscribe(async (monitorConfigs) => {
       try {
@@ -304,6 +303,8 @@ export class SyntheticsService {
           this.logger.debug('No monitor found which can be pushed to service.');
           return null;
         }
+
+        const output = await this.getOutput();
 
         if (!output) {
           sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
@@ -360,16 +361,22 @@ export class SyntheticsService {
   }
 
   async deleteConfigs(configs: SyntheticsMonitorWithId[]) {
-    const output = await this.getOutput();
-    if (!output) {
-      return;
-    }
+    const hasPublicLocations = configs.some(({ locations }) =>
+      locations.some(({ isServiceManaged }) => isServiceManaged)
+    );
 
-    const data = {
-      output,
-      monitors: this.formatConfigs(configs),
-    };
-    return await this.apiClient.delete(data);
+    if (hasPublicLocations) {
+      const output = await this.getOutput();
+      if (!output) {
+        return;
+      }
+
+      const data = {
+        output,
+        monitors: this.formatConfigs(configs),
+      };
+      return await this.apiClient.delete(data);
+    }
   }
 
   async deleteAllConfigs() {

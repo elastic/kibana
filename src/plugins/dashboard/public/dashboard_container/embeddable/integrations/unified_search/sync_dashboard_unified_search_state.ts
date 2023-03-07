@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { merge, Subject } from 'rxjs';
+import { Subject } from 'rxjs';
 import { distinctUntilChanged, finalize, switchMap, tap } from 'rxjs/operators';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -35,7 +35,7 @@ export function syncUnifiedSearchState(
     getState,
     dispatch,
     onStateChange,
-    actions: { setFiltersAndQuery, setTimeRange },
+    actions: { setFiltersAndQuery, setTimeRange, setRefreshInterval },
   } = this.getReduxEmbeddableTools();
 
   // get Observable for when the dashboard's saved filters or query change.
@@ -76,10 +76,13 @@ export function syncUnifiedSearchState(
     }
   );
 
-  const timeRefreshSubscription = merge(
-    timefilterService.getRefreshIntervalUpdate$(),
-    timefilterService.getTimeUpdate$()
-  ).subscribe(() => dispatch(setTimeRange(timefilterService.getTime())));
+  const timeUpdateSubscription = timefilterService
+    .getTimeUpdate$()
+    .subscribe(() => dispatch(setTimeRange(timefilterService.getTime())));
+
+  const refreshIntervalSubscription = timefilterService
+    .getRefreshIntervalUpdate$()
+    .subscribe(() => dispatch(setRefreshInterval(timefilterService.getRefreshInterval())));
 
   const autoRefreshSubscription = timefilterService
     .getAutoRefreshFetch$()
@@ -96,7 +99,8 @@ export function syncUnifiedSearchState(
 
   const stopSyncingUnifiedSearchState = () => {
     autoRefreshSubscription.unsubscribe();
-    timeRefreshSubscription.unsubscribe();
+    timeUpdateSubscription.unsubscribe();
+    refreshIntervalSubscription.unsubscribe();
     unsubscribeFromSavedFilterChanges();
     stopSyncingAppFilters();
   };

@@ -5,5 +5,6 @@
  * 2.0.
  */
 
+export { getGroupTableItems } from './get_group_table_items';
 export { SpikeAnalysisTable } from './spike_analysis_table';
 export { SpikeAnalysisGroupsTable } from './spike_analysis_table_groups';

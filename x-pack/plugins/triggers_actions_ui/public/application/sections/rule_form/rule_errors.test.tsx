@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import React, { Fragment } from 'react';
 import {
   validateBaseProperties,
@@ -151,26 +151,25 @@ describe('rule_errors', () => {
         })),
       }));
       const result = await getRuleActionErrors(
-        mockRule({
-          actions: [
-            {
-              id: '1234',
-              actionTypeId: 'myActionType',
-              group: '',
-              params: {
-                name: 'yes',
-              },
+        [
+          {
+            id: '1234',
+            actionTypeId: 'myActionType',
+            group: '',
+            params: {
+              name: 'yes',
             },
-            {
-              id: '5678',
-              actionTypeId: 'myActionType2',
-              group: '',
-              params: {
-                name: 'yes',
-              },
+          },
+          {
+            id: '5678',
+            actionTypeId: 'myActionType2',
+            group: '',
+            params: {
+              name: 'yes',
             },
-          ],
-        }),
+          },
+        ],
+
         actionTypeRegistry
       );
       expect(result).toStrictEqual([
@@ -245,9 +244,9 @@ function mockRuleTypeModel(overloads: Partial<RuleTypeModel> = {}): RuleTypeMode
 
 function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {
-    id: uuid.v4(),
+    id: uuidv4(),
     enabled: true,
-    name: `rule-${uuid.v4()}`,
+    name: `rule-${uuidv4()}`,
     tags: [],
     ruleTypeId: '.noop',
     consumer: 'consumer',

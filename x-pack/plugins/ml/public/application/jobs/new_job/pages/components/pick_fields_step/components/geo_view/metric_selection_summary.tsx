@@ -55,12 +55,15 @@ export const GeoDetectorsSummary: FC = () => {
   useEffect(() => {
     async function getMapLayersForGeoJob() {
       if (geoField) {
-        const filters = data.query.filterManager.getFilters() ?? [];
+        const { filter, query } = jobCreator.savedSearchQuery ?? {};
+        const filters = [...data.query.filterManager.getFilters(), ...(filter ?? [])];
+
         const layers = await mapLoader.getMapLayersForGeoJob(
           geoField,
           splitField,
           fieldValues,
-          filters
+          filters,
+          query
         );
         setLayerList(layers);
       }

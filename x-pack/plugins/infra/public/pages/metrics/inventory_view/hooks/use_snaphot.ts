@@ -12,10 +12,9 @@ import { useEffect } from 'react';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
-  SnapshotNodeResponseRT,
-  SnapshotNodeResponse,
-  SnapshotRequest,
   InfraTimerangeInput,
+  SnapshotNodeResponseRT,
+  SnapshotRequest,
 } from '../../../../../common/http_api/snapshot_api';
 
 export interface UseSnapshotRequest
@@ -25,12 +24,18 @@ export interface UseSnapshotRequest
   sendRequestImmediately?: boolean;
   includeTimeseries?: boolean;
   timerange?: InfraTimerangeInput;
+  requestTs?: number;
 }
 export function useSnapshot({
   timerange,
   currentTime,
+  accountId = '',
+  region = '',
+  groupBy = null,
   sendRequestImmediately = true,
   includeTimeseries = true,
+  dropPartialBuckets = true,
+  requestTs,
   ...args
 }: UseSnapshotRequest) {
   const decodeResponse = (response: any) => {
@@ -42,6 +47,9 @@ export function useSnapshot({
 
   const payload: Omit<SnapshotRequest, 'filterQuery'> = {
     ...args,
+    accountId,
+    region,
+    groupBy,
     timerange: timerange ?? {
       interval: '1m',
       to: currentTime,
@@ -49,9 +57,10 @@ export function useSnapshot({
       lookbackSize: 5,
     },
     includeTimeseries,
+    dropPartialBuckets,
   };
 
-  const { error, loading, response, makeRequest } = useHTTPRequest<SnapshotNodeResponse>(
+  const { error, loading, response, makeRequest } = useHTTPRequest(
     '/api/metrics/snapshot',
     'POST',
     JSON.stringify(payload),
@@ -64,7 +73,7 @@ export function useSnapshot({
         await makeRequest();
       }
     })();
-  }, [makeRequest, sendRequestImmediately]);
+  }, [makeRequest, sendRequestImmediately, requestTs]);
 
   return {
     error: (error && error.message) || null,

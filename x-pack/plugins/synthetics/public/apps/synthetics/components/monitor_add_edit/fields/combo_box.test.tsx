@@ -8,15 +8,15 @@
 import { fireEvent } from '@testing-library/react';
 import React from 'react';
 import { render } from '../../../utils/testing/rtl_helpers';
-import { ComboBox } from './combo_box';
+import { FormattedComboBox } from './combo_box';
 
-describe('<ComboBox />', () => {
+describe('<FormattedComboBox />', () => {
   const onChange = jest.fn();
   const selectedOptions: string[] = [];
 
   it('renders ComboBox', () => {
     const { getByTestId } = render(
-      <ComboBox selectedOptions={selectedOptions} onChange={onChange} />
+      <FormattedComboBox selectedOptions={selectedOptions} onChange={onChange} />
     );
 
     expect(getByTestId('syntheticsFleetComboBox')).toBeInTheDocument();
@@ -25,7 +25,7 @@ describe('<ComboBox />', () => {
   it('calls onBlur', () => {
     const onBlur = jest.fn();
     const { getByTestId } = render(
-      <ComboBox selectedOptions={selectedOptions} onChange={onChange} onBlur={onBlur} />
+      <FormattedComboBox selectedOptions={selectedOptions} onChange={onChange} onBlur={onBlur} />
     );
 
     const combobox = getByTestId('syntheticsFleetComboBox');

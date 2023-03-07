@@ -1,0 +1,11 @@
+{
+  "type": "plugin",
+  "id": "@kbn/content-management-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Content management app",
+  "plugin": {
+    "id": "contentManagement",
+    "server": true,
+    "browser": true
+  }
+}

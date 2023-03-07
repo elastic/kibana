@@ -22,23 +22,27 @@ import {
 import fetch from 'node-fetch';
 import type { TelemetryCollectionManagerPluginStart } from '@kbn/telemetry-collection-manager-plugin/server';
 import {
-  PluginInitializerContext,
-  Logger,
-  SavedObjectsClientContract,
+  type PluginInitializerContext,
+  type Logger,
+  type SavedObjectsClientContract,
   SavedObjectsClient,
-  CoreStart,
+  type CoreStart,
 } from '@kbn/core/server';
+import { getTelemetryChannelEndpoint } from '../common/telemetry_config';
+import {
+  TELEMETRY_SAVED_OBJECT_TYPE,
+  getTelemetrySavedObject,
+  updateTelemetrySavedObject,
+} from './saved_objects';
 import { getNextAttemptDate } from './get_next_attempt_date';
 import {
-  getTelemetryChannelEndpoint,
   getTelemetryOptIn,
   getTelemetrySendUsageFrom,
   getTelemetryFailureDetails,
-} from '../common/telemetry_config';
-import { getTelemetrySavedObject, updateTelemetrySavedObject } from './telemetry_repository';
+} from './telemetry_config';
 import { PAYLOAD_CONTENT_ENCODING } from '../common/constants';
 import type { EncryptedTelemetryPayload } from '../common/types';
-import { TelemetryConfigType } from './config';
+import type { TelemetryConfigType } from './config';
 import { isReportIntervalExpired } from '../common/is_report_interval_expired';
 
 export interface FetcherTaskDepsStart {
@@ -78,7 +82,9 @@ export class FetcherTask {
   }
 
   public start({ savedObjects }: CoreStart, { telemetryCollectionManager }: FetcherTaskDepsStart) {
-    this.internalRepository = new SavedObjectsClient(savedObjects.createInternalRepository());
+    this.internalRepository = new SavedObjectsClient(
+      savedObjects.createInternalRepository([TELEMETRY_SAVED_OBJECT_TYPE])
+    );
     this.telemetryCollectionManager = telemetryCollectionManager;
 
     this.subscriptions.add(this.validateConnectivity());

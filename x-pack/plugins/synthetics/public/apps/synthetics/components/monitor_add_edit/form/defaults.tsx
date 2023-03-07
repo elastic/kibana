@@ -4,16 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { isEqual } from 'lodash';
 import { formatKibanaNamespace } from '../../../../../../common/formatters';
-import { DEFAULT_FIELDS, DEFAULT_TLS_FIELDS } from '../constants';
+import { DEFAULT_FIELDS } from '../constants';
 import {
   ConfigKey,
   DataStream,
   FormMonitorType,
   SyntheticsMonitor,
   BrowserFields,
-  TLSFields,
+  HTTPFields,
 } from '../types';
 
 export const getDefaultFormFields = (
@@ -96,16 +95,7 @@ export const formatDefaultFormValues = (monitor?: SyntheticsMonitor) => {
     case FormMonitorType.TCP:
       return {
         ...monitorWithFormMonitorType,
-        isTLSEnabled: isCustomTLSEnabled(monitor),
+        isTLSEnabled: (monitor as HTTPFields)[ConfigKey.METADATA].is_tls_enabled,
       };
   }
-};
-
-const isCustomTLSEnabled = (monitor: SyntheticsMonitor) => {
-  const sslKeys = Object.keys(monitor).filter((key) => key.includes('ssl')) as unknown as Array<
-    keyof TLSFields
-  >;
-  const sslValues: Record<string, unknown> = {};
-  sslKeys.map((key) => (sslValues[key] = (monitor as TLSFields)[key]));
-  return !isEqual(sslValues, DEFAULT_TLS_FIELDS);
 };

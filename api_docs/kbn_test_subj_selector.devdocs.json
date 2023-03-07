@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/test-subj-selector",
-        "id": "def-server.subj",
+        "id": "def-common.subj",
         "type": "Function",
         "tags": [],
         "label": "subj",
@@ -29,7 +37,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/test-subj-selector",
-            "id": "def-server.subj.$1",
+            "id": "def-common.subj.$1",
             "type": "string",
             "tags": [],
             "label": "selector",
@@ -47,14 +55,6 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

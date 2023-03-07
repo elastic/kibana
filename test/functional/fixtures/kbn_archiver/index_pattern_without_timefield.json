@@ -17,6 +17,22 @@
 {
   "attributes": {
     "fields": "[]",
+    "timeFieldName": "with-different-timefield",
+    "title": "with-different-timefield"
+  },
+  "coreMigrationVersion": "7.17.1",
+  "id": "with-different-timefield",
+  "migrationVersion": {
+    "index-pattern": "7.11.0"
+  },
+  "references": [],
+  "type": "index-pattern",
+  "version": "WzEzLDJd"
+}
+
+{
+  "attributes": {
+    "fields": "[]",
     "title": "without-timefield"
   },
   "coreMigrationVersion": "7.17.1",

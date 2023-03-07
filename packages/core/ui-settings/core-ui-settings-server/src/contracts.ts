@@ -78,7 +78,7 @@ export interface UiSettingsServiceStart {
    * ```ts
    * start(core: CoreStart) {
    *  const soClient = core.savedObjects.getScopedClient(arbitraryRequest);
-   *  const uiSettingsClient = core.uiSettings.asScopedToGlobalClient(soClient);
+   *  const uiSettingsClient = core.uiSettings.globalAsScopedToClient(soClient);
    * }
    * ```
    */

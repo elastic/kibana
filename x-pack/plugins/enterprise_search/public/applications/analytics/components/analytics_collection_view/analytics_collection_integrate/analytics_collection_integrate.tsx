@@ -28,7 +28,7 @@ export type TabKey = 'javascriptEmbed' | 'searchuiEmbed' | 'javascriptClientEmbe
 export const AnalyticsCollectionIntegrate: React.FC<AnalyticsCollectionIntegrateProps> = ({
   collection,
 }) => {
-  const analyticsDNSUrl = getEnterpriseSearchUrl(`/analytics/api/collections/${collection.id}`);
+  const analyticsDNSUrl = getEnterpriseSearchUrl(`/api/analytics/collections/${collection.id}`);
   const webClientSrc = getEnterpriseSearchUrl('/analytics.js');
 
   const [selectedTab, setSelectedTab] = React.useState<TabKey>('javascriptEmbed');

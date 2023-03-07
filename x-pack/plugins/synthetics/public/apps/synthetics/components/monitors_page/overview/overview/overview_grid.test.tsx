@@ -29,6 +29,9 @@ describe('Overview Grid', () => {
         },
         name: `Monitor ${i}`,
         isEnabled: true,
+        isStatusAlertEnabled: true,
+        type: 'browser',
+        tags: [],
       });
       data.push({
         id: `${i}`,
@@ -39,6 +42,9 @@ describe('Overview Grid', () => {
         },
         name: `Monitor ${i}`,
         isEnabled: true,
+        isStatusAlertEnabled: true,
+        type: 'browser',
+        tags: [],
       });
     }
     return data;
@@ -75,6 +81,8 @@ describe('Overview Grid', () => {
           },
           loaded: true,
           loading: false,
+        },
+        overviewStatus: {
           status: {
             downConfigs: {},
             upConfigs: {},
@@ -133,6 +141,8 @@ describe('Overview Grid', () => {
           },
           loaded: true,
           loading: false,
+        },
+        overviewStatus: {
           status: {
             downConfigs: {},
             upConfigs: {},

@@ -59,7 +59,7 @@ describe('Transform: useIndexData()', () => {
         useIndexData(
           {
             id: 'the-id',
-            title: 'the-title',
+            getIndexPattern: () => 'the-index-pattern',
             fields: [],
           } as unknown as SearchItems['dataView'],
           query,
@@ -82,7 +82,7 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
   test('Minimal initialization, no cross cluster search warning.', async () => {
     // Arrange
     const dataView = {
-      title: 'the-data-view-title',
+      getIndexPattern: () => 'the-data-view-index-pattern',
       fields: [] as any[],
     } as SearchItems['dataView'];
 
@@ -125,7 +125,7 @@ describe('Transform: <DataGrid /> with useIndexData()', () => {
   test('Cross-cluster search warning', async () => {
     // Arrange
     const dataView = {
-      title: 'remote:the-index-pattern-title',
+      getIndexPattern: () => 'remote:the-index-pattern-title',
       fields: [] as any[],
     } as SearchItems['dataView'];
 

@@ -11,6 +11,7 @@ import {
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiResizableContainer,
   EuiSpacer,
   EuiTabbedContent,
 } from '@elastic/eui';
@@ -21,6 +22,7 @@ import { useParams } from 'react-router-dom';
 import { noop } from 'lodash';
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { RulePreview } from '../../../../detections/components/rules/rule_preview';
 import type { RuleUpdateProps } from '../../../../../common/detection_engine/rule_schema';
 import { useRule, useUpdateRule } from '../../../rule_management/logic';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
@@ -75,7 +77,6 @@ import {
 import { HeaderPage } from '../../../../common/components/header_page';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
-import { PreviewFlyout } from '../../../../detections/pages/detection_engine/rules/preview';
 import { useGetSavedQuery } from '../../../../detections/pages/detection_engine/rules/use_get_saved_query';
 
 const formHookNoop = async (): Promise<undefined> => undefined;
@@ -129,7 +130,8 @@ const EditRulePageComponent: FC = () => {
   const { mutateAsync: updateRule, isLoading } = useUpdateRule();
   const [dataViewOptions, setDataViewOptions] = useState<{ [x: string]: DataViewListItem }>({});
   const [isPreviewDisabled, setIsPreviewDisabled] = useState(false);
-  const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(false);
+  const [isRulePreviewVisible, setIsRulePreviewVisible] = useState(true);
+  const collapseFn = useRef<() => void | undefined>();
 
   useEffect(() => {
     const fetchDataViews = async () => {
@@ -196,8 +198,6 @@ const EditRulePageComponent: FC = () => {
       }
     }
   }, [activeStep]);
-
-  const onPreviewClose = useCallback(() => setIsRulePreviewVisible(false), []);
 
   const [indicesConfig] = useUiSetting$<string[]>(DEFAULT_INDEX_KEY);
   const [threatIndicesConfig] = useUiSetting$<string[]>(DEFAULT_THREAT_INDEX_KEY);
@@ -464,99 +464,123 @@ const EditRulePageComponent: FC = () => {
   return (
     <>
       <SecuritySolutionPageWrapper>
-        <EuiFlexGroup direction="row" justifyContent="spaceAround">
-          <MaxWidthEuiFlexItem>
-            <HeaderPage
-              backOptions={{
-                path: getRuleDetailsUrl(ruleId ?? ''),
-                text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
-                pageId: SecurityPageName.rules,
-                dataTestSubj: 'ruleEditBackToRuleDetails',
-              }}
-              isLoading={isLoading}
-              title={i18n.PAGE_TITLE}
-            >
-              {defineStep.data && aboutStep.data && scheduleStep.data && (
-                <EuiButton
-                  iconType="visBarVerticalStacked"
-                  onClick={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
+        <EuiResizableContainer>
+          {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
+            collapseFn.current = () => togglePanel?.('preview', { direction: 'left' });
+            return (
+              <>
+                <EuiResizablePanel initialSize={70} minSize={'40%'} mode="main">
+                  <EuiFlexGroup direction="row" justifyContent="spaceAround">
+                    <MaxWidthEuiFlexItem>
+                      <HeaderPage
+                        backOptions={{
+                          path: getRuleDetailsUrl(ruleId ?? ''),
+                          text: `${i18n.BACK_TO} ${rule?.name ?? ''}`,
+                          pageId: SecurityPageName.rules,
+                          dataTestSubj: 'ruleEditBackToRuleDetails',
+                        }}
+                        isLoading={isLoading}
+                        title={i18n.PAGE_TITLE}
+                      >
+                        <EuiButton
+                          data-test-subj="preview-container"
+                          isSelected={isRulePreviewVisible}
+                          fill={isRulePreviewVisible}
+                          iconType="visBarVerticalStacked"
+                          onClick={() => {
+                            collapseFn.current?.();
+                            setIsRulePreviewVisible((isVisible) => !isVisible);
+                          }}
+                        >
+                          {ruleI18n.RULE_PREVIEW_TITLE}
+                        </EuiButton>
+                      </HeaderPage>
+                      {invalidSteps.length > 0 && (
+                        <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
+                          <FormattedMessage
+                            id="xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription"
+                            defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"
+                            values={{
+                              countError: invalidSteps.length,
+                              tabHasError: invalidSteps
+                                .map((t) => {
+                                  if (t === RuleStep.aboutRule) {
+                                    return ruleI18n.ABOUT;
+                                  } else if (t === RuleStep.defineRule) {
+                                    return ruleI18n.DEFINITION;
+                                  } else if (t === RuleStep.scheduleRule) {
+                                    return ruleI18n.SCHEDULE;
+                                  } else if (t === RuleStep.ruleActions) {
+                                    return ruleI18n.RULE_ACTIONS;
+                                  }
+                                  return t;
+                                })
+                                .join(', '),
+                            }}
+                          />
+                        </EuiCallOut>
+                      )}
+
+                      <EuiTabbedContent
+                        initialSelectedTab={tabs[0]}
+                        selectedTab={tabs.find((t) => t.id === activeStep)}
+                        onTabClick={onTabClick}
+                        tabs={tabs}
+                      />
+
+                      <EuiSpacer />
+
+                      <EuiFlexGroup
+                        alignItems="center"
+                        gutterSize="s"
+                        justifyContent="flexEnd"
+                        responsive={false}
+                      >
+                        <EuiFlexItem grow={false}>
+                          <EuiButton iconType="cross" onClick={goToDetailsRule}>
+                            {i18n.CANCEL}
+                          </EuiButton>
+                        </EuiFlexItem>
+
+                        <EuiFlexItem grow={false}>
+                          <EuiButton
+                            data-test-subj="ruleEditSubmitButton"
+                            fill
+                            onClick={onSubmit}
+                            iconType="save"
+                            isLoading={isLoading}
+                            isDisabled={loading}
+                          >
+                            {i18n.SAVE_CHANGES}
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </MaxWidthEuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiResizablePanel>
+                <EuiResizableButton />
+
+                <EuiResizablePanel
+                  id={'preview'}
+                  mode="collapsible"
+                  initialSize={30}
+                  minSize={'20%'}
+                  onToggleCollapsed={() => setIsRulePreviewVisible((isVisible) => !isVisible)}
                 >
-                  {ruleI18n.RULE_PREVIEW_TITLE}
-                </EuiButton>
-              )}
-            </HeaderPage>
-            {invalidSteps.length > 0 && (
-              <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="alert">
-                <FormattedMessage
-                  id="xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription"
-                  defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"
-                  values={{
-                    countError: invalidSteps.length,
-                    tabHasError: invalidSteps
-                      .map((t) => {
-                        if (t === RuleStep.aboutRule) {
-                          return ruleI18n.ABOUT;
-                        } else if (t === RuleStep.defineRule) {
-                          return ruleI18n.DEFINITION;
-                        } else if (t === RuleStep.scheduleRule) {
-                          return ruleI18n.SCHEDULE;
-                        } else if (t === RuleStep.ruleActions) {
-                          return ruleI18n.RULE_ACTIONS;
-                        }
-                        return t;
-                      })
-                      .join(', '),
-                  }}
-                />
-              </EuiCallOut>
-            )}
-
-            <EuiTabbedContent
-              initialSelectedTab={tabs[0]}
-              selectedTab={tabs.find((t) => t.id === activeStep)}
-              onTabClick={onTabClick}
-              tabs={tabs}
-            />
-
-            <EuiSpacer />
-
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              justifyContent="flexEnd"
-              responsive={false}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiButton iconType="cross" onClick={goToDetailsRule}>
-                  {i18n.CANCEL}
-                </EuiButton>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={false}>
-                <EuiButton
-                  data-test-subj="ruleEditSubmitButton"
-                  fill
-                  onClick={onSubmit}
-                  iconType="save"
-                  isLoading={isLoading}
-                  isDisabled={loading}
-                >
-                  {i18n.SAVE_CHANGES}
-                </EuiButton>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-            {isRulePreviewVisible && defineStep.data && aboutStep.data && scheduleStep.data && (
-              <PreviewFlyout
-                isDisabled={isPreviewDisabled}
-                defineStepData={defineStep.data}
-                aboutStepData={aboutStep.data}
-                scheduleStepData={scheduleStep.data}
-                exceptionsList={rule?.exceptions_list}
-                onClose={onPreviewClose}
-              />
-            )}
-          </MaxWidthEuiFlexItem>
-        </EuiFlexGroup>
+                  {defineStep.data && aboutStep.data && scheduleStep.data && (
+                    <RulePreview
+                      isDisabled={isPreviewDisabled}
+                      defineRuleData={defineStep.data}
+                      aboutRuleData={aboutStep.data}
+                      scheduleRuleData={scheduleStep.data}
+                      exceptionsList={rule?.exceptions_list}
+                    />
+                  )}
+                </EuiResizablePanel>
+              </>
+            );
+          }}
+        </EuiResizableContainer>
       </SecuritySolutionPageWrapper>
 
       <SpyRoute pageName={SecurityPageName.rules} state={{ ruleName: rule?.name }} />

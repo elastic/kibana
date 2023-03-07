@@ -20,29 +20,23 @@ import {
 import { i18n } from '@kbn/i18n';
 import { UiCounterMetricType } from '@kbn/analytics';
 import classNames from 'classnames';
-import { FieldButton, FieldIcon } from '@kbn/react-field';
+import { FieldButton } from '@kbn/react-field';
 import type { DataViewField, DataView } from '@kbn/data-views-plugin/public';
 import {
+  FieldIcon,
   FieldPopover,
   FieldPopoverHeader,
   FieldPopoverHeaderProps,
   FieldPopoverVisualize,
+  getFieldIconProps,
+  wrapFieldNameOnDot,
 } from '@kbn/unified-field-list-plugin/public';
 import { DiscoverFieldStats } from './discover_field_stats';
-import { getTypeForFieldIcon } from '../../../../utils/get_type_for_field_icon';
 import { DiscoverFieldDetails } from './deprecated_stats/discover_field_details';
-import { getFieldTypeName } from '../../../../utils/get_field_type_name';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { SHOW_LEGACY_FIELD_TOP_VALUES, PLUGIN_ID } from '../../../../../common';
 import { getUiActions } from '../../../../kibana_services';
-import { type DataDocuments$ } from '../../hooks/use_saved_search';
-
-function wrapOnDot(str?: string) {
-  // u200B is a non-width white-space character, which allows
-  // the browser to efficiently word-wrap right after the dot
-  // without us having to draw a lot of extra DOM elements, etc
-  return str ? str.replace(/\./g, '.\u200B') : '';
-}
+import { type DataDocuments$ } from '../../services/discover_data_state_container';
 
 const FieldInfoIcon: React.FC = memo(() => (
   <EuiToolTip
@@ -65,10 +59,7 @@ const FieldInfoIcon: React.FC = memo(() => (
 ));
 
 const DiscoverFieldTypeIcon: React.FC<{ field: DataViewField }> = memo(({ field }) => {
-  const typeForIcon = getTypeForFieldIcon(field);
-  return (
-    <FieldIcon type={typeForIcon} label={getFieldTypeName(typeForIcon)} scripted={field.scripted} />
-  );
+  return <FieldIcon {...getFieldIconProps(field)} />;
 });
 
 const FieldName: React.FC<{ field: DataViewField; highlight?: string }> = memo(
@@ -86,12 +77,12 @@ const FieldName: React.FC<{ field: DataViewField; highlight?: string }> = memo(
 
     return (
       <EuiHighlight
-        search={wrapOnDot(highlight)}
+        search={wrapFieldNameOnDot(highlight)}
         data-test-subj={`field-${field.name}`}
         title={title}
         className="dscSidebarField__name"
       >
-        {wrapOnDot(field.displayName)}
+        {wrapFieldNameOnDot(field.displayName)}
       </EuiHighlight>
     );
   }
@@ -241,7 +232,7 @@ export interface DiscoverFieldProps {
    */
   onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
   /**
-   * Callback to remove/deselect a the field
+   * Callback to remove a field column from the table
    * @param fieldName
    */
   onRemoveField: (fieldName: string) => void;

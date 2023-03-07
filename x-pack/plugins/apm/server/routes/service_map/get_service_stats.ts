@@ -30,6 +30,7 @@ export async function getServiceStats({
   maxNumberOfServices,
   serviceGroupKuery,
   serviceName,
+  kuery,
 }: IEnvOptions & { maxNumberOfServices: number }) {
   const params = {
     apm: {
@@ -49,6 +50,7 @@ export async function getServiceStats({
             ...environmentQuery(environment),
             ...termsQuery(SERVICE_NAME, serviceName),
             ...kqlQuery(serviceGroupKuery),
+            ...kqlQuery(kuery),
           ],
         },
       },

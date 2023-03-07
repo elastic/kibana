@@ -11,6 +11,13 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.navigation.overvi
   defaultMessage: 'Overview',
 });
 
+export const DATA_QUALITY = i18n.translate(
+  'xpack.securitySolution.navigation.ecsDataQualityDashboard',
+  {
+    defaultMessage: 'Data Quality',
+  }
+);
+
 export const DETECTION_RESPONSE = i18n.translate(
   'xpack.securitySolution.navigation.detectionResponse',
   {
@@ -54,7 +61,7 @@ export const RULES = i18n.translate('xpack.securitySolution.navigation.rules', {
 });
 
 export const EXCEPTIONS = i18n.translate('xpack.securitySolution.navigation.exceptions', {
-  defaultMessage: 'Rule Exceptions',
+  defaultMessage: 'Shared Exception Lists',
 });
 
 export const ALERTS = i18n.translate('xpack.securitySolution.navigation.alerts', {

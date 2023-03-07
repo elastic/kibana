@@ -12,6 +12,7 @@ import {
   addMustClausesToBoolQuery,
   addMustNotClausesToBoolQuery,
   getAliases,
+  buildRemoveAliasActions,
   versionMigrationCompleted,
 } from './helpers';
 
@@ -265,5 +266,24 @@ describe('versionMigrationCompleted', () => {
   });
   it('returns false if neither the version or current alias exists', () => {
     expect(versionMigrationCompleted('.current-alias', '.version-alias', {})).toBe(false);
+  });
+});
+
+describe('buildRemoveAliasActions', () => {
+  test('empty', () => {
+    expect(buildRemoveAliasActions('.kibana_test_123', [], [])).toEqual([]);
+  });
+  test('no exclusions', () => {
+    expect(buildRemoveAliasActions('.kibana_test_123', ['a', 'b', 'c'], [])).toEqual([
+      { remove: { index: '.kibana_test_123', alias: 'a', must_exist: true } },
+      { remove: { index: '.kibana_test_123', alias: 'b', must_exist: true } },
+      { remove: { index: '.kibana_test_123', alias: 'c', must_exist: true } },
+    ]);
+  });
+  test('with exclusions', () => {
+    expect(buildRemoveAliasActions('.kibana_test_123', ['a', 'b', 'c'], ['b'])).toEqual([
+      { remove: { index: '.kibana_test_123', alias: 'a', must_exist: true } },
+      { remove: { index: '.kibana_test_123', alias: 'c', must_exist: true } },
+    ]);
   });
 });

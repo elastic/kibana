@@ -11,6 +11,7 @@ import type {
   ThreatSubtechnique,
   ThreatTechnique,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import { parseInt } from 'lodash';
 import type {
   CustomRule,
   MachineLearningRule,
@@ -32,7 +33,6 @@ import {
   APPLY_SELECTED_SAVED_QUERY_BUTTON,
   AT_LEAST_ONE_INDEX_PATTERN,
   AT_LEAST_ONE_VALID_MATCH,
-  BACK_TO_ALL_RULES_LINK,
   COMBO_BOX_CLEAR_BTN,
   CREATE_AND_ENABLE_BTN,
   CUSTOM_QUERY_INPUT,
@@ -115,24 +115,27 @@ import {
 } from '../screens/common/rule_actions';
 import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
-import { SERVER_SIDE_EVENT_COUNT } from '../screens/timeline';
+import { ALERTS_TABLE_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
-import { refreshPage } from './security_header';
 import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
+import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
+import { waitForAlerts } from './alerts';
+import { refreshPage } from './security_header';
+import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 
 export const createAndEnableRule = () => {
   cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
-  cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
-  cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
+  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
+  cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const createRuleWithoutEnabling = () => {
   cy.get(CREATE_WITHOUT_ENABLING_BTN).click({ force: true });
   cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
-  cy.get(BACK_TO_ALL_RULES_LINK).click({ force: true });
-  cy.get(BACK_TO_ALL_RULES_LINK).should('not.exist');
+  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
+  cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const fillAboutRule = (
@@ -617,11 +620,14 @@ export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatIndicatorRul
 };
 
 export const fillDefineMachineLearningRuleAndContinue = (rule: MachineLearningRule) => {
-  rule.machineLearningJobs.forEach((machineLearningJob) => {
-    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
-    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(`${machineLearningJob}{enter}`);
-    cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
-  });
+  const text = rule.machineLearningJobs
+    .map((machineLearningJob) => `${machineLearningJob}{downArrow}{enter}`)
+    .join('');
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).click({ force: true });
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type(text);
+
+  cy.get(MACHINE_LEARNING_DROPDOWN_INPUT).type('{esc}');
+
   cy.get(ANOMALY_THRESHOLD_INPUT).type(
     `{selectall}${getMachineLearningRule().anomalyScoreThreshold}`,
     {
@@ -667,17 +673,22 @@ export const selectNewTermsRuleType = () => {
 export const waitForAlertsToPopulate = async (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
+      cy.log('Waiting for alerts to appear');
       refreshPage();
-      return cy
-        .get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((countText) => {
-          const alertCount = parseInt(countText, 10) || 0;
-          return alertCount >= alertCountThreshold;
-        });
+      return cy.root().then(($el) => {
+        const emptyTableState = $el.find(EMPTY_ALERT_TABLE);
+        if (emptyTableState.length > 0) {
+          cy.log('Table is empty', emptyTableState.length);
+          return false;
+        }
+        const countEl = $el.find(ALERTS_TABLE_COUNT);
+        const alertCount = parseInt(countEl.text(), 10) || 0;
+        return alertCount >= alertCountThreshold;
+      });
     },
     { interval: 500, timeout: 12000 }
   );
+  waitForAlerts();
 };
 
 export const waitForTheRuleToBeExecuted = () => {

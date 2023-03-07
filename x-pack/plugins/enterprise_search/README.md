@@ -49,11 +49,14 @@ To debug Kea state in-browser, Kea recommends [Redux Devtools](https://v2.keajs.
 
 Documentation: https://www.elastic.co/guide/en/kibana/current/development-tests.html#_unit_testing
 
-Jest tests can be run directly from the `x-pack/plugins/enterprise_search` folder. This also works for any subfolders or subcomponents.
+Jest tests can be run from the root kibana directory, however, since the tests take so long to run you will likely want to apply the appropriate Jest configuration file to test only your changes. For example:
+- `x-pack/plugins/enterprise_search/common/jest.config.js`
+- `x-pack/plugins/enterprise_search/public/jest.config.js`
+- `x-pack/plugins/enterprise_search/server/jest.config.js`
 
 ```bash
-yarn test:jest
-yarn test:jest --watch
+yarn test:jest --config {YOUR_JEST_CONFIG_FILE}
+yarn test:jest --config {YOUR_JEST_CONFIG_FILE} --watch
 ```
 
 Unfortunately coverage collection does not work as automatically, and requires using our handy jest.sh script if you want to run tests on a specific file or folder and only get coverage numbers for that file or folder:

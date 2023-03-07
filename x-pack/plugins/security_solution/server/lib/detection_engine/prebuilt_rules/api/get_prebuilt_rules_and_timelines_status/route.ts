@@ -8,7 +8,6 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { buildSiemResponse } from '../../../routes/utils';
-import type { ConfigType } from '../../../../../config';
 import type { SetupPlugins } from '../../../../../plugin';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
@@ -22,7 +21,7 @@ import { findRules } from '../../../rule_management/logic/search/find_rules';
 import { getLatestPrebuiltRules } from '../../logic/get_latest_prebuilt_rules';
 import { getRulesToInstall } from '../../logic/get_rules_to_install';
 import { getRulesToUpdate } from '../../logic/get_rules_to_update';
-import { ruleAssetSavedObjectsClientFactory } from '../../logic/rule_asset/rule_asset_saved_objects_client';
+import { ruleAssetsClientFactory } from '../../logic/rule_asset/rule_asset_saved_objects_client';
 import { rulesToMap } from '../../logic/utils';
 
 import { buildFrameworkRequest } from '../../../../timeline/utils/common';
@@ -33,7 +32,6 @@ import {
 
 export const getPrebuiltRulesAndTimelinesStatusRoute = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
   security: SetupPlugins['security']
 ) => {
   router.get(
@@ -49,7 +47,7 @@ export const getPrebuiltRulesAndTimelinesStatusRoute = (
       const ctx = await context.resolve(['core', 'alerting']);
       const savedObjectsClient = ctx.core.savedObjects.client;
       const rulesClient = ctx.alerting.getRulesClient();
-      const ruleAssetsClient = ruleAssetSavedObjectsClientFactory(savedObjectsClient);
+      const ruleAssetsClient = ruleAssetsClientFactory(savedObjectsClient);
 
       try {
         const latestPrebuiltRules = await getLatestPrebuiltRules(ruleAssetsClient);

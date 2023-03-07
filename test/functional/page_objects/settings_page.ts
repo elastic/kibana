@@ -36,6 +36,12 @@ export class SettingsPageObject extends FtrService {
     await this.testSubjects.existOrFail('managementSettingsTitle');
   }
 
+  async clickKibanaGlobalSettings() {
+    await this.testSubjects.click('settings');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.testSubjects.click('advancedSettingsTab-global-settings');
+  }
+
   async clickKibanaSavedObjects() {
     await this.testSubjects.click('objects');
     await this.savedObjects.waitTableIsLoaded();
@@ -130,6 +136,13 @@ export class SettingsPageObject extends FtrService {
       `advancedSetting-editField-${propertyName}-editor`,
       propertyValue
     );
+    await this.testSubjects.click(`advancedSetting-saveButton`);
+    await this.header.waitUntilLoadingHasFinished();
+  }
+
+  async setAdvancedSettingsImage(propertyName: string, path: string) {
+    const input = await this.testSubjects.find(`advancedSetting-editField-${propertyName}`);
+    await input.type(path);
     await this.testSubjects.click(`advancedSetting-saveButton`);
     await this.header.waitUntilLoadingHasFinished();
   }

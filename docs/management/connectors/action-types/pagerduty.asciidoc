@@ -1,6 +1,5 @@
-[role="xpack"]
 [[pagerduty-action-type]]
-=== PagerDuty connector and action
+== PagerDuty connector and action
 ++++
 <titleabbrev>PagerDuty</titleabbrev>
 ++++
@@ -8,34 +7,43 @@
 The PagerDuty connector uses the https://v2.developer.pagerduty.com/docs/events-api-v2[v2 Events API] to trigger, acknowledge, and resolve PagerDuty alerts.
 
 [float]
+[[define-pagerduty-ui]]
+=== Create connectors in {kib}
+
+You can create connectors in *{stack-manage-app} > {connectors-ui}*
+or as needed when you're creating a rule. For example:
+
+[role="screenshot"]
+image::management/connectors/images/pagerduty-connector.png[PagerDuty connector]
+
+[float]
 [[pagerduty-connector-configuration]]
 ==== Connector configuration
 
-PagerDuty connectors have the following configuration properties.
+PagerDuty connectors have the following configuration properties:
 
 Name::      The name of the connector. The name is used to identify a  connector in the management UI connector listing, or in the connector list when configuring an action.
 API URL::   An optional PagerDuty event URL. Defaults to `https://events.pagerduty.com/v2/enqueue`. If you are using the <<action-settings, `xpack.actions.allowedHosts`>> setting, make sure the hostname is added to the allowed hosts.
 Integration Key::   A 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
 
 [float]
-[[pagerduty-connector-networking-configuration]]
-==== Connector networking configuration
+[[preconfigured-pagerduty-configuration]]
+=== Create preconfigured connectors
 
-Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
-
-[float]
-[[Preconfigured-pagerduty-configuration]]
-==== Preconfigured connector type
+If you are running {kib} on-prem, you can define connectors by
+adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
+For example:
 
 [source,text]
 --
- my-pagerduty:
-   name: preconfigured-pagerduty-connector-type
-   actionTypeId: .pagerduty
-   config:
-     apiUrl: https://test.host
-   secrets:
-     routingKey: testroutingkey
+xpack.actions.preconfigured:
+  my-pagerduty:
+    name: preconfigured-pagerduty-connector-type
+    actionTypeId: .pagerduty
+    config:
+      apiUrl: https://test.host
+    secrets:
+      routingKey: testroutingkey
 --
 
 Config defines information for the connector type.
@@ -47,22 +55,14 @@ Secrets defines sensitive information for the connector type.
 `routingKey`:: A string that corresponds to *Integration Key*.
 
 [float]
-[[define-pagerduty-ui]]
-==== Define connector in {stack-manage-app}
+[[pagerduty-action-configuration]]
+=== Test connectors
 
-Define PagerDuty connector properties.
-
-[role="screenshot"]
-image::management/connectors/images/pagerduty-connector.png[PagerDuty connector]
-
-Test PagerDuty action parameters.
+You can test connectors with the <<execute-connector-api,run connector API>> or
+as you're creating or editing the connector in {kib}. For example:
 
 [role="screenshot"]
 image::management/connectors/images/pagerduty-params-test.png[PagerDuty params test]
-
-[float]
-[[pagerduty-action-configuration]]
-==== Action configuration
 
 PagerDuty actions have the following properties.
 
@@ -79,8 +79,15 @@ Class::         An *optional* value indicating the class/type of the event, for 
 For more details on these properties, see https://v2.developer.pagerduty.com/v2/docs/send-an-event-events-api-v2[PagerDuty v2 event parameters].
 
 [float]
+[[pagerduty-connector-networking-configuration]]
+=== Connector networking configuration
+
+Use the <<action-settings, Action configuration settings>> to customize connector networking configurations, such as proxies, certificates, or TLS settings. You can set configurations that apply to all your connectors or use `xpack.actions.customHostSettings` to set per-host configurations.
+
+
+[float]
 [[pagerduty-benefits]]
-==== Configure PagerDuty
+=== Configure PagerDuty
 
 By integrating PagerDuty with rules, you can:
 
@@ -90,14 +97,14 @@ By integrating PagerDuty with rules, you can:
 
 [float]
 [[pagerduty-support]]
-==== Support
+=== Support
 If you need help with this integration, get in touch with the {kib} team by visiting
 https://support.elastic.co[support.elastic.co] or by using the *Ask Elastic* option in the {kib} Help menu.
 You can also select the {kib} category at https://discuss.elastic.co/[discuss.elastic.co].
 
 [float]
 [[pagerduty-integration-walkthrough]]
-==== Integration with PagerDuty walkthrough
+=== Integration with PagerDuty walkthrough
 
 [[pagerduty-in-pagerduty]]
 *In PagerDuty*
@@ -145,8 +152,8 @@ See <<pagerduty-in-pagerduty,In PagerDuty>> for how to obtain the endpoint and k
 
 . Set up an action using your PagerDuty connector, by determining:
 +
-* The action’s type: Trigger, Resolve, or Acknowledge.
-* The event’s severity: Info, warning, error, or critical.
+* The action's type: Trigger, Resolve, or Acknowledge.
+* The event's severity: Info, warning, error, or critical.
 * An array of different fields, including the timestamp, group, class, component, and your dedup key. By default, the dedup is configured to create a new PagerDuty incident for each alert and reuse the incident when a recovered alert reactivates.
 Depending on your custom needs, assign them variables from the rule context.
 To see the available context variables, click on the *Add variable* icon next

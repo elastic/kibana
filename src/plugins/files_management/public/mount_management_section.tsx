@@ -8,6 +8,8 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Router } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider, FormattedRelative } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
@@ -26,7 +28,7 @@ const queryClient = new QueryClient();
 export const mountManagementSection = (
   coreStart: CoreStart,
   startDeps: StartDependencies,
-  { element }: ManagementAppMountParams
+  { element, history }: ManagementAppMountParams
 ) => {
   ReactDOM.render(
     <I18nProvider>
@@ -41,7 +43,9 @@ export const mountManagementSection = (
           <FilesManagementAppContextProvider
             filesClient={startDeps.files.filesClientFactory.asUnscoped()}
           >
-            <App />
+            <Router history={history}>
+              <Route path="/" component={App} />
+            </Router>
           </FilesManagementAppContextProvider>
         </TableListViewKibanaProvider>
       </QueryClientProvider>

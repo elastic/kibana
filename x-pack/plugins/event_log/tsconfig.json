@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": [
     "server/**/*",
@@ -14,7 +12,16 @@
     "common/**/*"
   ],
   "kbn_references": [
-    { "path": "../../../src/core/tsconfig.json" },
-    { "path": "../spaces/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/spaces-plugin",
+    "@kbn/es-query",
+    "@kbn/config-schema",
+    "@kbn/i18n",
+    "@kbn/utility-types",
+    "@kbn/std",
+    "@kbn/safer-lodash-set",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

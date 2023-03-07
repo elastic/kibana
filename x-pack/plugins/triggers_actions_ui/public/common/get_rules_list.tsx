@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ConnectorProvider } from '../application/context/connector_context';
 import { RulesList } from '../application/sections';
 import type { RulesListProps } from '../application/sections/rules_list/components/rules_list';
 import { ConnectorServices } from '../types';
+
+const queryClient = new QueryClient();
 
 export const getRulesListLazy = (props: {
   connectorServices: ConnectorServices;
@@ -17,7 +20,9 @@ export const getRulesListLazy = (props: {
 }) => {
   return (
     <ConnectorProvider value={{ services: props.connectorServices }}>
-      <RulesList {...props.rulesListProps} />
+      <QueryClientProvider client={queryClient}>
+        <RulesList {...props.rulesListProps} />
+      </QueryClientProvider>
     </ConnectorProvider>
   );
 };

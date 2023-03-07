@@ -15,6 +15,7 @@ export interface GeneratedDoc {
   url: string;
   version: string;
   '@timestamp': number;
+  should_ignore_this_field: string;
 }
 
 const REFERENCE_TS = 1669018354793;
@@ -50,6 +51,7 @@ function getArtificialLogsWithSpike(index: string) {
                 url,
                 version: 'v1.0.0',
                 '@timestamp': ts + tsOffset,
+                should_ignore_this_field: 'should_ignore_this_field',
               };
 
               bulkBody.push(action);
@@ -74,6 +76,7 @@ function getArtificialLogsWithSpike(index: string) {
           url,
           version: 'v1.0.0',
           '@timestamp': DEVIATION_TS + tsOffset,
+          should_ignore_this_field: 'should_ignore_this_field',
         });
       });
     });
@@ -91,6 +94,7 @@ function getArtificialLogsWithSpike(index: string) {
           url,
           version: 'v1.0.0',
           '@timestamp': DEVIATION_TS + tsOffset,
+          should_ignore_this_field: 'should_ignore_this_field',
         });
       });
     });
@@ -158,6 +162,7 @@ export function ExplainLogRateSpikesDataGeneratorProvider({ getService }: FtrPro
                 url: { type: 'keyword' },
                 version: { type: 'keyword' },
                 '@timestamp': { type: 'date' },
+                should_ignore_this_field: { type: 'keyword', doc_values: false, index: false },
               },
             },
           });

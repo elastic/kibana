@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { ParsedUrlQueryParams, UrlQueryParams } from '../../../common/ui/types';
+import type { ParsedUrlQueryParams, PartialQueryParams } from '../../../common/ui/types';
 
-export const parseUrlQueryParams = (parsedUrlParams: ParsedUrlQueryParams): UrlQueryParams => {
-  const urlParams: UrlQueryParams = {
+export const parseUrlQueryParams = (parsedUrlParams: ParsedUrlQueryParams): PartialQueryParams => {
+  const urlParams: PartialQueryParams = {
     ...(parsedUrlParams.sortField && { sortField: parsedUrlParams.sortField }),
     ...(parsedUrlParams.sortOrder && { sortOrder: parsedUrlParams.sortOrder }),
   };

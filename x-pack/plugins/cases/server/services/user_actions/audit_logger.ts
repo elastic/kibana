@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import type { EcsEventType } from '@kbn/ecs';
+import type { EcsEvent } from '@kbn/ecs';
 import type { AuditLogger } from '@kbn/security-plugin/server';
+import type { ArrayElement } from '@kbn/utility-types';
 import type { UserAction as Action } from '../../../common/api';
 import type { EventDetails } from './types';
 
-const actionsToEcsType: Record<Action, EcsEventType> = {
+const actionsToEcsType: Record<Action, ArrayElement<EcsEvent['type']>> = {
   add: 'change',
   delete: 'deletion',
   create: 'creation',
-  push_to_service: 'creation',
+  push_to_service: 'change',
   update: 'change',
 };
 
@@ -31,7 +32,8 @@ export class UserActionAuditLogger {
       event: {
         action: event.descriptiveAction,
         category: ['database'],
-        type: [actionsToEcsType[event.action]],
+        type: [actionsToEcsType[event.action] as string],
+        outcome: 'success',
       },
       kibana: {
         saved_object: {

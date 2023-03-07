@@ -78,6 +78,7 @@ export function createPluginInitializerContext({
       roles: {
         backgroundTasks: nodeInfo.roles.backgroundTasks,
         ui: nodeInfo.roles.ui,
+        migrator: nodeInfo.roles.migrator,
       },
     },
 
@@ -194,6 +195,12 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>(
       registerProvider: deps.capabilities.registerProvider,
       registerSwitcher: deps.capabilities.registerSwitcher,
     },
+    customBranding: {
+      register: (fetchFn) => {
+        deps.customBranding.register(plugin.name, fetchFn);
+      },
+      getBrandingFor: deps.customBranding.getBrandingFor,
+    },
     docLinks: deps.docLinks,
     elasticsearch: {
       legacy: deps.elasticsearch.legacy,
@@ -286,6 +293,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>(
     capabilities: {
       resolveCapabilities: deps.capabilities.resolveCapabilities,
     },
+    customBranding: deps.customBranding,
     docLinks: deps.docLinks,
     elasticsearch: {
       client: deps.elasticsearch.client,

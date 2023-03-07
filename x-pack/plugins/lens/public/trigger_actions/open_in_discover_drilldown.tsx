@@ -12,7 +12,6 @@ import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { CollectConfigProps as CollectConfigPropsBase } from '@kbn/kibana-utils-plugin/public';
-import { reactToUiComponent } from '@kbn/kibana-react-plugin/public';
 import type {
   UiActionsEnhancedDrilldownDefinition as Drilldown,
   UiActionsEnhancedBaseActionFactoryContext as BaseActionFactoryContext,
@@ -92,7 +91,7 @@ export class OpenInDiscoverDrilldown
     );
   };
 
-  public readonly CollectConfig = reactToUiComponent(this.ReactCollectConfig);
+  public readonly CollectConfig = this.ReactCollectConfig;
 
   public readonly createConfig = () => ({
     openInNewTab: true,

@@ -44,7 +44,11 @@ export const SourceFieldSection = () => {
       </p>
 
       <p>
-        <a href={documentationService.getDisablingMappingSourceFieldLink()} target="_blank">
+        <a
+          href={documentationService.getDisablingMappingSourceFieldLink()}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           <FormattedMessage
             id="xpack.idxMgmt.mappingsEditor.disabledSourceFieldCallOutDescription2"
             defaultMessage="Learn more about alternatives to disabling the {source} field."

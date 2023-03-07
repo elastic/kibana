@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { HttpHandler } from '@kbn/core/public';
 import { ToastInput } from '@kbn/core/public';
@@ -26,7 +26,53 @@ export function useHTTPRequest<Response>(
   const toast = toastDanger ? toastDanger : kibana.notifications.toasts.danger;
   const [response, setResponse] = useState<Response | null>(null);
   const [error, setError] = useState<InfraHttpError | null>(null);
-  const [request, makeRequest] = useTrackedPromise(
+
+  const onError = useCallback(
+    (e: unknown) => {
+      const err = e as InfraHttpError;
+      if (e && e instanceof CanceledPromiseError) {
+        return;
+      }
+      setError(err);
+      toast({
+        toastLifeTimeMs: 3000,
+        title: i18n.translate('xpack.infra.useHTTPRequest.error.title', {
+          defaultMessage: `Error while fetching resource`,
+        }),
+        body: (
+          <div>
+            {err.response ? (
+              <>
+                <h5>
+                  {i18n.translate('xpack.infra.useHTTPRequest.error.status', {
+                    defaultMessage: `Error`,
+                  })}
+                </h5>
+                {err.response?.statusText} ({err.response?.status})
+                <h5>
+                  {i18n.translate('xpack.infra.useHTTPRequest.error.url', {
+                    defaultMessage: `URL`,
+                  })}
+                </h5>
+                {err.response?.url}
+                <h5>
+                  {i18n.translate('xpack.infra.useHTTPRequest.error.body.message', {
+                    defaultMessage: `Message`,
+                  })}
+                </h5>
+                {err.body?.message || err.message}
+              </>
+            ) : (
+              <h5>{err.body?.message || err.message}</h5>
+            )}
+          </div>
+        ),
+      });
+    },
+    [toast]
+  );
+
+  const [request, makeRequest] = useTrackedPromise<any, Response>(
     {
       cancelPreviousOn: 'resolution',
       createPromise: () => {
@@ -38,50 +84,18 @@ export function useHTTPRequest<Response>(
           body,
         });
       },
-      onResolve: (resp) => setResponse(decode(resp)),
-      onReject: (e: unknown) => {
-        const err = e as InfraHttpError;
-        if (e && e instanceof CanceledPromiseError) {
-          return;
+      onResolve: (resp) => {
+        try {
+          setResponse(decode(resp)); // Catch decoding errors
+        } catch (e) {
+          onError(e);
         }
-        setError(err);
-        toast({
-          toastLifeTimeMs: 3000,
-          title: i18n.translate('xpack.infra.useHTTPRequest.error.title', {
-            defaultMessage: `Error while fetching resource`,
-          }),
-          body: (
-            <div>
-              {err.response ? (
-                <>
-                  <h5>
-                    {i18n.translate('xpack.infra.useHTTPRequest.error.status', {
-                      defaultMessage: `Error`,
-                    })}
-                  </h5>
-                  {err.response?.statusText} ({err.response?.status})
-                  <h5>
-                    {i18n.translate('xpack.infra.useHTTPRequest.error.url', {
-                      defaultMessage: `URL`,
-                    })}
-                  </h5>
-                  {err.response?.url}
-                  <h5>
-                    {i18n.translate('xpack.infra.useHTTPRequest.error.body.message', {
-                      defaultMessage: `Message`,
-                    })}
-                  </h5>
-                  {err.body?.message || err.message}
-                </>
-              ) : (
-                <h5>{err.body?.message || err.message}</h5>
-              )}
-            </div>
-          ),
-        });
+      },
+      onReject: (e: unknown) => {
+        onError(e);
       },
     },
-    [pathname, body, method, fetch, toast]
+    [pathname, body, method, fetch, toast, onError]
   );
 
   const loading = useMemo(() => {

@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EntityArrayIterable } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { Readable } from 'stream';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateSpanLinksData } from './data_generator';
 
@@ -26,13 +26,12 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       ids = spanLinksData.ids;
 
-      await synthtraceEsClient.index(
-        new EntityArrayIterable(spanLinksData.apmFields.producerInternalOnly).merge(
-          new EntityArrayIterable(spanLinksData.apmFields.producerExternalOnly),
-          new EntityArrayIterable(spanLinksData.apmFields.producerConsumer),
-          new EntityArrayIterable(spanLinksData.apmFields.producerMultiple)
-        )
-      );
+      await synthtraceEsClient.index([
+        Readable.from(spanLinksData.events.producerInternalOnly),
+        Readable.from(spanLinksData.events.producerExternalOnly),
+        Readable.from(spanLinksData.events.producerConsumer),
+        Readable.from(spanLinksData.events.producerMultiple),
+      ]);
     });
 
     after(() => synthtraceEsClient.clean());
@@ -229,6 +228,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             transactionId: ids.producerConsumer.transactionCId,
             spanName: 'Transaction C',
             duration: 1000000,
+            environment: 'production',
           });
 
           const serviceDDetails = spanALinksDetails.childrenLinks.spanLinksDetails.find(
@@ -245,6 +245,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             transactionId: ids.producerMultiple.transactionDId,
             spanName: 'Transaction D',
             duration: 1000000,
+            environment: 'production',
           });
         });
       });
@@ -300,6 +301,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 duration: 100000,
                 spanSubtype: 'http',
                 spanType: 'external',
+                environment: 'production',
               },
             },
           ]);
@@ -342,6 +344,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 duration: 100000,
                 spanSubtype: 'http',
                 spanType: 'external',
+                environment: 'production',
               },
             },
             {
@@ -353,6 +356,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 transactionId: ids.producerExternalOnly.transactionBId,
                 duration: 1000000,
                 spanName: 'Transaction B',
+                environment: 'production',
               },
             },
             {
@@ -376,6 +380,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 duration: 100000,
                 spanSubtype: 'http',
                 spanType: 'external',
+                environment: 'production',
               },
             },
           ]);
@@ -397,6 +402,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 transactionId: ids.producerMultiple.transactionDId,
                 spanName: 'Transaction D',
                 duration: 1000000,
+                environment: 'production',
               },
             },
           ]);
@@ -439,6 +445,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 duration: 100000,
                 spanSubtype: 'http',
                 spanType: 'external',
+                environment: 'production',
               },
             },
             {
@@ -452,6 +459,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 duration: 100000,
                 spanSubtype: 'http',
                 spanType: 'external',
+                environment: 'production',
               },
             },
           ]);
@@ -476,6 +484,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 duration: 100000,
                 spanSubtype: 'http',
                 spanType: 'external',
+                environment: 'production',
               },
             },
             {
@@ -487,6 +496,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 transactionId: ids.producerConsumer.transactionCId,
                 spanName: 'Transaction C',
                 duration: 1000000,
+                environment: 'production',
               },
             },
           ]);

@@ -113,13 +113,15 @@ export function SelectServices({
   return (
     <Container>
       <EuiModalHeader>
-        <EuiModalHeaderTitle>
-          <h1>
+        <div>
+          <EuiModalHeaderTitle>
             {i18n.translate(
               'xpack.apm.serviceGroups.selectServicesForm.title',
-              { defaultMessage: 'Select services' }
+              {
+                defaultMessage: 'Select services',
+              }
             )}
-          </h1>
+          </EuiModalHeaderTitle>
           <EuiSpacer size="s" />
           <EuiText color="subdued" size="s">
             {i18n.translate(
@@ -135,6 +137,7 @@ export function SelectServices({
               {kueryValidationMessage}
             </EuiText>
           )}
+          <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
               <KueryBar
@@ -195,7 +198,7 @@ export function SelectServices({
               )}
             </EuiText>
           )}
-        </EuiModalHeaderTitle>
+        </div>
       </EuiModalHeader>
       <EuiModalBody
         style={{

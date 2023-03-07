@@ -14,18 +14,15 @@ import { EnhancedEmbeddable } from '@kbn/embeddable-enhanced-plugin/public';
 
 test('<MenuItem/>', () => {
   const state = createStateContainer<{ events: object[] }>({ events: [] });
-  const { getByText, queryByText } = render(
-    <MenuItem
-      context={{
-        embeddable: {
-          enhancements: {
-            dynamicActions: { state } as unknown as DynamicActionManager,
-          },
-        } as unknown as EnhancedEmbeddable,
-        trigger: {} as any,
-      }}
-    />
-  );
+  const context = {
+    embeddable: {
+      enhancements: {
+        dynamicActions: { state } as unknown as DynamicActionManager,
+      },
+    } as unknown as EnhancedEmbeddable,
+    trigger: {},
+  };
+  const { getByText, queryByText } = render(<MenuItem context={context} />);
 
   expect(getByText(/manage drilldowns/i)).toBeInTheDocument();
   expect(queryByText('0')).not.toBeInTheDocument();

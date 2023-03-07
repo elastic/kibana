@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/core-i18n-server-internal",
-        "id": "def-server.I18nService",
+        "id": "def-common.I18nService",
         "type": "Class",
         "tags": [],
         "label": "I18nService",
@@ -23,7 +31,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-i18n-server-internal",
-            "id": "def-server.I18nService.Unnamed",
+            "id": "def-common.I18nService.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -37,7 +45,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-i18n-server-internal",
-                "id": "def-server.I18nService.Unnamed.$1",
+                "id": "def-common.I18nService.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "coreContext",
@@ -55,7 +63,7 @@
           },
           {
             "parentPluginId": "@kbn/core-i18n-server-internal",
-            "id": "def-server.I18nService.preboot",
+            "id": "def-common.I18nService.preboot",
             "type": "Function",
             "tags": [],
             "label": "preboot",
@@ -71,7 +79,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-i18n-server-internal",
-                "id": "def-server.I18nService.preboot.$1",
+                "id": "def-common.I18nService.preboot.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ pluginPaths, http }",
@@ -89,7 +97,7 @@
           },
           {
             "parentPluginId": "@kbn/core-i18n-server-internal",
-            "id": "def-server.I18nService.setup",
+            "id": "def-common.I18nService.setup",
             "type": "Function",
             "tags": [],
             "label": "setup",
@@ -113,7 +121,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-i18n-server-internal",
-                "id": "def-server.I18nService.setup.$1",
+                "id": "def-common.I18nService.setup.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "{ pluginPaths, http }",
@@ -139,7 +147,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-i18n-server-internal",
-        "id": "def-server.I18nConfigType",
+        "id": "def-common.I18nConfigType",
         "type": "Type",
         "tags": [],
         "label": "I18nConfigType",
@@ -153,14 +161,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

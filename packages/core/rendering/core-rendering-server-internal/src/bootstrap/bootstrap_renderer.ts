@@ -82,6 +82,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       core: `${regularBundlePath}/core/`,
       'kbn-ui-shared-deps-src': `${regularBundlePath}/kbn-ui-shared-deps-src/`,
       'kbn-ui-shared-deps-npm': `${regularBundlePath}/kbn-ui-shared-deps-npm/`,
+      'kbn-monaco': `${regularBundlePath}/kbn-monaco/`,
       ...Object.fromEntries(
         [...bundlePaths.entries()].map(([pluginId, plugin]) => [pluginId, plugin.publicPath])
       ),

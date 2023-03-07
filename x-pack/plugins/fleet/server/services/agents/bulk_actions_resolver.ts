@@ -19,16 +19,11 @@ import { ReassignActionRunner } from './reassign_action_runner';
 import { UpgradeActionRunner } from './upgrade_action_runner';
 import { UpdateAgentTagsActionRunner } from './update_agent_tags_action_runner';
 import { UnenrollActionRunner } from './unenroll_action_runner';
-import type { ActionParams, RetryParams } from './action_runner';
+import type { ActionParams } from './action_runner';
 import { RequestDiagnosticsActionRunner } from './request_diagnostics_action_runner';
-
-export enum BulkActionTaskType {
-  REASSIGN_RETRY = 'fleet:reassign_action:retry',
-  UNENROLL_RETRY = 'fleet:unenroll_action:retry',
-  UPGRADE_RETRY = 'fleet:upgrade_action:retry',
-  UPDATE_AGENT_TAGS_RETRY = 'fleet:update_agent_tags:retry',
-  REQUEST_DIAGNOSTICS_RETRY = 'fleet:request_diagnostics:retry',
-}
+import type { RetryParams } from './retry_helper';
+import { getRetryParams } from './retry_helper';
+import { BulkActionTaskType } from './bulk_action_types';
 
 /**
  * Create and run retry tasks of agent bulk actions
@@ -114,11 +109,7 @@ export class BulkActionsResolver {
       scope: ['fleet'],
       state: {},
       params: { actionParams, retryParams },
-      runAt:
-        runAt ??
-        moment(new Date())
-          .add(Math.pow(3, retryParams.retryCount ?? 1), 's')
-          .toDate(),
+      runAt: runAt ?? moment(new Date()).add(3, 's').toDate(),
     });
     appContextService.getLogger().info('Scheduling task ' + taskId);
     return taskId;
@@ -146,7 +137,10 @@ export function createRetryTask(
 
       const { esClient, soClient } = await getDeps();
 
-      const retryParams = taskInstance.params.retryParams;
+      const retryParams: RetryParams = getRetryParams(
+        taskInstance.taskType,
+        taskInstance.params.retryParams
+      );
 
       appContextService
         .getLogger()

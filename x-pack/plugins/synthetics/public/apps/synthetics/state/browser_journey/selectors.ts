@@ -8,3 +8,8 @@
 import { SyntheticsAppState } from '../root_reducer';
 
 export const selectBrowserJourneyState = (state: SyntheticsAppState) => state.browserJourney;
+export const selectBrowserJourney = (checkGroup?: string) => (state: SyntheticsAppState) =>
+  checkGroup ? state.browserJourney.journeys[checkGroup] : undefined;
+
+export const selectBrowserJourneyLoading = (checkGroup?: string) => (state: SyntheticsAppState) =>
+  checkGroup ? state.browserJourney.journeysLoading[checkGroup] : false;

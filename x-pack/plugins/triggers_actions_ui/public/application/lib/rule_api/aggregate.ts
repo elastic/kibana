@@ -40,15 +40,15 @@ export async function loadRuleAggregations({
     ruleStatusesFilter,
     tagsFilter,
   });
-  const res = await http.get<AsApiContract<RuleAggregations>>(
+  const res = await http.post<AsApiContract<RuleAggregations>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
-      query: {
+      body: JSON.stringify({
         search_fields: searchText ? JSON.stringify(['name', 'tags']) : undefined,
         search: searchText,
         filter: filters.length ? filters.join(' and ') : undefined,
         default_search_operator: 'AND',
-      },
+      }),
     }
   );
   return rewriteBodyRes(res);

@@ -11,7 +11,8 @@
  */
 
 import Handlebars from '.';
-import { expectTemplate } from './src/__jest__/test_bench';
+import type { HelperOptions, TemplateDelegate } from './src/types';
+import { expectTemplate, forEachCompileFunctionName } from './src/__jest__/test_bench';
 
 it('Handlebars.create', () => {
   expect(Handlebars.create()).toMatchSnapshot();
@@ -35,7 +36,10 @@ describe('Handlebars.compileAST', () => {
   });
 
   it('invalid template', () => {
-    expectTemplate('{{value').withInput({ value: 42 }).toThrowErrorMatchingSnapshot();
+    expectTemplate('{{value').withInput({ value: 42 }).toThrow(`Parse error on line 1:
+{{value
+--^
+Expecting 'ID', 'STRING', 'NUMBER', 'BOOLEAN', 'UNDEFINED', 'NULL', 'DATA', got 'INVALID'`);
   });
 
   if (!process.env.EVAL) {
@@ -46,51 +50,191 @@ describe('Handlebars.compileAST', () => {
   }
 });
 
-it('Only provide options.fn/inverse to block helpers', () => {
-  function toHaveProperties(...args: any[]) {
-    toHaveProperties.calls++;
-    const options = args[args.length - 1];
-    expect(options).toHaveProperty('fn');
-    expect(options).toHaveProperty('inverse');
-    return 42;
-  }
-  toHaveProperties.calls = 0;
+// Extra "helpers" tests
+describe('helpers', () => {
+  it('Only provide options.fn/inverse to block helpers', () => {
+    function toHaveProperties(...args: any[]) {
+      toHaveProperties.calls++;
+      const options = args[args.length - 1];
+      expect(options).toHaveProperty('fn');
+      expect(options).toHaveProperty('inverse');
+      return 42;
+    }
+    toHaveProperties.calls = 0;
 
-  function toNotHaveProperties(...args: any[]) {
-    toNotHaveProperties.calls++;
-    const options = args[args.length - 1];
-    expect(options).not.toHaveProperty('fn');
-    expect(options).not.toHaveProperty('inverse');
-    return 42;
-  }
-  toNotHaveProperties.calls = 0;
+    function toNotHaveProperties(...args: any[]) {
+      toNotHaveProperties.calls++;
+      const options = args[args.length - 1];
+      expect(options).not.toHaveProperty('fn');
+      expect(options).not.toHaveProperty('inverse');
+      return 42;
+    }
+    toNotHaveProperties.calls = 0;
 
-  const nonBlockTemplates = ['{{foo}}', '{{foo 1 2}}'];
-  const blockTemplates = ['{{#foo}}42{{/foo}}', '{{#foo 1 2}}42{{/foo}}'];
+    const nonBlockTemplates = ['{{foo}}', '{{foo 1 2}}'];
+    const blockTemplates = ['{{#foo}}42{{/foo}}', '{{#foo 1 2}}42{{/foo}}'];
 
-  for (const template of nonBlockTemplates) {
-    expectTemplate(template)
-      .withInput({
-        foo: toNotHaveProperties,
+    for (const template of nonBlockTemplates) {
+      expectTemplate(template)
+        .withInput({
+          foo: toNotHaveProperties,
+        })
+        .toCompileTo('42');
+
+      expectTemplate(template).withHelper('foo', toNotHaveProperties).toCompileTo('42');
+    }
+
+    for (const template of blockTemplates) {
+      expectTemplate(template)
+        .withInput({
+          foo: toHaveProperties,
+        })
+        .toCompileTo('42');
+
+      expectTemplate(template).withHelper('foo', toHaveProperties).toCompileTo('42');
+    }
+
+    const factor = process.env.AST || process.env.EVAL ? 1 : 2;
+    expect(toNotHaveProperties.calls).toEqual(nonBlockTemplates.length * 2 * factor);
+    expect(toHaveProperties.calls).toEqual(blockTemplates.length * 2 * factor);
+  });
+
+  it('should pass expected "this" to helper functions (without input)', () => {
+    expectTemplate('{{hello "world" 12 true false}}')
+      .withHelper('hello', function (this: any, ...args: any[]) {
+        expect(this).toMatchInlineSnapshot(`Object {}`);
       })
-      .toCompileTo('42');
+      .toCompileTo('');
+  });
 
-    expectTemplate(template).withHelper('foo', toNotHaveProperties).toCompileTo('42');
-  }
-
-  for (const template of blockTemplates) {
-    expectTemplate(template)
-      .withInput({
-        foo: toHaveProperties,
+  it('should pass expected "this" to helper functions (with input)', () => {
+    expectTemplate('{{hello "world" 12 true false}}')
+      .withHelper('hello', function (this: any, ...args: any[]) {
+        expect(this).toMatchInlineSnapshot(`
+          Object {
+            "people": Array [
+              Object {
+                "id": 1,
+                "name": "Alan",
+              },
+              Object {
+                "id": 2,
+                "name": "Yehuda",
+              },
+            ],
+          }
+        `);
       })
-      .toCompileTo('42');
+      .withInput({
+        people: [
+          { name: 'Alan', id: 1 },
+          { name: 'Yehuda', id: 2 },
+        ],
+      })
+      .toCompileTo('');
+  });
 
-    expectTemplate(template).withHelper('foo', toHaveProperties).toCompileTo('42');
-  }
+  it('should pass expected "this" and arguments to helper functions (non-block helper)', () => {
+    expectTemplate('{{hello "world" 12 true false}}')
+      .withHelper('hello', function (this: any, ...args: any[]) {
+        expect(args).toMatchInlineSnapshot(`
+          Array [
+            "world",
+            12,
+            true,
+            false,
+            Object {
+              "data": Object {
+                "root": Object {
+                  "people": Array [
+                    Object {
+                      "id": 1,
+                      "name": "Alan",
+                    },
+                    Object {
+                      "id": 2,
+                      "name": "Yehuda",
+                    },
+                  ],
+                },
+              },
+              "hash": Object {},
+              "loc": Object {
+                "end": Object {
+                  "column": 31,
+                  "line": 1,
+                },
+                "start": Object {
+                  "column": 0,
+                  "line": 1,
+                },
+              },
+              "lookupProperty": [Function],
+              "name": "hello",
+            },
+          ]
+        `);
+      })
+      .withInput({
+        people: [
+          { name: 'Alan', id: 1 },
+          { name: 'Yehuda', id: 2 },
+        ],
+      })
+      .toCompileTo('');
+  });
 
-  const factor = process.env.AST || process.env.EVAL ? 1 : 2;
-  expect(toNotHaveProperties.calls).toEqual(nonBlockTemplates.length * 2 * factor);
-  expect(toHaveProperties.calls).toEqual(blockTemplates.length * 2 * factor);
+  it('should pass expected "this" and arguments to helper functions (block helper)', () => {
+    expectTemplate('{{#hello "world" 12 true false}}{{/hello}}')
+      .withHelper('hello', function (this: any, ...args: any[]) {
+        expect(args).toMatchInlineSnapshot(`
+          Array [
+            "world",
+            12,
+            true,
+            false,
+            Object {
+              "data": Object {
+                "root": Object {
+                  "people": Array [
+                    Object {
+                      "id": 1,
+                      "name": "Alan",
+                    },
+                    Object {
+                      "id": 2,
+                      "name": "Yehuda",
+                    },
+                  ],
+                },
+              },
+              "fn": [Function],
+              "hash": Object {},
+              "inverse": [Function],
+              "loc": Object {
+                "end": Object {
+                  "column": 42,
+                  "line": 1,
+                },
+                "start": Object {
+                  "column": 0,
+                  "line": 1,
+                },
+              },
+              "lookupProperty": [Function],
+              "name": "hello",
+            },
+          ]
+        `);
+      })
+      .withInput({
+        people: [
+          { name: 'Alan', id: 1 },
+          { name: 'Yehuda', id: 2 },
+        ],
+      })
+      .toCompileTo('');
+  });
 });
 
 // Extra "blocks" tests
@@ -108,33 +252,27 @@ describe('blocks', () => {
       expect(calls).toEqual(callsExpected);
     });
 
-    it('should call decorator again if render function is called again', () => {
-      const callsExpected = process.env.AST || process.env.EVAL ? 1 : 2;
+    forEachCompileFunctionName((compileName) => {
+      it(`should call decorator again if render function is called again for #${compileName}`, () => {
+        global.kbnHandlebarsEnv = Handlebars.create();
 
-      global.kbnHandlebarsEnv = Handlebars.create();
+        kbnHandlebarsEnv!.registerDecorator('decorator', () => {
+          calls++;
+        });
 
-      kbnHandlebarsEnv!.registerDecorator('decorator', () => {
-        calls++;
+        const compile = kbnHandlebarsEnv![compileName].bind(kbnHandlebarsEnv);
+        const render = compile('{{*decorator}}');
+
+        let calls = 0;
+        expect(render()).toEqual('');
+        expect(calls).toEqual(1);
+
+        calls = 0;
+        expect(render()).toEqual('');
+        expect(calls).toEqual(1);
+
+        global.kbnHandlebarsEnv = null;
       });
-
-      let renderAST;
-      let renderEval;
-      if (process.env.AST || !process.env.EVAL) {
-        renderAST = kbnHandlebarsEnv!.compileAST('{{*decorator}}');
-      }
-      if (process.env.EVAL || !process.env.AST) {
-        renderEval = kbnHandlebarsEnv!.compile('{{*decorator}}');
-      }
-
-      let calls = 0;
-      if (renderAST) expect(renderAST({})).toEqual('');
-      if (renderEval) expect(renderEval({})).toEqual('');
-      expect(calls).toEqual(callsExpected);
-
-      calls = 0;
-      if (renderAST) expect(renderAST({})).toEqual('');
-      if (renderEval) expect(renderEval({})).toEqual('');
-      expect(calls).toEqual(callsExpected);
     });
 
     it('should pass expected options to nested decorator', () => {
@@ -170,7 +308,37 @@ describe('blocks', () => {
         .toCompileTo('');
     });
 
-    it('should pass expected options to root decorator', () => {
+    it('should pass expected options to root decorator with no args', () => {
+      expectTemplate('{{*decorator}}')
+        .withDecorator('decorator', function (fn, props, container, options) {
+          expect(options).toMatchInlineSnapshot(`
+            Object {
+              "args": Array [],
+              "data": Object {
+                "root": Object {
+                  "foo": "bar",
+                },
+              },
+              "hash": Object {},
+              "loc": Object {
+                "end": Object {
+                  "column": 14,
+                  "line": 1,
+                },
+                "start": Object {
+                  "column": 0,
+                  "line": 1,
+                },
+              },
+              "name": "decorator",
+            }
+          `);
+        })
+        .withInput({ foo: 'bar' })
+        .toCompileTo('');
+    });
+
+    it('should pass expected options to root decorator with one arg', () => {
       expectTemplate('{{*decorator foo}}')
         .withDecorator('decorator', function (fn, props, container, options) {
           expect(options).toMatchInlineSnapshot(`
@@ -202,9 +370,172 @@ describe('blocks', () => {
         .toCompileTo('');
     });
 
+    describe('return values', () => {
+      for (const [desc, template, result] of [
+        ['non-block', '{{*decorator}}cont{{*decorator}}ent', 'content'],
+        ['block', '{{#*decorator}}con{{/decorator}}tent', 'tent'],
+      ]) {
+        describe(desc, () => {
+          const falsy = [undefined, null, false, 0, ''];
+          const truthy = [true, 42, 'foo', {}];
+
+          // Falsy return values from decorators are simply ignored and the
+          // execution falls back to default behavior which is to render the
+          // other parts of the template.
+          for (const value of falsy) {
+            it(`falsy value (type ${typeof value}): ${JSON.stringify(value)}`, () => {
+              expectTemplate(template)
+                .withDecorator('decorator', () => value)
+                .toCompileTo(result);
+            });
+          }
+
+          // Truthy return values from decorators are expected to be functions
+          // and the program will attempt to call them. We expect an error to
+          // be thrown in this case.
+          for (const value of truthy) {
+            it(`non-falsy value (type ${typeof value}): ${JSON.stringify(value)}`, () => {
+              expectTemplate(template)
+                .withDecorator('decorator', () => value)
+                .toThrow('is not a function');
+            });
+          }
+
+          // If the decorator return value is a custom function, its return
+          // value will be the final content of the template.
+          for (const value of [...falsy, ...truthy]) {
+            it(`function returning ${typeof value}: ${JSON.stringify(value)}`, () => {
+              expectTemplate(template)
+                .withDecorator('decorator', () => () => value)
+                .toCompileTo(value as string);
+            });
+          }
+        });
+      }
+    });
+
+    describe('custom return function should be called with expected arguments and its return value should be rendered in the template', () => {
+      it('root decorator', () => {
+        expectTemplate('{{*decorator}}world')
+          .withInput({ me: 'my' })
+          .withDecorator(
+            'decorator',
+            (fn): TemplateDelegate =>
+              (context, options) => {
+                expect(context).toMatchInlineSnapshot(`
+              Object {
+                "me": "my",
+              }
+            `);
+                expect(options).toMatchInlineSnapshot(`
+              Object {
+                "decorators": Object {
+                  "decorator": [Function],
+                },
+                "helpers": Object {},
+                "partials": Object {},
+              }
+            `);
+                return `hello ${context.me} ${fn()}!`;
+              }
+          )
+          .toCompileTo('hello my world!');
+      });
+
+      it('decorator nested inside of array-helper', () => {
+        expectTemplate('{{#arr}}{{*decorator}}world{{/arr}}')
+          .withInput({ arr: ['my'] })
+          .withDecorator(
+            'decorator',
+            (fn): TemplateDelegate =>
+              (context, options) => {
+                expect(context).toMatchInlineSnapshot(`"my"`);
+                expect(options).toMatchInlineSnapshot(`
+              Object {
+                "blockParams": Array [
+                  "my",
+                  0,
+                ],
+                "data": Object {
+                  "_parent": Object {
+                    "root": Object {
+                      "arr": Array [
+                        "my",
+                      ],
+                    },
+                  },
+                  "first": true,
+                  "index": 0,
+                  "key": 0,
+                  "last": true,
+                  "root": Object {
+                    "arr": Array [
+                      "my",
+                    ],
+                  },
+                },
+              }
+            `);
+                return `hello ${context} ${fn()}!`;
+              }
+          )
+          .toCompileTo('hello my world!');
+      });
+
+      it('decorator nested inside of custom helper', () => {
+        expectTemplate('{{#helper}}{{*decorator}}world{{/helper}}')
+          .withHelper('helper', function (options: HelperOptions) {
+            return options.fn('my', { foo: 'bar' } as any);
+          })
+          .withDecorator(
+            'decorator',
+            (fn): TemplateDelegate =>
+              (context, options) => {
+                expect(context).toMatchInlineSnapshot(`"my"`);
+                expect(options).toMatchInlineSnapshot(`
+              Object {
+                "foo": "bar",
+              }
+            `);
+                return `hello ${context} ${fn()}!`;
+              }
+          )
+          .toCompileTo('hello my world!');
+      });
+    });
+
+    it('should call multiple decorators in the same program body in the expected order and get the expected output', () => {
+      let decoratorCall = 0;
+      let progCall = 0;
+      expectTemplate('{{*decorator}}con{{*decorator}}tent', {
+        beforeRender() {
+          // ensure the counters are reset between EVAL/AST render calls
+          decoratorCall = 0;
+          progCall = 0;
+        },
+      })
+        .withInput({
+          decoratorCall: 0,
+          progCall: 0,
+        })
+        .withDecorator('decorator', (fn) => {
+          const decoratorCallOrder = ++decoratorCall;
+          const ret: TemplateDelegate = () => {
+            const progCallOrder = ++progCall;
+            return `(decorator: ${decoratorCallOrder}, prog: ${progCallOrder}, fn: "${fn()}")`;
+          };
+          return ret;
+        })
+        .toCompileTo('(decorator: 2, prog: 1, fn: "(decorator: 1, prog: 2, fn: "content")")');
+    });
+
     describe('registration', () => {
       beforeEach(() => {
         global.kbnHandlebarsEnv = Handlebars.create();
+      });
+
+      afterEach(() => {
+        global.kbnHandlebarsEnv = null;
       });
 
       it('should be able to call decorators registered using the `registerDecorator` function', () => {
@@ -228,7 +559,7 @@ describe('blocks', () => {
 
         kbnHandlebarsEnv!.unregisterDecorator('decorator');
 
-        expectTemplate('{{*decorator}}').toThrowErrorMatchingSnapshot();
+        expectTemplate('{{*decorator}}').toThrow('lookupProperty(...) is not a function');
         expect(calls).toEqual(0);
       });
     });

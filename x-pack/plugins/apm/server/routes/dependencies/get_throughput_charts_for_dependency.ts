@@ -16,7 +16,7 @@ import {
 } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
-import { getBucketSize } from '../../lib/helpers/get_bucket_size';
+import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import {
   getDocCountFieldForServiceDestinationStatistics,
   getDocumentTypeFilterForServiceDestinationStatistics,

@@ -13,32 +13,23 @@ import { PrebuiltRuleToInstall } from '../../../../../common/detection_engine/pr
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type {
   IRuleAssetSOAttributes,
-  RuleAssetSavedObjectsClient,
+  IRuleAssetsClient,
 } from './rule_asset/rule_asset_saved_objects_client';
 
+import { prebuiltRulesToMap } from './utils';
+
 export const getLatestPrebuiltRules = async (
-  client: RuleAssetSavedObjectsClient
+  ruleAssetsClient: IRuleAssetsClient
 ): Promise<Map<string, PrebuiltRuleToInstall>> =>
   withSecuritySpan('getLatestPrebuiltRules', async () => {
-    const fleetRules = await getFleetRules(client);
-    return new Map(fleetRules.map((rule) => [rule.rule_id, rule]));
+    const ruleAssets = await ruleAssetsClient.fetchLatestVersions();
+    return prebuiltRulesToMap(validateRuleAssets(ruleAssets));
   });
-
-/**
- * Retrieve and validate prebuilt rules that were installed from Fleet as saved objects.
- */
-const getFleetRules = async (
-  client: RuleAssetSavedObjectsClient
-): Promise<PrebuiltRuleToInstall[]> => {
-  const fleetResponse = await client.all();
-  const fleetRules = fleetResponse.map((so) => so.attributes);
-  return validateFleetRules(fleetRules);
-};
 
 /**
  * Validate the rules from Saved Objects created by Fleet.
  */
-const validateFleetRules = (rules: IRuleAssetSOAttributes[]): PrebuiltRuleToInstall[] => {
+const validateRuleAssets = (rules: IRuleAssetSOAttributes[]): PrebuiltRuleToInstall[] => {
   return rules.map((rule) => {
     const decoded = PrebuiltRuleToInstall.decode(rule);
     const checked = exactCheck(rule, decoded);

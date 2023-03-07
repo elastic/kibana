@@ -9,6 +9,7 @@ import type { EuiDataGridColumnActions } from '@elastic/eui';
 import { keyBy } from 'lodash/fp';
 import React from 'react';
 
+import { eventRenderedViewColumns } from '../../../../detections/configurations/security_solution_detections/columns';
 import type {
   BrowserField,
   BrowserFields,
@@ -154,11 +155,13 @@ export const getSchema = (type: string | undefined): BUILT_IN_SCHEMA | undefined
 /** Enriches the column headers with field details from the specified browserFields */
 export const getColumnHeaders = (
   headers: ColumnHeaderOptions[],
-  browserFields: BrowserFields
+  browserFields: BrowserFields,
+  isEventRenderedView?: boolean
 ): ColumnHeaderOptions[] => {
   const browserFieldByName = getAllFieldsByName(browserFields);
-  return headers
-    ? headers.map((header) => {
+  const headersToMap = isEventRenderedView ? eventRenderedViewColumns : headers;
+  return headersToMap
+    ? headersToMap.map((header) => {
         const browserField: Partial<BrowserField> | undefined = browserFieldByName[header.id];
 
         // augment the header with metadata from browserFields:

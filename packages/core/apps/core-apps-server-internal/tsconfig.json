@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../tsconfig.bazel.json",
+  "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "declaration": true,
-    "emitDeclarationOnly": true,
-    "outDir": "target_types",
+    "outDir": "target/types",
     "stripInternal": false,
     "types": [
       "jest",
@@ -12,5 +10,30 @@
   },
   "include": [
     "**/*.ts",
+  ],
+  "kbn_references": [
+    "@kbn/config",
+    "@kbn/config-schema",
+    "@kbn/ui-shared-deps-npm",
+    "@kbn/ui-shared-deps-src",
+    "@kbn/logging",
+    "@kbn/core-base-server-internal",
+    "@kbn/core-http-resources-server",
+    "@kbn/core-http-server",
+    "@kbn/core-lifecycle-server-internal",
+    "@kbn/core-plugins-base-server-internal",
+    "@kbn/repo-info",
+    "@kbn/core-base-server-mocks",
+    "@kbn/core-http-router-server-mocks",
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-http-resources-server-mocks",
+    "@kbn/core-base-common",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/core-lifecycle-server-mocks",
+    "@kbn/core-ui-settings-server",
+    "@kbn/monaco",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

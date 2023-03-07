@@ -10,6 +10,7 @@ import {
   Direction,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiLoadingChart,
   EuiTableSortingType,
 } from '@elastic/eui';
 import numeral from '@elastic/numeral';
@@ -99,14 +100,7 @@ export function MetricsSection({ bucketSize }: Props) {
   }
 
   const isLoading = status === FETCH_STATUS.LOADING;
-  const isPending = status === FETCH_STATUS.LOADING;
-  if (isLoading || isPending) {
-    return <pre>Loading</pre>;
-  }
-
-  if (!data) {
-    return <pre>No Data</pre>;
-  }
+  const isInitialLoad = isLoading && !data;
 
   const columns: Array<EuiBasicTableColumn<MetricsFetchDataSeries>> = [
     {
@@ -218,12 +212,27 @@ export function MetricsSection({ bucketSize }: Props) {
       }}
       hasError={status === FETCH_STATUS.FAILURE}
     >
-      <EuiBasicTable
-        onChange={handleTableChange}
-        sorting={sorting}
-        items={viewData?.series ?? []}
-        columns={columns}
-      />
+      {isInitialLoad ? (
+        <div
+          data-test-subj="loading"
+          style={{
+            height: 240,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <EuiLoadingChart size="l" />
+        </div>
+      ) : (
+        <EuiBasicTable
+          onChange={handleTableChange}
+          sorting={sorting}
+          items={viewData?.series ?? []}
+          columns={columns}
+          loading={isLoading}
+        />
+      )}
     </SectionContainer>
   );
 }

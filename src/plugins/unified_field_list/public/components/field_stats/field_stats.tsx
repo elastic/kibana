@@ -34,6 +34,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery, Query, Filter, AggregateQuery } from '@kbn/es-query';
+import { showExamplesForField } from '../../../common/utils/field_examples_calculator';
 import { OverrideFieldTopValueBarCallback } from './field_top_values_bucket';
 import type { BucketedAggregation } from '../../../common/types';
 import { canProvideStatsForField } from '../../../common/utils/field_stats_utils';
@@ -208,12 +209,14 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
 
   useEffect(() => {
     fetchData();
+  }, [dataViewOrDataViewId, field, dslQuery, query, filters, fromDate, toDate, services]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  useEffect(() => {
     return () => {
       isCanceledRef.current = true;
       abortControllerRef.current?.abort();
     };
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   const chartTheme = charts.theme.useChartsTheme();
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
@@ -262,8 +265,8 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   if (!dataView) {
     return null;
   }
-
   const formatter = dataView.getFormatterForField(field);
+
   let title = <></>;
 
   function combineWithTitleAndFooter(el: React.ReactElement) {
@@ -423,12 +426,12 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
     title = (
       <EuiTitle size="xxxs">
         <h6>
-          {field.aggregatable
-            ? i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
-                defaultMessage: 'Top values',
-              })
-            : i18n.translate('unifiedFieldList.fieldStats.examplesLabel', {
+          {showExamplesForField(field)
+            ? i18n.translate('unifiedFieldList.fieldStats.examplesLabel', {
                 defaultMessage: 'Examples',
+              })
+            : i18n.translate('unifiedFieldList.fieldStats.topValuesLabel', {
+                defaultMessage: 'Top values',
               })}
         </h6>
       </EuiTitle>

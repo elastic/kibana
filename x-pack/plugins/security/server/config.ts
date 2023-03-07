@@ -226,6 +226,11 @@ export const ConfigSchema = schema.object({
         }
       },
     }),
+    concurrentSessions: schema.maybe(
+      schema.object({
+        maxSessions: schema.number({ min: 1, max: 1000 }),
+      })
+    ),
   }),
   secureCookies: schema.boolean({ defaultValue: false }),
   sameSiteCookies: schema.maybe(
@@ -400,6 +405,13 @@ export function createConfig(
       },
     } as AppenderConfigType);
 
+  const session = getSessionConfig(config.session, providers);
+  if (session.concurrentSessions?.maxSessions != null && config.authc.http.enabled) {
+    logger.warn(
+      'Both concurrent user sessions limit and HTTP authentication are configured. The limit does not apply to HTTP authentication.'
+    );
+  }
+
   return {
     ...config,
     audit: {
@@ -412,7 +424,7 @@ export function createConfig(
       sortedProviders: Object.freeze(sortedProviders),
       http: config.authc.http,
     },
-    session: getSessionConfig(config.session, providers),
+    session,
     encryptionKey,
     secureCookies,
   };
@@ -420,6 +432,7 @@ export function createConfig(
 
 function getSessionConfig(session: RawConfigType['session'], providers: ProvidersConfigType) {
   return {
+    concurrentSessions: session.concurrentSessions,
     cleanupInterval: session.cleanupInterval,
     getExpirationTimeouts(provider: AuthenticationProvider | undefined) {
       // Both idle timeout and lifespan from the provider specific session config can have three

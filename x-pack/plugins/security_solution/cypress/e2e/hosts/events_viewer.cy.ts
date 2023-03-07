@@ -60,12 +60,9 @@ describe('Events Viewer', () => {
   });
 
   context('Fields rendering', () => {
-    before(() => {
+    beforeEach(() => {
       visit(HOSTS_URL);
       openEvents();
-    });
-
-    beforeEach(() => {
       openEventsViewerFieldsBrowser();
     });
 
@@ -92,7 +89,7 @@ describe('Events Viewer', () => {
   });
 
   context('Events viewer query modal', () => {
-    before(() => {
+    beforeEach(() => {
       visit(HOSTS_URL);
       openEvents();
     });
@@ -105,12 +102,9 @@ describe('Events Viewer', () => {
   });
 
   context('Events viewer fields behaviour', () => {
-    before(() => {
+    beforeEach(() => {
       visit(HOSTS_URL);
       openEvents();
-    });
-
-    beforeEach(() => {
       openEventsViewerFieldsBrowser();
     });
 
@@ -135,7 +129,7 @@ describe('Events Viewer', () => {
   });
 
   context('Events behavior', () => {
-    before(() => {
+    beforeEach(() => {
       visit(HOSTS_URL);
       openEvents();
       waitsForEventsToBeLoaded();

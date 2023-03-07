@@ -234,17 +234,6 @@ describe('rule_loader', () => {
               "authorization": "ApiKey rule-apikey",
             },
             "path": "/",
-            "raw": Object {
-              "req": Object {
-                "url": "/",
-              },
-            },
-            "route": Object {
-              "settings": Object {},
-            },
-            "url": Object {
-              "href": "/",
-            },
           },
         ]
       `);
@@ -264,17 +253,6 @@ describe('rule_loader', () => {
               "authorization": "ApiKey rule-apikey",
             },
             "path": "/",
-            "raw": Object {
-              "req": Object {
-                "url": "/",
-              },
-            },
-            "route": Object {
-              "settings": Object {},
-            },
-            "url": Object {
-              "href": "/",
-            },
           },
         ]
       `);
@@ -293,17 +271,6 @@ describe('rule_loader', () => {
           Object {
             "headers": Object {},
             "path": "/",
-            "raw": Object {
-              "req": Object {
-                "url": "/",
-              },
-            },
-            "route": Object {
-              "settings": Object {},
-            },
-            "url": Object {
-              "href": "/",
-            },
           },
         ]
       `);

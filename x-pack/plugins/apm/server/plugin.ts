@@ -15,10 +15,10 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { isEmpty, mapValues } from 'lodash';
-import { mappingFromFieldMap } from '@kbn/rule-registry-plugin/common/mapping_from_field_map';
 import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { APMConfig, APM_SERVER_FEATURE_ID } from '.';
 import { APM_FEATURE, registerFeaturesUsage } from './feature';
 import { registerApmRuleTypes } from './routes/alerts/register_apm_rule_types';
@@ -58,6 +58,7 @@ import { tutorialProvider } from './tutorial';
 import { migrateLegacyAPMIndicesToSpaceAware } from './saved_objects/migrations/migrate_legacy_apm_indices_to_space_aware';
 import { scheduleSourceMapMigration } from './routes/source_maps/schedule_source_map_migration';
 import { createApmSourceMapIndexTemplate } from './routes/source_maps/create_apm_source_map_index_template';
+import { addApiKeysToEveryPackagePolicyIfMissing } from './routes/fleet/api_keys/add_api_keys_to_policies_if_missing';
 
 export class APMPlugin
   implements
@@ -129,25 +130,32 @@ export class APMPlugin
               ...experimentalRuleFieldMap,
               [SERVICE_NAME]: {
                 type: 'keyword',
+                required: false,
               },
               [SERVICE_ENVIRONMENT]: {
                 type: 'keyword',
+                required: false,
               },
               [TRANSACTION_TYPE]: {
                 type: 'keyword',
+                required: false,
               },
               [PROCESSOR_EVENT]: {
                 type: 'keyword',
+                required: false,
               },
               [AGENT_NAME]: {
                 type: 'keyword',
+                required: false,
               },
               [SERVICE_LANGUAGE_NAME]: {
                 type: 'keyword',
+                required: false,
               },
               labels: {
                 type: 'object',
                 dynamic: true,
+                required: false,
               },
             },
             'strict'
@@ -169,11 +177,13 @@ export class APMPlugin
       };
     }) as APMRouteHandlerResources['plugins'];
 
-    const boundGetApmIndices = async () =>
-      getApmIndices({
-        savedObjectsClient: await getInternalSavedObjectsClient(core),
+    const boundGetApmIndices = async () => {
+      const coreStart = await getCoreStart();
+      return getApmIndices({
+        savedObjectsClient: await getInternalSavedObjectsClient(coreStart),
         config: await firstValueFrom(config$),
       });
+    };
 
     boundGetApmIndices().then((indices) => {
       plugins.home?.tutorials.registerTutorial(
@@ -218,21 +228,31 @@ export class APMPlugin
     }
 
     registerFleetPolicyCallbacks({
-      plugins: resourcePlugins,
-      ruleDataClient,
-      config: currentConfig,
       logger: this.logger,
-      kibanaVersion: this.initContext.env.packageInfo.version,
+      coreStartPromise: getCoreStart(),
+      plugins: resourcePlugins,
+      config: currentConfig,
+    }).catch((e) => {
+      this.logger?.error('Failed to register APM Fleet policy callbacks');
+      this.logger?.error(e);
     });
 
-    const fleetStartPromise = resourcePlugins.fleet?.start();
+    // This will add an API key to all existing APM package policies
+    addApiKeysToEveryPackagePolicyIfMissing({
+      coreStartPromise: getCoreStart(),
+      pluginStartPromise: getPluginStart(),
+      logger: this.logger,
+    }).catch((e) => {
+      this.logger?.error('Failed to add API keys to APM package policies');
+      this.logger?.error(e);
+    });
+
     const taskManager = plugins.taskManager;
 
     // create source map index and run migrations
     scheduleSourceMapMigration({
       coreStartPromise: getCoreStart(),
       pluginStartPromise: getPluginStart(),
-      fleetStartPromise,
       taskManager,
       logger: this.logger,
     }).catch((e) => {

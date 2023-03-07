@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/utility-types",
-  "owner": "@elastic/kibana-core",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/kibana-core"
 }

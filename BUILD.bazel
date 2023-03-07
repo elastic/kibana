@@ -3,11 +3,18 @@
 exports_files(
   [
     "tsconfig.base.json",
-    "tsconfig.bazel.json",
     "tsconfig.browser.json",
     "tsconfig.browser_bazel.json",
     "tsconfig.json",
-    "package.json"
+    "package.json",
+    ".browserslistrc"
   ],
   visibility = ["//visibility:public"]
+)
+
+config_setting(
+  name = "dist",
+  values = {
+    "define": "dist=true"
+  }
 )

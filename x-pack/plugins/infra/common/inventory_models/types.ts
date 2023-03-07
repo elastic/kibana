@@ -248,7 +248,6 @@ export const ESPercentileAggRT = rt.type({
 export const ESCaridnalityAggRT = rt.type({
   cardinality: rt.partial({
     field: rt.string,
-    script: rt.string,
   }),
 });
 
@@ -345,7 +344,6 @@ export type MetricsUIAggregation = rt.TypeOf<typeof MetricsUIAggregationRT>;
 export const SnapshotMetricTypeKeys = {
   count: null,
   cpu: null,
-  cpuCores: null,
   diskLatency: null,
   load: null,
   memory: null,

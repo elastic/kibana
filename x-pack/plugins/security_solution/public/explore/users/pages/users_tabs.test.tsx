@@ -11,7 +11,7 @@ import { Router } from 'react-router-dom';
 
 import '../../../common/mock/match_media';
 import { TestProviders } from '../../../common/mock';
-import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
+import { TabNavigationWithBreadcrumbs } from '../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 import { Users } from './users';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
@@ -24,9 +24,8 @@ jest.mock('../../../common/components/search_bar', () => ({
 jest.mock('../../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
-jest.mock('../../../common/components/visualization_actions', () => ({
-  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
-}));
+jest.mock('../../../common/components/visualization_actions/actions');
+jest.mock('../../../common/components/visualization_actions/lens_embeddable');
 const mockNavigateToApp = jest.fn();
 jest.mock('../../../common/lib/kibana', () => {
   const original = jest.requireActual('../../../common/lib/kibana');
@@ -101,6 +100,6 @@ describe('Users - rendering', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(SecuritySolutionTabNavigation).exists()).toBe(true);
+    expect(wrapper.find(TabNavigationWithBreadcrumbs).exists()).toBe(true);
   });
 });

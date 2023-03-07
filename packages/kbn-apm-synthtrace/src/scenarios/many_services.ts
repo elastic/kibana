@@ -6,21 +6,14 @@
  * Side Public License, v 1.
  */
 
+import { ApmFields, apm, Instance } from '@kbn/apm-synthtrace-client';
 import { flatten, random } from 'lodash';
-
-import { apm, timerange } from '../..';
 import { Scenario } from '../cli/scenario';
-import { getLogger } from '../cli/utils/get_common_services';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
-import { ApmFields } from '../lib/apm/apm_fields';
-import { Instance } from '../lib/apm/instance';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
-const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
-  const logger = getLogger(runOptions);
-
+const scenario: Scenario<ApmFields> = async ({ logger }) => {
   const numServices = 500;
   const languages = ['go', 'dotnet', 'java', 'python'];
   const services = ['web', 'order-processing', 'api-backend', 'proxy'];
@@ -32,9 +25,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   };
 
   return {
-    generate: ({ from, to }) => {
-      const range = timerange(from, to);
-
+    generate: ({ range }) => {
       const successfulTimestamps = range.ratePerMinute(180);
 
       const instances = flatten(
@@ -104,12 +95,11 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         return successfulTraceEvents;
       };
 
-      return instances
-        .flatMap((instance) => urls.map((url) => ({ instance, url })))
-        .map(({ instance, url }) =>
-          logger.perf('generating_apm_events', () => instanceSpans(instance, url))
-        )
-        .reduce((p, c) => p.merge(c));
+      return logger.perf('generating_apm_events', () =>
+        instances
+          .flatMap((instance) => urls.map((url) => ({ instance, url })))
+          .map(({ instance, url }) => instanceSpans(instance, url))
+      );
     },
   };
 };

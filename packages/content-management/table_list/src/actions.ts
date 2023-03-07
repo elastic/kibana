@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 import type { IHttpFetchError } from '@kbn/core-http-browser';
-import type { CriteriaWithPagination, Direction, Query } from '@elastic/eui';
+import type { Query } from '@elastic/eui';
 
-import type { SortColumnField } from './components';
+import type { State, UserContentCommonSchema } from './table_list_view';
 
 /** Action to trigger a fetch of the table items */
 export interface OnFetchItemsAction {
@@ -49,17 +49,14 @@ export interface OnSelectionChangeAction<T> {
 }
 
 /** Action to update the state of the table whenever the sort or page size changes */
-export interface OnTableChangeAction<T> {
+export interface OnTableChangeAction<T extends UserContentCommonSchema> {
   type: 'onTableChange';
-  data: CriteriaWithPagination<T>;
-}
-
-/** Action to update the sort column of the table */
-export interface OnTableSortChangeAction<T> {
-  type: 'onTableSortChange';
   data: {
-    field: SortColumnField;
-    direction: Direction;
+    sort?: State<T>['tableSort'];
+    page?: {
+      pageIndex: number;
+      pageSize: number;
+    };
   };
 }
 
@@ -77,13 +74,12 @@ export interface OnSearchQueryChangeAction {
   };
 }
 
-export type Action<T> =
+export type Action<T extends UserContentCommonSchema> =
   | OnFetchItemsAction
   | OnFetchItemsSuccessAction<T>
   | OnFetchItemsErrorAction
   | DeleteItemsActions
   | OnSelectionChangeAction<T>
   | OnTableChangeAction<T>
-  | OnTableSortChangeAction<T>
   | ShowConfirmDeleteItemsModalAction
   | OnSearchQueryChangeAction;

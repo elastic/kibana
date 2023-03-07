@@ -39,7 +39,7 @@ describe('getExceptionListsItemFilter', () => {
       savedObjectType: ['exception-list'],
     });
     expect(filter).toEqual(
-      '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "some-list-id") AND exception-list.attributes.name: "Sample Endpoint Exception List")'
+      '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "some-list-id") AND (exception-list.attributes.name: "Sample Endpoint Exception List"))'
     );
   });
 
@@ -61,7 +61,7 @@ describe('getExceptionListsItemFilter', () => {
       savedObjectType: ['exception-list', 'exception-list-agnostic'],
     });
     expect(filter).toEqual(
-      '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "list-1") AND exception-list.attributes.name: "Sample Endpoint Exception List") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-2")'
+      '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "list-1") AND (exception-list.attributes.name: "Sample Endpoint Exception List")) OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-2")'
     );
   });
 
@@ -83,7 +83,7 @@ describe('getExceptionListsItemFilter', () => {
       savedObjectType: ['exception-list', 'exception-list-agnostic', 'exception-list-agnostic'],
     });
     expect(filter).toEqual(
-      '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "list-1") AND exception-list.attributes.name: "Sample Endpoint Exception List") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-2") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-3")'
+      '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "list-1") AND (exception-list.attributes.name: "Sample Endpoint Exception List")) OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-2") OR (exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-3")'
     );
   });
 
@@ -98,7 +98,7 @@ describe('getExceptionListsItemFilter', () => {
       savedObjectType: ['exception-list', 'exception-list-agnostic', 'exception-list-agnostic'],
     });
     expect(filter).toEqual(
-      '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "list-1") AND exception-list.attributes.name: "Sample Endpoint Exception List 1") OR ((exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-2") AND exception-list.attributes.name: "Sample Endpoint Exception List 2") OR ((exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-3") AND exception-list.attributes.name: "Sample Endpoint Exception List 3")'
+      '((exception-list.attributes.list_type: item AND exception-list.attributes.list_id: "list-1") AND (exception-list.attributes.name: "Sample Endpoint Exception List 1")) OR ((exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-2") AND (exception-list.attributes.name: "Sample Endpoint Exception List 2")) OR ((exception-list-agnostic.attributes.list_type: item AND exception-list-agnostic.attributes.list_id: "list-3") AND (exception-list.attributes.name: "Sample Endpoint Exception List 3"))'
     );
   });
 });

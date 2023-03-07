@@ -5,14 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 const realPath = jest.requireActual('path');
 
 jest.doMock('path', () => ({
   ...realPath,
-  resolve(...pathSegments: string[]) {
-    return pathSegments.join('/');
-  },
   dirname(filePath: string) {
     return '/test/kibanaRoot';
   },

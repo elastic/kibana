@@ -23,7 +23,7 @@ import {
 import { getServicesCounts } from './get_services_counts';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getServiceGroupAlerts } from './get_service_group_alerts';
-import { getApmAlertsClient } from './get_apm_alerts_client';
+import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 
 const serviceGroupsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/service-groups',

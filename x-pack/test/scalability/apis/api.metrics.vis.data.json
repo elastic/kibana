@@ -1,0 +1,50 @@
+{
+  "journeyName": "POST /api/metrics/vis/data",
+  "scalabilitySetup": {
+    "responseTimeThreshold": {
+      "threshold1": 5000,
+      "threshold2": 10000,
+      "threshold3": 20000
+    },
+    "warmup": [
+      {
+        "action": "constantUsersPerSec",
+        "userCount": 10,
+        "duration": "30s"
+      }
+    ],
+    "test": [
+      {
+        "action": "rampUsersPerSec",
+        "minUsersCount": 10,
+        "maxUsersCount": 150,
+        "duration": "140s"
+      }
+    ],
+    "maxDuration": "5m"
+  },
+  "testData": {
+    "esArchives": ["x-pack/performance/es_archives/sample_data_ecommerce"],
+    "kbnArchives": ["x-pack/performance/kbn_archives/promotion_tracking_dashboard"]
+  },
+  "streams": [
+    {
+      "requests": [
+        {
+          "http": {
+            "method": "POST",
+            "path": "/api/metrics/vis/data",
+            "headers": {
+              "Cookie": "",
+              "Kbn-Version": "",
+              "Accept-Encoding": "gzip, deflate, br",
+              "Content-Type": "application/json"
+            },
+            "body": "{\"timerange\":{\"timezone\":\"UTC\",\"min\":\"2022-11-14T00:00:00.000Z\",\"max\":\"2022-12-14T17:17:09.931Z\"},\"query\":[{\"query\":\"\",\"language\":\"kuery\"}],\"filters\":[],\"panels\":[{\"time_range_mode\":\"entire_time_range\",\"id\":\"61ca57f0-469d-11e7-af02-69e470af7417\",\"type\":\"timeseries\",\"series\":[{\"id\":\"ea20ae70-b88d-11e8-a451-f37365e9f268\",\"color\":\"rgba(211,96,134,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"ea20ae71-b88d-11e8-a451-f37365e9f268\",\"type\":\"sum\",\"field\":\"taxful_total_price\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":\"5\",\"fill\":\"0\",\"stacked\":\"none\",\"filter\":{\"query\":\"products.product_name:*trouser*\",\"language\":\"lucene\"},\"label\":\"Revenue Trousers\",\"value_template\":\"${{value}}\",\"split_color_mode\":\"gradient\"},{\"id\":\"062d77b0-b88e-11e8-a451-f37365e9f268\",\"color\":\"rgba(84,179,153,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"062d77b1-b88e-11e8-a451-f37365e9f268\",\"type\":\"sum\",\"field\":\"taxful_total_price\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":\"05\",\"fill\":\"0\",\"stacked\":\"none\",\"filter\":{\"query\":\"products.product_name:*watch*\",\"language\":\"lucene\"},\"label\":\"Revenue Watches\",\"value_template\":\"${{value}}\",\"split_color_mode\":\"gradient\"},{\"id\":\"61ca57f1-469d-11e7-af02-69e470af7417\",\"color\":\"rgba(96,146,192,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"61ca57f2-469d-11e7-af02-69e470af7417\",\"type\":\"sum\",\"field\":\"taxful_total_price\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":\"5\",\"fill\":\"0\",\"stacked\":\"none\",\"filter\":{\"query\":\"products.product_name:*bag*\",\"language\":\"lucene\"},\"label\":\"Revenue Bags\",\"value_template\":\"${{value}}\",\"split_color_mode\":\"gradient\"},{\"id\":\"faa2c170-b88d-11e8-a451-f37365e9f268\",\"color\":\"rgba(202,142,174,1)\",\"split_mode\":\"everything\",\"metrics\":[{\"id\":\"faa2c171-b88d-11e8-a451-f37365e9f268\",\"type\":\"sum\",\"field\":\"taxful_total_price\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"number\",\"chart_type\":\"line\",\"line_width\":\"2\",\"point_size\":\"5\",\"fill\":\"0\",\"stacked\":\"none\",\"filter\":{\"query\":\"products.product_name:*cocktail dress*\",\"language\":\"lucene\"},\"label\":\"Revenue Cocktail Dresses\",\"value_template\":\"${{value}}\",\"split_color_mode\":\"gradient\"}],\"time_field\":\"order_date\",\"interval\":\"12h\",\"use_kibana_indexes\":true,\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"show_grid\":1,\"legend_position\":\"bottom\",\"annotations\":[{\"fields\":\"taxful_total_price\",\"template\":\"Ring the bell! ${{taxful_total_price}}\",\"query_string\":{\"query\":\"taxful_total_price:>250\",\"language\":\"lucene\"},\"id\":\"c8c30be0-b88f-11e8-a451-f37365e9f268\",\"color\":\"rgba(25,77,51,1)\",\"time_field\":\"order_date\",\"icon\":\"fa-bell\",\"ignore_global_filters\":1,\"ignore_panel_filters\":1,\"index_pattern\":{\"id\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\"}}],\"tooltip_mode\":\"show_all\",\"drop_last_bucket\":0,\"isModelInvalid\":false,\"index_pattern\":{\"id\":\"ff959d40-b880-11e8-a6d9-e546fe2bba5f\"},\"truncate_legend\":1,\"max_lines_legend\":1}],\"state\":{},\"searchSession\":{\"sessionId\":\"8c3dfba6-dcf9-4402-aa7c-3b36fd9bda0c\",\"isRestore\":false,\"isStored\":false}}",
+            "statusCode": 200
+          }
+        }
+      ]
+    }
+  ]
+}

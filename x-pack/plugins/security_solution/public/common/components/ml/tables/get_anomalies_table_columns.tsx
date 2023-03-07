@@ -10,14 +10,13 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { Columns } from '../../../../explore/components/paginated_table';
 import type { AnomaliesBy, Anomaly } from '../types';
 
-import { EntityDraggable } from '../entity_draggable';
+import { Entity } from '../entity';
 import { createCompoundAnomalyKey } from './create_compound_key';
 
 import * as i18n from './translations';
 import { getEntries } from '../get_entries';
-import { DraggableScore } from '../score/draggable_score';
+import { Score } from '../score/score';
 import { ExplorerLink } from '../links/create_explorer_link';
-import { escapeDataProviderId } from '../../drag_and_drop/helpers';
 import { FormattedRelativePreferenceDate } from '../../formatted_date';
 
 export const getAnomaliesDefaultTableColumns = (
@@ -32,14 +31,14 @@ export const getAnomaliesDefaultTableColumns = (
 ] => [
   {
     name: i18n.DETECTOR,
-    field: 'anomaly.jobId',
+    field: 'jobName',
     sortable: true,
-    render: (jobId, anomalyBy) => (
+    render: (jobName, anomalyBy) => (
       <ExplorerLink
         score={anomalyBy.anomaly}
         startDate={startDate}
         endDate={endDate}
-        linkName={jobId}
+        linkName={jobName}
       />
     ),
   },
@@ -47,27 +46,14 @@ export const getAnomaliesDefaultTableColumns = (
     name: i18n.SCORE,
     field: 'anomaly.severity',
     sortable: true,
-    render: (_, anomalyBy) => (
-      <DraggableScore
-        id={escapeDataProviderId(
-          `anomalies-table-severity-${createCompoundAnomalyKey(anomalyBy.anomaly)}`
-        )}
-        score={anomalyBy.anomaly}
-      />
-    ),
+    render: (_, anomalyBy) => <Score score={anomalyBy.anomaly} />,
   },
   {
     name: i18n.ENTITY,
     field: 'anomaly.entityValue',
     sortable: true,
     render: (entityValue, anomalyBy) => (
-      <EntityDraggable
-        idPrefix={`anomalies-table-entityValue${createCompoundAnomalyKey(
-          anomalyBy.anomaly
-        )}-entity`}
-        entityName={anomalyBy.anomaly.entityName}
-        entityValue={entityValue}
-      />
+      <Entity entityName={anomalyBy.anomaly.entityName} entityValue={entityValue} />
     ),
   },
   {
@@ -87,13 +73,7 @@ export const getAnomaliesDefaultTableColumns = (
               >
                 <EuiFlexGroup gutterSize="none" responsive={false}>
                   <EuiFlexItem grow={false}>
-                    <EntityDraggable
-                      idPrefix={`anomalies-table-influencers-${entityName}-${entityValue}-${createCompoundAnomalyKey(
-                        anomalyBy.anomaly
-                      )}`}
-                      entityName={entityName}
-                      entityValue={entityValue}
-                    />
+                    <Entity entityName={entityName} entityValue={entityValue} />
                   </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiFlexItem>

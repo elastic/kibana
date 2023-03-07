@@ -8,12 +8,13 @@
 import { pluck } from 'rxjs/operators';
 import { lastValueFrom } from 'rxjs';
 import { Query, AggregateQuery, Filter } from '@kbn/es-query';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import { DataTableRecord } from '../../../types';
+import type { RecordsFetchResponse, DataTableRecord } from '../../../types';
 
 interface SQLErrorResponse {
   error: {
@@ -24,24 +25,28 @@ interface SQLErrorResponse {
 
 export function fetchSql(
   query: Query | AggregateQuery,
-  dataViewsService: DataViewsContract,
+  dataView: DataView,
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
+  inspectorAdapters: Adapters,
   filters?: Filter[],
   inputQuery?: Query
-) {
+): Promise<RecordsFetchResponse> {
   const timeRange = data.query.timefilter.timefilter.getTime();
   return textBasedQueryStateToAstWithValidation({
     filters,
     query,
     time: timeRange,
-    dataViewsService,
+    dataView,
     inputQuery,
   })
     .then((ast) => {
       if (ast) {
-        const execution = expressions.run(ast, null);
+        const execution = expressions.run(ast, null, {
+          inspectorAdapters,
+        });
         let finalData: DataTableRecord[] = [];
+        let textBasedQueryColumns: Datatable['columns'] | undefined;
         let error: string | undefined;
         execution.pipe(pluck('result')).subscribe((resp) => {
           const response = resp as Datatable | SQLErrorResponse;
@@ -50,6 +55,7 @@ export function fetchSql(
           } else {
             const table = response as Datatable;
             const rows = table?.rows ?? [];
+            textBasedQueryColumns = table?.columns ?? undefined;
             finalData = rows.map(
               (row: Record<string, string>, idx: number) =>
                 ({
@@ -64,11 +70,17 @@ export function fetchSql(
           if (error) {
             throw new Error(error);
           } else {
-            return finalData || [];
+            return {
+              records: finalData || [],
+              textBasedQueryColumns,
+            };
           }
         });
       }
-      return [];
+      return {
+        records: [] as DataTableRecord[],
+        textBasedQueryColumns: [],
+      };
     })
     .catch((err) => {
       throw new Error(err.message);

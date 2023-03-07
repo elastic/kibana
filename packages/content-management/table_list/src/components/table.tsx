@@ -17,7 +17,6 @@ import {
   SearchFilterConfig,
   Direction,
   Query,
-  Ast,
 } from '@elastic/eui';
 
 import { useServices } from '../services';
@@ -54,6 +53,7 @@ interface Props<T extends UserContentCommonSchema> extends State<T>, TagManageme
   deleteItems: TableListViewProps<T>['deleteItems'];
   onSortChange: (column: SortColumnField, direction: Direction) => void;
   onTableChange: (criteria: CriteriaWithPagination<T>) => void;
+  onTableSearchChange: (arg: { query: Query | null; queryText: string }) => void;
   clearTagSelection: () => void;
 }
 
@@ -73,6 +73,7 @@ export function Table<T extends UserContentCommonSchema>({
   deleteItems,
   tableCaption,
   onTableChange,
+  onTableSearchChange,
   onSortChange,
   addOrRemoveExcludeTagFilter,
   addOrRemoveIncludeTagFilter,
@@ -128,19 +129,6 @@ export function Table<T extends UserContentCommonSchema>({
     addOrRemoveIncludeTagFilter,
   });
 
-  const onSearchQueryChange = useCallback(
-    (arg: { query: Query | null; queryText: string }) => {
-      dispatch({
-        type: 'onSearchQueryChange',
-        data: {
-          query: arg.query ?? new Query(Ast.create([]), undefined, arg.queryText),
-          text: arg.queryText,
-        },
-      });
-    },
-    [dispatch]
-  );
-
   const tableSortSelectFilter = useMemo<SearchFilterConfig>(() => {
     return {
       type: 'custom_component',
@@ -191,7 +179,7 @@ export function Table<T extends UserContentCommonSchema>({
 
   const search = useMemo(() => {
     return {
-      onChange: onSearchQueryChange,
+      onChange: onTableSearchChange,
       toolsLeft: renderToolsLeft(),
       query: searchQuery.query ?? undefined,
       box: {
@@ -200,7 +188,7 @@ export function Table<T extends UserContentCommonSchema>({
       },
       filters: searchFilters,
     };
-  }, [onSearchQueryChange, renderToolsLeft, searchFilters, searchQuery.query]);
+  }, [onTableSearchChange, renderToolsLeft, searchFilters, searchQuery.query]);
 
   const noItemsMessage = (
     <FormattedMessage

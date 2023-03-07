@@ -46,7 +46,7 @@ export const postAgentUpgradeHandler: RequestHandler<
     });
   }
   try {
-    const agent = await getAgentById(esClient, request.params.agentId);
+    const agent = await getAgentById(esClient, soClient, request.params.agentId);
 
     const fleetServerAgents = await getAllFleetServerAgents(soClient, esClient);
     const agentIsFleetServer = fleetServerAgents.some(

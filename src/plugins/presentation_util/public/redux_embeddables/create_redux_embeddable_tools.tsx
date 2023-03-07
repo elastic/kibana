@@ -52,17 +52,17 @@ export const createReduxEmbeddableTools = <
 }): ReduxEmbeddableTools<ReduxEmbeddableStateType, ReducerType> => {
   // Additional generic reducers to aid in embeddable syncing
   const genericReducers = {
-    updateEmbeddableReduxInput: (
+    replaceEmbeddableReduxInput: (
       state: Draft<ReduxEmbeddableStateType>,
-      action: PayloadAction<Partial<ReduxEmbeddableStateType['explicitInput']>>
+      action: PayloadAction<ReduxEmbeddableStateType['explicitInput']>
     ) => {
-      state.explicitInput = { ...state.explicitInput, ...action.payload };
+      state.explicitInput = action.payload;
     },
-    updateEmbeddableReduxOutput: (
+    replaceEmbeddableReduxOutput: (
       state: Draft<ReduxEmbeddableStateType>,
-      action: PayloadAction<Partial<ReduxEmbeddableStateType['output']>>
+      action: PayloadAction<ReduxEmbeddableStateType['output']>
     ) => {
-      state.output = { ...state.output, ...action.payload };
+      state.output = action.payload;
     },
   };
 

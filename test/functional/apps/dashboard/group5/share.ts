@@ -40,6 +40,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const dashboardCustomizePanel = getService('dashboardCustomizePanel');
 
   const PageObjects = getPageObjects(['dashboard', 'common', 'share', 'timePicker']);
 
@@ -62,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('unpinned filter should show up only in app state when dashboard is unsaved', async () => {
-        await filterBar.addFilter('geo.src', 'is', 'AE');
+        await filterBar.addFilter({ field: 'geo.src', operation: 'is', value: 'AE' });
         await PageObjects.dashboard.waitForRenderComplete();
 
         const sharedUrl = await getSharedUrl(mode);
@@ -128,7 +129,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         it('should have "panels" in app state when a panel has been modified', async () => {
-          await dashboardPanelActions.setCustomPanelTitle('Test New Title');
+          await dashboardPanelActions.customizePanel();
+          await dashboardCustomizePanel.setCustomPanelTitle('Test New Title');
+          await dashboardCustomizePanel.clickSaveButton();
           await PageObjects.dashboard.waitForRenderComplete();
           await testSubjects.existOrFail('dashboardUnsavedChangesBadge');
 

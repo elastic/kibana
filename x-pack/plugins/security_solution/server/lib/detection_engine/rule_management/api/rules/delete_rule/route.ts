@@ -46,7 +46,6 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
 
         const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
         const rulesClient = ctx.alerting.getRulesClient();
-        const ruleExecutionLog = ctx.securitySolution.getRuleExecutionLog();
         const savedObjectsClient = ctx.core.savedObjects.client;
 
         const rule = await readRules({ rulesClient, id, ruleId });
@@ -64,15 +63,12 @@ export const deleteRuleRoute = (router: SecuritySolutionPluginRouter) => {
           });
         }
 
-        const ruleExecutionSummary = await ruleExecutionLog.getExecutionSummary(migratedRule.id);
-
         await deleteRules({
           ruleId: migratedRule.id,
           rulesClient,
-          ruleExecutionLog,
         });
 
-        const transformed = transform(migratedRule, ruleExecutionSummary);
+        const transformed = transform(migratedRule);
         if (transformed == null) {
           return siemResponse.error({ statusCode: 500, body: 'failed to transform alert' });
         } else {

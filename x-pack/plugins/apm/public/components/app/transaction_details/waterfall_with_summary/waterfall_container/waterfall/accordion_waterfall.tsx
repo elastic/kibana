@@ -34,7 +34,10 @@ interface AccordionWaterfallProps {
   waterfallItemId?: string;
   waterfall: IWaterfall;
   timelineMargins: Margins;
-  onClickWaterfallItem: (item: IWaterfallSpanOrTransaction) => void;
+  onClickWaterfallItem: (
+    item: IWaterfallSpanOrTransaction,
+    flyoutDetailTab: string
+  ) => void;
   showCriticalPath: boolean;
   maxLevelOpen: number;
 }
@@ -159,8 +162,8 @@ export function AccordionWaterfall(props: AccordionWaterfallProps) {
               isSelected={item.id === waterfallItemId}
               errorCount={errorCount}
               marginLeftLevel={marginLeftLevel}
-              onClick={() => {
-                onClickWaterfallItem(item);
+              onClick={(flyoutDetailTab: string) => {
+                onClickWaterfallItem(item, flyoutDetailTab);
               }}
               segments={criticalPathSegmentsById[item.id]
                 ?.filter((segment) => segment.self)

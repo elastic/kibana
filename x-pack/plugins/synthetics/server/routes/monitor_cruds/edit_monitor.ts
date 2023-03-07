@@ -56,9 +56,9 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     const monitor = request.body as SyntheticsMonitor;
     const { monitorId } = request.params;
 
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
-
     try {
+      const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
+
       const previousMonitor: SavedObject<EncryptedSyntheticsMonitor> = await savedObjectsClient.get(
         syntheticsMonitorType,
         monitorId
@@ -162,7 +162,14 @@ export const syncEditedMonitor = async ({
     const allPrivateLocations = await getSyntheticsPrivateLocations(savedObjectsClient);
 
     const editSyncPromise = syntheticsMonitorClient.editMonitors(
-      [{ monitor: monitorWithId as MonitorFields, id: previousMonitor.id, previousMonitor }],
+      [
+        {
+          monitor: monitorWithId as MonitorFields,
+          id: previousMonitor.id,
+          previousMonitor,
+          decryptedPreviousMonitor,
+        },
+      ],
       request,
       savedObjectsClient,
       allPrivateLocations,

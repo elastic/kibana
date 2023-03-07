@@ -99,9 +99,17 @@ export class DashboardContainerFactoryDefinition
     parent?: Container,
     creationOptions?: DashboardCreationOptions
   ): Promise<DashboardContainer | ErrorEmbeddable> => {
+    const dashboardCreationStartTime = performance.now();
     const { DashboardContainer: DashboardContainerEmbeddable } = await import(
       './dashboard_container'
     );
-    return Promise.resolve(new DashboardContainerEmbeddable(initialInput, parent, creationOptions));
+    return Promise.resolve(
+      new DashboardContainerEmbeddable(
+        initialInput,
+        dashboardCreationStartTime,
+        parent,
+        creationOptions
+      )
+    );
   };
 }

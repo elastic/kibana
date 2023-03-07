@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
+import moment from 'moment';
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
@@ -13,6 +16,8 @@ import {
   getConnectorByName,
   createSlackConnectorAndObjectRemover,
   createSlackConnector,
+  createRuleWithActionsAndParams,
+  getAlertSummary,
 } from './utils';
 
 export default ({ getPageObjects, getPageObject, getService }: FtrProviderContext) => {
@@ -290,6 +295,107 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       expect(await testSubjects.exists('preconfiguredBadge')).to.be(true);
       expect(await testSubjects.exists('edit-connector-flyout-save-btn')).to.be(false);
+    });
+
+    describe('Execution log', () => {
+      const testRunUuid = uuidv4();
+      let rule: any;
+
+      before(async () => {
+        await pageObjects.common.navigateToApp('triggersActions');
+
+        const connectorName = generateUniqueKey();
+        const createdAction = await createSlackConnector({ name: connectorName, getService });
+        objectRemover.add(createdAction.id, 'action', 'actions');
+
+        const alerts = [{ id: 'us-central' }];
+        rule = await createRuleWithActionsAndParams(
+          createdAction.id,
+          testRunUuid,
+          {
+            instances: alerts,
+          },
+          {
+            schedule: { interval: '1s' },
+          },
+          supertest
+        );
+        objectRemover.add(rule.id, 'alert', 'alerts');
+
+        // refresh to see rule
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        // click on first rule
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(rule.name);
+
+        // await first run to complete so we have an initial state
+        await retry.try(async () => {
+          const { alerts: alertInstances } = await getAlertSummary(rule.id, supertest);
+          expect(Object.keys(alertInstances).length).to.eql(alerts.length);
+        });
+      });
+
+      after(async () => {
+        await objectRemover.removeAll();
+      });
+
+      it('renders the event log list and can filter/sort', async () => {
+        await browser.refresh();
+        await (await testSubjects.find('logsTab')).click();
+
+        const tabbedContentExists = await testSubjects.exists('ruleDetailsTabbedContent');
+        if (!tabbedContentExists) {
+          return;
+        }
+
+        await new Promise((resolve) => setTimeout(resolve, 5000));
+
+        const refreshButton = await testSubjects.find('superDatePickerApplyTimeButton');
+        await refreshButton.click();
+
+        // List, date picker, and status picker all exists
+        await testSubjects.existOrFail('eventLogList');
+        await testSubjects.existOrFail('eventLogStatusFilterButton');
+
+        let statusFilter = await testSubjects.find('eventLogStatusFilterButton');
+        let statusNumber = await statusFilter.findByCssSelector('.euiNotificationBadge');
+
+        expect(statusNumber.getVisibleText()).to.eql(0);
+
+        await statusFilter.click();
+        await testSubjects.click('eventLogStatusFilter-success');
+        await statusFilter.click();
+
+        statusFilter = await testSubjects.find('eventLogStatusFilterButton');
+        statusNumber = await statusFilter.findByCssSelector('.euiNotificationBadge');
+
+        expect(statusNumber.getVisibleText()).to.eql(1);
+
+        const eventLogList = await find.byCssSelector('.euiDataGridRow');
+        const rows = await eventLogList.parseDomContent();
+        expect(rows.length).to.be.greaterThan(0);
+
+        await pageObjects.triggersActionsUI.ensureEventLogColumnExists('timestamp');
+
+        const timestampCells = await find.allByCssSelector(
+          '[data-gridcell-column-id="timestamp"][data-test-subj="dataGridRowCell"]'
+        );
+
+        let validTimestamps = 0;
+        await asyncForEach(timestampCells, async (cell) => {
+          const text = await cell.getVisibleText();
+          if (text.toLowerCase() !== 'invalid date') {
+            if (moment(text).isValid()) {
+              validTimestamps += 1;
+            }
+          }
+        });
+        expect(validTimestamps).to.be.greaterThan(0);
+
+        await pageObjects.triggersActionsUI.sortEventLogColumn('timestamp', 'asc');
+        await testSubjects.existOrFail('dataGridHeaderCellSortingIcon-timestamp');
+      });
     });
   });
 

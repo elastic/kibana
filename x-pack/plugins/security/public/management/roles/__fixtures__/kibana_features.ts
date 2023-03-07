@@ -11,7 +11,7 @@ import { KibanaFeature } from '@kbn/features-plugin/public';
 export const createFeature = (
   config: Pick<
     KibanaFeatureConfig,
-    'id' | 'name' | 'subFeatures' | 'reserved' | 'privilegesTooltip'
+    'id' | 'name' | 'subFeatures' | 'reserved' | 'privilegesTooltip' | 'description'
   > & {
     excludeFromBaseAll?: boolean;
     excludeFromBaseRead?: boolean;

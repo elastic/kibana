@@ -8,7 +8,7 @@
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 
-import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudStart } from '@kbn/cloud-plugin/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type {
   CoreSetup,
@@ -267,6 +267,7 @@ export class SecurityPlugin
       config,
       license,
       buildNumber: this.initializerContext.env.packageInfo.buildNum,
+      customBranding: core.customBranding,
     });
 
     registerSecurityUsageCollector({ usageCollection, config, license });
@@ -297,6 +298,7 @@ export class SecurityPlugin
       getSpacesService: () => spaces?.spacesService,
       features,
       getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
+      customBranding: core.customBranding,
     });
 
     this.userProfileService.setup({ authz: this.authorizationSetup, license });
@@ -370,7 +372,7 @@ export class SecurityPlugin
     const clusterClient = core.elasticsearch.client;
     const { watchOnlineStatus$ } = this.elasticsearchService.start();
     const { session } = this.sessionManagementService.start({
-      auditLogger: this.auditSetup!.withoutRequest,
+      audit: this.auditSetup!,
       elasticsearchClient: clusterClient.asInternalUser,
       kibanaIndexName: this.getKibanaIndexName(),
       online$: watchOnlineStatus$(),

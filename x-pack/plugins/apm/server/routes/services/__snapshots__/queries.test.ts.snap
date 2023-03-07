@@ -30,6 +30,8 @@ Object {
     "_source": Array [
       "agent.name",
       "service.runtime.name",
+      "cloud.provider",
+      "cloud.service.name",
     ],
     "query": Object {
       "bool": Object {
@@ -54,11 +56,23 @@ Object {
             },
           },
         ],
-        "should": Object {
-          "exists": Object {
-            "field": "service.runtime.name",
+        "should": Array [
+          Object {
+            "exists": Object {
+              "field": "service.runtime.name",
+            },
           },
-        },
+          Object {
+            "exists": Object {
+              "field": "cloud.provider",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "cloud.service.name",
+            },
+          },
+        ],
       },
     },
     "size": 1,
@@ -77,14 +91,22 @@ exports[`services queries fetches the service items 1`] = `
 Array [
   Object {
     "apm": Object {
-      "events": Array [
-        "transaction",
+      "sources": Array [
+        Object {
+          "documentType": "transactionEvent",
+          "rollupInterval": "none",
+        },
       ],
     },
     "body": Object {
       "aggs": Object {
         "sample": Object {
           "aggs": Object {
+            "overflowCount": Object {
+              "sum": Object {
+                "field": "service_transaction.aggregation.overflow_count",
+              },
+            },
             "services": Object {
               "aggs": Object {
                 "transactionType": Object {
@@ -99,15 +121,6 @@ Array [
                         "field": "service.environment",
                       },
                     },
-                    "outcomes": Object {
-                      "terms": Object {
-                        "field": "event.outcome",
-                        "include": Array [
-                          "failure",
-                          "success",
-                        ],
-                      },
-                    },
                     "sample": Object {
                       "top_metrics": Object {
                         "metrics": Array [
@@ -120,6 +133,37 @@ Array [
                         },
                       },
                     },
+                    "successful": Object {
+                      "filter": Object {
+                        "bool": Object {
+                          "filter": Array [
+                            Object {
+                              "terms": Object {
+                                "event.outcome": Array [
+                                  "success",
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
+                    "successful_or_failed": Object {
+                      "filter": Object {
+                        "bool": Object {
+                          "filter": Array [
+                            Object {
+                              "terms": Object {
+                                "event.outcome": Array [
+                                  "failure",
+                                  "success",
+                                ],
+                              },
+                            },
+                          ],
+                        },
+                      },
+                    },
                   },
                   "terms": Object {
                     "field": "transaction.type",
@@ -128,7 +172,7 @@ Array [
               },
               "terms": Object {
                 "field": "service.name",
-                "size": 500,
+                "size": 1000,
               },
             },
           },
@@ -190,7 +234,7 @@ Array [
               },
               "terms": Object {
                 "field": "service.name",
-                "size": 500,
+                "size": 1000,
               },
             },
           },
@@ -219,6 +263,7 @@ Array [
       "track_total_hits": false,
     },
   },
+  undefined,
 ]
 `;
 

@@ -24,9 +24,9 @@ import { login, visitWithoutDateRange } from '../../tasks/login';
 import { getUnmappedRule } from '../../objects/rule';
 
 import { ALERTS_URL } from '../../urls/navigation';
-import { pageSelector } from '../../screens/alerts_detection_rules';
+import { tablePageSelector } from '../../screens/table_pagination';
 
-describe('Alert details with unmapped fields', () => {
+describe('Alert details with unmapped fields', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     esArchiverLoad('unmapped_fields');
@@ -36,11 +36,12 @@ describe('Alert details with unmapped fields', () => {
     waitForAlertsToPopulate();
     expandFirstAlert();
   });
+
   after(() => {
     esArchiverUnload('unmapped_fields');
   });
 
-  it('Displays the unmapped field on the JSON view', () => {
+  it('should display the unmapped field on the JSON view', () => {
     const expectedUnmappedValue = 'This is the unmapped field';
 
     openJsonView();
@@ -51,24 +52,25 @@ describe('Alert details with unmapped fields', () => {
     });
   });
 
-  it('Displays the unmapped field on the table', () => {
-    const expectedUnmmappedField = {
+  it('should displays the unmapped field on the table', () => {
+    const expectedUnmappedField = {
       field: 'unmapped',
       text: 'This is the unmapped field',
     };
 
     openTable();
-    cy.get(ALERT_FLYOUT).find(pageSelector(4)).click({ force: true });
+    cy.get(ALERT_FLYOUT).find(tablePageSelector(4)).click({ force: true });
     cy.get(ALERT_FLYOUT)
       .find(TABLE_ROWS)
+      .last()
       .within(() => {
-        cy.get(CELL_TEXT).should('contain', expectedUnmmappedField.field);
-        cy.get(CELL_TEXT).should('contain', expectedUnmmappedField.text);
+        cy.get(CELL_TEXT).should('contain', expectedUnmappedField.field);
+        cy.get(CELL_TEXT).should('contain', expectedUnmappedField.text);
       });
   });
 
   // This test makes sure that the table does not overflow horizontally
-  it('Table does not scroll horizontally', () => {
+  it('table should not scroll horizontally', () => {
     openTable();
 
     cy.get(ALERT_FLYOUT)

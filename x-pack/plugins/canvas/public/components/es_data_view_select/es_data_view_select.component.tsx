@@ -36,7 +36,11 @@ export const ESDataViewSelect: React.FunctionComponent<ESDataViewSelectProps> = 
   const selectedOption = selectedDataView
     ? { value: selectedDataView.title, label: selectedDataView.name || selectedDataView.title }
     : { value, label: value };
-  const options = dataViews.map(({ name, title }) => ({ value: title, label: name || title }));
+  const options = dataViews.map(({ name, title }) => ({
+    value: title,
+    label: name || title,
+    'data-test-subj': `canvasDataViewSelect__${name || title}`,
+  }));
 
   return (
     <EuiComboBox
@@ -58,6 +62,7 @@ export const ESDataViewSelect: React.FunctionComponent<ESDataViewSelectProps> = 
       isClearable={false}
       onCreateOption={(input) => onChange(input || defaultOption.value)}
       compressed
+      data-test-subj="canvasDataViewSelect"
     />
   );
 };

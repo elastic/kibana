@@ -12,7 +12,7 @@ import {
   savedQueryIdOrUndefined,
   packIdOrUndefined,
   queryOrUndefined,
-  queriesOrUndefined,
+  arrayQueries,
 } from '@kbn/osquery-io-ts-types';
 
 export const createLiveQueryRequestBodySchema = t.partial({
@@ -21,7 +21,7 @@ export const createLiveQueryRequestBodySchema = t.partial({
   agent_platforms: t.array(t.string),
   agent_policy_ids: t.array(t.string),
   query: queryOrUndefined,
-  queries: queriesOrUndefined,
+  queries: arrayQueries,
   saved_query_id: savedQueryIdOrUndefined,
   ecs_mapping: ecsMappingOrUndefined,
   pack_id: packIdOrUndefined,

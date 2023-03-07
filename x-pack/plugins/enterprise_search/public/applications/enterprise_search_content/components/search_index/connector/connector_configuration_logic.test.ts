@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
+import { LogicMounter } from '../../../../__mocks__/kea_logic';
 import { connectorIndex } from '../../../__mocks__/view_index.mock';
 
 import { ConnectorStatus } from '../../../../../../common/types/connectors';
@@ -33,7 +33,6 @@ describe('ConnectorConfigurationLogic', () => {
   const { mount: mountIndexNameLogic } = new LogicMounter(IndexNameLogic);
   const { mount: mountFetchIndexApiWrapperLogic } = new LogicMounter(CachedFetchIndexApiLogic);
   const { mount: mountIndexViewLogic } = new LogicMounter(IndexViewLogic);
-  const { clearFlashMessages, flashAPIErrors, flashSuccessToast } = mockFlashMessageHelpers;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,7 +56,7 @@ describe('ConnectorConfigurationLogic', () => {
       expect(ConnectorConfigurationLogic.values).toEqual({
         ...DEFAULT_VALUES,
         configState: { foo: { label: 'newBar', value: 'oldBar' } },
-        configView: [{ key: 'foo', label: 'newBar', value: 'oldBar' }],
+        configView: [{ isPasswordField: false, key: 'foo', label: 'newBar', value: 'oldBar' }],
       });
     });
     it('should set config on setConfigState', () => {
@@ -67,45 +66,21 @@ describe('ConnectorConfigurationLogic', () => {
       expect(ConnectorConfigurationLogic.values).toEqual({
         ...DEFAULT_VALUES,
         configState: { foo: { label: 'thirdBar', value: 'fourthBar' } },
-        configView: [{ key: 'foo', label: 'thirdBar', value: 'fourthBar' }],
-      });
-    });
-    describe('makeRequest', () => {
-      it('should call clearFlashMessages', () => {
-        ConnectorConfigurationLogic.actions.makeRequest({
-          configuration: {},
-          connectorId: 'id',
-          indexName: 'name',
-        });
-        expect(clearFlashMessages).toHaveBeenCalled();
-      });
-    });
-    describe('apiError', () => {
-      it('should call flashAPIError', () => {
-        ConnectorConfigurationLogic.actions.apiError('error' as any);
-        expect(flashAPIErrors).toHaveBeenCalledWith('error');
-      });
-    });
-    describe('apiSuccess', () => {
-      it('should call flashAPIError', () => {
-        ConnectorConfigurationLogic.actions.apiSuccess({
-          configuration: {},
-          indexName: 'name',
-        });
-        expect(flashSuccessToast).toHaveBeenCalledWith('Configuration successfully updated');
+        configView: [{ isPasswordField: false, key: 'foo', label: 'thirdBar', value: 'fourthBar' }],
       });
     });
     describe('setLocalConfigEntry', () => {
       it('should set local config entry and sort keys', () => {
         ConnectorConfigurationLogic.actions.setConfigState({
           bar: { label: 'foo', value: 'foofoo' },
-          foo: { label: 'thirdBar', value: 'fourthBar' },
+          password: { label: 'thirdBar', value: 'fourthBar' },
         });
         ConnectorConfigurationLogic.actions.setLocalConfigState({
           bar: { label: 'foo', value: 'foofoo' },
-          foo: { label: 'thirdBar', value: 'fourthBar' },
+          password: { label: 'thirdBar', value: 'fourthBar' },
         });
         ConnectorConfigurationLogic.actions.setLocalConfigEntry({
+          isPasswordField: false,
           key: 'bar',
           label: 'foo',
           value: 'fafa',
@@ -114,19 +89,19 @@ describe('ConnectorConfigurationLogic', () => {
           ...DEFAULT_VALUES,
           configState: {
             bar: { label: 'foo', value: 'foofoo' },
-            foo: { label: 'thirdBar', value: 'fourthBar' },
+            password: { label: 'thirdBar', value: 'fourthBar' },
           },
           configView: [
-            { key: 'bar', label: 'foo', value: 'foofoo' },
-            { key: 'foo', label: 'thirdBar', value: 'fourthBar' },
+            { isPasswordField: false, key: 'bar', label: 'foo', value: 'foofoo' },
+            { isPasswordField: true, key: 'password', label: 'thirdBar', value: 'fourthBar' },
           ],
           localConfigState: {
             bar: { label: 'foo', value: 'fafa' },
-            foo: { label: 'thirdBar', value: 'fourthBar' },
+            password: { label: 'thirdBar', value: 'fourthBar' },
           },
           localConfigView: [
-            { key: 'bar', label: 'foo', value: 'fafa' },
-            { key: 'foo', label: 'thirdBar', value: 'fourthBar' },
+            { isPasswordField: false, key: 'bar', label: 'foo', value: 'fafa' },
+            { isPasswordField: true, key: 'password', label: 'thirdBar', value: 'fourthBar' },
           ],
         });
       });
@@ -137,7 +112,7 @@ describe('ConnectorConfigurationLogic', () => {
         expect(ConnectorConfigurationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           configState: connectorIndex.connector.configuration,
-          configView: [{ key: 'foo', label: 'bar', value: 'barbar' }],
+          configView: [{ isPasswordField: false, key: 'foo', label: 'bar', value: 'barbar' }],
           index: connectorIndex,
         });
       });
@@ -159,14 +134,14 @@ describe('ConnectorConfigurationLogic', () => {
         expect(ConnectorConfigurationLogic.values).toEqual({
           ...DEFAULT_VALUES,
           configState: connectorIndex.connector.configuration,
-          configView: [{ key: 'foo', label: 'bar', value: 'barbar' }],
+          configView: [{ isPasswordField: false, key: 'foo', label: 'bar', value: 'barbar' }],
           index: {
             ...connectorIndex,
             connector: { ...connectorIndex.connector, status: ConnectorStatus.NEEDS_CONFIGURATION },
           },
           isEditing: true,
           localConfigState: connectorIndex.connector.configuration,
-          localConfigView: [{ key: 'foo', label: 'bar', value: 'barbar' }],
+          localConfigView: [{ isPasswordField: false, key: 'foo', label: 'bar', value: 'barbar' }],
           shouldStartInEditMode: true,
         });
       });
@@ -180,7 +155,7 @@ describe('ConnectorConfigurationLogic', () => {
         });
         ConnectorConfigurationLogic.actions.saveConfig();
         expect(ConnectorConfigurationLogic.actions.makeRequest).toHaveBeenCalledWith({
-          configuration: { foo: { label: 'bar', value: 'Barbara' } },
+          configuration: { foo: 'Barbara' },
           connectorId: '2',
           indexName: 'connector',
         });

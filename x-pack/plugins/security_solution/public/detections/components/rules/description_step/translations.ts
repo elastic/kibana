@@ -140,3 +140,10 @@ export const ALERT_SUPPRESSION_TECHNICAL_PREVIEW = i18n.translate(
     defaultMessage: 'Technical Preview',
   }
 );
+
+export const ALERT_SUPPRESSION_PER_RULE_EXECUTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDescription.alertSuppressionPerRuleExecution',
+  {
+    defaultMessage: 'One rule execution',
+  }
+);

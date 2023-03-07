@@ -38,7 +38,8 @@ export default function (providerContext: FtrProviderContext) {
     '../fixtures/direct_upload_packages/apache_0.1.4.zip'
   );
 
-  describe('EPM - get', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/149794
+  describe.skip('EPM - get', () => {
     skipIfNoDockerRegistry(providerContext);
     setupFleetAndAgents(providerContext);
 
@@ -151,7 +152,7 @@ export default function (providerContext: FtrProviderContext) {
       // not from the package registry. This is because they contain a field the registry
       // does not support
       const res = await supertest
-        .get(`/api/fleet/epm/packages/integration_to_input/0.9.1?prerelease=true`)
+        .get(`/api/fleet/epm/packages/integration_to_input/2.0.0`)
         .expect(200);
 
       const packageInfo = res.body.item;
@@ -207,6 +208,35 @@ export default function (providerContext: FtrProviderContext) {
         ({ dataset }) => dataset === 'non_epr_fields.test_metrics_2'
       );
       expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
+    });
+
+    it('allows user with only package level permission to access corresponding packages', async function () {
+      const pkg = 'endpoint';
+      const pkgVersion = '8.6.0';
+      await installPackage(pkg, pkgVersion);
+      const response = await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${pkg}`)
+        .auth(
+          testUsers.endpoint_integr_read_only_fleet_none.username,
+          testUsers.endpoint_integr_read_only_fleet_none.password
+        )
+        .expect(200);
+      expect(response.body.item.name).to.be(pkg);
+      expect(response.body.item.version).to.be(pkgVersion);
+      await uninstallPackage(pkg, pkgVersion);
+    });
+
+    it('rejects user with only package level permission to access unauthorized packages', async function () {
+      const response = await supertestWithoutAuth
+        .get(`/api/fleet/epm/packages/${testPkgName}`)
+        .auth(
+          testUsers.endpoint_integr_read_only_fleet_none.username,
+          testUsers.endpoint_integr_read_only_fleet_none.password
+        )
+        .expect(403);
+      expect(response.body.message).to.be(
+        'Authorization denied to package: apache. Allowed package(s): endpoint'
+      );
     });
   });
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Ecs } from '../../../../../common/ecs';
+import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isInvestigateInResolverActionEnabled } from './investigate_in_resolver';
 
 describe('InvestigateInResolverAction', () => {
@@ -53,6 +53,28 @@ describe('InvestigateInResolverAction', () => {
         _id: '1',
         agent: { type: ['endpoint', 'blah'] },
         process: { entity_id: [''] },
+      };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+    });
+
+    it('returns true for process event from sysmon via filebeat', () => {
+      const data: Ecs = {
+        _id: '1',
+        agent: { type: ['filebeat'] },
+        event: { dataset: ['windows.sysmon_operational'] },
+        process: { entity_id: ['always_unique'] },
+      };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeTruthy();
+    });
+
+    it('returns false for process event from filebeat but not from sysmon', () => {
+      const data: Ecs = {
+        _id: '1',
+        agent: { type: ['filebeat'] },
+        event: { dataset: ['windows.not_sysmon'] },
+        process: { entity_id: ['always_unique'] },
       };
 
       expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();

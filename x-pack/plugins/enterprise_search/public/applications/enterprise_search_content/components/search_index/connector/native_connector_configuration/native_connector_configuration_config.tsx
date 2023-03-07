@@ -33,7 +33,7 @@ export const NativeConnectorConfigurationConfig: React.FC<
           'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.config.encryptionWarningMessage',
           {
             defaultMessage:
-              'Encryption for data source credentials is unavailable in this technical preview. Your data source credentials will be stored, unencrypted, in Elasticsearch.',
+              'Encryption for data source credentials is unavailable in this beta. Your data source credentials will be stored, unencrypted, in Elasticsearch.',
           }
         )}
       </EuiText>

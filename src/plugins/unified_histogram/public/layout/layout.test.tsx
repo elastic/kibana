@@ -56,14 +56,6 @@ describe('Layout', () => {
     hits?: UnifiedHistogramHitsContext | null;
     chart?: UnifiedHistogramChartContext | null;
   } = {}) => {
-    services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
-      return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-    };
-
-    (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
-      language: 'kuery',
-      query: '',
-    });
     (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
       jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
     );
@@ -75,6 +67,15 @@ describe('Layout', () => {
         chart={chart ?? undefined}
         resizeRef={resizeRef}
         dataView={dataViewWithTimefieldMock}
+        query={{
+          language: 'kuery',
+          query: '',
+        }}
+        filters={[]}
+        timeRange={{
+          from: '2020-05-14T11:05:13.590',
+          to: '2020-05-14T11:20:13.590',
+        }}
         {...rest}
       />
     );

@@ -6,8 +6,9 @@
  */
 
 import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
-import uuid from 'uuid/v5';
+import { v5 as uuidv5 } from 'uuid';
 import { omit } from 'lodash';
+import { safeLoad } from 'js-yaml';
 
 import type { NewOutput, Output, OutputSOAttributes } from '../types';
 import {
@@ -63,7 +64,7 @@ export function outputIdToUuid(id: string) {
   }
 
   // UUID v5 need a namespace (uuid.DNS), changing this params will result in loosing the ability to generate predicable uuid
-  return uuid(id, uuid.DNS);
+  return uuidv5(id, uuidv5.DNS);
 }
 
 function outputSavedObjectToOutput(so: SavedObject<OutputSOAttributes>): Output {
@@ -238,6 +239,19 @@ class OutputService {
 
     if (output.ssl) {
       data.ssl = JSON.stringify(output.ssl);
+    }
+
+    // Remove the shipper data if the shipper is not enabled from the yaml config
+    if (!output.config_yaml && output.shipper) {
+      data.shipper = null;
+    }
+    if (output.config_yaml) {
+      const configJs = safeLoad(output.config_yaml);
+      const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
+
+      if (isShipperDisabled && output.shipper) {
+        data.shipper = null;
+      }
     }
 
     const newSo = await this.encryptedSoClient.create<OutputSOAttributes>(SAVED_OBJECT_TYPE, data, {
@@ -421,6 +435,20 @@ class OutputService {
     if (mergedType === outputType.Elasticsearch && updateData.hosts) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
+
+    // Remove the shipper data if the shipper is not enabled from the yaml config
+    if (!data.config_yaml && data.shipper) {
+      updateData.shipper = null;
+    }
+    if (data.config_yaml) {
+      const configJs = safeLoad(data.config_yaml);
+      const isShipperDisabled = !configJs?.shipper || configJs?.shipper?.enabled === false;
+
+      if (isShipperDisabled && data.shipper) {
+        updateData.shipper = null;
+      }
+    }
+
     const outputSO = await this.encryptedSoClient.update<Nullable<OutputSOAttributes>>(
       SAVED_OBJECT_TYPE,
       outputIdToUuid(id),

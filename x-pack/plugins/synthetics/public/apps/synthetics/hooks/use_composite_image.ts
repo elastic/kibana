@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { useEffect, useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import React, { useEffect, useState } from 'react';
 import { composeScreenshotRef } from '../utils/monitor_test_result/compose_screenshot_images';
 import {
   ScreenshotRefImageData,
@@ -71,44 +71,105 @@ export function shouldCompose(
 }
 
 /**
- * Assembles the data for a composite image and returns the composite to a callback.
+ * Assembles the data for a composite image and returns the image src and isComposing.
  * @param imgRef the data and dimensions for the composite image.
- * @param onComposeImageSuccess sends the composited image to this callback.
- * @param imageData this is the composited image value, if it is truthy the function will skip the compositing process
  */
-export const useCompositeImage = (
-  imgRef: ScreenshotRefImageData,
-  onComposeImageSuccess: React.Dispatch<string | undefined>,
-  imageData?: string
-): void => {
+export const useComposeImageFromRef = (
+  imgRef: ScreenshotRefImageData | undefined
+): { isComposing: boolean; imgSrc: string | undefined } => {
   const dispatch = useDispatch();
   const { blocks }: { blocks: ScreenshotBlockCache } = useSelector(selectBrowserJourneyState);
+  const [isAnyBlockLoading, isAllBlocksLoaded] = useMemo(
+    () => [getIsAnyBlockLoading(imgRef, blocks), getIsAllBlocksLoaded(imgRef, blocks)],
+    [imgRef, blocks]
+  );
 
   useEffect(() => {
-    dispatch(
-      fetchBlocksAction(imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash))
-    );
-  }, [dispatch, imgRef.ref.screenshotRef.screenshot_ref.blocks]);
+    if (imgRef) {
+      dispatch(
+        fetchBlocksAction(imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash))
+      );
+    }
+  }, [dispatch, imgRef]);
 
-  const [curRef, setCurRef] = useState<ScreenshotRefImageData>(imgRef);
+  const stepRefId =
+    imgRef?.stepName ?? imgRef?.ref.screenshotRef.screenshot_ref.blocks[0]?.hash ?? '';
+  const uniqueRefId = `${imgRef?.ref.screenshotRef.monitor.check_group}/${stepRefId}`;
+  const [composeState, setComposeState] = useState<
+    Record<string, { isComposing: boolean; imgSrc: string | undefined }>
+  >({});
+
+  const { isComposing, imgSrc } = composeState[uniqueRefId] ?? {
+    isComposing: false,
+    imgSrc: undefined,
+  };
 
   useEffect(() => {
-    const canvas = document.createElement('canvas');
+    if (imgRef) {
+      // if the imgSrc is truthy it means it's already been composed, so there
+      // is no need to call the function
+      if (!isComposing && !imgSrc && isAllBlocksLoaded) {
+        setComposeState((prevState) => ({
+          ...prevState,
+          [uniqueRefId]: { isComposing: true, imgSrc: undefined },
+        }));
 
-    async function compose() {
-      await composeScreenshotRef(imgRef, canvas, blocks);
-      const imgData = canvas.toDataURL('image/jpg', 1.0);
-      onComposeImageSuccess(imgData);
-    }
+        const canvas = document.createElement('canvas');
+        composeScreenshotRef(imgRef, canvas, blocks).then(() => {
+          const dataUrl = canvas.toDataURL('image/jpg', 1.0);
+          setComposeState((prevState) => ({
+            ...prevState,
+            [uniqueRefId]: { isComposing: false, imgSrc: dataUrl },
+          }));
 
-    // if the URL is truthy it means it's already been composed, so there
-    // is no need to call the function
-    if (shouldCompose(imageData, imgRef, curRef, blocks)) {
-      compose();
-      setCurRef(imgRef);
+          canvas.parentElement?.removeChild(canvas);
+        });
+      }
     }
-    return () => {
-      canvas.parentElement?.removeChild(canvas);
-    };
-  }, [blocks, curRef, imageData, imgRef, onComposeImageSuccess]);
+  }, [
+    blocks,
+    imgRef,
+    composeState,
+    imgSrc,
+    isComposing,
+    uniqueRefId,
+    isAnyBlockLoading,
+    isAllBlocksLoaded,
+  ]);
+
+  return { isComposing: isComposing || isAnyBlockLoading, imgSrc };
 };
+
+function getIsAnyBlockLoading(
+  imgRef: ScreenshotRefImageData | undefined,
+  blocks: { [key: string]: StoreScreenshotBlock }
+) {
+  if (!imgRef) {
+    return false;
+  }
+
+  const hashes = imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash);
+  for (const hash of hashes) {
+    if (blocks[hash] && isPendingBlock(blocks[hash])) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function getIsAllBlocksLoaded(
+  imgRef: ScreenshotRefImageData | undefined,
+  blocks: { [key: string]: StoreScreenshotBlock }
+) {
+  if (!imgRef) {
+    return false;
+  }
+
+  const hashes = imgRef.ref.screenshotRef.screenshot_ref.blocks.map(({ hash }) => hash);
+  for (const hash of hashes) {
+    if (!blocks[hash] || isPendingBlock(blocks[hash])) {
+      return false;
+    }
+  }
+  return true;
+}

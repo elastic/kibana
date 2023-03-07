@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-config-server-internal",
-        "id": "def-server.coreDeprecationProvider",
+        "id": "def-common.coreDeprecationProvider",
         "type": "Function",
         "tags": [],
         "label": "coreDeprecationProvider",
@@ -22,9 +30,9 @@
           "() => ",
           {
             "pluginId": "@kbn/config",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnConfigPluginApi",
-            "section": "def-server.ConfigDeprecation",
+            "section": "def-common.ConfigDeprecation",
             "text": "ConfigDeprecation"
           },
           "[]"
@@ -38,7 +46,7 @@
       },
       {
         "parentPluginId": "@kbn/core-config-server-internal",
-        "id": "def-server.ensureValidConfiguration",
+        "id": "def-common.ensureValidConfiguration",
         "type": "Function",
         "tags": [],
         "label": "ensureValidConfiguration",
@@ -56,7 +64,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-config-server-internal",
-            "id": "def-server.ensureValidConfiguration.$1",
+            "id": "def-common.ensureValidConfiguration.$1",
             "type": "Object",
             "tags": [],
             "label": "configService",
@@ -71,7 +79,7 @@
           },
           {
             "parentPluginId": "@kbn/core-config-server-internal",
-            "id": "def-server.ensureValidConfiguration.$2",
+            "id": "def-common.ensureValidConfiguration.$2",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -90,14 +98,6 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

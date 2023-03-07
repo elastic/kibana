@@ -39,6 +39,14 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'quoted_identifier',
         'src_ws',
         'unquoted_identifier',
+        'pipe',
+        'not',
+        'percent',
+        'integer_literal',
+        'decimal_literal',
+        'src_unquoted_identifier',
+        'src_quoted_identifier',
+        'string',
       ],
       euiThemeVars.euiTextColor
     ),
@@ -52,79 +60,24 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'sort',
         'by',
         'where',
-        'unknown_cmd',
         'expr_ws',
         'row',
         'limit',
-        'asc',
-        'desc',
+        'nulls_ordering_direction',
+        'nulls_ordering',
+        'null',
+        'boolean_value',
+        'comparison_operator',
       ],
       euiThemeVars.euiColorPrimaryText
     ),
 
     // math functions
-    ...buildRuleGroup(
-      [
-        'round_function_math',
-        'avg_function_math',
-        'sum_function_math',
-        'min_function_math',
-        'max_function_math',
-      ],
-      euiThemeVars.euiColorPrimaryText
-    ),
-
-    // values
-    ...buildRuleGroup(
-      [
-        'pipe',
-        'true',
-        'not',
-        'null',
-        'nulls',
-        'false',
-        'src_unquoted_identifier',
-        'src_quoted_identifier',
-        'string',
-      ],
-      euiThemeVars.euiTextColor
-    ),
-
-    // values #2
-    ...buildRuleGroup(
-      [
-        'true',
-        'not',
-        'null',
-        'nulls',
-        'false',
-        'not',
-        'null',
-        'percent',
-        'integer_literal',
-        'decimal_literal',
-      ],
-      euiThemeVars.euiTextColor
-    ),
+    ...buildRuleGroup(['unary_function'], euiThemeVars.euiColorPrimaryText),
 
     // operators
     ...buildRuleGroup(
-      [
-        'or',
-        'and',
-        'rp',
-        'eq',
-        'neq',
-        'lp',
-        'lt',
-        'lte',
-        'gt',
-        'gte',
-        'plus',
-        'minus',
-        'asterisk',
-        'slash',
-      ],
+      ['or', 'and', 'rp', 'lp', 'plus', 'minus', 'asterisk', 'slash'],
       euiThemeVars.euiTextSubduedColor
     ),
 

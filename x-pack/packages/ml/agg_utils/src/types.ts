@@ -68,6 +68,7 @@ export interface ChangePoint extends FieldValuePair {
   pValue: number | null;
   normalizedScore: number;
   histogram?: ChangePointHistogramItem[];
+  unique?: boolean;
 }
 
 /**

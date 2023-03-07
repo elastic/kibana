@@ -265,6 +265,10 @@ export function isScriptedField(
   return fieldName.scripted;
 }
 
+export function isRuntimeField(field: IndexPatternField): boolean {
+  return Boolean(field.runtime);
+}
+
 export function getFieldsByValidationState(
   newIndexPattern: IndexPattern,
   column?: GenericIndexPatternColumn,

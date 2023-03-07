@@ -11,14 +11,14 @@ import { oneWeek, sevenDays, sixHours } from './duration';
 export function sixHoursRolling(): TimeWindow {
   return {
     duration: sixHours(),
-    is_rolling: true,
+    isRolling: true,
   };
 }
 
 export function sevenDaysRolling(): TimeWindow {
   return {
     duration: sevenDays(),
-    is_rolling: true,
+    isRolling: true,
   };
 }
 
@@ -26,7 +26,7 @@ export function weeklyCalendarAligned(startTime: Date): TimeWindow {
   return {
     duration: oneWeek(),
     calendar: {
-      start_time: startTime,
+      startTime,
     },
   };
 }

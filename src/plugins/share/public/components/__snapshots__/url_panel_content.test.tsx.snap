@@ -13,7 +13,7 @@ exports[`share url panel content render 1`] = `
       hasEmptyLabelSpace={false}
       helpText={
         <FormattedMessage
-          defaultMessage="Can't share as saved object until the {objectType} has been saved."
+          defaultMessage="To share as a saved object, save the {objectType}."
           id="share.urlPanel.canNotShareAsSavedObjectHelpText"
           values={
             Object {

@@ -54,7 +54,6 @@ export {
   type RangeSliderEmbeddableInput,
 } from './range_slider';
 
-export { LazyControlsCallout, type CalloutProps } from './controls_callout';
 export {
   LazyControlGroupRenderer,
   useControlGroupContainerContext,

@@ -1,0 +1,31 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "react"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/es-query",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/ml-url-state",
+    "@kbn/data-plugin",
+    "@kbn/datemath",
+    "@kbn/core",
+    "@kbn/data-views-plugin",
+    "@kbn/ml-is-populated-object",
+    "@kbn/kibana-react-plugin",
+    "@kbn/ml-query-utils",
+  ]
+}

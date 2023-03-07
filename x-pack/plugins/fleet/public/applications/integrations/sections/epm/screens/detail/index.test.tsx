@@ -6,7 +6,7 @@
  */
 
 import React, { lazy, memo } from 'react';
-import { Route } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { act, cleanup } from '@testing-library/react';
 
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
@@ -39,7 +39,8 @@ import { ExperimentalFeaturesService } from '../../../../services';
 ExperimentalFeaturesService.init({});
 import { Detail } from '.';
 
-describe('when on integration detail', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/150607
+describe.skip('when on integration detail', () => {
   const pkgkey = 'nginx-0.3.7';
   const detailPageUrlPath = pagePathGetters.integration_details_overview({ pkgkey })[1];
   let testRenderer: TestRenderer;

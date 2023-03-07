@@ -17,6 +17,7 @@ export const sessionIndexMock = {
     invalidate: jest.fn(),
     initialize: jest.fn(),
     cleanUp: jest.fn(),
+    isWithinConcurrentSessionLimit: jest.fn().mockResolvedValue(true),
   }),
 
   createValue: (sessionValue: Partial<SessionIndexValue> = {}): SessionIndexValue => ({

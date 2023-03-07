@@ -45,7 +45,7 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
     },
   });
 
-  const stuckJobsCountResponse = await client.asCurrentUser.count({
+  const idleJobsCountResponse = await client.asCurrentUser.count({
     index: CONNECTORS_JOBS_INDEX,
     query: {
       bool: {
@@ -127,10 +127,10 @@ export const fetchSyncJobsStats = async (client: IScopedClusterClient): Promise<
   const response = {
     connected: connectedResponse.count,
     errors: errorResponse.count,
+    idle: idleJobsCountResponse.count,
     in_progress: inProgressJobsCountResponse.count,
     incomplete: incompleteResponse.count,
     orphaned_jobs: orphanedJobsCountResponse.count,
-    stuck: stuckJobsCountResponse.count,
   };
 
   return response;

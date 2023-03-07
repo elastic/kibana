@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-saved-objects-import-export-server-mocks",
-        "id": "def-server.savedObjectsExporterMock",
+        "id": "def-common.savedObjectsExporterMock",
         "type": "Object",
         "tags": [],
         "label": "savedObjectsExporterMock",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-mocks",
-            "id": "def-server.savedObjectsExporterMock.create",
+            "id": "def-common.savedObjectsExporterMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -37,9 +45,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectsExporter",
+                "section": "def-common.ISavedObjectsExporter",
                 "text": "ISavedObjectsExporter"
               },
               ">"
@@ -55,7 +63,7 @@
       },
       {
         "parentPluginId": "@kbn/core-saved-objects-import-export-server-mocks",
-        "id": "def-server.savedObjectsImporterMock",
+        "id": "def-common.savedObjectsImporterMock",
         "type": "Object",
         "tags": [],
         "label": "savedObjectsImporterMock",
@@ -66,7 +74,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-import-export-server-mocks",
-            "id": "def-server.savedObjectsImporterMock.create",
+            "id": "def-common.savedObjectsImporterMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -75,9 +83,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectsImporter",
+                "section": "def-common.ISavedObjectsImporter",
                 "text": "ISavedObjectsImporter"
               },
               ">"
@@ -92,13 +100,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

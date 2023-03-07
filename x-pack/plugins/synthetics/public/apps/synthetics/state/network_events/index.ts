@@ -5,18 +5,9 @@
  * 2.0.
  */
 
-import { handleActions, Action } from 'redux-actions';
-import {
-  NetworkEvent,
-  SyntheticsNetworkEventsApiResponse,
-} from '../../../../../common/runtime_types';
-import {
-  FetchNetworkEventsFailPayload,
-  FetchNetworkEventsParams,
-  getNetworkEvents,
-  getNetworkEventsFail,
-  getNetworkEventsSuccess,
-} from './actions';
+import { createReducer } from '@reduxjs/toolkit';
+import { NetworkEvent } from '../../../../../common/runtime_types';
+import { getNetworkEvents } from './actions';
 
 export interface NetworkEventsState {
   [checkGroup: string]: {
@@ -33,19 +24,11 @@ export interface NetworkEventsState {
 
 const initialState: NetworkEventsState = {};
 
-type Payload = FetchNetworkEventsParams &
-  SyntheticsNetworkEventsApiResponse &
-  FetchNetworkEventsFailPayload &
-  string[];
-
-export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
-  {
-    [String(getNetworkEvents)]: (
-      state: NetworkEventsState,
-      { payload: { checkGroup, stepIndex } }: Action<FetchNetworkEventsParams>
-    ) => ({
-      ...state,
-      [checkGroup]: state[checkGroup]
+export const networkEventsReducer = createReducer(initialState, (builder) => {
+  builder
+    .addCase(getNetworkEvents.get, (state, action) => {
+      const { checkGroup, stepIndex } = action.payload;
+      state[checkGroup] = state[checkGroup]
         ? {
             [stepIndex]: state[checkGroup][stepIndex]
               ? {
@@ -69,61 +52,44 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
               total: 0,
               isWaterfallSupported: true,
             },
-          },
-    }),
+          };
+    })
+    .addCase(getNetworkEvents.success, (state, action) => {
+      const { events, total, checkGroup, stepIndex, isWaterfallSupported, hasNavigationRequest } =
+        action.payload;
 
-    [String(getNetworkEventsSuccess)]: (
-      state: NetworkEventsState,
-      {
-        payload: {
-          events,
-          total,
-          checkGroup,
-          stepIndex,
-          isWaterfallSupported,
-          hasNavigationRequest,
-        },
-      }: Action<SyntheticsNetworkEventsApiResponse & FetchNetworkEventsParams>
-    ) => {
-      return {
-        ...state,
-        [checkGroup]: state[checkGroup]
-          ? {
-              [stepIndex]: state[checkGroup][stepIndex]
-                ? {
-                    ...state[checkGroup][stepIndex],
-                    loading: false,
-                    events,
-                    total,
-                    isWaterfallSupported,
-                    hasNavigationRequest,
-                  }
-                : {
-                    loading: false,
-                    events,
-                    total,
-                    isWaterfallSupported,
-                    hasNavigationRequest,
-                  },
-            }
-          : {
-              [stepIndex]: {
-                loading: false,
-                events,
-                total,
-                isWaterfallSupported,
-                hasNavigationRequest,
-              },
+      state[checkGroup] = state[checkGroup]
+        ? {
+            [stepIndex]: state[checkGroup][stepIndex]
+              ? {
+                  ...state[checkGroup][stepIndex],
+                  loading: false,
+                  events,
+                  total,
+                  isWaterfallSupported,
+                  hasNavigationRequest,
+                }
+              : {
+                  loading: false,
+                  events,
+                  total,
+                  isWaterfallSupported,
+                  hasNavigationRequest,
+                },
+          }
+        : {
+            [stepIndex]: {
+              loading: false,
+              events,
+              total,
+              isWaterfallSupported,
+              hasNavigationRequest,
             },
-      };
-    },
-
-    [String(getNetworkEventsFail)]: (
-      state: NetworkEventsState,
-      { payload: { checkGroup, stepIndex, error } }: Action<FetchNetworkEventsFailPayload>
-    ) => ({
-      ...state,
-      [checkGroup]: state[checkGroup]
+          };
+    })
+    .addCase(getNetworkEvents.fail, (state, action) => {
+      const { checkGroup, stepIndex, error } = action.payload;
+      state[checkGroup] = state[checkGroup]
         ? {
             [stepIndex]: state[checkGroup][stepIndex]
               ? {
@@ -150,8 +116,6 @@ export const networkEventsReducer = handleActions<NetworkEventsState, Payload>(
               error,
               isWaterfallSupported: true,
             },
-          },
-    }),
-  },
-  initialState
-);
+          };
+    });
+});

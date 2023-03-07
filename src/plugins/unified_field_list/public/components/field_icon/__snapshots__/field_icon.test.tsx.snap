@@ -1,0 +1,33 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`UnifiedFieldList <FieldIcon /> accepts additional props 1`] = `
+<FieldIcon
+  fill="none"
+  label="Date"
+  scripted={false}
+  type="date"
+/>
+`;
+
+exports[`UnifiedFieldList <FieldIcon /> renders Document type properly 1`] = `
+<FieldIcon
+  label="Records"
+  type="number"
+/>
+`;
+
+exports[`UnifiedFieldList <FieldIcon /> renders properly 1`] = `
+<FieldIcon
+  label="Date"
+  scripted={false}
+  type="date"
+/>
+`;
+
+exports[`UnifiedFieldList <FieldIcon /> renders properly scripted fields 1`] = `
+<FieldIcon
+  label="Date"
+  scripted={true}
+  type="date"
+/>
+`;

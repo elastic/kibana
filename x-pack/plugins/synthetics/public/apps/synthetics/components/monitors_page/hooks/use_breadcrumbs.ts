@@ -17,7 +17,7 @@ export const useMonitorListBreadcrumbs = (extraCrumbs?: Array<{ text: string; hr
   useBreadcrumbs([
     {
       text: MONITOR_MANAGEMENT_CRUMB,
-      href: `${appPath}/${MONITORS_ROUTE}`,
+      href: `${appPath}${MONITORS_ROUTE}`,
     },
     ...(extraCrumbs ?? []),
   ]);

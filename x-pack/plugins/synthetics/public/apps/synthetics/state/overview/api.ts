@@ -29,12 +29,22 @@ function toMonitorOverviewQueryArgs(
   pageState: MonitorOverviewPageState
 ): FetchMonitorOverviewQueryArgs {
   return {
+    sortField: pageState.sortField,
+    sortOrder: pageState.sortOrder,
+    ...toStatusOverviewQueryArgs(pageState),
+  };
+}
+
+export function toStatusOverviewQueryArgs(
+  pageState: MonitorOverviewPageState
+): FetchMonitorOverviewQueryArgs {
+  return {
     query: pageState.query,
     tags: pageState.tags,
     locations: pageState.locations,
-    monitorType: pageState.monitorType,
-    sortField: pageState.sortField,
-    sortOrder: pageState.sortOrder,
+    projects: pageState.projects,
+    schedules: pageState.schedules,
+    monitorTypes: pageState.monitorTypes,
     searchFields: [],
   };
 }
@@ -43,7 +53,7 @@ export const fetchMonitorOverview = async (
   pageState: MonitorOverviewPageState
 ): Promise<MonitorOverviewResult> => {
   const params = toMonitorOverviewQueryArgs(pageState);
-  return await apiService.get(
+  return apiService.get(
     SYNTHETICS_API_URLS.SYNTHETICS_OVERVIEW,
     params,
     MonitorOverviewResultCodec
@@ -53,6 +63,6 @@ export const fetchMonitorOverview = async (
 export const fetchOverviewStatus = async (
   pageState: MonitorOverviewPageState
 ): Promise<OverviewStatus> => {
-  const params = toMonitorOverviewQueryArgs(pageState);
-  return await apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, params, OverviewStatusCodec);
+  const params = toStatusOverviewQueryArgs(pageState);
+  return apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, params, OverviewStatusCodec);
 };

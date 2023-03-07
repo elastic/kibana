@@ -131,6 +131,7 @@ export const IndexPatternTable = ({
       <EuiButton
         color="danger"
         iconType="trash"
+        data-test-subj="delete-data-views-button"
         onClick={() => clickHandler(selectedItems, deleteModalMsg(selectedItems, !!spaces))}
       >
         <FormattedMessage

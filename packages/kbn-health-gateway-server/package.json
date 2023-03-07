@@ -2,11 +2,9 @@
   "name": "@kbn/health-gateway-server",
   "private": true,
   "version": "1.0.0",
-  "main": "./target_node/index.js",
   "author": "Kibana Core",
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "scripts": {
-    "start": "node ../../bazel-bin/packages/kbn-health-gateway-server/target_node/scripts/init.js"
-  },
-  "types": "./target_types/index.d.ts"
+    "start": "node -r '@kbn/babel-register/install' ./scripts/init"
+  }
 }

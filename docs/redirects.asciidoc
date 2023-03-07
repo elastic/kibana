@@ -396,11 +396,6 @@ This content has moved. Refer to <<saved-object-migrations>>.
 
 This content has moved. Refer to {stack-ref}/upgrading-kibana.html[Upgrade Kibana].
 
-[role="exclude",id="upgrade-assistant"]
-== Upgrade Assistant
-
-This content has moved. Refer to {kibana-ref-all}/7.17/upgrade-assistant.html[Upgrade Assistant].
-
 [role="exclude",id="brew"]
 == Install {kib} on macOS with Homebrew
 

@@ -7,11 +7,12 @@
  */
 
 // must be before mocks imports to avoid conflicting with `REPO_ROOT` accessor.
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { mockPackage, scanPluginSearchPathsMock } from './plugins_discovery.test.mocks';
 import mockFs from 'mock-fs';
 import { getEnvOptions, rawConfigServiceMock } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { Package } from '@kbn/repo-packages';
 
 import { firstValueFrom, from } from 'rxjs';
 import { map, toArray } from 'rxjs/operators';
@@ -24,7 +25,34 @@ import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 import { PluginType } from '@kbn/core-base-common';
 
-const KIBANA_ROOT = process.cwd();
+jest.mock('@kbn/repo-packages', () => ({
+  ...jest.requireActual('@kbn/repo-packages'),
+  getPluginPackagesFilter: jest.fn().mockReturnValue(() => true),
+}));
+
+jest.mock('./plugin_manifest_from_plugin_package', () => ({
+  pluginManifestFromPluginPackage: jest.fn((version, pkgManifest) => ({
+    version,
+    ...pkgManifest,
+  })),
+}));
+
+const getPluginPackagesFilterMock: jest.Mock =
+  jest.requireMock('@kbn/repo-packages').getPluginPackagesFilter;
+const pluginManifestFromPluginPackageMock: jest.Mock = jest.requireMock(
+  './plugin_manifest_from_plugin_package'
+).pluginManifestFromPluginPackage;
+
+function getMockPackage(id: string) {
+  return {
+    id,
+    manifest: {
+      id,
+      type: 'plugin',
+    },
+    directory: resolve(REPO_ROOT, `packages/${id}`),
+  } as Package;
+}
 
 const Plugins = {
   invalid: () => ({
@@ -123,8 +151,8 @@ const packageMock = {
   },
 };
 
-const manifestPath = (...pluginPath: string[]) =>
-  resolve(KIBANA_ROOT, 'src', 'plugins', ...pluginPath, 'kibana.json');
+const pluginDir = (...segments: string[]) => resolve(REPO_ROOT, 'plugins', ...segments);
+const manifestPath = (...pluginPath: string[]) => resolve(pluginDir(...pluginPath), 'kibana.json');
 
 describe('plugins discovery system', () => {
   let logger: ReturnType<typeof loggingSystemMock.create>;
@@ -148,6 +176,7 @@ describe('plugins discovery system', () => {
       roles: {
         backgroundTasks: true,
         ui: true,
+        migrator: false,
       },
     };
 
@@ -155,6 +184,7 @@ describe('plugins discovery system', () => {
       REPO_ROOT,
       getEnvOptions({
         cliArgs: { envName: 'development' },
+        repoPackages: [],
       })
     );
 
@@ -180,6 +210,8 @@ describe('plugins discovery system', () => {
     jest.spyOn(console, 'log').mockImplementation((...args) => {
       process.stdout.write(args + '\n');
     });
+
+    jest.clearAllMocks();
   });
 
   afterEach(() => {
@@ -198,10 +230,10 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
-        [`${KIBANA_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
-        [`${KIBANA_ROOT}/x-pack/plugins/plugin_c`]: Plugins.valid('pluginC'),
-        [`${KIBANA_ROOT}/src/plugins/plugin_d`]: Plugins.validPreboot('pluginD'),
+        [pluginDir('plugin_a')]: Plugins.valid('pluginA'),
+        [pluginDir('plugin_b')]: Plugins.valid('pluginB'),
+        [pluginDir(`plugin_c`)]: Plugins.valid('pluginC'),
+        [pluginDir(`plugin_d`)]: Plugins.validPreboot('pluginD'),
       },
       { createCwd: false }
     );
@@ -225,12 +257,12 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.invalid(),
-        [`${KIBANA_ROOT}/src/plugins/plugin_b`]: Plugins.incomplete(),
-        [`${KIBANA_ROOT}/src/plugins/plugin_c`]: Plugins.incompatible(),
-        [`${KIBANA_ROOT}/src/plugins/plugin_d`]: Plugins.incompatibleType('pluginD'),
-        [`${KIBANA_ROOT}/src/plugins/plugin_ad`]: Plugins.missingManifest(),
-        [`${KIBANA_ROOT}/src/plugins/plugin_e`]: Plugins.missingOwnerAttribute(),
+        [pluginDir(`plugin_a`)]: Plugins.invalid(),
+        [pluginDir(`plugin_b`)]: Plugins.incomplete(),
+        [pluginDir(`plugin_c`)]: Plugins.incompatible(),
+        [pluginDir(`plugin_d`)]: Plugins.incompatibleType('pluginD'),
+        [pluginDir(`plugin_ad`)]: Plugins.missingManifest(),
+        [pluginDir(`plugin_e`)]: Plugins.missingOwnerAttribute(),
       },
       { createCwd: false }
     );
@@ -292,7 +324,7 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/src/plugins`]: mockFs.directory({
+        [pluginDir('.')]: mockFs.directory({
           mode: 0, // 0000
           items: {
             plugin_a: Plugins.valid('pluginA'),
@@ -312,12 +344,38 @@ describe('plugins discovery system', () => {
       )
       .toPromise();
 
-    const srcPluginsPath = resolve(KIBANA_ROOT, 'src', 'plugins');
-    const xpackPluginsPath = resolve(KIBANA_ROOT, 'x-pack', 'plugins');
+    const srcPluginsPath = pluginDir('.');
     expect(errors).toEqual(
       expect.arrayContaining([
         `Error: EACCES, permission denied '${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
-        `Error: ENOENT, no such file or directory '${xpackPluginsPath}' (invalid-search-path, ${xpackPluginsPath})`,
+      ])
+    );
+  });
+
+  it('return errors when the plugin search path is missing', async () => {
+    const { plugin$, error$ } = discover({
+      config: new PluginsConfig(pluginConfig, env),
+      coreContext,
+      instanceInfo,
+      nodeInfo,
+    });
+
+    mockFs({}, { createCwd: false });
+
+    const plugins = await plugin$.pipe(toArray()).toPromise();
+    expect(plugins).toHaveLength(0);
+
+    const errors = await error$
+      .pipe(
+        map((error) => error.toString()),
+        toArray()
+      )
+      .toPromise();
+
+    const srcPluginsPath = pluginDir('.');
+    expect(errors).toEqual(
+      expect.arrayContaining([
+        `Error: ENOENT, no such file or directory '${srcPluginsPath}' (invalid-search-path, ${srcPluginsPath})`,
       ])
     );
   });
@@ -332,7 +390,7 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: {
+        [pluginDir(`plugin_a`)]: {
           ...Plugins.inaccessibleManifest(),
           nested_plugin: Plugins.valid('nestedPlugin'),
         },
@@ -368,11 +426,11 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/plugin_b`]: Plugins.valid('pluginB'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_c`]: Plugins.valid('pluginC'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_d`]: Plugins.validPreboot('pluginD'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin_e`]: Plugins.incomplete(),
+        [pluginDir(`plugin_a`)]: Plugins.valid('pluginA'),
+        [pluginDir(`sub1/plugin_b`)]: Plugins.valid('pluginB'),
+        [pluginDir(`sub1/sub2/plugin_c`)]: Plugins.valid('pluginC'),
+        [pluginDir(`sub1/sub2/plugin_d`)]: Plugins.validPreboot('pluginD'),
+        [pluginDir(`sub1/sub2/plugin_e`)]: Plugins.incomplete(),
       },
       { createCwd: false }
     );
@@ -413,7 +471,7 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/src/plugins/plugin_a`]: {
+        [pluginDir(`plugin_a`)]: {
           ...Plugins.valid('pluginA'),
           nested_plugin: Plugins.valid('nestedPlugin'),
         },
@@ -437,13 +495,12 @@ describe('plugins discovery system', () => {
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/src/plugins/sub1/plugin`]: Plugins.valid('plugin1'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/plugin`]: Plugins.valid('plugin2'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/plugin`]: Plugins.valid('plugin3'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/plugin`]: Plugins.valid('plugin4'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/plugin`]: Plugins.valid('plugin5'),
-        [`${KIBANA_ROOT}/src/plugins/sub1/sub2/sub3/sub4/sub5/sub6/plugin`]:
-          Plugins.valid('plugin6'),
+        [pluginDir(`sub1/plugin`)]: Plugins.valid('plugin1'),
+        [pluginDir(`sub1/sub2/plugin`)]: Plugins.valid('plugin2'),
+        [pluginDir(`sub1/sub2/sub3/plugin`)]: Plugins.valid('plugin3'),
+        [pluginDir(`sub1/sub2/sub3/sub4/plugin`)]: Plugins.valid('plugin4'),
+        [pluginDir(`sub1/sub2/sub3/sub4/sub5/plugin`)]: Plugins.valid('plugin5'),
+        [pluginDir(`sub1/sub2/sub3/sub4/sub5/sub6/plugin`)]: Plugins.valid('plugin6'),
       },
       { createCwd: false }
     );
@@ -465,12 +522,12 @@ describe('plugins discovery system', () => {
       nodeInfo,
     });
 
-    const pluginFolder = resolve(KIBANA_ROOT, '..', 'ext-plugins');
+    const pluginFolder = pluginDir('../ext-plugins');
 
     mockFs(
       {
-        [`${KIBANA_ROOT}/plugins`]: mockFs.symlink({
-          path: '../ext-plugins',
+        [pluginDir(`.`)]: mockFs.symlink({
+          path: pluginFolder,
         }),
         [pluginFolder]: {
           plugin_a: Plugins.valid('pluginA'),
@@ -542,31 +599,88 @@ describe('plugins discovery system', () => {
     expect(loggingSystemMock.collect(logger).warn).toEqual([]);
   });
 
+  describe('plugin packages', () => {
+    it('filters repoPackages in the env and converts them to PluginWrappers', async () => {
+      const foo = getMockPackage('foo');
+      const bar = getMockPackage('bar');
+      coreContext.env = {
+        ...env,
+        pluginSearchPaths: [],
+        repoPackages: [foo, bar],
+      };
+      const filterFn = jest.fn((p: Package) => p === foo);
+      getPluginPackagesFilterMock.mockReturnValue(filterFn);
+
+      const { plugin$ } = discover({
+        config: new PluginsConfig(pluginConfig, coreContext.env),
+        coreContext,
+        instanceInfo,
+        nodeInfo,
+      });
+
+      const [plugin, ...empty] = await firstValueFrom(plugin$.pipe(toArray()));
+      expect(empty).toHaveLength(0);
+
+      expect(getPluginPackagesFilterMock).toHaveBeenCalledTimes(1);
+      const filterArgs = getPluginPackagesFilterMock.mock.calls[0];
+      expect(filterArgs).toEqual([
+        {
+          examples: false,
+          oss: false,
+          parentDirs: [],
+          paths: [],
+        },
+      ]);
+
+      expect(filterFn).toHaveBeenCalledTimes(2);
+      expect(filterFn.mock.calls[0]).toEqual([foo, 0]);
+      expect(filterFn.mock.calls[1]).toEqual([bar, 1]);
+      expect(filterFn.mock.results).toEqual([
+        { type: 'return', value: true },
+        { type: 'return', value: false },
+      ]);
+
+      expect(pluginManifestFromPluginPackageMock).toHaveBeenCalledTimes(1);
+      const manifestArgs = pluginManifestFromPluginPackageMock.mock.calls[0];
+      expect(manifestArgs).toEqual([coreContext.env.packageInfo.version, foo.manifest]);
+      expect(pluginManifestFromPluginPackageMock.mock.results[0]).toEqual({
+        type: 'return',
+        value: plugin.manifest,
+      });
+    });
+  });
+
   describe('discovery order', () => {
     beforeEach(() => {
       scanPluginSearchPathsMock.mockClear();
+      getPluginPackagesFilterMock.mockReturnValue(() => true);
     });
 
     it('returns the plugins in a deterministic order', async () => {
       mockFs(
         {
-          [`${KIBANA_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
-          [`${KIBANA_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
-          [`${KIBANA_ROOT}/x-pack/plugins/plugin_c`]: Plugins.valid('pluginC'),
+          [`${REPO_ROOT}/src/plugins/plugin_a`]: Plugins.valid('pluginA'),
+          [`${REPO_ROOT}/plugins/plugin_b`]: Plugins.valid('pluginB'),
+          [`${REPO_ROOT}/x-pack/plugins/plugin_c`]: Plugins.valid('pluginC'),
         },
         { createCwd: false }
       );
 
       scanPluginSearchPathsMock.mockReturnValue(
         from([
-          `${KIBANA_ROOT}/src/plugins/plugin_a`,
-          `${KIBANA_ROOT}/plugins/plugin_b`,
-          `${KIBANA_ROOT}/x-pack/plugins/plugin_c`,
+          `${REPO_ROOT}/src/plugins/plugin_a`,
+          `${REPO_ROOT}/plugins/plugin_b`,
+          `${REPO_ROOT}/x-pack/plugins/plugin_c`,
         ])
       );
 
+      coreContext.env = {
+        ...env,
+        repoPackages: [getMockPackage('foo'), getMockPackage('bar')],
+      };
+
       let { plugin$ } = discover({
-        config: new PluginsConfig(pluginConfig, env),
+        config: new PluginsConfig(pluginConfig, coreContext.env),
         coreContext,
         instanceInfo,
         nodeInfo,
@@ -576,18 +690,22 @@ describe('plugins discovery system', () => {
       let plugins = await firstValueFrom(plugin$.pipe(toArray()));
       let pluginNames = plugins.map((plugin) => plugin.name);
 
-      expect(pluginNames).toHaveLength(3);
-      // order coming from `ROOT/plugin` -> `ROOT/src/plugins` -> // ROOT/x-pack
-      expect(pluginNames).toEqual(['pluginB', 'pluginA', 'pluginC']);
+      // order coming from `ROOT/packages` -> `ROOT/plugin` -> `ROOT/src/plugins` -> // ROOT/x-pack
+      expect(pluginNames).toEqual(['bar', 'foo', 'pluginB', 'pluginA', 'pluginC']);
 
       // second pass
       scanPluginSearchPathsMock.mockReturnValue(
         from([
-          `${KIBANA_ROOT}/plugins/plugin_b`,
-          `${KIBANA_ROOT}/x-pack/plugins/plugin_c`,
-          `${KIBANA_ROOT}/src/plugins/plugin_a`,
+          `${REPO_ROOT}/plugins/plugin_b`,
+          `${REPO_ROOT}/x-pack/plugins/plugin_c`,
+          `${REPO_ROOT}/src/plugins/plugin_a`,
         ])
       );
+
+      coreContext.env = {
+        ...env,
+        repoPackages: [getMockPackage('bar'), getMockPackage('foo')],
+      };
 
       plugin$ = discover({
         config: new PluginsConfig(pluginConfig, env),
@@ -600,9 +718,8 @@ describe('plugins discovery system', () => {
       plugins = await firstValueFrom(plugin$.pipe(toArray()));
       pluginNames = plugins.map((plugin) => plugin.name);
 
-      expect(pluginNames).toHaveLength(3);
-      // order coming from `ROOT/plugin` -> `ROOT/src/plugins` -> // ROOT/x-pack
-      expect(pluginNames).toEqual(['pluginB', 'pluginA', 'pluginC']);
+      // order coming from `ROOT/packages` -> `ROOT/plugin` -> `ROOT/src/plugins` -> // ROOT/x-pack
+      expect(pluginNames).toEqual(['bar', 'foo', 'pluginB', 'pluginA', 'pluginC']);
     });
   });
 });

@@ -9,6 +9,7 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 
 import { FleetPlugin } from './plugin';
 
+export { buildAgentStatusRuntimeField } from './services/agents/build_status_runtime_field';
 export type {
   AgentService,
   AgentClient,
@@ -19,6 +20,7 @@ export type {
   ArtifactsClientInterface,
   Artifact,
   ListArtifactsProps,
+  MessageSigningServiceInterface,
 } from './services';
 export { getRegistryUrl } from './services';
 
@@ -27,6 +29,7 @@ export type {
   ExternalCallback,
   PutPackagePolicyUpdateCallback,
   PostPackagePolicyDeleteCallback,
+  PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyCreateCallback,
   FleetRequestHandlerContext,
   PostPackagePolicyPostCreateCallback,

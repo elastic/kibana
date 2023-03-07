@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/ci-stats-core",
-        "id": "def-server.parseConfig",
+        "id": "def-common.parseConfig",
         "type": "Function",
         "tags": [],
         "label": "parseConfig",
@@ -22,17 +30,17 @@
           "(log: ",
           {
             "pluginId": "@kbn/some-dev-log",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnSomeDevLogPluginApi",
-            "section": "def-server.SomeDevLog",
+            "section": "def-common.SomeDevLog",
             "text": "SomeDevLog"
           },
           ") => ",
           {
             "pluginId": "@kbn/ci-stats-core",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCiStatsCorePluginApi",
-            "section": "def-server.Config",
+            "section": "def-common.Config",
             "text": "Config"
           },
           " | undefined"
@@ -43,7 +51,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-core",
-            "id": "def-server.parseConfig.$1",
+            "id": "def-common.parseConfig.$1",
             "type": "Object",
             "tags": [],
             "label": "log",
@@ -51,9 +59,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/some-dev-log",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnSomeDevLogPluginApi",
-                "section": "def-server.SomeDevLog",
+                "section": "def-common.SomeDevLog",
                 "text": "SomeDevLog"
               }
             ],
@@ -70,7 +78,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/ci-stats-core",
-        "id": "def-server.CiStatsMetadata",
+        "id": "def-common.CiStatsMetadata",
         "type": "Interface",
         "tags": [],
         "label": "CiStatsMetadata",
@@ -83,7 +91,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-core",
-            "id": "def-server.CiStatsMetadata.Unnamed",
+            "id": "def-common.CiStatsMetadata.Unnamed",
             "type": "IndexSignature",
             "tags": [],
             "label": "[key: string]: string | number | boolean | string[] | undefined",
@@ -102,7 +110,7 @@
       },
       {
         "parentPluginId": "@kbn/ci-stats-core",
-        "id": "def-server.Config",
+        "id": "def-common.Config",
         "type": "Interface",
         "tags": [],
         "label": "Config",
@@ -115,7 +123,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ci-stats-core",
-            "id": "def-server.Config.apiToken",
+            "id": "def-common.Config.apiToken",
             "type": "string",
             "tags": [],
             "label": "apiToken",
@@ -128,7 +136,7 @@
           },
           {
             "parentPluginId": "@kbn/ci-stats-core",
-            "id": "def-server.Config.buildId",
+            "id": "def-common.Config.buildId",
             "type": "string",
             "tags": [],
             "label": "buildId",
@@ -143,14 +151,6 @@
         "initialIsOpen": false
       }
     ],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

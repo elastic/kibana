@@ -1,0 +1,4 @@
+summary: Run a Jira connector to retrieve the list of issue types.
+value:
+  params:
+    subAction: issueTypes

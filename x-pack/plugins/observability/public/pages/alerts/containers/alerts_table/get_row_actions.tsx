@@ -6,6 +6,7 @@
  */
 import React from 'react';
 import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
+import { RenderCustomActionsRowArgs } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ObservabilityRuleTypeRegistry } from '../../../../rules/create_observability_rule_type_registry';
 import { ObservabilityActions } from '../../components/observability_actions';
 import type { ObservabilityActionsProps } from '../../components/observability_actions';
@@ -22,11 +23,7 @@ export const getRowActions = (
   config: ConfigSchema
 ) => {
   return () => ({
-    renderCustomActionsRow: (
-      alert: EcsFieldsResponse,
-      setFlyoutAlert: (data: unknown, id?: string) => void,
-      id?: string
-    ) => {
+    renderCustomActionsRow: ({ alert, setFlyoutAlert, id }: RenderCustomActionsRowArgs) => {
       return (
         <ObservabilityActions
           data={buildData(alert)}

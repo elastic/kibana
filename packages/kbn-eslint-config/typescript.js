@@ -3,9 +3,6 @@
 // Some IDEs could not be running eslint with the correct extensions yet
 // as this package was moved from typescript-eslint-parser to @typescript-eslint/parser
 
-const semver = require('semver');
-const { kibanaPackageJson: PKG } = require('@kbn/utils');
-
 const eslintConfigPrettierRules = require('eslint-config-prettier').rules;
 
 // The current implementation excluded all the variables matching the regexp.

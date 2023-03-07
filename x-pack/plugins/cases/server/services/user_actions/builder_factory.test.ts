@@ -56,7 +56,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -105,7 +105,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -164,7 +164,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -211,7 +211,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -268,7 +268,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -320,7 +320,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -371,7 +371,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -405,7 +405,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "push_to_service",
@@ -456,7 +456,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "add",
@@ -493,7 +493,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -527,7 +527,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -561,7 +561,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "add",
@@ -602,7 +602,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "update",
@@ -638,7 +638,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
+      expect(userAction!.parameters).toMatchInlineSnapshot(`
         Object {
           "attributes": Object {
             "action": "create",
@@ -706,34 +706,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.parameters).toMatchInlineSnapshot(`
-        Object {
-          "attributes": Object {
-            "action": "delete",
-            "created_at": "2022-01-09T22:00:00.000Z",
-            "created_by": Object {
-              "email": "elastic@elastic.co",
-              "full_name": "Elastic User",
-              "username": "elastic",
-            },
-            "owner": "securitySolution",
-            "payload": Object {},
-            "type": "delete_case",
-          },
-          "references": Array [
-            Object {
-              "id": "123",
-              "name": "associated-cases",
-              "type": "cases",
-            },
-            Object {
-              "id": "456",
-              "name": "connectorId",
-              "type": "action",
-            },
-          ],
-        }
-      `);
+      expect(userAction).toBeUndefined();
     });
   });
 
@@ -745,7 +718,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "update",
           "descriptiveAction": "case_user_action_update_case_title",
@@ -754,7 +727,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User updated the title for case id: 123 - user action id: 123"`
       );
     });
@@ -781,7 +754,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "update",
           "descriptiveAction": "case_user_action_update_case_connector",
@@ -790,7 +763,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User changed the case connector to id: 456 for case id: 123 - user action id: 123"`
       );
     });
@@ -810,7 +783,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "update",
           "descriptiveAction": "case_user_action_update_comment",
@@ -819,7 +792,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases-comments",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User changed comment id: test-id for case id: 123 - user action id: 123"`
       );
     });
@@ -835,7 +808,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "create",
           "descriptiveAction": "case_user_action_create_comment",
@@ -844,7 +817,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases-comments",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User created comment id: test-id for case id: 123 - user action id: 123"`
       );
     });
@@ -860,7 +833,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "update",
           "descriptiveAction": "case_user_action_update_comment",
@@ -869,7 +842,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases-comments",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User changed comment id: test-id for case id: 123 - user action id: 123"`
       );
     });
@@ -885,7 +858,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "update",
           "descriptiveAction": "case_user_action_update_comment",
@@ -894,7 +867,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases-comments",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User changed comment id: test-id for case id: 123 - user action id: 123"`
       );
     });
@@ -906,7 +879,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "update",
           "descriptiveAction": "case_user_action_update_case_description",
@@ -915,7 +888,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User updated the description for case id: 123 - user action id: 123"`
       );
     });
@@ -927,7 +900,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "push_to_service",
           "descriptiveAction": "case_user_action_pushed_case",
@@ -936,7 +909,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User pushed case id: 123 to an external service with connector id: 456 - user action id: 123"`
       );
     });
@@ -949,7 +922,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "add",
           "descriptiveAction": "case_user_action_add_case_tags",
@@ -958,7 +931,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User added tags to case id: 123 - user action id: 123"`
       );
     });
@@ -971,7 +944,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "update",
           "descriptiveAction": "case_user_action_update_case_tags",
@@ -980,7 +953,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User changed tags for case id: 123 - user action id: 123"`
       );
     });
@@ -993,7 +966,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "delete",
           "descriptiveAction": "case_user_action_delete_case_tags",
@@ -1002,7 +975,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User deleted tags in case id: 123 - user action id: 123"`
       );
     });
@@ -1014,7 +987,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "update",
           "descriptiveAction": "case_user_action_update_case_status",
@@ -1023,7 +996,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User updated the status for case id: 123 - user action id: 123"`
       );
     });
@@ -1035,7 +1008,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "update",
           "descriptiveAction": "case_user_action_update_case_severity",
@@ -1044,7 +1017,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User updated the severity for case id: 123 - user action id: 123"`
       );
     });
@@ -1056,7 +1029,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "add",
           "descriptiveAction": "case_user_action_add_case_assignees",
@@ -1065,7 +1038,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User assigned uids: [1,2] to case id: 123 - user action id: 123"`
       );
     });
@@ -1078,7 +1051,7 @@ describe('UserActionBuilder', () => {
         action: Actions.delete,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "delete",
           "descriptiveAction": "case_user_action_delete_case_assignees",
@@ -1087,7 +1060,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User unassigned uids: [1,2] from case id: 123 - user action id: 123"`
       );
     });
@@ -1100,7 +1073,7 @@ describe('UserActionBuilder', () => {
         action: Actions.create,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "create",
           "descriptiveAction": "case_user_action_create_case_assignees",
@@ -1109,7 +1082,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User changed uids: [1,2] for case id: 123 - user action id: 123"`
       );
     });
@@ -1121,7 +1094,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "update",
           "descriptiveAction": "case_user_action_update_case_settings",
@@ -1130,7 +1103,7 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User updated the settings for case id: 123 - user action id: 123"`
       );
     });
@@ -1142,7 +1115,7 @@ describe('UserActionBuilder', () => {
         ...commonArgs,
       });
 
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
+      expect(userAction!.eventDetails).toMatchInlineSnapshot(`
         Object {
           "action": "create",
           "descriptiveAction": "case_user_action_create_case",
@@ -1151,30 +1124,8 @@ describe('UserActionBuilder', () => {
           "savedObjectType": "cases",
         }
       `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
+      expect(userAction!.eventDetails.getMessage('123')).toMatchInlineSnapshot(
         `"User created case id: 123 - user action id: 123"`
-      );
-    });
-
-    it('logs a delete case user action correctly', () => {
-      const builder = builderFactory.getBuilder(ActionTypes.delete_case)!;
-      const userAction = builder.build({
-        payload: {},
-        connectorId: '456',
-        ...commonArgs,
-      });
-
-      expect(userAction.eventDetails).toMatchInlineSnapshot(`
-        Object {
-          "action": "delete",
-          "descriptiveAction": "case_user_action_delete_case",
-          "getMessage": [Function],
-          "savedObjectId": "123",
-          "savedObjectType": "cases",
-        }
-      `);
-      expect(userAction.eventDetails.getMessage('123')).toMatchInlineSnapshot(
-        `"User deleted case id: 123"`
       );
     });
   });

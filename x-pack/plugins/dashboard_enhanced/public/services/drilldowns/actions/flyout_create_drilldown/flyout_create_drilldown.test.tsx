@@ -26,6 +26,9 @@ const actionParams: OpenFlyoutAddDrilldownParams = {
       application: {
         currentAppId$: new Subject(),
       },
+      theme: {
+        theme$: new Subject(),
+      },
     } as any,
     plugins: {
       uiActionsEnhanced,

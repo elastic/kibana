@@ -60,6 +60,7 @@ const getDeleteCommentUserAction = ({
 };
 
 const getCreateCommentUserAction = ({
+  appId,
   userAction,
   userProfiles,
   caseData,
@@ -85,11 +86,12 @@ const getCreateCommentUserAction = ({
   comment: Comment;
 } & Omit<
   UserActionBuilderArgs,
-  'caseServices' | 'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
+  'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
 >): EuiCommentProps[] => {
   switch (comment.type) {
     case CommentType.user:
       const userBuilder = createUserAttachmentUserActionBuilder({
+        appId,
         userProfiles,
         comment,
         outlined: comment.id === selectedOutlineCommentId,
@@ -162,6 +164,7 @@ const getCreateCommentUserAction = ({
 };
 
 export const createCommentUserActionBuilder: UserActionBuilder = ({
+  appId,
   caseData,
   userProfiles,
   externalReferenceAttachmentTypeRegistry,
@@ -182,6 +185,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
   handleManageQuote,
   handleOutlineComment,
   actionsNavigation,
+  caseConnectors,
 }) => ({
   build: () => {
     const commentUserAction = userAction as UserActionResponse<CommentUserAction>;
@@ -202,6 +206,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
 
     if (commentUserAction.action === Actions.create) {
       const commentAction = getCreateCommentUserAction({
+        appId,
         caseData,
         userProfiles,
         userAction: commentUserAction,
@@ -222,6 +227,7 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
         handleDeleteComment,
         handleManageQuote,
         actionsNavigation,
+        caseConnectors,
       });
 
       return commentAction;

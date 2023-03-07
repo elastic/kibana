@@ -12,6 +12,12 @@ export const RuleNotifyWhenTypeValues = [
 ] as const;
 export type RuleNotifyWhenType = typeof RuleNotifyWhenTypeValues[number];
 
+export enum RuleNotifyWhen {
+  CHANGE = 'onActionGroupChange',
+  ACTIVE = 'onActiveAlert',
+  THROTTLE = 'onThrottleInterval',
+}
+
 export function validateNotifyWhenType(notifyWhen: string) {
   if (RuleNotifyWhenTypeValues.includes(notifyWhen as RuleNotifyWhenType)) {
     return;

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ConfigType } from '../../../../config';
 import type { SetupPlugins } from '../../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
@@ -14,9 +13,8 @@ import { installPrebuiltRulesAndTimelinesRoute } from './install_prebuilt_rules_
 
 export const registerPrebuiltRulesRoutes = (
   router: SecuritySolutionPluginRouter,
-  config: ConfigType,
   security: SetupPlugins['security']
 ) => {
-  getPrebuiltRulesAndTimelinesStatusRoute(router, config, security);
+  getPrebuiltRulesAndTimelinesStatusRoute(router, security);
   installPrebuiltRulesAndTimelinesRoute(router);
 };

@@ -13,10 +13,18 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/core-http-context-server-mocks",
-        "id": "def-server.ContextContainerMock",
+        "id": "def-common.ContextContainerMock",
         "type": "Type",
         "tags": [],
         "label": "ContextContainerMock",
@@ -25,81 +33,81 @@
           "{ registerContext: jest.MockInstance<",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IContextContainer",
+            "section": "def-common.IContextContainer",
             "text": "IContextContainer"
           },
           ", [pluginOpaqueId: symbol, contextName: \"resolve\", provider: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IContextProvider",
+            "section": "def-common.IContextProvider",
             "text": "IContextProvider"
           },
           "<",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
+            "section": "def-common.RequestHandlerContextBase",
             "text": "RequestHandlerContextBase"
           },
           ", \"resolve\">]>; createHandler: jest.MockInstance<(request: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaRequest",
+            "section": "def-common.KibanaRequest",
             "text": "KibanaRequest"
           },
           "<unknown, unknown, unknown, any>, response: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
+            "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ") => Promise<",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
+            "section": "def-common.IKibanaResponse",
             "text": "IKibanaResponse"
           },
           "<any>>, [pluginOpaqueId: symbol, handler: ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandler",
+            "section": "def-common.RequestHandler",
             "text": "RequestHandler"
           },
           "<unknown, unknown, unknown, ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
+            "section": "def-common.RequestHandlerContextBase",
             "text": "RequestHandlerContextBase"
           },
           ", any, ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
+            "section": "def-common.KibanaResponseFactory",
             "text": "KibanaResponseFactory"
           },
           ">]>; } & ",
           {
             "pluginId": "@kbn/core-http-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IContextContainer",
+            "section": "def-common.IContextContainer",
             "text": "IContextContainer"
           }
         ],
@@ -112,7 +120,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-http-context-server-mocks",
-        "id": "def-server.contextMock",
+        "id": "def-common.contextMock",
         "type": "Object",
         "tags": [],
         "label": "contextMock",
@@ -123,7 +131,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-context-server-mocks",
-            "id": "def-server.contextMock.create",
+            "id": "def-common.contextMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -132,9 +140,9 @@
               "(mockContext?: any) => ",
               {
                 "pluginId": "@kbn/core-http-context-server-mocks",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreHttpContextServerMocksPluginApi",
-                "section": "def-server.ContextContainerMock",
+                "section": "def-common.ContextContainerMock",
                 "text": "ContextContainerMock"
               }
             ],
@@ -145,7 +153,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-context-server-mocks",
-                "id": "def-server.contextMock.create.$1",
+                "id": "def-common.contextMock.create.$1",
                 "type": "Any",
                 "tags": [],
                 "label": "mockContext",
@@ -164,7 +172,7 @@
       },
       {
         "parentPluginId": "@kbn/core-http-context-server-mocks",
-        "id": "def-server.contextServiceMock",
+        "id": "def-common.contextServiceMock",
         "type": "Object",
         "tags": [],
         "label": "contextServiceMock",
@@ -175,7 +183,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-http-context-server-mocks",
-            "id": "def-server.contextServiceMock.create",
+            "id": "def-common.contextServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -191,7 +199,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-context-server-mocks",
-            "id": "def-server.contextServiceMock.createPrebootContract",
+            "id": "def-common.contextServiceMock.createPrebootContract",
             "type": "Function",
             "tags": [],
             "label": "createPrebootContract",
@@ -208,7 +216,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-context-server-mocks",
-                "id": "def-server.contextServiceMock.createPrebootContract.$1",
+                "id": "def-common.contextServiceMock.createPrebootContract.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "mockContext",
@@ -224,7 +232,7 @@
           },
           {
             "parentPluginId": "@kbn/core-http-context-server-mocks",
-            "id": "def-server.contextServiceMock.createSetupContract",
+            "id": "def-common.contextServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -241,7 +249,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-http-context-server-mocks",
-                "id": "def-server.contextServiceMock.createSetupContract.$1",
+                "id": "def-common.contextServiceMock.createSetupContract.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "mockContext",
@@ -259,13 +267,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

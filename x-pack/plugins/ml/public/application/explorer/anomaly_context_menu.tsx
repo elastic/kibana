@@ -19,14 +19,14 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import type { Query, TimeRange } from '@kbn/es-query';
-import { isDefined } from '../../../common/types/guards';
+import { isDefined } from '@kbn/ml-is-defined';
+import { useTimeRangeUpdates } from '@kbn/ml-date-picker';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
 import { escapeKueryForFieldValuePair } from '../util/string_utils';
 import { SEARCH_QUERY_LANGUAGE } from '../../../common/constants/search';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
 import { ANOMALY_EXPLORER_CHARTS_EMBEDDABLE_TYPE } from '../../embeddables';
-import { useTimeRangeUpdates } from '../contexts/kibana/use_timefilter';
 import { useMlKibana } from '../contexts/kibana';
 import {
   AppStateSelectedCells,

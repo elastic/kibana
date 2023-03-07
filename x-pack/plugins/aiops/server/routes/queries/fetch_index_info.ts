@@ -68,9 +68,10 @@ export const fetchIndexInfo = async (
   Object.entries(respMapping.fields).forEach(([key, value]) => {
     const fieldTypes = Object.keys(value) as ES_FIELD_TYPES[];
     const isSupportedType = fieldTypes.some((type) => SUPPORTED_ES_FIELD_TYPES.includes(type));
+    const isAggregatable = fieldTypes.some((type) => value[type].aggregatable);
 
     // Check if fieldName is something we can aggregate on
-    if (isSupportedType) {
+    if (isSupportedType && isAggregatable) {
       acceptableFields.add(key);
     }
   });

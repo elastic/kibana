@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './metric_component';
+export { MetricComponent } from './metric_component';

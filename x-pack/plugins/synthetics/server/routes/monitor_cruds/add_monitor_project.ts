@@ -31,6 +31,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     },
   },
   handler: async ({
+    context,
     request,
     response,
     savedObjectsClient,
@@ -40,7 +41,6 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     const { projectName } = request.params;
     const decodedProjectName = decodeURI(projectName);
     const monitors = (request.body?.monitors as ProjectMonitor[]) || [];
-    const spaceId = server.spaces.spacesService.getSpaceId(request);
 
     if (monitors.length > 250) {
       return response.badRequest({
@@ -51,6 +51,7 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
     }
 
     try {
+      const { id: spaceId } = await server.spaces.spacesService.getActiveSpace(request);
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
       const pushMonitorFormatter = new ProjectMonitorFormatter({
@@ -73,6 +74,11 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       };
     } catch (error) {
       server.logger.error(`Error adding monitors to project ${decodedProjectName}`);
+      if (error.output.statusCode === 404) {
+        const spaceId = server.spaces.spacesService.getSpaceId(request);
+        return response.notFound({ body: { message: `Kibana space '${spaceId}' does not exist` } });
+      }
+
       throw error;
     }
   },

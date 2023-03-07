@@ -8,6 +8,7 @@
 import { History } from 'history';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
+import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';
 import { SpanFlyout } from './span_flyout';
 import { TransactionFlyout } from './transaction_flyout';
 import { IWaterfall } from './waterfall_helpers/waterfall_helpers';
@@ -15,7 +16,13 @@ import { IWaterfall } from './waterfall_helpers/waterfall_helpers';
 interface Props {
   waterfallItemId?: string;
   waterfall: IWaterfall;
-  toggleFlyout: ({ history }: { history: History }) => void;
+  toggleFlyout: ({
+    history,
+    flyoutDetailTab,
+  }: {
+    history: History;
+    flyoutDetailTab?: string;
+  }) => void;
 }
 
 export function WaterfallFlyout({
@@ -24,6 +31,14 @@ export function WaterfallFlyout({
   toggleFlyout,
 }: Props) {
   const history = useHistory();
+  const {
+    query: { flyoutDetailTab },
+  } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/traces/explorer/waterfall',
+    '/dependencies/operation'
+  );
   const currentItem = waterfall.items.find(
     (item) => item.id === waterfallItemId
   );
@@ -47,6 +62,7 @@ export function WaterfallFlyout({
           traceId={currentItem.doc.trace.id}
           onClose={() => toggleFlyout({ history })}
           spanLinksCount={currentItem.spanLinksCount}
+          flyoutDetailTab={flyoutDetailTab}
         />
       );
     case 'transaction':
@@ -58,6 +74,7 @@ export function WaterfallFlyout({
           rootTransactionDuration={waterfall.rootWaterfallTransaction?.duration}
           errorCount={waterfall.getErrorCount(currentItem.id)}
           spanLinksCount={currentItem.spanLinksCount}
+          flyoutDetailTab={flyoutDetailTab}
         />
       );
     default:

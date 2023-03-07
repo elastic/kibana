@@ -78,7 +78,7 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
     getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
     id="dashboard"
-    initialFilter="\\"search by title\\""
+    initialFilter="search by title"
     tableListTitle="Dashboards"
   >
     <DashboardUnsavedListing
@@ -97,7 +97,6 @@ exports[`after fetch When given a title that matches multiple dashboards, filter
 
 exports[`after fetch initialFilter 1`] = `
 <DashboardListing
-  initialFilter="testFilter"
   kbnUrlStateStorage={
     Object {
       "cancel": [Function],
@@ -173,7 +172,7 @@ exports[`after fetch initialFilter 1`] = `
     getDetailViewLink={[Function]}
     headingId="dashboardListingHeading"
     id="dashboard"
-    initialFilter="testFilter"
+    initialFilter=""
     tableListTitle="Dashboards"
   >
     <DashboardUnsavedListing

@@ -9,6 +9,7 @@ import React, { FC, useState, useEffect } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useUrlState } from '@kbn/ml-url-state';
 import { OutlierExploration } from './components/outlier_exploration';
 import { RegressionExploration } from './components/regression_exploration';
 import { ClassificationExploration } from './components/classification_exploration';
@@ -24,7 +25,6 @@ import {
   AnalyticsIdSelectorControls,
 } from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
-import { useUrlState } from '../../../util/url_state';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
 
 export const Page: FC<{

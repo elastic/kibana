@@ -29,10 +29,6 @@ import { login } from '../tasks/login';
 import { esArchiverLoad, esArchiverUnload } from '../tasks/es_archiver';
 import { selectRange } from '../tasks/select_range';
 
-before(() => {
-  login();
-});
-
 const THREAT_INTELLIGENCE = '/app/security/threat_intelligence/indicators';
 const CASES = 'app/security/cases';
 
@@ -74,10 +70,14 @@ const deleteCase = () => {
 describe('Cases with invalid indicators', () => {
   before(() => {
     esArchiverLoad('threat_intelligence/invalid_indicators_data');
+    login();
+  });
 
+  beforeEach(() => {
     cy.visit(THREAT_INTELLIGENCE);
     selectRange();
   });
+
   after(() => {
     esArchiverUnload('threat_intelligence/invalid_indicators_data');
   });
@@ -105,7 +105,9 @@ describe('Cases with invalid indicators', () => {
 describe('Cases interactions', () => {
   before(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
+    login();
   });
+
   after(() => {
     esArchiverUnload('threat_intelligence/indicators_data');
   });

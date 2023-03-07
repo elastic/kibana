@@ -12,12 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { EuiPanel } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
 import { EuiIconTip } from '@elastic/eui';
-import { ALERT_DURATION, ALERT_END } from '@kbn/rule-data-utils';
+import {
+  ALERT_DURATION,
+  ALERT_END,
+  ALERT_RULE_UUID,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
 import moment from 'moment';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
-import { getTransactionType } from '../../../../context/apm_service/apm_service_context';
-import { useServiceAgentFetcher } from '../../../../context/apm_service/use_service_agent_fetcher';
-import { useServiceTransactionTypesFetcher } from '../../../../context/apm_service/use_service_transaction_types_fetcher';
 import { asPercent } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getDurationFormatter } from '../../../../../common/utils/formatters/duration';
@@ -41,9 +43,17 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from './types';
-import { getAggsTypeFromRule } from './helpers';
+import { getAggsTypeFromRule, isLatencyThresholdRuleType } from './helpers';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
+import { LatencyAlertsHistoryChart } from './latency_alerts_history_chart';
+import {
+  AlertActiveRect,
+  AlertAnnotation,
+  AlertThresholdRect,
+  AlertThresholdAnnotation,
+} from './latency_chart_components';
+import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 
 export function AlertDetailsAppSection({
   rule,
@@ -51,10 +61,8 @@ export function AlertDetailsAppSection({
   timeZone,
 }: AlertDetailsAppSectionProps) {
   const params = rule.params;
-  const environment = String(params.environment) || ENVIRONMENT_ALL.value;
-  const latencyAggregationType = getAggsTypeFromRule(
-    params.aggregationType as string
-  );
+  const environment = alert.fields[SERVICE_ENVIRONMENT];
+  const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
 
   // duration is us, convert it to MS
   const alertDurationMS = alert.fields[ALERT_DURATION]! / 1000;
@@ -91,23 +99,7 @@ export function AlertDetailsAppSection({
         .toISOString();
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { agentName } = useServiceAgentFetcher({
-    serviceName,
-    start,
-    end,
-  });
-  const transactionTypes = useServiceTransactionTypesFetcher({
-    serviceName,
-    start,
-    end,
-  });
-
-  const transactionType = getTransactionType({
-    transactionType: String(alert.fields[TRANSACTION_TYPE]),
-    transactionTypes,
-    agentName,
-  });
-
+  const transactionType = alert.fields[TRANSACTION_TYPE];
   const comparisonChartTheme = getComparisonChartTheme();
   const INITIAL_STATE = {
     currentPeriod: [],
@@ -289,8 +281,31 @@ export function AlertDetailsAppSection({
       }),
     },
   ];
-
   /* Error Rate */
+
+  const getLatencyChartAdditionalData = () => {
+    if (isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID])) {
+      return [
+        <AlertThresholdRect
+          key={'alertThresholdRect'}
+          threshold={alert.fields[ALERT_EVALUATION_THRESHOLD]}
+          alertStarted={alert.start}
+        />,
+        <AlertAnnotation
+          key={'alertAnnotationStart'}
+          alertStarted={alert.start}
+        />,
+        <AlertActiveRect
+          key={'alertAnnotationActiveRect'}
+          alertStarted={alert.start}
+        />,
+        <AlertThresholdAnnotation
+          key={'alertThresholdAnnotation'}
+          threshold={alert.fields[ALERT_EVALUATION_THRESHOLD]}
+        />,
+      ];
+    }
+  };
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -313,6 +328,7 @@ export function AlertDetailsAppSection({
             </EuiFlexGroup>
             <TimeseriesChart
               id="latencyChart"
+              annotations={getLatencyChartAdditionalData()}
               height={200}
               comparisonEnabled={comparisonEnabled}
               offset={offset}
@@ -409,6 +425,18 @@ export function AlertDetailsAppSection({
               </EuiPanel>
             </EuiFlexItem>
           </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LatencyAlertsHistoryChart
+            ruleId={alert.fields[ALERT_RULE_UUID]}
+            serviceName={serviceName}
+            start={start}
+            end={end}
+            transactionType={transactionType}
+            latencyAggregationType={latencyAggregationType}
+            environment={environment}
+            timeZone={timeZone}
+          />
         </EuiFlexItem>
       </ChartPointerEventContextProvider>
     </EuiFlexGroup>

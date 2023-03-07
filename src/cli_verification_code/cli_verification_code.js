@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { kibanaPackageJson, getDataPath } from '@kbn/utils';
+import { getDataPath } from '@kbn/utils';
+import { kibanaPackageJson } from '@kbn/repo-info';
 import path from 'path';
 import fs from 'fs';
 import chalk from 'chalk';

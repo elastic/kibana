@@ -8,7 +8,7 @@
 import React, { forwardRef, useMemo } from 'react';
 import styled from 'styled-components';
 import type { EuiMarkdownEditorProps } from '@elastic/eui';
-import { EuiFormRow, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
+import { EuiFormRow, EuiFlexItem, EuiFlexGroup, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as i18n from '../../common/translations';
@@ -82,7 +82,7 @@ export const MarkdownEditorForm = React.memo(
             describedByIds={idAria ? [idAria] : undefined}
             fullWidth
             error={errorMessage}
-            helpText={hasConflicts ? conflictWarningText : field.helpText}
+            helpText={field.helpText}
             isInvalid={isInvalid}
             label={field.label}
             labelAppend={field.labelAppend}
@@ -99,7 +99,13 @@ export const MarkdownEditorForm = React.memo(
           </EuiFormRow>
           {bottomRightContent && (
             <BottomContentWrapper justifyContent={'flexEnd'}>
-              <EuiFlexItem grow={false}>{bottomRightContent}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText color="danger" size="s">
+                  {hasConflicts && conflictWarningText}
+                </EuiText>
+                <EuiSpacer size="s" />
+                {bottomRightContent}
+              </EuiFlexItem>
             </BottomContentWrapper>
           )}
         </CommentEditorContext.Provider>

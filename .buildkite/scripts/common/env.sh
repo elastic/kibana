@@ -12,6 +12,8 @@ PARENT_DIR="$(cd "$KIBANA_DIR/.."; pwd)"
 export PARENT_DIR
 export WORKSPACE="${WORKSPACE:-$PARENT_DIR}"
 
+export DOCS_REPO_CACHE_DIR="$HOME/.docs-repos"
+
 # A few things, such as Chrome, respect this variable
 # For many agent types, the workspace is mounted on a local ssd, so will be faster than the default tmp dir location
 if [[ -d /opt/local-ssd/buildkite ]]; then
@@ -108,3 +110,6 @@ export BROWSERSLIST_IGNORE_OLD_DATA=true
 export TEST_GROUP_TYPE_UNIT="Jest Unit Tests"
 export TEST_GROUP_TYPE_INTEGRATION="Jest Integration Tests"
 export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"
+
+# tells the gh command what our default repo is
+export GH_REPO=github.com/elastic/kibana

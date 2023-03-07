@@ -46,11 +46,15 @@ const assertReturnVal = (workers: Assignments[]) => {
 const testBundle = (id: string) =>
   new Bundle({
     contextDir: `/repo/plugin/${id}/public`,
-    publicDirNames: ['public'],
     id,
     outputDir: `/repo/plugins/${id}/target/public`,
     sourceRoot: `/repo`,
     type: 'plugin',
+    remoteInfo: {
+      pkgId: `@kbn/${id}-plugin`,
+      targets: ['public'],
+    },
+    ignoreMetrics: false,
   });
 
 const getBundles = ({

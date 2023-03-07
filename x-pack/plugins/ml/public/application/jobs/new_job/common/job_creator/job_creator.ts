@@ -7,8 +7,10 @@
 
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
-import { ES_FIELD_TYPES } from '@kbn/data-plugin/public';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import type { Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
 import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
 import { UrlConfig } from '../../../../../../common/types/custom_urls';
 import { IndexPatternTitle } from '../../../../../../common/types/kibana';
@@ -17,6 +19,7 @@ import {
   aggregations,
   mlOnlyAggregations,
 } from '../../../../../../common/constants/aggregation_types';
+import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
 import {
   Job,
   Datafeed,
@@ -28,7 +31,6 @@ import {
 } from '../../../../../../common/types/anomaly_detection_jobs';
 import { Aggregation, Field, RuntimeMappings } from '../../../../../../common/types/fields';
 import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
-import { addExcludeFrozenToQuery } from '../../../../../../common/util/query_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
 import { JobRunner, ProgressSubscriber } from '../job_runner';
@@ -105,6 +107,18 @@ export class JobCreator {
     return this._type;
   }
 
+  public get savedSearch(): SavedSearchSavedObject | null {
+    return this._savedSearch;
+  }
+
+  public get dataView(): DataView {
+    return this._indexPattern;
+  }
+
+  public get dataViewId(): string | undefined {
+    return this._indexPattern.id;
+  }
+
   public get indexPatternTitle(): string {
     return this._indexPatternTitle;
   }
@@ -139,6 +153,10 @@ export class JobCreator {
     this._detectors.length = 0;
     this._aggs.length = 0;
     this._fields.length = 0;
+  }
+
+  public get savedSearchQuery(): { query: Query; filter: any[] } | null {
+    return this._savedSearch ? getQueryFromSavedSearchObject(this._savedSearch) : null;
   }
 
   public get detectors(): Detector[] {
@@ -293,7 +311,11 @@ export class JobCreator {
   public set useDedicatedIndex(enable: boolean) {
     this._useDedicatedIndex = enable;
     if (enable) {
-      this._job_config.results_index_name = this._job_config.job_id;
+      if (this._job_config.results_index_name === undefined) {
+        // only set the results_index_name if it hasn't been set before.
+        // this allows it to be overwritten in the advanced JSON editor.
+        this._job_config.results_index_name = this._job_config.job_id;
+      }
     } else {
       // @ts-expect-error The operand of a 'delete' operator must be optional
       delete this._job_config.results_index_name;

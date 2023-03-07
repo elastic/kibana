@@ -25,6 +25,8 @@ import {
   Tags,
   tags,
   name,
+  ExpireTimeOrUndefined,
+  expireTimeOrUndefined,
 } from '../../common';
 import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 
@@ -46,6 +48,7 @@ export const createRuleExceptionListItemSchema = t.intersection([
       namespace_type: namespaceType, // defaults to 'single' if not set during decode
       os_types: osTypeArrayOrUndefined, // defaults to empty array if not set during decode
       tags, // defaults to empty array if not set during decode
+      expire_time: expireTimeOrUndefined,
     })
   ),
 ]);
@@ -57,7 +60,7 @@ export type CreateRuleExceptionListItemSchema = t.OutputOf<
 // This type is used after a decode since some things are defaults after a decode.
 export type CreateRuleExceptionListItemSchemaDecoded = Omit<
   RequiredKeepUndefined<t.TypeOf<typeof createRuleExceptionListItemSchema>>,
-  'tags' | 'item_id' | 'entries' | 'namespace_type' | 'comments'
+  'tags' | 'item_id' | 'entries' | 'namespace_type' | 'comments' | 'expire_time'
 > & {
   comments: CreateCommentsArray;
   tags: Tags;
@@ -65,4 +68,5 @@ export type CreateRuleExceptionListItemSchemaDecoded = Omit<
   entries: EntriesArray;
   namespace_type: NamespaceType;
   os_types: OsTypeArray;
+  expire_time: ExpireTimeOrUndefined;
 };

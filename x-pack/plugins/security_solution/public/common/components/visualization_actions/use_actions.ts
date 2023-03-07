@@ -18,26 +18,25 @@ import { INSPECT } from '../inspect/translations';
 export type ActionTypes = 'addToExistingCase' | 'addToNewCase' | 'openInLens';
 
 export const useActions = ({
-  withActions,
   attributes,
-  timeRange,
+  extraActions,
   inspectActionProps,
+  timeRange,
+  withActions,
 }: {
-  withActions?: boolean;
-
   attributes: LensAttributes | null;
-
-  timeRange: { from: string; to: string };
-
+  extraActions?: Action[];
   inspectActionProps?: { onInspectActionClicked: () => void; isDisabled: boolean };
+  timeRange: { from: string; to: string };
+  withActions?: boolean;
 }) => {
   const { lens } = useKibana().services;
   const { navigateToPrefilledEditor } = lens;
   const [defaultActions, setDefaultActions] = useState([
     'inspect',
-    'openInLens',
     'addToNewCase',
     'addToExistingCase',
+    'openInLens',
   ]);
 
   useEffect(() => {
@@ -75,7 +74,7 @@ export const useActions = ({
 
   const actions = useMemo(
     () =>
-      defaultActions.reduce<Action[]>((acc, action) => {
+      defaultActions?.reduce<Action[]>((acc, action) => {
         if (action === 'inspect' && inspectActionProps != null) {
           return [
             ...acc,
@@ -120,7 +119,9 @@ export const useActions = ({
     ]
   );
 
-  return actions;
+  const withExtraActions = actions.concat(extraActions ?? []);
+
+  return withExtraActions;
 };
 
 const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => {
@@ -140,7 +141,7 @@ const getOpenInLensAction = ({ callback }: { callback: () => void }): Action => 
     async execute(context: ActionExecutionContext<object>): Promise<void> {
       callback();
     },
-    order: 3,
+    order: 1,
   };
 };
 
@@ -167,7 +168,7 @@ const getAddToNewCaseAction = ({
       callback();
     },
     disabled,
-    order: 2,
+    order: 3,
   };
 };
 
@@ -221,6 +222,6 @@ const getAddToExistingCaseAction = ({
       callback();
     },
     disabled,
-    order: 1,
+    order: 2,
   };
 };

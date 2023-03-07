@@ -88,7 +88,7 @@ describe('utils', () => {
       isDeprecated: false,
     };
 
-    it('creates an external incident', async () => {
+    it('creates an external incident correctly for Jira', async () => {
       const res = await createIncident({
         theCase,
         userActions: [],
@@ -108,6 +108,155 @@ describe('utils', () => {
           description:
             'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
           externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('creates an external incident correctly for SN', async () => {
+      const snConnector = {
+        ...connector,
+        actionTypeId: '.servicenow',
+      };
+
+      const res = await createIncident({
+        theCase,
+        userActions: [],
+        connector: snConnector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          category: null,
+          subcategory: null,
+          correlation_display: 'Elastic Case',
+          correlation_id: 'mock-id-1',
+          impact: null,
+          severity: null,
+          urgency: null,
+          short_description: 'Super Bad Security Issue',
+          description:
+            'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('creates an external incident correctly for SIR', async () => {
+      const snConnector = {
+        ...connector,
+        actionTypeId: '.servicenow-sir',
+      };
+
+      const res = await createIncident({
+        theCase,
+        userActions: [],
+        connector: snConnector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          category: null,
+          subcategory: null,
+          correlation_display: 'Elastic Case',
+          correlation_id: 'mock-id-1',
+          dest_ip: [],
+          source_ip: [],
+          malware_hash: [],
+          malware_url: [],
+          priority: null,
+          short_description: 'Super Bad Security Issue',
+          description:
+            'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('creates an external incident correctly for IBM Resilient', async () => {
+      const resilientConnector = {
+        ...connector,
+        actionTypeId: '.resilient',
+      };
+
+      const res = await createIncident({
+        theCase,
+        userActions: [],
+        connector: resilientConnector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          incidentTypes: null,
+          severityCode: null,
+          name: 'Super Bad Security Issue',
+          description:
+            'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('creates an external incident correctly for Swimlane', async () => {
+      const swimlaneConnector = {
+        ...connector,
+        actionTypeId: '.swimlane',
+      };
+
+      const res = await createIncident({
+        theCase,
+        userActions: [],
+        connector: swimlaneConnector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          caseId: 'mock-id-1',
+          caseName: 'Super Bad Security Issue',
+          description:
+            'This is a brand new case of a bad meanie defacing data\n\nAdded by elastic.',
+          externalId: null,
+        },
+        comments: [],
+      });
+    });
+
+    it('creates an external incident correctly for Cases webhook', async () => {
+      const webhookConnector = {
+        ...connector,
+        actionTypeId: '.cases-webhook',
+      };
+
+      const res = await createIncident({
+        theCase,
+        userActions: [],
+        connector: webhookConnector,
+        alerts: [],
+        casesConnectors,
+        spaceId: 'default',
+      });
+
+      expect(res).toEqual({
+        incident: {
+          externalId: null,
+          description: 'This is a brand new case of a bad meanie defacing data',
+          tags: ['defacement'],
+          title: 'Super Bad Security Issue',
         },
         comments: [],
       });

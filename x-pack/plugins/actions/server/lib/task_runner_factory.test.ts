@@ -19,7 +19,17 @@ import { ActionTypeDisabledError } from './errors';
 import { actionsClientMock } from '../mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { IN_MEMORY_METRICS } from '../monitoring';
+import { pick } from 'lodash';
 
+const executeParamsFields = [
+  'actionId',
+  'isEphemeral',
+  'params',
+  'relatedSavedObjects',
+  'executionId',
+  'request.headers',
+  'taskInfo',
+];
 const spaceIdToNamespace = jest.fn();
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mockedEncryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
@@ -136,25 +146,25 @@ test('executes the task by calling the executor with proper parameters, using gi
     { namespace: 'namespace-test' }
   );
 
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, executeParamsFields)).toEqual({
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
     relatedSavedObjects: [],
     executionId: '123abc',
-    request: expect.objectContaining({
+    request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }),
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
     },
   });
 
-  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
   expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
     executeParams.request,
     '/s/test'
@@ -196,25 +206,25 @@ test('executes the task by calling the executor with proper parameters, using st
     { namespace: 'namespace-test' }
   );
 
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, executeParamsFields)).toEqual({
     actionId: '9',
     isEphemeral: false,
     params: { baz: true },
     executionId: '123abc',
     relatedSavedObjects: [],
-    request: expect.objectContaining({
+    request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }),
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
     },
   });
 
-  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
   expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
     executeParams.request,
     '/s/test'
@@ -251,26 +261,26 @@ test('executes the task by calling the executor with proper parameters when cons
     { namespace: 'namespace-test' }
   );
 
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, [...executeParamsFields, 'consumer'])).toEqual({
     actionId: '2',
     consumer: 'test-consumer',
     isEphemeral: false,
     params: { baz: true },
     relatedSavedObjects: [],
     executionId: '123abc',
-    request: expect.objectContaining({
+    request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }),
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
     },
   });
 
-  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
   expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
     executeParams.request,
     '/s/test'
@@ -444,25 +454,25 @@ test('uses API key when provided', async () => {
 
   await taskRunner.run();
 
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, executeParamsFields)).toEqual({
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
     executionId: '123abc',
     relatedSavedObjects: [],
-    request: expect.objectContaining({
+    request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }),
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
     },
   });
 
-  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
   expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
     executeParams.request,
     '/s/test'
@@ -502,7 +512,8 @@ test('uses relatedSavedObjects merged with references when provided', async () =
 
   await taskRunner.run();
 
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, executeParamsFields)).toEqual({
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
@@ -513,12 +524,12 @@ test('uses relatedSavedObjects merged with references when provided', async () =
         type: 'some-type',
       },
     ],
-    request: expect.objectContaining({
+    request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }),
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
@@ -554,7 +565,8 @@ test('uses relatedSavedObjects as is when references are empty', async () => {
 
   await taskRunner.run();
 
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, executeParamsFields)).toEqual({
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
@@ -566,12 +578,12 @@ test('uses relatedSavedObjects as is when references are empty', async () => {
         namespace: 'yo',
       },
     ],
-    request: expect.objectContaining({
+    request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }),
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
@@ -611,16 +623,18 @@ test('sanitizes invalid relatedSavedObjects when provided', async () => {
   });
 
   await taskRunner.run();
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, executeParamsFields)).toEqual({
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
-    request: expect.objectContaining({
+    request: {
       headers: {
         // base64 encoded "123:abc"
         authorization: 'ApiKey MTIzOmFiYw==',
       },
-    }),
+    },
     executionId: '123abc',
     relatedSavedObjects: [],
     taskInfo: {
@@ -656,22 +670,22 @@ test(`doesn't use API key when not provided`, async () => {
 
   await taskRunner.run();
 
-  expect(mockedActionExecutor.execute).toHaveBeenCalledWith({
+  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
+  expect(pick(executeParams, executeParamsFields)).toEqual({
     actionId: '2',
     isEphemeral: false,
     params: { baz: true },
     executionId: '123abc',
     relatedSavedObjects: [],
-    request: expect.objectContaining({
+    request: {
       headers: {},
-    }),
+    },
     taskInfo: {
       scheduled: new Date(),
       attempts: 0,
     },
   });
 
-  const [executeParams] = mockedActionExecutor.execute.mock.calls[0];
   expect(taskRunnerFactoryInitializerParams.basePathService.set).toHaveBeenCalledWith(
     executeParams.request,
     '/s/test'

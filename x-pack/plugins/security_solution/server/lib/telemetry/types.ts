@@ -52,6 +52,7 @@ export interface TelemetryEvent {
   };
   cluster_name?: string;
   cluster_uuid?: string;
+  package_version?: string;
   file?: {
     [key: string]: SearchTypes;
     Ext?: {
@@ -381,7 +382,7 @@ export interface ValueListMetaData {
 
 export interface ValueListResponseAggregation {
   aggregations: {
-    total_value_list_count: number;
+    total_value_list_count: { value: number };
     type_breakdown: {
       buckets: Array<{
         key: string;
@@ -435,4 +436,11 @@ export interface TelemetryFilterListArtifact {
   endpoint_alerts: AllowlistFields;
   exception_lists: AllowlistFields;
   prebuilt_rules_alerts: AllowlistFields;
+}
+
+export interface ValueListResponse {
+  listMetricsResponse: ValueListResponseAggregation;
+  itemMetricsResponse: ValueListItemsResponseAggregation;
+  exceptionListMetricsResponse: ValueListExceptionListResponseAggregation;
+  indicatorMatchMetricsResponse: ValueListIndicatorMatchResponseAggregation;
 }

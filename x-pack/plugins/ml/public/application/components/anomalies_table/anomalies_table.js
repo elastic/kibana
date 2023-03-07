@@ -17,6 +17,7 @@ import React, { Component } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { usePageUrlState } from '@kbn/ml-url-state';
 
 import { getColumns } from './anomalies_table_columns';
 
@@ -26,7 +27,6 @@ import { mlTableService } from '../../services/table_service';
 import { RuleEditorFlyout } from '../rule_editor';
 import { ml } from '../../services/ml_api_service';
 import { INFLUENCERS_LIMIT, ANOMALIES_TABLE_TABS, MAX_CHARS } from './anomalies_table_constants';
-import { usePageUrlState } from '../../util/url_state';
 
 export class AnomaliesTableInternal extends Component {
   constructor(props) {

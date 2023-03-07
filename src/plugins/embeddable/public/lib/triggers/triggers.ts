@@ -29,6 +29,19 @@ export interface ValueClickContext<T extends IEmbeddable = IEmbeddable> {
   };
 }
 
+export interface MultiValueClickContext<T extends IEmbeddable = IEmbeddable> {
+  embeddable?: T;
+  data: {
+    data: {
+      table: Pick<Datatable, 'rows' | 'columns'>;
+      column: number;
+      value: any[];
+    };
+    timeFieldName?: string;
+    negate?: boolean;
+  };
+}
+
 export interface CellValueContext<T extends IEmbeddable = IEmbeddable> {
   embeddable: T;
   data: Array<{
@@ -50,6 +63,7 @@ export interface RangeSelectContext<T extends IEmbeddable = IEmbeddable> {
 
 export type ChartActionContext<T extends IEmbeddable = IEmbeddable> =
   | ValueClickContext<T>
+  | MultiValueClickContext<T>
   | RangeSelectContext<T>
   | RowClickContext;
 
@@ -60,7 +74,7 @@ export const contextMenuTrigger: Trigger = {
     defaultMessage: 'Context menu',
   }),
   description: i18n.translate('embeddableApi.contextMenuTrigger.description', {
-    defaultMessage: 'A panel top-right corner context menu click.',
+    defaultMessage: "A new action will be added to the panel's context menu",
   }),
 };
 
@@ -108,6 +122,17 @@ export const valueClickTrigger: Trigger = {
   }),
 };
 
+export const MULTI_VALUE_CLICK_TRIGGER = 'MULTI_VALUE_CLICK_TRIGGER';
+export const multiValueClickTrigger: Trigger = {
+  id: MULTI_VALUE_CLICK_TRIGGER,
+  title: i18n.translate('embeddableApi.multiValueClickTrigger.title', {
+    defaultMessage: 'Multi click',
+  }),
+  description: i18n.translate('embeddableApi.multiValueClickTrigger.description', {
+    defaultMessage: 'Selecting multiple values of a single dimension on the visualization',
+  }),
+};
+
 export const CELL_VALUE_TRIGGER = 'CELL_VALUE_TRIGGER';
 export const cellValueTrigger: Trigger = {
   id: CELL_VALUE_TRIGGER,
@@ -122,6 +147,11 @@ export const cellValueTrigger: Trigger = {
 export const isValueClickTriggerContext = (
   context: ChartActionContext
 ): context is ValueClickContext => context.data && 'data' in context.data;
+
+export const isMultiValueClickTriggerContext = (
+  context: ChartActionContext
+): context is MultiValueClickContext =>
+  context.data && 'data' in context.data && !Array.isArray(context.data.data);
 
 export const isRangeSelectTriggerContext = (
   context: ChartActionContext

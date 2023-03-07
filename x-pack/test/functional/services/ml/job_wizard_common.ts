@@ -7,9 +7,10 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlCommonUI } from './common_ui';
-import { MlCustomUrls } from './custom_urls';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlCommonUI } from './common_ui';
+import type { MlCustomUrls } from './custom_urls';
+import type { MlCommonFieldStatsFlyout } from './field_stats_flyout';
 
 export interface SectionOptions {
   withAdvancedSection: boolean;
@@ -18,7 +19,8 @@ export interface SectionOptions {
 export function MachineLearningJobWizardCommonProvider(
   { getService }: FtrProviderContext,
   mlCommonUI: MlCommonUI,
-  customUrls: MlCustomUrls
+  customUrls: MlCustomUrls,
+  mlCommonFieldStatsFlyout: MlCommonFieldStatsFlyout
 ) {
   const comboBox = getService('comboBox');
   const retry = getService('retry');
@@ -97,6 +99,19 @@ export function MachineLearningJobWizardCommonProvider(
 
     async assertAggAndFieldInputExists() {
       await testSubjects.existOrFail('mlJobWizardAggSelection > comboBoxInput');
+    },
+
+    async assertFieldStatFlyoutContentFromAggSelectionInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedTopValuesContent: string[]
+    ) {
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'mlJobWizardAggSelection',
+        fieldName,
+        fieldType,
+        expectedTopValuesContent
+      );
     },
 
     async assertAggAndFieldSelection(expectedIdentifier: string[]) {
@@ -416,6 +431,19 @@ export function MachineLearningJobWizardCommonProvider(
       await testSubjects.existOrFail('mlInfluencerSelect > comboBoxInput');
     },
 
+    async assertFieldStatFlyoutContentFromInfluencerInputTrigger(
+      fieldName: string,
+      fieldType: 'keyword' | 'date' | 'number',
+      expectedTopValuesContent?: string[]
+    ) {
+      await mlCommonFieldStatsFlyout.assertFieldStatFlyoutContentFromComboBoxTrigger(
+        'mlInfluencerSelect',
+        fieldName,
+        fieldType,
+        expectedTopValuesContent
+      );
+    },
+
     async getSelectedInfluencers(): Promise<string[]> {
       return await comboBox.getComboBoxSelectedOptions('mlInfluencerSelect > comboBoxInput');
     },
@@ -492,7 +520,7 @@ export function MachineLearningJobWizardCommonProvider(
     },
 
     async clickUseFullDataButton(expectedStartDate: string, expectedEndDate: string) {
-      await testSubjects.clickWhenNotDisabledWithoutRetry('mlButtonUseFullData');
+      await testSubjects.clickWhenNotDisabledWithoutRetry('mlDatePickerButtonUseFullData');
       await this.assertDateRangeSelection(expectedStartDate, expectedEndDate);
     },
 

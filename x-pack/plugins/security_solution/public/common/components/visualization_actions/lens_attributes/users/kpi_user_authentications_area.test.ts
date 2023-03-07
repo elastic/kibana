@@ -16,13 +16,14 @@ jest.mock('../../../../containers/sourcerer', () => ({
   useSourcererDataView: jest.fn().mockReturnValue({
     selectedPatterns: ['auditbeat-mytest-*'],
     dataViewId: 'security-solution-my-test',
+    indicesExist: true,
   }),
 }));
 
 jest.mock('../../../../utils/route/use_route_spy', () => ({
   useRouteSpy: jest.fn().mockReturnValue([
     {
-      detailName: 'mockHost',
+      detailName: 'elastic',
       pageName: 'users',
       tabName: 'events',
     },

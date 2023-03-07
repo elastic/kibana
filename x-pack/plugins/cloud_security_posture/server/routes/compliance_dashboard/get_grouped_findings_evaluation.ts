@@ -11,7 +11,8 @@ import type {
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { calculatePostureScore } from './get_stats';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import { calculatePostureScore } from '../../../common/utils/helpers';
 import type { ComplianceDashboardData } from '../../../common/types';
 import { KeyDocCount } from './compliance_dashboard';
 
@@ -62,8 +63,15 @@ export const failedFindingsAggQuery = {
   },
 };
 
-export const getRisksEsQuery = (query: QueryDslQueryContainer, pitId: string): SearchRequest => ({
+export const getRisksEsQuery = (
+  query: QueryDslQueryContainer,
+  pitId: string,
+  runtimeMappings: MappingRuntimeFields
+): SearchRequest => ({
   size: 0,
+  // creates the `safe_posture_type` runtime fields,
+  // `safe_posture_type` is used by the `query` to filter by posture type for older findings without this field
+  runtime_mappings: runtimeMappings,
   query,
   aggs: failedFindingsAggQuery,
   pit: {
@@ -90,10 +98,11 @@ export const getFailedFindingsFromAggs = (
 export const getGroupedFindingsEvaluation = async (
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
-  pitId: string
+  pitId: string,
+  runtimeMappings: MappingRuntimeFields
 ): Promise<ComplianceDashboardData['groupedFindingsEvaluation']> => {
   const resourceTypesQueryResult = await esClient.search<unknown, FailedFindingsQueryResult>(
-    getRisksEsQuery(query, pitId)
+    getRisksEsQuery(query, pitId, runtimeMappings)
   );
 
   const ruleSections = resourceTypesQueryResult.aggregations?.aggs_by_resource_type.buckets;

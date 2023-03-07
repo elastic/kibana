@@ -41,7 +41,6 @@ describe('ML - error message utils', () => {
       // kibana error without attributes
       const bodyWithoutAttributes: MLHttpFetchError = {
         name: 'name',
-        req: {} as Request,
         request: {} as Request,
         message: 'Something else',
         body: {
@@ -55,7 +54,6 @@ describe('ML - error message utils', () => {
       // kibana error with attributes
       const bodyWithAttributes: MLHttpFetchError = {
         name: 'name',
-        req: {} as Request,
         request: {} as Request,
         message: 'Something else',
         body: {

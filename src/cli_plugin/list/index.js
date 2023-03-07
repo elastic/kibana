@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { fromRoot } from '@kbn/utils';
+import { fromRoot } from '@kbn/repo-info';
 import { list } from './list';
 import { Logger } from '../../cli/logger';
 import { logWarnings } from '../lib/log_warnings';

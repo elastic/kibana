@@ -30,13 +30,13 @@ import { getEndpointSecurityPolicyManager } from './common/roles_users/endpoint_
 import { getHunter } from './common/roles_users/hunter';
 import { getPlatformEngineer } from './common/roles_users/platform_engineer';
 import { getSocManager } from './common/roles_users/soc_manager';
-import { getThreadIntelligenceAnalyst } from './common/roles_users/thread_intelligence_analyst';
+import { getThreatIntelligenceAnalyst } from './common/roles_users/threat_intelligence_analyst';
 
 const rolesMapping: { [id: string]: Omit<Role, 'name'> } = {
   t1Analyst: getT1Analyst(),
   t2Analyst: getT2Analyst(),
   hunter: getHunter(),
-  threadIntelligenceAnalyst: getThreadIntelligenceAnalyst(),
+  threatIntelligenceAnalyst: getThreatIntelligenceAnalyst(),
   socManager: getSocManager(),
   platformEngineer: getPlatformEngineer(),
   endpointOperationsAnalyst: getEndpointOperationsAnalyst(),
@@ -170,13 +170,13 @@ async function main() {
     node: {
       alias: 'n',
       describe: 'elasticsearch node url',
-      default: 'http://elastic:changeme@localhost:9200',
+      default: 'http://elastic:changeme@127.0.0.1:9200',
       type: 'string',
     },
     kibana: {
       alias: 'k',
       describe: 'kibana url',
-      default: 'http://elastic:changeme@localhost:5601',
+      default: 'http://elastic:changeme@127.0.0.1:5601',
       type: 'string',
     },
     eventIndex: {

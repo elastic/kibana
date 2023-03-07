@@ -165,6 +165,7 @@ const kibanaSubFeatureSchema = schema.object({
   name: schema.string(),
   requireAllSpaces: schema.maybe(schema.boolean()),
   privilegesTooltip: schema.maybe(schema.string()),
+  description: schema.maybe(schema.string()),
   privilegeGroups: schema.maybe(
     schema.arrayOf(
       schema.oneOf([
@@ -198,6 +199,7 @@ const kibanaFeatureSchema = schema.object({
   }),
   name: schema.string(),
   category: appCategorySchema,
+  description: schema.maybe(schema.string()),
   order: schema.maybe(schema.number()),
   excludeFromBasePrivileges: schema.maybe(schema.boolean()),
   minimumLicense: schema.maybe(validLicenseSchema),

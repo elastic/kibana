@@ -366,6 +366,9 @@ export const mockSecurityJobs: SecurityJob[] = [
     awaitingNodeAssignment: false,
     jobTags: {},
     bucketSpanSeconds: 900,
+    customSettings: {
+      security_app_display_name: 'Unusual Network Activity',
+    },
   },
   {
     id: 'rare_process_by_host_linux_ecs',
@@ -387,6 +390,9 @@ export const mockSecurityJobs: SecurityJob[] = [
     awaitingNodeAssignment: false,
     jobTags: {},
     bucketSpanSeconds: 900,
+    customSettings: {
+      security_app_display_name: 'Unusually Linux Processes',
+    },
   },
   {
     datafeedId: '',
@@ -408,5 +414,8 @@ export const mockSecurityJobs: SecurityJob[] = [
     awaitingNodeAssignment: false,
     jobTags: {},
     bucketSpanSeconds: 900,
+    customSettings: {
+      security_app_display_name: 'Unusually Windows Processes',
+    },
   },
 ];

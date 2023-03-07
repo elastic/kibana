@@ -8,7 +8,6 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { Status } from '../../../../../common/types/api';
-import { flashAPIErrors } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { GenerateApiKeyLogic } from '../../api/generate_api_key/generate_api_key_logic';
@@ -58,8 +57,7 @@ export const OverviewLogic = kea<MakeLogicType<OverviewLogicValues, OverviewLogi
     ],
   },
   listeners: ({ actions }) => ({
-    apiError: async (error, breakpoint) => {
-      flashAPIErrors(error);
+    apiError: async (_, breakpoint) => {
       // show error for a second before navigating away
       await breakpoint(1000);
       KibanaLogic.values.navigateToUrl(SEARCH_INDICES_PATH);

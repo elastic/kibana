@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type ExperimentalFeatures = typeof allowedExperimentalValues;
+export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
 
 /**
  * A list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.
@@ -20,8 +20,9 @@ export const allowedExperimentalValues = Object.freeze({
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
   policyResponseInFleetEnabled: true,
-  chartEmbeddablesEnabled: false,
-
+  chartEmbeddablesEnabled: true,
+  donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
+  alertsPreviewChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 9
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
@@ -64,7 +65,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables endpoint package level rbac
    */
-  endpointRbacEnabled: false,
+  endpointRbacEnabled: true,
 
   /**
    * Enables endpoint package level rbac for response actions only.
@@ -79,12 +80,21 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the `get-file` endpoint response action
    */
-  responseActionGetFileEnabled: false,
+  responseActionGetFileEnabled: true,
+
+  /**
+   * Enables the `execute` endpoint response action
+   */
+  responseActionExecuteEnabled: false,
 
   /**
    * Enables top charts on Alerts Page
    */
-  alertsPageChartsEnabled: false,
+  alertsPageChartsEnabled: true,
+  /**
+   * Enables the new security flyout over the current alert details flyout
+   */
+  securityFlyoutEnabled: false,
 
   /**
    * Keep DEPRECATED experimental flags that are documented to prevent failed upgrades.
@@ -95,6 +105,12 @@ export const allowedExperimentalValues = Object.freeze({
    */
   riskyHostsEnabled: false, // DEPRECATED
   riskyUsersEnabled: false, // DEPRECATED
+
+  /*
+   * Enables new Set of filters on the Alerts page.
+   *
+   **/
+  alertsPageFiltersEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -127,7 +143,7 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
   };
 };
 
-export const isValidExperimentalValue = (value: string): boolean => {
+export const isValidExperimentalValue = (value: string): value is keyof ExperimentalFeatures => {
   return allowedKeys.includes(value as keyof ExperimentalFeatures);
 };
 

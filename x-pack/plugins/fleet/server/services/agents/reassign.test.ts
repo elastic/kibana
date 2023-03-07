@@ -73,6 +73,13 @@ describe('reassignAgents (plural)', () => {
       agentInHostedDoc2,
       regularAgentPolicySO2,
     } = createClientMock();
+
+    esClient.search.mockResponse({
+      hits: {
+        hits: [agentInRegularDoc, agentInHostedDoc, agentInHostedDoc2],
+      },
+    } as any);
+
     const idsToReassign = [agentInRegularDoc._id, agentInHostedDoc._id, agentInHostedDoc2._id];
     await reassignAgents(soClient, esClient, { agentIds: idsToReassign }, regularAgentPolicySO2.id);
 

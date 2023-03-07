@@ -24,6 +24,7 @@ import {
   Storage,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
+import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
@@ -216,7 +217,13 @@ export class VisualizationsPlugin
         if (this.isLinkedToOriginatingApp?.()) {
           return core.http.basePath.prepend(VisualizeConstants.VISUALIZE_BASE_PATH);
         }
-        return urlToSave;
+        const tableListUrlState = ['s', 'title', 'sort', 'sortdir'];
+        return replaceUrlHashQuery(urlToSave, (query) => {
+          tableListUrlState.forEach((param) => {
+            delete query[param];
+          });
+          return query;
+        });
       },
     });
     this.stopUrlTracking = () => {

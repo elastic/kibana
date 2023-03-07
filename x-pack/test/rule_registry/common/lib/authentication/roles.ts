@@ -109,6 +109,7 @@ export const observabilityOnlyAll: Role = {
       {
         feature: {
           apm: ['all'],
+          logs: ['all'],
         },
         spaces: ['space1'],
       },
@@ -126,6 +127,7 @@ export const observabilityOnlyAllSpace2: Role = {
       {
         feature: {
           apm: ['all'],
+          logs: ['all'],
         },
         spaces: ['space2'],
       },
@@ -143,6 +145,7 @@ export const observabilityOnlyRead: Role = {
       {
         feature: {
           apm: ['read'],
+          logs: ['read'],
         },
         spaces: ['space1'],
       },
@@ -160,6 +163,7 @@ export const observabilityOnlyReadSpace2: Role = {
       {
         feature: {
           apm: ['read'],
+          logs: ['read'],
         },
         spaces: ['space2'],
       },
@@ -214,6 +218,7 @@ export const observabilityOnlyAllSpacesAll: Role = {
       {
         feature: {
           apm: ['all'],
+          logs: ['all'],
         },
         spaces: ['*'],
       },
@@ -260,6 +265,7 @@ export const observabilityOnlyAllSpacesAllWithReadESIndices: Role = {
       {
         feature: {
           apm: ['all'],
+          logs: ['all'],
         },
         spaces: ['default', 'space1'],
       },
@@ -277,6 +283,7 @@ export const observabilityOnlyReadSpacesAll: Role = {
       {
         feature: {
           apm: ['read'],
+          logs: ['read'],
         },
         spaces: ['*'],
       },

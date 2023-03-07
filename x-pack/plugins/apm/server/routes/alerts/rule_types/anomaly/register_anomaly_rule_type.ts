@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { schema } from '@kbn/config-schema';
 import { KibanaRequest } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
@@ -36,7 +35,6 @@ import {
   getEnvironmentEsField,
   getEnvironmentLabel,
 } from '../../../../../common/environment_filter_values';
-import { ANOMALY_SEVERITY } from '../../../../../common/ml_constants';
 import {
   ANOMALY_ALERT_SEVERITY_TYPES,
   ApmRuleType,
@@ -49,20 +47,7 @@ import { getMLJobs } from '../../../service_map/get_service_anomalies';
 import { apmActionVariables } from '../../action_variables';
 import { RegisterRuleDependencies } from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
-
-const paramsSchema = schema.object({
-  serviceName: schema.maybe(schema.string()),
-  transactionType: schema.maybe(schema.string()),
-  windowSize: schema.number(),
-  windowUnit: schema.string(),
-  environment: schema.string(),
-  anomalySeverityType: schema.oneOf([
-    schema.literal(ANOMALY_SEVERITY.CRITICAL),
-    schema.literal(ANOMALY_SEVERITY.MAJOR),
-    schema.literal(ANOMALY_SEVERITY.MINOR),
-    schema.literal(ANOMALY_SEVERITY.WARNING),
-  ]),
-});
+import { anomalyParamsSchema } from '../../../../../common/rules/schema';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
@@ -86,9 +71,7 @@ export function registerAnomalyRuleType({
       name: ruleTypeConfig.name,
       actionGroups: ruleTypeConfig.actionGroups,
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
-      validate: {
-        params: paramsSchema,
-      },
+      validate: { params: anomalyParamsSchema },
       actionVariables: {
         context: [
           ...(observability.getAlertDetailsConfig()?.apm.enabled
@@ -108,7 +91,7 @@ export function registerAnomalyRuleType({
       isExportable: true,
       executor: async ({ params, services, spaceId }) => {
         if (!ml) {
-          return {};
+          return { state: {} };
         }
 
         const { savedObjectsClient, scopedClusterClient, getAlertUuid } =
@@ -143,7 +126,7 @@ export function registerAnomalyRuleType({
         const threshold = selectedOption.threshold;
 
         if (mlJobs.length === 0) {
-          return {};
+          return { state: {} };
         }
 
         // start time must be at least 30, does like this to support rules created before this change where default was 15
@@ -337,7 +320,7 @@ export function registerAnomalyRuleType({
             });
         }
 
-        return {};
+        return { state: {} };
       },
     })
   );

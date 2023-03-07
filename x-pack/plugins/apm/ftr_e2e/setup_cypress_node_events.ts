@@ -5,33 +5,35 @@
  * 2.0.
  */
 import {
-  apm,
+  ApmSynthtraceEsClient,
   createLogger,
-  EntityArrayIterable,
   LogLevel,
 } from '@kbn/apm-synthtrace';
 import { createEsClientForTesting } from '@kbn/test';
-import { some } from 'lodash';
 import del from 'del';
+import { some } from 'lodash';
+import { Readable } from 'stream';
 
 export function setupNodeEvents(
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ) {
+  const logger = createLogger(LogLevel.info);
+
   const client = createEsClientForTesting({
     esUrl: config.env.ES_NODE,
     requestTimeout: config.env.ES_REQUEST_TIMEOUT,
     isCloud: !!config.env.TEST_CLOUD,
   });
 
-  const synthtraceEsClient = new apm.ApmSynthtraceEsClient(
+  const synthtraceEsClient = new ApmSynthtraceEsClient({
     client,
-    createLogger(LogLevel.info),
-    {
-      forceLegacyIndices: false,
-      refreshAfterIndex: true,
-    }
-  );
+    logger,
+    refreshAfterIndex: true,
+    version: config.env.APM_PACKAGE_VERSION,
+  });
+
+  synthtraceEsClient.pipeline(synthtraceEsClient.getDefaultPipeline(false));
 
   on('task', {
     // send logs to node process
@@ -41,11 +43,11 @@ export function setupNodeEvents(
       return null;
     },
 
-    'synthtrace:index': async (events: Array<Record<string, any>>) => {
-      await synthtraceEsClient.index(new EntityArrayIterable(events));
+    async 'synthtrace:index'(events: Array<Record<string, any>>) {
+      await synthtraceEsClient.index(Readable.from(events));
       return null;
     },
-    'synthtrace:clean': async () => {
+    async 'synthtrace:clean'() {
       await synthtraceEsClient.clean();
       return null;
     },

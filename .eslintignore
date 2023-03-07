@@ -28,6 +28,7 @@ snapshots.js
 /x-pack/plugins/canvas/storybook/build
 /x-pack/plugins/reporting/server/export_types/printable_pdf/server/lib/pdf/assets/**
 /x-pack/plugins/reporting/server/export_types/printable_pdf_v2/server/lib/pdf/assets/**
+/x-pack/plugins/cloud_integrations/cloud_full_story/server/assets/**
 /x-pack/plugins/cloud_integrations/cloud_gain_sight/server/assets/**
 
 # package overrides

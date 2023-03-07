@@ -12,6 +12,7 @@ import { map, sortBy, defaults, isObject, pick } from 'lodash';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { DataView, DataViewField } from '@kbn/data-plugin/common';
 import { flattenHit } from '@kbn/data-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 type FieldHitValue = any;
 
@@ -26,10 +27,27 @@ export const canProvideExamplesForField = (field: DataViewField): boolean => {
   if (field.name === '_score') {
     return false;
   }
-  return ['string', 'text', 'keyword', 'version', 'ip', 'number'].includes(field.type);
+  return [
+    'string',
+    'text',
+    'keyword',
+    'version',
+    'ip',
+    'number',
+    'geo_point',
+    'geo_shape',
+  ].includes(field.type);
 };
 
-export function getFieldExampleBuckets(params: FieldValueCountsParams) {
+export const showExamplesForField = (field: DataViewField): boolean => {
+  return (
+    (!field.aggregatable && canProvideExamplesForField(field)) ||
+    field.type === 'geo_point' ||
+    field.type === 'geo_shape'
+  );
+};
+
+export function getFieldExampleBuckets(params: FieldValueCountsParams, formatter?: FieldFormat) {
   params = defaults(params, {
     count: 5,
   });
@@ -41,7 +59,8 @@ export function getFieldExampleBuckets(params: FieldValueCountsParams) {
   }
 
   const records = getFieldValues(params.hits, params.field, params.dataView);
-  const { groups, sampledValues } = groupValues(records);
+
+  const { groups, sampledValues } = groupValues(records, formatter);
   const buckets = sortBy(groups, ['count', 'order'])
     .reverse()
     .slice(0, params.count)
@@ -64,7 +83,10 @@ export function getFieldValues(
   });
 }
 
-export function groupValues(records: FieldHitValue[]): {
+export function groupValues(
+  records: FieldHitValue[],
+  formatter?: FieldFormat
+): {
   groups: Record<string, { count: number; key: any; order: number }>;
   sampledValues: number;
 } {
@@ -86,7 +108,9 @@ export function groupValues(records: FieldHitValue[]): {
       values = recordValues == null ? [] : [recordValues];
     }
 
-    values.forEach((value) => {
+    values.forEach((v) => {
+      const value = formatter ? formatter.convert(v) : v;
+
       if (visitedValuesMap[value]) {
         // already counted in groups
         return;

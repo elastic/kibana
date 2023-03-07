@@ -25,17 +25,18 @@ import { RedirectToDefaultServiceRouteView } from '../service_detail/redirect_to
 
 export function page({
   title,
-  tab,
+  tabKey,
   element,
   searchBarOptions,
 }: {
   title: string;
-  tab: React.ComponentProps<typeof MobileServiceTemplate>['selectedTab'];
+  tabKey: React.ComponentProps<typeof MobileServiceTemplate>['selectedTabKey'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: {
     showKueryBar?: boolean;
     showTransactionTypeSelector?: boolean;
     showTimeComparison?: boolean;
+    showMobileFilters?: boolean;
     hidden?: boolean;
   };
 }): {
@@ -45,7 +46,7 @@ export function page({
     element: (
       <MobileServiceTemplate
         title={title}
-        selectedTab={tab}
+        selectedTabKey={tabKey}
         searchBarOptions={searchBarOptions}
       >
         {element}
@@ -99,13 +100,14 @@ export const mobileServiceDetail = {
       '/mobile-services/{serviceName}/overview': {
         ...page({
           element: <MobileServiceOverview />,
-          tab: 'overview',
+          tabKey: 'overview',
           title: i18n.translate('xpack.apm.views.overview.title', {
             defaultMessage: 'Overview',
           }),
           searchBarOptions: {
             showTransactionTypeSelector: true,
             showTimeComparison: true,
+            showMobileFilters: true,
           },
         }),
         params: t.partial({
@@ -123,7 +125,7 @@ export const mobileServiceDetail = {
       },
       '/mobile-services/{serviceName}/transactions': {
         ...page({
-          tab: 'transactions',
+          tabKey: 'transactions',
           title: i18n.translate('xpack.apm.views.transactions.title', {
             defaultMessage: 'Transactions',
           }),
@@ -131,6 +133,7 @@ export const mobileServiceDetail = {
           searchBarOptions: {
             showTransactionTypeSelector: true,
             showTimeComparison: true,
+            showMobileFilters: true,
           },
         }),
         params: t.partial({
@@ -139,6 +142,10 @@ export const mobileServiceDetail = {
             pageSize: toNumberRt,
             sortField: t.string,
             sortDirection: t.union([t.literal('asc'), t.literal('desc')]),
+            device: t.string,
+            osVersion: t.string,
+            appVersion: t.string,
+            netConnectionType: t.string,
           }),
         }),
         children: {
@@ -154,6 +161,7 @@ export const mobileServiceDetail = {
                 t.partial({
                   traceId: t.string,
                   transactionId: t.string,
+                  flyoutDetailTab: t.string,
                 }),
                 offsetRt,
               ]),
@@ -170,7 +178,7 @@ export const mobileServiceDetail = {
         },
       },
       '/mobile-services/{serviceName}/service-map': page({
-        tab: 'service-map',
+        tabKey: 'service-map',
         title: i18n.translate('xpack.apm.views.serviceMap.title', {
           defaultMessage: 'Service Map',
         }),
@@ -179,16 +187,23 @@ export const mobileServiceDetail = {
           hidden: true,
         },
       }),
-      '/mobile-services/{serviceName}/alerts': page({
-        tab: 'alerts',
-        title: i18n.translate('xpack.apm.views.alerts.title', {
-          defaultMessage: 'Alerts',
+      '/mobile-services/{serviceName}/alerts': {
+        ...page({
+          tabKey: 'alerts',
+          title: i18n.translate('xpack.apm.views.alerts.title', {
+            defaultMessage: 'Alerts',
+          }),
+          element: <AlertsOverview />,
+          searchBarOptions: {
+            hidden: true,
+          },
         }),
-        element: <AlertsOverview />,
-        searchBarOptions: {
-          hidden: true,
-        },
-      }),
+        params: t.partial({
+          query: t.partial({
+            alertStatus: t.string,
+          }),
+        }),
+      },
       '/mobile-services/{serviceName}/': {
         element: <RedirectToDefaultServiceRouteView />,
       },

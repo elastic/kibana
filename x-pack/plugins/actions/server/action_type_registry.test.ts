@@ -21,50 +21,51 @@ let mockedLicenseState: jest.Mocked<ILicenseState>;
 let mockedActionsConfig: jest.Mocked<ActionsConfigurationUtilities>;
 let actionTypeRegistryParams: ActionTypeRegistryOpts;
 
-beforeEach(() => {
-  jest.resetAllMocks();
-  mockedLicenseState = licenseStateMock.create();
-  mockedActionsConfig = actionsConfigMock.create();
-  actionTypeRegistryParams = {
-    licensing: licensingMock.createSetup(),
-    taskManager: mockTaskManager,
-    taskRunnerFactory: new TaskRunnerFactory(
-      new ActionExecutor({ isESOCanEncrypt: true }),
-      inMemoryMetrics
-    ),
-    actionsConfigUtils: mockedActionsConfig,
-    licenseState: mockedLicenseState,
-    preconfiguredActions: [
-      {
-        actionTypeId: 'foo',
-        config: {},
-        id: 'my-slack1',
-        name: 'Slack #xyz',
-        secrets: {},
-        isPreconfigured: true,
-        isDeprecated: false,
-      },
-    ],
+describe('actionTypeRegistry', () => {
+  beforeEach(() => {
+    jest.resetAllMocks();
+    mockedLicenseState = licenseStateMock.create();
+    mockedActionsConfig = actionsConfigMock.create();
+    actionTypeRegistryParams = {
+      licensing: licensingMock.createSetup(),
+      taskManager: mockTaskManager,
+      taskRunnerFactory: new TaskRunnerFactory(
+        new ActionExecutor({ isESOCanEncrypt: true }),
+        inMemoryMetrics
+      ),
+      actionsConfigUtils: mockedActionsConfig,
+      licenseState: mockedLicenseState,
+      preconfiguredActions: [
+        {
+          actionTypeId: 'foo',
+          config: {},
+          id: 'my-slack1',
+          name: 'Slack #xyz',
+          secrets: {},
+          isPreconfigured: true,
+          isDeprecated: false,
+        },
+      ],
+    };
+  });
+
+  const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
+    return { status: 'ok', actionId: options.actionId };
   };
-});
 
-const executor: ExecutorType<{}, {}, {}, void> = async (options) => {
-  return { status: 'ok', actionId: options.actionId };
-};
-
-describe('register()', () => {
-  test('able to register action types', () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'gold',
-      supportedFeatureIds: ['alerting'],
-      executor,
-    });
-    expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
-    expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
-    expect(mockTaskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
+  describe('register()', () => {
+    test('able to register action types', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register({
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'gold',
+        supportedFeatureIds: ['alerting'],
+        executor,
+      });
+      expect(actionTypeRegistry.has('my-action-type')).toEqual(true);
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+      expect(mockTaskManager.registerTaskDefinitions.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "actions:my-action-type": Object {
@@ -76,157 +77,157 @@ describe('register()', () => {
         },
       ]
     `);
-    expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
-      'Connector: My action type',
-      'gold'
-    );
-  });
-
-  test('shallow clones the given action type', () => {
-    const myType: ActionType = {
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      executor,
-    };
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register(myType);
-    myType.name = 'Changed';
-    expect(actionTypeRegistry.get('my-action-type').name).toEqual('My action type');
-  });
-
-  test('throws error if action type already registered', () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      executor,
+      expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
+        'Connector: My action type',
+        'gold'
+      );
     });
-    expect(() =>
+
+    test('shallow clones the given action type', () => {
+      const myType: ActionType = {
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        executor,
+      };
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(myType);
+      myType.name = 'Changed';
+      expect(actionTypeRegistry.get('my-action-type').name).toEqual('My action type');
+    });
+
+    test('throws error if action type already registered', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
         executor,
-      })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"Action type \\"my-action-type\\" is already registered."`
-    );
-  });
+      });
+      expect(() =>
+        actionTypeRegistry.register({
+          id: 'my-action-type',
+          name: 'My action type',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+          executor,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Action type \\"my-action-type\\" is already registered."`
+      );
+    });
 
-  test('throws if empty supported feature ids provided', () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    expect(() =>
+    test('throws if empty supported feature ids provided', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      expect(() =>
+        actionTypeRegistry.register({
+          id: 'my-action-type',
+          name: 'My action type',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: [],
+          executor,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"At least one \\"supportedFeatureId\\" value must be supplied for connector type \\"my-action-type\\"."`
+      );
+    });
+
+    test('throws if invalid feature ids provided', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      expect(() =>
+        actionTypeRegistry.register({
+          id: 'my-action-type',
+          name: 'My action type',
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['foo'],
+          executor,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid feature ids \\"foo\\" for connector type \\"my-action-type\\"."`
+      );
+    });
+
+    test('provides a getRetry function that handles ExecutorError', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'basic',
-        supportedFeatureIds: [],
+        supportedFeatureIds: ['alerting'],
         executor,
-      })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"At least one \\"supportedFeatureId\\" value must be supplied for connector type \\"my-action-type\\"."`
-    );
-  });
+      });
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+      const registerTaskDefinitionsCall = mockTaskManager.registerTaskDefinitions.mock.calls[0][0];
+      const getRetry = registerTaskDefinitionsCall['actions:my-action-type'].getRetry!;
 
-  test('throws if invalid feature ids provided', () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    expect(() =>
+      const retryTime = new Date();
+      expect(getRetry(0, new Error())).toEqual(true);
+      expect(getRetry(0, new ExecutorError('my message', {}, true))).toEqual(true);
+      expect(getRetry(0, new ExecutorError('my message', {}, false))).toEqual(false);
+      expect(getRetry(0, new ExecutorError('my message', {}, undefined))).toEqual(false);
+      expect(getRetry(0, new ExecutorError('my message', {}, retryTime))).toEqual(retryTime);
+    });
+
+    test('provides a getRetry function that handles errors based on maxAttempts', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
       actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
         minimumLicenseRequired: 'basic',
-        supportedFeatureIds: ['foo'],
+        supportedFeatureIds: ['alerting'],
         executor,
-      })
-    ).toThrowErrorMatchingInlineSnapshot(
-      `"Invalid feature ids \\"foo\\" for connector type \\"my-action-type\\"."`
-    );
+        maxAttempts: 2,
+      });
+      expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
+      const registerTaskDefinitionsCall = mockTaskManager.registerTaskDefinitions.mock.calls[0][0];
+      const getRetry = registerTaskDefinitionsCall['actions:my-action-type'].getRetry!;
+
+      expect(getRetry(1, new Error())).toEqual(true);
+      expect(getRetry(3, new Error())).toEqual(false);
+    });
+
+    test('registers gold+ action types to the licensing feature usage API', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register({
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'gold',
+        supportedFeatureIds: ['alerting'],
+        executor,
+      });
+      expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
+        'Connector: My action type',
+        'gold'
+      );
+    });
+
+    test(`doesn't register basic action types to the licensing feature usage API`, () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register({
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        executor,
+      });
+      expect(actionTypeRegistryParams.licensing.featureUsage.register).not.toHaveBeenCalled();
+    });
   });
 
-  test('provides a getRetry function that handles ExecutorError', () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      executor,
-    });
-    expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
-    const registerTaskDefinitionsCall = mockTaskManager.registerTaskDefinitions.mock.calls[0][0];
-    const getRetry = registerTaskDefinitionsCall['actions:my-action-type'].getRetry!;
-
-    const retryTime = new Date();
-    expect(getRetry(0, new Error())).toEqual(false);
-    expect(getRetry(0, new ExecutorError('my message', {}, true))).toEqual(true);
-    expect(getRetry(0, new ExecutorError('my message', {}, false))).toEqual(false);
-    expect(getRetry(0, new ExecutorError('my message', {}, undefined))).toEqual(false);
-    expect(getRetry(0, new ExecutorError('my message', {}, retryTime))).toEqual(retryTime);
-  });
-
-  test('provides a getRetry function that handles errors based on maxAttempts', () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      executor,
-      maxAttempts: 2,
-    });
-    expect(mockTaskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
-    const registerTaskDefinitionsCall = mockTaskManager.registerTaskDefinitions.mock.calls[0][0];
-    const getRetry = registerTaskDefinitionsCall['actions:my-action-type'].getRetry!;
-
-    expect(getRetry(1, new Error())).toEqual(true);
-    expect(getRetry(2, new Error())).toEqual(false);
-  });
-
-  test('registers gold+ action types to the licensing feature usage API', () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'gold',
-      supportedFeatureIds: ['alerting'],
-      executor,
-    });
-    expect(actionTypeRegistryParams.licensing.featureUsage.register).toHaveBeenCalledWith(
-      'Connector: My action type',
-      'gold'
-    );
-  });
-
-  test(`doesn't register basic action types to the licensing feature usage API`, () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      executor,
-    });
-    expect(actionTypeRegistryParams.licensing.featureUsage.register).not.toHaveBeenCalled();
-  });
-});
-
-describe('get()', () => {
-  test('returns action type', () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      executor,
-    });
-    const actionType = actionTypeRegistry.get('my-action-type');
-    expect(actionType).toMatchInlineSnapshot(`
+  describe('get()', () => {
+    test('returns action type', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register({
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        executor,
+      });
+      const actionType = actionTypeRegistry.get('my-action-type');
+      expect(actionType).toMatchInlineSnapshot(`
       Object {
         "executor": [Function],
         "id": "my-action-type",
@@ -237,255 +238,99 @@ describe('get()', () => {
         ],
       }
     `);
-  });
-
-  test(`throws an error when action type doesn't exist`, () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    expect(() => actionTypeRegistry.get('my-action-type')).toThrowErrorMatchingInlineSnapshot(
-      `"Action type \\"my-action-type\\" is not registered."`
-    );
-  });
-});
-
-describe('list()', () => {
-  test('returns list of action types', () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      executor,
     });
-    const actionTypes = actionTypeRegistry.list();
-    expect(actionTypes).toEqual([
-      {
+
+    test(`throws an error when action type doesn't exist`, () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      expect(() => actionTypeRegistry.get('my-action-type')).toThrowErrorMatchingInlineSnapshot(
+        `"Action type \\"my-action-type\\" is not registered."`
+      );
+    });
+  });
+
+  describe('list()', () => {
+    test('returns list of action types', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
-      },
-    ]);
-    expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
-    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
-  });
+        executor,
+      });
+      const actionTypes = actionTypeRegistry.list();
+      expect(actionTypes).toEqual([
+        {
+          id: 'my-action-type',
+          name: 'My action type',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+      expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
+      expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
+    });
 
-  test('returns list of connector types filtered by feature id if provided', () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      executor,
-    });
-    actionTypeRegistry.register({
-      id: 'another-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['cases'],
-      executor,
-    });
-    const actionTypes = actionTypeRegistry.list('alerting');
-    expect(actionTypes).toEqual([
-      {
+    test('returns list of connector types filtered by feature id if provided', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register({
         id: 'my-action-type',
         name: 'My action type',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
         minimumLicenseRequired: 'basic',
         supportedFeatureIds: ['alerting'],
-      },
-    ]);
-    expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
-    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
-  });
-});
-
-describe('has()', () => {
-  test('returns false for unregistered action types', () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    expect(actionTypeRegistry.has('my-action-type')).toEqual(false);
-  });
-
-  test('returns true after registering an action type', () => {
-    const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register({
-      id: 'my-action-type',
-      name: 'My action type',
-      minimumLicenseRequired: 'basic',
-      supportedFeatureIds: ['alerting'],
-      executor,
-    });
-    expect(actionTypeRegistry.has('my-action-type'));
-  });
-});
-
-describe('isActionTypeEnabled', () => {
-  let actionTypeRegistry: ActionTypeRegistry;
-  const fooActionType: ActionType = {
-    id: 'foo',
-    name: 'Foo',
-    minimumLicenseRequired: 'basic',
-    supportedFeatureIds: ['alerting'],
-    executor: async (options) => {
-      return { status: 'ok', actionId: options.actionId };
-    },
-  };
-
-  beforeEach(() => {
-    actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register(fooActionType);
-  });
-
-  test('should call isActionTypeEnabled of the actions config', async () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-    actionTypeRegistry.isActionTypeEnabled('foo');
-    expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalledWith('foo');
-  });
-
-  test('should call isActionExecutable of the actions config', async () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-    actionTypeRegistry.isActionExecutable('my-slack1', 'foo');
-    expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalledWith('foo');
-  });
-
-  test('should return true when isActionTypeEnabled is false and isLicenseValidForActionType is true and it has preconfigured connectors', async () => {
-    mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-
-    expect(actionTypeRegistry.isActionExecutable('my-slack1', 'foo')).toEqual(true);
-  });
-
-  test('should call isLicenseValidForActionType of the license state with notifyUsage false by default', async () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-    actionTypeRegistry.isActionTypeEnabled('foo');
-    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
-      notifyUsage: false,
+        executor,
+      });
+      actionTypeRegistry.register({
+        id: 'another-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['cases'],
+        executor,
+      });
+      const actionTypes = actionTypeRegistry.list('alerting');
+      expect(actionTypes).toEqual([
+        {
+          id: 'my-action-type',
+          name: 'My action type',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+      expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalled();
+      expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalled();
     });
   });
 
-  test('should call isLicenseValidForActionType of the license state with notifyUsage true when specified', async () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-    actionTypeRegistry.isActionTypeEnabled('foo', { notifyUsage: true });
-    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
-      notifyUsage: true,
+  describe('has()', () => {
+    test('returns false for unregistered action types', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      expect(actionTypeRegistry.has('my-action-type')).toEqual(false);
+    });
+
+    test('returns true after registering an action type', () => {
+      const actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register({
+        id: 'my-action-type',
+        name: 'My action type',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        executor,
+      });
+      expect(actionTypeRegistry.has('my-action-type'));
     });
   });
 
-  test('should return false when isActionTypeEnabled is false and isLicenseValidForActionType is true', async () => {
-    mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-    expect(actionTypeRegistry.isActionTypeEnabled('foo')).toEqual(false);
-  });
-
-  test('should return false when isActionTypeEnabled is true and isLicenseValidForActionType is false', async () => {
-    mockedActionsConfig.isActionTypeEnabled.mockReturnValue(true);
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({
-      isValid: false,
-      reason: 'invalid',
-    });
-    expect(actionTypeRegistry.isActionTypeEnabled('foo')).toEqual(false);
-  });
-});
-
-describe('ensureActionTypeEnabled', () => {
-  let actionTypeRegistry: ActionTypeRegistry;
-  const fooActionType: ActionType = {
-    id: 'foo',
-    name: 'Foo',
-    minimumLicenseRequired: 'basic',
-    supportedFeatureIds: ['alerting'],
-    executor: async (options) => {
-      return { status: 'ok', actionId: options.actionId };
-    },
-  };
-
-  beforeEach(() => {
-    actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register(fooActionType);
-  });
-
-  test('should call ensureActionTypeEnabled of the action config', async () => {
-    actionTypeRegistry.ensureActionTypeEnabled('foo');
-    expect(mockedActionsConfig.ensureActionTypeEnabled).toHaveBeenCalledWith('foo');
-  });
-
-  test('should call ensureLicenseForActionType on the license state', async () => {
-    actionTypeRegistry.ensureActionTypeEnabled('foo');
-    expect(mockedLicenseState.ensureLicenseForActionType).toHaveBeenCalledWith(fooActionType);
-  });
-
-  test('should throw when ensureActionTypeEnabled throws', async () => {
-    mockedActionsConfig.ensureActionTypeEnabled.mockImplementation(() => {
-      throw new Error('Fail');
-    });
-    expect(() =>
-      actionTypeRegistry.ensureActionTypeEnabled('foo')
-    ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
-  });
-
-  test('should throw when ensureLicenseForActionType throws', async () => {
-    mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
-      throw new Error('Fail');
-    });
-    expect(() =>
-      actionTypeRegistry.ensureActionTypeEnabled('foo')
-    ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
-  });
-});
-
-describe('isActionExecutable()', () => {
-  let actionTypeRegistry: ActionTypeRegistry;
-  const fooActionType: ActionType = {
-    id: 'foo',
-    name: 'Foo',
-    minimumLicenseRequired: 'basic',
-    supportedFeatureIds: ['alerting'],
-    executor: async (options) => {
-      return { status: 'ok', actionId: options.actionId };
-    },
-  };
-
-  beforeEach(() => {
-    actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
-    actionTypeRegistry.register(fooActionType);
-  });
-
-  test('should call isLicenseValidForActionType of the license state with notifyUsage false by default', async () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-    actionTypeRegistry.isActionExecutable('123', 'foo');
-    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
-      notifyUsage: false,
-    });
-  });
-
-  test('should call isLicenseValidForActionType of the license state with notifyUsage true when specified', async () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-    actionTypeRegistry.isActionExecutable('123', 'foo', { notifyUsage: true });
-    expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
-      notifyUsage: true,
-    });
-  });
-});
-
-describe('getAllTypes()', () => {
-  test('should return empty when notihing is registered', () => {
-    const registry = new ActionTypeRegistry(actionTypeRegistryParams);
-    const result = registry.getAllTypes();
-    expect(result).toEqual([]);
-  });
-
-  test('should return list of registered type ids', () => {
-    mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
-    const registry = new ActionTypeRegistry(actionTypeRegistryParams);
-    registry.register({
+  describe('isActionTypeEnabled', () => {
+    let actionTypeRegistry: ActionTypeRegistry;
+    const fooActionType: ActionType = {
       id: 'foo',
       name: 'Foo',
       minimumLicenseRequired: 'basic',
@@ -493,8 +338,165 @@ describe('getAllTypes()', () => {
       executor: async (options) => {
         return { status: 'ok', actionId: options.actionId };
       },
+    };
+
+    beforeEach(() => {
+      actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(fooActionType);
     });
-    const result = registry.getAllTypes();
-    expect(result).toEqual(['foo']);
+
+    test('should call isActionTypeEnabled of the actions config', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      actionTypeRegistry.isActionTypeEnabled('foo');
+      expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalledWith('foo');
+    });
+
+    test('should call isActionExecutable of the actions config', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      actionTypeRegistry.isActionExecutable('my-slack1', 'foo');
+      expect(mockedActionsConfig.isActionTypeEnabled).toHaveBeenCalledWith('foo');
+    });
+
+    test('should return true when isActionTypeEnabled is false and isLicenseValidForActionType is true and it has preconfigured connectors', async () => {
+      mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+
+      expect(actionTypeRegistry.isActionExecutable('my-slack1', 'foo')).toEqual(true);
+    });
+
+    test('should call isLicenseValidForActionType of the license state with notifyUsage false by default', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      actionTypeRegistry.isActionTypeEnabled('foo');
+      expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
+        notifyUsage: false,
+      });
+    });
+
+    test('should call isLicenseValidForActionType of the license state with notifyUsage true when specified', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      actionTypeRegistry.isActionTypeEnabled('foo', { notifyUsage: true });
+      expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
+        notifyUsage: true,
+      });
+    });
+
+    test('should return false when isActionTypeEnabled is false and isLicenseValidForActionType is true', async () => {
+      mockedActionsConfig.isActionTypeEnabled.mockReturnValue(false);
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      expect(actionTypeRegistry.isActionTypeEnabled('foo')).toEqual(false);
+    });
+
+    test('should return false when isActionTypeEnabled is true and isLicenseValidForActionType is false', async () => {
+      mockedActionsConfig.isActionTypeEnabled.mockReturnValue(true);
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({
+        isValid: false,
+        reason: 'invalid',
+      });
+      expect(actionTypeRegistry.isActionTypeEnabled('foo')).toEqual(false);
+    });
+  });
+
+  describe('ensureActionTypeEnabled', () => {
+    let actionTypeRegistry: ActionTypeRegistry;
+    const fooActionType: ActionType = {
+      id: 'foo',
+      name: 'Foo',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor: async (options) => {
+        return { status: 'ok', actionId: options.actionId };
+      },
+    };
+
+    beforeEach(() => {
+      actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(fooActionType);
+    });
+
+    test('should call ensureActionTypeEnabled of the action config', async () => {
+      actionTypeRegistry.ensureActionTypeEnabled('foo');
+      expect(mockedActionsConfig.ensureActionTypeEnabled).toHaveBeenCalledWith('foo');
+    });
+
+    test('should call ensureLicenseForActionType on the license state', async () => {
+      actionTypeRegistry.ensureActionTypeEnabled('foo');
+      expect(mockedLicenseState.ensureLicenseForActionType).toHaveBeenCalledWith(fooActionType);
+    });
+
+    test('should throw when ensureActionTypeEnabled throws', async () => {
+      mockedActionsConfig.ensureActionTypeEnabled.mockImplementation(() => {
+        throw new Error('Fail');
+      });
+      expect(() =>
+        actionTypeRegistry.ensureActionTypeEnabled('foo')
+      ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    });
+
+    test('should throw when ensureLicenseForActionType throws', async () => {
+      mockedLicenseState.ensureLicenseForActionType.mockImplementation(() => {
+        throw new Error('Fail');
+      });
+      expect(() =>
+        actionTypeRegistry.ensureActionTypeEnabled('foo')
+      ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    });
+  });
+
+  describe('isActionExecutable()', () => {
+    let actionTypeRegistry: ActionTypeRegistry;
+    const fooActionType: ActionType = {
+      id: 'foo',
+      name: 'Foo',
+      minimumLicenseRequired: 'basic',
+      supportedFeatureIds: ['alerting'],
+      executor: async (options) => {
+        return { status: 'ok', actionId: options.actionId };
+      },
+    };
+
+    beforeEach(() => {
+      actionTypeRegistry = new ActionTypeRegistry(actionTypeRegistryParams);
+      actionTypeRegistry.register(fooActionType);
+    });
+
+    test('should call isLicenseValidForActionType of the license state with notifyUsage false by default', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      actionTypeRegistry.isActionExecutable('123', 'foo');
+      expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
+        notifyUsage: false,
+      });
+    });
+
+    test('should call isLicenseValidForActionType of the license state with notifyUsage true when specified', async () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      actionTypeRegistry.isActionExecutable('123', 'foo', { notifyUsage: true });
+      expect(mockedLicenseState.isLicenseValidForActionType).toHaveBeenCalledWith(fooActionType, {
+        notifyUsage: true,
+      });
+    });
+  });
+
+  describe('getAllTypes()', () => {
+    test('should return empty when notihing is registered', () => {
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      const result = registry.getAllTypes();
+      expect(result).toEqual([]);
+    });
+
+    test('should return list of registered type ids', () => {
+      mockedLicenseState.isLicenseValidForActionType.mockReturnValue({ isValid: true });
+      const registry = new ActionTypeRegistry(actionTypeRegistryParams);
+      registry.register({
+        id: 'foo',
+        name: 'Foo',
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+        executor: async (options) => {
+          return { status: 'ok', actionId: options.actionId };
+        },
+      });
+      const result = registry.getAllTypes();
+      expect(result).toEqual(['foo']);
+    });
   });
 });

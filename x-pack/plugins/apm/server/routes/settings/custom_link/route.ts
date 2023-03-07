@@ -19,7 +19,7 @@ import { getTransaction } from './get_transaction';
 import { listCustomLinks } from './list_custom_links';
 import { createApmServerRoute } from '../../apm_routes/create_apm_server_route';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
-import { createInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
+import { createInternalESClientWithContext } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 
 const customLinkTransactionRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/settings/custom_links/transaction',
@@ -63,7 +63,7 @@ const listCustomLinksRoute = createApmServerRoute({
 
     const { query } = params;
 
-    const internalESClient = await createInternalESClient({
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: resources.params.query._inspect,
@@ -94,7 +94,7 @@ const createCustomLinkRoute = createApmServerRoute({
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const internalESClient = await createInternalESClient({
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: resources.params.query._inspect,
@@ -130,7 +130,7 @@ const updateCustomLinkRoute = createApmServerRoute({
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const internalESClient = await createInternalESClient({
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: resources.params.query._inspect,
@@ -166,7 +166,7 @@ const deleteCustomLinkRoute = createApmServerRoute({
       throw Boom.forbidden(INVALID_LICENSE);
     }
 
-    const internalESClient = await createInternalESClient({
+    const internalESClient = await createInternalESClientWithContext({
       context,
       request,
       debug: resources.params.query._inspect,

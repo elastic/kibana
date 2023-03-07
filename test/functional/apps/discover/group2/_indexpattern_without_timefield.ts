@@ -129,5 +129,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.assertHitCount('1');
     });
+
+    it('should allow switching from data views with different timefields and sort correctly', async () => {
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.selectIndexPattern('with-timefield');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      let url = await browser.getCurrentUrl();
+      expect(url).to.contain(`@timestamp`);
+
+      await PageObjects.discover.selectIndexPattern('with-different-timefield');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      url = await browser.getCurrentUrl();
+      expect(url).to.contain(`with-different-timefield`);
+      await browser.goBack();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      url = await browser.getCurrentUrl();
+      expect(url).to.contain(`@timestamp`);
+    });
   });
 }

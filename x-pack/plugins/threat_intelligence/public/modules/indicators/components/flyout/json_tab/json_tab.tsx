@@ -9,8 +9,7 @@ import React, { VFC } from 'react';
 import { EuiCodeBlock } from '@elastic/eui';
 import { Indicator } from '../../../../../../common/types/indicator';
 import { IndicatorEmptyPrompt } from '../empty_prompt';
-
-export const CODE_BLOCK_TEST_ID = 'tiFlyoutJsonCodeBlock';
+import { CODE_BLOCK_TEST_ID } from './test_ids';
 
 export interface IndicatorsFlyoutJsonProps {
   /**

@@ -47,7 +47,7 @@ describe('Entity Analytics Dashboard', () => {
   });
 
   describe('Without data', () => {
-    before(() => {
+    beforeEach(() => {
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -64,7 +64,9 @@ describe('Entity Analytics Dashboard', () => {
     before(() => {
       esArchiverLoad('risk_hosts_no_data');
       esArchiverLoad('risk_users_no_data');
+    });
 
+    beforeEach(() => {
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -86,7 +88,9 @@ describe('Entity Analytics Dashboard', () => {
     before(() => {
       esArchiverLoad('risk_hosts_legacy_data');
       esArchiverLoad('risk_users_legacy_data');
+    });
 
+    beforeEach(() => {
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -107,6 +111,9 @@ describe('Entity Analytics Dashboard', () => {
   describe('With host risk data', () => {
     before(() => {
       esArchiverLoad('risk_hosts');
+    });
+
+    beforeEach(() => {
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -137,6 +144,9 @@ describe('Entity Analytics Dashboard', () => {
     describe('With alerts data', () => {
       before(() => {
         createCustomRuleEnabled(getNewRule());
+      });
+
+      beforeEach(() => {
         visit(ALERTS_URL);
         waitForAlertsToPopulate();
         visit(ENTITY_ANALYTICS_URL);
@@ -161,6 +171,9 @@ describe('Entity Analytics Dashboard', () => {
   describe('With user risk data', () => {
     before(() => {
       esArchiverLoad('risk_users');
+    });
+
+    beforeEach(() => {
       visit(ENTITY_ANALYTICS_URL);
     });
 
@@ -191,6 +204,9 @@ describe('Entity Analytics Dashboard', () => {
     describe('With alerts data', () => {
       before(() => {
         createCustomRuleEnabled(getNewRule());
+      });
+
+      beforeEach(() => {
         visit(ALERTS_URL);
         waitForAlertsToPopulate();
         visit(ENTITY_ANALYTICS_URL);
@@ -213,7 +229,7 @@ describe('Entity Analytics Dashboard', () => {
   });
 
   describe('With anomalies data', () => {
-    before(() => {
+    beforeEach(() => {
       visit(ENTITY_ANALYTICS_URL);
     });
 

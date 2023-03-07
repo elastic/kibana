@@ -6,7 +6,7 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract, Logger } from '@kbn/core/server';
 import type { AgentPolicyServiceInterface, AgentService } from '@kbn/fleet-plugin/server';
 import moment from 'moment';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
@@ -24,6 +24,7 @@ import {
   getAgentStatusesByAgentPolicies,
   getCspAgentPolicies,
   getCspPackagePolicies,
+  getInstalledPolicyTemplates,
 } from '../../lib/fleet_util';
 import { checkIndexStatus } from '../../lib/check_index_status';
 
@@ -36,7 +37,8 @@ const getHealthyAgents = async (
   soClient: SavedObjectsClientContract,
   installedCspPackagePolicies: PackagePolicy[],
   agentPolicyService: AgentPolicyServiceInterface,
-  agentService: AgentService
+  agentService: AgentService,
+  logger: Logger
 ): Promise<number> => {
   // Get agent policies of package policies (from installed package policies)
   const agentPolicies = await getCspAgentPolicies(
@@ -48,7 +50,8 @@ const getHealthyAgents = async (
   // Get agents statuses of the following agent policies
   const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
     agentService,
-    agentPolicies
+    agentPolicies,
+    logger
   );
 
   return Object.values(agentStatusesByAgentPolicyId).reduce(
@@ -105,6 +108,7 @@ const getCspStatus = async ({
     installation,
     latestCspPackage,
     installedPackagePolicies,
+    installedPolicyTemplates,
   ] = await Promise.all([
     checkIndexStatus(esClient.asCurrentUser, LATEST_FINDINGS_INDEX_DEFAULT_NS, logger),
     checkIndexStatus(esClient.asCurrentUser, FINDINGS_INDEX_PATTERN, logger),
@@ -114,13 +118,15 @@ const getCspStatus = async ({
     getCspPackagePolicies(soClient, packagePolicyService, CLOUD_SECURITY_POSTURE_PACKAGE_NAME, {
       per_page: 10000,
     }),
+    getInstalledPolicyTemplates(packagePolicyService, soClient),
   ]);
 
   const healthyAgents = await getHealthyAgents(
     soClient,
     installedPackagePolicies.items,
     agentPolicyService,
-    agentService
+    agentService,
+    logger
   );
 
   const installedPackagePoliciesTotal = installedPackagePolicies.total;
@@ -158,6 +164,7 @@ const getCspStatus = async ({
       status,
       indicesDetails,
       latestPackageVersion: latestCspPackageVersion,
+      installedPolicyTemplates,
       healthyAgents,
       installedPackagePolicies: installedPackagePoliciesTotal,
       isPluginInitialized: isPluginInitialized(),
@@ -168,6 +175,7 @@ const getCspStatus = async ({
     indicesDetails,
     latestPackageVersion: latestCspPackageVersion,
     healthyAgents,
+    installedPolicyTemplates,
     installedPackagePolicies: installedPackagePoliciesTotal,
     installedPackageVersion: installation?.install_version,
     isPluginInitialized: isPluginInitialized(),

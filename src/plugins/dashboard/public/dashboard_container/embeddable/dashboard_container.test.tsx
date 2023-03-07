@@ -27,7 +27,7 @@ import {
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { createEditModeAction } from '@kbn/embeddable-plugin/public/lib/test_samples';
+import { createEditModeActionDefinition } from '@kbn/embeddable-plugin/public/lib/test_samples';
 
 import { DashboardContainer } from './dashboard_container';
 import { getSampleDashboardInput, getSampleDashboardPanel } from '../../mocks';
@@ -201,7 +201,7 @@ test('searchSessionId propagates to children', async () => {
 test('DashboardContainer in edit mode shows edit mode actions', async () => {
   const uiActionsSetup = uiActionsPluginMock.createSetupContract();
 
-  const editModeAction = createEditModeAction();
+  const editModeAction = createEditModeActionDefinition();
   uiActionsSetup.registerAction(editModeAction);
   uiActionsSetup.addTriggerAction(CONTEXT_MENU_TRIGGER, editModeAction);
 

@@ -11,7 +11,6 @@ export type { SyntheticsAppState as AppState } from './root_reducer';
 export type { IHttpSerializedFetchError } from './utils/http_error';
 
 export * from './ui';
-export * from './index_status';
 export * from './synthetics_enablement';
 export * from './service_locations';
 export * from './monitor_list';

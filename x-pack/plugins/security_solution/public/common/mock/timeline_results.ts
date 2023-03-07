@@ -7,6 +7,7 @@
 
 import { FilterStateStore } from '@kbn/es-query';
 
+import { VIEW_SELECTION } from '../../../common/constants';
 import type { TimelineResult } from '../../../common/types/timeline';
 import {
   TimelineId,
@@ -1993,6 +1994,7 @@ export const mockTimelineModel: TimelineModel = {
   highlightedDropAndProviderId: '',
   historyIds: [],
   id: 'ef579e40-jibber-jabber',
+  selectAll: false,
   indexNames: [],
   isFavorite: false,
   isLive: false,
@@ -2074,6 +2076,11 @@ export const mockDataTableModel: DataTableModel = {
   showCheckboxes: false,
   selectAll: false,
   totalCount: 0,
+  viewMode: VIEW_SELECTION.gridView,
+  additionalFilters: {
+    showOnlyThreatIndicatorAlerts: false,
+    showBuildingBlockAlerts: false,
+  },
 };
 
 export const mockGetOneTimelineResult: TimelineResult = {
@@ -2184,6 +2191,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
     pinnedEventsSaveObject: {},
     queryFields: [],
     savedObjectId: null,
+    selectAll: false,
     selectedEventIds: {},
     sessionViewConfig: null,
     show: false,
@@ -2205,6 +2213,7 @@ export const defaultTimelineProps: CreateTimelineProps = {
   to: '2018-11-05T19:03:25.937Z',
   notes: null,
   ruleNote: '# this is some markdown documentation',
+  ruleAuthor: ['elastic'],
 };
 
 export const mockTimelineDetails: TimelineEventsDetailsItem[] = [

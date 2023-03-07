@@ -6,15 +6,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiText,
-  EuiTitle,
-  EuiLink,
-} from '@elastic/eui';
-import { css } from '@emotion/css';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { useHistory } from 'react-router-dom';
 
 import { ConfigKey } from '../../../../../../common/runtime_types';
@@ -48,9 +40,9 @@ export const MonitorStatusHeader = ({
     <EuiFlexGroup
       direction="row"
       alignItems="baseline"
-      css={css`
-        margin-bottom: 0;
-      `}
+      css={{
+        marginBottom: 0,
+      }}
     >
       <EuiFlexItem grow={false}>
         <EuiTitle size="xs">
@@ -68,7 +60,7 @@ export const MonitorStatusHeader = ({
 
       {showViewHistoryButton ? (
         <EuiFlexItem grow={false}>
-          <EuiLink
+          <EuiButtonEmpty
             href={
               monitor?.[ConfigKey.CONFIG_ID]
                 ? history.createHref({
@@ -83,15 +75,12 @@ export const MonitorStatusHeader = ({
                   })
                 : undefined
             }
+            data-test-subj="monitorStatusChartViewHistoryButton"
+            size="xs"
+            iconType="list"
           >
-            <EuiButtonEmpty
-              data-test-subj="monitorStatusChartViewHistoryButton"
-              size="xs"
-              iconType="list"
-            >
-              {labels.VIEW_HISTORY_LABEL}
-            </EuiButtonEmpty>
-          </EuiLink>
+            {labels.VIEW_HISTORY_LABEL}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       ) : null}
     </EuiFlexGroup>

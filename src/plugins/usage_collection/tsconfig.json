@@ -1,9 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
     "isolatedModules": true
   },
   "include": [
@@ -13,7 +11,17 @@
     "../../../typings/**/*"
   ],
   "kbn_references": [
-    { "path": "../../core/tsconfig.json" },
-    { "path": "../../plugins/kibana_utils/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/analytics",
+    "@kbn/config-schema",
+    "@kbn/std",
+    "@kbn/analytics-client",
+    "@kbn/utility-types",
+    "@kbn/i18n",
+    "@kbn/core-http-server-mocks",
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

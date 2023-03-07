@@ -7,8 +7,14 @@
 
 import { Action } from 'redux-actions';
 import { all, call, fork, put, select, takeEvery, throttle } from 'redux-saga/effects';
-import { ScreenshotBlockDoc, ScreenshotBlockCache } from '../../../../../common/runtime_types';
-import { fetchScreenshotBlockSet } from './api';
+import { serializeHttpFetchError } from '../utils/http_error';
+import { FetchNetworkEventsParams } from '../network_events/actions';
+import {
+  ScreenshotBlockDoc,
+  ScreenshotBlockCache,
+  SyntheticsJourneyApiResponse,
+} from '../../../../../common/runtime_types';
+import { fetchBrowserJourney, fetchScreenshotBlockSet } from './api';
 
 import {
   fetchBlocksAction,
@@ -17,6 +23,7 @@ import {
   putBlocksAction,
   putCacheSize,
   updateHitCountsAction,
+  fetchJourneyAction,
 } from './actions';
 
 import { isPendingBlock } from './models';
@@ -84,4 +91,31 @@ function* pruneBlockCache() {
       yield put(pruneCacheAction(cacheSize - MAX_CACHE_SIZE));
     }
   });
+}
+
+export function* fetchJourneyStepsEffect() {
+  const inProgressRequests = new Set<string>();
+
+  yield takeEvery(
+    String(fetchJourneyAction.get),
+    function* (action: Action<FetchNetworkEventsParams>): Generator {
+      try {
+        if (!inProgressRequests.has(action.payload.checkGroup)) {
+          inProgressRequests.add(action.payload.checkGroup);
+
+          const response = (yield call(
+            fetchBrowserJourney,
+            action.payload
+          )) as SyntheticsJourneyApiResponse;
+
+          inProgressRequests.delete(action.payload.checkGroup);
+
+          yield put(fetchJourneyAction.success(response));
+        }
+      } catch (e) {
+        inProgressRequests.delete(action.payload.checkGroup);
+        yield put(fetchJourneyAction.fail(serializeHttpFetchError(e, action.payload)));
+      }
+    }
+  );
 }

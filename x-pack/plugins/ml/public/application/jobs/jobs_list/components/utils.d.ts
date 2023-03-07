@@ -9,6 +9,14 @@ import { CombinedJobWithStats } from '../../../../../common/types/anomaly_detect
 
 export function stopDatafeeds(jobs: Array<{ id: string }>, callback?: () => void): Promise<void>;
 export function closeJobs(jobs: Array<{ id: string }>, callback?: () => void): Promise<void>;
-export function deleteJobs(jobs: Array<{ id: string }>, callback?: () => void): Promise<void>;
-export function resetJobs(jobIds: string[], callback?: () => void): Promise<void>;
+export function deleteJobs(
+  jobs: Array<{ id: string }>,
+  deleteUserAnnotations?: boolean,
+  callback?: () => void
+): Promise<void>;
+export function resetJobs(
+  jobIds: string[],
+  deleteUserAnnotations?: boolean,
+  callback?: () => void
+): Promise<void>;
 export function loadFullJob(jobId: string): Promise<CombinedJobWithStats>;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiLoadingContent, EuiSteps } from '@elastic/eui';
+import { EuiSkeletonText, EuiSteps } from '@elastic/eui';
 
 import { useAdvancedForm } from './hooks';
 import { useLatestFleetServers } from './hooks/use_latest_fleet_servers';
@@ -20,10 +20,14 @@ import {
 } from './steps';
 
 interface AdvancedTabProps {
+  onClose: () => void;
   selectedPolicyId?: string;
 }
 
-export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selectedPolicyId }) => {
+export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({
+  selectedPolicyId,
+  onClose,
+}) => {
   const {
     isSelectFleetServerPolicyLoading,
     eligibleFleetServerPolicies,
@@ -56,6 +60,7 @@ export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selecte
     getAddFleetServerHostStep({
       fleetServerHostForm,
       disabled: !Boolean(fleetServerPolicyId || selectedPolicyId),
+      onClose,
     }),
     getGenerateServiceTokenStep({
       serviceToken,
@@ -78,7 +83,7 @@ export const AdvancedTab: React.FunctionComponent<AdvancedTabProps> = ({ selecte
   ];
 
   return isSelectFleetServerPolicyLoading ? (
-    <EuiLoadingContent />
+    <EuiSkeletonText />
   ) : (
     <EuiSteps steps={steps} className="eui-textLeft" />
   );

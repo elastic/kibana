@@ -68,6 +68,11 @@ export const getCreateVisualizationButtonTitle = () =>
     defaultMessage: 'Create visualization',
   });
 
+export const getQuickCreateButtonGroupLegend = () =>
+  i18n.translate('dashboard.solutionToolbar.quickCreateButtonGroupLegend', {
+    defaultMessage: 'Shortcuts to popular visualization types',
+  });
+
 export const getNewDashboardTitle = () =>
   i18n.translate('dashboard.savedDashboard.newDashboardTitle', {
     defaultMessage: 'New Dashboard',
@@ -335,3 +340,23 @@ export const topNavStrings = {
     }),
   },
 };
+
+export const getControlButtonTitle = () =>
+  i18n.translate('dashboard.editingToolbar.controlsButtonTitle', {
+    defaultMessage: 'Controls',
+  });
+
+export const getAddControlButtonTitle = () =>
+  i18n.translate('dashboard.editingToolbar.addControlButtonTitle', {
+    defaultMessage: 'Add control',
+  });
+
+export const getOnlyOneTimeSliderControlMsg = () =>
+  i18n.translate('dashboard.editingToolbar.onlyOneTimeSliderControlMsg', {
+    defaultMessage: 'Control group already contains time slider control.',
+  });
+
+export const getAddTimeSliderControlButtonTitle = () =>
+  i18n.translate('dashboard.editingToolbar.addTimeSliderControlButtonTitle', {
+    defaultMessage: 'Add time slider control',
+  });

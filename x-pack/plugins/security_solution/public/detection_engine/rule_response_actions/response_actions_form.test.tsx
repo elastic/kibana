@@ -15,6 +15,29 @@ import type { ArrayItem } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { getMockTheme } from '../../common/lib/kibana/kibana_react.mock';
 
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'), // use actual for all non-hook parts
+  useParams: () => ({
+    detailName: 'testId',
+  }),
+}));
+jest.mock('../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../common/lib/kibana');
+  return {
+    ...original,
+    useToasts: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+      remove: jest.fn(),
+    }),
+  };
+});
+
+import * as rules from '../rule_management/logic/use_rule';
+// @ts-expect-error we don't really care about thr useRule return value
+jest.spyOn(rules, 'useRule').mockReturnValue({});
+
 const renderWithContext = (Element: React.ReactElement) => {
   const mockTheme = getMockTheme({ eui: { euiColorLightestShade: '#F5F7FA' } });
 
@@ -38,7 +61,8 @@ describe('ResponseActionsForm', () => {
     const { getByTestId, queryByTestId } = renderWithContext(<Component items={[]} />);
     expect(getByTestId('response-actions-form'));
     expect(getByTestId('response-actions-header'));
-    expect(getByTestId('response-actions-list'));
+    expect(getByTestId('response-actions-wrapper'));
+    expect(queryByTestId('response-actions-list'));
     expect(queryByTestId('response-actions-list-item-0')).toEqual(null);
   });
   it('renders list of elements', async () => {

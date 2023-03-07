@@ -20,11 +20,12 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
 
   const userCasesPermissions = useGetUserCasesPermissions();
 
-  const createCaseFlyout = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
+  const addToNewCase = casesUi.hooks.getUseCasesAddToNewCaseFlyout({
     onClose,
     onSuccess,
   });
-  const selectCaseModal = casesUi.hooks.getUseCasesAddToExistingCaseModal({
+
+  const addToExisting = casesUi.hooks.getUseCasesAddToExistingCaseModal({
     onClose,
     onRowClick: onSuccess,
   });
@@ -40,7 +41,7 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
             disabledLabel: ADD_TO_CASE_DISABLED,
             onClick: (items?: TimelineItem[]) => {
               const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items) : [];
-              createCaseFlyout.open({ attachments: caseAttachments });
+              addToNewCase.open({ attachments: caseAttachments });
             },
           },
           {
@@ -51,16 +52,17 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
             'data-test-subj': 'attach-existing-case',
             onClick: (items?: TimelineItem[]) => {
               const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items) : [];
-              selectCaseModal.open({ attachments: caseAttachments });
+
+              addToExisting.open({ attachments: caseAttachments });
             },
           },
         ]
       : [];
   }, [
     casesUi.helpers,
-    createCaseFlyout,
+    addToExisting,
+    addToNewCase,
     userCasesPermissions.create,
     userCasesPermissions.read,
-    selectCaseModal,
   ]);
 };

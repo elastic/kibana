@@ -75,6 +75,10 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
     },
     externals,
     module: {
+      // no parse rules for a few known large packages which have no require() statements
+      // or which have require() statements that should be ignored because the file is
+      // already bundled with all its necessary dependencies
+      noParse: [/[\/\\]node_modules[\/\\]vega[\/\\]build-es5[\/\\]vega\.js$/],
       rules: [
         {
           test: /\.(html|md|txt|tmpl)$/,
@@ -85,7 +89,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
         {
           test: /\.peggy$/,
           use: {
-            loader: '@kbn/peggy-loader',
+            loader: require.resolve('@kbn/peggy-loader'),
           },
         },
         {
@@ -98,7 +102,7 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
               loader: 'postcss-loader',
               options: {
                 postcssOptions: {
-                  config: require.resolve('@kbn/optimizer/postcss.config.js'),
+                  config: require.resolve('@kbn/optimizer/postcss.config'),
                 },
               },
             },
@@ -128,8 +132,8 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
       alias: {
         core_app_image_assets: resolve(REPO_ROOT, 'src/core/public/styles/core_app/images'),
         core_styles: resolve(REPO_ROOT, 'src/core/public/index.scss'),
+        vega: resolve(REPO_ROOT, 'node_modules/vega/build-es5/vega.js'),
       },
-      symlinks: false,
     },
     stats,
   };
@@ -151,9 +155,8 @@ export default ({ config: storybookConfig }: { config: Configuration }) => {
 
       // move the plugins to the top of the preset array so they will run after the typescript preset
       options.presets = [
-        {
-          plugins: [...plugins, require.resolve('@kbn/babel-plugin-synthetic-packages')],
-        },
+        require.resolve('@kbn/babel-preset/common_preset'),
+        { plugins },
         ...(options.presets as Preset[]).filter(isDesiredPreset).map((preset) => {
           const tsPreset = getTsPreset(preset);
           if (!tsPreset) {

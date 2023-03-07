@@ -19,6 +19,10 @@ import { UserActionMarkdownFooter } from './markdown_form_footer';
 
 export const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui.euiSizeM} ${theme.eui.euiSizeL}`};
+  text-overflow: ellipsis;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
 `;
 
 interface UserActionMarkdownProps {

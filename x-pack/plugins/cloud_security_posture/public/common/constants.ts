@@ -7,15 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
+import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types';
 import {
   CLOUDBEAT_EKS,
   CLOUDBEAT_VANILLA,
   CLOUDBEAT_AWS,
   CLOUDBEAT_GCP,
   CLOUDBEAT_AZURE,
-  CLOUDBEAT_INTEGRATION,
-  POLICY_TEMPLATE,
+  CLOUDBEAT_VULN_MGMT_AWS,
+  KSPM_POLICY_TEMPLATE,
+  CSPM_POLICY_TEMPLATE,
+  VULN_MGMT_POLICY_TEMPLATE,
 } from '../../common/constants';
+
+import eksLogo from '../assets/icons/cis_eks_logo.svg';
 
 export const statusColors = {
   passed: euiThemeVars.euiColorVis0,
@@ -29,22 +34,30 @@ export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 export const LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY = 'cloudPosture:findings:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
+export const LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY =
+  'cloudPosture:complianceDashboard:clusterSort';
 
-export type CloudPostureIntegrations = Record<POLICY_TEMPLATE, CloudPostureIntegrationProps>;
+export type CloudPostureIntegrations = Record<
+  CloudSecurityPolicyTemplate,
+  CloudPostureIntegrationProps
+>;
 export interface CloudPostureIntegrationProps {
-  policyTemplate: POLICY_TEMPLATE;
+  policyTemplate: CloudSecurityPolicyTemplate;
   name: string;
   shortName: string;
   options: Array<{
-    type: CLOUDBEAT_INTEGRATION;
+    type: PostureInput;
     name: string;
     benchmark: string;
+    disabled?: boolean;
+    icon?: string;
+    tooltip?: string;
   }>;
 }
 
 export const cloudPostureIntegrations: CloudPostureIntegrations = {
   cspm: {
-    policyTemplate: 'cspm',
+    policyTemplate: CSPM_POLICY_TEMPLATE,
     name: i18n.translate('xpack.csp.cspmIntegration.integration.nameTitle', {
       defaultMessage: 'Cloud Security Posture Management',
     }),
@@ -60,6 +73,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.awsOption.benchmarkTitle', {
           defaultMessage: 'CIS AWS',
         }),
+        icon: 'logoAWS',
       },
       {
         type: CLOUDBEAT_GCP,
@@ -68,6 +82,11 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         }),
         benchmark: i18n.translate('xpack.csp.cspmIntegration.gcpOption.benchmarkTitle', {
           defaultMessage: 'CIS GCP',
+        }),
+        disabled: true,
+        icon: 'logoGCP',
+        tooltip: i18n.translate('xpack.csp.cspmIntegration.gcpOption.tooltipContent', {
+          defaultMessage: 'Coming soon',
         }),
       },
       {
@@ -78,11 +97,16 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.azureOption.benchmarkTitle', {
           defaultMessage: 'CIS Azure',
         }),
+        disabled: true,
+        icon: 'logoAzure',
+        tooltip: i18n.translate('xpack.csp.cspmIntegration.azureOption.tooltipContent', {
+          defaultMessage: 'Coming soon',
+        }),
       },
     ],
   },
   kspm: {
-    policyTemplate: 'kspm',
+    policyTemplate: KSPM_POLICY_TEMPLATE,
     name: i18n.translate('xpack.csp.kspmIntegration.integration.nameTitle', {
       defaultMessage: 'Kubernetes Security Posture Management',
     }),
@@ -98,6 +122,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.kspmIntegration.vanillaOption.benchmarkTitle', {
           defaultMessage: 'CIS Kubernetes',
         }),
+        icon: 'logoKubernetes',
       },
       {
         type: CLOUDBEAT_EKS,
@@ -107,6 +132,20 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.kspmIntegration.eksOption.benchmarkTitle', {
           defaultMessage: 'CIS EKS',
         }),
+        icon: eksLogo,
+      },
+    ],
+  },
+  vuln_mgmt: {
+    policyTemplate: VULN_MGMT_POLICY_TEMPLATE,
+    name: 'Vulnerability Management', // TODO: we should use i18n and fix this
+    shortName: 'VULN_MGMT', // TODO: we should use i18n and fix this
+    options: [
+      {
+        type: CLOUDBEAT_VULN_MGMT_AWS,
+        name: 'Amazon Web Services', // TODO: we should use i18n and fix this
+        icon: 'logoAWS',
+        benchmark: 'N/A', // TODO: change benchmark to be optional
       },
     ],
   },

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -27,8 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  // Failing: See https://github.com/elastic/kibana/issues/147625
-  describe.skip('lens show underlying data from dashboard', () => {
+  describe('lens show underlying data from dashboard', () => {
     it('should show the open button for a compatible saved visualization', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');
@@ -36,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.goToTimeRange();
       await PageObjects.lens.save('Embedded Visualization', true, false, false, 'new');
 
-      await PageObjects.dashboard.saveDashboard(`Open in Discover Testing ${uuid()}`, {
+      await PageObjects.dashboard.saveDashboard(`Open in Discover Testing ${uuidv4()}`, {
         exitFromEditMode: true,
       });
 
@@ -59,13 +58,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show the open button for a compatible saved visualization with annotations and reference line', async () => {
       await PageObjects.dashboard.switchToEditMode();
+      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
 
       await PageObjects.lens.createLayer('annotations');
       await PageObjects.lens.createLayer('referenceLine');
       await PageObjects.lens.save('Embedded Visualization', false);
 
-      await PageObjects.dashboard.saveDashboard(`Open in Discover Testing ${uuid()}`, {
+      await PageObjects.dashboard.saveDashboard(`Open in Discover Testing ${uuidv4()}`, {
         exitFromEditMode: true,
       });
 
@@ -88,13 +88,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should bring both dashboard context and visualization context to discover', async () => {
       await PageObjects.dashboard.switchToEditMode();
+      await dashboardPanelActions.openContextMenu();
       await dashboardPanelActions.clickEdit();
       await savedQueryManagementComponent.openSavedQueryManagementComponent();
       await queryBar.switchQueryLanguage('lucene');
       await savedQueryManagementComponent.closeSavedQueryManagementComponent();
       await queryBar.setQuery('host.keyword www.elastic.co');
       await queryBar.submitQuery();
-      await filterBarService.addFilter('geo.src', 'is', 'AF');
+      await filterBarService.addFilter({ field: 'geo.src', operation: 'is', value: 'AF' });
       // the filter bar seems to need a moment to settle before saving and returning
       await PageObjects.common.sleep(1000);
 
@@ -104,11 +105,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await savedQueryManagementComponent.closeSavedQueryManagementComponent();
       await queryBar.setQuery('request.keyword : "/apm"');
       await queryBar.submitQuery();
-      await filterBarService.addFilter(
-        'host.raw',
-        'is',
-        'cdn.theacademyofperformingartsandscience.org'
-      );
+      await filterBarService.addFilter({
+        field: 'host.raw',
+        operation: 'is',
+        value: 'cdn.theacademyofperformingartsandscience.org',
+      });
 
       await PageObjects.dashboard.clickQuickSave();
 

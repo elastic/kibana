@@ -208,6 +208,7 @@ export const renderApp = ({
     element
   );
   return () => {
+    corePlugins.data.search.session.clear();
     ReactDOM.unmountComponentAtNode(element);
   };
 };

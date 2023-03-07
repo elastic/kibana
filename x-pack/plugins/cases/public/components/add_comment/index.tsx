@@ -120,10 +120,9 @@ export const AddComment = React.memo(
             updateCase: onCommentPosted,
           });
 
-          removeItemFromSessionStorage(draftStorageKey);
-
           reset({ defaultValue: {} });
         }
+        removeItemFromSessionStorage(draftStorageKey);
       }, [
         submit,
         onCommentSaving,

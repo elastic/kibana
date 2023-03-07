@@ -81,13 +81,15 @@ export function TrainedModelsTableProvider(
     }
 
     public async waitForRefreshButtonLoaded() {
-      await testSubjects.existOrFail('~mlRefreshPageButton', { timeout: 10 * 1000 });
-      await testSubjects.existOrFail('mlRefreshPageButton loaded', { timeout: 30 * 1000 });
+      await testSubjects.existOrFail('~mlDatePickerRefreshPageButton', { timeout: 10 * 1000 });
+      await testSubjects.existOrFail('mlDatePickerRefreshPageButton loaded', {
+        timeout: 30 * 1000,
+      });
     }
 
     public async refreshModelsTable() {
       await this.waitForRefreshButtonLoaded();
-      await testSubjects.click('~mlRefreshPageButton');
+      await testSubjects.click('~mlDatePickerRefreshPageButton');
       await this.waitForRefreshButtonLoaded();
       await this.waitForModelsToLoad();
     }

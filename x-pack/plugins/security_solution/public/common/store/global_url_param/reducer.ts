@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import type { RisonValue } from '@kbn/rison';
+import deepEqual from 'fast-deep-equal';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { registerUrlParam, updateUrlParam, deregisterUrlParam } from './actions';
 
-export type GlobalUrlParam = Record<string, string | null>;
+export type GlobalUrlParam = Record<string, RisonValue | null>;
 
 export const initialGlobalUrlParam: GlobalUrlParam = {};
 
@@ -34,8 +36,7 @@ export const globalUrlParamReducer = reducerWithInitialState(initialGlobalUrlPar
     return nextState;
   })
   .case(updateUrlParam, (state, { key, value }) => {
-    // Only update the URL after the query param is registered and if the current value is different than the previous value
-    if (state[key] === undefined || state[key] === value) {
+    if (state[key] === undefined || deepEqual(state[key], value)) {
       return state;
     }
 

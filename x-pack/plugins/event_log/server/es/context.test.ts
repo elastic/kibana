@@ -10,7 +10,7 @@ import { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '../lib/ready_signal';
 
-jest.mock('../lib/../../../../package.json', () => ({ version: '1.2.3' }));
+jest.mock('../../../../package.json', () => ({ version: '1.2.3' }));
 jest.mock('./init');
 jest.mock('../lib/ready_signal', () => {
   const createReadySignalActual = jest.requireActual('../lib/ready_signal');

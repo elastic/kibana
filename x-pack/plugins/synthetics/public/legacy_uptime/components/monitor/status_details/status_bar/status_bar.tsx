@@ -21,7 +21,11 @@ import * as labels from '../translations';
 import { StatusByLocations } from './status_by_location';
 import { useStatusBar } from './use_status_bar';
 import { MonitorIDLabel, OverallAvailability } from '../translations';
-import { PROJECT_LABEL, TAGS_LABEL, URL_LABEL } from '../../../common/translations';
+import {
+  PROJECT_LABEL,
+  TAGS_LABEL,
+  URL_LABEL,
+} from '../../../../../../common/translations/translations';
 import { MonitorLocations } from '../../../../../../common/runtime_types/monitor';
 import { formatAvailabilityValue } from '../availability_reporting/availability_reporting';
 import { MonitorRedirects } from './monitor_redirects';

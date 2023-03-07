@@ -34,6 +34,7 @@ describe('TLS Handshakes KPI', () => {
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const MockKpiBaseComponentManage = KpiBaseComponentManage as jest.Mock;
   const mockRefetchByRestartingSession = jest.fn();
+  const mockSession = { current: { start: jest.fn(() => 'mockNewSearchSessionId') } };
   const mockRefetch = jest.fn();
   const defaultProps = {
     from: '2019-06-25T04:31:59.345Z',
@@ -58,6 +59,7 @@ describe('TLS Handshakes KPI', () => {
     ]);
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useRefetchByRestartingSession as jest.Mock).mockReturnValue({
+      session: mockSession,
       searchSessionId: 'mockSearchSessionId',
       refetchByRestartingSession: mockRefetchByRestartingSession,
     });
@@ -104,8 +106,6 @@ describe('TLS Handshakes KPI', () => {
     expect(MockKpiBaseComponentManage.mock.calls[0][0].refetch).toEqual(
       mockRefetchByRestartingSession
     );
-    expect(MockKpiBaseComponentManage.mock.calls[0][0].searchSessionId).toEqual(
-      'mockSearchSessionId'
-    );
+    expect(MockKpiBaseComponentManage.mock.calls[0][0].session).toEqual(mockSession);
   });
 });

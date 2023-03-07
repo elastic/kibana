@@ -16,4 +16,6 @@ export interface ModuleId {
   repoRel: string;
   /** info about the package the source file is within, in the case the file is found within a package */
   pkgInfo?: PkgInfo;
+  /** path segments of the dirname of this */
+  dirs: string[];
 }

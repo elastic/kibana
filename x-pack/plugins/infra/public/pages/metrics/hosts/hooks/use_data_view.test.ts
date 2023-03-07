@@ -9,8 +9,7 @@ import { useDataView } from './use_data_view';
 import { renderHook } from '@testing-library/react-hooks';
 import { KibanaReactContextValue, useKibana } from '@kbn/kibana-react-plugin/public';
 import { coreMock, notificationServiceMock } from '@kbn/core/public/mocks';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
+import type { DataView, DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import { InfraClientStartDeps } from '../../../../types';
 import { CoreStart } from '@kbn/core/public';
 

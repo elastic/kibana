@@ -1,0 +1,122 @@
+{
+  "id": "@kbn/core-custom-branding-common",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/core-custom-branding-common",
+        "id": "def-common.CustomBranding",
+        "type": "Interface",
+        "tags": [],
+        "label": "CustomBranding",
+        "description": [],
+        "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-custom-branding-common",
+            "id": "def-common.CustomBranding.logo",
+            "type": "string",
+            "tags": [],
+            "label": "logo",
+            "description": [
+              "\nCustom replacement for the Elastic logo in the top lef *"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-common",
+            "id": "def-common.CustomBranding.faviconSVG",
+            "type": "string",
+            "tags": [],
+            "label": "faviconSVG",
+            "description": [
+              "\nCustom replacement for favicon in SVG format"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-common",
+            "id": "def-common.CustomBranding.pageTitle",
+            "type": "string",
+            "tags": [],
+            "label": "pageTitle",
+            "description": [
+              "\nCustom page title"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-common",
+            "id": "def-common.CustomBranding.customizedLogo",
+            "type": "string",
+            "tags": [],
+            "label": "customizedLogo",
+            "description": [
+              "\nCustom replacement for Elastic Mark"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-custom-branding-common",
+            "id": "def-common.CustomBranding.faviconPNG",
+            "type": "string",
+            "tags": [],
+            "label": "faviconPNG",
+            "description": [
+              "\nCustom replacement for favicon in PNG format"
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/core/custom-branding/core-custom-branding-common/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

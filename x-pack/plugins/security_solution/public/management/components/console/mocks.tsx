@@ -7,16 +7,35 @@
 
 /* eslint-disable import/no-extraneous-dependencies */
 
-import React, { useEffect } from 'react';
+import React, { memo, useEffect } from 'react';
 import { EuiCode } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 import { act } from '@testing-library/react';
+import { within } from '@testing-library/dom';
+import { convertToTestId } from './components/command_list';
 import { Console } from './console';
-import type { ConsoleProps, CommandDefinition, CommandExecutionComponent } from './types';
+import type {
+  CommandArgumentValueSelectorProps,
+  CommandDefinition,
+  CommandExecutionComponent,
+  ConsoleProps,
+} from './types';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 
-export interface ConsoleTestSetup {
+interface ConsoleSelectorsAndActionsMock {
+  getLeftOfCursorInputText: () => string;
+  getRightOfCursorInputText: () => string;
+  getInputText: () => string;
+  openHelpPanel: () => void;
+  closeHelpPanel: () => void;
+}
+
+export interface ConsoleTestSetup
+  extends Pick<
+    AppContextTestRender,
+    'startServices' | 'coreStart' | 'depsStart' | 'queryClient' | 'history' | 'setExperimentalFlag'
+  > {
   renderConsole(props?: Partial<ConsoleProps>): ReturnType<AppContextTestRender['render']>;
 
   commands: CommandDefinition[];
@@ -33,7 +52,53 @@ export interface ConsoleTestSetup {
       useKeyboard: boolean;
     }>
   ): void;
+
+  selectors: ConsoleSelectorsAndActionsMock;
 }
+
+/**
+ * A set of jest selectors and actions for interacting with the console
+ * @param dataTestSubj
+ */
+export const getConsoleSelectorsAndActionMock = (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  dataTestSubj: string = 'test'
+): ConsoleTestSetup['selectors'] => {
+  const getLeftOfCursorInputText: ConsoleSelectorsAndActionsMock['getLeftOfCursorInputText'] =
+    () => {
+      return renderResult.getByTestId(`${dataTestSubj}-cmdInput-leftOfCursor`).textContent ?? '';
+    };
+  const getRightOfCursorInputText: ConsoleSelectorsAndActionsMock['getRightOfCursorInputText'] =
+    () => {
+      return renderResult.getByTestId(`${dataTestSubj}-cmdInput-rightOfCursor`).textContent ?? '';
+    };
+  const getInputText: ConsoleSelectorsAndActionsMock['getInputText'] = () => {
+    return getLeftOfCursorInputText() + getRightOfCursorInputText();
+  };
+
+  const isHelpPanelOpen = (): boolean => {
+    return Boolean(renderResult.queryByTestId(`${dataTestSubj}-sidePanel-helpContent`));
+  };
+
+  const openHelpPanel: ConsoleSelectorsAndActionsMock['openHelpPanel'] = () => {
+    if (!isHelpPanelOpen()) {
+      renderResult.getByTestId(`${dataTestSubj}-header-helpButton`).click();
+    }
+  };
+  const closeHelpPanel: ConsoleSelectorsAndActionsMock['closeHelpPanel'] = () => {
+    if (isHelpPanelOpen()) {
+      renderResult.getByTestId(`${dataTestSubj}-sidePanel-headerCloseButton`).click();
+    }
+  };
+
+  return {
+    getInputText,
+    getLeftOfCursorInputText,
+    getRightOfCursorInputText,
+    openHelpPanel,
+    closeHelpPanel,
+  };
+};
 
 /**
  * Finds the console in the Render Result and enters the command provided
@@ -70,10 +135,14 @@ export const enterConsoleCommand = (
 
 export const getConsoleTestSetup = (): ConsoleTestSetup => {
   const mockedContext = createAppRootMockRenderer();
+  const { startServices, coreStart, depsStart, queryClient, history, setExperimentalFlag } =
+    mockedContext;
 
   let renderResult: ReturnType<AppContextTestRender['render']>;
 
   const commandList = getCommandListMock();
+
+  let testSubj: string;
 
   const renderConsole: ConsoleTestSetup['renderConsole'] = ({
     prompt = '$$>',
@@ -81,6 +150,8 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     'data-test-subj': dataTestSubj = 'test',
     ...others
   } = {}) => {
+    testSubj = dataTestSubj;
+
     return (renderResult = mockedContext.render(
       <Console prompt={prompt} commands={commands} data-test-subj={dataTestSubj} {...others} />
     ));
@@ -90,10 +161,52 @@ export const getConsoleTestSetup = (): ConsoleTestSetup => {
     enterConsoleCommand(renderResult, cmd, options);
   };
 
+  let selectors: ConsoleSelectorsAndActionsMock;
+  const initSelectorsIfNeeded = () => {
+    if (selectors) {
+      return selectors;
+    }
+
+    if (!testSubj) {
+      throw new Error(`no 'dataTestSubj' provided to 'render()'!`);
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    selectors = getConsoleSelectorsAndActionMock(renderResult, testSubj!);
+  };
+
   return {
+    startServices,
+    coreStart,
+    depsStart,
+    queryClient,
+    history,
+    setExperimentalFlag,
     renderConsole,
     commands: commandList,
     enterCommand,
+    selectors: {
+      getInputText: () => {
+        initSelectorsIfNeeded();
+        return selectors.getInputText();
+      },
+      getLeftOfCursorInputText: () => {
+        initSelectorsIfNeeded();
+        return selectors.getLeftOfCursorInputText();
+      },
+      getRightOfCursorInputText: () => {
+        initSelectorsIfNeeded();
+        return selectors.getRightOfCursorInputText();
+      },
+      openHelpPanel: () => {
+        initSelectorsIfNeeded();
+        return selectors.openHelpPanel();
+      },
+      closeHelpPanel: () => {
+        initSelectorsIfNeeded();
+        return selectors.closeHelpPanel();
+      },
+    },
   };
 };
 
@@ -137,11 +250,13 @@ export const getCommandListMock = (): CommandDefinition[] => {
       name: 'cmd1',
       about: 'a command with no options',
       RenderComponent: jest.fn(RenderComponent),
+      helpGroupLabel: 'group 1',
     },
     {
       name: 'cmd2',
       about: 'runs cmd 2',
       RenderComponent: jest.fn(RenderComponent),
+      helpGroupLabel: 'group 2',
       args: {
         file: {
           about: 'Includes file in the run',
@@ -168,6 +283,7 @@ export const getCommandListMock = (): CommandDefinition[] => {
       name: 'cmd3',
       about: 'allows argument to be used multiple times',
       RenderComponent: jest.fn(RenderComponent),
+      helpGroupPosition: 0,
       args: {
         foo: {
           about: 'foo stuff',
@@ -181,6 +297,7 @@ export const getCommandListMock = (): CommandDefinition[] => {
       about: 'all options optional, but at least one is required',
       RenderComponent: jest.fn(RenderComponent),
       mustHaveArgs: true,
+      helpGroupPosition: 1,
       args: {
         foo: {
           about: 'foo stuff',
@@ -221,6 +338,9 @@ export const getCommandListMock = (): CommandDefinition[] => {
       mustHaveArgs: true,
       exampleUsage: 'cmd6 --foo 123',
       exampleInstruction: 'Enter --foo to execute',
+      helpGroupLabel: 'group 1',
+      helpGroupPosition: 0,
+      helpCommandPosition: 0,
       args: {
         foo: {
           about: 'foo stuff',
@@ -236,7 +356,79 @@ export const getCommandListMock = (): CommandDefinition[] => {
         },
       },
     },
+    {
+      name: 'cmd7',
+      about: 'Command with argument selector',
+      RenderComponent: jest.fn(RenderComponent),
+      helpGroupLabel: 'group 2',
+      args: {
+        foo: {
+          about: 'foo stuff',
+          required: true,
+          allowMultiples: true,
+          SelectorComponent: ArgumentSelectorComponentMock,
+        },
+      },
+    },
   ];
 
   return commands;
+};
+
+export const ArgumentSelectorComponentMock = memo<
+  CommandArgumentValueSelectorProps<{ selection: string }>
+>(({ value, valueText, onChange, argName, argIndex }) => {
+  useEffect(() => {
+    if (!value) {
+      onChange({ valueText: 'foo selected', value: { selection: 'foo' } });
+    }
+  }, [onChange, value]);
+
+  return (
+    <span data-test-subj="argSelectorValueText">{`${argName}[${argIndex}]: ${valueText}`}</span>
+  );
+});
+ArgumentSelectorComponentMock.displayName = 'ArgumentSelectorComponentMock';
+
+export interface HelpSidePanelSelectorsAndActions {
+  getHelpGroupLabels: () => string[];
+  getHelpCommandNames: (forGroup?: string) => string[];
+}
+
+export const getHelpSidePanelSelectorsAndActionsMock = (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  dataTestSubj: string = 'test'
+): HelpSidePanelSelectorsAndActions => {
+  const getHelpGroupLabels: HelpSidePanelSelectorsAndActions['getHelpGroupLabels'] = () => {
+    // FYI: we're collapsing the labels here because EUI includes mobile elements
+    // in the DOM that have the same test ids
+    return Array.from(
+      new Set(
+        renderResult
+          .getAllByTestId(`${dataTestSubj}-commandList-group`)
+          .map((element) => element.textContent ?? '')
+      )
+    );
+  };
+
+  const getHelpCommandNames: HelpSidePanelSelectorsAndActions['getHelpCommandNames'] = (
+    forGroup
+  ) => {
+    let searchContainer = renderResult.container;
+
+    if (forGroup) {
+      searchContainer = renderResult.getByTestId(
+        `${dataTestSubj}-commandList-${convertToTestId(forGroup)}`
+      );
+    }
+
+    return within(searchContainer)
+      .getAllByTestId(`${dataTestSubj}-commandList-commandName`)
+      .map((commandEle) => commandEle.textContent ?? '');
+  };
+
+  return {
+    getHelpGroupLabels,
+    getHelpCommandNames,
+  };
 };

@@ -355,7 +355,7 @@ plugins.actions.registerSubActionConnectorType({
 });
 ```
 
-You can see a full example in [x-pack/test/alerting_api_integration/common/fixtures/plugins/alerts/server/sub_action_connector.ts](../../../../test/alerting_api_integration/common/fixtures/plugins/alerts/server/sub_action_connector.ts)
+You can see a full example in [x-pack/test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts](../../../../test/alerting_api_integration/common/plugins/alerts/server/sub_action_connector.ts)
 
 ### Example: Register sub action connector with custom validators
 

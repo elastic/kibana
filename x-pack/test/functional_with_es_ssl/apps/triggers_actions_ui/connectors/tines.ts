@@ -6,18 +6,18 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  tinesAgentWebhook,
+  tinesStory1,
+} from '@kbn/actions-simulators-plugin/server/tines_simulation';
+import {
+  ExternalServiceSimulator,
+  getExternalServiceSimulatorPath,
+} from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
 import { getConnectorByName } from './utils';
-import {
-  tinesAgentWebhook,
-  tinesStory1,
-} from '../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/tines_simulation';
-import {
-  ExternalServiceSimulator,
-  getExternalServiceSimulatorPath,
-} from '../../../../alerting_api_integration/common/fixtures/plugins/actions_simulators/server/plugin';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');

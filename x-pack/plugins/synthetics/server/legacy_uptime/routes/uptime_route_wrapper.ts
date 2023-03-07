@@ -7,7 +7,7 @@
 
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import { UMKibanaRouteWrapper } from './types';
-import { createUptimeESClient, isTestUser } from '../lib/lib';
+import { isTestUser, UptimeEsClient } from '../lib/lib';
 
 export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) => ({
   ...uptimeRoute,
@@ -20,13 +20,13 @@ export const uptimeRouteWrapper: UMKibanaRouteWrapper = (uptimeRoute, server) =>
 
     server.authSavedObjectsClient = coreContext.savedObjects.client;
 
-    const uptimeEsClient = createUptimeESClient({
-      request,
-      isDev: server.isDev && !isTestUser(server),
-      savedObjectsClient: coreContext.savedObjects.client,
-      esClient: esClient.asCurrentUser,
-      uiSettings: coreContext.uiSettings,
-    });
+    const uptimeEsClient = new UptimeEsClient(
+      coreContext.savedObjects.client,
+      esClient.asCurrentUser,
+      Boolean(server.isDev && !isTestUser(server)),
+      coreContext.uiSettings,
+      request
+    );
 
     server.uptimeEsClient = uptimeEsClient;
 

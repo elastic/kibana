@@ -374,6 +374,7 @@ describe('FormBased Data Panel', () => {
     (UseExistingFieldsApi.useExistingFieldsReader as jest.Mock).mockClear();
     (UseExistingFieldsApi.useExistingFieldsFetcher as jest.Mock).mockClear();
     UseExistingFieldsApi.resetExistingFieldsCache();
+    window.localStorage.removeItem('lens.unifiedFieldList.initiallyOpenSections');
   });
 
   it('should render a warning if there are no index patterns', async () => {
@@ -926,7 +927,7 @@ describe('FormBased Data Panel', () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
       act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"] input').simulate('change', {
           target: { value: 'me' },
         });
       });
@@ -946,7 +947,7 @@ describe('FormBased Data Panel', () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
       act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"] input').simulate('change', {
           target: { value: 'me' },
         });
       });
@@ -965,7 +966,10 @@ describe('FormBased Data Panel', () => {
     it('should filter down by type', async () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternFieldTypeFilterToggle"]')
+        .last()
+        .simulate('click');
 
       wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
 
@@ -977,7 +981,10 @@ describe('FormBased Data Panel', () => {
     it('should display no fields in groups when filtered by type Record', async () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternFieldTypeFilterToggle"]')
+        .last()
+        .simulate('click');
 
       wrapper.find('[data-test-subj="typeFilter-document"]').first().simulate('click');
 
@@ -990,7 +997,10 @@ describe('FormBased Data Panel', () => {
     it('should toggle type if clicked again', async () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternFieldTypeFilterToggle"]')
+        .last()
+        .simulate('click');
 
       wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
       wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
@@ -1008,12 +1018,15 @@ describe('FormBased Data Panel', () => {
       const wrapper = await mountAndWaitForLazyModules(<InnerFormBasedDataPanel {...props} />);
 
       act(() => {
-        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"]').simulate('change', {
+        wrapper.find('[data-test-subj="lnsIndexPatternFieldSearch"] input').simulate('change', {
           target: { value: 'me' },
         });
       });
 
-      wrapper.find('[data-test-subj="lnsIndexPatternFiltersToggle"]').first().simulate('click');
+      wrapper
+        .find('[data-test-subj="lnsIndexPatternFieldTypeFilterToggle"]')
+        .last()
+        .simulate('click');
 
       wrapper.find('[data-test-subj="typeFilter-number"]').first().simulate('click');
 

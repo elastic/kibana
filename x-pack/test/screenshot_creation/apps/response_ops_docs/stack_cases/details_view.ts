@@ -14,7 +14,7 @@ export default function ({ getService }: FtrProviderContext) {
   const screenshotDirectories = ['response_ops_docs', 'stack_cases'];
   let CASE_ID: string;
 
-  describe('deatils view', function () {
+  describe('details view', function () {
     before(async () => {
       const { id: caseId } = await cases.api.createCase({
         title: 'Web transactions',

@@ -31,7 +31,6 @@ export interface Props {
 
 export class Timeslider extends Component<Props, {}> {
   private _isMounted: boolean = false;
-  private _controlGroup?: ControlGroupContainer | undefined;
   private readonly _subscriptions = new Subscription();
 
   componentWillUnmount() {
@@ -39,30 +38,21 @@ export class Timeslider extends Component<Props, {}> {
     this._subscriptions.unsubscribe();
   }
 
-  componentDidUpdate() {
-    if (
-      this._controlGroup &&
-      !_.isEqual(this._controlGroup.getInput().timeRange, this.props.timeRange)
-    ) {
-      this._controlGroup.updateInput({
-        timeRange: this.props.timeRange,
-      });
-    }
-  }
-
   componentDidMount() {
     this._isMounted = true;
   }
 
-  _getInitialInput = async (
+  _getCreationOptions = async (
     initialInput: Partial<ControlGroupInput>,
     builder: typeof controlGroupInputBuilder
   ) => {
     builder.addTimeSliderControl(initialInput);
     return {
-      ...initialInput,
-      viewMode: ViewMode.VIEW,
-      timeRange: this.props.timeRange,
+      initialInput: {
+        ...initialInput,
+        viewMode: ViewMode.VIEW,
+        timeRange: this.props.timeRange,
+      },
     };
   };
 
@@ -71,9 +61,8 @@ export class Timeslider extends Component<Props, {}> {
       return;
     }
 
-    this._controlGroup = controlGroup;
     this._subscriptions.add(
-      this._controlGroup
+      controlGroup
         .getOutput$()
         .pipe(
           distinctUntilChanged(({ timeslice: timesliceA }, { timeslice: timesliceB }) =>
@@ -84,7 +73,7 @@ export class Timeslider extends Component<Props, {}> {
           // use waitForTimesliceToLoad$ observable to wait until next frame loaded
           // .pipe(first()) waits until the first value is emitted from an observable and then automatically unsubscribes
           this.props.waitForTimesliceToLoad$.pipe(first()).subscribe(() => {
-            this._controlGroup!.anyControlOutputConsumerLoading$.next(false);
+            controlGroup.anyControlOutputConsumerLoading$.next(false);
           });
 
           this.props.setTimeslice(
@@ -104,7 +93,8 @@ export class Timeslider extends Component<Props, {}> {
       <div className="mapTimeslider mapTimeslider--animation">
         <ControlGroupRenderer
           onLoadComplete={this._onLoadComplete}
-          getInitialInput={this._getInitialInput}
+          getCreationOptions={this._getCreationOptions}
+          timeRange={this.props.timeRange}
         />
       </div>
     );

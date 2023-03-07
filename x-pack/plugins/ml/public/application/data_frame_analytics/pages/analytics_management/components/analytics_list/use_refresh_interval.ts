@@ -7,8 +7,9 @@
 
 import React, { useEffect } from 'react';
 
+import { useUrlState } from '@kbn/ml-url-state';
+
 import { useMlKibana } from '../../../../../contexts/kibana';
-import { useUrlState } from '../../../../../util/url_state';
 
 import {
   DEFAULT_REFRESH_INTERVAL_MS,

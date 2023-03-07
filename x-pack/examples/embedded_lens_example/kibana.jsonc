@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/embedded-lens-example-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "plugin": {
+    "id": "embeddedLensExample",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "embedded_lens_example"
+    ],
+    "requiredPlugins": [
+      "lens",
+      "data",
+      "embeddable",
+      "developerExamples"
+    ]
+  }
+}

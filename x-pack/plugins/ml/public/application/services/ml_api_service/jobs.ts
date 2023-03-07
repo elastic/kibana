@@ -124,8 +124,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  deleteJobs(jobIds: string[]) {
-    const body = JSON.stringify({ jobIds });
+  deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean) {
+    const body = JSON.stringify({ jobIds, deleteUserAnnotations });
     return httpService.http<any>({
       path: `${ML_BASE_PATH}/jobs/delete_jobs`,
       method: 'POST',
@@ -142,8 +142,8 @@ export const jobsApiProvider = (httpService: HttpService) => ({
     });
   },
 
-  resetJobs(jobIds: string[]) {
-    const body = JSON.stringify({ jobIds });
+  resetJobs(jobIds: string[], deleteUserAnnotations?: boolean) {
+    const body = JSON.stringify({ jobIds, deleteUserAnnotations });
     return httpService.http<ResetJobsResponse>({
       path: `${ML_BASE_PATH}/jobs/reset_jobs`,
       method: 'POST',

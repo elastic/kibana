@@ -34,6 +34,7 @@ describe('DNS KPI', () => {
   const mockUseQueryToggle = useQueryToggle as jest.Mock;
   const MockKpiBaseComponentManage = KpiBaseComponentManage as jest.Mock;
   const mockRefetchByRestartingSession = jest.fn();
+  const mockSession = { current: { start: jest.fn(() => 'mockNewSearchSessionId') } };
   const mockRefetch = jest.fn();
   const defaultProps = {
     from: '2019-06-25T04:31:59.345Z',
@@ -59,6 +60,7 @@ describe('DNS KPI', () => {
     ]);
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
     (useRefetchByRestartingSession as jest.Mock).mockReturnValue({
+      session: mockSession,
       searchSessionId: 'mockSearchSessionId',
       refetchByRestartingSession: mockRefetchByRestartingSession,
     });
@@ -91,7 +93,7 @@ describe('DNS KPI', () => {
       </TestProviders>
     );
     expect(MockKpiBaseComponentManage.mock.calls[0][0].refetch).toEqual(mockRefetch);
-    expect(MockKpiBaseComponentManage.mock.calls[0][0].searchSessionId).toBeUndefined();
+    expect(MockKpiBaseComponentManage.mock.calls[0][0].session).toBeUndefined();
   });
   it('Refetch by restarting search session ID if isChartEmbeddablesEnabled = true', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
@@ -105,8 +107,6 @@ describe('DNS KPI', () => {
     expect(MockKpiBaseComponentManage.mock.calls[0][0].refetch).toEqual(
       mockRefetchByRestartingSession
     );
-    expect(MockKpiBaseComponentManage.mock.calls[0][0].searchSessionId).toEqual(
-      'mockSearchSessionId'
-    );
+    expect(MockKpiBaseComponentManage.mock.calls[0][0].session).toEqual(mockSession);
   });
 });

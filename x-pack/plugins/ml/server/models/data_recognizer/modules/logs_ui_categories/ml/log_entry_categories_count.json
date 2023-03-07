@@ -1,5 +1,4 @@
 {
-  "job_type": "anomaly_detector",
   "description": "Logs UI: Detects anomalies in count of log entries by category",
   "groups": [
     "logs-ui"

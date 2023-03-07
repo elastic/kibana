@@ -9,7 +9,6 @@ import { kea, MakeLogicType } from 'kea';
 
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../../../shared/encode_path_params';
-import { clearFlashMessages, flashAPIErrors } from '../../../../../shared/flash_messages';
 
 import { KibanaLogic } from '../../../../../shared/kibana';
 import {
@@ -28,7 +27,7 @@ import { NativeConnector } from '../types';
 
 type SelectConnectorActions = Pick<
   Actions<SetNativeConnectorArgs, SetNativeConnectorResponse>,
-  'apiError' | 'apiSuccess' | 'makeRequest'
+  'apiSuccess' | 'makeRequest'
 > & {
   saveNativeConnector(): void;
   setSelectedConnector(nativeConnector: NativeConnector): {
@@ -66,11 +65,9 @@ export const SelectConnectorLogic = kea<
     },
   }),
   listeners: ({ actions, values }) => ({
-    apiError: (error) => flashAPIErrors(error),
     apiSuccess: () => {
       CachedFetchIndexApiLogic.actions.makeRequest({ indexName: values.index.name });
     },
-    makeRequest: () => clearFlashMessages(),
     saveNativeConnector: () => {
       if (!isConnectorIndex(values.index) || values.selectedNativeConnector === null) {
         KibanaLogic.values.navigateToUrl(

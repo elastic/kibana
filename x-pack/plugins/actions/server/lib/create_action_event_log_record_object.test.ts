@@ -29,6 +29,8 @@ describe('createActionEventLogRecordObject', () => {
           },
         ],
         spaceId: 'default',
+        name: 'test name',
+        actionExecutionId: '123abc',
       })
     ).toStrictEqual({
       '@timestamp': '1970-01-01T00:00:00.000Z',
@@ -58,6 +60,13 @@ describe('createActionEventLogRecordObject', () => {
           schedule_delay: 0,
           scheduled: '1970-01-01T00:00:00.000Z',
         },
+        action: {
+          name: 'test name',
+          id: '1',
+          execution: {
+            uuid: '123abc',
+          },
+        },
       },
     });
   });
@@ -80,6 +89,7 @@ describe('createActionEventLogRecordObject', () => {
             relation: 'primary',
           },
         ],
+        actionExecutionId: '123abc',
       })
     ).toStrictEqual({
       event: {
@@ -104,6 +114,13 @@ describe('createActionEventLogRecordObject', () => {
             type_id: '.email',
           },
         ],
+        action: {
+          name: 'test name',
+          id: '1',
+          execution: {
+            uuid: '123abc',
+          },
+        },
       },
       message: 'action execution start',
     });
@@ -125,6 +142,7 @@ describe('createActionEventLogRecordObject', () => {
             relation: 'primary',
           },
         ],
+        actionExecutionId: '123abc',
       })
     ).toStrictEqual({
       event: {
@@ -141,6 +159,13 @@ describe('createActionEventLogRecordObject', () => {
             type_id: '.email',
           },
         ],
+        action: {
+          name: 'test name',
+          id: '1',
+          execution: {
+            uuid: '123abc',
+          },
+        },
       },
       message: 'action execution start',
     });
@@ -163,6 +188,8 @@ describe('createActionEventLogRecordObject', () => {
             relation: 'primary',
           },
         ],
+        name: 'test name',
+        actionExecutionId: '123abc',
       })
     ).toStrictEqual({
       event: {
@@ -188,6 +215,13 @@ describe('createActionEventLogRecordObject', () => {
         task: {
           schedule_delay: undefined,
           scheduled: '1970-01-01T00:00:00.000Z',
+        },
+        action: {
+          name: 'test name',
+          id: '1',
+          execution: {
+            uuid: '123abc',
+          },
         },
       },
     });
@@ -218,6 +252,7 @@ describe('createActionEventLogRecordObject', () => {
             id: '123',
           },
         ],
+        actionExecutionId: '123abc',
       })
     ).toStrictEqual({
       event: {
@@ -250,6 +285,70 @@ describe('createActionEventLogRecordObject', () => {
             type_id: '.rule-type',
           },
         ],
+        action: {
+          name: 'test name',
+          id: '1',
+          execution: {
+            uuid: '123abc',
+          },
+        },
+      },
+      message: 'action execution start',
+    });
+  });
+
+  test('created action event "execute" for preconfigured connector with space_agnostic true', async () => {
+    expect(
+      createActionEventLogRecordObject({
+        actionId: '1',
+        name: 'test name',
+        action: 'execute',
+        message: 'action execution start',
+        namespace: 'default',
+        executionId: '123abc',
+        consumer: 'test-consumer',
+        savedObjects: [
+          {
+            id: '2',
+            type: 'action',
+            typeId: '.email',
+            relation: 'primary',
+          },
+        ],
+        actionExecutionId: '123abc',
+        isPreconfigured: true,
+      })
+    ).toStrictEqual({
+      event: {
+        action: 'execute',
+        kind: 'action',
+      },
+      kibana: {
+        alert: {
+          rule: {
+            consumer: 'test-consumer',
+            execution: {
+              uuid: '123abc',
+            },
+          },
+        },
+        saved_objects: [
+          {
+            id: '2',
+            namespace: 'default',
+            rel: 'primary',
+            type: 'action',
+            type_id: '.email',
+            space_agnostic: true,
+          },
+        ],
+        action: {
+          name: 'test name',
+          id: '1',
+          execution: {
+            uuid: '123abc',
+          },
+        },
       },
       message: 'action execution start',
     });

@@ -10,9 +10,9 @@ import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { map, reduce, upperFirst } from 'lodash';
 import ReactMarkdown from 'react-markdown';
 import { css } from '@emotion/react';
+import { ResponseActionsWrapper } from './response_actions_wrapper';
 import { FORM_ERRORS_TITLE } from '../../detections/components/rules/rule_actions_field/translations';
 import { ResponseActionsHeader } from './response_actions_header';
-import { ResponseActionsList } from './response_actions_list';
 import type { ArrayItem, FormHook } from '../../shared_imports';
 import { useSupportedResponseActionTypes } from './use_supported_response_action_types';
 
@@ -44,7 +44,7 @@ export const ResponseActionsForm = ({
     }
 
     return (
-      <ResponseActionsList
+      <ResponseActionsWrapper
         items={items}
         removeItem={removeItem}
         supportedResponseActionTypes={supportedResponseActionTypes}

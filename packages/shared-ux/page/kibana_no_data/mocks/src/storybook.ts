@@ -79,7 +79,11 @@ export class StorybookMock extends AbstractStorybookMock<
       docsLink: 'http://docs.elastic.dev',
     };
 
-    return { noDataConfig, onDataViewCreated: action('onDataViewCreated') };
+    return {
+      showPlainSpinner: false,
+      noDataConfig,
+      onDataViewCreated: action('onDataViewCreated'),
+    };
   }
 
   getServices(params: Params): KibanaNoDataPageServices {

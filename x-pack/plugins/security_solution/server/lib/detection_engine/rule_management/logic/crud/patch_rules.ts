@@ -16,12 +16,14 @@ export interface PatchRulesOptions {
   rulesClient: RulesClient;
   nextParams: PatchRuleRequestBody;
   existingRule: RuleAlertType | null | undefined;
+  allowMissingConnectorSecrets?: boolean;
 }
 
 export const patchRules = async ({
   rulesClient,
   existingRule,
   nextParams,
+  allowMissingConnectorSecrets,
 }: PatchRulesOptions): Promise<PartialRule<RuleParams> | null> => {
   if (existingRule == null) {
     return null;
@@ -32,6 +34,7 @@ export const patchRules = async ({
   const update = await rulesClient.update({
     id: existingRule.id,
     data: patchedRule,
+    allowMissingConnectorSecrets,
   });
 
   if (nextParams.throttle !== undefined) {

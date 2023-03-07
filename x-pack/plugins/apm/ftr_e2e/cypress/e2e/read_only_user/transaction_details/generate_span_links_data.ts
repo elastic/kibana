@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, EntityArrayIterable, timerange } from '@kbn/apm-synthtrace';
-import { synthtrace } from '../../../../synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { SpanLink } from '../../../../../typings/es_schemas/raw/fields/span_links';
+import { synthtrace } from '../../../../synthtrace';
 
 function getProducerInternalOnly() {
   const producerInternalOnlyInstance = apm
@@ -17,32 +17,34 @@ function getProducerInternalOnly() {
     })
     .instance('instance a');
 
-  const events = timerange(
-    new Date('2022-01-01T00:00:00.000Z'),
-    new Date('2022-01-01T00:01:00.000Z')
-  )
-    .interval('1m')
-    .rate(1)
-    .generator((timestamp) => {
-      return producerInternalOnlyInstance
-        .transaction({ transactionName: `Transaction A` })
-        .timestamp(timestamp)
-        .duration(1000)
-        .success()
-        .children(
-          producerInternalOnlyInstance
-            .span({
-              spanName: `Span A`,
-              spanType: 'external',
-              spanSubtype: 'http',
-            })
-            .timestamp(timestamp + 50)
-            .duration(100)
-            .success()
-        );
-    });
+  const events = Array.from(
+    timerange(
+      new Date('2022-01-01T00:00:00.000Z'),
+      new Date('2022-01-01T00:01:00.000Z')
+    )
+      .interval('1m')
+      .rate(1)
+      .generator((timestamp) => {
+        return producerInternalOnlyInstance
+          .transaction({ transactionName: `Transaction A` })
+          .timestamp(timestamp)
+          .duration(1000)
+          .success()
+          .children(
+            producerInternalOnlyInstance
+              .span({
+                spanName: `Span A`,
+                spanType: 'external',
+                spanSubtype: 'http',
+              })
+              .timestamp(timestamp + 50)
+              .duration(100)
+              .success()
+          );
+      })
+  );
 
-  const apmFields = events.toArray();
+  const apmFields = events.flatMap((event) => event.serialize());
   const transactionA = apmFields.find(
     (item) => item['processor.event'] === 'transaction'
   );
@@ -63,7 +65,7 @@ function getProducerInternalOnly() {
   return {
     ids,
     spanASpanLink,
-    apmFields,
+    events,
   };
 }
 
@@ -76,46 +78,48 @@ function getProducerExternalOnly() {
     })
     .instance('instance b');
 
-  const events = timerange(
-    new Date('2022-01-01T00:02:00.000Z'),
-    new Date('2022-01-01T00:03:00.000Z')
-  )
-    .interval('1m')
-    .rate(1)
-    .generator((timestamp) => {
-      return producerExternalOnlyInstance
-        .transaction({ transactionName: `Transaction B` })
-        .timestamp(timestamp)
-        .duration(1000)
-        .success()
-        .children(
-          producerExternalOnlyInstance
-            .span({
-              spanName: `Span B`,
-              spanType: 'external',
-              spanSubtype: 'http',
-            })
-            .defaults({
-              'span.links': [
-                { trace: { id: 'trace#1' }, span: { id: 'span#1' } },
-              ],
-            })
-            .timestamp(timestamp + 50)
-            .duration(100)
-            .success(),
-          producerExternalOnlyInstance
-            .span({
-              spanName: `Span B.1`,
-              spanType: 'external',
-              spanSubtype: 'http',
-            })
-            .timestamp(timestamp + 50)
-            .duration(100)
-            .success()
-        );
-    });
+  const events = Array.from(
+    timerange(
+      new Date('2022-01-01T00:02:00.000Z'),
+      new Date('2022-01-01T00:03:00.000Z')
+    )
+      .interval('1m')
+      .rate(1)
+      .generator((timestamp) => {
+        return producerExternalOnlyInstance
+          .transaction({ transactionName: `Transaction B` })
+          .timestamp(timestamp)
+          .duration(1000)
+          .success()
+          .children(
+            producerExternalOnlyInstance
+              .span({
+                spanName: `Span B`,
+                spanType: 'external',
+                spanSubtype: 'http',
+              })
+              .defaults({
+                'span.links': [
+                  { trace: { id: 'trace#1' }, span: { id: 'span#1' } },
+                ],
+              })
+              .timestamp(timestamp + 50)
+              .duration(100)
+              .success(),
+            producerExternalOnlyInstance
+              .span({
+                spanName: `Span B.1`,
+                spanType: 'external',
+                spanSubtype: 'http',
+              })
+              .timestamp(timestamp + 50)
+              .duration(100)
+              .success()
+          );
+      })
+  );
 
-  const apmFields = events.toArray();
+  const apmFields = events.flatMap((event) => event.serialize());
   const transactionB = apmFields.find(
     (item) => item['processor.event'] === 'transaction'
   );
@@ -142,7 +146,7 @@ function getProducerExternalOnly() {
   return {
     ids,
     spanBSpanLink,
-    apmFields,
+    events,
   };
 }
 
@@ -159,37 +163,39 @@ function getProducerConsumer({
     })
     .instance('instance c');
 
-  const events = timerange(
-    new Date('2022-01-01T00:04:00.000Z'),
-    new Date('2022-01-01T00:05:00.000Z')
-  )
-    .interval('1m')
-    .rate(1)
-    .generator((timestamp) => {
-      return producerConsumerInstance
-        .transaction({ transactionName: `Transaction C` })
-        .defaults({
-          'span.links': producerInternalOnlySpanASpanLink
-            ? [producerInternalOnlySpanASpanLink]
-            : [],
-        })
-        .timestamp(timestamp)
-        .duration(1000)
-        .success()
-        .children(
-          producerConsumerInstance
-            .span({
-              spanName: `Span C`,
-              spanType: 'external',
-              spanSubtype: 'http',
-            })
-            .timestamp(timestamp + 50)
-            .duration(100)
-            .success()
-        );
-    });
+  const events = Array.from(
+    timerange(
+      new Date('2022-01-01T00:04:00.000Z'),
+      new Date('2022-01-01T00:05:00.000Z')
+    )
+      .interval('1m')
+      .rate(1)
+      .generator((timestamp) => {
+        return producerConsumerInstance
+          .transaction({ transactionName: `Transaction C` })
+          .defaults({
+            'span.links': producerInternalOnlySpanASpanLink
+              ? [producerInternalOnlySpanASpanLink]
+              : [],
+          })
+          .timestamp(timestamp)
+          .duration(1000)
+          .success()
+          .children(
+            producerConsumerInstance
+              .span({
+                spanName: `Span C`,
+                spanType: 'external',
+                spanSubtype: 'http',
+              })
+              .timestamp(timestamp + 50)
+              .duration(100)
+              .success()
+          );
+      })
+  );
 
-  const apmFields = events.toArray();
+  const apmFields = events.flatMap((event) => event.serialize());
   const transactionC = apmFields.find(
     (item) => item['processor.event'] === 'transaction'
   );
@@ -221,7 +227,7 @@ function getProducerConsumer({
     transactionCSpanLink,
     spanCSpanLink,
     ids,
-    apmFields,
+    events,
   };
 }
 
@@ -244,50 +250,53 @@ function getConsumerMultiple({
     })
     .instance('instance d');
 
-  const events = timerange(
-    new Date('2022-01-01T00:06:00.000Z'),
-    new Date('2022-01-01T00:07:00.000Z')
-  )
-    .interval('1m')
-    .rate(1)
-    .generator((timestamp) => {
-      return consumerMultipleInstance
-        .transaction({ transactionName: `Transaction D` })
-        .defaults({
-          'span.links':
-            producerInternalOnlySpanASpanLink && producerConsumerSpanCSpanLink
-              ? [
-                  producerInternalOnlySpanASpanLink,
-                  producerConsumerSpanCSpanLink,
-                ]
-              : [],
-        })
-        .timestamp(timestamp)
-        .duration(1000)
-        .success()
-        .children(
-          consumerMultipleInstance
-            .span({
-              spanName: `Span E`,
-              spanType: 'external',
-              spanSubtype: 'http',
-            })
-            .defaults({
-              'span.links':
-                producerExternalOnlySpanBSpanLink &&
-                producerConsumerTransactionCSpanLink
-                  ? [
-                      producerExternalOnlySpanBSpanLink,
-                      producerConsumerTransactionCSpanLink,
-                    ]
-                  : [],
-            })
-            .timestamp(timestamp + 50)
-            .duration(100)
-            .success()
-        );
-    });
-  const apmFields = events.toArray();
+  const events = Array.from(
+    timerange(
+      new Date('2022-01-01T00:06:00.000Z'),
+      new Date('2022-01-01T00:07:00.000Z')
+    )
+      .interval('1m')
+      .rate(1)
+      .generator((timestamp) => {
+        return consumerMultipleInstance
+          .transaction({ transactionName: `Transaction D` })
+          .defaults({
+            'span.links':
+              producerInternalOnlySpanASpanLink && producerConsumerSpanCSpanLink
+                ? [
+                    producerInternalOnlySpanASpanLink,
+                    producerConsumerSpanCSpanLink,
+                  ]
+                : [],
+          })
+          .timestamp(timestamp)
+          .duration(1000)
+          .success()
+          .children(
+            consumerMultipleInstance
+              .span({
+                spanName: `Span E`,
+                spanType: 'external',
+                spanSubtype: 'http',
+              })
+              .defaults({
+                'span.links':
+                  producerExternalOnlySpanBSpanLink &&
+                  producerConsumerTransactionCSpanLink
+                    ? [
+                        producerExternalOnlySpanBSpanLink,
+                        producerConsumerTransactionCSpanLink,
+                      ]
+                    : [],
+              })
+              .timestamp(timestamp + 50)
+              .duration(100)
+              .success()
+          );
+      })
+  );
+
+  const apmFields = events.flatMap((event) => event.serialize());
   const transactionD = apmFields.find(
     (item) => item['processor.event'] === 'transaction'
   );
@@ -304,7 +313,7 @@ function getConsumerMultiple({
 
   return {
     ids,
-    apmFields,
+    events,
   };
 }
 
@@ -345,13 +354,12 @@ export function generateSpanLinksData() {
     producerExternalOnlySpanBSpanLink: producerExternalOnly.spanBSpanLink,
   });
 
-  synthtrace.index(
-    new EntityArrayIterable(producerInternalOnly.apmFields).merge(
-      new EntityArrayIterable(producerExternalOnly.apmFields),
-      new EntityArrayIterable(producerConsumer.apmFields),
-      new EntityArrayIterable(producerMultiple.apmFields)
-    )
-  );
+  synthtrace.index([
+    ...producerInternalOnly.events,
+    ...producerExternalOnly.events,
+    ...producerConsumer.events,
+    ...producerMultiple.events,
+  ]);
 
   return {
     producerInternalOnlyIds: producerInternalOnly.ids,

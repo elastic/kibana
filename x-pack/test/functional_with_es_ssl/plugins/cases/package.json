@@ -1,0 +1,13 @@
+{
+  "name": "@kbn/functional-with-es-ssl-cases-test-plugin",
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "kibana": {
+    "version": "kibana"
+  },
+  "main": "target/test/functional_with_es_ssl/plugins/cases",
+  "scripts": {
+    "kbn": "node ../../../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../../../node_modules/.bin/tsc"
+  }
+}

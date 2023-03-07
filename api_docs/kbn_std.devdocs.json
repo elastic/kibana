@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.Semaphore",
+        "id": "def-common.Semaphore",
         "type": "Class",
         "tags": [],
         "label": "Semaphore",
@@ -23,7 +31,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.Semaphore.Unnamed",
+            "id": "def-common.Semaphore.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -37,7 +45,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/std",
-                "id": "def-server.Semaphore.Unnamed.$1",
+                "id": "def-common.Semaphore.Unnamed.$1",
                 "type": "number",
                 "tags": [],
                 "label": "capacity",
@@ -55,7 +63,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.Semaphore.acquire",
+            "id": "def-common.Semaphore.acquire",
             "type": "Function",
             "tags": [],
             "label": "acquire",
@@ -73,7 +81,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.Semaphore.release",
+            "id": "def-common.Semaphore.release",
             "type": "Function",
             "tags": [],
             "label": "release",
@@ -94,7 +102,7 @@
     "functions": [
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.assertNever",
+        "id": "def-common.assertNever",
         "type": "Function",
         "tags": [],
         "label": "assertNever",
@@ -110,7 +118,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.assertNever.$1",
+            "id": "def-common.assertNever.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "x",
@@ -129,7 +137,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.asyncForEach",
+        "id": "def-common.asyncForEach",
         "type": "Function",
         "tags": [],
         "label": "asyncForEach",
@@ -149,7 +157,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEach.$1",
+            "id": "def-common.asyncForEach.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -167,7 +175,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEach.$2",
+            "id": "def-common.asyncForEach.$2",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -189,7 +197,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.asyncForEachWithLimit",
+        "id": "def-common.asyncForEachWithLimit",
         "type": "Function",
         "tags": [],
         "label": "asyncForEachWithLimit",
@@ -209,7 +217,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEachWithLimit.$1",
+            "id": "def-common.asyncForEachWithLimit.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -227,7 +235,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEachWithLimit.$2",
+            "id": "def-common.asyncForEachWithLimit.$2",
             "type": "number",
             "tags": [],
             "label": "limit",
@@ -244,7 +252,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncForEachWithLimit.$3",
+            "id": "def-common.asyncForEachWithLimit.$3",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -266,7 +274,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.asyncMap",
+        "id": "def-common.asyncMap",
         "type": "Function",
         "tags": [],
         "label": "asyncMap",
@@ -286,7 +294,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMap.$1",
+            "id": "def-common.asyncMap.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -304,7 +312,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMap.$2",
+            "id": "def-common.asyncMap.$2",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -326,7 +334,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.asyncMapWithLimit",
+        "id": "def-common.asyncMapWithLimit",
         "type": "Function",
         "tags": [],
         "label": "asyncMapWithLimit",
@@ -346,7 +354,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMapWithLimit.$1",
+            "id": "def-common.asyncMapWithLimit.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -364,7 +372,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMapWithLimit.$2",
+            "id": "def-common.asyncMapWithLimit.$2",
             "type": "number",
             "tags": [],
             "label": "limit",
@@ -381,7 +389,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.asyncMapWithLimit.$3",
+            "id": "def-common.asyncMapWithLimit.$3",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -403,7 +411,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.deepFreeze",
+        "id": "def-common.deepFreeze",
         "type": "Function",
         "tags": [],
         "label": "deepFreeze",
@@ -414,9 +422,9 @@
           "(object: T) => ",
           {
             "pluginId": "@kbn/utility-types",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-server.RecursiveReadonly",
+            "section": "def-common.RecursiveReadonly",
             "text": "RecursiveReadonly"
           },
           "<T>"
@@ -427,7 +435,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.deepFreeze.$1",
+            "id": "def-common.deepFreeze.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "object",
@@ -446,7 +454,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.ensureNoUnsafeProperties",
+        "id": "def-common.ensureNoUnsafeProperties",
         "type": "Function",
         "tags": [],
         "label": "ensureNoUnsafeProperties",
@@ -460,7 +468,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.ensureNoUnsafeProperties.$1",
+            "id": "def-common.ensureNoUnsafeProperties.$1",
             "type": "Any",
             "tags": [],
             "label": "obj",
@@ -479,7 +487,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -495,7 +503,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -510,7 +518,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -529,7 +537,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -543,7 +551,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -558,7 +566,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -577,7 +585,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -591,7 +599,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -606,7 +614,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -625,7 +633,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -639,7 +647,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -654,7 +662,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -673,7 +681,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -687,7 +695,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -702,7 +710,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "path",
@@ -721,7 +729,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.get",
+        "id": "def-common.get",
         "type": "Function",
         "tags": [],
         "label": "get",
@@ -735,7 +743,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$1",
+            "id": "def-common.get.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -750,7 +758,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.get.$2",
+            "id": "def-common.get.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "path",
@@ -769,7 +777,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.getFlattenedObject",
+        "id": "def-common.getFlattenedObject",
         "type": "Function",
         "tags": [],
         "label": "getFlattenedObject",
@@ -785,7 +793,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.getFlattenedObject.$1",
+            "id": "def-common.getFlattenedObject.$1",
             "type": "Object",
             "tags": [],
             "label": "rootValue",
@@ -804,7 +812,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.getUrlOrigin",
+        "id": "def-common.getUrlOrigin",
         "type": "Function",
         "tags": [],
         "label": "getUrlOrigin",
@@ -820,7 +828,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.getUrlOrigin.$1",
+            "id": "def-common.getUrlOrigin.$1",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -839,7 +847,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.isPromise",
+        "id": "def-common.isPromise",
         "type": "Function",
         "tags": [],
         "label": "isPromise",
@@ -853,7 +861,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.isPromise.$1",
+            "id": "def-common.isPromise.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "maybePromise",
@@ -872,7 +880,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.isRelativeUrl",
+        "id": "def-common.isRelativeUrl",
         "type": "Function",
         "tags": [],
         "label": "isRelativeUrl",
@@ -888,7 +896,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.isRelativeUrl.$1",
+            "id": "def-common.isRelativeUrl.$1",
             "type": "string",
             "tags": [],
             "label": "candidatePath",
@@ -907,7 +915,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.map$",
+        "id": "def-common.map$",
         "type": "Function",
         "tags": [],
         "label": "map$",
@@ -929,7 +937,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.map$.$1",
+            "id": "def-common.map$.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -947,7 +955,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.map$.$2",
+            "id": "def-common.map$.$2",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -969,7 +977,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.mapToObject",
+        "id": "def-common.mapToObject",
         "type": "Function",
         "tags": [],
         "label": "mapToObject",
@@ -983,7 +991,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.mapToObject.$1",
+            "id": "def-common.mapToObject.$1",
             "type": "Object",
             "tags": [],
             "label": "map",
@@ -1002,7 +1010,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.mapWithLimit$",
+        "id": "def-common.mapWithLimit$",
         "type": "Function",
         "tags": [],
         "label": "mapWithLimit$",
@@ -1024,7 +1032,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.mapWithLimit$.$1",
+            "id": "def-common.mapWithLimit$.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "iterable",
@@ -1042,7 +1050,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.mapWithLimit$.$2",
+            "id": "def-common.mapWithLimit$.$2",
             "type": "number",
             "tags": [],
             "label": "limit",
@@ -1059,7 +1067,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.mapWithLimit$.$3",
+            "id": "def-common.mapWithLimit$.$3",
             "type": "Function",
             "tags": [],
             "label": "fn",
@@ -1081,7 +1089,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.merge",
+        "id": "def-common.merge",
         "type": "Function",
         "tags": [],
         "label": "merge",
@@ -1097,7 +1105,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$1",
+            "id": "def-common.merge.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "baseObj",
@@ -1112,7 +1120,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$2",
+            "id": "def-common.merge.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "source1",
@@ -1131,7 +1139,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.merge",
+        "id": "def-common.merge",
         "type": "Function",
         "tags": [],
         "label": "merge",
@@ -1145,7 +1153,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$1",
+            "id": "def-common.merge.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "baseObj",
@@ -1160,7 +1168,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$2",
+            "id": "def-common.merge.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "overrideObj",
@@ -1175,7 +1183,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$3",
+            "id": "def-common.merge.$3",
             "type": "Uncategorized",
             "tags": [],
             "label": "overrideObj2",
@@ -1194,7 +1202,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.merge",
+        "id": "def-common.merge",
         "type": "Function",
         "tags": [],
         "label": "merge",
@@ -1208,7 +1216,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$1",
+            "id": "def-common.merge.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "baseObj",
@@ -1223,7 +1231,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$2",
+            "id": "def-common.merge.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "overrideObj",
@@ -1238,7 +1246,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$3",
+            "id": "def-common.merge.$3",
             "type": "Uncategorized",
             "tags": [],
             "label": "overrideObj2",
@@ -1257,7 +1265,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.merge",
+        "id": "def-common.merge",
         "type": "Function",
         "tags": [],
         "label": "merge",
@@ -1271,7 +1279,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$1",
+            "id": "def-common.merge.$1",
             "type": "Object",
             "tags": [],
             "label": "baseObj",
@@ -1286,7 +1294,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.merge.$2",
+            "id": "def-common.merge.$2",
             "type": "Array",
             "tags": [],
             "label": "sources",
@@ -1305,7 +1313,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.modifyUrl",
+        "id": "def-common.modifyUrl",
         "type": "Function",
         "tags": [],
         "label": "modifyUrl",
@@ -1316,17 +1324,17 @@
           "(url: string, urlModifier: (urlParts: ",
           {
             "pluginId": "@kbn/std",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnStdPluginApi",
-            "section": "def-server.URLMeaningfulParts",
+            "section": "def-common.URLMeaningfulParts",
             "text": "URLMeaningfulParts"
           },
           ") => void | Partial<",
           {
             "pluginId": "@kbn/std",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnStdPluginApi",
-            "section": "def-server.URLMeaningfulParts",
+            "section": "def-common.URLMeaningfulParts",
             "text": "URLMeaningfulParts"
           },
           ">) => string"
@@ -1337,7 +1345,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.modifyUrl.$1",
+            "id": "def-common.modifyUrl.$1",
             "type": "string",
             "tags": [],
             "label": "url",
@@ -1354,7 +1362,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.modifyUrl.$2",
+            "id": "def-common.modifyUrl.$2",
             "type": "Function",
             "tags": [],
             "label": "urlModifier",
@@ -1365,17 +1373,17 @@
               "(urlParts: ",
               {
                 "pluginId": "@kbn/std",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnStdPluginApi",
-                "section": "def-server.URLMeaningfulParts",
+                "section": "def-common.URLMeaningfulParts",
                 "text": "URLMeaningfulParts"
               },
               ") => void | Partial<",
               {
                 "pluginId": "@kbn/std",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnStdPluginApi",
-                "section": "def-server.URLMeaningfulParts",
+                "section": "def-common.URLMeaningfulParts",
                 "text": "URLMeaningfulParts"
               },
               ">"
@@ -1393,7 +1401,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.pick",
+        "id": "def-common.pick",
         "type": "Function",
         "tags": [],
         "label": "pick",
@@ -1407,7 +1415,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.pick.$1",
+            "id": "def-common.pick.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -1422,7 +1430,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.pick.$2",
+            "id": "def-common.pick.$2",
             "type": "Object",
             "tags": [],
             "label": "keys",
@@ -1441,7 +1449,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.unset",
+        "id": "def-common.unset",
         "type": "Function",
         "tags": [],
         "label": "unset",
@@ -1457,7 +1465,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.unset.$1",
+            "id": "def-common.unset.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "obj",
@@ -1472,7 +1480,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.unset.$2",
+            "id": "def-common.unset.$2",
             "type": "string",
             "tags": [],
             "label": "atPath",
@@ -1491,7 +1499,7 @@
       },
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.withTimeout",
+        "id": "def-common.withTimeout",
         "type": "Function",
         "tags": [],
         "label": "withTimeout",
@@ -1505,7 +1513,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.withTimeout.$1",
+            "id": "def-common.withTimeout.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  promise,\n  timeoutMs,\n}",
@@ -1516,7 +1524,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/std",
-                "id": "def-server.withTimeout.$1.promise",
+                "id": "def-common.withTimeout.$1.promise",
                 "type": "Object",
                 "tags": [],
                 "label": "promise",
@@ -1530,7 +1538,7 @@
               },
               {
                 "parentPluginId": "@kbn/std",
-                "id": "def-server.withTimeout.$1.timeoutMs",
+                "id": "def-common.withTimeout.$1.timeoutMs",
                 "type": "number",
                 "tags": [],
                 "label": "timeoutMs",
@@ -1549,7 +1557,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.URLMeaningfulParts",
+        "id": "def-common.URLMeaningfulParts",
         "type": "Interface",
         "tags": [],
         "label": "URLMeaningfulParts",
@@ -1562,7 +1570,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.auth",
+            "id": "def-common.URLMeaningfulParts.auth",
             "type": "CompoundType",
             "tags": [],
             "label": "auth",
@@ -1576,7 +1584,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.hash",
+            "id": "def-common.URLMeaningfulParts.hash",
             "type": "CompoundType",
             "tags": [],
             "label": "hash",
@@ -1590,7 +1598,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.hostname",
+            "id": "def-common.URLMeaningfulParts.hostname",
             "type": "CompoundType",
             "tags": [],
             "label": "hostname",
@@ -1604,7 +1612,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.pathname",
+            "id": "def-common.URLMeaningfulParts.pathname",
             "type": "CompoundType",
             "tags": [],
             "label": "pathname",
@@ -1618,7 +1626,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.protocol",
+            "id": "def-common.URLMeaningfulParts.protocol",
             "type": "CompoundType",
             "tags": [],
             "label": "protocol",
@@ -1632,7 +1640,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.slashes",
+            "id": "def-common.URLMeaningfulParts.slashes",
             "type": "CompoundType",
             "tags": [],
             "label": "slashes",
@@ -1646,7 +1654,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.port",
+            "id": "def-common.URLMeaningfulParts.port",
             "type": "CompoundType",
             "tags": [],
             "label": "port",
@@ -1660,7 +1668,7 @@
           },
           {
             "parentPluginId": "@kbn/std",
-            "id": "def-server.URLMeaningfulParts.query",
+            "id": "def-common.URLMeaningfulParts.query",
             "type": "Object",
             "tags": [],
             "label": "query",
@@ -1681,7 +1689,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/std",
-        "id": "def-server.Freezable",
+        "id": "def-common.Freezable",
         "type": "Type",
         "tags": [],
         "label": "Freezable",
@@ -1695,14 +1703,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

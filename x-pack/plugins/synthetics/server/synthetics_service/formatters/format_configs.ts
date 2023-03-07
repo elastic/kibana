@@ -12,6 +12,7 @@ import {
   MonitorFields,
   SyntheticsMonitor,
   HeartbeatConfig,
+  TLSFields,
 } from '../../../common/runtime_types';
 import { formatters } from '.';
 
@@ -28,6 +29,7 @@ const UI_KEYS_TO_SKIP = [
   ConfigKey.FORM_MONITOR_TYPE,
   ConfigKey.TEXT_ASSERTION,
   ConfigKey.CONFIG_HASH,
+  ConfigKey.ALERT_CONFIG,
   'secrets',
 ];
 
@@ -51,6 +53,13 @@ export const formatMonitorConfig = (configKeys: ConfigKey[], config: Partial<Mon
       formattedMonitor[key] = !!formatters[key] ? formatters[key]?.(config) : value;
     }
   });
+
+  if (!config[ConfigKey.METADATA]?.is_tls_enabled) {
+    const sslKeys = Object.keys(formattedMonitor).filter((key) =>
+      key.includes('ssl')
+    ) as unknown as Array<keyof TLSFields>;
+    sslKeys.forEach((key) => (formattedMonitor[key] = null));
+  }
 
   Object.keys(uiToHeartbeatKeyMap).forEach((key) => {
     const hbKey = key as YamlKeys;

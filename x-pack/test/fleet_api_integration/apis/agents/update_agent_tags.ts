@@ -68,48 +68,11 @@ export default function (providerContext: FtrProviderContext) {
         expect(agent2data.body.item.tags).to.eql(['existingTag']);
       });
 
-      it('should allow to update tags of multiple agents by kuery', async () => {
-        await supertest
-          .post(`/api/fleet/agents/bulk_update_agent_tags`)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            agents: 'active: true',
-            tagsToAdd: ['newTag'],
-            tagsToRemove: ['existingTag'],
-          })
-          .expect(200);
-
-        const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
-        expect(body.total).to.eql(4);
-        body.items.forEach((agent: any) => {
-          expect(agent.tags.includes('newTag')).to.be(true);
-          expect(agent.tags.includes('existingTag')).to.be(false);
-        });
-      });
-
-      it('should bulk update tags of multiple agents by kuery in batches', async () => {
-        const { body: actionBody } = await supertest
-          .post(`/api/fleet/agents/bulk_update_agent_tags`)
-          .set('kbn-xsrf', 'xxx')
-          .send({
-            agents: 'active: true',
-            tagsToAdd: ['newTag'],
-            tagsToRemove: ['existingTag'],
-            batchSize: 3,
-          })
-          .expect(200);
-
-        const actionId = actionBody.actionId;
-
-        const verifyActionResult = async () => {
-          const { body } = await supertest.get(`/api/fleet/agents`).set('kbn-xsrf', 'xxx');
-          expect(body.total).to.eql(4);
-          body.items.forEach((agent: any) => {
-            expect(agent.tags.includes('newTag')).to.be(true);
-            expect(agent.tags.includes('existingTag')).to.be(false);
-          });
-        };
-
+      async function pollResult(
+        actionId: string,
+        nbAgentsAck: number,
+        verifyActionResult: Function
+      ) {
         await new Promise((resolve, reject) => {
           let attempts = 0;
           const intervalId = setInterval(async () => {
@@ -122,7 +85,7 @@ export default function (providerContext: FtrProviderContext) {
               body: { items: actionStatuses },
             } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
             const action = actionStatuses.find((a: any) => a.actionId === actionId);
-            if (action && action.nbAgentsAck === 4) {
+            if (action && action.nbAgentsAck === nbAgentsAck) {
               clearInterval(intervalId);
               await verifyActionResult();
               resolve({});
@@ -131,6 +94,52 @@ export default function (providerContext: FtrProviderContext) {
         }).catch((e) => {
           throw e;
         });
+      }
+
+      it('should bulk update tags of multiple agents by kuery - add', async () => {
+        const { body: actionBody } = await supertest
+          .post(`/api/fleet/agents/bulk_update_agent_tags`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: 'active: true',
+            tagsToAdd: ['newTag'],
+            tagsToRemove: [],
+          })
+          .expect(200);
+
+        const actionId = actionBody.actionId;
+
+        const verifyActionResult = async () => {
+          const { body } = await supertest
+            .get(`/api/fleet/agents?kuery=tags:newTag`)
+            .set('kbn-xsrf', 'xxx');
+          expect(body.total).to.eql(4);
+        };
+
+        await pollResult(actionId, 4, verifyActionResult);
+      });
+
+      it('should bulk update tags of multiple agents by kuery - remove', async () => {
+        const { body: actionBody } = await supertest
+          .post(`/api/fleet/agents/bulk_update_agent_tags`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            agents: 'active: true',
+            tagsToAdd: [],
+            tagsToRemove: ['existingTag'],
+          })
+          .expect(200);
+
+        const actionId = actionBody.actionId;
+
+        const verifyActionResult = async () => {
+          const { body } = await supertest
+            .get(`/api/fleet/agents?kuery=tags:existingTag`)
+            .set('kbn-xsrf', 'xxx');
+          expect(body.total).to.eql(0);
+        };
+
+        await pollResult(actionId, 2, verifyActionResult);
       });
 
       it('should return a 403 if user lacks fleet all permissions', async () => {
@@ -180,8 +189,8 @@ export default function (providerContext: FtrProviderContext) {
           .get(`/api/fleet/agents/action_status`)
           .set('kbn-xsrf', 'xxx');
         const actionStatus = body.items[0];
-        expect(actionStatus.status).to.eql('FAILED');
-        expect(actionStatus.nbAgentsFailed).to.eql(1);
+        expect(actionStatus.status).to.eql('COMPLETE');
+        expect(actionStatus.nbAgentsAck).to.eql(1);
       });
     });
   });

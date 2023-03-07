@@ -15,7 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiLink,
 } from '@elastic/eui';
-
+import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
@@ -48,6 +48,7 @@ import {
   NameField,
   schema,
   Footer,
+  SubmittingType,
   AdvancedParamsContent,
   PreviewPanel,
   RollupBetaWarning,
@@ -136,7 +137,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       }
 
       if (editData && editData.getIndexPattern() !== formData.title) {
-        editDataViewModal({
+        await editDataViewModal({
           dataViewName: formData.name || formData.title,
           overlays,
           onEdit: async () => {
@@ -167,9 +168,13 @@ const IndexPatternEditorFlyoutContentComponent = ({
   const rollupIndex = useObservable(dataViewEditorService.rollupIndex$);
   const rollupIndicesCapabilities = useObservable(dataViewEditorService.rollupIndicesCaps$, {});
 
-  useEffect(() => {
-    dataViewEditorService.setIndexPattern(title);
-  }, [dataViewEditorService, title]);
+  useDebounce(
+    () => {
+      dataViewEditorService.setIndexPattern(title);
+    },
+    250,
+    [dataViewEditorService, title]
+  );
 
   useEffect(() => {
     dataViewEditorService.setAllowHidden(allowHidden);
@@ -281,6 +286,9 @@ const IndexPatternEditorFlyoutContentComponent = ({
           <AdvancedParamsContent
             disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
             disableId={!!editData}
+            onAllowHiddenChange={() => {
+              form.getFields().title.validate();
+            }}
           />
         </Form>
         <Footer
@@ -294,7 +302,14 @@ const IndexPatternEditorFlyoutContentComponent = ({
             form.setFieldValue('isAdHoc', adhoc || false);
             form.submit();
           }}
-          submitDisabled={form.isSubmitted && !form.isValid}
+          submitDisabled={(form.isSubmitted && !form.isValid) || form.isSubmitting}
+          submittingType={
+            form.isSubmitting
+              ? form.getFormData().isAdHoc
+                ? SubmittingType.savingAsAdHoc
+                : SubmittingType.persisting
+              : undefined
+          }
           isEdit={!!editData}
           isPersisted={Boolean(editData && editData.isPersisted())}
           allowAdHoc={allowAdHoc}

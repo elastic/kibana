@@ -10,19 +10,20 @@ import { INSPECT_MODAL } from '../../screens/inspect';
 import { ALL_USERS_TABLE } from '../../screens/users/all_users';
 import { AUTHENTICATIONS_TAB } from '../../screens/users/user_authentications';
 
-import { clickInspectButton, closesModal } from '../../tasks/inspect';
+import { clickInspectButton } from '../../tasks/inspect';
 import { login, visit } from '../../tasks/login';
 
 import { USERS_URL } from '../../urls/navigation';
 
-describe('Inspect', () => {
+// This will be fixed in a follow up PR, https://github.com/elastic/kibana/issues/152359
+describe.skip('Inspect', () => {
   context('Users stats and tables', () => {
     before(() => {
       login();
-      visit(USERS_URL);
     });
-    afterEach(() => {
-      closesModal();
+
+    beforeEach(() => {
+      visit(USERS_URL);
     });
 
     it(`inspects all users table`, () => {

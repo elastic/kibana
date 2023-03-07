@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiForm, EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { useDashboardContainerContext } from '../../../dashboard_container_renderer';
+import { useDashboardContainerContext } from '../../../dashboard_container_context';
 
 export const DashboardOptions = () => {
   const {

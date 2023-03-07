@@ -20,13 +20,20 @@ const withTheme = (storyFn: () => ReactNode) => (
 storiesOf('JobIdFilter', module)
   .addDecorator(withTheme)
   .add('empty', () => (
-    <JobIdFilter title="Job id" selectedJobIds={[]} jobIds={[]} onSelect={action('onSelect')} />
+    <JobIdFilter
+      title="Job id"
+      selectedJobIds={[]}
+      jobIds={[]}
+      jobNameById={{}}
+      onSelect={action('onSelect')}
+    />
   ))
   .add('one selected item', () => (
     <JobIdFilter
       title="Job id"
       selectedJobIds={['test_job_1']}
       jobIds={['test_job_1', 'test_job_2', 'test_job_3', 'test_job_4']}
+      jobNameById={{}}
       onSelect={action('onSelect')}
     />
   ))
@@ -35,6 +42,7 @@ storiesOf('JobIdFilter', module)
       title="Job id"
       selectedJobIds={['test_job_2', 'test_job_3']}
       jobIds={['test_job_1', 'test_job_2', 'test_job_3', 'test_job_4']}
+      jobNameById={{}}
       onSelect={action('onSelect')}
     />
   ))
@@ -43,6 +51,7 @@ storiesOf('JobIdFilter', module)
       title="Job id"
       selectedJobIds={[]}
       jobIds={['test_job_1', 'test_job_2', 'test_job_3', 'test_job_4']}
+      jobNameById={{}}
       onSelect={action('onSelect')}
     />
   ));

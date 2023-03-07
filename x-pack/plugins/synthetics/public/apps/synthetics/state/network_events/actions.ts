@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction } from 'redux-actions';
+import { createAsyncAction } from '../utils/actions';
 import { SyntheticsNetworkEventsApiResponse } from '../../../../../common/runtime_types';
 
 export interface FetchNetworkEventsParams {
@@ -18,10 +18,11 @@ export interface FetchNetworkEventsFailPayload {
   stepIndex: number;
   error: Error;
 }
+type NetworkSuccessPayload = Pick<FetchNetworkEventsParams, 'checkGroup' | 'stepIndex'> &
+  SyntheticsNetworkEventsApiResponse;
 
-export const getNetworkEvents = createAction<FetchNetworkEventsParams>('GET_NETWORK_EVENTS');
-export const getNetworkEventsSuccess = createAction<
-  Pick<FetchNetworkEventsParams, 'checkGroup' | 'stepIndex'> & SyntheticsNetworkEventsApiResponse
->('GET_NETWORK_EVENTS_SUCCESS');
-export const getNetworkEventsFail =
-  createAction<FetchNetworkEventsFailPayload>('GET_NETWORK_EVENTS_FAIL');
+export const getNetworkEvents = createAsyncAction<
+  FetchNetworkEventsParams,
+  NetworkSuccessPayload,
+  FetchNetworkEventsFailPayload
+>('GET_NETWORK_EVENTS');

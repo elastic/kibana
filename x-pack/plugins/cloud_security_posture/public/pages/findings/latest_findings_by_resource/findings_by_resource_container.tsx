@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
@@ -42,7 +43,7 @@ const getDefaultQuery = ({
   query,
   filters,
   pageIndex: 0,
-  sortDirection: 'desc',
+  sortDirection: 'asc',
 });
 
 export const FindingsByResourceContainer = ({ dataView }: FindingsBaseProps) => (
@@ -114,7 +115,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
   };
 
   return (
-    <div data-test-subj={TEST_SUBJECTS.FINDINGS_CONTAINER}>
+    <div data-test-subj={TEST_SUBJECTS.FINDINGS_BY_RESOURCE_CONTAINER}>
       <FindingsSearchBar
         dataView={dataView}
         setQuery={(query) => {
@@ -179,7 +180,7 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
               });
             }}
             sorting={{
-              sort: { field: 'failed_findings', direction: urlQuery.sortDirection },
+              sort: { field: 'compliance_score', direction: urlQuery.sortDirection },
             }}
             onAddFilter={(field, value, negate) =>
               setUrlQuery({

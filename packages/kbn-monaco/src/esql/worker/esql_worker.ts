@@ -8,8 +8,9 @@
 
 import { CharStreams } from 'antlr4ts';
 import { monaco } from '../../monaco_imports';
+import { AutocompleteListener } from '../lib/autocomplete/autocomplete_listener';
 import type { BaseWorkerDefinition } from '../../types';
-import { getParser } from '../lib/antlr_facade';
+import { getParser, ROOT_STATEMENT } from '../lib/antlr_facade';
 import { ANTLREErrorListener } from '../../common/error_listener';
 
 export class ESQLWorker implements BaseWorkerDefinition {
@@ -19,23 +20,47 @@ export class ESQLWorker implements BaseWorkerDefinition {
     this._ctx = ctx;
   }
 
-  private getTextDocument(modelUri: string): string | undefined {
+  private getModelCharStream(modelUri: string) {
     const model = this._ctx.getMirrorModels().find((m) => m.uri.toString() === modelUri);
+    const text = model?.getValue();
 
-    return model?.getValue();
+    if (text) {
+      return CharStreams.fromString(text);
+    }
   }
 
   public async getSyntaxErrors(modelUri: string) {
-    const code = this.getTextDocument(modelUri);
+    const inputStream = this.getModelCharStream(modelUri);
 
-    if (code) {
-      const inputStream = CharStreams.fromString(code);
+    if (inputStream) {
       const errorListener = new ANTLREErrorListener();
       const parser = getParser(inputStream, errorListener);
 
-      parser.singleStatement();
+      parser[ROOT_STATEMENT]();
 
       return errorListener.getErrors();
+    }
+    return [];
+  }
+
+  public async provideAutocompleteSuggestions(
+    modelUri: string,
+    meta: {
+      word: string;
+      line: number;
+      index: number;
+    }
+  ) {
+    const inputStream = this.getModelCharStream(modelUri);
+
+    if (inputStream) {
+      const errorListener = new ANTLREErrorListener();
+      const parseListener = new AutocompleteListener();
+      const parser = getParser(inputStream, errorListener, parseListener);
+
+      parser[ROOT_STATEMENT]();
+
+      return parseListener.getAutocompleteSuggestions();
     }
   }
 }

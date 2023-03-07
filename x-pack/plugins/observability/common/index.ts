@@ -8,11 +8,11 @@
 export type { AsDuration, AsPercent, TimeUnitChar } from './utils/formatters';
 
 export { formatDurationFromTimeUnitChar } from './utils/formatters';
+export { getInspectResponse } from './utils/get_inspect_response';
 
 export { ProcessorEvent } from './processor_event';
 
 export {
-  enableNewSyntheticsView,
   enableInspectEsQueries,
   maxSuggestions,
   enableComparisonByDefault,
@@ -21,20 +21,24 @@ export {
   apmServiceInventoryOptimizedSorting,
   apmServiceGroupMaxNumberOfServices,
   apmTraceExplorerTab,
-  apmOperationsTab,
   apmLabsButton,
   enableInfrastructureHostsView,
   enableAwsLambdaMetrics,
   enableAgentExplorerView,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
+  apmEnableServiceMetrics,
+  apmEnableContinuousRollups,
   enableCriticalPath,
+  profilingElasticsearchPlugin,
 } from './ui_settings_keys';
 
 export {
   ProgressiveLoadingQuality,
   getProbabilityFromProgressiveLoadingQuality,
 } from './progressive_loading';
+
+export const sloFeatureId = 'slo';
 
 export const casesFeatureId = 'observabilityCases';
 

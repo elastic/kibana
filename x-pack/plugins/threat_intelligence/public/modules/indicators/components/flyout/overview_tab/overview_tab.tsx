@@ -23,6 +23,11 @@ import { unwrapValue } from '../../../utils';
 import { IndicatorEmptyPrompt } from '../empty_prompt';
 import { IndicatorBlock } from './block';
 import { HighlightedValuesTable } from './highlighted_values_table';
+import {
+  INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS,
+  INDICATORS_FLYOUT_OVERVIEW_TABLE,
+  INDICATORS_FLYOUT_OVERVIEW_TITLE,
+} from './test_ids';
 
 const highLevelFields = [
   RawIndicatorFieldId.Feed,
@@ -30,10 +35,6 @@ const highLevelFields = [
   RawIndicatorFieldId.MarkingTLP,
   RawIndicatorFieldId.Confidence,
 ];
-
-export const TI_FLYOUT_OVERVIEW_TITLE = 'tiFlyoutOverviewTitle';
-export const TI_FLYOUT_OVERVIEW_TABLE = 'tiFlyoutOverviewTableRow';
-export const TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS = 'tiFlyoutOverviewHighLevelBlocks';
 
 export interface IndicatorsFlyoutOverviewProps {
   indicator: Indicator;
@@ -50,13 +51,13 @@ export const IndicatorsFlyoutOverview: VFC<IndicatorsFlyoutOverviewProps> = ({
 
   const highLevelBlocks = useMemo(
     () => (
-      <EuiFlexGroup data-test-subj={TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS}>
+      <EuiFlexGroup data-test-subj={INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS}>
         {highLevelFields.map((field) => (
           <EuiFlexItem key={field}>
             <IndicatorBlock
               indicator={indicator}
               field={field}
-              data-test-subj={TI_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS}
+              data-test-subj={INDICATORS_FLYOUT_OVERVIEW_HIGH_LEVEL_BLOCKS}
             />
           </EuiFlexItem>
         ))}
@@ -83,7 +84,7 @@ export const IndicatorsFlyoutOverview: VFC<IndicatorsFlyoutOverviewProps> = ({
   return (
     <>
       <EuiTitle>
-        <h2 data-test-subj={TI_FLYOUT_OVERVIEW_TITLE}>{title}</h2>
+        <h2 data-test-subj={INDICATORS_FLYOUT_OVERVIEW_TITLE}>{title}</h2>
       </EuiTitle>
 
       {indicatorDescription}
@@ -115,7 +116,10 @@ export const IndicatorsFlyoutOverview: VFC<IndicatorsFlyoutOverviewProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <HighlightedValuesTable indicator={indicator} data-test-subj={TI_FLYOUT_OVERVIEW_TABLE} />
+      <HighlightedValuesTable
+        indicator={indicator}
+        data-test-subj={INDICATORS_FLYOUT_OVERVIEW_TABLE}
+      />
     </>
   );
 };

@@ -12,7 +12,7 @@ import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-
 interface Props {
   alertFlyoutVisible: boolean;
   alertTypeId?: string;
-  setAlertFlyoutVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+  setAlertFlyoutVisibility: (value: boolean) => void;
 }
 
 interface KibanaDeps {

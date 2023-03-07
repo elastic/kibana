@@ -6,19 +6,19 @@
  * Side Public License, v 1.
  */
 
-import { createAction } from '../../ui_actions';
 import { ViewMode } from '../../types';
 import { IEmbeddable } from '../..';
+import { UiActionsActionDefinition } from '../../ui_actions';
 
 export const EDIT_MODE_ACTION = 'EDIT_MODE_ACTION';
 
-export function createEditModeAction() {
-  return createAction({
+export function createEditModeActionDefinition(): UiActionsActionDefinition {
+  return {
     id: EDIT_MODE_ACTION,
     type: EDIT_MODE_ACTION,
     getDisplayName: () => 'I only show up in edit mode',
     isCompatible: async (context: { embeddable: IEmbeddable }) =>
       context.embeddable.getInput().viewMode === ViewMode.EDIT,
     execute: async () => {},
-  });
+  };
 }

@@ -30,7 +30,7 @@ interface AlertsPopoverProps {
   adHocDataViews: DataView[];
   I18nContext: I18nStart['Context'];
   services: DiscoverServices;
-  updateDataViewList: (dataViews: DataView[]) => Promise<void>;
+  updateDataViewList: (dataViews: DataView[]) => void;
 }
 
 interface EsQueryAlertMetaData {
@@ -193,7 +193,7 @@ export function openAlertsPopover({
   services: DiscoverServices;
   adHocDataViews: DataView[];
   savedQueryId?: string;
-  updateDataViewList: (dataViews: DataView[]) => Promise<void>;
+  updateDataViewList: (dataViews: DataView[]) => void;
 }) {
   if (isOpen) {
     closeAlertsPopover();

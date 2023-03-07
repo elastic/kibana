@@ -28,13 +28,13 @@ export async function loadRuleAggregationsWithKueryFilter({
     searchText,
   });
 
-  const res = await http.get<AsApiContract<RuleAggregations>>(
+  const res = await http.post<AsApiContract<RuleAggregations>>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/_aggregate`,
     {
-      query: {
+      body: JSON.stringify({
         ...(filtersKueryNode ? { filter: JSON.stringify(filtersKueryNode) } : {}),
         default_search_operator: 'AND',
-      },
+      }),
     }
   );
   return rewriteBodyRes(res);

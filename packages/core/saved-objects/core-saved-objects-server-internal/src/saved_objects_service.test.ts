@@ -21,7 +21,7 @@ import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { type RawPackageInfo, Env } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
@@ -419,6 +419,7 @@ describe('SavedObjectsService', () => {
       startDeps.node = nodeServiceMock.createInternalStartContract({
         ui: true,
         backgroundTasks: true,
+        migrator: false,
       });
       await soService.start(startDeps);
 
@@ -444,6 +445,7 @@ describe('SavedObjectsService', () => {
       startDeps.node = nodeServiceMock.createInternalStartContract({
         ui: true,
         backgroundTasks: false,
+        migrator: false,
       });
       await soService.start(startDeps);
 
@@ -469,6 +471,7 @@ describe('SavedObjectsService', () => {
       startDeps.node = nodeServiceMock.createInternalStartContract({
         ui: false,
         backgroundTasks: true,
+        migrator: false,
       });
       await soService.start(startDeps);
 

@@ -7,7 +7,6 @@
  */
 
 export { mergeSavedObjectMigrationMaps } from './src/merge_migration_maps';
-export { SavedObjectsErrorHelpers, type DecoratedError } from './src/saved_objects_error_helpers';
 export {
   SavedObjectsUtils,
   ALL_NAMESPACES_STRING,
@@ -15,3 +14,5 @@ export {
   FIND_DEFAULT_PAGE,
   FIND_DEFAULT_PER_PAGE,
 } from './src/saved_objects_utils';
+
+export { setsAreEqual, arrayMapsAreEqual, setMapsAreEqual } from './src/saved_objects_test_utils';

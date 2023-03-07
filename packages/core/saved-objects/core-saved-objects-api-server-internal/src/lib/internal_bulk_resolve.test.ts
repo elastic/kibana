@@ -13,12 +13,11 @@ import {
 } from './internal_bulk_resolve.test.mock';
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
 import type {
   SavedObjectsBulkResolveObject,
   SavedObjectsBaseOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   SavedObjectsSerializer,
   LEGACY_URL_ALIAS_TYPE,
@@ -27,21 +26,16 @@ import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { internalBulkResolve, type InternalBulkResolveParams } from './internal_bulk_resolve';
 import { normalizeNamespace } from './internal_utils';
 import {
-  AuditAction,
   type ISavedObjectsEncryptionExtension,
   type ISavedObjectsSecurityExtension,
   type ISavedObjectTypeRegistry,
+  type SavedObject,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import {
-  authMap,
   enforceError,
-  typeMapsAreEqual,
-  setsAreEqual,
-  setupCheckAuthorized,
-  setupCheckUnauthorized,
-  setupEnforceFailure,
-  setupEnforceSuccess,
-  setupRedactPassthrough,
+  setupAuthorizeAndRedactInternalBulkResolveFailure,
+  setupAuthorizeAndRedactInternalBulkResolveSuccess,
 } from '../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../mocks/saved_objects_extensions.mock';
 
@@ -436,6 +430,17 @@ describe('internalBulkResolve', () => {
     let mockSecurityExt: jest.Mocked<ISavedObjectsSecurityExtension>;
     let params: InternalBulkResolveParams;
 
+    const expectedObjects = [
+      expect.objectContaining({
+        outcome: 'exactMatch',
+        saved_object: expect.objectContaining({ id: objects[0].id }),
+      }),
+      expect.objectContaining({
+        outcome: 'exactMatch',
+        saved_object: expect.objectContaining({ id: objects[1].id }),
+      }),
+    ];
+
     beforeEach(() => {
       mockGetSavedObjectFromSource.mockReset();
       mockGetSavedObjectFromSource.mockImplementation((_registry, type, id) => {
@@ -464,135 +469,58 @@ describe('internalBulkResolve', () => {
     });
 
     test(`propagates decorated error when unauthorized`, async () => {
-      setupCheckUnauthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
-
+      setupAuthorizeAndRedactInternalBulkResolveFailure(mockSecurityExt);
       await expect(internalBulkResolve(params)).rejects.toThrow(enforceError);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeAndRedactInternalBulkResolve).toHaveBeenCalledTimes(1);
     });
 
-    test(`returns result when authorized`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
-      setupRedactPassthrough(mockSecurityExt);
+    test(`returns result when successful`, async () => {
+      setupAuthorizeAndRedactInternalBulkResolveSuccess(mockSecurityExt);
 
       const result = await internalBulkResolve(params);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
+      expect(mockSecurityExt.authorizeAndRedactInternalBulkResolve).toHaveBeenCalledTimes(1);
 
       const bulkIds = objects.map((obj) => obj.id);
       const expectedNamespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
       expectBulkArgs(expectedNamespaceString, bulkIds);
       const mgetIds = bulkIds;
       expectMgetArgs(namespace, mgetIds);
-      expect(result.resolved_objects).toEqual([
-        expect.objectContaining({
-          outcome: 'exactMatch',
-          saved_object: expect.objectContaining({ id: objects[0].id }),
-        }),
-        expect.objectContaining({
-          outcome: 'exactMatch',
-          saved_object: expect.objectContaining({ id: objects[1].id }),
-        }),
-      ]);
+      expect(result.resolved_objects).toEqual(expectedObjects);
     });
 
-    test(`calls checkAuthorization with type, actions, namespace, and object namespaces`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
+    test(`returns empty array when no objects are provided`, async () => {
+      setupAuthorizeAndRedactInternalBulkResolveSuccess(mockSecurityExt);
 
-      await internalBulkResolve(params);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      const expectedActions = new Set(['bulk_get']);
-      const expectedSpaces = new Set([namespace]);
-      const expectedTypes = new Set([objects[0].type]);
-
-      const {
-        actions: actualActions,
-        spaces: actualSpaces,
-        types: actualTypes,
-      } = mockSecurityExt.checkAuthorization.mock.calls[0][0];
-
-      expect(setsAreEqual(actualActions, expectedActions)).toBeTruthy();
-      expect(setsAreEqual(actualSpaces, expectedSpaces)).toBeTruthy();
-      expect(setsAreEqual(actualTypes, expectedTypes)).toBeTruthy();
+      const result = await internalBulkResolve({ ...params, objects: [] });
+      expect(result).toEqual({ resolved_objects: [] });
+      expect(mockSecurityExt.authorizeAndRedactInternalBulkResolve).not.toHaveBeenCalled();
     });
 
-    test(`calls enforceAuthorization with action, type map, and auth map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
-
-      await internalBulkResolve(params);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledWith(
-        expect.objectContaining({
-          action: 'bulk_get',
-        })
-      );
-
-      const expectedTypesAndSpaces = new Map([[objects[0].type, new Set([namespace])]]);
-
-      const { typesAndSpaces: actualTypesAndSpaces, typeMap: actualTypeMap } =
-        mockSecurityExt.enforceAuthorization.mock.calls[0][0];
-
-      expect(typeMapsAreEqual(actualTypesAndSpaces, expectedTypesAndSpaces)).toBeTruthy();
-      expect(actualTypeMap).toBe(authMap);
-    });
-
-    test(`calls redactNamespaces with authorization map`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
-      setupRedactPassthrough(mockSecurityExt);
-
-      await internalBulkResolve(params);
-      expect(mockSecurityExt.checkAuthorization).toHaveBeenCalledTimes(1);
-      expect(mockSecurityExt.enforceAuthorization).toHaveBeenCalledTimes(1);
-
-      expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledTimes(objects.length);
-      objects.forEach((obj, i) => {
-        const { savedObject, typeMap } = mockSecurityExt.redactNamespaces.mock.calls[i][0];
-        expect(savedObject).toEqual(
-          expect.objectContaining({
-            type: obj.type,
-            id: obj.id,
-            namespaces: [namespace],
-          })
-        );
-        expect(typeMap).toBe(authMap);
+    describe('calls authorizeAndRedactInternalBulkResolve of the security extension', () => {
+      beforeEach(() => {
+        setupAuthorizeAndRedactInternalBulkResolveFailure(mockSecurityExt);
       });
-    });
 
-    test(`adds audit event per object when successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceSuccess(mockSecurityExt);
+      test(`in the default space`, async () => {
+        await expect(
+          internalBulkResolve({ ...params, options: { namespace: 'default' } })
+        ).rejects.toThrow(enforceError);
+        expect(mockSecurityExt.authorizeAndRedactInternalBulkResolve).toHaveBeenCalledTimes(1);
 
-      await internalBulkResolve(params);
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-      objects.forEach((obj) => {
-        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-          action: AuditAction.RESOLVE,
-          savedObject: { type: obj.type, id: obj.id },
-          error: undefined,
-        });
+        const { namespace: actualNamespace, objects: actualObjects } =
+          mockSecurityExt.authorizeAndRedactInternalBulkResolve.mock.calls[0][0];
+        expect(actualNamespace).toBeUndefined();
+        expect(actualObjects).toEqual(expectedObjects);
       });
-    });
 
-    test(`adds audit event per object when not successful`, async () => {
-      setupCheckAuthorized(mockSecurityExt);
-      setupEnforceFailure(mockSecurityExt);
+      test(`in a non-default space`, async () => {
+        await expect(internalBulkResolve(params)).rejects.toThrow(enforceError);
+        expect(mockSecurityExt.authorizeAndRedactInternalBulkResolve).toHaveBeenCalledTimes(1);
 
-      await expect(internalBulkResolve(params)).rejects.toThrow(enforceError);
-
-      expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledTimes(objects.length);
-      objects.forEach((obj) => {
-        expect(mockSecurityExt.addAuditEvent).toHaveBeenCalledWith({
-          action: AuditAction.RESOLVE,
-          savedObject: { type: obj.type, id: obj.id },
-          error: enforceError,
-        });
+        const { namespace: actualNamespace, objects: actualObjects } =
+          mockSecurityExt.authorizeAndRedactInternalBulkResolve.mock.calls[0][0];
+        expect(actualNamespace).toEqual(namespace);
+        expect(actualObjects).toEqual(expectedObjects);
       });
     });
   });

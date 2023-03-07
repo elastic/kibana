@@ -12,27 +12,31 @@ import { CenterJustifiedSpinner } from '../../../components/center_justified_spi
 import { NoPermissionPrompt } from '../../../components/prompts/no_permission_prompt';
 
 interface RulesListPromptsProps {
-  showPrompt: boolean;
-  showCreateRule: boolean;
   showSpinner: boolean;
-  authorizedToCreateRules: boolean;
+  showNoAuthPrompt: boolean;
+  showCreateFirstRulePrompt: boolean;
+  showCreateRuleButtonInPrompt: boolean;
   onCreateRulesClick: () => void;
 }
 
 export const RulesListPrompts = (props: RulesListPromptsProps) => {
-  const { showPrompt, authorizedToCreateRules, showSpinner, showCreateRule, onCreateRulesClick } =
-    props;
+  const {
+    showNoAuthPrompt,
+    showSpinner,
+    showCreateRuleButtonInPrompt,
+    showCreateFirstRulePrompt,
+    onCreateRulesClick,
+  } = props;
+  if (showNoAuthPrompt) return <NoPermissionPrompt />;
 
-  if (showPrompt) {
-    if (authorizedToCreateRules) {
-      return (
-        <EmptyPrompt showCreateRule={showCreateRule} onCreateRulesClick={onCreateRulesClick} />
-      );
-    } else {
-      return <NoPermissionPrompt />;
-    }
+  if (showCreateFirstRulePrompt) {
+    return (
+      <EmptyPrompt
+        showCreateRule={showCreateRuleButtonInPrompt}
+        onCreateRulesClick={onCreateRulesClick}
+      />
+    );
   }
-
   if (showSpinner) {
     return (
       <EuiPageTemplate.Section grow={false} paddingSize="none">

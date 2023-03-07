@@ -12,6 +12,9 @@ export const CLOSE_SINGLE_ALERT_CHECKBOX = '[data-test-subj="closeAlertOnAddExce
 export const CONFIRM_BTN = '[data-test-subj="addExceptionConfirmButton"]';
 
 export const FIELD_INPUT =
+  '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxInput"] input';
+
+export const FIELD_INPUT_PARENT =
   '[data-test-subj="fieldAutocompleteComboBox"] [data-test-subj="comboBoxInput"]';
 
 export const LOADING_SPINNER = '[data-test-subj="loading-spinner"]';
@@ -46,8 +49,10 @@ export const EXCEPTIONS_TABLE_SHOWING_LISTS = '[data-test-subj="showingException
 export const EXCEPTIONS_TABLE_DELETE_BTN =
   '[data-test-subj="sharedListOverflowCardActionItemDelete"]';
 
-export const EXCEPTIONS_TABLE_EXPORT_BTN =
+export const EXCEPTIONS_TABLE_EXPORT_MODAL_BTN =
   '[data-test-subj="sharedListOverflowCardActionItemExport"]';
+
+export const EXCEPTIONS_TABLE_EXPORT_CONFIRM_BTN = '[data-test-subj="confirmModalConfirmButton"]';
 
 export const EXCEPTIONS_TABLE_SEARCH_CLEAR =
   '[data-test-subj="allExceptionListsPanel"] button.euiFormControlLayoutClearButton';
@@ -110,3 +115,11 @@ export const ADD_TO_RULE_OR_LIST_SECTION = '[data-test-subj="exceptionItemAddToR
 export const OS_SELECTION_SECTION = '[data-test-subj="osSelectionDropdown"]';
 
 export const OS_INPUT = '[data-test-subj="osSelectionDropdown"] [data-test-subj="comboBoxInput"]';
+
+export const MANAGE_EXCEPTION_CREATE_BUTTON_MENU =
+  '[data-test-subj="manageExceptionListCreateButton"]';
+
+export const MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION =
+  '[data-test-subj="manageExceptionListCreateExceptionButton"]';
+
+export const RULE_ACTION_LINK_RULE_SWITCH = '[data-test-subj="ruleActionLinkRuleSwitch"]';

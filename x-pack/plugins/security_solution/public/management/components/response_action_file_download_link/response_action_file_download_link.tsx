@@ -6,14 +6,14 @@
  */
 
 import React, { memo, useMemo, type CSSProperties } from 'react';
-import { EuiButtonEmpty, EuiLoadingContent, EuiText } from '@elastic/eui';
+import { EuiButtonEmpty, EuiSkeletonText, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
+import { getFileDownloadId } from '../../../../common/endpoint/service/response_actions/get_file_download_id';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
 import { FormattedError } from '../formatted_error';
 import { useGetFileInfo } from '../../hooks/response_actions/use_get_file_info';
-import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
 import type { MaybeImmutable } from '../../../../common/endpoint/types';
 import type { ActionDetails } from '../../../../common/endpoint/types/actions';
@@ -44,6 +44,7 @@ export interface ResponseActionFileDownloadLinkProps {
   /** If left undefined, the first agent that the action was sent to will be used */
   agentId?: string;
   buttonTitle?: string;
+  canAccessFileDownloadLink: boolean;
   'data-test-subj'?: string;
   textSize?: 's' | 'xs';
 }
@@ -56,14 +57,15 @@ export interface ResponseActionFileDownloadLinkProps {
  */
 export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLinkProps>(
   ({
-    action,
+    action: _action,
     agentId,
     buttonTitle = DEFAULT_BUTTON_TITLE,
+    canAccessFileDownloadLink,
     'data-test-subj': dataTestSubj,
     textSize = 's',
   }) => {
+    const action = _action as ActionDetails; // cast to remove `Immutable`
     const getTestId = useTestIdGenerator(dataTestSubj);
-    const { canWriteFileOperations } = useUserPrivileges().endpointPrivileges;
 
     const shouldFetchFileInfo: boolean = useMemo(() => {
       return action.isCompleted && action.wasSuccessful;
@@ -72,24 +74,24 @@ export const ResponseActionFileDownloadLink = memo<ResponseActionFileDownloadLin
     const downloadUrl: string = useMemo(() => {
       return resolvePathVariables(ACTION_AGENT_FILE_DOWNLOAD_ROUTE, {
         action_id: action.id,
-        agent_id: agentId ?? action.agents[0],
+        file_id: getFileDownloadId(action, agentId),
       });
-    }, [action.agents, action.id, agentId]);
+    }, [action, agentId]);
 
     const {
       isFetching,
       data: fileInfo,
       error,
     } = useGetFileInfo(action, undefined, {
-      enabled: canWriteFileOperations && shouldFetchFileInfo,
+      enabled: canAccessFileDownloadLink && shouldFetchFileInfo,
     });
 
-    if (!canWriteFileOperations || !action.isCompleted || !action.wasSuccessful) {
+    if (!canAccessFileDownloadLink || !action.isCompleted || !action.wasSuccessful) {
       return null;
     }
 
     if (isFetching) {
-      return <EuiLoadingContent lines={1} data-test-subj={getTestId('loading')} />;
+      return <EuiSkeletonText lines={1} data-test-subj={getTestId('loading')} />;
     }
 
     // Check if file is no longer available

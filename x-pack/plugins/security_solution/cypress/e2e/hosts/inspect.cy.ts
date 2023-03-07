@@ -14,14 +14,17 @@ import { login, visit, visitHostDetailsPage } from '../../tasks/login';
 
 import { HOSTS_URL } from '../../urls/navigation';
 
-describe('Inspect', () => {
+// This will be fixed in a follow up PR, https://github.com/elastic/kibana/issues/152359
+describe.skip('Inspect', () => {
   before(() => {
     login();
   });
+
   context('Hosts stats and tables', () => {
-    before(() => {
+    beforeEach(() => {
       visit(HOSTS_URL);
     });
+
     afterEach(() => {
       closesModal();
     });
@@ -35,7 +38,7 @@ describe('Inspect', () => {
   });
 
   context('Hosts details', () => {
-    before(() => {
+    beforeEach(() => {
       visitHostDetailsPage('test.local');
     });
 

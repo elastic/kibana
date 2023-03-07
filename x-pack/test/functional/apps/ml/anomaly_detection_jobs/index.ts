@@ -43,11 +43,13 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       loadTestFile(require.resolve('./single_metric_job_without_datafeed_start'));
       loadTestFile(require.resolve('./multi_metric_job'));
       loadTestFile(require.resolve('./population_job'));
+      loadTestFile(require.resolve('./geo_job'));
       loadTestFile(require.resolve('./saved_search_job'));
       loadTestFile(require.resolve('./advanced_job'));
       loadTestFile(require.resolve('./categorization_job'));
       loadTestFile(require.resolve('./date_nanos_job'));
       loadTestFile(require.resolve('./custom_urls'));
+      loadTestFile(require.resolve('./delete_job_and_delete_annotations'));
     }
   });
 }

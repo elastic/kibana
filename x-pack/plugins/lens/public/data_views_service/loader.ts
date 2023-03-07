@@ -47,7 +47,7 @@ export function convertDataViewIntoLensIndexPattern(
         customLabel: field.customLabel,
         runtimeField: field.runtimeField,
         runtime: Boolean(field.runtimeField),
-        timeSeriesMetricType: field.timeSeriesMetric,
+        timeSeriesMetric: field.timeSeriesMetric,
         timeSeriesRollup: field.isRolledUpField,
         partiallyApplicableFunctions: field.isRolledUpField
           ? {
@@ -176,7 +176,9 @@ export async function loadIndexPatterns({
   }
   indexPatterns.push(
     ...(await Promise.all(
-      Object.values(adHocDataViews || {}).map((spec) => dataViews.create(spec))
+      Object.values(adHocDataViews || {}).map((spec) =>
+        dataViews.create({ ...spec, allowNoIndex: true })
+      )
     ))
   );
 

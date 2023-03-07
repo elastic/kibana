@@ -8,6 +8,7 @@ Array [
       "category": Array [
         "database",
       ],
+      "outcome": "success",
       "type": Array [
         "creation",
       ],
@@ -31,6 +32,7 @@ Array [
       "category": Array [
         "database",
       ],
+      "outcome": "success",
       "type": Array [
         "deletion",
       ],
@@ -54,6 +56,7 @@ Array [
       "category": Array [
         "database",
       ],
+      "outcome": "success",
       "type": Array [
         "change",
       ],

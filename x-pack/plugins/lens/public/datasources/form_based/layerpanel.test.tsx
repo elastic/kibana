@@ -11,10 +11,20 @@ import { FormBasedLayerPanelProps, LayerPanel } from './layerpanel';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { ShallowWrapper } from 'enzyme';
 import { EuiSelectable } from '@elastic/eui';
-import { DataViewsList } from '@kbn/unified-search-plugin/public';
+import { DataViewsList } from '@kbn/unified-search-plugin/public/dataview_picker/dataview_list';
 import { ChangeIndexPattern } from '../../shared_components/dataview_picker/dataview_picker';
 import { getFieldByNameFactory } from './pure_helpers';
 import { TermsIndexPatternColumn } from './operations';
+
+jest.mock('@kbn/unified-search-plugin/public', () => {
+  const actual = jest.requireActual('@kbn/unified-search-plugin/public');
+  return {
+    ...actual,
+    DataViewsList: jest.requireActual(
+      '@kbn/unified-search-plugin/public/dataview_picker/dataview_list'
+    ).DataViewsList,
+  };
+});
 
 interface IndexPatternPickerOption {
   label: string;
@@ -236,7 +246,8 @@ describe('Layer Data Panel', () => {
           ? { ...option, checked: 'on' }
           : { ...option, checked: undefined }
     );
-    return getIndexPatternPickerList(instance).prop('onChange')!(options, event);
+    const selectedOption = { label: selectedLabel };
+    return getIndexPatternPickerList(instance).prop('onChange')!(options, event, selectedOption);
   }
 
   function getIndexPatternPickerOptions(instance: ShallowWrapper) {
@@ -250,7 +261,7 @@ describe('Layer Data Panel', () => {
       getIndexPatternPickerOptions(instance)!.map(
         (option: IndexPatternPickerOption) => option.label
       )
-    ).toEqual(['my-fake-index-pattern', 'my-fake-restricted-pattern', 'my-compatible-pattern']);
+    ).toEqual(['my-compatible-pattern', 'my-fake-index-pattern', 'my-fake-restricted-pattern']);
   });
 
   it('should switch data panel to target index pattern', () => {

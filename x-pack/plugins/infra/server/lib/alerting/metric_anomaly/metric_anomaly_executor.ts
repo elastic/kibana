@@ -41,7 +41,7 @@ export const createMetricAnomalyExecutor =
     MetricAnomalyAllowedActionGroups
   >) => {
     if (!ml) {
-      return;
+      return { state: {} };
     }
     const request = {} as KibanaRequest;
     const mlSystem = ml.mlSystemProvider(request, services.savedObjectsClient);
@@ -96,6 +96,8 @@ export const createMetricAnomalyExecutor =
         influencers: influencers.join(', '),
       });
     }
+
+    return { state: {} };
   };
 
 export const FIRED_ACTIONS_ID = 'metrics.anomaly.fired';

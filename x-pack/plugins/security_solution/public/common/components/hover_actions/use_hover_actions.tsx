@@ -83,7 +83,7 @@ export const useHoverActions = ({
   const values = useMemo(() => {
     const val = dataProvider.queryMatch.value;
 
-    if (typeof val === 'number') {
+    if (typeof val === 'number' || typeof val === 'boolean') {
       return val.toString();
     }
 

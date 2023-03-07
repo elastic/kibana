@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { finished } from 'stream/promises';
+
 import tar from 'tar';
 import yauzl from 'yauzl';
 
@@ -16,19 +18,20 @@ export async function untarBuffer(
   buffer: Buffer,
   filter = (entry: ArchiveEntry): boolean => true,
   onEntry = (entry: ArchiveEntry): void => {}
-): Promise<unknown> {
+) {
   const deflatedStream = bufferToStream(buffer);
   // use tar.list vs .extract to avoid writing to disk
-  const inflateStream = tar.list().on('entry', (entry: tar.FileStat) => {
-    const path = entry.header.path || '';
+  const inflateStream = tar.list().on('entry', (entry) => {
+    const path = entry.path || '';
     if (!filter({ path })) return;
-    streamToBuffer(entry).then((entryBuffer) => onEntry({ buffer: entryBuffer, path }));
+    streamToBuffer(entry as unknown as NodeJS.ReadableStream).then((entryBuffer) =>
+      onEntry({ buffer: entryBuffer, path })
+    );
   });
 
-  return new Promise((resolve, reject) => {
-    inflateStream.on('end', resolve).on('error', reject);
-    deflatedStream.pipe(inflateStream);
-  });
+  deflatedStream.pipe(inflateStream);
+
+  await finished(inflateStream);
 }
 
 export async function unzipBuffer(

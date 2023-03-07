@@ -67,7 +67,6 @@ export const getCasesByAlertID = async (
     services: { caseService, attachmentService },
     logger,
     authorization,
-    unsecuredSavedObjectsClient,
   } = clientArgs;
 
   try {
@@ -107,8 +106,7 @@ export const getCasesByAlertID = async (
       return [];
     }
 
-    const commentStats = await attachmentService.getCaseCommentStats({
-      unsecuredSavedObjectsClient,
+    const commentStats = await attachmentService.getter.getCaseCommentStats({
       caseIds,
     });
 

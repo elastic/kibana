@@ -39,7 +39,7 @@ async function disableWithOCC(context: RulesClientContext, { id }: { id: string 
     version = alert.version;
   }
 
-  recoverRuleAlerts(context, id, attributes);
+  await recoverRuleAlerts(context, id, attributes);
 
   try {
     await context.authorization.ensureAuthorized({

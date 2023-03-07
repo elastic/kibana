@@ -12,7 +12,9 @@ import { run as syntheticsRun } from '@elastic/synthetics';
 import { PromiseType } from 'utility-types';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
 
+import { EsArchiver } from '@kbn/es-archiver';
 import { esArchiverUnload } from './tasks/es_archiver';
+import { TestReporter } from './test_reporter';
 
 export interface ArgParams {
   headless: boolean;
@@ -28,6 +30,8 @@ export class SyntheticsRunner {
   public testFilesLoaded: boolean = false;
 
   public params: ArgParams;
+
+  private loadTestFilesCallback?: (reload?: boolean) => Promise<void>;
 
   constructor(getService: any, params: ArgParams) {
     this.getService = getService;
@@ -47,9 +51,10 @@ export class SyntheticsRunner {
     });
   }
 
-  async loadTestFiles(callback: () => Promise<void>) {
+  async loadTestFiles(callback: (reload?: boolean) => Promise<void>, reload = false) {
     console.log('Loading test files');
-    await callback();
+    await callback(reload);
+    this.loadTestFilesCallback = callback;
     this.testFilesLoaded = true;
     console.log('Successfully loaded test files');
   }
@@ -58,14 +63,19 @@ export class SyntheticsRunner {
     try {
       console.log('Loading esArchiver...');
 
-      const esArchiver = this.getService('esArchiver');
+      const esArchiver: EsArchiver = this.getService('esArchiver');
 
-      const promises = dataArchives.map((archive) => esArchiver.loadIfNeeded(e2eDir + archive));
+      const promises = dataArchives.map((archive) => {
+        if (archive === 'synthetics_data') {
+          return esArchiver.load(e2eDir + archive, {
+            docsOnly: true,
+            skipExisting: true,
+          });
+        }
+        return esArchiver.load(e2eDir + archive, { skipExisting: true });
+      });
 
-      await Promise.all([
-        ...promises,
-        esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote'),
-      ]);
+      await Promise.all([...promises]);
     } catch (e) {
       console.log(e);
     }
@@ -96,13 +106,34 @@ export class SyntheticsRunner {
       throw new Error('Test files not loaded');
     }
     const { headless, match, pauseOnError } = this.params;
-    const results = await syntheticsRun({
-      params: { kibanaUrl: this.kibanaUrl, getService: this.getService },
-      playwrightOptions: { headless, chromiumSandbox: false, timeout: 60 * 1000 },
-      match: match === 'undefined' ? '' : match,
-      pauseOnError,
-      screenshots: 'off',
-    });
+    const noOfRuns = process.env.NO_OF_RUNS ? Number(process.env.NO_OF_RUNS) : 1;
+    console.log(`Running ${noOfRuns} times`);
+    let results: PromiseType<ReturnType<typeof syntheticsRun>> = {};
+    for (let i = 0; i < noOfRuns; i++) {
+      results = await syntheticsRun({
+        params: { kibanaUrl: this.kibanaUrl, getService: this.getService },
+        playwrightOptions: {
+          headless,
+          chromiumSandbox: false,
+          timeout: 60 * 1000,
+          viewport: {
+            height: 900,
+            width: 1600,
+          },
+          recordVideo: {
+            dir: '.journeys/videos',
+          },
+        },
+        match: match === 'undefined' ? '' : match,
+        pauseOnError,
+        screenshots: 'only-on-failure',
+        reporter: TestReporter,
+      });
+      if (noOfRuns > 1) {
+        // need to reload again since runner resets the journeys
+        await this.loadTestFiles(this.loadTestFilesCallback!, true);
+      }
+    }
 
     await this.assertResults(results);
   }
@@ -110,7 +141,8 @@ export class SyntheticsRunner {
   assertResults(results: PromiseType<ReturnType<typeof syntheticsRun>>) {
     Object.entries(results).forEach(([_journey, result]) => {
       if (result.status !== 'succeeded') {
-        throw new Error('Tests failed');
+        process.exitCode = 1;
+        process.exit();
       }
     });
   }

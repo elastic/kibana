@@ -16,7 +16,7 @@ import {
 import nodemailerGetService from 'nodemailer/lib/well-known';
 import SMTPConnection from 'nodemailer/lib/smtp-connection';
 import { AdditionalEmailServices, INTERNAL_BASE_STACK_CONNECTORS_API_PATH } from '../../common';
-import { ELASTIC_CLOUD_SERVICE } from '../connector_types/stack/email';
+import { ELASTIC_CLOUD_SERVICE } from '../connector_types/email';
 
 const paramSchema = schema.object({
   service: schema.string(),

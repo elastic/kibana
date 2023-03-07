@@ -1,12 +1,10 @@
 {
   "name": "@kbn/apm-synthtrace",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Elastic APM trace data generator",
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "bin": {
     "synthtrace": "./bin/synthtrace"
   },
-  "main": "./target_node/index.js",
-  "private": true,
-  "types": "./target_types/index.d.ts"
+  "private": true
 }

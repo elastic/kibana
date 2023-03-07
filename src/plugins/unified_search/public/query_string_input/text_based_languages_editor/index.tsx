@@ -43,12 +43,13 @@ import {
   parseErrors,
   getInlineEditorText,
   getDocumentationSections,
+  MonacoError,
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
 
 import './overwrite.scss';
-import { IUnifiedSearchPluginServices } from '../../types';
+import type { IUnifiedSearchPluginServices } from '../../types';
 
 export interface TextBasedLanguagesEditorProps {
   query: AggregateQuery;
@@ -103,9 +104,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isWordWrapped, setIsWordWrapped] = useState(true);
-  const [editorErrors, setEditorErrors] = useState<
-    Array<{ startLineNumber: number; message: string }>
-  >([]);
+  const [editorErrors, setEditorErrors] = useState<MonacoError[]>([]);
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
   const kibana = useKibana<IUnifiedSearchPluginServices>();
@@ -241,6 +240,19 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     [errors]
   );
 
+  const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoError) => {
+    if (!editor1.current) {
+      return;
+    }
+
+    editor1.current.focus();
+    editor1.current.setPosition({
+      lineNumber: startLineNumber,
+      column: startColumn,
+    });
+    editor1.current.revealLine(startLineNumber);
+  }, []);
+
   // Clean up the monaco editor and DOM on unmount
   useEffect(() => {
     const model = editorModel;
@@ -337,8 +349,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     overviewRulerLanes: 0,
     hideCursorInOverviewRuler: true,
     scrollbar: {
-      vertical: 'hidden',
       horizontal: 'hidden',
+      vertical: 'auto',
     },
     overviewRulerBorder: false,
     readOnly: isDisabled,
@@ -456,7 +468,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <EuiFlexGroup gutterSize="none" responsive={false} css={{ margin: 0 }} ref={containerRef}>
+      <EuiFlexGroup
+        gutterSize="none"
+        responsive={false}
+        css={{ margin: '0 0 1px 0' }}
+        ref={containerRef}
+      >
         <EuiResizeObserver onResize={onResize}>
           {(resizeRef) => (
             <EuiOutsideClickDetector
@@ -512,6 +529,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         lines={lines}
                         containerCSS={styles.bottomContainer}
                         errors={editorErrors}
+                        onErrorClick={onErrorClick}
+                        refreshErrors={onTextLangQuerySubmit}
                       />
                     )}
                   </div>
@@ -577,7 +596,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         )}
       </EuiFlexGroup>
       {isCodeEditorExpanded && (
-        <EditorFooter lines={lines} containerCSS={styles.bottomContainer} errors={editorErrors} />
+        <EditorFooter
+          lines={lines}
+          containerCSS={styles.bottomContainer}
+          errors={editorErrors}
+          onErrorClick={onErrorClick}
+          refreshErrors={onTextLangQuerySubmit}
+        />
       )}
       {isCodeEditorExpanded && (
         <ResizableButton

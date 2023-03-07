@@ -7,15 +7,8 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { i18n } from '@kbn/i18n';
-
 import { Connector } from '../../../../../../../common/types/connectors';
 import { Actions } from '../../../../../shared/api_logic/create_api_logic';
-import {
-  flashAPIErrors,
-  flashSuccessToast,
-  clearFlashMessages,
-} from '../../../../../shared/flash_messages';
 import {
   ConnectorNameAndDescriptionApiLogic,
   PutConnectorNameAndDescriptionArgs,
@@ -32,7 +25,7 @@ type NameAndDescription = Partial<Pick<Connector, 'name' | 'description'>>;
 
 type ConnectorNameAndDescriptionActions = Pick<
   Actions<PutConnectorNameAndDescriptionArgs, PutConnectorNameAndDescriptionResponse>,
-  'apiError' | 'apiSuccess' | 'makeRequest'
+  'apiSuccess' | 'makeRequest'
 > & {
   fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
   saveNameAndDescription: () => void;
@@ -77,22 +70,11 @@ export const ConnectorNameAndDescriptionLogic = kea<
       ),
   }),
   listeners: ({ actions, values }) => ({
-    apiError: (error) => flashAPIErrors(error),
-    apiSuccess: ({ indexName }) => {
-      flashSuccessToast(
-        i18n.translate(
-          'xpack.enterpriseSearch.content.indices.configurationConnector.configuration.successToast.title',
-          { defaultMessage: 'Configuration successfully updated' }
-        )
-      );
-      CachedFetchIndexApiLogic.actions.makeRequest({ indexName });
-    },
     fetchIndexApiSuccess: (index) => {
       if (!values.isEditing && isConnectorIndex(index)) {
         actions.setNameAndDescription(index.connector);
       }
     },
-    makeRequest: () => clearFlashMessages(),
     saveNameAndDescription: () => {
       if (isConnectorIndex(values.index) || isCrawlerIndex(values.index)) {
         actions.makeRequest({

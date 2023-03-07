@@ -19,15 +19,23 @@ import { discoverServiceMock } from '../../__mocks__/services';
 import { Router } from 'react-router-dom';
 import { createMemoryHistory } from 'history';
 import { urlTrackerMock } from '../../__mocks__/url_tracker.mock';
+import { getDiscoverStateMock } from '../../__mocks__/discover_state.mock';
+import { DiscoverMainProvider } from './services/discover_state_provider';
 
 setHeaderActionMenuMounter(jest.fn());
 setUrlTracker(urlTrackerMock);
+
+discoverServiceMock.data.query.timefilter.timefilter.getTime = () => {
+  return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
+};
 
 describe('DiscoverMainApp', () => {
   test('renders', async () => {
     const dataViewList = [dataViewMock].map((ip) => {
       return { ...ip, ...{ attributes: { title: ip.title } } };
     }) as unknown as DataViewListItem[];
+    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+    stateContainer.actions.setDataView(dataViewMock);
     const props = {
       dataViewList,
       savedSearch: savedSearchMock,
@@ -40,7 +48,9 @@ describe('DiscoverMainApp', () => {
       const component = await mountWithIntl(
         <Router history={history}>
           <KibanaContextProvider services={discoverServiceMock}>
-            <DiscoverMainApp {...props} />
+            <DiscoverMainProvider value={stateContainer}>
+              <DiscoverMainApp {...props} />
+            </DiscoverMainProvider>
           </KibanaContextProvider>
         </Router>
       );
@@ -50,7 +60,7 @@ describe('DiscoverMainApp', () => {
       await component.update();
 
       expect(component.find(DiscoverTopNav).exists()).toBe(true);
-      expect(component.find(DiscoverTopNav).prop('dataView')).toEqual(dataViewMock);
+      expect(component.find(DiscoverTopNav).prop('savedSearch')).toEqual(savedSearchMock);
     });
   });
 });

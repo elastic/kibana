@@ -12,6 +12,8 @@ import {
   type Pagination,
   type CriteriaWithPagination,
   EuiLink,
+  EuiToolTip,
+  EuiAvatar,
 } from '@elastic/eui';
 import React from 'react';
 import { generatePath } from 'react-router-dom';
@@ -83,7 +85,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION_NAME,
   },
   {
-    field: 'rules.enabled',
+    field: 'rules_count',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.rulesColumnTitle', {
       defaultMessage: 'Rules',
     }),
@@ -97,7 +99,6 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     }),
     dataType: 'string',
     truncateText: true,
-    sortable: true,
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.INTEGRATION,
     render: (field: PackagePolicy) => {
       const enabledIntegration = getEnabledCspIntegrationDetails(field);
@@ -106,13 +107,12 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
   },
   {
     field: 'package_policy',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.deploymentTypeColumnTitle', {
-      defaultMessage: 'Deployment Type',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.monitoringColumnTitle', {
+      defaultMessage: 'Monitoring',
     }),
     dataType: 'string',
     truncateText: true,
-    sortable: true,
-    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.DEPLOYMENT_TYPE,
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.MONITORING,
     render: (field: PackagePolicy) => {
       const enabledIntegration = getEnabledCspIntegrationDetails(field);
       return enabledIntegration?.enabledIntegrationOption?.name || ' ';
@@ -146,11 +146,20 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     truncateText: true,
     sortable: true,
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CREATED_BY,
+    render: (createdBy: Benchmark['package_policy']['created_by']) => {
+      return (
+        <EuiToolTip position="top" content={createdBy} anchorClassName="eui-textTruncate">
+          <span>
+            <EuiAvatar size="s" name={createdBy} /> {createdBy}
+          </span>
+        </EuiToolTip>
+      );
+    },
   },
   {
     field: 'package_policy.created_at',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.createdAtColumnTitle', {
-      defaultMessage: 'Created at',
+      defaultMessage: 'Created',
     }),
     dataType: 'date',
     truncateText: true,

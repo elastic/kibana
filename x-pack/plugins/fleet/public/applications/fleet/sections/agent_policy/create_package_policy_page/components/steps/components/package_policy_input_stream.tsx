@@ -21,9 +21,11 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
-import { useGetDataStreams } from '../../../../../../../../hooks';
+import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
 
-import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../services/package_prerelease';
+import { useConfig, useGetDataStreams } from '../../../../../../../../hooks';
+
+import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../../common/services';
 import type { ExperimentalDataStreamFeature } from '../../../../../../../../../common/types/models/epm';
 
 import type {
@@ -42,7 +44,7 @@ import { PackagePolicyEditorDatastreamMappings } from '../../datastream_mappings
 import { ExperimentDatastreamSettings } from './experimental_datastream_settings';
 import { PackagePolicyInputVarField } from './package_policy_input_var_field';
 import { useDataStreamId } from './hooks';
-import { orderDatasets } from './order_datasets';
+import { sortDatastreamsByDataset } from './sort_datastreams';
 
 const ScrollAnchor = styled.div`
   display: none;
@@ -58,6 +60,7 @@ interface Props {
   updatePackagePolicyInputStream: (updatedStream: Partial<NewPackagePolicyInputStream>) => void;
   inputStreamValidationResults: PackagePolicyConfigValidationResults;
   forceShowErrors?: boolean;
+  isEditPage?: boolean;
 }
 
 export const PackagePolicyInputStreamConfig = memo<Props>(
@@ -70,7 +73,12 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     updatePackagePolicyInputStream,
     inputStreamValidationResults,
     forceShowErrors,
+    isEditPage,
   }) => {
+    const config = useConfig();
+    const isExperimentalDataStreamSettingsEnabled =
+      config.enableExperimental?.includes('experimentalDataStreamSettings') ?? false;
+
     const {
       params: { packagePolicyId },
     } = useRouteMatch<{ packagePolicyId?: string }>();
@@ -84,6 +92,10 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const isPackagePolicyEdit = !!packagePolicyId;
     const isInputOnlyPackage = packageInfo.type === 'input';
 
+    const hasDatasetVar = packageInputStream.vars?.some(
+      (varDef) => varDef.name === DATASET_VAR_NAME
+    );
+    const showPipelinesAndMappings = !isInputOnlyPackage && !hasDatasetVar;
     useEffect(() => {
       if (isDefaultDatastream && containerRef.current) {
         containerRef.current.scrollIntoView();
@@ -138,9 +150,8 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     );
 
     const { data: dataStreamsData } = useGetDataStreams();
-    const datasetList =
-      uniq(dataStreamsData?.data_streams.map((dataStream) => dataStream.dataset)) ?? [];
-    const datasets = orderDatasets(datasetList, packageInfo.name);
+    const datasetList = uniq(dataStreamsData?.data_streams) ?? [];
+    const datastreams = sortDatastreamsByDataset(datasetList, packageInfo.name);
 
     return (
       <>
@@ -221,7 +232,9 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       errors={inputStreamValidationResults?.vars![varName]}
                       forceShowErrors={forceShowErrors}
                       packageType={packageInfo.type}
-                      datasets={datasets}
+                      packageName={packageInfo.name}
+                      datastreams={datastreams}
+                      isEditPage={isEditPage}
                     />
                   </EuiFlexItem>
                 );
@@ -282,13 +295,15 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                             errors={inputStreamValidationResults?.vars![varName]}
                             forceShowErrors={forceShowErrors}
                             packageType={packageInfo.type}
-                            datasets={datasets}
+                            packageName={packageInfo.name}
+                            datastreams={datastreams}
+                            isEditPage={isEditPage}
                           />
                         </EuiFlexItem>
                       );
                     })}
                     {/* Only show datastream pipelines and mappings on edit and not for input packages*/}
-                    {isPackagePolicyEdit && !isInputOnlyPackage && (
+                    {isPackagePolicyEdit && showPipelinesAndMappings && (
                       <>
                         <EuiFlexItem>
                           <PackagePolicyEditorDatastreamPipelines
@@ -305,13 +320,15 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       </>
                     )}
                     {/* Experimental index/datastream settings e.g. synthetic source */}
-                    <ExperimentDatastreamSettings
-                      registryDataStream={packageInputStream.data_stream}
-                      experimentalDataFeatures={
-                        packagePolicy.package?.experimental_data_stream_features
-                      }
-                      setNewExperimentalDataFeatures={setNewExperimentalDataFeatures}
-                    />
+                    {isExperimentalDataStreamSettingsEnabled && (
+                      <ExperimentDatastreamSettings
+                        registryDataStream={packageInputStream.data_stream}
+                        experimentalDataFeatures={
+                          packagePolicy.package?.experimental_data_stream_features
+                        }
+                        setNewExperimentalDataFeatures={setNewExperimentalDataFeatures}
+                      />
+                    )}
                   </>
                 ) : null}
               </Fragment>

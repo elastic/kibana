@@ -12,7 +12,12 @@ import { getSelectedFields, shouldShowField, INITIAL_SELECTED_FIELDS_RESULT } fr
 
 describe('group_fields', function () {
   it('should pick fields as unknown_selected if they are unknown', function () {
-    const actual = getSelectedFields(dataView, ['currency']);
+    const actual = getSelectedFields({
+      dataView,
+      columns: ['currency'],
+      allFields: dataView.fields,
+      isPlainRecord: false,
+    });
     expect(actual).toMatchInlineSnapshot(`
       Object {
         "selectedFields": Array [
@@ -29,13 +34,47 @@ describe('group_fields', function () {
     `);
   });
 
+  it('should pick fields as nested for a nested field root', function () {
+    const actual = getSelectedFields({
+      dataView,
+      columns: ['nested1', 'bytes'],
+      allFields: [
+        {
+          name: 'nested1',
+          type: 'nested',
+        },
+      ] as DataViewField[],
+      isPlainRecord: false,
+    });
+    expect(actual.selectedFieldsMap).toMatchInlineSnapshot(`
+      Object {
+        "bytes": true,
+        "nested1": true,
+      }
+    `);
+  });
+
   it('should work correctly if no columns selected', function () {
-    expect(getSelectedFields(dataView, [])).toBe(INITIAL_SELECTED_FIELDS_RESULT);
-    expect(getSelectedFields(dataView, ['_source'])).toBe(INITIAL_SELECTED_FIELDS_RESULT);
+    expect(
+      getSelectedFields({ dataView, columns: [], allFields: dataView.fields, isPlainRecord: false })
+    ).toBe(INITIAL_SELECTED_FIELDS_RESULT);
+    expect(
+      getSelectedFields({
+        dataView,
+        columns: ['_source'],
+        allFields: dataView.fields,
+        isPlainRecord: false,
+      })
+    ).toBe(INITIAL_SELECTED_FIELDS_RESULT);
   });
 
   it('should pick fields into selected group', function () {
-    const actual = getSelectedFields(dataView, ['bytes', '@timestamp']);
+    const actual = getSelectedFields({
+      dataView,
+      columns: ['bytes', '@timestamp'],
+      allFields: dataView.fields,
+      isPlainRecord: false,
+    });
     expect(actual.selectedFields.map((field) => field.name)).toEqual(['bytes', '@timestamp']);
     expect(actual.selectedFieldsMap).toStrictEqual({
       bytes: true,
@@ -44,7 +83,12 @@ describe('group_fields', function () {
   });
 
   it('should pick fields into selected group if they contain multifields', function () {
-    const actual = getSelectedFields(dataView, ['machine.os', 'machine.os.raw']);
+    const actual = getSelectedFields({
+      dataView,
+      columns: ['machine.os', 'machine.os.raw'],
+      allFields: dataView.fields,
+      isPlainRecord: false,
+    });
     expect(actual.selectedFields.map((field) => field.name)).toEqual([
       'machine.os',
       'machine.os.raw',
@@ -56,7 +100,12 @@ describe('group_fields', function () {
   });
 
   it('should sort selected fields by columns order', function () {
-    const actual1 = getSelectedFields(dataView, ['bytes', 'extension.keyword', 'unknown']);
+    const actual1 = getSelectedFields({
+      dataView,
+      columns: ['bytes', 'extension.keyword', 'unknown'],
+      allFields: dataView.fields,
+      isPlainRecord: false,
+    });
     expect(actual1.selectedFields.map((field) => field.name)).toEqual([
       'bytes',
       'extension.keyword',
@@ -68,7 +117,12 @@ describe('group_fields', function () {
       unknown: true,
     });
 
-    const actual2 = getSelectedFields(dataView, ['extension', 'bytes', 'unknown']);
+    const actual2 = getSelectedFields({
+      dataView,
+      columns: ['extension', 'bytes', 'unknown'],
+      allFields: dataView.fields,
+      isPlainRecord: false,
+    });
     expect(actual2.selectedFields.map((field) => field.name)).toEqual([
       'extension',
       'bytes',
@@ -79,6 +133,33 @@ describe('group_fields', function () {
       bytes: true,
       unknown: true,
     });
+  });
+
+  it('should pick fields only from allFields instead of data view fields for a text based query', function () {
+    const actual = getSelectedFields({
+      dataView,
+      columns: ['bytes'],
+      allFields: [
+        {
+          name: 'bytes',
+          type: 'text',
+        },
+      ] as DataViewField[],
+      isPlainRecord: true,
+    });
+    expect(actual).toMatchInlineSnapshot(`
+      Object {
+        "selectedFields": Array [
+          Object {
+            "name": "bytes",
+            "type": "text",
+          },
+        ],
+        "selectedFieldsMap": Object {
+          "bytes": true,
+        },
+      }
+    `);
   });
 
   it('should show any fields if for text-based searches', function () {

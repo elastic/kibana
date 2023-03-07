@@ -22,7 +22,7 @@ import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
 import { hasMlUserPermissions } from '../../../../common/machine_learning/has_ml_user_permissions';
-import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
+import { TabNavigationWithBreadcrumbs } from '../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 import { HostsKpiComponent } from '../components/kpi_hosts';
 import { SiemSearchBar } from '../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
@@ -213,7 +213,7 @@ const HostsComponent = () => {
 
               <EuiSpacer />
 
-              <SecuritySolutionTabNavigation
+              <TabNavigationWithBreadcrumbs
                 navTabs={navTabsHosts({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
                   isRiskyHostsEnabled: capabilities.isPlatinumOrTrialLicense,

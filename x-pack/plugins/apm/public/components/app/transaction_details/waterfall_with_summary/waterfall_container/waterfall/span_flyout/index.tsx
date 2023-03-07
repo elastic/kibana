@@ -92,6 +92,7 @@ interface Props {
   traceId: string;
   totalDuration?: number;
   spanLinksCount: SpanLinksCount;
+  flyoutDetailTab?: string;
   onClose: () => void;
 }
 
@@ -107,6 +108,7 @@ export function SpanFlyout({
   totalDuration,
   onClose,
   spanLinksCount,
+  flyoutDetailTab,
 }: Props) {
   const { data = INITIAL_DATA, status } = useFetcher(
     (callApmApi) => {
@@ -171,6 +173,7 @@ export function SpanFlyout({
               parentTransaction={parentTransaction}
               totalDuration={totalDuration}
               spanLinksCount={spanLinksCount}
+              flyoutDetailTab={flyoutDetailTab}
             />
           )}
         </EuiFlyoutBody>
@@ -184,11 +187,13 @@ function SpanFlyoutBody({
   parentTransaction,
   totalDuration,
   spanLinksCount,
+  flyoutDetailTab,
 }: {
   span: Span;
   parentTransaction?: Transaction;
   totalDuration?: number;
   spanLinksCount: SpanLinksCount;
+  flyoutDetailTab?: string;
 }) {
   const stackframes = span.span.stacktrace;
   const codeLanguage = parentTransaction?.service.language?.name;
@@ -205,6 +210,46 @@ function SpanFlyoutBody({
     spanId: span.span.id,
     processorEvent: ProcessorEvent.span,
   });
+
+  const tabs = [
+    {
+      id: 'metadata',
+      name: i18n.translate('xpack.apm.propertiesTable.tabs.metadataLabel', {
+        defaultMessage: 'Metadata',
+      }),
+      content: (
+        <Fragment>
+          <EuiSpacer size="m" />
+          <SpanMetadata spanId={span.span.id} />
+        </Fragment>
+      ),
+    },
+    ...(!isEmpty(stackframes)
+      ? [
+          {
+            id: 'stack-trace',
+            name: i18n.translate(
+              'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
+              {
+                defaultMessage: 'Stack Trace',
+              }
+            ),
+            content: (
+              <Fragment>
+                <EuiSpacer size="l" />
+                <Stacktrace
+                  stackframes={stackframes}
+                  codeLanguage={codeLanguage}
+                />
+              </Fragment>
+            ),
+          },
+        ]
+      : []),
+    ...(spanLinksTabContent ? [spanLinksTabContent] : []),
+  ];
+
+  const initialTab = tabs.find(({ id }) => id === flyoutDetailTab) ?? tabs[0];
   return (
     <>
       <StickySpanProperties span={span} transaction={parentTransaction} />
@@ -270,48 +315,7 @@ function SpanFlyoutBody({
       />
       <EuiHorizontalRule />
       <SpanDatabase spanDb={spanDb} />
-      <EuiTabbedContent
-        tabs={[
-          {
-            id: 'metadata',
-            name: i18n.translate(
-              'xpack.apm.propertiesTable.tabs.metadataLabel',
-              {
-                defaultMessage: 'Metadata',
-              }
-            ),
-            content: (
-              <Fragment>
-                <EuiSpacer size="m" />
-                <SpanMetadata spanId={span.span.id} />
-              </Fragment>
-            ),
-          },
-          ...(!isEmpty(stackframes)
-            ? [
-                {
-                  id: 'stack-trace',
-                  name: i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel',
-                    {
-                      defaultMessage: 'Stack Trace',
-                    }
-                  ),
-                  content: (
-                    <Fragment>
-                      <EuiSpacer size="l" />
-                      <Stacktrace
-                        stackframes={stackframes}
-                        codeLanguage={codeLanguage}
-                      />
-                    </Fragment>
-                  ),
-                },
-              ]
-            : []),
-          ...(spanLinksTabContent ? [spanLinksTabContent] : []),
-        ]}
-      />
+      <EuiTabbedContent tabs={tabs} initialSelectedTab={initialTab} />
     </>
   );
 }

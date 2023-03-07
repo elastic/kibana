@@ -1,7 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/home-sample-data-types",
-  "owner": "@elastic/kibana-global-experience",
-  "runtimeDeps": [],
-  "typeDeps": []
+  "owner": "@elastic/appex-sharedux"
 }

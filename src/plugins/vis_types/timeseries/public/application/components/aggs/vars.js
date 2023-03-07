@@ -8,7 +8,7 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import uuid from 'uuid';
+import { v1 as uuidv1 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
 import { AddDeleteButtons } from '../add_delete_buttons';
@@ -17,7 +17,7 @@ import { MetricSelect } from './metric_select';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldText } from '@elastic/eui';
 import { getIndexPatternKey } from '../../../../common/index_patterns_utils';
 
-export const newVariable = (opts) => ({ id: uuid.v1(), name: '', field: '', ...opts });
+export const newVariable = (opts) => ({ id: uuidv1(), name: '', field: '', ...opts });
 
 export class CalculationVars extends Component {
   constructor(props) {

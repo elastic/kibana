@@ -36,6 +36,7 @@ describe('index_patterns/field_capabilities/field_capabilities', () => {
     indices: undefined,
     fieldCapsOptions: undefined,
     indexFilter: undefined,
+    fields: undefined,
     ...args,
   });
 

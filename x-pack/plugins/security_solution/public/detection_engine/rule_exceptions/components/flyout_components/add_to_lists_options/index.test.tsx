@@ -11,6 +11,7 @@ import { shallow } from 'enzyme';
 
 import { ExceptionsAddToListsOptions } from '.';
 
+jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../rule_management/logic/use_find_rules');
 
 describe('ExceptionsAddToListsOptions', () => {

@@ -84,6 +84,12 @@ const BLOCKLIST_PAGE_LABELS: ArtifactListPageProps['labels'] = {
       defaultMessage: '"{itemName}" has been removed from blocklist.',
       values: { itemName },
     }),
+  emptyStateTitleNoEntries: i18n.translate(
+    'xpack.securitySolution.blocklist.emptyStateTitleNoEntries',
+    {
+      defaultMessage: 'There are no blocklist entries to display.',
+    }
+  ),
   emptyStateTitle: i18n.translate('xpack.securitySolution.blocklist.emptyStateTitle', {
     defaultMessage: 'Add your first blocklist entry',
   }),

@@ -54,7 +54,13 @@ image::images/enter-query.png[Select saved query dropdown name showing query nam
 +
 TIP: To save a single query for future use, click *Save for later* and define the ID, description, and other <<osquery-manage-query,details>>.
 
-. Review the results. Next, navigate to *Discover* to dive deeper into the response or to *Lens* to create visualizations.
+. Review the results and do any of the following:
+
+** Click *View in Discover* (image:images/discover-button-osquery.png[View in Discover icon,20,20]) to explore the results in *Discover*.
+** Click *View in Lens* (image:images/lens-button-osquery.png[View in Lens icon,20,20]) to navigate to *Lens*, where you can use the drag-and-drop *Lens* editor to create visualizations.
+** Click *Add to Case* (image:images/case-button-osquery.png[Add to Case icon,20,20]) to add the query results to a new or existing case. 
+** Click the view details icon (image:images/view-osquery-details.png[View details icon,20,20]) to examine the query ID and statement.  
+
 . To view more information about the request, such as failures, open the *Status* tab.
 
 [float]
@@ -82,23 +88,26 @@ You can run packs as live queries or schedule packs to run for one or more agent
 
 . Click the **Packs** tab.
 . Click **Add pack** to create a new pack, or click the name of an existing pack, then **Edit** to add queries to an existing pack.
+. Provide a name for the pack. The short description is optional. 
+. Schedule the pack to be deployed on specified agent policies (*Policy*) or on all agent policies (*Global*).
++
+TIP: Pack deployment details are stored within the <<osquery-custom-config,Osquery configuration>>. The `shard` field value is the percentage of agents in the policy using the pack.  
++
+If you choose the *Policy* option, configure these fields: 
++
+NOTE: When defining pack deployment details, you cannot configure the same policy multiple times. In other words, after specifying a policy, you can either choose to deploy the pack to all of the policy's agents or only a subset. You cannot choose both.
 
-. Provide the following fields:
+** *Scheduled {agent} policies (optional)*: Allows you to deploy the pack to specific agent policies. By default, the pack is deployed to all {agents} that are registered to the policies you define.  
+** *Partial deployment (shards)*: Allows you to deploy the pack to a portion of the agents on each specified agent policy. After defining a policy, use the *Shard* slider to set the amount of agents to which the pack is deployed. For example, after specifying a policy, you can choose to deploy the pack to half of the policy's agents by selecting 50% on the slider.
 
-* The name of the pack.
+. If you're creating a new pack, add queries to schedule:
 
-* A short description of the pack.
-
-* The agent policies where this pack should run. If no agent policies are set, the pack is not scheduled.
-
-. Add queries to schedule:
-
-* To add a query to the pack, click *Add query*, and then either add a saved query or enter a new query.
+ ** Click *Add query* and then add a saved query or enter a new query.
 Each query must include a unique query ID and the interval at which it should run.
 Optionally, set the minimum Osquery version and platform,
 or <<osquery-map-fields,map ECS fields>>. When you add a saved query to a pack, this adds a copy of the query. A connection is not maintained between saved queries and packs.
 
-* To upload queries from a `.conf` query pack, drag the pack to the drop zone under the query table. To explore the community packs that Osquery publishes, click *Example packs*.
+** Upload queries from a `.conf` query pack by dragging the pack to the drop zone under the query table. To explore the community packs that Osquery publishes, click *Example packs*.
 
 . Click *Save pack*. The queries run when the policy receives the update.
 

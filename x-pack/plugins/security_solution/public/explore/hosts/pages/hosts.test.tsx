@@ -18,7 +18,7 @@ import {
   kibanaObservable,
   createSecuritySolutionStorageMock,
 } from '../../../common/mock';
-import { SecuritySolutionTabNavigation } from '../../../common/components/navigation';
+import { TabNavigationWithBreadcrumbs } from '../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 import { inputsActions } from '../../../common/store/inputs';
 import type { State } from '../../../common/store';
 import { createStore } from '../../../common/store';
@@ -39,9 +39,7 @@ jest.mock('../../../common/components/search_bar', () => ({
 jest.mock('../../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
-jest.mock('../../../common/components/visualization_actions', () => ({
-  VisualizationActions: jest.fn(() => <div data-test-subj="mock-viz-actions" />),
-}));
+jest.mock('../../../common/components/visualization_actions/actions');
 jest.mock('../../../common/components/visualization_actions/lens_embeddable', () => ({
   LensEmbeddable: jest.fn(() => <div data-test-subj="mock-lens-embeddable" />),
 }));
@@ -140,7 +138,7 @@ describe('Hosts - rendering', () => {
         </Router>
       </TestProviders>
     );
-    expect(wrapper.find(SecuritySolutionTabNavigation).exists()).toBe(true);
+    expect(wrapper.find(TabNavigationWithBreadcrumbs).exists()).toBe(true);
   });
 
   test('it should add the new filters after init', async () => {

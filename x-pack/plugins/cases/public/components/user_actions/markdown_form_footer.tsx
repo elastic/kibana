@@ -24,7 +24,7 @@ const UserActionMarkdownFooterComponent: React.FC<UserActionMarkdownFooterProps>
   const [{ content }] = useFormData<{ content: string }>({ watch: ['content'] });
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" responsive={false}>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
           data-test-subj="user-action-cancel-markdown"

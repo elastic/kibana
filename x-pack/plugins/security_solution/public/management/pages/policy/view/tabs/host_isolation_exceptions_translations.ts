@@ -110,6 +110,15 @@ export const POLICY_ARTIFACT_HOST_ISOLATION_EXCEPTIONS_LABELS = Object.freeze({
       defaultMessage: 'Manage host isolation exceptions',
     }
   ),
+  emptyUnassignedNoPrivilegesMessage: (policyName: string): string =>
+    i18n.translate(
+      'xpack.securitySolution.endpoint.policy.hostIsolationException.empty.unassigned.noPrivileges.content',
+      {
+        defaultMessage:
+          'There are currently no host isolation exceptions assigned to {policyName}.',
+        values: { policyName },
+      }
+    ),
   emptyUnexistingTitle: i18n.translate(
     'xpack.securitySolution.endpoint.policy.hostIsolationException.empty.unexisting.title',
     { defaultMessage: 'No host isolation exceptions exist' }

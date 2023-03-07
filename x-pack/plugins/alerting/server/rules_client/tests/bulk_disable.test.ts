@@ -8,7 +8,7 @@
 import { RulesClient, ConstructorOptions } from '../rules_client';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { SavedObject } from '@kbn/core-saved-objects-common';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../authorization/alerting_authorization.mock';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -196,6 +196,9 @@ describe('bulkDisableRules', () => {
       })
       .mockResolvedValueOnce({
         saved_objects: [savedObjectWith409Error],
+      })
+      .mockResolvedValueOnce({
+        saved_objects: [savedObjectWith409Error],
       });
 
     encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = jest
@@ -217,11 +220,17 @@ describe('bulkDisableRules', () => {
         find: function* asyncGenerator() {
           yield { saved_objects: [enabledRule2] };
         },
+      })
+      .mockResolvedValueOnce({
+        close: jest.fn(),
+        find: function* asyncGenerator() {
+          yield { saved_objects: [enabledRule2] };
+        },
       });
 
     const result = await rulesClient.bulkDisableRules({ ids: ['id1', 'id2'] });
 
-    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(3);
+    expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(4);
     expect(taskManager.bulkDisable).toHaveBeenCalledTimes(1);
     expect(taskManager.bulkDisable).toHaveBeenCalledWith(['id1']);
     expect(result).toStrictEqual({
@@ -343,10 +352,11 @@ describe('bulkDisableRules', () => {
       });
 
       taskManager.bulkDisable.mockResolvedValue({
-        tasks: [{ id: 'id1' }],
+        tasks: [taskManagerMock.createTask({ id: 'id1' })],
         errors: [
           {
-            task: { id: 'id2' },
+            type: 'task',
+            id: 'id2',
             error: {
               error: '',
               message: 'UPS',
@@ -354,7 +364,7 @@ describe('bulkDisableRules', () => {
             },
           },
         ],
-      } as unknown as BulkUpdateTaskResult);
+      });
 
       await rulesClient.bulkDisableRules({ filter: 'fake_filter' });
 

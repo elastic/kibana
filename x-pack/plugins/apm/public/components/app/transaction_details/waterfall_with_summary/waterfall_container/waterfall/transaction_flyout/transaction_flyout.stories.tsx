@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { apm, dedot } from '@kbn/apm-synthtrace';
+import { apm, dedot } from '@kbn/apm-synthtrace-client';
 import { Story } from '@storybook/react';
 import React, { ComponentProps, ComponentType } from 'react';
 import { TransactionFlyout } from '.';

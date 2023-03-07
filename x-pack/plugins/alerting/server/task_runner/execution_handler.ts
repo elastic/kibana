@@ -201,7 +201,11 @@ export class ExecutionHandler<
           if (isSummaryActionPerRuleRun(action) && !this.hasAlerts(alerts)) {
             continue;
           }
-          const summarizedAlerts = await this.getSummarizedAlerts({ action, spaceId, ruleId });
+          const summarizedAlerts = await this.getSummarizedAlerts({
+            action,
+            spaceId,
+            ruleId,
+          });
           const actionToRun = {
             ...action,
             params: injectActionParams({
@@ -235,8 +239,11 @@ export class ExecutionHandler<
           logActions.push({
             id: action.id,
             typeId: action.actionTypeId,
-            alertId: 'summary',
-            alertGroup: action.group,
+            alertSummary: {
+              new: summarizedAlerts.new.count,
+              ongoing: summarizedAlerts.ongoing.count,
+              recovered: summarizedAlerts.recovered.count,
+            },
           });
         } else {
           const executableAlert = alert!;
@@ -263,8 +270,8 @@ export class ExecutionHandler<
                 kibanaBaseUrl: this.taskRunnerContext.kibanaBaseUrl,
                 alertParams: this.rule.params,
                 actionParams: action.params,
-                ruleUrl: this.buildRuleUrl(spaceId),
                 flapping: executableAlert.getFlapping(),
+                ruleUrl: this.buildRuleUrl(spaceId),
               }),
             }),
           };
@@ -281,9 +288,7 @@ export class ExecutionHandler<
             alertGroup: action.group,
           });
 
-          if (this.isRecoveredAlert(actionGroup)) {
-            executableAlert.scheduleActions(action.group as ActionGroupIds);
-          } else {
+          if (!this.isRecoveredAlert(actionGroup)) {
             if (isSummaryActionOnInterval(action)) {
               executableAlert.updateLastScheduledActions(
                 action.group as ActionGroupIds,
@@ -404,11 +409,13 @@ export class ExecutionHandler<
       return;
     }
 
+    const relativePath = this.ruleType.getViewInAppRelativeUrl
+      ? this.ruleType.getViewInAppRelativeUrl({ rule: this.rule })
+      : `${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`;
+
     try {
       const ruleUrl = new URL(
-        `${
-          spaceId !== 'default' ? `/s/${spaceId}` : ''
-        }${triggersActionsRoute}${getRuleDetailsRoute(this.rule.id)}`,
+        `${spaceId !== 'default' ? `/s/${spaceId}` : ''}${relativePath}`,
         this.taskRunnerContext.kibanaBaseUrl
       );
 
@@ -527,12 +534,14 @@ export class ExecutionHandler<
         end: new Date(),
         ruleId,
         spaceId,
+        excludedAlertInstanceIds: this.rule.mutedInstanceIds,
       };
     } else {
       options = {
         executionUuid: this.executionId,
         ruleId,
         spaceId,
+        excludedAlertInstanceIds: this.rule.mutedInstanceIds,
       };
     }
 

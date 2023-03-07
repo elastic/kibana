@@ -28,6 +28,7 @@ export const useMonitorName = ({ search = '' }: { search?: string }) => {
     const values = monitors.map((monitor) => ({
       label: monitor.attributes.name as string,
       key: monitor.id,
+      locationIds: monitor.attributes.locations.map((location) => location.id),
     }));
 
     return { values: values.filter((val) => val.key !== monitorId), loading };

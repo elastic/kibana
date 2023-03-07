@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const RETRY_IF_CONFLICTS_ATTEMPTS = 2;
+export const RETRY_IF_CONFLICTS_ATTEMPTS = 3;
 
 // milliseconds to wait before retrying when conflicts occur
 // note: we considered making this random, to help avoid a stampede, but

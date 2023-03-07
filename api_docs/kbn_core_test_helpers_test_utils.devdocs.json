@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/core-test-helpers-test-utils",
-        "id": "def-server.createExportableType",
+        "id": "def-common.createExportableType",
         "type": "Function",
         "tags": [],
         "label": "createExportableType",
@@ -22,9 +30,9 @@
           "(name: string) => ",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.SavedObjectsType",
+            "section": "def-common.SavedObjectsType",
             "text": "SavedObjectsType"
           },
           "<any>"
@@ -35,7 +43,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-test-utils",
-            "id": "def-server.createExportableType.$1",
+            "id": "def-common.createExportableType.$1",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -54,7 +62,85 @@
       },
       {
         "parentPluginId": "@kbn/core-test-helpers-test-utils",
-        "id": "def-server.setupServer",
+        "id": "def-common.createHiddenTypeVariants",
+        "type": "Function",
+        "tags": [],
+        "label": "createHiddenTypeVariants",
+        "description": [],
+        "signature": [
+          "(createOptions: { name: string; hide?: boolean | undefined; hideFromHttpApis?: boolean | undefined; }) => ",
+          {
+            "pluginId": "@kbn/core-saved-objects-server",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsServerPluginApi",
+            "section": "def-common.SavedObjectsType",
+            "text": "SavedObjectsType"
+          },
+          "<any>"
+        ],
+        "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-test-helpers-test-utils",
+            "id": "def-common.createHiddenTypeVariants.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "createOptions",
+            "description": [],
+            "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-test-helpers-test-utils",
+                "id": "def-common.createHiddenTypeVariants.$1.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-test-utils",
+                "id": "def-common.createHiddenTypeVariants.$1.hide",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "hide",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/core-test-helpers-test-utils",
+                "id": "def-common.createHiddenTypeVariants.$1.hideFromHttpApis",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "hideFromHttpApis",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "packages/core/test-helpers/core-test-helpers-test-utils/src/create_hidden_type_variants.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-test-helpers-test-utils",
+        "id": "def-common.setupServer",
         "type": "Function",
         "tags": [],
         "label": "setupServer",
@@ -67,17 +153,17 @@
           "; handlerContext: { savedObjects: { client: jest.Mocked<",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsClientContract",
+            "section": "def-common.SavedObjectsClientContract",
             "text": "SavedObjectsClientContract"
           },
           ">; typeRegistry: jest.Mocked<",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.ISavedObjectTypeRegistry",
+            "section": "def-common.ISavedObjectTypeRegistry",
             "text": "ISavedObjectTypeRegistry"
           },
           " & Pick<",
@@ -85,49 +171,49 @@
           ", \"registerType\">>; getClient: () => jest.Mocked<",
           {
             "pluginId": "@kbn/core-saved-objects-api-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-            "section": "def-server.SavedObjectsClientContract",
+            "section": "def-common.SavedObjectsClientContract",
             "text": "SavedObjectsClientContract"
           },
           ">; getExporter: () => jest.Mocked<",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.ISavedObjectsExporter",
+            "section": "def-common.ISavedObjectsExporter",
             "text": "ISavedObjectsExporter"
           },
           ">; getImporter: () => jest.Mocked<",
           {
             "pluginId": "@kbn/core-saved-objects-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-            "section": "def-server.ISavedObjectsImporter",
+            "section": "def-common.ISavedObjectsImporter",
             "text": "ISavedObjectsImporter"
           },
           ">; }; elasticsearch: { client: ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreElasticsearchClientServerMocksPluginApi",
-            "section": "def-server.ScopedClusterClientMock",
+            "section": "def-common.ScopedClusterClientMock",
             "text": "ScopedClusterClientMock"
           },
           "; }; uiSettings: { client: jest.Mocked<",
           {
             "pluginId": "@kbn/core-ui-settings-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreUiSettingsServerPluginApi",
-            "section": "def-server.IUiSettingsClient",
+            "section": "def-common.IUiSettingsClient",
             "text": "IUiSettingsClient"
           },
           ">; }; deprecations: { client: jest.Mocked<",
           {
             "pluginId": "@kbn/core-deprecations-server",
-            "scope": "server",
+            "scope": "common",
             "docId": "kibKbnCoreDeprecationsServerPluginApi",
-            "section": "def-server.DeprecationsClient",
+            "section": "def-common.DeprecationsClient",
             "text": "DeprecationsClient"
           },
           ">; }; }; }>"
@@ -138,7 +224,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-test-helpers-test-utils",
-            "id": "def-server.setupServer.$1",
+            "id": "def-common.setupServer.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "coreId",
@@ -156,14 +242,6 @@
         "initialIsOpen": false
       }
     ],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

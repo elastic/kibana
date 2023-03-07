@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-usage-data-server-mocks",
-        "id": "def-server.coreUsageDataServiceMock",
+        "id": "def-common.coreUsageDataServiceMock",
         "type": "Object",
         "tags": [],
         "label": "coreUsageDataServiceMock",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server-mocks",
-            "id": "def-server.coreUsageDataServiceMock.create",
+            "id": "def-common.coreUsageDataServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -37,17 +45,17 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/utility-types",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnUtilityTypesPluginApi",
-                "section": "def-server.PublicMethodsOf",
+                "section": "def-common.PublicMethodsOf",
                 "text": "PublicMethodsOf"
               },
               "<",
               {
                 "pluginId": "@kbn/core-usage-data-server-internal",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUsageDataServerInternalPluginApi",
-                "section": "def-server.CoreUsageDataService",
+                "section": "def-common.CoreUsageDataService",
                 "text": "CoreUsageDataService"
               },
               ">>"
@@ -60,7 +68,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server-mocks",
-            "id": "def-server.coreUsageDataServiceMock.createSetupContract",
+            "id": "def-common.coreUsageDataServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -79,7 +87,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-usage-data-server-mocks",
-                "id": "def-server.coreUsageDataServiceMock.createSetupContract.$1",
+                "id": "def-common.coreUsageDataServiceMock.createSetupContract.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "usageStatsClient",
@@ -88,9 +96,9 @@
                   "{ getUsageStats: jest.MockInstance<Promise<",
                   {
                     "pluginId": "@kbn/core-usage-data-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreUsageDataServerPluginApi",
-                    "section": "def-server.CoreUsageStats",
+                    "section": "def-common.CoreUsageStats",
                     "text": "CoreUsageStats"
                   },
                   ">, []>; incrementSavedObjectsBulkCreate: jest.MockInstance<Promise<void>, [options: ",
@@ -136,7 +144,7 @@
           },
           {
             "parentPluginId": "@kbn/core-usage-data-server-mocks",
-            "id": "def-server.coreUsageDataServiceMock.createStartContract",
+            "id": "def-common.coreUsageDataServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -145,9 +153,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-usage-data-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreUsageDataServerPluginApi",
-                "section": "def-server.CoreUsageDataStart",
+                "section": "def-common.CoreUsageDataStart",
                 "text": "CoreUsageDataStart"
               },
               ">"
@@ -163,7 +171,7 @@
       },
       {
         "parentPluginId": "@kbn/core-usage-data-server-mocks",
-        "id": "def-server.coreUsageStatsClientMock",
+        "id": "def-common.coreUsageStatsClientMock",
         "type": "Object",
         "tags": [],
         "label": "coreUsageStatsClientMock",
@@ -174,7 +182,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-usage-data-server-mocks",
-            "id": "def-server.coreUsageStatsClientMock.create",
+            "id": "def-common.coreUsageStatsClientMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -194,13 +202,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

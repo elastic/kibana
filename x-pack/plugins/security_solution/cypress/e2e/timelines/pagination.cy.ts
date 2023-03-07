@@ -29,10 +29,14 @@ describe('Pagination', () => {
     cleanKibana();
     esArchiverLoad('timeline');
     login();
+  });
+
+  beforeEach(() => {
     visit(HOSTS_URL);
     openTimelineUsingToggle();
     populateTimeline();
   });
+
   after(() => {
     esArchiverUnload('timeline');
   });

@@ -12,7 +12,7 @@ import { createTopNFunctions } from '../../common/functions';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';
-import { getExecutablesAndStackTraces } from './get_executables_and_stacktraces';
+import { getStackTraces } from './get_stacktraces';
 import { createCommonFilter } from './query';
 
 const querySchema = schema.object({
@@ -44,21 +44,24 @@ export function registerTopNFunctionsSearchRoute({
 
         const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
         const esClient = await getClient(context);
+        const profilingElasticsearchClient = createProfilingEsClient({ request, esClient });
         const filter = createCommonFilter({
           timeFrom,
           timeTo,
           kuery,
         });
 
-        const { stackFrames, stackTraceEvents, stackTraces, executables } =
-          await getExecutablesAndStackTraces({
-            client: createProfilingEsClient({ request, esClient }),
-            filter,
-            logger,
-            sampleSize: targetSampleSize,
-          });
-
         const t0 = Date.now();
+        const { stackTraceEvents, stackTraces, executables, stackFrames } = await getStackTraces({
+          context,
+          logger,
+          client: profilingElasticsearchClient,
+          filter,
+          sampleSize: targetSampleSize,
+        });
+        logger.info(`querying stacktraces took ${Date.now() - t0} ms`);
+
+        const t1 = Date.now();
         const topNFunctions = await withProfilingSpan('create_topn_functions', async () => {
           return createTopNFunctions(
             stackTraceEvents,
@@ -69,7 +72,7 @@ export function registerTopNFunctionsSearchRoute({
             endIndex
           );
         });
-        logger.info(`creating topN functions took ${Date.now() - t0} ms`);
+        logger.info(`creating topN functions took ${Date.now() - t1} ms`);
 
         logger.info('returning payload response to client');
 

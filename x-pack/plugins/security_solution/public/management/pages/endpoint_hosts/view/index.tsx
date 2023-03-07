@@ -19,7 +19,6 @@ import {
   EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiCallOut,
 } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -30,7 +29,6 @@ import type {
   CreatePackagePolicyRouteState,
   AgentPolicyDetailsDeployAgentAction,
 } from '@kbn/fleet-plugin/public';
-import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { EndpointDetailsFlyout } from './details';
 import * as selectors from '../store/selectors';
 import { useEndpointSelector } from './hooks';
@@ -127,9 +125,6 @@ export const EndpointList = () => {
     autoRefreshInterval,
     isAutoRefreshEnabled,
     patternsError,
-    areEndpointsEnrolling,
-    agentsWithEndpointsTotalError,
-    endpointsTotalError,
     metadataTransformStats,
   } = useEndpointSelector(selector);
   const {
@@ -544,7 +539,7 @@ export const EndpointList = () => {
   }, [queryParams, search, getAppUrl, canReadPolicyManagement, backToEndpointList, PAD_LEFT]);
 
   const renderTableOrEmptyState = useMemo(() => {
-    if (endpointsExist || areEndpointsEnrolling) {
+    if (endpointsExist) {
       return (
         <EuiBasicTable
           data-test-subj="endpointListTable"
@@ -582,7 +577,6 @@ export const EndpointList = () => {
     }
   }, [
     endpointsExist,
-    areEndpointsEnrolling,
     policyItemsLoading,
     policyItems,
     listData,
@@ -615,10 +609,6 @@ export const EndpointList = () => {
   const refreshInterval = useMemo(() => {
     return !endpointsExist ? DEFAULT_POLL_INTERVAL : autoRefreshInterval;
   }, [endpointsExist, autoRefreshInterval]);
-
-  const hasErrorFindingTotals = useMemo(() => {
-    return endpointsTotalError || agentsWithEndpointsTotalError ? true : false;
-  }, [endpointsTotalError, agentsWithEndpointsTotalError]);
 
   const shouldShowKQLBar = useMemo(() => {
     return endpointsExist && !patternsError;
@@ -701,7 +691,7 @@ export const EndpointList = () => {
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
-      hideHeader={!(endpointsExist || areEndpointsEnrolling)}
+      hideHeader={!endpointsExist}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"
@@ -718,37 +708,6 @@ export const EndpointList = () => {
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
       <>
-        {areEndpointsEnrolling && !hasErrorFindingTotals && (
-          <>
-            <EuiCallOut size="s" data-test-subj="endpointsEnrollingNotification">
-              <FormattedMessage
-                id="xpack.securitySolution.endpoint.list.endpointsEnrolling"
-                defaultMessage="Endpoints are enrolling. {agentsLink} to track progress."
-                values={{
-                  agentsLink: (
-                    <LinkToApp
-                      appId="fleet"
-                      appPath={`#${pagePathGetters.agent_list({
-                        kuery: 'packages : "endpoint"',
-                      })}`}
-                      href={`${services.application.getUrlForApp(
-                        'fleet'
-                      )}#${pagePathGetters.agent_list({
-                        kuery: 'packages : "endpoint"',
-                      })}`}
-                    >
-                      <FormattedMessage
-                        id="xpack.securitySolution.endpoint.list.endpointsEnrolling.viewAgentsLink"
-                        defaultMessage="View agents"
-                      />
-                    </LinkToApp>
-                  ),
-                }}
-              />
-            </EuiCallOut>
-            <EuiSpacer size="m" />
-          </>
-        )}
         {transformFailedCallout}
         <EuiFlexGroup gutterSize="s" alignItems="center">
           {shouldShowKQLBar && (

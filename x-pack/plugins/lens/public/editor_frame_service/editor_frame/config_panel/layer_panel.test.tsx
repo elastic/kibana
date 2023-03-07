@@ -113,6 +113,7 @@ describe('LayerPanel', () => {
       onEmptyDimensionAdd: jest.fn(),
       onChangeIndexPattern: jest.fn(),
       indexPatternService: createIndexPatternServiceMock(),
+      getUserMessages: () => [],
     };
   }
 
@@ -1363,5 +1364,7 @@ describe('LayerPanel', () => {
       expect(mockDatasource.renderDimensionTrigger).not.toHaveBeenCalled();
       expect(mockVisualization.renderDimensionTrigger).toHaveBeenCalled();
     });
+
+    // TODO - test user message display
   });
 });

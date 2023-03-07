@@ -13,10 +13,18 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/core-environment-server-internal",
-        "id": "def-server.PidConfigType",
+        "id": "def-common.PidConfigType",
         "type": "Type",
         "tags": [],
         "label": "PidConfigType",
@@ -33,7 +41,7 @@
     "objects": [
       {
         "parentPluginId": "@kbn/core-environment-server-internal",
-        "id": "def-server.pidConfig",
+        "id": "def-common.pidConfig",
         "type": "Object",
         "tags": [],
         "label": "pidConfig",
@@ -44,7 +52,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-environment-server-internal",
-            "id": "def-server.pidConfig.path",
+            "id": "def-common.pidConfig.path",
             "type": "string",
             "tags": [],
             "label": "path",
@@ -55,7 +63,7 @@
           },
           {
             "parentPluginId": "@kbn/core-environment-server-internal",
-            "id": "def-server.pidConfig.schema",
+            "id": "def-common.pidConfig.schema",
             "type": "Object",
             "tags": [],
             "label": "schema",
@@ -63,25 +71,25 @@
             "signature": [
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.ObjectType",
+                "section": "def-common.ObjectType",
                 "text": "ObjectType"
               },
               "<{ file: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<string | undefined>; exclusive: ",
               {
                 "pluginId": "@kbn/config-schema",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnConfigSchemaPluginApi",
-                "section": "def-server.Type",
+                "section": "def-common.Type",
                 "text": "Type"
               },
               "<boolean>; }>"
@@ -94,13 +102,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

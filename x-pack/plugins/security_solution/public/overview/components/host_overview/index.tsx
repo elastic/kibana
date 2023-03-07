@@ -54,6 +54,7 @@ interface HostSummaryProps {
   endDate: string;
   narrowDateRange: NarrowDateRange;
   hostName: string;
+  jobNameById: Record<string, string | undefined>;
 }
 
 const HostRiskOverviewWrapper = styled(EuiFlexGroup)`
@@ -76,6 +77,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
     narrowDateRange,
     startDate,
     hostName,
+    jobNameById,
   }) => {
     const capabilities = useMlCapabilities();
     const userPermissions = hasMlUserPermissions(capabilities);
@@ -198,6 +200,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
                     endDate={endDate}
                     isLoading={isLoadingAnomaliesData}
                     narrowDateRange={narrowDateRange}
+                    jobNameById={jobNameById}
                   />
                 ),
               },
@@ -211,6 +214,7 @@ export const HostOverview = React.memo<HostSummaryProps>(
         narrowDateRange,
         startDate,
         userPermissions,
+        jobNameById,
       ]
     );
 

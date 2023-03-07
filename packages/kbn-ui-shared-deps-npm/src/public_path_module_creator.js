@@ -6,6 +6,9 @@
  * Side Public License, v 1.
  */
 
+/**
+ * @param {{ key: string }} param0
+ */
 module.exports = function ({ key }) {
   return {
     code: `__webpack_public_path__ = window.__kbnPublicPath__['${key}']`,

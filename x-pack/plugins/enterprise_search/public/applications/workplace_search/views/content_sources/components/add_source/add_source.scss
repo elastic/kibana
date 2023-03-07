@@ -98,9 +98,3 @@
     background: transparent;
   }
 }
-
-@media (min-width: 768px) {
-  .organizational-content-source-item {
-    max-width: calc(33.3% - #{$euiSize});
-  }
-}

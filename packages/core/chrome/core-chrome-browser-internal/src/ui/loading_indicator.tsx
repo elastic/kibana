@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiLoadingSpinner, EuiProgress, EuiIcon } from '@elastic/eui';
+import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import classNames from 'classnames';
@@ -18,6 +18,7 @@ import './loading_indicator.scss';
 export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   showAsBar?: boolean;
+  customLogo?: string;
 }
 
 export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { visible: boolean }> {
@@ -61,11 +62,33 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       ? 'globalLoadingIndicator'
       : 'globalLoadingIndicator-hidden';
 
-    const ariaHidden = this.state.visible ? false : true;
+    const ariaHidden = !this.state.visible;
 
     const ariaLabel = i18n.translate('core.ui.loadingIndicatorAriaLabel', {
       defaultMessage: 'Loading content',
     });
+
+    const logoImage = this.props.customLogo ? (
+      <EuiImage
+        src={this.props.customLogo}
+        data-test-subj={testSubj}
+        size={24}
+        alt="logo"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.customLogoAriaLabel', {
+          defaultMessage: 'User logo',
+        })}
+      />
+    ) : (
+      <EuiIcon
+        type={'logoElastic'}
+        size="l"
+        data-test-subj={testSubj}
+        className="chrHeaderLogo__cluster"
+        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
+          defaultMessage: 'Elastic Logo',
+        })}
+      />
+    );
 
     const logo = this.state.visible ? (
       <EuiLoadingSpinner
@@ -75,15 +98,7 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
         aria-label={ariaLabel}
       />
     ) : (
-      <EuiIcon
-        type="logoElastic"
-        size="l"
-        data-test-subj={testSubj}
-        className="chrHeaderLogo__cluster"
-        aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
-          defaultMessage: 'Elastic Logo',
-        })}
-      />
+      logoImage
     );
 
     return !this.props.showAsBar ? (

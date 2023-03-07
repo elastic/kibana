@@ -29,6 +29,7 @@ const createSetupContractMock = () => {
     getInjectedVar: jest.fn(),
     getInjectedVars: jest.fn(),
     getKibanaBuildNumber: jest.fn(),
+    getCustomBranding: jest.fn(),
   };
   setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
   setupContract.getExternalUrlConfig.mockReturnValue({ policy: [] });

@@ -7,6 +7,9 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
+import { createAppContextStartContractMock } from '../../mocks';
+import { appContextService } from '../app_context';
+
 import { cancelAgentAction } from './actions';
 import { bulkUpdateAgents } from './crud';
 
@@ -15,6 +18,13 @@ jest.mock('./crud');
 const mockedBulkUpdateAgents = bulkUpdateAgents as jest.Mock;
 
 describe('Agent actions', () => {
+  beforeEach(async () => {
+    appContextService.start(createAppContextStartContractMock());
+  });
+
+  afterEach(() => {
+    appContextService.stop();
+  });
   describe('cancelAgentAction', () => {
     it('throw if the target action is not found', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
@@ -28,7 +38,7 @@ describe('Agent actions', () => {
       );
     });
 
-    it('should create one CANCEL action for each action found', async () => {
+    it('should create one CANCEL action for each UPGRADE action found', async () => {
       const esClient = elasticsearchServiceMock.createInternalClient();
       esClient.search.mockResolvedValue({
         hits: {
@@ -38,6 +48,7 @@ describe('Agent actions', () => {
                 action_id: 'action1',
                 agents: ['agent1', 'agent2'],
                 expiration: '2022-05-12T18:16:18.019Z',
+                type: 'UPGRADE',
               },
             },
             {
@@ -45,6 +56,7 @@ describe('Agent actions', () => {
                 action_id: 'action1',
                 agents: ['agent3', 'agent4'],
                 expiration: '2022-05-12T18:16:18.019Z',
+                type: 'UPGRADE',
               },
             },
           ],

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { apm, timerange } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 
 export function generateData({ from, to }: { from: number; to: number }) {
   const range = timerange(from, to);

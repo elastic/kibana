@@ -7,17 +7,21 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors } from './utils';
+import { catchAndReturnBoomErrors, throwOnHttpHiddenTypes } from './utils';
 
 interface RouteDependencies {
+  config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerFindRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { config, coreUsageData, logger }: RouteDependencies
 ) => {
   const referenceSchema = schema.object({
     type: schema.string(),
@@ -26,7 +30,7 @@ export const registerFindRoute = (
   const searchOperatorSchema = schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
   });
-
+  const { allowHttpApiAccess } = config;
   router.get(
     {
       path: '/_find',
@@ -59,6 +63,7 @@ export const registerFindRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
+      logger.warn("The find saved object API '/api/saved_objects/_find' is deprecated.");
       const query = req.query;
 
       const namespaces =
@@ -67,7 +72,7 @@ export const registerFindRoute = (
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsFind({ request: req }).catch(() => {});
 
-      // manually validation to avoid using JSON.parse twice
+      // manually validate to avoid using JSON.parse twice
       let aggs;
       if (query.aggs) {
         try {
@@ -81,10 +86,25 @@ export const registerFindRoute = (
         }
       }
       const { savedObjects } = await context.core;
+
+      // check if registered type(s)are exposed to the global SO Http API's.
+      const findForTypes = Array.isArray(query.type) ? query.type : [query.type];
+
+      const unsupportedTypes = [...new Set(findForTypes)].filter((tname) => {
+        const fullType = savedObjects.typeRegistry.getType(tname);
+        // pass unknown types through to the registry to handle
+        if (!fullType?.hidden && fullType?.hiddenFromHttpApis) {
+          return fullType.name;
+        }
+      });
+      if (unsupportedTypes.length > 0 && !allowHttpApiAccess) {
+        throwOnHttpHiddenTypes(unsupportedTypes);
+      }
+
       const result = await savedObjects.client.find({
         perPage: query.per_page,
         page: query.page,
-        type: Array.isArray(query.type) ? query.type : [query.type],
+        type: findForTypes,
         search: query.search,
         defaultSearchOperator: query.default_search_operator,
         searchFields:

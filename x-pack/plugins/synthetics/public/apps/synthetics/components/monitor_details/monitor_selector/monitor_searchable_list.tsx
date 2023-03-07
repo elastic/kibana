@@ -22,11 +22,15 @@ import { useMonitorName } from './use_monitor_name';
 import { AddMonitorLink } from '../../common/links/add_monitor';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 
+type MonitorOption = EuiSelectableOption & {
+  locationIds?: string[];
+};
+
 export const MonitorSearchableList = ({ closePopover }: { closePopover: () => void }) => {
   const history = useHistory();
   const recentlyViewed = useRecentlyViewedMonitors();
 
-  const [options, setOptions] = useState<EuiSelectableOption[]>([]);
+  const [options, setOptions] = useState<MonitorOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
 
   const selectedLocation = useSelectedLocation();
@@ -36,14 +40,19 @@ export const MonitorSearchableList = ({ closePopover }: { closePopover: () => vo
   const { values, loading } = useMonitorName({ search: searchValue });
 
   useEffect(() => {
-    const newOptions: EuiSelectableOption[] = [];
+    const newOptions: MonitorOption[] = [];
     if (recentlyViewed.length > 0 && !searchValue) {
       const otherMonitors = values.filter((value) =>
         recentlyViewed.every((recent) => recent.key !== value.key)
-      );
+      ) as MonitorOption[];
 
       if (otherMonitors.length > 0) {
-        newOptions.push({ key: 'monitors', label: OTHER_MONITORS, isGroupLabel: true });
+        newOptions.push({
+          key: 'monitors',
+          label: OTHER_MONITORS,
+          isGroupLabel: true,
+          locationIds: [],
+        });
       }
 
       setOptions([...recentlyViewed, ...newOptions, ...otherMonitors]);
@@ -52,8 +61,15 @@ export const MonitorSearchableList = ({ closePopover }: { closePopover: () => vo
     }
   }, [recentlyViewed, searchValue, values]);
 
+  const getLocationId = (option: MonitorOption) => {
+    if (option.locationIds?.includes(selectedLocation?.id ?? '')) {
+      return selectedLocation?.id;
+    }
+    return option.locationIds?.[0];
+  };
+
   return (
-    <EuiSelectable
+    <EuiSelectable<MonitorOption>
       searchable
       isLoading={loading}
       searchProps={{
@@ -67,7 +83,7 @@ export const MonitorSearchableList = ({ closePopover }: { closePopover: () => vo
         setOptions(selectedOptions);
         const option = selectedOptions.find((opt) => opt.checked === 'on');
         if (option) {
-          history.push(`/monitor/${option.key}?locationId=${selectedLocation?.id}`);
+          history.push(`/monitor/${option.key}?locationId=${getLocationId(option)}`);
         }
         closePopover();
       }}
@@ -77,7 +93,9 @@ export const MonitorSearchableList = ({ closePopover }: { closePopover: () => vo
       }}
       renderOption={(option, search) => (
         <EuiLink
-          href={`${basePath}/app/synthetics/monitor/${option.key}?locationId=${selectedLocation?.id}`}
+          href={`${basePath}/app/synthetics/monitor/${option.key}?locationId=${getLocationId(
+            option
+          )}`}
         >
           <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
         </EuiLink>

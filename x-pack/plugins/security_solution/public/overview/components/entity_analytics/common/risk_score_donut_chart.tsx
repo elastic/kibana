@@ -43,7 +43,7 @@ export const RiskScoreDonutChart = ({ severityCount }: RiskScoreDonutChartProps)
   const [donutChartData, legendItems, total] = useRiskDonutChartData(severityCount);
 
   return (
-    <EuiFlexGroup responsive={false}>
+    <EuiFlexGroup responsive={false} data-test-subj="risk-score-donut-chart">
       <StyledLegendItems grow={false}>
         {legendItems.length > 0 && <Legend legendItems={legendItems} />}
       </StyledLegendItems>

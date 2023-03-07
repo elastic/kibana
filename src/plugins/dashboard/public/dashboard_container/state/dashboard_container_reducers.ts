@@ -39,10 +39,15 @@ export const dashboardContainerReducers = {
 
     state.explicitInput.tags = action.payload.tags;
     state.explicitInput.title = action.payload.title;
-    state.explicitInput.timeRange = action.payload.timeRange;
     state.explicitInput.description = action.payload.description;
     state.explicitInput.timeRestore = action.payload.timeRestore;
-    state.explicitInput.refreshInterval = action.payload.refreshInterval;
+
+    if (action.payload.refreshInterval) {
+      state.explicitInput.refreshInterval = action.payload.refreshInterval;
+    }
+    if (action.payload.timeRange) {
+      state.explicitInput.timeRange = action.payload.timeRange;
+    }
   },
 
   setDescription: (
@@ -172,6 +177,13 @@ export const dashboardContainerReducers = {
     action: PayloadAction<DashboardContainerByValueInput['timeRange']>
   ) => {
     state.explicitInput.timeRange = action.payload;
+  },
+
+  setRefreshInterval: (
+    state: DashboardReduxState,
+    action: PayloadAction<DashboardContainerByValueInput['refreshInterval']>
+  ) => {
+    state.explicitInput.refreshInterval = action.payload;
   },
 
   setTimeslice: (

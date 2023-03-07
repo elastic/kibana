@@ -8,12 +8,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiLink,
-  EuiDescriptionListDescription,
-} from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 
 export interface NoResultsSuggestionWhenFiltersProps {
   onDisableFilters: () => void;
@@ -23,29 +18,21 @@ export function NoResultsSuggestionWhenFilters({
   onDisableFilters,
 }: NoResultsSuggestionWhenFiltersProps) {
   return (
-    <EuiDescriptionList compressed>
-      <EuiDescriptionListTitle data-test-subj="discoverNoResultsAdjustFilters">
-        <FormattedMessage
-          id="discover.noResults.adjustFilters"
-          defaultMessage="Adjust your filters"
-        />
-      </EuiDescriptionListTitle>
-      <EuiDescriptionListDescription>
-        <FormattedMessage
-          id="discover.noResults.tryRemovingOrDisablingFilters"
-          defaultMessage="Try removing or {disablingFiltersLink}."
-          values={{
-            disablingFiltersLink: (
-              <EuiLink data-test-subj="discoverNoResultsDisableFilters" onClick={onDisableFilters}>
-                <FormattedMessage
-                  id="discover.noResults.temporaryDisablingFiltersLinkText"
-                  defaultMessage="temporarily disabling filters"
-                />
-              </EuiLink>
-            ),
-          }}
-        />
-      </EuiDescriptionListDescription>
-    </EuiDescriptionList>
+    <EuiText data-test-subj="discoverNoResultsAdjustFilters">
+      <FormattedMessage
+        id="discover.noResults.suggestion.removeOrDisableFiltersText"
+        defaultMessage="Remove or {disableFiltersLink}"
+        values={{
+          disableFiltersLink: (
+            <EuiLink data-test-subj="discoverNoResultsDisableFilters" onClick={onDisableFilters}>
+              <FormattedMessage
+                id="discover.noResults.suggestion.disableFiltersLinkText"
+                defaultMessage="disable filters"
+              />
+            </EuiLink>
+          ),
+        }}
+      />
+    </EuiText>
   );
 }

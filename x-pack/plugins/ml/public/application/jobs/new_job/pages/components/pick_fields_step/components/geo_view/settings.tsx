@@ -29,7 +29,7 @@ export const GeoSettings: FC<Props> = ({ setIsValid }) => {
       </EuiFlexGroup>
       <EuiFlexGroup gutterSize="xl">
         <EuiFlexItem>
-          <BucketSpan setIsValid={setIsValid} />
+          <BucketSpan setIsValid={setIsValid} hideEstimateButton={true} />
         </EuiFlexItem>
         <EuiFlexItem />
       </EuiFlexGroup>

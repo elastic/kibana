@@ -12,7 +12,7 @@ import {
   isOfAggregateQueryType,
   getAggregateQueryMode,
 } from '@kbn/es-query';
-import { RecordRawType } from '../hooks/use_saved_search';
+import { RecordRawType } from '../services/discover_data_state_container';
 
 export function getRawRecordType(query?: Query | AggregateQuery) {
   if (query && isOfAggregateQueryType(query) && getAggregateQueryMode(query) === 'sql') {

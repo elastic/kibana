@@ -6,28 +6,26 @@
  * Side Public License, v 1.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButtonGroupOptionProps,
   EuiSelectableOption,
   EuiPopoverTitle,
+  EuiButtonEmpty,
   EuiButtonGroup,
-  toSentenceCase,
-  EuiButtonIcon,
   EuiSelectable,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiToolTip,
   EuiPopover,
   Direction,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
 
 import {
   getCompatibleSortingTypes,
-  DEFAULT_SORT,
-  sortDirections,
+  OPTIONS_LIST_DEFAULT_SORT,
   OptionsListSortBy,
 } from '../../../common/options_list/suggestions_sorting';
 import { OptionsListReduxState } from '../types';
@@ -39,9 +37,6 @@ interface OptionsListSortingPopoverProps {
 }
 type SortByItem = EuiSelectableOption & {
   data: { sortBy: OptionsListSortBy };
-};
-type SortOrderItem = EuiButtonGroupOptionProps & {
-  value: Direction;
 };
 
 export const OptionsListPopoverSortingButton = ({
@@ -57,7 +52,7 @@ export const OptionsListPopoverSortingButton = ({
 
   // Select current state from Redux using multiple selectors to avoid rerenders.
   const field = select((state) => state.componentState.field);
-  const sort = select((state) => state.explicitInput.sort ?? DEFAULT_SORT);
+  const sort = select((state) => state.explicitInput.sort ?? OPTIONS_LIST_DEFAULT_SORT);
 
   const [isSortingPopoverOpen, setIsSortingPopoverOpen] = useState(false);
 
@@ -73,18 +68,20 @@ export const OptionsListPopoverSortingButton = ({
     });
   });
 
-  const sortOrderOptions = useMemo(
-    () =>
-      sortDirections.map((key) => {
-        return {
-          id: key,
-          iconType: `sort${toSentenceCase(key)}ending`,
-          'data-test-subj': `optionsList__sortOrder_${key}`,
-          label: OptionsListStrings.editorAndPopover.sortOrder[key].getSortOrderLabel(),
-        } as SortOrderItem;
-      }),
-    []
-  );
+  const sortOrderOptions: EuiButtonGroupOptionProps[] = [
+    {
+      id: 'asc',
+      iconType: `sortAscending`,
+      'data-test-subj': `optionsList__sortOrder_asc`,
+      label: OptionsListStrings.editorAndPopover.sortOrder.asc.getSortOrderLabel(),
+    },
+    {
+      id: 'desc',
+      iconType: `sortDescending`,
+      'data-test-subj': `optionsList__sortOrder_desc`,
+      label: OptionsListStrings.editorAndPopover.sortOrder.desc.getSortOrderLabel(),
+    },
+  ];
 
   const onSortByChange = (updatedOptions: SortByItem[]) => {
     setSortByOptions(updatedOptions);
@@ -94,25 +91,32 @@ export const OptionsListPopoverSortingButton = ({
     }
   };
 
+  const SortButton = () => (
+    <EuiButtonEmpty
+      size="s"
+      color="text"
+      iconSide="right"
+      iconType="arrowDown"
+      disabled={showOnlySelected}
+      data-test-subj="optionsListControl__sortingOptionsButton"
+      onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
+      className="euiFilterGroup" // this gives the button a nice border
+      aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
+    >
+      {OptionsListStrings.popover.getSortPopoverTitle()}
+    </EuiButtonEmpty>
+  );
+
   return (
     <EuiPopover
       button={
-        <EuiToolTip
-          position="top"
-          content={
-            showOnlySelected
-              ? OptionsListStrings.popover.getSortDisabledTooltip()
-              : OptionsListStrings.popover.getSortPopoverDescription()
-          }
-        >
-          <EuiButtonIcon
-            iconType="sortable"
-            disabled={showOnlySelected}
-            data-test-subj="optionsListControl__sortingOptionsButton"
-            onClick={() => setIsSortingPopoverOpen(!isSortingPopoverOpen)}
-            aria-label={OptionsListStrings.popover.getSortPopoverDescription()}
-          />
-        </EuiToolTip>
+        showOnlySelected ? (
+          <EuiToolTip position="top" content={OptionsListStrings.popover.getSortDisabledTooltip()}>
+            <SortButton />
+          </EuiToolTip>
+        ) : (
+          <SortButton />
+        )
       }
       panelPaddingSize="none"
       isOpen={isSortingPopoverOpen}

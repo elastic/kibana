@@ -88,6 +88,7 @@ export const StatefulBody = React.memo<Props>(
         selectedEventIds,
         show,
         queryFields,
+        selectAll,
       } = timelineDefaults,
     } = useSelector((state: State) => timelineBodySelector(state, id));
 
@@ -135,10 +136,10 @@ export const StatefulBody = React.memo<Props>(
 
     // Sync to selectAll so parent components can select all events
     useEffect(() => {
-      if (!isSelectAllChecked) {
+      if (selectAll && !isSelectAllChecked) {
         onSelectAll({ isSelected: true });
       }
-    }, [isSelectAllChecked, onSelectAll]);
+    }, [isSelectAllChecked, onSelectAll, selectAll]);
 
     const enabledRowRenderers = useMemo(() => {
       if (

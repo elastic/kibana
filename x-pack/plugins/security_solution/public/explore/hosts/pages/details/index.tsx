@@ -37,7 +37,7 @@ import { hostToCriteria } from '../../../../common/components/ml/criteria/host_t
 import { hasMlUserPermissions } from '../../../../../common/machine_learning/has_ml_user_permissions';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
-import { SecuritySolutionTabNavigation } from '../../../../common/components/navigation';
+import { TabNavigationWithBreadcrumbs } from '../../../../common/components/navigation/tab_navigation_with_breadcrumbs';
 import { HostOverview } from '../../../../overview/components/host_overview';
 import { SiemSearchBar } from '../../../../common/components/search_bar';
 import { SecuritySolutionPageWrapper } from '../../../../common/components/page_wrapper';
@@ -204,7 +204,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 endDate={to}
                 skip={isInitializing}
               >
-                {({ isLoadingAnomaliesData, anomaliesData }) => (
+                {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
                   <HostOverviewManage
                     id={id}
                     isInDetailsSidePanel={false}
@@ -220,6 +220,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                     inspect={inspect}
                     hostName={detailName}
                     indexNames={selectedPatterns}
+                    jobNameById={jobNameById}
                   />
                 )}
               </AnomalyTableProvider>
@@ -248,7 +249,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                 </>
               )}
 
-              <SecuritySolutionTabNavigation
+              <TabNavigationWithBreadcrumbs
                 navTabs={navTabsHostDetails({
                   hasMlUserPermissions: hasMlUserPermissions(capabilities),
                   isRiskyHostsEnabled: isPlatinumOrTrialLicense,

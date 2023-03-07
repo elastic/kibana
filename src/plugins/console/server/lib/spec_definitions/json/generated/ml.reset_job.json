@@ -1,7 +1,8 @@
 {
   "ml.reset_job": {
     "url_params": {
-      "wait_for_completion": "__flag__"
+      "wait_for_completion": "__flag__",
+      "delete_user_annotations": "__flag__"
     },
     "methods": [
       "POST"

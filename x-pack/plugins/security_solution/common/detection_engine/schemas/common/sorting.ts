@@ -9,12 +9,6 @@ import * as t from 'io-ts';
 import type { Either } from 'fp-ts/lib/Either';
 import { capitalize } from 'lodash';
 
-export type SortField = t.TypeOf<typeof SortField>;
-export const SortField = t.string;
-
-export type SortFieldOrUndefined = t.TypeOf<typeof SortFieldOrUndefined>;
-export const SortFieldOrUndefined = t.union([SortField, t.undefined]);
-
 export type SortOrder = t.TypeOf<typeof SortOrder>;
 export const SortOrder = t.keyof({ asc: null, desc: null });
 

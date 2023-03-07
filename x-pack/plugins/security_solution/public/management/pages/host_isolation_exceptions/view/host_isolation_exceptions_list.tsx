@@ -87,6 +87,12 @@ const HOST_ISOLATION_EXCEPTIONS_LABELS: ArtifactListPageProps['labels'] = Object
       defaultMessage: '"{itemName}" has been removed from host isolation exception list.',
       values: { itemName },
     }),
+  emptyStateTitleNoEntries: i18n.translate(
+    'xpack.securitySolution.hostIsolationExceptions.emptyStateTitleNoEntries',
+    {
+      defaultMessage: 'There are no host isolation exceptions to display.',
+    }
+  ),
   emptyStateTitle: i18n.translate(
     'xpack.securitySolution.hostIsolationExceptions.emptyStateTitle',
     {

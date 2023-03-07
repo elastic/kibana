@@ -9,6 +9,7 @@ import { useMemo } from 'react';
 import { isEmpty } from 'lodash';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { useKibanaSpace } from '../../../../hooks/use_kibana_space';
 import { HeatMapLensAttributes } from '../configurations/lens_attributes/heatmap_attributes';
 import { useLensFormulaHelper } from './use_lens_formula_helper';
 import { ALL_VALUES_SELECTED } from '../configurations/constants/url_constants';
@@ -46,7 +47,8 @@ export function getLayerConfigs(
   reportType: ReportViewType,
   theme: EuiTheme,
   dataViews: DataViewState,
-  reportConfigMap: ReportConfigMap
+  reportConfigMap: ReportConfigMap,
+  spaceId?: string
 ) {
   const layerConfigs: LayerConfig[] = [];
 
@@ -64,6 +66,7 @@ export function getLayerConfigs(
         dataView,
         dataType: series.dataType,
         reportConfigMap,
+        spaceId,
       });
 
       const filters: UrlFilter[] = (series.filters ?? []).concat(
@@ -71,7 +74,11 @@ export function getLayerConfigs(
         getFiltersFromDefs(series.textReportDefinitions)
       );
 
-      const color = `euiColorVis${seriesIndex}`;
+      const color = (theme.eui as unknown as Record<string, string>)?.[`euiColorVis${seriesIndex}`];
+      let seriesColor = series.color!;
+      if (reportType !== 'single-metric') {
+        seriesColor = series.color ?? color;
+      }
 
       layerConfigs.push({
         filters,
@@ -79,12 +86,12 @@ export function getLayerConfigs(
         seriesConfig,
         time: series.time,
         name: series.name,
+        color: seriesColor,
         breakdown: series.breakdown === LABEL_FIELDS_BREAKDOWN ? undefined : series.breakdown,
         seriesType: series.seriesType,
         operationType: series.operationType,
         reportDefinitions: series.reportDefinitions ?? {},
         selectedMetricField: series.selectedMetricField,
-        color: series.color ?? (theme.eui as unknown as Record<string, string>)[color],
         showPercentileAnnotations: series.showPercentileAnnotations,
       });
     }
@@ -97,6 +104,8 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
   const { storage, allSeries, lastRefresh, reportType } = useSeriesStorage();
 
   const { dataViews } = useAppDataViewContext();
+
+  const spaceId = useKibanaSpace();
 
   const { reportConfigMap } = useExploratoryView();
 
@@ -117,7 +126,8 @@ export const useLensAttributes = (): TypedLensByValueInput['attributes'] | null 
       reportTypeT,
       theme,
       dataViews,
-      reportConfigMap
+      reportConfigMap,
+      spaceId.space?.id
     );
 
     if (layerConfigs.length < 1) {

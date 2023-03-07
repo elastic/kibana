@@ -9,11 +9,8 @@
 import Path from 'path';
 
 import Resolve from 'resolve';
-import { readPackageManifest } from '@kbn/bazel-packages';
-import { REPO_ROOT } from '@kbn/utils';
-import normalizePath from 'normalize-path';
-import { discoverPackageManifestPaths } from '@kbn/bazel-packages';
-import { readPackageMap, PackageMap } from '@kbn/synthetic-package-map';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { getPackages, type Package } from '@kbn/repo-packages';
 
 import { safeStat, readFileSync } from './helpers/fs';
 import { ResolveResult } from './resolve_result';
@@ -23,15 +20,8 @@ import { memoize } from './helpers/memoize';
 const NODE_MODULE_SEG = Path.sep + 'node_modules' + Path.sep;
 
 export class ImportResolver {
-  static create(repoRoot: string) {
-    const pkgMap = new Map();
-    for (const manifestPath of discoverPackageManifestPaths(REPO_ROOT)) {
-      const relativeBazelPackageDir = Path.relative(REPO_ROOT, Path.dirname(manifestPath));
-      const pkg = readPackageManifest(manifestPath);
-      pkgMap.set(pkg.id, normalizePath(relativeBazelPackageDir));
-    }
-
-    return new ImportResolver(repoRoot, pkgMap, readPackageMap());
+  static create(repoRoot: string, packages: Package[] = getPackages(repoRoot)) {
+    return new ImportResolver(repoRoot, new Map(packages.map((p) => [p.id, p])));
   }
 
   private safeStat = memoize(safeStat);
@@ -61,52 +51,63 @@ export class ImportResolver {
      */
     private readonly cwd: string,
     /**
-     * Map of actual package names to normalized root-relative directories
+     * Map of package ids to normalized root-relative directories
      * for each package
      */
-    private readonly pkgMap: PackageMap,
-    /**
-     * Map of synthetic package names to normalized root-relative directories
-     * for each simulated package
-     */
-    private readonly synthPkgMap: PackageMap
-  ) {}
+    private readonly pkgsById: Map<string, Package>
+  ) {
+    this._dirToPkg = new Map(
+      Array.from(this.pkgsById.values()).map((p) => [p.normalizedRepoRelativeDir, p])
+    );
+  }
+
+  /**
+   * map of repoRels and the packages they point to or are contained within.
+   * This map is initially populated with the position of the packages, and
+   * from then on serves as a cache for `pkgForDir(dir)`
+   */
+  private readonly _dirToPkg: Map<string, Package | null>;
+  private pkgForDir(dir: string): Package | null {
+    const cached = this._dirToPkg.get(dir);
+    if (cached !== undefined) {
+      return cached;
+    }
+
+    const parent = Path.dirname(dir);
+    if (parent === '.') {
+      this._dirToPkg.set(dir, null);
+      return null;
+    }
+
+    const pkgId = this.pkgForDir(parent);
+    this._dirToPkg.set(dir, pkgId);
+    return pkgId;
+  }
 
   getPackageIdForPath(path: string) {
-    const relative = normalizePath(Path.relative(this.cwd, path));
+    const relative = Path.relative(this.cwd, path);
     if (relative.startsWith('..')) {
-      throw new Error(`path is outside of cwd [${this.cwd}]`);
+      return null;
     }
 
-    for (const [synthPkgId, dir] of this.synthPkgMap) {
-      if (relative === dir || relative.startsWith(dir + '/')) {
-        return synthPkgId;
-      }
-    }
+    return this.pkgForDir(Path.dirname(relative))?.id ?? null;
+  }
 
-    for (const [pkgId, dir] of this.pkgMap) {
-      if (relative === dir || relative.startsWith(dir + '/')) {
-        return pkgId;
-      }
-    }
-
-    return null;
+  getPackageManifestForPath(path: string) {
+    const pkgId = this.getPackageIdForPath(path);
+    return pkgId ? this.getPkgManifest(pkgId) : undefined;
   }
 
   getAbsolutePackageDir(pkgId: string) {
-    const dir = this.synthPkgMap.get(pkgId) ?? this.pkgMap.get(pkgId);
-    if (!dir) {
-      return null;
-    }
-    return Path.resolve(this.cwd, dir);
+    return this.pkgsById.get(pkgId)?.directory ?? null;
   }
 
-  isBazelPackage(pkgId: string) {
-    return this.pkgMap.has(pkgId);
+  isRepoPkg(pkgId: string) {
+    return this.pkgsById.has(pkgId);
   }
 
-  isSyntheticPackage(pkgId: string) {
-    return this.synthPkgMap.has(pkgId);
+  getPkgManifest(pkgId: string) {
+    return this.pkgsById.get(pkgId)?.manifest;
   }
 
   private shouldIgnore(req: string): boolean {
@@ -122,13 +123,6 @@ export class ImportResolver {
 
     // ignore amd require done by ace syntax plugin
     if (req === 'ace/lib/dom') {
-      return true;
-    }
-
-    // ignore requests to bazel target dirs, these files are only available in the build output
-    // and will never resolve in dev. We will validate that people don't import these files from
-    // outside the package in another rule
-    if (req.includes('/target_workers/') || req.includes('/target_node/')) {
       return true;
     }
 
@@ -177,6 +171,15 @@ export class ImportResolver {
       if (!Path.isAbsolute(path)) {
         return {
           type: 'built-in',
+        };
+      }
+
+      const pkgId = this.getPackageIdForPath(path);
+      if (pkgId) {
+        return {
+          type: 'file',
+          absolute: path,
+          pkgId,
         };
       }
 
@@ -252,18 +255,15 @@ export class ImportResolver {
     if (req[0] !== '.') {
       const parts = req.split('/');
       const pkgId = parts[0].startsWith('@') ? `${parts[0]}/${parts[1]}` : `${parts[0]}`;
-      if (this.synthPkgMap.has(pkgId)) {
-        const pkgDir = this.getAbsolutePackageDir(pkgId);
-        if (pkgDir) {
-          return this.resolve(
-            getRelativeImportReq({
-              absolute: parts.length > 2 ? Path.resolve(pkgDir, ...parts.slice(2)) : pkgDir,
-              dirname,
-              type: 'esm',
-            }),
-            dirname
-          );
-        }
+      const pkgDir = this.getAbsolutePackageDir(pkgId);
+      if (pkgDir) {
+        return this.resolve(
+          `./${Path.relative(
+            dirname,
+            parts.length > 2 ? Path.resolve(pkgDir, ...parts.slice(2)) : pkgDir
+          )}`,
+          dirname
+        );
       }
     }
 

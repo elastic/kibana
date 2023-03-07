@@ -10,32 +10,27 @@ import { merge } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ChangePoint } from '@kbn/ml-agg-utils';
-
 import type { SavedSearch } from '@kbn/discover-plugin/public';
+import type { Dictionary } from '@kbn/ml-url-state';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 
-import { useTimeBuckets } from './use_time_buckets';
-
-import { useAiopsAppContext } from './use_aiops_app_context';
-import { aiopsRefresh$ } from '../application/services/timefilter_refresh_service';
 import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import type { AiOpsIndexBasedAppState } from '../components/explain_log_rate_spikes/explain_log_rate_spikes_app_state';
-import {
-  getEsQueryFromSavedSearch,
-  SavedSearchSavedObject,
-} from '../application/utils/search_utils';
+import { getEsQueryFromSavedSearch } from '../application/utils/search_utils';
+import type { GroupTableItem } from '../components/spike_analysis_table/types';
 
-import { useTimefilter } from './use_time_filter';
+import { useTimeBuckets } from './use_time_buckets';
+import { useAiopsAppContext } from './use_aiops_app_context';
+
 import { useDocumentCountStats } from './use_document_count_stats';
-import type { Dictionary } from './use_url_state';
-import type { GroupTableItem } from '../components/spike_analysis_table/spike_analysis_table_groups';
 
 const DEFAULT_BAR_TARGET = 75;
 
 export const useData = (
   {
-    currentDataView,
-    currentSavedSearch,
-  }: { currentDataView: DataView; currentSavedSearch: SavedSearch | SavedSearchSavedObject | null },
+    selectedDataView,
+    selectedSavedSearch,
+  }: { selectedDataView: DataView; selectedSavedSearch: SavedSearch | null },
   aiopsListState: AiOpsIndexBasedAppState,
   onUpdate: (params: Dictionary<unknown>) => void,
   selectedChangePoint?: ChangePoint,
@@ -57,9 +52,9 @@ export const useData = (
   /** Prepare required params to pass to search strategy **/
   const { searchQueryLanguage, searchString, searchQuery } = useMemo(() => {
     const searchData = getEsQueryFromSavedSearch({
-      dataView: currentDataView,
+      dataView: selectedDataView,
       uiSettings,
-      savedSearch: currentSavedSearch,
+      savedSearch: selectedSavedSearch,
       filterManager,
     });
 
@@ -84,8 +79,8 @@ export const useData = (
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
-    currentSavedSearch?.id,
-    currentDataView.id,
+    selectedSavedSearch?.id,
+    selectedDataView.id,
     aiopsListState.searchString,
     aiopsListState.searchQueryLanguage,
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -98,7 +93,7 @@ export const useData = (
   const _timeBuckets = useTimeBuckets();
 
   const timefilter = useTimefilter({
-    timeRangeSelector: currentDataView?.timeFieldName !== undefined,
+    timeRangeSelector: selectedDataView?.timeFieldName !== undefined,
     autoRefreshSelector: true,
   });
 
@@ -140,20 +135,20 @@ export const useData = (
         earliest: timefilterActiveBounds.min?.valueOf(),
         latest: timefilterActiveBounds.max?.valueOf(),
         intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
-        index: currentDataView.getIndexPattern(),
+        index: selectedDataView.getIndexPattern(),
         searchQuery,
-        timeFieldName: currentDataView.timeFieldName,
-        runtimeFieldMap: currentDataView.getRuntimeMappings(),
+        timeFieldName: selectedDataView.timeFieldName,
+        runtimeFieldMap: selectedDataView.getRuntimeMappings(),
       });
       setLastRefresh(Date.now());
     }
   }
 
   useEffect(() => {
-    const timeUpdateSubscription = merge(
+    const timefilterUpdateSubscription = merge(
       timefilter.getAutoRefreshFetch$(),
       timefilter.getTimeUpdate$(),
-      aiopsRefresh$
+      mlTimefilterRefresh$
     ).subscribe(() => {
       if (onUpdate) {
         onUpdate({
@@ -163,22 +158,20 @@ export const useData = (
       }
       updateFieldStatsRequest();
     });
-    return () => {
-      timeUpdateSubscription.unsubscribe();
-    };
-  });
 
-  // This hook listens just for an initial update of the timefilter to be switched on.
-  useEffect(() => {
-    const timeUpdateSubscription = timefilter.getEnabledUpdated$().subscribe(() => {
+    // This listens just for an initial update of the timefilter to be switched on.
+    const timefilterEnabledSubscription = timefilter.getEnabledUpdated$().subscribe(() => {
       if (fieldStatsRequest === undefined) {
         updateFieldStatsRequest();
       }
     });
+
     return () => {
-      timeUpdateSubscription.unsubscribe();
+      timefilterUpdateSubscription.unsubscribe();
+      timefilterEnabledSubscription.unsubscribe();
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Ensure request is updated when search changes
   useEffect(() => {

@@ -17,7 +17,7 @@ import React, {
 
 import type { ChangePoint } from '@kbn/ml-agg-utils';
 
-import type { GroupTableItem } from './spike_analysis_table_groups';
+import type { GroupTableItem } from './types';
 
 type ChangePointOrNull = ChangePoint | null;
 type GroupOrNull = GroupTableItem | null;

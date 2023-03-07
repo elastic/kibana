@@ -32,6 +32,12 @@ export interface DashboardPublicState {
   lastSavedId?: string;
 }
 
+export interface DashboardRenderPerformanceStats {
+  lastTimeToData: number;
+  panelsRenderDoneTime: number;
+  panelsRenderStartTime: number;
+}
+
 export interface DashboardContainerOutput extends ContainerOutput {
   usedDataViewIds?: string[];
 }

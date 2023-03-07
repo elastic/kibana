@@ -86,9 +86,6 @@ export const CrawlerLogic = kea<MakeLogicType<CrawlerValues, CrawlerActions>>({
     values: [GetCrawlerApiLogic, ['status', 'data'], CachedFetchIndexApiLogic, ['indexData']],
   },
   listeners: ({ actions, values }) => ({
-    apiError: (error) => {
-      flashAPIErrors(error);
-    },
     fetchCrawlerData: () => {
       const { indexName } = IndexNameLogic.values;
 

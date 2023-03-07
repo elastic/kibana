@@ -23,12 +23,14 @@ interface CheckAccess {
   log: Logger;
 }
 
-const ALLOW_ALL_PLUGINS = {
+const ALLOW_ALL_PLUGINS: ProductAccess = {
   hasAppSearchAccess: true,
+  hasSearchEnginesAccess: false, // still false unless Feature Flag explicitly enabled on backend
   hasWorkplaceSearchAccess: true,
 };
-const DENY_ALL_PLUGINS = {
+const DENY_ALL_PLUGINS: ProductAccess = {
   hasAppSearchAccess: false,
+  hasSearchEnginesAccess: false,
   hasWorkplaceSearchAccess: false,
 };
 

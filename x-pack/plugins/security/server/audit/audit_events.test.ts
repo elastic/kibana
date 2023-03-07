@@ -7,19 +7,21 @@
 
 import { URL } from 'url';
 
-import { AuditAction } from '@kbn/core-saved-objects-server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
 import { AuthenticationResult } from '../authentication';
+import { AuditAction } from '../saved_objects/saved_objects_security_extension';
 import {
   httpRequestEvent,
   savedObjectEvent,
+  sessionCleanupConcurrentLimitEvent,
   sessionCleanupEvent,
   SpaceAuditAction,
   spaceAuditEvent,
   userLoginEvent,
   userLogoutEvent,
+  userSessionConcurrentLimitLogoutEvent,
 } from './audit_events';
 
 describe('#savedObjectEvent', () => {
@@ -360,6 +362,63 @@ describe('#userLogoutEvent', () => {
   });
 });
 
+describe('#userSessionConcurrentLimitLogoutEvent', () => {
+  test('creates event with `unknown` outcome', () => {
+    expect(
+      userSessionConcurrentLimitLogoutEvent({
+        username: 'elastic',
+        provider: { name: 'basic1', type: 'basic' },
+        userProfileId: 'uid',
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "user_logout",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+        },
+        "message": "User [elastic] is logging out due to exceeded concurrent sessions limit for basic provider [name=basic1]",
+        "user": Object {
+          "id": "uid",
+          "name": "elastic",
+        },
+      }
+    `);
+
+    expect(
+      userSessionConcurrentLimitLogoutEvent({
+        username: 'elastic',
+        provider: { name: 'basic1', type: 'basic' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "user_logout",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+        },
+        "message": "User [elastic] is logging out due to exceeded concurrent sessions limit for basic provider [name=basic1]",
+        "user": Object {
+          "id": undefined,
+          "name": "elastic",
+        },
+      }
+    `);
+  });
+});
+
 describe('#sessionCleanupEvent', () => {
   test('creates event with `unknown` outcome', () => {
     expect(
@@ -383,6 +442,37 @@ describe('#sessionCleanupEvent', () => {
           "session_id": "sid",
         },
         "message": "Removing invalid or expired session for user [hash=abcdef]",
+        "user": Object {
+          "hash": "abcdef",
+        },
+      }
+    `);
+  });
+});
+
+describe('#sessionCleanupConcurrentLimitEvent', () => {
+  test('creates event with `unknown` outcome', () => {
+    expect(
+      sessionCleanupConcurrentLimitEvent({
+        usernameHash: 'abcdef',
+        sessionId: 'sid',
+        provider: { name: 'basic1', type: 'basic' },
+      })
+    ).toMatchInlineSnapshot(`
+      Object {
+        "event": Object {
+          "action": "session_cleanup",
+          "category": Array [
+            "authentication",
+          ],
+          "outcome": "unknown",
+        },
+        "kibana": Object {
+          "authentication_provider": "basic1",
+          "authentication_type": "basic",
+          "session_id": "sid",
+        },
+        "message": "Removing session for user [hash=abcdef] due to exceeded concurrent sessions limit",
         "user": Object {
           "hash": "abcdef",
         },

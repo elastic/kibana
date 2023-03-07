@@ -130,6 +130,7 @@ export interface TimelineModel {
   /** If selectAll checkbox in header is checked **/
   isSelectAllChecked: boolean;
   isLoading: boolean;
+  selectAll: boolean;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -171,6 +172,7 @@ export type SubsetTimelineModel = Readonly<
     | 'pinnedEventIds'
     | 'pinnedEventsSaveObject'
     | 'dateRange'
+    | 'selectAll'
     | 'selectedEventIds'
     | 'sessionViewConfig'
     | 'show'

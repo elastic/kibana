@@ -23,6 +23,7 @@ import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
 import { DocTableContext } from '../../components/doc_table/doc_table_context';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { DataTableRecord } from '../../types';
+import { DiscoverGridFlyout } from '../../components/discover_grid/discover_grid_flyout';
 
 export interface ContextAppContentProps {
   columns: string[];
@@ -74,6 +75,7 @@ export function ContextAppContent({
   addFilter,
 }: ContextAppContentProps) {
   const { uiSettings: config } = useDiscoverServices();
+  const services = useDiscoverServices();
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>();
   const isAnchorLoading =
@@ -160,6 +162,8 @@ export function ContextAppContent({
             onAddColumn={onAddColumn}
             onRemoveColumn={onRemoveColumn}
             onSetColumns={onSetColumns}
+            DocumentView={DiscoverGridFlyout}
+            services={services}
           />
         </div>
       )}

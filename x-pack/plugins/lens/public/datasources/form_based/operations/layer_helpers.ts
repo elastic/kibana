@@ -22,11 +22,12 @@ import type {
 import {
   operationDefinitionMap,
   operationDefinitions,
-  OperationType,
-  RequiredReference,
-  OperationDefinition,
-  GenericOperationDefinition,
-  TermsIndexPatternColumn,
+  type OperationType,
+  type RequiredReference,
+  type OperationDefinition,
+  type GenericOperationDefinition,
+  type TermsIndexPatternColumn,
+  type FieldBasedOperationErrorMessage,
 } from './definitions';
 import type { DataViewDragDropOperation, FormBasedLayer, FormBasedPrivateState } from '../types';
 import { getSortScoreByPriorityForField } from './operations';
@@ -554,11 +555,7 @@ function replaceFormulaColumn(
 
   // when coming to Formula keep the custom label
   const regeneratedColumn = newLayer.columns[columnId];
-  if (
-    !shouldResetLabel &&
-    regeneratedColumn.operationType !== previousColumn.operationType &&
-    previousColumn.customLabel
-  ) {
+  if (!shouldResetLabel && previousColumn.customLabel) {
     regeneratedColumn.customLabel = true;
     regeneratedColumn.label = previousColumn.label;
   }
@@ -1536,6 +1533,10 @@ export function updateLayerIndexPattern(
   };
 }
 
+type LayerErrorMessage = FieldBasedOperationErrorMessage & {
+  fixAction: DatasourceFixAction<FormBasedPrivateState>;
+};
+
 /**
  * Collects all errors from the columns in the layer, for display in the workspace. This includes:
  *
@@ -1552,15 +1553,7 @@ export function getErrorMessages(
   layerId: string,
   core: CoreStart,
   data: DataPublicPluginStart
-):
-  | Array<
-      | string
-      | {
-          message: string;
-          fixAction?: DatasourceFixAction<FormBasedPrivateState>;
-        }
-    >
-  | undefined {
+): LayerErrorMessage[] | undefined {
   const columns = Object.entries(layer.columns);
   const visibleManagedReferences = columns.filter(
     ([columnId, column]) =>
@@ -1608,13 +1601,7 @@ export function getErrorMessages(
       };
     })
     // remove the undefined values
-    .filter((v) => v != null) as Array<
-    | string
-    | {
-        message: string;
-        fixAction?: DatasourceFixAction<FormBasedPrivateState>;
-      }
-  >;
+    .filter((v) => v != null) as LayerErrorMessage[];
 
   return errors.length ? errors : undefined;
 }

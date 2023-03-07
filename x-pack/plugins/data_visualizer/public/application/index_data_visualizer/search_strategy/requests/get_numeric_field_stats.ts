@@ -10,15 +10,15 @@ import { find, get } from 'lodash';
 import { catchError, map } from 'rxjs/operators';
 import { Observable, of } from 'rxjs';
 import { AggregationsTermsAggregation } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type {
   IKibanaSearchRequest,
   IKibanaSearchResponse,
   ISearchOptions,
 } from '@kbn/data-plugin/common';
 import type { ISearchStart } from '@kbn/data-plugin/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import { isDefined } from '@kbn/ml-is-defined';
 import { processTopValues } from './utils';
-import { isDefined } from '../../../common/util/is_defined';
 import { buildAggregationWithSamplingOption } from './build_random_sampler_agg';
 import { MAX_PERCENT, PERCENTILE_SPACING, SAMPLER_TOP_TERMS_THRESHOLD } from './constants';
 import type {

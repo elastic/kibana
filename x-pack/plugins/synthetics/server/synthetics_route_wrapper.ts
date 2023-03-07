@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
-import { createUptimeESClient, isTestUser } from './legacy_uptime/lib/lib';
+import { isTestUser, UptimeEsClient } from './legacy_uptime/lib/lib';
 import { syntheticsServiceApiKey } from './legacy_uptime/lib/saved_objects/service_api_key';
 import { SyntheticsRouteWrapper, SyntheticsStreamingRouteHandler } from './legacy_uptime/routes';
 
@@ -29,12 +29,13 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
     // specifically needed for the synthetics service api key generation
     server.authSavedObjectsClient = savedObjectsClient;
 
-    const uptimeEsClient = createUptimeESClient({
-      request,
+    const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-      esClient: esClient.asCurrentUser,
-      uiSettings: coreContext.uiSettings,
-    });
+      esClient.asCurrentUser,
+      false,
+      coreContext.uiSettings,
+      request
+    );
 
     server.uptimeEsClient = uptimeEsClient;
 
@@ -61,13 +62,13 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
     // specifically needed for the synthetics service api key generation
     server.authSavedObjectsClient = savedObjectsClient;
 
-    const uptimeEsClient = createUptimeESClient({
-      isDev: Boolean(server.isDev) && !isTestUser(server),
-      uiSettings,
-      request,
+    const uptimeEsClient = new UptimeEsClient(
       savedObjectsClient,
-      esClient: esClient.asCurrentUser,
-    });
+      esClient.asCurrentUser,
+      Boolean(server.isDev) && !isTestUser(server),
+      uiSettings,
+      request
+    );
 
     server.uptimeEsClient = uptimeEsClient;
 

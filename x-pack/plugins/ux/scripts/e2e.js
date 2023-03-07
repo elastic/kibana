@@ -6,11 +6,9 @@
  */
 
 /* eslint-disable no-console */
-/* eslint-disable @kbn/imports/uniform_imports */
-
 const {
   executeSyntheticsRunner,
-} = require('../../synthetics/scripts/base_e2e');
+} = require('@kbn/synthetics-plugin/scripts/base_e2e');
 const path = require('path');
 
 const e2eDir = path.join(__dirname, '../e2e');

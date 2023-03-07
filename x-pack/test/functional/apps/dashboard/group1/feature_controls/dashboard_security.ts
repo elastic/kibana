@@ -130,7 +130,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`does not allow a visualization to be edited`, async () => {
         await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
-        await panelActions.openContextMenu();
         await panelActions.expectMissingEditPanelAction();
       });
 
@@ -141,7 +140,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`does not allow a map to be edited`, async () => {
         await PageObjects.dashboard.gotoDashboardEditMode('dashboard with map');
-        await panelActions.openContextMenu();
         await panelActions.expectMissingEditPanelAction();
       });
     });
@@ -187,14 +185,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it(`allows a visualization to be edited`, async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
-        await panelActions.openContextMenu();
         await panelActions.expectExistsEditPanelAction();
       });
 
       it(`allows a map to be edited`, async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardEditMode('dashboard with map');
-        await panelActions.openContextMenu();
         await panelActions.expectExistsEditPanelAction();
       });
 
@@ -458,8 +454,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/116881
-    describe.skip('no dashboard privileges', () => {
+    describe('no dashboard privileges', () => {
       before(async () => {
         await security.role.create('no_dashboard_privileges_role', {
           elasticsearch: {

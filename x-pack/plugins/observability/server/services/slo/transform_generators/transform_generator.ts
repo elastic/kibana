@@ -6,16 +6,10 @@
  */
 
 import { MappingRuntimeFieldType } from '@elastic/elasticsearch/lib/api/types';
-import {
-  AggregationsCalendarInterval,
-  TransformPutTransformRequest,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+
 import { TransformSettings } from '../../../assets/transform_templates/slo_transform_template';
-import {
-  calendarAlignedTimeWindowSchema,
-  rollingTimeWindowSchema,
-  timeslicesBudgetingMethodSchema,
-} from '../../../types/schema';
 import { SLO } from '../../../domain/models';
 
 export abstract class TransformGenerator {
@@ -35,64 +29,19 @@ export abstract class TransformGenerator {
           source: `emit(${slo.revision})`,
         },
       },
-      'slo._internal.name': {
-        type: 'keyword' as MappingRuntimeFieldType,
-        script: {
-          source: `emit('${slo.name}')`,
-        },
-      },
-      'slo._internal.budgeting_method': {
-        type: 'keyword' as MappingRuntimeFieldType,
-        script: {
-          source: `emit('${slo.budgeting_method}')`,
-        },
-      },
-      'slo._internal.objective.target': {
-        type: 'double' as MappingRuntimeFieldType,
-        script: {
-          source: `emit(${slo.objective.target})`,
-        },
-      },
-      ...(timeslicesBudgetingMethodSchema.is(slo.budgeting_method) && {
-        'slo._internal.objective.timeslice_target': {
-          type: 'double' as MappingRuntimeFieldType,
-          script: {
-            source: `emit(${slo.objective.timeslice_target})`,
-          },
-        },
-        'slo._internal.objective.timeslice_window': {
-          type: 'keyword' as MappingRuntimeFieldType,
-          script: {
-            source: `emit('${slo.objective.timeslice_window?.format()}')`,
-          },
-        },
-      }),
-      'slo._internal.time_window.duration': {
-        type: 'keyword' as MappingRuntimeFieldType,
-        script: {
-          source: `emit('${slo.time_window.duration.format()}')`,
-        },
-      },
-      ...(calendarAlignedTimeWindowSchema.is(slo.time_window) && {
-        'slo._internal.time_window.is_rolling': {
-          type: 'boolean' as MappingRuntimeFieldType,
-          script: {
-            source: `emit(false)`,
-          },
-        },
-      }),
-      ...(rollingTimeWindowSchema.is(slo.time_window) && {
-        'slo._internal.time_window.is_rolling': {
-          type: 'boolean' as MappingRuntimeFieldType,
-          script: {
-            source: `emit(true)`,
-          },
-        },
-      }),
     };
   }
 
+  public buildDescription(slo: SLO): string {
+    return `Rolled-up SLI data for SLO: ${slo.name}`;
+  }
+
   public buildCommonGroupBy(slo: SLO) {
+    let fixedInterval = '1m';
+    if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
+      fixedInterval = slo.objective.timesliceWindow!.format();
+    }
+
     return {
       'slo.id': {
         terms: {
@@ -104,48 +53,11 @@ export abstract class TransformGenerator {
           field: 'slo.revision',
         },
       },
-      'slo._internal.name': {
-        terms: {
-          field: 'slo._internal.name',
-        },
-      },
-      'slo._internal.budgeting_method': {
-        terms: {
-          field: 'slo._internal.budgeting_method',
-        },
-      },
-      'slo._internal.objective.target': {
-        terms: {
-          field: 'slo._internal.objective.target',
-        },
-      },
-      'slo._internal.time_window.duration': {
-        terms: {
-          field: 'slo._internal.time_window.duration',
-        },
-      },
-      'slo._internal.time_window.is_rolling': {
-        terms: {
-          field: 'slo._internal.time_window.is_rolling',
-        },
-      },
-      ...(timeslicesBudgetingMethodSchema.is(slo.budgeting_method) && {
-        'slo._internal.objective.timeslice_target': {
-          terms: {
-            field: 'slo._internal.objective.timeslice_target',
-          },
-        },
-        'slo._internal.objective.timeslice_window': {
-          terms: {
-            field: 'slo._internal.objective.timeslice_window',
-          },
-        },
-      }),
       // Field used in the destination index, using @timestamp as per mapping definition
       '@timestamp': {
         date_histogram: {
-          field: slo.settings.timestamp_field,
-          calendar_interval: '1m' as AggregationsCalendarInterval,
+          field: slo.settings.timestampField,
+          fixed_interval: fixedInterval,
         },
       },
     };
@@ -154,8 +66,8 @@ export abstract class TransformGenerator {
   public buildSettings(slo: SLO): TransformSettings {
     return {
       frequency: slo.settings.frequency.format(),
-      sync_field: slo.settings.timestamp_field,
-      sync_delay: slo.settings.sync_delay.format(),
+      sync_field: slo.settings.timestampField,
+      sync_delay: slo.settings.syncDelay.format(),
     };
   }
 }

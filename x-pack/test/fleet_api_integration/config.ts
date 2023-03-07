@@ -69,9 +69,11 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
         `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DIR}`,
         '--xpack.cloudSecurityPosture.enabled=true',
+        `--xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout=10`,
         `--xpack.fleet.packageVerification.gpgKeyPath=${getFullPath(
           './apis/fixtures/package_verification/signatures/fleet_test_key_public.asc'
         )}`,
+        `--xpack.securitySolution.enableExperimental=${JSON.stringify(['endpointRbacEnabled'])}`,
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xPackAPITestsConfig.get('kbnTestServer.serverArgs')),
 

@@ -22,7 +22,7 @@ import type {
   RuleStep,
   DefineStepRule,
 } from '../../../pages/detection_engine/rules/types';
-import { DataSourceType } from '../../../pages/detection_engine/rules/types';
+import { DataSourceType, GroupByOptions } from '../../../pages/detection_engine/rules/types';
 import { fillEmptySeverityMappings } from '../../../pages/detection_engine/rules/helpers';
 import { TestProviders } from '../../../../common/mock';
 
@@ -57,6 +57,11 @@ export const stepDefineStepMLRule: DefineStepRule = {
   eqlOptions: {},
   dataSourceType: DataSourceType.IndexPatterns,
   groupByFields: ['host.name'],
+  groupByRadioSelection: GroupByOptions.PerRuleExecution,
+  groupByDuration: {
+    unit: 'm',
+    value: 5,
+  },
   newTermsFields: ['host.ip'],
   historyWindowSize: '7d',
   shouldLoadQueryDynamically: false,

@@ -11,9 +11,9 @@ import { LegacyRequest } from '../../types';
 import { standaloneClusterFilter } from '.';
 import { Globals } from '../../static_globals';
 import {
-  getLegacyIndexPattern,
   getIndexPatterns,
   getLogstashDataset,
+  getBeatDataset,
 } from '../cluster/get_index_patterns';
 
 export async function hasStandaloneClusters(req: LegacyRequest, ccs: string) {
@@ -22,8 +22,7 @@ export async function hasStandaloneClusters(req: LegacyRequest, ccs: string) {
     moduleType: 'logstash',
     ccs,
   });
-  // use legacy because no integration exists for beats
-  const beatsIndexPatterns = getLegacyIndexPattern({
+  const beatsIndexPatterns = getIndexPatterns({
     moduleType: 'beats',
     config: Globals.app.config,
     ccs,
@@ -51,7 +50,12 @@ export async function hasStandaloneClusters(req: LegacyRequest, ccs: string) {
           },
           {
             terms: {
-              'data_stream.dataset': [getLogstashDataset('node'), getLogstashDataset('node_stats')],
+              'data_stream.dataset': [
+                getLogstashDataset('node'),
+                getLogstashDataset('node_stats'),
+                getBeatDataset('state'),
+                getBeatDataset('stats'),
+              ],
             },
           },
         ],

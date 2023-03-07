@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { withSpan } from '@kbn/apm-utils';
 import { AlertingAuthorizationEntity } from '../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
@@ -16,9 +17,13 @@ export const getAuthorizationFilter = async (
   { action }: { action: BulkAction }
 ) => {
   try {
-    const authorizationTuple = await context.authorization.getFindAuthorizationFilter(
-      AlertingAuthorizationEntity.Rule,
-      alertingAuthorizationFilterOpts
+    const authorizationTuple = await withSpan(
+      { name: 'authorization.getFindAuthorizationFilter', type: 'rules' },
+      () =>
+        context.authorization.getFindAuthorizationFilter(
+          AlertingAuthorizationEntity.Rule,
+          alertingAuthorizationFilterOpts
+        )
     );
     return authorizationTuple.filter;
   } catch (error) {

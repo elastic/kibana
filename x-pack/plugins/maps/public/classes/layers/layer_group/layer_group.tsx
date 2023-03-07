@@ -12,7 +12,7 @@ import type { Query } from '@kbn/es-query';
 import { asyncMap } from '@kbn/std';
 import React, { ReactElement } from 'react';
 import { EuiIcon } from '@elastic/eui';
-import uuid from 'uuid/v4';
+import { v4 as uuidv4 } from 'uuid';
 import { LAYER_TYPE, MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 import { DataRequest } from '../../util/data_request';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
@@ -48,7 +48,7 @@ export class LayerGroup implements ILayer {
     return {
       ...options,
       type: LAYER_TYPE.LAYER_GROUP,
-      id: typeof options.id === 'string' && options.id.length ? options.id : uuid(),
+      id: typeof options.id === 'string' && options.id.length ? options.id : uuidv4(),
       label:
         typeof options.label === 'string' && options.label.length
           ? options.label
@@ -86,7 +86,7 @@ export class LayerGroup implements ILayer {
 
   async cloneDescriptor(): Promise<LayerDescriptor[]> {
     const clonedDescriptor = copyPersistentState(this._descriptor);
-    clonedDescriptor.id = uuid();
+    clonedDescriptor.id = uuidv4();
     const displayName = await this.getDisplayName();
     clonedDescriptor.label = `Clone of ${displayName}`;
 

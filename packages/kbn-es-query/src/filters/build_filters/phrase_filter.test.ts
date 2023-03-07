@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import {
   buildInlineScriptForPhraseFilter,
   buildPhraseFilter,
@@ -134,7 +134,7 @@ describe('buildInlineScriptForPhraseFilter', () => {
     };
 
     const expected =
-      `boolean compare(Supplier s, def v) {return s.get() == v;}` +
+      `boolean compare(Supplier s, def v) {if(s.get() instanceof List){List list = s.get(); for(def k : list){if(k==v){return true;}}return false;}else{return s.get() == v;}}` +
       `compare(() -> { return foo; }, params.value);`;
 
     expect(buildInlineScriptForPhraseFilter(field)).toBe(expected);

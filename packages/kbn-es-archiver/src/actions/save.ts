@@ -11,7 +11,8 @@ import { createWriteStream, mkdirSync } from 'fs';
 import { Readable, Writable } from 'stream';
 import type { Client } from '@elastic/elasticsearch';
 import { ToolingLog } from '@kbn/tooling-log';
-import { createListStream, createPromiseFromStreams, REPO_ROOT } from '@kbn/utils';
+import { createListStream, createPromiseFromStreams } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 import {
   createStats,

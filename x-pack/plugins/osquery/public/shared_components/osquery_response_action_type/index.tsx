@@ -7,7 +7,6 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import uuid from 'uuid';
 import type { FieldErrors } from 'react-hook-form';
 import { useFieldArray } from 'react-hook-form';
 import { useForm as useHookForm, FormProvider } from 'react-hook-form';
@@ -35,7 +34,6 @@ interface OsqueryResponseActionsValues {
 
 interface OsqueryResponseActionsParamsFormFields {
   savedQueryId: string | null;
-  id: string;
   ecs_mapping: ECSMapping;
   query: string;
   packId?: string[];
@@ -58,7 +56,6 @@ const OsqueryResponseActionParamsFormComponent = ({
   onError,
   onChange,
 }: OsqueryResponseActionsParamsFormProps) => {
-  const uniqueId = useMemo(() => uuid.v4(), []);
   const hooksForm = useHookForm<OsqueryResponseActionsParamsFormFields>({
     mode: 'all',
     defaultValues: defaultValues
@@ -70,14 +67,13 @@ const OsqueryResponseActionParamsFormComponent = ({
         }
       : {
           ecs_mapping: {},
-          id: uniqueId,
           queryType: 'query',
         },
   });
 
   const { watch, register, formState, control } = hooksForm;
 
-  const [packId, queryType, queries, id] = watch(['packId', 'queryType', 'queries', 'id']);
+  const [packId, queryType, queries] = watch(['packId', 'queryType', 'queries']);
   const { data: packData } = usePack({
     packId: packId?.[0],
     skip: !packId?.[0],
@@ -105,7 +101,6 @@ const OsqueryResponseActionParamsFormComponent = ({
 
   useEffect(() => {
     register('savedQueryId');
-    register('id');
   }, [register]);
 
   useEffect(() => {
@@ -114,12 +109,10 @@ const OsqueryResponseActionParamsFormComponent = ({
         // @ts-expect-error update types
         formData.queryType === 'pack'
           ? {
-              id: formData.id,
               packId: formData?.packId?.length ? formData?.packId[0] : undefined,
               queries: formData.queries,
             }
           : {
-              id: formData.id,
               savedQueryId: formData.savedQueryId,
               query: formData.query,
               ecsMapping: formData.ecs_mapping,
@@ -150,10 +143,9 @@ const OsqueryResponseActionParamsFormComponent = ({
   const queryDetails = useMemo(
     () => ({
       queries,
-      action_id: id,
       agents: [],
     }),
-    [id, queries]
+    [queries]
   );
 
   return (

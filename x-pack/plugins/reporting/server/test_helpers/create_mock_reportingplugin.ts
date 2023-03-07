@@ -18,6 +18,7 @@ import {
   statusServiceMock,
 } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { DeepPartial } from 'utility-types';
@@ -66,6 +67,7 @@ export const createMockPluginStart = async (
     esClient: elasticsearchServiceMock.createClusterClient(),
     savedObjects: { getScopedClient: jest.fn() },
     uiSettings: { asScopedToClient: () => ({ get: jest.fn() }) },
+    discover: discoverPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
     fieldFormats: () => Promise.resolve(fieldFormatsMock),
     store: await createMockReportingStore(config),

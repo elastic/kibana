@@ -233,6 +233,50 @@ describe('install', () => {
         expect.objectContaining({ installSource: 'upload' })
       );
     });
+
+    it('should fetch latest version if version not provided', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'test_package',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.status).toEqual('installed');
+
+      expect(sendTelemetryEvents).toHaveBeenCalledWith(
+        expect.anything(),
+        undefined,
+        expect.objectContaining({
+          newVersion: '1.3.0',
+        })
+      );
+    });
+
+    it('should do nothing if same version is installed', async () => {
+      jest.spyOn(obj, 'getInstallationObject').mockImplementationOnce(() =>
+        Promise.resolve({
+          attributes: {
+            version: '1.2.0',
+            install_status: 'installed',
+            installed_es: [],
+            installed_kibana: [],
+          },
+        } as any)
+      );
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const response = await installPackage({
+        spaceId: DEFAULT_SPACE_ID,
+        installSource: 'registry',
+        pkgkey: 'apache-1.2.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(response.status).toEqual('already_installed');
+    });
   });
 
   describe('upload', () => {

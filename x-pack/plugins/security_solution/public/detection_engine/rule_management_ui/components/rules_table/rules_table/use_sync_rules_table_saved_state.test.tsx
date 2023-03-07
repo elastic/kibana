@@ -55,12 +55,9 @@ describe('useSyncRulesTableSavedState', () => {
 
     renderHook(() => useSyncRulesTableSavedState());
 
-    expect(replaceUrlParams).toHaveBeenCalledWith([
-      {
-        key: URL_PARAM_KEY.rulesTable,
-        value: expectedUrlState,
-      },
-    ]);
+    expect(replaceUrlParams).toHaveBeenCalledWith({
+      [URL_PARAM_KEY.rulesTable]: expectedUrlState,
+    });
   };
 
   const expectStateToSyncWithStorage = (
@@ -96,7 +93,7 @@ describe('useSyncRulesTableSavedState', () => {
 
     renderHook(() => useSyncRulesTableSavedState());
 
-    expect(replaceUrlParams).toHaveBeenCalledWith([{ key: URL_PARAM_KEY.rulesTable, value: null }]);
+    expect(replaceUrlParams).toHaveBeenCalledWith({ [URL_PARAM_KEY.rulesTable]: null });
     expect(setStorage).not.toHaveBeenCalled();
     expect(removeStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY);
   });
@@ -108,6 +105,7 @@ describe('useSyncRulesTableSavedState', () => {
         tags: ['test'],
         showCustomRules: true,
         showElasticRules: false,
+        enabled: true,
       },
       sortingOptions: {
         field: 'name',
@@ -127,6 +125,7 @@ describe('useSyncRulesTableSavedState', () => {
       order: 'asc',
       page: 3,
       perPage: 10,
+      enabled: true,
     };
     const expectedStorageState: RulesTableStorageSavedState = omit(expectedUrlState, 'page');
 
@@ -136,9 +135,7 @@ describe('useSyncRulesTableSavedState', () => {
 
     renderHook(() => useSyncRulesTableSavedState());
 
-    expect(replaceUrlParams).toHaveBeenCalledWith([
-      { key: URL_PARAM_KEY.rulesTable, value: expectedUrlState },
-    ]);
+    expect(replaceUrlParams).toHaveBeenCalledWith({ [URL_PARAM_KEY.rulesTable]: expectedUrlState });
     expect(setStorage).toHaveBeenCalledWith(RULES_TABLE_STATE_STORAGE_KEY, expectedStorageState);
   });
 
@@ -177,6 +174,16 @@ describe('useSyncRulesTableSavedState', () => {
           filterOptions: { ...defaultState.filterOptions, tags: ['test'] },
         },
         { tags: ['test'] }
+      );
+    });
+
+    it('syncs only the enabled state filter', () => {
+      expectStateToSyncWithUrl(
+        {
+          ...defaultState,
+          filterOptions: { ...defaultState.filterOptions, enabled: true },
+        },
+        { enabled: true }
       );
     });
 
@@ -262,6 +269,16 @@ describe('useSyncRulesTableSavedState', () => {
           filterOptions: { ...defaultState.filterOptions, tags: ['test'] },
         },
         { tags: ['test'] }
+      );
+    });
+
+    it('syncs only the enabled state filter', () => {
+      expectStateToSyncWithStorage(
+        {
+          ...defaultState,
+          filterOptions: { ...defaultState.filterOptions, enabled: true },
+        },
+        { enabled: true }
       );
     });
 

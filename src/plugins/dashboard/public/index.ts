@@ -7,14 +7,20 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { DashboardPlugin } from './plugin';
 
+import { DashboardPlugin } from './plugin';
 export {
   createDashboardEditUrl,
   DASHBOARD_APP_ID,
   LEGACY_DASHBOARD_APP_ID,
 } from './dashboard_constants';
-export { DASHBOARD_CONTAINER_TYPE } from './dashboard_container';
+export {
+  DASHBOARD_CONTAINER_TYPE,
+  type DashboardContainer,
+  type DashboardCreationOptions,
+  LazyDashboardContainerRenderer,
+  useDashboardContainerContext,
+} from './dashboard_container';
 export type { DashboardSetup, DashboardStart, DashboardFeatureFlagConfig } from './plugin';
 
 export {

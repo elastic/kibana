@@ -92,6 +92,10 @@ export interface ChromeHelpExtensionMenuCustomLink extends ChromeHelpExtensionLi
    * Content of the button (in lieu of `children`)
    */
   content: React.ReactNode;
+  /**
+   * Opens link in new tab
+   */
+  external?: boolean;
 }
 
 /** @public */

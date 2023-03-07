@@ -9,7 +9,7 @@
 import { IConfigService } from '@kbn/config';
 import { configServiceMock } from '@kbn/config-mocks';
 import { ByteSizeValue } from '@kbn/config-schema';
-import { fromRoot } from '@kbn/utils';
+import { fromRoot } from '@kbn/repo-info';
 import { duration } from 'moment';
 import { from } from 'rxjs';
 

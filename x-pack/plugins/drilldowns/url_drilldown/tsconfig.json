@@ -1,19 +1,24 @@
 {
   "extends": "../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": ["public/**/*"],
   "kbn_references": [
-    { "path": "../../../../src/core/tsconfig.json" },
-    { "path": "../../../../src/plugins/ui_actions_enhanced/tsconfig.json" },
-    { "path": "../../../../src/plugins/embeddable/tsconfig.json" },
-    { "path": "../../../../src/plugins/expressions/tsconfig.json" },
-    { "path": "../../../../src/plugins/kibana_react/tsconfig.json" },
-    { "path": "../../../../src/plugins/kibana_utils/tsconfig.json" },
-    { "path": "../../../../src/plugins/ui_actions/tsconfig.json" },
-    { "path": "../../../../src/plugins/data/tsconfig.json" }
+    "@kbn/core",
+    "@kbn/ui-actions-enhanced-plugin",
+    "@kbn/embeddable-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/monaco",
+    "@kbn/std",
+    "@kbn/image-embeddable-plugin"
+  ],
+  "exclude": [
+    "target/**/*",
   ]
 }

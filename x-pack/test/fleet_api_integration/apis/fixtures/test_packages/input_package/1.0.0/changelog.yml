@@ -1,0 +1,6 @@
+# newer versions go on top
+- version: "1.0.0"
+  changes:
+    - description: basic input package
+      type: enhancement
+      link: https://github.com/elastic/package-spec/pull/325

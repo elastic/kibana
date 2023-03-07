@@ -8,7 +8,6 @@
 import { pick } from 'lodash';
 
 import type { KibanaRequest } from '@kbn/core/server';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
 import type { FleetAuthz } from '../../../common';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../common';
@@ -66,8 +65,13 @@ export async function getAuthzFromRequest(req: KibanaRequest): Promise<FleetAuth
 
   if (security.authz.mode.useRbacForRequest(req)) {
     const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(req);
-    const endpointPrivileges = ENDPOINT_PRIVILEGES.map((privilege) =>
-      security.authz.actions.api.get(`${DEFAULT_APP_CATEGORIES.security.id}-${privilege}`)
+    const endpointPrivileges = Object.entries(ENDPOINT_PRIVILEGES).map(
+      ([_, { appId, privilegeType, privilegeName }]) => {
+        if (privilegeType === 'ui') {
+          return security.authz.actions[privilegeType].get(`${appId}`, `${privilegeName}`);
+        }
+        return security.authz.actions[privilegeType].get(`${appId}-${privilegeName}`);
+      }
     );
     const { privileges } = await checkPrivileges({
       kibana: [

@@ -24,7 +24,6 @@ import { Operations } from '../../authorization';
  */
 export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): Promise<void> {
   const {
-    unsecuredSavedObjectsClient,
     services: { caseService, attachmentService, userActionService },
     logger,
     authorization,
@@ -50,9 +49,8 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       entities: Array.from(entities.values()),
     });
 
-    const attachmentIds = await attachmentService.getAttachmentIdsForCases({
+    const attachmentIds = await attachmentService.getter.getAttachmentIdsForCases({
       caseIds: ids,
-      unsecuredSavedObjectsClient,
     });
 
     const userActionIds = await userActionService.getUserActionIdsForCases(ids);
@@ -68,7 +66,7 @@ export async function deleteCases(ids: string[], clientArgs: CasesClientArgs): P
       options: { refresh: 'wait_for' },
     });
 
-    await userActionService.bulkAuditLogCaseDeletion(
+    await userActionService.creator.bulkAuditLogCaseDeletion(
       cases.saved_objects.map((caseInfo) => caseInfo.id)
     );
   } catch (error) {

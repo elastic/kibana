@@ -8,16 +8,10 @@
 
 import Fs from 'fs';
 import Fsp from 'fs/promises';
-import Path from 'path';
 import * as Rx from 'rxjs';
 
-import { assertAbsolute, mkdirp } from './fs';
-
-const fsReadDir$ = Rx.bindNodeCallback(
-  (path: string, cb: (err: Error | null, ents: Fs.Dirent[]) => void) => {
-    Fs.readdir(path, { withFileTypes: true }, cb);
-  }
-);
+import { assertAbsolute, mkdirp, fsReadDir$ } from './fs';
+import { type DirRecord, type FileRecord, type Record, SomePath } from './fs_records';
 
 interface Options {
   /**
@@ -29,7 +23,9 @@ interface Options {
    */
   destination: string;
   /**
-   * function that is called with each Record
+   * function that is called with each Record. If a falsy value is returned the
+   * record will be dropped. If it is a directory none of its children will be
+   * considered.
    */
   filter?: (record: Readonly<Record>) => boolean;
   /**
@@ -41,72 +37,10 @@ interface Options {
    */
   time?: Date;
   /**
-   *
+   * function which can replace the records of files as they are copied
    */
   map?: (record: Readonly<FileRecord>) => Promise<undefined | FileRecord>;
 }
-
-export class SomePath {
-  static fromAbs(path: string) {
-    return new SomePath(Path.dirname(path), Path.basename(path));
-  }
-
-  constructor(
-    /** The directory of the item at this path */
-    public readonly dir: string,
-    /** The name of the item at this path */
-    public readonly name: string
-  ) {}
-
-  private _abs: string | null = null;
-  /** The absolute path of the file */
-  public get abs() {
-    if (this._abs === null) {
-      this._abs = Path.resolve(this.dir, this.name);
-    }
-
-    return this._abs;
-  }
-
-  private _ext: string | null = null;
-  /** The extension of the filename, starts with a . like the Path.extname API */
-  public get ext() {
-    if (this._ext === null) {
-      this._ext = Path.extname(this.name);
-    }
-
-    return this._ext;
-  }
-
-  /** return a file path with the file name changed to `name` */
-  withName(name: string) {
-    return new SomePath(this.dir, name);
-  }
-
-  /** return a file path with the file extension changed to `extension` */
-  withExt(extension: string) {
-    return new SomePath(this.dir, Path.basename(this.name, this.ext) + extension);
-  }
-
-  child(childName: string) {
-    return new SomePath(this.abs, childName);
-  }
-}
-
-interface DirRecord {
-  type: 'dir';
-  source: SomePath;
-  dest: SomePath;
-}
-
-interface FileRecord {
-  type: 'file';
-  source: SomePath;
-  dest: SomePath;
-  content?: string;
-}
-
-type Record = FileRecord | DirRecord;
 
 /**
  * Copy all of the files from one directory to another, optionally filtered with a
@@ -183,6 +117,6 @@ export async function scanCopy(options: Options) {
       type: 'dir',
       source: SomePath.fromAbs(source),
       dest: SomePath.fromAbs(destination),
-    })
+    }).pipe(Rx.defaultIfEmpty(undefined))
   );
 }

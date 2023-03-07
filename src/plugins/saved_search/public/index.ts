@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-export type { SavedSearch, SaveSavedSearchOptions, SortOrder } from './services/saved_searches';
+export type { SortOrder } from '../common/types';
+export type { SavedSearch, SaveSavedSearchOptions } from './services/saved_searches';
 export {
   getSavedSearch,
   getSavedSearchFullPathUrl,
@@ -15,11 +16,7 @@ export {
   throwErrorOnSavedSearchUrlConflict,
   saveSavedSearch,
 } from './services/saved_searches';
-export type {
-  DiscoverGridSettings,
-  DiscoverGridSettingsColumn,
-} from './services/saved_searches/types';
-export { VIEW_MODE } from './services/saved_searches/types';
+export { VIEW_MODE } from '../common';
 
 export function plugin() {
   return {

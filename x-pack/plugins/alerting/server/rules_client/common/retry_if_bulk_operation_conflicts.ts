@@ -9,6 +9,7 @@ import pMap from 'p-map';
 import { chunk } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { Logger, SavedObjectsBulkUpdateObject } from '@kbn/core/server';
+import { withSpan } from '@kbn/apm-utils';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { BulkOperationError } from '../types';
 import { waitBeforeNextRetry, RETRY_IF_CONFLICTS_ATTEMPTS } from './wait_before_next_retry';
@@ -35,13 +36,15 @@ export const retryIfBulkOperationConflicts = async ({
   filter: KueryNode | null;
   retries?: number;
 }): Promise<BulkOperationResult> => {
-  return handler({
-    action,
-    logger,
-    bulkOperation,
-    filter,
-    retries,
-  });
+  return withSpan({ name: 'retryIfBulkOperationConflicts', type: 'rules' }, () =>
+    handler({
+      action,
+      logger,
+      bulkOperation,
+      filter,
+      retries,
+    })
+  );
 };
 
 const handler = async ({

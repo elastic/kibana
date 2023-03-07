@@ -32,7 +32,7 @@ export default function ({ getService }) {
 
         it('should return all followers and a grouping of stats by follower index', async () => {
           const { body } = await supertest
-            .post('/api/monitoring/v1/clusters/YCxj-RAgSZCP6GuOQ8M1EQ/elasticsearch/ccr')
+            .post('/api/monitoring/v1/clusters/vX4lH4C6QmyrJeYrvKr0-A/elasticsearch/ccr')
             .set('kbn-xsrf', 'xxx')
             .send({
               timeRange,
@@ -40,6 +40,18 @@ export default function ({ getService }) {
             .expect(200);
 
           expect(body).to.eql(ccrFixture);
+        });
+
+        it('should return an empty list of followers if the cluster_uuid does not have any match', async () => {
+          const { body } = await supertest
+            .post('/api/monitoring/v1/clusters/random_uuid/elasticsearch/ccr')
+            .set('kbn-xsrf', 'xxx')
+            .send({
+              timeRange,
+            })
+            .expect(200);
+
+          expect(body).to.eql([]);
         });
       });
     });

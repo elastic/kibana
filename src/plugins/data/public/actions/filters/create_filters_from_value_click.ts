@@ -71,7 +71,7 @@ const getOtherBucketFilterTerms = (
  * @param  {string} cellValue - value of the current cell
  * @return {Filter[]|undefined} - list of filters to provide to queryFilter.addFilters()
  */
-const createFilter = async (
+export const createFilter = async (
   table: Pick<Datatable, 'rows' | 'columns'>,
   columnIndex: number,
   rowIndex: number

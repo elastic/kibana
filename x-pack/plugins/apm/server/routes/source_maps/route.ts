@@ -34,7 +34,7 @@ export const sourceMapRt = t.intersection([
     names: t.array(t.string),
     file: t.string,
     sourceRoot: t.string,
-    sourcesContent: t.array(t.string),
+    sourcesContent: t.array(t.union([t.string, t.null])),
   }),
 ]);
 
@@ -108,7 +108,7 @@ const uploadSourceMapRoute = createApmServerRoute({
     const fleetPluginStart = await plugins.fleet?.start();
     const coreStart = await core.start();
     const internalESClient = coreStart.elasticsearch.client.asInternalUser;
-    const savedObjectsClient = await getInternalSavedObjectsClient(core.setup);
+    const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
     try {
       if (fleetPluginStart) {
         // create source map as fleet artifact
@@ -136,7 +136,7 @@ const uploadSourceMapRoute = createApmServerRoute({
 
         // sync source map to fleet policy
         await updateSourceMapsOnFleetPolicies({
-          core,
+          coreStart,
           fleetPluginStart,
           savedObjectsClient:
             savedObjectsClient as unknown as SavedObjectsClientContract,
@@ -167,13 +167,13 @@ const deleteSourceMapRoute = createApmServerRoute({
     const { id } = params.path;
     const coreStart = await core.start();
     const internalESClient = coreStart.elasticsearch.client.asInternalUser;
-    const savedObjectsClient = await getInternalSavedObjectsClient(core.setup);
+    const savedObjectsClient = await getInternalSavedObjectsClient(coreStart);
     try {
       if (fleetPluginStart) {
         await deleteFleetSourcemapArtifact({ id, fleetPluginStart });
         await deleteApmSourceMap({ internalESClient, fleetId: id });
         await updateSourceMapsOnFleetPolicies({
-          core,
+          coreStart,
           fleetPluginStart,
           savedObjectsClient:
             savedObjectsClient as unknown as SavedObjectsClientContract,

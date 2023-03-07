@@ -1,10 +1,26 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "./target/types",
-    "emitDeclarationOnly": true,
-    "declaration": true,
+    "outDir": "target/types",
   },
   "include": ["common/**/*", "public/**/*", "server/**/*"],
-  "kbn_references": [{ "path": "../../core/tsconfig.json" }]
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/i18n-react",
+    "@kbn/i18n",
+    "@kbn/ui-theme",
+    "@kbn/core-http-browser",
+    "@kbn/core-status-common-internal",
+    "@kbn/safer-lodash-set",
+    "@kbn/test-jest-helpers",
+    "@kbn/config-schema",
+    "@kbn/utility-types",
+    "@kbn/std",
+    "@kbn/utils",
+    "@kbn/core-logging-server-mocks",
+    "@kbn/core-preboot-server",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
 }

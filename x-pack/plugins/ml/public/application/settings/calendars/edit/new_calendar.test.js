@@ -65,7 +65,6 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   withKibana: (comp) => {
     return comp;
   },
-  reactToUiComponent: jest.fn(),
 }));
 
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';

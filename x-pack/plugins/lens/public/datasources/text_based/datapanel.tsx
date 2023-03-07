@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormControlLayout, htmlIdGenerator } from '@elastic/eui';
+import { EuiHighlight } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
@@ -17,6 +17,11 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import {
+  FieldList,
+  FieldListFilters,
+  FieldIcon,
+  GetCustomFieldType,
+  wrapFieldNameOnDot,
   FieldListGrouped,
   FieldListGroupedProps,
   FieldsGroupNames,
@@ -27,8 +32,8 @@ import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
 import { ChildDragDropProvider, DragDrop } from '../../drag_drop';
-import { DataType } from '../../types';
-import { LensFieldIcon } from '../../shared_components';
+
+const getCustomFieldType: GetCustomFieldType<DatatableColumn> = (field) => field?.meta.type;
 
 export type TextBasedDataPanelProps = DatasourceDataPanelProps<TextBasedPrivateState> & {
   data: DataPublicPluginStart;
@@ -36,8 +41,6 @@ export type TextBasedDataPanelProps = DatasourceDataPanelProps<TextBasedPrivateS
   dataViews: DataViewsPublicPluginStart;
   layerFields?: string[];
 };
-const htmlId = htmlIdGenerator('datapanel-text-based-languages');
-const fieldSearchDescriptionId = htmlId();
 
 export function TextBasedDataPanel({
   setState,
@@ -46,6 +49,7 @@ export function TextBasedDataPanel({
   core,
   data,
   query,
+  frame,
   filters,
   dateRange,
   expressions,
@@ -53,18 +57,18 @@ export function TextBasedDataPanel({
   layerFields,
 }: TextBasedDataPanelProps) {
   const prevQuery = usePrevious(query);
-  const [localState, setLocalState] = useState({ nameFilter: '' });
   const [dataHasLoaded, setDataHasLoaded] = useState(false);
-  const clearLocalState = () => setLocalState((s) => ({ ...s, nameFilter: '' }));
   useEffect(() => {
     async function fetchData() {
       if (query && isOfAggregateQueryType(query) && !isEqual(query, prevQuery)) {
+        const frameDataViews = frame.dataViews;
         const stateFromQuery = await getStateFromAggregateQuery(
           state,
           query,
           dataViews,
           data,
-          expressions
+          expressions,
+          frameDataViews
         );
 
         setDataHasLoaded(true);
@@ -72,7 +76,7 @@ export function TextBasedDataPanel({
       }
     }
     fetchData();
-  }, [data, dataViews, expressions, prevQuery, query, setState, state]);
+  }, [data, dataViews, expressions, prevQuery, query, setState, state, frame.dataViews]);
 
   const { fieldList } = state;
 
@@ -81,19 +85,6 @@ export function TextBasedDataPanel({
       return Boolean(layerFields?.includes(field.name));
     },
     [layerFields]
-  );
-
-  const onFilterField = useCallback(
-    (field: DatatableColumn) => {
-      if (
-        localState.nameFilter &&
-        !field.name.toLowerCase().includes(localState.nameFilter.toLowerCase())
-      ) {
-        return false;
-      }
-      return true;
-    },
-    [localState]
   );
 
   const onOverrideFieldGroupDetails = useCallback((groupName) => {
@@ -107,36 +98,44 @@ export function TextBasedDataPanel({
     }
   }, []);
 
-  const fieldListGroupedProps = useGroupedFields<DatatableColumn>({
+  const { fieldListFiltersProps, fieldListGroupedProps } = useGroupedFields<DatatableColumn>({
     dataViewId: null,
     allFields: dataHasLoaded ? fieldList : null,
     services: {
       dataViews,
+      core,
     },
-    onFilterField,
+    getCustomFieldType,
     onSelectedFieldFilter,
     onOverrideFieldGroupDetails,
   });
 
   const renderFieldItem: FieldListGroupedProps<DatatableColumn>['renderFieldItem'] = useCallback(
-    ({ field, itemIndex, groupIndex, hideDetails }) => {
+    ({ field, itemIndex, fieldSearchHighlight }) => {
+      if (!field) {
+        return <></>;
+      }
       return (
         <DragDrop
           draggable
           order={[itemIndex]}
           value={{
-            field: field?.name,
+            field: field.name,
             id: field.id,
-            humanData: { label: field?.name },
+            humanData: { label: field.name },
           }}
           dataTestSubj={`lnsFieldListPanelField-${field.name}`}
         >
           <FieldButton
-            className={`lnsFieldItem lnsFieldItem--${field?.meta?.type}`}
+            className={`lnsFieldItem lnsFieldItem--${field.meta.type}`}
             isActive={false}
             onClick={() => {}}
-            fieldIcon={<LensFieldIcon type={field?.meta.type as DataType} />}
-            fieldName={field?.name}
+            fieldIcon={<FieldIcon type={getCustomFieldType(field)} />}
+            fieldName={
+              <EuiHighlight search={wrapFieldNameOnDot(fieldSearchHighlight)}>
+                {wrapFieldNameOnDot(field.name)}
+              </EuiHighlight>
+            }
           />
         </DragDrop>
       );
@@ -151,56 +150,20 @@ export function TextBasedDataPanel({
       }}
     >
       <ChildDragDropProvider {...dragDropContext}>
-        <EuiFlexGroup
-          gutterSize="none"
+        <FieldList
           className="lnsInnerIndexPatternDataPanel"
-          direction="column"
-          responsive={false}
+          isProcessing={!dataHasLoaded}
+          prepend={
+            <FieldListFilters {...fieldListFiltersProps} data-test-subj="lnsTextBasedLanguages" />
+          }
         >
-          <EuiFlexItem grow={false}>
-            <EuiFormControlLayout
-              icon="search"
-              fullWidth
-              clear={{
-                title: i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
-                  defaultMessage: 'Clear name and type filters',
-                }),
-                'aria-label': i18n.translate('xpack.lens.indexPatterns.clearFiltersLabel', {
-                  defaultMessage: 'Clear name and type filters',
-                }),
-                onClick: () => {
-                  clearLocalState();
-                },
-              }}
-            >
-              <input
-                className="euiFieldText euiFieldText--fullWidth lnsInnerIndexPatternDataPanel__textField"
-                data-test-subj="lnsTextBasedLanguagesFieldSearch"
-                placeholder={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
-                  defaultMessage: 'Search field names',
-                  description: 'Search the list of fields in the data view for the provided text',
-                })}
-                value={localState.nameFilter}
-                onChange={(e) => {
-                  setLocalState({ ...localState, nameFilter: e.target.value });
-                }}
-                aria-label={i18n.translate('xpack.lens.indexPatterns.filterByNameLabel', {
-                  defaultMessage: 'Search field names',
-                  description: 'Search the list of fields in the data view for the provided text',
-                })}
-                aria-describedby={fieldSearchDescriptionId}
-              />
-            </EuiFormControlLayout>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <FieldListGrouped<DatatableColumn>
-              {...fieldListGroupedProps}
-              renderFieldItem={renderFieldItem}
-              screenReaderDescriptionForSearchInputId={fieldSearchDescriptionId}
-              data-test-subj="lnsTextBasedLanguages"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          <FieldListGrouped<DatatableColumn>
+            {...fieldListGroupedProps}
+            renderFieldItem={renderFieldItem}
+            data-test-subj="lnsTextBasedLanguages"
+            localStorageKeyPrefix="lens"
+          />
+        </FieldList>
       </ChildDragDropProvider>
     </KibanaContextProvider>
   );

@@ -8,6 +8,8 @@
 import React, { FC, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
+import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import { FieldTypesHelpPopover } from '../../../common/components/field_types_filter/field_types_help_popover';
 import type { SupportedFieldType } from '../../../../../common/types';
 import { FieldTypeIcon } from '../../../common/components/field_type_icon';
@@ -19,6 +21,7 @@ export const DataVisualizerFieldTypeFilter: FC<{
   setVisibleFieldTypes(q: string[]): void;
   visibleFieldTypes: string[];
 }> = ({ indexedFieldTypes, setVisibleFieldTypes, visibleFieldTypes }) => {
+  const euiTheme = useCurrentEuiTheme();
   const options: Option[] = useMemo(() => {
     return indexedFieldTypes.map((indexedFieldName) => {
       const label = jobTypeLabels[indexedFieldName] ?? '';
@@ -55,6 +58,11 @@ export const DataVisualizerFieldTypeFilter: FC<{
         checkedOptions={visibleFieldTypes}
         dataTestSubj={'dataVisualizerFieldTypeSelect'}
         postfix={<FieldTypesHelpPopover fieldTypes={indexedFieldTypes} />}
+        cssStyles={{
+          filterGroup: css`
+            margin-left: ${euiTheme.euiSizeS};
+          `,
+        }}
       />
     </>
   );

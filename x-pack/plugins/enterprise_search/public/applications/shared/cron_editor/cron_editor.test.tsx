@@ -17,9 +17,7 @@ import { CronEditor } from './cron_editor';
 
 describe('CronEditor', () => {
   ['MINUTE', 'HOUR', 'DAY', 'WEEK', 'MONTH', 'YEAR'].forEach((unit) => {
-    // Skipped during Jest 29 upgrade
-    // No snapshot has been committed
-    test.skip(`is rendered with a ${unit} frequency`, () => {
+    it(`is rendered with a ${unit} frequency`, () => {
       const component = mountWithI18nProvider(
         <CronEditor
           fieldToPreferredValueMap={{}}

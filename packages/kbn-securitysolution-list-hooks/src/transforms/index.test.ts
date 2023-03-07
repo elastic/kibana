@@ -19,7 +19,7 @@ import {
   removeIdFromExceptionItemsEntries,
   transformInput,
   transformOutput,
-} from '@kbn/securitysolution-list-hooks';
+} from '../..';
 
 import { getCreateExceptionListItemSchemaMock } from '../mocks/request/create_exception_list_item_schema.mock';
 import { getUpdateExceptionListItemSchemaMock } from '../mocks/request/update_exception_list_item_schema.mock';

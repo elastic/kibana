@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { withSpan } from '@kbn/apm-utils';
 import { RulesClientContext } from '../types';
 import { ScheduleTaskOptions } from '../types';
 
@@ -28,7 +29,9 @@ export async function scheduleTask(context: RulesClientContext, opts: ScheduleTa
     enabled: true,
   };
   try {
-    return await context.taskManager.schedule(taskInstance);
+    return await withSpan({ name: 'taskManager.schedule', type: 'rules' }, () =>
+      context.taskManager.schedule(taskInstance)
+    );
   } catch (err) {
     if (err.statusCode === 409 && !throwOnConflict) {
       return taskInstance;

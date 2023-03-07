@@ -1,0 +1,11 @@
+title: The issueTypes subaction
+type: object
+required:
+  - subAction
+description: The `issueTypes` subaction for Jira connectors.
+properties:
+  subAction:
+    type: string
+    description: The action to test.
+    enum:
+      - issueTypes

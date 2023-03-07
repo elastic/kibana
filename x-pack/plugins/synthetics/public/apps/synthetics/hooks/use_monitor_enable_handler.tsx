@@ -42,7 +42,7 @@ export function useMonitorEnableHandler({
     (enabled: boolean) => {
       dispatch(
         fetchUpsertMonitorAction({
-          id: configId,
+          configId,
           monitor: { [ConfigKey.ENABLED]: enabled },
           success: {
             message: enabled ? labels.enabledSuccessLabel : labels.disabledSuccessLabel,

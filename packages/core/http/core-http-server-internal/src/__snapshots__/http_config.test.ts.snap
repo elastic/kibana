@@ -69,6 +69,7 @@ Object {
   },
   "rewriteBasePath": false,
   "securityResponseHeaders": Object {
+    "crossOriginOpenerPolicy": "same-origin",
     "disableEmbedding": false,
     "permissionsPolicy": null,
     "referrerPolicy": "no-referrer-when-downgrade",

@@ -8,7 +8,7 @@
 
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
-import { REPO_ROOT } from '@kbn/utils';
+import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs';
 import path from 'path';
 import { Journey } from './run_performance_cli';
@@ -40,13 +40,36 @@ run(
           })
       : [{ name: path.parse(journeyPath).name, path: journeyPath }];
 
+    const skippedFilePath = 'x-pack/test/scalability/disabled_scalability_tests.json';
+    const skipped: string[] = JSON.parse(
+      fs.readFileSync(path.resolve(REPO_ROOT, skippedFilePath), 'utf8')
+    ).map((relativePath: string) => path.resolve(REPO_ROOT, relativePath));
+    let filtered: Journey[] = [];
+
+    if (skipped.length === 0) {
+      filtered = journeys;
+    } else {
+      for (const journey of journeys) {
+        if (skipped.includes(journey.path)) {
+          log.warning(`Journey '${journey.name} is skipped'`);
+        } else {
+          filtered.push(journey);
+        }
+      }
+    }
+
+    if (filtered.length === 0) {
+      log.info(`No journeys found, check skipped list in '${skippedFilePath}'`);
+      return;
+    }
+
     log.info(
-      `Found ${journeys.length} journeys to run: ${JSON.stringify(journeys.map((j) => j.name))}`
+      `Found ${filtered.length} journeys to run: ${JSON.stringify(filtered.map((j) => j.name))}`
     );
 
     const failedJourneys = [];
 
-    for (const journey of journeys) {
+    for (const journey of filtered) {
       try {
         process.stdout.write(`--- Running scalability journey: ${journey.name}\n`);
         await runScalabilityJourney(journey.path, kibanaInstallDir);

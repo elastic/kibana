@@ -95,7 +95,9 @@ export function getBeforeSetup(
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
     isExportable: true,
-    async executor() {},
+    async executor() {
+      return { state: {} };
+    },
     producer: 'alerts',
   }));
   rulesClientParams.getEventLogClient.mockResolvedValue(

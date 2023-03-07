@@ -28,6 +28,8 @@ enum AllowListingField {
   hostname = 'hostname',
 }
 
+export const DEFAULT_MAX_ATTEMPTS: number = 3;
+
 export interface ActionsConfigurationUtilities {
   isHostnameAllowed: (hostname: string) => boolean;
   isUriAllowed: (uri: string) => boolean;
@@ -40,6 +42,13 @@ export interface ActionsConfigurationUtilities {
   getResponseSettings: () => ResponseSettings;
   getCustomHostSettings: (targetUrl: string) => CustomHostSettings | undefined;
   getMicrosoftGraphApiUrl: () => undefined | string;
+  getMaxAttempts: ({
+    actionTypeMaxAttempts,
+    actionTypeId,
+  }: {
+    actionTypeMaxAttempts?: number;
+    actionTypeId: string;
+  }) => number;
   validateEmailAddresses(
     addresses: string[],
     options?: ValidateEmailAddressesOptions
@@ -194,5 +203,17 @@ export function getActionsConfigurationUtilities(
     getMicrosoftGraphApiUrl: () => getMicrosoftGraphApiUrlFromConfig(config),
     validateEmailAddresses: (addresses: string[], options: ValidateEmailAddressesOptions) =>
       validatedEmailCurried(addresses, options),
+    getMaxAttempts: ({ actionTypeMaxAttempts, actionTypeId }) => {
+      const connectorTypeConfig = config.run?.connectorTypeOverrides?.find(
+        (connectorType) => actionTypeId === connectorType.id
+      );
+
+      return (
+        connectorTypeConfig?.maxAttempts ||
+        config.run?.maxAttempts ||
+        actionTypeMaxAttempts ||
+        DEFAULT_MAX_ATTEMPTS
+      );
+    },
   };
 }

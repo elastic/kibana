@@ -7,12 +7,13 @@
 
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
-import { IndicatorsTable, IndicatorsTableProps, TABLE_UPDATE_PROGRESS_TEST_ID } from '.';
+import { IndicatorsTable, IndicatorsTableProps } from '.';
 import { TestProvidersComponent } from '../../../../common/mocks/test_providers';
 import { generateMockIndicator, Indicator } from '../../../../../common/types/indicator';
-import { BUTTON_TEST_ID } from './components/open_flyout_button';
-import { TITLE_TEST_ID } from '../flyout';
+import { BUTTON_TEST_ID } from './components/open_flyout_button/test_ids';
 import { SecuritySolutionDataViewBase } from '../../../../types';
+import { TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
+import { INDICATORS_FLYOUT_TITLE_TEST_ID } from '../flyout/test_ids';
 
 const stub = () => {};
 
@@ -111,7 +112,7 @@ describe('<IndicatorsTable />', () => {
       screen.getAllByTestId(BUTTON_TEST_ID)[0].click();
     });
 
-    expect(screen.queryByTestId(TITLE_TEST_ID)).toBeInTheDocument();
+    expect(screen.queryByTestId(INDICATORS_FLYOUT_TITLE_TEST_ID)).toBeInTheDocument();
 
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
     expect(screen.queryByTestId(TABLE_UPDATE_PROGRESS_TEST_ID)).not.toBeInTheDocument();

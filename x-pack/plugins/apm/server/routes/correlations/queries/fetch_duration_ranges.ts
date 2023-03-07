@@ -12,6 +12,7 @@ import { getCommonCorrelationsQuery } from './get_common_correlations_query';
 import { Environment } from '../../../../common/environment_rt';
 import { getDurationField, getEventType } from '../utils';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { getDocumentTypeFilterForTransactions } from '../../../lib/helpers/transactions';
 
 export const fetchDurationRanges = async ({
   rangeSteps,
@@ -37,11 +38,13 @@ export const fetchDurationRanges = async ({
   totalDocCount: number;
   durationRanges: Array<{ key: number; doc_count: number }>;
 }> => {
-  const durationField = getDurationField(chartType, searchMetrics);
-
   // when using metrics data, ensure we filter by docs with the appropriate duration field
   const filteredQuery = searchMetrics
-    ? { bool: { filter: [query, { exists: { field: durationField } }] } }
+    ? {
+        bool: {
+          filter: [query, ...getDocumentTypeFilterForTransactions(true)],
+        },
+      }
     : query;
 
   const ranges = rangeSteps.reduce(

@@ -21,7 +21,7 @@ import { css } from '@emotion/react';
 
 import {
   getCompatibleSortingTypes,
-  DEFAULT_SORT,
+  OPTIONS_LIST_DEFAULT_SORT,
   OptionsListSortBy,
 } from '../../../common/options_list/suggestions_sorting';
 import { OptionsListStrings } from './options_list_strings';
@@ -48,8 +48,8 @@ export const OptionsListEditorOptions = ({
   fieldType,
 }: ControlEditorProps<OptionsListEmbeddableInput>) => {
   const [state, setState] = useState<OptionsListEditorState>({
-    sortDirection: initialInput?.sort?.direction ?? DEFAULT_SORT.direction,
-    sortBy: initialInput?.sort?.by ?? DEFAULT_SORT.by,
+    sortDirection: initialInput?.sort?.direction ?? OPTIONS_LIST_DEFAULT_SORT.direction,
+    sortBy: initialInput?.sort?.by ?? OPTIONS_LIST_DEFAULT_SORT.by,
     runPastTimeout: initialInput?.runPastTimeout,
     singleSelect: initialInput?.singleSelect,
     hideExclude: initialInput?.hideExclude,
@@ -60,8 +60,12 @@ export const OptionsListEditorOptions = ({
   useEffect(() => {
     // when field type changes, ensure that the selected sort type is still valid
     if (!getCompatibleSortingTypes(fieldType).includes(state.sortBy)) {
-      onChange({ sort: DEFAULT_SORT });
-      setState((s) => ({ ...s, sortBy: DEFAULT_SORT.by, sortDirection: DEFAULT_SORT.direction }));
+      onChange({ sort: OPTIONS_LIST_DEFAULT_SORT });
+      setState((s) => ({
+        ...s,
+        sortBy: OPTIONS_LIST_DEFAULT_SORT.by,
+        sortDirection: OPTIONS_LIST_DEFAULT_SORT.direction,
+      }));
     }
   }, [fieldType, onChange, state.sortBy]);
 

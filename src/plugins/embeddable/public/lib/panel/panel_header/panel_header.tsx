@@ -19,14 +19,14 @@ import {
 import classNames from 'classnames';
 import React from 'react';
 import { Action } from '@kbn/ui-actions-plugin/public';
-import { uiToReactComponent } from '@kbn/kibana-react-plugin/public';
 import { PanelOptionsMenu } from './panel_options_menu';
 import { IEmbeddable } from '../../embeddables';
 import { EmbeddableContext, panelBadgeTrigger, panelNotificationTrigger } from '../../triggers';
-import { CustomizePanelTitleAction } from '.';
+import { CustomizePanelAction } from '.';
 
 export interface PanelHeaderProps {
   title?: string;
+  description?: string;
   index?: number;
   isViewMode: boolean;
   hidePanelTitle: boolean;
@@ -40,7 +40,7 @@ export interface PanelHeaderProps {
   embeddable: IEmbeddable;
   headerId?: string;
   showPlaceholderTitle?: boolean;
-  customizeTitle?: CustomizePanelTitleAction;
+  customizePanel?: CustomizePanelAction;
 }
 
 function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmbeddable) {
@@ -51,6 +51,7 @@ function renderBadges(badges: Array<Action<EmbeddableContext>>, embeddable: IEmb
       iconType={badge.getIconType({ embeddable, trigger: panelBadgeTrigger })}
       onClick={() => badge.execute({ embeddable, trigger: panelBadgeTrigger })}
       onClickAriaLabel={badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
+      data-test-subj={`embeddablePanelBadge-${badge.id}`}
     >
       {badge.getDisplayName({ embeddable, trigger: panelBadgeTrigger })}
     </EuiBadge>
@@ -65,7 +66,7 @@ function renderNotifications(
     const context = { embeddable };
 
     let badge = notification.MenuItem ? (
-      React.createElement(uiToReactComponent(notification.MenuItem), {
+      React.createElement(notification.MenuItem, {
         key: notification.id,
         context: {
           embeddable,
@@ -102,22 +103,9 @@ function renderNotifications(
   });
 }
 
-type EmbeddableWithDescription = IEmbeddable & { getDescription: () => string };
-
-function getViewDescription(embeddable: IEmbeddable | EmbeddableWithDescription) {
-  if ('getDescription' in embeddable) {
-    const description = embeddable.getDescription();
-
-    if (description) {
-      return description;
-    }
-  }
-
-  return '';
-}
-
 export function PanelHeader({
   title,
+  description,
   index,
   isViewMode,
   hidePanelTitle,
@@ -127,9 +115,8 @@ export function PanelHeader({
   notifications,
   embeddable,
   headerId,
-  customizeTitle,
+  customizePanel,
 }: PanelHeaderProps) {
-  const description = getViewDescription(embeddable);
   const showTitle = !hidePanelTitle && (!isViewMode || title);
   const showPanelBar =
     !isViewMode || badges.length > 0 || notifications.length > 0 || showTitle || description;
@@ -182,7 +169,7 @@ export function PanelHeader({
         >
           {title || placeholderTitle}
         </span>
-      ) : customizeTitle ? (
+      ) : customizePanel ? (
         <EuiLink
           color="text"
           data-test-subj={'embeddablePanelTitleLink'}
@@ -194,7 +181,7 @@ export function PanelHeader({
             defaultMessage: 'Click to edit title: {title}',
             values: { title: title || placeholderTitle },
           })}
-          onClick={() => customizeTitle.execute({ embeddable })}
+          onClick={() => customizePanel.execute({ embeddable })}
         >
           {title || placeholderTitle}
         </EuiLink>

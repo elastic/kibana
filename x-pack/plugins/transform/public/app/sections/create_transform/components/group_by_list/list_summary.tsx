@@ -20,7 +20,7 @@ interface ListProps {
 export const GroupByListSummary: React.FC<ListProps> = ({ list }) => {
   const listKeys = Object.keys(list);
   return (
-    <Fragment>
+    <>
       {listKeys.map((optionsDataId: string) => {
         return (
           <Fragment key={optionsDataId}>
@@ -31,6 +31,6 @@ export const GroupByListSummary: React.FC<ListProps> = ({ list }) => {
           </Fragment>
         );
       })}
-    </Fragment>
+    </>
   );
 };

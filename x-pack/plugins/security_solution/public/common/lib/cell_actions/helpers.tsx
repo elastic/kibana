@@ -12,7 +12,6 @@ import {
   HOST_NAME_FIELD_NAME,
   REFERENCE_URL_FIELD_NAME,
   RULE_REFERENCE_FIELD_NAME,
-  SIGNAL_RULE_NAME_FIELD_NAME,
   USER_NAME_FIELD_NAME,
 } from '../../../timelines/components/timeline/body/renderers/constants';
 import { INDICATOR_REFERENCE } from '../../../../common/cti/constants';
@@ -34,11 +33,6 @@ export const COLUMNS_WITH_LINKS = [
     columnId: 'destination.ip',
     fieldType: IP_FIELD_TYPE,
     label: i18n.EXPAND_IP_DETAILS,
-  },
-  {
-    columnId: SIGNAL_RULE_NAME_FIELD_NAME,
-    label: i18n.VIEW_RULE_DETAILS,
-    linkField: 'kibana.alert.rule.uuid',
   },
   {
     columnId: 'signal.rule.name',

@@ -9,10 +9,18 @@
     "objects": []
   },
   "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
     "classes": [
       {
         "parentPluginId": "@kbn/repo-source-classifier",
-        "id": "def-server.RepoSourceClassifier",
+        "id": "def-common.RepoSourceClassifier",
         "type": "Class",
         "tags": [],
         "label": "RepoSourceClassifier",
@@ -23,7 +31,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/repo-source-classifier",
-            "id": "def-server.RepoSourceClassifier.Unnamed",
+            "id": "def-common.RepoSourceClassifier.Unnamed",
             "type": "Function",
             "tags": [],
             "label": "Constructor",
@@ -37,7 +45,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/repo-source-classifier",
-                "id": "def-server.RepoSourceClassifier.Unnamed.$1",
+                "id": "def-common.RepoSourceClassifier.Unnamed.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "resolver",
@@ -45,9 +53,9 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/import-resolver",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnImportResolverPluginApi",
-                    "section": "def-server.ImportResolver",
+                    "section": "def-common.ImportResolver",
                     "text": "ImportResolver"
                   }
                 ],
@@ -61,7 +69,7 @@
           },
           {
             "parentPluginId": "@kbn/repo-source-classifier",
-            "id": "def-server.RepoSourceClassifier.classify",
+            "id": "def-common.RepoSourceClassifier.classify",
             "type": "Function",
             "tags": [],
             "label": "classify",
@@ -76,7 +84,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/repo-source-classifier",
-                "id": "def-server.RepoSourceClassifier.classify.$1",
+                "id": "def-common.RepoSourceClassifier.classify.$1",
                 "type": "string",
                 "tags": [],
                 "label": "absolute",
@@ -102,7 +110,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/repo-source-classifier",
-        "id": "def-server.ModuleType",
+        "id": "def-common.ModuleType",
         "type": "Type",
         "tags": [],
         "label": "ModuleType",
@@ -116,14 +124,6 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": []
   }
 }

@@ -6,13 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EntityIterable } from '../../..';
-import { apm } from '../../lib/apm';
-import { ApmFields } from '../../lib/apm/apm_fields';
-import { timerange } from '../../lib/timerange';
+import { apm, ApmFields, SynthtraceGenerator, timerange } from '@kbn/apm-synthtrace-client';
 
 describe('simple trace', () => {
-  let iterable: EntityIterable<ApmFields>;
+  let iterable: SynthtraceGenerator<ApmFields>;
   let events: Array<Record<string, any>>;
 
   beforeEach(() => {
@@ -45,7 +42,8 @@ describe('simple trace', () => {
               .timestamp(timestamp + 50)
           )
       );
-    events = iterable.toArray();
+
+    events = Array.from(iterable).flatMap((event) => event.serialize());
   });
 
   // TODO this is not entirely factual, since id's are generated of a global sequence number

@@ -311,7 +311,10 @@ export class ForecastsTableUI extends Component {
           return (
             <EuiButtonIcon
               onClick={() => this.openSingleMetricView(forecast)}
-              isDisabled={forecast.forecast_status !== FORECAST_REQUEST_STATE.FINISHED}
+              isDisabled={
+                this.props.job.blocked !== undefined ||
+                forecast.forecast_status !== FORECAST_REQUEST_STATE.FINISHED
+              }
               iconType="visLine"
               aria-label={viewForecastAriaLabel}
             />

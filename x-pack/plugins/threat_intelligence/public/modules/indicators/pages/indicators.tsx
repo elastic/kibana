@@ -6,6 +6,9 @@
  */
 
 import React, { FC, VFC } from 'react';
+import { useBlockListContext } from '../hooks/use_block_list_context';
+import { BlockListProvider } from '../containers/block_list_provider';
+import { BlockListFlyout } from '../../block_list/containers/flyout';
 import { IndicatorsBarChartWrapper } from '../components/barchart';
 import { IndicatorsTable } from '../components/table';
 import { useAggregatedIndicators, useIndicators, useSourcererDataView } from '../hooks';
@@ -22,12 +25,16 @@ import { QueryBar } from '../../query_bar/query_bar';
 const IndicatorsPageProviders: FC = ({ children }) => (
   <IndicatorsFilters>
     <FieldTypesProvider>
-      <InspectorProvider>{children}</InspectorProvider>
+      <InspectorProvider>
+        <BlockListProvider>{children}</BlockListProvider>
+      </InspectorProvider>
     </FieldTypesProvider>
   </IndicatorsFilters>
 );
 
 const IndicatorsPageContent: VFC = () => {
+  const { blockListIndicatorValue } = useBlockListContext();
+
   const { browserFields, indexPattern } = useSourcererDataView();
 
   const columnSettings = useColumnSettings();
@@ -101,6 +108,8 @@ const IndicatorsPageContent: VFC = () => {
           onChangeItemsPerPage={onChangeItemsPerPage}
           onChangePage={onChangePage}
         />
+
+        {blockListIndicatorValue && <BlockListFlyout indicatorFileHash={blockListIndicatorValue} />}
       </DefaultPageLayout>
     </FieldTypesProvider>
   );

@@ -58,6 +58,13 @@ jest.doMock('@kbn/core-ui-settings-server-internal', () => ({
   UiSettingsService: jest.fn(() => mockUiSettingsService),
 }));
 
+import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
+
+export const mockCustomBrandingService = customBrandingServiceMock.create();
+jest.doMock('@kbn/core-custom-branding-server-internal', () => ({
+  CustomBrandingService: jest.fn(() => mockCustomBrandingService),
+}));
+
 export const mockEnsureValidConfiguration = jest.fn();
 jest.doMock('@kbn/core-config-server-internal', () => ({
   ensureValidConfiguration: mockEnsureValidConfiguration,

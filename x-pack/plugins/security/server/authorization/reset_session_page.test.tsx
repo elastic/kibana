@@ -28,6 +28,25 @@ describe('ResetSessionPage', () => {
         logoutUrl="/path/to/logout"
         buildNumber={100500}
         basePath={mockCoreSetup.http.basePath}
+        customBranding={{}}
+      />
+    );
+
+    expect(body).toMatchSnapshot();
+  });
+
+  it('renders as expected with custom page title', async () => {
+    const mockCoreSetup = coreMock.createSetup();
+    (mockCoreSetup.http.basePath.prepend as jest.Mock).mockImplementation(
+      (path) => `/mock-basepath${path}`
+    );
+
+    const body = renderToStaticMarkup(
+      <ResetSessionPage
+        logoutUrl="/path/to/logout"
+        buildNumber={100500}
+        basePath={mockCoreSetup.http.basePath}
+        customBranding={{ pageTitle: 'My Company Name' }}
       />
     );
 

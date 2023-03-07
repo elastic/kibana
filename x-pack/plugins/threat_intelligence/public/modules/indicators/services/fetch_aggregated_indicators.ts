@@ -11,7 +11,7 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { BARCHART_AGGREGATION_NAME, FactoryQueryType } from '../../../../common/constants';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
-import { search } from '../utils/search';
+import { search } from '../../../utils/search';
 import { getIndicatorQueryParams } from '../utils/get_indicator_query_params';
 
 const TIMESTAMP_FIELD = RawIndicatorFieldId.TimeStamp;

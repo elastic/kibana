@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
-import { Route, Switch, Redirect } from 'react-router-dom';
+import { Switch, Redirect } from 'react-router-dom';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import {
   ENGINE_ANALYTICS_PATH,

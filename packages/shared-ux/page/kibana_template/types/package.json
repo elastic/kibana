@@ -2,6 +2,5 @@
   "name": "@kbn/shared-ux-page-kibana-template-types",
   "private": true,
   "version": "1.0.0",
-  "main": "./target_node/index.js",
   "license": "SSPL-1.0 OR Elastic License 2.0"
 }

@@ -9,10 +9,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { keys, clone, uniq, filter, map } from 'lodash';
 import { getDataTableRecords } from '../../../../../__fixtures__/real_hits';
-import type { DataView } from '@kbn/data-views-plugin/public';
-// @ts-expect-error
-import { fieldCalculator } from './field_calculator';
+import { fieldCalculator, FieldCountsParams } from './field_calculator';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { FieldDetails, ValidFieldDetails } from './types';
+import { isValidFieldDetails } from './get_details';
+
+const validateResults = (
+  extensions: FieldDetails,
+  validate: (extensions: ValidFieldDetails) => void
+) => {
+  if (isValidFieldDetails(extensions)) {
+    validate(extensions);
+  } else {
+    throw new Error('extensions is not valid');
+  }
+};
 
 describe('fieldCalculator', function () {
   it('should have a _countMissing that counts nulls & undefineds in an array', function () {
@@ -122,72 +133,67 @@ describe('fieldCalculator', function () {
     it('Should return an array of values for _source fields', function () {
       const extensions = fieldCalculator.getFieldValues(
         hits,
-        dataView.fields.getByName('extension'),
-        dataView
+        dataView.fields.getByName('extension')!
       );
       expect(extensions).toBeInstanceOf(Array);
-      expect(
-        filter(extensions, function (v) {
-          return v === 'html';
-        }).length
-      ).toBe(8);
+      expect(filter(extensions, (v) => v === 'html').length).toBe(8);
       expect(uniq(clone(extensions)).sort()).toEqual(['gif', 'html', 'php', 'png']);
     });
 
     it('Should return an array of values for core meta fields', function () {
-      const types = fieldCalculator.getFieldValues(
-        hits,
-        dataView.fields.getByName('_id'),
-        dataView
-      );
+      const types = fieldCalculator.getFieldValues(hits, dataView.fields.getByName('_id')!);
       expect(types).toBeInstanceOf(Array);
       expect(types.length).toBe(20);
     });
   });
 
   describe('getFieldValueCounts', function () {
-    let params: { hits: any; field: any; count: number; dataView: DataView };
+    let params: FieldCountsParams;
     beforeEach(function () {
       params = {
         hits: getDataTableRecords(dataView),
-        field: dataView.fields.getByName('extension'),
+        field: dataView.fields.getByName('extension')!,
         count: 3,
         dataView,
       };
     });
 
     it('counts the top 3 values', function () {
-      const extensions = fieldCalculator.getFieldValueCounts(params);
-      expect(extensions).toBeInstanceOf(Object);
-      expect(extensions.buckets).toBeInstanceOf(Array);
-      expect(extensions.buckets.length).toBe(3);
-      expect(map(extensions.buckets, 'value')).toEqual(['html', 'php', 'gif']);
-      expect(extensions.error).toBe(undefined);
+      validateResults(fieldCalculator.getFieldValueCounts(params), (extensions) => {
+        expect(extensions).toBeInstanceOf(Object);
+        expect(extensions.buckets).toBeInstanceOf(Array);
+        expect(extensions.buckets.length).toBe(3);
+        expect(map(extensions.buckets, 'value')).toEqual(['html', 'php', 'gif']);
+      });
     });
 
     it('fails to analyze geo and attachment types', function () {
-      params.field = dataView.fields.getByName('point');
-      expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
+      params.field = dataView.fields.getByName('point')!;
+      expect(isValidFieldDetails(fieldCalculator.getFieldValueCounts(params))).toBeFalsy();
 
-      params.field = dataView.fields.getByName('area');
-      expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
+      params.field = dataView.fields.getByName('area')!;
+      expect(isValidFieldDetails(fieldCalculator.getFieldValueCounts(params))).toBeFalsy();
 
-      params.field = dataView.fields.getByName('request_body');
-      expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
+      params.field = dataView.fields.getByName('request_body')!;
+      expect(isValidFieldDetails(fieldCalculator.getFieldValueCounts(params))).toBeFalsy();
     });
 
     it('fails to analyze fields that are in the mapping, but not the hits', function () {
-      params.field = dataView.fields.getByName('ip');
-      expect(fieldCalculator.getFieldValueCounts(params).error).not.toBe(undefined);
+      params.field = dataView.fields.getByName('ip')!;
+      expect(isValidFieldDetails(fieldCalculator.getFieldValueCounts(params))).toBeFalsy();
     });
 
     it('counts the total hits', function () {
-      expect(fieldCalculator.getFieldValueCounts(params).total).toBe(params.hits.length);
+      validateResults(fieldCalculator.getFieldValueCounts(params), (extensions) => {
+        expect(extensions.total).toBe(params.hits.length);
+      });
     });
 
     it('counts the hits the field exists in', function () {
-      params.field = dataView.fields.getByName('phpmemory');
-      expect(fieldCalculator.getFieldValueCounts(params).exists).toBe(5);
+      params.field = dataView.fields.getByName('phpmemory')!;
+      validateResults(fieldCalculator.getFieldValueCounts(params), (extensions) => {
+        expect(extensions.exists).toBe(5);
+      });
     });
   });
 });

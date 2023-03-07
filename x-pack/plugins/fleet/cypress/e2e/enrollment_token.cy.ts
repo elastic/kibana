@@ -49,6 +49,12 @@ describe('Enrollment token page', () => {
     cy.get('.euiPanel').contains('Are you sure you want to revoke');
     cy.get('.euiButton').contains('Revoke enrollment token').click({ force: true });
 
-    cy.getBySel(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN).first().should('not.exist');
+    cy.getBySel(ENROLLMENT_TOKENS.LIST_TABLE).within(() => {
+      cy.get('.euiTableRow')
+        .first()
+        .within(() => {
+          cy.getBySel(ENROLLMENT_TOKENS.TABLE_REVOKE_BTN).should('not.exist');
+        });
+    });
   });
 });

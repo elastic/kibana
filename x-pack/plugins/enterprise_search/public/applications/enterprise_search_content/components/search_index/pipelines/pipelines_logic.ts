@@ -8,6 +8,7 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_PIPELINE_VALUES } from '../../../../../../common/constants';
@@ -17,11 +18,7 @@ import { IngestPipelineParams } from '../../../../../../common/types/connectors'
 import { ElasticsearchIndexWithIngestion } from '../../../../../../common/types/indices';
 import { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { Actions } from '../../../../shared/api_logic/create_api_logic';
-import {
-  clearFlashMessages,
-  flashAPIErrors,
-  flashSuccessToast,
-} from '../../../../shared/flash_messages';
+import { flashSuccessToast } from '../../../../shared/flash_messages';
 
 import {
   FetchDefaultPipelineApiLogic,
@@ -69,6 +66,10 @@ import {
 } from '../../../api/pipelines/detach_ml_inference_pipeline';
 
 import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_processors';
+import {
+  RevertConnectorPipelineActions,
+  RevertConnectorPipelineApilogic,
+} from '../../../api/pipelines/revert_connector_pipeline_api_logic';
 import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 
 type PipelinesActions = Pick<
@@ -80,7 +81,8 @@ type PipelinesActions = Pick<
     AttachMlInferencePipelineResponse
   >['apiSuccess'];
   closeAddMlInferencePipelineModal: () => void;
-  closeModal: () => void;
+  closeDeleteModal: () => void;
+  closePipelineSettings: () => void;
   createCustomPipeline: Actions<
     CreateCustomPipelineApiLogicArgs,
     CreateCustomPipelineApiLogicResponse
@@ -135,7 +137,9 @@ type PipelinesActions = Pick<
   fetchMlInferenceProcessors: typeof FetchMlInferencePipelineProcessorsApiLogic.actions.makeRequest;
   fetchMlInferenceProcessorsApiError: (error: HttpError) => HttpError;
   openAddMlInferencePipelineModal: () => void;
-  openModal: () => void;
+  openDeleteModal: () => void;
+  openPipelineSettings: () => void;
+  revertPipelineSuccess: RevertConnectorPipelineActions['apiSuccess'];
   savePipeline: () => void;
   setPipelineState(pipeline: IngestPipelineParams): {
     pipeline: IngestPipelineParams;
@@ -151,19 +155,23 @@ interface PipelinesValues {
   hasIndexIngestionPipeline: boolean;
   index: CachedFetchIndexApiLogicValues['fetchIndexApiData'];
   indexName: string;
+  isDeleteModalOpen: boolean;
   mlInferencePipelineProcessors: InferencePipeline[];
   pipelineName: string;
   pipelineState: IngestPipelineParams;
   showAddMlInferencePipelineModal: boolean;
-  showModal: boolean;
+  showMissingPipelineCallout: boolean;
+  showPipelineSettings: boolean;
 }
 
 export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesActions>>({
   actions: {
     closeAddMlInferencePipelineModal: true,
-    closeModal: true,
+    closeDeleteModal: true,
+    closePipelineSettings: true,
     openAddMlInferencePipelineModal: true,
-    openModal: true,
+    openDeleteModal: true,
+    openPipelineSettings: true,
     savePipeline: true,
     setPipelineState: (pipeline: IngestPipelineParams) => ({ pipeline }),
   },
@@ -204,6 +212,8 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         'apiSuccess as detachMlPipelineSuccess',
         'makeRequest as detachMlPipeline',
       ],
+      RevertConnectorPipelineApilogic,
+      ['apiSuccess as revertPipelineSuccess'],
     ],
     values: [
       FetchCustomPipelineApiLogic,
@@ -227,7 +237,6 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
     },
   }),
   listeners: ({ actions, values }) => ({
-    apiError: (error) => flashAPIErrors(error),
     apiSuccess: ({ pipeline }) => {
       if (isConnectorIndex(values.index) || isCrawlerIndex(values.index)) {
         if (values.index.connector) {
@@ -238,11 +247,6 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
           });
         }
       }
-      flashSuccessToast(
-        i18n.translate('xpack.enterpriseSearch.content.indices.pipelines.successToast.title', {
-          defaultMessage: 'Pipelines successfully updated',
-        })
-      );
     },
     attachMlInferencePipelineSuccess: () => {
       // Re-fetch processors to ensure we display newly added ml processor
@@ -250,23 +254,15 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       // Needed to ensure correct JSON is available in the JSON configurations tab
       actions.fetchCustomPipeline({ indexName: values.index.name });
     },
-    closeModal: () =>
+    closePipelineSettings: () =>
       actions.setPipelineState(
         isConnectorIndex(values.index) || isCrawlerIndex(values.index)
           ? values.index.connector?.pipeline ?? values.defaultPipelineValues
           : values.defaultPipelineValues
       ),
-    createCustomPipelineError: (error) => flashAPIErrors(error),
-    createCustomPipelineSuccess: ({ created }) => {
-      flashSuccessToast(
-        i18n.translate(
-          'xpack.enterpriseSearch.content.indices.pipelines.successToastCustom.title',
-          {
-            defaultMessage: 'Custom pipeline successfully created',
-          }
-        )
-      );
-      actions.setPipelineState({ ...values.pipelineState, name: created[0] });
+    createCustomPipelineSuccess: (created) => {
+      actions.fetchCustomPipelineSuccess(created);
+      actions.setPipelineState({ ...values.pipelineState, name: values.indexName });
       actions.savePipeline();
       actions.fetchCustomPipeline({ indexName: values.index.name });
     },
@@ -276,7 +272,6 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       // Needed to ensure correct JSON is available in the JSON configurations tab
       actions.fetchCustomPipeline({ indexName: values.index.name });
     },
-    deleteMlPipelineError: (error) => flashAPIErrors(error),
     deleteMlPipelineSuccess: (value) => {
       if (value.deleted) {
         flashSuccessToast(
@@ -296,7 +291,6 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       // Needed to ensure correct JSON is available in the JSON configurations tab
       actions.fetchCustomPipeline({ indexName: values.index.name });
     },
-    detachMlPipelineError: (error) => flashAPIErrors(error),
     detachMlPipelineSuccess: (response) => {
       if (response.updated) {
         flashSuccessToast(
@@ -317,7 +311,7 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       actions.fetchCustomPipeline({ indexName: values.index.name });
     },
     fetchIndexApiSuccess: (index) => {
-      if (!values.showModal) {
+      if (!values.showPipelineSettings) {
         // Don't do this when the modal is open to avoid overwriting the values while editing
         const pipeline =
           isConnectorIndex(index) || isCrawlerIndex(index)
@@ -326,13 +320,25 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         actions.setPipelineState(pipeline ?? values.defaultPipelineValues);
       }
     },
-    makeRequest: () => clearFlashMessages(),
-    openModal: () => {
+    openPipelineSettings: () => {
       const pipeline =
         isCrawlerIndex(values.index) || isConnectorIndex(values.index)
           ? values.index.connector?.pipeline
           : values.defaultPipelineValues;
       actions.setPipelineState(pipeline ?? values.defaultPipelineValues);
+    },
+    revertPipelineSuccess: () => {
+      if (isConnectorIndex(values.index) || isCrawlerIndex(values.index)) {
+        if (values.index.connector) {
+          // had to split up these if checks rather than nest them or typescript wouldn't recognize connector as defined
+          actions.fetchIndexApiSuccess({
+            ...values.index,
+            connector: { ...values.index.connector, pipeline: values.defaultPipelineValues },
+          });
+          actions.fetchCustomPipelineSuccess({});
+        }
+      }
+      actions.fetchCustomPipeline({ indexName: values.indexName });
     },
     savePipeline: () => {
       if (isConnectorIndex(values.index) || isCrawlerIndex(values.index)) {
@@ -347,6 +353,14 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
   }),
   path: ['enterprise_search', 'content', 'pipelines'],
   reducers: () => ({
+    isDeleteModalOpen: [
+      false,
+      {
+        closeDeleteModal: () => false,
+        openDeleteModal: () => true,
+        revertPipelineSuccess: () => false,
+      },
+    ],
     pipelineState: [
       DEFAULT_PIPELINE_VALUES,
       {
@@ -362,12 +376,12 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
         openAddMlInferencePipelineModal: () => true,
       },
     ],
-    showModal: [
+    showPipelineSettings: [
       false,
       {
         apiSuccess: () => false,
-        closeModal: () => false,
-        openModal: () => true,
+        closePipelineSettings: () => false,
+        openPipelineSettings: () => true,
       },
     ],
   }),
@@ -401,6 +415,26 @@ export const PipelinesLogic = kea<MakeLogicType<PipelinesValues, PipelinesAction
       () => [selectors.pipelineState, selectors.customPipelineData, selectors.indexName],
       (pipelineState, customPipelineData, indexName) =>
         customPipelineData && customPipelineData[indexName] ? indexName : pipelineState.name,
+    ],
+    showMissingPipelineCallout: [
+      () => [
+        selectors.hasIndexIngestionPipeline,
+        selectors.pipelineName,
+        selectors.customPipelineData,
+        selectors.index,
+      ],
+      (
+        hasCustomPipeline: boolean,
+        pipelineName: string,
+        customPipelineData: Record<string, IngestPipeline | undefined> | undefined,
+        index: ElasticsearchIndexWithIngestion
+      ) =>
+        Boolean(
+          hasCustomPipeline &&
+            customPipelineData &&
+            !customPipelineData[pipelineName] &&
+            isConnectorIndex(index)
+        ),
     ],
   }),
 });

@@ -189,8 +189,8 @@ describe('ServiceIcons', () => {
           data: {
             agentName: 'java',
             containerType: 'Kubernetes',
-            serverlessType: 'lambda',
-            cloudProvider: 'gcp',
+            serverlessType: 'aws.lambda',
+            cloudProvider: 'aws',
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           refetch: jest.fn(),
@@ -234,7 +234,7 @@ describe('ServiceIcons', () => {
             agentName: 'java',
             containerType: 'Kubernetes',
             serverlessType: '',
-            cloudProvider: 'gcp',
+            cloudProvider: 'aws',
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           refetch: jest.fn(),
@@ -279,8 +279,8 @@ describe('ServiceIcons', () => {
           data: {
             agentName: 'java',
             containerType: 'Kubernetes',
-            serverlessType: 'lambda',
-            cloudProvider: 'gcp',
+            serverlessType: 'aws.lambda',
+            cloudProvider: 'aws',
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           refetch: jest.fn(),
@@ -320,9 +320,9 @@ describe('ServiceIcons', () => {
       expect(getByTestId('serverless')).toBeInTheDocument();
       expect(getByTestId('cloud')).toBeInTheDocument();
 
-      fireEvent.click(getByTestId('popover_Serverless'));
+      fireEvent.click(getByTestId('popover_AWS Lambda'));
       expect(queryAllByTestId('loading-content')).toHaveLength(0);
-      expect(getByText('Serverless')).toBeInTheDocument();
+      expect(getByText('AWS Lambda')).toBeInTheDocument();
       expect(getByText('lambda-java-dev')).toBeInTheDocument();
       expect(getByText('datasource')).toBeInTheDocument();
       expect(getByText('http')).toBeInTheDocument();
@@ -334,8 +334,8 @@ describe('ServiceIcons', () => {
           data: {
             agentName: 'java',
             containerType: 'Kubernetes',
-            serverlessType: 'lambda',
-            cloudProvider: 'gcp',
+            serverlessType: 'aws.lambda',
+            cloudProvider: 'aws',
           },
           status: fetcherHook.FETCH_STATUS.SUCCESS,
           refetch: jest.fn(),

@@ -7,7 +7,12 @@
  */
 
 import { encode } from '@kbn/rison';
-import Handlebars, { ExtendedCompileOptions, compileFnName } from '@kbn/handlebars';
+import Handlebars, {
+  type CompileOptions,
+  type HelperOptions,
+  type HelperDelegate,
+  compileFnName,
+} from '@kbn/handlebars';
 import { i18n } from '@kbn/i18n';
 import { emptyLabel } from '../../../../common/empty_label';
 
@@ -16,9 +21,9 @@ const handlebars = Handlebars.create();
 function createSerializationHelper(
   fnName: string,
   serializeFn: (value: unknown) => string
-): Handlebars.HelperDelegate {
+): HelperDelegate {
   return (...args) => {
-    const { hash } = args.slice(-1)[0] as Handlebars.HelperOptions;
+    const { hash } = args.slice(-1)[0] as HelperOptions;
     const hasHash = Object.keys(hash).length > 0;
     const hasValues = args.length > 1;
     if (hasHash && hasValues) {
@@ -53,7 +58,7 @@ export function replaceVars(
   str: string,
   args: Record<string, unknown> = {},
   vars: Record<string, unknown> = {},
-  compileOptions: Partial<ExtendedCompileOptions> = {}
+  compileOptions: Partial<CompileOptions> = {}
 ) {
   try {
     /** we need add '[]' for emptyLabel because this value contains special characters.

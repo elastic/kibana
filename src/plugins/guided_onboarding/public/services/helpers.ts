@@ -12,8 +12,10 @@ import type {
   GuideState,
   GuideStep,
   StepStatus,
+  GuideConfig,
+  StepConfig,
 } from '@kbn/guided-onboarding';
-import type { GuidesConfig, PluginState, GuideConfig, StepConfig } from '../../common';
+import type { GuidesConfig, PluginState } from '../../common';
 
 export const findGuideConfigByGuideId = (
   guidesConfig?: GuidesConfig,

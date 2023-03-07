@@ -14,11 +14,18 @@ const mockGetTranslationPaths = getTranslationPaths as jest.Mock;
 jest.mock('./get_translation_paths', () => ({
   getTranslationPaths: jest.fn().mockResolvedValue([]),
 }));
-jest.mock('@kbn/utils', () => ({
+jest.mock('@kbn/repo-info', () => ({
   fromRoot: jest.fn().mockImplementation((path: string) => path),
 }));
+jest.mock('@kbn/repo-packages', () => {
+  return {
+    getPackages: jest.fn().mockReturnValue([]),
+    getPluginPackagesFilter: jest.fn().mockImplementation(() => () => false),
+  };
+});
 
 const locale = 'en';
+const { getPackages, getPluginPackagesFilter } = jest.requireMock('@kbn/repo-packages');
 
 describe('getKibanaTranslationPaths', () => {
   beforeEach(() => {
@@ -66,5 +73,22 @@ describe('getKibanaTranslationPaths', () => {
     const translationFiles = await getKibanaTranslationFiles('en', []);
 
     expect(translationFiles).toEqual(['/root/en.json', '/kibana-extra/en.json']);
+  });
+
+  it('looks for translation paths in filters plugin packages', async () => {
+    const package1 = { directory: 'package1' };
+    const package2 = { directory: 'package2' };
+    const filter = jest.fn((p: any) => p === package2);
+
+    getPackages.mockReturnValue([package1, package2]);
+    getPluginPackagesFilter.mockReturnValue(filter);
+
+    await getKibanaTranslationFiles(locale, []);
+    expect(getPackages).toHaveBeenCalledTimes(1);
+    expect(getPluginPackagesFilter).toHaveBeenCalledTimes(1);
+    expect(filter).toHaveBeenCalledTimes(2);
+    expect(mockGetTranslationPaths).toHaveBeenCalledTimes(3);
+    expect(mockGetTranslationPaths).not.toHaveBeenCalledWith({ cwd: 'package1', nested: false });
+    expect(mockGetTranslationPaths).toHaveBeenCalledWith({ cwd: 'package2', nested: false });
   });
 });

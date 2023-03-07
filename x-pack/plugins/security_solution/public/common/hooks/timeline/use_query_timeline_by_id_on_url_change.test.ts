@@ -7,7 +7,6 @@
 
 import { queryTimelineById } from '../../../timelines/components/open_timeline/helpers';
 import { useQueryTimelineByIdOnUrlChange } from './use_query_timeline_by_id_on_url_change';
-import * as urlHelpers from '../../utils/global_query_string/helpers';
 import { renderHook } from '@testing-library/react-hooks';
 import { timelineDefaults } from '../../../timelines/store/timeline/defaults';
 
@@ -91,15 +90,11 @@ describe('queryTimelineByIdOnUrlChange', () => {
 
   describe('when decode rison fails', () => {
     it('should not call queryTimelineById', () => {
-      jest.spyOn(urlHelpers, 'decodeRisonUrlState').mockImplementationOnce(() => {
-        throw new Error('Unable to decode');
-      });
-
       mockUseLocation.mockReturnValue({ search: oldTimelineRisonSearchString });
 
       const { rerender } = renderHook(() => useQueryTimelineByIdOnUrlChange());
-      mockUseLocation.mockReturnValue({ search: newTimelineRisonSearchString });
-      jest.clearAllMocks();
+      mockUseLocation.mockReturnValue({ search: '?foo=bar' });
+
       rerender();
 
       expect(queryTimelineById).not.toBeCalled();

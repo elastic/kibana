@@ -27,4 +27,5 @@ export const HOST_BY_RISK_TABLE_PERPAGE_OPTIONS =
 export const HOST_BY_RISK_TABLE_NEXT_PAGE_BUTTON =
   '[data-test-subj="numberedPagination"] [data-test-subj="pagination-button-next"]';
 
-export const HOST_BY_RISK_TABLE_HOSTNAME_CELL = '[data-test-subj="render-content-host.name"]';
+export const HOST_BY_RISK_TABLE_HOSTNAME_CELL =
+  '[data-test-subj="cellActions-renderContent-host.name"]';

@@ -9,8 +9,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
+import { UX_APP } from '../../../../context/constants';
 import { ObservabilityPublicPluginsStart } from '../../../..';
-import type { AppDataType } from '../../../shared/exploratory_view/types';
 import { SectionContainer } from '..';
 import { getDataHandler } from '../../../../data_handler';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
@@ -52,7 +52,7 @@ export function UXSection({ bucketSize }: Props) {
         [SERVICE_NAME]: ['ALL_VALUES'],
       },
       breakdown: SERVICE_NAME,
-      dataType: 'ux' as AppDataType,
+      dataType: UX_APP,
       selectedMetricField: TRANSACTION_DURATION,
       showPercentileAnnotations: false,
     },

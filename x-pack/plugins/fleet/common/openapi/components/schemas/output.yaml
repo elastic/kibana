@@ -35,6 +35,25 @@ properties:
         type: string
       key:
         type: string
+  proxy_id:
+    type: string
+  shipper:
+    type: object
+    properties:
+      disk_queue_enabled:
+        type: boolean
+      disk_queue_path:
+        type: string
+      disk_queue_max_size:
+        type: number
+      disk_queue_encryption_enabled:
+        type: boolean
+      disk_queue_compression_enabled:
+        type: boolean
+      compression_level:
+        type: number
+      loadbalance:
+        type: boolean
 required:
   - id
   - is_default

@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
+import { i18n } from '@kbn/i18n';
+
+import { Actions, createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 
 export interface CancelSyncsApiArgs {
@@ -17,4 +19,11 @@ export const cancelSyncs = async ({ connectorId }: CancelSyncsApiArgs) => {
   return await HttpLogic.values.http.post(route);
 };
 
-export const CancelSyncsApiLogic = createApiLogic(['cancel_syncs_api_logic'], cancelSyncs);
+export const CancelSyncsApiLogic = createApiLogic(['cancel_syncs_api_logic'], cancelSyncs, {
+  showSuccessFlashFn: () =>
+    i18n.translate('xpack.enterpriseSearch.content.searchIndex.cancelSyncs.successMessage', {
+      defaultMessage: 'Successfully canceled syncs',
+    }),
+});
+
+export type CancelSyncsActions = Actions<CancelSyncsApiArgs, {}>;

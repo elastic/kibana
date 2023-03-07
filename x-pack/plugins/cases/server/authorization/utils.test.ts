@@ -10,6 +10,7 @@ import { OWNER_FIELD } from '../../common/api';
 import {
   combineFilterWithAuthorizationFilter,
   ensureFieldIsSafeForQuery,
+  groupByAuthorization,
   getOwnersFilter,
   includeFieldsRequiredForAuthentication,
 } from './utils';
@@ -274,6 +275,33 @@ describe('utils', () => {
           "type": "function",
         }
       `);
+    });
+  });
+
+  describe('groupByAuthorization', () => {
+    const cases = [
+      { id: '1', type: 'cases', references: [], attributes: { owner: 'cases' } },
+      { id: '2', type: 'cases', references: [], attributes: { owner: 'securitySolution' } },
+      { id: '3', type: 'cases', references: [], attributes: { owner: 'securitySolution' } },
+    ];
+
+    it('partitions authorized and unauthorized cases correctly', () => {
+      const authorizedOwners = ['cases'];
+
+      const res = groupByAuthorization(cases, authorizedOwners);
+      expect(res).toEqual({ authorized: [cases[0]], unauthorized: [cases[1], cases[2]] });
+    });
+
+    it('partitions authorized and unauthorized cases correctly when there are not authorized entities', () => {
+      const res = groupByAuthorization(cases, []);
+      expect(res).toEqual({ authorized: [], unauthorized: cases });
+    });
+
+    it('partitions authorized and unauthorized cases correctly when there are no saved objects', () => {
+      const authorizedOwners = ['cases'];
+
+      const res = groupByAuthorization([], authorizedOwners);
+      expect(res).toEqual({ authorized: [], unauthorized: [] });
     });
   });
 });

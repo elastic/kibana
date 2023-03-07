@@ -11,12 +11,13 @@ import * as t from 'io-ts';
 import React from 'react';
 import { TopNFunctionSortField, topNFunctionSortFieldRt } from '../../common/functions';
 import { StackTracesDisplayOption, TopNType } from '../../common/stack_traces';
-import { FlameGraphComparisonMode } from '../../common/flamegraph';
+import { FlameGraphComparisonMode, FlameGraphNormalizationMode } from '../../common/flamegraph';
 import { FlameGraphsView } from '../components/flame_graphs_view';
 import { FunctionsView } from '../components/functions_view';
 import { RedirectTo } from '../components/redirect_to';
 import { RouteBreadcrumb } from '../components/route_breadcrumb';
 import { StackTracesView } from '../components/stack_traces_view';
+import { NoDataPage } from '../components/no_data_page';
 
 const routes = {
   '/': {
@@ -31,6 +32,15 @@ const routes = {
       </RouteBreadcrumb>
     ),
     children: {
+      '/add-data-instructions': {
+        element: (
+          <NoDataPage
+            subTitle={i18n.translate('xpack.profiling.addDataTitle', {
+              defaultMessage: 'Select an option below to deploy the host-agent.',
+            })}
+          />
+        ),
+      },
       '/': {
         children: {
           '/stacktraces/{topNType}': {
@@ -61,7 +71,7 @@ const routes = {
             },
           },
           '/stacktraces': {
-            element: <RedirectTo pathname="/stacktraces/containers" />,
+            element: <RedirectTo pathname="/stacktraces/threads" />,
           },
           '/flamegraphs': {
             element: (
@@ -101,19 +111,30 @@ const routes = {
                   </RouteBreadcrumb>
                 ),
                 params: t.type({
-                  query: t.type({
-                    comparisonRangeFrom: t.string,
-                    comparisonRangeTo: t.string,
-                    comparisonKuery: t.string,
-                    comparisonMode: t.union([
-                      t.literal(FlameGraphComparisonMode.Absolute),
-                      t.literal(FlameGraphComparisonMode.Relative),
-                    ]),
-                  }),
+                  query: t.intersection([
+                    t.type({
+                      comparisonRangeFrom: t.string,
+                      comparisonRangeTo: t.string,
+                      comparisonKuery: t.string,
+                      comparisonMode: t.union([
+                        t.literal(FlameGraphComparisonMode.Absolute),
+                        t.literal(FlameGraphComparisonMode.Relative),
+                      ]),
+                    }),
+                    t.partial({
+                      normalizationMode: t.union([
+                        t.literal(FlameGraphNormalizationMode.Scale),
+                        t.literal(FlameGraphNormalizationMode.Time),
+                      ]),
+                      baseline: toNumberRt,
+                      comparison: toNumberRt,
+                    }),
+                  ]),
                 }),
                 defaults: {
                   query: {
                     comparisonMode: FlameGraphComparisonMode.Absolute,
+                    normalizationMode: FlameGraphNormalizationMode.Time,
                   },
                 },
               },
@@ -179,7 +200,7 @@ const routes = {
             },
           },
           '/': {
-            element: <RedirectTo pathname="/stacktraces/containers" />,
+            element: <RedirectTo pathname="/stacktraces/threads" />,
           },
         },
         element: <Outlet />,

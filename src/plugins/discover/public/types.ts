@@ -7,11 +7,12 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { type DatatableColumn } from '@kbn/expressions-plugin/common';
 
 export type ValueToStringConverter = (
   rowIndex: number,
   columnId: string,
-  options?: { disableMultiline?: boolean }
+  options?: { compatibleWithCSV?: boolean }
 ) => { formattedString: string; withFormula: boolean };
 
 export interface EsHitRecord extends Omit<estypes.SearchHit, '_source'> {
@@ -37,4 +38,9 @@ export interface DataTableRecord {
    * Determines that the given doc is the anchor doc when rendering view surrounding docs
    */
   isAnchor?: boolean;
+}
+
+export interface RecordsFetchResponse {
+  records: DataTableRecord[];
+  textBasedQueryColumns?: DatatableColumn[];
 }

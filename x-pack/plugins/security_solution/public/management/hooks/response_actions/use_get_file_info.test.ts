@@ -61,18 +61,18 @@ describe('When using the `useGetFileInfo()` hook', () => {
     expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalledWith({
       path: resolvePathVariables(ACTION_AGENT_FILE_INFO_ROUTE, {
         action_id: '123',
-        agent_id: 'agent-a',
+        file_id: '123.agent-a',
       }),
     });
   });
 
   it('should allow specific agent id to be set on input', async () => {
-    await renderReactQueryHook(() => useGetFileInfo(actionDetailsMock, 'abc'));
+    await renderReactQueryHook(() => useGetFileInfo(actionDetailsMock, 'agent-a'));
 
     expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalledWith({
       path: resolvePathVariables(ACTION_AGENT_FILE_INFO_ROUTE, {
         action_id: '123',
-        agent_id: 'abc',
+        file_id: '123.agent-a',
       }),
     });
   });

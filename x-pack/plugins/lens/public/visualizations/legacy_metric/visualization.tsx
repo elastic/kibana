@@ -232,7 +232,7 @@ export const getLegacyMetricVisualization = ({
             ? [
                 {
                   columnId: props.state.accessor,
-                  triggerIcon: hasColoring ? 'colorBy' : undefined,
+                  triggerIconType: hasColoring ? 'colorBy' : undefined,
                   palette: hasColoring ? stops.map(({ color }) => color) : undefined,
                 },
               ]
@@ -310,11 +310,6 @@ export const getLegacyMetricVisualization = ({
       </KibanaThemeProvider>,
       domElement
     );
-  },
-
-  getErrorMessages(state) {
-    // Is it possible to break it?
-    return undefined;
   },
 
   getVisualizationInfo(state: LegacyMetricState) {

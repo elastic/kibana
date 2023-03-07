@@ -41,6 +41,9 @@ const createMock = () => {
   return mocked;
 };
 
+/**
+ * @deprecated See https://github.com/elastic/kibana/issues/149098
+ */
 export const savedObjectsServiceMock = {
   create: createMock,
   createStartContract: createStartContractMock,

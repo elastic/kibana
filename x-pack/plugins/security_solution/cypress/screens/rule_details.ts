@@ -59,7 +59,7 @@ export const INVESTIGATION_NOTES_MARKDOWN = 'test markdown';
 
 export const INVESTIGATION_NOTES_TOGGLE = '[data-test-subj="stepAboutDetailsToggle-notes"]';
 
-export const MACHINE_LEARNING_JOB_ID = '[data-test-subj="machineLearningJobId"]';
+export const MACHINE_LEARNING_JOB_ID = '[data-test-subj="machineLearningJob"]';
 
 export const MACHINE_LEARNING_JOB_STATUS = '[data-test-subj="machineLearningJobStatus"]';
 
@@ -70,7 +70,7 @@ export const NEW_TERMS_FIELDS_DETAILS = 'Fields';
 export const NEW_TERMS_HISTORY_WINDOW_DETAILS = 'History Window Size';
 
 export const FIELDS_BROWSER_BTN =
-  '[data-test-subj="events-viewer-panel"] [data-test-subj="show-field-browser"]';
+  '[data-test-subj="alertsTable"] [data-test-subj="show-field-browser"]';
 
 export const REFRESH_BUTTON = '[data-test-subj="refreshButton"]';
 
@@ -119,8 +119,6 @@ export const TIMELINE_FIELD = (field: string) => {
 export const removeExternalLinkText = (str: string) =>
   str.replace(/\(opens in a new tab or window\)/g, '');
 
-export const BACK_TO_RULES = '[data-test-subj="ruleDetailsBackToAllRules"]';
-
 export const DEFINE_RULE_PANEL_PROGRESS =
   '[data-test-subj="defineRule"] [data-test-subj="stepPanelProgress"]';
 
@@ -131,3 +129,5 @@ export const THREAT_TACTIC = '[data-test-subj="threatTacticLink"]';
 export const THREAT_TECHNIQUE = '[data-test-subj="threatTechniqueLink"]';
 
 export const THREAT_SUBTECHNIQUE = '[data-test-subj="threatSubtechniqueLink"]';
+
+export const BACK_TO_RULES_TABLE = '[data-test-subj="breadcrumb"][title="Rules"]';

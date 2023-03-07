@@ -26,23 +26,23 @@ import { useBreakpoints } from '../../../../hooks/use_breakpoints';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { useApmRouter } from '../../../../hooks/use_apm_router';
-import { useFiltersForMobileCharts } from './use_filters_for_mobile_charts';
 import { ServiceOverviewThroughputChart } from '../../service_overview/service_overview_throughput_chart';
 import { TransactionsTable } from '../../../shared/transactions_table';
 import {
-  DEVICE_MODEL_NAME,
+  DEVICE_MODEL_IDENTIFIER,
   HOST_OS_VERSION,
   NETWORK_CONNECTION_TYPE,
   SERVICE_VERSION,
 } from '../../../../../common/es_fields/apm';
 import { MostUsedChart } from './most_used_chart';
-import { MobileFilters } from './filters';
-import { LatencyMap } from './latency_map';
+import { GeoMap } from './geo_map';
 import { FailedTransactionRateChart } from '../../../shared/charts/failed_transaction_rate_chart';
 import { ServiceOverviewDependenciesTable } from '../../service_overview/service_overview_dependencies_table';
-import { AggregatedTransactionsBadge } from '../../../shared/aggregated_transactions_badge';
 import { LatencyChart } from '../../../shared/charts/latency_chart';
-
+import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for_embeddable_charts';
+import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
+import { MobileStats } from './stats/stats';
+import { MobileLocationStats } from './stats/location_stats';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -50,9 +50,8 @@ import { LatencyChart } from '../../../shared/charts/latency_chart';
 export const chartHeight = 288;
 
 export function MobileServiceOverview() {
-  const { serviceName, fallbackToTransactions } = useApmServiceContext();
+  const { serviceName } = useApmServiceContext();
   const router = useApmRouter();
-  const filters = useFiltersForMobileCharts();
 
   const {
     query,
@@ -61,13 +60,27 @@ export function MobileServiceOverview() {
       kuery,
       rangeFrom,
       rangeTo,
-      netConnectionType,
       device,
       osVersion,
       appVersion,
-      transactionType,
+      netConnectionType,
+      offset,
+      comparisonEnabled,
     },
   } = useApmParams('/mobile-services/{serviceName}/overview');
+
+  const embeddableFilters = useFiltersForEmbeddableCharts({
+    serviceName,
+    environment,
+  });
+
+  const kueryWithMobileFilters = getKueryWithMobileFilters({
+    device,
+    osVersion,
+    appVersion,
+    netConnectionType,
+    kuery,
+  });
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const dependenciesLink = router.link('/services/{serviceName}/dependencies', {
@@ -100,26 +113,6 @@ export function MobileServiceOverview() {
     >
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <MobileFilters
-              start={start}
-              end={end}
-              environment={environment}
-              transactionType={transactionType}
-              kuery={kuery}
-              filters={{
-                device,
-                osVersion,
-                appVersion,
-                netConnectionType,
-              }}
-            />
-          </EuiFlexItem>
-          {fallbackToTransactions && (
-            <EuiFlexItem>
-              <AggregatedTransactionsBadge />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem>
             <EuiHorizontalRule />
           </EuiFlexItem>
@@ -156,102 +149,127 @@ export function MobileServiceOverview() {
             <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup gutterSize="s">
-              <EuiFlexItem grow={5}>
-                <EuiPanel hasBorder={true}>
-                  <LatencyMap filters={filters} />
-                </EuiPanel>
-              </EuiFlexItem>
-
-              <EuiFlexItem grow={7}>
-                <EuiPanel hasBorder={true}>
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xs">
-                      <h2>
-                        {i18n.translate(
-                          'xpack.apm.serviceOverview.mostUsedTitle',
-                          {
-                            defaultMessage: 'Most used',
-                          }
-                        )}
-                      </h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexGroup direction={rowDirection} gutterSize="s">
-                    {/* Device */}
-                    <EuiFlexItem>
-                      <MostUsedChart
-                        title={i18n.translate(
-                          'xpack.apm.serviceOverview.mostUsed.device',
-                          {
-                            defaultMessage: 'Devices',
-                          }
-                        )}
-                        metric={DEVICE_MODEL_NAME}
-                        start={start}
-                        end={end}
-                        kuery={kuery}
-                        filters={filters}
-                      />
-                    </EuiFlexItem>
-                    {/* NCT */}
-                    <EuiFlexItem>
-                      <MostUsedChart
-                        title={i18n.translate(
-                          'xpack.apm.serviceOverview.mostUsed.nct',
-                          {
-                            defaultMessage: 'Network Connection Type',
-                          }
-                        )}
-                        metric={NETWORK_CONNECTION_TYPE}
-                        start={start}
-                        end={end}
-                        kuery={kuery}
-                        filters={filters}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <EuiFlexGroup>
-                    {/* OS version */}
-                    <EuiFlexItem>
-                      <MostUsedChart
-                        title={i18n.translate(
-                          'xpack.apm.serviceOverview.mostUsed.osVersion',
-                          {
-                            defaultMessage: 'OS version',
-                          }
-                        )}
-                        metric={HOST_OS_VERSION}
-                        start={start}
-                        end={end}
-                        kuery={kuery}
-                        filters={filters}
-                      />
-                    </EuiFlexItem>
-                    {/* App version */}
-                    <EuiFlexItem>
-                      <MostUsedChart
-                        title={i18n.translate(
-                          'xpack.apm.serviceOverview.mostUsed.appVersion',
-                          {
-                            defaultMessage: 'App version',
-                          }
-                        )}
-                        metric={SERVICE_VERSION}
-                        start={start}
-                        end={end}
-                        kuery={kuery}
-                        filters={filters}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <MobileStats
+              start={start}
+              end={end}
+              kuery={kueryWithMobileFilters}
+            />
+            <EuiSpacer size="s" />
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
-              <LatencyChart height={latencyChartHeight} kuery={kuery} />
+              <EuiFlexGroup>
+                <EuiFlexItem grow={8}>
+                  <GeoMap
+                    start={start}
+                    end={end}
+                    kuery={kueryWithMobileFilters}
+                    filters={embeddableFilters}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem grow={4}>
+                  <MobileLocationStats
+                    start={start}
+                    end={end}
+                    kuery={kueryWithMobileFilters}
+                    environment={environment}
+                    offset={offset}
+                    serviceName={serviceName}
+                    comparisonEnabled={comparisonEnabled}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiPanel hasBorder={true}>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xs">
+                  <h2>
+                    {i18n.translate('xpack.apm.serviceOverview.mostUsedTitle', {
+                      defaultMessage: 'Most used',
+                    })}
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiSpacer size="xs" />
+              <EuiFlexGroup direction={rowDirection} gutterSize="s">
+                {/* Device */}
+                <EuiFlexItem>
+                  <MostUsedChart
+                    title={i18n.translate(
+                      'xpack.apm.serviceOverview.mostUsed.device',
+                      {
+                        defaultMessage: 'Devices',
+                      }
+                    )}
+                    metric={DEVICE_MODEL_IDENTIFIER}
+                    start={start}
+                    end={end}
+                    kuery={kueryWithMobileFilters}
+                    filters={embeddableFilters}
+                  />
+                </EuiFlexItem>
+                {/* NCT */}
+                <EuiFlexItem>
+                  <MostUsedChart
+                    title={i18n.translate(
+                      'xpack.apm.serviceOverview.mostUsed.nct',
+                      {
+                        defaultMessage: 'Network Connection Type',
+                      }
+                    )}
+                    metric={NETWORK_CONNECTION_TYPE}
+                    start={start}
+                    end={end}
+                    kuery={kueryWithMobileFilters}
+                    filters={embeddableFilters}
+                  />
+                </EuiFlexItem>
+                <EuiSpacer size="s" />
+                {/* OS version */}
+                <EuiFlexItem>
+                  <MostUsedChart
+                    title={i18n.translate(
+                      'xpack.apm.serviceOverview.mostUsed.osVersion',
+                      {
+                        defaultMessage: 'OS version',
+                      }
+                    )}
+                    metric={HOST_OS_VERSION}
+                    start={start}
+                    end={end}
+                    kuery={kueryWithMobileFilters}
+                    filters={embeddableFilters}
+                  />
+                </EuiFlexItem>
+                {/* App version */}
+                <EuiFlexItem>
+                  <MostUsedChart
+                    title={i18n.translate(
+                      'xpack.apm.serviceOverview.mostUsed.appVersion',
+                      {
+                        defaultMessage: 'App version',
+                      }
+                    )}
+                    metric={SERVICE_VERSION}
+                    start={start}
+                    end={end}
+                    kuery={kueryWithMobileFilters}
+                    filters={embeddableFilters}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+
+          <EuiFlexItem>
+            <EuiPanel hasBorder={true}>
+              <LatencyChart
+                height={latencyChartHeight}
+                kuery={kueryWithMobileFilters}
+              />
             </EuiPanel>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -263,13 +281,13 @@ export function MobileServiceOverview() {
               <EuiFlexItem grow={3}>
                 <ServiceOverviewThroughputChart
                   height={nonLatencyChartHeight}
-                  kuery={kuery}
+                  kuery={kueryWithMobileFilters}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={7}>
                 <EuiPanel hasBorder={true}>
                   <TransactionsTable
-                    kuery={kuery}
+                    kuery={kueryWithMobileFilters}
                     environment={environment}
                     fixedHeight={true}
                     isSingleColumn={isSingleColumn}
@@ -292,7 +310,7 @@ export function MobileServiceOverview() {
                 <FailedTransactionRateChart
                   height={nonLatencyChartHeight}
                   showAnnotations={false}
-                  kuery={kuery}
+                  kuery={kueryWithMobileFilters}
                 />
               </EuiFlexItem>
 

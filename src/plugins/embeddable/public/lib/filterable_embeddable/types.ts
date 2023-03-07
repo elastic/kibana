@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { type AggregateQuery, type Filter, type Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import { EmbeddableInput } from '../embeddables';
+
+export type FilterableEmbeddableInput = EmbeddableInput & {
+  filters?: Filter[];
+  query?: Query;
+  timeRange?: TimeRange;
+  timeslice?: [number, number];
+};
 
 /**
  * All embeddables that implement this interface should support being filtered

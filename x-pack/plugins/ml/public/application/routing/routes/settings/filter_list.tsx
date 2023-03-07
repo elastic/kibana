@@ -7,8 +7,10 @@
 
 import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
-import { NavigateToPath, useTimefilter } from '../../../contexts/kibana';
-import { MlRoute, PageLoader, PageProps } from '../../router';
+import { useTimefilter } from '@kbn/ml-date-picker';
+import { ML_PAGES } from '../../../../locator';
+import { NavigateToPath } from '../../../contexts/kibana';
+import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
 import { useResolver } from '../../use_resolver';
 import { checkFullLicense } from '../../../license';
 import {
@@ -23,7 +25,7 @@ export const filterListRouteFactory = (
   navigateToPath: NavigateToPath,
   basePath: string
 ): MlRoute => ({
-  path: '/settings/filter_lists',
+  path: createPath(ML_PAGES.FILTER_LISTS_MANAGE),
   title: i18n.translate('xpack.ml.settings.filterList.docTitle', {
     defaultMessage: 'Filters',
   }),
@@ -39,11 +41,19 @@ export const filterListRouteFactory = (
 const PageWrapper: FC<PageProps> = ({ deps }) => {
   const { redirectToMlAccessDeniedPage } = deps;
 
-  const { context } = useResolver(undefined, undefined, deps.config, deps.dataViewsContract, {
-    checkFullLicense,
-    checkGetJobsCapabilities: () => checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
-    getMlNodeCount,
-  });
+  const { context } = useResolver(
+    undefined,
+    undefined,
+    deps.config,
+    deps.dataViewsContract,
+    deps.getSavedSearchDeps,
+    {
+      checkFullLicense,
+      checkGetJobsCapabilities: () =>
+        checkGetJobsCapabilitiesResolver(redirectToMlAccessDeniedPage),
+      getMlNodeCount,
+    }
+  );
 
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
 

@@ -5,45 +5,30 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { useMemo, useEffect } from 'react';
-import { History } from 'history';
+import { useEffect } from 'react';
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { DiscoverSearchSessionManager } from '../services/discover_search_session';
 import {
   createSearchSessionRestorationDataProvider,
-  GetStateReturn,
+  DiscoverStateContainer,
 } from '../services/discover_state';
 import { DiscoverServices } from '../../../build_services';
 
 export function useSearchSession({
   services,
-  history,
   stateContainer,
   savedSearch,
 }: {
   services: DiscoverServices;
-  stateContainer: GetStateReturn;
-  history: History;
+  stateContainer: DiscoverStateContainer;
   savedSearch: SavedSearch;
 }) {
   const { data, capabilities } = services;
-  /**
-   * Search session logic
-   */
-  const searchSessionManager = useMemo(
-    () =>
-      new DiscoverSearchSessionManager({
-        history,
-        session: data.search.session,
-      }),
-    [data.search.session, history]
-  );
 
   useEffect(() => {
     data.search.session.enableStorage(
       createSearchSessionRestorationDataProvider({
-        appStateContainer: stateContainer.appStateContainer,
+        appStateContainer: stateContainer.appState,
         data,
         getSavedSearch: () => savedSearch,
       }),
@@ -57,12 +42,5 @@ export function useSearchSession({
               },
       }
     );
-  }, [
-    capabilities.discover.storeSearchSession,
-    data,
-    savedSearch,
-    stateContainer.appStateContainer,
-  ]);
-
-  return searchSessionManager;
+  }, [capabilities.discover.storeSearchSession, data, savedSearch, stateContainer.appState]);
 }

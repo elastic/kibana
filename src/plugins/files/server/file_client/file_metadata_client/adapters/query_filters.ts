@@ -22,16 +22,18 @@ export function filterDeletedFiles({ attrPrefix }: { attrPrefix: string }): Kuer
 
 export function filterArgsToKuery({
   extension,
+  mimeType,
   kind,
   meta,
   name,
   status,
+  user,
   attrPrefix = '',
 }: Omit<FindFileArgs, 'page' | 'perPage'> & { attrPrefix?: string }): KueryNode {
   const kueryExpressions: KueryNode[] = [filterDeletedFiles({ attrPrefix })];
 
   const addFilters = (
-    fieldName: keyof FileMetadata,
+    fieldName: keyof FileMetadata | string,
     values: string[] = [],
     isWildcard = false
   ): void => {
@@ -52,6 +54,8 @@ export function filterArgsToKuery({
   addFilters('FileKind', kind);
   addFilters('Status', status);
   addFilters('extension', extension);
+  addFilters('mime_type', mimeType);
+  addFilters('user.id', user);
 
   if (meta) {
     const addMetaFilters = pipe(

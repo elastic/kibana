@@ -48,10 +48,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'alertDetailsPageEnabled',
+          'chartEmbeddablesEnabled',
         ])}`,
         // mock cloud to enable the guided onboarding tour in e2e tests
         '--xpack.cloud.id=test',
         `--home.disableWelcomeScreen=true`,
+        // Specify which version of the detection-rules package to install
+        // `--xpack.securitySolution.prebuiltRulesPackageVersion=8.3.1`,
       ],
     },
   };

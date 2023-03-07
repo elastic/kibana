@@ -5,8 +5,13 @@
  * 2.0.
  */
 
+import { TimeBuckets } from '@kbn/data-plugin/common';
+
 export interface Bucket {
   start?: number;
   end?: number;
+  timeBuckets: TimeBuckets;
 }
-export type BucketSize = { bucketSize: number; intervalString: string } | undefined;
+export type BucketSize =
+  | { bucketSize: number; intervalString: string; dateFormat: string }
+  | undefined;

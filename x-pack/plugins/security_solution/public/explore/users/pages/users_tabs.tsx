@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
 
 import type { UsersTabsProps } from './types';
 import { UsersTableType } from '../store/model';

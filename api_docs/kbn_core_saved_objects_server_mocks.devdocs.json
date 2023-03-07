@@ -14,10 +14,18 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-saved-objects-server-mocks",
-        "id": "def-server.savedObjectsServiceMock",
+        "id": "def-common.savedObjectsServiceMock",
         "type": "Object",
         "tags": [],
         "label": "savedObjectsServiceMock",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-saved-objects-server-mocks",
-            "id": "def-server.savedObjectsServiceMock.create",
+            "id": "def-common.savedObjectsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -44,7 +52,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-mocks",
-            "id": "def-server.savedObjectsServiceMock.createInternalSetupContract",
+            "id": "def-common.savedObjectsServiceMock.createInternalSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalSetupContract",
@@ -62,7 +70,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-mocks",
-            "id": "def-server.savedObjectsServiceMock.createSetupContract",
+            "id": "def-common.savedObjectsServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -71,9 +79,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsServiceSetup",
+                "section": "def-common.SavedObjectsServiceSetup",
                 "text": "SavedObjectsServiceSetup"
               },
               ">"
@@ -86,7 +94,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-mocks",
-            "id": "def-server.savedObjectsServiceMock.createInternalStartContract",
+            "id": "def-common.savedObjectsServiceMock.createInternalStartContract",
             "type": "Function",
             "tags": [],
             "label": "createInternalStartContract",
@@ -95,17 +103,17 @@
               "(typeRegistry?: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectTypeRegistry",
+                "section": "def-common.ISavedObjectTypeRegistry",
                 "text": "ISavedObjectTypeRegistry"
               },
               "> | undefined) => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsServiceStart",
+                "section": "def-common.SavedObjectsServiceStart",
                 "text": "SavedObjectsServiceStart"
               },
               ">"
@@ -117,7 +125,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-server-mocks",
-                "id": "def-server.savedObjectsServiceMock.createInternalStartContract.$1",
+                "id": "def-common.savedObjectsServiceMock.createInternalStartContract.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "typeRegistry",
@@ -126,9 +134,9 @@
                   "jest.Mocked<",
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.ISavedObjectTypeRegistry",
+                    "section": "def-common.ISavedObjectTypeRegistry",
                     "text": "ISavedObjectTypeRegistry"
                   },
                   "> | undefined"
@@ -141,7 +149,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-mocks",
-            "id": "def-server.savedObjectsServiceMock.createStartContract",
+            "id": "def-common.savedObjectsServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -150,17 +158,17 @@
               "(typeRegistry?: jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectTypeRegistry",
+                "section": "def-common.ISavedObjectTypeRegistry",
                 "text": "ISavedObjectTypeRegistry"
               },
               "> | undefined) => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectsServiceStart",
+                "section": "def-common.SavedObjectsServiceStart",
                 "text": "SavedObjectsServiceStart"
               },
               ">"
@@ -172,7 +180,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-server-mocks",
-                "id": "def-server.savedObjectsServiceMock.createStartContract.$1",
+                "id": "def-common.savedObjectsServiceMock.createStartContract.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "typeRegistry",
@@ -181,9 +189,9 @@
                   "jest.Mocked<",
                   {
                     "pluginId": "@kbn/core-saved-objects-server",
-                    "scope": "server",
+                    "scope": "common",
                     "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                    "section": "def-server.ISavedObjectTypeRegistry",
+                    "section": "def-common.ISavedObjectTypeRegistry",
                     "text": "ISavedObjectTypeRegistry"
                   },
                   "> | undefined"
@@ -196,7 +204,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-mocks",
-            "id": "def-server.savedObjectsServiceMock.createMigrationContext",
+            "id": "def-common.savedObjectsServiceMock.createMigrationContext",
             "type": "Function",
             "tags": [],
             "label": "createMigrationContext",
@@ -205,9 +213,9 @@
               "({ migrationVersion, convertToMultiNamespaceTypeVersion, isSingleNamespaceType, }?: { migrationVersion?: string | undefined; convertToMultiNamespaceTypeVersion?: string | undefined; isSingleNamespaceType?: boolean | undefined; }) => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.SavedObjectMigrationContext",
+                "section": "def-common.SavedObjectMigrationContext",
                 "text": "SavedObjectMigrationContext"
               },
               ">"
@@ -219,7 +227,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/core-saved-objects-server-mocks",
-                "id": "def-server.savedObjectsServiceMock.createMigrationContext.$1",
+                "id": "def-common.savedObjectsServiceMock.createMigrationContext.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "__0",
@@ -235,7 +243,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-mocks",
-            "id": "def-server.savedObjectsServiceMock.createTypeRegistryMock",
+            "id": "def-common.savedObjectsServiceMock.createTypeRegistryMock",
             "type": "Function",
             "tags": [],
             "label": "createTypeRegistryMock",
@@ -244,9 +252,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectTypeRegistry",
+                "section": "def-common.ISavedObjectTypeRegistry",
                 "text": "ISavedObjectTypeRegistry"
               },
               " & Pick<",
@@ -261,7 +269,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-mocks",
-            "id": "def-server.savedObjectsServiceMock.createExporter",
+            "id": "def-common.savedObjectsServiceMock.createExporter",
             "type": "Function",
             "tags": [],
             "label": "createExporter",
@@ -270,9 +278,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectsExporter",
+                "section": "def-common.ISavedObjectsExporter",
                 "text": "ISavedObjectsExporter"
               },
               ">"
@@ -285,7 +293,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-mocks",
-            "id": "def-server.savedObjectsServiceMock.createImporter",
+            "id": "def-common.savedObjectsServiceMock.createImporter",
             "type": "Function",
             "tags": [],
             "label": "createImporter",
@@ -294,9 +302,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectsImporter",
+                "section": "def-common.ISavedObjectsImporter",
                 "text": "ISavedObjectsImporter"
               },
               ">"
@@ -309,7 +317,7 @@
           },
           {
             "parentPluginId": "@kbn/core-saved-objects-server-mocks",
-            "id": "def-server.savedObjectsServiceMock.createSerializer",
+            "id": "def-common.savedObjectsServiceMock.createSerializer",
             "type": "Function",
             "tags": [],
             "label": "createSerializer",
@@ -318,9 +326,9 @@
               "() => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
+                "scope": "common",
                 "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectsSerializer",
+                "section": "def-common.ISavedObjectsSerializer",
                 "text": "ISavedObjectsSerializer"
               },
               ">"
@@ -335,13 +343,5 @@
         "initialIsOpen": false
       }
     ]
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
   }
 }

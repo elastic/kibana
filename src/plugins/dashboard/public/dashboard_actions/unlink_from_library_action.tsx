@@ -86,11 +86,15 @@ export class UnlinkFromLibraryAction implements Action<UnlinkFromLibraryActionCo
       type: embeddable.type,
       explicitInput: { ...newInput, title: embeddable.getTitle() },
     };
-    dashboard.replacePanel(panelToReplace, newPanel, true);
+    const replacedPanelId = await dashboard.replacePanel(panelToReplace, newPanel, true);
 
     const title = dashboardUnlinkFromLibraryActionStrings.getSuccessMessage(
       embeddable.getTitle() ? `'${embeddable.getTitle()}'` : ''
     );
+
+    if (dashboard.getExpandedPanelId() !== undefined) {
+      dashboard.setExpandedPanelId(replacedPanelId);
+    }
 
     this.toastsService.addSuccess({
       title,

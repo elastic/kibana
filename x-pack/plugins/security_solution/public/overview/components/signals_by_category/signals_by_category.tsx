@@ -34,6 +34,7 @@ interface Props {
   setAbsoluteRangeDatePickerTarget?: InputsModelId;
   showLegend?: boolean;
   runtimeMappings?: MappingRuntimeFields;
+  hideQueryToggle?: boolean;
 }
 
 const SignalsByCategoryComponent: React.FC<Props> = ({
@@ -46,6 +47,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
   showLegend,
   setAbsoluteRangeDatePickerTarget = InputsModelId.global,
   runtimeMappings,
+  hideQueryToggle = false,
 }) => {
   const dispatch = useDispatch();
   const { signalIndexName } = useSignalIndex();
@@ -86,6 +88,7 @@ const SignalsByCategoryComponent: React.FC<Props> = ({
       title={i18n.ALERT_TREND}
       titleSize={onlyField == null ? 'm' : 's'}
       updateDateRange={updateDateRangeCallback}
+      hideQueryToggle={hideQueryToggle}
     />
   );
 };

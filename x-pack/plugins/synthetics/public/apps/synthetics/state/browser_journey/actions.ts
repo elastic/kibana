@@ -6,6 +6,9 @@
  */
 
 import { createAction } from '@reduxjs/toolkit';
+import { FetchJourneyStepsParams } from '..';
+import { SyntheticsJourneyApiResponse } from '../../../../../common/runtime_types';
+import { createAsyncAction } from '../utils/actions';
 import { PutBlocksPayload } from './models';
 
 // This action denotes a set of blocks is required
@@ -31,3 +34,8 @@ export const updateHitCountsAction = createAction<string[]>('[BROWSER JOURNEY] U
 export const pruneCacheAction = createAction<number>(
   '[BROWSER JOURNEY] PRUNE SCREENSHOT BLOCK CACHE'
 );
+
+export const fetchJourneyAction = createAsyncAction<
+  FetchJourneyStepsParams,
+  SyntheticsJourneyApiResponse
+>('fetchJourneyStepsAction');

@@ -149,3 +149,11 @@ steps:
     timeout_in_minutes: 10
     agents:
       queue: kibana-default
+
+  - wait
+
+  - command: '.buildkite/scripts/steps/artifacts/docker_image_trigger.sh'
+    label: Trigger container image build
+    timeout_in_minutes: 10
+    agents:
+      queue: 'kibana-default'

@@ -144,6 +144,8 @@ describe('es_query executor', () => {
         name: 'test-rule-name',
         alertLimit: 1000,
         params: defaultProps,
+        publicBaseUrl: 'https://localhost:5601',
+        spacePrefix: '',
         timestamp: undefined,
         services: {
           scopedClusterClient: scopedClusterClientMock,
@@ -180,7 +182,9 @@ describe('es_query executor', () => {
         services: {
           searchSourceClient: searchSourceClientMock,
           logger,
+          share: undefined,
         },
+        spacePrefix: '',
       });
       expect(mockFetchEsQuery).not.toHaveBeenCalled();
     });
@@ -225,6 +229,7 @@ describe('es_query executor', () => {
         },
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
       await executor(coreMock, {
         ...defaultExecutorOptions,
@@ -277,6 +282,7 @@ describe('es_query executor', () => {
         },
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
       await executor(coreMock, {
         ...defaultExecutorOptions,
@@ -413,6 +419,7 @@ describe('es_query executor', () => {
         },
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
       await executor(coreMock, {
         ...defaultExecutorOptions,
@@ -456,6 +463,7 @@ describe('es_query executor', () => {
         parsedResults: { results: [], truncated: false },
         dateStart: new Date().toISOString(),
         dateEnd: new Date().toISOString(),
+        link: 'https://localhost:5601/app/management/insightsAndAlerting/triggersActions/rule/test-rule-id',
       });
       await executor(coreMock, {
         ...defaultExecutorOptions,

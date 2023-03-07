@@ -77,7 +77,7 @@ export const useGenerateUpdatedKueryString = (
   // this try catch is necessary to evaluate user input in kuery bar,
   // this error will be actually shown in UI for user to see
   try {
-    if ((filterQueryString || urlFilters || excludedFilters) && dataView) {
+    if ((filterQueryString || urlFilters || excludedFilters) && dataView && combinedFilterString) {
       const ast = fromKueryExpression(combinedFilterString);
 
       const elasticsearchQuery = toElasticsearchQuery(ast, dataView);

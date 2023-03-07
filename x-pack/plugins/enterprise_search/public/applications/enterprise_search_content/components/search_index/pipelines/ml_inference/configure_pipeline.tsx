@@ -20,6 +20,7 @@ import {
   EuiSuperSelect,
   EuiSuperSelectOption,
   EuiSpacer,
+  EuiTitle,
   EuiText,
 } from '@elastic/eui';
 
@@ -30,6 +31,7 @@ import { docLinks } from '../../../../../shared/doc_links';
 
 import { IndexViewLogic } from '../../index_view_logic';
 
+import { InferenceConfiguration } from './inference_config';
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
 import { MlModelSelectOption } from './model_select_option';
 import { PipelineSelectOption } from './pipeline_select_option';
@@ -122,6 +124,15 @@ export const ConfigurePipeline: React.FC = () => {
 
   return (
     <>
+      <EuiTitle size="xs">
+        <h4>
+          {i18n.translate(
+            'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.title',
+            { defaultMessage: 'Add a new pipeline' }
+          )}
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="m" />
       <EuiText color="subdued">
         <p>
           {i18n.translate(
@@ -274,6 +285,7 @@ export const ConfigurePipeline: React.FC = () => {
             onChange={(value) =>
               setInferencePipelineConfiguration({
                 ...configuration,
+                inferenceConfig: undefined,
                 modelID: value,
               })
             }
@@ -285,6 +297,7 @@ export const ConfigurePipeline: React.FC = () => {
         <EuiFlexGroup>
           <EuiFlexItem>
             <EuiFormRow
+              fullWidth
               label={i18n.translate(
                 'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.sourceFieldLabel',
                 {
@@ -295,6 +308,7 @@ export const ConfigurePipeline: React.FC = () => {
               isInvalid={emptySourceFields}
             >
               <EuiSelect
+                fullWidth
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectSchemaField`}
                 disabled={inputsDisabled}
                 value={sourceField}
@@ -341,6 +355,7 @@ export const ConfigurePipeline: React.FC = () => {
               }
               error={formErrors.destinationField}
               isInvalid={formErrors.destinationField !== undefined}
+              fullWidth
             >
               <EuiFieldText
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-targetField`}
@@ -353,10 +368,12 @@ export const ConfigurePipeline: React.FC = () => {
                     destinationField: e.target.value,
                   })
                 }
+                fullWidth
               />
             </EuiFormRow>
           </EuiFlexItem>
         </EuiFlexGroup>
+        <InferenceConfiguration />
       </EuiForm>
     </>
   );

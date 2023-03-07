@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { createKQLCustomIndicator, createSLO } from '../fixtures/slo';
+import {
+  createKQLCustomIndicator,
+  createSLO,
+  createSLOWithTimeslicesBudgetingMethod,
+} from '../fixtures/slo';
 import { KQLCustomTransformGenerator } from './kql_custom';
 
 const generator = new KQLCustomTransformGenerator();
@@ -32,7 +36,7 @@ describe('KQL Custom Transform Generator', () => {
     });
   });
 
-  it('returns the correct transform params with every specified indicator params', async () => {
+  it('returns the expected transform params with every specified indicator params', async () => {
     const anSLO = createSLO({ indicator: createKQLCustomIndicator() });
     const transform = generator.getTransformParams(anSLO);
 
@@ -46,6 +50,18 @@ describe('KQL Custom Transform Generator', () => {
     });
     expect(transform.source.runtime_mappings!['slo.revision']).toMatchObject({
       script: { source: `emit(${anSLO.revision})` },
+    });
+  });
+
+  it('returns the expected transform params for timeslices slo', async () => {
+    const anSLO = createSLOWithTimeslicesBudgetingMethod({
+      indicator: createKQLCustomIndicator(),
+    });
+    const transform = generator.getTransformParams(anSLO);
+
+    expect(transform).toMatchSnapshot({
+      transform_id: expect.any(String),
+      source: { runtime_mappings: { 'slo.id': { script: { source: expect.any(String) } } } },
     });
   });
 
