@@ -176,6 +176,7 @@ describe('plugins discovery system', () => {
       roles: {
         backgroundTasks: true,
         ui: true,
+        migrator: false,
       },
     };
 

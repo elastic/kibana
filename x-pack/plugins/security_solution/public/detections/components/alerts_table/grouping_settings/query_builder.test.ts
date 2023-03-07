@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { MAX_QUERY_SIZE } from '../../../../common/components/grouping';
 import { getAlertsGroupingQuery } from '.';
 
 describe('getAlertsGroupingQuery', () => {
@@ -45,9 +44,8 @@ describe('getAlertsGroupingQuery', () => {
       _source: false,
       aggs: {
         alertsCount: {
-          terms: {
-            exclude: ['alerts'],
-            field: 'kibana.alert.rule.producer',
+          value_count: {
+            field: 'kibana.alert.rule.name',
           },
         },
         groupsNumber: {
@@ -96,7 +94,7 @@ describe('getAlertsGroupingQuery', () => {
             },
           },
           multi_terms: {
-            size: MAX_QUERY_SIZE,
+            size: 10000,
             terms: [
               {
                 field: 'kibana.alert.rule.name',
@@ -183,9 +181,8 @@ describe('getAlertsGroupingQuery', () => {
       _source: false,
       aggs: {
         alertsCount: {
-          terms: {
-            exclude: ['alerts'],
-            field: 'kibana.alert.rule.producer',
+          value_count: {
+            field: 'process.name',
           },
         },
         groupsNumber: {

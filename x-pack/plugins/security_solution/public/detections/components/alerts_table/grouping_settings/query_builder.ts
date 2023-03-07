@@ -7,8 +7,8 @@
 
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { BoolQuery } from '@kbn/es-query';
-import type { TermsOrCardinalityAggregation } from '../../../../common/components/grouping';
-import { getGroupingQuery } from '../../../../common/components/grouping';
+import type { NamedAggregation } from '@kbn/securitysolution-grouping';
+import { getGroupingQuery } from '@kbn/securitysolution-grouping';
 
 const getGroupFields = (groupValue: string) => {
   if (groupValue === 'kibana.alert.rule.name') {
@@ -43,12 +43,7 @@ export const getAlertsGroupingQuery = ({
     additionalFilters,
     additionalAggregationsRoot: [
       {
-        alertsCount: {
-          terms: {
-            field: 'kibana.alert.rule.producer',
-            exclude: ['alerts'],
-          },
-        },
+        alertsCount: { value_count: { field: selectedGroup } },
       },
       ...(selectedGroup !== 'none'
         ? [
@@ -74,8 +69,8 @@ export const getAlertsGroupingQuery = ({
     stackByMultipleFields1: [],
   });
 
-const getAggregationsByGroupField = (field: string): TermsOrCardinalityAggregation[] => {
-  const aggMetrics: TermsOrCardinalityAggregation[] = [
+const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
+  const aggMetrics: NamedAggregation[] = [
     {
       alertsCount: {
         cardinality: {

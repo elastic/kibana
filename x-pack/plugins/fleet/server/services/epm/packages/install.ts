@@ -45,7 +45,7 @@ import type {
   PackageVerificationResult,
   RegistryDataStream,
 } from '../../../types';
-import { AUTO_UPGRADE_POLICIES_PACKAGES } from '../../../../common/constants';
+import { AUTO_UPGRADE_POLICIES_PACKAGES, DATASET_VAR_NAME } from '../../../../common/constants';
 import { FleetError, PackageOutdatedError, PackagePolicyValidationError } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { dataStreamService, licenseService } from '../..';
@@ -1033,7 +1033,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
   const paths = await getArchiveFilelist(pkgInfo);
   if (!paths) throw new Error('No paths found for ');
 
-  const datasetName = packagePolicy.inputs[0].streams[0].vars?.['data_stream.dataset']?.value;
+  const datasetName = packagePolicy.inputs[0].streams[0].vars?.[DATASET_VAR_NAME]?.value;
   const [dataStream] = getNormalizedDataStreams(pkgInfo, datasetName);
   const existingDataStreams = await dataStreamService.getMatchingDataStreams(esClient, {
     type: dataStream.type,

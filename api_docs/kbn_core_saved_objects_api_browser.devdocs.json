@@ -1280,18 +1280,6 @@
           },
           {
             "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
-          },
-          {
-            "plugin": "synthetics",
-            "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
-          },
-          {
-            "plugin": "synthetics",
             "path": "x-pack/plugins/synthetics/public/legacy_uptime/state/private_locations/api.ts"
           },
           {
@@ -1557,10 +1545,6 @@
               {
                 "plugin": "graph",
                 "path": "x-pack/plugins/graph/public/helpers/saved_workspace_utils.ts"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
               },
               {
                 "plugin": "synthetics",
@@ -2244,10 +2228,6 @@
                 "path": "x-pack/plugins/lens/public/persistence/saved_objects_utils/find_object_by_title.ts"
               },
               {
-                "plugin": "cases",
-                "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-              },
-              {
                 "plugin": "maps",
                 "path": "x-pack/plugins/maps/public/routes/list_page/maps_list_view.tsx"
               },
@@ -2526,10 +2506,6 @@
               {
                 "plugin": "monitoring",
                 "path": "x-pack/plugins/monitoring/public/application/pages/elasticsearch/ingest_pipeline_modal.tsx"
-              },
-              {
-                "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/state/private_locations/api.ts"
               },
               {
                 "plugin": "synthetics",
@@ -3999,50 +3975,6 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/common/types/kibana.ts"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
-          },
-          {
-            "plugin": "cases",
-            "path": "x-pack/plugins/cases/public/components/markdown_editor/plugins/lens/saved_objects_finder.tsx"
           },
           {
             "plugin": "maps",

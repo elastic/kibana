@@ -1,11 +1,1050 @@
 {
   "id": "contentManagement",
   "client": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
+    "classes": [
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-public.ContentClient",
+        "type": "Class",
+        "tags": [],
+        "label": "ContentClient",
+        "description": [],
+        "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.ContentClient.queryClient",
+            "type": "Object",
+            "tags": [],
+            "label": "queryClient",
+            "description": [],
+            "signature": [
+              "QueryClient"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.ContentClient.queryOptionBuilder",
+            "type": "Object",
+            "tags": [],
+            "label": "queryOptionBuilder",
+            "description": [],
+            "signature": [
+              "{ get: <I extends ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.GetIn",
+                "text": "GetIn"
+              },
+              "<string, object> = ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.GetIn",
+                "text": "GetIn"
+              },
+              "<string, object>, O = unknown>(input: I) => { queryKey: readonly [string, string]; queryFn: () => Promise<O>; }; search: <I extends ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchIn",
+                "text": "SearchIn"
+              },
+              "<string, object, object> = ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchIn",
+                "text": "SearchIn"
+              },
+              "<string, object, object>, O = unknown>(input: I) => { queryKey: readonly [string, \"search\", unknown]; queryFn: () => Promise<O>; }; }"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.ContentClient.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.ContentClient.Unnamed.$1",
+                "type": "Function",
+                "tags": [],
+                "label": "crudClientProvider",
+                "description": [],
+                "signature": [
+                  "(contentType: string) => ",
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "public",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-public.CrudClient",
+                    "text": "CrudClient"
+                  }
+                ],
+                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.ContentClient.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "<I extends ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.GetIn",
+                "text": "GetIn"
+              },
+              "<string, object> = ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.GetIn",
+                "text": "GetIn"
+              },
+              "<string, object>, O = unknown>(input: I) => Promise<O>"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.ContentClient.get.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "I"
+                ],
+                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.ContentClient.get$",
+            "type": "Function",
+            "tags": [],
+            "label": "get$",
+            "description": [],
+            "signature": [
+              "<I extends ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.GetIn",
+                "text": "GetIn"
+              },
+              "<string, object> = ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.GetIn",
+                "text": "GetIn"
+              },
+              "<string, object>, O = unknown>(input: I) => ",
+              "Observable",
+              "<",
+              "QueryObserverResult",
+              "<O, unknown>>"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.ContentClient.get$.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "I"
+                ],
+                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.ContentClient.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "<I extends ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.CreateIn",
+                "text": "CreateIn"
+              },
+              "<string, object, object>, O = unknown>(input: I) => Promise<O>"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.ContentClient.create.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "I"
+                ],
+                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.ContentClient.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "signature": [
+              "<I extends ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.UpdateIn",
+                "text": "UpdateIn"
+              },
+              "<string, object, object>, O = unknown>(input: I) => Promise<O>"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.ContentClient.update.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "I"
+                ],
+                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.ContentClient.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              "<I extends ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.DeleteIn",
+                "text": "DeleteIn"
+              },
+              "<string, object>, O = unknown>(input: I) => Promise<O>"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.ContentClient.delete.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "I"
+                ],
+                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.ContentClient.search",
+            "type": "Function",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "<I extends ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchIn",
+                "text": "SearchIn"
+              },
+              "<string, object, object>, O = unknown>(input: I) => Promise<O>"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.ContentClient.search.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "I"
+                ],
+                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.ContentClient.search$",
+            "type": "Function",
+            "tags": [],
+            "label": "search$",
+            "description": [],
+            "signature": [
+              "<I extends ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchIn",
+                "text": "SearchIn"
+              },
+              "<string, object, object>, O = unknown>(input: I) => ",
+              "Observable",
+              "<",
+              "QueryObserverResult",
+              "<O, unknown>>"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.ContentClient.search$.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  "I"
+                ],
+                "path": "src/plugins/content_management/public/content_client/content_client.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-public.ContentClientProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "ContentClientProvider",
+        "description": [],
+        "signature": [
+          "({ contentClient, children, }: React.PropsWithChildren<{ contentClient: ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "public",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-public.ContentClient",
+            "text": "ContentClient"
+          },
+          "; }>) => JSX.Element"
+        ],
+        "path": "src/plugins/content_management/public/content_client/content_client_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.ContentClientProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  contentClient,\n  children,\n}",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<{ contentClient: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "public",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-public.ContentClient",
+                "text": "ContentClient"
+              },
+              "; }>"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client_context.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-public.useContentClient",
+        "type": "Function",
+        "tags": [],
+        "label": "useContentClient",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "public",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-public.ContentClient",
+            "text": "ContentClient"
+          }
+        ],
+        "path": "src/plugins/content_management/public/content_client/content_client_context.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-public.useCreateContentMutation",
+        "type": "Function",
+        "tags": [],
+        "label": "useCreateContentMutation",
+        "description": [],
+        "signature": [
+          "<I extends ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.CreateIn",
+            "text": "CreateIn"
+          },
+          "<string, object, object> = ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.CreateIn",
+            "text": "CreateIn"
+          },
+          "<string, object, object>, O = unknown>() => ",
+          "UseMutationResult",
+          "<O, unknown, I, unknown>"
+        ],
+        "path": "src/plugins/content_management/public/content_client/content_client_mutation_hooks.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-public.useDeleteContentMutation",
+        "type": "Function",
+        "tags": [],
+        "label": "useDeleteContentMutation",
+        "description": [],
+        "signature": [
+          "<I extends ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.DeleteIn",
+            "text": "DeleteIn"
+          },
+          "<string, object> = ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.DeleteIn",
+            "text": "DeleteIn"
+          },
+          "<string, object>, O = unknown>() => ",
+          "UseMutationResult",
+          "<O, unknown, I, unknown>"
+        ],
+        "path": "src/plugins/content_management/public/content_client/content_client_mutation_hooks.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-public.useGetContentQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "useGetContentQuery",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "<I extends ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.GetIn",
+            "text": "GetIn"
+          },
+          "<string, object> = ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.GetIn",
+            "text": "GetIn"
+          },
+          "<string, object>, O = unknown>(input: I, queryOptions?: ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "public",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-public.QueryOptions",
+            "text": "QueryOptions"
+          },
+          " | undefined) => ",
+          "UseQueryResult",
+          "<O, unknown>"
+        ],
+        "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.useGetContentQuery.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "input",
+            "description": [
+              "- get content identifier like \"id\" and \"contentType\""
+            ],
+            "signature": [
+              "I"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.useGetContentQuery.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "queryOptions",
+            "description": [
+              "- query options"
+            ],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "public",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-public.QueryOptions",
+                "text": "QueryOptions"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-public.useSearchContentQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "useSearchContentQuery",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          "<I extends ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.SearchIn",
+            "text": "SearchIn"
+          },
+          "<string, object, object> = ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.SearchIn",
+            "text": "SearchIn"
+          },
+          "<string, object, object>, O = unknown>(input: I, queryOptions?: ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "public",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-public.QueryOptions",
+            "text": "QueryOptions"
+          },
+          " | undefined) => ",
+          "UseQueryResult",
+          "<O, unknown>"
+        ],
+        "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.useSearchContentQuery.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "input",
+            "description": [
+              "- get content identifier like \"id\" and \"contentType\""
+            ],
+            "signature": [
+              "I"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.useSearchContentQuery.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "queryOptions",
+            "description": [
+              "- query options"
+            ],
+            "signature": [
+              {
+                "pluginId": "contentManagement",
+                "scope": "public",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-public.QueryOptions",
+                "text": "QueryOptions"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-public.useUpdateContentMutation",
+        "type": "Function",
+        "tags": [],
+        "label": "useUpdateContentMutation",
+        "description": [],
+        "signature": [
+          "<I extends ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.UpdateIn",
+            "text": "UpdateIn"
+          },
+          "<string, object, object> = ",
+          {
+            "pluginId": "contentManagement",
+            "scope": "common",
+            "docId": "kibContentManagementPluginApi",
+            "section": "def-common.UpdateIn",
+            "text": "UpdateIn"
+          },
+          "<string, object, object>, O = unknown>() => ",
+          "UseMutationResult",
+          "<O, unknown, I, unknown>"
+        ],
+        "path": "src/plugins/content_management/public/content_client/content_client_mutation_hooks.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-public.CrudClient",
+        "type": "Interface",
+        "tags": [],
+        "label": "CrudClient",
+        "description": [],
+        "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.CrudClient.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [],
+            "signature": [
+              "(input: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.GetIn",
+                "text": "GetIn"
+              },
+              "<string, object>) => Promise<unknown>"
+            ],
+            "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.CrudClient.get.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.GetIn",
+                    "text": "GetIn"
+                  },
+                  "<string, object>"
+                ],
+                "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.CrudClient.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [],
+            "signature": [
+              "(input: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.CreateIn",
+                "text": "CreateIn"
+              },
+              "<string, object, object>) => Promise<unknown>"
+            ],
+            "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.CrudClient.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.CreateIn",
+                    "text": "CreateIn"
+                  },
+                  "<string, object, object>"
+                ],
+                "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.CrudClient.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [],
+            "signature": [
+              "(input: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.UpdateIn",
+                "text": "UpdateIn"
+              },
+              "<string, object, object>) => Promise<unknown>"
+            ],
+            "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.CrudClient.update.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.UpdateIn",
+                    "text": "UpdateIn"
+                  },
+                  "<string, object, object>"
+                ],
+                "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.CrudClient.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [],
+            "signature": [
+              "(input: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.DeleteIn",
+                "text": "DeleteIn"
+              },
+              "<string, object>) => Promise<unknown>"
+            ],
+            "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.CrudClient.delete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.DeleteIn",
+                    "text": "DeleteIn"
+                  },
+                  "<string, object>"
+                ],
+                "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-public.CrudClient.search",
+            "type": "Function",
+            "tags": [],
+            "label": "search",
+            "description": [],
+            "signature": [
+              "(input: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "common",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-common.SearchIn",
+                "text": "SearchIn"
+              },
+              "<string, object, object>) => Promise<unknown>"
+            ],
+            "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-public.CrudClient.search.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "input",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "common",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-common.SearchIn",
+                    "text": "SearchIn"
+                  },
+                  "<string, object, object>"
+                ],
+                "path": "src/plugins/content_management/public/crud_client/crud_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-public.QueryOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "QueryOptions",
+        "description": [
+          "\nExposed `useQuery` options"
+        ],
+        "signature": [
+          "{ enabled?: boolean | undefined; }"
+        ],
+        "path": "src/plugins/content_management/public/content_client/content_client_query_hooks.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "start": {
       "parentPluginId": "contentManagement",
@@ -26,7 +1065,13 @@
           "label": "client",
           "description": [],
           "signature": [
-            "ContentClient"
+            {
+              "pluginId": "contentManagement",
+              "scope": "public",
+              "docId": "kibContentManagementPluginApi",
+              "section": "def-public.ContentClient",
+              "text": "ContentClient"
+            }
           ],
           "path": "src/plugins/content_management/public/types.ts",
           "deprecated": false,
@@ -91,7 +1136,541 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
+    "interfaces": [
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-server.ContentStorage",
+        "type": "Interface",
+        "tags": [],
+        "label": "ContentStorage",
+        "description": [],
+        "path": "src/plugins/content_management/server/core/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.ContentStorage.get",
+            "type": "Function",
+            "tags": [],
+            "label": "get",
+            "description": [
+              "Get a single item"
+            ],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", id: string, options: unknown) => Promise<any>"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.get.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.get.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.get.$3",
+                "type": "Unknown",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.ContentStorage.bulkGet",
+            "type": "Function",
+            "tags": [],
+            "label": "bulkGet",
+            "description": [
+              "Get multiple items"
+            ],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", ids: string[], options: unknown) => Promise<any>"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.bulkGet.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.bulkGet.$2",
+                "type": "Array",
+                "tags": [],
+                "label": "ids",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.bulkGet.$3",
+                "type": "Unknown",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.ContentStorage.create",
+            "type": "Function",
+            "tags": [],
+            "label": "create",
+            "description": [
+              "Create an item"
+            ],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", data: object, options: unknown) => Promise<any>"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.create.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.create.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "object"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.create.$3",
+                "type": "Unknown",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.ContentStorage.update",
+            "type": "Function",
+            "tags": [],
+            "label": "update",
+            "description": [
+              "Update an item"
+            ],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", id: string, data: object, options: unknown) => Promise<any>"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.update.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.update.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.update.$3",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "data",
+                "description": [],
+                "signature": [
+                  "object"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.update.$4",
+                "type": "Unknown",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.ContentStorage.delete",
+            "type": "Function",
+            "tags": [],
+            "label": "delete",
+            "description": [
+              "Delete an item"
+            ],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", id: string, options: unknown) => Promise<any>"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.delete.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.delete.$2",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.delete.$3",
+                "type": "Unknown",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.ContentStorage.search",
+            "type": "Function",
+            "tags": [],
+            "label": "search",
+            "description": [
+              "Search items"
+            ],
+            "signature": [
+              "(ctx: ",
+              {
+                "pluginId": "contentManagement",
+                "scope": "server",
+                "docId": "kibContentManagementPluginApi",
+                "section": "def-server.StorageContext",
+                "text": "StorageContext"
+              },
+              ", query: object, options: unknown) => Promise<any>"
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.search.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "ctx",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "contentManagement",
+                    "scope": "server",
+                    "docId": "kibContentManagementPluginApi",
+                    "section": "def-server.StorageContext",
+                    "text": "StorageContext"
+                  }
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.search.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "object"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "contentManagement",
+                "id": "def-server.ContentStorage.search.$3",
+                "type": "Unknown",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "unknown"
+                ],
+                "path": "src/plugins/content_management/server/core/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "contentManagement",
+        "id": "def-server.StorageContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "StorageContext",
+        "description": [
+          "Context that is sent to all storage instance methods"
+        ],
+        "path": "src/plugins/content_management/server/core/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "contentManagement",
+            "id": "def-server.StorageContext.requestHandlerContext",
+            "type": "Object",
+            "tags": [],
+            "label": "requestHandlerContext",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-request-handler-context-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpRequestHandlerContextServerPluginApi",
+                "section": "def-common.RequestHandlerContext",
+                "text": "RequestHandlerContext"
+              }
+            ],
+            "path": "src/plugins/content_management/server/core/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
     "misc": [],
     "objects": [],
@@ -102,6 +1681,17 @@
       "tags": [],
       "label": "ContentManagementServerSetup",
       "description": [],
+      "signature": [
+        {
+          "pluginId": "contentManagement",
+          "scope": "server",
+          "docId": "kibContentManagementPluginApi",
+          "section": "def-server.ContentManagementServerSetup",
+          "text": "ContentManagementServerSetup"
+        },
+        " extends ",
+        "CoreApi"
+      ],
       "path": "src/plugins/content_management/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -598,7 +2188,7 @@
         "label": "API_ENDPOINT",
         "description": [],
         "signature": [
-          "\"/api/content_management\""
+          "\"/api/content_management/rpc\""
         ],
         "path": "src/plugins/content_management/common/constants.ts",
         "deprecated": false,
@@ -650,140 +2240,6 @@
         "path": "src/plugins/content_management/common/rpc/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "contentManagement",
-        "id": "def-common.schemas",
-        "type": "Object",
-        "tags": [],
-        "label": "schemas",
-        "description": [],
-        "path": "src/plugins/content_management/common/rpc/rpc.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "contentManagement",
-            "id": "def-common.schemas.get",
-            "type": "Object",
-            "tags": [],
-            "label": "get",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "contentManagement",
-                "scope": "common",
-                "docId": "kibContentManagementPluginApi",
-                "section": "def-common.ProcedureSchemas",
-                "text": "ProcedureSchemas"
-              }
-            ],
-            "path": "src/plugins/content_management/common/rpc/rpc.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "contentManagement",
-            "id": "def-common.schemas.bulkGet",
-            "type": "Object",
-            "tags": [],
-            "label": "bulkGet",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "contentManagement",
-                "scope": "common",
-                "docId": "kibContentManagementPluginApi",
-                "section": "def-common.ProcedureSchemas",
-                "text": "ProcedureSchemas"
-              }
-            ],
-            "path": "src/plugins/content_management/common/rpc/rpc.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "contentManagement",
-            "id": "def-common.schemas.create",
-            "type": "Object",
-            "tags": [],
-            "label": "create",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "contentManagement",
-                "scope": "common",
-                "docId": "kibContentManagementPluginApi",
-                "section": "def-common.ProcedureSchemas",
-                "text": "ProcedureSchemas"
-              }
-            ],
-            "path": "src/plugins/content_management/common/rpc/rpc.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "contentManagement",
-            "id": "def-common.schemas.update",
-            "type": "Object",
-            "tags": [],
-            "label": "update",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "contentManagement",
-                "scope": "common",
-                "docId": "kibContentManagementPluginApi",
-                "section": "def-common.ProcedureSchemas",
-                "text": "ProcedureSchemas"
-              }
-            ],
-            "path": "src/plugins/content_management/common/rpc/rpc.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "contentManagement",
-            "id": "def-common.schemas.delete",
-            "type": "Object",
-            "tags": [],
-            "label": "delete",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "contentManagement",
-                "scope": "common",
-                "docId": "kibContentManagementPluginApi",
-                "section": "def-common.ProcedureSchemas",
-                "text": "ProcedureSchemas"
-              }
-            ],
-            "path": "src/plugins/content_management/common/rpc/rpc.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "contentManagement",
-            "id": "def-common.schemas.search",
-            "type": "Object",
-            "tags": [],
-            "label": "search",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "contentManagement",
-                "scope": "common",
-                "docId": "kibContentManagementPluginApi",
-                "section": "def-common.ProcedureSchemas",
-                "text": "ProcedureSchemas"
-              }
-            ],
-            "path": "src/plugins/content_management/common/rpc/rpc.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       }
     ]

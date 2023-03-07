@@ -21,7 +21,7 @@ export const selectors = i18n.translate('xpack.cloudDefend.controlSelectors', {
 });
 
 export const selectorsHelp = i18n.translate('xpack.cloudDefend.controlSelectorsHelp', {
-  defaultMessage: 'Create selectors to match on activities that should be blocked or alerted.',
+  defaultMessage: 'Create selectors to match on operations that should be blocked or alerted.',
 });
 
 export const responses = i18n.translate('xpack.cloudDefend.controlResponses', {
@@ -99,6 +99,22 @@ export const errorValueLengthExceeded = i18n.translate(
   }
 );
 
+export const getConditionHelpLabel = (prop: string) => {
+  switch (prop) {
+    case ControlSelectorCondition.ignoreVolumeMounts:
+      return i18n.translate('xpack.cloudDefend.ignoreVolumeMountsHelp', {
+        defaultMessage: 'Ignore operations on all volume mounts.',
+      });
+    case ControlSelectorCondition.ignoreVolumeFiles:
+      return i18n.translate('xpack.cloudDefend.ignoreVolumeFilesHelp', {
+        defaultMessage:
+          'Ignore operations on file mounts only. e.g mounted files, configMaps, secrets etc...',
+      });
+    default:
+      return '';
+  }
+};
+
 export const getConditionLabel = (prop: string) => {
   switch (prop) {
     case ControlSelectorCondition.operation:
@@ -116,6 +132,14 @@ export const getConditionLabel = (prop: string) => {
     case ControlSelectorCondition.targetFilePath:
       return i18n.translate('xpack.cloudDefend.targetFilePath', {
         defaultMessage: 'Target file path',
+      });
+    case ControlSelectorCondition.ignoreVolumeFiles:
+      return i18n.translate('xpack.cloudDefend.ignoreVolumeFiles', {
+        defaultMessage: 'Ignore volume files',
+      });
+    case ControlSelectorCondition.ignoreVolumeMounts:
+      return i18n.translate('xpack.cloudDefend.ignoreVolumeMounts', {
+        defaultMessage: 'Ignore volume mounts',
       });
     case ControlSelectorCondition.orchestratorClusterId:
       return i18n.translate('xpack.cloudDefend.orchestratorClusterId', {
@@ -141,5 +165,7 @@ export const getConditionLabel = (prop: string) => {
       return i18n.translate('xpack.cloudDefend.orchestratorResourceType', {
         defaultMessage: 'Orchestrator resource type',
       });
+    default:
+      return '';
   }
 };

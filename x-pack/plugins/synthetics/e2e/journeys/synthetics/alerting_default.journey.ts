@@ -38,8 +38,6 @@ journey('AlertingDefaults', async ({ page, params }) => {
   });
 
   step('Click text=Synthetics', async () => {
-    await page.click('text=Synthetics');
-    await page.click('text=Settings');
     expect(page.url()).toBe('http://localhost:5620/app/synthetics/settings/alerting');
     await page.click('.euiComboBox__inputWrap');
     await page.click("text=There aren't any options available");
