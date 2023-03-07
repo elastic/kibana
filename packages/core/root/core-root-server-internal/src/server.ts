@@ -10,7 +10,7 @@ import apm from 'elastic-apm-node';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { NodeRoles } from '@kbn/core-node-server';
-import { CriticalError } from '@kbn/core-base-server-internal';
+import { CriticalError as CriticalException } from '@kbn/core-base-server-internal';
 import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
 import { DocLinksService } from '@kbn/core-doc-links-server-internal';
 import { LoggingService, ILoggingSystem } from '@kbn/core-logging-server-internal';
@@ -373,7 +373,11 @@ export class Server {
     if (this.nodeRoles?.migrator === true) {
       startTransaction?.end();
       this.log.info('Detected migrator node role; shutting down Kibana...');
-      throw new CriticalError('Migrations completed, shutting down Kibana', 'MigrationOnlyNode', 0);
+      throw new CriticalException(
+        'Migrations completed, shutting down Kibana',
+        'MigrationOnlyNode',
+        0
+      );
     }
 
     const capabilitiesStart = this.capabilities.start();
