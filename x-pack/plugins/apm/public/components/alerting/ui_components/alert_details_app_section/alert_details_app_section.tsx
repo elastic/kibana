@@ -21,8 +21,6 @@ import {
 import moment from 'moment';
 import { formatAlertEvaluationValue } from '@kbn/observability-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { asPercent } from '../../../../../common/utils/formatters';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getDurationFormatter } from '../../../../../common/utils/formatters/duration';
 import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
@@ -46,7 +44,6 @@ import {
 } from './types';
 import { getAggsTypeFromRule, isLatencyThresholdRuleType } from './helpers';
 import { filterNil } from '../../../shared/charts/latency_chart';
-import { errorRateI18n } from '../../../shared/charts/failed_transaction_rate_chart';
 import { LatencyAlertsHistoryChart } from './latency_alerts_history_chart';
 import {
   AlertActiveRect,
@@ -55,6 +52,7 @@ import {
   AlertThresholdAnnotation,
 } from './latency_chart_components';
 import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
+import FailedTransactionChart from './failed_transaction_chart';
 
 export function AlertDetailsAppSection({
   rule,
@@ -271,68 +269,6 @@ export function AlertDetailsAppSection({
 
   /* Throughput Chart */
 
-  /* Error Rate */
-  type ErrorRate =
-    APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate'>;
-
-  const INITIAL_STATE_ERROR_RATE: ErrorRate = {
-    currentPeriod: {
-      timeseries: [],
-      average: null,
-    },
-    previousPeriod: {
-      timeseries: [],
-      average: null,
-    },
-  };
-  function yLabelFormat(y?: number | null) {
-    return asPercent(y || 0, 1);
-  }
-
-  const {
-    data: dataErrorRate = INITIAL_STATE_ERROR_RATE,
-    status: statusErrorRate,
-  } = useFetcher(
-    (callApmApi) => {
-      if (transactionType && serviceName && start && end) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/transactions/charts/error_rate',
-          {
-            params: {
-              path: {
-                serviceName,
-              },
-              query: {
-                environment,
-                kuery: '',
-                start,
-                end,
-                transactionType,
-                transactionName: undefined,
-              },
-            },
-          }
-        );
-      }
-    },
-    [environment, serviceName, start, end, transactionType]
-  );
-
-  const { currentPeriodColor: currentPeriodColorErrorRate } =
-    getTimeSeriesColor(ChartType.FAILED_TRANSACTION_RATE);
-
-  const timeseriesErrorRate = [
-    {
-      data: dataErrorRate.currentPeriod.timeseries,
-      type: 'linemark',
-      color: currentPeriodColorErrorRate,
-      title: i18n.translate('xpack.apm.errorRate.chart.errorRate', {
-        defaultMessage: 'Failed transaction rate (avg.)',
-      }),
-    },
-  ];
-  /* Error Rate */
-
   const getLatencyChartAdditionalData = () => {
     if (isLatencyThresholdRuleType(alert.fields[ALERT_RULE_TYPE_ID])) {
       return [
@@ -438,42 +374,15 @@ export function AlertDetailsAppSection({
                 />
               </EuiPanel>
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiPanel hasBorder={true}>
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="s"
-                  responsive={false}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xs">
-                      <h2>
-                        {i18n.translate('xpack.apm.errorRate', {
-                          defaultMessage: 'Failed transaction rate',
-                        })}
-                      </h2>
-                    </EuiTitle>
-                  </EuiFlexItem>
-
-                  <EuiFlexItem grow={false}>
-                    <EuiIconTip content={errorRateI18n} position="right" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-
-                <TimeseriesChart
-                  id="errorRate"
-                  height={200}
-                  showAnnotations={false}
-                  fetchStatus={statusErrorRate}
-                  timeseries={timeseriesErrorRate}
-                  yLabelFormat={yLabelFormat}
-                  yDomain={{ min: 0, max: 1 }}
-                  comparisonEnabled={false}
-                  customTheme={comparisonChartTheme}
-                  timeZone={timeZone}
-                />
-              </EuiPanel>
-            </EuiFlexItem>
+            <FailedTransactionChart
+              transactionType={transactionType}
+              serviceName={serviceName}
+              environment={environment}
+              start={start}
+              end={end}
+              comparisonChartTheme={comparisonChartTheme}
+              timeZone={timeZone}
+            />
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
