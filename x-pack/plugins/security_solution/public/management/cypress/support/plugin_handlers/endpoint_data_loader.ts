@@ -11,6 +11,20 @@ import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/test';
 import type seedrandom from 'seedrandom';
 import { kibanaPackageJson } from '@kbn/repo-info';
+import pRetry from 'p-retry';
+import { STARTED_TRANSFORM_STATES } from '../../../../../common/constants';
+import {
+  ENDPOINT_ALERTS_INDEX,
+  ENDPOINT_EVENTS_INDEX,
+} from '../../../../../scripts/endpoint/common/constants';
+import {
+  METADATA_DATASTREAM,
+  METADATA_UNITED_INDEX,
+  METADATA_UNITED_TRANSFORM,
+  metadataCurrentIndexPattern,
+  metadataTransformPrefix,
+  POLICY_RESPONSE_INDEX,
+} from '../../../../../common/endpoint/constants';
 import { EndpointDocGenerator } from '../../../../../common/endpoint/generate_data';
 import { EndpointMetadataGenerator } from '../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 import { indexHostsAndAlerts } from '../../../../../common/endpoint/index_data';
@@ -23,7 +37,6 @@ interface CyLoadEndpointDataOptions {
   enableFleetIntegration: boolean;
   generatorSeed: string;
   waitUntilTransformed: boolean;
-  waitTimeout: number;
   customIndexFn: () => Promise<IndexedHostsAndAlertsResponse>;
 }
 
@@ -45,16 +58,14 @@ export const cyLoadEndpointDataHandler = async (
     enableFleetIntegration = true,
     generatorSeed = `cy.${Math.random()}`,
     waitUntilTransformed = true,
-    // waitTimeout = 60000,
     customIndexFn,
   } = options;
 
   if (waitUntilTransformed) {
     // need this before indexing docs so that the united transform doesn't
     // create a checkpoint with a timestamp after the doc timestamps
-    // FIXME:PT Implement stop transforms
-    // await this.stopTransform(metadataTransformPrefix);
-    // await this.stopTransform(METADATA_UNITED_TRANSFORM);
+    await stopTransform(esClient, metadataTransformPrefix);
+    await stopTransform(esClient, METADATA_UNITED_TRANSFORM);
   }
 
   // load data into the system
@@ -66,11 +77,10 @@ export const cyLoadEndpointDataHandler = async (
         generatorSeed,
         numHosts,
         numHostDocs,
-        // FIXME:PT use const for indexes (where possible)
-        'metrics-endpoint.metadata-default',
-        'metrics-endpoint.policy-default',
-        'logs-endpoint.events.process-default',
-        'logs-endpoint.alerts-default',
+        METADATA_DATASTREAM,
+        POLICY_RESPONSE_INDEX,
+        ENDPOINT_EVENTS_INDEX,
+        ENDPOINT_ALERTS_INDEX,
         alertsPerHost,
         enableFleetIntegration,
         undefined,
@@ -78,13 +88,16 @@ export const cyLoadEndpointDataHandler = async (
       );
 
   if (waitUntilTransformed) {
-    // FIXME:PT implement start transform methods
-    // await this.startTransform(metadataTransformPrefix);
-    // const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
-    // await this.waitForEndpoints(metadataIds, waitTimeout);
-    // await this.startTransform(METADATA_UNITED_TRANSFORM);
-    // const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));
-    // await this.waitForUnitedEndpoints(agentIds, waitTimeout);
+    await startTransform(esClient, metadataTransformPrefix);
+
+    const metadataIds = Array.from(new Set(indexedData.hosts.map((host) => host.agent.id)));
+    await waitForEndpoints(esClient, 'endpoint_index', metadataIds);
+
+    await startTransform(esClient, METADATA_UNITED_TRANSFORM);
+
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    const agentIds = Array.from(new Set(indexedData.agents.map((agent) => agent.agent!.id)));
+    await waitForEndpoints(esClient, 'united_index', agentIds);
   }
 
   return indexedData;
@@ -102,4 +115,104 @@ const CurrentKibanaVersionDocGenerator = class extends EndpointDocGenerator {
 
     super(seedValue, MetadataGenerator);
   }
+};
+
+const stopTransform = async (esClient: Client, transformId: string): Promise<void> => {
+  await esClient.transform.stopTransform({
+    transform_id: `${transformId}*`,
+    force: true,
+    wait_for_completion: true,
+    allow_no_match: true,
+  });
+};
+
+const startTransform = async (esClient: Client, transformId: string): Promise<void> => {
+  const transformsResponse = await esClient.transform.getTransformStats({
+    transform_id: `${transformId}*`,
+  });
+
+  await Promise.all(
+    transformsResponse.transforms.map((transform) => {
+      if (STARTED_TRANSFORM_STATES.has(transform.state)) {
+        return Promise.resolve();
+      }
+
+      return esClient.transform.startTransform({ transform_id: transform.id });
+    })
+  );
+};
+
+/**
+ * Waits for data to show up on the Transform destination index of either the Endpoint metadata or
+ * the united metadata index
+ *
+ * @param esClient
+ * @param location
+ * @param ids
+ */
+const waitForEndpoints = async (
+  esClient: Client,
+  location: 'endpoint_index' | 'united_index',
+  ids: string[] = []
+) => {
+  const index = location === 'endpoint_index' ? metadataCurrentIndexPattern : METADATA_UNITED_INDEX;
+  const body = ids.length
+    ? location === 'endpoint_index'
+      ? {
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    'agent.id': ids,
+                  },
+                },
+              ],
+            },
+          },
+        }
+      : {
+          query: {
+            bool: {
+              filter: [
+                {
+                  terms: {
+                    'agent.id': ids,
+                  },
+                },
+                // make sure that both endpoint and agent portions are populated
+                // since agent is likely to be populated first
+                { exists: { field: 'united.endpoint.agent.id' } },
+                { exists: { field: 'united.agent.agent.id' } },
+              ],
+            },
+          },
+        }
+    : {
+        size: 1,
+        query: {
+          match_all: {},
+        },
+      };
+
+  const expectedSize = ids.length || 1;
+
+  await pRetry(
+    async () => {
+      const response = await esClient.search({
+        index,
+        size: expectedSize,
+        body,
+        rest_total_hits_as_int: true,
+      });
+
+      // If not the expected number of Endpoints, then throw an error so we keep trying
+      if (response.hits.total !== expectedSize) {
+        throw new Error(
+          `Expected number of endpoints not found. Looking for ${expectedSize} but received ${response.hits.total}`
+        );
+      }
+    },
+    { forever: false }
+  );
 };
