@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { HttpHandler } from '@kbn/core/public';
 import { ToastInput } from '@kbn/core/public';
@@ -74,6 +74,14 @@ export function useHTTPRequest<Response>(
     },
     [toast]
   );
+
+  useEffect(() => {
+    return () => {
+      if (abortable) {
+        abortController.current.abort();
+      }
+    };
+  }, [abortable]);
 
   const [request, makeRequest] = useTrackedPromise<any, Response>(
     {

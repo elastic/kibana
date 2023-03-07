@@ -67,7 +67,7 @@ export const HostsTable = () => {
         refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
           defaultMessage: 'Check for new data',
         })}
-        onRefetch={() => onSubmit({ ...searchCriteria })}
+        onRefetch={() => onSubmit()}
         testString="noMetricsDataPrompt"
       />
     );
