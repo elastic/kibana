@@ -500,7 +500,11 @@ export class LegacyCoreEditor implements CoreEditor {
   addFoldsAtRanges(foldRanges: Range[]) {
     const session = this.editor.getSession();
     foldRanges.forEach((range) => {
-      session.addFold('...', _AceRange.fromPoints(range.start, range.end));
+      try {
+        session.addFold('...', _AceRange.fromPoints(range.start, range.end));
+      } catch (e) {
+        // ignore the error if a fold fails
+      }
     });
   }
 }
