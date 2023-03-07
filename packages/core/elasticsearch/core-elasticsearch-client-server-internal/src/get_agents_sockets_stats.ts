@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { NetworkAgent } from '@kbn/core-elasticsearch-client-server-internal';
 import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
+import type { NetworkAgent } from './agent_manager';
 
 export const getAgentsSocketsStats = (agents: Set<NetworkAgent>): ElasticsearchClientsMetrics => {
   const nodes = new Set<string>();

@@ -186,7 +186,7 @@ describe('BuilderEntryItem', () => {
     );
 
     expect(wrapper.find('.euiFormHelpText.euiFormRow__text').text()).toMatch(
-      /This field is defined as several types across different indices./
+      /This field is defined as different types across the following indices or is unmapped. This can cause unexpected query results./
     );
   });
 
