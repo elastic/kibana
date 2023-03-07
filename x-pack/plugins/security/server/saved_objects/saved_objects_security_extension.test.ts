@@ -19,6 +19,7 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
+import { useDebouncedValue } from '@kbn/expressions-plugin/public/react_expression_renderer/use_debounced_value';
 
 import { auditLoggerMock } from '../audit/mocks';
 import type { CheckSavedObjectsPrivileges } from '../authorization';
@@ -450,8 +451,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: ['x', 'y', 'z'],
-            requested_types: [...types],
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'User is updating saved objects',
@@ -467,8 +468,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: ['x', 'y', 'z'],
-            requested_types: [...types],
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'User is creating saved objects',
@@ -505,8 +506,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: ['x', 'y', 'z'],
-            requested_types: [...types],
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'User has updated saved objects',
@@ -522,8 +523,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: ['x', 'y', 'z'],
-            requested_types: [...types],
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'User has created saved objects',
@@ -572,8 +573,8 @@ describe('#authorize (unpublished by interface)', () => {
             kibana: {
               add_to_spaces: undefined,
               delete_from_spaces: undefined,
-              requested_spaces: [...(enforceMap.get(obj.type) ?? [])],
-              requested_types: undefined,
+              unauthorized_spaces: undefined,
+              unauthorized_types: undefined,
               saved_object: {
                 id: obj.id,
                 type: obj.type,
@@ -594,8 +595,8 @@ describe('#authorize (unpublished by interface)', () => {
             kibana: {
               add_to_spaces: undefined,
               delete_from_spaces: undefined,
-              requested_spaces: [...(enforceMap.get(obj.type) ?? [])],
-              requested_types: undefined,
+              unauthorized_spaces: undefined,
+              unauthorized_types: undefined,
               saved_object: {
                 id: obj.id,
                 type: obj.type,
@@ -649,8 +650,8 @@ describe('#authorize (unpublished by interface)', () => {
             kibana: {
               add_to_spaces: undefined,
               delete_from_spaces: undefined,
-              requested_spaces: [...(enforceMap.get(obj.type) ?? [])],
-              requested_types: undefined,
+              unauthorized_spaces: undefined,
+              unauthorized_types: undefined,
               saved_object: {
                 id: obj.id,
                 type: obj.type,
@@ -671,8 +672,8 @@ describe('#authorize (unpublished by interface)', () => {
             kibana: {
               add_to_spaces: undefined,
               delete_from_spaces: undefined,
-              requested_spaces: [...(enforceMap.get(obj.type) ?? [])],
-              requested_types: undefined,
+              unauthorized_spaces: undefined,
+              unauthorized_types: undefined,
               saved_object: {
                 id: obj.id,
                 type: obj.type,
@@ -743,8 +744,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: ['x', 'y', 'z'],
-            requested_types: [...types],
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'User is updating saved objects',
@@ -760,8 +761,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: ['x', 'y', 'z'],
-            requested_types: [...types],
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'User is creating saved objects',
@@ -804,8 +805,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: ['x', 'y', 'z'],
-            requested_types: [...types],
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'Failed attempt to update saved objects',
@@ -855,8 +856,8 @@ describe('#authorize (unpublished by interface)', () => {
             kibana: {
               add_to_spaces: undefined,
               delete_from_spaces: undefined,
-              requested_spaces: [...(enforceMap.get(obj.type) ?? [])],
-              requested_types: undefined,
+              unauthorized_spaces: undefined,
+              unauthorized_types: undefined,
               saved_object: {
                 id: obj.id,
                 type: obj.type,
@@ -931,8 +932,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: ['x', 'y', 'z'],
-            requested_types: [...types],
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'Failed attempt to update saved objects',
@@ -976,8 +977,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: ['y', 'z', 'x'],
-            requested_types: [...types],
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'Failed attempt to update saved objects',
@@ -1029,8 +1030,8 @@ describe('#authorize (unpublished by interface)', () => {
             kibana: {
               add_to_spaces: undefined,
               delete_from_spaces: undefined,
-              requested_spaces: [...(enforceMap.get(obj.type) ?? [])],
-              requested_types: undefined,
+              unauthorized_spaces: undefined,
+              unauthorized_types: undefined,
               saved_object: {
                 id: obj.id,
                 type: obj.type,
@@ -1105,8 +1106,8 @@ describe('#authorize (unpublished by interface)', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: ['y', 'z', 'x'],
-            requested_types: [...types],
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: undefined,
           },
           message: 'Failed attempt to update saved objects',
@@ -1450,8 +1451,8 @@ describe('#create', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
-          requested_spaces: [namespace, ...(obj1.initialNamespaces ?? [])],
-          requested_types: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `User is creating ${obj1.type} [id=${obj1.id}]`,
@@ -1499,8 +1500,8 @@ describe('#create', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
-          requested_spaces: [namespace, ...(obj1.initialNamespaces ?? [])],
-          requested_types: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `Failed attempt to create ${obj1.type} [id=${obj1.id}]`,
@@ -1733,8 +1734,8 @@ describe('#create', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: [namespace, ...(obj.initialNamespaces ?? [])],
-            requested_types: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `User is creating ${obj.type} [id=${obj.id}]`,
@@ -1801,8 +1802,8 @@ describe('#create', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: [namespace, ...(obj.initialNamespaces ?? [])],
-            requested_types: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `Failed attempt to create ${obj.type} [id=${obj.id}]`,
@@ -1938,8 +1939,8 @@ describe('update', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
-          requested_spaces: [namespace, obj1.objectNamespace],
-          requested_types: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `User is updating ${obj1.type} [id=${obj1.id}]`,
@@ -1987,8 +1988,8 @@ describe('update', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
-          requested_spaces: [namespace, obj1.objectNamespace],
-          requested_types: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `Failed attempt to update ${obj1.type} [id=${obj1.id}]`,
@@ -2219,8 +2220,8 @@ describe('update', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: [namespace, obj.objectNamespace],
-            requested_types: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `User is updating ${obj.type} [id=${obj.id}]`,
@@ -2280,8 +2281,8 @@ describe('update', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: [namespace, obj.objectNamespace],
-            requested_types: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `Failed attempt to update ${obj.type} [id=${obj.id}]`,
@@ -2419,8 +2420,8 @@ describe('delete', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
-          requested_spaces: [namespace],
-          requested_types: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `User is deleting ${obj1.type} [id=${obj1.id}]`,
@@ -2468,8 +2469,8 @@ describe('delete', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
-          requested_spaces: [namespace],
-          requested_types: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `Failed attempt to delete ${obj1.type} [id=${obj1.id}]`,
@@ -2696,8 +2697,8 @@ describe('delete', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: [namespace],
-            requested_types: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `User is deleting ${obj.type} [id=${obj.id}]`,
@@ -2756,8 +2757,8 @@ describe('delete', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: [namespace],
-            requested_types: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `Failed attempt to delete ${obj.type} [id=${obj.id}]`,
@@ -2924,8 +2925,8 @@ describe('get', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
-          requested_spaces: [namespace],
-          requested_types: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `User is accessing ${obj1.type} [id=${obj1.id}]`,
@@ -2988,8 +2989,8 @@ describe('get', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
-          requested_spaces: [namespace],
-          requested_types: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `Failed attempt to access ${obj1.type} [id=${obj1.id}]`,
@@ -3025,8 +3026,8 @@ describe('get', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
-          requested_spaces: [namespace],
-          requested_types: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj1.type, id: obj1.id },
         },
         message: `Failed attempt to access ${obj1.type} [id=${obj1.id}]`,
@@ -3232,8 +3233,8 @@ describe('get', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: [...new Set([namespace, ...obj.objectNamespaces])],
-            requestes_types: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `User has accessed ${obj.type} [id=${obj.id}]`,
@@ -3264,8 +3265,8 @@ describe('get', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
-          requested_spaces: objA.objectNamespaces,
-          requested_types: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: objA.type, id: objA.id },
         },
         message: `User has accessed ${objA.type} [id=${objA.id}]`,
@@ -3325,8 +3326,8 @@ describe('get', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: [...new Set([namespace, ...obj.objectNamespaces])],
-            requested_types: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `Failed attempt to access ${obj.type} [id=${obj.id}]`,
@@ -3745,8 +3746,8 @@ describe(`#authorizeRemoveReferences`, () => {
       kibana: {
         add_to_spaces: undefined,
         delete_from_spaces: undefined,
-        requested_spaces: [namespace],
-        requested_types: undefined,
+        unauthorized_spaces: undefined,
+        unauthorized_types: undefined,
         saved_object: { type: obj1.type, id: obj1.id },
       },
       message: `User is removing references to ${obj1.type} [id=${obj1.id}]`,
@@ -3790,8 +3791,8 @@ describe(`#authorizeRemoveReferences`, () => {
       kibana: {
         add_to_spaces: undefined,
         delete_from_spaces: undefined,
-        requested_spaces: [namespace],
-        requested_types: undefined,
+        unauthorized_spaces: undefined,
+        unauthorized_types: undefined,
         saved_object: { type: obj1.type, id: obj1.id },
       },
       message: `Failed attempt to remove references to ${obj1.type} [id=${obj1.id}]`,
@@ -3982,8 +3983,8 @@ describe(`#authorizeOpenPointInTime`, () => {
         add_to_spaces: undefined,
         delete_from_spaces: undefined,
         saved_object: undefined,
-        requested_spaces: multipleSpaces,
-        requested_types: multipleTypes,
+        unauthorized_spaces: undefined,
+        unauthorized_types: undefined,
       },
       message: `User is opening point-in-time saved objects`,
     });
@@ -4026,8 +4027,8 @@ describe(`#authorizeOpenPointInTime`, () => {
         add_to_spaces: undefined,
         delete_from_spaces: undefined,
         saved_object: undefined,
-        requested_spaces: multipleSpaces,
-        requested_types: multipleTypes,
+        unauthorized_spaces: multipleSpaces,
+        unauthorized_types: multipleTypes,
       },
       message: `Failed attempt to open point-in-time saved objects`,
     });
@@ -4430,8 +4431,8 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: obj.spaces,
-            requested_types: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `User has collected references and spaces of ${obj.type} [id=${obj.id}]`,
@@ -4493,8 +4494,8 @@ describe('#authorizeAndRedactMultiNamespaceReferences', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
-          requested_spaces: [namespace],
-          requested_types: objects.map((obj) => obj.type),
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: undefined,
         },
         message: `Failed attempt to collect references and spaces of saved objects`,
@@ -4866,9 +4867,6 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       action: 'saved_object_resolve',
       addToSpaces: undefined,
       deleteFromSpaces: undefined,
-      typesAndSpaces: new Map()
-        .set(resolveObj1.saved_object.type, new Set([namespace]))
-        .set(resolveObj2.saved_object.type, new Set([namespace])),
       objects: undefined,
       useSuccessOutcome: true,
     });
@@ -4877,8 +4875,8 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       action: 'saved_object_resolve',
       addToSpaces: undefined,
       deleteFromSpaces: undefined,
-      requestedSpaces: [namespace],
-      requestedTypes: objects.map((obj) => obj.saved_object.type),
+      unauthorizedSpaces: undefined,
+      unauthorizedTypes: undefined,
       error: undefined,
       outcome: 'success',
     });
@@ -4894,8 +4892,8 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       kibana: {
         add_to_spaces: undefined,
         delete_from_spaces: undefined,
-        requested_spaces: [namespace],
-        requested_types: objects.map((obj) => obj.saved_object.type),
+        unauthorized_spaces: undefined,
+        unauthorized_types: undefined,
         saved_object: undefined,
       },
       message: `User has resolved saved objects`,
@@ -4958,8 +4956,8 @@ describe('#authorizeAndRedactInternalBulkResolve', () => {
       kibana: {
         add_to_spaces: undefined,
         delete_from_spaces: undefined,
-        requested_spaces: [namespace],
-        requested_types: objects.map((obj) => obj.saved_object.type),
+        unauthorized_spaces: undefined,
+        unauthorized_types: undefined,
         saved_object: undefined,
       },
       message: `Failed attempt to resolve saved objects`,
@@ -5410,8 +5408,8 @@ describe('#authorizeUpdateSpaces', () => {
         kibana: {
           add_to_spaces: spacesToAdd,
           delete_from_spaces: spacesToRemove,
-          requested_spaces: [...spacesToAdd, ...spacesToRemove, namespace],
-          requestedTypes: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj.type, id: obj.id },
         },
         message: `User is updating spaces of ${obj.type} [id=${obj.id}]`,
@@ -5481,8 +5479,8 @@ describe('#authorizeUpdateSpaces', () => {
         kibana: {
           add_to_spaces: spacesToAdd,
           delete_from_spaces: spacesToRemove,
-          requested_spaces: [...spacesToAdd, ...spacesToRemove, namespace],
-          requestedTypes: undefined,
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: obj.type, id: obj.id },
         },
         message: `Failed attempt to update spaces of ${obj.type} [id=${obj.id}]`,
@@ -5683,8 +5681,8 @@ describe('find', () => {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
           saved_object: undefined,
-          requested_spaces: [namespace],
-          requested_types: [obj1.type],
+          unauthorized_spaces: [namespace],
+          unauthorized_types: [obj1.type],
         },
         message: `Failed attempt to access saved objects`,
       });
@@ -5839,8 +5837,8 @@ describe('find', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: obj.existingNamespaces,
-            requeted_types: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `User has accessed ${obj.type} [id=${obj.id}]`,
@@ -5872,8 +5870,8 @@ describe('find', () => {
           kibana: {
             add_to_spaces: undefined,
             delete_from_spaces: undefined,
-            requested_spaces: obj.existingNamespaces,
-            requested_types: undefined,
+            unauthorized_spaces: undefined,
+            unauthorized_types: undefined,
             saved_object: { type: obj.type, id: obj.id },
           },
           message: `User has accessed ${obj.type} [id=${obj.id}]`,
@@ -6088,7 +6086,8 @@ describe('#authorizeDisableLegacyUrlAliases', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
-          requested_spaces: [...expectedSpaces],
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: 'legacy-url-alias', id: legacyObjectId },
         },
         message: `User is updating legacy-url-alias [id=${legacyObjectId}]`,
@@ -6142,7 +6141,8 @@ describe('#authorizeDisableLegacyUrlAliases', () => {
         kibana: {
           add_to_spaces: undefined,
           delete_from_spaces: undefined,
-          requested_spaces: [...expectedSpaces],
+          unauthorized_spaces: undefined,
+          unauthorized_types: undefined,
           saved_object: { type: 'legacy-url-alias', id: legacyObjectId },
         },
         message: `Failed attempt to update legacy-url-alias [id=${legacyObjectId}]`,
