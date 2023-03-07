@@ -1,6 +1,7 @@
 get:
-  summary: Settings
-  tags: []
+  summary: Get settings
+  tags:
+    - Fleet internals
   responses:
     '200':
       description: OK
@@ -12,8 +13,9 @@ get:
       $ref: ../components/responses/error.yaml
   operationId: get-settings
 put:
-  summary: Settings - Update
-  tags: []
+  summary: Update settings
+  tags:
+    - Fleet internals
   requestBody:
     content:
       application/json:

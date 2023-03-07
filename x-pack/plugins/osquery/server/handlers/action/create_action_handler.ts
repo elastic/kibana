@@ -11,11 +11,7 @@ import { filter, flatten, isEmpty, map, omit, pick, pickBy, some } from 'lodash'
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import {
-  containsDynamicQuery,
-  replaceParamsQuery,
-} from '../../../common/utils/replace_params_query';
-import { createDynamicQueries, createQueries } from './create_queries';
+import { createDynamicQueries, replacedQueries } from './create_queries';
 import { getInternalSavedObjectsClient } from '../../routes/utils';
 import { parseAgentSelection } from '../../lib/parse_agent_groups';
 import { packSavedObjectType } from '../../../common/types';
@@ -94,16 +90,13 @@ export const createActionHandler = async (
       : undefined,
     queries: packSO
       ? map(convertSOQueriesToPack(packSO.attributes.queries), (packQuery, packQueryId) => {
-          const dynamicQueryPresent = packQuery.query && containsDynamicQuery(packQuery.query);
+          const replacedQuery = replacedQueries(packQuery.query, alertData);
 
           return pickBy(
             {
               action_id: uuidv4(),
               id: packQueryId,
-              query:
-                dynamicQueryPresent && alertData
-                  ? replaceParamsQuery(packQuery.query, alertData).result
-                  : packQuery.query,
+              ...replacedQuery,
               ecs_mapping: packQuery.ecs_mapping,
               version: packQuery.version,
               platform: packQuery.platform,
@@ -112,9 +105,7 @@ export const createActionHandler = async (
             (value) => !isEmpty(value)
           );
         })
-      : alertData
-      ? await createDynamicQueries(params, alertData, osqueryContext)
-      : await createQueries(params, selectedAgents, osqueryContext),
+      : await createDynamicQueries({ params, alertData, agents: selectedAgents, osqueryContext }),
   };
 
   const fleetActions = map(
@@ -130,31 +121,33 @@ export const createActionHandler = async (
       data: pick(query, ['id', 'query', 'ecs_mapping', 'version', 'platform']),
     })
   );
-
-  await esClientInternal.bulk({
-    refresh: 'wait_for',
-    body: flatten(
-      fleetActions.map((action) => [{ index: { _index: AGENT_ACTIONS_INDEX } }, action])
-    ),
-  });
-
-  const actionsComponentTemplateExists = await esClientInternal.indices.exists({
-    index: `${ACTIONS_INDEX}*`,
-  });
-
-  if (actionsComponentTemplateExists) {
+  if (fleetActions.length) {
     await esClientInternal.bulk({
       refresh: 'wait_for',
-      body: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
+      body: flatten(
+        fleetActions.map((action) => [{ index: { _index: AGENT_ACTIONS_INDEX } }, action])
+      ),
+    });
+
+    const actionsComponentTemplateExists = await esClientInternal.indices.exists({
+      index: `${ACTIONS_INDEX}*`,
+    });
+
+    if (actionsComponentTemplateExists) {
+      await esClientInternal.bulk({
+        refresh: 'wait_for',
+        body: [{ index: { _index: `${ACTIONS_INDEX}-default` } }, osqueryAction],
+      });
+    }
+
+    osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
+      ...omit(osqueryAction, ['type', 'input_type', 'user_id']),
+      agents: osqueryAction.agents.length,
     });
   }
 
-  osqueryContext.telemetryEventsSender.reportEvent(TELEMETRY_EBT_LIVE_QUERY_EVENT, {
-    ...omit(osqueryAction, ['type', 'input_type', 'user_id']),
-    agents: osqueryAction.agents.length,
-  });
-
   return {
     response: osqueryAction,
+    fleetActionsCount: fleetActions.length,
   };
 };

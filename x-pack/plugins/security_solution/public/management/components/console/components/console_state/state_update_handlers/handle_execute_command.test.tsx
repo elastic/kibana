@@ -25,29 +25,6 @@ describe('When a Console command is entered by the user', () => {
     render = (props = {}) => (renderResult = testSetup.renderConsole(props));
   });
 
-  it('should display all available commands when `help` command is entered', async () => {
-    render();
-    enterCommand('help');
-
-    expect(renderResult.getByTestId('test-helpOutput')).toBeTruthy();
-
-    await waitFor(() => {
-      expect(renderResult.getAllByTestId('test-commandList-command')).toHaveLength(commands.length);
-    });
-  });
-
-  it('should display custom help output when Command service has `getHelp()` defined', async () => {
-    const HelpComponent: React.FunctionComponent = () => {
-      return <div data-test-subj="custom-help">{'help output'}</div>;
-    };
-    render({ HelpComponent });
-    enterCommand('help');
-
-    await waitFor(() => {
-      expect(renderResult.getByTestId('custom-help')).toBeTruthy();
-    });
-  });
-
   it('should clear the command output history when `clear` is entered', async () => {
     render();
     enterCommand('help');

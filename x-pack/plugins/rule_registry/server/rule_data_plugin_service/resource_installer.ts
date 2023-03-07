@@ -15,18 +15,16 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import {
   DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,
-} from '@kbn/alerting-plugin/server';
-import {
   ECS_COMPONENT_TEMPLATE_NAME,
-  TECHNICAL_COMPONENT_TEMPLATE_NAME,
-} from '../../common/assets';
+} from '@kbn/alerting-plugin/server';
+import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
 import { ecsComponentTemplate } from '../../common/assets/component_templates/ecs_component_template';
 
 import type { IndexInfo } from './index_info';
 
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
-const TOTAL_FIELDS_LIMIT = 1900;
+const TOTAL_FIELDS_LIMIT = 2500;
 interface ConstructorOptions {
   getResourceName(relativeName: string): string;
   getClusterClient: () => Promise<ElasticsearchClient>;
@@ -98,7 +96,7 @@ export class ResourceInstaller {
    */
   public async installCommonResources(): Promise<void> {
     await this.installWithTimeout('common resources shared between all indices', async () => {
-      const { getResourceName, logger, areFrameworkAlertsEnabled } = this.options;
+      const { logger, areFrameworkAlertsEnabled } = this.options;
 
       try {
         // We can install them in parallel
@@ -112,15 +110,14 @@ export class ResourceInstaller {
                   name: DEFAULT_ALERTS_ILM_POLICY_NAME,
                   body: DEFAULT_ALERTS_ILM_POLICY,
                 }),
+                this.createOrUpdateComponentTemplate({
+                  name: ECS_COMPONENT_TEMPLATE_NAME,
+                  body: ecsComponentTemplate,
+                }),
               ]),
           this.createOrUpdateComponentTemplate({
-            name: getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME),
+            name: TECHNICAL_COMPONENT_TEMPLATE_NAME,
             body: technicalComponentTemplate,
-          }),
-
-          this.createOrUpdateComponentTemplate({
-            name: getResourceName(ECS_COMPONENT_TEMPLATE_NAME),
-            body: ecsComponentTemplate,
           }),
         ]);
       } catch (err) {
@@ -315,7 +312,7 @@ export class ResourceInstaller {
   }
 
   private async installNamespacedIndexTemplate(indexInfo: IndexInfo, namespace: string) {
-    const { logger, getResourceName } = this.options;
+    const { logger } = this.options;
     const {
       componentTemplateRefs,
       componentTemplates,
@@ -329,8 +326,7 @@ export class ResourceInstaller {
 
     logger.debug(`Installing index template for ${primaryNamespacedAlias}`);
 
-    const technicalComponentNames = [getResourceName(TECHNICAL_COMPONENT_TEMPLATE_NAME)];
-    const referencedComponentNames = componentTemplateRefs.map((ref) => getResourceName(ref));
+    const technicalComponentNames = [TECHNICAL_COMPONENT_TEMPLATE_NAME];
     const ownComponentNames = componentTemplates.map((template) =>
       indexInfo.getComponentTemplateName(template.name)
     );
@@ -365,11 +361,7 @@ export class ResourceInstaller {
         // - then we include own component templates registered with this index
         // - finally, we include technical component templates to make sure the index gets all the
         //   mappings and settings required by all Kibana plugins using rule registry to work properly
-        composed_of: [
-          ...referencedComponentNames,
-          ...ownComponentNames,
-          ...technicalComponentNames,
-        ],
+        composed_of: [...componentTemplateRefs, ...ownComponentNames, ...technicalComponentNames],
 
         template: {
           settings: {

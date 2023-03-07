@@ -24,9 +24,9 @@ import {
 } from '@kbn/core-saved-objects-server-internal';
 import { createHiddenTypeVariants } from '@kbn/core-test-helpers-test-utils';
 import { loggerMock } from '@kbn/logging-mocks';
+import { setupConfig } from './routes_test_utils';
 
 const coreId = Symbol('core');
-
 const testTypes = [
   { name: 'index-pattern', hide: false },
   { name: 'hidden-type', hide: true },
@@ -71,12 +71,16 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
 
     const router =
       httpSetup.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
+
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsGet.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
+
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
-    registerGetRoute(router, { coreUsageData, logger });
+
+    const config = setupConfig();
+    registerGetRoute(router, { config, coreUsageData, logger });
 
     await server.start();
   });

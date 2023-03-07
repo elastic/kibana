@@ -31,6 +31,9 @@ import {
   updateSessionViewConfig,
   setTableUpdatedAt,
   updateTotalCount,
+  changeViewMode,
+  updateShowBuildingBlockAlertsFilter,
+  updateShowThreatIndicatorAlertsFilter,
 } from './actions';
 
 import {
@@ -83,19 +86,21 @@ export const dataTableReducer = reducerWithInitialState(initialDataTableState)
       dataTableSettingsProps,
     }),
   }))
-  .case(toggleDetailPanel, (state, action) => ({
-    ...state,
-    tableById: {
-      ...state.tableById,
-      [action.id]: {
-        ...state.tableById[action.id],
-        expandedDetail: {
-          ...state.tableById[action.id].expandedDetail,
-          ...updateTableDetailsPanel(action),
+  .case(toggleDetailPanel, (state, action) => {
+    return {
+      ...state,
+      tableById: {
+        ...state.tableById,
+        [action.id]: {
+          ...state.tableById[action.id],
+          expandedDetail: {
+            ...state.tableById[action.id].expandedDetail,
+            ...updateTableDetailsPanel(action),
+          },
         },
       },
-    },
-  }))
+    };
+  })
   .case(applyDeltaToColumnWidth, (state, { id, columnId, delta }) => ({
     ...state,
     tableById: applyDeltaToTableColumnWidth({
@@ -266,6 +271,42 @@ export const dataTableReducer = reducerWithInitialState(initialDataTableState)
       [id]: {
         ...state.tableById[id],
         totalCount,
+      },
+    },
+  }))
+  .case(changeViewMode, (state, { id, viewMode }) => ({
+    ...state,
+    tableById: {
+      ...state.tableById,
+      [id]: {
+        ...state.tableById[id],
+        viewMode,
+      },
+    },
+  }))
+  .case(updateShowBuildingBlockAlertsFilter, (state, { id, showBuildingBlockAlerts }) => ({
+    ...state,
+    tableById: {
+      ...state.tableById,
+      [id]: {
+        ...state.tableById[id],
+        additionalFilters: {
+          ...state.tableById[id].additionalFilters,
+          showBuildingBlockAlerts,
+        },
+      },
+    },
+  }))
+  .case(updateShowThreatIndicatorAlertsFilter, (state, { id, showOnlyThreatIndicatorAlerts }) => ({
+    ...state,
+    tableById: {
+      ...state.tableById,
+      [id]: {
+        ...state.tableById[id],
+        additionalFilters: {
+          ...state.tableById[id].additionalFilters,
+          showOnlyThreatIndicatorAlerts,
+        },
       },
     },
   }))

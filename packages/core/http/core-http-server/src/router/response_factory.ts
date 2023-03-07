@@ -13,6 +13,7 @@ import type {
   HttpResponsePayload,
   IKibanaResponse,
   RedirectResponseOptions,
+  FileHttpResponseOptions,
   ResponseError,
   ErrorHttpResponseOptions,
 } from './response';
@@ -196,6 +197,13 @@ export interface KibanaErrorResponseFactory {
 export type KibanaResponseFactory = KibanaSuccessResponseFactory &
   KibanaRedirectionResponseFactory &
   KibanaErrorResponseFactory & {
+    /**
+     * Creates a response with defined status code and payload.
+     * @param options - {@link FileHttpResponseOptions} configures HTTP response parameters.
+     */
+    file<T extends HttpResponsePayload | ResponseError>(
+      options: FileHttpResponseOptions<T>
+    ): IKibanaResponse;
     /**
      * Creates a response with defined status code and payload.
      * @param options - {@link CustomHttpResponseOptions} configures HTTP response parameters.

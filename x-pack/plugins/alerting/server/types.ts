@@ -22,6 +22,7 @@ import {
 } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
+import { type FieldMap } from '@kbn/alerts-as-data-utils';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
 import { PluginSetupContract, PluginStartContract } from './plugin';
 import { RulesClient } from './rules_client';
@@ -51,7 +52,6 @@ import {
   SanitizedRule,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
-import { FieldMap } from '../common/alert_schema/field_maps/types';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
 export type WithoutQueryAndParams<T> = Pick<T, Exclude<keyof T, 'query' | 'params'>>;
 export type SpaceIdToNamespaceFunction = (spaceId?: string) => string | undefined;
@@ -172,6 +172,8 @@ export interface IRuleTypeAlerts {
   context: string;
   namespace?: string;
   fieldMap: FieldMap;
+  useEcs?: boolean;
+  useLegacyAlerts?: boolean;
 }
 
 export interface RuleType<
