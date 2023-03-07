@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
+import { CoreApi } from './core';
+
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SetupDependencies {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ContentManagementServerSetup {}
+export interface ContentManagementServerSetup extends CoreApi {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContentManagementServerStart {}

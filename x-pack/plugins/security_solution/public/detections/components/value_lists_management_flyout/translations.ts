@@ -48,8 +48,8 @@ export const CANCEL_BUTTON = i18n.translate(
   }
 );
 
-export const UPLOAD_BUTTON = i18n.translate('xpack.securitySolution.lists.valueListsImportButton', {
-  defaultMessage: 'Import list',
+export const UPLOAD_BUTTON = i18n.translate('xpack.securitySolution.lists.valueListImportButton', {
+  defaultMessage: 'Import value list',
 });
 
 export const UPLOAD_SUCCESS_TITLE = i18n.translate(
