@@ -48,7 +48,7 @@ export const EmptyGroupingComponent: React.FC<{ height?: keyof typeof heights }>
                 </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiImage size="200" alt="" src={noResultsIllustrationLight} />
+                <EuiImage size="200px" alt="" src={noResultsIllustrationLight} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
