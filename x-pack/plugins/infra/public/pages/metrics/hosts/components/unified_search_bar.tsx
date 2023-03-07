@@ -7,7 +7,13 @@
 
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  type Filter,
+  type Query,
+  type TimeRange,
+} from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +39,9 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   };
 
   const onPanelFiltersChange = (panelFilters: Filter[]) => {
-    onQueryChange({ panelFilters });
+    if (!compareFilters(searchCriteria.panelFilters, panelFilters, COMPARE_ALL_OPTIONS)) {
+      onQueryChange({ panelFilters });
+    }
   };
 
   const onClearSavedQuery = () => {

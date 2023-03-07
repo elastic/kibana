@@ -8,9 +8,9 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { ControlGroupContainer, type ControlGroupInput } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { compareFilters, COMPARE_ALL_OPTIONS, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { tap, Subscription, map, filter as rxFilter, debounceTime } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
@@ -51,23 +51,15 @@ export const ControlsContent: React.FC<Props> = ({
 
   const loadCompleteHandler = useCallback(
     (controlGroup: ControlGroupContainer) => {
-      inputSubscription.current = controlGroup.onFiltersPublished$
-        .pipe(
-          debounceTime(250),
-          map((controlFilters) =>
-            controlFilters.sort((a, b) => a.meta.key?.localeCompare(b.meta.key ?? '') ?? 0)
-          ),
-          rxFilter((sortedFilter) => !compareFilters(filters, sortedFilter, COMPARE_ALL_OPTIONS)),
-          tap((newFilters) => onFiltersChange(newFilters))
-        )
-        .subscribe();
+      inputSubscription.current = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
+        onFiltersChange(newFilters);
+      });
 
       filterSubscription.current = controlGroup
         .getInput$()
-        .pipe(tap(({ panels }) => setControlPanels(panels)))
-        .subscribe();
+        .subscribe(({ panels }) => setControlPanels(panels));
     },
-    [filters, onFiltersChange, setControlPanels]
+    [onFiltersChange, setControlPanels]
   );
 
   useEffect(() => {
