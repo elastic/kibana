@@ -198,6 +198,9 @@ describe('useDiscoverHistogram', () => {
   });
 
   describe('state', () => {
+    beforeEach(() => {
+      mockCheckHitCount.mockClear();
+    });
     it('should subscribe to state changes', async () => {
       const { hook } = await renderUseDiscoverHistogram();
       const api = createMockUnifiedHistogramApi({ initialized: true });
@@ -349,7 +352,6 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should update total hits when the total hits state changes', async () => {
-      mockCheckHitCount.mockClear();
       const totalHits$ = new BehaviorSubject({
         fetchStatus: FetchStatus.LOADING,
         result: undefined,
@@ -386,7 +388,6 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should fetch total hits for text based', async () => {
-      mockCheckHitCount.mockClear();
       mockQueryState = {
         query: { sql: 'select * from index' },
         filters: [],
@@ -428,7 +429,6 @@ describe('useDiscoverHistogram', () => {
     });
 
     it('should not update total hits when the total hits state changes to an error', async () => {
-      mockCheckHitCount.mockClear();
       mockQueryState = {
         query: {
           query: 'query',
