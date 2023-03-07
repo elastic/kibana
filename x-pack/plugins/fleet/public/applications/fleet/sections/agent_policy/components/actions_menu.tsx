@@ -165,7 +165,10 @@ export const AgentPolicyActionMenu = memo<{
                 </EuiPortal>
               )}
               {isUninstallCommandFlyoutOpen && (
-                <UninstallCommandFlyout onClose={() => setIsUninstallCommandFlyoutOpen(false)} />
+                <UninstallCommandFlyout
+                  policyId={agentPolicy.id}
+                  onClose={() => setIsUninstallCommandFlyoutOpen(false)}
+                />
               )}
               <ContextMenuActions
                 isOpen={isContextMenuOpen}
