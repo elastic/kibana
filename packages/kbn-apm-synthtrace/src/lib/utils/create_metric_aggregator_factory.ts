@@ -16,23 +16,23 @@ export interface ServiceMapValue {
 }
 
 export function createMetricAggregatorFactory<TFields extends Fields>() {
-  return function <TMetric extends Record<string, any>, TOutput extends Record<string, any>>(
-    {
-      filter,
-      getAggregateKey,
-      init,
-      flushInterval,
-      group,
-    }: {
-      filter: (event: TFields) => boolean;
-      getAggregateKey: (event: TFields) => string;
-      init: (event: TFields) => TMetric;
-      flushInterval: string;
-      group: (set: TMetric, key: string, serviceMap: Map<string, ServiceMapValue>) => void;
-    },
-    reduce: (metric: TMetric, event: TFields) => void,
-    serialize: (metric: TMetric) => TOutput
-  ) {
+  return function <TMetric extends Record<string, any>, TOutput extends Record<string, any>>({
+    filter,
+    getAggregateKey,
+    init,
+    flushInterval,
+    group,
+    reduce,
+    serialize,
+  }: {
+    filter: (event: TFields) => boolean;
+    getAggregateKey: (event: TFields) => string;
+    init: (event: TFields) => TMetric;
+    flushInterval: string;
+    group: (set: TMetric, key: string, serviceMap: Map<string, ServiceMapValue>) => void;
+    reduce: (metric: TMetric, event: TFields) => void;
+    serialize: (metric: TMetric) => TOutput;
+  }) {
     let cb: (() => void) | undefined;
 
     const metrics: Map<string, TMetric & { '@timestamp'?: number }> = new Map();

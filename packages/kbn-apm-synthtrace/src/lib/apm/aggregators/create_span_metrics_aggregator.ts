@@ -21,39 +21,36 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
 ];
 
 export function createSpanMetricsAggregator(flushInterval: string) {
-  return createApmMetricAggregator(
-    {
-      filter: (event) =>
-        event['processor.event'] === 'span' && !!event['span.destination.service.resource'],
-      getAggregateKey: (event) => {
-        // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/spanmetrics/aggregator.go
-        const key = hashKeysOf(event, KEY_FIELDS);
-        return key;
-      },
-      flushInterval,
-      init: (event) => {
-        const set = pick(event, KEY_FIELDS);
-
-        return {
-          ...set,
-          'metricset.name': 'service_destination',
-          'metricset.interval': flushInterval,
-          'processor.event': 'metric',
-          'processor.name': 'metric',
-          'span.destination.service.response_time.count': 0,
-          'span.destination.service.response_time.sum.us': 0,
-        };
-      },
-      group: identity,
+  return createApmMetricAggregator({
+    filter: (event) =>
+      event['processor.event'] === 'span' && !!event['span.destination.service.resource'],
+    getAggregateKey: (event) => {
+      // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/spanmetrics/aggregator.go
+      const key = hashKeysOf(event, KEY_FIELDS);
+      return key;
     },
-    (metric, event) => {
+    flushInterval,
+    init: (event) => {
+      const set = pick(event, KEY_FIELDS);
+
+      return {
+        ...set,
+        'metricset.name': 'service_destination',
+        'metricset.interval': flushInterval,
+        'processor.event': 'metric',
+        'processor.name': 'metric',
+        'span.destination.service.response_time.count': 0,
+        'span.destination.service.response_time.sum.us': 0,
+      };
+    },
+    group: identity,
+    reduce: (metric, event) => {
       metric['span.destination.service.response_time.count'] += 1;
       metric['span.destination.service.response_time.sum.us'] += event['span.duration.us']!;
     },
-    (metric) => {
-      // @ts-expect-error
+    serialize: (metric) => {
       metric._doc_count = metric['span.destination.service.response_time.count'];
       return metric;
-    }
-  );
+    },
+  });
 }

@@ -56,62 +56,60 @@ export function createTransactionMetricsAggregator(
   flushInterval: string,
   options?: ScenarioOptions
 ) {
-  return createApmMetricAggregator(
-    {
-      filter: (event) => event['processor.event'] === 'transaction',
-      getAggregateKey: (event) => {
-        // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/txmetrics/aggregator.go
-        let key = hashKeysOf(event, KEY_FIELDS);
-        key = appendHash(key, event['parent.id'] ? '1' : '0');
-        return key;
-      },
-      flushInterval,
-      init: (event) => {
-        const set = pick(event, KEY_FIELDS);
-
-        return {
-          ...set,
-          'metricset.name': 'transaction',
-          'metricset.interval': flushInterval,
-          'processor.event': 'metric',
-          'processor.name': 'metric',
-          'transaction.root': !event['parent.id'],
-          'transaction.duration.histogram': createLosslessHistogram(),
-          'transaction.duration.summary': {
-            value_count: 0,
-            sum: 0,
-          },
-          'event.success_count': {
-            sum: 0,
-            value_count: 0,
-          },
-          'transaction.aggregation.overflow_count': 0,
-        };
-      },
-      group: (set, key, serviceListMap) => {
-        const { transactions = {} } = options || {};
-        const maxTransactionOverflowCount = transactions?.max_groups ?? 10_000;
-        const serviceName = set['service.name'];
-        let service = serviceListMap.get(serviceName);
-
-        if (!service) {
-          service = {
-            transactionCount: 0,
-            overflowKey: null,
-          };
-          serviceListMap.set(serviceName, service);
-        }
-
-        const isTransactionCountOverflown = service.transactionCount >= maxTransactionOverflowCount;
-        if (isTransactionCountOverflown) {
-          service.overflowKey = key;
-          set['transaction.name'] = '_other';
-          set['transaction.aggregation.overflow_count'] += 1;
-        }
-        service.transactionCount += 1;
-      },
+  return createApmMetricAggregator({
+    filter: (event) => event['processor.event'] === 'transaction',
+    getAggregateKey: (event) => {
+      // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/txmetrics/aggregator.go
+      let key = hashKeysOf(event, KEY_FIELDS);
+      key = appendHash(key, event['parent.id'] ? '1' : '0');
+      return key;
     },
-    (metric, event) => {
+    flushInterval,
+    init: (event) => {
+      const set = pick(event, KEY_FIELDS);
+
+      return {
+        ...set,
+        'metricset.name': 'transaction',
+        'metricset.interval': flushInterval,
+        'processor.event': 'metric',
+        'processor.name': 'metric',
+        'transaction.root': !event['parent.id'],
+        'transaction.duration.histogram': createLosslessHistogram(),
+        'transaction.duration.summary': {
+          value_count: 0,
+          sum: 0,
+        },
+        'event.success_count': {
+          sum: 0,
+          value_count: 0,
+        },
+        'transaction.aggregation.overflow_count': 0,
+      };
+    },
+    group: (set, key, serviceListMap) => {
+      const { transactions = {} } = options || {};
+      const maxTransactionOverflowCount = transactions?.max_groups ?? 10_000;
+      const serviceName = set['service.name'];
+      let service = serviceListMap.get(serviceName);
+
+      if (!service) {
+        service = {
+          transactionCount: 0,
+          overflowKey: null,
+        };
+        serviceListMap.set(serviceName, service);
+      }
+
+      const isTransactionCountOverflown = service.transactionCount >= maxTransactionOverflowCount;
+      if (isTransactionCountOverflown) {
+        service.overflowKey = key;
+        set['transaction.name'] = '_other';
+        set['transaction.aggregation.overflow_count'] += 1;
+      }
+      service.transactionCount += 1;
+    },
+    reduce: (metric, event) => {
       const duration = event['transaction.duration.us']!;
       metric['transaction.duration.histogram'].record(duration);
 
@@ -128,7 +126,7 @@ export function createTransactionMetricsAggregator(
       summary.sum += duration;
       summary.value_count += 1;
     },
-    (metric) => {
+    serialize: (metric) => {
       const serialized = metric['transaction.duration.histogram'].serialize();
       metric['transaction.duration.histogram'] = {
         values: serialized.values,
@@ -137,6 +135,6 @@ export function createTransactionMetricsAggregator(
       metric._doc_count = serialized.total;
 
       return metric;
-    }
-  );
+    },
+  });
 }

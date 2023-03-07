@@ -21,44 +21,42 @@ export function createServiceSummaryMetricsAggregator(
   flushInterval: string,
   options?: ScenarioOptions
 ) {
-  return createApmMetricAggregator(
-    {
-      filter: () => true,
-      getAggregateKey: (event) => {
-        // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/txmetrics/aggregator.go
-        return hashKeysOf(event, KEY_FIELDS);
-      },
-      flushInterval,
-      init: (event) => {
-        const set = pick(event, KEY_FIELDS);
-
-        return {
-          ...set,
-          'metricset.name': 'service_summary',
-          'metricset.interval': flushInterval,
-          'processor.event': 'metric',
-          'processor.name': 'metric',
-        };
-      },
-      group: (set, key, serviceListMap) => {
-        const { service_transactions: serviceTransaction = {} } = options || {};
-        const maxServiceOverflowCount = serviceTransaction?.max_groups ?? 10_000;
-        let service = serviceListMap.get(set['service.name']);
-        if (!service) {
-          service = {
-            transactionCount: 0,
-            overflowKey: null,
-          };
-          const hasServiceBucketOverflown = serviceListMap.size >= maxServiceOverflowCount;
-          if (hasServiceBucketOverflown) {
-            set['service.name'] = '_other';
-            service.overflowKey = key;
-          }
-          serviceListMap.set(set['service.name'], service);
-        }
-      },
+  return createApmMetricAggregator({
+    filter: () => true,
+    getAggregateKey: (event) => {
+      // see https://github.com/elastic/apm-server/blob/main/x-pack/apm-server/aggregation/txmetrics/aggregator.go
+      return hashKeysOf(event, KEY_FIELDS);
     },
-    noop,
-    identity
-  );
+    flushInterval,
+    init: (event) => {
+      const set = pick(event, KEY_FIELDS);
+
+      return {
+        ...set,
+        'metricset.name': 'service_summary',
+        'metricset.interval': flushInterval,
+        'processor.event': 'metric',
+        'processor.name': 'metric',
+      };
+    },
+    group: (set, key, serviceListMap) => {
+      const { service_transactions: serviceTransaction = {} } = options || {};
+      const maxServiceOverflowCount = serviceTransaction?.max_groups ?? 10_000;
+      let service = serviceListMap.get(set['service.name']);
+      if (!service) {
+        service = {
+          transactionCount: 0,
+          overflowKey: null,
+        };
+        const hasServiceBucketOverflown = serviceListMap.size >= maxServiceOverflowCount;
+        if (hasServiceBucketOverflown) {
+          set['service.name'] = '_other';
+          service.overflowKey = key;
+        }
+        serviceListMap.set(set['service.name'], service);
+      }
+    },
+    reduce: noop,
+    serialize: identity,
+  });
 }

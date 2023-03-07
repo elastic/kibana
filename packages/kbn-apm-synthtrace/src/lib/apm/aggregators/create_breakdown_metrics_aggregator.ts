@@ -16,29 +16,27 @@ const filter = (event: ApmFields) =>
 export function createBreakdownMetricsAggregator(flushInterval: string) {
   const dropProcessedEventsStream = createFilterTransform(negate(filter));
 
-  const aggregatorStream = createApmMetricAggregator(
-    {
-      filter,
-      getAggregateKey: (event) => {
-        return event.meta!['metricset.id'];
-      },
-      flushInterval,
-      init: (event) => {
-        return {
-          ...event,
-          meta: {},
-          'span.self_time.count': 0,
-          'span.self_time.sum.us': 0,
-        };
-      },
-      group: identity,
+  const aggregatorStream = createApmMetricAggregator({
+    filter,
+    getAggregateKey: (event) => {
+      return event.meta!['metricset.id'];
     },
-    (metric, event) => {
+    flushInterval,
+    init: (event) => {
+      return {
+        ...event,
+        meta: {},
+        'span.self_time.count': 0,
+        'span.self_time.sum.us': 0,
+      };
+    },
+    group: identity,
+    reduce: (metric, event) => {
       metric['span.self_time.count'] += event['span.self_time.count']!;
       metric['span.self_time.sum.us'] += event['span.self_time.sum.us']!;
     },
-    identity
-  );
+    serialize: identity,
+  });
 
   const mergedStreams = fork(dropProcessedEventsStream, aggregatorStream);
 
