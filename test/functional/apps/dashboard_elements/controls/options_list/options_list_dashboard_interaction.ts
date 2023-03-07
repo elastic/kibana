@@ -299,6 +299,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'keyword',
           `emit(doc['sound.keyword'].value.substring(0, 1).toUpperCase())`
         );
+        await retry.waitFor('field editor flyout to close', async () => {
+          return !(await testSubjects.exists('fieldEditor'));
+        });
         await header.waitUntilLoadingHasFinished();
 
         await returnToDashboard();
