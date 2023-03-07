@@ -47,7 +47,7 @@ const ResponseActionTypeFormComponent = ({ item, onDeleteAction }: ResponseActio
   const action: RuleResponseAction = get(data, item.path);
   const editDisabled = useCheckEndpointPermissions(action) ?? false;
 
-  const getResponseActionTypeForm = useCallback(() => {
+  const getResponseActionTypeForm = useMemo(() => {
     if (action?.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY) {
       return <OsqueryResponseAction item={item} />;
     }
@@ -106,7 +106,7 @@ const ResponseActionTypeFormComponent = ({ item, onDeleteAction }: ResponseActio
       buttonContent={renderButtonContent}
       extraAction={renderExtraContent}
     >
-      {getResponseActionTypeForm()}
+      {getResponseActionTypeForm}
     </StyledEuiAccordion>
   );
 };

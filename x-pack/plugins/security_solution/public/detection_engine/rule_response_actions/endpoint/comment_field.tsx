@@ -4,48 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
-import { useController } from 'react-hook-form';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 interface ActionTypeFieldProps {
-  euiFieldProps?: Record<string, unknown>;
+  basePath: string;
   disabled: boolean;
+  readDefaultValueOnForm: boolean;
 }
 
-const CommentFieldComponent = ({ euiFieldProps, disabled }: ActionTypeFieldProps) => {
-  const {
-    field: { onChange, value, name: fieldName },
-    fieldState: { error },
-  } = useController({
-    name: 'comment',
-    defaultValue: '',
-  });
-
-  const hasError = useMemo(() => !!error?.message, [error?.message]);
-
-  return (
-    <EuiFormRow
-      label={i18n.translate('xpack.securitySolution.responseActions.endpoint.commentLabel', {
-        defaultMessage: 'Comment (optional)',
-      })}
-      error={error?.message}
-      isInvalid={hasError}
-      fullWidth
-    >
-      <EuiFieldText
-        disabled={disabled}
-        isInvalid={hasError}
-        onChange={onChange}
-        value={value}
-        name={fieldName}
-        fullWidth
-        data-test-subj="input"
-        {...euiFieldProps}
-      />
-    </EuiFormRow>
-  );
+const CONFIG = {
+  label: i18n.translate('xpack.securitySolution.responseActions.endpoint.commentLabel', {
+    defaultMessage: 'Comment (optional)',
+  }),
 };
+
+const CommentFieldComponent = ({
+  basePath,
+  disabled,
+  readDefaultValueOnForm,
+}: ActionTypeFieldProps) => (
+  <UseField
+    path={`${basePath}.comment`}
+    readDefaultValueOnForm={readDefaultValueOnForm}
+    config={CONFIG}
+    isDisabled={disabled}
+    component={TextField}
+  />
+);
 
 export const CommentField = React.memo(CommentFieldComponent);

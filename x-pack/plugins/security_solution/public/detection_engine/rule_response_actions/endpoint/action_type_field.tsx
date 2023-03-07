@@ -4,84 +4,82 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { map } from 'lodash';
 import React, { useMemo } from 'react';
-import { useController } from 'react-hook-form';
-import { EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { difference } from 'lodash';
+import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { SuperSelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { getUiCommand } from '../../../management/components/endpoint_response_actions_list/components/hooks';
 import { getRbacControl } from '../../../management/components/endpoint_responder/lib/utils';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 interface ActionTypeFieldProps {
-  euiFieldProps?: Record<string, unknown>;
+  basePath: string;
   disabled: boolean;
-  usedEndpointCommands: string[];
+  readDefaultValueOnForm: boolean;
 }
 
 const ActionTypeFieldComponent = ({
-  euiFieldProps,
+  basePath,
   disabled,
-  usedEndpointCommands,
+  readDefaultValueOnForm,
 }: ActionTypeFieldProps) => {
-  const {
-    field: { onChange, value, name: fieldName },
-    fieldState: { error },
-  } = useController({
-    name: 'command',
-    defaultValue: '',
-  });
+  const { endpointPrivileges } = useUserPrivileges();
+  const [data] = useFormData();
 
-  const AVAILABLE_COMMANDS = useMemo(() => {
-    return difference(
-      ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
-      usedEndpointCommands.filter((commandName) => commandName !== value)
-    );
-  }, [usedEndpointCommands, value]);
+  const fieldOptions = useMemo(
+    () =>
+      ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.map((name) => {
+        const isDisabled =
+          map(data.responseActions, 'params.command').includes(name) ||
+          !getRbacControl({
+            commandName: getUiCommand(name),
+            privileges: endpointPrivileges,
+          });
 
-  const endpointPrivileges = useUserPrivileges().endpointPrivileges;
-  const FIELD_OPTIONS = useMemo(() => {
-    return ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.map((name) => {
-      const isDisabled =
-        !AVAILABLE_COMMANDS.includes(name) ||
-        !getRbacControl({
-          commandName: getUiCommand(name),
-          privileges: endpointPrivileges,
-        });
-
-      return {
-        value: name,
-        inputDisplay: name,
-        disabled: isDisabled,
-        'data-test-subj': `command-type-${name}`,
-      };
-    });
-  }, [AVAILABLE_COMMANDS, endpointPrivileges]);
-
-  const hasError = useMemo(() => !!error?.message, [error?.message]);
+        return {
+          value: name,
+          inputDisplay: name,
+          disabled: isDisabled,
+          'data-test-subj': `command-type-${name}`,
+        };
+      }),
+    [data.responseActions, endpointPrivileges]
+  );
 
   return (
-    <EuiFormRow
-      label={i18n.translate('xpack.securitySolution.responseActions.endpoint.commandLabel', {
-        defaultMessage: 'Command',
-      })}
-      error={error?.message}
-      isInvalid={hasError}
-      fullWidth
-    >
-      <EuiSuperSelect
-        disabled={disabled}
-        isInvalid={hasError}
-        name={fieldName}
-        data-test-subj={'commandTypeField'}
-        options={FIELD_OPTIONS}
-        fullWidth
-        valueOfSelected={value}
-        onChange={onChange}
-        {...euiFieldProps}
-      />
-    </EuiFormRow>
+    <UseField
+      path={`${basePath}.command`}
+      readDefaultValueOnForm={readDefaultValueOnForm}
+      config={{
+        label: i18n.translate('xpack.securitySolution.responseActions.endpoint.commandLabel', {
+          defaultMessage: 'Command',
+        }),
+        validations: [
+          {
+            validator: fieldValidators.emptyField(
+              i18n.translate(
+                'xpack.securitySolution.responseActions.endpoint.validations.commandIsRequiredErrorMessage',
+                {
+                  defaultMessage: 'A command is required.',
+                }
+              )
+            ),
+          },
+        ],
+      }}
+      component={SuperSelectField}
+      isDisabled={disabled}
+      componentProps={{
+        euiFieldProps: {
+          options: fieldOptions,
+          'data-test-subj': 'commandTypeField',
+        },
+      }}
+    />
   );
 };
 
