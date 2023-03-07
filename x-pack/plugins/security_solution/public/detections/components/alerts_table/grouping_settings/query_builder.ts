@@ -72,7 +72,7 @@ export const getAlertsGroupingQuery = ({
 const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   const aggMetrics: NamedAggregation[] = [
     {
-      alertsCount: {
+      unitCount0: {
         cardinality: {
           field: 'kibana.alert.uuid',
         },
