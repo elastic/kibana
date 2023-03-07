@@ -5,11 +5,6 @@
  * 2.0.
  */
 
-import type { GroupModel } from './types';
+export type IndexingInterval = [string | Date, string | Date];
 
-export const defaultGroup: GroupModel = {
-  activePage: 0,
-  itemsPerPage: 25,
-  activeGroup: 'none',
-  options: [],
-};
+export type Document = Record<string, unknown>;
