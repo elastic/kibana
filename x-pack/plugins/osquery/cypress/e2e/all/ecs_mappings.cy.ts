@@ -6,8 +6,7 @@
  */
 
 import { getAdvancedButton } from '../../screens/integrations';
-import { login } from '../../tasks/login';
-import { ROLES } from '../../test';
+import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
@@ -21,7 +20,7 @@ import {
 
 describe('EcsMapping', () => {
   before(() => {
-    login(ROLES.soc_manager);
+    login(ROLE.soc_manager);
     navigateTo('/app/osquery');
   });
 
@@ -36,7 +35,7 @@ describe('EcsMapping', () => {
     submitQuery();
     checkResults();
     cy.contains('[ "test1", "test2" ]');
-    typeInECSFieldInput('labels{downArrow}{enter}', 1);
+    typeInECSFieldInput('client.domain{downArrow}{enter}', 1);
 
     getOsqueryFieldTypes('Static value', 1);
 
