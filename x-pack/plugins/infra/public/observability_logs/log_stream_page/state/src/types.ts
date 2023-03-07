@@ -5,8 +5,22 @@
  * 2.0.
  */
 
+import { TimeRange } from '@kbn/es-query';
+import { TimeKey } from '../../../../../common/time';
 import type { LogViewStatus } from '../../../../../common/log_views';
-import { ParsedQuery } from '../../../log_stream_query_state';
+import {
+  JumpToTargetPositionEvent,
+  LogStreamPositionContext,
+  ReportVisiblePositionsEvent,
+  VisiblePositions,
+} from '../../../log_stream_position_state';
+import { LogStreamPositionNotificationEvent } from '../../../log_stream_position_state/src/notifications';
+import {
+  LogStreamQueryContextWithTime,
+  ParsedQuery,
+  UpdateRefreshIntervalEvent,
+  UpdateTimeRangeEvent,
+} from '../../../log_stream_query_state';
 import { LogStreamQueryNotificationEvent } from '../../../log_stream_query_state/src/notifications';
 import type {
   LogViewContextWithError,
@@ -14,13 +28,31 @@ import type {
   LogViewNotificationEvent,
 } from '../../../log_view_state';
 
+export interface ReceivedInitialQueryParametersEvent {
+  type: 'RECEIVED_INITIAL_QUERY_PARAMETERS';
+  validatedQuery: ParsedQuery;
+  timeRange: LogStreamPageContextWithTime['timeRange'];
+  refreshInterval: LogStreamPageContextWithTime['refreshInterval'];
+  timestamps: LogStreamPageContextWithTime['timestamps'];
+}
+
+export interface ReceivedInitialPositionParametersEvent {
+  type: 'RECEIVED_INITIAL_POSITION_PARAMETERS';
+  targetPosition: LogStreamPageContextWithPositions['targetPosition'];
+  latestPosition: LogStreamPageContextWithPositions['latestPosition'];
+  visiblePositions: LogStreamPageContextWithPositions['visiblePositions'];
+}
+
 export type LogStreamPageEvent =
   | LogViewNotificationEvent
   | LogStreamQueryNotificationEvent
-  | {
-      type: 'RECEIVED_INITIAL_PARAMETERS';
-      validatedQuery: ParsedQuery;
-    };
+  | LogStreamPositionNotificationEvent
+  | ReceivedInitialQueryParametersEvent
+  | ReceivedInitialPositionParametersEvent
+  | JumpToTargetPositionEvent
+  | ReportVisiblePositionsEvent
+  | UpdateTimeRangeEvent
+  | UpdateRefreshIntervalEvent;
 
 export interface LogStreamPageContextWithLogView {
   logViewStatus: LogViewStatus;
@@ -34,6 +66,9 @@ export interface LogStreamPageContextWithLogViewError {
 export interface LogStreamPageContextWithQuery {
   parsedQuery: ParsedQuery;
 }
+
+export type LogStreamPageContextWithTime = LogStreamQueryContextWithTime;
+export type LogStreamPageContextWithPositions = LogStreamPositionContext;
 
 export type LogStreamPageTypestate =
   | {
@@ -58,7 +93,10 @@ export type LogStreamPageTypestate =
     }
   | {
       value: { hasLogViewIndices: 'initialized' };
-      context: LogStreamPageContextWithLogView & LogStreamPageContextWithQuery;
+      context: LogStreamPageContextWithLogView &
+        LogStreamPageContextWithQuery &
+        LogStreamPageContextWithTime &
+        LogStreamPageContextWithPositions;
     }
   | {
       value: 'missingLogViewIndices';
@@ -67,3 +105,12 @@ export type LogStreamPageTypestate =
 
 export type LogStreamPageStateValue = LogStreamPageTypestate['value'];
 export type LogStreamPageContext = LogStreamPageTypestate['context'];
+
+export interface LogStreamPageCallbacks {
+  updateTimeRange: (timeRange: Partial<TimeRange>) => void;
+  jumpToTargetPosition: (targetPosition: TimeKey | null) => void;
+  jumpToTargetPositionTime: (time: number) => void;
+  reportVisiblePositions: (visiblePositions: VisiblePositions) => void;
+  startLiveStreaming: () => void;
+  stopLiveStreaming: () => void;
+}

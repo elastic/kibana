@@ -8,16 +8,9 @@
 import React, { VFC } from 'react';
 import { EuiButtonIcon, EuiContextMenuItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { useInvestigateInTimeline } from '../../hooks';
 import { Indicator } from '../../../../../common/types/indicator';
-
-const BUTTON_ICON_LABEL: string = i18n.translate(
-  'xpack.threatIntelligence.timeline.investigateInTimelineButtonIcon',
-  {
-    defaultMessage: 'Investigate in Timeline',
-  }
-);
+import { BUTTON_ICON_LABEL } from './translations';
 
 export interface InvestigateInTimelineProps {
   /**

@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { set, get, isEqual } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { get, isEqual } from 'lodash';
 import type { BulkEditOperation, BulkEditFields } from '../types';
 
 // defining an union type that will passed directly to generic function as a workaround for the issue similar to

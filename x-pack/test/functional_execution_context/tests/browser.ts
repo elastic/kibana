@@ -13,7 +13,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'home', 'timePicker']);
   const retry = getService('retry');
 
-  describe('Browser apps', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/149611
+  describe.skip('Browser apps', () => {
     before(async () => {
       await PageObjects.common.navigateToUrl('home', '/tutorial_directory/sampleData', {
         useActualUrl: true,

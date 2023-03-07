@@ -10,21 +10,17 @@ import styled from 'styled-components';
 import { EuiInMemoryTable } from '@elastic/eui';
 
 export const SummaryTable = styled(EuiInMemoryTable as unknown as AnyStyledComponent)`
-  .timelines__hoverActionButton {
+  .inlineActions {
     opacity: 0;
   }
 
   .flyoutTableHoverActions {
-    .hoverActions-active {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
-        opacity: 1;
-      }
+    .inlineActions-popoverOpen {
+      opacity: 1;
     }
 
     &:hover {
-      .timelines__hoverActionButton,
-      .securitySolution__hoverActionButton {
+      .inlineActions {
         opacity: 1;
       }
     }

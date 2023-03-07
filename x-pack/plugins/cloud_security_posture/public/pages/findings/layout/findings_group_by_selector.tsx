@@ -12,6 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
 import type { FindingsGroupByKind } from '../types';
 import { findingsNavigation } from '../../../common/navigation/constants';
+import * as TEST_SUBJECTS from '../test_subjects';
 
 const getGroupByOptions = (): Array<EuiComboBoxOptionOption<FindingsGroupByKind>> => [
   {
@@ -56,6 +57,7 @@ export const FindingsGroupBySelector = ({ type }: Props) => {
   return (
     <div>
       <EuiComboBox
+        data-test-subj={TEST_SUBJECTS.FINDINGS_GROUP_BY_SELECTOR}
         prepend={<GroupByLabel />}
         singleSelection={{ asPlainText: true }}
         options={groupByOptions}

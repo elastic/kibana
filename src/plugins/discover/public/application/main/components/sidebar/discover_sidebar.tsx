@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageSideBar_Deprecated as EuiPageSideBar,
-  htmlIdGenerator,
 } from '@elastic/eui';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
@@ -44,8 +43,6 @@ import { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
 import { getUiActions } from '../../../../kibana_services';
 import { getRawRecordType } from '../../utils/get_raw_record_type';
 import { RecordRawType } from '../../services/discover_data_state_container';
-
-const fieldSearchDescriptionId = htmlIdGenerator()();
 
 export interface DiscoverSidebarProps extends DiscoverSidebarResponsiveProps {
   /**
@@ -176,7 +173,7 @@ export function DiscoverSidebarComponent({
               },
               fieldName,
               onDelete: async () => {
-                await onFieldEdited();
+                await onFieldEdited({ removedFieldName: fieldName });
               },
             });
             if (setFieldEditorRef) {
@@ -326,7 +323,6 @@ export function DiscoverSidebarComponent({
               <FieldListGrouped
                 {...fieldListGroupedProps}
                 renderFieldItem={renderFieldItem}
-                screenReaderDescriptionId={fieldSearchDescriptionId}
                 localStorageKeyPrefix="discover"
               />
             ) : (

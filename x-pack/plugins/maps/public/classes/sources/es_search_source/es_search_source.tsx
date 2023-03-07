@@ -824,7 +824,8 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   async getTileUrl(
     searchFilters: VectorSourceRequestMeta,
     refreshToken: string,
-    hasLabels: boolean
+    hasLabels: boolean,
+    buffer: number
   ): Promise<string> {
     const dataView = await this.getIndexPattern();
     const indexSettings = await loadIndexSettings(dataView.getIndexPattern());
@@ -872,6 +873,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 ?geometryFieldName=${this._descriptor.geoField}\
 &index=${dataView.getIndexPattern()}\
 &hasLabels=${hasLabels}\
+&buffer=${buffer}\
 &requestBody=${encodeMvtResponseBody(requestBody)}\
 &token=${refreshToken}`;
   }

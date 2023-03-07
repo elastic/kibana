@@ -7,7 +7,8 @@
 
 import React, { memo } from 'react';
 import { Switch, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/kibana-react-plugin/public';
+import { Route } from '@kbn/shared-ux-router';
+
 import { PolicyDetails, PolicyList } from './view';
 import {
   MANAGEMENT_ROUTING_POLICY_DETAILS_FORM_PATH,

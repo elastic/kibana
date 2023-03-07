@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { format, READ_ONLY_FIELDS } from './formatter';
+import { format, ALLOWED_FIELDS } from './formatter';
 import { DataStream } from '../../../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../../../common/constants/monitor_defaults';
 
@@ -84,6 +84,11 @@ describe('format', () => {
         include_headers: true,
         include_body: 'on_error',
       },
+      alert: {
+        status: {
+          enabled: false,
+        },
+      },
     };
   });
 
@@ -140,6 +145,11 @@ describe('format', () => {
       'url.port': null,
       username: '',
       id: '',
+      alert: {
+        status: {
+          enabled: false,
+        },
+      },
     });
   });
 
@@ -224,6 +234,11 @@ describe('format', () => {
         service: {
           name: '',
         },
+        alert: {
+          status: {
+            enabled: false,
+          },
+        },
       };
       expect(format(browserFormFields)).toEqual({
         ...DEFAULT_FIELDS[DataStream.BROWSER],
@@ -290,6 +305,11 @@ describe('format', () => {
         'url.port': null,
         urls: '',
         id: '',
+        alert: {
+          status: {
+            enabled: false,
+          },
+        },
       });
     }
   );
@@ -356,12 +376,17 @@ describe('format', () => {
       'url.port': null,
       username: '',
       id: '',
+      alert: {
+        status: {
+          enabled: false,
+        },
+      },
     });
   });
 
   it('handles read only', () => {
     expect(format(formValues, true)).toEqual(
-      READ_ONLY_FIELDS.reduce<Record<string, unknown>>((acc, key) => {
+      ALLOWED_FIELDS.reduce<Record<string, unknown>>((acc, key) => {
         acc[key] = formValues[key];
         return acc;
       }, {})

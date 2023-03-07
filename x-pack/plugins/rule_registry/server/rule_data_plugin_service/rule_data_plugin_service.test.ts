@@ -43,6 +43,7 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
+        areFrameworkAlertsEnabled: false,
         pluginStop$,
       });
       expect(ruleDataService.isRegistrationContextDisabled('observability.logs')).toBe(true);
@@ -59,6 +60,7 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
+        areFrameworkAlertsEnabled: false,
         pluginStop$,
       });
       expect(ruleDataService.isRegistrationContextDisabled('observability.apm')).toBe(false);
@@ -77,6 +79,7 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
+        areFrameworkAlertsEnabled: false,
         pluginStop$,
       });
 
@@ -96,6 +99,7 @@ describe('ruleDataPluginService', () => {
         isWriteEnabled: true,
         disabledRegistrationContexts: ['observability.logs'],
         isWriterCacheEnabled: true,
+        areFrameworkAlertsEnabled: false,
         pluginStop$,
       });
       const indexOptions = {

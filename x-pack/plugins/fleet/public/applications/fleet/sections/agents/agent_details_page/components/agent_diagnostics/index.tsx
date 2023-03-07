@@ -15,15 +15,20 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiLink,
-  EuiLoadingContent,
   EuiLoadingSpinner,
   EuiText,
+  EuiSkeletonText,
   formatDate,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+
+import {
+  isAgentRequestDiagnosticsSupported,
+  MINIMUM_DIAGNOSTICS_AGENT_VERSION,
+} from '../../../../../../../../common/services';
 
 import {
   sendGetAgentUploads,
@@ -215,6 +220,20 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
     }
   }
 
+  const requestDiagnosticsButton = (
+    <EuiButton
+      fill
+      size="m"
+      onClick={onSubmit}
+      disabled={isSubmitting || !isAgentRequestDiagnosticsSupported(agent)}
+    >
+      <FormattedMessage
+        id="xpack.fleet.agentList.diagnosticsOneButton"
+        defaultMessage="Request diagnostics .zip"
+      />
+    </EuiButton>
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
@@ -235,16 +254,25 @@ export const AgentDiagnosticsTab: React.FunctionComponent<AgentDiagnosticsProps>
         </EuiCallOut>
       </EuiFlexItem>
       <FlexStartEuiFlexItem>
-        <EuiButton fill size="m" onClick={onSubmit} disabled={isSubmitting}>
-          <FormattedMessage
-            id="xpack.fleet.agentList.diagnosticsOneButton"
-            defaultMessage="Request diagnostics .zip"
-          />
-        </EuiButton>
+        {isAgentRequestDiagnosticsSupported(agent) ? (
+          requestDiagnosticsButton
+        ) : (
+          <EuiToolTip
+            content={
+              <FormattedMessage
+                id="xpack.fleet.requestDiagnostics.notSupportedTooltip"
+                defaultMessage="Requesting agent diagnostics is not supported for agents before version {version}."
+                values={{ version: MINIMUM_DIAGNOSTICS_AGENT_VERSION }}
+              />
+            }
+          >
+            {requestDiagnosticsButton}
+          </EuiToolTip>
+        )}
       </FlexStartEuiFlexItem>
       <EuiFlexItem>
         {isLoading ? (
-          <EuiLoadingContent lines={3} />
+          <EuiSkeletonText lines={3} />
         ) : (
           <EuiBasicTable<AgentDiagnostics> items={diagnosticsEntries} columns={columns} />
         )}

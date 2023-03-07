@@ -40,6 +40,7 @@ export const ACTION_VARIABLES = {
           'Link to the view within Elastic that shows further details and context surrounding this alert',
       }
     ),
+    usesPublicBaseUrl: true,
   },
   [VIEW_IN_APP_URL]: {
     name: VIEW_IN_APP_URL,
@@ -50,5 +51,6 @@ export const ACTION_VARIABLES = {
           'Link to the view or feature within Elastic that can be used to investigate the alert and its context further',
       }
     ),
+    usesPublicBaseUrl: true,
   },
 };

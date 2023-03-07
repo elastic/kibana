@@ -40,6 +40,7 @@ interface Props {
   visibleCellActions: number;
   actionContext: CellActionExecutionContext;
   showActionTooltips: boolean;
+  disabledActionTypes: string[];
 }
 
 export const HoverActionsPopover: React.FC<Props> = ({
@@ -47,12 +48,13 @@ export const HoverActionsPopover: React.FC<Props> = ({
   visibleCellActions,
   actionContext,
   showActionTooltips,
+  disabledActionTypes,
 }) => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [isExtraActionsPopoverOpen, setIsExtraActionsPopoverOpen] = useState(false);
   const [showHoverContent, setShowHoverContent] = useState(false);
 
-  const [{ value: actions }, loadActions] = useLoadActionsFn();
+  const [{ value: actions }, loadActions] = useLoadActionsFn({ disabledActionTypes });
 
   const { visibleActions, extraActions } = useMemo(
     () => partitionActions(actions ?? [], visibleCellActions),

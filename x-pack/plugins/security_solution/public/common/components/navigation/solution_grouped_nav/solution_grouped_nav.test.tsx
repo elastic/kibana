@@ -12,6 +12,10 @@ import { TestProviders } from '../../../mock';
 import type { SolutionGroupedNavProps } from './solution_grouped_nav';
 import { SolutionGroupedNav } from './solution_grouped_nav';
 import type { SideNavItem } from './types';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { TELEMETRY_EVENT } from './telemetry/const';
+
+const mockTrack = jest.fn();
 
 const mockItems: SideNavItem[] = [
   {
@@ -35,9 +39,17 @@ const mockItems: SideNavItem[] = [
 ];
 
 const renderNav = (props: Partial<SolutionGroupedNavProps> = {}) =>
-  render(<SolutionGroupedNav items={mockItems} selectedId={SecurityPageName.alerts} {...props} />, {
-    wrapper: TestProviders,
-  });
+  render(
+    <SolutionGroupedNav
+      items={mockItems}
+      selectedId={SecurityPageName.alerts}
+      tracker={mockTrack}
+      {...props}
+    />,
+    {
+      wrapper: TestProviders,
+    }
+  );
 
 describe('SolutionGroupedNav', () => {
   beforeEach(() => {
@@ -80,6 +92,23 @@ describe('SolutionGroupedNav', () => {
       result.getByTestId(`groupedNavItemLink-${SecurityPageName.exploreLanding}`).click();
       expect(mockOnClick).toHaveBeenCalled();
     });
+
+    it('should send telemetry if link clicked', () => {
+      const items = [
+        ...mockItems,
+        {
+          id: SecurityPageName.exploreLanding,
+          label: 'Explore',
+          href: '/explore',
+        },
+      ];
+      const result = renderNav({ items });
+      result.getByTestId(`groupedNavItemLink-${SecurityPageName.exploreLanding}`).click();
+      expect(mockTrack).toHaveBeenCalledWith(
+        METRIC_TYPE.CLICK,
+        `${TELEMETRY_EVENT.NAVIGATION}${SecurityPageName.exploreLanding}`
+      );
+    });
   });
 
   describe('panel button toggle', () => {
@@ -100,6 +129,17 @@ describe('SolutionGroupedNav', () => {
       result.getByTestId(`groupedNavItemButton-${SecurityPageName.dashboardsLanding}`).click();
       expect(result.getByTestId('groupedNavPanel')).toBeInTheDocument();
       expect(result.getByText('Overview')).toBeInTheDocument();
+    });
+
+    it('should telemetry when button is clicked', () => {
+      const result = renderNav();
+      expect(result.queryByTestId('groupedNavPanel')).not.toBeInTheDocument();
+
+      result.getByTestId(`groupedNavItemButton-${SecurityPageName.dashboardsLanding}`).click();
+      expect(mockTrack).toHaveBeenCalledWith(
+        METRIC_TYPE.CLICK,
+        `${TELEMETRY_EVENT.GROUPED_NAVIGATION_TOGGLE}${SecurityPageName.dashboardsLanding}`
+      );
     });
 
     it('should close the group panel when the same button is clicked', () => {

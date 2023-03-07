@@ -30,8 +30,8 @@ import {
   getReferenceFromEsResponse,
   bulkCreateAttachments,
   updateComment,
-} from '../../../../common/lib/utils';
-import { getCaseUserActions } from '../../../../common/lib/user_actions';
+  getCaseUserActions,
+} from '../../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

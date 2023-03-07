@@ -8,12 +8,11 @@
 import { kea, MakeLogicType } from 'kea';
 
 import { ConnectorConfiguration, ConnectorStatus } from '../../../../../../common/types/connectors';
-import { Actions } from '../../../../shared/api_logic/create_api_logic';
+import { isNotNullish } from '../../../../../../common/utils/is_not_nullish';
 
 import {
   ConnectorConfigurationApiLogic,
-  PostConnectorConfigurationArgs,
-  PostConnectorConfigurationResponse,
+  PostConnectorConfigurationActions,
 } from '../../../api/connector/update_connector_configuration_api_logic';
 import {
   CachedFetchIndexApiLogic,
@@ -23,7 +22,7 @@ import { FetchIndexApiResponse } from '../../../api/index/fetch_index_api_logic'
 import { isConnectorIndex } from '../../../utils/indices';
 
 type ConnectorConfigurationActions = Pick<
-  Actions<PostConnectorConfigurationArgs, PostConnectorConfigurationResponse>,
+  PostConnectorConfigurationActions,
   'apiSuccess' | 'makeRequest'
 > & {
   fetchIndexApiSuccess: CachedFetchIndexApiLogicActions['apiSuccess'];
@@ -53,7 +52,38 @@ interface ConfigEntry {
   isPasswordField: boolean;
   key: string;
   label: string;
+  order?: number;
   value: string;
+}
+
+/**
+ *
+ * Sorts the connector configuration by specified order (if present)
+ * otherwise by alphabetic order of keys
+ *
+ */
+function sortConnectorConfiguration(config: ConnectorConfiguration): ConfigEntry[] {
+  return Object.keys(config)
+    .map(
+      (key) =>
+        ({
+          key,
+          ...config[key],
+        } as ConfigEntry)
+    )
+    .sort((a, b) => {
+      if (isNotNullish(a.order)) {
+        if (isNotNullish(b.order)) {
+          return a.order - b.order;
+        }
+        return -1;
+      }
+      if (isNotNullish(b.order)) {
+        // a doesn't have an order, but b has an order so takes precedence
+        return 1;
+      }
+      return a.key.localeCompare(b.key);
+    });
 }
 
 export const ConnectorConfigurationLogic = kea<
@@ -117,7 +147,17 @@ export const ConnectorConfigurationLogic = kea<
     saveConfig: () => {
       if (isConnectorIndex(values.index)) {
         actions.makeRequest({
-          configuration: values.localConfigState,
+          configuration: Object.keys(values.localConfigState)
+            .map((key) =>
+              values.localConfigState[key]
+                ? { key, value: values.localConfigState[key]?.value ?? '' }
+                : null
+            )
+            .filter(isNotNullish)
+            .reduce(
+              (prev: Record<string, string>, { key, value }) => ({ ...prev, [key]: value }),
+              {}
+            ),
           connectorId: values.index.connector.id,
           indexName: values.index.connector.index_name,
         });
@@ -148,9 +188,9 @@ export const ConnectorConfigurationLogic = kea<
     localConfigState: [
       {},
       {
-        setLocalConfigEntry: (configState, { key, label, value }) => ({
+        setLocalConfigEntry: (configState, { key, label, order, value }) => ({
           ...configState,
-          [key]: { label, value },
+          [key]: { label, order, value },
         }),
         setLocalConfigState: (_, { configState }) => configState,
       },
@@ -166,27 +206,21 @@ export const ConnectorConfigurationLogic = kea<
   selectors: ({ selectors }) => ({
     configView: [
       () => [selectors.configState],
-      (configState) =>
-        Object.keys(configState)
-          .map((key) => ({
-            key,
-            label: configState[key].label,
-            value: configState[key].value,
-          }))
-          .sort((a, b) => a.key.localeCompare(b.key)),
+      (configState: ConnectorConfiguration) =>
+        sortConnectorConfiguration(configState).map((config) => ({
+          ...config,
+          isPasswordField:
+            config.key.includes('password') || config.label.toLowerCase().includes('password'),
+        })),
     ],
     localConfigView: [
       () => [selectors.localConfigState],
       (configState) =>
-        Object.keys(configState)
-          .map((key) => ({
-            isPasswordField:
-              key.includes('password') || configState[key].label.toLowerCase().includes('password'),
-            key,
-            label: configState[key].label,
-            value: configState[key].value,
-          }))
-          .sort((a, b) => a.key.localeCompare(b.key)),
+        sortConnectorConfiguration(configState).map((config) => ({
+          ...config,
+          isPasswordField:
+            config.key.includes('password') || config.label.toLowerCase().includes('password'),
+        })),
     ],
   }),
 });

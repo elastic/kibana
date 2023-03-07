@@ -218,7 +218,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../fixtures/audit/anonymous.log');
+      const logFilePath = resolve(__dirname, '../../plugins/audit_log/anonymous.log');
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {

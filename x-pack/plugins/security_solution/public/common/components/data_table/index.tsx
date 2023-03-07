@@ -22,11 +22,14 @@ import React, { useCallback, useEffect, useMemo, useContext, useRef } from 'reac
 import { useDispatch } from 'react-redux';
 
 import styled, { ThemeContext } from 'styled-components';
-import type { Filter } from '@kbn/es-query';
 import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type { DataTableCellAction } from '../../../../common/types';
+import {
+  useDataGridColumnsSecurityCellActions,
+  SecurityCellActionsTrigger,
+  type UseDataGridColumnsSecurityCellActionsProps,
+} from '../cell_actions';
 import type {
   CellValueElementProps,
   ColumnHeaderOptions,
@@ -36,12 +39,7 @@ import type {
 import type { TimelineItem } from '../../../../common/search_strategy/timeline';
 
 import { getColumnHeader, getColumnHeaders } from './column_headers/helpers';
-import {
-  addBuildingBlockStyle,
-  hasCellActions,
-  mapSortDirectionToDirection,
-  mapSortingColumns,
-} from './helpers';
+import { addBuildingBlockStyle, mapSortDirectionToDirection, mapSortingColumns } from './helpers';
 
 import type { BrowserFields } from '../../../../common/search_strategy/index_fields';
 import { REMOVE_COLUMN } from './column_headers/translations';
@@ -62,10 +60,8 @@ export interface DataTableProps {
   browserFields: BrowserFields;
   bulkActions?: BulkActionsProp;
   data: TimelineItem[];
-  defaultCellActions?: DataTableCellAction[];
-  disabledCellActions: string[];
+  disableCellActions?: boolean;
   fieldBrowserOptions?: FieldBrowserOptions;
-  filters?: Filter[];
   id: string;
   leadingControlColumns: EuiDataGridControlColumn[];
   loadPage: (newActivePage: number) => void;
@@ -107,7 +103,7 @@ const EuiDataGridContainer = styled.div<{ hideLastPage: boolean }>`
   }
 `;
 
-const memoizedColumnHeaders: (
+const memoizedGetColumnHeaders: (
   headers: ColumnHeaderOptions[],
   browserFields: BrowserFields,
   isEventRenderedView: boolean
@@ -119,10 +115,8 @@ export const DataTableComponent = React.memo<DataTableProps>(
     browserFields,
     bulkActions = true,
     data,
-    defaultCellActions,
-    disabledCellActions,
+    disableCellActions = false,
     fieldBrowserOptions,
-    filters,
     hasCrudPermissions,
     id,
     leadingControlColumns,
@@ -143,7 +137,7 @@ export const DataTableComponent = React.memo<DataTableProps>(
     const { columns, selectedEventIds, showCheckboxes, sort, isLoading, defaultColumns } =
       dataTable;
 
-    const columnHeaders = memoizedColumnHeaders(columns, browserFields, isEventRenderedView);
+    const columnHeaders = memoizedGetColumnHeaders(columns, browserFields, isEventRenderedView);
 
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
 
@@ -309,57 +303,52 @@ export const DataTableComponent = React.memo<DataTableProps>(
       [dispatch, id]
     );
 
+    const columnsCellActionsProps = useMemo<UseDataGridColumnsSecurityCellActionsProps>(() => {
+      const fields = disableCellActions
+        ? []
+        : columnHeaders.map((column) => ({
+            name: column.id,
+            type: column.type ?? 'keyword',
+            values: data.map(
+              ({ data: columnData }) =>
+                columnData.find((rowData) => rowData.field === column.id)?.value
+            ),
+            aggregatable: column.aggregatable,
+          }));
+
+      return {
+        triggerId: SecurityCellActionsTrigger.DEFAULT,
+        fields,
+        metadata: {
+          scopeId: id,
+        },
+        dataGridRef,
+      };
+    }, [disableCellActions, columnHeaders, data, id]);
+
+    const columnsCellActions = useDataGridColumnsSecurityCellActions(columnsCellActionsProps);
+
     const columnsWithCellActions: EuiDataGridColumn[] = useMemo(
       () =>
-        columnHeaders.map((header) => {
-          const buildAction = (dataTableCellAction: DataTableCellAction) =>
-            dataTableCellAction({
-              browserFields,
-              data: data.map((row) => row.data),
-              ecsData: data.map((row) => row.ecs),
-              header: columnHeaders.find((h) => h.id === header.id),
-              pageSize: pagination.pageSize,
-              scopeId: id,
-              closeCellPopover: dataGridRef.current?.closeCellPopover,
-            });
-          return {
-            ...header,
-            actions: {
-              ...header.actions,
-              additional: [
-                {
-                  iconType: 'cross',
-                  label: REMOVE_COLUMN,
-                  onClick: () => {
-                    dispatch(dataTableActions.removeColumn({ id, columnId: header.id }));
-                  },
-                  size: 'xs',
+        columnHeaders.map((header, columnIndex) => ({
+          ...header,
+          actions: {
+            ...header.actions,
+            additional: [
+              {
+                iconType: 'cross',
+                label: REMOVE_COLUMN,
+                onClick: () => {
+                  dispatch(dataTableActions.removeColumn({ id, columnId: header.id }));
                 },
-              ],
-            },
-            ...(hasCellActions({
-              columnId: header.id,
-              disabledCellActions,
-            })
-              ? {
-                  cellActions:
-                    header.dataTableCellActions?.map(buildAction) ??
-                    defaultCellActions?.map(buildAction),
-                  visibleCellActions: 3,
-                }
-              : {}),
-          };
-        }),
-      [
-        browserFields,
-        columnHeaders,
-        data,
-        defaultCellActions,
-        disabledCellActions,
-        dispatch,
-        id,
-        pagination.pageSize,
-      ]
+                size: 'xs',
+              },
+            ],
+          },
+          cellActions: columnsCellActions[columnIndex] ?? [],
+          visibleCellActions: 3,
+        })),
+      [columnHeaders, columnsCellActions, dispatch, id]
     );
 
     const renderTableCellValue = useMemo(() => {
@@ -392,12 +381,12 @@ export const DataTableComponent = React.memo<DataTableProps>(
         }
 
         return renderCellValue({
+          asPlainText: false,
           browserFields,
           columnId: header.id,
           data: rowData,
           ecsData: ecs,
           eventId,
-          globalFilters: filters,
           header,
           isDetails,
           isDraggable: false,
@@ -417,7 +406,6 @@ export const DataTableComponent = React.memo<DataTableProps>(
       browserFields,
       columnHeaders,
       data,
-      filters,
       id,
       pagination.pageSize,
       renderCellValue,

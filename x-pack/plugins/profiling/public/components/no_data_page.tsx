@@ -124,7 +124,8 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
           }),
           content: (
             <EuiCodeBlock paddingSize="s" isCopyable>
-              wget -O- https://releases.prodfiler.com/stable/pf-host-agent_linux_amd64.tgz | tar xz
+              wget -O pf-host-agent.tgz &quot;https://ela.st/pf-host-agent-amd64&quot; && tar xzf
+              pf-host-agent.tgz
             </EuiCodeBlock>
           ),
         },
@@ -162,8 +163,8 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
               'Open the URL below and download the right DEB package for your CPU architecture:',
           }),
           content: (
-            <EuiLink target="_blank" href={`https://releases.prodfiler.com/stable/index.html`}>
-              https://releases.prodfiler.com/stable/index.html
+            <EuiLink target="_blank" href={`https://ela.st/pf-host-agent-linux`}>
+              https://ela.st/pf-host-agent-linux
             </EuiLink>
           ),
         },
@@ -212,8 +213,8 @@ docker.elastic.co/observability/profiling-agent:stable /root/pf-host-agent \\
               'Open the URL below and download the right RPM package for your CPU architecture:',
           }),
           content: (
-            <EuiLink target="_blank" href={`https://releases.prodfiler.com/stable/index.html`}>
-              https://releases.prodfiler.com/stable/index.html
+            <EuiLink target="_blank" href={`https://ela.st/pf-host-agent-linux`}>
+              https://ela.st/pf-host-agent-linux
             </EuiLink>
           ),
         },

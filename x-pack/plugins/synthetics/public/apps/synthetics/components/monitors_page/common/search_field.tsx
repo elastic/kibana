@@ -30,7 +30,7 @@ export function SearchField() {
   // Hydrate search input
   const hasInputChangedRef = useRef(false);
   useEffect(() => {
-    if (query && query !== search && !hasInputChangedRef.current) {
+    if (query !== search && !hasInputChangedRef.current) {
       setSearch(query);
     }
 

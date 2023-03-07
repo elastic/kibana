@@ -6,12 +6,13 @@
  */
 
 import React, { useMemo } from 'react';
+import type { CSSProperties } from 'styled-components';
 import styled from 'styled-components';
+import type { ViewSelection } from '../../../../common/types';
 import { TableId } from '../../../../common/types';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { InspectButton } from '../inspect';
 import { UpdatedFlexGroup, UpdatedFlexItem } from './styles';
-import type { ViewSelection } from './summary_view_select';
 import { SummaryViewSelector } from './summary_view_select';
 
 const TitleText = styled.span`
@@ -26,6 +27,8 @@ interface Props {
   onViewChange: (viewSelection: ViewSelection) => void;
   additionalFilters?: React.ReactNode;
   hasRightOffset?: boolean;
+  showInspect?: boolean;
+  position?: CSSProperties['position'];
   additionalMenuOptions?: React.ReactNode[];
 }
 
@@ -37,6 +40,8 @@ export const RightTopMenu = ({
   onViewChange,
   additionalFilters,
   hasRightOffset,
+  showInspect = true,
+  position = 'absolute',
   additionalMenuOptions = [],
 }: Props) => {
   const alignItems = tableView === 'gridView' ? 'baseline' : 'center';
@@ -63,12 +68,17 @@ export const RightTopMenu = ({
       alignItems={alignItems}
       data-test-subj="events-viewer-updated"
       gutterSize="m"
+      component="span"
       justifyContent="flexEnd"
+      direction="row"
       $hasRightOffset={hasRightOffset}
+      position={position}
     >
-      <UpdatedFlexItem grow={false} $show={!loading}>
-        <InspectButton title={justTitle} queryId={tableId} />
-      </UpdatedFlexItem>
+      {showInspect ? (
+        <UpdatedFlexItem grow={false} $show={!loading}>
+          <InspectButton title={justTitle} queryId={tableId} />
+        </UpdatedFlexItem>
+      ) : null}
       <UpdatedFlexItem grow={false} $show={!loading}>
         {additionalFilters}
       </UpdatedFlexItem>

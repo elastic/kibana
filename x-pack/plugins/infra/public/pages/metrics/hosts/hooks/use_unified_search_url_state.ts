@@ -79,7 +79,8 @@ export const useHostsUrlState = () => {
 
   const getDateRangeAsTimestamp = useCallback(() => {
     const from = DateMath.parse(state.dateRange.from)?.valueOf() ?? getDefaultFromTimestamp();
-    const to = DateMath.parse(state.dateRange.to)?.valueOf() ?? getDefaultToTimestamp();
+    const to =
+      DateMath.parse(state.dateRange.to, { roundUp: true })?.valueOf() ?? getDefaultToTimestamp();
 
     return { from, to };
   }, [state.dateRange]);

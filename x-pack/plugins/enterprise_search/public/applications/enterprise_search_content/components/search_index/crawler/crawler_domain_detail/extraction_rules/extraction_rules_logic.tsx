@@ -250,6 +250,7 @@ export const ExtractionRulesLogic = kea<
         cancelEditExtractionRule: () => null,
         editExtractionRule: (_, { extractionRule }) => extractionRule,
         updateSuccess: () => null,
+        updateExtractionRuleSuccess: () => null,
       },
     ],
     extractionRuleToEditIsNew: [
@@ -257,6 +258,8 @@ export const ExtractionRulesLogic = kea<
       {
         addSuccess: () => false,
         editNewExtractionRule: () => true,
+        editExtractionRule: () => false,
+        updateExtractionRuleSuccess: () => false,
       },
     ],
     fieldRuleFlyoutVisible: [

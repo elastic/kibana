@@ -177,7 +177,7 @@ describe('<Findings />', () => {
     renderFindingsPage();
 
     expectIdsInDoc({
-      be: [TEST_SUBJECTS.FINDINGS_CONTAINER],
+      be: [TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER],
       notToBe: [
         NO_FINDINGS_STATUS_TEST_SUBJ.INDEX_TIMEOUT,
         NO_FINDINGS_STATUS_TEST_SUBJ.NO_AGENTS_DEPLOYED,

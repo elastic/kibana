@@ -1,6 +1,7 @@
-
 get:
-  summary: Agent policy - Get full policy
+  summary: Get full agent policy by ID
+  tags:
+    - Agent policies
   operationId: agent-policy-full
   responses:
     '200':
@@ -14,6 +15,8 @@ get:
                 oneOf:
                   - type: string
                   - $ref: ../components/schemas/agent_policy_full.yaml
+    '400':
+      $ref: ../components/responses/error.yaml
 parameters:
   - schema:
       type: string

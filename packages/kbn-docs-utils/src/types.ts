@@ -7,8 +7,10 @@
  */
 
 export interface PluginOrPackage {
+  id: string;
   manifest: {
     id: string;
+    pluginId?: string;
     description?: string;
     owner: { name: string; githubTeam?: string };
     serviceFolders: readonly string[];

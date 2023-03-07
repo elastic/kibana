@@ -45,7 +45,7 @@
             "path": "packages/core/lifecycle/core-lifecycle-browser-mocks/src/core_start.mock.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/mocks.ts"
           },
           {
@@ -155,7 +155,7 @@
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/mocks.ts"
           },
           {

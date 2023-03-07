@@ -23,14 +23,14 @@ describe('SLO Selector', () => {
   const onSelectedSpy = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
-    useFetchSloListMock.mockReturnValue({ loading: true, sloList: emptySloList });
+    useFetchSloListMock.mockReturnValue({ isLoading: true, sloList: emptySloList });
   });
 
   it('fetches SLOs asynchronously', async () => {
     render(<SloSelector onSelected={onSelectedSpy} />);
 
     expect(screen.getByTestId('sloSelector')).toBeTruthy();
-    expect(useFetchSloListMock).toHaveBeenCalledWith({ name: '', refetch: false });
+    expect(useFetchSloListMock).toHaveBeenCalledWith({ name: '' });
   });
 
   it('searches SLOs when typing', async () => {
@@ -42,6 +42,6 @@ describe('SLO Selector', () => {
       await wait(310); // debounce delay
     });
 
-    expect(useFetchSloListMock).toHaveBeenCalledWith({ name: 'latency', refetch: false });
+    expect(useFetchSloListMock).toHaveBeenCalledWith({ name: 'latency' });
   });
 });

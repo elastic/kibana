@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/status-plugin-b-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "statusPluginB",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "statusPluginA"
+    ]
+  }
+}

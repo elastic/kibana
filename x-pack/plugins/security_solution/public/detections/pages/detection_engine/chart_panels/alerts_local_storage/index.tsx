@@ -30,12 +30,14 @@ import {
 } from '../../../../components/alerts_kpis/common/config';
 import type { AlertsSettings } from './types';
 import type { AlertViewSelection } from '../chart_select/helpers';
-import { TREND_ID } from '../chart_select/helpers';
+import { CHARTS_ID, TREND_ID } from '../chart_select/helpers';
 import type { GroupBySelection } from '../../../../components/alerts_kpis/alerts_progress_bar_panel/types';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 
 export const useAlertsLocalStorage = (): AlertsSettings => {
+  const isAlertsPageChartsEnabled = useIsExperimentalFeatureEnabled('alertsPageChartsEnabled');
   const [alertViewSelection, setAlertViewSelection] = useLocalStorage<AlertViewSelection>({
-    defaultValue: TREND_ID,
+    defaultValue: isAlertsPageChartsEnabled ? CHARTS_ID : TREND_ID,
     key: getSettingKey({
       category: VIEW_CATEGORY,
       page: ALERTS_PAGE,

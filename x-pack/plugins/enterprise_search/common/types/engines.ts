@@ -44,3 +44,7 @@ export interface EnterpriseSearchEngineFieldCapabilities {
   name: string;
   updated: string;
 }
+export interface EnterpriseSearchSchemaField {
+  field_name: string;
+  field_type: string[];
+}

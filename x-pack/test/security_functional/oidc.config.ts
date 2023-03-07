@@ -21,11 +21,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   );
 
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
-  const jwksPath = resolve(__dirname, '../security_api_integration/fixtures/oidc/jwks.json');
-  const oidcOpPPlugin = resolve(
-    __dirname,
-    '../security_api_integration/fixtures/oidc/oidc_provider'
-  );
+  const jwksPath = require.resolve('@kbn/security-api-integration-helpers/oidc/jwks.json');
+  const oidcOpPPlugin = resolve(__dirname, '../security_api_integration/plugins/oidc_provider');
 
   const testEndpointsPlugin = resolve(__dirname, './plugins/test_endpoints');
 

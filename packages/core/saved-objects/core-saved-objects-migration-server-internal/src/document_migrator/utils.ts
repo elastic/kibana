@@ -15,13 +15,13 @@ import {
 import { Logger } from '@kbn/logging';
 import { MigrationLogger } from '../core/migration_logger';
 import { TransformSavedObjectDocumentError } from '../core/transform_saved_object_document_error';
-import type { Transform, TransformFn } from './types';
+import { type Transform, type TransformFn, TransformType } from './types';
 
 /**
  * If a specific transform function fails, this tacks on a bit of information
  * about the document and transform that caused the failure.
  */
-export function wrapWithTry(
+export function convertMigrationFunction(
   version: string,
   type: SavedObjectsType,
   migrationFn: SavedObjectMigrationFn,
@@ -64,15 +64,26 @@ export function transformComparator(a: Transform, b: Transform) {
   if (semver !== 0) {
     return semver;
   } else if (a.transformType !== b.transformType) {
-    if (a.transformType === 'migrate') {
+    if (a.transformType === TransformType.Migrate) {
       return 1;
-    } else if (b.transformType === 'migrate') {
+    } else if (b.transformType === TransformType.Migrate) {
       return -1;
-    } else if (a.transformType === 'convert') {
+    } else if (a.transformType === TransformType.Convert) {
       return 1;
-    } else if (b.transformType === 'convert') {
+    } else if (b.transformType === TransformType.Convert) {
       return -1;
     }
   }
   return 0;
+}
+
+export function maxVersion(a?: string, b?: string) {
+  if (!a) {
+    return b;
+  }
+  if (!b) {
+    return a;
+  }
+
+  return Semver.gt(a, b) ? a : b;
 }

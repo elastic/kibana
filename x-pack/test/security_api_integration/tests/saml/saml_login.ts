@@ -16,7 +16,7 @@ import {
   getLogoutRequest,
   getSAMLRequestId,
   getSAMLResponse,
-} from '../../fixtures/saml/saml_tools';
+} from '@kbn/security-api-integration-helpers/saml/saml_tools';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { FileWrapper } from '../audit/file_wrapper';
 
@@ -796,7 +796,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../fixtures/audit/saml.log');
+      const logFilePath = resolve(__dirname, '../../packages/helpers/audit/saml.log');
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {

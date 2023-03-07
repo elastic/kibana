@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useEffect, useState, useRef } from 'react';
-import { loadRuleTypes } from '../lib/rule_api';
+import { loadRuleTypes } from '../lib/rule_api/rule_types';
 import { RuleType, RuleTypeIndex } from '../../types';
 import { useKibana } from '../../common/lib/kibana';
 

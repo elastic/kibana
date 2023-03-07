@@ -139,6 +139,7 @@ kibana_vars=(
     regionmap
     savedObjects.maxImportExportSize
     savedObjects.maxImportPayloadBytes
+    savedObjects.allowHttpApiAccess
     security.showInsecureClusterWarning
     server.basePath
     server.compression.enabled

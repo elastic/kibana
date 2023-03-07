@@ -8,7 +8,7 @@
 
 import { resolve, join } from 'path';
 import loadJsonFile from 'load-json-file';
-import { getPluginSearchPaths } from '@kbn/plugin-discovery';
+import { getPluginSearchPaths } from '@kbn/repo-packages';
 import type { Package } from '@kbn/repo-packages';
 import { PackageInfo, EnvironmentMode } from './types';
 
@@ -101,8 +101,6 @@ export class Env {
 
     this.pluginSearchPaths = getPluginSearchPaths({
       rootDir: this.homeDir,
-      oss: options.cliArgs.oss,
-      examples: options.cliArgs.runExamples,
     });
     this.repoPackages = options.repoPackages;
 

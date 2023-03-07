@@ -12,7 +12,6 @@ import { i18n } from '@kbn/i18n';
 import { DevToolsSettings } from '../../../services';
 import { subscribeResizeChecker } from '../editor/legacy/subscribe_console_resize_checker';
 
-// @ts-ignore
 import * as InputMode from '../../models/legacy_core_editor/mode/input';
 const inputMode = new InputMode.Mode();
 import * as editor from '../../models/legacy_core_editor';

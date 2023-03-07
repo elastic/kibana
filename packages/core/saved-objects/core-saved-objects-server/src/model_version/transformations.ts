@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectSanitizedDoc } from '../serialization';
+import type { SavedObjectUnsanitizedDoc } from '../serialization';
 import type { SavedObjectsMigrationLogger } from '../migration';
 
 /**
@@ -14,7 +14,7 @@ import type { SavedObjectsMigrationLogger } from '../migration';
  *
  * @public
  */
-export type SavedObjectModelTransformationDoc<T = unknown> = SavedObjectSanitizedDoc<T>;
+export type SavedObjectModelTransformationDoc<T = unknown> = SavedObjectUnsanitizedDoc<T>;
 
 /**
  * Context passed down to {@link SavedObjectModelTransformationFn | transformation functions}.

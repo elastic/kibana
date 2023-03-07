@@ -90,15 +90,17 @@ export function readFieldCapsResponse(
         );
       });
 
-      const isAggregatable = types.some((type) => {
-        return (
-          !!capsByType[type].aggregatable ||
-          (!!capsByType[type].non_aggregatable_indices &&
-            capsByType[type].non_aggregatable_indices!.length > 0)
-        );
-      });
-
       const timeSeriesMetricProp = uniq(types.map((t) => capsByType[t].time_series_metric));
+      const isTimeSeriesCounter = !!timeSeriesMetricProp.find((item) => item === 'counter');
+
+      const isAggregatable =
+        types.some((type) => {
+          return (
+            !!capsByType[type].aggregatable ||
+            (!!capsByType[type].non_aggregatable_indices &&
+              capsByType[type].non_aggregatable_indices!.length > 0)
+          );
+        }) && !isTimeSeriesCounter;
 
       // If there are multiple types but they all resolve to the same kibana type
       // ignore the conflict and carry on (my wayward son)

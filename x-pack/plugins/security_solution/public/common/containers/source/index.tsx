@@ -34,7 +34,7 @@ export const getAllFieldsByName = (
   keyBy('name', getAllBrowserFields(browserFields));
 
 export const getIndexFields = memoizeOne(
-  (title: string, fields: IndexField[]): DataViewBase =>
+  (title: string, fields: IndexField[], _includeUnmapped: boolean = false): DataViewBase =>
     fields && fields.length > 0
       ? {
           fields: fields.map((field) =>
@@ -54,7 +54,10 @@ export const getIndexFields = memoizeOne(
           title,
         }
       : { fields: [], title },
-  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1].length === lastArgs[1].length
+  (newArgs, lastArgs) =>
+    newArgs[0] === lastArgs[0] &&
+    newArgs[1].length === lastArgs[1].length &&
+    newArgs[2] === lastArgs[2]
 );
 
 /**
@@ -104,7 +107,7 @@ export const useFetchIndex = (
   strategy: string = 'indexFields',
   includeUnmapped: boolean = false
 ): [boolean, FetchIndexReturn] => {
-  console.log('indexNames', indexNames);
+  // console.log('indexNames', indexNames);
   const { data } = useKibana().services;
   const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef(new Subscription());
@@ -125,13 +128,17 @@ export const useFetchIndex = (
         abortCtrl.current = new AbortController();
         setLoading(true);
         const dv = await data.dataViews.create({ title: iNames.join(','), allowNoIndex: true });
-        const { browserFields } = getDataViewStateFromIndexFields(iNames, dv.fields);
+        const { browserFields } = getDataViewStateFromIndexFields(
+          iNames,
+          dv.fields,
+          includeUnmapped
+        );
 
         setState({
           browserFields,
           indexes: dv.getIndexPattern().split(','),
           indexExists: dv.getIndexPattern().split(',').length > 0,
-          indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields),
+          indexPatterns: getIndexFields(dv.getIndexPattern(), dv.fields, includeUnmapped),
         });
         setLoading(false);
       };
@@ -140,13 +147,13 @@ export const useFetchIndex = (
       // abortCtrl.current.abort();
       asyncSearch();
     },
-    [data.dataViews]
+    [data.dataViews, includeUnmapped]
   );
 
   useEffect(() => {
     if (!isEmpty(indexNames)) {
       // && !isEqual(previousIndexesName.current, indexNames)) {
-      console.log('how many times do we actually call this?');
+      // console.log('how many times do we actually call this?');
       indexFieldsSearch(indexNames);
     }
     // return () => {

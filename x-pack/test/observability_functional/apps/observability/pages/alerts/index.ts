@@ -49,12 +49,12 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('Alerts table', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.load('x-pack/test/functional/es_archives/infra/simple_logs');
         await observability.alerts.common.navigateToTimeWithData();
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+        await esArchiver.unload('x-pack/test/functional/es_archives/infra/simple_logs');
       });
 
       it('Renders the table', async () => {
@@ -170,8 +170,8 @@ export default ({ getService }: FtrProviderContext) => {
               'Oct 19, 2021 @ 15:00:41.555',
               'Oct 19, 2021 @ 15:20:38.749',
               '20 minutes',
-              '5',
-              '30.73',
+              '5.0%',
+              '31%',
               'Failed transaction rate threshold',
             ];
 

@@ -35,9 +35,9 @@ export function getReferences({ node, plugins, currentPluginId, log }: Opts): Ap
 
     // Don't include references from inside the plugin itself, we only care about
     // external references (if it's only used internally, it shouldn't be exported).
-    if (refPlugin && refPlugin.manifest.id !== currentPluginId) {
+    if (refPlugin && refPlugin.id !== currentPluginId) {
       refs.push({
-        plugin: refPlugin.manifest.id,
+        plugin: refPlugin.id,
         path: getSourceForNode(ref),
       });
     }

@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/custom-branding-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": " Enables customization of Kibana",
+  "plugin": {
+    "id": "customBranding",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "licensing",
+      "licenseApiGuard"
+    ]
+  }
+}

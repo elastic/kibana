@@ -8,19 +8,12 @@
 
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import { getKibanaVersion } from './lib/saved_objects_test_utils';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
   describe('resolve', () => {
-    let KIBANA_VERSION: string;
-
-    before(async () => {
-      KIBANA_VERSION = await getKibanaVersion(getService);
-    });
-
     describe('with kibana index', () => {
       before(async () => {
         await kibanaServer.importExport.load(
@@ -49,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
                 created_at: '2015-01-01T00:00:00.000Z',
                 version: resp.body.saved_object.version,
                 migrationVersion: resp.body.saved_object.migrationVersion,
-                coreMigrationVersion: KIBANA_VERSION,
+                coreMigrationVersion: '7.14.0',
                 attributes: {
                   title: 'Count of requests',
                   description: '',

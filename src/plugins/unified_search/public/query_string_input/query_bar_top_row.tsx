@@ -405,6 +405,7 @@ export const QueryBarTopRow = React.memo(
             onRefreshChange={props.onRefreshChange}
             showUpdateButton={false}
             recentlyUsedRanges={recentlyUsedRanges}
+            locale={i18n.getLocale()}
             commonlyUsedRanges={commonlyUsedRanges}
             dateFormat={uiSettings.get('dateFormat')}
             isAutoRefreshOnly={showAutoRefreshOnly}

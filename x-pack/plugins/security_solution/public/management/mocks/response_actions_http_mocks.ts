@@ -18,6 +18,7 @@ import {
   SUSPEND_PROCESS_ROUTE,
   GET_FILE_ROUTE,
   ACTION_AGENT_FILE_INFO_ROUTE,
+  EXECUTE_ROUTE,
 } from '../../../common/endpoint/constants';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
 import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
@@ -31,6 +32,8 @@ import type {
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
   ActionFileInfoApiResponse,
+  ResponseActionExecuteOutputContent,
+  ResponseActionsExecuteParameters,
 } from '../../../common/endpoint/types';
 
 export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
@@ -53,6 +56,8 @@ export type ResponseActionsHttpMocksInterface = ResponseProvidersInterface<{
   getFile: () => ActionDetailsApiResponse<ResponseActionGetFileOutputContent>;
 
   fileInfo: () => ActionFileInfoApiResponse;
+
+  execute: () => ActionDetailsApiResponse<ResponseActionExecuteOutputContent>;
 }>;
 
 export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHttpMocksInterface>([
@@ -196,6 +201,24 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
           status: 'READY',
         },
       };
+    },
+  },
+  {
+    id: 'execute',
+    path: EXECUTE_ROUTE,
+    method: 'post',
+    handler: (): ActionDetailsApiResponse<ResponseActionExecuteOutputContent> => {
+      const generator = new EndpointActionGenerator('seed');
+      const response = generator.generateActionDetails<
+        ResponseActionExecuteOutputContent,
+        ResponseActionsExecuteParameters
+      >({
+        outputs: {
+          'a.b.c': generator.generateExecuteActionResponseOutput(),
+        },
+      });
+
+      return { data: response };
     },
   },
 ]);

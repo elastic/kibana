@@ -1472,5 +1472,38 @@ describe('Execution Handler', () => {
         ]
       `);
     });
+
+    it('sets the rule.url to the value from getViewInAppRelativeUrl when the rule type has it defined', async () => {
+      const execParams = {
+        ...defaultExecutionParams,
+        rule: ruleWithUrl,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          kibanaBaseUrl: 'http://localhost:12345',
+        },
+        ruleType: {
+          ...ruleType,
+          getViewInAppRelativeUrl() {
+            return '/app/management/some/other/place';
+          },
+        },
+      };
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionParams": Object {
+              "val": "rule url: http://localhost:12345/s/test1/app/management/some/other/place",
+            },
+            "actionTypeId": "test",
+            "ruleId": "1",
+            "spaceId": "test1",
+          },
+        ]
+      `);
+    });
   });
 });

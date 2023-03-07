@@ -128,7 +128,7 @@
         "label": "Language",
         "description": [],
         "signature": [
-          "\"eql\" | \"lucene\" | \"kuery\""
+          "\"kuery\" | \"eql\" | \"lucene\""
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
@@ -143,7 +143,7 @@
         "label": "LanguageOrUndefined",
         "description": [],
         "signature": [
-          "\"eql\" | \"lucene\" | \"kuery\" | undefined"
+          "\"kuery\" | \"eql\" | \"lucene\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/language/index.ts",
         "deprecated": false,
@@ -303,7 +303,7 @@
             "section": "def-common.SavedObjectAttributes",
             "text": "SavedObjectAttributes"
           },
-          "; }"
+          "; } & { uuid?: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
@@ -318,7 +318,7 @@
         "label": "RuleActionArray",
         "description": [],
         "signature": [
-          "{ group: string; id: string; action_type_id: string; params: ",
+          "({ group: string; id: string; action_type_id: string; params: ",
           {
             "pluginId": "@kbn/securitysolution-io-ts-alerting-types",
             "scope": "common",
@@ -326,7 +326,7 @@
             "section": "def-common.SavedObjectAttributes",
             "text": "SavedObjectAttributes"
           },
-          "; }[]"
+          "; } & { uuid?: string | undefined; })[]"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
@@ -341,7 +341,7 @@
         "label": "RuleActionArrayCamel",
         "description": [],
         "signature": [
-          "{ group: string; id: string; actionTypeId: string; params: ",
+          "({ group: string; id: string; actionTypeId: string; params: ",
           {
             "pluginId": "@kbn/securitysolution-io-ts-alerting-types",
             "scope": "common",
@@ -349,7 +349,7 @@
             "section": "def-common.SavedObjectAttributes",
             "text": "SavedObjectAttributes"
           },
-          "; }[]"
+          "; } & { uuid?: string | undefined; })[]"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
@@ -372,7 +372,7 @@
             "section": "def-common.SavedObjectAttributes",
             "text": "SavedObjectAttributes"
           },
-          "; }"
+          "; } & { uuid?: string | undefined; }"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
@@ -455,6 +455,21 @@
         "type": "Type",
         "tags": [],
         "label": "RuleActionTypeId",
+        "description": [],
+        "signature": [
+          "string"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-alerting-types",
+        "id": "def-common.RuleActionUuid",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleActionUuid",
         "description": [],
         "signature": [
           "string"
@@ -726,7 +741,7 @@
         "label": "ThreatLanguage",
         "description": [],
         "signature": [
-          "\"eql\" | \"lucene\" | \"kuery\" | undefined"
+          "\"kuery\" | \"eql\" | \"lucene\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
@@ -741,7 +756,7 @@
         "label": "ThreatLanguageOrUndefined",
         "description": [],
         "signature": [
-          "\"eql\" | \"lucene\" | \"kuery\" | undefined"
+          "\"kuery\" | \"eql\" | \"lucene\" | undefined"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/threat_mapping/index.ts",
         "deprecated": false,
@@ -990,7 +1005,7 @@
         "description": [],
         "signature": [
           "Type",
-          "<{ group: string; id: string; action_type_id: string; params: ",
+          "<({ group: string; id: string; action_type_id: string; params: ",
           {
             "pluginId": "@kbn/securitysolution-io-ts-alerting-types",
             "scope": "common",
@@ -998,7 +1013,7 @@
             "section": "def-common.SavedObjectAttributes",
             "text": "SavedObjectAttributes"
           },
-          "; }[], { group: string; id: string; action_type_id: string; params: ",
+          "; } & { uuid?: string | undefined; })[], ({ group: string; id: string; action_type_id: string; params: ",
           {
             "pluginId": "@kbn/securitysolution-io-ts-alerting-types",
             "scope": "common",
@@ -1006,7 +1021,7 @@
             "section": "def-common.SavedObjectAttributes",
             "text": "SavedObjectAttributes"
           },
-          "; }[] | undefined, unknown>"
+          "; } & { uuid?: string | undefined; })[] | undefined, unknown>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/default_actions_array/index.ts",
         "deprecated": false,
@@ -1523,6 +1538,8 @@
         "signature": [
           "ExactC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ group: ",
           "StringC",
@@ -1548,7 +1565,11 @@
             "section": "def-common.SavedObjectAttributes",
             "text": "SavedObjectAttributes"
           },
-          ", unknown>; }>>"
+          ", unknown>; }>, ",
+          "PartialC",
+          "<{ uuid: ",
+          "Type",
+          "<string, string, unknown>; }>]>>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
@@ -1567,6 +1588,8 @@
           "<",
           "ExactC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ group: ",
           "StringC",
@@ -1592,7 +1615,11 @@
             "section": "def-common.SavedObjectAttributes",
             "text": "SavedObjectAttributes"
           },
-          ", unknown>; }>>>"
+          ", unknown>; }>, ",
+          "PartialC",
+          "<{ uuid: ",
+          "Type",
+          "<string, string, unknown>; }>]>>>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
@@ -1611,6 +1638,8 @@
           "<",
           "ExactC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ group: ",
           "StringC",
@@ -1636,7 +1665,11 @@
             "section": "def-common.SavedObjectAttributes",
             "text": "SavedObjectAttributes"
           },
-          ", unknown>; }>>>"
+          ", unknown>; }>, ",
+          "PartialC",
+          "<{ uuid: ",
+          "Type",
+          "<string, string, unknown>; }>]>>>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
@@ -1653,6 +1686,8 @@
         "signature": [
           "ExactC",
           "<",
+          "IntersectionC",
+          "<[",
           "TypeC",
           "<{ group: ",
           "StringC",
@@ -1678,7 +1713,11 @@
             "section": "def-common.SavedObjectAttributes",
             "text": "SavedObjectAttributes"
           },
-          ", unknown>; }>>"
+          ", unknown>; }>, ",
+          "PartialC",
+          "<{ uuid: ",
+          "Type",
+          "<string, string, unknown>; }>]>>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,
@@ -1778,6 +1817,22 @@
         "description": [],
         "signature": [
           "StringC"
+        ],
+        "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/securitysolution-io-ts-alerting-types",
+        "id": "def-common.RuleActionUuid",
+        "type": "Object",
+        "tags": [],
+        "label": "RuleActionUuid",
+        "description": [],
+        "signature": [
+          "Type",
+          "<string, string, unknown>"
         ],
         "path": "packages/kbn-securitysolution-io-ts-alerting-types/src/actions/index.ts",
         "deprecated": false,

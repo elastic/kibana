@@ -9,8 +9,8 @@ import Fs from 'fs';
 import { join } from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import { FtrConfigProviderContext } from '@kbn/test';
+import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import { pageObjects } from './page_objects';
-import { getAllExternalServiceSimulatorPaths } from '../alerting_api_integration/common/plugins/actions_simulators/server/plugin';
 
 // .server-log is specifically not enabled
 const enabledActionTypes = [

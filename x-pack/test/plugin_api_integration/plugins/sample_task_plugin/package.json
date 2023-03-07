@@ -1,5 +1,5 @@
 {
-  "name": "sample_task_plugin",
+  "name": "@kbn/sample-task-plugin",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",

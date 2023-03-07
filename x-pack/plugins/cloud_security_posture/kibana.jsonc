@@ -1,0 +1,34 @@
+{
+  "type": "plugin",
+  "id": "@kbn/cloud-security-posture-plugin",
+  "owner": "@elastic/kibana-cloud-security-posture",
+  "description": "The cloud security posture plugin",
+  "plugin": {
+    "id": "cloudSecurityPosture",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "cloudSecurityPosture"
+    ],
+    "requiredPlugins": [
+      "navigation",
+      "data",
+      "fleet",
+      "unifiedSearch",
+      "taskManager",
+      "security",
+      "charts",
+      "discover",
+      "cloud",
+      "licensing"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "usageCollection"
+    ]
+  }
+}

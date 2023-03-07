@@ -123,17 +123,17 @@ Refer to the corresponding {es} logs for potential write errors.
 | `unknown` | User is updating a saved object.
 | `failure` | User is not authorized to update a saved object.
 
-.2+| `saved_object_add_to_spaces`
-| `unknown` | User is adding a saved object to other spaces.
-| `failure` | User is not authorized to add a saved object to other spaces.
-
-.2+| `saved_object_delete_from_spaces`
-| `unknown` | User is removing a saved object from other spaces.
-| `failure` | User is not authorized to remove a saved object from other spaces.
+.2+| `saved_object_update_objects_spaces`
+| `unknown` | User is adding and/or removing a saved object to/from other spaces.
+| `failure` | User is not authorized to add or remove a saved object to or from other spaces.
 
 .2+| `saved_object_remove_references`
 | `unknown` | User is removing references to a saved object.
 | `failure` | User is not authorized to remove references to a saved object.
+
+.2+| `saved_object_collect_multinamespace_references`
+| `success` | User has accessed references to a multi-space saved object.
+| `failure` | User is not authorized to access references to a multi-space saved object.
 
 .2+| `connector_update`
 | `unknown` | User is updating a connector.

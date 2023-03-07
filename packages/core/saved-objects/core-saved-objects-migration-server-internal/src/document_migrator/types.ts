@@ -12,17 +12,15 @@ import type { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
  * Map containing all the info to convert types
  */
 export interface ActiveMigrations {
-  [type: string]: TypeConversion;
+  [type: string]: TypeTransforms;
 }
 
 /**
  * Structure containing all the required info to perform a type's conversion
  */
-export interface TypeConversion {
-  /** Derived from `migrate` transforms and `convert` transforms */
-  latestMigrationVersion?: string;
-  /** Derived from `reference` transforms */
-  latestCoreMigrationVersion?: string;
+export interface TypeTransforms {
+  /** Derived from the related transforms */
+  latestVersion: Record<TransformType, string>;
   /** List of transforms registered for the type **/
   transforms: Transform[];
 }
@@ -50,7 +48,11 @@ export interface Transform {
  *   * `reference` - These transforms are defined by core and added by consumers using the type registry; they are applied to all object
  *     types based on their `coreMigrationVersion` field. These are applied during index migrations, NOT document migrations.
  */
-export type TransformType = 'migrate' | 'convert' | 'reference';
+export enum TransformType {
+  Migrate = 'migrate',
+  Convert = 'convert',
+  Reference = 'reference',
+}
 
 /**
  * Transformation function for a {@link Transform}

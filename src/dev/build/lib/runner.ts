@@ -37,10 +37,10 @@ export function createRunner({ config, log }: Options) {
       await log.indent(4, async () => {
         const start = Date.now();
         const time = () => {
-          const sec = (Date.now() - start) / 1000;
-          const minStr = sec > 60 ? `${Math.floor(sec / 60)} min ` : '';
-          const secStr = `${Math.round(sec % 60)} sec`;
-          return chalk.dim(`${minStr}${secStr}`);
+          const secs = Math.round((Date.now() - start) / 1000);
+          const m = Math.floor(secs / 60);
+          const s = secs - m * 60;
+          return chalk.dim(`${m ? `${m} min ` : ''}${s} sec`);
         };
 
         try {

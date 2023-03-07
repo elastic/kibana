@@ -9,8 +9,8 @@ import type { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting
 import type { SavedObjectsClientContract, SavedObject } from '@kbn/core/public';
 import type { Tag, TagAttributes } from '@kbn/saved-objects-tagging-plugin/common';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import { SECURITY_TAG_NAME } from '../../../../common/constants';
 
-export const SECURITY_TAG_NAME = 'Security Solution' as const;
 export const SECURITY_TAG_DESCRIPTION = 'Security Solution auto-generated tag' as const;
 
 /**
