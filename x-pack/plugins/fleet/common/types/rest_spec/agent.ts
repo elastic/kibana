@@ -241,5 +241,5 @@ export interface PostRetrieveAgentsByActionsRequest {
 }
 
 export interface PostRetrieveAgentsByActionsResponse {
-  items: Array<string | undefined>;
+  items: string[];
 }

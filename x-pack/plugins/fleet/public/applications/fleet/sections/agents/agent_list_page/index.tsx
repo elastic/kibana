@@ -78,6 +78,10 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { pagination, pageSizeOptions, setPagination } = usePagination();
   const [sortField, setSortField] = useState<keyof Agent>('enrolled_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+
+  // Agents filtered by "view agents" in activity flyout
+  const [actionsFilteredAgents, setActionsFilteredAgents] = useState<string[]>([]);
+
   const VERSION_FIELD = 'local_metadata.elastic.agent.version';
   const HOSTNAME_FIELD = 'local_metadata.host.hostname';
 
@@ -120,7 +124,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSelectedStatus([]);
     setSelectedTags([]);
     setShowUpgradeable(false);
-  }, [setSearch, setDraftKuery, setSelectedAgentPolicies, setSelectedStatus, setShowUpgradeable]);
+    setActionsFilteredAgents([]);
+  }, [
+    setSearch,
+    setDraftKuery,
+    setSelectedAgentPolicies,
+    setSelectedStatus,
+    setShowUpgradeable,
+    setActionsFilteredAgents,
+  ]);
 
   // Agent enrollment flyout state
   const [enrollmentFlyout, setEnrollmentFlyoutState] = useState<{
@@ -206,6 +218,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         .filter((statusKuery) => statusKuery !== undefined)
         .join(' or ');
 
+      if (actionsFilteredAgents.length) {
+        if (kueryBuilder) {
+          kueryBuilder = `(${kueryBuilder}) and`;
+        }
+        kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.agent.id : (${actionsFilteredAgents
+          .map((id) => `"${id}"`)
+          .join(' or ')})`;
+      }
+
       if (kueryBuilder) {
         kueryBuilder = `(${kueryBuilder}) and (${kueryStatus})`;
       } else {
@@ -214,7 +235,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     }
 
     return kueryBuilder;
-  }, [search, selectedAgentPolicies, selectedTags, selectedStatus]);
+  }, [search, selectedAgentPolicies, selectedTags, selectedStatus, actionsFilteredAgents]);
 
   const showInactive = useMemo(() => {
     return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
@@ -485,6 +506,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             onAbortSuccess={fetchData}
             onClose={() => setAgentActivityFlyoutOpen(false)}
             refreshAgentActivity={isLoading}
+            setActionsFilteredAgents={setActionsFilteredAgents}
           />
         </EuiPortal>
       ) : null}

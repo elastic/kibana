@@ -270,6 +270,7 @@ export function sendPostRetrieveAgentsByActions(body: PostRetrieveAgentsByAction
   return sendRequest<PostRetrieveAgentsByActionsResponse>({
     path: agentRouteService.getAgentsByActionsPath(),
     method: 'post',
+    body,
   });
 }
 

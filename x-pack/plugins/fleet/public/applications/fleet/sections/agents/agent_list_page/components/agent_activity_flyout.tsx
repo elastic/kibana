@@ -24,12 +24,17 @@ import {
   EuiEmptyPrompt,
   EuiButtonEmpty,
   EuiFlyoutFooter,
+  EuiSpacer,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
 import type { ActionStatus } from '../../../../types';
 import { useActionStatus } from '../hooks';
-import { useGetAgentPolicies, useStartServices } from '../../../../hooks';
+import {
+  useGetAgentPolicies,
+  useStartServices,
+  sendPostRetrieveAgentsByActions,
+} from '../../../../hooks';
 import { SO_SEARCH_LIMIT } from '../../../../constants';
 
 import { Loading } from '../../components';
@@ -50,7 +55,8 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   onClose: () => void;
   onAbortSuccess: () => void;
   refreshAgentActivity: boolean;
-}> = ({ onClose, onAbortSuccess, refreshAgentActivity }) => {
+  setActionsFilteredAgents: (actionIds: string[]) => void;
+}> = ({ onClose, onAbortSuccess, refreshAgentActivity, setActionsFilteredAgents }) => {
   const { data: agentPoliciesData } = useGetAgentPolicies({
     perPage: SO_SEARCH_LIMIT,
   });
@@ -65,7 +71,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
     return policy?.name ?? policyId;
   };
 
-  const currentActionsEnriched = currentActions.map((a) => ({
+  const currentActionsEnriched: ActionStatus[] = currentActions.map((a) => ({
     ...a,
     newPolicyId: getAgentPolicyName(a.newPolicyId ?? ''),
   }));
@@ -76,6 +82,13 @@ export const AgentActivityFlyout: React.FunctionComponent<{
 
   const todayActions = getTodayActions(completedActions);
   const otherDays = getOtherDaysActions(completedActions);
+
+  const onClickViewAgents = async (action: ActionStatus) => {
+    const agents = await sendPostRetrieveAgentsByActions({ actionIds: [action.actionId] });
+
+    if (agents?.data?.items?.length) setActionsFilteredAgents(agents.data.items);
+    onClose();
+  };
 
   return (
     <>
@@ -160,6 +173,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
               }
               actions={inProgressActions}
               abortUpgrade={abortUpgrade}
+              onClickViewAgents={onClickViewAgents}
             />
           ) : null}
           {todayActions.length > 0 ? (
@@ -172,6 +186,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
               }
               actions={todayActions}
               abortUpgrade={abortUpgrade}
+              onClickViewAgents={onClickViewAgents}
             />
           ) : null}
           {Object.keys(otherDays).map((day) => (
@@ -180,6 +195,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
               title={<FormattedDate value={day} year="numeric" month="short" day="2-digit" />}
               actions={otherDays[day]}
               abortUpgrade={abortUpgrade}
+              onClickViewAgents={onClickViewAgents}
             />
           ))}
         </FullHeightFlyoutBody>
@@ -206,7 +222,8 @@ const ActivitySection: React.FunctionComponent<{
   title: ReactNode;
   actions: ActionStatus[];
   abortUpgrade: (action: ActionStatus) => Promise<void>;
-}> = ({ title, actions, abortUpgrade }) => {
+  onClickViewAgents: (action: ActionStatus) => void;
+}> = ({ title, actions, abortUpgrade, onClickViewAgents }) => {
   return (
     <>
       <EuiPanel color="subdued" hasBorder={true} borderRadius="none">
@@ -220,9 +237,14 @@ const ActivitySection: React.FunctionComponent<{
             action={currentAction}
             abortUpgrade={abortUpgrade}
             key={currentAction.actionId}
+            onClickViewAgents={onClickViewAgents}
           />
         ) : (
-          <ActivityItem action={currentAction} key={currentAction.actionId} />
+          <ActivityItem
+            action={currentAction}
+            key={currentAction.actionId}
+            onClickViewAgents={onClickViewAgents}
+          />
         )
       )}
     </>
@@ -322,7 +344,10 @@ const inProgressDescription = (time?: string) => (
   />
 );
 
-const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ action }) => {
+const ActivityItem: React.FunctionComponent<{
+  action: ActionStatus;
+  onClickViewAgents: (action: ActionStatus) => void;
+}> = ({ action, onClickViewAgents }) => {
   const completeTitle = (
     <EuiText>
       <FormattedMessage
@@ -503,6 +528,18 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
+      <EuiSpacer size="xs" />
+      <EuiButtonEmpty
+        size="m"
+        onClick={() => onClickViewAgents(action)}
+        flush="left"
+        data-test-subj="viewAgents"
+      >
+        <FormattedMessage
+          id="xpack.fleet.agentActivityFlyout.viewAgentsButton"
+          defaultMessage="View Agents"
+        />
+      </EuiButtonEmpty>
     </EuiPanel>
   );
 };
@@ -510,7 +547,8 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
 export const UpgradeInProgressActivityItem: React.FunctionComponent<{
   action: ActionStatus;
   abortUpgrade: (action: ActionStatus) => Promise<void>;
-}> = ({ action, abortUpgrade }) => {
+  onClickViewAgents: (action: ActionStatus) => void;
+}> = ({ action, abortUpgrade, onClickViewAgents }) => {
   const { docLinks } = useStartServices();
   const [isAborting, setIsAborting] = useState(false);
   const onClickAbortUpgrade = useCallback(async () => {
@@ -594,6 +632,19 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
                   />
                 </p>
               </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="m"
+                onClick={() => onClickViewAgents(action)}
+                flush="left"
+                data-test-subj="viewAgents"
+              >
+                <FormattedMessage
+                  id="xpack.fleet.agentActivityFlyout.viewAgentsButton"
+                  defaultMessage="View Agents"
+                />
+              </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {showCancelButton ? (
