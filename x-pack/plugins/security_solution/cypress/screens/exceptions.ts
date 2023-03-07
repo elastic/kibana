@@ -141,3 +141,6 @@ export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT =
   '[data-test-subj="editModalDescriptionTextField"]';
 
 export const EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN = '[data-test-subj="editModalSaveBtn"]';
+
+export const EXCEPTIONS_LIST_DETAILS_HEADER =
+  '[data-test-subj="exceptionListManagementPageHeader"]';

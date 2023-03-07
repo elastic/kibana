@@ -12,7 +12,10 @@ import { createCustomRule } from '../../../tasks/api_calls/rules';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 
 import { exceptionsListDetailsUrl } from '../../../urls/navigation';
-import { editExceptionLisDetails } from '../../../tasks/exceptions_table';
+import {
+  editExceptionLisDetails,
+  waitForExceptionListDetailToBeLoaded,
+} from '../../../tasks/exceptions_table';
 import { createExceptionList } from '../../../tasks/api_calls/exceptions';
 import { esArchiverResetKibana } from '../../../tasks/es_archiver';
 import {
@@ -55,6 +58,7 @@ describe('Exception list management page', () => {
 
   beforeEach(() => {
     visitWithoutDateRange(exceptionsListDetailsUrl(getExceptionList1().list_id));
+    waitForExceptionListDetailToBeLoaded();
   });
 
   it('Edits list details', () => {
