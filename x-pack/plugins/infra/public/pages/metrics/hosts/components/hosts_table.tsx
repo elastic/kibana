@@ -6,14 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiPortal,
-  EuiFlyout,
-  EuiFlyoutHeader,
-  EuiTitle,
-  EuiFlyoutBody,
-  EuiInMemoryTable,
-} from '@elastic/eui';
+import { EuiInMemoryTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { NoData } from '../../../../components/empty_states';
@@ -22,15 +15,23 @@ import { useHostsTable } from '../hooks/use_hosts_table';
 import { useTableProperties } from '../hooks/use_table_properties_url_state';
 import { useHostsViewContext } from '../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
+import { Flyout } from './host_details_flyout/flyout';
 
 export const HostsTable = () => {
   const { hostNodes, loading } = useHostsViewContext();
-  const { onSubmit, unifiedSearchDateRange } = useUnifiedSearchContext();
+  const { onSubmit, unifiedSearchDateRange, getDateRangeAsTimestamp } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
 
-  const { columns, items, isFlyoutOpen, setIsFlyoutOpen } = useHostsTable(hostNodes, {
-    time: unifiedSearchDateRange,
-  });
+  const { columns, items, isFlyoutOpen, setIsFlyoutOpen, clickedItemIndex } = useHostsTable(
+    hostNodes,
+    {
+      time: unifiedSearchDateRange,
+    }
+  );
+
+  const { to } = getDateRangeAsTimestamp();
+
+  const onClose = () => setIsFlyoutOpen(!isFlyoutOpen);
 
   const noData = items.length === 0;
 
@@ -99,20 +100,8 @@ export const HostsTable = () => {
         columns={columns}
         onTableChange={onTableChange}
       />
-      {/* @TODO Extract and add host name title */}
       {isFlyoutOpen && (
-        <EuiPortal>
-          <EuiFlyout onClose={() => setIsFlyoutOpen(!isFlyoutOpen)}>
-            <EuiFlyoutHeader hasBorder>
-              <EuiTitle size="m">
-                <h2>Host</h2>
-              </EuiTitle>
-            </EuiFlyoutHeader>
-            <EuiFlyoutBody>
-              <p>Metadata</p>
-            </EuiFlyoutBody>
-          </EuiFlyout>
-        </EuiPortal>
+        <Flyout node={items[clickedItemIndex]} nodeType="host" currentTime={to} onClose={onClose} />
       )}
     </>
   );

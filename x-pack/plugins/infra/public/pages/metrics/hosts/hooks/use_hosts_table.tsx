@@ -33,6 +33,7 @@ export interface HostNodeRow extends HostMetrics {
   servicesOnHost?: number | null;
   title: { name: string; cloudProvider?: CloudProvider | null };
   name: string;
+  index: number;
 }
 
 // type MappedMetrics = Record<keyof HostNodeRow, SnapshotNodeMetric>;
@@ -49,7 +50,8 @@ const formatMetric = (type: SnapshotMetricInput['type'], value: number | undefin
 };
 
 const buildItemsList = (nodes: SnapshotNode[]) => {
-  return nodes.map(({ metrics, path, name }) => ({
+  return nodes.map(({ metrics, path, name }, index) => ({
+    index,
     name,
     os: path.at(-1)?.os ?? '-',
     title: {
@@ -115,8 +117,8 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
     services: { telemetry },
   } = useKibanaContextForPlugin();
 
-  // @TODO:
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const [clickedItemIndex, setClickedItemIndex] = useState(0);
 
   const reportHostEntryClick = useCallback(
     ({ name, cloudProvider }: HostNodeRow['title']) => {
@@ -135,14 +137,21 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
       {
         name: '',
         width: '32px',
+        field: 'index',
         actions: [
           {
             name: '',
             description: 'Expand',
-            icon: isFlyoutOpen ? 'minimize' : 'expand',
+            icon: ({ index }) =>
+              isFlyoutOpen && index === clickedItemIndex ? 'minimize' : 'expand',
             type: 'icon',
-            onClick: () => {
-              setIsFlyoutOpen(!isFlyoutOpen);
+            onClick: ({ index }) => {
+              setClickedItemIndex(index);
+              if (isFlyoutOpen && index === clickedItemIndex) {
+                setIsFlyoutOpen(false);
+              } else {
+                setIsFlyoutOpen(true);
+              }
             },
           },
         ],
@@ -209,8 +218,8 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         align: 'right',
       },
     ],
-    [isFlyoutOpen, reportHostEntryClick, time]
+    [clickedItemIndex, isFlyoutOpen, reportHostEntryClick, time]
   );
 
-  return { columns, items, isFlyoutOpen, setIsFlyoutOpen };
+  return { columns, items, isFlyoutOpen, setIsFlyoutOpen, clickedItemIndex };
 };
