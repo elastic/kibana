@@ -20,8 +20,7 @@ import {
   getSimpleRuleOutput,
   getWebHookAction,
   removeServerGeneratedProperties,
-  waitForEventLogExecuteComplete,
-  waitForRuleSuccessOrStatus,
+  waitForRuleStatus,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -74,13 +73,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const rule = await createRule(supertest, log, getSimpleRule(ruleId, true));
 
-        await waitForRuleSuccessOrStatus(
+        await waitForRuleStatus(RuleExecutionStatus['partial failure'], {
           supertest,
           log,
-          rule.id,
-          RuleExecutionStatus['partial failure'] // we just need to run the rule, successful result isn't important here
-        );
-        await waitForEventLogExecuteComplete(es, log, rule.id);
+          ruleId,
+        });
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -104,13 +101,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const rule = await createRule(supertest, log, getSimpleRule(ruleId, true));
 
-        await waitForRuleSuccessOrStatus(
+        await waitForRuleStatus(RuleExecutionStatus['partial failure'], {
           supertest,
           log,
-          rule.id,
-          RuleExecutionStatus['partial failure'] // we just need to run the rule, successful result isn't important here
-        );
-        await waitForEventLogExecuteComplete(es, log, rule.id);
+          ruleId,
+        });
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)

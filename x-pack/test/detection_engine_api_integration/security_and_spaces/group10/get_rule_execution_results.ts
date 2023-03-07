@@ -26,7 +26,8 @@ import {
   getRuleForSignalTesting,
   indexEventLogExecutionEvents,
   waitForEventLogExecuteComplete,
-  waitForRuleSuccessOrStatus,
+  waitForRuleStatus,
+  waitForRuleSuccess,
 } from '../../utils';
 import {
   failedGapExecution,
@@ -76,7 +77,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return execution events for a rule that has executed successfully', async () => {
       const rule = getRuleForSignalTesting(['auditbeat-*']);
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id);
+      await waitForRuleSuccess({ supertest, log, id });
       await waitForEventLogExecuteComplete(es, log, id);
 
       const start = dateMath.parse('now-24h')?.utc().toISOString();
@@ -102,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return execution events for a rule that has executed in a warning state', async () => {
       const rule = getRuleForSignalTesting(['no-name-index']);
       const { id } = await createRule(supertest, log, rule);
-      await waitForRuleSuccessOrStatus(supertest, log, id, RuleExecutionStatus['partial failure']);
+      await waitForRuleStatus(RuleExecutionStatus['partial failure'], { supertest, log, id });
       await waitForEventLogExecuteComplete(es, log, id);
 
       const start = dateMath.parse('now-24h')?.utc().toISOString();

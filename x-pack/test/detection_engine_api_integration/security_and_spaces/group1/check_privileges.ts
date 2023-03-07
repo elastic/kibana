@@ -15,7 +15,7 @@ import {
   createSignalsIndex,
   deleteSignalsIndex,
   deleteAllRules,
-  waitForRuleSuccessOrStatus,
+  waitForRuleStatus,
   getRuleForSignalTesting,
   createRuleWithAuth,
   getThresholdRuleForSignalTesting,
@@ -65,12 +65,11 @@ export default ({ getService }: FtrProviderContext) => {
             user: ROLES.detections_admin,
             pass: 'changeme',
           });
-          await waitForRuleSuccessOrStatus(
+          await waitForRuleStatus(RuleExecutionStatus['partial failure'], {
             supertest,
             log,
             id,
-            RuleExecutionStatus['partial failure']
-          );
+          });
           const { body } = await supertest
             .get(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
@@ -104,12 +103,11 @@ export default ({ getService }: FtrProviderContext) => {
             user: ROLES.detections_admin,
             pass: 'changeme',
           });
-          await waitForRuleSuccessOrStatus(
+          await waitForRuleStatus(RuleExecutionStatus['partial failure'], {
             supertest,
             log,
             id,
-            RuleExecutionStatus['partial failure']
-          );
+          });
           const { body } = await supertest
             .get(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
