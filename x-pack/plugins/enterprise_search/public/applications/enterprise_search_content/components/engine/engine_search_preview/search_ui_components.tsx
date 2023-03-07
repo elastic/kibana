@@ -14,16 +14,19 @@ import {
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiButton,
+  EuiComboBox,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
   EuiSelect,
+  EuiSpacer,
   EuiText,
   EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
+import { withSearch } from '@elastic/react-search-ui';
 import type {
   InputViewProps,
   PagingInfoViewProps,
@@ -31,6 +34,7 @@ import type {
   ResultsPerPageViewProps,
   ResultsViewProps,
 } from '@elastic/react-search-ui-views';
+import type { SearchContextState } from '@elastic/search-ui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 
@@ -224,3 +228,85 @@ export const ResultsPerPageView: React.FC<ResultsPerPageViewProps> = ({
     </EuiFlexGroup>
   </EuiFlexItem>
 );
+
+export const Sorting = withSearch<
+  { sortableFields: string[] },
+  Pick<SearchContextState, 'setSort' | 'sortList'>
+>(({ setSort, sortList }) => ({ setSort, sortList }))(({ sortableFields, sortList, setSort }) => {
+  const [{ direction, field }] = !sortList?.length ? [{ direction: '', field: '' }] : sortList;
+  const relevance = i18n.translate(
+    'xpack.enterpriseSearch.content.engine.searchPreivew.sortingView.relevanceLabel',
+    { defaultMessage: 'Relevance' }
+  );
+
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiTitle size="xxxs">
+          <label htmlFor="sorting-field">
+            <FormattedMessage
+              id="xpack.enterpriseSearch.content.engine.searchPreview.sortingView.fieldLabel"
+              defaultMessage="Sort By"
+            />
+          </label>
+        </EuiTitle>
+        <EuiComboBox
+          id="sorting-field"
+          isClearable={false}
+          singleSelection={{ asPlainText: true }}
+          options={[
+            { label: relevance, value: '' },
+            ...sortableFields.map((f: string) => ({ label: f, value: f })),
+          ]}
+          selectedOptions={[{ label: !!field ? field : relevance, value: field }]}
+          onChange={([{ value }]) =>
+            setSort(value === '' ? [] : [{ direction: 'asc', field: value }], 'asc')
+          }
+        />
+      </EuiFlexGroup>
+      {field !== '' && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiTitle size="xxxs">
+              <label htmlFor="sorting-direction">
+                <FormattedMessage
+                  id="xpack.enterpriseSearch.content.engine.searchPreview.sortingView.directionLabel"
+                  defaultMessage="Order By"
+                />
+              </label>
+            </EuiTitle>
+            <EuiSelect
+              id="sorting-direction"
+              onChange={(evt) => {
+                switch (evt.target.value) {
+                  case 'asc':
+                    return setSort([{ direction: 'asc', field }], 'asc');
+                  case 'desc':
+                    return setSort([{ direction: 'desc', field }], 'desc');
+                }
+              }}
+              value={direction}
+              options={[
+                {
+                  text: i18n.translate(
+                    'xpack.enterpriseSearch.content.engine.searchPreview.sortingView.ascLabel',
+                    { defaultMessage: 'Ascending' }
+                  ),
+                  value: 'asc',
+                },
+                {
+                  text: i18n.translate(
+                    'xpack.enterpriseSearch.content.engine.searchPreview.sortingView.descLabel',
+                    { defaultMessage: 'Descending' }
+                  ),
+                  value: 'desc',
+                },
+              ]}
+            />
+          </EuiFlexGroup>
+        </>
+      )}
+    </EuiFlexItem>
+  );
+});
