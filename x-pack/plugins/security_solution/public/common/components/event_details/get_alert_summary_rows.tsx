@@ -205,7 +205,9 @@ function getFieldsByRuleType(ruleType?: string): EventSummaryField[] {
 }
 
 /**
- * Returns a list of fields based on user-defined custom fields
+ * Gets the fields to display based on custom rules and configuration
+ * @param customs The list of custom-defined fields to display
+ * @returns The list of custom-defined fields to display
  */
 function getFieldsByCustoms(customs: EventSummaryField[]): EventSummaryField[] {
   return customs;
