@@ -59,14 +59,12 @@ export const getAlertsGroupingQuery = ({
     ],
     from,
     runtimeMappings,
-    stackByMultipleFields0: selectedGroup !== 'none' ? getGroupFields(selectedGroup) : [],
+    groupByFields: selectedGroup !== 'none' ? getGroupFields(selectedGroup) : [],
     to,
-    additionalStatsAggregationsFields0:
+    additionalStatsAggregations:
       selectedGroup !== 'none' ? getAggregationsByGroupField(selectedGroup) : [],
-    stackByMultipleFields0Size: pageSize,
-    stackByMultipleFields0From: pageIndex * pageSize,
-    additionalStatsAggregationsFields1: [],
-    stackByMultipleFields1: [],
+    size: pageSize,
+    pageNumber: pageIndex * pageSize,
   });
 
 const getAggregationsByGroupField = (field: string): NamedAggregation[] => {

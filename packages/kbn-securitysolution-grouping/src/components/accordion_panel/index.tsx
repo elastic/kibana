@@ -37,6 +37,7 @@ interface GroupPanelProps<T> {
   onToggleGroup?: (isOpen: boolean, groupBucket: RawBucket<T>) => void;
   renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
   selectedGroup: string;
+  groupingLevel?: number;
 }
 
 const DefaultGroupPanelRenderer = ({ title }: { title: string }) => (
@@ -63,6 +64,7 @@ const GroupPanelComponent = <T,>({
   onToggleGroup,
   renderChildComponent,
   selectedGroup,
+  groupingLevel = 0,
 }: GroupPanelProps<T>) => {
   const groupFieldValue = useMemo(() => firstNonNullValue(groupBucket.key), [groupBucket.key]);
 
@@ -88,7 +90,7 @@ const GroupPanelComponent = <T,>({
           {groupPanelRenderer ?? <DefaultGroupPanelRenderer title={groupFieldValue} />}
         </div>
       }
-      className={customAccordionClassName}
+      className={groupingLevel > 0 ? 'groupingAccordionFormLevel' : customAccordionClassName}
       data-test-subj="grouping-accordion"
       extraAction={extraAction}
       forceState={forceState}

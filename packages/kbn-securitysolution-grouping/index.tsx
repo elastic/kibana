@@ -14,7 +14,9 @@ import {
   getGroupingQuery,
   isNoneGroup,
   useGrouping,
+  useGroupPaging,
 } from './src';
+import type { NamedAggregation, GroupingFieldTotalAggregation, GroupingAggregation } from './src';
 import type {
   GroupOption,
   GroupingAggregation,
@@ -29,9 +31,10 @@ export const getGroupSelector = (
 export { getGroupingQuery, isNoneGroup, useGrouping };
 
 export type {
-  GroupOption,
   GroupingAggregation,
   GroupingFieldTotalAggregation,
   NamedAggregation,
   RawBucket,
+  GroupingProps,
+  GroupsPagingSettingsById,
 };

@@ -15,5 +15,5 @@ export const updateGroupSelector = actionCreator<{
 }>('UPDATE_GROUP_SELECTOR');
 
 export const updateSelectedGroup = actionCreator<{
-  selectedGroup: string;
+  selectedGroups: string[];
 }>('UPDATE_SELECTED_GROUP');

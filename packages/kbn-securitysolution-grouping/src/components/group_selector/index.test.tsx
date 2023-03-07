@@ -42,7 +42,7 @@ const testProps = {
       esTypes: ['ip'],
     },
   ],
-  groupSelected: 'kibana.alert.rule.name',
+  groupsSelected: ['kibana.alert.rule.name'],
   onGroupChange,
   options: [
     {

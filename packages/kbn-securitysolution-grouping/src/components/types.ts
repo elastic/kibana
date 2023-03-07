@@ -19,10 +19,10 @@ export type RawBucket<T> = GenericBuckets & T;
 
 /** Defines the shape of the aggregation returned by Elasticsearch */
 export interface GroupingAggregation<T> {
-  stackByMultipleFields0?: {
+  groupByFields?: {
     buckets?: Array<RawBucket<T>>;
   };
-  groupsCount0?: {
+  groupsNumber?: {
     value?: number | null;
   };
 }
@@ -31,3 +31,5 @@ export type GroupingFieldTotalAggregation = Record<
   string,
   { value?: number | null; buckets?: Array<{ doc_count?: number | null }> }
 >;
+
+export type { GroupingProps } from './grouping';

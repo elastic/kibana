@@ -8,24 +8,24 @@
 
 // action types
 export enum ActionType {
-  updateActiveGroup = 'UPDATE_ACTIVE_GROUP',
+  updateActiveGroups = 'UPDATE_ACTIVE_GROUPS',
   updateGroupActivePage = 'UPDATE_GROUP_ACTIVE_PAGE',
   updateGroupItemsPerPage = 'UPDATE_GROUP_ITEMS_PER_PAGE',
   updateGroupOptions = 'UPDATE_GROUP_OPTIONS',
 }
 
-export interface UpdateActiveGroup {
-  type: ActionType.updateActiveGroup;
-  payload: { activeGroup: string; id: string };
+export interface UpdateActiveGroups {
+  type: ActionType.updateActiveGroups;
+  payload: { activeGroups: string[]; id: string };
 }
 
 export interface UpdateGroupActivePage {
   type: ActionType.updateGroupActivePage;
-  payload: { activePage: number; id: string };
+  payload: { activePage: number; id: string; selectedGroup: string };
 }
 export interface UpdateGroupItemsPerPage {
   type: ActionType.updateGroupItemsPerPage;
-  payload: { itemsPerPage: number; id: string };
+  payload: { itemsPerPage: number; id: string; selectedGroup: string };
 }
 export interface UpdateGroupOptions {
   type: ActionType.updateGroupOptions;
@@ -33,7 +33,7 @@ export interface UpdateGroupOptions {
 }
 
 export type Action =
-  | UpdateActiveGroup
+  | UpdateActiveGroups
   | UpdateGroupActivePage
   | UpdateGroupItemsPerPage
   | UpdateGroupOptions;
@@ -46,10 +46,18 @@ export interface GroupOption {
 }
 
 export interface GroupModel {
-  activeGroup: string;
+  activeGroups: string[];
   options: GroupOption[];
+  pagingSettings: GroupsPagingSettingsById;
+}
+
+export interface GroupPagingSettings {
   activePage: number;
   itemsPerPage: number;
+}
+
+export interface GroupsPagingSettingsById {
+  [id: string]: GroupPagingSettings;
 }
 
 export interface GroupsById {
@@ -73,8 +81,12 @@ export interface Storage<T = any, S = void> {
 export const EMPTY_GROUP_BY_ID: GroupsById = {};
 
 export const defaultGroup: GroupModel = {
-  activePage: 0,
-  itemsPerPage: 25,
-  activeGroup: 'none',
+  pagingSettings: {
+    none: {
+      activePage: 0,
+      itemsPerPage: 25,
+    },
+  },
+  activeGroups: ['none'],
   options: [],
 };

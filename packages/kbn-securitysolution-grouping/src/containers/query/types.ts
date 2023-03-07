@@ -25,21 +25,16 @@ export interface GroupingQueryArgs {
   from: string;
   runtimeMappings?: MappingRuntimeFields;
   additionalAggregationsRoot?: NamedAggregation[];
-  stackByMultipleFields0: string[];
-  stackByMultipleFields0Size?: number;
-  stackByMultipleFields0From?: number;
-  stackByMultipleFields0Sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
-  additionalStatsAggregationsFields0: NamedAggregation[];
-  stackByMultipleFields1: string[] | undefined;
-  stackByMultipleFields1Size?: number;
-  stackByMultipleFields1From?: number;
-  stackByMultipleFields1Sort?: Array<{ [category: string]: { order: estypes.SortOrder } }>;
-  additionalStatsAggregationsFields1: NamedAggregation[];
+  groupByFields: string[];
+  size?: number;
+  pageNumber?: number;
+  sort?: Array<{ [category: string]: { order: 'asc' | 'desc' } }>;
+  additionalStatsAggregations: NamedAggregation[];
   to: string;
 }
 
 export interface MainAggregation extends NamedAggregation {
-  stackByMultipleFields0: {
+  groupByFields: {
     terms?: estypes.AggregationsAggregationContainer['terms'];
     multi_terms?: estypes.AggregationsAggregationContainer['multi_terms'];
     aggs: NamedAggregation;

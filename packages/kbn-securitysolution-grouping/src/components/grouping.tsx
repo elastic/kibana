@@ -21,29 +21,29 @@ import type { BadgeMetric, CustomMetric } from './accordion_panel';
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
-import { groupingContainerCss, groupsUnitCountCss } from './styles';
+import { groupingContainerCss, groupingContainerCssLevel, groupsUnitCountCss } from './styles';
 import { GROUPS_UNIT } from './translations';
 import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } from './types';
+import { GroupsPagingSettingsById } from '../hooks/types';
 
 export interface GroupingProps<T> {
   badgeMetricStats?: (fieldBucket: RawBucket<T>) => BadgeMetric[];
   customMetricStats?: (fieldBucket: RawBucket<T>) => CustomMetric[];
   data?: GroupingAggregation<T> & GroupingFieldTotalAggregation;
   groupPanelRenderer?: (fieldBucket: RawBucket<T>) => JSX.Element | undefined;
-  groupSelector?: JSX.Element;
   inspectButton?: JSX.Element;
   isLoading: boolean;
-  pagination: {
-    pageIndex: number;
-    pageSize: number;
-    onChangeItemsPerPage: (itemsPerPageNumber: number) => void;
-    onChangePage: (pageNumber: number) => void;
-    itemsPerPageOptions: number[];
-  };
   renderChildComponent: (groupFilter: Filter[]) => React.ReactNode;
   selectedGroup: string;
   takeActionItems: (groupFilters: Filter[]) => JSX.Element[];
   unit?: (n: number) => string;
+  pagination: {
+    pagingSettings: GroupsPagingSettingsById;
+    onChangeItemsPerPage: (newItemsPerPage: number, selectedGroup: string) => void;
+    onChangePage: (newActivePage: number, selectedGroup: string) => void;
+    itemsPerPageOptions: number[];
+  };
+  groupingLevel?: number;
 }
 
 const GroupingComponent = <T,>({
@@ -51,19 +51,18 @@ const GroupingComponent = <T,>({
   customMetricStats,
   data,
   groupPanelRenderer,
-  groupSelector,
   inspectButton,
   isLoading,
-  pagination,
   renderChildComponent,
   selectedGroup,
   takeActionItems,
   unit = defaultUnit,
+  pagination,
+  groupingLevel = 0,
 }: GroupingProps<T>) => {
   const [trigger, setTrigger] = useState<
     Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket<T> }>
   >({});
-
   const groupsNumber = data?.groupsNumber?.value ?? 0;
   const unitCountText = useMemo(() => {
     const count = data?.alertsCount?.value ?? 0;
@@ -77,7 +76,7 @@ const GroupingComponent = <T,>({
 
   const groupPanels = useMemo(
     () =>
-      data?.stackByMultipleFields0?.buckets?.map((groupBucket) => {
+      data?.groupByFields?.buckets?.map((groupBucket) => {
         const group = firstNonNullValue(groupBucket.key);
         const groupKey = `group0-${group}`;
 
@@ -111,77 +110,93 @@ const GroupingComponent = <T,>({
                   : () => null
               }
               selectedGroup={selectedGroup}
+              groupingLevel={groupingLevel}
             />
-            <EuiSpacer size="s" />
+            {groupingLevel > 0 ? null : <EuiSpacer size="s" />}
           </span>
         );
       }),
     [
       badgeMetricStats,
       customMetricStats,
-      data?.stackByMultipleFields0?.buckets,
+      data?.groupByFields?.buckets,
       groupPanelRenderer,
       isLoading,
       renderChildComponent,
       selectedGroup,
       takeActionItems,
       trigger,
+      groupingLevel,
     ]
   );
+  const groupPageSize = pagination.pagingSettings[selectedGroup].itemsPerPage ?? 25;
+  const groupPageIndex = pagination.pagingSettings[selectedGroup].activePage ?? 0;
   const pageCount = useMemo(
-    () => (groupsNumber && pagination.pageSize ? Math.ceil(groupsNumber / pagination.pageSize) : 1),
-    [groupsNumber, pagination.pageSize]
+    () => (groupsNumber && groupPageSize ? Math.ceil(groupsNumber / groupPageSize) : 1),
+    [groupsNumber, groupPageSize]
   );
   return (
     <>
-      <EuiFlexGroup
-        data-test-subj="grouping-table"
-        justifyContent="spaceBetween"
-        alignItems="center"
-        style={{ paddingBottom: 20, paddingTop: 20 }}
-      >
-        <EuiFlexItem grow={false}>
-          {groupsNumber > 0 ? (
-            <EuiFlexGroup gutterSize="none">
-              <EuiFlexItem grow={false}>
-                <span css={groupsUnitCountCss} data-test-subj="alert-count">
-                  {unitCountText}
-                </span>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <span
-                  css={groupsUnitCountCss}
-                  data-test-subj="groups-count"
-                  style={{ borderRight: 'none' }}
-                >
-                  {unitGroupsCountText}
-                </span>
-              </EuiFlexItem>
+      {groupingLevel > 0 ? null : (
+        <EuiFlexGroup
+          data-test-subj="grouping-table"
+          justifyContent="spaceBetween"
+          alignItems="center"
+          style={{ paddingBottom: 20, paddingTop: 20 }}
+        >
+          <EuiFlexItem grow={false}>
+            {groupsNumber > 0 ? (
+              <EuiFlexGroup gutterSize="none">
+                <EuiFlexItem grow={false}>
+                  <span css={groupsUnitCountCss} data-test-subj="alert-count">
+                    {unitCountText}
+                  </span>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <span
+                    css={groupsUnitCountCss}
+                    data-test-subj="groups-count"
+                    style={{ borderRight: 'none' }}
+                  >
+                    {unitGroupsCountText}
+                  </span>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : null}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="xs">
+              {inspectButton && <EuiFlexItem>{inspectButton}</EuiFlexItem>}
             </EuiFlexGroup>
-          ) : null}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs">
-            {inspectButton && <EuiFlexItem>{inspectButton}</EuiFlexItem>}
-            <EuiFlexItem>{groupSelector}</EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <div css={groupingContainerCss} className="eui-xScroll">
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      <div
+        css={groupingLevel > 0 ? groupingContainerCssLevel : groupingContainerCss}
+        className="eui-xScroll"
+      >
         {groupsNumber > 0 ? (
           <>
             {groupPanels}
-            <EuiSpacer size="m" />
-            <EuiTablePagination
-              activePage={pagination.pageIndex}
-              data-test-subj="grouping-table-pagination"
-              itemsPerPage={pagination.pageSize}
-              itemsPerPageOptions={pagination.itemsPerPageOptions}
-              onChangeItemsPerPage={pagination.onChangeItemsPerPage}
-              onChangePage={pagination.onChangePage}
-              pageCount={pageCount}
-              showPerPageOptions
-            />
+            {groupingLevel > 0 && pageCount === 1 ? null : (
+              <>
+                <EuiSpacer size="m" />
+                <EuiTablePagination
+                  activePage={groupPageIndex}
+                  data-test-subj="grouping-table-pagination"
+                  itemsPerPage={groupPageSize}
+                  itemsPerPageOptions={pagination.itemsPerPageOptions}
+                  onChangeItemsPerPage={(pageSize: number) =>
+                    pagination.onChangeItemsPerPage(pageSize, selectedGroup)
+                  }
+                  onChangePage={(pageIndex: number) =>
+                    pagination.onChangePage(pageIndex, selectedGroup)
+                  }
+                  pageCount={pageCount}
+                  showPerPageOptions
+                />
+              </>
+            )}
           </>
         ) : (
           <>

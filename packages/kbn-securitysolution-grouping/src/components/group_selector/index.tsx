@@ -20,21 +20,27 @@ import { StyledContextMenu, StyledEuiButtonEmpty } from '../styles';
 export interface GroupSelectorProps {
   'data-test-subj'?: string;
   fields: FieldSpec[];
-  groupSelected: string;
+  groupsSelected: string[];
   onGroupChange: (groupSelection: string) => void;
   options: Array<{ key: string; label: string }>;
   title?: string;
+  maxGroupingLevels?: number;
 }
-
 const GroupSelectorComponent = ({
   'data-test-subj': dataTestSubj,
   fields,
-  groupSelected = 'none',
+  groupsSelected = ['none'],
   onGroupChange,
   options,
   title = i18n.GROUP_BY,
+  maxGroupingLevels = 2,
 }: GroupSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const isGroupSelected = useCallback(
+    (groupKey: string) =>
+      !!groupsSelected.find((selectedGroupKey) => selectedGroupKey === groupKey),
+    [groupsSelected]
+  );
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
     () => [
@@ -48,7 +54,7 @@ const GroupSelectorComponent = ({
             style={{ lineHeight: 1 }}
           >
             <EuiFlexItem grow={false} component="p" style={{ lineHeight: 1.5 }}>
-              {i18n.SELECT_FIELD.toUpperCase()}
+              {i18n.SELECT_FIELD(maxGroupingLevels)}
             </EuiFlexItem>
             <EuiFlexItem grow={false} component="span">
               <EuiBetaBadge
@@ -64,20 +70,23 @@ const GroupSelectorComponent = ({
           {
             'data-test-subj': 'panel-none',
             name: i18n.NONE,
-            icon: groupSelected === 'none' ? 'check' : 'empty',
+            icon: isGroupSelected('none') ? 'check' : 'empty',
             onClick: () => onGroupChange('none'),
           },
           ...options.map<EuiContextMenuPanelItemDescriptor>((o) => ({
             'data-test-subj': `panel-${o.key}`,
+            disabled: groupsSelected.length === maxGroupingLevels && !isGroupSelected(o.key),
             name: o.label,
             onClick: () => onGroupChange(o.key),
-            icon: groupSelected === o.key ? 'check' : 'empty',
+            icon: isGroupSelected(o.key) ? 'check' : 'empty',
           })),
           {
             'data-test-subj': `panel-custom`,
             name: i18n.CUSTOM_FIELD,
             icon: 'empty',
+            disabled: groupsSelected.length === maxGroupingLevels,
             panel: 'customPanel',
+            hasPanel: true,
           },
         ],
       },
@@ -96,11 +105,11 @@ const GroupSelectorComponent = ({
         ),
       },
     ],
-    [fields, groupSelected, onGroupChange, options]
+    [fields, groupsSelected.length, isGroupSelected, maxGroupingLevels, onGroupChange, options]
   );
-  const selectedOption = useMemo(
-    () => options.filter((groupOption) => groupOption.key === groupSelected),
-    [groupSelected, options]
+  const selectedOptions = useMemo(
+    () => options.filter((groupOption) => isGroupSelected(groupOption.key)),
+    [isGroupSelected, options]
   );
 
   const onButtonClick = useCallback(() => setIsPopoverOpen((currentVal) => !currentVal), []);
@@ -116,20 +125,26 @@ const GroupSelectorComponent = ({
         iconType="arrowDown"
         onClick={onButtonClick}
         title={
-          groupSelected !== 'none' && selectedOption.length > 0
-            ? selectedOption[0].label
-            : i18n.NONE
+          isGroupSelected('none')
+            ? i18n.NONE
+            : selectedOptions.reduce(
+                (optionsTitle, o) => (optionsTitle ? [optionsTitle, o.label].join(', ') : o.label),
+                ''
+              )
         }
         size="xs"
       >
         {`${title}: ${
-          groupSelected !== 'none' && selectedOption.length > 0
-            ? selectedOption[0].label
-            : i18n.NONE
+          isGroupSelected('none')
+            ? i18n.NONE
+            : selectedOptions.reduce(
+                (optionsTitle, o) => (optionsTitle ? [optionsTitle, o.label].join(', ') : o.label),
+                ''
+              )
         }`}
       </StyledEuiButtonEmpty>
     ),
-    [groupSelected, onButtonClick, selectedOption, title]
+    [isGroupSelected, onButtonClick, selectedOptions, title]
   );
 
   return (

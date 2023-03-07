@@ -12,4 +12,5 @@ export * from './group_selector';
 export * from './types';
 export * from './grouping';
 
-export const isNoneGroup = (groupKey: string | null) => groupKey === NONE_GROUP_KEY;
+export const isNoneGroup = (groupKeys: string[]) =>
+  groupKeys && !!groupKeys.find((groupKey) => groupKey === NONE_GROUP_KEY);

@@ -20,6 +20,7 @@ export interface UseGetGroupSelectorArgs {
   fields: FieldSpec[];
   groupingId: string;
   groupingState: GroupMap;
+  maxGroupingLevels?: number;
 }
 
 export const useGetGroupSelector = ({
@@ -28,20 +29,26 @@ export const useGetGroupSelector = ({
   fields,
   groupingId,
   groupingState,
+  maxGroupingLevels = 1,
 }: UseGetGroupSelectorArgs) => {
-  const { activeGroup: selectedGroup, options } =
+  const { activeGroups: selectedGroups, options } =
     groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
 
   const setGroupsActivePage = useCallback(
-    (activePage: number) => {
-      dispatch(groupActions.updateGroupActivePage({ id: groupingId, activePage }));
+    (selectedGroup: string, activePage: number) => {
+      dispatch(groupActions.updateGroupActivePage({ id: groupingId, activePage, selectedGroup }));
     },
     [dispatch, groupingId]
   );
 
-  const setSelectedGroup = useCallback(
-    (activeGroup: string) => {
-      dispatch(groupActions.updateActiveGroup({ id: groupingId, activeGroup }));
+  const setSelectedGroups = useCallback(
+    (activeGroups: string[]) => {
+      dispatch(
+        groupActions.updateActiveGroups({
+          id: groupingId,
+          activeGroups,
+        })
+      );
     },
     [dispatch, groupingId]
   );
@@ -56,34 +63,42 @@ export const useGetGroupSelector = ({
   useEffect(() => {
     if (options.length > 0) return;
     setOptions(
-      defaultGroupingOptions.find((o) => o.key === selectedGroup)
+      defaultGroupingOptions.find((o) => selectedGroups.find((selected) => selected === o.key))
         ? defaultGroupingOptions
         : [
             ...defaultGroupingOptions,
-            ...(!isNoneGroup(selectedGroup)
-              ? [
-                  {
-                    key: selectedGroup,
-                    label: selectedGroup,
-                  },
-                ]
+            ...(!isNoneGroup(selectedGroups)
+              ? selectedGroups.map((selectedGroup) => ({
+                  key: selectedGroup,
+                  label: selectedGroup,
+                }))
               : []),
           ]
     );
-  }, [defaultGroupingOptions, selectedGroup, setOptions, options]);
+  }, [defaultGroupingOptions, options, selectedGroups, setOptions]);
 
   return getGroupSelector({
-    groupSelected: selectedGroup,
+    groupsSelected: selectedGroups,
     'data-test-subj': 'alerts-table-group-selector',
     onGroupChange: (groupSelection: string) => {
-      if (groupSelection === selectedGroup) {
+      if (selectedGroups.find((selected) => selected === groupSelection)) {
+        const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
+        setSelectedGroups(groups);
+        if (groups.length === 0) {
+          setSelectedGroups(['none']);
+        }
         return;
       }
-      setGroupsActivePage(0);
-      setSelectedGroup(groupSelection);
+
+      setGroupsActivePage(groupSelection, 0);
+      setSelectedGroups(
+        isNoneGroup([groupSelection])
+          ? [groupSelection]
+          : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection]
+      );
 
       if (
-        !isNoneGroup(groupSelection) &&
+        !isNoneGroup([groupSelection]) &&
         !options.find((o: GroupOption) => o.key === groupSelection)
       ) {
         setOptions([
@@ -99,5 +114,6 @@ export const useGetGroupSelector = ({
     },
     fields,
     options,
+    maxGroupingLevels,
   });
 };

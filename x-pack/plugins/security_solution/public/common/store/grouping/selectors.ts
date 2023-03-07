@@ -12,6 +12,6 @@ const groupSelector = (state: GroupState) => state.groups.groupSelector;
 
 export const getGroupSelector = () => createSelector(groupSelector, (selector) => selector);
 
-export const selectedGroup = (state: GroupState) => state.groups.selectedGroup;
+export const selectedGroups = (state: GroupState) => state.groups.selectedGroups;
 
-export const getSelectedGroup = () => createSelector(selectedGroup, (group) => group);
+export const getSelectedGroups = () => createSelector(selectedGroups, (groups) => groups);

@@ -25,9 +25,9 @@ export const getPersistentControlsHook = (tableId: TableId) => {
     const getGroupSelector = groupSelectors.getGroupSelector();
 
     const groupSelector = useSelector((state: State) => getGroupSelector(state));
-    const getSelectedGroup = groupSelectors.getSelectedGroup();
+    const getSelectedGroups = groupSelectors.getSelectedGroups();
 
-    const selectedGroup = useSelector((state: State) => getSelectedGroup(state));
+    const selectedGroups = useSelector((state: State) => getSelectedGroups(state));
 
     const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
 
@@ -84,10 +84,10 @@ export const getPersistentControlsHook = (tableId: TableId) => {
           hasRightOffset={false}
           additionalFilters={additionalFiltersComponent}
           showInspect={false}
-          additionalMenuOptions={isNoneGroup(selectedGroup) ? [groupSelector] : []}
+          additionalMenuOptions={isNoneGroup(selectedGroups) ? [groupSelector] : []}
         />
       ),
-      [tableView, handleChangeTableView, additionalFiltersComponent, groupSelector, selectedGroup]
+      [tableView, handleChangeTableView, additionalFiltersComponent, groupSelector, selectedGroups]
     );
 
     return {

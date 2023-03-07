@@ -11,13 +11,13 @@ import type { GroupModel } from './types';
 
 export const initialGroupingState: GroupModel = {
   groupSelector: null,
-  selectedGroup: null,
+  selectedGroups: [],
 };
 
 export const groupsReducer = reducerWithInitialState(initialGroupingState)
-  .case(updateSelectedGroup, (state, { selectedGroup }) => ({
+  .case(updateSelectedGroup, (state, { selectedGroups }) => ({
     ...state,
-    selectedGroup,
+    selectedGroups,
   }))
   .case(updateGroupSelector, (state, { groupSelector }) => ({
     ...state,

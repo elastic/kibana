@@ -21,20 +21,30 @@ export const useGroupingPagination = ({
   groupingState,
   dispatch,
 }: UseGroupingPaginationArgs) => {
-  const { activePage, itemsPerPage } =
+  const { pagingSettings } =
     groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
 
   const setGroupsActivePage = useCallback(
-    (newActivePage: number) => {
-      dispatch(groupActions.updateGroupActivePage({ id: groupingId, activePage: newActivePage }));
+    (newActivePage: number, selectedGroup: string) => {
+      dispatch(
+        groupActions.updateGroupActivePage({
+          id: groupingId,
+          activePage: newActivePage,
+          selectedGroup,
+        })
+      );
     },
     [dispatch, groupingId]
   );
 
   const setGroupsItemsPerPage = useCallback(
-    (newItemsPerPage: number) => {
+    (newItemsPerPage: number, selectedGroup: string) => {
       dispatch(
-        groupActions.updateGroupItemsPerPage({ id: groupingId, itemsPerPage: newItemsPerPage })
+        groupActions.updateGroupItemsPerPage({
+          id: groupingId,
+          itemsPerPage: newItemsPerPage,
+          selectedGroup,
+        })
       );
     },
     [dispatch, groupingId]
@@ -42,12 +52,11 @@ export const useGroupingPagination = ({
 
   return useMemo(
     () => ({
-      pageIndex: activePage,
-      pageSize: itemsPerPage,
+      pagingSettings,
       onChangeItemsPerPage: setGroupsItemsPerPage,
       onChangePage: setGroupsActivePage,
       itemsPerPageOptions: [10, 25, 50, 100],
     }),
-    [activePage, itemsPerPage, setGroupsActivePage, setGroupsItemsPerPage]
+    [pagingSettings, setGroupsActivePage, setGroupsItemsPerPage]
   );
 };

@@ -13,24 +13,23 @@ import { GroupingProps, GroupSelectorProps } from '..';
 import { useGroupingPagination } from './use_grouping_pagination';
 import { groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
-import { defaultGroup, GroupOption } from './types';
+import { defaultGroup, GroupOption, GroupsPagingSettingsById } from './types';
 import { Grouping as GroupingComponent } from '../components/grouping';
 
 interface Grouping<T> {
   getGrouping: (
-    props: Omit<GroupingProps<T>, 'groupSelector' | 'pagination' | 'selectedGroup'>
+    props: Omit<GroupingProps<T>, 'groupSelector' | 'pagination'>
   ) => React.ReactElement<GroupingProps<T>>;
   groupSelector: React.ReactElement<GroupSelectorProps>;
   pagination: {
-    pageIndex: number;
-    pageSize: number;
+    pagingSettings: GroupsPagingSettingsById;
   };
-  selectedGroup: string;
+  selectedGroups: string[];
 }
 
 interface GroupingArgs {
   defaultGroupingOptions: GroupOption[];
-
+  maxGroupingLevels?: number;
   fields: FieldSpec[];
   groupingId: string;
 }
@@ -38,10 +37,10 @@ export const useGrouping = <T,>({
   defaultGroupingOptions,
   fields,
   groupingId,
+  maxGroupingLevels,
 }: GroupingArgs): Grouping<T> => {
   const [groupingState, dispatch] = useReducer(groupsReducerWithStorage, initialState);
-
-  const { activeGroup: selectedGroup } = useMemo(
+  const { activeGroups: selectedGroups } = useMemo(
     () => groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup,
     [groupingId, groupingState]
   );
@@ -52,34 +51,46 @@ export const useGrouping = <T,>({
     fields,
     groupingId,
     groupingState,
+    maxGroupingLevels,
   });
 
   const pagination = useGroupingPagination({ groupingId, groupingState, dispatch });
 
   const getGrouping = useCallback(
     (
-      props: Omit<GroupingProps<T>, 'groupSelector' | 'pagination' | 'selectedGroup'>
+      props: Omit<GroupingProps<T>, 'groupSelector' | 'pagination'>
     ): React.ReactElement<GroupingProps<T>> => (
-      <GroupingComponent
-        {...props}
-        groupSelector={groupSelector}
-        pagination={pagination}
-        selectedGroup={selectedGroup}
-      />
+      <GroupingComponent {...props} pagination={pagination} />
     ),
-    [groupSelector, pagination, selectedGroup]
+    [pagination]
   );
 
   return useMemo(
     () => ({
       getGrouping,
       groupSelector,
-      selectedGroup,
+      selectedGroups,
       pagination: {
-        pageIndex: pagination.pageIndex,
-        pageSize: pagination.pageSize,
+        pagingSettings: pagination.pagingSettings,
       },
     }),
-    [getGrouping, groupSelector, pagination.pageIndex, pagination.pageSize, selectedGroup]
+    [getGrouping, groupSelector, pagination.pagingSettings, selectedGroups]
   );
+};
+
+interface GroupPagingArgs {
+  selectedGroup: string;
+  groupingId: string;
+}
+export const useGroupPaging = ({
+  selectedGroup,
+  groupingId,
+}: GroupPagingArgs): {
+  pageIndex: number;
+  pageSize: number;
+} => {
+  return {
+    pageIndex: 0,
+    pageSize: 10,
+  };
 };

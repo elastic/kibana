@@ -9,36 +9,39 @@
 import {
   ActionType,
   GroupOption,
-  UpdateActiveGroup,
+  UpdateActiveGroups,
   UpdateGroupActivePage,
   UpdateGroupItemsPerPage,
   UpdateGroupOptions,
 } from '../types';
 
-const updateActiveGroup = ({
-  activeGroup,
+const updateActiveGroups = ({
+  activeGroups,
   id,
 }: {
-  activeGroup: string;
+  activeGroups: string[];
   id: string;
-}): UpdateActiveGroup => ({
+}): UpdateActiveGroups => ({
   payload: {
-    activeGroup,
+    activeGroups,
     id,
   },
-  type: ActionType.updateActiveGroup,
+  type: ActionType.updateActiveGroups,
 });
 
 const updateGroupActivePage = ({
   activePage,
   id,
+  selectedGroup,
 }: {
   activePage: number;
   id: string;
+  selectedGroup: string;
 }): UpdateGroupActivePage => ({
   payload: {
     activePage,
     id,
+    selectedGroup,
   },
   type: ActionType.updateGroupActivePage,
 });
@@ -46,13 +49,16 @@ const updateGroupActivePage = ({
 const updateGroupItemsPerPage = ({
   itemsPerPage,
   id,
+  selectedGroup,
 }: {
   itemsPerPage: number;
   id: string;
+  selectedGroup: string;
 }): UpdateGroupItemsPerPage => ({
   payload: {
     itemsPerPage,
     id,
+    selectedGroup,
   },
   type: ActionType.updateGroupItemsPerPage,
 });
@@ -72,7 +78,7 @@ const updateGroupOptions = ({
 });
 
 export const groupActions = {
-  updateActiveGroup,
+  updateActiveGroups,
   updateGroupActivePage,
   updateGroupItemsPerPage,
   updateGroupOptions,
