@@ -24,11 +24,7 @@ const rt = {
     meta: schema.maybe(commonSchemas.fileMeta),
   }),
   params: schema.object({
-    id: schema.string({
-      minLength: 3,
-      maxLength: 10,
-      validate: (name) => name.match(/^[a-z0-9]+$/),
-    }),
+    id: schema.string(),
   }),
 };
 
@@ -38,16 +34,7 @@ export type Endpoint<M = unknown> = CreateRouteDefinition<
   FilesClient['update']
 >;
 
-export const handler: CreateHandler<Endpoint> = async ({ files, fileKind, core }, req, res) => {
-  const { savedObjects } = await core;
-  const result = await savedObjects.client.find<{ id: string }>({
-    type: 'myObject',
-    filter: 'myObject.attributes.name: "foo"',
-    sortField: 'a',
-  });
-  return res.ok({
-    body: result.saved_objects.map(({ attributes: { foo, bar } }) => ({ foo, bar })),
-  });
+export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req, res) => {
   const { fileService } = await files;
   const {
     params: { id },
