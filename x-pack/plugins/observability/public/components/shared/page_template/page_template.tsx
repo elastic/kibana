@@ -53,9 +53,13 @@ export interface ObservabilityPageTemplateDependencies {
   navigationSections$: Observable<NavigationSection[]>;
   getPageTemplateServices: () => KibanaPageTemplateKibanaDependencies;
   guidedOnboardingApi: GuidedOnboardingPluginStart['guidedOnboardingApi'];
+  isSidebarEnabled$: Observable<boolean>;
 }
 
-export type ObservabilityPageTemplateProps = ObservabilityPageTemplateDependencies &
+export type ObservabilityPageTemplateProps = Omit<
+  ObservabilityPageTemplateDependencies,
+  'isSidebarEnabled$'
+> &
   WrappedPageTemplateProps;
 
 export function ObservabilityPageTemplate({

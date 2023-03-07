@@ -56,6 +56,7 @@ describe('Page template', () => {
       navigationSections$: navigationRegistry.sections$,
       getPageTemplateServices,
       guidedOnboardingApi: guidedOnboardingMock.createStart().guidedOnboardingApi,
+      isSidebarEnabled$: of(true),
     });
 
     const component = shallow(

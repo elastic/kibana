@@ -18,6 +18,7 @@ export const configSchema = schema.object({
   accessCheckTimeout: schema.number({ defaultValue: 5000 }),
   accessCheckTimeoutWarning: schema.number({ defaultValue: 300 }),
   customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
+  enabled: schema.boolean({ defaultValue: true }),
   host: schema.maybe(schema.string()),
   ssl: schema.object({
     certificateAuthorities: schema.maybe(

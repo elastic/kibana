@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { combineLatest, Observable, ReplaySubject } from 'rxjs';
+import { combineLatest, Observable, ReplaySubject, BehaviorSubject } from 'rxjs';
 import { map, scan, shareReplay, switchMap } from 'rxjs/operators';
 
 export interface NavigationSection {
@@ -45,6 +45,8 @@ export interface NavigationEntry {
 export interface NavigationRegistry {
   registerSections: (sections$: Observable<NavigationSection[]>) => void;
   sections$: Observable<NavigationSection[]>;
+  isSidebarEnabled$: Observable<boolean>;
+  setIsSidebarEnabled: (enabled: boolean) => void;
 }
 
 export const createNavigationRegistry = (): NavigationRegistry => {
@@ -53,6 +55,8 @@ export const createNavigationRegistry = (): NavigationRegistry => {
   const registerSections = (sections$: Observable<NavigationSection[]>) => {
     registeredSections$.next(sections$);
   };
+
+  const isSidebarEnabled$ = new BehaviorSubject<boolean>(true);
 
   const sections$: Observable<NavigationSection[]> = registeredSections$.pipe(
     scan(
@@ -69,5 +73,9 @@ export const createNavigationRegistry = (): NavigationRegistry => {
   return {
     registerSections,
     sections$,
+    isSidebarEnabled$,
+    setIsSidebarEnabled: (enabled) => {
+      isSidebarEnabled$.next(enabled);
+    },
   };
 };

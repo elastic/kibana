@@ -6,7 +6,15 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
+
 import { CanvasPlugin } from './plugin';
 
 export const plugin = (initializerContext: PluginInitializerContext) =>
   new CanvasPlugin(initializerContext);
+
+export const config = {
+  schema: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
+};

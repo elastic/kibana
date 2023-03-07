@@ -1,0 +1,9 @@
+{
+  "prefix": "serverlessSecurity",
+  "paths": {
+    "serverlessSecurity": "."
+  },
+  "translations": [
+    "translations/ja-JP.json"
+  ]
+}

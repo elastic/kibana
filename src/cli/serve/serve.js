@@ -194,6 +194,20 @@ function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   merge(extraCliOptions);
   merge(readKeystore());
 
+  // Get around the config problem for serverless by setting the config
+  // values directly. This is a temporary solution until we can get
+  // serverless to include and use a different config.
+  set('xpack.apm.enabled', false);
+  set('xpack.canvas.enabled', false);
+  set('xpack.observability.enabled', false);
+  set('xpack.reporting.enabled', false);
+  set('xpack.uptime.enabled', false);
+  set('xpack.watcher.enabled', false);
+
+  set('xpack.serverless.plugin.enabled', true);
+  set('xpack.serverless.security.enabled', true);
+  set('uiSettings.overrides.defaultRoute', '/app/security/get_started');
+
   return rawConfig;
 }
 

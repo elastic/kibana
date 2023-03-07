@@ -7,5 +7,6 @@
  */
 
 export { Header } from './header';
+export { SolutionHeader } from './solution';
 export { LoadingIndicator } from './loading_indicator';
 export type { NavType } from './header';
