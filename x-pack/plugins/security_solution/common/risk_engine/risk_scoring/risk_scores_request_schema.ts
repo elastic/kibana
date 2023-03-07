@@ -14,7 +14,7 @@ export const riskScoresRequestSchema = t.exact(
     data_view_id: DataViewId,
     debug: t.boolean,
     enrich_inputs: t.boolean,
-    filter: t.unknown,
+    filters: t.unknown,
     identifier_type: t.string,
     range: t.type({
       start: t.string,
