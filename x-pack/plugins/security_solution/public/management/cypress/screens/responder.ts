@@ -6,7 +6,7 @@
  */
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '../../../../../../test/security_solution_ftr/page_objects/helpers/super_date_picker';
+import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '../../../../common/test';
 
 const TEST_SUBJ = Object.freeze({
   responderPage: 'consolePageOverlay',
