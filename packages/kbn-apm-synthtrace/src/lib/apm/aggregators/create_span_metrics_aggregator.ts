@@ -7,7 +7,6 @@
  */
 import { identity, pick } from 'lodash';
 import { ApmFields, hashKeysOf } from '@kbn/apm-synthtrace-client';
-import { ScenarioOptions } from '../../../cli/scenario';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
 
 const KEY_FIELDS: Array<keyof ApmFields> = [
@@ -21,7 +20,7 @@ const KEY_FIELDS: Array<keyof ApmFields> = [
   'service.target.type',
 ];
 
-export function createSpanMetricsAggregator(flushInterval: string, options?: ScenarioOptions) {
+export function createSpanMetricsAggregator(flushInterval: string) {
   return createApmMetricAggregator(
     {
       filter: (event) =>

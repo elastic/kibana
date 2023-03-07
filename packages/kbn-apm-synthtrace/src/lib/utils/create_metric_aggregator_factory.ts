@@ -10,7 +10,7 @@ import { appendHash, Fields, parseInterval } from '@kbn/apm-synthtrace-client';
 import moment from 'moment';
 import { Duplex, PassThrough } from 'stream';
 
-interface ServiceMapValue {
+export interface ServiceMapValue {
   transactionCount: number;
   overflowKey: string | null;
 }

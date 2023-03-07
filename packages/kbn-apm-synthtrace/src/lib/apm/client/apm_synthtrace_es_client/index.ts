@@ -129,9 +129,9 @@ export class ApmSynthtraceEsClient {
         createServiceSummaryMetricsAggregator('1m', options),
         createServiceSummaryMetricsAggregator('10m', options),
         createServiceSummaryMetricsAggregator('60m', options),
-        createSpanMetricsAggregator('1m', options),
-        createSpanMetricsAggregator('10m', options),
-        createSpanMetricsAggregator('60m', options),
+        createSpanMetricsAggregator('1m'),
+        createSpanMetricsAggregator('10m'),
+        createSpanMetricsAggregator('60m'),
       ];
 
       const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
@@ -142,7 +142,7 @@ export class ApmSynthtraceEsClient {
         ...serializationTransform,
         getIntakeDefaultsTransform(),
         fork(new PassThrough({ objectMode: true }), ...aggregators),
-        createBreakdownMetricsAggregator('30s', options),
+        createBreakdownMetricsAggregator('30s'),
         getApmServerMetadataTransform(this.version),
         getRoutingTransform(),
         getDedotTransform(),

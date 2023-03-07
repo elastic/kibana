@@ -7,14 +7,13 @@
  */
 import { ApmFields } from '@kbn/apm-synthtrace-client';
 import { identity, negate } from 'lodash';
-import { ScenarioOptions } from '../../../cli/scenario';
 import { createFilterTransform, fork } from '../../utils/stream_utils';
 import { createApmMetricAggregator } from './create_apm_metric_aggregator';
 
 const filter = (event: ApmFields) =>
   event['processor.event'] === 'metric' && event['metricset.name'] === 'span_breakdown';
 
-export function createBreakdownMetricsAggregator(flushInterval: string, options?: ScenarioOptions) {
+export function createBreakdownMetricsAggregator(flushInterval: string) {
   const dropProcessedEventsStream = createFilterTransform(negate(filter));
 
   const aggregatorStream = createApmMetricAggregator(
