@@ -213,12 +213,15 @@ class AgentPolicyService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     agentPolicy: NewAgentPolicy,
-    options?: { id?: string; user?: AuthenticatedUser }
+    options: { id?: string; user?: AuthenticatedUser } = {}
   ): Promise<AgentPolicy> {
-    const id = SavedObjectsUtils.generateId();
+    // Ensure an ID is provided, so we can include it in the audit logs below
+    if (!options.id) {
+      options.id = SavedObjectsUtils.generateId();
+    }
 
     appContextService.writeCustomAuditLog({
-      message: `User is creating ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${agentPolicy.id}]`,
+      message: `User is creating ${AGENT_POLICY_SAVED_OBJECT_TYPE} [id=${options.id}]`,
       event: {
         action: 'saved_object_create',
         category: ['database'],
@@ -227,7 +230,7 @@ class AgentPolicyService {
       },
       kibana: {
         saved_object: {
-          id,
+          id: options.id,
           type: AGENT_POLICY_SAVED_OBJECT_TYPE,
         },
       },
@@ -241,7 +244,6 @@ class AgentPolicyService {
       SAVED_OBJECT_TYPE,
       {
         ...agentPolicy,
-        id,
         status: 'active',
         is_managed: agentPolicy.is_managed ?? false,
         revision: 1,

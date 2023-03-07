@@ -814,6 +814,23 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     options?: { user?: AuthenticatedUser; force?: boolean },
     currentVersion?: string
   ): Promise<PackagePolicy[] | null> {
+    for (const packagePolicy of packagePolicyUpdates) {
+      appContextService.writeCustomAuditLog({
+        message: `User is updating ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
+        event: {
+          action: 'saved_object_update',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['access'],
+        },
+        kibana: {
+          saved_object: {
+            id: packagePolicy.id,
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        },
+      });
+    }
     const oldPackagePolicies = await this.getByIDs(
       soClient,
       packagePolicyUpdates.map((p) => p.id)
@@ -937,6 +954,24 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     context?: RequestHandlerContext,
     request?: KibanaRequest
   ): Promise<PostDeletePackagePoliciesResponse> {
+    for (const id of ids) {
+      appContextService.writeCustomAuditLog({
+        message: `User is deleting ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
+        event: {
+          action: 'saved_object_delete',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['access'],
+        },
+        kibana: {
+          saved_object: {
+            id,
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        },
+      });
+    }
+
     const result: PostDeletePackagePoliciesResponse = [];
     const logger = appContextService.getLogger();
 
