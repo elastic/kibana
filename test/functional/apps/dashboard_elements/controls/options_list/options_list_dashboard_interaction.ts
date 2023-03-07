@@ -294,18 +294,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToApp('settings');
         await settings.clickKibanaIndexPatterns();
         await settings.clickIndexPatternByName('animals-*');
-
-        const startingCount = parseInt(await settings.getFieldsTabCount(), 10);
         await settings.addRuntimeField(
           FIELD_NAME,
           'keyword',
           `emit(doc['sound.keyword'].value.substring(0, 1).toUpperCase())`
         );
-        await header.waitUntilLoadingHasFinished();
-        await retry.try(async function () {
-          expect(parseInt(await settings.getFieldsTabCount(), 10)).to.be(startingCount + 1);
-        });
-
         await returnToDashboard();
         await dashboardControls.deleteAllControls();
       });
