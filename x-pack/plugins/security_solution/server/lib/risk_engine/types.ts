@@ -31,8 +31,8 @@ export interface BaseRiskScore {
   '@timestamp': string;
   identifierField: string;
   identifierValue: string;
-  // calculatedLevel: string;
-  // calculatedScore: number;
+  calculatedLevel: string;
+  calculatedScore: number;
   calculatedScoreNorm: number;
 }
 
@@ -53,9 +53,16 @@ export interface CalculateRiskScoreAggregations {
   };
 }
 
-interface RiskScoreBucket {
+export interface RiskScoreBucket {
   key: string;
   doc_count: number;
-  normalized_score: { value: number };
+  risk_details: {
+    value: {
+      score: number;
+      normalized_score: number;
+      level: string;
+    };
+  };
+
   riskiest_inputs: SearchResponse;
 }
