@@ -24,6 +24,12 @@ export const useViewEditMode = ({
   const [pendingChangesPopoverOpen, setPendingChangesPopoverOpen] = useState(false);
 
   useEffect(() => {
+    if (controlGroup && controlGroup.getInput().viewMode !== filterGroupMode) {
+      controlGroup.updateInput({ viewMode: filterGroupMode });
+    }
+  }, [controlGroup, filterGroupMode]);
+
+  useEffect(() => {
     setPendingChangesPopoverOpen(hasPendingChanges);
   }, [hasPendingChanges]);
 
