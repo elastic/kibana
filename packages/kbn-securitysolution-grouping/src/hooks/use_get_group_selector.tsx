@@ -60,27 +60,50 @@ export const useGetGroupSelector = ({
       }
       setGroupsActivePage(0);
       setSelectedGroup(groupSelection);
+      if (
+        !isNoneGroup(groupSelection) &&
+        !options.find((o: GroupOption) => o.key === groupSelection)
+      ) {
+        setOptions([
+          ...defaultGroupingOptions,
+          {
+            label: groupSelection,
+            key: groupSelection,
+          },
+        ]);
+      }
     },
-    [selectedGroup, setGroupsActivePage, setSelectedGroup]
+    [
+      defaultGroupingOptions,
+      options,
+      selectedGroup,
+      setGroupsActivePage,
+      setOptions,
+      setSelectedGroup,
+    ]
   );
 
   useEffect(() => {
-    if (defaultGroupingOptions.length === 0) return;
-    const newOptions = defaultGroupingOptions.find((o) => o.key === selectedGroup)
-      ? defaultGroupingOptions
-      : [
-          ...defaultGroupingOptions,
-          ...(!isNoneGroup(selectedGroup)
-            ? [
-                {
-                  key: selectedGroup,
-                  label: selectedGroup,
-                },
-              ]
-            : []),
-        ];
-    setOptions(newOptions);
-  }, [defaultGroupingOptions, selectedGroup, setOptions]);
+    console.log('useEffect');
+    // only set options the first time, all other updates will be taken care of by onGroupChange
+    if (options.length > 0) return;
+    setOptions(
+      defaultGroupingOptions.find((o) => o.key === selectedGroup)
+        ? defaultGroupingOptions
+        : [
+            ...defaultGroupingOptions,
+            ...(!isNoneGroup(selectedGroup)
+              ? [
+                  {
+                    key: selectedGroup,
+                    label: selectedGroup,
+                  },
+                ]
+              : []),
+          ]
+    );
+  }, [defaultGroupingOptions, options.length, selectedGroup, setOptions]);
+
   return getGroupSelector({
     groupSelected: selectedGroup,
     'data-test-subj': 'alerts-table-group-selector',
