@@ -13,7 +13,6 @@ import type {
   DataViewsContract,
   DataViewSpec,
 } from '@kbn/data-views-plugin/public';
-import type { ISearchSource } from '@kbn/data-plugin/public';
 import type { IUiSettingsClient, ToastsStart } from '@kbn/core/public';
 interface DataViewData {
   /**
@@ -107,17 +106,10 @@ export async function loadDataView(
  */
 export function resolveDataView(
   ip: DataViewData,
-  searchSource: ISearchSource | undefined,
   toastNotifications: ToastsStart,
   isTextBasedQuery?: boolean
 ) {
   const { loaded: loadedDataView, stateVal, stateValFound } = ip;
-
-  const ownDataView = searchSource?.getOwnField('index');
-
-  if (ownDataView && !stateVal) {
-    return ownDataView;
-  }
 
   if (stateVal && !stateValFound) {
     const warningTitle = i18n.translate('discover.valueIsNotConfiguredDataViewIDWarningTitle', {
@@ -127,20 +119,6 @@ export function resolveDataView(
       },
     });
 
-    if (ownDataView) {
-      toastNotifications.addWarning({
-        title: warningTitle,
-        text: i18n.translate('discover.showingSavedDataViewWarningDescription', {
-          defaultMessage: 'Showing the saved data view: "{ownDataViewTitle}" ({ownDataViewId})',
-          values: {
-            ownDataViewTitle: ownDataView.getIndexPattern(),
-            ownDataViewId: ownDataView.id,
-          },
-        }),
-        'data-test-subj': 'dscDataViewNotFoundShowSavedWarning',
-      });
-      return ownDataView;
-    }
     if (!Boolean(isTextBasedQuery)) {
       toastNotifications.addWarning({
         title: warningTitle,

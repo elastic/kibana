@@ -125,7 +125,11 @@ export function DiscoverMainRoute(props: Props) {
       }
       try {
         await stateContainer.actions.loadDataViewList();
-        const currentSavedSearch = await stateContainer.actions.loadSavedSearch(id, nextDataView);
+        const currentSavedSearch = await stateContainer.actions.loadSavedSearch(
+          id,
+          nextDataView,
+          historyLocationState?.dataViewSpec
+        );
         if (currentSavedSearch?.id) {
           chrome.recentlyAccessed.add(
             getSavedSearchFullPathUrl(currentSavedSearch.id),
@@ -167,8 +171,9 @@ export function DiscoverMainRoute(props: Props) {
     },
     [
       checkData,
+      stateContainer.actions,
       id,
-      stateContainer,
+      historyLocationState?.dataViewSpec,
       chrome,
       history,
       core.application.navigateToApp,

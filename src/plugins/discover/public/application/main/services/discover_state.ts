@@ -19,13 +19,12 @@ import {
   QueryState,
   SearchSessionInfoProvider,
 } from '@kbn/data-plugin/public';
-import { DataView, DataViewType } from '@kbn/data-views-plugin/public';
+import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/public';
 import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
 import { AggregateQuery, TimeRange, Query } from '@kbn/es-query';
 import { buildStateSubscribe } from '../hooks/utils/build_state_subscribe';
-import { loadDataViewBySavedSearch } from '../utils/load_data_view_by_saved_search';
 import { addLog } from '../../../utils/add_log';
 import { getUrlTracker } from '../../../kibana_services';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
@@ -62,29 +61,32 @@ interface DiscoverStateContainerParams {
 
 const loadPersistedSavedSearch = async (
   id: string,
+  dataView: DataView | undefined,
   {
     appStateContainer,
     internalStateContainer,
     savedSearchContainer,
-    loadAndResolveDataView,
   }: {
     appStateContainer: DiscoverAppStateContainer;
     internalStateContainer: InternalStateContainer;
     savedSearchContainer: SavedSearchContainer;
-    loadAndResolveDataView: () => Promise<{ dataView: DataView }>;
   }
 ): Promise<SavedSearch> => {
   addLog('🧭 [discoverState] loadSavedSearch');
   const isEmptyURL = appStateContainer.isEmptyURL();
   if (isEmptyURL) {
     appStateContainer.set({});
-  } else {
-    await loadAndResolveDataView();
   }
   const currentSavedSearch = await savedSearchContainer.load(id, {
     dataViewList: internalStateContainer.getState().savedDataViews,
     appState: !isEmptyURL ? appStateContainer.getState() : undefined,
   });
+  if (dataView?.id !== currentSavedSearch.searchSource.getField('index')?.id) {
+    savedSearchContainer.update({
+      nextDataView: dataView,
+      nextState: appStateContainer.getState(),
+    });
+  }
   if (currentSavedSearch) {
     await appStateContainer.resetWithSavedSearch(currentSavedSearch);
   }
@@ -92,50 +94,29 @@ const loadPersistedSavedSearch = async (
 };
 
 const loadNewSavedSearch = async (
-  nextDataView: DataView | undefined,
+  nextDataView: DataView,
   {
     appStateContainer,
-    internalStateContainer,
     savedSearchContainer,
-    services,
-    loadAndResolveDataView,
   }: {
     appStateContainer: DiscoverAppStateContainer;
-    internalStateContainer: InternalStateContainer;
     savedSearchContainer: SavedSearchContainer;
-    services: DiscoverServices;
-    loadAndResolveDataView: (id: string | undefined) => Promise<{ dataView: DataView }>;
   }
 ) => {
   addLog('🧭 [discoverState] loadNewSavedSearch', { nextDataView });
   const isEmptyURL = appStateContainer.isEmptyURL();
-  let { dataView } = nextDataView
-    ? { dataView: nextDataView }
-    : await loadAndResolveDataView(appStateContainer.getState().index);
   const nextSavedSearch = await savedSearchContainer.new(
-    dataView,
+    nextDataView,
     !isEmptyURL ? appStateContainer.getState() : undefined
   );
 
-  if (!dataView) {
-    dataView = await loadDataViewBySavedSearch(
-      nextSavedSearch,
-      appStateContainer,
-      internalStateContainer.getState().savedDataViews,
-      services
-    );
-  }
-
-  if (dataView) {
-    nextSavedSearch.searchSource.setField('index', dataView);
-  }
-
   appStateContainer.resetWithSavedSearch(nextSavedSearch);
+  /**
   await savedSearchContainer.update({
-    nextDataView: dataView,
+    nextDataView,
     nextState: appStateContainer.getState(),
     resetSavedSearch: true,
-  });
+  }); **/
   return nextSavedSearch;
 };
 
@@ -232,7 +213,8 @@ export interface DiscoverStateContainer {
      */
     loadSavedSearch: (
       savedSearchId?: string | undefined,
-      dataView?: DataView | undefined
+      dataView?: DataView | undefined,
+      dataViewSpec?: DataViewSpec
     ) => Promise<SavedSearch | undefined>;
   };
 }
@@ -326,13 +308,14 @@ export function getDiscoverStateContainer({
     internalStateContainer.transitions.setSavedDataViews(dataViewList);
   };
 
-  const loadAndResolveDataView = async (id?: string, actualSavedSearch?: SavedSearch) => {
-    const nextDataViewData = await loadDataView(services.dataViews, services.uiSettings, id);
-    const nextDataView = resolveDataView(
-      nextDataViewData,
-      actualSavedSearch?.searchSource,
-      services.toastNotifications
+  const loadAndResolveDataView = async (id?: string, dataViewSpec?: DataViewSpec) => {
+    const nextDataViewData = await loadDataView(
+      services.dataViews,
+      services.uiSettings,
+      id,
+      dataViewSpec
     );
+    const nextDataView = resolveDataView(nextDataViewData, services.toastNotifications);
     return { fallback: !nextDataViewData.stateValFound, dataView: nextDataView };
   };
   /**
@@ -367,27 +350,34 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const loadSavedSearch = async (id?: string, nextDataView?: DataView): Promise<SavedSearch> => {
+  const loadSavedSearch = async (
+    id?: string,
+    nextDataView?: DataView,
+    dataViewSpec?: DataViewSpec
+  ): Promise<SavedSearch> => {
     let nextSavedSearch: SavedSearch;
+    const { dataView } = nextDataView
+      ? { dataView: nextDataView }
+      : await loadAndResolveDataView(appStateContainer.getState().index, dataViewSpec);
     if (typeof id === 'string') {
-      nextSavedSearch = await loadPersistedSavedSearch(id, {
+      const isEmptyURL = appStateContainer.isEmptyURL();
+      if (isEmptyURL) {
+        appStateContainer.set({});
+      }
+      nextSavedSearch = await loadPersistedSavedSearch(id, isEmptyURL ? undefined : dataView, {
         appStateContainer,
         internalStateContainer,
         savedSearchContainer,
-        loadAndResolveDataView,
       });
     } else {
-      nextSavedSearch = await loadNewSavedSearch(nextDataView, {
+      nextSavedSearch = await loadNewSavedSearch(dataView, {
         appStateContainer,
-        internalStateContainer,
         savedSearchContainer,
-        services,
-        loadAndResolveDataView,
       });
     }
-    const dataView = nextSavedSearch.searchSource.getField('index');
-    if (dataView) {
-      setDataView(dataView);
+    const actualDataView = nextSavedSearch.searchSource.getField('index');
+    if (actualDataView) {
+      setDataView(actualDataView);
       if (!dataView.isPersisted()) {
         internalStateContainer.transitions.appendAdHocDataViews(dataView);
       }
