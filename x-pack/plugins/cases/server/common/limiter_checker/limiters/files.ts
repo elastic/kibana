@@ -8,9 +8,10 @@
 import { buildFilter } from '../../../client/utils';
 import { CommentType, FILE_ATTACHMENT_TYPE } from '../../../../common/api';
 import type { CommentRequest } from '../../../../common/api';
-import { CASE_COMMENT_SAVED_OBJECT, MAX_FILES_PER_CASE } from '../../../../common/constants';
+import { CASE_COMMENT_SAVED_OBJECT } from '../../../../common/constants';
 import { isFileAttachmentRequest } from '../../utils';
 import { BaseLimiter } from '../base_limiter';
+import { MAX_FILES_PER_CASE } from '../../../files';
 
 export class FileLimiter extends BaseLimiter {
   constructor() {
