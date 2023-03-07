@@ -51,7 +51,7 @@ export const calculateRiskScores = async ({
   dataViewId,
   enrichInputs,
   esClient,
-  filters: userFilter,
+  filter: userFilter,
   identifierType,
   range,
 }: {
