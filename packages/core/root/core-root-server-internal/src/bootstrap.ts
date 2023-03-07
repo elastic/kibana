@@ -114,11 +114,13 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
 
 function onRootShutdown(reason?: any) {
   if (reason !== undefined) {
-    // There is a chance that logger wasn't configured properly and error that
-    // that forced root to shut down could go unnoticed. To prevent this we always
-    // mirror such fatal errors in standard output with `console.error`.
-    // eslint-disable-next-line no-console
-    console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+    if (reason.code !== 'MigrationOnlyNode') {
+      // There is a chance that logger wasn't configured properly and error that
+      // that forced root to shut down could go unnoticed. To prevent this we always
+      // mirror such fatal errors in standard output with `console.error`.
+      // eslint-disable-next-line no-console
+      console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+    }
 
     process.exit(reason instanceof CriticalError ? reason.processExitCode : 1);
   }

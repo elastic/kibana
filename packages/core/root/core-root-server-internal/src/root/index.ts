@@ -89,7 +89,9 @@ export class Root {
         );
       }
 
-      this.log.fatal(reason);
+      if (reason.code !== 'MigrationOnlyNode') {
+        this.log.fatal(reason);
+      }
     }
 
     await this.server.stop();
