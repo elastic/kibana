@@ -27,12 +27,14 @@ import {
   getSimpleRule,
   createLegacyRuleAction,
   getThresholdRuleForSignalTesting,
+  getLegacyActionSO,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('update_rules', () => {
     describe('update rules', () => {
@@ -207,6 +209,13 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await createLegacyRuleAction(supertest, createRuleBody.id, connector.body.id);
 
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(1);
+        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
+          createRuleBody.id
+        );
+
         const action1 = {
           group: 'default',
           id: connector.body.id,
@@ -249,6 +258,10 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.throttle = '1d';
 
         expect(bodyToCompare).to.eql(outputRule);
+
+        // legacy sidecar action should be gone
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
       });
 
       it('should update a single rule property of name using the auto-generated id', async () => {

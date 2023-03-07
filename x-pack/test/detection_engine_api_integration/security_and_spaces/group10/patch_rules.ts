@@ -23,12 +23,14 @@ import {
   createRule,
   getSimpleMlRule,
   createLegacyRuleAction,
+  getLegacyActionSO,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('patch_rules', () => {
     describe('patch rules', () => {
@@ -352,6 +354,11 @@ export default ({ getService }: FtrProviderContext) => {
         ]);
         await createLegacyRuleAction(supertest, rule.id, connector.body.id);
 
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(1);
+        expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(rule.id);
+
         // patch disable the rule
         const patchResponse = await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
@@ -376,6 +383,10 @@ export default ({ getService }: FtrProviderContext) => {
         outputRule.throttle = '1h';
 
         expect(bodyToCompare).to.eql(outputRule);
+
+        // legacy sidecar action should be gone
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
       });
 
       it('should give a 404 if it is given a fake id', async () => {

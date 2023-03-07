@@ -22,12 +22,14 @@ import {
   removeServerGeneratedPropertiesIncludingRuleId,
   createRule,
   createLegacyRuleAction,
+  getLegacyActionSO,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('patch_rules_bulk', () => {
     describe('deprecations', () => {
@@ -169,6 +171,14 @@ export default ({ getService }: FtrProviderContext) => {
           createLegacyRuleAction(supertest, rule1.id, connector.body.id),
           createLegacyRuleAction(supertest, rule2.id, connector.body.id),
         ]);
+
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(2);
+        expect(
+          sidecarActionsResults.hits.hits.map((hit) => hit?._source?.references[0].id).sort()
+        ).to.eql([rule1.id, rule2.id].sort());
+
         // patch a simple rule's name
         const { body } = await supertest
           .patch(DETECTION_ENGINE_RULES_BULK_UPDATE)
@@ -178,6 +188,10 @@ export default ({ getService }: FtrProviderContext) => {
             { id: rule2.id, enabled: false },
           ])
           .expect(200);
+
+        // legacy sidecar action should be gone
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
 
         // @ts-expect-error
         body.forEach((response) => {

@@ -24,12 +24,14 @@ import {
   createRule,
   getSimpleRule,
   createLegacyRuleAction,
+  getLegacyActionSO,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
+  const es = getService('es');
 
   describe('update_rules_bulk', () => {
     describe('deprecations', () => {
@@ -148,6 +150,13 @@ export default ({ getService }: FtrProviderContext) => {
           createLegacyRuleAction(supertest, rule2.id, connector.body.id),
         ]);
 
+        // check for legacy sidecar action
+        const sidecarActionsResults = await getLegacyActionSO(es);
+        expect(sidecarActionsResults.hits.hits.length).to.eql(2);
+        expect(
+          sidecarActionsResults.hits.hits.map((hit) => hit?._source?.references[0].id).sort()
+        ).to.eql([rule1.id, rule2.id].sort());
+
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.name = 'some other name';
         updatedRule1.actions = [action1];
@@ -164,6 +173,10 @@ export default ({ getService }: FtrProviderContext) => {
           .set('kbn-xsrf', 'true')
           .send([updatedRule1, updatedRule2])
           .expect(200);
+
+        // legacy sidecar action should be gone
+        const sidecarActionsPostResults = await getLegacyActionSO(es);
+        expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
 
         body.forEach((response) => {
           const bodyToCompare = removeServerGeneratedProperties(response);
