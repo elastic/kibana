@@ -15,7 +15,6 @@ import {
   type UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import chalk from 'chalk';
-import path from 'path';
 import { getEndpointPackageInfo } from '../../../common/endpoint/index_data';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
@@ -60,7 +59,6 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
     const uniqueId = Math.random().toString().substring(2, 6);
     const username = userInfo().username.toLowerCase();
     const policyId: string = policy || (await getOrCreateAgentPolicyId());
-    const localVmConfigDir = path.resolve(__dirname, 'vm_config');
 
     if (!policyId) {
       throw new Error(`No valid policy id provide or unable to create it`);
@@ -87,38 +85,9 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
     log.info(`Creating VM named: ${vmName}`);
 
-    await execa.command(
-      `multipass launch --name ${vmName} --cloud-init vm_config_cloud_init.yaml`,
-      { cwd: localVmConfigDir }
-    );
+    await execa.command(`multipass launch --name ${vmName}`);
 
-    const vmInfo: {
-      errors: string[];
-      info: {
-        [vmName: string]: {
-          cpu_count: string;
-          disks: {
-            [diskName: string]: {
-              total: string;
-              used: string;
-            };
-          };
-          image_hash: string;
-          image_release: string;
-          ipv4: string[];
-          load: number[];
-          memory: {
-            total: number;
-            used: number;
-            mounts: {};
-            release: string;
-            state: string;
-          };
-        };
-      };
-    } = JSON.parse((await execa('multipass', ['info', vmName, '--format', 'json'])).stdout);
-
-    log.verbose(dump(vmInfo));
+    log.verbose(await execa('multipass', ['info', vmName]));
 
     const agentDownloadUrl = await getAgentDownloadUrl(version);
     const agentDownloadedFile = agentDownloadUrl.substring(agentDownloadUrl.lastIndexOf('/') + 1);
@@ -165,9 +134,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
     await execa(`multipass`, agentEnrollArgs);
 
-    // const runAgentCommand = `multipass exec ${vmName} --working-directory /home/ubuntu/${vmDirName} -- nohup bash -c 'sudo /home/ubuntu/${vmDiname}/elastic-agent &>/dev/null &'`;
-
-    const runAgentCommand = `ssh ubuntu@${vmInfo.info[vmName].ipv4[0]} -o StrictHostKeyChecking=no -i multipass_ssh_key -tt nohup bash -c 'sudo /home/ubuntu/${vmDirName}/elastic-agent &>/dev/null &'`;
+    const runAgentCommand = `multipass exec ${vmName} --working-directory /home/ubuntu/${vmDirName} -- sudo ./elastic-agent \&>/dev/null \&`;
 
     log.info(`Running elastic agent`);
     log.verbose(`Command: ${runAgentCommand}`);
@@ -177,18 +144,13 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
     // as is with the command that runs endpoint. See https://github.com/canonical/multipass/issues/667
     // To get around it, `timeout` is set to 5s, which should be enough time for the command to be executed
     // in the VM.
-    await execa
-      .command(runAgentCommand, { timeout: 5000, cwd: localVmConfigDir })
-      .catch((error) => {
-        if (error.originalMessage !== 'Timed out') {
-          throw error;
-        }
+    await execa.command(runAgentCommand, { timeout: 5000 }).catch((error) => {
+      if (error.originalMessage !== 'Timed out') {
+        throw error;
+      }
 
-        log.verbose(`command timed out, but that might be ok - Fleet server should be running`);
-      })
-      .then((output) => {
-        log.verbose(dump(output));
-      });
+      log.verbose(`command timed out, but that might be ok - Fleet server should be running`);
+    });
 
     log.info(`Waiting for Agent to check-in with Fleet`);
     await waitForHostToEnroll(kbnClient, vmName);
