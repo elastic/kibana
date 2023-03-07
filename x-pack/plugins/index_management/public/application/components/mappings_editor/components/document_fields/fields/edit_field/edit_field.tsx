@@ -200,12 +200,23 @@ export const EditField = React.memo(
                   <EuiText size="s">
                     <p>
                       <EuiToolTip
-                        content="Not updating all settings will apply default values to the settings you haven't changed."
+                        content={i18n.translate(
+                          'xpack.idxMgmt.mappingsEditor.editFieldFlyout.formCompletionTooltip',
+                          {
+                            defaultMessage:
+                              "Not updating all settings will apply default values to the settings you haven't changed.",
+                          }
+                        )}
                         position="top"
                       >
                         <span>
                           <EuiTextColor color="subdued">
-                            Review all settings before updating{' '}
+                            {i18n.translate(
+                              'xpack.idxMgmt.mappingsEditor.editFieldFlyout.formCompletionGuide',
+                              {
+                                defaultMessage: 'Review all settings before updating ',
+                              }
+                            )}
                           </EuiTextColor>
                           <EuiIcon type="questionInCircle" />
                         </span>
