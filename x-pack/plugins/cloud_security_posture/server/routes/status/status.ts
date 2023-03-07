@@ -87,7 +87,7 @@ export const calculateCspStatusCode = (
   if (!installedPolicyTemplates.includes(postureTypeCheck)) return 'not-installed';
   if (indicesStatus.findings === 'not-empty') return 'indexed';
   if (healthyAgents === 0) return 'not-deployed';
-  if (timeSinceInstallationInMinutes <= INDEX_TIMEOUT_IN_MINUTES) return 'indexing';
+  if (indicesStatus.findingsLatest === 'empty') return 'indexing';
   if (timeSinceInstallationInMinutes > INDEX_TIMEOUT_IN_MINUTES) return 'index-timeout';
 
   throw new Error('Could not determine csp status');
@@ -162,7 +162,7 @@ const getCspStatus = async ({
     ),
     getInstalledPolicyTemplates(packagePolicyService, soClient),
   ]);
-//console.log(installation)
+console.log(installation)
   const healthyAgentsKspm = await getHealthyAgents(
     soClient,
     installedPackagePoliciesKspm.items,
