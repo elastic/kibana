@@ -20,6 +20,7 @@ import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
 import { AutoRefreshButton } from './components/auto_refresh_button';
 import { paths } from '../../config';
 import type { ObservabilityAppServices } from '../../application/types';
+import { HeaderTitle } from './components/header_title';
 
 export function SlosPage() {
   const {
@@ -64,9 +65,7 @@ export function SlosPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: i18n.translate('xpack.observability.slosPageTitle', {
-          defaultMessage: 'SLOs',
-        }),
+        pageTitle: <HeaderTitle />,
         rightSideItems: [
           <EuiButton
             color="primary"
