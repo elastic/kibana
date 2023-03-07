@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RRule, ByWeekday, Weekday, rrulestr } from 'rrule';
+import { RRule, ByWeekday, Weekday, rrulestr } from '@kbn/rrule';
 import { RuleSnoozeSchedule } from '../../types';
 
 const MAX_TIMESTAMP = 8640000000000000;

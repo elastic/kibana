@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { RRule } from 'rrule';
+import { RRule } from '@kbn/rrule';
 import { isRuleSnoozed } from './is_rule_snoozed';
 import { RRuleRecord } from '../types';
 

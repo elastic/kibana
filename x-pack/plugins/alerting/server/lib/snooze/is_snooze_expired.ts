@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RRule, Weekday } from 'rrule';
+import { RRule, Weekday } from '@kbn/rrule';
 import { RuleSnoozeSchedule } from '../../types';
 import { isSnoozeActive, parseByWeekday } from './is_snooze_active';
 

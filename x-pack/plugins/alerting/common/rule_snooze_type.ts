@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { WeekdayStr } from 'rrule';
+import type { WeekdayStr } from '@kbn/rrule';
 
 type SnoozeRRule = Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
 
