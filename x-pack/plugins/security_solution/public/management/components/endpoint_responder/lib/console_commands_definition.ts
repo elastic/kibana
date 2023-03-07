@@ -79,7 +79,7 @@ const commandToCapabilitiesPrivilegesMap = new Map<
     'release',
     {
       capability: 'isolation',
-      privilege: (privileges: EndpointPrivileges) => privileges.canIsolateHost,
+      privilege: (privileges: EndpointPrivileges) => privileges.canUnIsolateHost,
     },
   ],
   [
@@ -126,7 +126,7 @@ const getRbacControl = ({
   commandName: ConsoleResponseActionCommands;
   privileges: EndpointPrivileges;
 }): boolean => {
-  return commandToCapabilitiesPrivilegesMap.get(commandName)?.privilege(privileges) ?? false;
+  return Boolean(commandToCapabilitiesPrivilegesMap.get(commandName)?.privilege(privileges));
 };
 
 const capabilitiesAndPrivilegesValidator = (command: Command): true | string => {
