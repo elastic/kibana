@@ -51,8 +51,8 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect('Content-Disposition', 'attachment; filename="export.ndjson"');
       });
 
-      it('should export a single rule with a rule_id', async () => {
-        await createRule(supertest, log, getSimpleRule());
+      it('should export a single disabled rule by its rule_id', async () => {
+        const rule = await createRule(supertest, log, getSimpleRule());
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -61,34 +61,10 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        const bodySplitAndParsed = JSON.parse(body.toString().split(/\n/)[0]);
-        const bodyToTest = removeServerGeneratedProperties(bodySplitAndParsed);
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
 
-        expect(bodyToTest).to.eql(getSimpleRuleOutput());
-      });
-
-      it('should export a single executed rule with a rule_id', async () => {
-        const ruleId = 'rule-1';
-
-        const rule = await createRule(supertest, log, getSimpleRule(ruleId, true));
-
-        await waitForRuleStatus(RuleExecutionStatus['partial failure'], {
-          supertest,
-          log,
-          ruleId,
-        });
-
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200)
-          .parse(binaryToString);
-
-        const bodySplitAndParsed = JSON.parse(body.toString().split(/\n/)[0]);
-
-        expect(bodySplitAndParsed).to.eql({
-          ...getSimpleRuleOutput(ruleId, true),
+        expect(exportedRule).to.eql({
+          ...getSimpleRuleOutput(),
           id: rule.id,
           created_at: rule.created_at,
           updated_at: rule.updated_at,
@@ -115,13 +91,55 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        const bodySplitAndParsed = JSON.parse(body.toString().split(/\n/)[0]);
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
 
-        expect(bodySplitAndParsed).to.eql({
+        expect(exportedRule).to.eql({
           ...getSimpleRuleOutput(ruleId, true),
           id: rule.id,
           created_at: rule.created_at,
           updated_at: rule.updated_at,
+        });
+      });
+
+      it('should export all executed rules', async () => {
+        const ruleId1 = 'rule-1';
+        const ruleId2 = 'rule-2';
+
+        const rule1 = await createRule(supertest, log, getSimpleRule(ruleId1, true));
+        const rule2 = await createRule(supertest, log, getSimpleRule(ruleId2, true));
+
+        await waitForRuleStatus(RuleExecutionStatus['partial failure'], {
+          supertest,
+          log,
+          ruleId: ruleId1,
+        });
+        await waitForRuleStatus(RuleExecutionStatus['partial failure'], {
+          supertest,
+          log,
+          ruleId: ruleId2,
+        });
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRule1 = JSON.parse(body.toString().split(/\n/)[1]);
+        const exportedRule2 = JSON.parse(body.toString().split(/\n/)[0]);
+
+        expect(exportedRule1).to.eql({
+          ...getSimpleRuleOutput(ruleId1, true),
+          id: rule1.id,
+          created_at: rule1.created_at,
+          updated_at: rule1.updated_at,
+        });
+        expect(exportedRule2).to.eql({
+          ...getSimpleRuleOutput(ruleId2, true),
+          id: rule2.id,
+          created_at: rule2.created_at,
+          updated_at: rule2.updated_at,
         });
       });
 
