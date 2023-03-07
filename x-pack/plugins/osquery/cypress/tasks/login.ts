@@ -8,7 +8,38 @@
 import * as yaml from 'js-yaml';
 import type { UrlObject } from 'url';
 import Url from 'url';
-import type { ROLES } from '../test';
+import type { Role } from '@kbn/security-plugin/common';
+import { request } from './common';
+import adminRole from '../../scripts/roles_users/admin/role.json';
+import alertTestRole from '../../scripts/roles_users/alert_test/role.json';
+import noneRole from '../../scripts/roles_users/none/role.json';
+import platformEngineerRole from '../../scripts/roles_users/platform_engineer/role.json';
+import readerRole from '../../scripts/roles_users/reader/role.json';
+import socManagerRole from '../../scripts/roles_users/soc_manager/role.json';
+import t1AnalystRole from '../../scripts/roles_users/t1_analyst/role.json';
+import t2AnalystRole from '../../scripts/roles_users/t2_analyst/role.json';
+
+export enum ROLE {
+  soc_manager = 'soc_manager',
+  reader = 'reader',
+  t1_analyst = 't1_analyst',
+  t2_analyst = 't2_analyst',
+  platform_engineer = 'platform_engineer',
+  admin = 'admin', // base: ['all']
+  alert_test = 'alert_test',
+  none = 'none',
+}
+
+export const rolesMapping: { [key in ROLE]: Omit<Role, 'name'> } = {
+  admin: adminRole,
+  alert_test: alertTestRole,
+  none: noneRole,
+  platform_engineer: platformEngineerRole,
+  reader: readerRole,
+  soc_manager: socManagerRole,
+  t1_analyst: t1AnalystRole,
+  t2_analyst: t2AnalystRole,
+};
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
@@ -53,7 +84,7 @@ const LOGIN_API_ENDPOINT = '/internal/security/login';
  * @param role string role/user to log in with
  * @param route string route to visit
  */
-export const getUrlWithRoute = (role: ROLES, route: string) => {
+export const getUrlWithRoute = (role: ROLE, route: string) => {
   const url = Cypress.config().baseUrl;
   const kibana = new URL(String(url));
   const theUrl = `${Url.format({
@@ -105,38 +136,42 @@ export const getCurlScriptEnvVars = () => ({
   KIBANA_URL: Cypress.config().baseUrl,
 });
 
-export const postRoleAndUser = (role: ROLES) => {
-  const env = getCurlScriptEnvVars();
-  const detectionsRoleScriptPath = `./scripts/roles_users/${role}/post_role.sh`;
-  const detectionsRoleJsonPath = `./scripts/roles_users/${role}/role.json`;
-  const detectionsUserScriptPath = `./scripts/roles_users/${role}/post_user.sh`;
-  const detectionsUserJsonPath = `./scripts/roles_users/${role}/user.json`;
-
+export const postRoleAndUser = (role: ROLE) => {
+  const rolePrivileges = rolesMapping[role];
   // post the role
-  cy.exec(`bash ${detectionsRoleScriptPath} ${detectionsRoleJsonPath}`, {
-    env,
+  request({
+    method: 'PUT',
+    url: `/api/security/role/${role}`,
+    body: rolePrivileges,
   });
 
   // post the user associated with the role to elasticsearch
-  cy.exec(`bash ${detectionsUserScriptPath} ${detectionsUserJsonPath}`, {
-    env,
+  request({
+    method: 'POST',
+    url: `/internal/security/users/${role}`,
+    body: {
+      username: role,
+      password: Cypress.env(ELASTICSEARCH_PASSWORD),
+      roles: [role],
+    },
   });
 };
 
-export const deleteRoleAndUser = (role: ROLES) => {
-  const env = getCurlScriptEnvVars();
-  const detectionsUserDeleteScriptPath = `./scripts/roles_users/${role}/delete_user.sh`;
-
-  // delete the role
-  cy.exec(`bash ${detectionsUserDeleteScriptPath}`, {
-    env,
+export const deleteRoleAndUser = (role: ROLE) => {
+  request({
+    method: 'DELETE',
+    url: `/internal/security/users/${role}`,
+  });
+  request({
+    method: 'DELETE',
+    url: `/api/security/role/${role}`,
   });
 };
 
 export const loginWithUser = (user: User) => {
   const url = Cypress.config().baseUrl;
 
-  cy.request({
+  request({
     body: {
       providerType: 'basic',
       providerName: url && !url.includes('localhost') ? 'cloud-basic' : 'basic',
@@ -152,7 +187,7 @@ export const loginWithUser = (user: User) => {
   });
 };
 
-export const loginWithRole = async (role: ROLES) => {
+export const loginWithRole = async (role: ROLE) => {
   postRoleAndUser(role);
   const theUrl = Url.format({
     auth: `${role}:changeme`,
@@ -189,7 +224,7 @@ export const loginWithRole = async (role: ROLES) => {
  * To speed the execution of tests, prefer this non-interactive authentication,
  * which is faster than authentication via Kibana's interactive login page.
  */
-export const login = (role?: ROLES) => {
+export const login = (role?: ROLE) => {
   if (role != null) {
     loginWithRole(role);
   } else if (credentialsProvidedByEnvironment()) {

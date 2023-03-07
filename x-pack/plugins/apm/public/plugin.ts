@@ -177,6 +177,7 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
                     matchPath(currentPath: string) {
                       return [
                         '/service-groups',
+                        '/mobile-services',
                         '/services',
                         '/service-map',
                       ].some((testPath) => currentPath.startsWith(testPath));
