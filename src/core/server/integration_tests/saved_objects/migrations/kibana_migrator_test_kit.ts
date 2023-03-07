@@ -150,7 +150,9 @@ export const getKibanaMigratorTestKit = async ({
 
   const runMigrations = async (rerun?: boolean) => {
     migrator.prepareMigrations();
-    return await migrator.runMigrations({ rerun });
+    const migrationResults = await migrator.runMigrations({ rerun });
+    await loggingSystem.stop();
+    return migrationResults;
   };
 
   const savedObjectsRepository = SavedObjectsRepository.createRepository(
@@ -283,13 +285,12 @@ const registerTypes = (
 };
 
 export const createBaseline = async () => {
-  const { client, migrator, savedObjectsRepository } = await getKibanaMigratorTestKit({
+  const { client, runMigrations, savedObjectsRepository } = await getKibanaMigratorTestKit({
     kibanaIndex: defaultKibanaIndex,
     types: baselineTypes,
   });
 
-  migrator.prepareMigrations();
-  await migrator.runMigrations();
+  await runMigrations();
 
   await savedObjectsRepository.bulkCreate(baselineDocuments, {
     refresh: 'wait_for',
