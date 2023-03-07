@@ -51,6 +51,7 @@ describe('createRuleRoute', () => {
         params: {
           foo: true,
         },
+        uuid: '123-456',
       },
     ],
     enabled: true,
@@ -100,6 +101,7 @@ describe('createRuleRoute', () => {
       {
         ...ruleToCreate.actions[0],
         connector_type_id: 'test',
+        uuid: '123-456',
       },
     ],
   };

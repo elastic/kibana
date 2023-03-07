@@ -243,6 +243,10 @@ describe('discover sidebar field', function () {
     await comp.update();
 
     expect(comp.find(EuiPopover).prop('isOpen')).toBe(true);
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    await comp.update();
+
     expect(findTestSubject(comp, 'dscFieldStats-title').text()).toBe('Top values');
     expect(findTestSubject(comp, 'dscFieldStats-topValues-bucket')).toHaveLength(2);
     expect(

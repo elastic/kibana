@@ -124,7 +124,7 @@ export const TRANSFORM_HEALTH_LABEL = {
     defaultMessage: 'Degraded',
   }),
   red: i18n.translate('xpack.transform.transformHealth.redLabel', {
-    defaultMessage: 'Outage',
+    defaultMessage: 'Unavailable',
   }),
 } as const;
 
@@ -187,6 +187,17 @@ export const TRANSFORM_HEALTH_CHECK_NAMES: Record<
       'xpack.transform.alertTypes.transformHealth.errorMessagesCheckDescription',
       {
         defaultMessage: 'Get alerts if a transform contains errors in the transform messages.',
+      }
+    ),
+  },
+  healthCheck: {
+    name: i18n.translate('xpack.transform.alertTypes.transformHealth.healthCheckName', {
+      defaultMessage: 'Unhealthy transform',
+    }),
+    description: i18n.translate(
+      'xpack.transform.alertTypes.transformHealth.healthCheckDescription',
+      {
+        defaultMessage: 'Get alerts if a transform health status is not green.',
       }
     ),
   },

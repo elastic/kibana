@@ -8,7 +8,7 @@ import { ObservabilityConfig } from '..';
 import { rulesRouteRepository } from './rules/route';
 import { slosRouteRepository } from './slo/route';
 
-export function getGlobalObservabilityServerRouteRepository(config: ObservabilityConfig) {
+export function getObservabilityServerRouteRepository(config: ObservabilityConfig) {
   const isSloFeatureEnabled = config.unsafe.slo.enabled;
 
   const repository = {
@@ -19,5 +19,5 @@ export function getGlobalObservabilityServerRouteRepository(config: Observabilit
 }
 
 export type ObservabilityServerRouteRepository = ReturnType<
-  typeof getGlobalObservabilityServerRouteRepository
+  typeof getObservabilityServerRouteRepository
 >;

@@ -101,16 +101,61 @@ export default function ({ getService }: FtrProviderContext) {
             jobDetails: [
               {
                 section: 'state',
+                // Don't include the 'Create time' value entry as it's not stable.
+                expectedEntries: [
+                  'STOPPED',
+                  'Create time',
+                  'Model memory limit',
+                  '2mb',
+                  'Version',
+                  '8.8.0',
+                ],
+              },
+              {
+                section: 'stats',
+                // Don't include the 'timestamp' or 'peak usage bytes' value entries as it's not stable.
+                expectedEntries: ['Memory usage', 'Timestamp', 'Peak usage bytes', 'Status', 'ok'],
+              },
+              {
+                section: 'counts',
+                expectedEntries: [
+                  'Data counts',
+                  'Training docs',
+                  '1460',
+                  'Test docs',
+                  '0',
+                  'Skipped docs',
+                  '0',
+                ],
+              },
+              {
+                section: 'progress',
+                expectedEntries: [
+                  'Phase 4/4',
+                  'reindexing',
+                  '100%',
+                  'loading_data',
+                  '100%',
+                  'computing_outliers',
+                  '100%',
+                  'writing_results',
+                  '100%',
+                ],
+              },
+              {
+                section: 'analysisStats',
                 expectedEntries: {
-                  id: jobId,
-                  state: 'stopped',
-                  data_counts:
-                    '{"training_docs_count":1460,"test_docs_count":0,"skipped_docs_count":0}',
-                  description:
-                    'Outlier detection job based on ft_ihp_outlier dataset with runtime fields',
+                  '': '',
+                  timestamp: 'March 1st 2023, 19:00:41',
+                  timing_stats: '{"elapsed_time":49}',
+                  n_neighbors: '0',
+                  method: 'ensemble',
+                  compute_feature_influence: 'true',
+                  feature_influence_threshold: '0.1',
+                  outlier_fraction: '0.05',
+                  standardization_enabled: 'true',
                 },
               },
-              { section: 'progress', expectedEntries: { Phase: '4/4' } },
             ],
           } as AnalyticsTableRowDetails,
         },

@@ -28,6 +28,7 @@ import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import {
   FINDINGS_TABLE_CELL_ADD_FILTER,
   FINDINGS_TABLE_CELL_ADD_NEGATED_FILTER,
+  FINDINGS_TABLE_EXPAND_COLUMN,
 } from '../test_subjects';
 
 export type OnAddFilter = <T extends string>(key: T, value: Serializable, negate: boolean) => void;
@@ -51,6 +52,7 @@ export const getExpandColumn = <T extends unknown>({
   width: '40px',
   actions: [
     {
+      'data-test-subj': FINDINGS_TABLE_EXPAND_COLUMN,
       name: i18n.translate('xpack.csp.expandColumnNameLabel', { defaultMessage: 'Expand' }),
       description: i18n.translate('xpack.csp.expandColumnDescriptionLabel', {
         defaultMessage: 'Expand',

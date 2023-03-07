@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { useContext, useEffect } from 'react';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   Alerts,
   BulkActionsConfig,
@@ -19,6 +20,7 @@ import {
 } from '../bulk_actions/get_leading_control_column';
 
 interface BulkActionsProps {
+  query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   alerts: Alerts;
   useBulkActionsConfig?: UseBulkActionsRegistry;
 }
@@ -29,14 +31,16 @@ export interface UseBulkActions {
   bulkActionsState: BulkActionsState;
   bulkActions: BulkActionsConfig[];
   setIsBulkActionsLoading: (isLoading: boolean) => void;
+  clearSelection: () => void;
 }
 
 export function useBulkActions({
   alerts,
+  query,
   useBulkActionsConfig = () => [],
 }: BulkActionsProps): UseBulkActions {
   const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
-  const bulkActions = useBulkActionsConfig();
+  const bulkActions = useBulkActionsConfig(query);
 
   const isBulkActionsColumnActive = bulkActions.length !== 0;
 
@@ -48,11 +52,16 @@ export function useBulkActions({
     updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
   };
 
+  const clearSelection = () => {
+    updateBulkActionsState({ action: BulkActionsVerbs.clear });
+  };
+
   return {
     isBulkActionsColumnActive,
     getBulkActionsLeadingControlColumn,
     bulkActionsState,
     bulkActions,
     setIsBulkActionsLoading,
+    clearSelection,
   };
 }

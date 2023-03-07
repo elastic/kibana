@@ -34,7 +34,7 @@ import {
   type UpdateByQueryResponse,
   updateAndPickupMappings,
   type UpdateAndPickupMappingsResponse,
-  updateTargetMappingsMeta,
+  updateMappings,
   removeWriteBlock,
   transformDocs,
   waitForIndexStatus,
@@ -43,6 +43,7 @@ import {
   type DocumentsTransformFailed,
   type DocumentsTransformSuccess,
   MIGRATION_CLIENT_OPTIONS,
+  createBulkIndexOperationTuple,
 } from '@kbn/core-saved-objects-migration-server-internal';
 
 const { startES } = createTestServers({
@@ -70,7 +71,11 @@ describe('migration actions', () => {
       indexName: 'existing_index_with_docs',
       mappings: {
         dynamic: true,
-        properties: {},
+        properties: {
+          someProperty: {
+            type: 'integer',
+          },
+        },
         _meta: {
           migrationMappingPropertyHashes: {
             references: '7997cf5a56cc02bdc9c93361bde732b0',
@@ -78,7 +83,7 @@ describe('migration actions', () => {
         },
       },
     })();
-    const sourceDocs = [
+    const docs = [
       { _source: { title: 'doc 1' } },
       { _source: { title: 'doc 2' } },
       { _source: { title: 'doc 3' } },
@@ -88,7 +93,7 @@ describe('migration actions', () => {
     await bulkOverwriteTransformedDocuments({
       client,
       index: 'existing_index_with_docs',
-      transformedDocs: sourceDocs,
+      operations: docs.map(createBulkIndexOperationTuple),
       refresh: 'wait_for',
     })();
 
@@ -101,7 +106,7 @@ describe('migration actions', () => {
     await bulkOverwriteTransformedDocuments({
       client,
       index: 'existing_index_with_write_block',
-      transformedDocs: sourceDocs,
+      operations: docs.map(createBulkIndexOperationTuple),
       refresh: 'wait_for',
     })();
     await setWriteBlock({ client, index: 'existing_index_with_write_block' })();
@@ -302,7 +307,7 @@ describe('migration actions', () => {
       const res = (await bulkOverwriteTransformedDocuments({
         client,
         index: 'new_index_without_write_block',
-        transformedDocs: sourceDocs,
+        operations: sourceDocs.map(createBulkIndexOperationTuple),
         refresh: 'wait_for',
       })()) as Either.Left<unknown>;
 
@@ -882,7 +887,7 @@ describe('migration actions', () => {
       await bulkOverwriteTransformedDocuments({
         client,
         index: 'reindex_target_4',
-        transformedDocs: sourceDocs,
+        operations: sourceDocs.map(createBulkIndexOperationTuple),
         refresh: 'wait_for',
       })();
 
@@ -1441,7 +1446,7 @@ describe('migration actions', () => {
       await bulkOverwriteTransformedDocuments({
         client,
         index: 'existing_index_without_mappings',
-        transformedDocs: sourceDocs,
+        operations: sourceDocs.map(createBulkIndexOperationTuple),
         refresh: 'wait_for',
       })();
 
@@ -1485,15 +1490,22 @@ describe('migration actions', () => {
     });
   });
 
-  describe('updateTargetMappingsMeta', () => {
+  describe('updateMappings', () => {
     it('rejects if ES throws an error', async () => {
-      const task = updateTargetMappingsMeta({
+      const task = updateMappings({
         client,
         index: 'no_such_index',
-        meta: {
-          migrationMappingPropertyHashes: {
-            references: 'updateda56cc02bdc9c93361bupdated',
-            newReferences: 'fooBarHashMd509387420934879300d9',
+        mappings: {
+          properties: {
+            created_at: {
+              type: 'date',
+            },
+          },
+          _meta: {
+            migrationMappingPropertyHashes: {
+              references: 'updateda56cc02bdc9c93361bupdated',
+              newReferences: 'fooBarHashMd509387420934879300d9',
+            },
           },
         },
       })();
@@ -1501,13 +1513,51 @@ describe('migration actions', () => {
       await expect(task).rejects.toThrow('index_not_found_exception');
     });
 
-    it('resolves right when mappings._meta are correctly updated', async () => {
-      const res = await updateTargetMappingsMeta({
+    it('resolves left when the mappings are incompatible', async () => {
+      const res = await updateMappings({
         client,
         index: 'existing_index_with_docs',
-        meta: {
-          migrationMappingPropertyHashes: {
-            newReferences: 'fooBarHashMd509387420934879300d9',
+        mappings: {
+          properties: {
+            someProperty: {
+              type: 'date', // attempt to change an existing field's type in an incompatible fashion
+            },
+          },
+          _meta: {
+            migrationMappingPropertyHashes: {
+              references: 'updateda56cc02bdc9c93361bupdated',
+              newReferences: 'fooBarHashMd509387420934879300d9',
+            },
+          },
+        },
+      })();
+
+      expect(Either.isLeft(res)).toBe(true);
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "type": "incompatible_mapping_exception",
+          },
+        }
+      `);
+    });
+
+    it('resolves right when mappings are correctly updated', async () => {
+      const res = await updateMappings({
+        client,
+        index: 'existing_index_with_docs',
+        mappings: {
+          properties: {
+            created_at: {
+              type: 'date',
+            },
+          },
+          _meta: {
+            migrationMappingPropertyHashes: {
+              references: 'updateda56cc02bdc9c93361bupdated',
+              newReferences: 'fooBarHashMd509387420934879300d9',
+            },
           },
         },
       })();
@@ -1518,8 +1568,17 @@ describe('migration actions', () => {
         index: ['existing_index_with_docs'],
       });
 
+      expect(indices.existing_index_with_docs.mappings?.properties).toEqual(
+        expect.objectContaining({
+          created_at: {
+            type: 'date',
+          },
+        })
+      );
+
       expect(indices.existing_index_with_docs.mappings?._meta).toEqual({
         migrationMappingPropertyHashes: {
+          references: 'updateda56cc02bdc9c93361bupdated',
           newReferences: 'fooBarHashMd509387420934879300d9',
         },
       });
@@ -1837,7 +1896,7 @@ describe('migration actions', () => {
       const task = bulkOverwriteTransformedDocuments({
         client,
         index: 'existing_index_with_docs',
-        transformedDocs: newDocs,
+        operations: newDocs.map(createBulkIndexOperationTuple),
         refresh: 'wait_for',
       });
 
@@ -1860,10 +1919,10 @@ describe('migration actions', () => {
       const task = bulkOverwriteTransformedDocuments({
         client,
         index: 'existing_index_with_docs',
-        transformedDocs: [
+        operations: [
           ...existingDocs,
           { _source: { title: 'doc 8' } } as unknown as SavedObjectsRawDoc,
-        ],
+        ].map(createBulkIndexOperationTuple),
         refresh: 'wait_for',
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -1883,7 +1942,7 @@ describe('migration actions', () => {
         bulkOverwriteTransformedDocuments({
           client,
           index: 'existing_index_with_write_block',
-          transformedDocs: newDocs,
+          operations: newDocs.map(createBulkIndexOperationTuple),
           refresh: 'wait_for',
         })()
       ).resolves.toMatchInlineSnapshot(`
@@ -1906,7 +1965,7 @@ describe('migration actions', () => {
       const task = bulkOverwriteTransformedDocuments({
         client,
         index: 'existing_index_with_docs',
-        transformedDocs: newDocs,
+        operations: newDocs.map(createBulkIndexOperationTuple),
       });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {

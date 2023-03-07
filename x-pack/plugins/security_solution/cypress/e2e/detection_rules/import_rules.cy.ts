@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TOASTER } from '../../screens/alerts_detection_rules';
+import { RULES_MANAGEMENT_TABLE, TOASTER } from '../../screens/alerts_detection_rules';
 import {
   expectNumberOfRules,
   expectToContainRule,
@@ -41,8 +41,8 @@ describe('Import rules', () => {
         'Successfully imported 1 ruleSuccessfully imported 1 exception.'
       );
 
-      expectNumberOfRules(expectedNumberOfRules);
-      expectToContainRule(expectedImportedRuleName);
+      expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
+      expectToContainRule(RULES_MANAGEMENT_TABLE, expectedImportedRuleName);
     });
   });
 

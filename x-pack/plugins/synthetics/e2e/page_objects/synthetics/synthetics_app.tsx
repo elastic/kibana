@@ -92,6 +92,7 @@ export function syntheticsAppPageProvider({ page, kibanaUrl }: { page: Page; kib
       if (doLogin) {
         await this.loginToKibana();
       }
+      await page.waitForSelector('h1:has-text("Settings")');
     },
 
     async navigateToAddMonitor() {

@@ -7,7 +7,7 @@
     ],
   },
   "include": [
-    "*.d.ts"
+    "*.ts"
   ],
   "exclude": [
     "target/**/*",

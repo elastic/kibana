@@ -13,5 +13,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseIntegrationTestsConfig.getAll(),
     testFiles: [require.resolve('.')],
+    junit: {
+      reportName: 'X-Pack API Integration Tests - aiops',
+    },
   };
 }

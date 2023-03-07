@@ -55,6 +55,7 @@ import {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
   type CellValueContext,
+  shouldFetch$,
 } from '@kbn/embeddable-plugin/public';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
@@ -501,20 +502,14 @@ export class Embeddable
 
     // Update search context and reload on changes related to search
     this.inputReloadSubscriptions.push(
-      this.getUpdated$()
-        .pipe(map(() => this.getInput()))
-        .pipe(
-          distinctUntilChanged((a, b) =>
-            fastIsEqual(
-              [a.filters, a.query, a.timeRange, a.searchSessionId],
-              [b.filters, b.query, b.timeRange, b.searchSessionId]
-            )
-          ),
-          skip(1)
-        )
-        .subscribe(async (input) => {
+      shouldFetch$<LensEmbeddableInput>(this.getUpdated$(), () => this.getInput()).subscribe(
+        (input) => {
+          // reset removable messages
+          // Dashboard search/context changes are detected here
+          this.additionalUserMessages = {};
           this.onContainerStateChanged(input);
-        })
+        }
+      )
     );
   }
 
@@ -538,11 +533,11 @@ export class Embeddable
 
   private get activeVisualizationState() {
     if (!this.activeVisualization) return;
-    return (
-      this.activeVisualization.fromPersistableState?.(
-        this.savedVis?.state.visualization,
-        this.savedVis?.references
-      ) || this.activeVisualization.initialize(() => '', this.savedVis?.state.visualization)
+    return this.activeVisualization.initialize(
+      () => '',
+      this.savedVis?.state.visualization,
+      undefined,
+      this.savedVis?.references
     );
   }
 
@@ -596,11 +591,10 @@ export class Embeddable
       })
     );
 
-    const mergedSearchContext = this.getMergedSearchContext();
-
     if (!this.savedVis) {
       return userMessages;
     }
+    const mergedSearchContext = this.getMergedSearchContext();
 
     const frameDatasourceAPI: FrameDatasourceAPI = {
       dataViews: {
@@ -652,13 +646,9 @@ export class Embeddable
     }
 
     return () => {
-      const withMessagesRemoved = {
-        ...this.additionalUserMessages,
-      };
-
-      messages.map(({ uniqueId }) => uniqueId).forEach((id) => delete withMessagesRemoved[id]);
-
-      this.additionalUserMessages = withMessagesRemoved;
+      messages.forEach(({ uniqueId }) => {
+        delete this.additionalUserMessages[uniqueId];
+      });
     };
   };
 
@@ -1182,7 +1172,11 @@ export class Embeddable
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
-    this.handleContainerStateChanged(this.input);
+    if (this.handleContainerStateChanged(this.input)) {
+      // reset removable messages
+      // Unified histogram search/context changes are detected here
+      this.additionalUserMessages = {};
+    }
     if (this.domNode) {
       this.render(this.domNode);
     }

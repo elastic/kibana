@@ -20,7 +20,7 @@ import moment from 'moment';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getClusterIdQuery } from './benchmarks_section';
-import { INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
+import { CSPM_POLICY_TEMPLATE, INTERNAL_FEATURE_FLAGS } from '../../../../common/constants';
 import { Cluster } from '../../../../common/types';
 import { useNavigateFindings } from '../../../common/hooks/use_navigate_findings';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
@@ -31,13 +31,16 @@ const defaultClusterTitle = i18n.translate(
 );
 
 const getClusterTitle = (cluster: Cluster) => {
-  if (cluster.meta.benchmark.posture_type === 'cspm') return cluster.meta.cloud?.account.name;
+  if (cluster.meta.benchmark.posture_type === CSPM_POLICY_TEMPLATE) {
+    return cluster.meta.cloud?.account.name;
+  }
+
   return cluster.meta.cluster?.name;
 };
 
 const getClusterId = (cluster: Cluster) => {
   const assetIdentifierId = cluster.meta.assetIdentifierId;
-  if (cluster.meta.benchmark.posture_type === 'cspm') return assetIdentifierId;
+  if (cluster.meta.benchmark.posture_type === CSPM_POLICY_TEMPLATE) return assetIdentifierId;
   return assetIdentifierId.slice(0, 6);
 };
 

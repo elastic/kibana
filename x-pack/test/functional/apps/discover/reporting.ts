@@ -51,6 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await reportingAPI.teardownEcommerce();
+        await esArchiver.emptyKibanaIndex();
       });
 
       it('is available if new', async () => {
@@ -72,6 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       after(async () => {
         await reportingAPI.teardownEcommerce();
+        await esArchiver.emptyKibanaIndex();
       });
 
       beforeEach(async () => {

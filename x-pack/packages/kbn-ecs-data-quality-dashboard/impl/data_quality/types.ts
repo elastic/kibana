@@ -18,6 +18,7 @@ export interface Mappings {
 
 export interface AllowedValue {
   description?: string;
+  expected_event_types?: string[];
   name?: string;
 }
 
@@ -27,8 +28,11 @@ export interface EcsMetadata {
   description?: string;
   example?: string;
   flat_name?: string;
+  format?: string;
+  ignore_above?: number;
   level?: string;
   name?: string;
+  normalize?: string[];
   required?: boolean;
   short?: string;
   type?: string;
@@ -40,6 +44,7 @@ export type EnrichedFieldMetadata = EcsMetadata & {
   indexFieldType: string;
   indexInvalidValues: UnallowedValueCount[];
   isEcsCompliant: boolean;
+  isInSameFamily: boolean;
 };
 
 export interface PartitionedFieldMetadata {

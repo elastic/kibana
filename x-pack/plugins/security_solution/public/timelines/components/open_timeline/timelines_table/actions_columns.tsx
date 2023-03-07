@@ -27,6 +27,7 @@ export const getActionsColumns = ({
   onOpenDeleteTimelineModal,
   onOpenTimeline,
   onCreateRule,
+  onCreateRuleFromEql,
   hasCrudAccess,
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
@@ -35,6 +36,7 @@ export const getActionsColumns = ({
   onOpenDeleteTimelineModal?: OnOpenDeleteTimelineModal;
   onOpenTimeline: OnOpenTimeline;
   onCreateRule?: OnCreateRuleFromTimeline;
+  onCreateRuleFromEql?: OnCreateRuleFromTimeline;
   hasCrudAccess: boolean;
 }): [TimelineActionsOverflowColumns] => {
   const createTimelineFromTemplate = {
@@ -149,7 +151,31 @@ export const getActionsColumns = ({
       timeline.status !== TimelineStatus.immutable,
     description: i18n.CREATE_RULE_FROM_TIMELINE,
     'data-test-subj': 'create-rule-from-timeline',
-    available: () => actionTimelineToShow.includes('createRule') && onCreateRule != null,
+    available: ({ queryType }: OpenTimelineResult) =>
+      actionTimelineToShow.includes('createRule') &&
+      onCreateRule != null &&
+      queryType != null &&
+      queryType.hasQuery,
+  };
+
+  const createRuleFromTimelineCorrelation = {
+    name: i18n.CREATE_RULE_FROM_TIMELINE_CORRELATION,
+    icon: 'indexEdit',
+    onClick: (selectedTimeline: OpenTimelineResult) => {
+      if (onCreateRuleFromEql != null && selectedTimeline.savedObjectId)
+        onCreateRuleFromEql(selectedTimeline.savedObjectId);
+    },
+    enabled: (timeline: OpenTimelineResult) =>
+      onCreateRuleFromEql != null &&
+      timeline.savedObjectId != null &&
+      timeline.status !== TimelineStatus.immutable,
+    description: i18n.CREATE_RULE_FROM_TIMELINE,
+    'data-test-subj': 'create-rule-from-eql',
+    available: ({ queryType }: OpenTimelineResult) =>
+      actionTimelineToShow.includes('createRuleFromEql') &&
+      onCreateRuleFromEql != null &&
+      queryType != null &&
+      queryType.hasEql,
   };
   return [
     {
@@ -162,6 +188,7 @@ export const getActionsColumns = ({
         exportTimelineAction,
         deleteTimelineColumn,
         createRuleFromTimeline,
+        createRuleFromTimelineCorrelation,
       ],
     },
   ];
