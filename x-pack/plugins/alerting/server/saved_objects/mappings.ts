@@ -8,6 +8,7 @@
 import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
 export const alertMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
   properties: {
     enabled: {
       type: 'boolean',
@@ -53,26 +54,27 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         actionTypeId: {
           type: 'keyword',
         },
-        params: {
-          dynamic: false,
-          properties: {},
-        },
-        frequency: {
-          properties: {
-            summary: {
-              index: false,
-              type: 'boolean',
-            },
-            notifyWhen: {
-              index: false,
-              type: 'keyword',
-            },
-            throttle: {
-              index: false,
-              type: 'keyword',
-            },
-          },
-        },
+        // NO NEED TO BE INDEXED
+        // params: {
+        //   dynamic: false,
+        //   properties: {},
+        // },
+        // frequency: {
+        //   properties: {
+        //     summary: {
+        //       index: false,
+        //       type: 'boolean',
+        //     },
+        //     notifyWhen: {
+        //       index: false,
+        //       type: 'keyword',
+        //     },
+        //     throttle: {
+        //       index: false,
+        //       type: 'keyword',
+        //     },
+        //   },
+        // },
       },
     },
     params: {
@@ -92,63 +94,67 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
     scheduledTaskId: {
       type: 'keyword',
     },
-    createdBy: {
-      type: 'keyword',
-    },
-    updatedBy: {
-      type: 'keyword',
-    },
-    createdAt: {
-      type: 'date',
-    },
-    updatedAt: {
-      type: 'date',
-    },
-    apiKey: {
-      type: 'binary',
-    },
-    apiKeyOwner: {
-      type: 'keyword',
-    },
-    throttle: {
-      type: 'keyword',
-    },
-    notifyWhen: {
-      type: 'keyword',
-    },
+    // NO NEED TO BE INDEXED
+    // createdBy: {
+    //   type: 'keyword',
+    // },
+    // updatedBy: {
+    //   type: 'keyword',
+    // },
+    // createdAt: {
+    //   type: 'date',
+    // },
+    // updatedAt: {
+    //   type: 'date',
+    // },
+    // NEED TO CHECK WITH KIBANA SECURITY
+    // apiKey: {
+    //   type: 'binary',
+    // },
+    // NO NEED TO BE INDEXED
+    // apiKeyOwner: {
+    //   type: 'keyword',
+    // },
+    // throttle: {
+    //   type: 'keyword',
+    // },
+    // notifyWhen: {
+    //   type: 'keyword',
+    // },
     muteAll: {
       type: 'boolean',
     },
     mutedInstanceIds: {
       type: 'keyword',
     },
-    meta: {
-      properties: {
-        versionApiKeyLastmodified: {
-          type: 'keyword',
-        },
-      },
-    },
+    // NO NEED TO BE INDEXED
+    // meta: {
+    //   properties: {
+    //     versionApiKeyLastmodified: {
+    //       type: 'keyword',
+    //     },
+    //   },
+    // },
     monitoring: {
       properties: {
         run: {
           properties: {
-            history: {
-              properties: {
-                duration: {
-                  type: 'long',
-                },
-                success: {
-                  type: 'boolean',
-                },
-                timestamp: {
-                  type: 'date',
-                },
-                outcome: {
-                  type: 'keyword',
-                },
-              },
-            },
+            // history: {
+            //   properties: {
+            //     duration: {
+            //       type: 'long',
+            //     },
+            //     success: {
+            //       type: 'boolean',
+            //     },
+            //     timestamp: {
+            //       type: 'date',
+            //     },
+            //     outcome: {
+            //       type: 'keyword',
+            //     },
+            //   },
+            // },
             calculated_metrics: {
               properties: {
                 p50: {
@@ -198,79 +204,81 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
       },
     },
-    snoozeSchedule: {
-      type: 'nested',
-      properties: {
-        id: {
-          type: 'keyword',
-        },
-        duration: {
-          type: 'long',
-        },
-        skipRecurrences: {
-          type: 'date',
-          format: 'strict_date_time',
-        },
-        rRule: {
-          type: 'nested',
-          properties: {
-            freq: {
-              type: 'keyword',
-            },
-            dtstart: {
-              type: 'date',
-              format: 'strict_date_time',
-            },
-            tzid: {
-              type: 'keyword',
-            },
-            until: {
-              type: 'date',
-              format: 'strict_date_time',
-            },
-            count: {
-              type: 'long',
-            },
-            interval: {
-              type: 'long',
-            },
-            wkst: {
-              type: 'keyword',
-            },
-            byweekday: {
-              type: 'keyword',
-            },
-            bymonth: {
-              type: 'short',
-            },
-            bysetpos: {
-              type: 'long',
-            },
-            bymonthday: {
-              type: 'short',
-            },
-            byyearday: {
-              type: 'short',
-            },
-            byweekno: {
-              type: 'short',
-            },
-            byhour: {
-              type: 'long',
-            },
-            byminute: {
-              type: 'long',
-            },
-            bysecond: {
-              type: 'long',
-            },
-          },
-        },
-      },
-    },
-    nextRun: {
-      type: 'date',
-    },
+    // NO NEED TO BE INDEXED
+    // snoozeSchedule: {
+    //   type: 'nested',
+    //   properties: {
+    //     id: {
+    //       type: 'keyword',
+    //     },
+    //     duration: {
+    //       type: 'long',
+    //     },
+    //     skipRecurrences: {
+    //       type: 'date',
+    //       format: 'strict_date_time',
+    //     },
+    //     rRule: {
+    //       type: 'nested',
+    //       properties: {
+    //         freq: {
+    //           type: 'keyword',
+    //         },
+    //         dtstart: {
+    //           type: 'date',
+    //           format: 'strict_date_time',
+    //         },
+    //         tzid: {
+    //           type: 'keyword',
+    //         },
+    //         until: {
+    //           type: 'date',
+    //           format: 'strict_date_time',
+    //         },
+    //         count: {
+    //           type: 'long',
+    //         },
+    //         interval: {
+    //           type: 'long',
+    //         },
+    //         wkst: {
+    //           type: 'keyword',
+    //         },
+    //         byweekday: {
+    //           type: 'keyword',
+    //         },
+    //         bymonth: {
+    //           type: 'short',
+    //         },
+    //         bysetpos: {
+    //           type: 'long',
+    //         },
+    //         bymonthday: {
+    //           type: 'short',
+    //         },
+    //         byyearday: {
+    //           type: 'short',
+    //         },
+    //         byweekno: {
+    //           type: 'short',
+    //         },
+    //         byhour: {
+    //           type: 'long',
+    //         },
+    //         byminute: {
+    //           type: 'long',
+    //         },
+    //         bysecond: {
+    //           type: 'long',
+    //         },
+    //       },
+    //     },
+    //   },
+    // },
+    // NO NEED TO BE INDEXED
+    // nextRun: {
+    //   type: 'date',
+    // },
     // Deprecated, if you need to add new property please do it in `last_run`
     executionStatus: {
       properties: {
@@ -286,42 +294,44 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         lastDuration: {
           type: 'long',
         },
-        error: {
-          properties: {
-            reason: {
-              type: 'keyword',
-            },
-            message: {
-              type: 'keyword',
-            },
-          },
-        },
-        warning: {
-          properties: {
-            reason: {
-              type: 'keyword',
-            },
-            message: {
-              type: 'keyword',
-            },
-          },
-        },
+        // NO NEED TO BE INDEXED
+        // error: {
+        //   properties: {
+        //     reason: {
+        //       type: 'keyword',
+        //     },
+        //     message: {
+        //       type: 'keyword',
+        //     },
+        //   },
+        // },
+        // warning: {
+        //   properties: {
+        //     reason: {
+        //       type: 'keyword',
+        //     },
+        //     message: {
+        //       type: 'keyword',
+        //     },
+        //   },
+        // },
       },
     },
     lastRun: {
       properties: {
-        outcome: {
-          type: 'keyword',
-        },
+        // outcome: {
+        //   type: 'keyword',
+        // },
         outcomeOrder: {
           type: 'float',
         },
-        warning: {
-          type: 'text',
-        },
-        outcomeMsg: {
-          type: 'text',
-        },
+        // NO NEED TO BE INDEXED
+        // warning: {
+        //   type: 'text',
+        // },
+        // outcomeMsg: {
+        //   type: 'text',
+        // },
         alertsCount: {
           properties: {
             active: {
