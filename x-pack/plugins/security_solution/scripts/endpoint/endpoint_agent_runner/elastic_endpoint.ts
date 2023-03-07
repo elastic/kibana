@@ -85,7 +85,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
     log.info(`Creating VM named: ${vmName}`);
 
-    await execa.command(`multipass launch --name ${vmName}`);
+    await execa.command(`multipass launch --name ${vmName} --disk 8G`);
 
     log.verbose(await execa('multipass', ['info', vmName]));
 
@@ -102,7 +102,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
     await execa.command(`multipass exec ${vmName} -- tar -zxf ${agentDownloadedFile}`);
     await execa.command(`multipass exec ${vmName} -- rm -f ${agentDownloadedFile}`);
 
-    const agentEnrollArgs = [
+    const agentInstallArguments = [
       'exec',
 
       vmName,
@@ -116,7 +116,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
       './elastic-agent',
 
-      'enroll',
+      'install',
 
       '--insecure',
 
@@ -130,27 +130,9 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
     ];
 
     log.info(`Enrolling elastic agent with Fleet`);
-    log.verbose(`Command: multipass ${agentEnrollArgs.join(' ')}`);
+    log.verbose(`Command: multipass ${agentInstallArguments.join(' ')}`);
 
-    await execa(`multipass`, agentEnrollArgs);
-
-    const runAgentCommand = `multipass exec ${vmName} --working-directory /home/ubuntu/${vmDirName} -- sudo ./elastic-agent \&>/dev/null \&`;
-
-    log.info(`Running elastic agent`);
-    log.verbose(`Command: ${runAgentCommand}`);
-
-    // About `timeout` option below
-    // The `multipass exec` command seems to have some issues when a command pass to it redirects output,
-    // as is with the command that runs endpoint. See https://github.com/canonical/multipass/issues/667
-    // To get around it, `timeout` is set to 5s, which should be enough time for the command to be executed
-    // in the VM.
-    await execa.command(runAgentCommand, { timeout: 5000 }).catch((error) => {
-      if (error.originalMessage !== 'Timed out') {
-        throw error;
-      }
-
-      log.verbose(`command timed out, but that might be ok - Fleet server should be running`);
-    });
+    await execa(`multipass`, agentInstallArguments);
 
     log.info(`Waiting for Agent to check-in with Fleet`);
     await waitForHostToEnroll(kbnClient, vmName);
