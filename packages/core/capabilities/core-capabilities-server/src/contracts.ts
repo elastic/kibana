@@ -53,8 +53,8 @@ export interface CapabilitiesSetup {
    * Register a {@link CapabilitiesSwitcher} to be used to change the default state
    * of the {@link Capabilities} entries when resolving them.
    *
-   * A capabilities switcher can only change the state of existing capabilities.
-   * Capabilities added or removed when invoking the switcher will be ignored.
+   * A capabilities switcher can only change the state of existing capabilities from `true` to `false`.
+   * Capabilities added, removed, or set to `true` when invoking the switcher will be ignored.
    *
    * @example
    * How to restrict some capabilities

@@ -57,13 +57,6 @@ export const resolveCapabilities = async (
     ),
   });
 
-  return switchers.reduce(async (caps, switcher) => {
-    const resolvedCaps = await caps;
-    const changes = await switcher(request, resolvedCaps, useDefaultCapabilities);
-    return recursiveApplyChanges(resolvedCaps, changes);
-  }, Promise.resolve(mergedCaps));
-
-  /*
   const switcherChanges = await Promise.all(
     switchers.map((switcher) => {
       return switcher(request, mergedCaps, useDefaultCapabilities);
@@ -73,7 +66,6 @@ export const resolveCapabilities = async (
   return switcherChanges.reduce<Capabilities>((caps, changes) => {
     return recursiveApplyChanges(caps, changes);
   }, mergedCaps);
-  */
 };
 
 function recursiveApplyChanges<
@@ -87,10 +79,15 @@ function recursiveApplyChanges<
       if (changed == null) {
         return [key, orig];
       }
-      if (typeof orig === 'object' && typeof changed === 'object') {
-        return [key, recursiveApplyChanges(orig, changed)];
+      if (typeof orig === typeof changed) {
+        if (typeof orig === 'object') {
+          return [key, recursiveApplyChanges(orig, changed)];
+        }
+        if (typeof orig === 'boolean') {
+          return [key, orig && changed];
+        }
       }
-      return [key, typeof orig === typeof changed ? changed : orig];
+      return [key, orig];
     })
     .reduce((acc, [key, value]) => {
       acc[key as keyof TDestination] = value;
