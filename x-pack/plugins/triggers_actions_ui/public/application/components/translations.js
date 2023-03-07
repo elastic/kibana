@@ -56,8 +56,15 @@ export const SHOW_ALL = i18n.translate(
   }
 );
 
-export const ADD_VARIABLE = i18n.translate(
+export const ADD_VARIABLE_POPOVER_BUTTON = i18n.translate(
   'xpack.triggersActionsUI.components.addMessageVariables.addVariablePopoverButton',
+  {
+    defaultMessage: 'Add variable',
+  }
+);
+
+export const ADD_VARIABLE_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.components.addMessageVariables.addRuleVariableTitle',
   {
     defaultMessage: 'Add variable',
   }

@@ -75,7 +75,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           }));
   }, [isShowAllPressed, messageVariables]);
 
-  const addVariableButtonTitle = buttonTitle ? buttonTitle : i18n.ADD_VARIABLE;
+  const addVariableButtonTitle = buttonTitle ? buttonTitle : i18n.ADD_VARIABLE_TITLE;
 
   const Button = useMemo(
     () =>
@@ -85,7 +85,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           data-test-subj={`${paramsProperty}AddVariableButton-Title`}
           size="xs"
           onClick={() => setIsVariablesPopoverOpen(true)}
-          aria-label={i18n.ADD_VARIABLE}
+          aria-label={i18n.ADD_VARIABLE_POPOVER_BUTTON}
         >
           {addVariableButtonTitle}
         </EuiButtonEmpty>
@@ -96,7 +96,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           title={addVariableButtonTitle}
           onClick={() => setIsVariablesPopoverOpen(true)}
           iconType="indexOpen"
-          aria-label={i18n.ADD_VARIABLE}
+          aria-label={i18n.ADD_VARIABLE_POPOVER_BUTTON}
         />
       ),
     [addVariableButtonTitle, paramsProperty, showButtonTitle]
