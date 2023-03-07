@@ -9,16 +9,16 @@
 import { Writable } from 'stream';
 
 export interface CacheConfig {
-  pathRoot: string;
   dir: string;
   prefix: string;
   log?: Writable;
 }
 
 export interface Cache {
-  getMtime(path: string): string | undefined;
-  getCode(path: string): string | undefined;
-  getSourceMap(path: string): object | undefined;
-  update(path: string, opts: { mtime: string; code: string; map?: any }): Promise<void>;
-  close(): void;
+  getKey(path: string, source: string): string;
+  getCode(key: string): string | undefined;
+  getSourceMap(key: string): object | undefined;
+  update(key: string, entry: { code: string; map?: object | null }): Promise<void>;
 }
+
+export type CacheEntry = [atime: number, code: string, sourceMap: object];

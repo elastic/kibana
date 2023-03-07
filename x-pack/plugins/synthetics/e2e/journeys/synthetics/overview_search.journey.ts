@@ -7,6 +7,7 @@
 
 import { before, expect, journey, step } from '@elastic/synthetics';
 import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import {
   addTestMonitor,
   cleanTestMonitors,
@@ -16,6 +17,8 @@ import { syntheticsAppPageProvider } from '../../page_objects/synthetics/synthet
 
 journey('Overview Search', async ({ page, params }) => {
   recordVideo(page);
+
+  const retry: RetryService = params.getService('retry');
 
   const syntheticsApp = syntheticsAppPageProvider({ page, kibanaUrl: params.kibanaUrl });
   const elasticJourney = 'Elastic journey';
@@ -98,47 +101,53 @@ journey('Overview Search', async ({ page, params }) => {
     await page.waitForSelector(`text=${elasticJourney}`);
     await page.waitForSelector(`text=${cnnJourney}`);
     await page.waitForSelector(`text=${googleJourney}`);
-    await page.click('[aria-label="Clear input"]');
-    await page.focus('[data-test-subj="syntheticsOverviewSearchInput"]');
-    await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'dev', { delay: 300 });
-    await page.waitForSelector(`text=${elasticJourney}`);
-    expect(await elastic.count()).toBe(1);
-    expect(await cnn.count()).toBe(0);
-    expect(await google.count()).toBe(0);
-    await page.click('[aria-label="Clear input"]');
-    await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'qa', { delay: 300 });
-    await page.waitForSelector(`text=${cnnJourney}`);
-    expect(await elastic.count()).toBe(0);
-    expect(await cnn.count()).toBe(1);
-    expect(await google.count()).toBe(0);
-    await page.click('[aria-label="Clear input"]');
-    await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'staging', { delay: 300 });
-    await page.waitForSelector(`text=${googleJourney}`);
-    expect(await elastic.count()).toBe(0);
-    expect(await cnn.count()).toBe(0);
-    expect(await google.count()).toBe(1);
-    await page.click('[aria-label="Clear input"]');
-    await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'prod', {
-      delay: 300,
-    });
-    await page.waitForSelector(`text=${gmailJourney}`);
-    expect(await elastic.count()).toBe(0);
-    expect(await cnn.count()).toBe(0);
-    expect(await google.count()).toBe(0);
-    expect(await gmail.count()).toBe(1);
-    await page.click('[aria-label="Clear input"]');
-    await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'tag', {
-      delay: 300,
-    });
-    await page.waitForSelector(`text=${elasticJourney}`);
-    await page.waitForSelector(`text=${cnnJourney}`);
-    await page.waitForSelector(`text=${googleJourney}`);
-    await page.waitForSelector(`text=${gmailJourney}`);
+    await retry.tryForTime(60 * 1000, async () => {
+      await page.click('[aria-label="Clear input"]');
+      await page.focus('[data-test-subj="syntheticsOverviewSearchInput"]');
+      await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'dev', { delay: 300 });
+      await page.waitForSelector(`text=${elasticJourney}`);
+      expect(await elastic.count()).toBe(1);
+      expect(await cnn.count()).toBe(0);
+      expect(await google.count()).toBe(0);
+      await page.click('[aria-label="Clear input"]');
+      await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'qa', { delay: 300 });
+      await page.waitForSelector(`text=${cnnJourney}`);
+      expect(await elastic.count()).toBe(0);
+      expect(await cnn.count()).toBe(1);
+      expect(await google.count()).toBe(0);
+      await page.click('[aria-label="Clear input"]');
+      await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'staging', {
+        delay: 300,
+      });
+      await page.waitForSelector(`text=${googleJourney}`);
+      expect(await elastic.count()).toBe(0);
+      expect(await cnn.count()).toBe(0);
+      expect(await google.count()).toBe(1);
+      await page.click('[aria-label="Clear input"]');
+      await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'prod', {
+        delay: 300,
+      });
+      await page.waitForSelector(`text=${gmailJourney}`);
+      await retry.try(async () => {
+        expect(await elastic.count()).toBe(0);
+        expect(await cnn.count()).toBe(0);
+        expect(await google.count()).toBe(0);
+        expect(await gmail.count()).toBe(1);
+      });
+      await page.click('[aria-label="Clear input"]');
+      await page.type('[data-test-subj="syntheticsOverviewSearchInput"]', 'tag', {
+        delay: 300,
+      });
+      await page.waitForSelector(`text=${elasticJourney}`);
+      await page.waitForSelector(`text=${cnnJourney}`);
+      await page.waitForSelector(`text=${googleJourney}`);
+      await page.waitForSelector(`text=${gmailJourney}`);
 
-    expect(await elastic.count()).toBe(1);
-    expect(await cnn.count()).toBe(1);
-    expect(await google.count()).toBe(1);
-    expect(await gmail.count()).toBe(1);
+      expect(await elastic.count()).toBe(1);
+      expect(await cnn.count()).toBe(1);
+      expect(await google.count()).toBe(1);
+      expect(await gmail.count()).toBe(1);
+    });
   });
 
   step('searches by url and host', async () => {

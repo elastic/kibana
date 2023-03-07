@@ -907,6 +907,11 @@ describe('Execution Handler', () => {
             ],
           ]
       `);
+    expect(alertingEventLogger.logAction).toBeCalledWith({
+      alertSummary: { new: 1, ongoing: 0, recovered: 0 },
+      id: '1',
+      typeId: 'testActionTypeId',
+    });
   });
 
   test('skips summary actions (per rule run) when there is no alerts', async () => {
@@ -946,6 +951,7 @@ describe('Execution Handler', () => {
 
     expect(getSummarizedAlertsMock).not.toHaveBeenCalled();
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+    expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
   });
 
   test('triggers summary actions (custom interval)', async () => {
@@ -1030,6 +1036,11 @@ describe('Execution Handler', () => {
             ],
           ]
       `);
+    expect(alertingEventLogger.logAction).toBeCalledWith({
+      alertSummary: { new: 1, ongoing: 0, recovered: 0 },
+      id: '1',
+      typeId: 'testActionTypeId',
+    });
   });
 
   test('does not trigger summary actions if it is still being throttled (custom interval)', async () => {
@@ -1075,6 +1086,7 @@ describe('Execution Handler', () => {
     );
     expect(getSummarizedAlertsMock).not.toHaveBeenCalled();
     expect(actionsClient.bulkEnqueueExecution).not.toHaveBeenCalled();
+    expect(alertingEventLogger.logAction).not.toHaveBeenCalled();
   });
 
   test('removes the obsolete actions from the task state', async () => {
@@ -1452,6 +1464,39 @@ describe('Execution Handler', () => {
           Object {
             "actionParams": Object {
               "val": "rule url: ",
+            },
+            "actionTypeId": "test",
+            "ruleId": "1",
+            "spaceId": "test1",
+          },
+        ]
+      `);
+    });
+
+    it('sets the rule.url to the value from getViewInAppRelativeUrl when the rule type has it defined', async () => {
+      const execParams = {
+        ...defaultExecutionParams,
+        rule: ruleWithUrl,
+        taskRunnerContext: {
+          ...defaultExecutionParams.taskRunnerContext,
+          kibanaBaseUrl: 'http://localhost:12345',
+        },
+        ruleType: {
+          ...ruleType,
+          getViewInAppRelativeUrl() {
+            return '/app/management/some/other/place';
+          },
+        },
+      };
+
+      const executionHandler = new ExecutionHandler(generateExecutionParams(execParams));
+      await executionHandler.run(generateAlert({ id: 1 }));
+
+      expect(injectActionParamsMock.mock.calls[0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "actionParams": Object {
+              "val": "rule url: http://localhost:12345/s/test1/app/management/some/other/place",
             },
             "actionTypeId": "test",
             "ruleId": "1",

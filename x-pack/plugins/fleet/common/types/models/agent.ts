@@ -135,6 +135,13 @@ export interface CurrentUpgrade {
   startTime?: string;
 }
 
+export interface ActionErrorResult {
+  agentId: string;
+  error: string;
+  timestamp: string;
+  hostname?: string;
+}
+
 export interface ActionStatus {
   actionId: string;
   // how many agents are successfully included in action documents
@@ -154,6 +161,8 @@ export interface ActionStatus {
   cancellationTime?: string;
   newPolicyId?: string;
   creationTime: string;
+  hasRolloutPeriod?: boolean;
+  latestErrors?: ActionErrorResult[];
 }
 
 export interface AgentDiagnostics {

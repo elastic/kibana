@@ -53,7 +53,11 @@ export class AutocompleteInfo {
         const collaborator = this.mapping;
         return () => this.alias.getIndices(includeAliases, collaborator);
       case ENTITIES.FIELDS:
-        return this.mapping.getMappings(context.indices, context.types);
+        return this.mapping.getMappings(
+          context.indices,
+          context.types,
+          Object.getPrototypeOf(context)
+        );
       case ENTITIES.INDEX_TEMPLATES:
         return () => this.indexTemplate.getTemplates();
       case ENTITIES.COMPONENT_TEMPLATES:
@@ -93,7 +97,6 @@ export class AutocompleteInfo {
   }
 
   private load(data: AutoCompleteEntitiesApiResponse) {
-    this.mapping.loadMappings(data.mappings);
     const collaborator = this.mapping;
     this.alias.loadAliases(data.aliases, collaborator);
     this.indexTemplate.loadTemplates(data.indexTemplates);

@@ -50,6 +50,10 @@
     "@kbn/ml-url-state",
     "@kbn/ml-local-storage",
     "@kbn/ml-query-utils",
+    "@kbn/charts-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/unified-field-list-plugin",
+    "@kbn/shared-ux-router"
   ],
   "exclude": [
     "target/**/*",

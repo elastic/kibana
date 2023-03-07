@@ -14,7 +14,7 @@ import { HeaderSection } from '../../../../common/components/header_section';
 import { InspectButtonContainer } from '../../../../common/components/inspect';
 import { useSummaryChartData } from '../alerts_summary_charts_panel/use_summary_chart_data';
 import { alertTypeAggregations } from '../alerts_summary_charts_panel/aggregations';
-import { isAlertsTypeData } from './helpers';
+import { getIsAlertsTypeData } from './helpers';
 import * as i18n from './translations';
 
 const ALERTS_BY_TYPE_CHART_ID = 'alerts-summary-alert_by_type';
@@ -37,7 +37,7 @@ export const AlertsByTypePanel: React.FC<ChartsPanelProps> = ({
     skip,
     uniqueQueryId,
   });
-  const data = useMemo(() => (isAlertsTypeData(items) ? items : []), [items]);
+  const data = useMemo(() => (getIsAlertsTypeData(items) ? items : []), [items]);
 
   return (
     <InspectButtonContainer>

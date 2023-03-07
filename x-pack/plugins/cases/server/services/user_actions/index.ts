@@ -18,6 +18,7 @@ import type {
   CaseUserActionAttributesWithoutConnectorId,
   CaseUserActionDeprecatedResponse,
   CaseUserActionInjectedAttributes,
+  User,
 } from '../../../common/api';
 import { ActionTypes } from '../../../common/api';
 import {
@@ -96,6 +97,29 @@ interface UserActionsStatsAggsResult {
       doc_count: number;
     }>;
   };
+}
+
+interface ParticipantsAggsResult {
+  participants: {
+    buckets: Array<{
+      key: string;
+      docs: {
+        hits: {
+          hits: SavedObjectsRawDoc[];
+        };
+      };
+    }>;
+  };
+  assignees: {
+    buckets: Array<{
+      key: string;
+    }>;
+  };
+}
+
+interface GetUsersResponse {
+  participants: Array<{ id: string; owner: string; user: User }>;
+  assignedAndUnassignedUsers: Set<string>;
 }
 
 export class CaseUserActionService {
@@ -711,6 +735,92 @@ export class CaseUserActionService {
         terms: {
           field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
           size: 100,
+        },
+      },
+    };
+  }
+
+  public async getUsers({ caseId }: { caseId: string }): Promise<GetUsersResponse> {
+    const response = await this.context.unsecuredSavedObjectsClient.find<
+      CaseUserActionAttributesWithoutConnectorId,
+      ParticipantsAggsResult
+    >({
+      type: CASE_USER_ACTION_SAVED_OBJECT,
+      hasReference: { type: CASE_SAVED_OBJECT, id: caseId },
+      page: 1,
+      perPage: 1,
+      sortField: defaultSortField,
+      aggs: CaseUserActionService.buildParticipantsAgg(),
+    });
+
+    const assignedAndUnassignedUsers: GetUsersResponse['assignedAndUnassignedUsers'] =
+      new Set<string>();
+    const participants: GetUsersResponse['participants'] = [];
+    const participantsBuckets = response.aggregations?.participants.buckets ?? [];
+    const assigneesBuckets = response.aggregations?.assignees.buckets ?? [];
+
+    for (const bucket of participantsBuckets) {
+      const rawDoc = bucket.docs.hits.hits[0];
+      const user =
+        this.context.savedObjectsSerializer.rawToSavedObject<CaseUserActionAttributesWithoutConnectorId>(
+          rawDoc
+        );
+
+      /**
+       * We are interested only for the created_by
+       * and the owner. For that reason, there is no
+       * need to call transformToExternalModel which
+       * injects the references ids to the document.
+       */
+      participants.push({
+        id: user.id,
+        user: user.attributes.created_by,
+        owner: user.attributes.owner,
+      });
+    }
+
+    /**
+     * The users set includes any
+     * user that got assigned in the
+     * case even if they removed as
+     * assignee at some point in time.
+     */
+    for (const bucket of assigneesBuckets) {
+      assignedAndUnassignedUsers.add(bucket.key);
+    }
+
+    return { participants, assignedAndUnassignedUsers };
+  }
+
+  private static buildParticipantsAgg(): Record<string, estypes.AggregationsAggregationContainer> {
+    return {
+      participants: {
+        terms: {
+          field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.created_by.username`,
+          size: MAX_DOCS_PER_PAGE,
+          order: { _key: 'asc' },
+          missing: 'Unknown',
+        },
+        aggregations: {
+          docs: {
+            top_hits: {
+              size: 1,
+              sort: [
+                {
+                  [`${CASE_USER_ACTION_SAVED_OBJECT}.created_at`]: {
+                    order: 'desc',
+                  },
+                },
+              ],
+            },
+          },
+        },
+      },
+      assignees: {
+        terms: {
+          field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.assignees.uid`,
+          size: MAX_DOCS_PER_PAGE,
+          order: { _key: 'asc' },
         },
       },
     };

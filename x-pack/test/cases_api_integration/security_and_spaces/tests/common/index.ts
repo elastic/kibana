@@ -49,6 +49,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/bulk_get_cases'));
     loadTestFile(require.resolve('./internal/bulk_get_attachments'));
     loadTestFile(require.resolve('./internal/get_connectors'));
+    loadTestFile(require.resolve('./internal/user_actions_get_users'));
 
     /**
      * Attachments framework

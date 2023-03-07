@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import useAsyncFn, { type AsyncState } from 'react-use/lib/useAsyncFn';
 import { useCellActionsContext } from '../context/cell_actions_context';
@@ -22,34 +23,57 @@ const useThrowError = (error?: Error) => {
 /**
  * Performs the getActions async call and returns its value
  */
-export const useLoadActions = (context: CellActionCompatibilityContext): AsyncActions => {
+export const useLoadActions = (
+  context: CellActionCompatibilityContext,
+  options: LoadActionsOptions = {}
+): AsyncActions => {
   const { getActions } = useCellActionsContext();
-  const { error, ...actionsState } = useAsync(() => getActions(context), []);
+  const { error, value, loading } = useAsync(() => getActions(context), []);
+  const filteredActions = useFilteredActions(value, options.disabledActionTypes);
   useThrowError(error);
-  return actionsState;
+  return { value: filteredActions, loading };
 };
 
 /**
  * Returns a function to perform the getActions async call
  */
-export const useLoadActionsFn = (): [AsyncActions, GetActions] => {
+export const useLoadActionsFn = (options: LoadActionsOptions = {}): [AsyncActions, GetActions] => {
   const { getActions } = useCellActionsContext();
-  const [{ error, ...actionsState }, loadActions] = useAsyncFn(getActions, []);
+  const [{ error, value, loading }, loadActions] = useAsyncFn(getActions, []);
+  const filteredActions = useFilteredActions(value, options.disabledActionTypes);
   useThrowError(error);
-  return [actionsState, loadActions];
+  return [{ value: filteredActions, loading }, loadActions];
 };
+
+interface LoadActionsOptions {
+  disabledActionTypes?: string[];
+}
 
 /**
  * Groups getActions calls for an array of contexts in one async bulk operation
  */
 export const useBulkLoadActions = (
-  contexts: CellActionCompatibilityContext[]
+  contexts: CellActionCompatibilityContext[],
+  options: LoadActionsOptions = {}
 ): AsyncActions<CellAction[][]> => {
   const { getActions } = useCellActionsContext();
   const { error, ...actionsState } = useAsync(
-    () => Promise.all(contexts.map((context) => getActions(context))),
-    []
+    () =>
+      Promise.all(
+        contexts.map((context) =>
+          getActions(context).then(
+            (actions) => filteredActions(actions, options.disabledActionTypes) ?? []
+          )
+        )
+      ),
+    [contexts]
   );
   useThrowError(error);
   return actionsState;
 };
+
+const useFilteredActions = (actions: CellAction[] | undefined, disabledActionTypes?: string[]) =>
+  useMemo(() => filteredActions(actions, disabledActionTypes), [actions, disabledActionTypes]);
+
+const filteredActions = (actions: CellAction[] | undefined, disabledActionTypes: string[] = []) =>
+  actions ? actions.filter(({ type }) => !disabledActionTypes?.includes(type)) : undefined;

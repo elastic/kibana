@@ -325,6 +325,7 @@ export class DashboardPageObject extends FtrService {
       await this.testSubjects.existOrFail('dashboardUnsavedChangesBadge');
       await this.clickQuickSave();
       await this.testSubjects.missingOrFail('dashboardUnsavedChangesBadge');
+      await this.testSubjects.click('toastCloseButton');
     });
     if (switchMode) {
       await this.clickCancelOutOfEditMode();

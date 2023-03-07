@@ -324,6 +324,7 @@ exports[`LoginPage page renders as expected 1`] = `
       />
       <span
         className="loginWelcome__logo"
+        style={Object {}}
       >
         <EuiIcon
           size="xxl"
@@ -411,6 +412,11 @@ exports[`LoginPage page renders with custom branding 1`] = `
       />
       <span
         className="loginWelcome__logo"
+        style={
+          Object {
+            "padding": 0,
+          }
+        }
       >
         <EuiImage
           alt="logo"

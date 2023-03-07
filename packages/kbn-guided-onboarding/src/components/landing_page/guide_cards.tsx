@@ -27,7 +27,7 @@ export interface GuideCardsProps {
 }
 export const GuideCards = (props: GuideCardsProps) => {
   return (
-    <EuiFlexGroup wrap responsive justifyContent="center">
+    <EuiFlexGroup wrap justifyContent="center" responsive={false}>
       {guideCards.map((card, index) => (
         <EuiFlexItem key={index} grow={false}>
           <GuideCard card={card} {...props} />

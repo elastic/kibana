@@ -27,7 +27,6 @@ import { TIMELINE_TEMPLATE_DETAILS } from '../../screens/rule_details';
 import { EUI_FILTER_SELECT_ITEM } from '../../screens/common/controls';
 
 import {
-  changeRowsPerPageTo,
   waitForRulesTableToBeLoaded,
   selectAllRules,
   goToTheRuleDetailsOf,
@@ -100,6 +99,7 @@ import { getIndicatorMatchTimelineTemplate } from '../../objects/timeline';
 
 import { esArchiverResetKibana } from '../../tasks/es_archiver';
 import { getAvailablePrebuiltRulesCount } from '../../tasks/api_calls/prebuilt_rules';
+import { setRowsPerPageTo } from '../../tasks/table_pagination';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 
@@ -224,7 +224,7 @@ describe('Detection rules, bulk edit', () => {
     it('should not lose rules selection after edit action', () => {
       const rulesCount = 4;
       // Switch to 5 rules per page, to have few pages in pagination(ideal way to test auto refresh and selection of few items)
-      changeRowsPerPageTo(numberOfRulesPerPage);
+      setRowsPerPageTo(numberOfRulesPerPage);
       selectNumberOfRules(rulesCount);
 
       // open add tags form and add 2 new tags

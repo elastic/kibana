@@ -10,12 +10,14 @@ import type {
   CaseUserActionStatsResponse,
   UserActionFindResponse,
   CaseUserActionsDeprecatedResponse,
+  GetCaseUsersResponse,
 } from '../../../common/api';
 import type { CasesClientArgs } from '../types';
 import { get } from './get';
 import { getConnectors } from './connectors';
 import { getStats } from './stats';
-import type { GetConnectorsRequest, UserActionFind, UserActionGet } from './types';
+import { getUsers } from './users';
+import type { GetConnectorsRequest, UserActionFind, UserActionGet, GetUsersRequest } from './types';
 import { find } from './find';
 import type { CasesClient } from '../client';
 
@@ -32,11 +34,14 @@ export interface UserActionsSubClient {
    * Retrieves all the connectors used within a given case
    */
   getConnectors(params: GetConnectorsRequest): Promise<GetCaseConnectorsResponse>;
-
   /**
    * Retrieves the total of comments and user actions in a given case
    */
   stats(params: UserActionGet): Promise<CaseUserActionStatsResponse>;
+  /**
+   * Retrieves all users participating in a case
+   */
+  getUsers(params: GetUsersRequest): Promise<GetCaseUsersResponse>;
 }
 
 /**
@@ -51,6 +56,7 @@ export const createUserActionsSubClient = (
     getAll: (params) => get(params, clientArgs),
     getConnectors: (params) => getConnectors(params, clientArgs),
     stats: (params) => getStats(params, casesClient, clientArgs),
+    getUsers: (params) => getUsers(params, casesClient, clientArgs),
   };
 
   return Object.freeze(attachmentSubClient);

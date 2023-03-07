@@ -981,9 +981,6 @@ describe('last_value', () => {
                 "id": "dimensionButton",
               },
               Object {
-                "id": "visualization",
-              },
-              Object {
                 "id": "embeddableBadge",
               },
             ],

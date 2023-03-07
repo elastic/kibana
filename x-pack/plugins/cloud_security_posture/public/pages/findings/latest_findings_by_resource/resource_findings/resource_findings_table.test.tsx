@@ -25,6 +25,10 @@ describe('<ResourceFindingsTable />', () => {
       },
       setTableOptions: jest.fn(),
       onAddFilter: jest.fn(),
+      flyoutFindingIndex: -1,
+      onOpenFlyout: jest.fn(),
+      onCloseFlyout: jest.fn(),
+      onPaginateFlyout: jest.fn(),
     };
 
     render(
@@ -50,6 +54,10 @@ describe('<ResourceFindingsTable />', () => {
       },
       setTableOptions: jest.fn(),
       onAddFilter: jest.fn(),
+      flyoutFindingIndex: -1,
+      onOpenFlyout: jest.fn(),
+      onCloseFlyout: jest.fn(),
+      onPaginateFlyout: jest.fn(),
     };
 
     render(

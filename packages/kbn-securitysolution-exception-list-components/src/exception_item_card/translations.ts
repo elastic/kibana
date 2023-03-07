@@ -34,6 +34,20 @@ export const EXCEPTION_ITEM_CARD_UPDATED_LABEL = i18n.translate(
   }
 );
 
+export const EXCEPTION_ITEM_CARD_EXPIRES_LABEL = i18n.translate(
+  'exceptionList-components.exceptions.exceptionItem.card.expiresLabel',
+  {
+    defaultMessage: 'Expires at',
+  }
+);
+
+export const EXCEPTION_ITEM_CARD_EXPIRED_LABEL = i18n.translate(
+  'exceptionList-components.exceptions.exceptionItem.card.expiredLabel',
+  {
+    defaultMessage: 'Expired at',
+  }
+);
+
 export const EXCEPTION_ITEM_CARD_META_BY = i18n.translate(
   'exceptionList-components.exceptions.exceptionItem.card.metaDetailsBy',
   {

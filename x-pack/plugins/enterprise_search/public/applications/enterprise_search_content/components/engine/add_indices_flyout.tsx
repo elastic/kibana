@@ -99,7 +99,12 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween" direction="rowReverse">
           <EuiFlexItem grow={false}>
-            <EuiButton fill iconType="plusInCircle" onClick={submitSelectedIndices}>
+            <EuiButton
+              fill
+              data-telemetry-id="entSearchContent-engines-indices-addNewIndices-submit"
+              iconType="plusInCircle"
+              onClick={submitSelectedIndices}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.engine.indices.addIndicesFlyout.submitButton',
                 { defaultMessage: 'Add selected' }
@@ -107,7 +112,11 @@ export const AddIndicesFlyout: React.FC<AddIndicesFlyoutProps> = ({ onClose }) =
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty flush="left" onClick={onClose}>
+            <EuiButtonEmpty
+              data-telemetry-id="entSearchContent-engines-indices-addNewIndices-cancel"
+              flush="left"
+              onClick={onClose}
+            >
               {i18n.translate(
                 'xpack.enterpriseSearch.content.engine.indices.addIndicesFlyout.cancelButton',
                 { defaultMessage: 'Cancel' }

@@ -215,10 +215,14 @@ export function TransformAPIProvider({ getService }: FtrProviderContext) {
       return body as TransformPivotConfig;
     },
 
-    async createTransform(transformId: string, transformConfig: PutTransformsRequestSchema) {
+    async createTransform(
+      transformId: string,
+      transformConfig: PutTransformsRequestSchema,
+      deferValidation?: boolean
+    ) {
       log.debug(`Creating transform with id '${transformId}'...`);
       const { body, status } = await esSupertest
-        .put(`/_transform/${transformId}`)
+        .put(`/_transform/${transformId}${deferValidation ? '?defer_validation=true' : ''}`)
         .send(transformConfig);
       this.assertResponseStatusCode(200, status, body);
 

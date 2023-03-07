@@ -12,6 +12,7 @@ import type {
   OptionsListEmbeddableInput,
   ControlGroupContainer,
 } from '@kbn/controls-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { LazyControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { PropsWithChildren } from 'react';
 import React, { createContext, useCallback, useEffect, useState, useRef, useMemo } from 'react';
@@ -276,7 +277,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
         });
       });
 
-      return initialInput;
+      return { initialInput };
     },
     [dataViewId, timeRange, filters, chainingSystem, query, selectControlsWithPriority]
   );
@@ -335,7 +336,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
         <EuiFlexItem grow={true} data-test-subj="filter_group__items">
           <ControlGroupRenderer
             onLoadComplete={onControlGroupLoadHandler}
-            getInitialInput={setOptions}
+            getCreationOptions={setOptions}
           />
           {!controlGroup ? <FilterGroupLoading /> : null}
         </EuiFlexItem>
@@ -344,6 +345,9 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
             id="filter-group__context-menu"
             button={
               <EuiButtonIcon
+                aria-label={i18n.translate('xpack.securitySolution.filterGroup.groupMenuTitle', {
+                  defaultMessage: 'Filter group menu',
+                })}
                 display="empty"
                 size="s"
                 iconType="boxesHorizontal"

@@ -11,7 +11,7 @@ import url from 'url';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { adminTestUser } from '@kbn/test';
 import { resolve } from 'path';
-import { getStateAndNonce } from '../../../fixtures/oidc/oidc_tools';
+import { getStateAndNonce } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { FileWrapper } from '../../audit/file_wrapper';
 
@@ -664,7 +664,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Audit Log', function () {
-      const logFilePath = resolve(__dirname, '../../../fixtures/audit/oidc.log');
+      const logFilePath = resolve(__dirname, '../../../packages/helpers/audit/oidc.log');
       const logFile = new FileWrapper(logFilePath, retry);
 
       beforeEach(async () => {

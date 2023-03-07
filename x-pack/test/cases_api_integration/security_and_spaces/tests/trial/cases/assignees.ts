@@ -14,12 +14,12 @@ import {
   findCases,
   updateCase,
   deleteAllCaseItems,
-} from '../../../../common/lib/utils';
-
-import { generateFakeAssignees, suggestUserProfiles } from '../../../../common/lib/user_profiles';
+  generateFakeAssignees,
+  suggestUserProfiles,
+  bulkGetUserProfiles,
+} from '../../../../common/lib/api';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { bulkGetUserProfiles } from '../../../../common/lib/user_profiles';
 import { superUser } from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export

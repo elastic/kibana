@@ -15,7 +15,7 @@ import {
   deleteConfiguration,
   createConfiguration,
   getAuthWithSuperUser,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import { nullUser } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export

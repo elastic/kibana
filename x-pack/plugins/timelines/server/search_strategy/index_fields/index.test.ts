@@ -424,6 +424,33 @@ describe('Fields Provider', () => {
         expect(response.indexFields).toHaveLength(0);
         expect(response.indicesExist).toEqual([]);
       });
+
+      it('should search index fields with includeUnmapped option', async () => {
+        const indices = ['some-index-pattern-*'];
+        const request = {
+          indices,
+          includeUnmapped: true,
+          onlyCheckIfIndicesExist: false,
+        };
+
+        const response = await requestIndexFieldSearchHandler(
+          request,
+          deps,
+          beatFields,
+          getStartServices,
+          useInternalUser
+        );
+
+        expect(getFieldsForWildcardMock).toHaveBeenCalledWith({
+          pattern: indices[0],
+          fieldCapsOptions: {
+            allow_no_indices: true,
+            includeUnmapped: true,
+          },
+        });
+        expect(response.indexFields).not.toHaveLength(0);
+        expect(response.indicesExist).toEqual(indices);
+      });
     });
   });
 });

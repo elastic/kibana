@@ -68,6 +68,8 @@ export const createDefaultAlertExecutorOptions = <
     notifyWhen: null,
     ruleTypeId: 'RULE_TYPE_ID',
     ruleTypeName: 'RULE_TYPE_NAME',
+    muteAll: false,
+    snoozeSchedule: [],
   },
   params,
   spaceId: 'SPACE_ID',

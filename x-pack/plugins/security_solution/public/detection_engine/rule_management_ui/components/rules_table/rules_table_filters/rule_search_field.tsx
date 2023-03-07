@@ -13,6 +13,7 @@ import { SEARCH_FIRST_RULE_ANCHOR } from '../rules_table/guided_onboarding/rules
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
 
 const SearchBarWrapper = styled(EuiFlexItem)`
+  min-width: 200px;
   & .euiPopover,
   & .euiPopover__anchor {
     // This is needed to "cancel" styles passed down from EuiTourStep that

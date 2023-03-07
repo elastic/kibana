@@ -6,7 +6,9 @@
  */
 
 import React, { lazy, useCallback, useEffect } from 'react';
-import { Route, RouteComponentProps, Switch } from 'react-router-dom';
+import { RouteComponentProps, Switch } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiButtonEmpty, EuiPageHeader, EuiPageTemplate } from '@elastic/eui';

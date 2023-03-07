@@ -120,11 +120,11 @@ export class ProjectMonitorFormatter {
   }
 
   init = async () => {
-    const locationsPromise = getAllLocations(
-      this.server,
-      this.syntheticsMonitorClient,
-      this.savedObjectsClient
-    );
+    const locationsPromise = getAllLocations({
+      server: this.server,
+      syntheticsMonitorClient: this.syntheticsMonitorClient,
+      savedObjectsClient: this.savedObjectsClient,
+    });
     const existingMonitorsPromise = this.getProjectMonitorsForProject();
 
     const [locations, existingMonitors] = await Promise.all([
@@ -264,7 +264,7 @@ export class ProjectMonitorFormatter {
   public getProjectMonitorsForProject = async () => {
     const finder = this.savedObjectsClient.createPointInTimeFinder({
       type: syntheticsMonitorType,
-      perPage: 1000,
+      perPage: 5000,
       filter: this.projectFilter,
     });
 

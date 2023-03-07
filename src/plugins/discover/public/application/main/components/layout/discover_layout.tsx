@@ -66,7 +66,6 @@ export function DiscoverLayout({
   stateContainer,
   persistDataView,
   updateAdHocDataViewId,
-  searchSessionManager,
   updateDataViewList,
 }: DiscoverLayoutProps) {
   const {
@@ -137,7 +136,7 @@ export function DiscoverLayout({
     config: uiSettings,
     dataView,
     dataViews,
-    setAppState: stateContainer.setAppState,
+    setAppState: stateContainer.appState.update,
     useNewFieldsApi,
     columns,
     sort,
@@ -156,12 +155,18 @@ export function DiscoverLayout({
     [filterManager, dataView, dataViews, trackUiMetric, capabilities]
   );
 
-  const onFieldEdited = useCallback(async () => {
-    if (!dataView.isPersisted()) {
-      await updateAdHocDataViewId(dataView);
-    }
-    stateContainer.dataState.refetch$.next('reset');
-  }, [dataView, stateContainer, updateAdHocDataViewId]);
+  const onFieldEdited = useCallback(
+    async ({ removedFieldName }: { removedFieldName?: string } = {}) => {
+      if (removedFieldName && currentColumns.includes(removedFieldName)) {
+        onRemoveColumn(removedFieldName);
+      }
+      if (!dataView.isPersisted()) {
+        await updateAdHocDataViewId(dataView);
+      }
+      stateContainer.dataState.refetch$.next('reset');
+    },
+    [dataView, stateContainer, updateAdHocDataViewId, currentColumns, onRemoveColumn]
+  );
 
   const onDisableFilters = useCallback(() => {
     const disabledFilters = filterManager
@@ -239,14 +244,12 @@ export function DiscoverLayout({
           setExpandedDoc={setExpandedDoc}
           savedSearch={savedSearch}
           stateContainer={stateContainer}
-          isTimeBased={isTimeBased}
           columns={currentColumns}
           viewMode={viewMode}
           onAddFilter={onAddFilter as DocViewFilterFn}
           onFieldEdited={onFieldEdited}
           resizeRef={resizeRef}
           inspectorAdapters={inspectorAdapters}
-          searchSessionManager={searchSessionManager}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -267,12 +270,10 @@ export function DiscoverLayout({
     resetSavedSearch,
     resultState,
     savedSearch,
-    searchSessionManager,
     setExpandedDoc,
     stateContainer,
     viewMode,
   ]);
-
   return (
     <EuiPage className="dscPage" data-fetch-counter={fetchCounter.current}>
       <h1

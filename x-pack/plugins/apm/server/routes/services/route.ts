@@ -7,68 +7,68 @@
 
 import Boom from '@hapi/boom';
 import { isoToEpochRt, jsonRt, toNumberRt } from '@kbn/io-ts-utils';
-import * as t from 'io-ts';
-import { uniq, mergeWith } from 'lodash';
 import {
-  UnknownMLCapabilitiesError,
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
+  UnknownMLCapabilitiesError,
 } from '@kbn/ml-plugin/server';
-import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { Annotation } from '@kbn/observability-plugin/common/annotations';
-import { apmServiceGroupMaxNumberOfServices } from '@kbn/observability-plugin/common';
+import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import * as t from 'io-ts';
+import { mergeWith, uniq } from 'lodash';
+import { ML_ERRORS } from '../../../common/anomaly_detection';
+import { offsetRt } from '../../../common/comparison_rt';
+import { ConnectionStatsItemWithImpact } from '../../../common/connections';
 import { latencyAggregationTypeRt } from '../../../common/latency_aggregation_types';
-import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
-import { getServiceInventorySearchSource } from '../../lib/helpers/get_service_inventory_search_source';
+import { ServerlessType } from '../../../common/serverless';
+import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
+import { getAnomalyTimeseries } from '../../lib/anomaly_detection/get_anomaly_timeseries';
+import { createInfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
+import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
-import { getServiceAnnotations } from './annotations';
-import { getServices } from './get_services';
-import { getServiceAgent } from './get_service_agent';
-import { getServiceDependencies } from './get_service_dependencies';
-import { getServiceInstanceMetadataDetails } from './get_service_instance_metadata_details';
-import { getServiceInstancesMainStatistics } from './get_service_instances/main_statistics';
-import { getServiceMetadataDetails } from './get_service_metadata_details';
-import { getServiceMetadataIcons } from './get_service_metadata_icons';
-import { getServiceNodeMetadata } from './get_service_node_metadata';
-import { getServiceTransactionTypes } from './get_service_transaction_types';
-import { getThroughput } from './get_throughput';
+import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
+import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
+  serviceTransactionDataSourceRt,
   environmentRt,
   kueryRt,
-  rangeRt,
   probabilityRt,
+  rangeRt,
 } from '../default_api_types';
-import { offsetPreviousPeriodCoordinates } from '../../../common/utils/offset_previous_period_coordinate';
-import { getServiceOverviewContainerMetadata } from './get_service_overview_container_metadata';
-import { getServiceInstanceContainerMetadata } from './get_service_instance_container_metadata';
-import { getServicesDetailedStatistics } from './get_services_detailed_statistics';
-import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
-import { getAnomalyTimeseries } from '../../lib/anomaly_detection/get_anomaly_timeseries';
-import { getServiceInstancesDetailedStatisticsPeriods } from './get_service_instances/detailed_statistics';
-import { ML_ERRORS } from '../../../common/anomaly_detection';
-import { ConnectionStatsItemWithImpact } from '../../../common/connections';
-import { getSortedAndFilteredServices } from './get_services/get_sorted_and_filtered_services';
-import { ServiceHealthStatus } from '../../../common/service_health_status';
 import { getServiceGroup } from '../service_groups/get_service_group';
-import { offsetRt } from '../../../common/comparison_rt';
-import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
-import { createInfraMetricsClient } from '../../lib/helpers/create_es_client/create_infra_metrics_client/create_infra_metrics_client';
-import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
-import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import { getServiceAnnotations } from './annotations';
+import { getServicesItems } from './get_services/get_services_items';
 import { getServicesAlerts } from './get_services/get_service_alerts';
-import { ServerlessType } from '../../../common/serverless';
+import { getServicesDetailedStatistics } from './get_services_detailed_statistics';
+import { getServiceAgent } from './get_service_agent';
+import { getServiceDependencies } from './get_service_dependencies';
+import { getServiceDependenciesBreakdown } from './get_service_dependencies_breakdown';
+import { getServiceInstancesDetailedStatisticsPeriods } from './get_service_instances/detailed_statistics';
+import { getServiceInstancesMainStatistics } from './get_service_instances/main_statistics';
+import { getServiceInstanceContainerMetadata } from './get_service_instance_container_metadata';
+import { getServiceInstanceMetadataDetails } from './get_service_instance_metadata_details';
+import { getServiceMetadataDetails } from './get_service_metadata_details';
+import { getServiceMetadataIcons } from './get_service_metadata_icons';
+import { getServiceNodeMetadata } from './get_service_node_metadata';
+import { getServiceOverviewContainerMetadata } from './get_service_overview_container_metadata';
+import { getServiceTransactionTypes } from './get_service_transaction_types';
+import { getThroughput } from './get_throughput';
 
 const servicesRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services',
   params: t.type({
     query: t.intersection([
-      environmentRt,
-      kueryRt,
-      rangeRt,
       t.partial({ serviceGroup: t.string }),
-      probabilityRt,
+      t.intersection([
+        probabilityRt,
+        serviceTransactionDataSourceRt,
+        environmentRt,
+        kueryRt,
+        rangeRt,
+      ]),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -120,7 +120,6 @@ const servicesRoute = createApmServerRoute({
     serviceOverflowCount: number;
   }> {
     const {
-      config,
       context,
       params,
       logger,
@@ -135,6 +134,8 @@ const servicesRoute = createApmServerRoute({
       end,
       serviceGroup: serviceGroupId,
       probability,
+      documentType,
+      rollupInterval,
     } = params.query;
     const savedObjectsClient = (await context.core).savedObjects.client;
 
@@ -154,29 +155,19 @@ const servicesRoute = createApmServerRoute({
       getRandomSampler({ security, request, probability }),
     ]);
 
-    const { searchAggregatedTransactions, searchAggregatedServiceMetrics } =
-      await getServiceInventorySearchSource({
-        serviceMetricsEnabled: false, // Disable serviceMetrics for 8.5 & 8.6
-        config,
-        apmEventClient,
-        kuery,
-        start,
-        end,
-      });
-
-    return getServices({
+    return getServicesItems({
       environment,
       kuery,
       mlClient,
       apmEventClient,
       apmAlertsClient,
-      searchAggregatedTransactions,
-      searchAggregatedServiceMetrics,
       logger,
       start,
       end,
       serviceGroup,
       randomSampler,
+      documentType,
+      rollupInterval,
     });
   },
 });
@@ -188,8 +179,10 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       environmentRt,
       kueryRt,
       rangeRt,
-      offsetRt,
-      probabilityRt,
+      t.intersection([offsetRt, probabilityRt, serviceTransactionDataSourceRt]),
+      t.type({
+        bucketSizeInSeconds: toNumberRt,
+      }),
     ]),
     body: t.type({ serviceNames: jsonRt.pipe(t.array(t.string)) }),
   }),
@@ -229,14 +222,22 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
     }>;
   }> => {
     const {
-      config,
       params,
       request,
       plugins: { security },
     } = resources;
 
-    const { environment, kuery, offset, start, end, probability } =
-      params.query;
+    const {
+      environment,
+      kuery,
+      offset,
+      start,
+      end,
+      probability,
+      documentType,
+      rollupInterval,
+      bucketSizeInSeconds,
+    } = params.query;
 
     const { serviceNames } = params.body;
 
@@ -244,16 +245,6 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       getApmEventClient(resources),
       getRandomSampler({ security, request, probability }),
     ]);
-
-    const { searchAggregatedTransactions, searchAggregatedServiceMetrics } =
-      await getServiceInventorySearchSource({
-        serviceMetricsEnabled: false, // Disable serviceMetrics for 8.5 & 8.6
-        config,
-        apmEventClient,
-        kuery,
-        start,
-        end,
-      });
 
     if (!serviceNames.length) {
       throw Boom.badRequest(`serviceNames cannot be empty`);
@@ -263,8 +254,9 @@ const servicesDetailedStatisticsRoute = createApmServerRoute({
       environment,
       kuery,
       apmEventClient,
-      searchAggregatedTransactions,
-      searchAggregatedServiceMetrics,
+      documentType,
+      rollupInterval,
+      bucketSizeInSeconds,
       offset,
       serviceNames,
       start,
@@ -1158,66 +1150,6 @@ const serviceAnomalyChartsRoute = createApmServerRoute({
   },
 });
 
-const sortedAndFilteredServicesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/sorted_and_filtered_services',
-  options: {
-    tags: ['access:apm'],
-  },
-  params: t.type({
-    query: t.intersection([
-      rangeRt,
-      environmentRt,
-      kueryRt,
-      t.partial({ serviceGroup: t.string }),
-    ]),
-  }),
-  handler: async (
-    resources
-  ): Promise<{
-    services: Array<{
-      serviceName: string;
-      healthStatus?: ServiceHealthStatus;
-    }>;
-  }> => {
-    const {
-      query: { start, end, environment, kuery, serviceGroup: serviceGroupId },
-    } = resources.params;
-
-    if (kuery) {
-      return {
-        services: [],
-      };
-    }
-
-    const {
-      savedObjects: { client: savedObjectsClient },
-      uiSettings: { client: uiSettingsClient },
-    } = await resources.context.core;
-
-    const [mlClient, apmEventClient, serviceGroup, maxNumberOfServices] =
-      await Promise.all([
-        getMlClient(resources),
-        getApmEventClient(resources),
-        serviceGroupId
-          ? getServiceGroup({ savedObjectsClient, serviceGroupId })
-          : Promise.resolve(null),
-        uiSettingsClient.get<number>(apmServiceGroupMaxNumberOfServices),
-      ]);
-    return {
-      services: await getSortedAndFilteredServices({
-        mlClient,
-        apmEventClient,
-        start,
-        end,
-        environment,
-        logger: resources.logger,
-        serviceGroup,
-        maxNumberOfServices,
-      }),
-    };
-  },
-});
-
 const serviceAlertsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/alerts_count',
   params: t.type({
@@ -1271,6 +1203,5 @@ export const serviceRouteRepository = {
   ...serviceDependenciesRoute,
   ...serviceDependenciesBreakdownRoute,
   ...serviceAnomalyChartsRoute,
-  ...sortedAndFilteredServicesRoute,
   ...serviceAlertsRoute,
 };

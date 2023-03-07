@@ -240,6 +240,7 @@ export function FilterItem({
                       })}
                     >
                       <EuiFlexItem
+                        role="button"
                         grow={false}
                         aria-label={strings.getDragFilterAriaLabel()}
                         {...provided.dragHandleProps}

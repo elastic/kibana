@@ -6,6 +6,7 @@
  */
 
 import type { ExceptionsBuilderReturnExceptionItem } from '@kbn/securitysolution-list-utils';
+import type { Moment } from 'moment';
 
 export interface State {
   exceptionItems: ExceptionsBuilderReturnExceptionItem[];
@@ -15,6 +16,8 @@ export interface State {
   disableBulkClose: boolean;
   bulkCloseIndex: string[] | undefined;
   entryErrorExists: boolean;
+  expireTime: Moment | undefined;
+  expireErrorExists: boolean;
 }
 
 export type Action =
@@ -44,6 +47,14 @@ export type Action =
     }
   | {
       type: 'setConditionValidationErrorExists';
+      errorExists: boolean;
+    }
+  | {
+      type: 'setExpireTime';
+      expireTime: Moment | undefined;
+    }
+  | {
+      type: 'setExpireError';
       errorExists: boolean;
     };
 
@@ -108,6 +119,22 @@ export const createExceptionItemsReducer =
         return {
           ...state,
           entryErrorExists: errorExists,
+        };
+      }
+      case 'setExpireTime': {
+        const { expireTime } = action;
+
+        return {
+          ...state,
+          expireTime,
+        };
+      }
+      case 'setExpireError': {
+        const { errorExists } = action;
+
+        return {
+          ...state,
+          expireErrorExists: errorExists,
         };
       }
       default:

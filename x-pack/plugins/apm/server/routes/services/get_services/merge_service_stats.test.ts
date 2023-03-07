@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { ServiceHealthStatus } from '../../../../common/service_health_status';
-import { getServiceStats } from './get_service_stats';
+import { getServiceTransactionStats } from './get_service_transaction_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
 type ServiceTransactionStat = Awaited<
-  ReturnType<typeof getServiceStats>
+  ReturnType<typeof getServiceTransactionStats>
 >['serviceStats'][number];
 
 function stat(values: Partial<ServiceTransactionStat>): ServiceTransactionStat {
@@ -40,7 +40,7 @@ describe('mergeServiceStats', () => {
             throughput: 4,
           }),
         ],
-        servicesFromErrorAndMetricDocuments: [
+        servicesWithoutTransactions: [
           {
             environments: ['production'],
             serviceName: 'opbeans-java',
@@ -93,7 +93,7 @@ describe('mergeServiceStats', () => {
             environments: ['staging'],
           }),
         ],
-        servicesFromErrorAndMetricDocuments: [
+        servicesWithoutTransactions: [
           {
             environments: ['production'],
             serviceName: 'opbeans-java',
@@ -142,7 +142,7 @@ describe('mergeServiceStats', () => {
             environments: ['staging'],
           }),
         ],
-        servicesFromErrorAndMetricDocuments: [],
+        servicesWithoutTransactions: [],
         healthStatuses: [
           {
             healthStatus: ServiceHealthStatus.healthy,
@@ -179,7 +179,7 @@ describe('mergeServiceStats', () => {
             environments: ['staging'],
           }),
         ],
-        servicesFromErrorAndMetricDocuments: [
+        servicesWithoutTransactions: [
           {
             environments: ['production'],
             serviceName: 'opbeans-java',

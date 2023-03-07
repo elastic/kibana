@@ -7,7 +7,7 @@
 
 import { Subject } from 'rxjs';
 import { App, AppDeepLink, ApplicationStart, AppNavLinkStatus, AppUpdater } from '@kbn/core/public';
-import { casesFeatureId } from '../common';
+import { casesFeatureId, sloFeatureId } from '../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 
 // Used in updater callback
@@ -163,11 +163,45 @@ describe('updateGlobalNavigation', () => {
       });
     });
 
+    it("hides the slo link when the capabilities don't include it", () => {
+      const capabilities = {
+        navLinks: { apm: true, logs: false, metrics: false, uptime: false },
+      } as unknown as ApplicationStart['capabilities'];
+
+      const sloRoute = {
+        id: 'slos',
+        title: 'SLOs',
+        order: 8002,
+        path: '/slos',
+        navLinkStatus: AppNavLinkStatus.hidden,
+      };
+
+      const deepLinks = [sloRoute];
+
+      const callback = jest.fn();
+      const updater$ = {
+        next: (cb: AppUpdater) => callback(cb(app)),
+      } as unknown as Subject<AppUpdater>;
+
+      updateGlobalNavigation({ capabilities, deepLinks, updater$ });
+
+      expect(callback).toHaveBeenCalledWith({
+        deepLinks: [
+          {
+            ...sloRoute,
+            navLinkStatus: AppNavLinkStatus.hidden,
+          },
+        ],
+        navLinkStatus: AppNavLinkStatus.visible,
+      });
+    });
+
     describe('when slos are enabled', () => {
       it('shows the slos deep link', () => {
         const capabilities = {
           [casesFeatureId]: { read_cases: true },
-          navLinks: { apm: true, logs: false, metrics: false, uptime: false },
+          [sloFeatureId]: { read: true },
+          navLinks: { apm: false, logs: false, metrics: false, uptime: false },
         } as unknown as ApplicationStart['capabilities'];
 
         const sloRoute = {

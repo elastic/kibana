@@ -17,7 +17,7 @@ jest.mock('../../../containers/authentications');
 jest.mock('../../../../common/containers/query_toggle');
 jest.mock('../../../../common/lib/kibana');
 
-jest.mock('../../../../common/components/visualization_actions');
+jest.mock('../../../../common/components/visualization_actions/actions');
 jest.mock('../../../../common/components/visualization_actions/lens_embeddable');
 
 describe('Authentications query tab body', () => {

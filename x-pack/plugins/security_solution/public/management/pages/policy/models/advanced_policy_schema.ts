@@ -1059,4 +1059,15 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'mac.advanced.capture_env_vars',
+    first_supported_version: '8.7',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.mac.advanced.capture_env_vars',
+      {
+        defaultMessage:
+          'The list of environment variables to capture (up to five), separated by commas.',
+      }
+    ),
+  },
 ];

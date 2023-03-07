@@ -87,7 +87,11 @@ journey('StatusFlyoutInAlertingApp', async ({ page, params }) => {
   });
 
   step('Tls alert flyout has setting values', async () => {
-    await assertText({ page, text: '30 days' });
-    await assertText({ page, text: '730 days' });
+    expect(await page.locator(byTestId('tlsExpirationThreshold')).textContent()).toBe(
+      'has a certificate expiring within days:  30'
+    );
+    expect(await page.locator(byTestId('tlsAgeExpirationThreshold')).textContent()).toBe(
+      'or older than days:  730'
+    );
   });
 });

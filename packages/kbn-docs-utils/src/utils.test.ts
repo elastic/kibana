@@ -77,13 +77,13 @@ it('test removeBrokenLinks', () => {
 
   const pluginApiMap: { [key: string]: PluginApi } = {};
   plugins.map((plugin) => {
-    pluginApiMap[plugin.manifest.id] = getPluginApi(project, plugin, plugins, log, false);
+    pluginApiMap[plugin.id] = getPluginApi(project, plugin, plugins, log, false);
   });
 
   const missingApiItems: { [key: string]: { [key: string]: string[] } } = {};
 
   plugins.forEach((plugin) => {
-    const id = plugin.manifest.id;
+    const id = plugin.id;
     const pluginApi = pluginApiMap[id];
     removeBrokenLinks(pluginApi, missingApiItems, pluginApiMap, log);
   });

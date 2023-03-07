@@ -130,11 +130,6 @@ const connectorMappingsProperties: Record<string, MappingProperty> = {
       run_ml_inference: { type: 'boolean' },
     },
   },
-  preferences: {
-    properties: {
-      extract_full_html: { type: 'boolean' },
-    },
-  },
   scheduling: {
     properties: {
       enabled: { type: 'boolean' },
@@ -174,6 +169,7 @@ const indices: IndexDefinition[] = [
         pipeline: defaultConnectorsPipelineMeta,
         version: 1,
       },
+      dynamic: false,
       properties: connectorMappingsProperties,
     },
     name: '.elastic-connectors-v1',
@@ -185,6 +181,7 @@ const indices: IndexDefinition[] = [
       _meta: {
         version: 1,
       },
+      dynamic: false,
       properties: {
         cancelation_requested_at: { type: 'date' },
         canceled_at: { type: 'date' },

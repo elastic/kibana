@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/maps-ems-plugin",
+  "owner": "@elastic/kibana-gis",
+  "plugin": {
+    "id": "mapsEms",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "map"
+    ],
+    "optionalPlugins": [
+      "licensing"
+    ],
+    "extraPublicDirs": [
+      "common"
+    ]
+  }
+}

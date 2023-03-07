@@ -13,7 +13,6 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { useIndicatorsFlyoutContext } from '../use_context';
 import { Indicator } from '../../../../../../common/types/indicator';
 import { FilterInButtonIcon, FilterOutButtonIcon } from '../../../../query_bar';
@@ -27,10 +26,7 @@ import {
   POPOVER_BUTTON_TEST_ID,
   TIMELINE_BUTTON_TEST_ID,
 } from './test_ids';
-
-const MORE_ACTIONS_BUTTON_LABEL = i18n.translate('xpack.threatIntelligence.more-actions.popover', {
-  defaultMessage: 'More actions',
-});
+import { MORE_ACTIONS_BUTTON_LABEL } from './translations';
 
 interface IndicatorValueActions {
   /**

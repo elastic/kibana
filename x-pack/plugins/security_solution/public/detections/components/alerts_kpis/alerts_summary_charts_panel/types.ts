@@ -6,8 +6,6 @@
  */
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { Filter, Query } from '@kbn/es-query';
-import { has } from 'lodash';
-import type { AlertSearchResponse } from '../../../containers/detection_engine/alerts/types';
 import type { SeverityBuckets as SeverityData } from '../../../../overview/components/detection_response/alerts_by_status/types';
 import type { AlertsBySeverityAgg } from '../severity_level_panel/types';
 import type { AlertsByTypeAgg, AlertsTypeData } from '../alerts_by_type_panel/types';
@@ -15,10 +13,20 @@ import type {
   AlertsByGroupingAgg,
   AlertsProgressBarData,
 } from '../alerts_progress_bar_panel/types';
+import type {
+  ChartCollapseAgg,
+  ChartCollapseData,
+} from '../../../pages/detection_engine/chart_panels/chart_collapse/types';
 
-export type SummaryChartsAgg = Partial<AlertsBySeverityAgg | AlertsByTypeAgg | AlertsByGroupingAgg>;
+export type SummaryChartsAgg = Partial<
+  AlertsBySeverityAgg | AlertsByTypeAgg | AlertsByGroupingAgg | ChartCollapseAgg
+>;
 
-export type SummaryChartsData = SeverityData | AlertsTypeData | AlertsProgressBarData;
+export type SummaryChartsData =
+  | SeverityData
+  | AlertsTypeData
+  | AlertsProgressBarData
+  | ChartCollapseData;
 
 export interface ChartsPanelProps {
   filters?: Filter[];
@@ -28,21 +36,3 @@ export interface ChartsPanelProps {
   skip?: boolean;
   addFilter?: ({ field, value }: { field: string; value: string | number }) => void;
 }
-
-export const isAlertsBySeverityAgg = (
-  data: AlertSearchResponse<{}, SummaryChartsAgg>
-): data is AlertSearchResponse<{}, AlertsBySeverityAgg> => {
-  return has(data, 'aggregations.statusBySeverity');
-};
-
-export const isAlertsByTypeAgg = (
-  data: AlertSearchResponse<{}, SummaryChartsAgg>
-): data is AlertSearchResponse<{}, AlertsByTypeAgg> => {
-  return has(data, 'aggregations.alertsByRule');
-};
-
-export const isAlertsByGroupingAgg = (
-  data: AlertSearchResponse<{}, SummaryChartsAgg>
-): data is AlertSearchResponse<{}, AlertsByGroupingAgg> => {
-  return has(data, 'aggregations.alertsByGrouping');
-};

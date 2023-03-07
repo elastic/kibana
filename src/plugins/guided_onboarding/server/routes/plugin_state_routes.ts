@@ -9,6 +9,7 @@
 import { IRouter, SavedObjectsClient } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { GuideState } from '@kbn/guided-onboarding';
+import { guideStateSavedObjectsType, pluginStateSavedObjectsType } from '../saved_objects';
 import { getPluginState, updatePluginStatus } from '../helpers/plugin_state_utils';
 import { API_BASE_PATH } from '../../common';
 import { updateGuideState } from '../helpers';
@@ -21,7 +22,9 @@ export const registerGetPluginStateRoute = (router: IRouter) => {
     },
     async (context, request, response) => {
       const coreContext = await context.core;
-      const savedObjectsClient = coreContext.savedObjects.client as SavedObjectsClient;
+      const savedObjectsClient = coreContext.savedObjects.getClient({
+        includedHiddenTypes: [pluginStateSavedObjectsType, guideStateSavedObjectsType],
+      }) as SavedObjectsClient;
       const pluginState = await getPluginState(savedObjectsClient);
       return response.ok({
         body: {
@@ -59,7 +62,9 @@ export const registerPutPluginStateRoute = (router: IRouter) => {
       const { status, guide } = request.body as { status?: string; guide?: GuideState };
 
       const coreContext = await context.core;
-      const savedObjectsClient = coreContext.savedObjects.client as SavedObjectsClient;
+      const savedObjectsClient = coreContext.savedObjects.getClient({
+        includedHiddenTypes: [pluginStateSavedObjectsType, guideStateSavedObjectsType],
+      }) as SavedObjectsClient;
 
       if (status) {
         await updatePluginStatus(savedObjectsClient, status);

@@ -8,6 +8,7 @@
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { EsFieldName } from '../../../../../../../common/types/fields';
 
 import {
@@ -25,7 +26,6 @@ import {
 } from '../../../../../../../common/types/transform';
 import { LatestFunctionConfig } from '../../../../../../../common/api_schemas/transforms';
 import { RUNTIME_FIELD_TYPES } from '../../../../../../../common/shared_imports';
-import type { TimeRangeMs } from '../../../../../../../common/types/date_picker';
 
 export interface ErrorMessage {
   query: string;

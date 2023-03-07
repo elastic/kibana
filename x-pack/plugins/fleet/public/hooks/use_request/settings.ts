@@ -5,10 +5,22 @@
  * 2.0.
  */
 
+import { useQuery } from '@tanstack/react-query';
+
 import { settingsRoutesService } from '../../services';
 import type { PutSettingsResponse, PutSettingsRequest, GetSettingsResponse } from '../../types';
 
-import { sendRequest, useRequest } from './use_request';
+import type { RequestError } from './use_request';
+import { sendRequest, sendRequestForRq, useRequest } from './use_request';
+
+export function useGetSettingsQuery() {
+  return useQuery<GetSettingsResponse, RequestError>(['settings'], () =>
+    sendRequestForRq<GetSettingsResponse>({
+      method: 'get',
+      path: settingsRoutesService.getInfoPath(),
+    })
+  );
+}
 
 export function useGetSettings() {
   return useRequest<GetSettingsResponse>({

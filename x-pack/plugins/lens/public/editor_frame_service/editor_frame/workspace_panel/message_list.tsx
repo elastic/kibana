@@ -25,9 +25,11 @@ import { UserMessage } from '../../../types';
 
 export const MessageList = ({
   messages,
+  useSmallIconsOnButton,
   customButtonStyles,
 }: {
   messages: UserMessage[];
+  useSmallIconsOnButton?: boolean;
   customButtonStyles?: SerializedStyles;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -85,7 +87,7 @@ export const MessageList = ({
           >
             {errorCount > 0 && (
               <>
-                <EuiIcon type={IconError} />
+                <EuiIcon type={IconError} size={useSmallIconsOnButton ? 's' : undefined} />
                 {errorCount}
               </>
             )}
@@ -93,6 +95,7 @@ export const MessageList = ({
               <>
                 <EuiIcon
                   type={IconWarning}
+                  size={useSmallIconsOnButton ? 's' : undefined}
                   css={css`
                     margin-left: 4px;
                   `}
@@ -121,7 +124,7 @@ export const MessageList = ({
                   <EuiIcon type={IconWarning} color="warning" />
                 )}
               </EuiFlexItem>
-              <EuiFlexItem grow={1}>
+              <EuiFlexItem grow={1} className="lnsWorkspaceWarningList__description">
                 <EuiText size="s">{message.longMessage}</EuiText>
               </EuiFlexItem>
             </EuiFlexGroup>

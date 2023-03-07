@@ -7,78 +7,73 @@
  */
 
 import Path from 'path';
-import globby from 'globby';
 
-import loadJsonFile from 'load-json-file';
-
-import { getPluginSearchPaths, simpleKibanaPlatformPluginDiscovery } from '@kbn/plugin-discovery';
+import { getPackages, getPluginPackagesFilter, type Package } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ApiScope, PluginOrPackage } from './types';
 
-export function findPlugins(): PluginOrPackage[] {
-  const pluginSearchPaths = getPluginSearchPaths({
-    rootDir: REPO_ROOT,
-    oss: false,
-    examples: false,
-  });
+function toApiScope(pkg: Package): ApiScope {
+  switch (pkg.manifest.type) {
+    case 'shared-browser':
+    case 'shared-scss':
+      return ApiScope.CLIENT;
+    case 'shared-server':
+      return ApiScope.SERVER;
+    case 'test-helper':
+    case 'functional-tests':
+    case 'shared-common':
+      return ApiScope.COMMON;
+    case 'plugin':
+      return pkg.manifest.plugin.server && !pkg.manifest.plugin.browser
+        ? ApiScope.SERVER
+        : !pkg.manifest.plugin.server && pkg.manifest.plugin.browser
+        ? ApiScope.CLIENT
+        : ApiScope.COMMON;
+  }
+}
 
-  return (
-    simpleKibanaPlatformPluginDiscovery(pluginSearchPaths, [
-      // discover "core" as a plugin
-      Path.resolve(REPO_ROOT, 'src/core'),
-    ]).map((p) => ({ ...p, isPlugin: true, importPath: p.directory })) as PluginOrPackage[]
-  ).concat(...findPackages());
+function toPluginOrPackage(pkg: Package): PluginOrPackage {
+  return {
+    id: pkg.isPlugin() ? pkg.manifest.plugin.id : pkg.manifest.id,
+    directory: Path.resolve(REPO_ROOT, pkg.normalizedRepoRelativeDir),
+    manifestPath: Path.resolve(REPO_ROOT, pkg.normalizedRepoRelativeDir, 'kibana.jsonc'),
+    isPlugin: pkg.isPlugin(),
+    manifest: {
+      id: pkg.isPlugin() ? pkg.manifest.plugin.id : pkg.manifest.id,
+      pluginId: pkg.isPlugin() ? pkg.manifest.plugin.id : undefined,
+      owner: {
+        name: pkg.manifest.owner?.[0] ?? '[Owner missing]',
+        githubTeam: pkg.manifest.owner?.[0]?.split('@elastic/')[1],
+      },
+      serviceFolders: pkg.manifest.serviceFolders || [],
+      description: pkg.manifest.description || undefined,
+    },
+    scope: toApiScope(pkg),
+  };
+}
+
+export function findPlugins(): PluginOrPackage[] {
+  const packages = getPackages(REPO_ROOT);
+  const plugins = packages.filter(
+    getPluginPackagesFilter({
+      examples: false,
+      testPlugins: false,
+    })
+  );
+  const core = packages.find((p) => p.manifest.id === '@kbn/core');
+
+  if (!core) {
+    throw new Error('unable to find @kbn/core');
+  }
+
+  return [...[core, ...plugins].map(toPluginOrPackage), ...findPackages()];
 }
 
 /**
  * Helper to find packages.
  */
 export function findPackages(): PluginOrPackage[] {
-  const packagePaths = globby
-    .sync(Path.resolve(REPO_ROOT, '{x-pack/,}packages/**/package.json'), { absolute: true })
-    .map((path) =>
-      // absolute paths returned from globby are using normalize or
-      // something so the path separators are `/` even on windows,
-      // Path.resolve solves this
-      Path.resolve(path)
-    );
-
-  if (packagePaths.length === 0) {
-    throw new Error('No packages found!');
-  }
-
-  return packagePaths.reduce<PluginOrPackage[]>((acc, path) => {
-    const manifest: { name: string; author?: string; main?: string; browser?: string } =
-      loadJsonFile.sync(path);
-    if (manifest.name === undefined) return acc;
-
-    let scope = ApiScope.COMMON;
-    if (manifest.main && !manifest.browser) {
-      scope = ApiScope.SERVER;
-    } else if (manifest.browser && !manifest.main) {
-      scope = ApiScope.CLIENT;
-    }
-
-    let ownerName = '[Owner missing]';
-    // Some of these author fields have "<email@gmail.com>" in the name which mdx chokes on. Removing the < and > seems to work.
-    if (Array.isArray(manifest.author)) {
-      ownerName = manifest.author.map((d) => d.replace(/[<>]/gi, '')).join(', ');
-    } else if (typeof manifest.author === 'string') {
-      ownerName = manifest.author.replace(/[<>]/gi, '');
-    }
-
-    acc.push({
-      directory: Path.dirname(path),
-      manifestPath: path,
-      manifest: {
-        ...manifest,
-        id: manifest.name,
-        serviceFolders: [],
-        owner: { name: ownerName },
-      },
-      isPlugin: false,
-      scope,
-    });
-    return acc;
-  }, [] as PluginOrPackage[]);
+  return getPackages(REPO_ROOT)
+    .filter((p) => !p.isPlugin())
+    .map(toPluginOrPackage);
 }

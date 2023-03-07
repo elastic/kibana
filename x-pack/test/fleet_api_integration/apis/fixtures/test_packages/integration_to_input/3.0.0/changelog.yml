@@ -1,0 +1,16 @@
+# newer versions go on top
+- version: "3.0.0"
+  changes:
+    - description: Remove required variable
+      type: enhancement
+      link: http://some.url
+- version: "2.0.0"
+  changes:
+    - description: Changed to input pkg
+      type: enhancement
+      link: http://some.url
+- version: "1.0.0"
+  changes:
+    - description: test
+      type: enhancement
+      link: http://some.url

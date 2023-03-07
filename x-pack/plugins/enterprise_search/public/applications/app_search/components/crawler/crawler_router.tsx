@@ -6,9 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { Route, Switch } from 'react-router-dom';
+import { Switch } from 'react-router-dom';
 
 import { useActions } from 'kea';
+
+import { Route } from '@kbn/shared-ux-router';
 
 import { ENGINE_CRAWLER_DOMAIN_PATH, ENGINE_CRAWLER_PATH } from '../../routes';
 

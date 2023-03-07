@@ -32,17 +32,18 @@ import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
 import { buildSiemResponse } from '../../../routes/utils';
 import { convertCreateAPIToInternalSchema } from '../../../rule_management';
 import type { RuleParams } from '../../../rule_schema';
-import { createPreviewRuleExecutionLogger } from '../../../signals/preview/preview_rule_execution_logger';
-import { parseInterval } from '../../../signals/utils';
+import { createPreviewRuleExecutionLogger } from './preview_rule_execution_logger';
+import { parseInterval } from '../../../rule_types/utils/utils';
 import { buildMlAuthz } from '../../../../machine_learning/authz';
 import { throwAuthzError } from '../../../../machine_learning/validation';
 import { buildRouteValidation } from '../../../../../utils/build_validation/route_validation';
+import { routeLimitedConcurrencyTag } from '../../../../../utils/route_limited_concurrency_tag';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 import type { RuleExecutionContext, StatusChangeArgs } from '../../../rule_monitoring';
 
 import type { ConfigType } from '../../../../../config';
-import { alertInstanceFactoryStub } from '../../../signals/preview/alert_instance_factory_stub';
+import { alertInstanceFactoryStub } from './alert_instance_factory_stub';
 import type {
   CreateRuleOptions,
   CreateSecurityRuleTypeWrapperProps,
@@ -61,6 +62,7 @@ import { wrapScopedClusterClient } from './wrap_scoped_cluster_client';
 import { wrapSearchSourceClient } from './wrap_search_source_client';
 
 const PREVIEW_TIMEOUT_SECONDS = 60;
+const MAX_ROUTE_CONCURRENCY = 10;
 
 export const previewRulesRoute = async (
   router: SecuritySolutionPluginRouter,
@@ -80,7 +82,7 @@ export const previewRulesRoute = async (
         body: buildRouteValidation(previewRulesSchema),
       },
       options: {
-        tags: ['access:securitySolution'],
+        tags: ['access:securitySolution', routeLimitedConcurrencyTag(MAX_ROUTE_CONCURRENCY)],
       },
     },
     async (context, request, response) => {
@@ -225,6 +227,8 @@ export const previewRulesRoute = async (
             ruleTypeName,
             updatedAt: new Date(),
             updatedBy: username ?? 'preview-updated-by',
+            muteAll: false,
+            snoozeSchedule: [],
           };
 
           let invocationStartTime;

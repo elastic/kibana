@@ -1191,7 +1191,7 @@
         "label": "GuidesConfig",
         "description": [],
         "signature": [
-          "{ search: ",
+          "{ siem: ",
           {
             "pluginId": "@kbn/guided-onboarding",
             "scope": "common",
@@ -1207,7 +1207,23 @@
             "section": "def-common.GuideConfig",
             "text": "GuideConfig"
           },
-          "; siem: ",
+          "; appSearch: ",
+          {
+            "pluginId": "@kbn/guided-onboarding",
+            "scope": "common",
+            "docId": "kibKbnGuidedOnboardingPluginApi",
+            "section": "def-common.GuideConfig",
+            "text": "GuideConfig"
+          },
+          "; websiteSearch: ",
+          {
+            "pluginId": "@kbn/guided-onboarding",
+            "scope": "common",
+            "docId": "kibKbnGuidedOnboardingPluginApi",
+            "section": "def-common.GuideConfig",
+            "text": "GuideConfig"
+          },
+          "; databaseSearch: ",
           {
             "pluginId": "@kbn/guided-onboarding",
             "scope": "common",

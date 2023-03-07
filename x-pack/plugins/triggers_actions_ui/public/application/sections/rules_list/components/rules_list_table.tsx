@@ -60,7 +60,7 @@ import { getFormattedSuccessRatio } from '../../../lib/monitoring_utils';
 import { hasAllPrivilege } from '../../../lib/capabilities';
 import { RuleTagBadge } from './rule_tag_badge';
 import { RuleStatusDropdown } from './rule_status_dropdown';
-import { RulesListNotifyBadge } from './rules_list_notify_badge';
+import { RulesListNotifyBadge } from './notify_badge';
 import { RulesListTableStatusCell } from './rules_list_table_status_cell';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { RulesListColumns, useRulesListColumnSelector } from './rules_list_column_selector';
@@ -342,7 +342,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         ),
         sortable: true,
         truncateText: true,
-        width: '25%',
+        width: '22%',
         'data-test-subj': 'rulesTableCell-name',
         render: (name: string, rule: RuleTableItem) => {
           const ruleType = ruleTypesState.data.get(rule.ruleTypeId);

@@ -7,10 +7,14 @@
 
 import { i18n } from '@kbn/i18n';
 
+import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { KibanaFeatureConfig, SubFeatureConfig } from '@kbn/features-plugin/common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { createUICapabilities } from '@kbn/cases-plugin/common';
+import {
+  createUICapabilities as createCasesUICapabilities,
+  getApiTags as getCasesApiTags,
+} from '@kbn/cases-plugin/common';
 
 import { EXCEPTION_LIST_NAMESPACE_AGNOSTIC } from '@kbn/securitysolution-list-constants';
 import { APP_ID, CASES_FEATURE_ID, SERVER_APP_ID } from '../common/constants';
@@ -18,7 +22,8 @@ import { savedObjectTypes } from './saved_objects';
 import type { ConfigType } from './config';
 
 export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
-  const casesCapabilities = createUICapabilities();
+  const casesCapabilities = createCasesUICapabilities();
+  const casesApiTags = getCasesApiTags(APP_ID);
 
   return {
     id: CASES_FEATURE_ID,
@@ -32,7 +37,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
     cases: [APP_ID],
     privileges: {
       all: {
-        api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+        api: casesApiTags.all,
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
@@ -42,13 +47,13 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
           push: [APP_ID],
         },
         savedObject: {
-          all: [],
-          read: [],
+          all: [...filesSavedObjectTypes],
+          read: [...filesSavedObjectTypes],
         },
         ui: casesCapabilities.all,
       },
       read: {
-        api: ['casesSuggestUserProfiles', 'bulkGetUserProfiles'],
+        api: casesApiTags.read,
         app: [CASES_FEATURE_ID, 'kibana'],
         catalogue: [APP_ID],
         cases: {
@@ -56,7 +61,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
         },
         savedObject: {
           all: [],
-          read: [],
+          read: [...filesSavedObjectTypes],
         },
         ui: casesCapabilities.read,
       },
@@ -71,7 +76,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
             groupType: 'independent',
             privileges: [
               {
-                api: [],
+                api: casesApiTags.delete,
                 id: 'cases_delete',
                 name: i18n.translate(
                   'xpack.securitySolution.featureRegistry.deleteSubFeatureDetails',
@@ -234,6 +239,12 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
     name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.fileOperations', {
       defaultMessage: 'File Operations',
     }),
+    description: i18n.translate(
+      'xpack.securitySolution.featureRegistry.subFeatures.fileOperations.description',
+      {
+        defaultMessage: 'Perform file-related response actions in the response console.',
+      }
+    ),
     privilegeGroups: [
       {
         groupType: 'mutually_exclusive',
@@ -248,43 +259,6 @@ const responseActionSubFeatures: SubFeatureConfig[] = [
               read: [],
             },
             ui: ['writeFileOperations'],
-          },
-        ],
-      },
-    ],
-  },
-  {
-    requireAllSpaces: true,
-    privilegesTooltip: i18n.translate(
-      'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.privilegesTooltip',
-      {
-        defaultMessage: 'All Spaces is required for Execute Operations access.',
-      }
-    ),
-    name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.executeOperations', {
-      defaultMessage: 'Execute Operations',
-    }),
-    description: i18n.translate(
-      'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.description',
-      {
-        // TODO: Update this description before 8.8 FF
-        defaultMessage: 'Perform script execution on the endpoint.',
-      }
-    ),
-    privilegeGroups: [
-      {
-        groupType: 'mutually_exclusive',
-        privileges: [
-          {
-            api: [`${APP_ID}-writeExecuteOperations`],
-            id: 'execute_operations_all',
-            includeIn: 'none',
-            name: 'All',
-            savedObject: {
-              all: [],
-              read: [],
-            },
-            ui: ['writeExecuteOperations'],
           },
         ],
       },
@@ -611,6 +585,46 @@ const subFeatures: SubFeatureConfig[] = [
   ...responseActionSubFeatures,
 ];
 
+// execute operations are not available in 8.7,
+// but will be available in 8.8
+const executeActionSubFeature: SubFeatureConfig = {
+  requireAllSpaces: true,
+  privilegesTooltip: i18n.translate(
+    'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.privilegesTooltip',
+    {
+      defaultMessage: 'All Spaces is required for Execute Operations access.',
+    }
+  ),
+  name: i18n.translate('xpack.securitySolution.featureRegistry.subFeatures.executeOperations', {
+    defaultMessage: 'Execute Operations',
+  }),
+  description: i18n.translate(
+    'xpack.securitySolution.featureRegistry.subFeatures.executeOperations.description',
+    {
+      // TODO: Update this description before 8.8 FF
+      defaultMessage: 'Perform script execution on the endpoint.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-writeExecuteOperations`],
+          id: 'execute_operations_all',
+          includeIn: 'none',
+          name: 'All',
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['writeExecuteOperations'],
+        },
+      ],
+    },
+  ],
+};
+
 function getSubFeatures(experimentalFeatures: ConfigType['experimentalFeatures']) {
   let filteredSubFeatures: SubFeatureConfig[] = [];
 
@@ -627,10 +641,8 @@ function getSubFeatures(experimentalFeatures: ConfigType['experimentalFeatures']
   }
 
   // behind FF (planned for 8.8)
-  if (!experimentalFeatures.responseActionExecuteEnabled) {
-    filteredSubFeatures = filteredSubFeatures.filter((subFeat) => {
-      return subFeat.name !== 'Execute operations';
-    });
+  if (experimentalFeatures.responseActionExecuteEnabled) {
+    filteredSubFeatures = [...filteredSubFeatures, executeActionSubFeature];
   }
 
   return filteredSubFeatures;

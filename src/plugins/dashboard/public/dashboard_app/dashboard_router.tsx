@@ -12,7 +12,8 @@ import React from 'react';
 import { History } from 'history';
 import { parse, ParsedQuery } from 'query-string';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Switch, Route, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
+import { Switch, RouteComponentProps, HashRouter, Redirect } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
 
 import {
   TableListViewKibanaDependencies,

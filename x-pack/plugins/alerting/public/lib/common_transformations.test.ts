@@ -31,6 +31,7 @@ describe('common_transformations', () => {
           group: 'some group',
           id: 'some-connector-id',
           params: { foo: 'car', bar: [1, 2, 3] },
+          uuid: '123-456',
         },
       ],
       params: { bar: 'foo', numbers: { 1: [2, 3] } } as never,
@@ -81,6 +82,7 @@ describe('common_transformations', () => {
       },
       last_run: {
         outcome: RuleLastRunOutcomeValues[2],
+        outcome_order: 20,
         outcome_msg: ['this is just a test'],
         warning: RuleExecutionStatusErrorReasons.Unknown,
         alerts_count: {
@@ -107,6 +109,7 @@ describe('common_transformations', () => {
               ],
               "foo": "car",
             },
+            "uuid": "123-456",
           },
         ],
         "alertTypeId": "some-rule-type",
@@ -137,6 +140,7 @@ describe('common_transformations', () => {
           "outcomeMsg": Array [
             "this is just a test",
           ],
+          "outcomeOrder": 20,
           "warning": "unknown",
         },
         "monitoring": Object {
@@ -211,6 +215,7 @@ describe('common_transformations', () => {
           group: 'some group',
           id: 'some-connector-id',
           params: {},
+          uuid: '123-456',
         },
       ],
       params: {} as never,
@@ -255,6 +260,7 @@ describe('common_transformations', () => {
       },
       last_run: {
         outcome: 'failed',
+        outcome_order: 20,
         outcome_msg: ['this is just a test'],
         warning: RuleExecutionStatusErrorReasons.Unknown,
         alerts_count: {
@@ -274,6 +280,7 @@ describe('common_transformations', () => {
             "group": "some group",
             "id": "some-connector-id",
             "params": Object {},
+            "uuid": "123-456",
           },
         ],
         "alertTypeId": "some-rule-type",
@@ -300,6 +307,7 @@ describe('common_transformations', () => {
           "outcomeMsg": Array [
             "this is just a test",
           ],
+          "outcomeOrder": 20,
           "warning": "unknown",
         },
         "monitoring": Object {

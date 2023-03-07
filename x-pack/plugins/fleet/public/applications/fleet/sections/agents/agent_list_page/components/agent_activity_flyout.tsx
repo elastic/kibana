@@ -35,6 +35,7 @@ import { SO_SEARCH_LIMIT } from '../../../../constants';
 import { Loading } from '../../components';
 
 import { getTodayActions, getOtherDaysActions } from './agent_activity_helper';
+import { ViewErrors } from './view_errors';
 
 const FullHeightFlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
@@ -502,6 +503,11 @@ const ActivityItem: React.FunctionComponent<{ action: ActionStatus }> = ({ actio
             {displayByStatus[action.status].description}
           </EuiText>
         </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {action.status === 'FAILED' && action.latestErrors && action.latestErrors.length > 0 ? (
+            <ViewErrors action={action} />
+          ) : null}
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
   );
@@ -531,6 +537,10 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
 
     return startDate > now;
   }, [action]);
+
+  const showCancelButton = useMemo(() => {
+    return isScheduled || action.hasRolloutPeriod;
+  }, [action, isScheduled]);
 
   return (
     <EuiPanel hasBorder={true} borderRadius="none">
@@ -592,17 +602,19 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                size="s"
-                onClick={onClickAbortUpgrade}
-                isLoading={isAborting}
-                data-test-subj="abortBtn"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.agentActivityFlyout.abortUpgradeButtom"
-                  defaultMessage="Cancel"
-                />
-              </EuiButton>
+              {showCancelButton ? (
+                <EuiButton
+                  size="s"
+                  onClick={onClickAbortUpgrade}
+                  isLoading={isAborting}
+                  data-test-subj="abortBtn"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.agentActivityFlyout.abortUpgradeButtom"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButton>
+              ) : null}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

@@ -12,6 +12,8 @@ import { EuiDataGridColumn } from '@elastic/eui';
 import { CoreSetup } from '@kbn/core/public';
 
 import type { DataView } from '@kbn/data-views-plugin/public';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { isRuntimeMappings } from '../../../../../../common/util/runtime_field_utils';
 import { RuntimeMappings } from '../../../../../../common/types/fields';
 import { DEFAULT_SAMPLER_SHARD_SIZE } from '../../../../../../common/constants/field_histograms';
@@ -85,6 +87,8 @@ export const useIndexData = (
   // (for example, as part of filebeat/metricbeat/ECS based indices)
   // to the data grid component which would significantly slow down the page.
   const [indexPatternFields, setIndexPatternFields] = useState<string[]>();
+  const [timeRangeMs, setTimeRangeMs] = useState<TimeRangeMs | undefined>();
+
   useEffect(() => {
     async function fetchDataGridSampleDocuments() {
       setErrorMessage('');
@@ -170,6 +174,7 @@ export const useIndexData = (
       setErrorMessage('');
       setStatus(INDEX_STATUS.LOADING);
 
+      const timeFieldName = indexPattern.getTimeField()?.name;
       const sort: EsSorting = sortingColumns.reduce((s, column) => {
         s[column.id] = { order: column.direction };
         return s;
@@ -191,11 +196,38 @@ export const useIndexData = (
           ...(isRuntimeMappings(combinedRuntimeMappings)
             ? { runtime_mappings: combinedRuntimeMappings }
             : {}),
+          ...(timeFieldName
+            ? {
+                aggs: {
+                  earliest: {
+                    min: {
+                      field: timeFieldName,
+                    },
+                  },
+                  latest: {
+                    max: {
+                      field: timeFieldName,
+                    },
+                  },
+                },
+              }
+            : {}),
         },
       };
 
       try {
         const resp: IndexSearchResponse = await ml.esSearch(esSearchRequest);
+
+        if (
+          resp.aggregations &&
+          isPopulatedObject(resp.aggregations.earliest, ['value']) &&
+          isPopulatedObject(resp.aggregations.latest, ['value'])
+        ) {
+          setTimeRangeMs({
+            from: resp.aggregations.earliest.value as number,
+            to: resp.aggregations.latest.value as number,
+          } as TimeRangeMs);
+        }
         const docs = resp.hits.hits.map((d) => getProcessedFields(d.fields ?? {}));
 
         setRowCountInfo({
@@ -269,5 +301,6 @@ export const useIndexData = (
     ...dataGrid,
     indexPatternFields,
     renderCellValue,
+    timeRangeMs,
   };
 };

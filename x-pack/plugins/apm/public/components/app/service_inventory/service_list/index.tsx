@@ -15,6 +15,7 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { TypeOf } from '@kbn/typed-react-router-config';
 import React, { useMemo } from 'react';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
@@ -22,10 +23,7 @@ import {
   ServiceInventoryFieldName,
   ServiceListItem,
 } from '../../../../../common/service_inventory';
-import {
-  TRANSACTION_PAGE_LOAD,
-  TRANSACTION_REQUEST,
-} from '../../../../../common/transaction_types';
+import { isDefaultTransactionType } from '../../../../../common/transaction_types';
 import {
   asMillisecondDuration,
   asPercent,
@@ -44,9 +42,9 @@ import {
   getTimeSeriesColor,
 } from '../../../shared/charts/helper/get_timeseries_color';
 import { EnvironmentBadge } from '../../../shared/environment_badge';
+import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { ListMetric } from '../../../shared/list_metric';
 import { ITableColumn, ManagedTable } from '../../../shared/managed_table';
-import { ServiceLink } from '../../../shared/links/apm/service_link';
 import { HealthBadge } from './health_badge';
 
 type ServicesDetailedStatisticsAPIResponse =
@@ -82,8 +80,10 @@ export function getServiceColumns({
       ? [
           {
             field: ServiceInventoryFieldName.AlertsCount,
-            name: '',
-            width: `${unit * 5}px`,
+            name: i18n.translate('xpack.apm.servicesTable.alertsColumnLabel', {
+              defaultMessage: 'Active alerts',
+            }),
+            width: `${unit * 8}px`,
             sortable: true,
             render: (_, { serviceName, alertsCount }) => {
               if (!alertsCount) {
@@ -91,16 +91,29 @@ export function getServiceColumns({
               }
 
               return (
-                <EuiBadge
-                  iconType="alert"
-                  color="danger"
-                  href={link('/services/{serviceName}/alerts', {
-                    path: { serviceName },
-                    query,
-                  })}
+                <EuiToolTip
+                  position="bottom"
+                  content={i18n.translate(
+                    'xpack.apm.home.servicesTable.tooltip.activeAlertsExplanation',
+                    {
+                      defaultMessage: 'Active alerts',
+                    }
+                  )}
                 >
-                  {alertsCount}
-                </EuiBadge>
+                  <EuiBadge
+                    iconType="alert"
+                    color="danger"
+                    href={link('/services/{serviceName}/alerts', {
+                      path: { serviceName },
+                      query: {
+                        ...query,
+                        alertStatus: ALERT_STATUS_ACTIVE,
+                      },
+                    })}
+                  >
+                    {alertsCount}
+                  </EuiBadge>
+                </EuiToolTip>
               );
             },
           } as ITableColumn<ServiceListItem>,
@@ -150,7 +163,7 @@ export function getServiceColumns({
                 defaultMessage: 'Environment',
               }
             ),
-            width: `${unit * 10}px`,
+            width: `${unit * 9}px`,
             sortable: true,
             render: (_, { environments }) => (
               <EnvironmentBadge environments={environments ?? []} />
@@ -166,7 +179,7 @@ export function getServiceColumns({
               'xpack.apm.servicesTable.transactionColumnLabel',
               { defaultMessage: 'Transaction type' }
             ),
-            width: `${unit * 10}px`,
+            width: `${unit * 8}px`,
             sortable: true,
           },
         ]
@@ -299,8 +312,7 @@ export function ServiceList({
 
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) =>
-      transactionType !== TRANSACTION_REQUEST &&
-      transactionType !== TRANSACTION_PAGE_LOAD
+      transactionType && !isDefaultTransactionType(transactionType)
   );
 
   const {

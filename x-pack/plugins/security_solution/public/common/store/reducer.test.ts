@@ -12,6 +12,7 @@ import { mockIndexPattern, mockSourcererState } from '../mock';
 import { useSourcererDataView } from '../containers/sourcerer';
 import { useDeepEqualSelector } from '../hooks/use_selector';
 import { renderHook } from '@testing-library/react-hooks';
+import { initialGroupingState } from './grouping/reducer';
 
 jest.mock('../hooks/use_selector');
 jest.mock('../lib/kibana', () => ({
@@ -38,9 +39,16 @@ describe('createInitialState', () => {
       kibanaDataViews: [mockSourcererState.defaultDataView],
       signalIndexName: 'siem-signals-default',
     };
-    const initState = createInitialState(mockPluginState, defaultState, {
-      dataTable: { tableById: {} },
-    });
+    const initState = createInitialState(
+      mockPluginState,
+      defaultState,
+      {
+        dataTable: { tableById: {} },
+      },
+      {
+        groups: initialGroupingState,
+      }
+    );
     beforeEach(() => {
       (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(initState));
     });
@@ -73,6 +81,9 @@ describe('createInitialState', () => {
           dataTable: {
             tableById: {},
           },
+        },
+        {
+          groups: initialGroupingState,
         }
       );
       (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(state));

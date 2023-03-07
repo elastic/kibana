@@ -92,23 +92,18 @@ export const Page: FC<PageProps> = ({ moduleId, existingGroupIds }) => {
   const [jobsAwaitingNodeCount, setJobsAwaitingNodeCount] = useState(0);
   // #endregion
 
-  const {
-    currentSavedSearch: savedSearch,
-    currentDataView: dataView,
-    combinedQuery,
-  } = useMlContext();
-  const pageTitle =
-    savedSearch !== null
-      ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {
-          defaultMessage: 'saved search {savedSearchTitle}',
-          values: { savedSearchTitle: savedSearch.attributes.title as string },
-        })
-      : i18n.translate('xpack.ml.newJob.recognize.dataViewPageTitle', {
-          defaultMessage: 'data view {dataViewName}',
-          values: { dataViewName: dataView.getName() },
-        });
-  const displayQueryWarning = savedSearch !== null;
-  const tempQuery = savedSearch === null ? undefined : combinedQuery;
+  const { selectedSavedSearch, currentDataView: dataView, combinedQuery } = useMlContext();
+  const pageTitle = selectedSavedSearch
+    ? i18n.translate('xpack.ml.newJob.recognize.savedSearchPageTitle', {
+        defaultMessage: 'saved search {savedSearchTitle}',
+        values: { savedSearchTitle: selectedSavedSearch.title ?? '' },
+      })
+    : i18n.translate('xpack.ml.newJob.recognize.dataViewPageTitle', {
+        defaultMessage: 'data view {dataViewName}',
+        values: { dataViewName: dataView.getName() },
+      });
+  const displayQueryWarning = selectedSavedSearch !== null;
+  const tempQuery = selectedSavedSearch === null ? undefined : combinedQuery;
 
   /**
    * Loads recognizer module configuration.

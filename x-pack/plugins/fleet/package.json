@@ -1,9 +1,9 @@
 {
   "author": "Elastic",
-  "name": "fleet",
-  "version": "8.0.0",
+  "name": "@kbn/fleet-plugin",
+  "version": "1.0.0",
   "private": true,
-  "license": "Elastic-License",
+  "license": "Elastic License 2.0",
   "scripts": {
     "cypress": "../../../node_modules/.bin/cypress",
     "cypress:open": "yarn cypress open --config-file ./cypress.config.ts",
@@ -11,6 +11,9 @@
     "cypress:run": "yarn cypress:run:reporter --browser chrome --spec './cypress/e2e/**/*.cy.ts'; status=$?; yarn junit:merge && exit $status",
     "cypress:run-as-ci": "node ../../../scripts/functional_tests --config ../../test/fleet_cypress/cli_config.ts",
     "cypress:run:reporter": "yarn cypress run --config-file ./cypress.config.ts --reporter ../../../node_modules/cypress-multi-reporters --reporter-options configFile=./cypress/reporter_config.json",
-    "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-fleet/cypress/results/mochawesome*.json > ../../../target/kibana-fleet/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-fleet/cypress/results/output.json --reportDir ../../../target/kibana-fleet/cypress/results && mkdir -p ../../../target/junit && cp ../../../target/kibana-fleet/cypress/results/*.xml ../../../target/junit/"
+    "junit:merge": "../../../node_modules/.bin/mochawesome-merge ../../../target/kibana-fleet/cypress/results/mochawesome*.json > ../../../target/kibana-fleet/cypress/results/output.json && ../../../node_modules/.bin/marge ../../../target/kibana-fleet/cypress/results/output.json --reportDir ../../../target/kibana-fleet/cypress/results && mkdir -p ../../../target/junit && cp ../../../target/kibana-fleet/cypress/results/*.xml ../../../target/junit/",
+    "openapi:build": "npx @redocly/openapi-cli bundle --ext yaml --output ./common/openapi/bundled.yaml ./common/openapi/entrypoint.yaml && npx @redocly/openapi-cli bundle --ext json --output ./common/openapi/bundled.json ./common/openapi/entrypoint.yaml",
+    "openapi:lint": "npx @redocly/cli lint ./common/openapi/bundled.yaml",
+    "openapi:speccy": "npx speccy lint ./common/openapi/bundled.yaml"
   }
 }

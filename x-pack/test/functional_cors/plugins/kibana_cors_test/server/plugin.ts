@@ -6,7 +6,7 @@
  */
 
 import Hapi from '@hapi/hapi';
-import { kbnTestConfig } from '@kbn/test';
+import { kbnTestConfig } from '@kbn/test/kbn_test_config';
 import Url from 'url';
 import abab from 'abab';
 

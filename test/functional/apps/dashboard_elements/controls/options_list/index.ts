@@ -14,16 +14,12 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
   const elasticChart = getService('elasticChart');
   const security = getService('security');
 
-  const { timePicker, dashboard } = getPageObjects([
-    'dashboardControls',
-    'timePicker',
-    'dashboard',
-    'common',
-  ]);
+  const { timePicker, dashboard, common } = getPageObjects(['timePicker', 'dashboard', 'common']);
 
-  async function setup() {
+  const setup = async () => {
     await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader', 'animals']);
 
+    await common.navigateToApp('dashboard');
     await dashboard.gotoDashboardLandingPage();
     await dashboard.clickNewDashboard();
     await timePicker.setDefaultDataRange();
@@ -32,13 +28,13 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
       exitFromEditMode: false,
       storeTimeWithDashboard: true,
     });
-  }
+  };
 
-  async function teardown() {
+  const teardown = async () => {
     await security.testUser.restoreDefaults();
-  }
+  };
 
-  describe('Options list control', function () {
+  describe('Options list control', async () => {
     before(setup);
     after(teardown);
 
@@ -46,5 +42,7 @@ export default function ({ loadTestFile, getService, getPageObjects }: FtrProvid
     loadTestFile(require.resolve('./options_list_dashboard_interaction'));
     loadTestFile(require.resolve('./options_list_suggestions'));
     loadTestFile(require.resolve('./options_list_validation'));
+
+    loadTestFile(require.resolve('./options_list_allow_expensive_queries_off.ts'));
   });
 }

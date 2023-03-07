@@ -35,6 +35,12 @@ export type RuleExecutionStatuses = typeof RuleExecutionStatusValues[number];
 export const RuleLastRunOutcomeValues = ['succeeded', 'warning', 'failed'] as const;
 export type RuleLastRunOutcomes = typeof RuleLastRunOutcomeValues[number];
 
+export const RuleLastRunOutcomeOrderMap: Record<RuleLastRunOutcomes, number> = {
+  succeeded: 0,
+  warning: 10,
+  failed: 20,
+};
+
 export enum RuleExecutionStatusErrorReasons {
   Read = 'read',
   Decrypt = 'decrypt',
@@ -71,6 +77,7 @@ export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
 export interface RuleAction {
+  uuid?: string;
   group: string;
   id: string;
   actionTypeId: string;
@@ -93,6 +100,7 @@ export interface RuleAggregations {
 
 export interface RuleLastRun {
   outcome: RuleLastRunOutcomes;
+  outcomeOrder?: number;
   warning?: RuleExecutionStatusErrorReasons | RuleExecutionStatusWarningReasons | null;
   outcomeMsg?: string[] | null;
   alertsCount: {
@@ -140,6 +148,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   lastRun?: RuleLastRun | null;
   nextRun?: Date | null;
   running?: boolean | null;
+  viewInAppRelativeUrl?: string;
 }
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<Rule<Params>, 'apiKey'>;
@@ -161,6 +170,8 @@ export type SanitizedRuleConfig = Pick<
   | 'updatedAt'
   | 'throttle'
   | 'notifyWhen'
+  | 'muteAll'
+  | 'snoozeSchedule'
 > & {
   producer: string;
   ruleTypeId: string;
@@ -193,6 +204,7 @@ export interface ActionVariable {
   description: string;
   deprecated?: boolean;
   useWithTripleBracesInTemplates?: boolean;
+  usesPublicBaseUrl?: boolean;
 }
 
 export interface RuleMonitoringHistory extends SavedObjectAttributes {

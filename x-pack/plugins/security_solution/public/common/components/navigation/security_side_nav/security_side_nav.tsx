@@ -23,6 +23,7 @@ import { EuiIconLaunch } from './icons/launch';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
 import { bottomNavOffset } from '../../../lib/helpers';
+import { track } from '../../../lib/telemetry';
 
 const isFooterNavItem = (id: SecurityPageName) =>
   id === SecurityPageName.landing || id === SecurityPageName.administration;
@@ -65,7 +66,9 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
       const formatDefaultItem = (navItem: NavLinkItem): DefaultSideNavItem => ({
         id: navItem.id,
         label: navItem.title,
-        ...getSecuritySolutionLinkProps({ deepLinkId: navItem.id }),
+        ...getSecuritySolutionLinkProps({
+          deepLinkId: navItem.id,
+        }),
         ...(navItem.categories && navItem.categories.length > 0
           ? { categories: navItem.categories }
           : {}),
@@ -166,6 +169,7 @@ export const SecuritySideNav: React.FC = () => {
       footerItems={footerItems}
       selectedId={selectedId}
       bottomOffset={bottomOffset}
+      tracker={track}
     />
   );
 };

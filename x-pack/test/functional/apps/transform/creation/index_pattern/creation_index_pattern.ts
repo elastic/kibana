@@ -7,7 +7,7 @@
 
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   GroupByEntry,
   isLatestTransformTestData,
@@ -36,12 +36,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
     });
 
+    const fieldStatsEntries = [
+      {
+        identifier: 'terms(customer_gender)',
+        fieldName: 'customer_gender',
+        type: 'keyword',
+        isGroupByInput: true,
+      },
+      {
+        fieldName: 'category.keyword',
+        type: 'keyword',
+        isAggInput: true,
+        isUniqueKeyInput: true,
+      },
+      {
+        fieldName: 'currency',
+        type: 'keyword',
+        isAggInput: true,
+        isUniqueKeyInput: true,
+      },
+      {
+        fieldName: 'order_date',
+        type: 'date',
+        isSortFieldInput: true,
+      },
+    ];
     const DEFAULT_NUM_FAILURE_RETRIES = '5';
     const testDataList: Array<PivotTransformTestData | LatestTransformTestData> = [
       {
         type: 'pivot',
         suiteTitle: 'batch transform with terms+date_histogram groups and avg agg',
         source: 'ft_ecommerce',
+        fieldStatsEntries,
         groupByEntries: [
           {
             identifier: 'terms(category)',
@@ -96,6 +122,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discoverAdjustSuperDatePicker: true,
         numFailureRetries: '7',
         expected: {
+          fullTimeRange: {
+            start: 'Jun 12, 2019 @ 00:04:19.000',
+            end: 'Jul 12, 2019 @ 23:45:36.000',
+          },
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "category": {'],
           pivotAdvancedEditorValue: {
             group_by: {
@@ -155,6 +185,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             status: TRANSFORM_STATE.STOPPED,
             mode: 'batch',
             progress: '100',
+            health: 'Healthy',
           },
           indexPreview: {
             columns: 10,
@@ -294,6 +325,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discoverAdjustSuperDatePicker: false,
         numFailureRetries: '-1',
         expected: {
+          fullTimeRange: {
+            start: 'Jun 12, 2019 @ 00:04:19.000',
+            end: 'Jul 12, 2019 @ 23:45:36.000',
+          },
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "geoip.country_iso_code": {'],
           pivotAdvancedEditorValue: {
             group_by: {
@@ -334,6 +369,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             status: TRANSFORM_STATE.STOPPED,
             mode: 'batch',
             progress: '100',
+            health: 'Healthy',
           },
           indexPreview: {
             columns: 10,
@@ -368,6 +404,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discoverAdjustSuperDatePicker: false,
         numFailureRetries: '0',
         expected: {
+          fullTimeRange: {
+            start: 'Jun 12, 2019 @ 00:04:19.000',
+            end: 'Jul 12, 2019 @ 23:45:36.000',
+          },
           pivotAdvancedEditorValueArr: ['{', '  "group_by": {', '    "customer_gender": {'],
           pivotAdvancedEditorValue: {
             group_by: {
@@ -394,6 +434,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             status: TRANSFORM_STATE.STOPPED,
             mode: 'batch',
             progress: '100',
+            health: 'Healthy',
           },
           indexPreview: {
             columns: 10,
@@ -407,6 +448,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         type: 'latest',
         suiteTitle: 'batch transform with the latest function',
         source: 'ft_ecommerce',
+        fieldStatsEntries,
         uniqueKeys: [
           {
             identifier: 'geoip.country_iso_code',
@@ -428,6 +470,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         discoverAdjustSuperDatePicker: true,
         numFailureRetries: '101',
         expected: {
+          fullTimeRange: {
+            start: 'Jun 12, 2019 @ 00:04:19.000',
+            end: 'Jul 12, 2019 @ 23:45:36.000',
+          },
           latestPreview: {
             column: 0,
             values: [],
@@ -436,6 +482,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             status: TRANSFORM_STATE.STOPPED,
             mode: 'batch',
             progress: '100',
+            health: 'Healthy',
           },
           indexPreview: {
             columns: 10,
@@ -506,6 +553,25 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             testData.expected.indexPreview.rows
           );
 
+          await transform.testExecution.logTestStep(
+            `sets the date picker back to the default '15 minutes ago'`
+          );
+          await transform.datePicker.quickSelect(15, 'm');
+
+          await transform.testExecution.logTestStep('again displays an empty index preview');
+          await transform.wizard.assertIndexPreviewEmpty();
+
+          await transform.testExecution.logTestStep(
+            `clicks the 'Use full data' button to auto-select time range`
+          );
+          await transform.datePicker.clickUseFullDataButton(testData.expected.fullTimeRange);
+
+          await transform.testExecution.logTestStep('again shows the index preview');
+          await transform.wizard.assertIndexPreview(
+            testData.expected.indexPreview.columns,
+            testData.expected.indexPreview.rows
+          );
+
           await transform.testExecution.logTestStep('displays an empty transform preview');
           await transform.wizard.assertTransformPreviewEmpty();
 
@@ -535,7 +601,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await canvasElement.resetAntiAliasing();
 
           if (isPivotTransformTestData(testData)) {
-            await transform.testExecution.logTestStep('adds the group by entries');
+            await transform.testExecution.logTestStep(
+              'opens field stats flyout from group by input'
+            );
+
+            const groupByFieldStatsEntries = testData.fieldStatsEntries
+              ? testData.fieldStatsEntries.filter((e) => e.isGroupByInput)
+              : [];
+
+            for (const { fieldName, type } of groupByFieldStatsEntries) {
+              await transform.wizard.assertFieldStatFlyoutContentFromGroupByInputTrigger(
+                fieldName,
+                type
+              );
+            }
+
             for (const [index, entry] of testData.groupByEntries.entries()) {
               await transform.wizard.assertGroupByInputExists();
               await transform.wizard.assertGroupByInputValue([]);
@@ -544,6 +624,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                 entry.identifier,
                 entry.label,
                 entry.intervalLabel
+              );
+            }
+
+            await transform.testExecution.logTestStep('opens field stats flyout from agg input');
+            const aggInputFieldStatsEntries = testData.fieldStatsEntries
+              ? testData.fieldStatsEntries.filter((e) => e.isAggInput)
+              : [];
+
+            for (const { fieldName, type } of aggInputFieldStatsEntries) {
+              await transform.wizard.assertFieldStatFlyoutContentFromAggInputTrigger(
+                fieldName,
+                type
               );
             }
 
@@ -564,12 +656,42 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           if (isLatestTransformTestData(testData)) {
             await transform.testExecution.logTestStep('sets latest transform method');
             await transform.wizard.selectTransformFunction('latest');
+
+            await transform.testExecution.logTestStep(
+              'opens field stats flyout from unique keys input'
+            );
+            const uniqueKeyInputFieldStatsEntries = testData.fieldStatsEntries
+              ? testData.fieldStatsEntries.filter((e) => e.isUniqueKeyInput)
+              : [];
+
+            for (const { fieldName, type } of uniqueKeyInputFieldStatsEntries) {
+              await transform.wizard.assertFieldStatsFlyoutContentFromUniqueKeysInputTrigger(
+                fieldName,
+                type
+              );
+            }
+
             await transform.testExecution.logTestStep('adds unique keys');
             for (const { identifier, label } of testData.uniqueKeys) {
               await transform.wizard.assertUniqueKeysInputExists();
               await transform.wizard.assertUniqueKeysInputValue([]);
               await transform.wizard.addUniqueKeyEntry(identifier, label);
             }
+
+            await transform.testExecution.logTestStep(
+              'opens field stats flyout from sort by input'
+            );
+            const sortFieldInputFieldStatsEntries = testData.fieldStatsEntries
+              ? testData.fieldStatsEntries.filter((e) => e.isSortFieldInput)
+              : [];
+
+            for (const { fieldName, type } of sortFieldInputFieldStatsEntries) {
+              await transform.wizard.assertFieldStatFlyoutContentFromSortFieldInputTrigger(
+                fieldName,
+                type
+              );
+            }
+
             await transform.testExecution.logTestStep('sets the sort field');
             await transform.wizard.assertSortFieldInputExists();
             await transform.wizard.assertSortFieldInputValue('');
@@ -701,6 +823,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             status: testData.expected.row.status,
             mode: testData.expected.row.mode,
             progress: testData.expected.row.progress,
+            health: testData.expected.row.health,
           });
         });
 

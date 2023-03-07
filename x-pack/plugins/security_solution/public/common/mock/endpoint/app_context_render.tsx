@@ -24,6 +24,8 @@ import type {
 } from '@testing-library/react-hooks/src/types/react';
 import type { UseBaseQueryResult } from '@tanstack/react-query';
 import ReactDOM from 'react-dom';
+import { ExperimentalFeaturesService } from '../../experimental_features_service';
+import { applyIntersectionObserverMock } from '../intersection_observer_mock';
 import { ConsoleManager } from '../../../management/components/console';
 import type { StartPlugins, StartServices } from '../../../types';
 import { depsStartMock } from './dependencies_start_mock';
@@ -41,6 +43,7 @@ import { APP_UI_ID, APP_PATH } from '../../../../common/constants';
 import { KibanaContextProvider, KibanaServices } from '../../lib/kibana';
 import { getDeepLinks } from '../../../app/deep_links';
 import { fleetGetPackageHttpMock } from '../../../management/mocks';
+import { allowedExperimentalValues } from '../../../../common/experimental_features';
 
 const REAL_REACT_DOM_CREATE_PORTAL = ReactDOM.createPortal;
 
@@ -244,6 +247,8 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
   );
 
   const render: UiRender = (ui, options) => {
+    applyIntersectionObserverMock();
+
     return reactRender(ui, {
       wrapper: AppWrapper,
       ...options,
@@ -279,7 +284,16 @@ export const createAppRootMockRenderer = (): AppContextTestRender => {
     return hookResult.current;
   };
 
+  ExperimentalFeaturesService.init({ experimentalFeatures: allowedExperimentalValues });
+
   const setExperimentalFlag: AppContextTestRender['setExperimentalFlag'] = (flags) => {
+    ExperimentalFeaturesService.init({
+      experimentalFeatures: {
+        ...allowedExperimentalValues,
+        ...flags,
+      },
+    });
+
     store.dispatch({
       type: UpdateExperimentalFeaturesTestActionType,
       payload: flags,

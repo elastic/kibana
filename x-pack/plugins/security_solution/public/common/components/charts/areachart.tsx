@@ -25,7 +25,7 @@ import {
   Wrapper,
   ChartWrapper,
 } from './common';
-import { VisualizationActions } from '../visualization_actions';
+import { VisualizationActions } from '../visualization_actions/actions';
 import type { VisualizationActionsProps } from '../visualization_actions/types';
 
 import { HoverVisibilityContainer } from '../hover_visibility_container';

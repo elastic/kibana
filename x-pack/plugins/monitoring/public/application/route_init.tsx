@@ -5,7 +5,9 @@
  * 2.0.
  */
 import React, { useContext } from 'react';
-import { Route, Redirect, useLocation } from 'react-router-dom';
+import { Redirect, useLocation } from 'react-router-dom';
+import { Route } from '@kbn/shared-ux-router';
+
 import { useClusters } from './hooks/use_clusters';
 import { GlobalStateContext } from './contexts/global_state_context';
 import { getClusterFromClusters } from '../lib/get_cluster_from_clusters';

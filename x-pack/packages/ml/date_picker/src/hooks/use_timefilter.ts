@@ -7,6 +7,7 @@
 
 import { useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import { merge, type Observable } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 import { isEqual } from 'lodash';
 
@@ -14,6 +15,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 
 import { useDatePickerContext } from './use_date_picker_context';
+import { mlTimefilterRefresh$, Refresh } from '../services/timefilter_refresh_service';
 
 /**
  * Options interface for the `useTimefilter` custom hook.
@@ -99,4 +101,30 @@ export const useTimeRangeUpdates = (absolute = false): TimeRange => {
   );
 
   return useObservable(timeChangeObservable$, getTimeCallback());
+};
+
+/**
+ * Provides the latest refresh, both manual or auto.
+ */
+export const useRefresh = () => {
+  const timefilter = useTimefilter();
+
+  const getTimeRange = () => {
+    const { from, to } = timefilter.getTime();
+    return { start: from, end: to };
+  };
+
+  const refresh$ = useMemo(() => {
+    return merge(
+      mlTimefilterRefresh$,
+      timefilter.getTimeUpdate$().pipe(
+        map(() => {
+          return { lastRefresh: Date.now(), timeRange: getTimeRange() };
+        })
+      )
+    ) as Observable<Refresh>;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return useObservable<Refresh>(refresh$);
 };

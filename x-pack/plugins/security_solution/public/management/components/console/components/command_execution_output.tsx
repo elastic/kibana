@@ -94,7 +94,7 @@ export const CommandExecutionOutput = memo<CommandExecutionOutputProps>(
         <div>
           <UserCommandInput input={command.inputDisplay} isValid={isValid} />
         </div>
-        <div>
+        <div className="noThemeOverrides">
           {/* UX desire for 12px (current theme): achieved with EuiSpace sizes - s (8px) + xs (4px) */}
           <EuiSpacer size="s" />
           <EuiSpacer size="xs" />

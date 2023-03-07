@@ -14,12 +14,12 @@ import type { CasesByAlertId } from '@kbn/cases-plugin/common/api/cases/case';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import { CommentType } from '@kbn/cases-plugin/common';
 
-import type { ResponseActionBodySchema } from '../../../../common/endpoint/schema/actions';
 import {
   NoParametersRequestSchema,
   KillOrSuspendProcessRequestSchema,
   EndpointActionGetFileSchema,
   ExecuteActionRequestSchema,
+  type ResponseActionBodySchema,
 } from '../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../common/constants';
 import {
@@ -48,6 +48,7 @@ import type {
   ResponseActionsExecuteParameters,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -254,6 +255,20 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     let fleetActionIndexResult;
     let logsEndpointActionsResult;
 
+    const getActionParameters = () => {
+      // set timeout to 4h (if not specified or when timeout is specified as 0) when command is `execute`
+      if (command === 'execute') {
+        const actionRequestParams = req.body.parameters as ResponseActionsExecuteParameters;
+        if (typeof actionRequestParams?.timeout === 'undefined') {
+          return { ...actionRequestParams, timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT };
+        }
+        return actionRequestParams;
+      }
+
+      // for all other commands return the parameters as is
+      return req.body.parameters ?? undefined;
+    };
+
     const agents = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
     const doc = {
       '@timestamp': moment().toISOString(),
@@ -268,7 +283,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
         data: {
           command,
           comment: req.body.comment ?? undefined,
-          parameters: req.body.parameters ?? undefined,
+          parameters: getActionParameters(),
         } as EndpointActionData<T>,
       } as Omit<EndpointAction, 'agents' | 'user_id' | '@timestamp'>,
       user: {
@@ -320,21 +335,36 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       }
     }
 
+    // add signature to doc
+    const fleetActionDoc = {
+      ...doc.EndpointActions,
+      '@timestamp': doc['@timestamp'],
+      agents,
+      timeout: 300, // 5 minutes
+      user_id: doc.user.id,
+    };
+    const fleetActionDocSignature = await endpointContext.service
+      .getMessageSigningService()
+      .sign(fleetActionDoc);
+    const signedFleetActionDoc = {
+      ...fleetActionDoc,
+      signed: {
+        data: fleetActionDocSignature.data.toString('base64'),
+        signature: fleetActionDocSignature.signature,
+      },
+    };
+
     // write actions to .fleet-actions index
     try {
       fleetActionIndexResult = await esClient.index<EndpointAction>(
         {
           index: AGENT_ACTIONS_INDEX,
-          body: {
-            ...doc.EndpointActions,
-            '@timestamp': doc['@timestamp'],
-            agents,
-            timeout: 300, // 5 minutes
-            user_id: doc.user.id,
-          },
+          body: signedFleetActionDoc,
           refresh: 'wait_for',
         },
-        { meta: true }
+        {
+          meta: true,
+        }
       );
 
       if (fleetActionIndexResult.statusCode !== 201) {

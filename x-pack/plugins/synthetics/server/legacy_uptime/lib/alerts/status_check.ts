@@ -20,6 +20,7 @@ import {
   StatusCheckFilters,
   Ping,
   GetMonitorAvailabilityParams,
+  OverviewPing,
 } from '../../../../common/runtime_types';
 import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
 import {
@@ -104,8 +105,8 @@ export const hasFilters = (filters?: StatusCheckFilters) => {
 
 export const generateFilterDSL = async (
   getIndexPattern: () => Promise<IndexPatternTitleAndFields | undefined>,
-  filters: StatusCheckFilters,
-  search: string
+  filters?: StatusCheckFilters,
+  search?: string
 ) => {
   const filtersExist = hasFilters(filters);
   if (!filtersExist && !search) return undefined;
@@ -122,8 +123,8 @@ export const generateFilterDSL = async (
 
 export const formatFilterString = async (
   uptimeEsClient: UptimeEsClient,
-  filters: StatusCheckFilters,
-  search: string,
+  filters?: StatusCheckFilters,
+  search?: string,
   libs?: UMServerLibs
 ) =>
   await generateFilterDSL(
@@ -233,7 +234,7 @@ export const getStatusMessage = (
   return statusMessage + availabilityMessage;
 };
 
-export const getInstanceId = (monitorInfo: Ping, monIdByLoc: string) => {
+export const getInstanceId = (monitorInfo: Ping | OverviewPing, monIdByLoc: string) => {
   const normalizeText = (txt: string) => {
     // replace url and name special characters with -
     return txt.replace(/[^A-Z0-9]+/gi, '_').toLowerCase();

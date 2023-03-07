@@ -75,7 +75,9 @@ export interface LifecycleAlertServices<
   alertWithLifecycle: LifecycleAlertService<InstanceState, InstanceContext, ActionGroupIds>;
   getAlertStartedDate: (alertInstanceId: string) => string | null;
   getAlertUuid: (alertInstanceId: string) => string;
-  getAlertByAlertUuid: (alertUuid: string) => Promise<Array<{ [id: string]: any }> | null>;
+  getAlertByAlertUuid: (
+    alertUuid: string
+  ) => Promise<Partial<ParsedTechnicalFields & ParsedExperimentalFields> | null> | null;
 }
 
 export type LifecycleRuleExecutor<
@@ -276,12 +278,7 @@ export const createLifecycleExecutor =
           trackedAlertRecoveredIds
         );
 
-        const {
-          alertUuid,
-          started,
-          flapping: isCurrentlyFlapping,
-          pendingRecoveredCount,
-        } = !isNew
+        const { alertUuid, started, flapping, pendingRecoveredCount } = !isNew
           ? state.trackedAlerts[alertId]
           : {
               alertUuid: lifecycleAlertServices.getAlertUuid(alertId),
@@ -291,8 +288,6 @@ export const createLifecycleExecutor =
                 : false,
               pendingRecoveredCount: 0,
             };
-
-        const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
 
         const event: ParsedTechnicalFields & ParsedExperimentalFields = {
           ...alertData?.fields,
@@ -312,7 +307,9 @@ export const createLifecycleExecutor =
           [ALERT_WORKFLOW_STATUS]: alertData?.fields[ALERT_WORKFLOW_STATUS] ?? 'open',
           [EVENT_KIND]: 'signal',
           [EVENT_ACTION]: isNew ? 'open' : isActive ? 'active' : 'close',
-          [TAGS]: options.rule.tags,
+          [TAGS]: Array.from(
+            new Set([...(currentAlertData?.tags ?? []), ...(options.rule.tags ?? [])])
+          ),
           [VERSION]: ruleDataClient.kibanaVersion,
           [ALERT_FLAPPING]: flapping,
           ...(isRecovered ? { [ALERT_END]: commonRuleFields[TIMESTAMP] } : {}),
@@ -364,10 +361,11 @@ export const createLifecycleExecutor =
     const nextTrackedAlerts = Object.fromEntries(
       allEventsToIndex
         .filter(({ event }) => event[ALERT_STATUS] !== ALERT_STATUS_RECOVERED)
-        .map(({ event, flappingHistory, flapping, pendingRecoveredCount }) => {
+        .map(({ event, flappingHistory, flapping: isCurrentlyFlapping, pendingRecoveredCount }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;
           const alertUuid = event[ALERT_UUID]!;
           const started = new Date(event[ALERT_START]!).toISOString();
+          const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
           return [
             alertId,
             { alertId, alertUuid, started, flappingHistory, flapping, pendingRecoveredCount },
@@ -385,10 +383,11 @@ export const createLifecycleExecutor =
             event[ALERT_STATUS] === ALERT_STATUS_RECOVERED &&
             (flapping || flappingHistory.filter((f: boolean) => f).length > 0)
         )
-        .map(({ event, flappingHistory, flapping, pendingRecoveredCount }) => {
+        .map(({ event, flappingHistory, flapping: isCurrentlyFlapping, pendingRecoveredCount }) => {
           const alertId = event[ALERT_INSTANCE_ID]!;
           const alertUuid = event[ALERT_UUID]!;
           const started = new Date(event[ALERT_START]!).toISOString();
+          const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
           return [
             alertId,
             { alertId, alertUuid, started, flappingHistory, flapping, pendingRecoveredCount },

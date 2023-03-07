@@ -1,21 +1,28 @@
 summary: Update an index threshold rule.
 value:
-  notify_when: onActionGroupChange
+  actions:
+    - frequency:
+        summary: false
+        notify_when: onActionGroupChange
+      group: threshold met
+      id: 96b668d0-a1b6-11ed-afdf-d39a49596974
+      params:
+        level: info
+        message: "alert {{alertName}} is active for group {{context.group}}:\n\n- Value: {{context.value}}\n- Conditions Met: {{context.conditions}} over {{params.timeWindowSize}}{{params.timeWindowUnit}}\n- Timestamp: {{context.date}}"
   params:
-    index: [".test-index"]
-    timeField: "@timestamp"
-    groupBy: top
-    aggType: avg
-    timeWindowSize: 5
-    timeWindowUnit: m
-    thresholdComparator: ">"
-    threshold: [1000]
     aggField: sheet.version
+    aggType: avg
+    index: [".test-index"]
+    groupBy: top
     termField: name.keyword
     termSize: 6
+    threshold: [1000]
+    thresholdComparator: ">"
+    timeField: "@timestamp"
+    timeWindowSize: 5
+    timeWindowUnit: m
+  name: new name
   schedule:
     interval: 1m
-  actions: []
   tags: []
-  name: new name
   throttle: null

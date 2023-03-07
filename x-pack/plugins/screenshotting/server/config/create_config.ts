@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { cloneDeep, set, upperFirst } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import { cloneDeep, upperFirst } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import { getDefaultChromiumSandboxDisabled } from './default_chromium_sandbox_disabled';
 import { ConfigType } from './schema';

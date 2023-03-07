@@ -26,7 +26,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
-import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/signals/types';
+import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -34,9 +34,12 @@ import {
   ALERT_ORIGINAL_EVENT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
+import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import {
+  createExceptionList,
+  createExceptionListItem,
   createRule,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getOpenSignals,
   getPreviewAlerts,
@@ -46,7 +49,7 @@ import {
   setSignalStatus,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { indexDocumentsFactory } from '../../utils/data_generator';
+import { dataGeneratorFactory } from '../../utils/data_generator';
 import { patchRule } from '../../utils/patch_rule';
 
 /**
@@ -81,7 +84,7 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
       await deleteSignalsIndex(supertest, log);
-      await deleteAllAlerts(supertest, log);
+      await deleteAllRules(supertest, log);
     });
 
     // First test creates a real rule - most remaining tests use preview API
@@ -727,7 +730,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       describe('with a suppression time window', async () => {
-        const indexDocuments = indexDocumentsFactory({
+        const { indexListOfDocuments, indexGeneratedDocuments } = dataGeneratorFactory({
           es,
           index: 'ecs_compliant',
           log,
@@ -755,7 +758,7 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'agent-1',
             },
           };
-          await indexDocuments([firstDocument, firstDocument]);
+          await indexListOfDocuments([firstDocument, firstDocument]);
 
           const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['ecs_compliant']),
@@ -796,7 +799,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           // Add a new document, then disable and re-enable to trigger another rule run. The second doc should
           // trigger an update to the existing alert without changing the timestamp
-          await indexDocuments([secondDocument, secondDocument]);
+          await indexListOfDocuments([secondDocument, secondDocument]);
           await patchRule(supertest, log, { id: createdRule.id, enabled: false });
           await patchRule(supertest, log, { id: createdRule.id, enabled: true });
           const afterTimestamp = new Date();
@@ -836,7 +839,7 @@ export default ({ getService }: FtrProviderContext) => {
               name: 'agent-1',
             },
           };
-          await indexDocuments([firstDocument, firstDocument]);
+          await indexListOfDocuments([firstDocument, firstDocument]);
 
           const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['ecs_compliant']),
@@ -872,7 +875,7 @@ export default ({ getService }: FtrProviderContext) => {
           };
           // Add new documents, then disable and re-enable to trigger another rule run. The second doc should
           // trigger a new alert since the first one is now closed.
-          await indexDocuments([secondDocument, secondDocument]);
+          await indexListOfDocuments([secondDocument, secondDocument]);
           await patchRule(supertest, log, { id: createdRule.id, enabled: false });
           await patchRule(supertest, log, { id: createdRule.id, enabled: true });
           const afterTimestamp = new Date();
@@ -1157,7 +1160,7 @@ export default ({ getService }: FtrProviderContext) => {
               ingested: '2020-10-28T06:10:00.000Z',
             },
           };
-          await indexDocuments([docWithoutOverride, docWithOverride]);
+          await indexListOfDocuments([docWithoutOverride, docWithOverride]);
 
           const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['ecs_compliant']),
@@ -1206,26 +1209,22 @@ export default ({ getService }: FtrProviderContext) => {
         it('should generate and update up to max_signals alerts', async () => {
           const id = uuidv4();
           const timestamp = '2020-10-28T06:00:00.000Z';
-          const docs = Array(150)
-            .fill({})
-            .map((_, i) => ({
-              id,
-              '@timestamp': timestamp,
-              agent: {
-                name: `agent-${i}`,
-              },
-            }));
           const laterTimestamp = '2020-10-28T07:00:00.000Z';
-          const laterDocs = Array(150)
-            .fill({})
-            .map((_, i) => ({
-              id,
-              '@timestamp': laterTimestamp,
-              agent: {
-                name: `agent-${i}`,
-              },
-            }));
-          await indexDocuments([...docs, ...laterDocs]);
+
+          await Promise.all(
+            [timestamp, laterTimestamp].map((t) =>
+              indexGeneratedDocuments({
+                docsCount: 150,
+                seed: (index) => ({
+                  id,
+                  '@timestamp': t,
+                  agent: {
+                    name: `agent-${index}`,
+                  },
+                }),
+              })
+            )
+          );
 
           const rule: QueryRuleCreateProps = {
             ...getRuleForSignalTesting(['ecs_compliant']),
@@ -1285,6 +1284,95 @@ export default ({ getService }: FtrProviderContext) => {
           });
         });
 
+        it('should create and update alerts in the same rule run without errors', async () => {
+          const id = uuidv4();
+          const timestamp = '2020-10-28T06:00:00.000Z';
+          // agent-1 should create an alert on the first rule run, then the second rule run should update that
+          // alert and make a new alert for agent-2
+          const firstDoc = {
+            id,
+            '@timestamp': timestamp,
+            agent: {
+              name: 'agent-1',
+            },
+          };
+          const laterTimestamp = '2020-10-28T07:00:00.000Z';
+          const secondDoc = {
+            id,
+            '@timestamp': laterTimestamp,
+            agent: {
+              name: 'agent-1',
+            },
+          };
+          const thirdDoc = {
+            id,
+            '@timestamp': laterTimestamp,
+            agent: {
+              name: 'agent-2',
+            },
+          };
+          await indexListOfDocuments([firstDoc, secondDoc, thirdDoc]);
+
+          const rule: QueryRuleCreateProps = {
+            ...getRuleForSignalTesting(['ecs_compliant']),
+            query: `id:${id}`,
+            alert_suppression: {
+              group_by: ['agent.name'],
+              duration: {
+                value: 300,
+                unit: 'm',
+              },
+            },
+            from: 'now-1h',
+            interval: '1h',
+            timestamp_override: 'event.ingested',
+            max_signals: 150,
+          };
+
+          const { previewId, logs } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T07:30:00.000Z'),
+            invocationCount: 2,
+          });
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+            sort: ['agent.name', ALERT_ORIGINAL_TIME],
+          });
+          expect(previewAlerts.length).to.eql(2);
+          expect(previewAlerts[0]._source).to.eql({
+            ...previewAlerts[0]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: 'agent-1',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: timestamp,
+            [ALERT_SUPPRESSION_START]: timestamp,
+            [ALERT_SUPPRESSION_END]: laterTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          });
+          expect(previewAlerts[1]._source).to.eql({
+            ...previewAlerts[1]._source,
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: 'agent-2',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: laterTimestamp,
+            [ALERT_SUPPRESSION_START]: laterTimestamp,
+            [ALERT_SUPPRESSION_END]: laterTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+          });
+          for (const logEntry of logs) {
+            expect(logEntry.errors.length).to.eql(0);
+          }
+        });
+
         describe('with host risk index', async () => {
           before(async () => {
             await esArchiver.load('x-pack/test/functional/es_archives/entity/host_risk');
@@ -1340,6 +1428,97 @@ export default ({ getService }: FtrProviderContext) => {
             expect(previewAlerts[0]._source?.host?.risk?.calculated_score_norm).to.eql(1);
           });
         });
+      });
+    });
+
+    describe('with exceptions', async () => {
+      afterEach(async () => {
+        await deleteAllExceptions(supertest, log);
+      });
+      it('should correctly evaluate exceptions with expiration time in the past', async () => {
+        // create an exception list container of type "detection"
+        const {
+          id,
+          list_id: listId,
+          namespace_type: namespaceType,
+          type,
+        } = await createExceptionList(supertest, log, {
+          description: 'description',
+          list_id: '123',
+          name: 'test list',
+          type: 'detection',
+        });
+
+        await createExceptionListItem(supertest, log, {
+          description: 'endpoint description',
+          entries: [
+            {
+              field: 'host.name',
+              operator: 'included',
+              type: 'match',
+              value: 'suricata-sensor-london',
+            },
+          ],
+          list_id: listId,
+          name: 'endpoint_list',
+          os_types: [],
+          type: 'simple',
+          expire_time: new Date(Date.now() - 1000000).toISOString(),
+        });
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          query: `_id:${ID} or _id:GBbXBmkBR346wHgn5_eR or _id:x10zJ2oE9v5HJNSHhyxi`,
+          exceptions_list: [{ id, list_id: listId, type, namespace_type: namespaceType }],
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts.length).equal(2);
+      });
+
+      it('should correctly evaluate exceptions with expiration time in the future', async () => {
+        // create an exception list container of type "detection"
+        const {
+          id,
+          list_id: listId,
+          namespace_type: namespaceType,
+          type,
+        } = await createExceptionList(supertest, log, {
+          description: 'description',
+          list_id: '123',
+          name: 'test list',
+          type: 'detection',
+        });
+
+        await createExceptionListItem(supertest, log, {
+          description: 'endpoint description',
+          entries: [
+            {
+              field: 'host.name',
+              operator: 'included',
+              type: 'match',
+              value: 'suricata-sensor-london',
+            },
+          ],
+          list_id: listId,
+          name: 'endpoint_list',
+          os_types: [],
+          type: 'simple',
+          expire_time: new Date(Date.now() + 1000000).toISOString(),
+        });
+
+        const rule: QueryRuleCreateProps = {
+          ...getRuleForSignalTesting(['auditbeat-*']),
+          query: `_id:${ID} or _id:GBbXBmkBR346wHgn5_eR or _id:x10zJ2oE9v5HJNSHhyxi`,
+          exceptions_list: [{ id, list_id: listId, type, namespace_type: namespaceType }],
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId });
+
+        expect(previewAlerts.length).equal(1);
       });
     });
   });

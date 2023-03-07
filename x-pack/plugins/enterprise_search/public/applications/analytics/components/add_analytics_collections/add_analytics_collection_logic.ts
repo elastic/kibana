@@ -9,11 +9,15 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import { Status } from '../../../../../common/types/api';
+import { HttpError, Status } from '../../../../../common/types/api';
 
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { generateEncodedPath } from '../../../shared/encode_path_params';
-import { flashSuccessToast } from '../../../shared/flash_messages';
+import {
+  flashAPIErrors,
+  FlashMessagesLogic,
+  flashSuccessToast,
+} from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 import {
   AddAnalyticsCollectionsAPILogic,
@@ -21,6 +25,8 @@ import {
   AddAnalyticsCollectionApiLogicResponse,
 } from '../../api/add_analytics_collection/add_analytics_collection_api_logic';
 import { COLLECTION_VIEW_PATH } from '../../routes';
+
+const SERVER_ERROR_CODE = 500;
 
 export interface AddAnalyticsCollectionsActions {
   apiError: Actions<
@@ -36,12 +42,17 @@ export interface AddAnalyticsCollectionsActions {
     AddAnalyticsCollectionApiLogicArgs,
     AddAnalyticsCollectionApiLogicResponse
   >['makeRequest'];
+  setInputError: (inputError: string | null) => { inputError: string | null };
   setNameValue(name: string): { name: string };
 }
 
 interface AddAnalyticsCollectionValues {
   canSubmit: boolean;
+  error: HttpError | undefined;
+  inputError: string | null;
   isLoading: boolean;
+  isSuccess: boolean;
+  isSystemError: boolean;
   name: string;
   status: Status;
 }
@@ -51,16 +62,37 @@ export const AddAnalyticsCollectionLogic = kea<
 >({
   actions: {
     createAnalyticsCollection: () => {},
-    setInputError: (inputError: string | boolean) => ({ inputError }),
+    setInputError: (inputError) => ({ inputError }),
     setNameValue: (name: string) => ({ name }),
   },
   connect: {
     actions: [AddAnalyticsCollectionsAPILogic, ['apiError', 'apiSuccess', 'makeRequest']],
-    values: [AddAnalyticsCollectionsAPILogic, ['status']],
+    values: [AddAnalyticsCollectionsAPILogic, ['status', 'error']],
   },
   listeners: ({ values, actions }) => ({
-    apiSuccess: async ({ name, id }, breakpoint) => {
-      // Wait for propagation of the new collection
+    apiError: async (error) => {
+      if (values.isSystemError) {
+        if (error?.body?.message) {
+          FlashMessagesLogic.actions.setFlashMessages([
+            {
+              description: error.body.message,
+              message: i18n.translate(
+                'xpack.enterpriseSearch.analytics.collectionsCreate.action.systemErrorMessage',
+                {
+                  defaultMessage: 'Sorry, there was an error creating your collection.',
+                }
+              ),
+              type: 'error',
+            },
+          ]);
+        } else {
+          flashAPIErrors(error);
+        }
+      } else {
+        actions.setInputError(error?.body?.message || null);
+      }
+    },
+    apiSuccess: async ({ name, id }) => {
       flashSuccessToast(
         i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.action.successMessage', {
           defaultMessage: "Successfully added collection '{name}'",
@@ -69,7 +101,6 @@ export const AddAnalyticsCollectionLogic = kea<
           },
         })
       );
-      await breakpoint(1000);
       KibanaLogic.values.navigateToUrl(
         generateEncodedPath(COLLECTION_VIEW_PATH, {
           id,
@@ -84,6 +115,13 @@ export const AddAnalyticsCollectionLogic = kea<
   }),
   path: ['enterprise_search', 'analytics', 'add_analytics_collection'],
   reducers: {
+    inputError: [
+      null,
+      {
+        setInputError: (_, { inputError }) => inputError,
+        setNameValue: () => null,
+      },
+    ],
     name: [
       '',
       {
@@ -96,10 +134,12 @@ export const AddAnalyticsCollectionLogic = kea<
       () => [selectors.isLoading, selectors.name],
       (isLoading, name) => !isLoading && name.length > 0,
     ],
-    isLoading: [
-      () => [selectors.status],
-      // includes success to include the redirect wait time
-      (status: Status) => [Status.LOADING, Status.SUCCESS].includes(status),
+    isLoading: [() => [selectors.status], (status: Status) => status === Status.LOADING],
+    isSuccess: [() => [selectors.status], (status: Status) => status === Status.SUCCESS],
+    isSystemError: [
+      () => [selectors.status, selectors.error],
+      (status: Status, error?: HttpError) =>
+        Boolean(status === Status.ERROR && (error?.body?.statusCode || 0) >= SERVER_ERROR_CODE),
     ],
   }),
 });

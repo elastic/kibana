@@ -7,10 +7,13 @@
 
 export interface KeyValuePair {
   label: string;
+  order?: number | null;
   value: string | null;
 }
 
-export type ConnectorConfiguration = Record<string, KeyValuePair | null>;
+export type ConnectorConfiguration = Record<string, KeyValuePair | null> & {
+  extract_full_html?: { label: string; value: boolean };
+};
 
 export interface ConnectorScheduling {
   enabled: boolean;
@@ -26,10 +29,6 @@ export interface CustomScheduling {
 }
 
 export type ConnectorCustomScheduling = Record<string, CustomScheduling | null>;
-
-export interface ConnectorPreferences extends Record<string, unknown> {
-  extract_full_html?: boolean | null;
-}
 
 export enum ConnectorStatus {
   CREATED = 'created',
@@ -154,7 +153,6 @@ export interface Connector {
   last_synced: string | null;
   name: string;
   pipeline?: IngestPipelineParams | null;
-  preferences: ConnectorPreferences;
   scheduling: {
     enabled: boolean;
     interval: string; // crontab syntax
@@ -172,7 +170,7 @@ export interface ConnectorSyncJob {
   completed_at: string | null;
   connector: {
     configuration: ConnectorConfiguration;
-    filtering: FilteringRules[] | null;
+    filtering: FilteringRules | FilteringRules[] | null;
     id: string;
     index_name: string;
     language: string;

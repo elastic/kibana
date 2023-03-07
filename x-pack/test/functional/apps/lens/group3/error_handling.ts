@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import expect from '@kbn/expect';
+import { intersection, uniq } from 'lodash';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -21,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const listingTable = getService('listingTable');
   const kibanaServer = getService('kibanaServer');
   const dashboardPanelActions = getService('dashboardPanelActions');
+  const testSubjects = getService('testSubjects');
 
   describe('Lens error handling', () => {
     describe('Index Pattern missing', () => {
@@ -85,23 +88,67 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.loadSavedDashboard('Dashboard with missing field Lens');
-      await PageObjects.lens.assertMessageListContains(
-        'Field missing field was not found.',
-        'error'
+      await PageObjects.dashboard.loadSavedDashboard(
+        'dashboard containing vis with missing fields'
       );
-      await PageObjects.lens.waitForVisualization('mtrVis');
+
+      const expectedMessages = [
+        'Field @timestamp was not found.',
+        'Field kubernetes.node.memory.allocatable.bytes was not found.',
+        'Field kubernetes.node.name was not found.',
+        'Field kubernetes.container.memory.usage.bytes was not found.',
+        'Sort field @timestamp was not found.',
+        'Field @timestamp was not found.',
+        'Field kubernetes.container.name was not found.',
+      ];
+
+      const dashboardMessageList = await PageObjects.lens.getMessageListTexts('error');
+
+      // make sure all the expected messages are there
+      expect(intersection(expectedMessages, dashboardMessageList).length).to.be(
+        uniq(expectedMessages).length
+      );
+      expect(dashboardMessageList.length).to.be(expectedMessages.length);
+      // make sure the visualization is rendering
+      await testSubjects.find('emptyPlaceholder');
 
       await PageObjects.dashboard.switchToEditMode();
       await dashboardPanelActions.editPanelByTitle();
-      await PageObjects.lens.assertMessageListContains(
-        'Field missing field was not found.',
-        'error'
+      await PageObjects.timePicker.waitForNoDataPopover();
+      await PageObjects.timePicker.ensureHiddenNoDataPopover();
+
+      const editorMessageList = await PageObjects.lens.getMessageListTexts('error');
+
+      expect(intersection(expectedMessages, editorMessageList).length).to.be(
+        uniq(expectedMessages).length
       );
-      await PageObjects.lens.waitForVisualization('mtrVis');
+      expect(editorMessageList.length).to.be(expectedMessages.length);
+      await testSubjects.find('emptyPlaceholder');
 
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/missing_fields'
+      );
+    });
+
+    it('displays fundamental configuration issues on dashboard', async () => {
+      await kibanaServer.importExport.load(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/fundamental_config_errors_on_dashboard'
+      );
+
+      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.loadSavedDashboard('lens fundamental config errors dash');
+
+      const failureElements = await testSubjects.findAll('errorMessageMarkdown');
+      const errorMessages = await Promise.all(failureElements.map((el) => el.getVisibleText()));
+
+      expect(errorMessages).to.eql([
+        'Visualization type not found.',
+        'The visualization type lnsUNKNOWN could not be resolved.',
+        'Could not find datasource for the visualization',
+      ]);
+
+      await kibanaServer.importExport.unload(
+        'x-pack/test/functional/fixtures/kbn_archiver/lens/fundamental_config_errors_on_dashboard'
       );
     });
   });

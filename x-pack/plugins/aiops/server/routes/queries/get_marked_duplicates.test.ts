@@ -7,7 +7,7 @@
 
 import { changePointGroups } from '../../../common/__mocks__/farequote/change_point_groups';
 import { fields } from '../../../common/__mocks__/artificial_logs/fields';
-import { filteredFrequentItems } from '../../../common/__mocks__/artificial_logs/filtered_frequent_items';
+import { filteredFrequentItemSets } from '../../../common/__mocks__/artificial_logs/filtered_frequent_item_sets';
 
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
 import { getMarkedDuplicates } from './get_marked_duplicates';
@@ -59,7 +59,7 @@ describe('markDuplicates', () => {
 
   it('marks duplicates based on change point groups for artificial logs', () => {
     const simpleHierarchicalTree = getSimpleHierarchicalTree(
-      filteredFrequentItems,
+      filteredFrequentItemSets,
       true,
       false,
       fields

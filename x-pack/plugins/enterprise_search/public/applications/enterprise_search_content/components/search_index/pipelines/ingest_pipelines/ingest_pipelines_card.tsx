@@ -19,20 +19,15 @@ import { PipelinesLogic } from '../pipelines_logic';
 import { CustomPipelineItem } from './custom_pipeline_item';
 import { CustomizeIngestPipelineItem } from './customize_pipeline_item';
 import { DefaultPipelineItem } from './default_pipeline_item';
-import { IngestPipelineModal } from './ingest_pipeline_modal';
+import { IngestPipelineFlyout } from './ingest_pipeline_flyout';
 
 export const IngestPipelinesCard: React.FC = () => {
   const { indexName, ingestionMethod } = useValues(IndexViewLogic);
 
-  const {
-    canSetPipeline,
-    hasIndexIngestionPipeline,
-    index,
-    pipelineName,
-    pipelineState,
-    showModal,
-  } = useValues(PipelinesLogic);
-  const { closeModal, openModal, setPipelineState, savePipeline } = useActions(PipelinesLogic);
+  const { canSetPipeline, index, pipelineName, pipelineState, showPipelineSettings } =
+    useValues(PipelinesLogic);
+  const { closePipelineSettings, openPipelineSettings, setPipelineState, savePipeline } =
+    useActions(PipelinesLogic);
   const { makeRequest: fetchCustomPipeline } = useActions(FetchCustomPipelineApiLogic);
   const { data: customPipelines } = useValues(FetchCustomPipelineApiLogic);
 
@@ -44,11 +39,11 @@ export const IngestPipelinesCard: React.FC = () => {
 
   return (
     <>
-      {!hasIndexIngestionPipeline && <CustomizeIngestPipelineItem />}
+      <CustomizeIngestPipelineItem />
       <EuiFlexGroup direction="column" gutterSize="s">
-        {showModal && (
-          <IngestPipelineModal
-            closeModal={closeModal}
+        {showPipelineSettings && (
+          <IngestPipelineFlyout
+            closeFlyout={closePipelineSettings}
             displayOnly={!canSetPipeline}
             indexName={indexName}
             ingestionMethod={ingestionMethod}
@@ -62,7 +57,7 @@ export const IngestPipelinesCard: React.FC = () => {
           <EuiPanel color="subdued">
             <DefaultPipelineItem
               index={index}
-              openModal={openModal}
+              openPipelineSettings={openPipelineSettings}
               pipelineName={pipelineName}
               ingestionMethod={ingestionMethod}
               indexName={indexName}

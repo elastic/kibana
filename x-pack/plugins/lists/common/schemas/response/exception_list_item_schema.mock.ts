@@ -33,6 +33,7 @@ export const getExceptionListItemSchemaMock = (
   created_by: USER,
   description: DESCRIPTION,
   entries: ENTRIES,
+  expire_time: undefined,
   id: '1',
   item_id: 'endpoint_list_item',
   list_id: 'endpoint_list_id',

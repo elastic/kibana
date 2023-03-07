@@ -14,7 +14,6 @@ export { buildKueryNodeFilter } from './build_kuery_node_filter';
 export { generateAPIKeyName } from './generate_api_key_name';
 export * from './mapped_params_utils';
 export { apiKeyAsAlertAttributes } from './api_key_as_alert_attributes';
-export { calculateIsSnoozedUntil } from './calculate_is_snoozed_until';
 export * from './inject_references';
 export { parseDate } from './parse_date';
 export { includeFieldsRequiredForAuthentication } from './include_fields_required_for_authentication';

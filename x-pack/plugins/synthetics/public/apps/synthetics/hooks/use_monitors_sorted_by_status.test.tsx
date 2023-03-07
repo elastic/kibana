@@ -101,6 +101,13 @@ describe('useMonitorsSortedByStatus', () => {
                   location: location2,
                   isEnabled: true,
                 },
+                {
+                  configId: 'test-monitor-4',
+                  id: 'test-monitor-4',
+                  name: 'Test monitor 4',
+                  location: location1,
+                  isEnabled: true,
+                },
               ],
             },
             error: null,
@@ -140,6 +147,13 @@ describe('useMonitorsSortedByStatus', () => {
                 [`test-monitor-3${location1.label}`]: {
                   configId: 'test-monitor-3',
                   monitorQueryId: 'test-monitor-3',
+                  location: location1.label,
+                },
+              },
+              pendingConfigs: {
+                [`test-monitor-4-${location1.label}`]: {
+                  configId: 'test-monitor-4',
+                  monitorQueryId: 'test-monitor-4',
                   location: location1.label,
                 },
               },
@@ -200,6 +214,13 @@ describe('useMonitorsSortedByStatus', () => {
           location: location1,
           isEnabled: false,
         },
+        {
+          configId: 'test-monitor-4',
+          id: 'test-monitor-4',
+          name: 'Test monitor 4',
+          location: location1,
+          isEnabled: true,
+        },
       ],
       downMonitors: {
         'test-monitor-1': ['US Central'],
@@ -258,6 +279,13 @@ describe('useMonitorsSortedByStatus', () => {
           name: 'Test monitor 1',
           location: location1,
           isEnabled: false,
+        },
+        {
+          configId: 'test-monitor-4',
+          id: 'test-monitor-4',
+          name: 'Test monitor 4',
+          location: location1,
+          isEnabled: true,
         },
       ],
       downMonitors: {

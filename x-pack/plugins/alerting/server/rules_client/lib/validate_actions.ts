@@ -17,7 +17,10 @@ import { parseDuration } from '../../lib';
 export async function validateActions(
   context: RulesClientContext,
   alertType: UntypedNormalizedRuleType,
-  data: Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & { actions: NormalizedAlertAction[] }
+  data: Pick<RawRule, 'notifyWhen' | 'throttle' | 'schedule'> & {
+    actions: NormalizedAlertAction[];
+  },
+  allowMissingConnectorSecrets?: boolean
 ): Promise<void> {
   const { actions, notifyWhen, throttle } = data;
   const hasRuleLevelNotifyWhen = typeof notifyWhen !== 'undefined';
@@ -28,6 +31,15 @@ export async function validateActions(
 
   const errors = [];
 
+  const uniqueActions = new Set(actions.map((action) => action.uuid));
+  if (uniqueActions.size < actions.length) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.hasDuplicatedUuid', {
+        defaultMessage: 'Actions have duplicated UUIDs',
+      })
+    );
+  }
+
   // check for actions using connectors with missing secrets
   const actionsClient = await context.getActionsClient();
   const actionIds = [...new Set(actions.map((action) => action.id))];
@@ -35,20 +47,26 @@ export async function validateActions(
   const actionsUsingConnectorsWithMissingSecrets = actionResults.filter(
     (result) => result.isMissingSecrets
   );
-
   if (actionsUsingConnectorsWithMissingSecrets.length) {
-    errors.push(
-      i18n.translate('xpack.alerting.rulesClient.validateActions.misconfiguredConnector', {
-        defaultMessage: 'Invalid connectors: {groups}',
-        values: {
-          groups: actionsUsingConnectorsWithMissingSecrets
-            .map((connector) => connector.name)
-            .join(', '),
-        },
-      })
-    );
+    if (allowMissingConnectorSecrets) {
+      context.logger.error(
+        `Invalid connectors with "allowMissingConnectorSecrets": ${actionsUsingConnectorsWithMissingSecrets
+          .map((connector) => connector.name)
+          .join(', ')}`
+      );
+    } else {
+      errors.push(
+        i18n.translate('xpack.alerting.rulesClient.validateActions.misconfiguredConnector', {
+          defaultMessage: 'Invalid connectors: {groups}',
+          values: {
+            groups: actionsUsingConnectorsWithMissingSecrets
+              .map((connector) => connector.name)
+              .join(', '),
+          },
+        })
+      );
+    }
   }
-
   // check for actions with invalid action groups
   const { actionGroups: alertTypeActionGroups } = alertType;
   const usedAlertActionGroups = actions.map((action) => action.group);

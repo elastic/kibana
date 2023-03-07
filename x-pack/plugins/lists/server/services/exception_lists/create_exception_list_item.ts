@@ -13,6 +13,7 @@ import type {
   EntriesArray,
   ExceptionListItemSchema,
   ExceptionListItemType,
+  ExpireTimeOrUndefined,
   ItemId,
   ListId,
   MetaOrUndefined,
@@ -45,11 +46,13 @@ interface CreateExceptionListItemOptions {
   tieBreaker?: string;
   type: ExceptionListItemType;
   osTypes: OsTypeArray;
+  expireTime: ExpireTimeOrUndefined;
 }
 
 export const createExceptionListItem = async ({
   comments,
   entries,
+  expireTime,
   itemId,
   listId,
   savedObjectsClient,
@@ -75,6 +78,7 @@ export const createExceptionListItem = async ({
     created_by: user,
     description,
     entries,
+    expire_time: expireTime,
     immutable: undefined,
     item_id: itemId,
     list_id: listId,

@@ -1,5 +1,5 @@
 {
-  "name": "elasticsearch_client_plugin",
+  "name": "@kbn/elasticsearch-client-plugin",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana"

@@ -13,12 +13,15 @@ import { EuiPopover, EuiButtonIcon, EuiText, EuiContextMenu, EuiIcon } from '@el
 
 import { i18n } from '@kbn/i18n';
 
+import { TelemetryLogic } from '../../../shared/telemetry/telemetry_logic';
+
 import { EngineViewLogic } from './engine_view_logic';
 
 export const EngineViewHeaderActions: React.FC = () => {
   const { engineData } = useValues(EngineViewLogic);
 
   const { openDeleteEngineModal } = useActions(EngineViewLogic);
+  const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const toggleActionsPopover = () => setIsActionsPopoverOpen((isPopoverOpen) => !isPopoverOpen);
@@ -66,6 +69,10 @@ export const EngineViewHeaderActions: React.FC = () => {
                   onClick: () => {
                     if (engineData) {
                       openDeleteEngineModal();
+                      sendEnterpriseSearchTelemetry({
+                        action: 'clicked',
+                        metric: 'entSearchContent-engines-engineView-deleteEngine',
+                      });
                     }
                   },
                   size: 's',

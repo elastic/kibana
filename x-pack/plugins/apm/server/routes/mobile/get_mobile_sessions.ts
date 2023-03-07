@@ -20,7 +20,7 @@ import {
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getOffsetInMs } from '../../../common/utils/get_offset_in_ms';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { getBucketSize } from '../../lib/helpers/get_bucket_size';
+import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { Coordinate } from '../../../typings/timeseries';
 import { Maybe } from '../../../typings/common';
 

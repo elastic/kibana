@@ -19,10 +19,18 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { type DataView } from '@kbn/data-plugin/common';
+import type { FieldStatsProps, FieldStatsServices } from '@kbn/unified-field-list-plugin/public';
+import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import { useFieldStatsFlyoutContext } from './use_field_stats_flytout_context';
 import { FieldStatsContent } from './field_stats_content';
 
-export const FieldStatsFlyout: FC = () => {
+export const FieldStatsFlyout: FC<{
+  dataView: DataView;
+  fieldStatsServices: FieldStatsServices;
+  timeRangeMs?: TimeRangeMs;
+  dslQuery?: FieldStatsProps['dslQuery'];
+}> = ({ dataView, fieldStatsServices, timeRangeMs, dslQuery }) => {
   const { setIsFlyoutVisible, isFlyoutVisible, fieldName } = useFieldStatsFlyoutContext();
 
   const closeFlyout = useCallback(() => setIsFlyoutVisible(false), []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -32,7 +40,13 @@ export const FieldStatsFlyout: FC = () => {
 
   if (isFlyoutVisible) {
     return (
-      <EuiFlyout type="push" size="xs" onClose={closeFlyout} aria-labelledby={pushedFlyoutTitleId}>
+      <EuiFlyout
+        type="push"
+        size="xs"
+        onClose={closeFlyout}
+        aria-labelledby={pushedFlyoutTitleId}
+        data-test-subj="mlFieldStatsFlyout"
+      >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">
             <h3 id={pushedFlyoutTitleId}>
@@ -50,7 +64,12 @@ export const FieldStatsFlyout: FC = () => {
         >
           <b>{fieldName}</b>
           <EuiSpacer />
-          <FieldStatsContent />
+          <FieldStatsContent
+            dataView={dataView}
+            fieldStatsServices={fieldStatsServices}
+            timeRangeMs={timeRangeMs}
+            dslQuery={dslQuery}
+          />
         </EuiFlyoutBody>
         <EuiFlyoutFooter>
           <EuiButton onClick={closeFlyout}>

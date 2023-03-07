@@ -44,7 +44,7 @@ import type { AiopsLicense } from '../types';
 import { duplicateIdentifier } from './queries/duplicate_identifier';
 import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
 import { fetchIndexInfo } from './queries/fetch_index_info';
-import { dropDuplicates, fetchFrequentItems } from './queries/fetch_frequent_items';
+import { dropDuplicates, fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
 import { getHistogramQuery } from './queries/get_histogram_query';
 import { getGroupFilter } from './queries/get_group_filter';
 import { getChangePointGroups } from './queries/get_change_point_groups';
@@ -423,11 +423,11 @@ export const defineExplainLogRateSpikesRoute = (
               })
             );
 
-            // Deduplicated change points we pass to the `frequent_items` aggregation.
+            // Deduplicated change points we pass to the `frequent_item_sets` aggregation.
             const deduplicatedChangePoints = dropDuplicates(changePoints, duplicateIdentifier);
 
             try {
-              const { fields, df } = await fetchFrequentItems(
+              const { fields, df } = await fetchFrequentItemSets(
                 client,
                 request.body.index,
                 JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
@@ -442,7 +442,7 @@ export const defineExplainLogRateSpikesRoute = (
               );
 
               if (shouldStop) {
-                logDebugMessage('shouldStop after fetching frequent_items.');
+                logDebugMessage('shouldStop after fetching frequent_item_sets.');
                 end();
                 return;
               }

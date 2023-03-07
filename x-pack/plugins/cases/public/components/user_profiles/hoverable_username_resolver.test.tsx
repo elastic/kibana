@@ -7,13 +7,13 @@
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';
-import type { ElasticUser } from '../../containers/types';
+import type { CaseUser } from '../../containers/types';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { HoverableUsernameResolver } from './hoverable_username_resolver';
 
 describe('HoverableUsernameResolver', () => {
   it('renders the full name using the elastic user information when the profile is not present', async () => {
-    const user: ElasticUser = {
+    const user: CaseUser = {
       username: 'user',
       email: 'some.user@google.com',
       fullName: 'Some Super User',
@@ -25,7 +25,7 @@ describe('HoverableUsernameResolver', () => {
   });
 
   it('renders the username when the profile uid is not found', async () => {
-    const user: ElasticUser = {
+    const user: CaseUser = {
       username: 'some_user',
       profileUid: '123',
       fullName: null,
@@ -38,7 +38,7 @@ describe('HoverableUsernameResolver', () => {
   });
 
   it('renders the full name using the profile', async () => {
-    const user: ElasticUser = {
+    const user: CaseUser = {
       username: userProfiles[0].user.username,
       profileUid: userProfiles[0].uid,
       fullName: null,
@@ -51,7 +51,7 @@ describe('HoverableUsernameResolver', () => {
   });
 
   it('renders the full name bolded by default', async () => {
-    const user: ElasticUser = {
+    const user: CaseUser = {
       username: userProfiles[0].user.username,
       profileUid: userProfiles[0].uid,
       fullName: null,

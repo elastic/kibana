@@ -59,6 +59,9 @@ const triggersActionsUiStartMock = {
       )),
       getRuleTagFilter: jest.fn(() => <div data-test-subj="rule-tag-filter">mocked component</div>),
       getRulesList: jest.fn(() => <div data-test-subj="rules-list">mocked component</div>),
+      getRulesSettingsLink: jest.fn(() => (
+        <div data-test-subj="rules-settings-link">mocked component</div>
+      )),
       ruleTypeRegistry: {
         has: jest.fn(),
         register: jest.fn(),

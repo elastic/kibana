@@ -179,6 +179,16 @@ export const useEnterpriseSearchNav = () => {
               to: ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + ENGINES_PATH,
             }),
           },
+          {
+            id: 'searchExperiences',
+            name: i18n.translate('xpack.enterpriseSearch.nav.searchExperiencesTitle', {
+              defaultMessage: 'Search Experiences',
+            }),
+            ...generateNavLink({
+              shouldNotCreateHref: true,
+              to: SEARCH_EXPERIENCES_PLUGIN.URL,
+            }),
+          },
         ],
         name: i18n.translate('xpack.enterpriseSearch.nav.searchTitle', {
           defaultMessage: 'Search',
@@ -269,17 +279,6 @@ export const useEnterpriseSearchEngineNav = (engineName?: string, isEmptyState?:
               ...generateNavLink({
                 shouldNotCreateHref: true,
                 to: `${enginePath}/${EngineViewTabs.INDICES}`,
-              }),
-            },
-
-            {
-              id: 'enterpriseSearchEngineDocuments',
-              name: i18n.translate('xpack.enterpriseSearch.nav.engine.documentsTitle', {
-                defaultMessage: 'Documents',
-              }),
-              ...generateNavLink({
-                shouldNotCreateHref: true,
-                to: `${enginePath}/${EngineViewTabs.DOCUMENTS}`,
               }),
             },
             {

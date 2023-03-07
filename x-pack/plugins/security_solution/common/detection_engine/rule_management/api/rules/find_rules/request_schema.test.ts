@@ -29,7 +29,7 @@ describe('Find rules request schema', () => {
     const payload: FindRulesRequestQuery = {
       per_page: 5,
       page: 1,
-      sort_field: 'some field',
+      sort_field: 'name',
       fields: ['field 1', 'field 2'],
       filter: 'some filter',
       sort_order: 'asc',
@@ -80,14 +80,14 @@ describe('Find rules request schema', () => {
 
   test('sort_field validates', () => {
     const payload: FindRulesRequestQuery = {
-      sort_field: 'value',
+      sort_field: 'name',
     };
 
     const decoded = FindRulesRequestQuery.decode(payload);
     const checked = exactCheck(payload, decoded);
     const message = pipe(checked, foldLeftRight);
     expect(getPaths(left(message.errors))).toEqual([]);
-    expect((message.schema as FindRulesRequestQuery).sort_field).toEqual('value');
+    expect((message.schema as FindRulesRequestQuery).sort_field).toEqual('name');
   });
 
   test('fields validates with a string', () => {
@@ -173,7 +173,7 @@ describe('Find rules request schema', () => {
   test('sort_order validates with desc and sort_field', () => {
     const payload: FindRulesRequestQuery = {
       sort_order: 'desc',
-      sort_field: 'some field',
+      sort_field: 'name',
     };
 
     const decoded = FindRulesRequestQuery.decode(payload);
@@ -187,7 +187,7 @@ describe('Find rules request schema', () => {
   test('sort_order does not validate with a string other than asc and desc', () => {
     const payload: Omit<FindRulesRequestQuery, 'sort_order'> & { sort_order: string } = {
       sort_order: 'some other string',
-      sort_field: 'some field',
+      sort_field: 'name',
     };
 
     const decoded = FindRulesRequestQuery.decode(payload);

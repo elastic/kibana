@@ -51,6 +51,7 @@ export function OperatorInput<TParams = unknown>({
       compressed
       isDisabled={!field || disabled}
       placeholder={strings.getOperatorSelectPlaceholderSelectLabel()}
+      aria-label={strings.getOperatorSelectPlaceholderSelectLabel()}
       options={operators}
       selectedOptions={operator ? [operator] : []}
       getLabel={({ message }) => message}

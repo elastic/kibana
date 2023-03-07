@@ -6,8 +6,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiComboBox, EuiIcon, EuiLink, EuiSpacer, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { DataStream } from '../../../../../../../../../common/types';
 
@@ -73,24 +75,59 @@ export const DatasetComboBox: React.FC<{
     });
   };
   return (
-    <EuiComboBox
-      aria-label={i18n.translate('xpack.fleet.datasetCombo.ariaLabel', {
-        defaultMessage: 'Dataset combo box',
-      })}
-      placeholder={i18n.translate('xpack.fleet.datasetCombo.placeholder', {
-        defaultMessage: 'Select a dataset',
-      })}
-      singleSelection={{ asPlainText: true }}
-      options={datasetOptions}
-      selectedOptions={selectedOptions}
-      onCreateOption={onCreateOption}
-      onChange={onDatasetChange}
-      customOptionText={i18n.translate('xpack.fleet.datasetCombo.customOptionText', {
-        defaultMessage: 'Add {searchValue} as a custom option',
-        values: { searchValue: '{searchValue}' },
-      })}
-      isClearable={false}
-      isDisabled={isDisabled}
-    />
+    <>
+      <EuiComboBox
+        aria-label={i18n.translate('xpack.fleet.datasetCombo.ariaLabel', {
+          defaultMessage: 'Dataset combo box',
+        })}
+        placeholder={i18n.translate('xpack.fleet.datasetCombo.placeholder', {
+          defaultMessage: 'Select a dataset',
+        })}
+        singleSelection={{ asPlainText: true }}
+        options={datasetOptions}
+        selectedOptions={selectedOptions}
+        onCreateOption={onCreateOption}
+        onChange={onDatasetChange}
+        customOptionText={i18n.translate('xpack.fleet.datasetCombo.customOptionText', {
+          defaultMessage: 'Add {searchValue} as a custom option',
+          values: { searchValue: '{searchValue}' },
+        })}
+        isClearable={false}
+        isDisabled={isDisabled}
+      />
+      {valueAsOption && valueAsOption.value.package !== pkgName && (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="warning">
+            <EuiIcon type="alert" />
+            &nbsp;
+            <FormattedMessage
+              id="xpack.fleet.datasetCombo.warning"
+              defaultMessage="This data stream is managed by the {package} integration, {learnMore}."
+              values={{
+                package: valueAsOption.value.package,
+                learnMore: (
+                  <EuiToolTip
+                    position="bottom"
+                    content={
+                      <FormattedMessage
+                        id="xpack.fleet.datasetCombo.warningTooltip"
+                        defaultMessage="The destination data stream may not be designed to receive data from this integration, check that the mappings and ingest pipelines are compatible before sending data."
+                      />
+                    }
+                  >
+                    <EuiLink target="_blank">
+                      {i18n.translate('xpack.fleet.datasetCombo.learnMoreLink', {
+                        defaultMessage: 'learn more',
+                      })}
+                    </EuiLink>
+                  </EuiToolTip>
+                ),
+              }}
+            />
+          </EuiText>
+        </>
+      )}
+    </>
   );
 };

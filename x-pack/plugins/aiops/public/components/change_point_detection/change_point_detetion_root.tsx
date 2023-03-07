@@ -8,10 +8,10 @@
 import React, { FC } from 'react';
 import { pick } from 'lodash';
 
-import { EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 
 import { DataView } from '@kbn/data-views-plugin/common';
-import { SavedSearch } from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import { UrlStateProvider } from '@kbn/ml-url-state';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
@@ -19,8 +19,8 @@ import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
 
+import { i18n } from '@kbn/i18n';
 import { DataSourceContext } from '../../hooks/use_data_source';
-import { SavedSearchSavedObject } from '../../application/utils/search_utils';
 import { AiopsAppContext, AiopsAppDependencies } from '../../hooks/use_aiops_app_context';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
@@ -33,7 +33,7 @@ const localStorage = new Storage(window.localStorage);
 
 export interface ChangePointDetectionAppStateProps {
   dataView: DataView;
-  savedSearch: SavedSearch | SavedSearchSavedObject | null;
+  savedSearch: SavedSearch | null;
   appDependencies: AiopsAppDependencies;
 }
 
@@ -48,6 +48,25 @@ export const ChangePointDetectionAppState: FC<ChangePointDetectionAppStateProps>
     wrapWithTheme,
     uiSettingsKeys: UI_SETTINGS,
   };
+
+  if (!dataView.isTimeBased()) {
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.aiops.index.dataViewNotBasedOnTimeSeriesNotificationTitle', {
+          defaultMessage: 'The data view "{dataViewTitle}" is not based on a time series.',
+          values: { dataViewTitle: dataView.getName() },
+        })}
+        color="danger"
+        iconType="alert"
+      >
+        <p>
+          {i18n.translate('xpack.aiops.index.changePointTimeSeriesNotificationDescription', {
+            defaultMessage: 'Change point detection only runs over time-based indices.',
+          })}
+        </p>
+      </EuiCallOut>
+    );
+  }
 
   return (
     <AiopsAppContext.Provider value={appDependencies}>

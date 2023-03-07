@@ -464,7 +464,7 @@
               "section": "def-common.StreamingResponseHandler",
               "text": "StreamingResponseHandler"
             },
-            "<Payload, Response>, method?: \"GET\" | \"POST\" | \"PUT\" | \"DELETE\" | undefined, pluginRouter?: ",
+            "<Payload, Response>, method?: \"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | undefined, pluginRouter?: ",
             {
               "pluginId": "@kbn/core-http-server",
               "scope": "common",
@@ -488,7 +488,7 @@
               "section": "def-common.RouteConfigOptions",
               "text": "RouteConfigOptions"
             },
-            "<\"get\" | \"post\" | \"put\" | \"delete\"> | undefined) => void"
+            "<\"get\" | \"delete\" | \"post\" | \"put\"> | undefined) => void"
           ],
           "path": "src/plugins/bfetch/server/plugin.ts",
           "deprecated": false,
@@ -556,7 +556,7 @@
               "label": "method",
               "description": [],
               "signature": [
-                "\"GET\" | \"POST\" | \"PUT\" | \"DELETE\" | undefined"
+                "\"GET\" | \"DELETE\" | \"POST\" | \"PUT\" | undefined"
               ],
               "path": "src/plugins/bfetch/server/plugin.ts",
               "deprecated": false,
@@ -608,7 +608,7 @@
                   "section": "def-common.RouteConfigOptions",
                   "text": "RouteConfigOptions"
                 },
-                "<\"get\" | \"post\" | \"put\" | \"delete\"> | undefined"
+                "<\"get\" | \"delete\" | \"post\" | \"put\"> | undefined"
               ],
               "path": "src/plugins/bfetch/server/plugin.ts",
               "deprecated": false,

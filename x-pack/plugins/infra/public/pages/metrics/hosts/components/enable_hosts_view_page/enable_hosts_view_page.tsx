@@ -11,9 +11,11 @@ import { css } from '@emotion/react';
 import { useEuiBackgroundColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { MetricsPageTemplate } from '../../../page_template';
-import hostsLandingBeta from './hosts_landing_beta.svg';
-import { ExperimentalBadge } from '../experimental_badge';
+import hostsLandingBetaLight from './hosts_landing_beta_light.svg';
+import hostsLandingBetaDark from './hosts_landing_beta_dark.svg';
+import { ExperimentalBadge } from '../../../../../components/experimental_badge';
 
 interface Props {
   actions?: ReactNode;
@@ -21,6 +23,7 @@ interface Props {
 
 export const EnableHostsViewPage = ({ actions }: Props) => {
   const backgroundColor = useEuiBackgroundColor('subdued');
+  const isDarkMode = useUiSetting<boolean>('theme:darkMode');
 
   useTrackPageview({ app: 'infra_metrics', path: 'hosts_feature_enable_landing_page' });
   useTrackPageview({
@@ -41,7 +44,13 @@ export const EnableHostsViewPage = ({ actions }: Props) => {
           </h2>
         }
         alignment="center"
-        icon={<EuiImage size="fullWidth" src={hostsLandingBeta} alt="" />}
+        icon={
+          <EuiImage
+            size="fullWidth"
+            src={isDarkMode ? hostsLandingBetaDark : hostsLandingBetaLight}
+            alt="Hosts Landing Page Image"
+          />
+        }
         color="plain"
         layout="horizontal"
         body={

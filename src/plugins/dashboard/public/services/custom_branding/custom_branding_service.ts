@@ -19,5 +19,6 @@ export const customBrandingServiceFactory: CustomBrandingServiceFactory = ({ cor
   const { customBranding } = coreStart;
   return {
     hasCustomBranding$: customBranding.hasCustomBranding$,
+    customBranding$: customBranding.customBranding$,
   };
 };

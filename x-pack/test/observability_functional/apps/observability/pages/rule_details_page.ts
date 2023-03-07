@@ -165,7 +165,8 @@ export default ({ getService }: FtrProviderContext) => {
         await activeAlerts.click();
 
         const url = await browser.getCurrentUrl();
-        const { from, to } = await observability.components.alertSearchBar.getAbsoluteTimeRange();
+        const from = 'rangeFrom:now-30d';
+        const to = 'rangeTo:now';
 
         expect(url.includes('tabId=alerts')).to.be(true);
         expect(url.includes('status%3Aactive')).to.be(true);
@@ -179,7 +180,8 @@ export default ({ getService }: FtrProviderContext) => {
         await compactWidget.click();
 
         const url = await browser.getCurrentUrl();
-        const { from, to } = await observability.components.alertSearchBar.getAbsoluteTimeRange();
+        const from = 'rangeFrom:now-30d';
+        const to = 'rangeTo:now';
 
         expect(url.includes('tabId=alerts')).to.be(true);
         expect(url.includes('status%3Aall')).to.be(true);

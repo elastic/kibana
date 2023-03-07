@@ -14,35 +14,9 @@ export const mlSavedObjectType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'agnostic',
   mappings: {
+    dynamic: false,
     properties: {
-      nodeId: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256,
-          },
-        },
-      },
       snapshotId: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256,
-          },
-        },
-      },
-      jobId: {
-        type: 'text',
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256,
-          },
-        },
-      },
-      status: {
         type: 'text',
         fields: {
           keyword: {

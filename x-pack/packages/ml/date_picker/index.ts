@@ -13,6 +13,7 @@ export {
   useRefreshIntervalUpdates,
   useTimefilter,
   useTimeRangeUpdates,
+  useRefresh,
 } from './src/hooks/use_timefilter';
 export { DatePickerWrapper } from './src/components/date_picker_wrapper';
 export {
@@ -22,6 +23,7 @@ export {
 export {
   getTimeFilterRange,
   type TimeRange,
+  type SetFullTimeRangeApiPath,
 } from './src/services/full_time_range_selector_service';
 export { type GetTimeFieldRangeResponse } from './src/services/types';
 export { mlTimefilterRefresh$, type Refresh } from './src/services/timefilter_refresh_service';

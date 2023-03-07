@@ -14,6 +14,7 @@ import {
   Settings,
   XYBrushEvent,
 } from '@elastic/charts';
+import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup, EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
@@ -85,7 +86,9 @@ export function APMSection({ bucketSize }: Props) {
   const min = moment.utc(absoluteStart).valueOf();
   const max = moment.utc(absoluteEnd).valueOf();
 
-  const formatter = niceTimeFormatter([min, max]);
+  const formatter = bucketSize?.dateFormat
+    ? timeFormatter(bucketSize?.dateFormat)
+    : niceTimeFormatter([min, max]);
 
   const isLoading = status === FETCH_STATUS.LOADING;
 

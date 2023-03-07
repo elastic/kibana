@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import moment from 'moment';
-import set from 'lodash/set';
+import set from '@kbn/safer-lodash-set/set';
 import cloneDeep from 'lodash/cloneDeep';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
@@ -78,6 +78,7 @@ export const getExceptionListItemSchemaMock = (
   created_by: USER,
   description: DESCRIPTION,
   entries: ENTRIES,
+  expire_time: undefined,
   id: '1',
   item_id: 'endpoint_list_item',
   list_id: 'endpoint_list_id',

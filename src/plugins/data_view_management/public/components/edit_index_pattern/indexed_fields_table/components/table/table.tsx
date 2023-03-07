@@ -220,7 +220,7 @@ const getItems = (conflictDescriptions: IndexedFieldItem['conflictDescriptions']
 };
 
 export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string) => (
-  <span>
+  <span data-test-subj={`field-name-${field.name}`}>
     {field.name}
     {field.info && field.info.length ? (
       <span>

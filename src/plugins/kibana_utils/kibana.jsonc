@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/kibana-utils-plugin",
+  "owner": "@elastic/kibana-app-services",
+  "plugin": {
+    "id": "kibanaUtils",
+    "server": false,
+    "browser": true,
+    "extraPublicDirs": [
+      "common",
+      "demos/state_containers/todomvc",
+      "common/state_containers"
+    ]
+  }
+}

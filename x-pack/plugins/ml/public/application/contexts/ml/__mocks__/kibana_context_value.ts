@@ -8,7 +8,10 @@
 import { dataViewMock } from './data_view';
 import { dataViewsContractMock } from './data_view_contract';
 import { kibanaConfigMock } from './kibana_config';
-import { savedSearchMock } from './saved_search';
+import { deprecatedSavedSearchSimpleObjMock } from './saved_search';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
+
+const mockSavedSearch: SavedSearch = {} as unknown as SavedSearch;
 
 export const kibanaContextValueMock = {
   combinedQuery: {
@@ -16,7 +19,8 @@ export const kibanaContextValueMock = {
     language: 'the-query-language',
   },
   currentDataView: dataViewMock,
-  currentSavedSearch: savedSearchMock,
+  deprecatedSavedSearchObj: deprecatedSavedSearchSimpleObjMock,
+  selectedSavedSearch: mockSavedSearch,
   dataViewsContract: dataViewsContractMock,
   kibanaConfig: kibanaConfigMock,
 };
