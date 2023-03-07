@@ -32,14 +32,14 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
         esClient,
       });
 
-      const result = await riskScoreService.getScores({
-        enrichInputs: options.enrich_inputs,
-        filters: options.filters ?? [],
-        range: options.range ?? { start: 'now-15d', end: 'now' },
-        identifierType: options.identifier_type as IdentifierType, // TODO validate
-      });
-
       try {
+        const result = await riskScoreService.getScores({
+          enrichInputs: options.enrich_inputs,
+          filters: options.filters ?? [],
+          range: options.range ?? { start: 'now-15d', end: 'now' },
+          identifierType: options.identifier_type as IdentifierType, // TODO validate
+        });
+
         return response.ok({ body: result });
       } catch (e) {
         const error = transformError(e);
