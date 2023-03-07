@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+/* eslint-disable no-console */
+
 import React, { useMemo, useReducer } from 'react';
 
 import { fireEvent, render, screen, within, waitFor } from '@testing-library/react';
@@ -506,27 +509,33 @@ describe('AlertsTable', () => {
       });
 
       it('should show the row loader when callback triggered', async () => {
+        const start = performance.now();
         render(<AlertsTableWithProviders {...customTableProps} />);
-        screen.debug(document.body, 1000000);
+        const step1 = performance.now();
+        console.log('step1', step1 - start);
         fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
-
+        const step2 = performance.now();
+        console.log('step2', step2 - step1);
         // the callback given to our clients to run when they want to update the loading state
         act(() => {
           mockedFn.mock.calls[0][0].setIsActionLoading(true);
         });
 
+        const step3 = performance.now();
+        console.log('step3', step3 - step2);
         expect(await screen.findAllByTestId('row-loader')).toHaveLength(1);
+        const step4 = performance.now();
+        console.log('step4', step4 - step3);
+        const selectedOptions = await screen.findAllByTestId('dataGridRowCell');
+        const end = performance.now();
+        console.log('end', end - step4);
+        // first row, first column
+        expect(within(selectedOptions[0]).getByLabelText('Loading')).toBeDefined();
+        expect(within(selectedOptions[0]).queryByRole('checkbox')).not.toBeInTheDocument();
 
-        await waitFor(async () => {
-          const selectedOptions = await screen.findAllByTestId('dataGridRowCell');
-          // first row, first column
-          expect(within(selectedOptions[0]).getByLabelText('Loading')).toBeDefined();
-          expect(within(selectedOptions[0]).queryByRole('checkbox')).not.toBeInTheDocument();
-
-          // second row, first column
-          expect(within(selectedOptions[6]).queryByLabelText('Loading')).not.toBeInTheDocument();
-          expect(within(selectedOptions[6]).getByRole('checkbox')).toBeDefined();
-        });
+        // second row, first column
+        expect(within(selectedOptions[6]).queryByLabelText('Loading')).not.toBeInTheDocument();
+        expect(within(selectedOptions[6]).getByRole('checkbox')).toBeDefined();
       });
 
       it('should show the row loader when callback triggered with false', async () => {
