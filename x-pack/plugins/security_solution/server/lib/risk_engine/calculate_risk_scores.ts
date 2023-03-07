@@ -42,6 +42,11 @@ const bucketToResponse = ({
       })),
 });
 
+const filterFromRange = (range?: GetScoresParams['range']): QueryDslQueryContainer[] => {
+  if (!range) return [];
+  return [{ range: { '@timestamp': { lt: range.end, gte: range.start } } }];
+};
+
 export const calculateRiskScores = async ({
   dataViewId,
   enrichInputs,
@@ -90,13 +95,15 @@ export const calculateRiskScores = async ({
     return results;
   `;
 
+  const filter = ((filters ?? []) as QueryDslQueryContainer[]).concat(filterFromRange(range)); // TODO better typings
+
   const results = await esClient.search<never, CalculateRiskScoreAggregations>({
     size: 0,
     index,
     query: {
       bool: {
         must: { exists: { field: ALERT_RISK_SCORE } },
-        filter: (filters ?? []) as QueryDslQueryContainer[], // TODO this sucks
+        filter,
       },
     },
     aggs: {
