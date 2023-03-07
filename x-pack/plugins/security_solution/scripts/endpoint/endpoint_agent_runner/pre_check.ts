@@ -52,7 +52,7 @@ const checkSsh = async () => {
   try {
     const version = await execa.command('ssh -V');
 
-    log.verbose(`Using 'ssh': ${version.stdout} ${version.stderr}`);
+    log.verbose(`Using 'ssh': ${version.stdout}`);
   } catch (err) {
     log.verbose(err);
     throw new Error(`ssh not found on local machine [${err.message}].\n\n`);
