@@ -31,6 +31,8 @@ export class SyntheticsRunner {
 
   public params: ArgParams;
 
+  private loadTestFilesCallback?: () => Promise<void>;
+
   constructor(getService: any, params: ArgParams) {
     this.getService = getService;
     this.kibanaUrl = this.getKibanaUrl();
@@ -52,6 +54,7 @@ export class SyntheticsRunner {
   async loadTestFiles(callback: () => Promise<void>) {
     console.log('Loading test files');
     await callback();
+    this.loadTestFilesCallback = callback;
     this.testFilesLoaded = true;
     console.log('Successfully loaded test files');
   }
@@ -126,6 +129,10 @@ export class SyntheticsRunner {
         screenshots: 'only-on-failure',
         reporter: TestReporter,
       });
+      if (noOfRuns > 1) {
+        // need to reload again since runner resets the journeys
+        await this.loadTestFiles(this.loadTestFilesCallback!);
+      }
     }
 
     await this.assertResults(results);

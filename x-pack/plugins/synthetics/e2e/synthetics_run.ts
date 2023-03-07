@@ -32,7 +32,7 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
       ]);
 
       await syntheticsRunner.loadTestFiles(async () => {
-        require('./journeys');
+        require(path.join(__dirname, './journeys'));
       });
 
       await syntheticsRunner.run();
