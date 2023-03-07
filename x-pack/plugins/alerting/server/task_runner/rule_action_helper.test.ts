@@ -64,6 +64,16 @@ describe('rule_action_helper', () => {
       const result = isSummaryAction(mockSummaryAction);
       expect(result).toBe(true);
     });
+
+    test('should return false if the action is undefined', () => {
+      const result = isSummaryAction(undefined);
+      expect(result).toBe(false);
+    });
+
+    test('should return false if the action is not a proper RuleAction', () => {
+      const result = isSummaryAction({} as RuleAction);
+      expect(result).toBe(false);
+    });
   });
 
   describe('isActionOnInterval', () => {
@@ -92,6 +102,16 @@ describe('rule_action_helper', () => {
       const result = isActionOnInterval(mockSummaryAction);
       expect(result).toBe(true);
     });
+
+    test('should return false if the action  undefined', () => {
+      const result = isActionOnInterval(undefined);
+      expect(result).toBe(false);
+    });
+
+    test('should return false if the action is not a proper RuleAction', () => {
+      const result = isActionOnInterval({} as RuleAction);
+      expect(result).toBe(false);
+    });
   });
 
   describe('generateActionHash', () => {
@@ -108,6 +128,11 @@ describe('rule_action_helper', () => {
     test('should return a hash for a summary action', () => {
       const result = generateActionHash(mockSummaryAction);
       expect(result).toBe('slack:summary:1d');
+    });
+
+    test('should return a hash for a broken summary action', () => {
+      const result = generateActionHash(undefined);
+      expect(result).toBe('no-action-type-id:no-action-group:no-throttling');
     });
   });
 
@@ -142,11 +167,14 @@ describe('rule_action_helper', () => {
     beforeEach(() => {
       jest.setSystemTime(new Date('2020-01-01T23:00:00.000Z').getTime());
     });
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
 
     afterAll(() => {
       jest.useRealTimers();
     });
-    const logger = { debug: jest.fn } as unknown as Logger;
+    const logger = { debug: jest.fn() } as unknown as Logger;
     const summaryActions = { '111-111': { date: new Date('2020-01-01T00:00:00.000Z') } };
 
     test('should return false if the action does not have throttle filed', () => {
@@ -194,7 +222,7 @@ describe('rule_action_helper', () => {
     test('should return false if the action is not in the task instance', () => {
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        summaryActions: { 'slack:summary:2d': { date: new Date('2020-01-01T00:00:00.000Z') } },
+        summaryActions: { '123-456': { date: new Date('2020-01-01T00:00:00.000Z') } },
         logger,
       });
       expect(result).toBe(false);
@@ -204,7 +232,7 @@ describe('rule_action_helper', () => {
       jest.advanceTimersByTime(3600000 * 2);
       const result = isSummaryActionThrottled({
         action: mockSummaryAction,
-        summaryActions: { 'slack:summary:1d': { date: new Date('2020-01-01T00:00:00.000Z') } },
+        summaryActions: { '123-456': { date: new Date('2020-01-01T00:00:00.000Z') } },
         logger,
       });
       expect(result).toBe(false);
@@ -217,6 +245,43 @@ describe('rule_action_helper', () => {
         logger,
       });
       expect(result).toBe(true);
+    });
+
+    test('should return false if the action is broken', () => {
+      const result = isSummaryActionThrottled({
+        action: undefined,
+        summaryActions,
+        logger,
+      });
+      expect(result).toBe(false);
+    });
+
+    test('should return false if there is no summary action in the state', () => {
+      const result = isSummaryActionThrottled({
+        action: mockSummaryAction,
+        summaryActions: undefined,
+        logger,
+      });
+      expect(result).toBe(false);
+    });
+
+    test('should return false if the actions throttle interval is not valid', () => {
+      const result = isSummaryActionThrottled({
+        action: {
+          ...mockSummaryAction,
+          frequency: {
+            summary: true,
+            notifyWhen: 'onThrottleInterval',
+            throttle: '1',
+          },
+        },
+        summaryActions,
+        logger,
+      });
+      expect(result).toBe(false);
+      expect(logger.debug).toHaveBeenCalledWith(
+        "Action'slack:1', has an invalid throttle interval"
+      );
     });
   });
 });

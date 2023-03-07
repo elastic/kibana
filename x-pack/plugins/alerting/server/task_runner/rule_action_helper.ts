@@ -13,12 +13,12 @@ import {
   ThrottledActions,
 } from '../../common';
 
-export const isSummaryAction = (action: RuleAction) => {
-  return action.frequency?.summary || false;
+export const isSummaryAction = (action?: RuleAction) => {
+  return action?.frequency?.summary || false;
 };
 
-export const isActionOnInterval = (action: RuleAction) => {
-  if (!action.frequency) {
+export const isActionOnInterval = (action?: RuleAction) => {
+  if (!action?.frequency) {
     return false;
   }
   return (
@@ -42,7 +42,7 @@ export const isSummaryActionThrottled = ({
   summaryActions,
   logger,
 }: {
-  action: RuleAction;
+  action?: RuleAction;
   summaryActions?: ThrottledActions;
   logger: Logger;
 }) => {
@@ -52,25 +52,31 @@ export const isSummaryActionThrottled = ({
   if (!summaryActions) {
     return false;
   }
-  const triggeredSummaryAction = summaryActions[action.uuid!];
+  const triggeredSummaryAction = summaryActions[action?.uuid!];
   if (!triggeredSummaryAction) {
     return false;
   }
-  const throttleMills = parseDuration(action.frequency!.throttle!);
+  let throttleMills = 0;
+  try {
+    throttleMills = parseDuration(action?.frequency!.throttle!);
+  } catch (e) {
+    logger.debug(`Action'${action?.actionTypeId}:${action?.id}', has an invalid throttle interval`);
+  }
+
   const throttled = triggeredSummaryAction.date.getTime() + throttleMills > Date.now();
 
   if (throttled) {
     logger.debug(
-      `skipping scheduling the action '${action.actionTypeId}:${action.id}', summary action is still being throttled`
+      `skipping scheduling the action '${action?.actionTypeId}:${action?.id}', summary action is still being throttled`
     );
   }
   return throttled;
 };
 
-export const generateActionHash = (action: RuleAction) => {
-  return `${action.actionTypeId}:${action.frequency?.summary ? 'summary' : action.group}:${
-    action.frequency?.throttle || 'no-throttling'
-  }`;
+export const generateActionHash = (action?: RuleAction) => {
+  return `${action?.actionTypeId || 'no-action-type-id'}:${
+    action?.frequency?.summary ? 'summary' : action?.group || 'no-action-group'
+  }:${action?.frequency?.throttle || 'no-throttling'}`;
 };
 
 export const getSummaryActionsFromTaskState = ({

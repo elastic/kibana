@@ -190,12 +190,12 @@ export class Alert<
 
     if (this.meta.lastScheduledActions.group !== group) {
       this.meta.lastScheduledActions.actions = {};
-    } else if (uuid && actionHash) {
+    } else if (uuid) {
       if (!this.meta.lastScheduledActions.actions) {
         this.meta.lastScheduledActions.actions = {};
       }
       // remove deprecated actionHash
-      if (this.meta.lastScheduledActions.actions[actionHash]) {
+      if (!!actionHash && this.meta.lastScheduledActions.actions[actionHash]) {
         delete this.meta.lastScheduledActions.actions[actionHash];
       }
       this.meta.lastScheduledActions.actions[uuid] = { date };
