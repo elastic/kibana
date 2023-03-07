@@ -164,6 +164,10 @@ export function mapReady() {
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
+    dispatch({
+      type: MAP_READY,
+    });
+
     const waitingForMapReadyLayerList = getWaitingForMapReadyLayerListRaw(getState());
     dispatch({
       type: CLEAR_WAITING_FOR_MAP_READY_LAYER_LIST,
@@ -179,10 +183,6 @@ export function mapReady() {
         dispatch(addLayer(layerDescriptor));
       });
     }
-
-    dispatch({
-      type: MAP_READY,
-    });
   };
 }
 
