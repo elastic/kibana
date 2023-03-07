@@ -399,6 +399,9 @@ const InsightEditorComponent = ({
       <EuiModalBody>
         <FormProvider {...formMethods}>
           <EuiForm fullWidth>
+            <EuiFormRow label={i18n.FORM_DESCRIPTION} fullWidth>
+              <></>
+            </EuiFormRow>
             <EuiFormRow
               label={i18n.LABEL}
               helpText={i18n.LABEL_TEXT}

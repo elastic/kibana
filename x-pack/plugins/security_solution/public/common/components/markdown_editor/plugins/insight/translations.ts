@@ -26,6 +26,14 @@ export const DESCRIPTION_TEXT = i18n.translate(
   }
 );
 
+export const FORM_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.markdown.insight.formDescription',
+  {
+    defaultMessage:
+      'Create a query to investigate an alert in Timeline, using a clickable query button in the investigation guide. The button also displays a count of matching documents.',
+  }
+);
+
 export const FILTER_BUILDER = i18n.translate(
   'xpack.securitySolution.markdown.insight.filterBuilder',
   {
@@ -37,7 +45,7 @@ export const FILTER_BUILDER_TEXT = i18n.translate(
   'xpack.securitySolution.markdown.insight.filterBuilderText',
   {
     defaultMessage:
-      'Create filters to populate the Timeline query builder. To use a value from the alert document, enter the field name in double braces {{kibana.alert.example}} as a custom option in the value field.',
+      'Create filters to populate the Timeline query builder. To use a value from the alert document, enter the field name in double braces {example} as a custom option in the value field.',
     values: {
       example: '{{kibana.alert.example}}',
     },
@@ -54,7 +62,8 @@ export const RELATIVE_TIMERANGE = i18n.translate(
 export const RELATIVE_TIMERANGE_TEXT = i18n.translate(
   'xpack.securitySolution.markdown.insight.relativeTimerangeText',
   {
-    defaultMessage: 'Select a time range to limit the query, relative to the alert's creation time (optional).',
+    defaultMessage:
+      "Select a time range to limit the query, relative to the alert's creation time (optional).",
   }
 );
 
