@@ -1,0 +1,94 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React from 'react';
+
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { Action } from '@kbn/ui-actions-plugin/public';
+import { ViewMode, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+
+import { pluginServices } from '../../services';
+import { ControlGroupStrings } from '../control_group_strings';
+import { ControlEmbeddable, DataControlInput } from '../../types';
+import { isControlGroup } from '../embeddable/control_group_container';
+
+export const ACTION_DELETE_CONTROL = 'deleteControl';
+
+export interface DeleteControlActionContext {
+  embeddable: ControlEmbeddable<DataControlInput>;
+}
+
+export class DeleteControlAction implements Action<DeleteControlActionContext> {
+  public readonly type = ACTION_DELETE_CONTROL;
+  public readonly id = ACTION_DELETE_CONTROL;
+  public order = 30; // TODO: use these
+
+  private openConfirm;
+
+  constructor() {
+    ({
+      overlays: { openConfirm: this.openConfirm },
+    } = pluginServices.getServices());
+  }
+
+  public readonly MenuItem = ({ context }: { context: DeleteControlActionContext }) => {
+    return (
+      <EuiToolTip content={this.getDisplayName(context)}>
+        <EuiButtonIcon
+          data-test-subj={`control-action-${context.embeddable.id}-edit`}
+          aria-label={this.getDisplayName(context)}
+          iconType={this.getIconType(context)}
+          onClick={() => this.execute(context)}
+          color="danger"
+        />
+      </EuiToolTip>
+    );
+  };
+
+  public getDisplayName({ embeddable }: DeleteControlActionContext) {
+    // if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
+    //   throw new IncompatibleActionError();
+    // }
+    return ControlGroupStrings.floatingActions.getRemoveButtonTitle();
+  }
+
+  public getIconType({ embeddable }: DeleteControlActionContext) {
+    // if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
+    //   throw new IncompatibleActionError();
+    // }
+    return 'cross';
+  }
+
+  public async isCompatible({ embeddable }: DeleteControlActionContext) {
+    if (isErrorEmbeddable(embeddable)) return false;
+
+    const controlGroup = embeddable.parent;
+    const dashboard = embeddable.getRoot();
+    return Boolean(
+      !isErrorEmbeddable(embeddable) &&
+        dashboard &&
+        dashboard.isContainer &&
+        dashboard.getInput()?.viewMode === ViewMode.EDIT &&
+        controlGroup &&
+        isControlGroup(controlGroup)
+    );
+  }
+
+  public async execute({ embeddable }: DeleteControlActionContext) {
+    this.openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
+      confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
+      cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),
+      title: ControlGroupStrings.management.deleteControls.getDeleteTitle(),
+      buttonColor: 'danger',
+    }).then((confirmed) => {
+      if (confirmed) {
+        embeddable.parent?.removeEmbeddable(embeddable.id);
+      }
+    });
+  }
+}

@@ -16,6 +16,7 @@ import { ControlsOptionsListService } from './options_list/types';
 import { ControlsSettingsService } from './settings/types';
 import { ControlsThemeService } from './theme/types';
 import { ControlsEmbeddableService } from './embeddable/types';
+import { ControlsUiActionsService } from './ui_actions/types';
 
 export interface ControlsServices {
   // dependency services
@@ -27,6 +28,7 @@ export interface ControlsServices {
   http: ControlsHTTPService;
   settings: ControlsSettingsService;
   theme: ControlsThemeService;
+  uiActions: ControlsUiActionsService;
 
   // controls plugin's own services
   controls: ControlsServiceType;

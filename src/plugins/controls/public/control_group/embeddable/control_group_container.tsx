@@ -16,7 +16,7 @@ import _ from 'lodash';
 import { ReduxEmbeddablePackage, ReduxEmbeddableTools } from '@kbn/presentation-util-plugin/public';
 import { OverlayRef } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { Container, EmbeddableFactory, IEmbeddable } from '@kbn/embeddable-plugin/public';
 import {
   ControlGroupInput,
   ControlGroupOutput,
@@ -53,6 +53,10 @@ import {
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
   flyoutRef = newRef;
+};
+
+export const isControlGroup = (embeddable: IEmbeddable): embeddable is ControlGroupContainer => {
+  return embeddable.isContainer && embeddable.type === CONTROL_GROUP_TYPE;
 };
 
 export class ControlGroupContainer extends Container<
@@ -214,6 +218,11 @@ export class ControlGroupContainer extends Container<
 
   public getPanelCount = () => {
     return Object.keys(this.getInput().panels).length;
+  };
+
+  public updatePanelState = (id: string, panelState: Partial<ControlPanelState>) => {
+    const panels = this.getExplicitInput().panels;
+    this.updateInput({ panels: { ...panels, [id]: { ...panels[id], ...panelState } } });
   };
 
   public updateFilterContext = (filters: Filter[]) => {
