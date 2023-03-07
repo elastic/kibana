@@ -229,7 +229,7 @@ export const EndpointStatusActionResult = memo<
                 { defaultMessage: 'Last active' }
               )}
               value={endpointDetails.metadata['@timestamp']}
-              className="eui-textTruncate"
+              className="eui-textTruncate formatted_date_inline_tooltip"
             />
           </ConsoleCodeBlock>
         ),
