@@ -145,5 +145,7 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/expandable-flyout",
     "@kbn/securitysolution-grouping",
+    "@kbn/core-analytics-server",
+    "@kbn/analytics-client",
   ]
 }
