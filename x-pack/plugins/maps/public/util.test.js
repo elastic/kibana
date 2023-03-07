@@ -11,6 +11,18 @@ import {
   testOnlyClearCanAccessEmsFontsPromise,
 } from './util';
 
+jest.mock('./kibana_services', () => ({
+  getDocLinks: () => {
+    return {
+      links: {
+        maps: {
+          connectToEms: 'https://www.elastic.co/guide/en/kibana/current/maps-connect-to-ems.html',
+        },
+      },
+    };
+  },
+}));
+
 describe('getGlyphUrl', () => {
   describe('EMS enabled', () => {
     beforeEach(() => {

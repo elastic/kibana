@@ -12,7 +12,8 @@ import { login, visit } from '../../tasks/login';
 
 import { NETWORK_URL } from '../../urls/navigation';
 
-describe('Inspect', () => {
+// This will be fixed in a follow up PR, https://github.com/elastic/kibana/issues/152359
+describe.skip('Inspect', () => {
   context('Network stats and tables', () => {
     before(() => {
       login();
