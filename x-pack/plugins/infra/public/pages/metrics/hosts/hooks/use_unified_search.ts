@@ -55,7 +55,7 @@ export const useUnifiedSearch = () => {
       filters?: Filter[];
       panelFilters?: Filter[];
     }) => {
-      const { query, dateRange, filters = [], panelFilters = [] } = data ?? {};
+      const { query, dateRange = getTime(), filters, panelFilters } = data ?? {};
 
       dispatch({
         type: 'setQuery',
@@ -67,7 +67,7 @@ export const useUnifiedSearch = () => {
         },
       });
     },
-    [dispatch]
+    [dispatch, getTime]
   );
 
   const loadFiltersFromState = useCallback(() => {

@@ -90,7 +90,4 @@ const createSnapshotRequest = ({
     to: dateRange.to,
     ignoreLookback: true,
   },
-  // The user might want to click on the submit button without changing the filters
-  // This makes sure all child components will re-render.
-  requestTs: Date.now(),
 });
