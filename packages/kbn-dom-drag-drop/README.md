@@ -1,4 +1,4 @@
-# Dom Drag & Drop
+# DOM Drag & Drop
 
 This is a simple drag / drop mechanism that plays nice with React.
 
