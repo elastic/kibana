@@ -154,7 +154,7 @@ const waitForEndpoints = async (
   esClient: Client,
   location: 'endpoint_index' | 'united_index',
   ids: string[] = []
-) => {
+): Promise<void> => {
   const index = location === 'endpoint_index' ? metadataCurrentIndexPattern : METADATA_UNITED_INDEX;
   const body = ids.length
     ? location === 'endpoint_index'
