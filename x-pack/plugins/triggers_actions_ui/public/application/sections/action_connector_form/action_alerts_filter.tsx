@@ -1,0 +1,185 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import moment, { Moment } from 'moment';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSwitch,
+  EuiButtonGroup,
+  EuiSpacer,
+  EuiDatePickerRange,
+  EuiDatePicker,
+} from '@elastic/eui';
+import deepEqual from 'fast-deep-equal';
+import { I18N_WEEKDAY_OPTIONS, ISO_WEEKDAYS } from '../../../common/constants';
+
+interface AlertsFilterTimeframe {
+  days: number[];
+  hours: {
+    start: string;
+    end: string;
+  };
+}
+
+interface ActionAlertsFilterProps {
+  state: {
+    timeframe: null | AlertsFilterTimeframe;
+  };
+  onChange: (update: any) => void;
+}
+
+const useDefaultTimezone = () => {
+  const kibanaTz: string = useUiSetting('dateFormat:tz');
+  if (!kibanaTz || kibanaTz === 'Browser') return moment.tz?.guess() ?? 'UTC';
+  return kibanaTz;
+};
+
+const useTimeframe = (initialTimeframe: AlertsFilterTimeframe | null) => {
+  const timezone = useDefaultTimezone();
+  const DEFAULT_TIMEFRAME = {
+    days: [],
+    hours: {
+      start: '00:00',
+      end: '24:00',
+      timezone,
+    },
+  };
+  return useState<AlertsFilterTimeframe>(initialTimeframe || DEFAULT_TIMEFRAME);
+};
+const useTimeFormat = () => {
+  const dateFormatScaled: Array<[string, string]> = useUiSetting('dateFormat:scaled');
+  const [, PT1M] = dateFormatScaled.find(([key]) => key === 'PT1M') ?? ['', 'HH:mm'];
+  return PT1M;
+};
+
+export const ActionAlertsFilter: React.FC<ActionAlertsFilterProps> = ({ state, onChange }) => {
+  const timeFormat = useTimeFormat();
+  const [timeframe, setTimeframe] = useTimeframe(state.timeframe);
+
+  const timeframeEnabled = useMemo(() => Boolean(state.timeframe), [state]);
+
+  useEffect(() => {
+    const nextState = {
+      ...state,
+      timeframe: timeframeEnabled ? timeframe : null,
+    };
+    if (!deepEqual(state, nextState)) onChange(nextState);
+  }, [timeframeEnabled, timeframe, state, onChange]);
+
+  const toggleTimeframe = useCallback(
+    () => onChange({ ...state, timeframe: state.timeframe ? null : timeframe }),
+    [state, timeframe, onChange]
+  );
+  const updateTimeframe = useCallback(
+    (update: Partial<AlertsFilterTimeframe>) => {
+      setTimeframe({
+        ...timeframe,
+        ...update,
+      });
+    },
+    [timeframe, setTimeframe]
+  );
+
+  const onChangeHours = useCallback(
+    (startOrEnd: 'start' | 'end') => (date: Moment) => {
+      updateTimeframe({
+        hours: { ...timeframe.hours, [startOrEnd]: date.format('HH:mm') },
+      });
+    },
+    [updateTimeframe, timeframe]
+  );
+
+  const onToggleWeekday = useCallback(
+    (id: string) => {
+      if (!timeframe) return;
+      const day = Number(id);
+      const previouslyHasDay = timeframe.days.includes(day);
+      const newDays = previouslyHasDay
+        ? timeframe.days.filter((d) => d !== day)
+        : [...timeframe.days, day];
+      updateTimeframe({ days: newDays });
+    },
+    [timeframe, updateTimeframe]
+  );
+  const selectedWeekdays = useMemo(
+    () =>
+      ISO_WEEKDAYS.reduce(
+        (result, day) => ({ ...result, [day]: timeframe.days.includes(day) }),
+        {}
+      ),
+    [timeframe]
+  );
+
+  const [startH, startM] = useMemo(() => timeframe.hours.start.split(':').map(Number), [timeframe]);
+  const [endH, endM] = useMemo(() => timeframe.hours.end.split(':').map(Number), [timeframe]);
+
+  return (
+    <>
+      <EuiSwitch
+        label={i18n.translate(
+          'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterTimeframeToggleLabel',
+          {
+            defaultMessage: 'Trigger action if alert is generated during timeframe',
+          }
+        )}
+        checked={timeframeEnabled}
+        onChange={toggleTimeframe}
+      />
+      {timeframeEnabled && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup alignItems="center">
+            <EuiFlexItem>
+              <EuiButtonGroup
+                buttonSize="compressed"
+                isFullWidth
+                legend={i18n.translate(
+                  'xpack.triggersActionsUI.sections.actionTypeForm.ActionAlertsFilterTimeframeWeekdays',
+                  {
+                    defaultMessage: 'Days of week',
+                  }
+                )}
+                options={I18N_WEEKDAY_OPTIONS}
+                idToSelectedMap={selectedWeekdays}
+                type="multi"
+                onChange={onToggleWeekday}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiDatePickerRange
+                startDateControl={
+                  <EuiDatePicker
+                    showTimeSelect
+                    showTimeSelectOnly
+                    dateFormat={timeFormat}
+                    timeFormat={timeFormat}
+                    selected={moment().set('hour', startH).set('minute', startM)}
+                    onChange={onChangeHours('start')}
+                  />
+                }
+                endDateControl={
+                  <EuiDatePicker
+                    showTimeSelect
+                    showTimeSelectOnly
+                    dateFormat={timeFormat}
+                    timeFormat={timeFormat}
+                    selected={moment().set('hour', endH).set('minute', endM)}
+                    onChange={onChangeHours('end')}
+                  />
+                }
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      )}
+    </>
+  );
+};

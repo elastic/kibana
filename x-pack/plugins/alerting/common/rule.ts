@@ -76,6 +76,14 @@ export interface RuleExecutionStatus {
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
+export interface RuleActionAlertsFilterTimeframe {
+  days: Array<1 | 2 | 3 | 4 | 5 | 6 | 7>;
+  hours: {
+    start: string;
+    end: string;
+  };
+}
+
 export interface RuleAction {
   uuid?: string;
   group: string;
@@ -86,6 +94,10 @@ export interface RuleAction {
     summary: boolean;
     notifyWhen: RuleNotifyWhenType;
     throttle: string | null;
+  };
+  alertsFilter?: {
+    timeframe: null | RuleActionAlertsFilterTimeframe;
+    kql: null | string;
   };
 }
 

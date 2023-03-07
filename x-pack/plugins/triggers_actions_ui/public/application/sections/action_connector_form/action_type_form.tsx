@@ -54,6 +54,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorsSelection } from './connectors_selection';
 import { ActionNotifyWhen } from './action_notify_when';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';
+import { ActionAlertsFilter } from './action_alerts_filter';
 
 export type ActionTypeFormProps = {
   actionItem: RuleAction;
@@ -72,6 +73,7 @@ export type ActionTypeFormProps = {
   hideNotifyWhen?: boolean;
   hasSummary?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
+  showActionAlertsFilter?: boolean;
 } & Pick<
   ActionAccordionFormProps,
   | 'defaultActionGroupId'
@@ -113,6 +115,7 @@ export const ActionTypeForm = ({
   defaultSummaryMessage,
   hasSummary,
   minimumThrottleInterval,
+  showActionAlertsFilter = true,
 }: ActionTypeFormProps) => {
   const {
     application: { capabilities },
@@ -143,6 +146,14 @@ export const ActionTypeForm = ({
   const [warning, setWarning] = useState<string | null>(null);
 
   const [useDefaultMessage, setUseDefaultMessage] = useState(false);
+
+  const [actionAlertsFilter, setActionAlertsFilter] = useState(
+    actionItem.alertsFilter ?? {
+      timeframe: null,
+      kql: null,
+      filter: '',
+    }
+  );
   const isSummaryAction = actionItem.frequency?.summary;
 
   const getDefaultParams = async () => {
@@ -376,6 +387,12 @@ export const ActionTypeForm = ({
                 setActionGroup(group);
               }}
             />
+          </>
+        )}
+        {showActionAlertsFilter && (
+          <>
+            {!hideNotifyWhen && <EuiSpacer size="xl" />}
+            <ActionAlertsFilter state={actionAlertsFilter} onChange={setActionAlertsFilter} />
           </>
         )}
       </EuiSplitPanel.Inner>
