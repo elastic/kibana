@@ -9,7 +9,7 @@
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useReducer } from 'react';
 import { groupActions, groupsReducerWithStorage, initialState } from '.';
-import { defaultGroup, LOCAL_STORAGE_GROUPING_KEY } from '@kbn/securitysolution-grouping/src';
+import { defaultGroup, LOCAL_STORAGE_GROUPING_KEY } from '../..';
 
 const groupingOptions = [
   { label: 'ruleName', key: 'kibana.alert.rule.name' },
