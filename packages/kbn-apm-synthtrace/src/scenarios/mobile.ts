@@ -310,7 +310,7 @@ function randomInt(max: number) {
 }
 
 function randomRange(min: number, max: number) {
-  let cal = Math.random() * (max - min) + min;
+  const cal = Math.random() * (max - min) + min;
   return cal.toPrecision(2);
 }
 
