@@ -386,7 +386,6 @@ export const getIncompatibleMappingsMigrator = async ({
 };
 
 export const readLog = async (logFilePath: string = defaultLogFilePath): Promise<string> => {
-  await delay(0.1); // give the logger enough time to write to the file
   return await fs.readFile(logFilePath, 'utf-8');
 };
 
