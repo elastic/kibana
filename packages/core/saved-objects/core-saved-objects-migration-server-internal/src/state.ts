@@ -230,7 +230,7 @@ export interface PrepareCompatibleMigration extends PostInitWithSource {
 }
 
 export interface RefreshSource extends PostInitWithSource {
-  /** Refresh temp index before searching for outdated docs */
+  /** Refresh source index before searching for outdated docs */
   readonly controlState: 'REFRESH_SOURCE';
 }
 
