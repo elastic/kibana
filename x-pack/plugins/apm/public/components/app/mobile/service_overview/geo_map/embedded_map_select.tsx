@@ -87,7 +87,7 @@ export function EmbeddedMapSelect({
             {i18n.translate('xpack.apm.serviceOverview.embeddedMap.subtitle', {
               defaultMessage:
                 'Map showing the total number of {currentMap} based on country and region',
-              values: { currentMap: currentMap.inputDisplay },
+              values: { currentMap: currentMap.inputDisplay as string },
             })}
           </p>
         </EuiText>
