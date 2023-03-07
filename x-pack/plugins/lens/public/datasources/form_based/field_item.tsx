@@ -8,7 +8,7 @@
 import './field_item.scss';
 
 import React, { useCallback, useState, useMemo } from 'react';
-import { EuiText, EuiButton, EuiPopoverFooter } from '@elastic/eui';
+import { EuiText, EuiButton, EuiPopoverFooter, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -146,6 +146,29 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
 
   const order = useMemo(() => [0, groupIndex, itemIndex], [groupIndex, itemIndex]);
 
+  const lensInfoIcon = (
+    <EuiIconTip
+      anchorClassName="lnsFieldItem__infoIcon"
+      content={
+        hideDetails
+          ? i18n.translate('xpack.lens.indexPattern.fieldItemTooltip', {
+              defaultMessage: 'Drag and drop to visualize.',
+            })
+          : exists
+          ? i18n.translate('xpack.lens.indexPattern.fieldStatsButtonLabel', {
+              defaultMessage: 'Click for a field preview, or drag and drop to visualize.',
+            })
+          : i18n.translate('xpack.lens.indexPattern.fieldStatsButtonEmptyLabel', {
+              defaultMessage:
+                'This field doesn’t have any data but you can still drag and drop to visualize.',
+            })
+      }
+      type="iInCircle"
+      color="subdued"
+      size="s"
+    />
+  );
+
   return (
     <li>
       <FieldPopover
@@ -170,6 +193,7 @@ export const InnerFieldItem = function InnerFieldItem(props: FieldItemProps) {
             <FieldItemButton<IndexPatternField>
               isEmpty={!exists}
               isActive={infoIsOpen}
+              infoIcon={lensInfoIcon}
               field={field}
               fieldSearchHighlight={highlight}
               onClick={togglePopover}

@@ -25,6 +25,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
   fieldSearchHighlight?: string;
   isActive?: FieldButtonProps['isActive'];
   isEmpty?: boolean; // whether the field has data or not
+  infoIcon?: FieldButtonProps['fieldInfoIcon'];
   className?: FieldButtonProps['className'];
   getCustomFieldType?: GetCustomFieldType<T>;
   onClick: FieldButtonProps['onClick'];
@@ -36,6 +37,7 @@ export interface FieldItemButtonProps<T extends FieldListItem> {
  * @param fieldSearchHighlight
  * @param isActive
  * @param isEmpty
+ * @param infoIcon
  * @param className
  * @param getCustomFieldType
  * @param onClick
@@ -47,6 +49,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
   fieldSearchHighlight,
   isActive,
   isEmpty,
+  infoIcon,
   className,
   getCustomFieldType,
   onClick,
@@ -87,6 +90,7 @@ export function FieldItemButton<T extends FieldListItem = DataViewField>({
           {wrapFieldNameOnDot(displayName)}
         </EuiHighlight>
       }
+      fieldInfoIcon={infoIcon}
       onClick={onClick}
       {...otherProps}
     />
