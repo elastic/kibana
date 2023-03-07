@@ -1,6 +1,7 @@
 get:
-  summary: Get stats for a package
-  tags: []
+  summary: Get package stats
+  tags:
+    - Elastic Package Manager (EPM)
   responses:
     '200':
       description: OK

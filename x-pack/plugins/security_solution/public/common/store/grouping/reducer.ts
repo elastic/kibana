@@ -6,70 +6,20 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import {
-  initGrouping,
-  updateActiveGroup,
-  updateGroupActivePage,
-  updateGroupItemsPerPage,
-  updateGroupOptions,
-} from './actions';
-import { EMPTY_GROUP_BY_ID } from './constants';
-import { defaultGroup } from './defaults';
-import type { GroupMap } from './types';
+import { updateGroupSelector, updateSelectedGroup } from './actions';
+import type { GroupModel } from './types';
 
-const initialGroupState: GroupMap = {
-  groupById: EMPTY_GROUP_BY_ID,
+export const initialGroupingState: GroupModel = {
+  groupSelector: null,
+  selectedGroup: null,
 };
 
-export const groupsReducer = reducerWithInitialState(initialGroupState)
-  .case(updateActiveGroup, (state, { id, activeGroup }) => ({
+export const groupsReducer = reducerWithInitialState(initialGroupingState)
+  .case(updateSelectedGroup, (state, { selectedGroup }) => ({
     ...state,
-    groupById: {
-      ...state.groupById,
-      [id]: {
-        ...state.groupById[id],
-        activeGroup,
-      },
-    },
+    selectedGroup,
   }))
-  .case(updateGroupActivePage, (state, { id, activePage }) => ({
+  .case(updateGroupSelector, (state, { groupSelector }) => ({
     ...state,
-    groupById: {
-      ...state.groupById,
-      [id]: {
-        ...state.groupById[id],
-        activePage,
-      },
-    },
-  }))
-
-  .case(updateGroupItemsPerPage, (state, { id, itemsPerPage }) => ({
-    ...state,
-    groupById: {
-      ...state.groupById,
-      [id]: {
-        ...state.groupById[id],
-        itemsPerPage,
-      },
-    },
-  }))
-  .case(updateGroupOptions, (state, { id, newOptionList }) => ({
-    ...state,
-    groupById: {
-      ...state.groupById,
-      [id]: {
-        ...state.groupById[id],
-        options: newOptionList,
-      },
-    },
-  }))
-  .case(initGrouping, (state, { id }) => ({
-    ...state,
-    groupById: {
-      ...state.groupById,
-      [id]: {
-        ...defaultGroup,
-        ...state.groupById[id],
-      },
-    },
+    groupSelector,
   }));

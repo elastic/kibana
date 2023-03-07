@@ -28,15 +28,15 @@ export function SloIndicatorTypeBadge({ slo }: Props) {
 function toIndicatorLabel(indicatorType: SLOWithSummaryResponse['indicator']['type']) {
   switch (indicatorType) {
     case 'sli.kql.custom':
-      return i18n.translate('xpack.observability.slos.slo.indicator.customKql', {
+      return i18n.translate('xpack.observability.slo.slo.indicator.customKql', {
         defaultMessage: 'KQL',
       });
     case 'sli.apm.transactionDuration':
-      return i18n.translate('xpack.observability.slos.slo.indicator.apmLatency', {
+      return i18n.translate('xpack.observability.slo.slo.indicator.apmLatency', {
         defaultMessage: 'Latency',
       });
     case 'sli.apm.transactionErrorRate':
-      return i18n.translate('xpack.observability.slos.slo.indicator.apmAvailability', {
+      return i18n.translate('xpack.observability.slo.slo.indicator.apmAvailability', {
         defaultMessage: 'Availability',
       });
     default:
