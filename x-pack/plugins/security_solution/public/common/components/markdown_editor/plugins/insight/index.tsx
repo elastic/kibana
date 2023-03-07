@@ -64,11 +64,12 @@ interface InsightComponentProps {
   relativeTo?: string;
 }
 
+const insightPrefix = '!{investigate';
+
 export const parser: Plugin = function () {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.inlineTokenizers;
   const methods = Parser.prototype.inlineMethods;
-  const insightPrefix = '!{investigate';
 
   const tokenizeInsight: RemarkTokenizer = function (eat, value, silent) {
     if (value.startsWith(insightPrefix) === false) {
@@ -314,7 +315,7 @@ const InsightEditorComponent = ({
 
   const onSubmit = useCallback(() => {
     onSave(
-      `!{insight${JSON.stringify(
+      `${insightPrefix}${JSON.stringify(
         pickBy(
           {
             label: labelController.field.value,
@@ -468,7 +469,7 @@ const InsightEditorComponent = ({
 };
 
 const InsightEditor = React.memo(InsightEditorComponent);
-const exampleInsight = `!{insight{
+const exampleInsight = `${insightPrefix}
   "label": "Test action",
   "description": "Click to investigate",
   "providers": [
