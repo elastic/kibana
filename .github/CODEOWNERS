@@ -476,7 +476,6 @@ examples/partial_results_example @elastic/kibana-data-discovery
 x-pack/plugins/painless_lab @elastic/platform-deployment-management
 packages/kbn-peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
-packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
 packages/kbn-picomatcher @elastic/kibana-operations
 packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
@@ -890,6 +889,7 @@ packages/kbn-yarn-lock-validator @elastic/kibana-operations
 /x-pack/test/visual_regression @elastic/appex-qa
 /x-pack/performance @elastic/appex-qa
 /packages/kbn-test/src/functional_test_runner @elastic/appex-qa
+/packages/kbn-performance-testing-dataset-extractor @elastic/appex-qa
 
 # Core
 /config/kibana.yml @elastic/kibana-core
