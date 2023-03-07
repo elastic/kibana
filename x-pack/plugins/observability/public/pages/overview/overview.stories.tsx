@@ -77,7 +77,6 @@ const withCore = makeDecorator({
 
     const config: ConfigSchema = {
       unsafe: {
-        slo: { enabled: false },
         alertDetails: {
           apm: { enabled: false },
           logs: { enabled: false },
