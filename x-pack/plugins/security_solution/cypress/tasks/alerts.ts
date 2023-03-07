@@ -36,9 +36,13 @@ import {
   CELL_FILTER_IN_BUTTON,
   CELL_SHOW_TOP_FIELD_BUTTON,
   ACTIONS_EXPAND_BUTTON,
+  ALERT_EMBEDDABLE_PROGRESS_BAR,
+  ALERT_COUNT_TABLE_COLUMN,
   SELECT_HISTOGRAM,
   CELL_FILTER_OUT_BUTTON,
   SHOW_TOP_N_CLOSE_BUTTON,
+  ALERTS_HISTOGRAM_LEGEND,
+  LEGEND_ACTIONS,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -314,6 +318,22 @@ export const openAnalyzerForFirstAlertInTimeline = () => {
   cy.get(OPEN_ANALYZER_BTN).first().click({ force: true });
 };
 
+export const clickAlertsHistogramLegend = () => {
+  cy.get(ALERTS_HISTOGRAM_LEGEND).click();
+};
+
+export const clickAlertsHistogramLegendAddToTimeline = (ruleName: string) => {
+  cy.get(LEGEND_ACTIONS.ADD_TO_TIMELINE(ruleName)).click();
+};
+
+export const clickAlertsHistogramLegendFilterOut = (ruleName: string) => {
+  cy.get(LEGEND_ACTIONS.FILTER_OUT(ruleName)).click();
+};
+
+export const clickAlertsHistogramLegendFilterFor = (ruleName: string) => {
+  cy.get(LEGEND_ACTIONS.FILTER_FOR(ruleName)).click();
+};
+
 const clickAction = (propertySelector: string, rowIndex: number, actionSelector: string) => {
   cy.get(propertySelector).eq(rowIndex).trigger('mouseover');
   cy.get(actionSelector).first().click({ force: true });
@@ -400,6 +420,26 @@ export const resetFilters = () => {
    * waitforpagefilters();
    *
    * */
+};
+
+export const parseAlertsCountToInt = (count: string | number) =>
+  typeof count === 'number' ? count : parseInt(count, 10);
+
+export const sumAlertCountFromAlertCountTable = (callback?: (sumOfEachRow: number) => void) => {
+  let sumOfEachRow = 0;
+  const alertCountColumn = ALERT_COUNT_TABLE_COLUMN(3);
+
+  cy.get(ALERT_EMBEDDABLE_PROGRESS_BAR)
+    .should('not.exist')
+    .then(() => {
+      cy.get(alertCountColumn)
+        .each((row) => {
+          sumOfEachRow += parseInt(row.text(), 10);
+        })
+        .then(() => {
+          callback?.(sumOfEachRow);
+        });
+    });
 };
 
 export const selectFirstPageAlerts = () => {
