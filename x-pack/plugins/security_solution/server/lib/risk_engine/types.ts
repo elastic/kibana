@@ -34,6 +34,7 @@ export interface BaseRiskScore {
   calculatedLevel: string;
   calculatedScore: number;
   calculatedScoreNorm: number;
+  notes: string[];
 }
 
 export interface SimpleRiskScore extends BaseRiskScore {
@@ -60,6 +61,7 @@ export interface RiskScoreBucket {
     value: {
       score: number;
       normalized_score: number;
+      notes: string[];
       level: string;
     };
   };
