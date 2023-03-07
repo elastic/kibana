@@ -18,10 +18,10 @@ import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 
 export const HostsTable = () => {
   const { hostNodes, loading } = useHostsViewContext();
-  const { onSubmit, unifiedSearchDateRange } = useUnifiedSearchContext();
+  const { onSubmit, searchCriteria } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
 
-  const { columns, items } = useHostsTable(hostNodes, { time: unifiedSearchDateRange });
+  const { columns, items } = useHostsTable(hostNodes, { time: searchCriteria.dateRange });
 
   const noData = items.length === 0;
 
@@ -67,7 +67,7 @@ export const HostsTable = () => {
         refetchText={i18n.translate('xpack.infra.waffle.checkNewDataButtonLabel', {
           defaultMessage: 'Check for new data',
         })}
-        onRefetch={() => onSubmit()}
+        onRefetch={() => onSubmit({ ...searchCriteria })}
         testString="noMetricsDataPrompt"
       />
     );

@@ -5,80 +5,71 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
-import { ControlGroupContainer, CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/public';
+import React, { useCallback, useEffect, useRef } from 'react';
+import { ControlGroupContainer, type ControlGroupInput } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { Filter, TimeRange } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
+import { tap, Subscription, map, debounceTime } from 'rxjs';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
 interface Props {
   timeRange: TimeRange;
   dataView: DataView;
-  filters: Filter[];
-  query: {
-    language: string;
-    query: string;
-  };
-  onFilterChange: (filters: Filter[]) => void;
+  onFiltersChanged: (filters: Filter[]) => void;
 }
 
-// Disable refresh, allow our timerange changes to refresh the embeddable.
-const REFRESH_CONFIG = {
-  pause: true,
-  value: 0,
-};
+export const ControlsContent: React.FC<Props> = ({ timeRange, dataView, onFiltersChanged }) => {
+  const [controlPanels, setControlPanels] = useControlPanels(dataView);
+  const inputSubscription = useRef<Subscription>();
+  const filterSubscription = useRef<Subscription>();
 
-export const ControlsContent: React.FC<Props> = ({
-  timeRange,
-  dataView,
-  query,
-  filters,
-  onFilterChange,
-}) => {
-  const [controlPanel, setControlPanels] = useControlPanels(dataView);
-  const [controlGroup, setControlGroup] = useState<ControlGroupContainer | undefined>();
+  const getInitialInput = useCallback(async () => {
+    const initialInput: Partial<ControlGroupInput> = {
+      id: dataView.id ?? '',
+      viewMode: ViewMode.VIEW,
+      chainingSystem: 'HIERARCHICAL',
+      controlStyle: 'oneLine',
+      defaultControlWidth: 'small',
+      panels: controlPanels,
+      timeRange,
+      ignoreParentSettings: {
+        ignoreValidations: true,
+      },
+    };
+
+    return { initialInput };
+  }, [controlPanels, dataView.id, timeRange]);
+
+  const loadCompleteHandler = (controlGroup: ControlGroupContainer) => {
+    inputSubscription.current = controlGroup.onFiltersPublished$
+      .pipe(
+        debounceTime(500),
+        map((newFilters) =>
+          newFilters.sort((a, b) => a.meta.key?.localeCompare(b.meta.key ?? '') ?? 0)
+        ),
+        tap((sortedFilters) => onFiltersChanged(sortedFilters))
+      )
+      .subscribe();
+
+    filterSubscription.current = controlGroup
+      .getInput$()
+      .pipe(tap(({ panels }) => setControlPanels(panels)))
+      .subscribe();
+  };
 
   useEffect(() => {
-    if (!controlGroup) {
-      return;
-    }
-    const filtersSubscription = controlGroup.onFiltersPublished$.subscribe((newFilters) => {
-      onFilterChange(newFilters);
-    });
-    const inputSubscription = controlGroup.getInput$().subscribe(({ panels }) => {
-      setControlPanels(panels);
-    });
-
     return () => {
-      filtersSubscription.unsubscribe();
-      inputSubscription.unsubscribe();
+      filterSubscription.current?.unsubscribe();
+      inputSubscription.current?.unsubscribe();
     };
-  }, [controlGroup, onFilterChange, setControlPanels]);
+  }, []);
 
   return (
     <LazyControlsRenderer
-      filters={filters}
-      getCreationOptions={async () => ({
-        initialInput: {
-          id: dataView.id ?? '',
-          type: CONTROL_GROUP_TYPE,
-          timeRange,
-          refreshConfig: REFRESH_CONFIG,
-          viewMode: ViewMode.VIEW,
-          filters: [...filters],
-          query,
-          chainingSystem: 'HIERARCHICAL',
-          controlStyle: 'oneLine',
-          defaultControlWidth: 'small',
-          panels: controlPanel,
-        },
-      })}
-      onLoadComplete={(newControlGroup) => {
-        setControlGroup(newControlGroup);
-      }}
-      query={query}
+      getCreationOptions={getInitialInput}
+      onLoadComplete={loadCompleteHandler}
       timeRange={timeRange}
     />
   );

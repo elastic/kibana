@@ -25,15 +25,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   const {
     services: { unifiedSearch, application },
   } = useKibana<InfraClientStartDeps>();
-  const {
-    unifiedSearchDateRange,
-    unifiedSearchQuery,
-    unifiedSearchFilters,
-    controlPanelFilters,
-    onSubmit,
-    saveQuery,
-    clearSavedQuery,
-  } = useUnifiedSearchContext();
+  const { searchCriteria, onSubmit, saveQuery, clearSavedQuery } = useUnifiedSearchContext();
 
   const { SearchBar } = unifiedSearch.ui;
 
@@ -43,7 +35,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
 
   const onPanelFiltersChange = (panelFilters: Filter[]) => {
     // <ControlsContent /> triggers this event 2 times during its loading lifecycle
-    if (!deepEqual(controlPanelFilters, panelFilters)) {
+    if (!deepEqual(searchCriteria.panelFilters, panelFilters)) {
       onQueryChange({ panelFilters });
     }
   };
@@ -74,9 +66,9 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
           defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
         })}
         indexPatterns={[dataView]}
-        query={unifiedSearchQuery}
-        dateRangeFrom={unifiedSearchDateRange.from}
-        dateRangeTo={unifiedSearchDateRange.to}
+        query={searchCriteria.query}
+        dateRangeFrom={searchCriteria.dateRange.from}
+        dateRangeTo={searchCriteria.dateRange.to}
         onQuerySubmit={onQuerySubmit}
         onSaved={onQuerySave}
         onSavedQueryUpdated={onQuerySave}
@@ -86,11 +78,9 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
         displayStyle="inPage"
       />
       <ControlsContent
-        timeRange={unifiedSearchDateRange}
+        timeRange={searchCriteria.dateRange}
         dataView={dataView}
-        query={unifiedSearchQuery}
-        filters={unifiedSearchFilters}
-        onFilterChange={onPanelFiltersChange}
+        onFiltersChanged={onPanelFiltersChange}
       />
     </EuiFlexGrid>
   );
