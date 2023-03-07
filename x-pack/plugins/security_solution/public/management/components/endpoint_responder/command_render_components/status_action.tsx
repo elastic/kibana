@@ -168,6 +168,16 @@ export const EndpointStatusActionResult = memo<
       {
         title: (
           <ConsoleCodeBlock>
+            {i18n.translate('xpack.securitySolution.endpointResponseActions.status.agentPlatform', {
+              defaultMessage: 'Agent platform',
+            })}
+          </ConsoleCodeBlock>
+        ),
+        description: <ConsoleCodeBlock>{endpointDetails.metadata.host.os.family}</ConsoleCodeBlock>,
+      },
+      {
+        title: (
+          <ConsoleCodeBlock>
             {i18n.translate('xpack.securitySolution.endpointResponseActions.status.version', {
               defaultMessage: 'Version',
             })}
@@ -186,6 +196,20 @@ export const EndpointStatusActionResult = memo<
         description: (
           <ConsoleCodeBlock>
             {POLICY_STATUS_TO_TEXT[endpointDetails.metadata.Endpoint.policy.applied.status]}
+          </ConsoleCodeBlock>
+        ),
+      },
+      {
+        title: (
+          <ConsoleCodeBlock>
+            {i18n.translate('xpack.securitySolution.endpointResponseActions.status.policyName', {
+              defaultMessage: 'Policy name',
+            })}
+          </ConsoleCodeBlock>
+        ),
+        description: (
+          <ConsoleCodeBlock>
+            {endpointDetails.metadata.Endpoint.policy.applied.name}
           </ConsoleCodeBlock>
         ),
       },
