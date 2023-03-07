@@ -19,7 +19,6 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsResolveResponse,
 } from '@kbn/core/server';
-import { useDebouncedValue } from '@kbn/expressions-plugin/public/react_expression_renderer/use_debounced_value';
 
 import { auditLoggerMock } from '../audit/mocks';
 import type { CheckSavedObjectsPrivileges } from '../authorization';
