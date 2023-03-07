@@ -19,7 +19,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { firstValueFrom } from 'rxjs';
 import { SearchAggregatedTransactionSetting } from '../../../../../common/aggregated_transactions';
 import {

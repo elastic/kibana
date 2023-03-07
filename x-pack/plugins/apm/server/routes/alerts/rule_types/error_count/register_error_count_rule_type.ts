@@ -10,7 +10,6 @@ import {
   ProcessorEvent,
   TimeUnitChar,
 } from '@kbn/observability-plugin/common';
-import { termQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -18,7 +17,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { firstValueFrom } from 'rxjs';
 import {
