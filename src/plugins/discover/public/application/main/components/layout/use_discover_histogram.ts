@@ -16,7 +16,7 @@ import {
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { AggregateQuery, Query } from '@kbn/es-query';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { distinctUntilChanged, map, Observable } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getUiActions } from '../../../../kibana_services';
@@ -27,7 +27,6 @@ import type { DataFetch$, SavedSearchData } from '../../services/discover_data_s
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../services/discover_state';
-import { getResolvedDateRange } from './utils';
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
@@ -148,26 +147,8 @@ export const useDiscoverHistogram = ({
   /**
    * Update Unified Histgoram request params
    */
-
-  const {
-    query,
-    filters,
-    fromDate: from,
-    toDate: to,
-  } = useQuerySubscriber({ data: services.data });
-
-  let timeRange = useMemo(
-    () => (from && to ? { from, to } : timefilter.getTimeDefaults()),
-    [timefilter, from, to]
-  );
-
-  if (isPlainRecord) {
-    const dateRange = getResolvedDateRange(timefilter);
-    timeRange = {
-      from: dateRange.fromDate,
-      to: dateRange.toDate,
-    };
-  }
+  const { query, filters } = useQuerySubscriber({ data: services.data });
+  const timeRange = timefilter.getAbsoluteTime();
 
   useEffect(() => {
     unifiedHistogram?.setRequestParams({
@@ -301,7 +282,6 @@ export const useDiscoverHistogram = ({
     };
   }, [
     isPlainRecord,
-    savedSearchData$.documents$,
     savedSearchData$.main$,
     savedSearchData$.totalHits$,
     services.data,

@@ -133,7 +133,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
   /**
-   * Callback to update the breakdown field -- should set {@link UnifiedHistogramBreakdownContext.field} to breakdownField
+   * Callback to update the suggested chart
    */
   onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
   /**
