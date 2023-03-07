@@ -92,6 +92,7 @@ describe('Exceptions viewer read only', () => {
           value: ['bar'],
         },
       ],
+      expire_time: undefined,
     });
 
     goToAlertsTab();
