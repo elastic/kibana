@@ -18,18 +18,22 @@ type MigrateRuleHook = (
 ) => Promise<void>;
 
 export const migrateRuleHook: MigrateRuleHook = async (context, { ruleId }) => {
-  const rule = await get(context, { id: ruleId });
+  try {
+    const rule = await get(context, { id: ruleId });
 
-  const ruleType = context.ruleTypeRegistry.get(rule.alertTypeId);
+    const ruleType = context.ruleTypeRegistry.get(rule.alertTypeId);
 
-  await ruleType?.migrateRule?.(
-    { rule },
-    {
-      savedObjectsClient: context.unsecuredSavedObjectsClient,
-      logger: context.logger,
-      update: (params) => update(context, params),
-      find: (params) => find(context, params),
-      delete: (params) => deleteRule(context, params),
-    }
-  );
+    await ruleType?.migrateRule?.(
+      { rule },
+      {
+        savedObjectsClient: context.unsecuredSavedObjectsClient,
+        logger: context.logger,
+        update: (params) => update(context, params),
+        find: (params) => find(context, params),
+        delete: (params) => deleteRule(context, params),
+      }
+    );
+  } catch (e) {
+    context.logger.error(`Migration has failed for rule ${ruleId}: ${e.message}`);
+  }
 };
