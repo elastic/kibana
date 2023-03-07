@@ -535,7 +535,7 @@ activities.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/fleet/README.md[fleet]
-|Fleet needs to have Elasticsearch API keys enabled, and also to have TLS enabled on kibana, (if you want to run Kibana without TLS you can provide the following config flag --xpack.fleet.agents.tlsCheckDisabled=false)
+|Fleet needs to have Elasticsearch API keys enabled.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/global_search/README.md[globalSearch]

@@ -22,7 +22,8 @@ import {
 } from '../kibana_migrator_test_kit';
 import { delay } from '../test_utils';
 
-describe('when migrating to a new version', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/152448
+describe.skip('when migrating to a new version', () => {
   let esServer: TestElasticsearchUtils['es'];
   let esClient: ElasticsearchClient;
   let migrator: IKibanaMigrator;

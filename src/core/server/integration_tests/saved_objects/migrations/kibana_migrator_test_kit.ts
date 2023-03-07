@@ -234,7 +234,9 @@ const getElasticsearchClient = async (
   return configureClient(esClientConfig, {
     logger: loggerFactory.get('elasticsearch'),
     type: 'data',
-    agentFactoryProvider: new AgentManager(),
+    agentFactoryProvider: new AgentManager(
+      loggerFactory.get('elasticsearch-service', 'agent-manager')
+    ),
     kibanaVersion,
   });
 };
