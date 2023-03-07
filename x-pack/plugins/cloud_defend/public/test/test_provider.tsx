@@ -37,13 +37,13 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
-interface CspAppDeps {
+interface CloudDefendAppDeps {
   core: CoreStart;
   deps: CloudDefendPluginStartDeps;
   params: AppMountParameters;
 }
 
-export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
+export const TestProvider: React.FC<Partial<CloudDefendAppDeps>> = ({
   core = coreMock.createStart(),
   deps = {
     data: dataPluginMock.createStartContract(),
