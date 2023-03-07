@@ -126,11 +126,3 @@ const ServiceStatusToLegacyState: Record<string, string> = {
   [ServiceStatusLevels.degraded.toString()]: 'yellow',
   [ServiceStatusLevels.available.toString()]: 'green',
 };
-
-export interface Extended {
-  kibanaStats: Record<string, unknown> | unknown[];
-}
-
-export interface KibanaStats {
-  extended: Record<string, unknown> | unknown[] | undefined;
-}

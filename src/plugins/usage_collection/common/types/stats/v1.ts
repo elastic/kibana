@@ -36,10 +36,13 @@ export interface ExtendedStats {
   cluster_uuid?: string; // snake_case if legacy === false
 }
 /**
- * OpsMetrics: partially typed to avoid duplicating core's OpsMetrics types
+ * OpsMetrics: aliased from a duplicate of core's OpsMetrics types
+ * @remarks the alternative to creating a local copy of the OpsMetrics types is to declare them as `unknown` and assume validation happens elsewhere.
+ * The disadvantage is that any changes made to the original OpsMetrics will be passed through without needing to update the API types.
  */
 export type LastOpsMetrics = OpsMetricsCopy.OpsMetrics;
-/** unused, for demonstration only */
+
+/** explicitly typed stats for kibana */
 export interface KibanaStats {
   // kibana
   kibana: {
@@ -53,15 +56,22 @@ export interface KibanaStats {
     snapshot: boolean;
     status: string;
   };
-  // // others
-  // [key: string]: unknown;
 }
 /** Stats response body */
 export type StatsHTTPBodyTyped = LastOpsMetrics | KibanaStats | ExtendedStats;
 
 /**
- * generic type for api response body
+ * unused, for demonstration purposes only.
+ * alternative generic type for api response body
  */
-export interface StatsHTTPBody {
+export interface LastOpsMetricsUnknown {
+  [key: string]: unknown;
+}
+
+/**
+ * unused, for demonstration purposes only.
+ * alternative generic type for api response body
+ */
+export interface StatsHTTPBodyUnknown {
   [key: string]: unknown;
 }

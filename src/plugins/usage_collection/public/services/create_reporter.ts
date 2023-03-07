@@ -22,6 +22,7 @@ export function createReporter(config: AnalyicsReporterConfig): Reporter {
   return new Reporter({
     debug,
     storage: localStorage,
+    // not sure if these versioned-type related changes are strictly needed for defining the Reporter.
     async http(report: v1.UiCountersHTTPRequestBody['report']) {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const response = await fetch.post<any>('/api/ui_counters/_report', {

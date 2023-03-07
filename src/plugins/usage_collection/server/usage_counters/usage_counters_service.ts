@@ -55,7 +55,7 @@ export class UsageCountersService {
   private readonly bufferDurationMs: number;
 
   private readonly counterSets = new Map<string, UsageCounter>();
-  private readonly source$ = new Rx.Subject<v1UsageCounters.v1.CounterMetric>();
+  private readonly source$ = new Rx.Subject<v1UsageCounters.v1.CounterMetric>(); // updates the types to specifically target what the HTTP API's require
   private readonly counter$ = this.source$.pipe(rxOp.multicast(new Rx.Subject()), rxOp.refCount());
   private readonly flushCache$ = new Rx.Subject<void>();
 
@@ -70,7 +70,7 @@ export class UsageCountersService {
   }
 
   public setup = (core: UsageCountersServiceSetupDeps): UsageCountersServiceSetup => {
-    const cache$ = new Rx.ReplaySubject<v1UsageCounters.v1.CounterMetric>();
+    const cache$ = new Rx.ReplaySubject<v1UsageCounters.v1.CounterMetric>(); // updates the types to specifically target what the HTTP API's require
     const storingCache$ = new Rx.BehaviorSubject<boolean>(false);
     // flush cache data from cache -> source
     this.flushCache$
@@ -135,6 +135,7 @@ export class UsageCountersService {
     this.stop$.next();
   };
 
+  // using updated types from the ones the HTTP API requires
   private storeDate$(
     counters: v1UsageCounters.v1.CounterMetric[],
     internalRepository: Pick<SavedObjectsRepository, 'incrementCounter'>
@@ -171,6 +172,7 @@ export class UsageCountersService {
     return this.counterSets.get(type);
   };
 
+  // using updated types from the ones the HTTP API requires
   private mergeCounters = (
     counters: v1UsageCounters.v1.CounterMetric[]
   ): Record<string, v1UsageCounters.v1.CounterMetric> => {

@@ -43,5 +43,6 @@ export const reportSchema = schema.object({
   application_usage: schema.maybe(schema.recordOf(schema.string(), applicationUsageReportSchema)),
 });
 
+// should the schema types also be versioned explicitly?
 export type ReportSchemaType = TypeOf<typeof reportSchema>;
 export type ApplicationUsageReport = TypeOf<typeof applicationUsageReportSchema>;
