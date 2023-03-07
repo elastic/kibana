@@ -632,7 +632,7 @@
         "label": "FloatingActions",
         "description": [],
         "signature": [
-          "({ className, actions, isEnabled, usingTwoLineLayout, children, }: React.PropsWithChildren<",
+          "({ className, actions, isEnabled, children, }: React.PropsWithChildren<",
           "FloatingActionsProps",
           ">) => JSX.Element"
         ],
@@ -645,7 +645,7 @@
             "id": "def-public.FloatingActions.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  className = '',\n  actions,\n  isEnabled,\n  usingTwoLineLayout,\n  children,\n}",
+            "label": "{\n  className = '',\n  actions,\n  isEnabled,\n  children,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
