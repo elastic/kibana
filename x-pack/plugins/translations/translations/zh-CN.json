@@ -35350,7 +35350,6 @@
     "xpack.synthetics.monitorManagement.getAPIKeyReducedPermissions.description": "使用 API 密钥从 CLI 或 CD 管道远程推送监测。要生成 API 密钥，您必须有权管理 API 密钥并具有 Uptime 写入权限。请联系您的管理员。",
     "xpack.synthetics.monitorManagement.getProjectApiKey.label": "生成项目 API 密钥",
     "xpack.synthetics.monitorManagement.getProjectAPIKeyLabel.generate": "生成项目 API 密钥",
-    "xpack.synthetics.monitorManagement.heading": "监测管理",
     "xpack.synthetics.monitorManagement.hostFieldLabel": "主机",
     "xpack.synthetics.monitorManagement.inProgress": "进行中",
     "xpack.synthetics.monitorManagement.invalidLabel": "无效",

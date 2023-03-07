@@ -55,13 +55,6 @@ const baseTitle = i18n.translate('xpack.synthetics.routes.baseTitle', {
   defaultMessage: 'Synthetics - Kibana',
 });
 
-export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
-  'xpack.synthetics.monitorManagement.heading',
-  {
-    defaultMessage: 'Monitor Management',
-  }
-);
-
 const getRoutes = (
   euiTheme: EuiThemeComputed,
   history: ReturnType<typeof useHistory>,

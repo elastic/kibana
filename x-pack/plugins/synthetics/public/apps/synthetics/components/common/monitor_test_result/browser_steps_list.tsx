@@ -168,7 +168,6 @@ export const BrowserStepsList = ({
             isExpanded={Boolean(itemIdToExpandedRowMap[step._id])}
             isTestNowMode={testNowMode}
             euiTheme={euiTheme}
-            timestamp={step.timestamp}
           />
         ),
         header: false,
@@ -352,7 +351,7 @@ const MobileRowDetails = ({
           allStepsLoaded={!stepsLoading}
           retryFetchOnRevisit={true}
           size={THUMBNAIL_SCREENSHOT_SIZE_MOBILE}
-          timestamp={journeyStep.timestamp}
+          timestamp={journeyStep?.['@timestamp']}
         />
         <div>
           <EuiFlexGroup direction="column" gutterSize="s">

@@ -92,6 +92,9 @@ export const ErrorsList = ({
           </EuiFlexGroup>
         );
       },
+      mobileOptions: {
+        header: false,
+      },
     },
     ...(isBrowserType
       ? [

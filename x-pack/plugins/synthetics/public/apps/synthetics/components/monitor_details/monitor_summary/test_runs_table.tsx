@@ -58,7 +58,6 @@ export const TestRunsTable = ({
   showViewHistoryButton = true,
 }: TestRunsTableProps) => {
   const history = useHistory();
-  const params = useGetUrlParams();
   const { basePath } = useSyntheticsSettingsContext();
   const { monitorId } = useParams<{ monitorId: string }>();
   const [page, setPage] = useState({ index: 0, size: 10 });
