@@ -135,6 +135,7 @@ export const BrowserStepsList = ({
           allStepsLoaded={!loading}
           retryFetchOnRevisit={true}
           size={screenshotImageSize}
+          testNowMode={testNowMode}
           timestamp={timestamp}
         />
       ),

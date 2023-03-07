@@ -7,7 +7,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useFetcher } from '@kbn/observability-plugin/public';
-import moment from 'moment';
 import {
   ScreenshotImageBlob,
   ScreenshotRefImageData,
@@ -34,6 +33,7 @@ export const useRetrieveStepImage = ({
   stepStatus,
   hasIntersected,
   imgPath,
+  testNowMode,
   retryFetchOnRevisit,
 }: {
   timestamp?: string;
@@ -41,6 +41,8 @@ export const useRetrieveStepImage = ({
   imgPath: string;
   stepStatus?: string;
   hasIntersected: boolean;
+
+  testNowMode?: boolean;
 
   /**
    * Whether to retry screenshot image fetch on revisit (when intersection change triggers).
@@ -57,9 +59,6 @@ export const useRetrieveStepImage = ({
   const isImageUrlAvailable = dataResult?.[imgPath]?.url ?? false;
 
   useFetcher(() => {
-    const is5MinutesOld = timestamp
-      ? moment(timestamp).isBefore(moment().subtract(5, 'minutes'))
-      : false;
     const retrieveAttemptedBefore = (imgState[imgPath]?.attempts ?? 0) > 0;
     const shouldRetry = retryFetchOnRevisit || !retrieveAttemptedBefore;
 
@@ -67,7 +66,14 @@ export const useRetrieveStepImage = ({
       setImgState((prevState) => {
         return getUpdatedState({ prevState, imgPath, increment: true, loading: true });
       });
-      return getJourneyScreenshot(imgPath, !is5MinutesOld)
+
+      const backoffOptions = !testNowMode
+        ? {
+            maxRetry: 2,
+            initialBackoff: 100,
+          }
+        : undefined;
+      return getJourneyScreenshot(imgPath, backoffOptions)
         .then((data) => {
           setImgState((prevState) => {
             return getUpdatedState({ prevState, imgPath, increment: false, data, loading: false });
