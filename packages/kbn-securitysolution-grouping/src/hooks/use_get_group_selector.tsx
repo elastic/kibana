@@ -60,6 +60,8 @@ export const useGetGroupSelector = ({
       }
       setGroupsActivePage(0);
       setSelectedGroup(groupSelection);
+
+      // only update options if the new selection is a custom field
       if (
         !isNoneGroup(groupSelection) &&
         !options.find((o: GroupOption) => o.key === groupSelection)
@@ -84,7 +86,6 @@ export const useGetGroupSelector = ({
   );
 
   useEffect(() => {
-    console.log('useEffect');
     // only set options the first time, all other updates will be taken care of by onGroupChange
     if (options.length > 0) return;
     setOptions(
