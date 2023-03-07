@@ -37,9 +37,9 @@ import {
   goToEndpointExceptionsTab,
 } from '../../../tasks/rule_details';
 
-describe('Add Endpoint exception from alerts table and close it', () => {
+describe('Validate close single endpoint exception', () => {
   const ITEM_NAME = 'Sample Exception';
-
+  const expectedNumberOfAlerts = 1;
   before(() => {
     esArchiverResetKibana();
     esArchiverLoad('endpoint');
@@ -57,7 +57,7 @@ describe('Add Endpoint exception from alerts table and close it', () => {
     esArchiverUnload('endpoint');
   });
 
-  it('Creates an exception item from alert actions overflow menu', () => {
+  it('Should be able to create and close single Endpoint exception from overflow menu', () => {
     openAddEndpointExceptionFromFirstAlert();
     selectCloseSingleAlerts();
     addExceptionFlyoutItemName(ITEM_NAME);
@@ -70,7 +70,7 @@ describe('Add Endpoint exception from alerts table and close it', () => {
     // Closed alert should appear in table
     goToClosedAlertsOnRuleDetailsPage();
     cy.get(ALERTS_COUNT).should('exist');
-
+    cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alert`);
     // Remove the exception and load an event that would have matched that exception
     // to show that said exception now starts to show up again
     goToEndpointExceptionsTab();
@@ -88,5 +88,6 @@ describe('Add Endpoint exception from alerts table and close it', () => {
     waitForAlertsToPopulate();
 
     cy.get(ALERTS_COUNT).should('exist');
+    cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alert`);
   });
 });
