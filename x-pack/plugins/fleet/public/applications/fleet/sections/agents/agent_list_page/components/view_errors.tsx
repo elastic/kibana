@@ -7,6 +7,7 @@
 
 import { stringify } from 'querystring';
 
+import styled from 'styled-components';
 import React from 'react';
 import { encode } from '@kbn/rison';
 import type { EuiBasicTableProps } from '@elastic/eui';
@@ -22,6 +23,12 @@ import { buildQuery } from '../../agent_details_page/components/agent_logs/build
 
 import type { ActionStatus } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
+
+const TruncatedEuiText = styled(EuiText)`
+  overflow: hidden;
+  max-height: 3rem;
+  text-overflow: ellipsis;
+`;
 
 export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ action }) => {
   const coreStart = useStartServices();
@@ -67,12 +74,11 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
       }),
       render: (error: string) => (
         <EuiToolTip content={error}>
-          <EuiText size="s" color="red" data-test-subj="errorText">
+          <TruncatedEuiText size="s" color="red" data-test-subj="errorText">
             {error}
-          </EuiText>
+          </TruncatedEuiText>
         </EuiToolTip>
       ),
-      truncateText: true,
     },
     {
       field: 'agentId',
@@ -85,7 +91,6 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
           <RedirectAppLinks coreStart={coreStart}>
             <EuiButton
               href={getErrorLogsUrl(agentId, errorItem!.timestamp)}
-              iconType="popout"
               color="danger"
               data-test-subj="viewLogsBtn"
             >
@@ -103,7 +108,7 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
   return (
     <>
       <EuiAccordion id={action.actionId + '_errors'} buttonContent="Show errors">
-        <EuiBasicTable items={action.latestErrors ?? []} columns={columns} />
+        <EuiBasicTable items={action.latestErrors ?? []} columns={columns} tableLayout="auto" />
       </EuiAccordion>
     </>
   );
