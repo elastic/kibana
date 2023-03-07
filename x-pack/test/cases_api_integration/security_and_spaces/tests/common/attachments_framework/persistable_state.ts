@@ -319,5 +319,23 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
     });
+
+    // This test is intended to fail when new persistable state attachment types are registered.
+    // To resolve, add the new persistable state attachment types ID to this list. This will trigger
+    // a CODEOWNERS review by Response Ops.
+    describe('check registered persistable state attachment types', () => {
+      const getRegisteredTypes = () => {
+        return supertest
+          .get('/api/cases_fixture/registered_persistable_state_attachments')
+          .expect(200)
+          .then((response) => response.body);
+      };
+
+      it('should check changes on all registered persistable state attachment types', async () => {
+        const types = await getRegisteredTypes();
+
+        expect(types).to.eql({ '.test': 'dde5bd7492d266a0d54b77b5eddbeca95e19651c' });
+      });
+    });
   });
 };

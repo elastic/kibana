@@ -14,6 +14,8 @@ import type {
 } from '@kbn/actions-plugin/server/types';
 import type { CasesClient } from './client';
 import type { AttachmentFramework } from './attachment_framework/types';
+import type { ExternalReferenceAttachmentTypeRegistry } from './attachment_framework/external_reference_registry';
+import type { PersistableStateAttachmentTypeRegistry } from './attachment_framework/persistable_state_registry';
 
 export interface CaseRequestContext {
   getCasesClient: () => Promise<CasesClient>;
@@ -51,6 +53,8 @@ export interface PluginStartContract {
    * @returns a {@link CasesClient}
    */
   getCasesClientWithRequest(request: KibanaRequest): Promise<CasesClient>;
+  getExternalReferenceAttachmentTypeRegistry(): ExternalReferenceAttachmentTypeRegistry;
+  getPersistableStateAttachmentTypeRegistry(): PersistableStateAttachmentTypeRegistry;
 }
 
 export interface PluginSetupContract {

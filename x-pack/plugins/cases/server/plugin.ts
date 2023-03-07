@@ -226,6 +226,9 @@ export class CasePlugin {
 
     return {
       getCasesClientWithRequest,
+      getExternalReferenceAttachmentTypeRegistry: () =>
+        this.externalReferenceAttachmentTypeRegistry,
+      getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
     };
   }
 
