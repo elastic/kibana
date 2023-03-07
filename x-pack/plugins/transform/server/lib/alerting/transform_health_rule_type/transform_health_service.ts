@@ -10,8 +10,8 @@ import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { keyBy, memoize, partition } from 'lodash';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { type TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import { FIELD_FORMAT_IDS, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { TransformStats } from '../../../../common/types/transform_stats';
 import { TransformHealthRuleParams } from './schema';
 import {
   ALL_TRANSFORMS_SELECTION,
@@ -23,7 +23,6 @@ import { getResultTestConfig } from '../../../../common/utils/alerts';
 import type {
   ErrorMessagesTransformResponse,
   TransformStateReportResponse,
-  TransformHealth,
   TransformHealthAlertContext,
 } from './register_transform_health_rule_type';
 import type { TransformHealthAlertRule } from '../../../../common/types/alerting';
@@ -43,13 +42,6 @@ type Transform = estypes.TransformGetTransformTransformSummary & {
 };
 
 type TransformWithAlertingRules = Transform & { alerting_rules: TransformHealthAlertRule[] };
-
-/**
- * TODO update types in the es client
- */
-type TransformGetTransformStats = TransformGetTransformStatsTransformStats & {
-  health: TransformHealth;
-};
 
 export function transformHealthServiceProvider({
   esClient,
@@ -105,18 +97,16 @@ export function transformHealthServiceProvider({
     return resultTransformIds;
   };
 
-  const getTransformStats = memoize(
-    async (transformIds: string[]): Promise<TransformGetTransformStats[]> => {
-      return (
-        await esClient.transform.getTransformStats({
-          transform_id: transformIds.join(','),
-        })
-      ).transforms as TransformGetTransformStats[];
-    }
-  );
+  const getTransformStats = memoize(async (transformIds: string[]): Promise<TransformStats[]> => {
+    return (
+      await esClient.transform.getTransformStats({
+        transform_id: transformIds.join(','),
+      })
+    ).transforms as TransformStats[];
+  });
 
   function baseTransformAlertResponseFormatter(
-    transformStats: TransformGetTransformStats
+    transformStats: TransformStats
   ): TransformStateReportResponse {
     const dateFormatter = fieldFormatsRegistry!.deserialize({ id: FIELD_FORMAT_IDS.DATE });
 

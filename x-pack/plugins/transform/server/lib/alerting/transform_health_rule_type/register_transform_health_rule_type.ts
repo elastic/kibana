@@ -16,19 +16,14 @@ import type {
 import { RuleType } from '@kbn/alerting-plugin/server';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
-import { PLUGIN, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
+import { PLUGIN, type TransformHealth, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
 import { transformHealthServiceProvider } from './transform_health_service';
-
-export interface TransformHealth {
-  status: 'green' | 'unknown' | 'yellow' | 'red';
-  issues?: Array<{ issue: string; details?: string; count: number; first_occurrence?: number }>;
-}
 
 export interface BaseTransformAlertResponse {
   transform_id: string;
   description?: string;
-  health_status: TransformHealth['status'];
+  health_status: TransformHealth;
   issues?: Array<{ issue: string; details?: string; count: number; first_occurrence?: string }>;
 }
 
