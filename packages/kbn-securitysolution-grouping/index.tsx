@@ -8,24 +8,30 @@
 
 import React from 'react';
 import {
-  GroupSelectorProps,
-  Grouping,
-  GroupingProps,
   GroupSelector,
+  GroupSelectorProps,
   RawBucket,
   getGroupingQuery,
   isNoneGroup,
+  useGrouping,
 } from './src';
-import type { NamedAggregation, GroupingFieldTotalAggregation, GroupingAggregation } from './src';
-
-export const getGrouping = <T,>(props: GroupingProps<T>): React.ReactElement<GroupingProps<T>> => (
-  <Grouping {...props} />
-);
+import type {
+  GroupOption,
+  GroupingAggregation,
+  GroupingFieldTotalAggregation,
+  NamedAggregation,
+} from './src';
 
 export const getGroupSelector = (
   props: GroupSelectorProps
 ): React.ReactElement<GroupSelectorProps> => <GroupSelector {...props} />;
 
-export { isNoneGroup, getGroupingQuery };
+export { getGroupingQuery, isNoneGroup, useGrouping };
 
-export type { GroupingAggregation, GroupingFieldTotalAggregation, NamedAggregation, RawBucket };
+export type {
+  GroupOption,
+  GroupingAggregation,
+  GroupingFieldTotalAggregation,
+  NamedAggregation,
+  RawBucket,
+};

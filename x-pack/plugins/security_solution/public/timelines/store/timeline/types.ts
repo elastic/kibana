@@ -11,7 +11,6 @@ import type { Observable } from 'rxjs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
-import type { GroupsById } from '../../../common/store/grouping';
 import type {
   ColumnHeaderOptions,
   RowRendererId,
@@ -64,7 +63,6 @@ export interface TimelineEpicDependencies<State> {
   selectAllTimelineQuery: () => (state: State, id: string) => inputsModel.GlobalQuery;
   selectNotesByIdSelector: (state: State) => NotesById;
   tableByIdSelector: (state: State) => TableById;
-  groupByIdSelector: (state: State) => GroupsById;
   kibana$: Observable<CoreStart>;
   storage: Storage;
 }

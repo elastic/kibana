@@ -8,7 +8,7 @@
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { v4 as uuidv4 } from 'uuid';
 import type { Filter, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -18,12 +18,9 @@ import type {
   GroupingAggregation,
   RawBucket,
 } from '@kbn/securitysolution-grouping';
-import { getGrouping, isNoneGroup } from '@kbn/securitysolution-grouping';
+import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
-import { useGetGroupSelector } from '../../../common/containers/grouping/hooks/use_get_group_selector';
 import type { Status } from '../../../../common/detection_engine/schemas/common';
-import { defaultGroup } from '../../../common/store/grouping/defaults';
-import { groupSelectors } from '../../../common/store/grouping';
 import { InspectButton } from '../../../common/components/inspect';
 import { defaultUnit } from '../../../common/components/toolbar/unit';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
@@ -32,7 +29,6 @@ import type { TableIdLiteral } from '../../../../common/types';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
 import { useInvalidFilterQuery } from '../../../common/hooks/use_invalid_filter_query';
 import { useKibana } from '../../../common/lib/kibana';
-import type { State } from '../../../common/store';
 import { SourcererScopeName } from '../../../common/store/sourcerer/model';
 import { useInspectButton } from '../alerts_kpis/common/hooks';
 
@@ -42,13 +38,13 @@ import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_que
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
 import {
   getAlertsGroupingQuery,
+  getDefaultGroupingOptions,
   getSelectedGroupBadgeMetrics,
   getSelectedGroupButtonContent,
   getSelectedGroupCustomMetrics,
   useGroupTakeActionsItems,
 } from './grouping_settings';
-import { initGrouping } from '../../../common/store/grouping/actions';
-import { useGroupingPagination } from '../../../common/containers/grouping/hooks/use_grouping_pagination';
+import { updateGroupSelector, updateSelectedGroup } from '../../../common/store/grouping/actions';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 
@@ -86,13 +82,6 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   renderChildComponent,
 }) => {
   const dispatch = useDispatch();
-  const groupingId = tableId;
-
-  const getGroupByIdSelector = groupSelectors.getGroupByIdSelector();
-
-  const { activeGroup: selectedGroup } =
-    useSelector((state: State) => getGroupByIdSelector(state, groupingId)) ?? defaultGroup;
-
   const { browserFields, indexPattern, selectedPatterns } = useSourcererDataView(
     SourcererScopeName.detections
   );
@@ -121,6 +110,20 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     [browserFields, defaultFilters, globalFilters, globalQuery, indexPattern, kibana, to, from]
   );
 
+  const { groupSelector, getGrouping, selectedGroup, pagination } = useGrouping({
+    defaultGroupingOptions: getDefaultGroupingOptions(tableId),
+    groupingId: tableId,
+    fields: indexPattern.fields,
+  });
+
+  useEffect(() => {
+    dispatch(updateGroupSelector({ groupSelector }));
+  }, [dispatch, groupSelector]);
+
+  useEffect(() => {
+    dispatch(updateSelectedGroup({ selectedGroup }));
+  }, [dispatch, selectedGroup]);
+
   useInvalidFilterQuery({
     id: tableId,
     filterQuery: getGlobalQuery([])?.filterQuery,
@@ -129,10 +132,6 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     startDate: from,
     endDate: to,
   });
-
-  useEffect(() => {
-    dispatch(initGrouping({ id: tableId }));
-  }, [dispatch, tableId]);
 
   const { deleteQuery, setQuery } = useGlobalTime(false);
   // create a unique, but stable (across re-renders) query id
@@ -150,10 +149,6 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
       return [];
     }
   }, [defaultFilters, globalFilters, globalQuery]);
-
-  const pagination = useGroupingPagination({
-    groupingId,
-  });
 
   const queryGroups = useMemo(
     () =>
@@ -217,12 +212,6 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     [uniqueQueryId]
   );
 
-  const groupsSelector = useGetGroupSelector({
-    tableId,
-    groupingId,
-    fields: indexPattern.fields,
-  });
-
   const takeActionItems = useGroupTakeActionsItems({
     indexName: indexPattern.title,
     currentStatus: currentAlertStatusFilterValue,
@@ -247,23 +236,19 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
             data: alertsGroupsData?.aggregations,
             groupPanelRenderer: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
               getSelectedGroupButtonContent(selectedGroup, fieldBucket),
-            groupsSelector,
             inspectButton: inspect,
             isLoading: loading || isLoadingGroups,
-            pagination,
             renderChildComponent,
-            selectedGroup,
             takeActionItems: getTakeActionItems,
             unit: defaultUnit,
           }),
     [
       alertsGroupsData?.aggregations,
+      getGrouping,
       getTakeActionItems,
-      groupsSelector,
       inspect,
       isLoadingGroups,
       loading,
-      pagination,
       renderChildComponent,
       selectedGroup,
     ]
