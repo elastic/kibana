@@ -29889,7 +29889,6 @@
     "xpack.securitySolution.lists.valueListsForm.keywordsRadioLabel": "Mots clés",
     "xpack.securitySolution.lists.valueListsForm.listTypesRadioLabel": "Type de liste de valeurs",
     "xpack.securitySolution.lists.valueListsForm.textRadioLabel": "Texte",
-    "xpack.securitySolution.lists.valueListsImportButton": "Importer la liste",
     "xpack.securitySolution.lists.valueListsImportSuccess": "La liste de valeurs \"{fileName}\" a été importée",
     "xpack.securitySolution.lists.valueListsImportSuccessTitle": "Liste de valeurs importée",
     "xpack.securitySolution.lists.valueListsTable.actionsColumn": "Actions",
