@@ -126,9 +126,7 @@ function LatencyChart({
         latencyAggregationType,
         previousPeriodLabel: '',
       }),
-    // It should only update when the data has changed
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data]
+    [data, latencyAggregationType]
   );
   const { currentPeriod, previousPeriod } = memoizedData;
 
