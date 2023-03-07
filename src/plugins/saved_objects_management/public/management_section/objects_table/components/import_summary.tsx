@@ -167,7 +167,7 @@ const StatusIndicator: FC<{ item: ImportItem }> = ({ item }) => {
     case 'error':
       return (
         <EuiIconTip
-          type={'alert'}
+          type={'error'}
           color={'danger'}
           content={i18n.translate('savedObjectsManagement.importSummary.errorOutcomeLabel', {
             defaultMessage: '{errorMessage}',

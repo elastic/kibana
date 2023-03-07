@@ -41,7 +41,7 @@ const ControlFrameError = ({ error }: ControlFrameErrorProps) => {
     <EuiButtonEmpty
       color="danger"
       iconSize="m"
-      iconType={'alert'}
+      iconType="error"
       onClick={() => setPopoverOpen((open) => !open)}
       className={'errorEmbeddableCompact__button'}
       textProps={{ className: 'errorEmbeddableCompact__text' }}
