@@ -258,6 +258,7 @@ export default function (providerContext: FtrProviderContext) {
                 agentId: 'agent1',
                 error: 'agent already assigned',
                 timestamp: '2022-09-15T11:00:00.000Z',
+                hostname: 'agent1',
               },
             ],
           },
