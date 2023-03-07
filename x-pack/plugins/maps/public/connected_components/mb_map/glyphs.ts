@@ -18,10 +18,10 @@ export async function getCanAccessEmsFonts(): Promise<boolean> {
         canAccessEmsFonts = undefined;
 
         const emsSettings = getEMSSettings();
-        if (!emsSettings!.isEMSEnabled()) {
+        if (!emsSettings || !emsSettings.isEMSEnabled()) {
           resolve(false);
         }
-        const emsFontUrlTemplate = emsSettings!.getEMSFontLibraryUrl();
+        const emsFontUrlTemplate = emsSettings.getEMSFontLibraryUrl();
 
         const emsFontUrl = emsFontUrlTemplate
           .replace('{fontstack}', 'Open Sans')
