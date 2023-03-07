@@ -13,9 +13,7 @@ import {
   EuiScreenReaderOnly,
   EuiButtonIcon,
 } from '@elastic/eui';
-import {
-  buildQueryFromFilters,
-} from '@kbn/es-query';
+import { buildQueryFromFilters, buildEsQuery } from '@kbn/es-query';
 import { Panel } from '../../common/components/panel';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { HeaderSection } from '../../common/components/header_section';
@@ -107,11 +105,14 @@ const EntityAnalyticsPageNewComponent = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const q = buildQueryFromFilters(filters); 
+      // const q = buildQueryFromFilters(filters, query, filters);
+
+      const q = buildEsQuery(undefined, query, filters);
+      console.log('q', q);
       const data = await http.fetch(RISK_SCORES_URL, {
         method: 'POST',
         body: JSON.stringify({
-          filters: q.filter,
+          filters: q,
           range: {
             start: range.from,
             end: range.to,
@@ -128,7 +129,7 @@ const EntityAnalyticsPageNewComponent = () => {
     } catch (error) {
       console.log('error', error);
     }
-  }, [range, filters]);
+  }, [range, filters, query]);
 
   console.log('query', query);
   console.log('filters', filters);
@@ -241,9 +242,10 @@ const EntityAnalyticsPageNewComponent = () => {
   return (
     <StyledFullHeightContainer>
       <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
-        <HeaderPage title={ENTITY_ANALYTICS}>
-          <SiemSearchBar hideQueryInput id={InputsModelId.global} indexPattern={indexPattern} />
-        </HeaderPage>
+        <FiltersGlobal>
+          <SiemSearchBar id={InputsModelId.global} indexPattern={indexPattern} />
+        </FiltersGlobal>
+        <HeaderPage title={ENTITY_ANALYTICS} />
         <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
           <EuiFlexItem />
           <EuiFlexItem>
