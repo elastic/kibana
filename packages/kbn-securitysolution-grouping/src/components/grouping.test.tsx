@@ -121,8 +121,8 @@ describe('grouping container', () => {
         <Grouping {...testProps} />
       </I18nProvider>
     );
-    expect(getByTestId('alert-count').textContent).toBe('2 alerts');
-    expect(getByTestId('groups-count').textContent).toBe('2 groups');
+    expect(getByTestId('unit-count').textContent).toBe('2 alerts');
+    expect(getByTestId('group-count').textContent).toBe('2 groups');
     expect(getAllByTestId('grouping-accordion').length).toBe(2);
     expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
   });
@@ -146,8 +146,8 @@ describe('grouping container', () => {
         <Grouping {...testProps} data={data} />
       </I18nProvider>
     );
-    expect(queryByTestId('alert-count')).not.toBeInTheDocument();
-    expect(queryByTestId('groups-count')).not.toBeInTheDocument();
+    expect(queryByTestId('unit-count')).not.toBeInTheDocument();
+    expect(queryByTestId('group-count')).not.toBeInTheDocument();
     expect(queryByTestId('grouping-accordion')).not.toBeInTheDocument();
     expect(getByTestId('empty-results-panel')).toBeInTheDocument();
   });

@@ -21,7 +21,7 @@ import type { BadgeMetric, CustomMetric } from './accordion_panel';
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
-import { groupingContainerCss, groupsUnitCountCss } from './styles';
+import { groupingContainerCss, countCss } from './styles';
 import { GROUPS_UNIT } from './translations';
 import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } from './types';
 
@@ -144,16 +144,12 @@ const GroupingComponent = <T,>({
           {groupCount > 0 && unitCount > 0 ? (
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow={false}>
-                <span css={groupsUnitCountCss} data-test-subj="alert-count">
+                <span css={countCss} data-test-subj="unit-count">
                   {unitCountText}
                 </span>
               </EuiFlexItem>
               <EuiFlexItem>
-                <span
-                  css={groupsUnitCountCss}
-                  data-test-subj="groups-count"
-                  style={{ borderRight: 'none' }}
-                >
+                <span css={countCss} data-test-subj="group-count" style={{ borderRight: 'none' }}>
                   {groupCountText}
                 </span>
               </EuiFlexItem>
