@@ -6,30 +6,14 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import type { GroupOption } from './types';
+import type React from 'react';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/groups');
 
-export const updateActiveGroup = actionCreator<{
-  id: string;
-  activeGroup: string;
-}>('UPDATE_ACTIVE_GROUP');
+export const updateGroupSelector = actionCreator<{
+  groupSelector: React.ReactElement;
+}>('UPDATE_GROUP_SELECTOR');
 
-export const updateGroupActivePage = actionCreator<{
-  id: string;
-  activePage: number;
-}>('UPDATE_GROUP_ACTIVE_PAGE');
-
-export const updateGroupItemsPerPage = actionCreator<{
-  id: string;
-  itemsPerPage: number;
-}>('UPDATE_GROUP_ITEMS_PER_PAGE');
-
-export const updateGroupOptions = actionCreator<{
-  id: string;
-  newOptionList: GroupOption[];
-}>('UPDATE_GROUP_OPTIONS');
-
-export const initGrouping = actionCreator<{
-  id: string;
-}>('INIT_GROUPING');
+export const updateSelectedGroup = actionCreator<{
+  selectedGroup: string;
+}>('UPDATE_SELECTED_GROUP');

@@ -1,34 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useCallback, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { getGroupSelector, isNoneGroup } from '@kbn/securitysolution-grouping';
-import type { TableId } from '../../../../../common/types';
-import { getDefaultGroupingOptions } from '../../../../detections/components/alerts_table/grouping_settings';
-import type { State } from '../../../store';
-import { defaultGroup } from '../../../store/grouping/defaults';
-import type { GroupOption } from '../../../store/grouping';
-import { groupActions, groupSelectors } from '../../../store/grouping';
+
+import { getGroupSelector, isNoneGroup } from '../..';
+import { groupActions, groupByIdSelector } from './state';
+import type { GroupOption } from './types';
+import { Action, defaultGroup, GroupMap } from './types';
 
 export interface UseGetGroupSelectorArgs {
+  defaultGroupingOptions: GroupOption[];
+  dispatch: React.Dispatch<Action>;
   fields: FieldSpec[];
   groupingId: string;
-  tableId: TableId;
+  groupingState: GroupMap;
 }
 
-export const useGetGroupSelector = ({ fields, groupingId, tableId }: UseGetGroupSelectorArgs) => {
-  const dispatch = useDispatch();
-
-  const getGroupByIdSelector = groupSelectors.getGroupByIdSelector();
-
+export const useGetGroupSelector = ({
+  defaultGroupingOptions,
+  dispatch,
+  fields,
+  groupingId,
+  groupingState,
+}: UseGetGroupSelectorArgs) => {
   const { activeGroup: selectedGroup, options } =
-    useSelector((state: State) => getGroupByIdSelector(state, groupingId)) ?? defaultGroup;
+    groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup;
 
   const setGroupsActivePage = useCallback(
     (activePage: number) => {
@@ -50,7 +52,6 @@ export const useGetGroupSelector = ({ fields, groupingId, tableId }: UseGetGroup
     },
     [dispatch, groupingId]
   );
-  const defaultGroupingOptions = getDefaultGroupingOptions(tableId);
 
   useEffect(() => {
     if (options.length > 0) return;
@@ -71,7 +72,7 @@ export const useGetGroupSelector = ({ fields, groupingId, tableId }: UseGetGroup
     );
   }, [defaultGroupingOptions, selectedGroup, setOptions, options]);
 
-  const groupsSelector = getGroupSelector({
+  return getGroupSelector({
     groupSelected: selectedGroup,
     'data-test-subj': 'alerts-table-group-selector',
     onGroupChange: (groupSelection: string) => {
@@ -81,7 +82,10 @@ export const useGetGroupSelector = ({ fields, groupingId, tableId }: UseGetGroup
       setGroupsActivePage(0);
       setSelectedGroup(groupSelection);
 
-      if (!isNoneGroup(groupSelection) && !options.find((o) => o.key === groupSelection)) {
+      if (
+        !isNoneGroup(groupSelection) &&
+        !options.find((o: GroupOption) => o.key === groupSelection)
+      ) {
         setOptions([
           ...defaultGroupingOptions,
           {
@@ -96,6 +100,4 @@ export const useGetGroupSelector = ({ fields, groupingId, tableId }: UseGetGroup
     fields,
     options,
   });
-
-  return groupsSelector;
 };
