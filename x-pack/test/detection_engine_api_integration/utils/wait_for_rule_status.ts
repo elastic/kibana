@@ -19,10 +19,12 @@ interface WaitForRuleStatusBaseParams {
 
 interface WaitForRuleStatusWithId extends WaitForRuleStatusBaseParams {
   id: string;
+  ruleId?: never;
 }
 
 interface WaitForRuleStatusWithRuleId extends WaitForRuleStatusBaseParams {
   ruleId: string;
+  id?: never;
 }
 
 export type WaitForRuleStatusParams = WaitForRuleStatusWithId | WaitForRuleStatusWithRuleId;
