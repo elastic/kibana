@@ -31,7 +31,7 @@ export class SyntheticsRunner {
 
   public params: ArgParams;
 
-  private loadTestFilesCallback?: () => Promise<void>;
+  private loadTestFilesCallback?: (reload?: boolean) => Promise<void>;
 
   constructor(getService: any, params: ArgParams) {
     this.getService = getService;
@@ -51,9 +51,9 @@ export class SyntheticsRunner {
     });
   }
 
-  async loadTestFiles(callback: () => Promise<void>) {
+  async loadTestFiles(callback: (reload?: boolean) => Promise<void>, reload = false) {
     console.log('Loading test files');
-    await callback();
+    await callback(reload);
     this.loadTestFilesCallback = callback;
     this.testFilesLoaded = true;
     console.log('Successfully loaded test files');
@@ -131,7 +131,7 @@ export class SyntheticsRunner {
       });
       if (noOfRuns > 1) {
         // need to reload again since runner resets the journeys
-        await this.loadTestFiles(this.loadTestFilesCallback!);
+        await this.loadTestFiles(this.loadTestFilesCallback!, true);
       }
     }
 

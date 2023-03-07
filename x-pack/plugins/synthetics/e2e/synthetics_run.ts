@@ -31,7 +31,15 @@ async function runE2ETests({ readConfigFile }: FtrConfigProviderContext) {
         'browser',
       ]);
 
-      await syntheticsRunner.loadTestFiles(async () => {
+      await syntheticsRunner.loadTestFiles(async (reload) => {
+        if (reload) {
+          const dirPath = require.resolve('./journeys').replace('index.ts', '');
+          Object.keys(require.cache).forEach(function (key) {
+            if (key.startsWith(dirPath)) {
+              delete require.cache[key];
+            }
+          });
+        }
         require(path.join(__dirname, './journeys'));
       });
 
