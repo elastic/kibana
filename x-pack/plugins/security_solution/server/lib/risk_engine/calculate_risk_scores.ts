@@ -5,15 +5,42 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_RISK_SCORE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type {
   CalculateRiskScoreAggregations,
   FullRiskScore,
   GetScoresParams,
+  RiskScoreBucket,
   SimpleRiskScore,
 } from './types';
+
+const bucketToResponse = ({
+  bucket,
+  enrichInputs,
+  now,
+  identifierField,
+}: {
+  bucket: RiskScoreBucket;
+  enrichInputs?: boolean;
+  now: string;
+  identifierField: string;
+}): SimpleRiskScore | FullRiskScore => ({
+  '@timestamp': now,
+  identifierField,
+  identifierValue: bucket.key,
+  calculatedLevel: bucket.risk_details.value.level,
+  calculatedScore: bucket.risk_details.value.score,
+  calculatedScoreNorm: bucket.risk_details.value.normalized_score,
+  riskiestInputs: enrichInputs
+    ? bucket.riskiest_inputs.hits.hits
+    : bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
+        _id: riskInput._id,
+        _index: riskInput._index,
+        sort: riskInput.sort,
+      })),
+});
 
 export const calculateRiskScores = async ({
   dataViewId,
@@ -27,6 +54,41 @@ export const calculateRiskScores = async ({
 } & GetScoresParams): Promise<SimpleRiskScore[] | FullRiskScore[]> => {
   const now = new Date().toISOString();
   const index = '.alerts-security*';
+
+  const reduceScript = `
+    Map results = new HashMap();
+    List scores = [];
+    for (state in states) {
+      scores.addAll(state.scores)
+    }
+    Collections.sort(scores, Collections.reverseOrder());
+    double max_score = scores[0];
+    double total_score = 0;
+    for (int i = 0; i < scores.length; i++) {
+      total_score += scores[i] / Math.pow(i + 1, params.p)
+    }
+    double score_norm = 100 * total_score / params.risk_cap;
+    results['score'] = total_score;
+    results['normalized_score'] = score_norm;
+
+    if (score_norm < 20) {
+      results['level'] = 'Unknown'
+    }
+    else if (score_norm >= 20 && score_norm < 40) {
+      results['level'] = 'Low'
+    }
+    else if (score_norm >= 40 && score_norm < 70) {
+      results['level'] = 'Moderate'
+    }
+    else if (score_norm >= 70 && score_norm < 90) {
+      results['level'] = 'High'
+    }
+    else if (score_norm >= 90) {
+      results['level'] = 'Critical'
+    }
+
+    return results;
+  `;
 
   const results = await esClient.search<never, CalculateRiskScoreAggregations>({
     size: 0,
@@ -57,7 +119,7 @@ export const calculateRiskScores = async ({
               _source: enrichInputs,
             },
           },
-          normalized_score: {
+          risk_details: {
             scripted_metric: {
               init_script: 'state.scores = []',
               map_script: `state.scores.add(doc['${ALERT_RISK_SCORE}'].value)`,
@@ -66,20 +128,7 @@ export const calculateRiskScores = async ({
                 p: 1.5,
                 risk_cap: 261.2,
               },
-              reduce_script: `
-                List scores = [];
-                for (state in states) {
-                  scores.addAll(state.scores)
-                }
-                Collections.sort(scores, Collections.reverseOrder());
-                double max_score = scores[0];
-                double total_score = 0;
-                for (int i = 0; i < scores.length; i++) {
-                  total_score += scores[i] / Math.pow(i + 1, params.p)
-                }
-                double normalized_score = 100 * total_score / params.risk_cap;
-                return normalized_score;
-                `,
+              reduce_script: reduceScript,
             },
           },
         },
@@ -103,29 +152,16 @@ export const calculateRiskScores = async ({
               _source: enrichInputs,
             },
           },
-          normalized_score: {
+          risk_details: {
             scripted_metric: {
-              init_script: 'state.scores = []',
+              init_script: `state.scores = []`,
               map_script: `state.scores.add(doc['${ALERT_RISK_SCORE}'].value)`,
               combine_script: 'return state',
               params: {
                 p: 1.5,
                 risk_cap: 261.2,
               },
-              reduce_script: `
-                List scores = [];
-                for (state in states) {
-                  scores.addAll(state.scores)
-                }
-                Collections.sort(scores, Collections.reverseOrder());
-                double max_score = scores[0];
-                double total_score = 0;
-                for (int i = 0; i < scores.length; i++) {
-                  total_score += scores[i] / Math.pow(i + 1, params.p)
-                }
-                double normalized_score = 100 * total_score / params.risk_cap;
-                return normalized_score;
-                `,
+              reduce_script: reduceScript,
             },
           },
         },
@@ -143,32 +179,22 @@ export const calculateRiskScores = async ({
   } = results.aggregations;
 
   return userBuckets
-    .map((bucket) => ({
-      '@timestamp': now,
-      identifierField: 'user.name',
-      identifierValue: bucket.key,
-      calculatedScoreNorm: bucket.normalized_score.value,
-      riskiestInputs: enrichInputs
-        ? bucket.riskiest_inputs.hits.hits
-        : bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
-            _id: riskInput._id,
-            _index: riskInput._index,
-            sort: riskInput.sort,
-          })),
-    }))
+    .map((bucket) =>
+      bucketToResponse({
+        bucket,
+        enrichInputs,
+        identifierField: 'user.name',
+        now,
+      })
+    )
     .concat(
-      hostBuckets.map((bucket) => ({
-        '@timestamp': now,
-        identifierField: 'host.name',
-        identifierValue: bucket.key,
-        calculatedScoreNorm: bucket.normalized_score.value,
-        riskiestInputs: enrichInputs
-          ? bucket.riskiest_inputs.hits.hits
-          : bucket.riskiest_inputs.hits.hits.map((riskInput) => ({
-              _id: riskInput._id,
-              _index: riskInput._index,
-              sort: riskInput.sort,
-            })),
-      }))
+      hostBuckets.map((bucket) =>
+        bucketToResponse({
+          bucket,
+          enrichInputs,
+          identifierField: 'host.name',
+          now,
+        })
+      )
     );
 };
