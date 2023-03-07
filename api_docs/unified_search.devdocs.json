@@ -1396,6 +1396,26 @@
             "path": "src/plugins/unified_search/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "unifiedSearch",
+            "id": "def-public.IUnifiedSearchPluginServices.savedObjectsManagement",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectsManagement",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "savedObjectsManagement",
+                "scope": "public",
+                "docId": "kibSavedObjectsManagementPluginApi",
+                "section": "def-public.SavedObjectsManagementPluginStart",
+                "text": "SavedObjectsManagementPluginStart"
+              }
+            ],
+            "path": "src/plugins/unified_search/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
