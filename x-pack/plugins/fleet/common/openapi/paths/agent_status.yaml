@@ -1,6 +1,7 @@
 get:
-  summary: Agents - Summary stats
-  tags: []
+  summary: Get agent status summary
+  tags:
+    - Agent status
   responses:
     '200':
       description: OK
@@ -29,10 +30,12 @@ get:
               updating:
                 type: integer
               all:
-                type: integer 
+                type: integer
               active:
                 type: integer
             required:
+              - active
+              - all
               - error
               - events
               - inactive
@@ -41,8 +44,8 @@ get:
               - other
               - total
               - updating
-              - all
-              - active
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: get-agent-status
   parameters:
     - schema:

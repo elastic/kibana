@@ -295,6 +295,10 @@ export const INVESTIGATE_BULK_IN_TIMELINE = i18n.translate(
   }
 );
 
+export const SESSIONS_TITLE = i18n.translate('xpack.securitySolution.sessionsView.sessionsTitle', {
+  defaultMessage: 'Sessions',
+});
+
 export const TAKE_ACTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.groups.additionalActions.takeAction',
   {
@@ -418,3 +422,15 @@ export const INSPECT_GROUPING_TITLE = i18n.translate(
     defaultMessage: 'Grouping query',
   }
 );
+
+export const EVENT_RENDERED_VIEW_COLUMNS = {
+  timestamp: i18n.translate('xpack.securitySolution.EventRenderedView.timestampTitle.column', {
+    defaultMessage: 'Timestamp',
+  }),
+  rule: i18n.translate('xpack.securitySolution.EventRenderedView.ruleTitle.column', {
+    defaultMessage: 'Rule',
+  }),
+  eventSummary: i18n.translate('xpack.securitySolution.EventRenderedView.eventSummary.column', {
+    defaultMessage: 'Event Summary',
+  }),
+};

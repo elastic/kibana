@@ -13,6 +13,7 @@ import type {
   StatsGetterConfig,
 } from '@kbn/telemetry-collection-manager-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { v2 } from '../../common/types';
 
 export type SecurityGetter = () => SecurityPluginStart | undefined;
 
@@ -64,8 +65,10 @@ export function registerTelemetryUsageStatsRoutes(
           refreshCache: unencrypted || refreshCache,
         };
 
-        const stats = await telemetryCollectionManager.getStats(statsConfig);
-        return res.ok({ body: stats });
+        const body: v2.UnencryptedTelemetryPayload = await telemetryCollectionManager.getStats(
+          statsConfig
+        );
+        return res.ok({ body });
       } catch (err) {
         if (isDev) {
           // don't ignore errors when running in dev mode

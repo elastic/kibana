@@ -11,9 +11,17 @@ import { OverviewStatus, OverviewStatusCodec } from '../../../../../common/runti
 import { apiService } from '../../../../utils/api_service';
 import { toStatusOverviewQueryArgs } from '../overview/api';
 
-export const fetchOverviewStatus = async (
-  pageState: MonitorOverviewPageState
-): Promise<OverviewStatus> => {
+export const fetchOverviewStatus = async ({
+  pageState,
+  scopeStatusByLocation,
+}: {
+  pageState: MonitorOverviewPageState;
+  scopeStatusByLocation?: boolean;
+}): Promise<OverviewStatus> => {
   const params = toStatusOverviewQueryArgs(pageState);
-  return apiService.get(SYNTHETICS_API_URLS.OVERVIEW_STATUS, params, OverviewStatusCodec);
+  return apiService.get(
+    SYNTHETICS_API_URLS.OVERVIEW_STATUS,
+    { ...params, scopeStatusByLocation },
+    OverviewStatusCodec
+  );
 };

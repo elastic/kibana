@@ -92,7 +92,7 @@ const ExceptionItemsComponent: FC<ExceptionItemsProps> = ({
         viewerStatus={viewerStatus}
         buttonText={emptyViewerButtonText}
         body={emptyViewerBody}
-        onCreateExceptionListItem={onCreateExceptionListItem}
+        onEmptyButtonStateClick={onCreateExceptionListItem}
       />
     );
   return (

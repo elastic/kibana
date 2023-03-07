@@ -555,11 +555,7 @@ function replaceFormulaColumn(
 
   // when coming to Formula keep the custom label
   const regeneratedColumn = newLayer.columns[columnId];
-  if (
-    !shouldResetLabel &&
-    regeneratedColumn.operationType !== previousColumn.operationType &&
-    previousColumn.customLabel
-  ) {
+  if (!shouldResetLabel && previousColumn.customLabel) {
     regeneratedColumn.customLabel = true;
     regeneratedColumn.label = previousColumn.label;
   }

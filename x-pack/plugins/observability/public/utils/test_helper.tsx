@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { merge } from 'lodash';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render as testLibRender } from '@testing-library/react';
 import { AppMountParameters } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -23,11 +24,10 @@ import { ConfigSchema } from '../plugin';
 import { Subset } from '../typings';
 
 const appMountParameters = { setHeaderActionMenu: () => {} } as unknown as AppMountParameters;
+const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 
 export const core = coreMock.createStart();
 export const data = dataPluginMock.createStartContract();
-
-const observabilityRuleTypeRegistry = createObservabilityRuleTypeRegistryMock();
 
 const defaultConfig: ConfigSchema = {
   unsafe: {
@@ -43,6 +43,19 @@ const defaultConfig: ConfigSchema = {
   },
 };
 
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+  logger: {
+    log: console.log,
+    warn: console.warn,
+    error: () => {},
+  },
+});
+
 export const render = (component: React.ReactNode, config: Subset<ConfigSchema> = {}) => {
   return testLibRender(
     <IntlProvider locale="en-US" messages={translations.messages}>
@@ -55,7 +68,9 @@ export const render = (component: React.ReactNode, config: Subset<ConfigSchema> 
             ObservabilityPageTemplate: KibanaPageTemplate,
           }}
         >
-          <EuiThemeProvider>{component}</EuiThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <EuiThemeProvider>{component}</EuiThemeProvider>
+          </QueryClientProvider>
         </PluginContext.Provider>
       </KibanaContextProvider>
     </IntlProvider>

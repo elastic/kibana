@@ -31,7 +31,7 @@ class Package {
    * @param {string} path
    */
   static fromManifest(repoRoot, path) {
-    const manifest = readPackageManifest(path);
+    const manifest = readPackageManifest(repoRoot, path);
     const dir = Path.dirname(path);
 
     return new Package(repoRoot, dir, manifest, readPackageJson(Path.resolve(dir, 'package.json')));

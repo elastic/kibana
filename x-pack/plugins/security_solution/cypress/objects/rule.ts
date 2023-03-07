@@ -65,6 +65,7 @@ export interface CustomRule {
   buildingBlockType?: string;
   exceptionLists?: Array<{ id: string; list_id: string; type: string; namespace_type: string }>;
   actions?: Actions;
+  enabled?: boolean;
 }
 
 export interface ThresholdRule extends CustomRule {

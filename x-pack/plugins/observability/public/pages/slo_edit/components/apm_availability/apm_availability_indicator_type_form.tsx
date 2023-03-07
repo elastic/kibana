@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiComboBox,
   EuiComboBoxOptionOption,
@@ -13,91 +13,85 @@ import {
   EuiFlexItem,
   EuiFormLabel,
 } from '@elastic/eui';
-import { Control, Controller } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput } from '@kbn/slo-schema';
 
-import { FieldSelector } from '../common/field_selector';
+import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
+import { FieldSelector } from '../apm_common/field_selector';
+import { QueryBuilder } from '../common/query_builder';
 
-export interface Props {
-  control: Control<CreateSLOInput>;
-}
+export function ApmAvailabilityIndicatorTypeForm() {
+  const { control, setValue, watch } = useFormContext<CreateSLOInput>();
+  const { data: apmIndex } = useFetchApmIndex();
+  useEffect(() => {
+    setValue('indicator.params.index', apmIndex);
+  }, [apmIndex, setValue]);
 
-export function ApmAvailabilityIndicatorTypeForm({ control }: Props) {
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexGroup direction="row" gutterSize="l">
         <FieldSelector
           allowAllOption={false}
-          label={i18n.translate('xpack.observability.slos.sloEdit.apmAvailability.serviceName', {
+          label={i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.serviceName', {
             defaultMessage: 'Service name',
           })}
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmAvailability.serviceName.placeholder',
+            'xpack.observability.slo.sloEdit.apmAvailability.serviceName.placeholder',
             {
               defaultMessage: 'Select the APM service',
             }
           )}
           fieldName="service.name"
           name="indicator.params.service"
-          control={control}
           dataTestSubj="apmAvailabilityServiceSelector"
         />
         <FieldSelector
           label={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmAvailability.serviceEnvironment',
+            'xpack.observability.slo.sloEdit.apmAvailability.serviceEnvironment',
             {
               defaultMessage: 'Service environment',
             }
           )}
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmAvailability.serviceEnvironment.placeholder',
+            'xpack.observability.slo.sloEdit.apmAvailability.serviceEnvironment.placeholder',
             {
               defaultMessage: 'Select the environment',
             }
           )}
           fieldName="service.environment"
           name="indicator.params.environment"
-          control={control}
           dataTestSubj="apmAvailabilityEnvironmentSelector"
         />
       </EuiFlexGroup>
 
       <EuiFlexGroup direction="row" gutterSize="l">
         <FieldSelector
-          label={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmAvailability.transactionType',
-            {
-              defaultMessage: 'Transaction type',
-            }
-          )}
+          label={i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.transactionType', {
+            defaultMessage: 'Transaction type',
+          })}
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmAvailability.transactionType.placeholder',
+            'xpack.observability.slo.sloEdit.apmAvailability.transactionType.placeholder',
             {
               defaultMessage: 'Select the transaction type',
             }
           )}
           fieldName="transaction.type"
           name="indicator.params.transactionType"
-          control={control}
           dataTestSubj="apmAvailabilityTransactionTypeSelector"
         />
         <FieldSelector
-          label={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmAvailability.transactionName',
-            {
-              defaultMessage: 'Transaction name',
-            }
-          )}
+          label={i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.transactionName', {
+            defaultMessage: 'Transaction name',
+          })}
           placeholder={i18n.translate(
-            'xpack.observability.slos.sloEdit.apmAvailability.transactionName.placeholder',
+            'xpack.observability.slo.sloEdit.apmAvailability.transactionName.placeholder',
             {
               defaultMessage: 'Select the transaction name',
             }
           )}
           fieldName="transaction.name"
           name="indicator.params.transactionName"
-          control={control}
           dataTestSubj="apmAvailabilityTransactionNameSelector"
         />
       </EuiFlexGroup>
@@ -105,7 +99,7 @@ export function ApmAvailabilityIndicatorTypeForm({ control }: Props) {
       <EuiFlexGroup direction="row" gutterSize="l">
         <EuiFlexItem>
           <EuiFormLabel>
-            {i18n.translate('xpack.observability.slos.sloEdit.apmAvailability.goodStatusCodes', {
+            {i18n.translate('xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes', {
               defaultMessage: 'Good status codes',
             })}
           </EuiFormLabel>
@@ -119,22 +113,26 @@ export function ApmAvailabilityIndicatorTypeForm({ control }: Props) {
               <EuiComboBox
                 {...field}
                 aria-label={i18n.translate(
-                  'xpack.observability.slos.sloEdit.apmAvailability.goodStatusCodes.placeholder',
+                  'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes.placeholder',
                   {
                     defaultMessage: 'Select the good status codes',
                   }
                 )}
                 placeholder={i18n.translate(
-                  'xpack.observability.slos.sloEdit.apmAvailability.goodStatusCodes.placeholder',
+                  'xpack.observability.slo.sloEdit.apmAvailability.goodStatusCodes.placeholder',
                   {
                     defaultMessage: 'Select the good status codes',
                   }
                 )}
                 isInvalid={!!fieldState.error}
-                options={generateStatusCodeOptions()}
+                options={generateStatusCodeOptions(['2xx', '3xx', '4xx', '5xx'])}
                 selectedOptions={generateStatusCodeOptions(field.value)}
                 onChange={(selected: EuiComboBoxOptionOption[]) => {
-                  field.onChange(selected.map((opts) => opts.value));
+                  if (selected.length) {
+                    return field.onChange(selected.map((opts) => opts.value));
+                  }
+
+                  field.onChange([]);
                 }}
                 isClearable={true}
                 data-test-subj="sloEditApmAvailabilityGoodStatusCodesSelector"
@@ -142,13 +140,29 @@ export function ApmAvailabilityIndicatorTypeForm({ control }: Props) {
             )}
           />
         </EuiFlexItem>
-        <EuiFlexItem />
+        <EuiFlexItem>
+          <QueryBuilder
+            control={control}
+            dataTestSubj="apmLatencyFilterInput"
+            indexPatternString={watch('indicator.params.index')}
+            label={i18n.translate('xpack.observability.slo.sloEdit.apmLatency.filter', {
+              defaultMessage: 'Query filter',
+            })}
+            name="indicator.params.filter"
+            placeholder={i18n.translate(
+              'xpack.observability.slo.sloEdit.apmLatency.filter.placeholder',
+              {
+                defaultMessage: 'Custom filter to apply on the index',
+              }
+            )}
+          />
+        </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexGroup>
   );
 }
 
-function generateStatusCodeOptions(codes: string[] = ['2xx', '3xx', '4xx', '5xx']) {
+function generateStatusCodeOptions(codes: string[] = []) {
   return codes.map((code) => ({
     label: code,
     value: code,

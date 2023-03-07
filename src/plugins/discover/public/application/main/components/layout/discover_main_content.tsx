@@ -52,7 +52,7 @@ export const DiscoverMainContent = ({
 
   const setDiscoverViewMode = useCallback(
     (mode: VIEW_MODE) => {
-      stateContainer.setAppState({ viewMode: mode });
+      stateContainer.appState.update({ viewMode: mode });
 
       if (trackUiMetric) {
         if (mode === VIEW_MODE.AGGREGATED_LEVEL) {

@@ -66,7 +66,7 @@ export const useBulkLoadActions = (
           )
         )
       ),
-    []
+    [contexts]
   );
   useThrowError(error);
   return actionsState;

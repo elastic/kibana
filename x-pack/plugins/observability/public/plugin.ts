@@ -105,7 +105,7 @@ export interface ObservabilityPublicPluginsStart {
   ruleTypeRegistry: RuleTypeRegistryContract;
   security: SecurityPluginStart;
   share: SharePluginStart;
-  spaces: SpacesPluginStart;
+  spaces?: SpacesPluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   usageCollection: UsageCollectionSetup;
   unifiedSearch: UnifiedSearchPublicPluginStart;
@@ -203,6 +203,7 @@ export class Plugin
       const [coreStart, pluginsStart, { navigation }] = await coreSetup.getStartServices();
 
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
+
       return renderApp({
         core: coreStart,
         config,

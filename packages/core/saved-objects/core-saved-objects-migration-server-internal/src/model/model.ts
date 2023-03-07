@@ -9,7 +9,8 @@
 import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 
-import { type AliasAction, isTypeof } from '../actions';
+import { isTypeof } from '../actions';
+import type { AliasAction } from '../actions';
 import type { AllActionStates, State } from '../state';
 import type { ResponseType } from '../next';
 import {
@@ -278,30 +279,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         ],
       };
     }
-  } else if (stateP.controlState === 'PREPARE_COMPATIBLE_MIGRATION') {
-    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      return {
-        ...stateP,
-        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
-      };
-    } else if (Either.isLeft(res)) {
-      // Note: if multiple newer Kibana versions are competing with each other to perform a migration,
-      // it might happen that another Kibana instance has deleted this instance's version index.
-      // NIT to handle this in properly, we'd have to add a PREPARE_COMPATIBLE_MIGRATION_CONFLICT step,
-      // similar to MARK_VERSION_INDEX_READY_CONFLICT.
-      if (isTypeof(res.left, 'alias_not_found_exception')) {
-        // We assume that the alias was already deleted by another Kibana instance
-        return {
-          ...stateP,
-          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
-        };
-      } else {
-        throwBadResponse(stateP, res.left as never);
-      }
-    } else {
-      throwBadResponse(stateP, res);
-    }
   } else if (stateP.controlState === 'LEGACY_SET_WRITE_BLOCK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     // If the write block is successfully in place
@@ -447,7 +424,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      // check the existing mappings to see if we can avoid reindexing
       if (
         // source exists
         Boolean(stateP.sourceIndexMappings._meta?.migrationMappingPropertyHashes) &&
@@ -459,36 +435,17 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           stateP.targetIndexMappings
         )
       ) {
-        // The source index .kibana is pointing to. E.g: ".xx8.7.0_001"
-        const source = stateP.sourceIndex.value;
-
+        // the existing mappings match, we can avoid reindexing
         return {
           ...stateP,
-          controlState: 'PREPARE_COMPATIBLE_MIGRATION',
-          sourceIndex: Option.none,
-          targetIndex: source!,
-          targetIndexRawMappings: stateP.sourceIndexMappings,
-          targetIndexMappings: mergeMigrationMappingPropertyHashes(
-            stateP.targetIndexMappings,
-            stateP.sourceIndexMappings
-          ),
-          preTransformDocsActions: [
-            // Point the version alias to the source index. This let's other Kibana
-            // instances know that a migration for the current version is "done"
-            // even though we may be waiting for document transformations to finish.
-            { add: { index: source!, alias: stateP.versionAlias } },
-            ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
-              stateP.currentAlias,
-              stateP.versionAlias,
-            ]),
-          ],
+          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+          targetIndex: stateP.sourceIndex.value!, // We preserve the same index, source == target (E.g: ".xx8.7.0_001")
           versionIndexReadyActions: Option.none,
         };
       } else {
-        // the mappings have changed, but changes might still be compatible
         return {
           ...stateP,
-          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+          controlState: 'UPDATE_SOURCE_MAPPINGS',
         };
       }
     } else if (Either.isLeft(res)) {
@@ -506,6 +463,155 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       }
     } else {
       return throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'UPDATE_SOURCE_MAPPINGS') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+        targetIndex: stateP.sourceIndex.value!, // We preserve the same index, source == target (E.g: ".xx8.7.0_001")
+        versionIndexReadyActions: Option.none,
+      };
+    } else if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isTypeof(left, 'incompatible_mapping_exception')) {
+        return {
+          ...stateP,
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+        };
+      } else {
+        return throwBadResponse(stateP, left as never);
+      }
+    } else {
+      return throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      if (res.right.unknownDocs.length) {
+        logs = [
+          ...stateP.logs,
+          { level: 'warning', message: extractDiscardedUnknownDocs(res.right.unknownDocs) },
+        ];
+      }
+
+      logs = [
+        ...logs,
+        ...Object.entries(res.right.errorsByType).map(([soType, error]) => ({
+          level: 'warning' as const,
+          message: `Ignored excludeOnUpgrade hook on type [${soType}] that failed with error: "${error.toString()}"`,
+        })),
+      ];
+
+      return {
+        ...stateP,
+        logs,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK',
+        deleteByQueryTaskId: res.right.taskId,
+      };
+    } else {
+      return {
+        ...stateP,
+        controlState: 'FATAL',
+        reason: extractUnknownDocFailureReason(
+          stateP.migrationDocLinks.resolveMigrationFailures,
+          res.left.unknownDocs
+        ),
+      };
+    }
+  } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      const source = stateP.sourceIndex.value;
+      return {
+        ...stateP,
+        logs,
+        controlState: 'PREPARE_COMPATIBLE_MIGRATION',
+        mustRefresh:
+          stateP.mustRefresh || typeof res.right.deleted === 'undefined' || res.right.deleted > 0,
+        targetIndexRawMappings: stateP.sourceIndexMappings,
+        targetIndexMappings: mergeMigrationMappingPropertyHashes(
+          stateP.targetIndexMappings,
+          stateP.sourceIndexMappings
+        ),
+        preTransformDocsActions: [
+          // Point the version alias to the source index. This let's other Kibana
+          // instances know that a migration for the current version is "done"
+          // even though we may be waiting for document transformations to finish.
+          { add: { index: source!, alias: stateP.versionAlias } },
+          ...buildRemoveAliasActions(source!, Object.keys(stateP.aliases), [
+            stateP.currentAlias,
+            stateP.versionAlias,
+          ]),
+        ],
+      };
+    } else {
+      if (isTypeof(res.left, 'wait_for_task_completion_timeout')) {
+        // After waiting for the specified timeout, the task has not yet
+        // completed. Retry this step to see if the task has completed after an
+        // exponential delay.  We will basically keep polling forever until the
+        // Elasticsearch task succeeds or fails.
+        return delayRetryState(stateP, res.left.message, Number.MAX_SAFE_INTEGER);
+      } else {
+        if (stateP.retryCount < stateP.retryAttempts) {
+          const retryCount = stateP.retryCount + 1;
+          const retryDelay = 1500 + 1000 * Math.random();
+          return {
+            ...stateP,
+            controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+            mustRefresh: true,
+            retryCount,
+            retryDelay,
+            logs: [
+              ...stateP.logs,
+              {
+                level: 'warning',
+                message: `Errors occurred whilst deleting unwanted documents. Another instance is probably updating or deleting documents in the same index. Retrying attempt ${retryCount}.`,
+              },
+            ],
+          };
+        } else {
+          const failures = res.left.failures.length;
+          const versionConflicts = res.left.versionConflicts ?? 0;
+
+          let reason = `Migration failed because it was unable to delete unwanted documents from the ${stateP.sourceIndex.value} system index (${failures} failures and ${versionConflicts} conflicts)`;
+          if (failures) {
+            reason += `:\n` + res.left.failures.map((failure: string) => `- ${failure}\n`).join('');
+          }
+          return {
+            ...stateP,
+            controlState: 'FATAL',
+            reason,
+          };
+        }
+      }
+    }
+  } else if (stateP.controlState === 'PREPARE_COMPATIBLE_MIGRATION') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: stateP.mustRefresh ? 'REFRESH_TARGET' : 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+      };
+    } else if (Either.isLeft(res)) {
+      // Note: if multiple newer Kibana versions are competing with each other to perform a migration,
+      // it might happen that another Kibana instance has deleted this instance's version index.
+      // NIT to handle this in properly, we'd have to add a PREPARE_COMPATIBLE_MIGRATION_CONFLICT step,
+      // similar to MARK_VERSION_INDEX_READY_CONFLICT.
+      if (isTypeof(res.left, 'alias_not_found_exception')) {
+        // We assume that the alias was already deleted by another Kibana instance
+        return {
+          ...stateP,
+          controlState: stateP.mustRefresh
+            ? 'REFRESH_TARGET'
+            : 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+        };
+      } else {
+        throwBadResponse(stateP, res.left as never);
+      }
+    } else {
+      throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'CHECK_UNKNOWN_DOCUMENTS') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -579,7 +685,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
 
     if (Either.isRight(res)) {
       excludeOnUpgradeQuery = addMustNotClausesToBoolQuery(
-        res.right.mustNotClauses,
+        res.right.filterClauses,
         stateP.excludeOnUpgradeQuery?.bool
       );
 
@@ -733,10 +839,8 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) ||
         stateP.discardCorruptObjects
       ) {
-        const processedDocs = Either.isRight(res)
-          ? res.right.processedDocs
-          : res.left.processedDocs;
-        const batches = createBatches(processedDocs, stateP.tempIndex, stateP.maxBatchSizeBytes);
+        const documents = Either.isRight(res) ? res.right.processedDocs : res.left.processedDocs;
+        const batches = createBatches({ documents, maxBatchSizeBytes: stateP.maxBatchSizeBytes });
         if (Either.isRight(batches)) {
           let corruptDocumentIds = stateP.corruptDocumentIds;
           let transformErrors = stateP.transformErrors;
@@ -751,7 +855,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             corruptDocumentIds,
             transformErrors,
             controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK', // handles the actual bulk indexing into temp index
-            transformedDocBatches: batches.right,
+            bulkOperationBatches: batches.right,
             currentBatch: 0,
             progress,
           };
@@ -760,7 +864,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ...stateP,
             controlState: 'FATAL',
             reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
-              _id: batches.left.document._id,
+              _id: batches.left.documentId,
               docSizeBytes: batches.left.docSizeBytes,
               maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
             }),
@@ -796,7 +900,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (stateP.currentBatch + 1 < stateP.transformedDocBatches.length) {
+      if (stateP.currentBatch + 1 < stateP.bulkOperationBatches.length) {
         return {
           ...stateP,
           controlState: 'REINDEX_SOURCE_TO_TEMP_INDEX_BULK',
@@ -938,25 +1042,40 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
         if (stateP.corruptDocumentIds.length > 0 || stateP.transformErrors.length > 0) {
-          const transformFailureReason = extractTransformFailuresReason(
-            stateP.migrationDocLinks.resolveMigrationFailures,
-            stateP.corruptDocumentIds,
-            stateP.transformErrors
-          );
-          return {
-            ...stateP,
-            controlState: 'FATAL',
-            reason: transformFailureReason,
-          };
-        } else {
-          // If there are no more results we have transformed all outdated
-          // documents and we didn't encounter any corrupt documents or transformation errors
-          // and can proceed to the next step
-          return {
-            ...stateP,
-            controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
-          };
+          if (!stateP.discardCorruptObjects) {
+            const transformFailureReason = extractTransformFailuresReason(
+              stateP.migrationDocLinks.resolveMigrationFailures,
+              stateP.corruptDocumentIds,
+              stateP.transformErrors
+            );
+            return {
+              ...stateP,
+              controlState: 'FATAL',
+              reason: transformFailureReason,
+            };
+          }
+
+          // at this point, users have configured kibana to discard corrupt objects
+          // thus, we can ignore corrupt documents and transform errors and proceed with the migration
+          logs = [
+            ...stateP.logs,
+            {
+              level: 'warning',
+              message: extractDiscardedCorruptDocs(
+                stateP.corruptDocumentIds,
+                stateP.transformErrors
+              ),
+            },
+          ];
         }
+
+        // If there are no more results we have transformed all outdated
+        // documents and we didn't encounter any corrupt documents or transformation errors
+        // and can proceed to the next step
+        return {
+          ...stateP,
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
+        };
       }
     } else {
       throwBadResponse(stateP, res);
@@ -968,20 +1087,36 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     // Otherwise the progress might look off when there are errors.
     const progress = incrementProcessedProgress(stateP.progress, stateP.outdatedDocuments.length);
 
-    if (Either.isRight(res)) {
-      // we haven't seen corrupt documents or any transformation errors thus far in the migration
-      // index the migrated docs
-      if (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) {
-        const batches = createBatches(
-          res.right.processedDocs,
-          stateP.targetIndex,
-          stateP.maxBatchSizeBytes
-        );
+    if (
+      Either.isRight(res) ||
+      (isTypeof(res.left, 'documents_transform_failed') && stateP.discardCorruptObjects)
+    ) {
+      // we might have some transformation errors, but user has chosen to discard them
+      if (
+        (stateP.corruptDocumentIds.length === 0 && stateP.transformErrors.length === 0) ||
+        stateP.discardCorruptObjects
+      ) {
+        const documents = Either.isRight(res) ? res.right.processedDocs : res.left.processedDocs;
+
+        let corruptDocumentIds = stateP.corruptDocumentIds;
+        let transformErrors = stateP.transformErrors;
+
+        if (Either.isLeft(res)) {
+          corruptDocumentIds = [...stateP.corruptDocumentIds, ...res.left.corruptDocumentIds];
+          transformErrors = [...stateP.transformErrors, ...res.left.transformErrors];
+        }
+
+        const batches = createBatches({
+          documents,
+          corruptDocumentIds,
+          transformErrors,
+          maxBatchSizeBytes: stateP.maxBatchSizeBytes,
+        });
         if (Either.isRight(batches)) {
           return {
             ...stateP,
             controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',
-            transformedDocBatches: batches.right,
+            bulkOperationBatches: batches.right,
             currentBatch: 0,
             hasTransformedDocs: true,
             progress,
@@ -991,7 +1126,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
             ...stateP,
             controlState: 'FATAL',
             reason: fatalReasonDocumentExceedsMaxBatchSizeBytes({
-              _id: batches.left.document._id,
+              _id: batches.left.documentId,
               docSizeBytes: batches.left.docSizeBytes,
               maxBatchSizeBytes: batches.left.maxBatchSizeBytes,
             }),
@@ -1024,7 +1159,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'TRANSFORMED_DOCUMENTS_BULK_INDEX') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      if (stateP.currentBatch + 1 < stateP.transformedDocBatches.length) {
+      if (stateP.currentBatch + 1 < stateP.bulkOperationBatches.length) {
         return {
           ...stateP,
           controlState: 'TRANSFORMED_DOCUMENTS_BULK_INDEX',

@@ -11,6 +11,7 @@ import { getMachineLearningRule } from '../../objects/rule';
 import {
   CUSTOM_RULES_BTN,
   RISK_SCORE,
+  RULES_MANAGEMENT_TABLE,
   RULE_NAME,
   RULE_SWITCH,
   SEVERITY,
@@ -73,7 +74,7 @@ describe('Detection rules, machine learning', () => {
 
     cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
-    expectNumberOfRules(expectedNumberOfRules);
+    expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
 
     cy.get(RULE_NAME).should('have.text', getMachineLearningRule().name);
     cy.get(RISK_SCORE).should('have.text', getMachineLearningRule().riskScore);

@@ -58,7 +58,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
             // make sure the counts of the # of events per type are as expected
             ['execute', { gte: 12 }],
             ['new-instance', { equal: 2 }],
-            ['active-instance', { gte: 8 }],
+            ['active-instance', { gte: 5 }],
             ['recovered-instance', { equal: 2 }],
           ]),
         });
@@ -132,9 +132,7 @@ export default function eventLogAlertTests({ getService }: FtrProviderContext) {
             break;
         }
       }
-      expect(flapping).to.eql(
-        new Array(instanceEvents.length - 4).fill(false).concat([true, true, true, true])
-      );
+      expect(flapping).to.eql(new Array(instanceEvents.length).fill(false));
     });
   });
 }

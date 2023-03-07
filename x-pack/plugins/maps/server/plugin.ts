@@ -207,6 +207,6 @@ export class MapsPlugin implements Plugin {
   }
 
   start(core: CoreStart, plugins: StartDeps) {
-    setStartServices(core, plugins);
+    setStartServices(core);
   }
 }
