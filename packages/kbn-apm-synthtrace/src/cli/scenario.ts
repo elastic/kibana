@@ -20,13 +20,13 @@ export interface ScenarioOptions {
   // Equivalent of APM Server Setting - Transactions.MaxTransactionGroups
   transactions?: {
     max_groups?: number;
+    max_services?: number;
   };
   // Equivalent of APM Server Setting - ServiceTransactions.MaxGroups
   service_transactions?: {
     max_groups?: number;
   };
 }
-
 export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{
   bootstrap?: (options: { apmEsClient: ApmSynthtraceEsClient }) => Promise<void>;
   generate: Generate<TFields>;

@@ -90,15 +90,19 @@ export function createTransactionMetricsAggregator(
     group: (set, key, serviceListMap) => {
       const { transactions = {} } = options || {};
       const maxTransactionOverflowCount = transactions?.max_groups ?? 10_000;
-      const serviceName = set['service.name'];
-      let service = serviceListMap.get(serviceName);
+      const maxTransactionGroupsPerService = transactions?.max_services ?? 10_000;
+      let service = serviceListMap.get(set['service.name']);
+      const hasServiceCountOverflowed = serviceListMap.size >= maxTransactionGroupsPerService;
 
       if (!service) {
         service = {
           transactionCount: 0,
           overflowKey: null,
         };
-        serviceListMap.set(serviceName, service);
+        if (hasServiceCountOverflowed) {
+          set['service.name'] = '_other';
+        }
+        serviceListMap.set(set['service.name'], service);
       }
 
       const isTransactionCountOverflown = service.transactionCount >= maxTransactionOverflowCount;
