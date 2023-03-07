@@ -72,7 +72,7 @@ export function AlertDetailsAppSection({
         label: (
           <FormattedMessage
             id="xpack.apm.pages.alertDetails.alertSummary.serviceEnv"
-            defaultMessage="Service Environment"
+            defaultMessage="Service environment"
           />
         ),
         value: alert?.fields[SERVICE_ENVIRONMENT],
