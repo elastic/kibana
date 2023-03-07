@@ -117,6 +117,7 @@ describe('useDiscoverHistogram', () => {
       fetchStatus: FetchStatus.COMPLETE,
       result: esHits.map((esHit) => buildDataTableRecord(esHit, dataViewWithTimefieldMock)),
     }) as DataDocuments$,
+    isPlainRecord = false,
   }: {
     stateContainer?: DiscoverStateContainer;
     searchSessionId?: string;
@@ -125,6 +126,7 @@ describe('useDiscoverHistogram', () => {
     main$?: DataMain$;
     savedSearchFetch$?: DataFetch$;
     documents$?: DataDocuments$;
+    isPlainRecord?: boolean;
   } = {}) => {
     const availableFields$ = new BehaviorSubject({
       fetchStatus: FetchStatus.COMPLETE,
@@ -145,6 +147,7 @@ describe('useDiscoverHistogram', () => {
       dataView: dataViewWithTimefieldMock,
       inspectorAdapters,
       searchSessionId,
+      isPlainRecord,
     };
 
     const Wrapper: WrapperComponent<UseDiscoverHistogramProps> = ({ children }) => (
@@ -408,7 +411,12 @@ describe('useDiscoverHistogram', () => {
         foundDocuments: true,
       }) as DataMain$;
       const stateContainer = getStateContainer();
-      const { hook } = await renderUseDiscoverHistogram({ stateContainer, documents$, main$ });
+      const { hook } = await renderUseDiscoverHistogram({
+        stateContainer,
+        documents$,
+        main$,
+        isPlainRecord: true,
+      });
       const api = createMockUnifiedHistogramApi({ initialized: true });
       let params: Partial<UnifiedHistogramState> = {};
       api.setTotalHits = jest.fn((p) => {

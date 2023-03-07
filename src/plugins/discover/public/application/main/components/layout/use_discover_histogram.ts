@@ -15,7 +15,7 @@ import {
   UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
-import { AggregateQuery, Query, isOfAggregateQueryType } from '@kbn/es-query';
+import { AggregateQuery, Query } from '@kbn/es-query';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { distinctUntilChanged, map, Observable } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -36,6 +36,7 @@ export interface UseDiscoverHistogramProps {
   inspectorAdapters: InspectorAdapters;
   savedSearchFetch$: DataFetch$;
   searchSessionId: string | undefined;
+  isPlainRecord: boolean;
 }
 
 export const useDiscoverHistogram = ({
@@ -45,6 +46,7 @@ export const useDiscoverHistogram = ({
   inspectorAdapters,
   savedSearchFetch$,
   searchSessionId,
+  isPlainRecord,
 }: UseDiscoverHistogramProps) => {
   const services = useDiscoverServices();
   const timefilter = services.data.query.timefilter.timefilter;
@@ -159,7 +161,6 @@ export const useDiscoverHistogram = ({
     [timefilter, from, to]
   );
 
-  const isPlainRecord = query && isOfAggregateQueryType(query);
   if (isPlainRecord) {
     const dateRange = getResolvedDateRange(timefilter);
     timeRange = {
