@@ -8,19 +8,27 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import { ControlGroupContainer, type ControlGroupInput } from '@kbn/controls-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { Filter, TimeRange } from '@kbn/es-query';
+import { compareFilters, COMPARE_ALL_OPTIONS, Filter, Query, TimeRange } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/public';
-import { tap, Subscription, map, debounceTime } from 'rxjs';
+import { tap, Subscription, map, filter as rxFilter, debounceTime } from 'rxjs';
 import { LazyControlsRenderer } from './lazy_controls_renderer';
 import { useControlPanels } from '../hooks/use_control_panels_url_state';
 
 interface Props {
-  timeRange: TimeRange;
   dataView: DataView;
-  onFiltersChanged: (filters: Filter[]) => void;
+  filters: Filter[];
+  query: Query;
+  timeRange: TimeRange;
+  onFiltersChange: (filters: Filter[]) => void;
 }
 
-export const ControlsContent: React.FC<Props> = ({ timeRange, dataView, onFiltersChanged }) => {
+export const ControlsContent: React.FC<Props> = ({
+  dataView,
+  filters,
+  query,
+  timeRange,
+  onFiltersChange,
+}) => {
   const [controlPanels, setControlPanels] = useControlPanels(dataView);
   const inputSubscription = useRef<Subscription>();
   const filterSubscription = useRef<Subscription>();
@@ -33,31 +41,34 @@ export const ControlsContent: React.FC<Props> = ({ timeRange, dataView, onFilter
       controlStyle: 'oneLine',
       defaultControlWidth: 'small',
       panels: controlPanels,
+      filters,
+      query,
       timeRange,
-      ignoreParentSettings: {
-        ignoreValidations: true,
-      },
     };
 
     return { initialInput };
-  }, [controlPanels, dataView.id, timeRange]);
+  }, [controlPanels, dataView.id, filters, query, timeRange]);
 
-  const loadCompleteHandler = (controlGroup: ControlGroupContainer) => {
-    inputSubscription.current = controlGroup.onFiltersPublished$
-      .pipe(
-        debounceTime(500),
-        map((newFilters) =>
-          newFilters.sort((a, b) => a.meta.key?.localeCompare(b.meta.key ?? '') ?? 0)
-        ),
-        tap((sortedFilters) => onFiltersChanged(sortedFilters))
-      )
-      .subscribe();
+  const loadCompleteHandler = useCallback(
+    (controlGroup: ControlGroupContainer) => {
+      inputSubscription.current = controlGroup.onFiltersPublished$
+        .pipe(
+          debounceTime(250),
+          map((controlFilters) =>
+            controlFilters.sort((a, b) => a.meta.key?.localeCompare(b.meta.key ?? '') ?? 0)
+          ),
+          rxFilter((sortedFilter) => !compareFilters(filters, sortedFilter, COMPARE_ALL_OPTIONS)),
+          tap((newFilters) => onFiltersChange(newFilters))
+        )
+        .subscribe();
 
-    filterSubscription.current = controlGroup
-      .getInput$()
-      .pipe(tap(({ panels }) => setControlPanels(panels)))
-      .subscribe();
-  };
+      filterSubscription.current = controlGroup
+        .getInput$()
+        .pipe(tap(({ panels }) => setControlPanels(panels)))
+        .subscribe();
+    },
+    [filters, onFiltersChange, setControlPanels]
+  );
 
   useEffect(() => {
     return () => {
@@ -71,6 +82,8 @@ export const ControlsContent: React.FC<Props> = ({ timeRange, dataView, onFilter
       getCreationOptions={getInitialInput}
       onLoadComplete={loadCompleteHandler}
       timeRange={timeRange}
+      query={query}
+      filters={filters}
     />
   );
 };

@@ -12,7 +12,6 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
@@ -34,10 +33,7 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   };
 
   const onPanelFiltersChange = (panelFilters: Filter[]) => {
-    // <ControlsContent /> triggers this event 2 times during its loading lifecycle
-    if (!deepEqual(searchCriteria.panelFilters, panelFilters)) {
-      onQueryChange({ panelFilters });
-    }
+    onQueryChange({ panelFilters });
   };
 
   const onClearSavedQuery = () => {
@@ -80,7 +76,9 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
       <ControlsContent
         timeRange={searchCriteria.dateRange}
         dataView={dataView}
-        onFiltersChanged={onPanelFiltersChange}
+        query={searchCriteria.query}
+        filters={searchCriteria.filters}
+        onFiltersChange={onPanelFiltersChange}
       />
     </EuiFlexGrid>
   );
