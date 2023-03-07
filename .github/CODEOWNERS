@@ -476,6 +476,7 @@ examples/partial_results_example @elastic/kibana-data-discovery
 x-pack/plugins/painless_lab @elastic/platform-deployment-management
 packages/kbn-peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
+packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
 packages/kbn-picomatcher @elastic/kibana-operations
 packages/kbn-plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
