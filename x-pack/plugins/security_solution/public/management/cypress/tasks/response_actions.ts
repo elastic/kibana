@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ENABLED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
+import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 export const validateAvailableCommands = () => {
   cy.get('[data-test-subj^="command-type"]').should(
     'have.length',
-    ENABLED_RESPONSE_ACTION_COMMANDS.length
+    ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.length
   );
-  ENABLED_RESPONSE_ACTION_COMMANDS.forEach((command) => {
+  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.forEach((command) => {
     cy.getByTestSubj(`command-type-${command}`);
   });
 };

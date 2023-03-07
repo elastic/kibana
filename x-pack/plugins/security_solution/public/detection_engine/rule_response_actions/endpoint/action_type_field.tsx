@@ -12,7 +12,7 @@ import { difference } from 'lodash';
 import { getUiCommand } from '../../../management/components/endpoint_response_actions_list/components/hooks';
 import { getRbacControl } from '../../../management/components/endpoint_responder/lib/utils';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { ENABLED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
+import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 interface ActionTypeFieldProps {
   euiFieldProps?: Record<string, unknown>;
@@ -35,14 +35,14 @@ const ActionTypeFieldComponent = ({
 
   const AVAILABLE_COMMANDS = useMemo(() => {
     return difference(
-      ENABLED_RESPONSE_ACTION_COMMANDS,
+      ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
       usedEndpointCommands.filter((commandName) => commandName !== value)
     );
   }, [usedEndpointCommands, value]);
 
   const endpointPrivileges = useUserPrivileges().endpointPrivileges;
   const FIELD_OPTIONS = useMemo(() => {
-    return ENABLED_RESPONSE_ACTION_COMMANDS.map((name) => {
+    return ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.map((name) => {
       const isDisabled =
         !AVAILABLE_COMMANDS.includes(name) ||
         !getRbacControl({
