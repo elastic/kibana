@@ -25,53 +25,53 @@ export const initialState: GroupMap = {
 
 const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) => {
   switch (action.type) {
-      case ActionType.updateActiveGroups: {
-        const { id, activeGroups } = action.payload;
-        return {
-          ...state,
-          groupById: {
-            ...groupsById,
-            [id]: {
-              ...groupsById[id],
-              activeGroups,
+    case ActionType.updateActiveGroups: {
+      const { id, activeGroups } = action.payload;
+      return {
+        ...state,
+        groupById: {
+          ...groupsById,
+          [id]: {
+            ...groupsById[id],
+            activeGroups,
           },
         },
       };
     }
     case ActionType.updateGroupActivePage: {
-        const { id, activePage, selectedGroup } = action.payload;
-        return {
-          ...state,
-          groupById: {
-            ...groupsById,
-            [id]: {
-              ...groupsById[id],
-              pagingSettings: {
-                ...groupsById[id].pagingSettings,
-                [selectedGroup]: {
-                  ...(groupsById[id].pagingSettings[selectedGroup] ?? { itemsPerPage: 25 }),
-                  activePage,
-                },
+      const { id, activePage, selectedGroup } = action.payload;
+      return {
+        ...state,
+        groupById: {
+          ...groupsById,
+          [id]: {
+            ...groupsById[id],
+            pagingSettings: {
+              ...groupsById[id].pagingSettings,
+              [selectedGroup]: {
+                ...(groupsById[id].pagingSettings[selectedGroup] ?? { itemsPerPage: 25 }),
+                activePage,
               },
             },
           },
-        };
-      }
-      case ActionType.updateGroupItemsPerPage: {
-        const { id, itemsPerPage, selectedGroup } = action.payload;
-        return {
-          ...state,
-          groupById: {
-            ...groupsById,
-            [id]: {
-              ...groupsById[id],
-              pagingSettings: {
-                ...groupsById[id].pagingSettings,
-                [selectedGroup]: {
-                  ...(groupsById[id].pagingSettings[selectedGroup] ?? { activePage: 0 }),
-                  itemsPerPage,
-                },
+        },
+      };
+    }
+    case ActionType.updateGroupItemsPerPage: {
+      const { id, itemsPerPage, selectedGroup } = action.payload;
+      return {
+        ...state,
+        groupById: {
+          ...groupsById,
+          [id]: {
+            ...groupsById[id],
+            pagingSettings: {
+              ...groupsById[id].pagingSettings,
+              [selectedGroup]: {
+                ...(groupsById[id].pagingSettings[selectedGroup] ?? { activePage: 0 }),
+                itemsPerPage,
               },
+            },
           },
         },
       };
