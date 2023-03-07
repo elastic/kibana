@@ -27,6 +27,10 @@ describe('When accessing Endpoint Response Console', () => {
     // (this is especially important for when Responder is displayed from a Timeline)
     setResponderActionLogDateRange();
     closeResponderActionLogFlyout();
+
+    // Global kibana nav bar should remain accessible
+    cy.getByTestSubj('toggleNavButton').should('be.visible');
+
     closeResponder();
   };
 
