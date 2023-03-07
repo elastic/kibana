@@ -5,15 +5,17 @@
  * 2.0.
  */
 
+import type { EnabledFeatures } from '@kbn/spaces-plugin/public/management/edit_space/enabled_features';
 import {
-  SUPPORTED_RESPONSE_ACTION_TYPES,
   RESPONSE_ACTION_TYPES,
+  SUPPORTED_RESPONSE_ACTION_TYPES,
 } from '../../../common/detection_engine/rule_response_actions/schemas';
 
 export interface ResponseActionType {
   id: RESPONSE_ACTION_TYPES;
   name: string;
   iconClass: string;
+  disabled?: boolean;
 }
 
 interface EnabledFeatures {
@@ -22,16 +24,19 @@ interface EnabledFeatures {
 
 export const getSupportedResponseActions = (
   actionTypes: ResponseActionType[],
-  enabledFeatures: EnabledFeatures
-): ResponseActionType[] => {
-  return actionTypes.filter((actionType) => {
-    if (!enabledFeatures.endpoint && actionType.id === RESPONSE_ACTION_TYPES.ENDPOINT) {
-      return false;
-    }
-
-    return SUPPORTED_RESPONSE_ACTION_TYPES.includes(actionType.id);
-  });
-};
+  enabledFeatures: EnabledFeatures,
+  userPermissions: EnabledFeatures
+): ResponseActionType[] =>
+  actionTypes.reduce((acc: ResponseActionType[], actionType) => {
+    const isEndpointAction = actionType.id === RESPONSE_ACTION_TYPES.ENDPOINT;
+    if (!enabledFeatures.endpoint && isEndpointAction) return acc;
+    if (SUPPORTED_RESPONSE_ACTION_TYPES.includes(actionType.id))
+      return [
+        ...acc,
+        { ...actionType, disabled: isEndpointAction ? !userPermissions.endpoint : undefined },
+      ];
+    return acc;
+  }, []);
 
 export const responseActionTypes = [
   {

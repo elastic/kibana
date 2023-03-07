@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import type { ResponseActionType } from './get_supported_response_actions';
 import { getSupportedResponseActions, responseActionTypes } from './get_supported_response_actions';
@@ -16,6 +17,7 @@ export const useSupportedResponseActionTypes = () => {
   >();
 
   const isEndpointEnabled = useIsExperimentalFeatureEnabled('endpointResponseActionsEnabled');
+  const { canIsolateHost } = useUserPrivileges().endpointPrivileges;
 
   const enabledFeatures = useMemo(
     () => ({
@@ -23,10 +25,22 @@ export const useSupportedResponseActionTypes = () => {
     }),
     [isEndpointEnabled]
   );
+
+  const userHasPermissionsToExecute = useMemo(
+    () => ({
+      endpoint: canIsolateHost,
+    }),
+    [canIsolateHost]
+  );
+
   useEffect(() => {
-    const supportedTypes = getSupportedResponseActions(responseActionTypes, enabledFeatures);
+    const supportedTypes = getSupportedResponseActions(
+      responseActionTypes,
+      enabledFeatures,
+      userHasPermissionsToExecute
+    );
     setSupportedResponseActionTypes(supportedTypes);
-  }, [isEndpointEnabled, enabledFeatures]);
+  }, [isEndpointEnabled, enabledFeatures, userHasPermissionsToExecute]);
 
   return supportedResponseActionTypes;
 };

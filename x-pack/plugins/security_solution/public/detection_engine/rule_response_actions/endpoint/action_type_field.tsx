@@ -12,7 +12,7 @@ import { difference } from 'lodash';
 import { getUiCommand } from '../../../management/components/endpoint_response_actions_list/components/hooks';
 import { getRbacControl } from '../../../management/components/endpoint_responder/lib/utils';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../common/endpoint/service/response_actions/constants';
+import { ENABLED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 interface ActionTypeFieldProps {
   euiFieldProps?: Record<string, unknown>;
@@ -35,14 +35,14 @@ const ActionTypeFieldComponent = ({
 
   const AVAILABLE_COMMANDS = useMemo(() => {
     return difference(
-      RESPONSE_ACTION_API_COMMANDS_NAMES,
+      ENABLED_RESPONSE_ACTION_COMMANDS,
       usedEndpointCommands.filter((commandName) => commandName !== value)
     );
   }, [usedEndpointCommands, value]);
 
   const endpointPrivileges = useUserPrivileges().endpointPrivileges;
   const FIELD_OPTIONS = useMemo(() => {
-    return RESPONSE_ACTION_API_COMMANDS_NAMES.map((name, index) => {
+    return ENABLED_RESPONSE_ACTION_COMMANDS.map((name) => {
       const isDisabled =
         !AVAILABLE_COMMANDS.includes(name) ||
         !getRbacControl({
@@ -54,6 +54,7 @@ const ActionTypeFieldComponent = ({
         value: name,
         inputDisplay: name,
         disabled: isDisabled,
+        'data-test-subj': `command-type-${name}`,
       };
     });
   }, [AVAILABLE_COMMANDS, endpointPrivileges]);

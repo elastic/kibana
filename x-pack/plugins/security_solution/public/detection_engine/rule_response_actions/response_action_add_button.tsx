@@ -82,7 +82,7 @@ export const ResponseActionAddButton = ({
         const keyPadItem = (
           <EuiKeyPadMenuItem
             key={index}
-            isDisabled={!isPlatinumPlus}
+            isDisabled={!isPlatinumPlus || item.disabled}
             data-test-subj={`${item.name}-response-action-type-selection-option`}
             label={item.name}
             betaBadgeTooltipContent={'should be visible'}
