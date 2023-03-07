@@ -129,13 +129,6 @@ export interface FindQueryHTTP {
   sortOrder?: FindSortOrderHTTP;
   hasReference?: ReferenceHTTP | ReferenceHTTP[];
   hasReferenceOperator?: FindSearchOperatorHTTP;
-  /**
-   * It is not clear who might be using this API option, the SOM UI only ever passes in "id" here.
-   *
-   * TODO: Determine use. If not in use we should remove this option. If in use we must deprecate and eventually
-   * remove.
-   */
-  fields?: string | string[];
 }
 
 export interface FindResponseHTTP {

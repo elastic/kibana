@@ -21,6 +21,7 @@ export interface EngineSearchPreviewValues {
   engineName: typeof EngineNameLogic.values.engineName;
   resultFields: Record<string, FieldConfiguration>;
   searchableFields: Record<string, SearchFieldConfiguration>;
+  sortableFields: string[];
 }
 
 export const EngineSearchPreviewLogic = kea<
@@ -84,6 +85,22 @@ export const EngineSearchPreviewLogic = kea<
         );
 
         return searchableFields;
+      },
+    ],
+    sortableFields: [
+      () => [selectors.engineFieldCapabilitiesData],
+      (data: EngineSearchPreviewValues['engineFieldCapabilitiesData']) => {
+        if (!data) return [];
+
+        return Object.entries(data.field_capabilities.fields)
+          .filter(([, mappings]) =>
+            Object.entries(mappings).some(
+              ([, { metadata_field: isMeta, aggregatable }]) =>
+                // Aggregatable are also _sortable_
+                aggregatable && !isMeta
+            )
+          )
+          .map(([field]) => field);
       },
     ],
   }),

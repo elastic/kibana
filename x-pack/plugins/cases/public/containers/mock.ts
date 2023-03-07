@@ -17,6 +17,7 @@ import type {
   PersistableComment,
   FindCaseUserActions,
   CaseUsers,
+  CaseUserActionsStats,
 } from '../../common/ui/types';
 import type {
   CaseConnector,
@@ -879,6 +880,12 @@ export const findCaseUserActionsResponse: FindCaseUserActions = {
   perPage: 1000,
   total: 20,
   userActions: [...caseUserActionsWithRegisteredAttachments],
+};
+
+export const getCaseUserActionsStatsResponse: CaseUserActionsStats = {
+  total: 20,
+  totalComments: 10,
+  totalOtherActions: 10,
 };
 
 // components tests

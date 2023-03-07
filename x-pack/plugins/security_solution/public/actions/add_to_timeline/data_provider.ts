@@ -77,7 +77,7 @@ export const createDataProviders = ({
 }: CreateDataProviderParams) => {
   if (field == null) return null;
 
-  const arrayValues = Array.isArray(values) ? values : [values];
+  const arrayValues = Array.isArray(values) ? (values.length > 0 ? values : [null]) : [values];
 
   return arrayValues.reduce<DataProvider[]>((dataProviders, value, index) => {
     let id: string = '';

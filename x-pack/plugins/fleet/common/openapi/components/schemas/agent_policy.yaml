@@ -1,52 +1,65 @@
-allOf:
-  - $ref: ./new_agent_policy.yaml
-  - type: object
-    properties:
-      id:
-        type: string
-      status:
-        type: string
-        enum:
-          - active
-          - inactive
-      package_policies:
-        description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policy with the ?full=true parameter
-        type: array
-        items:
-          $ref: ./package_policy.yaml
-      updated_on:
-        type: string
-        format: date-time
-      updated_by:
-        type: string
-      data_output_id:
-        type: string
-        nullable: true
-      monitoring_output_id:
-        type: string
-        nullable: true
-      fleet_server_host_id:
-        type: string
-        nullable: true
-      download_source_id:
-        type: string
-        nullable: true
-      revision:
-        type: number
-      agents:
-        type: number
-      agent_features:
-        type: array
-        items: 
-          type: object
-          properties:
-            name: 
-              type: string
-            enabled: 
-              type: boolean
-          required:
-            - name
-            - enabled
-    required:
-      - id
-      - status
+title: Agent Policy
+type: object
+properties:
+  id:
+    type: string
+  name:
+    type: string
+  namespace:
+    type: string
+  description:
+    type: string
+  monitoring_enabled:
+    type: array
+    items:
+      type: string
+      enum:
+        - metrics
+        - logs
+  data_output_id:
+    type: string
+    nullable: true
+  monitoring_output_id:
+    type: string
+    nullable: true
+  fleet_server_host_id:
+    type: string
+    nullable: true
+  download_source_id:
+    type: string
+    nullable: true
+  unenroll_timeout:
+    type: number
+  inactivity_timeout:
+    type: number
+  package_policies:
+    description: This field is present only when retrieving a single agent policy, or when retrieving a list of agent policy with the ?full=true parameter
+    type: array
+    items:
+      $ref: ./package_policy.yaml
+  updated_on:
+    type: string
+    format: date-time
+  updated_by:
+    type: string
+  revision:
+    type: number
+  agents:
+    type: number
+  agent_features:
+    type: array
+    items:
+      type: object
+      properties:
+        name:
+          type: string
+        enabled:
+          type: boolean
+      required:
+        - name
+        - enabled
+required:
+  - id
+  - status
+  - name
+  - namespace

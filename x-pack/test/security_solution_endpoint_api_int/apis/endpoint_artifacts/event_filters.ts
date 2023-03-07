@@ -184,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
           body.entries[0].field = 'some.invalid.field';
 
           await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -196,7 +196,7 @@ export default function ({ getService }: FtrProviderContext) {
           const body = eventFilterApiCall.getBody({ os_types: ['linux', 'windows'] });
 
           await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -211,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           // Using superuser there as we need custom license for this action
           await supertest[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(400)
@@ -224,7 +224,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           // Using superuser here as we need custom license for this action
           await supertest[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(body)
             .expect(200);
@@ -236,7 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
       for (const eventFilterApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
         it(`should not error on [${eventFilterApiCall.method}] - [${eventFilterApiCall.info}]`, async () => {
           await supertestWithoutAuth[eventFilterApiCall.method](eventFilterApiCall.path)
-            .auth(ROLE.analyst_hunter, 'changeme')
+            .auth(ROLE.endpoint_security_policy_manager, 'changeme')
             .set('kbn-xsrf', 'true')
             .send(eventFilterApiCall.getBody())
             .expect(200);

@@ -7,6 +7,7 @@
 
 import { FilterStateStore } from '@kbn/es-query';
 
+import { VIEW_SELECTION } from '../../../common/constants';
 import type { TimelineResult } from '../../../common/types/timeline';
 import {
   TimelineId,
@@ -2075,6 +2076,11 @@ export const mockDataTableModel: DataTableModel = {
   showCheckboxes: false,
   selectAll: false,
   totalCount: 0,
+  viewMode: VIEW_SELECTION.gridView,
+  additionalFilters: {
+    showOnlyThreatIndicatorAlerts: false,
+    showBuildingBlockAlerts: false,
+  },
 };
 
 export const mockGetOneTimelineResult: TimelineResult = {

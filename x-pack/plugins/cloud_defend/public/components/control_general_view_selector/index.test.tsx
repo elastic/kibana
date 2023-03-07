@@ -118,6 +118,21 @@ describe('<ControlGeneralViewSelector />', () => {
     expect(updatedOptions[0]).not.toHaveTextContent('containerImageName');
   });
 
+  it('allows the user add boolean type conditions', async () => {
+    const { getByTestId, rerender } = render(<WrappedComponent />);
+    const addConditionBtn = getByTestId('cloud-defend-btnaddselectorcondition');
+
+    userEvent.click(addConditionBtn);
+
+    const addIgnoreVolumeMounts = getByTestId('cloud-defend-addmenu-ignoreVolumeMounts');
+
+    await waitFor(() => userEvent.click(addIgnoreVolumeMounts));
+
+    const updatedSelector: ControlSelector = { ...onChange.mock.calls[0][0] };
+    rerender(<WrappedComponent selector={updatedSelector} />);
+    expect(updatedSelector.ignoreVolumeMounts).toBeTruthy();
+  });
+
   it('shows an error if no conditions are added', async () => {
     const { getByText, getByTestId, rerender } = render(<WrappedComponent />);
 

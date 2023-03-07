@@ -95,7 +95,7 @@ export const ControlledField = <TFieldKey extends keyof FormConfig>({
     >
       <FieldComponent
         {...field}
-        checked={field.value}
+        checked={field.value || false}
         defaultValue={field.value}
         onChange={onChange}
         {...generatedProps}

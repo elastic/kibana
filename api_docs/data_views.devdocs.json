@@ -85,7 +85,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -97,7 +97,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -284,6 +284,14 @@
                 "path": "src/plugins/data/public/search/errors/painless_error.tsx"
               },
               {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -298,14 +306,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
                 "plugin": "controls",
@@ -4462,7 +4462,7 @@
             "tags": [],
             "label": "refreshFields",
             "description": [
-              "\nRefresh field list for a given index pattern."
+              "\nRefresh field list for a given data view."
             ],
             "signature": [
               "(dataView: ",
@@ -8293,7 +8293,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -8305,7 +8305,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -8492,6 +8492,14 @@
                 "path": "src/plugins/data/public/search/errors/painless_error.tsx"
               },
               {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -8506,14 +8514,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
                 "plugin": "controls",
@@ -11714,7 +11714,7 @@
             "tags": [],
             "label": "refreshFields",
             "description": [
-              "\nRefresh field list for a given index pattern."
+              "\nRefresh field list for a given data view."
             ],
             "signature": [
               "(dataView: ",
@@ -15596,7 +15596,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -15608,7 +15608,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -15795,6 +15795,14 @@
                 "path": "src/plugins/data/public/search/errors/painless_error.tsx"
               },
               {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -15809,14 +15817,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
                 "plugin": "controls",
@@ -18909,6 +18909,71 @@
       },
       {
         "parentPluginId": "dataViews",
+        "id": "def-common.DataViewMissingIndices",
+        "type": "Class",
+        "tags": [],
+        "label": "DataViewMissingIndices",
+        "description": [
+          "\nTried to call a method that relies on SearchSource having an indexPattern assigned"
+        ],
+        "signature": [
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewMissingIndices",
+            "text": "DataViewMissingIndices"
+          },
+          " extends ",
+          {
+            "pluginId": "kibanaUtils",
+            "scope": "common",
+            "docId": "kibKibanaUtilsPluginApi",
+            "section": "def-common.KbnError",
+            "text": "KbnError"
+          }
+        ],
+        "path": "src/plugins/data_views/common/lib/errors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "dataViews",
+            "id": "def-common.DataViewMissingIndices.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/plugins/data_views/common/lib/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "dataViews",
+                "id": "def-common.DataViewMissingIndices.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/data_views/common/lib/errors.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "dataViews",
         "id": "def-common.DataViewSavedObjectConflictError",
         "type": "Class",
         "tags": [],
@@ -19613,7 +19678,7 @@
             "tags": [],
             "label": "refreshFields",
             "description": [
-              "\nRefresh field list for a given index pattern."
+              "\nRefresh field list for a given data view."
             ],
             "signature": [
               "(dataView: ",
@@ -25936,14 +26001,6 @@
             "path": "src/plugins/data/server/query/route_handler_context.test.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
             "plugin": "data",
             "path": "src/plugins/data/public/search/session/sessions_mgmt/lib/api.ts"
           },
@@ -25966,18 +26023,6 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
           },
           {
             "plugin": "fleet",
