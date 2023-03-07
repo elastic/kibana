@@ -40,9 +40,9 @@ export const getPrebuiltRulesStatusRoute = (router: SecuritySolutionPluginRouter
         const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
         const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
-        const [latestVersions, installedVersions] = await Promise.all([
+        const [latestVersions, { installedVersions }] = await Promise.all([
           ruleAssetsClient.fetchLatestVersions(),
-          ruleObjectsClient.fetchInstalledVersions(),
+          ruleObjectsClient.fetchInstalledRules(),
         ]);
 
         const versionBuckets = getVersionBuckets({
@@ -81,7 +81,5 @@ const calculateRuleStats = (buckets: VersionBuckets): PrebuiltRulesStatusStats =
     num_prebuilt_rules_installed: installedVersions.length,
     num_prebuilt_rules_to_install: latestVersionsToInstall.length,
     num_prebuilt_rules_to_upgrade: installedVersionsToUpgrade.length,
-    rule_ids_to_install: latestVersionsToInstall.map((r) => r.rule_id),
-    rule_ids_to_upgrade: installedVersionsToUpgrade.map((r) => r.rule_id),
   };
 };

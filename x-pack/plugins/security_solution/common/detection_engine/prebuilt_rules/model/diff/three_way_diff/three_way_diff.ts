@@ -92,7 +92,7 @@ export interface ThreeWayDiff<TValue> extends ThreeVersionsOf<TValue> {
    *   - base=A, current=A, target=B
    *   - base=A, current=B, target=C
    */
-  has_value_changed: boolean;
+  has_update: boolean;
 
   /**
    * True if:

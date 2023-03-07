@@ -12,7 +12,7 @@ import type {
 } from '../../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
 import {
   determineDiffOutcome,
-  determineIfValueChanged,
+  determineIfValueCanUpdate,
   ThreeWayDiffOutcome,
 } from '../../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff_outcome';
 import { ThreeWayMergeOutcome } from '../../../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_merge_outcome';
@@ -27,7 +27,7 @@ export const simpleDiffAlgorithm = <TValue>(
   } = versions;
 
   const diffOutcome = determineDiffOutcome(baseVersion, currentVersion, targetVersion);
-  const hasValueChanged = determineIfValueChanged(diffOutcome);
+  const valueCanUpdate = determineIfValueCanUpdate(diffOutcome);
 
   const { mergeOutcome, mergedVersion } = mergeVersions(
     baseVersion,
@@ -44,7 +44,7 @@ export const simpleDiffAlgorithm = <TValue>(
 
     diff_outcome: diffOutcome,
     merge_outcome: mergeOutcome,
-    has_value_changed: hasValueChanged,
+    has_update: valueCanUpdate,
     has_conflict: mergeOutcome === ThreeWayMergeOutcome.Conflict,
   };
 };

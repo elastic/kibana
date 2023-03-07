@@ -52,7 +52,7 @@ export const determineDiffOutcome = <TValue>(
     : ThreeWayDiffOutcome.CustomizedValueCanUpdate;
 };
 
-export const determineIfValueChanged = (diffCase: ThreeWayDiffOutcome): boolean => {
+export const determineIfValueCanUpdate = (diffCase: ThreeWayDiffOutcome): boolean => {
   return (
     diffCase === ThreeWayDiffOutcome.StockValueCanUpdate ||
     diffCase === ThreeWayDiffOutcome.CustomizedValueCanUpdate

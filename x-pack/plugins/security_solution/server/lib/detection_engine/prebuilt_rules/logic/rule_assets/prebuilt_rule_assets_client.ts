@@ -145,7 +145,7 @@ export const createPrebuiltRuleAssetsClient = (
         const findResult = await savedObjectsClient.find<PrebuiltRuleAsset>({
           type: PREBUILT_RULE_ASSETS_SO_TYPE,
           filter,
-          perPage: 10000,
+          perPage: MAX_PREBUILT_RULES_COUNT,
         });
 
         const ruleAssets = findResult.saved_objects.map((so) => so.attributes);

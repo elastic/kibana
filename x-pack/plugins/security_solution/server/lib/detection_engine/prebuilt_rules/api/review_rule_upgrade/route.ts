@@ -131,9 +131,9 @@ const getRuleDiffCalculationArgs = (
 
 const calculateRuleStats = (results: CalculateRuleDiffResult[]): RuleUpgradeStatsForReview => {
   return {
-    num_rules_to_upgrade: results.length,
-    num_stock_rules_to_upgrade: results.length,
-    num_customized_rules_to_upgrade: 0,
+    num_rules_to_upgrade_total: results.length,
+    num_rules_to_upgrade_not_customized: results.length,
+    num_rules_to_upgrade_customized: 0,
     tags: [],
     fields: [],
   };
@@ -152,7 +152,7 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
       diff: {
         fields: pickBy<ThreeWayDiff<unknown>>(
           ruleDiff.fields,
-          (fieldDiff) => fieldDiff.has_value_changed || fieldDiff.has_conflict
+          (fieldDiff) => fieldDiff.has_update || fieldDiff.has_conflict
         ),
         has_conflict: ruleDiff.has_conflict,
       },

@@ -16,22 +16,16 @@ export interface GetPrebuiltRulesStatusResponseBody {
 
 export interface PrebuiltRulesStatusStats {
   /** Total number of existing (known) prebuilt rules */
-  num_prebuilt_rules_total: number; // do we need it?
+  num_prebuilt_rules_total: number;
 
   /** Number of installed prebuilt rules */
-  num_prebuilt_rules_installed: number; // do we need it?
+  num_prebuilt_rules_installed: number;
 
   /** Number of prebuilt rules available for installation (not yet installed) */
   num_prebuilt_rules_to_install: number;
 
   /** Number of installed prebuilt rules available for upgrade (stock + customized) */
   num_prebuilt_rules_to_upgrade: number;
-
-  /** Signature ids ("rule_id") of prebuilt rules available for installation (not yet installed) */
-  rule_ids_to_install: string[];
-
-  /** Signature ids ("rule_id") of installed prebuilt rules available for upgrade (stock + customized) */
-  rule_ids_to_upgrade: string[];
 
   // In the future we could add more stats such as:
   // - number of installed prebuilt rules which were deprecated

@@ -23,13 +23,13 @@ export interface ReviewRuleUpgradeResponseBody {
 
 export interface RuleUpgradeStatsForReview {
   /** Number of installed prebuilt rules available for upgrade (stock + customized) */
-  num_rules_to_upgrade: number;
+  num_rules_to_upgrade_total: number;
 
   /** Number of installed prebuilt rules available for upgrade which are stock (non-customized) */
-  num_stock_rules_to_upgrade: number;
+  num_rules_to_upgrade_not_customized: number;
 
   /** Number of installed prebuilt rules available for upgrade which are customized by the user */
-  num_customized_rules_to_upgrade: number;
+  num_rules_to_upgrade_customized: number;
 
   /** A union of all tags of all rules available for upgrade */
   tags: RuleTagArray;

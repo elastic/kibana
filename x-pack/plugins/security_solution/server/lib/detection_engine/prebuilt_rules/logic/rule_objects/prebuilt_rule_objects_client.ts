@@ -14,8 +14,6 @@ import type { PrebuiltRuleVersionInfo } from '../../model/rule_versions/prebuilt
 
 export interface IPrebuiltRuleObjectsClient {
   fetchInstalledRules(): Promise<FetchInstalledRulesResult>;
-
-  fetchInstalledVersions(): Promise<PrebuiltRuleVersionInfo[]>;
 }
 
 export interface FetchInstalledRulesResult {
@@ -36,15 +34,6 @@ export const createPrebuiltRuleObjectsClient = (
           installedRules: rules,
           installedVersions: versions,
         };
-      });
-    },
-
-    fetchInstalledVersions: (): Promise<PrebuiltRuleVersionInfo[]> => {
-      return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledVersions', async () => {
-        const rulesData = await getExistingPrepackagedRules({ rulesClient });
-        const rules = rulesData.map((rule) => internalRuleToAPIResponse(rule));
-        const versions = rules.map((rule) => convertRuleToVersionInfo(rule));
-        return versions;
       });
     },
   };

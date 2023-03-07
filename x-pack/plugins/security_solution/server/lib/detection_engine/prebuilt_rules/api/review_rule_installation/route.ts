@@ -42,9 +42,9 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
         const ruleAssetsClient = createPrebuiltRuleAssetsClient(soClient);
         const ruleObjectsClient = createPrebuiltRuleObjectsClient(rulesClient);
 
-        const [latestVersions, installedVersions] = await Promise.all([
+        const [latestVersions, { installedVersions }] = await Promise.all([
           ruleAssetsClient.fetchLatestVersions(),
-          ruleObjectsClient.fetchInstalledVersions(),
+          ruleObjectsClient.fetchInstalledRules(),
         ]);
 
         const versionBuckets = getVersionBuckets({
@@ -78,14 +78,7 @@ export const reviewRuleInstallationRoute = (router: SecuritySolutionPluginRouter
 };
 
 const getAggregatedTags = (rules: PrebuiltRuleAsset[]): string[] => {
-  const set = new Set<string>();
-
-  rules.forEach((rule) => {
-    (rule.tags ?? []).forEach((tag) => {
-      set.add(tag);
-    });
-  });
-
+  const set = new Set<string>(rules.flatMap((rule) => rule.tags || []));
   return Array.from(set.values());
 };
 
