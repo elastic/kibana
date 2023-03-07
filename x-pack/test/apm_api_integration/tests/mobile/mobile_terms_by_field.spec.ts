@@ -6,12 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { generateMobileData } from './generate_mobile_data';
-
-type MobileTermsByField = APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/terms'>;
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const apmApiClient = getService('apmApiClient');
@@ -26,13 +23,13 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     kuery = '',
     serviceName,
     fieldName,
-    size = 10,
+    size,
   }: {
     environment?: string;
     kuery?: string;
     serviceName: string;
-    transactionType?: string;
-    fieldName?: string;
+    fieldName: string;
+    size: number;
   }) {
     return await apmApiClient
       .readUser({
@@ -55,7 +52,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when('Mobile terms when data is not loaded', { config: 'basic', archives: [] }, () => {
     describe('when no data', () => {
       it('handles empty state', async () => {
-        const response = await getMobileTermsByField({ serviceName: 'foo' });
+        const response = await getMobileTermsByField({
+          serviceName: 'foo',
+          fieldName: 'bar',
+          size: 1,
+        });
         expect(response.terms).to.eql([]);
       });
 
@@ -63,6 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const response = await getMobileTermsByField({
           serviceName: 'synth-android',
           fieldName: '',
+          size: 1,
         });
         expect(response.terms).to.eql([]);
       });
@@ -86,6 +88,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceName: 'synth-android',
           environment: 'production',
           fieldName: 'device.model.identifier',
+          size: 10,
         });
         expect(response.terms).to.eql([
           {
@@ -108,6 +111,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           serviceName: 'synth-android',
           environment: 'production',
           fieldName: 'service.version',
+          size: 10,
         });
         expect(response.terms).to.eql([
           {
