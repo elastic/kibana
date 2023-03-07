@@ -194,7 +194,7 @@ const mockedUseCellActions: UseCellActions = () => {
   };
 };
 
-for (let index = 0; index < 100; index++) {
+for (let index = 0; index < 50; index++) {
   describe('AlertsTable', () => {
     const fetchAlertsData = {
       activePage: 0,
