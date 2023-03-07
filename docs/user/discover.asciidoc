@@ -87,7 +87,7 @@ You’ll modify the document table to display your fields of interest.
 [role="screenshot"]
 image:images/discover-sidebar-available-fields.png[Fields list that displays the top five search results, width=50%]
 
-. Expand *Available fields* and click `manufacturer` to view its most popular values.
+. In the *Available fields* list, click `manufacturer` to view its most popular values.
 +
 **Discover** shows the top 10 values and the number of records used to calculate those values.
 
@@ -103,12 +103,13 @@ them to the document table. Your table should look similar to this:
 [role="screenshot"]
 image:images/document-table.png[Document table with fields for manufacturer, customer_first_name, and customer_last_name]
 
-. To rearrange the table columns, click a
-column header, and then select *Move left* or *Move right*.
-
-. To copy the name or values in a column to the clipboard, click the column header and select the desired **Copy** option.
 
 . Optionally try out these actions:
++
+* To rearrange the table columns, click a
+column header, and then select *Move left* or *Move right*.
++
+* To copy the name or values in a column to the clipboard, click the column header and select the desired **Copy** option.
 +
 * For keyboard shortcuts on the document table, click
 image:images/keyboard-shortcut-icon.png[icon button for opening list of keyboard shortcuts, width=24px].
@@ -192,7 +193,7 @@ you can use to build a structured query.
 Search the ecommerce data for documents where the country matches US:
 
 . Enter `g`, and then select *geoip.country_iso_code*.
-. Select *:* for equals some value and *US*, and then refresh the query.
+. Select *:* for equals some value and *US*, and then click the refresh button or press the Enter key.
 . For a more complex search, try:
 +
 ```ts
