@@ -77,6 +77,7 @@ export const bulkEditActionToRulesClientOperation = (
       ];
 
     case BulkActionEditType.set_rule_actions:
+      // TODO: [Frequency Integration] should we convert actions here???
       return [
         {
           field: 'actions',

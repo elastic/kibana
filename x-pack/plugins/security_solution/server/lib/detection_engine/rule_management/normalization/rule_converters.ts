@@ -74,12 +74,7 @@ import type {
   NewTermsRuleParams,
   NewTermsSpecificRuleParams,
 } from '../../rule_schema';
-import {
-  transformActions,
-  transformFromAlertThrottle,
-  transformToAlertThrottle,
-  transformToNotifyWhen,
-} from './rule_actions';
+import { transformActions, transformToFrequency, transformFromAlertThrottle } from './rule_actions';
 import { convertAlertSuppressionToCamel, convertAlertSuppressionToSnake } from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 
@@ -422,6 +417,23 @@ export const convertPatchAPIToInternalSchema = (
 ): InternalRuleUpdate => {
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
   const existingParams = existingRule.params;
+
+  // TODO: [Frequency Integration] Convert throttle to actions.frequency if needed
+  if (nextParams.actions?.length && !nextParams.actions[0].frequency) {
+    const frequency = transformToFrequency(nextParams.throttle);
+    nextParams.actions = nextParams.actions.map((action) => ({
+      ...action,
+      frequency,
+    }));
+  }
+  if (existingRule.actions.length && !existingRule.actions[0].frequency) {
+    const frequency = transformToFrequency(existingRule.throttle);
+    existingRule.actions = existingRule.actions.map((action) => ({
+      ...action,
+      frequency,
+    }));
+  }
+
   return {
     name: nextParams.name ?? existingRule.name,
     tags: nextParams.tags ?? existingRule.tags,
@@ -466,12 +478,6 @@ export const convertPatchAPIToInternalSchema = (
     actions: nextParams.actions
       ? nextParams.actions.map(transformRuleToAlertAction)
       : existingRule.actions,
-    throttle: nextParams.throttle
-      ? transformToAlertThrottle(nextParams.throttle)
-      : existingRule.throttle ?? null,
-    notifyWhen: nextParams.throttle
-      ? transformToNotifyWhen(nextParams.throttle)
-      : existingRule.notifyWhen ?? null,
   };
 };
 
@@ -487,6 +493,16 @@ export const convertCreateAPIToInternalSchema = (
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
   const newRuleId = input.rule_id ?? uuidv4();
+
+  // TODO: [Frequency Integration] Convert throttle to actions.frequency if needed
+  if (input.actions?.length && !input.actions[0].frequency) {
+    const frequency = transformToFrequency(input.throttle);
+    input.actions = input.actions.map((action) => ({
+      ...action,
+      frequency,
+    }));
+  }
+
   return {
     name: input.name,
     tags: input.tags ?? [],
@@ -528,8 +544,6 @@ export const convertCreateAPIToInternalSchema = (
     schedule: { interval: input.interval ?? '5m' },
     enabled: input.enabled ?? defaultEnabled,
     actions: input.actions?.map(transformRuleToAlertAction) ?? [],
-    throttle: transformToAlertThrottle(input.throttle),
-    notifyWhen: transformToNotifyWhen(input.throttle),
   };
 };
 
@@ -677,6 +691,17 @@ export const internalRuleToAPIResponse = (
   const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> =>
     (obj as ResolvedSanitizedRule<RuleParams>).outcome != null;
 
+  // TODO: [Frequency Integration] Convert throttle to actions.frequency if needed
+  const throttle = transformFromAlertThrottle(rule, legacyRuleActions);
+  let actions = transformActions(rule.actions, legacyRuleActions);
+  if (actions?.length && !actions[0].frequency) {
+    const frequency = transformToFrequency(throttle);
+    actions = actions.map((action) => ({
+      ...action,
+      frequency,
+    }));
+  }
+
   return {
     // saved object properties
     outcome: isResolvedRule(rule) ? rule.outcome : undefined,
@@ -697,8 +722,8 @@ export const internalRuleToAPIResponse = (
     // Type specific security solution rule params
     ...typeSpecificCamelToSnake(rule.params),
     // Actions
-    throttle: transformFromAlertThrottle(rule, legacyRuleActions),
-    actions: transformActions(rule.actions, legacyRuleActions),
+    actions,
+    throttle,
     // Execution summary
     execution_summary: executionSummary ?? undefined,
   };

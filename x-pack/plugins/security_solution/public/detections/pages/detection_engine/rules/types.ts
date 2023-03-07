@@ -194,7 +194,6 @@ export interface ActionsStepRule {
   responseActions?: RuleResponseAction[];
   enabled: boolean;
   kibanaSiemAppUrl?: string;
-  throttle?: string | null;
 }
 
 export interface DefineStepRuleJson {
