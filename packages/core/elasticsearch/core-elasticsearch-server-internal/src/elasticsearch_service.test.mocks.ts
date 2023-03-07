@@ -10,7 +10,7 @@ import type { AgentManager } from '@kbn/core-elasticsearch-client-server-interna
 
 export const MockClusterClient = jest.fn();
 export const MockAgentManager: jest.MockedClass<typeof AgentManager> = jest.fn().mockReturnValue({
-  getAgents: jest.fn(),
+  getAgentsStats: jest.fn(),
   getAgentFactory: jest.fn(),
 });
 
