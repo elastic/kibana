@@ -151,7 +151,7 @@ exports[`UploadLicense should display an error when ES says license is expired 1
       <div
         aria-live="assertive"
         class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
-        role="alert"
+        role="warning"
         tabindex="-1"
       >
         <p
@@ -288,7 +288,7 @@ exports[`UploadLicense should display an error when ES says license is invalid 1
       <div
         aria-live="assertive"
         class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
-        role="alert"
+        role="warning"
         tabindex="-1"
       >
         <p
@@ -425,7 +425,7 @@ exports[`UploadLicense should display an error when submitting invalid JSON 1`] 
       <div
         aria-live="assertive"
         class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
-        role="alert"
+        role="warning"
         tabindex="-1"
       >
         <p
@@ -562,7 +562,7 @@ exports[`UploadLicense should display error when ES returns error 1`] = `
       <div
         aria-live="assertive"
         class="euiPanel euiPanel--danger euiPanel--paddingMedium euiCallOut euiCallOut--danger euiForm__errors emotion-euiPanel-none-m-danger-euiCallOut"
-        role="alert"
+        role="warning"
         tabindex="-1"
       >
         <p
