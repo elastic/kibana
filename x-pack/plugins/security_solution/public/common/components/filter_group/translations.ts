@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 export const PENDING_CHANGES_REMINDER = i18n.translate(
   'xpack.securitySolution.filtersGroup.pendingChanges',
   {
-    defaultMessage: 'Be sure to save the pending changes',
+    defaultMessage: 'Save pending changes',
   }
 );
 

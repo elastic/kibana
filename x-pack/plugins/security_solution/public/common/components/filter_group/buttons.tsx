@@ -49,7 +49,7 @@ export const SaveControls: FC<SaveControlsProps> = ({ onClick }) => {
           size="s"
           iconSize="m"
           display="base"
-          color={hasPendingChanges ? 'danger' : 'primary'}
+          color={'primary'}
           iconType={'save'}
           data-test-subj={'filter-group__save'}
           onClick={onClick}
@@ -69,7 +69,7 @@ export const SaveControls: FC<SaveControlsProps> = ({ onClick }) => {
       }}
     >
       <div style={{ maxWidth: '200px' }}>
-        <EuiCallOut title={PENDING_CHANGES_REMINDER} color="warning" iconType="alert" />
+        <EuiCallOut title={PENDING_CHANGES_REMINDER} color="warning" iconType="alert" size="s" />
       </div>
     </EuiPopover>
   );
