@@ -13,7 +13,7 @@ export type IdentifierType = 'user' | 'host';
 
 export interface GetScoresParams {
   dataViewId?: DataViewId;
-  filters?: unknown;
+  filter?: unknown;
   identifierType?: IdentifierType;
   enrichInputs?: boolean;
   range: { start: string; end: string };
