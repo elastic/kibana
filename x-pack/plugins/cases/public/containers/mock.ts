@@ -242,6 +242,7 @@ export const basicCase: Case = {
 };
 
 export const basicAttachment: Attachment = {
+  id: '7d47d130-bcec-11ed-afa1-0242ac120002',
   fileName: 'my-super-cool-screenshot',
   fileType: 'png',
   dateAdded: basicCreatedAt,

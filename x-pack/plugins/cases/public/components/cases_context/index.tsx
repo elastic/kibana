@@ -40,7 +40,6 @@ export interface CasesContextValue {
   features: CasesFeaturesAllRequired;
   releasePhase: ReleasePhase;
   dispatch: CasesContextValueDispatch;
-  filesPlugin: FilesStart;
 }
 
 export interface CasesContextProps
@@ -50,11 +49,11 @@ export interface CasesContextProps
     | 'permissions'
     | 'externalReferenceAttachmentTypeRegistry'
     | 'persistableStateAttachmentTypeRegistry'
-    | 'filesPlugin'
   > {
   basePath?: string;
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
+  filesPlugin: FilesStart;
 }
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
@@ -96,7 +95,6 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     ),
     releasePhase,
     dispatch,
-    filesPlugin,
   }));
 
   /**

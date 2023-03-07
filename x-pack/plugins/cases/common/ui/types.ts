@@ -104,6 +104,7 @@ export interface ResolvedCase {
 }
 
 export interface Attachment {
+  id: string;
   fileName: string | null | undefined;
   fileType: string;
   dateAdded: string;

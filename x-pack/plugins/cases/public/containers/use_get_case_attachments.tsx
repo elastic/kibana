@@ -5,68 +5,58 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-extraneous-dependencies
-import faker from 'faker';
-import type { Attachments } from './types';
+import type { UseQueryResult } from '@tanstack/react-query';
 
-const fakeFiles: Attachments = [];
+import { useFilesContext } from '@kbn/shared-ux-file-context';
+import { useQuery } from '@tanstack/react-query';
 
-for (let i = 0; i < 15; i++) {
-  fakeFiles.push({
-    fileName: faker.system.fileName(),
-    fileType: faker.system.fileType(),
-    dateAdded: faker.date.past().toString(),
-  });
-}
+import type { ServerError } from '../types';
+import type { Attachment } from './types';
+
+import { APP_ID } from '../../common';
+import { useToasts } from '../common/lib/kibana';
+import { CASES_FILE_KINDS } from '../files';
+import { casesQueriesKeys } from './constants';
+import * as i18n from './translations';
 
 export interface GetCaseAttachmentsParams {
+  caseId: string;
   page: number;
   perPage: number;
-  extension?: string[];
-  mimeType?: string[];
-  searchTerm?: string;
+  // extension?: string[];
+  // mimeType?: string[];
+  // searchTerm?: string;
 }
-
-interface GetCaseAttachmentsResponse {
-  pageOfItems: Attachments;
-  availableTypes: string[];
-  totalItemCount: number;
-}
-
-// Manually handle pagination of data
-const findFiles = (files: Attachments, pageIndex: number, pageSize: number) => {
-  let pageOfItems;
-
-  if (!pageIndex && !pageSize) {
-    pageOfItems = files;
-  } else {
-    const startIndex = pageIndex * pageSize;
-    pageOfItems = files.slice(startIndex, Math.min(startIndex + pageSize, files.length));
-  }
-
-  return {
-    pageOfItems,
-    totalItemCount: files.length,
-  };
-};
 
 export const useGetCaseAttachments = ({
+  caseId,
   page,
   perPage,
-  extension,
-  mimeType,
-  searchTerm,
-}: GetCaseAttachmentsParams): {
-  data: GetCaseAttachmentsResponse;
-  isLoading: boolean;
-} => {
-  const availableTypes = [...new Set(fakeFiles.map((item) => item.fileType))];
+}: GetCaseAttachmentsParams): UseQueryResult<{ files: Attachment[]; total: number }> => {
+  const toasts = useToasts();
+  const { client: filesClient } = useFilesContext();
+  const filePage = page + 1;
 
-  return {
-    data: {
-      ...findFiles(fakeFiles, page, perPage),
-      availableTypes,
+  return useQuery(
+    casesQueriesKeys.caseAttachments({ caseId, page: filePage, perPage }),
+    () => {
+      return filesClient.list({
+        kind: CASES_FILE_KINDS[APP_ID].id,
+        page: filePage,
+        perPage,
+        meta: { caseId },
+      });
     },
-    isLoading: false,
-  };
+    {
+      keepPreviousData: true,
+      onError: (error: ServerError) => {
+        if (error.name !== 'AbortError') {
+          toasts.addError(
+            error.body && error.body.message ? new Error(error.body.message) : error,
+            { title: i18n.ERROR_TITLE }
+          );
+        }
+      },
+    }
+  );
 };

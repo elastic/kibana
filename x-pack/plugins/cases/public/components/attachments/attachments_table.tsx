@@ -7,7 +7,9 @@
 import React, { useMemo } from 'react';
 
 import type { EuiBasicTableColumn, Pagination, EuiBasicTableProps } from '@elastic/eui';
+
 import {
+  EuiButtonIcon,
   EuiLink,
   EuiBasicTable,
   EuiLoadingContent,
@@ -16,7 +18,12 @@ import {
   EuiEmptyPrompt,
   EuiButton,
 } from '@elastic/eui';
+import { useFilesContext } from '@kbn/shared-ux-file-context';
+
 import type { Attachment, Attachments } from '../../../common/ui/types';
+
+import { APP_ID } from '../../../common';
+import { CASES_FILE_KINDS } from '../../files';
 
 interface AttachmentsTableProps {
   isLoading: boolean;
@@ -35,25 +42,27 @@ export const AttachmentsTable = ({
   onDownload,
   isLoading,
 }: AttachmentsTableProps) => {
+  const { client: filesClient } = useFilesContext();
+
   const columns: Array<EuiBasicTableColumn<Attachment>> = [
     {
-      field: 'fileName',
+      field: 'name',
       name: 'Name',
       'data-test-subj': 'attachments-table-filename',
-      render: (fileName: Attachment['fileName']) => (
+      render: (name: Attachment['fileName']) => (
         <EuiLink color="primary" href="#" target="_blank" external={false}>
-          {fileName}
+          {name}
         </EuiLink>
       ),
       width: '60%',
     },
     {
-      field: 'fileType',
+      field: 'mimeType',
       'data-test-subj': 'attachments-table-filetype',
       name: 'Type',
     },
     {
-      field: 'dateAdded',
+      field: 'created',
       name: 'Date Added',
       'data-test-subj': 'attachments-table-date-added',
       dataType: 'date',
@@ -66,9 +75,18 @@ export const AttachmentsTable = ({
           name: 'Download',
           isPrimary: true,
           description: 'Download this file',
-          icon: 'download',
-          type: 'icon',
-          onClick: onDownload,
+          render: (attachment: Attachment) => {
+            return (
+              <EuiButtonIcon
+                iconType={'download'}
+                aria-label={'download'}
+                href={filesClient.getDownloadHref({
+                  fileKind: CASES_FILE_KINDS[APP_ID].id,
+                  id: attachment.id,
+                })}
+              />
+            );
+          },
           'data-test-subj': 'attachments-table-action-download',
         },
         {
@@ -107,7 +125,7 @@ export const AttachmentsTable = ({
         <>
           <EuiSpacer size="xl" />
           <EuiText size="xs" data-test-subj="attachments-table-results-count">
-            {`Showing ${resultsCount}`}
+            {'Showing'} {resultsCount}
           </EuiText>
         </>
       )}

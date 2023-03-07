@@ -7,24 +7,30 @@
 import React, { useMemo, useState } from 'react';
 
 import type { Criteria } from '@elastic/eui';
+
 import { EuiFlexItem, EuiFlexGroup, EuiFieldSearch, EuiSelect, EuiButtonGroup } from '@elastic/eui';
+import { useQueryClient } from '@tanstack/react-query';
+
 import type { Case, Attachment } from '../../../../common/ui/types';
+import type { GetCaseAttachmentsParams } from '../../../containers/use_get_case_attachments';
 
 import { CaseViewTabs } from '../case_view_tabs';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
-import type { GetCaseAttachmentsParams } from '../../../containers/use_get_case_attachments';
 import { useGetCaseAttachments } from '../../../containers/use_get_case_attachments';
 import { AttachmentsTable } from '../../attachments/attachments_table';
 import { AddFile } from '../../add_file';
+import { casesQueriesKeys } from '../../../containers/constants';
 
 interface CaseViewAttachmentsProps {
   caseData: Case;
 }
 
 export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
+  const queryClient = useQueryClient();
   const [filteringOptions, setFilteringOptions] = useState<GetCaseAttachmentsParams>({
     page: 0,
     perPage: 5,
+    caseId: caseData.id,
   });
   const { data: attachmentsData, isLoading } = useGetCaseAttachments(filteringOptions);
 
@@ -42,21 +48,14 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
     () => ({
       pageIndex: filteringOptions.page,
       pageSize: filteringOptions.perPage,
-      totalItemCount: attachmentsData.totalItemCount,
-      pageSizeOptions: [5, 10, 0],
+      totalItemCount: attachmentsData?.total ?? 0,
+      pageSizeOptions: [1, 5, 10, 0],
       showPerPageOptions: true,
     }),
-    [filteringOptions.page, filteringOptions.perPage, attachmentsData.totalItemCount]
+    [filteringOptions.page, filteringOptions.perPage, attachmentsData]
   );
 
-  const selectOptions = useMemo(
-    () => [
-      { value: 'any', text: 'any' },
-      ...attachmentsData.availableTypes.map((type) => ({ value: type, text: type })),
-    ],
-    [attachmentsData.availableTypes]
-  );
-
+  const selectOptions = [{ value: 'any', text: 'any' }];
   const [selectValue, setSelectValue] = useState(selectOptions[0].value);
 
   const tableViewSelectedId = 'tableViewSelectedId';
@@ -74,7 +73,9 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
     },
   ];
 
-  const refreshAttachmentsTable = () => {};
+  const refreshAttachmentsTable = () => {
+    queryClient.invalidateQueries(casesQueriesKeys.caseAttachments({ ...filteringOptions }));
+  };
 
   return (
     <EuiFlexGroup>
@@ -90,13 +91,15 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
                 <EuiFieldSearch
                   fullWidth
                   placeholder="Search"
-                  value={filteringOptions.searchTerm}
-                  disabled={isLoading || attachmentsData.totalItemCount === 0}
-                  onChange={(event) =>
-                    setFilteringOptions({
-                      ...filteringOptions,
-                      searchTerm: event.target.value,
-                    })
+                  // value={filteringOptions.searchTerm}
+                  value={''}
+                  disabled={isLoading || attachmentsData?.total === 0}
+                  onChange={
+                    (event) => {}
+                    // setFilteringOptions({
+                    //   ...filteringOptions,
+                    //   searchTerm: event.target.value,
+                    // })
                   }
                   isClearable={true}
                   data-test-subj="case-detail-search-file"
@@ -106,7 +109,7 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
                 <EuiSelect
                   options={selectOptions}
                   value={selectValue}
-                  disabled={isLoading || attachmentsData.totalItemCount === 0}
+                  disabled={isLoading || attachmentsData?.total === 0}
                   onChange={(e) => setSelectValue(e.target.value)}
                   data-test-subj="case-detail-select-file-type"
                 />
@@ -124,7 +127,7 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
             </EuiFlexGroup>
             <AttachmentsTable
               isLoading={isLoading}
-              items={attachmentsData.pageOfItems}
+              items={attachmentsData?.files ?? []}
               onChange={onTableChange}
               onDelete={() => {}}
               onDownload={() => {}}

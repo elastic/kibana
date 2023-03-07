@@ -15,15 +15,16 @@ import {
 import React, { useCallback, useState } from 'react';
 
 import type { UploadedFile } from '@kbn/shared-ux-file-upload/src/file_upload';
+
 import { FileUpload } from '@kbn/shared-ux-file-upload';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 
 import { APP_ID, CommentType, ExternalReferenceStorageType } from '../../../common';
+import { CASES_FILE_KINDS } from '../../files';
 import { useKibana } from '../../common/lib/kibana';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import * as i18n from './translations';
-import { CASES_FILE_KINDS } from '../../files';
 
 interface AddFileProps {
   caseId: string;
@@ -56,7 +57,10 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId, onFileAdded }) => {
             {
               type: CommentType.externalReference,
               externalReferenceId: file.id,
-              externalReferenceStorage: { type: ExternalReferenceStorageType.elasticSearchDoc },
+              externalReferenceStorage: {
+                type: ExternalReferenceStorageType.savedObject,
+                soType: FILE_ATTACHMENT_TYPE,
+              },
               externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
               externalReferenceMetadata: {
                 file: {
@@ -75,6 +79,9 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId, onFileAdded }) => {
           title: 'File uploaded successfuly!',
           text: `File ID: ${file.id}`,
         });
+
+        // used to refresh the attachments table
+        onFileAdded();
       } catch (error) {
         // error toast is handled inside  createAttachments
 
