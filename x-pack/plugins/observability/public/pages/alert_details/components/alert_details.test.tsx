@@ -18,7 +18,7 @@ import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useBreadcrumbs } from '../../../hooks/use_breadcrumbs';
-import { AlertDetails } from './alert_details';
+import { AlertDetails } from '../alert_details';
 import { ConfigSchema } from '../../../plugin';
 import { alert, alertWithNoData } from '../mock/alert';
 import { ruleTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/rule_type_registry.mock';

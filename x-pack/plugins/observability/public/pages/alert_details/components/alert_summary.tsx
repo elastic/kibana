@@ -30,9 +30,14 @@ import {
 } from '@kbn/rule-data-utils';
 import { formatAlertEvaluationValue } from '../../../utils/format_alert_evaluation_value';
 import { asDuration } from '../../../../common/utils/formatters';
-import { AlertSummaryProps } from '../types';
 import { AlertStatusIndicator } from '../../../components/shared/alert_status_indicator';
-import { DEFAULT_DATE_FORMAT } from '../constants';
+import type { TopAlert } from '../../../typings/alerts';
+
+export interface AlertSummaryProps {
+  alert: TopAlert | null;
+}
+
+const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 
 export function AlertSummary({ alert }: AlertSummaryProps) {
   const tags = alert?.fields[ALERT_RULE_TAGS];

@@ -5,22 +5,10 @@
  * 2.0.
  */
 
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
-import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
-
 export interface RuleStatsState {
   total: number;
   disabled: number;
   muted: number;
   error: number;
   snoozed: number;
-}
-
-export interface TopAlert<TAdditionalMetaFields extends Record<string, any> = {}> {
-  fields: ParsedTechnicalFields & ParsedExperimentalFields & TAdditionalMetaFields;
-  start: number;
-  lastUpdated: number;
-  reason: string;
-  link?: string;
-  active: boolean;
 }

@@ -13,13 +13,12 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-
 import React, { useMemo, useState, useCallback } from 'react';
-
 import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { CommentType } from '@kbn/cases-plugin/common';
 import { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { useKibana } from '../../../utils/kibana_react';
 import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
@@ -28,10 +27,10 @@ import { translations, paths } from '../../../config';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../containers/alerts_table/translations';
 import { ObservabilityAppServices } from '../../../application/types';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
-import type { TopAlert } from '../containers/alerts_page/types';
 import { ObservabilityRuleTypeRegistry } from '../../..';
-import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/types';
 import { ConfigSchema } from '../../../plugin';
+import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/alert_details';
+import type { TopAlert } from '../../../typings/alerts';
 
 export interface ObservabilityActionsProps {
   data: TimelineNonEcsData[];
