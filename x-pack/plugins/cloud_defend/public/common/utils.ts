@@ -6,10 +6,70 @@
  */
 import yaml from 'js-yaml';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { ControlSelector, ControlResponse, ControlSchema, TelemetryType } from '../types';
+import {
+  ControlSelector,
+  ControlResponse,
+  ControlSchema,
+  SelectorType,
+  DefaultFileSelector,
+  DefaultProcessSelector,
+  SelectorConditionsMap,
+  CommonSelectorCondition,
+  FileSelectorCondition,
+  ProcessSelectorCondition,
+  SelectorCondition,
+} from '../types';
 
 export function getInputFromPolicy(policy: NewPackagePolicy, inputId: string) {
   return policy.inputs.find((input) => input.type === inputId);
+}
+
+export function camelToSentenceCase(prop: string) {
+  const sentence = prop.replace(/([A-Z])/g, ' $1').toLowerCase();
+  return sentence[0].toUpperCase() + sentence.slice(1);
+}
+
+export function getSelectorConditionsForType(type: SelectorType): SelectorCondition[] {
+  const conditions: SelectorCondition[] = Object.keys(
+    SelectorConditionsMap.common
+  ) as SelectorCondition[];
+  switch (type) {
+    case SelectorType.process:
+      return conditions.concat(Object.keys(SelectorConditionsMap.process) as SelectorCondition[]);
+    case SelectorType.file:
+    default:
+      return conditions.concat(Object.keys(SelectorConditionsMap.file) as SelectorCondition[]);
+  }
+}
+
+export function getSelectorConditionValueType(prop: SelectorCondition) {
+  if (SelectorConditionsMap.common[prop as CommonSelectorCondition]) {
+    return SelectorConditionsMap.common[prop as CommonSelectorCondition]?.type;
+  } else if (SelectorConditionsMap.file.hasOwnProperty(prop)) {
+    return SelectorConditionsMap.file[prop as FileSelectorCondition]?.type;
+  } else if (SelectorConditionsMap.process.hasOwnProperty(prop)) {
+    return SelectorConditionsMap.process[prop as ProcessSelectorCondition]?.type;
+  }
+}
+
+export function getSelectorConditionValues(prop: SelectorCondition) {
+  if (SelectorConditionsMap.common.hasOwnProperty(prop)) {
+    return SelectorConditionsMap.common[prop as CommonSelectorCondition]?.values;
+  } else if (SelectorConditionsMap.file.hasOwnProperty(prop)) {
+    return SelectorConditionsMap.file[prop as FileSelectorCondition]?.values;
+  } else if (SelectorConditionsMap.process.hasOwnProperty(prop)) {
+    return SelectorConditionsMap.process[prop as ProcessSelectorCondition]?.values;
+  }
+}
+
+export function getDefaultSelectorByType(type: SelectorType): ControlSelector {
+  switch (type) {
+    case SelectorType.process:
+      return { type, ...DefaultProcessSelector };
+    case SelectorType.file:
+    default:
+      return { type, ...DefaultFileSelector };
+  }
 }
 
 export function getSelectorsAndResponsesFromYaml(configuration: string): {
@@ -25,10 +85,10 @@ export function getSelectorsAndResponsesFromYaml(configuration: string): {
     if (result) {
       if (result.file && result.file.selectors && result.file.responses) {
         selectors = selectors.concat(
-          result.file.selectors.map((selector: any) => ({ ...selector, type: TelemetryType.file }))
+          result.file.selectors.map((selector: any) => ({ ...selector, type: SelectorType.file }))
         );
         responses = responses.concat(
-          result.file.responses.map((response: any) => ({ ...response, type: TelemetryType.file }))
+          result.file.responses.map((response: any) => ({ ...response, type: SelectorType.file }))
         );
       }
 
@@ -36,13 +96,13 @@ export function getSelectorsAndResponsesFromYaml(configuration: string): {
         selectors = selectors.concat(
           result.process.selectors.map((selector: any) => ({
             ...selector,
-            type: TelemetryType.process,
+            type: SelectorType.process,
           }))
         );
         responses = responses.concat(
           result.process.responses.map((response: any) => ({
             ...response,
-            type: TelemetryType.process,
+            type: SelectorType.process,
           }))
         );
       }

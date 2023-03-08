@@ -7,7 +7,6 @@
 import React, { useState, useMemo, useCallback, FormEvent } from 'react';
 import {
   EuiBadge,
-  EuiFormLabel,
   EuiIcon,
   EuiToolTip,
   EuiAccordion,
@@ -29,13 +28,16 @@ import { useStyles } from './styles';
 import {
   ControlGeneralViewSelectorDeps,
   ControlFormErrorMap,
-  ControlSelectorCondition,
-  ControlFileSelectorCondition,
-  ControlSelectorConditionUIOptionsMap,
-  ControlSelectorBooleanConditions,
   ControlSelector,
-  TelemetryType,
+  SelectorType,
+  SelectorCondition,
 } from '../../types';
+import {
+  getSelectorConditionValueType,
+  getSelectorConditionValues,
+  getSelectorConditionsForType,
+  camelToSentenceCase,
+} from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
 import {
   VALID_SELECTOR_NAME_REGEX,
@@ -46,15 +48,15 @@ import {
 
 interface ConditionProps {
   label: string;
-  prop: string;
-  onRemoveCondition(prop: string): void;
+  prop: SelectorCondition;
+  onRemoveCondition(prop: SelectorCondition): void;
 }
 
 interface StringArrayConditionProps extends ConditionProps {
   selector: ControlSelector;
   errorMap: ControlFormErrorMap;
-  onAddValueToCondition(prop: string, value: string): void;
-  onChangeStringArrayCondition(prop: string, value: string[]): void;
+  onAddValueToCondition(prop: SelectorCondition, value: string): void;
+  onChangeStringArrayCondition(prop: SelectorCondition, value: string[]): void;
 }
 
 const BooleanCondition = ({ label, prop, onRemoveCondition }: ConditionProps) => {
@@ -96,7 +98,7 @@ const StringArrayCondition = ({
       return { label: option, value: option };
     }) || [];
 
-  const restrictedValues = ControlSelectorConditionUIOptionsMap[prop]?.values;
+  const restrictedValues = getSelectorConditionValues(prop);
 
   return (
     <EuiFormRow
@@ -174,13 +176,20 @@ export const ControlGeneralViewSelector = ({
     setAddConditionOpen(false);
   }, []);
 
-  const remainingProps = useMemo(() => {
-    const keys = Object.keys(typeof selector);
+  const availableConditions = useMemo(
+    () => (selector.type ? getSelectorConditionsForType(selector.type) : []),
+    [selector.type]
+  );
 
-    return keys.filter((condition) => !selector.hasOwnProperty(condition));
+  const remainingConditions = useMemo(() => {
+    return availableConditions.filter((condition) => !selector.hasOwnProperty(condition));
+  }, [availableConditions, selector]);
+
+  const conditionsAdded = useMemo(() => {
+    return Object.keys(selector).filter(
+      (key) => !['type', 'hasErrors', 'name'].includes(key)
+    ) as SelectorCondition[];
   }, [selector]);
-
-  const conditionsAdded = Object.keys(ControlSelectorCondition).length - remainingProps.length;
 
   const onRemoveClicked = useCallback(() => {
     // we prevent the removal of the last selector to avoid an empty state
@@ -224,7 +233,7 @@ export const ControlGeneralViewSelector = ({
       const updatedSelector = { ...selector };
 
       updatedSelector.name = value;
-      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded === 0;
+      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded.length === 0;
 
       onChange(updatedSelector, index);
     },
@@ -232,7 +241,7 @@ export const ControlGeneralViewSelector = ({
   );
 
   const onChangeStringArrayCondition = useCallback(
-    (prop: string, values: string[]) => {
+    (prop: SelectorCondition, values: string[]) => {
       const updatedSelector = { ...selector, [prop]: values };
       const errors = [];
 
@@ -243,7 +252,7 @@ export const ControlGeneralViewSelector = ({
       values.forEach((value) => {
         const bytes = new Blob([value]).size;
 
-        if (prop === ControlFileSelectorCondition.targetFilePath) {
+        if (prop === 'targetFilePath') {
           if (bytes > MAX_FILE_PATH_VALUE_LENGTH_BYTES) {
             errors.push(i18n.errorValueLengthExceeded);
           }
@@ -258,7 +267,7 @@ export const ControlGeneralViewSelector = ({
         delete errorMap[prop];
       }
 
-      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded === 0;
+      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded.length === 0;
       setErrorMap({ ...errorMap });
 
       onChange(updatedSelector, index);
@@ -276,8 +285,10 @@ export const ControlGeneralViewSelector = ({
   );
 
   const onAddCondition = useCallback(
-    (prop: string) => {
-      if (prop in ControlSelectorBooleanConditions) {
+    (prop: SelectorCondition) => {
+      const valueType = getSelectorConditionValueType(prop);
+
+      if (valueType === 'flag' || valueType === 'boolean') {
         onChangeBooleanCondition(prop, true);
       } else {
         onChangeStringArrayCondition(prop, []);
@@ -294,7 +305,7 @@ export const ControlGeneralViewSelector = ({
 
       delete errorMap[prop];
       setErrorMap({ ...errorMap });
-      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded === 1;
+      updatedSelector.hasErrors = Object.keys(errorMap).length > 0 || conditionsAdded.length === 1;
 
       onChange(updatedSelector, index);
       closeAddCondition();
@@ -303,7 +314,7 @@ export const ControlGeneralViewSelector = ({
   );
 
   const onAddValueToCondition = useCallback(
-    (prop: string, searchValue: string) => {
+    (prop: SelectorCondition, searchValue: string) => {
       const value = searchValue.trim();
       const values = selector[prop as keyof ControlSelector] as string[];
 
@@ -319,7 +330,7 @@ export const ControlGeneralViewSelector = ({
       return prev.concat(errorMap[current]);
     }, []);
 
-    if (conditionsAdded === 0) {
+    if (conditionsAdded.length === 0) {
       errs.push(i18n.errorConditionRequired);
     }
 
@@ -328,9 +339,9 @@ export const ControlGeneralViewSelector = ({
 
   const selectorTypeIcon = useMemo(() => {
     switch (selector.type) {
-      case TelemetryType.process:
+      case SelectorType.process:
         return 'gear';
-      case TelemetryType.file:
+      case SelectorType.file:
       default:
         return 'document';
     }
@@ -370,7 +381,7 @@ export const ControlGeneralViewSelector = ({
               <EuiText css={styles.conditionsBadge} size="xs">
                 <b>{i18n.conditions}</b>
               </EuiText>
-              <EuiBadge color="hollow">{conditionsAdded}</EuiBadge>
+              <EuiBadge color="hollow">{conditionsAdded.length}</EuiBadge>
               <div css={styles.verticalDivider} />
             </div>
           )}
@@ -433,33 +444,32 @@ export const ControlGeneralViewSelector = ({
             maxLength={MAX_SELECTOR_NAME_LENGTH}
           />
         </EuiFormRow>
-        {Object.keys(selector).map((prop: string) => {
-          if (['name', 'type', 'hasErrors'].indexOf(prop) === -1) {
-            const label = i18n.getConditionLabel(prop);
+        {conditionsAdded.map((prop) => {
+          const label = camelToSentenceCase(prop);
+          const valueType = getSelectorConditionValueType(prop);
 
-            if (prop in ControlSelectorBooleanConditions) {
-              return (
-                <BooleanCondition
-                  key={prop}
-                  label={label}
-                  prop={prop}
-                  onRemoveCondition={onRemoveCondition}
-                />
-              );
-            } else {
-              return (
-                <StringArrayCondition
-                  key={prop}
-                  label={label}
-                  prop={prop}
-                  selector={selector}
-                  errorMap={errorMap}
-                  onAddValueToCondition={onAddValueToCondition}
-                  onChangeStringArrayCondition={onChangeStringArrayCondition}
-                  onRemoveCondition={onRemoveCondition}
-                />
-              );
-            }
+          if (valueType === 'flag') {
+            return (
+              <BooleanCondition
+                key={prop}
+                label={label}
+                prop={prop}
+                onRemoveCondition={onRemoveCondition}
+              />
+            );
+          } else {
+            return (
+              <StringArrayCondition
+                key={prop}
+                label={label}
+                prop={prop}
+                selector={selector}
+                errorMap={errorMap}
+                onAddValueToCondition={onAddValueToCondition}
+                onChangeStringArrayCondition={onChangeStringArrayCondition}
+                onRemoveCondition={onRemoveCondition}
+              />
+            );
           }
         })}
       </EuiForm>
@@ -483,14 +493,15 @@ export const ControlGeneralViewSelector = ({
       >
         <EuiContextMenuPanel
           size="s"
-          items={remainingProps.map((prop) => {
+          items={remainingConditions.map((prop) => {
+            const label = camelToSentenceCase(prop);
             return (
               <EuiContextMenuItem
                 data-test-subj={`cloud-defend-addmenu-${prop}`}
                 key={prop}
                 onClick={() => onAddCondition(prop)}
               >
-                {i18n.getConditionLabel(prop)}
+                {label}
               </EuiContextMenuItem>
             );
           })}

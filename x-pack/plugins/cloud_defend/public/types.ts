@@ -51,73 +51,113 @@ export interface CloudDefendSecuritySolutionContext {
 /**
  * cloud_defend/control types
  */
+
+/*
+ * 'stringArray' uses a EuiComboBox
+ * 'flag' is a boolean value which is always 'true'
+ * 'boolean' can be true or false
+ */
+export type SelectorConditionType = 'stringArray' | 'flag' | 'boolean';
+
+export type CommonSelectorCondition =
+  | 'containerImageName'
+  | 'containerImageTag'
+  | 'orchestratorClusterId'
+  | 'orchestratorClusterName'
+  | 'orchestratorNamespace'
+  | 'orchestratorResourceLabel'
+  | 'orchestratorResourceName'
+  | 'orchestratorResourceType'
+  | 'orchestratorResourceLabel'
+  | 'orchestratorType';
+
+export type FileSelectorCondition =
+  | 'targetFilePath'
+  | 'ignoreVolumeFiles'
+  | 'ignoreVolumeMounts'
+  | 'operation';
+
+export type ProcessSelectorCondition =
+  | 'processExecutable'
+  | 'processName'
+  | 'processUserName'
+  | 'processUserId'
+  | 'sessionLeaderInteractive'
+  | 'sessionLeaderExecutable'
+  | 'operation';
+
+export type SelectorCondition =
+  | CommonSelectorCondition
+  | FileSelectorCondition
+  | ProcessSelectorCondition;
+
+interface SelectorConditionsMapProps {
+  common: {
+    [key in CommonSelectorCondition]: {
+      type: SelectorConditionType;
+      values?: string[];
+    };
+  };
+  file: {
+    [key in FileSelectorCondition]: {
+      type: SelectorConditionType;
+      values?: string[];
+    };
+  };
+  process: {
+    [key in ProcessSelectorCondition]: {
+      type: SelectorConditionType;
+      values?: string[];
+    };
+  };
+}
+
+// used to determine UX control and allowed values for each condition
+export const SelectorConditionsMap: SelectorConditionsMapProps = {
+  common: {
+    containerImageName: { type: 'stringArray' },
+    containerImageTag: { type: 'stringArray' },
+    orchestratorClusterId: { type: 'stringArray' },
+    orchestratorClusterName: { type: 'stringArray' },
+    orchestratorNamespace: { type: 'stringArray' },
+    orchestratorResourceLabel: { type: 'stringArray' },
+    orchestratorResourceName: { type: 'stringArray' },
+    orchestratorResourceType: { type: 'stringArray' },
+    orchestratorType: { type: 'stringArray', values: ['kubernetes'] },
+  },
+  file: {
+    operation: {
+      type: 'stringArray',
+      values: ['createExecutable', 'modifyExecutable', 'createFile', 'modifyFile', 'deleteFile'],
+    },
+    targetFilePath: { type: 'stringArray' },
+    ignoreVolumeFiles: { type: 'flag' },
+    ignoreVolumeMounts: { type: 'flag' },
+  },
+  process: {
+    operation: { type: 'stringArray', values: ['fork', 'exec'] },
+    processExecutable: { type: 'stringArray' },
+    processName: { type: 'stringArray' },
+    processUserName: { type: 'stringArray' },
+    processUserId: { type: 'stringArray' },
+    sessionLeaderInteractive: { type: 'boolean' },
+    sessionLeaderExecutable: { type: 'stringArray' },
+  },
+};
+
 export enum ControlResponseAction {
+  log = 'log',
   alert = 'alert',
   block = 'block',
 }
 
-export enum ControlSelectorCondition {
-  operation = 'operation',
-  containerImageName = 'containerImageName',
-  containerImageTag = 'containerImageTag',
-  orchestratorClusterId = 'orchestratorClusterId',
-  orchestratorClusterName = 'orchestratorClusterName',
-  orchestratorNamespace = 'orchestratorNamespace',
-  orchestratorResourceLabel = 'orchestratorResourceLabel',
-  orchestratorResourceName = 'orchestratorResourceName',
-  orchestratorResourceType = 'orchestratorResourceType',
-  orchestratorType = 'orchestratorType',
-}
-
-export enum ControlFileSelectorCondition {
-  targetFilePath = 'targetFilePath',
-  ignoreVolumeFiles = 'ignoreVolumeFiles',
-  ignoreVolumeMounts = 'ignoreVolumeMounts',
-}
-
-export enum ControlProcessSelectorCondition {
-  processExecutable = 'processExecutable',
-  processName = 'processName',
-  processUserName = 'processUserName',
-  processUserId = 'processUserId',
-  sessionLeaderInteractive = 'sessionLeaderInteractive',
-  sessionLeaderExecutable = 'sessionLeaderExecutable',
-}
-
-export enum ControlSelectorBooleanConditions {
-  ignoreVolumeFiles = 'ignoreVolumeFiles',
-  ignoreVolumeMounts = 'ignoreVolumeMounts',
-  sessionLeaderInteractive = 'sessionLeaderInteractive',
-}
-
-export enum ControlSelectorOperation {
-  createFile = 'createFile',
-  modifyFile = 'modifyFile',
-  deleteFile = 'deleteFile',
-  createExecutable = 'createExecutable',
-  modifyExecutable = 'modifyExecutable',
-}
-
-export enum ControlSelectorOrchestratorType {
-  kubernetes = 'kubernetes',
-}
-
-export interface ControlSelectorConditionUIOptions {
-  [key: string]: {
-    values: string[];
-  };
-}
-
-export const ControlSelectorConditionUIOptionsMap: ControlSelectorConditionUIOptions = {
-  operation: { values: Object.values(ControlSelectorOperation) },
-  orchestratorType: { values: Object.values(ControlSelectorOrchestratorType) },
-};
-
-export enum TelemetryType {
+// every selector/response has a type, currently we support file and process selectors (which match on their respective telemetry/operations)
+export enum SelectorType {
   file = 'file',
   process = 'process',
 }
 
+// outer most wrapper of the yaml configuration fed to cloud-defend agent.
 export interface ControlSchema {
   file?: {
     selectors: ControlSelector[];
@@ -155,7 +195,7 @@ export interface ControlSelector {
   sessionLeaderInteractive?: string[];
 
   // ephemeral props (used only in UI)
-  type?: TelemetryType;
+  type?: SelectorType;
 
   // used to track selector error state in UI
   hasErrors?: boolean;
@@ -167,15 +207,20 @@ export interface ControlResponse {
   actions: ControlResponseAction[];
 
   // ephemeral props (used only in UI)
-  type?: TelemetryType;
+  type?: SelectorType;
 
   // used to track response error state in UI
   hasErrors?: boolean;
 }
 
-export const DefaultSelector: ControlSelector = {
+export const DefaultFileSelector: ControlSelector = {
   name: 'Untitled',
-  operation: ControlSelectorConditionUIOptionsMap.operation.values,
+  operation: ['createExecutable', 'modifyExecutable'],
+};
+
+export const DefaultProcessSelector: ControlSelector = {
+  name: 'Untitled',
+  operation: ['fork', 'exec'],
 };
 
 export const DefaultResponse: ControlResponse = {

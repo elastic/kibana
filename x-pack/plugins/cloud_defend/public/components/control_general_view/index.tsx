@@ -28,12 +28,12 @@ import {
   getInputFromPolicy,
   getYamlFromSelectorsAndResponses,
   getSelectorsAndResponsesFromYaml,
+  getDefaultSelectorByType,
 } from '../../common/utils';
 import {
-  TelemetryType,
+  SelectorType,
   ControlSelector,
   ControlResponse,
-  DefaultSelector,
   DefaultResponse,
   ViewDeps,
 } from '../../types';
@@ -42,7 +42,7 @@ import { ControlGeneralViewSelector } from '../control_general_view_selector';
 import { ControlGeneralViewResponse } from '../control_general_view_response';
 
 interface AddSelectorButtonProps {
-  onSelectType(type: TelemetryType): void;
+  onSelectType(type: SelectorType): void;
 }
 
 const AddSelectorButton = ({ onSelectType }: AddSelectorButtonProps) => {
@@ -57,12 +57,12 @@ const AddSelectorButton = ({ onSelectType }: AddSelectorButtonProps) => {
 
   const addFileSelector = useCallback(() => {
     closePopover();
-    onSelectType(TelemetryType.file);
+    onSelectType(SelectorType.file);
   }, [onSelectType]);
 
   const addProcessSelector = useCallback(() => {
     closePopover();
-    onSelectType(TelemetryType.process);
+    onSelectType(SelectorType.process);
   }, [onSelectType]);
 
   const items = [
@@ -146,17 +146,20 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
     [selectors]
   );
 
-  const onAddSelector = useCallback((type: TelemetryType) => {
-    const newSelector = { ...DefaultSelector };
-    const dupe = selectors.find((selector) => selector.name === newSelector.name);
+  const onAddSelector = useCallback(
+    (type: SelectorType) => {
+      const newSelector = getDefaultSelectorByType(type);
+      const dupe = selectors.find((selector) => selector.name === newSelector.name);
 
-    if (dupe) {
-      newSelector.name = incrementName(dupe.name);
-    }
+      if (dupe) {
+        newSelector.name = incrementName(dupe.name);
+      }
 
-    selectors.push(newSelector);
-    onUpdateYaml(selectors, responses);
-  }, [incrementName, onUpdateYaml, responses, selectors]);
+      selectors.push(newSelector);
+      onUpdateYaml(selectors, responses);
+    },
+    [incrementName, onUpdateYaml, responses, selectors]
+  );
 
   const onAddResponse = useCallback(() => {
     const newResponse = { ...DefaultResponse };

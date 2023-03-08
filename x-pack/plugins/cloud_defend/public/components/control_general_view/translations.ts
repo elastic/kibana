@@ -6,12 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  ControlSelectorCondition,
-  ControlFileSelectorCondition,
-  ControlProcessSelectorCondition,
-  TelemetryType,
-} from '../../types';
+import { SelectorCondition, SelectorType } from '../../types';
 
 export const fileSelector = i18n.translate('xpack.cloudDefend.fileSelector', {
   defaultMessage: 'File selector',
@@ -22,7 +17,7 @@ export const processSelector = i18n.translate('xpack.cloudDefend.processSelector
 });
 
 export const networkSelector = i18n.translate('xpack.cloudDefend.networkSelector', {
-  defaultMessage: 'Network selector (coming soon)',
+  defaultMessage: 'Network (coming soon)',
 });
 
 export const conditions = i18n.translate('xpack.cloudDefend.conditions', {
@@ -42,7 +37,8 @@ export const selectors = i18n.translate('xpack.cloudDefend.controlSelectors', {
 });
 
 export const selectorsHelp = i18n.translate('xpack.cloudDefend.controlSelectorsHelp', {
-  defaultMessage: 'Create selectors to match on operations that should be blocked or alerted.',
+  defaultMessage:
+    'Create file or process selectors to match on operations and or conditions of interest.',
 });
 
 export const responses = i18n.translate('xpack.cloudDefend.controlResponses', {
@@ -51,7 +47,7 @@ export const responses = i18n.translate('xpack.cloudDefend.controlResponses', {
 
 export const responsesHelp = i18n.translate('xpack.cloudDefend.controlResponsesHelp', {
   defaultMessage:
-    'Responses are evaluated from top to bottom. At most, one set of actions will be performed.',
+    'Use responses to map one or more selectors to a set of actions. Selectors can also be used to "exclude" events.',
 });
 
 export const matchSelectors = i18n.translate('xpack.cloudDefend.controlMatchSelectors', {
@@ -120,13 +116,13 @@ export const errorValueLengthExceeded = i18n.translate(
   }
 );
 
-export const getSelectorIconTooltip = (telemetryType?: TelemetryType) => {
+export const getSelectorIconTooltip = (telemetryType?: SelectorType) => {
   switch (telemetryType) {
-    case TelemetryType.process:
+    case SelectorType.process:
       return i18n.translate('xpack.cloudDefend.processSelectorIconTooltip', {
         defaultMessage: 'A process selector. Matches only on process operations.',
       });
-    case TelemetryType.file:
+    case SelectorType.file:
     default:
       return i18n.translate('xpack.cloudDefend.fileSelectorIconTooltip', {
         defaultMessage: 'A file selector. Matches only on file operations.',
@@ -134,101 +130,17 @@ export const getSelectorIconTooltip = (telemetryType?: TelemetryType) => {
   }
 };
 
-export const getConditionHelpLabel = (prop: string) => {
+export const getConditionHelpLabel = (prop: SelectorCondition) => {
   switch (prop) {
-    case ControlFileSelectorCondition.ignoreVolumeMounts:
+    case 'ignoreVolumeMounts':
       return i18n.translate('xpack.cloudDefend.ignoreVolumeMountsHelp', {
         defaultMessage: 'Ignore operations on all volume mounts.',
       });
-    case ControlFileSelectorCondition.ignoreVolumeFiles:
+    case 'ignoreVolumeFiles':
       return i18n.translate('xpack.cloudDefend.ignoreVolumeFilesHelp', {
         defaultMessage:
           'Ignore operations on file mounts only. e.g mounted files, configMaps, secrets etc...',
       });
-    default:
-      return '';
-  }
-};
-
-export const getConditionLabel = (prop: string) => {
-  switch (prop) {
-    case ControlSelectorCondition.operation:
-      return i18n.translate('xpack.cloudDefend.operation', {
-        defaultMessage: 'Operation',
-      });
-    case ControlSelectorCondition.containerImageName:
-      return i18n.translate('xpack.cloudDefend.containerImageName', {
-        defaultMessage: 'Container image name',
-      });
-    case ControlSelectorCondition.containerImageTag:
-      return i18n.translate('xpack.cloudDefend.containerImageTag', {
-        defaultMessage: 'Container image tag',
-      });
-    case ControlSelectorCondition.orchestratorClusterId:
-      return i18n.translate('xpack.cloudDefend.orchestratorClusterId', {
-        defaultMessage: 'Orchestrator cluster ID',
-      });
-    case ControlSelectorCondition.orchestratorClusterName:
-      return i18n.translate('xpack.cloudDefend.orchestratorClusterName', {
-        defaultMessage: 'Orchestrator cluster name',
-      });
-    case ControlSelectorCondition.orchestratorNamespace:
-      return i18n.translate('xpack.cloudDefend.orchestratorNamespace', {
-        defaultMessage: 'Orchestrator namespace',
-      });
-    case ControlSelectorCondition.orchestratorResourceLabel:
-      return i18n.translate('xpack.cloudDefend.orchestratorResourceLabel', {
-        defaultMessage: 'Orchestrator resource label',
-      });
-    case ControlSelectorCondition.orchestratorResourceName:
-      return i18n.translate('xpack.cloudDefend.orchestratorResourceName', {
-        defaultMessage: 'Orchestrator resource name',
-      });
-    case ControlSelectorCondition.orchestratorResourceType:
-      return i18n.translate('xpack.cloudDefend.orchestratorResourceType', {
-        defaultMessage: 'Orchestrator resource type',
-      });
-
-    // file selector specific
-    case ControlFileSelectorCondition.targetFilePath:
-      return i18n.translate('xpack.cloudDefend.targetFilePath', {
-        defaultMessage: 'Target file path',
-      });
-    case ControlFileSelectorCondition.ignoreVolumeFiles:
-      return i18n.translate('xpack.cloudDefend.ignoreVolumeFiles', {
-        defaultMessage: 'Ignore volume files',
-      });
-    case ControlFileSelectorCondition.ignoreVolumeMounts:
-      return i18n.translate('xpack.cloudDefend.ignoreVolumeMounts', {
-        defaultMessage: 'Ignore volume mounts',
-      });
-
-    // process selector specific
-    case ControlProcessSelectorCondition.processExecutable:
-      return i18n.translate('xpack.cloudDefend.processExecutableLbl', {
-        defaultMessage: 'Process executable',
-      });
-    case ControlProcessSelectorCondition.processName:
-      return i18n.translate('xpack.cloudDefend.processNameLbl', {
-        defaultMessage: 'Process name',
-      });
-    case ControlProcessSelectorCondition.processUserName:
-      return i18n.translate('xpack.cloudDefend.processUserNameLbl', {
-        defaultMessage: 'Process user name',
-      });
-    case ControlProcessSelectorCondition.processUserId:
-      return i18n.translate('xpack.cloudDefend.processUserIdLbl', {
-        defaultMessage: 'Process user ID',
-      });
-    case ControlProcessSelectorCondition.sessionLeaderInteractive:
-      return i18n.translate('xpack.cloudDefend.sessionLeaderInteractiveLbl', {
-        defaultMessage: 'Session leader interactive',
-      });
-    case ControlProcessSelectorCondition.sessionLeaderExecutable:
-      return i18n.translate('xpack.cloudDefend.sessionLeaderExecutableLbl', {
-        defaultMessage: 'Session leader executable',
-      });
-
     default:
       return '';
   }
