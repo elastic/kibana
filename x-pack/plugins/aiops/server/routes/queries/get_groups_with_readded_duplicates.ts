@@ -7,20 +7,20 @@
 
 import { uniqWith, isEqual } from 'lodash';
 
-import type { ChangePointGroup } from '@kbn/ml-agg-utils';
+import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
 
-import type { ChangePointDuplicateGroup } from '../../../common/types';
+import type { SignificantTermDuplicateGroup } from '../../../common/types';
 
 export function getGroupsWithReaddedDuplicates(
-  groups: ChangePointGroup[],
-  groupedChangePoints: ChangePointDuplicateGroup[]
-): ChangePointGroup[] {
+  groups: SignificantTermGroup[],
+  groupedSignificantTerms: SignificantTermDuplicateGroup[]
+): SignificantTermGroup[] {
   return groups.map((g) => {
     const group = [...g.group];
 
     for (const groupItem of g.group) {
       const { duplicate } = groupItem;
-      const duplicates = groupedChangePoints.find((d) =>
+      const duplicates = groupedSignificantTerms.find((d) =>
         d.group.some(
           (dg) => dg.fieldName === groupItem.fieldName && dg.fieldValue === groupItem.fieldValue
         )
