@@ -292,11 +292,6 @@ export class DashboardPageObject extends FtrService {
     await this.waitForRenderComplete();
   }
 
-  public async resetDashboardToLastSavedState() {
-    await this.ensureDashboardIsInEditMode();
-    await this.clickCancelOutOfEditMode();
-  }
-
   public async clickCancelOutOfEditMode(accept = true) {
     this.log.debug('clickCancelOutOfEditMode');
     if (await this.getIsInViewMode()) return;
