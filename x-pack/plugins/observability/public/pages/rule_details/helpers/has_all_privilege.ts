@@ -4,5 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { RuleType, Rule } from '@kbn/triggers-actions-ui-plugin/public';
 
-export { PageTitle } from './page_title';
+export function hasAllPrivilege(rule: Rule, ruleType?: RuleType): boolean {
+  return ruleType?.authorizedConsumers[rule.consumer]?.all ?? false;
+}

@@ -45,34 +45,44 @@ import {
 } from '../../utils/alert_summary_widget';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../components/shared/alert_search_bar';
 import { DeleteModalConfirmation } from './components/delete_modal_confirmation';
-import { CenterJustifiedSpinner } from './components/center_justified_spinner';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 
-import {
-  EXECUTION_TAB,
-  ALERTS_TAB,
-  RULE_DETAILS_PAGE_ID,
-  RULE_DETAILS_ALERTS_SEARCH_BAR_ID,
-  SEARCH_BAR_URL_STORAGE_KEY,
-} from './constants';
-import { RuleDetailsPathParams, TabId } from './types';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { RULES_BREADCRUMB_TEXT } from '../rules/translations';
-import { PageTitle } from './components';
-import { getHealthColor } from './config';
-import { hasExecuteActionsCapability, hasAllPrivilege } from './config';
+import { PageTitle } from './components/page_title';
+import { getHealthColor } from './helpers/get_health_color';
+import { hasExecuteActionsCapability } from './helpers/has_execute_actions_capability';
+import { hasAllPrivilege } from './helpers/has_all_privilege';
 import { paths } from '../../config/paths';
 import { ALERT_STATUS_ALL } from '../../../common/constants';
 import { AlertStatus } from '../../../common/typings';
 import { observabilityFeatureId, ruleDetailsLocatorID } from '../../../common';
-import { ALERT_STATUS_LICENSE_ERROR, rulesStatusesTranslationsMapping } from './translations';
 import { ObservabilityAppServices } from '../../application/types';
+
+export const EXECUTION_TAB = 'execution';
+export const ALERTS_TAB = 'alerts';
+export const SEARCH_BAR_URL_STORAGE_KEY = 'searchBarParams';
+export const EVENT_ERROR_LOG_TAB = 'rule_error_log_list';
+export const RULE_DETAILS_PAGE_ID = 'rule-details-alerts-o11y';
+export const RULE_DETAILS_ALERTS_SEARCH_BAR_ID = 'rule-details-alerts-search-bar-o11y';
+
+type TabId = typeof ALERTS_TAB | typeof EXECUTION_TAB;
+
+export interface RuleDetailsPathParams {
+  ruleId: string;
+}
 
 export function RuleDetailsPage() {
   const {
+    application: { capabilities, navigateToUrl },
     charts,
     http,
+    notifications: { toasts },
+    share: {
+      url: { locators },
+    },
     triggersActionsUi: {
       alertsTableConfigurationRegistry,
       ruleTypeRegistry,
@@ -82,11 +92,6 @@ export function RuleDetailsPage() {
       getAlertSummaryWidget: AlertSummaryWidget,
       getRuleStatusPanel: RuleStatusPanel,
       getRuleDefinition,
-    },
-    application: { capabilities, navigateToUrl },
-    notifications: { toasts },
-    share: {
-      url: { locators },
     },
   } = useKibana<ObservabilityAppServices>().services;
 
@@ -326,7 +331,9 @@ export function RuleDetailsPage() {
     rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License;
 
   const statusMessage = isLicenseError
-    ? ALERT_STATUS_LICENSE_ERROR
+    ? i18n.translate('xpack.observability.ruleDetails.ruleStatusLicenseError', {
+        defaultMessage: 'License Error',
+      })
     : rulesStatusesTranslationsMapping[rule.executionStatus.status];
 
   return (
@@ -452,3 +459,24 @@ export function RuleDetailsPage() {
     </ObservabilityPageTemplate>
   );
 }
+
+const rulesStatusesTranslationsMapping = {
+  ok: i18n.translate('xpack.observability.ruleDetails.ruleStatusOk', {
+    defaultMessage: 'Ok',
+  }),
+  active: i18n.translate('xpack.observability.ruleDetails.ruleStatusActive', {
+    defaultMessage: 'Active',
+  }),
+  error: i18n.translate('xpack.observability.ruleDetails.ruleStatusError', {
+    defaultMessage: 'Error',
+  }),
+  pending: i18n.translate('xpack.observability.ruleDetails.ruleStatusPending', {
+    defaultMessage: 'Pending',
+  }),
+  unknown: i18n.translate('xpack.observability.ruleDetails.ruleStatusUnknown', {
+    defaultMessage: 'Unknown',
+  }),
+  warning: i18n.translate('xpack.observability.ruleDetails.ruleStatusWarning', {
+    defaultMessage: 'Warning',
+  }),
+};

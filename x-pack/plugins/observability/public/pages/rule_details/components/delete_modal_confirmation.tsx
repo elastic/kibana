@@ -7,18 +7,12 @@
 
 import { EuiConfirmModal } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import type {
   BulkOperationAttributes,
   BulkOperationResponse,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
-import {
-  confirmModalText,
-  confirmButtonText,
-  cancelButtonText,
-  deleteSuccessText,
-  deleteErrorText,
-} from '../translations';
 
 export function DeleteModalConfirmation({
   idsToDelete,
@@ -89,3 +83,38 @@ export function DeleteModalConfirmation({
     </EuiConfirmModal>
   );
 }
+
+const confirmModalText = (numIdsToDelete: number, singleTitle: string, multipleTitle: string) =>
+  i18n.translate('xpack.observability.rules.deleteSelectedIdsConfirmModal.descriptionText', {
+    defaultMessage:
+      "You can't recover {numIdsToDelete, plural, one {a deleted {singleTitle}} other {deleted {multipleTitle}}}.",
+    values: { numIdsToDelete, singleTitle, multipleTitle },
+  });
+
+const confirmButtonText = (numIdsToDelete: number, singleTitle: string, multipleTitle: string) =>
+  i18n.translate('xpack.observability.rules.deleteSelectedIdsConfirmModal.deleteButtonLabel', {
+    defaultMessage:
+      'Delete {numIdsToDelete, plural, one {{singleTitle}} other {# {multipleTitle}}} ',
+    values: { numIdsToDelete, singleTitle, multipleTitle },
+  });
+
+const cancelButtonText = i18n.translate(
+  'xpack.observability.rules.deleteSelectedIdsConfirmModal.cancelButtonLabel',
+  {
+    defaultMessage: 'Cancel',
+  }
+);
+
+const deleteSuccessText = (numSuccesses: number, singleTitle: string, multipleTitle: string) =>
+  i18n.translate('xpack.observability.rules.deleteSelectedIdsSuccessNotification.descriptionText', {
+    defaultMessage:
+      'Deleted {numSuccesses, number} {numSuccesses, plural, one {{singleTitle}} other {{multipleTitle}}}',
+    values: { numSuccesses, singleTitle, multipleTitle },
+  });
+
+const deleteErrorText = (numErrors: number, singleTitle: string, multipleTitle: string) =>
+  i18n.translate('xpack.observability.rules.deleteSelectedIdsErrorNotification.descriptionText', {
+    defaultMessage:
+      'Failed to delete {numErrors, number} {numErrors, plural, one {{singleTitle}} other {{multipleTitle}}}',
+    values: { numErrors, singleTitle, multipleTitle },
+  });

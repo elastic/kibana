@@ -6,9 +6,21 @@
  */
 
 import { useEffect, useState, useCallback } from 'react';
-import { loadRule } from '@kbn/triggers-actions-ui-plugin/public';
-import { FetchRuleProps, FetchRule } from '../pages/rule_details/types';
-import { RULE_LOAD_ERROR } from '../pages/rule_details/translations';
+import { i18n } from '@kbn/i18n';
+import { HttpSetup } from '@kbn/core-http-browser';
+import { loadRule, Rule, RuleType } from '@kbn/triggers-actions-ui-plugin/public';
+
+export interface FetchRuleProps {
+  ruleId?: string;
+  http: HttpSetup;
+}
+
+export interface FetchRule {
+  isRuleLoading: boolean;
+  rule?: Rule;
+  ruleType?: RuleType;
+  errorRule?: string;
+}
 
 export function useFetchRule({ ruleId, http }: FetchRuleProps) {
   const [ruleSummary, setRuleSummary] = useState<FetchRule>({
@@ -34,9 +46,13 @@ export function useFetchRule({ ruleId, http }: FetchRuleProps) {
       setRuleSummary((oldState: FetchRule) => ({
         ...oldState,
         isRuleLoading: false,
-        errorRule: RULE_LOAD_ERROR(
-          error instanceof Error ? error.message : typeof error === 'string' ? error : ''
-        ),
+        errorRule: i18n.translate('xpack.observability.ruleDetails.ruleLoadError', {
+          defaultMessage: 'Unable to load rule. Reason: {message}',
+          values: {
+            message:
+              error instanceof Error ? error.message : typeof error === 'string' ? error : '',
+          },
+        }),
       }));
     }
   }, [ruleId, http]);
