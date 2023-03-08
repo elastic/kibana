@@ -24,7 +24,7 @@ const rule2Desc = 'Rule 2 description';
 
 const testProps = {
   data: {
-    groupsNumber: {
+    groupCount0: {
       value: 2,
     },
     stackByMultipleFields0: {
@@ -75,7 +75,7 @@ const testProps = {
             sum_other_doc_count: 0,
             buckets: [],
           },
-          alertsCount: {
+          unitCount0: {
             value: 1,
           },
           severitiesSubAggregation: {
@@ -97,7 +97,7 @@ const testProps = {
         },
       ],
     },
-    alertsCount: {
+    unitCount0: {
       value: 2,
     },
   },
@@ -120,21 +120,21 @@ describe('grouping container', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('Renders group counts when groupsNumber > 0', () => {
+  it('Renders group counts when groupCount0 > 0', () => {
     const { getByTestId, getAllByTestId, queryByTestId } = render(
       <I18nProvider>
         <Grouping {...testProps} />
       </I18nProvider>
     );
-    expect(getByTestId('alert-count').textContent).toBe('2 alerts');
-    expect(getByTestId('groups-count').textContent).toBe('2 groups');
+    expect(getByTestId('unit-count').textContent).toBe('2 events');
+    expect(getByTestId('group-count').textContent).toBe('2 groups');
     expect(getAllByTestId('grouping-accordion').length).toBe(2);
     expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
   });
 
-  it('Does not render group counts when groupsNumber = 0', () => {
+  it('Does not render group counts when groupCount0 = 0', () => {
     const data = {
-      groupsNumber: {
+      groupCount0: {
         value: 0,
       },
       stackByMultipleFields0: {
@@ -142,7 +142,7 @@ describe('grouping container', () => {
         sum_other_doc_count: 0,
         buckets: [],
       },
-      alertsCount: {
+      unitCount0: {
         value: 0,
       },
     };
@@ -151,8 +151,8 @@ describe('grouping container', () => {
         <Grouping {...testProps} data={data} />
       </I18nProvider>
     );
-    expect(queryByTestId('alert-count')).not.toBeInTheDocument();
-    expect(queryByTestId('groups-count')).not.toBeInTheDocument();
+    expect(queryByTestId('unit-count')).not.toBeInTheDocument();
+    expect(queryByTestId('group-count')).not.toBeInTheDocument();
     expect(queryByTestId('grouping-accordion')).not.toBeInTheDocument();
     expect(getByTestId('empty-results-panel')).toBeInTheDocument();
   });

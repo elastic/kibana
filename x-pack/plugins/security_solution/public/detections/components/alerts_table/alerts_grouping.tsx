@@ -128,6 +128,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     onGroupChangeCallback,
     tracker: track,
   });
+  const resetPagination = pagination.reset;
 
   useEffect(() => {
     dispatch(updateGroupSelector({ groupSelector }));
@@ -151,6 +152,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
   const uniqueQueryId = useMemo(() => `${ALERTS_GROUPING_ID}-${uuidv4()}`, []);
 
   const additionalFilters = useMemo(() => {
+    resetPagination();
     try {
       return [
         buildEsQuery(undefined, globalQuery != null ? [globalQuery] : [], [
@@ -161,7 +163,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     } catch (e) {
       return [];
     }
-  }, [defaultFilters, globalFilters, globalQuery]);
+  }, [defaultFilters, globalFilters, globalQuery, resetPagination]);
 
   const queryGroups = useMemo(
     () =>
