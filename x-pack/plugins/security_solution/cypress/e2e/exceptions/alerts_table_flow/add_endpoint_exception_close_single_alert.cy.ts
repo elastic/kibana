@@ -37,7 +37,7 @@ import {
   goToEndpointExceptionsTab,
 } from '../../../tasks/rule_details';
 
-describe('Validate close single endpoint exception', () => {
+describe('Add endpoint exception to validate closing of single alert', () => {
   const ITEM_NAME = 'Sample Exception';
   const expectedNumberOfAlerts = 1;
   before(() => {
