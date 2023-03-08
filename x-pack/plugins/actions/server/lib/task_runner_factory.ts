@@ -22,8 +22,8 @@ import {
 } from '@kbn/core/server';
 import { RunContext } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { ActionExecutorContract } from './action_executor';
-import { ExecutorError } from './executor_error';
 import {
   ActionTaskParams,
   ActionTypeRegistryContract,
@@ -122,9 +122,8 @@ export class TaskRunnerFactory {
           inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_FAILURES);
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
-          throw new ExecutorError(
-            executorResult.message,
-            executorResult.data,
+          throw throwRetryableError(
+            new Error(executorResult.message),
             executorResult.retry as boolean | Date
           );
         }
