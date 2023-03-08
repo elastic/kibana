@@ -991,7 +991,10 @@ describe('Fleet - validatePackagePolicyConfig', () => {
         {
           name: 'myvariable',
           type: 'select',
-          options: [{ value: 'a', text: 'A' }, { value: 'b', text: 'B' }],
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
         },
         'myvariable',
         safeLoad
