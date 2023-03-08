@@ -16,14 +16,15 @@ import { createTestEsCluster, kibanaServerTestUser } from '@kbn/test';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-jest.setTimeout(100_000);
-
 describe('migrator-only node', () => {
+  const log = new ToolingLog({ writeTo: process.stdout, level: 'debug' });
+  log.indent(4);
+  const es = createTestEsCluster({ log });
+  jest.setTimeout(100_000 + es.getStartTimeout());
+
   it('starts Kibana, runs migrations and then exits with a "0" status code', async () => {
     const expectedLog = /Detected migrator node role/;
-    const log = new ToolingLog({ writeTo: process.stdout, level: 'debug' });
-    log.indent(4);
-    const es = createTestEsCluster({ log });
+    
     let proc: undefined | ChildProcess.ChildProcess;
     let logsSub: undefined | Rx.Subscription;
     try {
