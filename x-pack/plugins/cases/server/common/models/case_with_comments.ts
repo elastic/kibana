@@ -27,14 +27,11 @@ import {
   ActionTypes,
   Actions,
 } from '../../../common/api';
-import {
-  CASE_SAVED_OBJECT,
-  MAX_ALERTS_PER_CASE,
-  MAX_DOCS_PER_PAGE,
-} from '../../../common/constants';
+import { CASE_SAVED_OBJECT, MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import type { CasesClientArgs } from '../../client';
 import type { RefreshSetting } from '../../services/types';
 import { createCaseError } from '../error';
+import { AttachmentLimitChecker } from '../limiter_checker';
 import type { AlertInfo, CaseSavedObject } from '../types';
 import {
   countAlertsForID,
@@ -46,8 +43,6 @@ import {
 } from '../utils';
 
 type CaseCommentModelParams = Omit<CasesClientArgs, 'authorization'>;
-
-const ALERT_LIMIT_MSG = `Case has reached the maximum allowed number (${MAX_ALERTS_PER_CASE}) of attached alerts.`;
 
 /**
  * This class represents a case that can have a comment attached to it.
@@ -92,6 +87,13 @@ export class CaseCommentModel {
       const { id, version, ...queryRestAttributes } = updateRequest;
       const options: SavedObjectsUpdateOptions<CommentAttributes> = {
         version,
+        /**
+         * This is to handle a scenario where an update occurs for an attachment framework style comment.
+         * The code that extracts the reference information from the attributes doesn't know about the reference to the case
+         * and therefore will accidentally remove that reference and we'll lose the connection between the comment and the
+         * case.
+         */
+        references: [...this.buildRefsToCase()],
         refresh: false,
       };
 
@@ -105,6 +107,11 @@ export class CaseCommentModel {
           queryRestAttributes.comment,
           currentComment
         );
+
+        /**
+         * The call to getOrUpdateLensReferences already handles retrieving the reference to the case and ensuring that is
+         * also included here so it's ok to overwrite what was set before.
+         */
         options.references = updatedReferences;
       }
 
@@ -239,16 +246,9 @@ export class CaseCommentModel {
   }
 
   private async validateCreateCommentRequest(req: CommentRequest[]) {
-    const totalAlertsInReq = req
-      .filter<CommentRequestAlertType>(isCommentRequestTypeAlert)
-      .reduce((count, attachment) => {
-        const ids = Array.isArray(attachment.alertId) ? attachment.alertId : [attachment.alertId];
-        return count + ids.length;
-      }, 0);
+    const hasAlertsInRequest = req.some((request) => isCommentRequestTypeAlert(request));
 
-    const reqHasAlerts = totalAlertsInReq > 0;
-
-    if (reqHasAlerts && this.caseInfo.attributes.status === CaseStatuses.closed) {
+    if (hasAlertsInRequest && this.caseInfo.attributes.status === CaseStatuses.closed) {
       throw Boom.badRequest('Alert cannot be attached to a closed case');
     }
 
@@ -256,30 +256,12 @@ export class CaseCommentModel {
       throw Boom.badRequest('The owner field of the comment must match the case');
     }
 
-    if (reqHasAlerts) {
-      /**
-       * This check is for optimization reasons.
-       * It saves one aggregation if the total number
-       * of alerts of the request is already greater than
-       * MAX_ALERTS_PER_CASE
-       */
-      if (totalAlertsInReq > MAX_ALERTS_PER_CASE) {
-        throw Boom.badRequest(ALERT_LIMIT_MSG);
-      }
+    const limitChecker = new AttachmentLimitChecker(
+      this.params.services.attachmentService,
+      this.caseInfo.id
+    );
 
-      await this.validateAlertsLimitOnCase(totalAlertsInReq);
-    }
-  }
-
-  private async validateAlertsLimitOnCase(totalAlertsInReq: number) {
-    const alertsValueCount =
-      await this.params.services.attachmentService.valueCountAlertsAttachedToCase({
-        caseId: this.caseInfo.id,
-      });
-
-    if (alertsValueCount + totalAlertsInReq > MAX_ALERTS_PER_CASE) {
-      throw Boom.badRequest(ALERT_LIMIT_MSG);
-    }
+    await limitChecker.validate(req);
   }
 
   private buildRefsToCase(): SavedObjectReference[] {
