@@ -242,12 +242,11 @@ test('stops services if consequent logger upgrade fails', async () => {
 });
 
 test('handles migrator-only node exception', async () => {
-  const errorImplementation = () => {
-    throw new CriticalError('Test', 'MigratioOnlyNode', 0);
-  };
   const mockOnShutdown = jest.fn();
   const root = new Root(rawConfigService, env, mockOnShutdown);
-  mockServer.start.mockImplementation(errorImplementation);
+  mockServer.start.mockImplementation(() => {
+    throw new CriticalError('Test', 'MigratioOnlyNode', 0);
+  });
   await root.preboot();
   await root.setup();
   await expect(() => root.start()).rejects.toBeInstanceOf(CriticalError);
