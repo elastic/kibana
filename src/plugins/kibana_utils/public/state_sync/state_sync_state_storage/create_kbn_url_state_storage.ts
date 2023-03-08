@@ -9,7 +9,7 @@
 import { Observable, of } from 'rxjs';
 import { catchError, map, share } from 'rxjs/operators';
 import { History } from 'history';
-import { debounce } from 'lodash';
+import { throttle } from 'lodash';
 import { IStateStorage } from './types';
 import {
   createKbnUrlControls,
@@ -75,7 +75,7 @@ export const createKbnUrlStateStorage = (
   }
 ): IKbnUrlStateStorage => {
   const url = createKbnUrlControls(history);
-  const onErrorDebounced = onGetError ? debounce((e) => onGetError(e), 100) : undefined;
+  const onErrorDebounced = onGetError ? throttle((e) => onGetError(e), 100) : undefined;
   return {
     set: <State>(
       key: string,
