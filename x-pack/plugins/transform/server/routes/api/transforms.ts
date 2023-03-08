@@ -97,10 +97,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 
           const alerting = await ctx.alerting;
           if (alerting) {
-            const transformHealthService = transformHealthServiceProvider(
-              esClient.asCurrentUser,
-              alerting.getRulesClient()
-            );
+            const transformHealthService = transformHealthServiceProvider({
+              esClient: esClient.asCurrentUser,
+              rulesClient: alerting.getRulesClient(),
+            });
 
             // @ts-ignore
             await transformHealthService.populateTransformsWithAssignedRules(body.transforms);

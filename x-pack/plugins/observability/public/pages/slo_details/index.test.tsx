@@ -55,6 +55,12 @@ const mockKibana = () => {
           prepend: mockBasePathPrepend,
         },
       },
+      uiSettings: {
+        get: (settings: string) => {
+          if (settings === 'dateFormat') return 'YYYY-MM-DD';
+          return '';
+        },
+      },
     },
   });
 };

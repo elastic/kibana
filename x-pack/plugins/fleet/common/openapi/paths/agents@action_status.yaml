@@ -5,6 +5,11 @@ get:
   parameters:
     - $ref: ../components/parameters/page_size.yaml
     - $ref: ../components/parameters/page_index.yaml
+    - schema:
+        type: integer
+        default: 5
+      in: query  
+      name: errorSize
   responses:
     '200':
       description: OK
@@ -28,6 +33,7 @@ get:
                         - CANCELLED
                         - FAILED
                         - IN_PROGRESS
+                        - ROLLOUT_PASSED
                     nbAgentsActioned:
                       type: number
                     nbAgentsActionCreated:
@@ -52,6 +58,18 @@ get:
                       type: string
                     creationTime:
                       type: string
+                    latestErrors:
+                      type: array
+                      description: latest errors that happened when the agents executed the action
+                      items:
+                        type: object
+                        properties:
+                          agentId:
+                            type: string  
+                          error:
+                            type: string
+                          timestamp:
+                            type: string    
                   required:
                     - actionId
                     - complete
