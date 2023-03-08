@@ -264,6 +264,13 @@ const ActionsTableComponent = () => {
     [actionsData, pageIndex, pageSize]
   );
 
+  const rowProps = useCallback(
+    (data) => ({
+      'data-test-subj': `row-${data._source.action_id}`,
+    }),
+    []
+  );
+
   return (
     <EuiBasicTable
       items={actionsData?.data?.items ?? EMPTY_ARRAY}
@@ -271,6 +278,8 @@ const ActionsTableComponent = () => {
       columns={columns}
       pagination={pagination}
       onChange={onTableChange}
+      rowProps={rowProps}
+      data-test-subj="liveQueryActionsTable"
     />
   );
 };
