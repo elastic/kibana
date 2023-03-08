@@ -562,6 +562,16 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
     },
 
+    /**
+     * Perform the specified layer action
+     */
+    async performLayerAction(testSubject: string, layerIndex = 0) {
+      await retry.try(async () => {
+        await testSubjects.click(`lnsLayerSplitButton--${layerIndex}`);
+        await testSubjects.click(testSubject);
+      });
+    },
+
     async isDimensionEditorOpen() {
       return await testSubjects.exists('lns-indexPattern-dimensionContainerBack');
     },
@@ -916,6 +926,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
       if (await testSubjects.exists(`lnsLayerAddButton-${layerType}`)) {
         await testSubjects.click(`lnsLayerAddButton-${layerType}`);
+        if (layerType === 'annotations') {
+          await testSubjects.click('lnsAnnotationLayer_new');
+        }
       }
     },
 

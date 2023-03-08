@@ -187,6 +187,7 @@ export function AddLayerButton({
                     onAddLayerClick(LayerTypes.ANNOTATIONS);
                     toggleLayersChoice(false);
                   },
+                  'data-test-subj': 'lnsAnnotationLayer_new',
                 },
                 {
                   name: i18n.translate('xpack.lens.configPanel.loadFromLibrary', {
@@ -197,6 +198,7 @@ export function AddLayerButton({
                     setLoadLibraryFlyoutVisible(true);
                     toggleLayersChoice(false);
                   },
+                  'data-test-subj': 'lnsAnnotationLayer_addFromLibrary',
                 },
               ],
             },

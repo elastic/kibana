@@ -9,9 +9,10 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header']);
+  const PageObjects = getPageObjects(['visualize', 'lens', 'common', 'header', 'tagManagement']);
   const find = getService('find');
   const retry = getService('retry');
+  const toastsService = getService('toasts');
   const testSubjects = getService('testSubjects');
   const from = 'Sep 19, 2015 @ 06:31:44.000';
   const to = 'Sep 23, 2015 @ 18:31:44.000';
@@ -100,6 +101,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.closeDimensionEditor();
 
       await testSubjects.existOrFail('xyVisGroupedAnnotationIcon');
+    });
+
+    it('should save annotation group to library', async () => {
+      await PageObjects.visualize.navigateToNewVisualization();
+      await PageObjects.visualize.clickVisType('lens');
+
+      await PageObjects.lens.goToTimeRange();
+      await PageObjects.lens.dragFieldToWorkspace('@timestamp', 'xyVisChart');
+
+      await PageObjects.lens.createLayer('annotations');
+
+      await PageObjects.lens.performLayerAction('lnsXY_annotationLayer_saveToLibrary', 1);
+
+      await PageObjects.visualize.setSaveModalValues('new annotation group', {
+        description: 'my description',
+      });
+
+      await testSubjects.click('savedObjectTagSelector');
+      await testSubjects.click(`tagSelectorOption-action__create`);
+
+      const { tagModal } = PageObjects.tagManagement;
+
+      expect(await tagModal.isOpened()).to.be(true);
+
+      await tagModal.fillForm(
+        {
+          name: 'my-new-tag',
+          color: '#FFCC33',
+          description: '',
+        },
+        {
+          submit: true,
+        }
+      );
+
+      expect(await tagModal.isOpened()).to.be(false);
+
+      await testSubjects.click('confirmSaveSavedObjectButton');
+
+      const toastContents = await toastsService.getToastContent(1);
+
+      expect(toastContents).to.be(
+        'Saved "new annotation group"\nView or manage in the annotation library'
+      );
+
+      // TODO check annotation library
     });
   });
 }
