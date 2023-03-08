@@ -9,11 +9,12 @@
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useCallback, useEffect } from 'react';
 
-import { UiCounterMetricType } from '@kbn/analytics';
+import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { getGroupSelector, isNoneGroup } from '../..';
 import { groupActions, groupByIdSelector } from './state';
 import type { GroupOption } from './types';
 import { Action, defaultGroup, GroupMap } from './types';
+import { getTelemetryEvent } from '../telemetry/const';
 
 export interface UseGetGroupSelectorArgs {
   defaultGroupingOptions: GroupOption[];
@@ -21,6 +22,7 @@ export interface UseGetGroupSelectorArgs {
   fields: FieldSpec[];
   groupingId: string;
   groupingState: GroupMap;
+  onGroupChangeCallback?: (param: { groupByField: string; tableId: string }) => void;
   tracker: (
     type: UiCounterMetricType,
     event: string | string[],
@@ -34,6 +36,7 @@ export const useGetGroupSelector = ({
   fields,
   groupingId,
   groupingState,
+  onGroupChangeCallback,
   tracker,
 }: UseGetGroupSelectorArgs) => {
   const { activeGroup: selectedGroup, options } =
@@ -90,6 +93,14 @@ export const useGetGroupSelector = ({
       setGroupsActivePage(0);
       setSelectedGroup(groupSelection);
 
+      // built-in telemetry: UI-counter
+      tracker?.(
+        METRIC_TYPE.CLICK,
+        getTelemetryEvent.groupChanged({ groupingId, selected: selectedGroup })
+      );
+
+      onGroupChangeCallback?.({ tableId: groupingId, groupByField: selectedGroup });
+
       if (
         !isNoneGroup(groupSelection) &&
         !options.find((o: GroupOption) => o.key === groupSelection)
@@ -107,6 +118,5 @@ export const useGetGroupSelector = ({
     },
     fields,
     options,
-    tracker,
   });
 };

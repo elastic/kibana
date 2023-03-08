@@ -94,7 +94,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
 
-    this.telemetry = new TelemetryService(null);
+    this.telemetry = new TelemetryService();
   }
   private appUpdater$ = new Subject<AppUpdater>();
 

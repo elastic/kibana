@@ -31,9 +31,9 @@ interface Grouping<T> {
 
 interface GroupingArgs {
   defaultGroupingOptions: GroupOption[];
-
   fields: FieldSpec[];
   groupingId: string;
+  onGroupChangeCallback?: (param: { groupByField: string; tableId: string }) => void;
   tracker: (
     type: UiCounterMetricType,
     event: string | string[],
@@ -44,6 +44,7 @@ export const useGrouping = <T,>({
   defaultGroupingOptions,
   fields,
   groupingId,
+  onGroupChangeCallback,
   tracker,
 }: GroupingArgs): Grouping<T> => {
   const [groupingState, dispatch] = useReducer(groupsReducerWithStorage, initialState);
@@ -59,6 +60,7 @@ export const useGrouping = <T,>({
     fields,
     groupingId,
     groupingState,
+    onGroupChangeCallback,
     tracker,
   });
 

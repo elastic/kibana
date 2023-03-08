@@ -60,7 +60,6 @@ export const useGroupTakeActionsItems = ({
       status: 'open' | 'closed' | 'acknowledged';
       groupByField: string;
     }) => {
-      console.log(params);
       telemetry.reportAlertsGroupingTakeAction(params);
     },
     [telemetry]

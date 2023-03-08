@@ -22,26 +22,27 @@ import { TelemetryClient } from './telemetry_client';
 export class TelemetryService {
   constructor(private analytics: AnalyticsServiceSetup | null = null) {}
 
-  public setup({ analytics }: TelemetryServiceSetupParams, context: Record<string, unknown>) {
+  public setup({ analytics }: TelemetryServiceSetupParams, context?: Record<string, unknown>) {
     this.analytics = analytics;
-    // emit a 1 time value of an object containing the kibana version.
-    const context$ = of(context);
+    if (context) {
+      const context$ = of(context);
 
-    analytics.registerContextProvider({
-      name: 'detection_response',
-      // RxJS Observable that emits every time the context changes.
-      context$,
-      // Similar to the `reportEvent` API, schema defining the structure of the expected output of the context$ observable.
-      schema: {
-        prebuiltRulesPackageVersion: {
-          type: 'keyword',
-          _meta: { description: 'The version of prebuilt rules', optional: true },
+      analytics.registerContextProvider({
+        name: 'detection_response',
+        // RxJS Observable that emits every time the context changes.
+        context$,
+        // Similar to the `reportEvent` API, schema defining the structure of the expected output of the context$ observable.
+        schema: {
+          prebuiltRulesPackageVersion: {
+            type: 'keyword',
+            _meta: { description: 'The version of prebuilt rules', optional: true },
+          },
         },
-      },
-    });
-    telemetryEvents.forEach((eventConfig) =>
-      analytics.registerEventType<TelemetryEventParams>(eventConfig)
-    );
+      });
+      telemetryEvents.forEach((eventConfig) =>
+        analytics.registerEventType<TelemetryEventParams>(eventConfig)
+      );
+    }
   }
 
   public start(): TelemetryClientStart {

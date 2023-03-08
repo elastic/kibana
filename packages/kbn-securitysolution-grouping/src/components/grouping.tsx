@@ -117,8 +117,6 @@ const GroupingComponent = <T,>({
               groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
               isLoading={isLoading}
               onToggleGroup={(isOpen) => {
-                console.log('ui-counter', 'groupToggled', { isOpen, groupingId, groupNumber });
-
                 tracker?.(
                   METRIC_TYPE.CLICK,
                   getTelemetryEvent.groupToggled({ isOpen, groupingId, groupNumber })

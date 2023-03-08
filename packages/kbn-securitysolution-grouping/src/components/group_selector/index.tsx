@@ -13,11 +13,9 @@ import type {
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
-import { METRIC_TYPE, UiCounterMetricType } from '@kbn/analytics';
 import { CustomFieldPanel } from './custom_field_panel';
 import * as i18n from '../translations';
 import { StyledContextMenu, StyledEuiButtonEmpty } from '../styles';
-import { getTelemetryEvent } from '../../telemetry/const';
 
 export interface GroupSelectorProps {
   'data-test-subj'?: string;
@@ -27,11 +25,6 @@ export interface GroupSelectorProps {
   onGroupChange: (groupSelection: string) => void;
   options: Array<{ key: string; label: string }>;
   title?: string;
-  tracker?: (
-    type: UiCounterMetricType,
-    event: string | string[],
-    count?: number | undefined
-  ) => void;
 }
 
 const GroupSelectorComponent = ({
@@ -42,7 +35,6 @@ const GroupSelectorComponent = ({
   onGroupChange,
   options,
   title = i18n.GROUP_BY,
-  tracker,
 }: GroupSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -76,11 +68,6 @@ const GroupSelectorComponent = ({
             name: i18n.NONE,
             icon: groupSelected === 'none' ? 'check' : 'empty',
             onClick: () => {
-              console.log('ui-counter', { groupingId, selected: 'none' });
-              tracker?.(
-                METRIC_TYPE.CLICK,
-                getTelemetryEvent.groupChanged({ groupingId, selected: 'none' })
-              );
               onGroupChange('none');
             },
           },
@@ -88,12 +75,6 @@ const GroupSelectorComponent = ({
             'data-test-subj': `panel-${o.key}`,
             name: o.label,
             onClick: () => {
-              console.log('ui-counter', { groupingId, selected: o.key });
-
-              tracker?.(
-                METRIC_TYPE.CLICK,
-                getTelemetryEvent.groupChanged({ groupingId, selected: o.key })
-              );
               onGroupChange(o.key);
             },
             icon: groupSelected === o.key ? 'check' : 'empty',
@@ -114,12 +95,6 @@ const GroupSelectorComponent = ({
           <CustomFieldPanel
             currentOptions={options.map((o) => ({ text: o.label, field: o.key }))}
             onSubmit={(field: string) => {
-              console.log('ui-counter', 'custom', { groupingId, selected: field });
-
-              tracker?.(
-                METRIC_TYPE.CLICK,
-                getTelemetryEvent.groupChanged({ groupingId, selected: field })
-              );
               onGroupChange(field);
             }}
             fields={fields}
@@ -127,7 +102,7 @@ const GroupSelectorComponent = ({
         ),
       },
     ],
-    [fields, groupSelected, groupingId, onGroupChange, options, tracker]
+    [fields, groupSelected, onGroupChange, options]
   );
   const selectedOption = useMemo(
     () => options.filter((groupOption) => groupOption.key === groupSelected),

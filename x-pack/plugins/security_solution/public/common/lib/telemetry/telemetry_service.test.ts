@@ -51,7 +51,7 @@ describe('TelemetryService', () => {
     });
   });
 
-  describe('#reportHostEntryClicked', () => {
+  describe('#reportAlertsGroupingTakeAction', () => {
     it('should report hosts entry click with properties', async () => {
       const setupParams = getSetupParams();
       service.setup(setupParams);

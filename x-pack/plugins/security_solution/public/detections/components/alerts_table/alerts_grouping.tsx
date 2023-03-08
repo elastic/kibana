@@ -114,10 +114,18 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     [browserFields, indexPattern, uiSettings, defaultFilters, globalFilters, from, to, globalQuery]
   );
 
+  const onGroupChangeCallback = useCallback(
+    (param) => {
+      telemetry.reportAlertsGroupingChanged(param);
+    },
+    [telemetry]
+  );
+
   const { groupSelector, getGrouping, selectedGroup, pagination } = useGrouping({
     defaultGroupingOptions: getDefaultGroupingOptions(tableId),
     groupingId: tableId,
     fields: indexPattern.fields,
+    onGroupChangeCallback,
     tracker: track,
   });
 
