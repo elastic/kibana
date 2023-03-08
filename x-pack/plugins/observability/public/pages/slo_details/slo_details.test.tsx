@@ -59,6 +59,7 @@ const mockKibana = () => {
       uiSettings: {
         get: (settings: string) => {
           if (settings === 'dateFormat') return 'YYYY-MM-DD';
+          if (settings === 'format:percent:defaultPattern') return '0.0%';
           return '';
         },
       },
