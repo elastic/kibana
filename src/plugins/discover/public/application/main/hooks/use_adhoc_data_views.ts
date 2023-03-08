@@ -7,24 +7,17 @@
  */
 
 import { useCallback, useEffect } from 'react';
-import type { FilterManager } from '@kbn/data-plugin/public';
-import type { ToastsStart } from '@kbn/core-notifications-browser';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ADHOC_DATA_VIEW_RENDER_EVENT } from '../../../constants';
 import { useConfirmPersistencePrompt } from '../../../hooks/use_confirm_persistence_prompt';
 import { DiscoverStateContainer } from '../services/discover_state';
-import { useFiltersValidation } from './use_filters_validation';
 
 export const useAdHocDataViews = ({
   stateContainer,
-  filterManager,
-  toastNotifications,
   trackUiMetric,
 }: {
   stateContainer: DiscoverStateContainer;
-  filterManager: FilterManager;
-  toastNotifications: ToastsStart;
   trackUiMetric?: (metricType: string, eventName: string | string[], count?: number) => void;
 }) => {
   const query = stateContainer.appState.getState().query;
@@ -36,11 +29,6 @@ export const useAdHocDataViews = ({
       trackUiMetric?.(METRIC_TYPE.COUNT, ADHOC_DATA_VIEW_RENDER_EVENT);
     }
   }, [dataView, isTextBasedMode, trackUiMetric]);
-
-  /**
-   * Takes care of checking data view id references in filters
-   */
-  useFiltersValidation({ stateContainer, filterManager, toastNotifications });
 
   const { openConfirmSavePrompt, updateSavedSearch } = useConfirmPersistencePrompt(stateContainer);
   const persistDataView = useCallback(async () => {

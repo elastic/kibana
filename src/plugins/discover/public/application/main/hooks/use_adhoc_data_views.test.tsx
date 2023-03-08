@@ -10,7 +10,6 @@ import React from 'react';
 import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
-import { discoverServiceMock as mockDiscoverServices } from '../../../__mocks__/services';
 import { useAdHocDataViews } from './use_adhoc_data_views';
 import * as persistencePromptModule from '../../../hooks/use_confirm_persistence_prompt';
 import { urlTrackerMock } from '../../../__mocks__/url_tracker.mock';
@@ -85,8 +84,6 @@ describe('useAdHocDataViews', () => {
       () =>
         useAdHocDataViews({
           stateContainer,
-          filterManager: mockDiscoverServices.filterManager,
-          toastNotifications: mockDiscoverServices.toastNotifications,
         }),
       {
         wrapper: ({ children }: { children: React.ReactElement }) => (

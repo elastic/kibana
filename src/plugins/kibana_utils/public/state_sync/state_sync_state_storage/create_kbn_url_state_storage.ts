@@ -9,6 +9,7 @@
 import { Observable, of } from 'rxjs';
 import { catchError, map, share } from 'rxjs/operators';
 import { History } from 'history';
+import { debounce } from 'lodash';
 import { IStateStorage } from './types';
 import {
   createKbnUrlControls,
@@ -74,6 +75,7 @@ export const createKbnUrlStateStorage = (
   }
 ): IKbnUrlStateStorage => {
   const url = createKbnUrlControls(history);
+  const onErrorDebounced = onGetError ? debounce((e) => onGetError(e), 100) : undefined;
   return {
     set: <State>(
       key: string,
@@ -100,7 +102,7 @@ export const createKbnUrlStateStorage = (
       try {
         return getStateFromKbnUrl(key, url.getPendingUrl(), { getFromHashQuery: useHashQuery });
       } catch (e) {
-        if (onGetError) onGetError(e);
+        if (onErrorDebounced) onErrorDebounced(e);
         return null;
       }
     },

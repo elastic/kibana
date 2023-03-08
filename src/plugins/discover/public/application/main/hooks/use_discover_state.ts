@@ -22,7 +22,7 @@ export function useDiscoverState({
   services: DiscoverServices;
   stateContainer: DiscoverStateContainer;
 }) {
-  const { filterManager, dataViews, toastNotifications, trackUiMetric } = services;
+  const { dataViews, trackUiMetric } = services;
   const savedSearch = stateContainer.savedSearchState.getPersisted$().getValue();
 
   const { setUrlTracking } = useUrlTracking(savedSearch);
@@ -37,8 +37,6 @@ export function useDiscoverState({
    */
   const { persistDataView } = useAdHocDataViews({
     stateContainer,
-    filterManager,
-    toastNotifications,
     trackUiMetric,
   });
 
