@@ -128,15 +128,22 @@ class PackageClientImpl implements PackageClient {
   }): Promise<Installation | undefined> {
     console.log('ensureInstalledPackage this.request', this.request);
     await this.#runPreflight();
-    const apiKeyWithCurrentUserPermission = await appContextService
-      .getSecurity()
-      .authc.apiKeys.grantAsInternalUser(this.request, {
-        name: `auto-generated-transform-api-key`,
-        role_descriptors: {},
-      });
+
+    let apiKeyWithCurrentUserPermission;
+    if (this.request) {
+      apiKeyWithCurrentUserPermission = await appContextService
+        .getSecurity()
+        .authc.apiKeys.grantAsInternalUser(this.request, {
+          name: `auto-generated-transform-api-key`,
+          role_descriptors: {},
+        });
+    }
 
     return ensureInstalledPackage({
-      ...{ ...options, apiKeyWithCurrentUserPermission },
+      ...{
+        ...options,
+        ...(apiKeyWithCurrentUserPermission ? apiKeyWithCurrentUserPermission : {}),
+      },
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
     });

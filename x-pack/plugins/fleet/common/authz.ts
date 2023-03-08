@@ -7,6 +7,8 @@
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
 
+import { TRANSFORM_PLUGIN_ID } from './constants/plugin';
+
 import { ENDPOINT_PRIVILEGES } from './constants';
 
 export interface FleetAuthz {
@@ -157,10 +159,31 @@ export function calculatePackagePrivilegesFromKibanaPrivileges(
     },
     {}
   );
+  //
+  const transformActions = {
+    createTransform: getAuthorizationFromPrivileges(
+      kibanaPrivileges,
+      `${TRANSFORM_PLUGIN_ID}0`,
+      `admin`
+    ),
+    startTransform: getAuthorizationFromPrivileges(
+      kibanaPrivileges,
+      `${TRANSFORM_PLUGIN_ID}-`,
+      'all'
+    ),
+    viewTransform: getAuthorizationFromPrivileges(
+      kibanaPrivileges,
+      `${TRANSFORM_PLUGIN_ID}-`,
+      `read`
+    ),
+  };
 
   return {
     endpoint: {
       actions: endpointActions,
+    },
+    transform: {
+      actions: transformActions,
     },
   };
 }

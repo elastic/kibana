@@ -415,7 +415,6 @@ const installTransformsAssets = async (
           }
         : {};
 
-    console.log('secondaryAuth', secondaryAuth);
     // ensure the .latest alias points to only the latest
     // by removing any associate of old destination indices
     await Promise.all(
@@ -763,21 +762,17 @@ async function handleTransformInstall({
   startTransform?: boolean;
   secondaryAuth?: SecondaryAuthorizationHeader;
 }): Promise<EsAssetReference> {
+  // For PUT and UPDATE transforms
+  // we want to add the current user's roles/permissions to the es-secondary-auth with a API Key.
+  // If API Key has insufficient permissions, it should still create the transforms but not start it
+  // Instead of failing, we need to allow package to continue installing other assets
+  // and prompt for users to authorize the transforms with the appropriate permissions after package is done installing
   let isUnauthorizedAPIKey = false;
   try {
-    console.log(
-      '--@@secondaryAuth',
-      secondaryAuth,
-      '\nBODY\n',
-      JSON.stringify({
-        transform_id: transform.installationName,
-        defer_validation: true,
-        body: transform.content,
-      })
-    );
     await retryTransientEsErrors(
       () =>
         // defer validation on put if the source index is not available
+        // but will check if API Key has sufficient permission
         esClient.transform.putTransform(
           {
             transform_id: transform.installationName,
@@ -795,9 +790,11 @@ async function handleTransformInstall({
       isResponseError &&
       err?.body?.error?.type === 'security_exception' &&
       err?.body?.error?.reason?.includes('unauthorized for API key');
-    // swallow the error if the transform already exists.
+
     const isAlreadyExistError =
       isResponseError && err?.body?.error?.type === 'resource_already_exists_exception';
+
+    // swallow the error if the transform already exists or if API key has insufficient permissions
     if (!isUnauthorizedAPIKey && !isAlreadyExistError) {
       throw err;
     }
