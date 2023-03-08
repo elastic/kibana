@@ -55,6 +55,7 @@ import {
   cellValueTrigger,
   CELL_VALUE_TRIGGER,
   type CellValueContext,
+  shouldFetch$,
 } from '@kbn/embeddable-plugin/public';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { DataViewsContract, DataView } from '@kbn/data-views-plugin/public';
@@ -432,23 +433,14 @@ export class Embeddable
 
     // Update search context and reload on changes related to search
     this.inputReloadSubscriptions.push(
-      this.getUpdated$()
-        .pipe(map(() => this.getInput()))
-        .pipe(
-          distinctUntilChanged((a, b) =>
-            fastIsEqual(
-              [a.filters, a.query, a.timeRange, a.searchSessionId],
-              [b.filters, b.query, b.timeRange, b.searchSessionId]
-            )
-          ),
-          skip(1)
-        )
-        .subscribe(async (input) => {
+      shouldFetch$<LensEmbeddableInput>(this.getUpdated$(), () => this.getInput()).subscribe(
+        (input) => {
           // reset removable messages
           // Dashboard search/context changes are detected here
           this.additionalUserMessages = {};
           this.onContainerStateChanged(input);
-        })
+        }
+      )
     );
   }
 
