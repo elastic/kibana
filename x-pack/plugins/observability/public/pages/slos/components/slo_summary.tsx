@@ -31,9 +31,9 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
 
   return (
     <EuiFlexGroup direction="row" justifyContent="spaceBetween" gutterSize="xl">
-      <EuiFlexItem grow={false} style={{ width: 200 }}>
+      <EuiFlexItem grow={false} style={{ width: 220 }}>
         <EuiFlexGroup direction="row" responsive={false} gutterSize="xs" alignItems="center">
-          <EuiFlexItem grow={false} style={{ width: 120 }}>
+          <EuiFlexItem grow={false} style={{ width: 140 }}>
             <EuiStat
               description={i18n.translate('xpack.observability.slo.slo.stats.objective', {
                 defaultMessage: '{objective} target',
@@ -74,7 +74,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
               reverse
             />
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <SloSparkline
               chart="area"
               id="error_budget_burn_down"
