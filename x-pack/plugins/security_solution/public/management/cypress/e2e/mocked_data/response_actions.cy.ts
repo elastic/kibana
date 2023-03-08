@@ -108,7 +108,6 @@ describe('Response actions', () => {
         cy.getByTestSubj('commandTypeField').click();
       });
       validateAvailableCommands();
-      cy.getByTestSubj(`command-type-${testedCommand}`).click();
       cy.intercept('PUT', '/api/detection_engine/rules').as('updateResponseAction');
       cy.getByTestSubj('ruleEditSubmitButton').click();
       cy.wait('@updateResponseAction').should(({ request }) => {
