@@ -16,7 +16,7 @@ import { createTestEsCluster, kibanaServerTestUser } from '@kbn/test';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-jest.setTimeout(100000);
+jest.setTimeout(100_000);
 
 describe('migrator-only node', () => {
   it('starts Kibana, runs migrations and then exits with a "0" status code', async () => {
