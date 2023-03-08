@@ -35,7 +35,7 @@ There are three types of controls:
 For example, if you are using the *[Logs] Web Traffic* dashboard from the sample web logs data, you can add an options list for the `machine.os.keyword` field that allows you to display only the logs generated from `osx` and `ios` operating systems.
 +
 [role="screenshot"]
-image::images/dashboard_controlsOptionsList_8.7.0.png[Options list control for the `machine.os.keyword` field with the `ios` option selected]
+image::images/dashboard_controlsOptionsList_8.7.0.png[Options list control for the `machine.os.keyword` field with the `osx` and `ios` options selected]
 
 * *Range slider* &mdash; Adds a slider that allows you to filter the data within a specified range of values. 
 +
