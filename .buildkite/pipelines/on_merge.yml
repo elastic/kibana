@@ -79,7 +79,7 @@ steps:
           limit: 1
 
   - command: '.buildkite/pipelines/e2e.yml'
-    label: Trigger E2E tests
+    label: Trigger unsupported ftr tests
     timeout_in_minutes: 10
     agents:
       queue: 'kibana-default'
