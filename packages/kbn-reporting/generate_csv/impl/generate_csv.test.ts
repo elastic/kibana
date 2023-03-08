@@ -41,7 +41,7 @@ const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
 
 let mockEsClient: IScopedClusterClient;
 let mockDataClient: IScopedSearchClient;
-let mockConfig: typeof CsvConfigType;
+let mockConfig: CsvConfigType;
 let mockLogger: jest.Mocked<Logger>;
 let uiSettingsClient: IUiSettingsClient;
 let stream: jest.Mocked<Writable>;
@@ -84,7 +84,7 @@ const mockFieldFormatsRegistry = {
     .mockImplementation(() => ({ id: 'string', convert: jest.fn().mockImplementation(identity) })),
 } as unknown as FieldFormatsRegistry;
 
-const getMockConfig = (properties: DeepPartial<typeof CsvConfigType> = {}) => {
+const getMockConfig = (properties: DeepPartial<CsvConfigType> = {}) => {
   const config = createMockConfig(createMockConfigSchema(properties));
   return config.get('csv');
 };

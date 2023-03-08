@@ -7,16 +7,15 @@
  */
 import { CsvConfigType } from '@kbn/reporting-generate-csv-types';
 import { DeepPartial } from '@kbn/utility-types';
+import _ from 'lodash';
 
-interface ReportingConfigTestType {
+interface CsvConfigTestType {
   index: string;
   encryptionKey: string;
-  csv: Partial<typeof CsvConfigType>;
+  csv: Partial<CsvConfigType>;
 }
 
-export const createMockConfig = (
-  reportingConfig: Partial<ReportingConfigTestType>
-): ReportingConfig => {
+export const createMockConfig = (reportingConfig: CsvConfigTestType) => {
   const mockConfigGet = jest.fn().mockImplementation((...keys: string[]) => {
     return _.get(reportingConfig, keys.join('.'));
   });
@@ -27,8 +26,8 @@ export const createMockConfig = (
 };
 
 export const createMockConfigSchema = (
-  overrides: DeepPartial<ReportingConfigType> = {}
-): ReportingConfigType => {
+  overrides: DeepPartial<CsvConfigType> = {}
+): CsvConfigType => {
   // deeply merge the defaults and the provided partial schema
   return {
     index: '.reporting',
@@ -55,5 +54,5 @@ export const createMockConfigSchema = (
       ...overrides.roles,
     },
     capture: { maxAttempts: 1 },
-  } as ReportingConfigType;
+  } as CsvConfigType;
 };

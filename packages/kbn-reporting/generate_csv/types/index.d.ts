@@ -142,7 +142,7 @@ export const UNVERSIONED_VERSION = '7.14.0';
 // FIXME: find a way to make these endpoints "generic" instead of hardcoded, as are the queued report export types
 export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv_searchsource`;
 
-export const CsvConfigType = schema.object({
+export const CsvConfig = schema.object({
   checkForFormulas: schema.boolean({ defaultValue: true }),
   escapeFormulaValues: schema.boolean({ defaultValue: false }),
   enablePanelActionDownload: schema.boolean({ defaultValue: true }),
@@ -162,6 +162,8 @@ export const CsvConfigType = schema.object({
     size: schema.number({ defaultValue: 500 }),
   }),
 });
+
+export type CsvConfigType = typeof CsvConfigType;
 
 export interface CsvExportSettings {
   timezone: string;

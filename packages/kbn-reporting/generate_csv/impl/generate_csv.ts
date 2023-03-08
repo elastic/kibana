@@ -54,7 +54,7 @@ export class CsvGenerator {
 
   constructor(
     private job: Omit<JobParamsCSV, 'version'>,
-    private config: typeof CsvConfigType,
+    private config: CsvConfigType,
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,
