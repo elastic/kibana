@@ -119,7 +119,11 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
 };
 
 export const shouldRefreshDiffingFunctions: DashboardDiffFunctions = {
-  ...unsavedChangesDiffingFunctions,
   filters: ({ currentValue, lastValue }) =>
     onlyDisabledFiltersChanged(lastValue, currentValue, shouldRefreshFilterCompareOptions),
+
+  // fire on all time range changes, regardless of timeRestore
+  timeRange: ({ currentValue, lastValue }) =>
+    areTimesEqual(currentValue?.from, lastValue?.from) &&
+    areTimesEqual(currentValue?.to, lastValue?.to),
 };
