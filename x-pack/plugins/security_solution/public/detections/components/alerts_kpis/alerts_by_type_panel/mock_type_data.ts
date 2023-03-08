@@ -27,7 +27,7 @@ export const mockAlertsData = {
     hits: [],
   },
   aggregations: {
-    alertsByRule: {
+    alertsByType: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 0,
       buckets: [
@@ -108,7 +108,7 @@ export const mockAlertsEmptyData = {
     hits: [],
   },
   aggregations: {
-    alertsByRule: {
+    alertsByType: {
       doc_count_error_upper_bound: 0,
       sum_other_doc_count: 0,
       buckets: [],
@@ -134,7 +134,7 @@ export const query = {
     },
   },
   aggs: {
-    alertsByRule: {
+    alertsByType: {
       terms: {
         field: 'kibana.alert.rule.name',
         size: 1000,
