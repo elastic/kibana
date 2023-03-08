@@ -41,7 +41,7 @@ export const IsolateHost = React.memo(
     const { loading, isolateHost } = useHostIsolation({
       endpointId,
       comment,
-      caseIds: caseIds.length > 0 ? caseIds : undefined,
+      caseIds,
     });
 
     const confirmHostIsolation = useCallback(async () => {

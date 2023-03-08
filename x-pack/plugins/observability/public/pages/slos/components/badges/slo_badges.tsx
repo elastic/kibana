@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../utils/kibana_react';
 import { paths } from '../../../../config';
 import { ActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
-import { SloStatusBadge } from './slo_status_badge';
+import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
 import { SloIndicatorTypeBadge } from './slo_indicator_type_badge';
 import { SloTimeWindowBadge } from './slo_time_window_badge';
 
@@ -52,12 +52,12 @@ export function SloBadges({ slo, activeAlerts }: Props) {
             color="danger"
             onClick={handleClick}
             onClickAriaLabel={i18n.translate(
-              'xpack.observability.slos.slo.activeAlertsBadge.ariaLabel',
+              'xpack.observability.slo.slo.activeAlertsBadge.ariaLabel',
               { defaultMessage: 'active alerts badge' }
             )}
             data-test-subj="o11ySlosPageSloActiveAlertsBadge"
           >
-            {i18n.translate('xpack.observability.slos.slo.activeAlertsBadge.label', {
+            {i18n.translate('xpack.observability.slo.slo.activeAlertsBadge.label', {
               defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
               values: { count: activeAlerts.count },
             })}

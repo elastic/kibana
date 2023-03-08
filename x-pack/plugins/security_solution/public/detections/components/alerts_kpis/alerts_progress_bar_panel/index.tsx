@@ -18,6 +18,7 @@ import { alertsGroupingAggregations } from '../alerts_summary_charts_panel/aggre
 import { getIsAlertsProgressBarData } from './helpers';
 import * as i18n from './translations';
 import type { GroupBySelection } from './types';
+import type { AddFilterProps } from '../common/types';
 
 const TOP_ALERTS_CHART_ID = 'alerts-summary-top-alerts';
 const DEFAULT_COMBOBOX_WIDTH = 150;
@@ -31,6 +32,7 @@ interface Props {
   skip?: boolean;
   groupBySelection: GroupBySelection;
   setGroupBySelection: (groupBySelection: GroupBySelection) => void;
+  addFilter?: ({ field, value, negate }: AddFilterProps) => void;
 }
 export const AlertsProgressBarPanel: React.FC<Props> = ({
   filters,
@@ -40,6 +42,7 @@ export const AlertsProgressBarPanel: React.FC<Props> = ({
   skip,
   groupBySelection,
   setGroupBySelection,
+  addFilter,
 }) => {
   const uniqueQueryId = useMemo(() => `${TOP_ALERTS_CHART_ID}-${uuid()}`, []);
   const dropDownOptions = DEFAULT_OPTIONS.map((field) => {
@@ -87,7 +90,12 @@ export const AlertsProgressBarPanel: React.FC<Props> = ({
             dropDownoptions={dropDownOptions}
           />
         </HeaderSection>
-        <AlertsProgressBar data={data} isLoading={isLoading} groupBySelection={groupBySelection} />
+        <AlertsProgressBar
+          data={data}
+          isLoading={isLoading}
+          groupBySelection={groupBySelection}
+          addFilter={addFilter}
+        />
       </EuiPanel>
     </InspectButtonContainer>
   );
