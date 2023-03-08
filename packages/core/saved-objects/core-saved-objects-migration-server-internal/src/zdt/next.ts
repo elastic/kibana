@@ -6,9 +6,19 @@
  * Side Public License, v 1.
  */
 
-import type { AllActionStates, InitState, State } from './state';
+import type {
+  AllActionStates,
+  State,
+  InitState,
+  CreateTargetIndexState,
+  UpdateIndexMappingsState,
+  UpdateIndexMappingsWaitForTaskState,
+  UpdateMappingModelVersionState,
+  UpdateAliasesState,
+} from './state';
 import type { MigratorContext } from './context';
 import * as Actions from './actions';
+import { createDelayFn } from '../common/utils';
 
 export type ActionMap = ReturnType<typeof nextActionMap>;
 
@@ -23,9 +33,45 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
 >;
 
 export const nextActionMap = (context: MigratorContext) => {
+  const client = context.elasticsearchClient;
   return {
     INIT: (state: InitState) =>
-      Actions.init({ client: context.elasticsearchClient, indices: [context.indexPrefix] }),
+      Actions.init({
+        client,
+        indices: [`${context.indexPrefix}_*`],
+      }),
+    CREATE_TARGET_INDEX: (state: CreateTargetIndexState) =>
+      Actions.createIndex({
+        client,
+        indexName: state.currentIndex,
+        mappings: state.indexMappings,
+      }),
+    UPDATE_INDEX_MAPPINGS: (state: UpdateIndexMappingsState) =>
+      Actions.updateAndPickupMappings({
+        client,
+        index: state.currentIndex,
+        mappings: { properties: state.additiveMappingChanges },
+      }),
+    UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: (state: UpdateIndexMappingsWaitForTaskState) =>
+      Actions.waitForPickupUpdatedMappingsTask({
+        client,
+        taskId: state.updateTargetMappingsTaskId,
+        timeout: '60s',
+      }),
+    UPDATE_MAPPING_MODEL_VERSIONS: (state: UpdateMappingModelVersionState) =>
+      Actions.updateMappings({
+        client,
+        index: state.currentIndex,
+        mappings: {
+          properties: {},
+          _meta: state.currentIndexMeta,
+        },
+      }),
+    UPDATE_ALIASES: (state: UpdateAliasesState) =>
+      Actions.updateAliases({
+        client,
+        aliasActions: state.aliasActions,
+      }),
   };
 };
 
@@ -33,13 +79,7 @@ export const next = (context: MigratorContext) => {
   const map = nextActionMap(context);
 
   return (state: State) => {
-    const delay = <F extends (...args: any) => any>(fn: F): (() => ReturnType<F>) => {
-      return () => {
-        return state.retryDelay > 0
-          ? new Promise((resolve) => setTimeout(resolve, state.retryDelay)).then(fn)
-          : fn();
-      };
-    };
+    const delay = createDelayFn(state);
 
     if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
       // Return null if we're in one of the terminating states
