@@ -50,11 +50,11 @@ export const SuggestionSelector = ({
     (newOptions) => {
       const suggestion = newOptions.length
         ? suggestions.find((current) => current.title === newOptions[0].value)
-        : undefined;
+        : activeSuggestion;
 
       onSuggestionChange?.(suggestion);
     },
-    [onSuggestionChange, suggestions]
+    [activeSuggestion, onSuggestionChange, suggestions]
   );
 
   const [suggestionsPopoverDisabled, setSuggestionaPopoverDisabled] = useState(false);
@@ -90,6 +90,7 @@ export const SuggestionSelector = ({
         onChange={onSelectionChange}
         compressed
         fullWidth={true}
+        isClearable={false}
         onFocus={disableFieldPopover}
         onBlur={enableFieldPopover}
         renderOption={(option) => {
