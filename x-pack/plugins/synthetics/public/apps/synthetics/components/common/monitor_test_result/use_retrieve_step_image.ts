@@ -53,12 +53,13 @@ export const useRetrieveStepImage = ({
   retryFetchOnRevisit: boolean;
 }) => {
   const [imgState, setImgState] = useState<ImageDataResult>({});
+  const [isLoading, setIsLoading] = useState(false);
   const skippedStep = stepStatus === 'skipped';
 
-  const dataResult = useGetStepScreenshotUrls(checkGroup, imgPath, imgState);
-  const isImageUrlAvailable = dataResult?.[imgPath]?.url ?? false;
+  const imageResult = useGetStepScreenshotUrls(checkGroup, imgPath, imgState);
+  const isImageUrlAvailable = imageResult?.[imgPath]?.url ?? false;
 
-  useFetcher(() => {
+  useFetcher(async () => {
     const retrieveAttemptedBefore = (imgState[imgPath]?.attempts ?? 0) > 0;
     const shouldRetry = retryFetchOnRevisit || !retrieveAttemptedBefore;
 
@@ -66,32 +67,31 @@ export const useRetrieveStepImage = ({
       setImgState((prevState) => {
         return getUpdatedState({ prevState, imgPath, increment: true, loading: true });
       });
-
+      if (stepStatus !== 'failed') setIsLoading(true);
       const backoffOptions = !testNowMode
         ? {
             maxRetry: 2,
             initialBackoff: 100,
           }
         : undefined;
-      return getJourneyScreenshot(imgPath, backoffOptions)
-        .then((data) => {
-          setImgState((prevState) => {
-            return getUpdatedState({ prevState, imgPath, increment: false, data, loading: false });
-          });
-
-          return data;
-        })
-        .catch(() => {
-          setImgState((prevState) => {
-            return getUpdatedState({ prevState, imgPath, increment: false, loading: false });
-          });
+      try {
+        const data = await getJourneyScreenshot(imgPath, backoffOptions);
+        setImgState((prevState) => {
+          return getUpdatedState({ prevState, imgPath, increment: false, data, loading: false });
         });
+        return data;
+      } catch (e: unknown) {
+        setImgState((prevState) => {
+          return getUpdatedState({ prevState, imgPath, increment: false, loading: false });
+        });
+      }
     } else {
-      return new Promise<ImageResponse>((resolve) => resolve(null));
+      return null;
     }
+    setIsLoading(false);
   }, [skippedStep, hasIntersected, imgPath, retryFetchOnRevisit, timestamp]);
 
-  return dataResult;
+  return { imageResult, isLoading };
 };
 
 /**
