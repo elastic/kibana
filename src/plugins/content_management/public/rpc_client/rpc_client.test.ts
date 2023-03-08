@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { procedureNames, API_ENDPOINT } from '../../common';
+import { API_ENDPOINT, procedureNames } from '../../common';
 
 import { RpcClient } from './rpc_client';
 

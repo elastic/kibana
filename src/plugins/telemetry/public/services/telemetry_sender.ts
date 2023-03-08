@@ -12,7 +12,7 @@ import { exhaustMap } from 'rxjs/operators';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { LOCALSTORAGE_KEY, PAYLOAD_CONTENT_ENCODING } from '../../common/constants';
 import { TelemetryService } from './telemetry_service';
-import type { EncryptedTelemetryPayload } from '../../common/types';
+import type { EncryptedTelemetryPayload } from '../../common/types/latest';
 import { isReportIntervalExpired } from '../../common/is_report_interval_expired';
 
 export class TelemetrySender {

@@ -11,7 +11,7 @@ import {
 } from '../../../tasks/es_archiver';
 import { getNewRule } from '../../../objects/rule';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
-import { createCustomRule, deleteCustomRule } from '../../../tasks/api_calls/rules';
+import { createRule, deleteCustomRule } from '../../../tasks/api_calls/rules';
 import { editException, editExceptionFlyoutItemName } from '../../../tasks/exceptions';
 import { EXCEPTIONS_URL } from '../../../urls/navigation';
 
@@ -28,7 +28,7 @@ describe('Add/edit exception from exception management page', () => {
     esArchiverLoad('exceptions');
     login();
     visitWithoutDateRange(EXCEPTIONS_URL);
-    createCustomRule(getNewRule());
+    createRule(getNewRule());
   });
 
   after(() => {

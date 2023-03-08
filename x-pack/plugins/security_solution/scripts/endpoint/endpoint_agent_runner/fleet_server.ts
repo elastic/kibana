@@ -44,8 +44,12 @@ import {
 } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 
-export const runFleetServerIfNeeded = async (): Promise<string | undefined> => {
+export const runFleetServerIfNeeded = async (): Promise<
+  { fleetServerContainerId: string; fleetServerAgentPolicyId: string } | undefined
+> => {
   let fleetServerContainerId;
+  let fleetServerAgentPolicyId;
+
   const {
     log,
     kibana: { isLocalhost: isKibanaOnLocalhost },
@@ -63,7 +67,7 @@ export const runFleetServerIfNeeded = async (): Promise<string | undefined> => {
   }
 
   try {
-    const fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
+    fleetServerAgentPolicyId = await getOrCreateFleetServerAgentPolicyId();
     const serviceToken = await generateFleetServiceToken();
 
     if (isKibanaOnLocalhost) {
@@ -82,7 +86,7 @@ export const runFleetServerIfNeeded = async (): Promise<string | undefined> => {
 
   log.indent(-4);
 
-  return fleetServerContainerId;
+  return { fleetServerContainerId, fleetServerAgentPolicyId };
 };
 
 const isFleetServerEnrolled = async () => {

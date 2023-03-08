@@ -1,6 +1,6 @@
 get:
   summary: Retrieves information about connectors.
-  operationId: getCaseConnectors
+  operationId: findCaseConnectors
   description: >
     In particular, only the connectors that are supported for use in cases are
     returned. You must have `read` privileges for the **Actions and Connectors**
