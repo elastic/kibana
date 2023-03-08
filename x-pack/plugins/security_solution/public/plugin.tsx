@@ -93,7 +93,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.kibanaVersion = initializerContext.env.packageInfo.version;
     this.kibanaBranch = initializerContext.env.packageInfo.branch;
     this.prebuiltRulesPackageVersion = this.config.prebuiltRulesPackageVersion;
-    this.telemetry = new TelemetryService();
+
+    this.telemetry = new TelemetryService(null);
   }
   private appUpdater$ = new Subject<AppUpdater>();
 
@@ -123,7 +124,11 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
       APP_UI_ID
     );
-    this.telemetry.setup({ analytics: core.analytics });
+    const telemetryContext = {
+      // experimentalFeatures: this.experimentalFeatures,
+      prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion,
+    };
+    this.telemetry.setup({ analytics: core.analytics }, telemetryContext);
 
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({

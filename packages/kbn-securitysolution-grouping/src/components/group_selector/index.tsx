@@ -76,6 +76,7 @@ const GroupSelectorComponent = ({
             name: i18n.NONE,
             icon: groupSelected === 'none' ? 'check' : 'empty',
             onClick: () => {
+              console.log('ui-counter', { groupingId, selected: 'none' });
               tracker?.(
                 METRIC_TYPE.CLICK,
                 getTelemetryEvent.groupChanged({ groupingId, selected: 'none' })
@@ -87,6 +88,8 @@ const GroupSelectorComponent = ({
             'data-test-subj': `panel-${o.key}`,
             name: o.label,
             onClick: () => {
+              console.log('ui-counter', { groupingId, selected: o.key });
+
               tracker?.(
                 METRIC_TYPE.CLICK,
                 getTelemetryEvent.groupChanged({ groupingId, selected: o.key })
@@ -111,6 +114,8 @@ const GroupSelectorComponent = ({
           <CustomFieldPanel
             currentOptions={options.map((o) => ({ text: o.label, field: o.key }))}
             onSubmit={(field: string) => {
+              console.log('ui-counter', 'custom', { groupingId, selected: field });
+
               tracker?.(
                 METRIC_TYPE.CLICK,
                 getTelemetryEvent.groupChanged({ groupingId, selected: field })

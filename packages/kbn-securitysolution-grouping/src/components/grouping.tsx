@@ -21,26 +21,26 @@ import { createGroupFilter } from './accordion_panel/helpers';
 import type { BadgeMetric, CustomMetric } from './accordion_panel';
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
-import { EmptyGroupingComponent } from './empty_resuls_panel';
+import { EmptyGroupingComponent } from './empty_results_panel';
 import { groupingContainerCss, groupsUnitCountCss } from './styles';
 import { GROUPS_UNIT } from './translations';
 import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } from './types';
 import { getTelemetryEvent } from '../telemetry/const';
 
-export interface GroupingProps {
-  badgeMetricStats?: (fieldBucket: RawBucket) => BadgeMetric[];
-  customMetricStats?: (fieldBucket: RawBucket) => CustomMetric[];
-  data?: GroupingAggregation & GroupingFieldTotalAggregation;
+export interface GroupingProps<T> {
+  badgeMetricStats?: (fieldBucket: RawBucket<T>) => BadgeMetric[];
+  customMetricStats?: (fieldBucket: RawBucket<T>) => CustomMetric[];
+  data?: GroupingAggregation<T> & GroupingFieldTotalAggregation;
   groupingId: string;
-  groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element | undefined;
-  groupsSelector?: JSX.Element;
+  groupPanelRenderer?: (fieldBucket: RawBucket<T>) => JSX.Element | undefined;
+  groupSelector?: JSX.Element;
   inspectButton?: JSX.Element;
   isLoading: boolean;
   onToggleCallback?: (params: {
     isOpen: boolean;
     groupName?: string | undefined;
     groupNumber: number;
-    tableId: string;
+    groupingId: string;
   }) => void;
   pagination: {
     pageIndex: number;
@@ -60,13 +60,13 @@ export interface GroupingProps {
   unit?: (n: number) => string;
 }
 
-const GroupingComponent = ({
+const GroupingComponent = <T,>({
   badgeMetricStats,
   customMetricStats,
   data,
   groupingId,
   groupPanelRenderer,
-  groupsSelector,
+  groupSelector,
   inspectButton,
   isLoading,
   onToggleCallback,
@@ -76,9 +76,9 @@ const GroupingComponent = ({
   takeActionItems,
   tracker,
   unit = defaultUnit,
-}: GroupingProps) => {
+}: GroupingProps<T>) => {
   const [trigger, setTrigger] = useState<
-    Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket }>
+    Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket<T> }>
   >({});
 
   const groupsNumber = data?.groupsNumber?.value ?? 0;
@@ -117,6 +117,8 @@ const GroupingComponent = ({
               groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
               isLoading={isLoading}
               onToggleGroup={(isOpen) => {
+                console.log('ui-counter', 'groupToggled', { isOpen, groupingId, groupNumber });
+
                 tracker?.(
                   METRIC_TYPE.CLICK,
                   getTelemetryEvent.groupToggled({ isOpen, groupingId, groupNumber })
@@ -128,7 +130,7 @@ const GroupingComponent = ({
                     selectedBucket: groupBucket,
                   },
                 });
-                onToggleCallback?.({ isOpen, groupName: group, groupNumber, tableId: groupingId });
+                onToggleCallback?.({ isOpen, groupName: group, groupNumber, groupingId });
               }}
               renderChildComponent={
                 trigger[groupKey] && trigger[groupKey].state === 'open'
@@ -145,8 +147,8 @@ const GroupingComponent = ({
       badgeMetricStats,
       customMetricStats,
       data?.stackByMultipleFields0?.buckets,
-      groupingId,
       groupPanelRenderer,
+      groupingId,
       isLoading,
       onToggleCallback,
       renderChildComponent,
@@ -191,7 +193,7 @@ const GroupingComponent = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs">
             {inspectButton && <EuiFlexItem>{inspectButton}</EuiFlexItem>}
-            <EuiFlexItem>{groupsSelector}</EuiFlexItem>
+            <EuiFlexItem>{groupSelector}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -224,4 +226,4 @@ const GroupingComponent = ({
   );
 };
 
-export const Grouping = React.memo(GroupingComponent);
+export const Grouping = React.memo(GroupingComponent) as typeof GroupingComponent;
