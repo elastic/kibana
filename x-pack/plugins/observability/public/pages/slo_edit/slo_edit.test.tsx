@@ -24,7 +24,7 @@ import { Subset } from '../../typings';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
 import { buildSlo } from '../../data/slo/slo';
 import { paths } from '../../config';
-import { SloEditPage } from '.';
+import { SloEditPage } from './slo_edit';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
