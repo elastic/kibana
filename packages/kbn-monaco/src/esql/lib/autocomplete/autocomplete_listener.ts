@@ -57,17 +57,12 @@ export class AutocompleteListener implements ESQLParserListener {
   };
   private readonly tables: string[][] = [];
   private parentContext: number | undefined;
-  private onlyCustomVars: boolean = false;
 
   private get fields() {
     const fieldsSuggestions: Array<DynamicAutocompleteItem | AutocompleteCommandDefinition> = [
       DynamicAutocompleteItem.FieldIdentifier,
     ];
-    const flattened = this.tables.slice(0, this.tables.length - 1).flat();
-    if (flattened.length) {
-      fieldsSuggestions.push(...buildConstantsDefinitions(flattened));
-    }
-    return this.onlyCustomVars ? buildConstantsDefinitions(flattened) : fieldsSuggestions;
+    return fieldsSuggestions;
   }
 
   private get hasSuggestions() {
@@ -160,12 +155,10 @@ export class AutocompleteListener implements ESQLParserListener {
     if (qn && qn.text) {
       this.suggestions = this.getEndCommandSuggestions([byOperatorDefinition]);
     }
-    this.onlyCustomVars = true;
   }
 
   exitProjectCommand?(ctx: ProjectCommandContext) {
     const qn = ctx.qualifiedNames();
-    // const qn = projectClause.qualifiedNames();
     if (qn && qn.text) {
       if (qn.text.slice(-1) !== ',') {
         this.suggestions = this.getEndCommandSuggestions();

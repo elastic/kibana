@@ -54,6 +54,7 @@ import {
 } from './helpers';
 import { EditorFooter } from './editor_footer';
 import { ResizableButton } from './resizable_button';
+import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 
 import './overwrite.scss';
 import type { IUnifiedSearchPluginServices } from '../../types';
@@ -91,6 +92,7 @@ const languageId = (language: string) => {
 let clickedOutside = false;
 let initialRender = true;
 let updateLinesFromModel = false;
+let currentCursorContent = '';
 
 export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   query,
@@ -118,7 +120,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
   const kibana = useKibana<IUnifiedSearchPluginServices>();
-  const { uiSettings, dataViews } = kibana.services;
+  // const [currentCursorContent, setCurrentCursorContent] = useState(queryString);
+  const { uiSettings, dataViews, expressions } = kibana.services;
 
   const styles = textBasedLanguagedEditorStyles(
     euiTheme,
@@ -218,6 +221,18 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       editor1.current?.onDidChangeModelContent((e) => {
         if (updateLinesFromModel) {
           setLines(editorModel.current?.getLineCount() || 1);
+        }
+        if (editor1?.current) {
+          const currentPosition = editor1.current?.getPosition();
+          const content = editorModel.current?.getValueInRange({
+            startLineNumber: 0,
+            startColumn: 0,
+            endLineNumber: currentPosition?.lineNumber ?? 1,
+            endColumn: currentPosition?.column ?? 1,
+          });
+          if (content) {
+            currentCursorContent = content || editor1.current?.getValue();
+          }
         }
       });
       editor1.current?.onDidFocusEditorText(() => {
@@ -345,34 +360,28 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const getFieldsIdentifiers: ESQLCustomAutocompleteCallbacks['getFieldsIdentifiers'] =
     useMemo(() => {
-      let source: string;
-      let cachedSuggestions: string[] = [];
+      let fieldsSuggestions: string[] = [];
 
       return async (ctx) => {
-        let data: string[] = [];
-        const sourceKey = ctx.userDefinedVariables.sourceIdentifiers.join(',');
-        if (sourceKey === source) {
-          return cachedSuggestions;
-        }
-        for (const s of ctx.userDefinedVariables.sourceIdentifiers) {
-          if (s) {
-            try {
-              const [dataView] = await dataViews.find(s, 1);
-              if (dataView) {
-                data = [...data, ...dataView.fields.map((f) => f.name)];
-              }
-            } catch (e) {
-              // nothing to be here
-            }
+        const pipes = currentCursorContent?.split('|');
+        pipes?.pop();
+        const validContent = pipes?.join('|');
+        // change the limit 1 to 0 when this bug is fixed https://github.com/elastic/elasticsearch-internal/issues/867
+        if (validContent) {
+          const esqlQuery = {
+            esql: `${validContent} | limit 1`,
+          };
+          try {
+            const table = await fetchFieldsFromESQL(esqlQuery, expressions);
+            fieldsSuggestions = table?.columns.map((c) => c.name) ?? [];
+          } catch (e) {
+            // no action yet
           }
         }
 
-        cachedSuggestions = data;
-        source = sourceKey;
-
-        return cachedSuggestions;
+        return fieldsSuggestions;
       };
-    }, [dataViews]);
+    }, [expressions]);
 
   const codeEditorOptions: CodeEditorProps['options'] = {
     automaticLayout: false,
