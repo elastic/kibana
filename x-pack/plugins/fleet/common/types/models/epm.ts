@@ -407,7 +407,7 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.required]?: boolean;
   [RegistryVarsEntryKeys.show_user]?: boolean;
   [RegistryVarsEntryKeys.multi]?: boolean;
-  [RegistryVarsEntryKeys.options]: Array<{ value: string; text: string }>;
+  [RegistryVarsEntryKeys.options]?: Array<{ value: string; text: string }>;
   [RegistryVarsEntryKeys.default]?: string | string[] | boolean;
   [RegistryVarsEntryKeys.os]?: {
     [key: string]: {
