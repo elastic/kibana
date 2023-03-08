@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { set } from 'lodash/fp';
+import { set } from '@kbn/safer-lodash-set/fp';
 import { renderParameterTemplates } from './render';
 
 const params = {

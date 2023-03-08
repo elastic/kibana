@@ -8,10 +8,13 @@
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { KibanaServices } from '../../../common/lib/kibana';
 import { createFilterInAction } from './filter_in';
+import { createFilter } from '../helpers';
 
 jest.mock('../../../common/lib/kibana');
+jest.mock('../helpers');
 
 const mockFilterManager = KibanaServices.get().data.query.filterManager;
+const mockCreateFilter = createFilter as jest.Mock;
 
 describe('Default createFilterInAction', () => {
   const filterInAction = createFilterInAction({ order: 1 });
@@ -41,6 +44,31 @@ describe('Default createFilterInAction', () => {
     it('should execute normally', async () => {
       await filterInAction.execute(context);
       expect(mockFilterManager.addFilters).toHaveBeenCalled();
+      expect(mockCreateFilter).toBeCalledWith(context.field.name, context.field.value, false);
+    });
+
+    describe('should execute correctly when negateFilters is provided', () => {
+      it('if negateFilters is false, negate should be false (do not exclude)', async () => {
+        await filterInAction.execute({
+          ...context,
+          metadata: {
+            negateFilters: false,
+          },
+        });
+        expect(mockFilterManager.addFilters).toHaveBeenCalled();
+        expect(mockCreateFilter).toBeCalledWith(context.field.name, context.field.value, false);
+      });
+
+      it('if negateFilters is true, negate should be true (exclude)', async () => {
+        await filterInAction.execute({
+          ...context,
+          metadata: {
+            negateFilters: true,
+          },
+        });
+        expect(mockFilterManager.addFilters).toHaveBeenCalled();
+        expect(mockCreateFilter).toBeCalledWith(context.field.name, context.field.value, true);
+      });
     });
   });
 });

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { AnalyticsTableRowDetails } from '../../../services/ml/data_frame_analytics_table';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FieldStatsType } from '../common/types';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -16,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('classification creation', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/bm_classification');
-      await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing', '@timestamp');
+      await ml.testResources.createIndexPatternIfNeeded('ft_bank_marketing');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -49,6 +50,18 @@ export default function ({ getService }: FtrProviderContext) {
         trainingPercent: 20,
         modelMemory: '60mb',
         createIndexPattern: true,
+        fieldStatsEntries: [
+          {
+            fieldName: 'age',
+            type: 'number' as FieldStatsType,
+            isDependentVariableInput: true,
+          },
+          {
+            fieldName: 'balance.keyword',
+            type: 'keyword' as FieldStatsType,
+            isDependentVariableInput: true,
+          },
+        ],
         expected: {
           rocCurveColorState: [
             // tick/grid/axis
@@ -138,8 +151,20 @@ export default function ({ getService }: FtrProviderContext) {
             testData.expected.runtimeFieldsEditorContent
           );
 
-          await ml.testExecution.logTestStep('inputs the dependent variable');
+          await ml.testExecution.logTestStep(
+            'opens field stats flyout from dependent variable input'
+          );
           await ml.dataFrameAnalyticsCreation.assertDependentVariableInputExists();
+          for (const { fieldName, type: fieldType } of testData.fieldStatsEntries.filter(
+            (e) => e.isDependentVariableInput
+          )) {
+            await ml.dataFrameAnalyticsCreation.assertFieldStatsFlyoutContentFromDependentVariableInputTrigger(
+              fieldName,
+              fieldType
+            );
+          }
+
+          await ml.testExecution.logTestStep('inputs the dependent variable');
           await ml.dataFrameAnalyticsCreation.selectDependentVariable(testData.dependentVariable);
 
           await ml.testExecution.logTestStep('inputs the training percent');

@@ -384,6 +384,16 @@ describe('Exception helpers', () => {
       const result = prepareExceptionItemsForBulkClose(payload);
       expect(result).toEqual(expected);
     });
+
+    test("should strip out any comments in the exceptions for bulk close'", () => {
+      const exceptionItemWithComment = {
+        ...getExceptionListItemSchemaMock(),
+        comments: getCommentsArrayMock(),
+      };
+      const payload = [exceptionItemWithComment];
+      const result = prepareExceptionItemsForBulkClose(payload);
+      expect(result).toEqual([getExceptionListItemSchemaMock()]);
+    });
   });
 
   describe('#lowercaseHashValues', () => {

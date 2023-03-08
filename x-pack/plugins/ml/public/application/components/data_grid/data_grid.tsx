@@ -124,7 +124,7 @@ export const DataGrid: FC<Props> = memo(
           analysisType === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION
         ) {
           if (schema === 'featureImportance') {
-            const row = data[rowIndex];
+            const row = data[rowIndex - pagination.pageIndex * pagination.pageSize];
             if (!row) return <div />;
             // if resultsField for some reason is not available then use ml
             const mlResultsField = resultsField ?? DEFAULT_RESULTS_FIELD;

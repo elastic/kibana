@@ -46,7 +46,7 @@ If you haven't already, start {kib} and connect it to {es} using the
 --
 {kib} uses the client certificate and corresponding private key when connecting to {es}.
 
-NOTE: This is not the same as the <<configuring-tls-browser-kib,server certificate>> that {kib} will present to web browsers.
+NOTE: This is not the same as the {ref}/security-basic-setup-https.html#encrypt-kibana-http[server certificate] that {kib} will present to web browsers.
 
 You may choose to generate a client certificate and private key using the {ref}/certutil.html[`elasticsearch-certutil`] tool. If you followed the {es} documentation for {ref}/security-basic-setup.html#generate-certificates[generating the certificates authority], then you already have a certificate authority (CA) to sign
 the {es} server certificate. You may choose to use the same CA to sign the {kib}

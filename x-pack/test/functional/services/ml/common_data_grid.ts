@@ -219,5 +219,20 @@ export function MachineLearningCommonDataGridProvider({ getService }: FtrProvide
         await browser.pressKeys(browser.keys.ESCAPE);
       });
     },
+
+    async assertActivePage(tableSubj: string, expectedPage: number) {
+      const table = await testSubjects.find(tableSubj);
+      const pagination = await table.findByClassName('euiPagination__list');
+      const activePage = await pagination.findByCssSelector(
+        '.euiPaginationButton[aria-current] .euiButtonEmpty__text'
+      );
+      const text = await activePage.getVisibleText();
+      expect(text).to.eql(expectedPage);
+    },
+
+    async selectPage(tableSubj: string, page: number) {
+      await testSubjects.click(`${tableSubj} > pagination-button-${page - 1}`);
+      await this.assertActivePage(tableSubj, page);
+    },
   };
 }

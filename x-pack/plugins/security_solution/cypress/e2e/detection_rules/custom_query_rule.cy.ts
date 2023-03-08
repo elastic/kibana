@@ -21,7 +21,7 @@ import {
   RISK_SCORE,
   RULE_NAME,
   RULES_ROW,
-  RULES_TABLE,
+  RULES_MANAGEMENT_TABLE,
   RULE_SWITCH,
   SEVERITY,
 } from '../../screens/alerts_detection_rules';
@@ -172,7 +172,7 @@ describe('Custom query rules', () => {
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
       cy.log('Asserting rule view in rules list');
-      cy.get(RULES_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
+      cy.get(RULES_MANAGEMENT_TABLE).find(RULES_ROW).should('have.length', expectedNumberOfRules);
       cy.get(RULE_NAME).should('have.text', ruleFields.ruleName);
       cy.get(RISK_SCORE).should('have.text', ruleFields.riskScore);
       cy.get(SEVERITY)
@@ -247,7 +247,7 @@ describe('Custom query rules', () => {
       });
 
       it('Deletes one rule', () => {
-        cy.get(RULES_TABLE)
+        cy.get(RULES_MANAGEMENT_TABLE)
           .find(RULES_ROW)
           .then((rules) => {
             const initialNumberOfRules = rules.length;
@@ -260,7 +260,7 @@ describe('Custom query rules', () => {
 
             deleteFirstRule();
 
-            cy.get(RULES_TABLE)
+            cy.get(RULES_MANAGEMENT_TABLE)
               .find(RULES_ROW)
               .should('have.length', expectedNumberOfRulesAfterDeletion);
             cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
@@ -275,7 +275,7 @@ describe('Custom query rules', () => {
       });
 
       it('Deletes more than one rule', () => {
-        cy.get(RULES_TABLE)
+        cy.get(RULES_MANAGEMENT_TABLE)
           .find(RULES_ROW)
           .then((rules) => {
             const initialNumberOfRules = rules.length;
@@ -286,21 +286,21 @@ describe('Custom query rules', () => {
             selectNumberOfRules(numberOfRulesToBeDeleted);
             deleteSelectedRules();
 
-            cy.get(RULES_TABLE)
+            cy.get(RULES_MANAGEMENT_TABLE)
               .get(RULES_ROW)
               .first()
               .within(() => {
                 cy.get(RULE_SWITCH).should('not.exist');
               });
 
-            cy.get(RULES_TABLE)
+            cy.get(RULES_MANAGEMENT_TABLE)
               .find(RULES_ROW)
               .should('have.length', expectedNumberOfRulesAfterDeletion);
             cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {
               const numberOfRules = body.data.length;
               expect(numberOfRules).to.eql(expectedNumberOfRulesAfterDeletion);
             });
-            cy.get(RULES_TABLE)
+            cy.get(RULES_MANAGEMENT_TABLE)
               .get(RULES_ROW)
               .first()
               .within(() => {
@@ -314,7 +314,7 @@ describe('Custom query rules', () => {
       });
 
       it('Deletes one rule from detail page', () => {
-        cy.get(RULES_TABLE)
+        cy.get(RULES_MANAGEMENT_TABLE)
           .find(RULES_ROW)
           .then((rules) => {
             const initialNumberOfRules = rules.length;
@@ -327,8 +327,8 @@ describe('Custom query rules', () => {
 
             // @ts-expect-error update types
             cy.waitFor('@deleteRule').then(() => {
-              cy.get(RULES_TABLE).should('exist');
-              cy.get(RULES_TABLE)
+              cy.get(RULES_MANAGEMENT_TABLE).should('exist');
+              cy.get(RULES_MANAGEMENT_TABLE)
                 .find(RULES_ROW)
                 .should('have.length', expectedNumberOfRulesAfterDeletion);
               cy.request({ url: '/api/detection_engine/rules/_find' }).then(({ body }) => {

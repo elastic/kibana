@@ -11,6 +11,7 @@ import {
   EuiFieldSearch,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiPortal,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -107,23 +108,28 @@ export class SpaceSelector extends Component<Props, State> {
         data-test-subj="kibanaSpaceSelector"
         panelled
       >
-        <KibanaPageTemplate.EmptyPrompt className="spcSpaceSelector__pageContent">
+        {/* Portal the fixed background graphic so it doesn't affect page positioning or overlap on top of global banners */}
+        <EuiPortal>
+          <div className="spcSelectorBackground" role="presentation" />
+        </EuiPortal>
+
+        <KibanaPageTemplate.Section color="transparent" paddingSize="xl">
           <EuiText textAlign="center" size="s">
             <EuiSpacer size="xxl" />
             <KibanaSolutionAvatar name="Elastic" size="xl" />
             <EuiSpacer size="xxl" />
-            <h1
-              // plain `eui` class undos forced focus style on non-EUI components
-              className="eui spcSpaceSelector__pageHeader"
-              tabIndex={0}
-              ref={this.setHeaderRef}
-            >
-              <FormattedMessage
-                id="xpack.spaces.spaceSelector.selectSpacesTitle"
-                defaultMessage="Select your space"
-              />
-            </h1>
             <EuiTextColor color="subdued">
+              <h1
+                // plain `eui` class undos forced focus style on non-EUI components
+                className="eui spcSpaceSelector__pageHeader"
+                tabIndex={0}
+                ref={this.setHeaderRef}
+              >
+                <FormattedMessage
+                  id="xpack.spaces.spaceSelector.selectSpacesTitle"
+                  defaultMessage="Select your space"
+                />
+              </h1>
               <p>
                 <FormattedMessage
                   id="xpack.spaces.spaceSelector.changeSpaceAnytimeAvailabilityText"
@@ -183,7 +189,7 @@ export class SpaceSelector extends Component<Props, State> {
               </EuiPanel>
             </Fragment>
           )}
-        </KibanaPageTemplate.EmptyPrompt>
+        </KibanaPageTemplate.Section>
       </KibanaPageTemplate>
     );
   }

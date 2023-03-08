@@ -8,7 +8,7 @@
 import { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
 import React, { FC, useEffect } from 'react';
 import { EuiButtonEmpty, EuiLink, useEuiTheme } from '@elastic/eui';
-import { Route, Switch, useHistory } from 'react-router-dom';
+import { Route, Switch, useHistory, useLocation } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -62,6 +62,7 @@ export const MONITOR_MANAGEMENT_LABEL = i18n.translate(
 const getRoutes = (
   euiTheme: EuiThemeComputed,
   history: ReturnType<typeof useHistory>,
+  location: ReturnType<typeof useLocation>,
   syntheticsPath: string
 ): RouteProps[] => {
   return [
@@ -70,7 +71,7 @@ const getRoutes = (
     getTestRunDetailsRoute(history, syntheticsPath, baseTitle),
     getStepDetailsRoute(history, syntheticsPath, baseTitle),
     ...getMonitorDetailsRoute(history, syntheticsPath, baseTitle),
-    ...getMonitorsRoute(history, syntheticsPath, baseTitle),
+    ...getMonitorsRoute(history, location, syntheticsPath, baseTitle),
     {
       title: i18n.translate('xpack.synthetics.gettingStartedRoute.title', {
         defaultMessage: 'Synthetics Getting Started | {baseTitle}',
@@ -174,10 +175,12 @@ export const PageRouter: FC = () => {
   const { addInspectorRequest } = useInspectorContext();
   const { euiTheme } = useEuiTheme();
   const history = useHistory();
+  const location = useLocation();
 
   const routes = getRoutes(
     euiTheme,
     history,
+    location,
     application.getUrlForApp(PLUGIN.SYNTHETICS_PLUGIN_ID)
   );
   const PageTemplateComponent = observability.navigation.PageTemplate;

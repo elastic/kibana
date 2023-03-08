@@ -770,8 +770,7 @@ export function copyToSpaceTestSuiteFactory(context: FtrProviderContext) {
           await testDataLoader.deleteFtrSpaces();
         });
 
-        // FLAKY: https://github.com/elastic/kibana/issues/86545
-        describe.skip('single-namespace types', () => {
+        describe('single-namespace types', () => {
           beforeEach(async () => {
             await testDataLoader.createFtrSavedObjectsData(SPACE_DATA_TO_LOAD);
           });

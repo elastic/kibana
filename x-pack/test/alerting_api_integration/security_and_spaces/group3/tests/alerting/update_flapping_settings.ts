@@ -30,8 +30,8 @@ export default function updateFlappingSettingsTest({ getService }: FtrProviderCo
             .auth(user.username, user.password)
             .send({
               enabled: false,
-              lookBackWindow: 20,
-              statusChangeThreshold: 20,
+              look_back_window: 20,
+              status_change_threshold: 20,
             });
 
           switch (scenario.id) {
@@ -51,12 +51,12 @@ export default function updateFlappingSettingsTest({ getService }: FtrProviderCo
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.enabled).to.eql(false);
-              expect(response.body.lookBackWindow).to.eql(20);
-              expect(response.body.statusChangeThreshold).to.eql(20);
-              expect(response.body.createdBy).to.eql(user.username);
-              expect(response.body.updatedBy).to.eql(user.username);
-              expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
-              expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
+              expect(response.body.look_back_window).to.eql(20);
+              expect(response.body.status_change_threshold).to.eql(20);
+              expect(response.body.created_by).to.eql(user.username);
+              expect(response.body.updated_by).to.eql(user.username);
+              expect(Date.parse(response.body.created_at)).to.be.greaterThan(0);
+              expect(Date.parse(response.body.updated_at)).to.be.greaterThan(0);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
@@ -72,8 +72,8 @@ export default function updateFlappingSettingsTest({ getService }: FtrProviderCo
         .auth(Superuser.username, Superuser.password)
         .send({
           enabled: true,
-          lookBackWindow: 200,
-          statusChangeThreshold: 200,
+          look_back_window: 200,
+          status_change_threshold: 200,
         })
         .expect(400);
 
@@ -87,8 +87,8 @@ export default function updateFlappingSettingsTest({ getService }: FtrProviderCo
         .auth(Superuser.username, Superuser.password)
         .send({
           enabled: true,
-          lookBackWindow: 20,
-          statusChangeThreshold: 200,
+          look_back_window: 20,
+          status_change_threshold: 200,
         })
         .expect(400);
 
@@ -102,8 +102,8 @@ export default function updateFlappingSettingsTest({ getService }: FtrProviderCo
         .auth(Superuser.username, Superuser.password)
         .send({
           enabled: true,
-          lookBackWindow: 5,
-          statusChangeThreshold: 10,
+          look_back_window: 5,
+          status_change_threshold: 10,
         })
         .expect(400);
 
@@ -121,14 +121,14 @@ export default function updateFlappingSettingsTest({ getService }: FtrProviderCo
           .auth(Superuser.username, Superuser.password)
           .send({
             enabled: false,
-            lookBackWindow: 20,
-            statusChangeThreshold: 20,
+            look_back_window: 20,
+            status_change_threshold: 20,
           });
 
         expect(postResponse.statusCode).to.eql(200);
         expect(postResponse.body.enabled).to.eql(false);
-        expect(postResponse.body.lookBackWindow).to.eql(20);
-        expect(postResponse.body.statusChangeThreshold).to.eql(20);
+        expect(postResponse.body.look_back_window).to.eql(20);
+        expect(postResponse.body.status_change_threshold).to.eql(20);
 
         // Get the rules settings in space2
         const getResponse = await supertestWithoutAuth
@@ -137,8 +137,8 @@ export default function updateFlappingSettingsTest({ getService }: FtrProviderCo
 
         expect(getResponse.statusCode).to.eql(200);
         expect(getResponse.body.enabled).to.eql(true);
-        expect(getResponse.body.lookBackWindow).to.eql(20);
-        expect(getResponse.body.statusChangeThreshold).to.eql(4);
+        expect(getResponse.body.look_back_window).to.eql(20);
+        expect(getResponse.body.status_change_threshold).to.eql(4);
       });
     });
   });

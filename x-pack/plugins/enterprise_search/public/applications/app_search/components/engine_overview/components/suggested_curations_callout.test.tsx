@@ -11,7 +11,8 @@ import { setMockValues } from '../../../../__mocks__/kea_logic';
 import React from 'react';
 
 import { shallow } from 'enzyme';
-import { set } from 'lodash/fp';
+
+import { set } from '@kbn/safer-lodash-set/fp';
 
 import { SuggestionsCallout } from '../../curations/components/suggestions_callout';
 

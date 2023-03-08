@@ -49,6 +49,7 @@ export default function ({ getPageObjects, getService }) {
         delete searchParams.token;
 
         expect(searchParams).to.eql({
+          buffer: 4,
           geometryFieldName: 'geometry',
           hasLabels: 'false',
           index: 'geo_shapes*',

@@ -19,6 +19,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Host',
           }
         ),
+        order: 0,
         value: '',
       },
       user: {
@@ -28,6 +29,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Username',
           }
         ),
+        order: 1,
         value: '',
       },
       password: {
@@ -37,6 +39,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Password',
           }
         ),
+        order: 2,
         value: '',
       },
       database: {
@@ -46,6 +49,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Database',
           }
         ),
+        order: 3,
         value: '',
       },
       collection: {
@@ -55,6 +59,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Collection',
           }
         ),
+        order: 4,
         value: '',
       },
       direct_connection: {
@@ -64,6 +69,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Direct connection (true/false)',
           }
         ),
+        order: 5,
         value: '',
       },
     },
@@ -89,6 +95,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Host',
           }
         ),
+        order: 0,
         value: '',
       },
       port: {
@@ -98,6 +105,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Port',
           }
         ),
+        order: 1,
         value: '',
       },
       user: {
@@ -107,10 +115,12 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Username',
           }
         ),
+        order: 2,
         value: '',
       },
       password: {
         value: '',
+        order: 3,
         label: i18n.translate(
           'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.passwordLabel',
           {
@@ -125,6 +135,27 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             defaultMessage: 'Databases',
           }
         ),
+        order: 4,
+        value: '',
+      },
+      ssl_disabled: {
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslDisabledLabel',
+          {
+            defaultMessage: 'Disable SSL (true/false)',
+          }
+        ),
+        order: 5,
+        value: 'true',
+      },
+      ssl_ca: {
+        label: i18n.translate(
+          'xpack.enterpriseSearch.nativeConnectors.mysql.configuration.sslCertificateLabel',
+          {
+            defaultMessage: 'SSL certificate',
+          }
+        ),
+        order: 6,
         value: '',
       },
     },

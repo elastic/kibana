@@ -28,22 +28,27 @@ export const ExplorerLink: React.FC<ExplorerLinkProps> = ({
     services: { ml, http },
   } = useKibana();
 
-  const explorerUrl = useMlHref(ml, http.basePath.get(), {
-    page: 'explorer',
-    pageState: {
-      jobIds: [score.jobId],
-      timeRange: {
-        from: new Date(startDate).toISOString(),
-        to: new Date(endDate).toISOString(),
-        mode: 'absolute',
-      },
-      refreshInterval: {
-        pause: true,
-        value: 0,
-        display: 'Off',
+  const explorerUrl = useMlHref(
+    ml,
+    http.basePath.get(),
+    {
+      page: 'explorer',
+      pageState: {
+        jobIds: [score.jobId],
+        timeRange: {
+          from: new Date(startDate).toISOString(),
+          to: new Date(endDate).toISOString(),
+          mode: 'absolute',
+        },
+        refreshInterval: {
+          pause: true,
+          value: 0,
+          display: 'Off',
+        },
       },
     },
-  });
+    [score.jobId]
+  );
 
   if (!explorerUrl) return null;
 

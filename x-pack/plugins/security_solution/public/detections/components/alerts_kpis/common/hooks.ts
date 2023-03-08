@@ -69,28 +69,37 @@ export function isKeyword(field: Partial<BrowserField>) {
   return field.esTypes && field.esTypes?.indexOf('keyword') >= 0;
 }
 
-export function getAggregatableFields(fields: {
-  [fieldName: string]: Partial<BrowserField>;
-}): EuiComboBoxOptionOption[] {
+export function getAggregatableFields(
+  fields: {
+    [fieldName: string]: Partial<BrowserField>;
+  },
+  useLensCompatibleFields?: boolean
+): EuiComboBoxOptionOption[] {
   const result = [];
   for (const [key, field] of Object.entries(fields)) {
-    if (field.aggregatable === true && isKeyword(field) && !isDataViewFieldSubtypeNested(field)) {
-      result.push({ label: key, value: key });
+    if (useLensCompatibleFields) {
+      if (field.aggregatable === true && isKeyword(field) && !isDataViewFieldSubtypeNested(field)) {
+        result.push({ label: key, value: key });
+      }
+    } else {
+      if (field.aggregatable === true) {
+        result.push({ label: key, value: key });
+      }
     }
   }
   return result;
 }
 
-export const useStackByFields = () => {
+export const useStackByFields = (useLensCompatibleFields?: boolean) => {
   const { pathname } = useLocation();
 
   const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
   const allFields = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
   const [stackByFieldOptions, setStackByFieldOptions] = useState(() =>
-    getAggregatableFields(allFields)
+    getAggregatableFields(allFields, useLensCompatibleFields)
   );
   useEffect(() => {
-    setStackByFieldOptions(getAggregatableFields(allFields));
-  }, [allFields]);
+    setStackByFieldOptions(getAggregatableFields(allFields, useLensCompatibleFields));
+  }, [allFields, useLensCompatibleFields]);
   return useMemo(() => stackByFieldOptions, [stackByFieldOptions]);
 };

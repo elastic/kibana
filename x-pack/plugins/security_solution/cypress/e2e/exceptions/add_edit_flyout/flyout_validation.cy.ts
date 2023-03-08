@@ -74,7 +74,7 @@ describe('Exceptions flyout', () => {
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
       createCustomRule({
         ...getNewRule(),
-        dataSource: { index: ['exceptions-*'], type: 'indexPatterns' },
+        dataSource: { index: ['auditbeat-*', 'exceptions-*'], type: 'indexPatterns' },
         exceptionLists: [
           {
             id: response.body.id,
@@ -289,7 +289,24 @@ describe('Exceptions flyout', () => {
     openExceptionFlyoutFromEmptyViewerPrompt();
 
     cy.get(FIELD_INPUT).eq(0).click({ force: true });
+    cy.get(FIELD_INPUT).eq(0).type('unique');
     cy.get(EXCEPTION_FIELD_LIST).contains('unique_value.test');
+
+    closeExceptionBuilderFlyout();
+  });
+
+  it('Validates auto-suggested fields correctly', () => {
+    // open add exception modal
+    openExceptionFlyoutFromEmptyViewerPrompt();
+
+    // add exception item name
+    addExceptionFlyoutItemName('My item name');
+
+    // add an entry with a value and submit button should enable
+    addExceptionEntryFieldValue('agent.type', 0);
+    cy.get(VALUES_INPUT).eq(0).type(`{enter}`);
+    cy.get(VALUES_INPUT).eq(0).type(`{downarrow}{enter}`);
+    cy.get(CONFIRM_BTN).should('be.enabled');
 
     closeExceptionBuilderFlyout();
   });

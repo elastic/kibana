@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { useEsSearch } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
+import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';
+import { useSelectedLocation } from './use_selected_location';
 import { createEsQuery } from '../../../../../../common/utils/es_search';
 import { Ping } from '../../../../../../common/runtime_types';
 import { STEP_END_FILTER } from '../../../../../../common/constants/data_filters';
@@ -18,6 +19,8 @@ export function useFailedTestByStep({ to, from }: { to: string; from: string }) 
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   const { monitorId } = useParams<{ monitorId: string }>();
+
+  const selectedLocation = useSelectedLocation();
 
   const params = createEsQuery({
     index: SYNTHETICS_INDEX_PATTERN,
@@ -39,6 +42,11 @@ export function useFailedTestByStep({ to, from }: { to: string; from: string }) 
             {
               term: {
                 'synthetics.step.status': 'failed',
+              },
+            },
+            {
+              term: {
+                'observer.geo.name': selectedLocation?.label,
               },
             },
             {
@@ -67,9 +75,14 @@ export function useFailedTestByStep({ to, from }: { to: string; from: string }) 
     },
   });
 
-  const { data, loading } = useEsSearch<Ping, typeof params>(params, [lastRefresh, monitorId], {
-    name: `getFailedTestsByStep/${monitorId}`,
-  });
+  const { data, loading } = useReduxEsSearch<Ping, typeof params>(
+    params,
+    [lastRefresh, monitorId],
+    {
+      name: `getFailedTestsByStep/${monitorId}`,
+      isRequestReady: !!selectedLocation,
+    }
+  );
 
   return useMemo(() => {
     const total = data?.hits.total.value;

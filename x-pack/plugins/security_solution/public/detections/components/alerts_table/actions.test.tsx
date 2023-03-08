@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import moment from 'moment';
-import set from 'lodash/set';
+import set from '@kbn/safer-lodash-set/set';
 import cloneDeep from 'lodash/cloneDeep';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';

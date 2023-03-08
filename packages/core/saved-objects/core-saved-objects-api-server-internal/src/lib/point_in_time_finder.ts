@@ -147,14 +147,14 @@ export class PointInTimeFinder<T = unknown, A = unknown>
     try {
       return await this.#client.find<T, A>(
         {
+          ...findOptions,
           // Sort fields are required to use searchAfter, so we set some defaults here
-          sortField: 'updated_at',
-          sortOrder: 'desc',
+          sortField: findOptions.sortField ?? 'updated_at',
+          sortOrder: findOptions.sortOrder ?? 'desc',
           // Bump keep_alive by 2m on every new request to allow for the ES client
           // to make multiple retries in the event of a network failure.
           pit: id ? { id, keepAlive: '2m' } : undefined,
           searchAfter,
-          ...findOptions,
         },
         this.#internalOptions
       );

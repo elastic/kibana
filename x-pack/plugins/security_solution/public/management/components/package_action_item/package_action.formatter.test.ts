@@ -15,7 +15,7 @@ describe('PackageActionFormatter', () => {
     const unit: FleetServerAgentComponentUnit = {
       id: 'test-id',
       type: 'input',
-      status: 'failed',
+      status: 'FAILED',
       message: 'test message',
       payload: {
         error: {
@@ -32,11 +32,32 @@ describe('PackageActionFormatter', () => {
     expect(formatter.linkUrl).toBe(docLinks.es_connection);
   });
 
+  it('correctly formats output connection error', () => {
+    const unit: FleetServerAgentComponentUnit = {
+      id: 'test-id',
+      type: 'input',
+      status: 'DEGRADED',
+      message: 'test message',
+      payload: {
+        error: {
+          code: ENDPOINT_ERROR_CODES.OUTPUT_SERVER_ERROR,
+          message: 'an error message',
+        },
+      },
+    };
+    const docLinks = { es_connection: 'somedoclink' };
+    const formatter = new PackageActionFormatter(unit, docLinks);
+    expect(formatter.key).toBe('es_connection');
+    expect(formatter.title).toBe(titles.get('es_connection'));
+    expect(formatter.description).toBe(descriptions.get('es_connection'));
+    expect(formatter.linkUrl).toBe(docLinks.es_connection);
+  });
+
   it('correct formats generic error', () => {
     const unit: FleetServerAgentComponentUnit = {
       id: 'test-id',
       type: 'input',
-      status: 'failed',
+      status: 'FAILED',
       message: 'test message',
     };
     const docLinks = { es_connection: 'somedoclink' };

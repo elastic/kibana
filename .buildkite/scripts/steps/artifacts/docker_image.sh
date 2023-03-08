@@ -6,8 +6,8 @@ set -euo pipefail
 
 source .buildkite/scripts/steps/artifacts/env.sh
 
-GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:7}
-KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana:$GIT_ABBREV_COMMIT"
+GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
+KIBANA_IMAGE="docker.elastic.co/kibana-ci/kibana:git-$GIT_ABBREV_COMMIT"
 
 echo "--- Verify manifest does not already exist"
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
@@ -25,7 +25,7 @@ node scripts/build \
   --docker-cross-compile \
   --docker-images \
   --docker-namespace="kibana-ci" \
-  --docker-tag="$GIT_ABBREV_COMMIT" \
+  --docker-tag="git-$GIT_ABBREV_COMMIT" \
   --skip-docker-ubi \
   --skip-docker-cloud \
   --skip-docker-contexts
@@ -82,14 +82,17 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]]; then
   cat << EOF | buildkite-agent pipeline upload
 steps:
   - trigger: k8s-gitops-update-image-tag
-    label: ":argo: Update image tag for deployment-api"
+    label: ":argo: Update image tag for Kibana"
     branches: main
     build:
       env:
         MODE: sed
         TARGET_FILE: kibana-controller.yaml
-        IMAGE_TAG: "$GIT_ABBREV_COMMIT"
+        IMAGE_TAG: "git-$GIT_ABBREV_COMMIT"
         SERVICE: kibana-controller
+        NAMESPACE: kibana-ci
+        IMAGE_NAME: kibana
+        COMMIT_MESSAGE: "gitops: update kibana tag to elastic/kibana@$GIT_ABBREV_COMMIT"
 EOF
 
 else

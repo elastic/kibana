@@ -163,7 +163,6 @@ export const addNotesToTimeline = (notes: string) => {
 
         cy.get(NOTES_TEXT_AREA).type(notes, {
           parseSpecialCharSequences: false,
-          delay: 0,
           force: true,
         });
         cy.get(ADD_NOTE_BUTTON)

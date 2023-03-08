@@ -53,17 +53,17 @@ export function registerRoutes({
   const router =
     http.createRouter<InternalSavedObjectsRequestHandlerContext>('/api/saved_objects/');
 
-  registerGetRoute(router, { coreUsageData });
-  registerResolveRoute(router, { coreUsageData });
-  registerCreateRoute(router, { coreUsageData });
-  registerDeleteRoute(router, { coreUsageData });
-  registerFindRoute(router, { coreUsageData });
-  registerUpdateRoute(router, { coreUsageData });
-  registerBulkGetRoute(router, { coreUsageData });
-  registerBulkCreateRoute(router, { coreUsageData });
-  registerBulkResolveRoute(router, { coreUsageData });
-  registerBulkUpdateRoute(router, { coreUsageData });
-  registerBulkDeleteRoute(router, { coreUsageData });
+  registerGetRoute(router, { coreUsageData, logger });
+  registerResolveRoute(router, { coreUsageData, logger });
+  registerCreateRoute(router, { coreUsageData, logger });
+  registerDeleteRoute(router, { coreUsageData, logger });
+  registerFindRoute(router, { coreUsageData, logger });
+  registerUpdateRoute(router, { coreUsageData, logger });
+  registerBulkGetRoute(router, { coreUsageData, logger });
+  registerBulkCreateRoute(router, { coreUsageData, logger });
+  registerBulkResolveRoute(router, { coreUsageData, logger });
+  registerBulkUpdateRoute(router, { coreUsageData, logger });
+  registerBulkDeleteRoute(router, { coreUsageData, logger });
   registerExportRoute(router, { config, coreUsageData });
   registerImportRoute(router, { config, coreUsageData });
   registerResolveImportErrorsRoute(router, { config, coreUsageData });

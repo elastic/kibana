@@ -52,14 +52,17 @@ export const NameAndDescriptionStats: React.FC = () => {
       description: <EditDescription label={NAME_LABEL} onClick={() => setIsFlyoutVisible(true)} />,
       isLoading: hideStats,
       title: indexData.connector.name,
+      descriptionElement: 'div',
+      titleElement: 'div',
     },
     {
       description: (
         <EditDescription label={DESCRIPTION_LABEL} onClick={() => setIsFlyoutVisible(true)} />
       ),
+      descriptionElement: 'div',
       isLoading: hideStats,
       title: <EuiText size="s">{indexData.connector.description || ''}</EuiText>,
-      titleElement: 'p',
+      titleElement: 'div',
     },
   ];
 
@@ -69,7 +72,7 @@ export const NameAndDescriptionStats: React.FC = () => {
         {stats.map((item, index) => (
           <EuiFlexItem key={index}>
             <EuiPanel color={'subdued'} hasShadow={false} paddingSize="l">
-              <EuiStat {...item} />
+              <EuiStat titleSize="m" {...item} />
             </EuiPanel>
           </EuiFlexItem>
         ))}

@@ -105,7 +105,7 @@ valid user ID and password in the `elasticsearch.username` and
 `elasticsearch.password` settings in the `kibana.yml` file. These values are
 used when {kib} sends monitoring data to the production cluster.
 
-.. <<configuring-tls-kib-es,Configure encryption for traffic between {kib} and {es}>>.
+.. ref}/security-basic-setup-https.html#encrypt-kibana-elasticsearch[Encrypt traffic between {kib} and {es}].
 
 . <<start-stop,Start {kib}>>.
 

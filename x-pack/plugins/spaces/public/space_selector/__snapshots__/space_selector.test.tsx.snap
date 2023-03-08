@@ -6,8 +6,15 @@ exports[`it renders without crashing 1`] = `
   data-test-subj="kibanaSpaceSelector"
   panelled={true}
 >
-  <_EuiPageEmptyPrompt
-    className="spcSpaceSelector__pageContent"
+  <EuiPortal>
+    <div
+      className="spcSelectorBackground"
+      role="presentation"
+    />
+  </EuiPortal>
+  <_EuiPageSection
+    color="transparent"
+    paddingSize="xl"
   >
     <EuiText
       size="s"
@@ -23,19 +30,19 @@ exports[`it renders without crashing 1`] = `
       <EuiSpacer
         size="xxl"
       />
-      <h1
-        className="eui spcSpaceSelector__pageHeader"
-        tabIndex={0}
-      >
-        <FormattedMessage
-          defaultMessage="Select your space"
-          id="xpack.spaces.spaceSelector.selectSpacesTitle"
-          values={Object {}}
-        />
-      </h1>
       <EuiTextColor
         color="subdued"
       >
+        <h1
+          className="eui spcSpaceSelector__pageHeader"
+          tabIndex={0}
+        >
+          <FormattedMessage
+            defaultMessage="Select your space"
+            id="xpack.spaces.spaceSelector.selectSpacesTitle"
+            values={Object {}}
+          />
+        </h1>
         <p>
           <FormattedMessage
             defaultMessage="You can change your space at anytime."
@@ -51,6 +58,6 @@ exports[`it renders without crashing 1`] = `
     <EuiLoadingSpinner
       size="xl"
     />
-  </_EuiPageEmptyPrompt>
+  </_EuiPageSection>
 </_KibanaPageTemplate>
 `;

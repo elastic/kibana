@@ -14,8 +14,6 @@ import {
   EuiBasicTableColumn,
   EuiButton,
   EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIcon,
   EuiInMemoryTable,
   EuiText,
@@ -39,7 +37,6 @@ import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_temp
 
 import { AddIndicesFlyout } from './add_indices_flyout';
 import { EngineIndicesLogic } from './engine_indices_logic';
-import { EngineViewHeaderActions } from './engine_view_header_actions';
 
 export const EngineIndices: React.FC = () => {
   const { sendEnterpriseSearchTelemetry } = useActions(TelemetryLogic);
@@ -184,27 +181,17 @@ export const EngineIndices: React.FC = () => {
           defaultMessage: 'Indices',
         }),
         rightSideItems: [
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
-            <EuiFlexItem>
-              <EuiButton
-                data-telemetry-id="entSearchContent-engines-indices-addNewIndices"
-                data-test-subj="engine-add-new-indices-btn"
-                iconType="plusInCircle"
-                fill
-                onClick={openAddIndicesFlyout}
-              >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton',
-                  {
-                    defaultMessage: 'Add new indices',
-                  }
-                )}
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EngineViewHeaderActions />
-            </EuiFlexItem>
-          </EuiFlexGroup>,
+          <EuiButton
+            data-telemetry-id="entSearchContent-engines-indices-addNewIndices"
+            data-test-subj="engine-add-new-indices-btn"
+            iconType="plusInCircle"
+            fill
+            onClick={openAddIndicesFlyout}
+          >
+            {i18n.translate('xpack.enterpriseSearch.content.engine.indices.addNewIndicesButton', {
+              defaultMessage: 'Add new indices',
+            })}
+          </EuiButton>,
         ],
       }}
       engineName={engineName}

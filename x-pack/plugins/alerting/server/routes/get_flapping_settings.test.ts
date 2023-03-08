@@ -58,6 +58,16 @@ describe('getFlappingSettingsRoute', () => {
     await handler(context, req, res);
 
     expect(rulesSettingsClient.flapping().get).toHaveBeenCalledTimes(1);
-    expect(res.ok).toHaveBeenCalled();
+    expect(res.ok).toHaveBeenCalledWith({
+      body: expect.objectContaining({
+        enabled: true,
+        look_back_window: 10,
+        status_change_threshold: 10,
+        created_by: 'test name',
+        updated_by: 'test name',
+        created_at: expect.any(String),
+        updated_at: expect.any(String),
+      }),
+    });
   });
 });

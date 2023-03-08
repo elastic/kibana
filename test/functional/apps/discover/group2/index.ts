@@ -11,7 +11,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
 
-  describe('discover app', function () {
+  describe('discover/group2', function () {
     before(async function () {
       await browser.setWindowSize(1300, 800);
     });

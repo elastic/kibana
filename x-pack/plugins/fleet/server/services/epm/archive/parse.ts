@@ -38,7 +38,7 @@ import { pkgToPkgKey } from '../registry';
 import { unpackBufferEntries } from '.';
 
 const readFileAsync = promisify(readFile);
-const MANIFEST_NAME = 'manifest.yml';
+export const MANIFEST_NAME = 'manifest.yml';
 
 const DEFAULT_RELEASE_VALUE = 'ga';
 
@@ -173,7 +173,7 @@ export async function _generatePackageInfoFromPaths(
   return parseAndVerifyArchive(paths, manifests, topLevelDir);
 }
 
-function parseAndVerifyArchive(
+export function parseAndVerifyArchive(
   paths: string[],
   manifests: ManifestMap,
   topLevelDirOverride?: string
@@ -264,7 +264,11 @@ function parseAndVerifyArchive(
   return parsed;
 }
 
-function parseAndVerifyReadme(paths: string[], pkgName: string, pkgVersion: string): string | null {
+export function parseAndVerifyReadme(
+  paths: string[],
+  pkgName: string,
+  pkgVersion: string
+): string | null {
   const readmeRelPath = `/docs/README.md`;
   const readmePath = `${pkgName}-${pkgVersion}${readmeRelPath}`;
   return paths.includes(readmePath) ? `/package/${pkgName}/${pkgVersion}${readmeRelPath}` : null;
@@ -421,7 +425,9 @@ export function parseAndVerifyVars(manifestVars: any[], location: string): Regis
       const { name, type, ...restOfProps } = manifestVar;
       if (!(name && type)) {
         throw new PackageInvalidArchiveError(
-          `Invalid var definition for ${location}: one of mandatory fields 'name' and 'type' missing in var: ${manifestVar}`
+          `Invalid var definition for ${location}: one of mandatory fields 'name' and 'type' missing in var: ${JSON.stringify(
+            manifestVar
+          )}`
         );
       }
 
@@ -460,7 +466,9 @@ export function parseAndVerifyPolicyTemplates(
       } = policyTemplate;
       if (!(name && policyTemplateTitle && description)) {
         throw new PackageInvalidArchiveError(
-          `Invalid top-level manifest: one of mandatory fields 'name', 'title', 'description' is missing in policy template: ${policyTemplate}`
+          `Invalid top-level manifest: one of mandatory fields 'name', 'title', 'description' is missing in policy template: ${JSON.stringify(
+            policyTemplate
+          )}`
         );
       }
       let parsedInputs: RegistryInput[] | undefined = [];
@@ -503,7 +511,9 @@ export function parseAndVerifyInputs(manifestInputs: any, location: string): Reg
       const { title: inputTitle, vars, ...restOfProps } = input;
       if (!(input.type && inputTitle)) {
         throw new PackageInvalidArchiveError(
-          `Invalid top-level manifest: one of mandatory fields 'type', 'title' missing in input: ${input}`
+          `Invalid top-level manifest: one of mandatory fields 'type', 'title' missing in input: ${JSON.stringify(
+            input
+          )}`
         );
       }
       const parsedVars = parseAndVerifyVars(vars, location);

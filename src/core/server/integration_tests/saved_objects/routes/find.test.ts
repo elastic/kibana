@@ -16,6 +16,7 @@ import {
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
 import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
+import { loggerMock } from '@kbn/logging-mocks';
 import {
   registerFindRoute,
   type InternalSavedObjectsRequestHandlerContext,
@@ -38,6 +39,7 @@ describe('GET /api/saved_objects/_find', () => {
   let handlerContext: SetupServerReturn['handlerContext'];
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
+  let loggerWarnSpy: jest.SpyInstance;
 
   const clientResponse = {
     total: 0,
@@ -64,7 +66,9 @@ describe('GET /api/saved_objects/_find', () => {
     coreUsageStatsClient = coreUsageStatsClientMock.create();
     coreUsageStatsClient.incrementSavedObjectsFind.mockRejectedValue(new Error('Oh no!')); // intentionally throw this error, which is swallowed, so we can assert that the operation does not fail
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
-    registerFindRoute(router, { coreUsageData });
+    const logger = loggerMock.create();
+    loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registerFindRoute(router, { coreUsageData, logger });
 
     await server.start();
   });
@@ -427,5 +431,12 @@ describe('GET /api/saved_objects/_find', () => {
         namespaces: ['default', 'foo'],
       })
     );
+  });
+
+  it('logs a warning message when called', async () => {
+    await supertest(httpSetup.server.listener)
+      .get('/api/saved_objects/_find?type=foo&type=bar')
+      .expect(200);
+    expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
   });
 });

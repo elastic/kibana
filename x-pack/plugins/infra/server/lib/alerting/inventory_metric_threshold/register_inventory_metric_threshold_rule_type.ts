@@ -28,7 +28,6 @@ import {
   alertStateActionVariableDescription,
   cloudActionVariableDescription,
   containerActionVariableDescription,
-  groupActionVariableDescription,
   hostActionVariableDescription,
   labelsActionVariableDescription,
   metricActionVariableDescription,
@@ -74,6 +73,13 @@ const condition = schema.object({
     })
   ),
 });
+
+const groupActionVariableDescription = i18n.translate(
+  'xpack.infra.inventory.alerting.groupActionVariableDescription',
+  {
+    defaultMessage: 'Name of the group reporting data',
+  }
+);
 
 export async function registerMetricInventoryThresholdRuleType(
   alertingPlugin: PluginSetupContract,

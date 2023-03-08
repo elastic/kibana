@@ -163,8 +163,7 @@ describe('partials', () => {
     global.kbnHandlebarsEnv = Handlebars.create();
 
     expect(() => {
-      const undef: unknown = undefined;
-      kbnHandlebarsEnv!.registerPartial('undefined_test', undef as Handlebars.Template);
+      kbnHandlebarsEnv!.registerPartial('undefined_test', undefined as any);
     }).toThrow('Attempting to register a partial called "undefined_test" as undefined');
 
     global.kbnHandlebarsEnv = null;
@@ -294,7 +293,6 @@ describe('partials', () => {
         {},
         {
           partials: {
-            // @ts-expect-error
             dude: 'fail',
           },
         }

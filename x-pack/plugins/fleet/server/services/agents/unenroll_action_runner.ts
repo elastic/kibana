@@ -137,7 +137,7 @@ export async function updateActionsForForceUnenroll(
   // creating an action doc so that force unenroll shows up in activity
   await createAgentAction(esClient, {
     id: actionId,
-    agents: [],
+    agents: agentIds,
     created_at: new Date().toISOString(),
     type: 'FORCE_UNENROLL',
     total,

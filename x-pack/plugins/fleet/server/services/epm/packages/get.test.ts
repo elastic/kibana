@@ -26,7 +26,7 @@ import { getSettings } from '../../settings';
 
 import { getPackageInfo, getPackages, getPackageUsageStats } from './get';
 
-const MockRegistry = Registry as jest.Mocked<typeof Registry>;
+const MockRegistry = jest.mocked(Registry);
 
 jest.mock('../../settings');
 
@@ -198,6 +198,9 @@ describe('When using EPM `get` services', () => {
           title: 'Nginx',
         } as any,
       ]);
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue(undefined);
+      MockRegistry.fetchInfo.mockResolvedValue({} as any);
+      MockRegistry.pkgToPkgKey.mockImplementation(({ name, version }) => `${name}-${version}`);
     });
 
     it('should return installed package that is not in registry', async () => {
@@ -209,28 +212,75 @@ describe('When using EPM `get` services', () => {
             attributes: {
               name: 'elasticsearch',
               version: '0.0.1',
-              install_status: 'upload',
+              install_source: 'upload',
             },
           },
         ],
       } as any);
 
+      soClient.get.mockImplementation((type) => {
+        if (type === 'epm-packages-assets') {
+          return Promise.resolve({
+            attributes: {
+              data_utf8: `
+name: elasticsearch
+version: 0.0.1
+title: Elastic
+description: Elasticsearch description`,
+            },
+          } as any);
+        } else {
+          return Promise.resolve({
+            id: 'elasticsearch',
+            attributes: {
+              name: 'elasticsearch',
+              version: '0.0.1',
+              install_source: 'upload',
+              package_assets: [],
+              data_utf8: `
+            name: elasticsearch
+            version: 0.0.1
+            title: Elastic
+            description: Elasticsearch description`,
+            },
+          });
+        }
+      });
+      soClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            references: [],
+            type: 'epm-package-assets',
+            attributes: {
+              asset_path: 'elasticsearch-0.0.1/manifest.yml',
+              data_utf8: `
+name: elasticsearch
+version: 0.0.1
+title: Elastic
+description: Elasticsearch description
+format_version: 0.0.1
+owner: elastic`,
+            },
+          },
+        ],
+      });
       await expect(
         getPackages({
           savedObjectsClient: soClient,
         })
       ).resolves.toMatchObject([
         {
+          id: 'elasticsearch',
           name: 'elasticsearch',
           version: '0.0.1',
           title: 'Elasticsearch',
-          status: 'upload',
           savedObject: {
             id: 'elasticsearch',
             attributes: {
               name: 'elasticsearch',
               version: '0.0.1',
-              install_status: 'upload',
+              install_source: 'upload',
             },
           },
         },
