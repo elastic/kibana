@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const changePoints = [
+export const significantTerms = [
   {
     fieldName: 'response_code',
     fieldValue: '500',
