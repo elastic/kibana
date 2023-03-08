@@ -70,8 +70,8 @@ export const EngineAnalyticsLogic = kea<
     setTotalQueries: (totalQueries) => ({ totalQueries }),
     setTotalQueriesPercentage: (totalQueriesPercentage) => ({ totalQueriesPercentage }),
   },
-  listeners: ({}) => ({}),
-  path: ['enterprise_search', 'content', 'engines', 'analytics'],
+
+  path: ['enterprise_search', 'content', 'engines', 'overview', 'analytics'],
   reducers: ({}) => ({
     endDate: [
       DEFAULT_TIME.to,
