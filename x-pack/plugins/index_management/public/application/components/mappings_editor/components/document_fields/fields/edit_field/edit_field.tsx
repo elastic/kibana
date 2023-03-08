@@ -204,7 +204,7 @@ export const EditField = React.memo(
                           'xpack.idxMgmt.mappingsEditor.editFieldFlyout.formCompletionTooltip',
                           {
                             defaultMessage:
-                              'Default values will be applied to the settings you haven’t changed.',
+                              "Default settings are applied to the settings that you haven't changed.",
                           }
                         )}
                         position="top"
