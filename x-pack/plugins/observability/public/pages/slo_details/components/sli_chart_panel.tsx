@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from 
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
+import { toI18nDuration } from '../../../utils/slo/duration';
 
 import { ChartData } from '../../../typings/slo';
 import { toHighPrecisionPercentage } from '../helpers/number';
@@ -41,7 +42,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
             <EuiText color="subdued" size="s">
               {i18n.translate('xpack.observability.slo.sloDetails.sliHistoryChartPanel.duration', {
                 defaultMessage: 'Last {duration}',
-                values: { duration: slo.timeWindow.duration },
+                values: { duration: toI18nDuration(slo.timeWindow.duration) },
               })}
             </EuiText>
           </EuiFlexItem>

@@ -11,6 +11,7 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import React from 'react';
+import { toI18nDuration } from '../../../utils/slo/duration';
 
 import { useKibana } from '../../../utils/kibana_react';
 import { toHighPrecisionPercentage } from '../helpers/number';
@@ -109,7 +110,7 @@ function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): st
     return i18n.translate('xpack.observability.slo.sloDetails.overview.rollingTimeWindow', {
       defaultMessage: '{duration} rolling',
       values: {
-        duration: timeWindow.duration,
+        duration: toI18nDuration(timeWindow.duration),
       },
     });
   }
