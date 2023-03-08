@@ -30,7 +30,6 @@ export interface GroupSelectorProps {
 const GroupSelectorComponent = ({
   'data-test-subj': dataTestSubj,
   fields,
-  groupingId,
   groupSelected = 'none',
   onGroupChange,
   options,
@@ -67,16 +66,12 @@ const GroupSelectorComponent = ({
             'data-test-subj': 'panel-none',
             name: i18n.NONE,
             icon: groupSelected === 'none' ? 'check' : 'empty',
-            onClick: () => {
-              onGroupChange('none');
-            },
+            onClick: () => onGroupChange('none'),
           },
           ...options.map<EuiContextMenuPanelItemDescriptor>((o) => ({
             'data-test-subj': `panel-${o.key}`,
             name: o.label,
-            onClick: () => {
-              onGroupChange(o.key);
-            },
+            onClick: () => onGroupChange(o.key),
             icon: groupSelected === o.key ? 'check' : 'empty',
           })),
           {

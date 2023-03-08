@@ -125,7 +125,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       APP_UI_ID
     );
     const telemetryContext = {
-      // experimentalFeatures: this.experimentalFeatures,
       prebuiltRulesPackageVersion: this.prebuiltRulesPackageVersion,
     };
     this.telemetry.setup({ analytics: core.analytics }, telemetryContext);

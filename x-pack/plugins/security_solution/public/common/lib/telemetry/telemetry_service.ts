@@ -39,10 +39,10 @@ export class TelemetryService {
           },
         },
       });
-      telemetryEvents.forEach((eventConfig) =>
-        analytics.registerEventType<TelemetryEventParams>(eventConfig)
-      );
     }
+    telemetryEvents.forEach((eventConfig) =>
+      analytics.registerEventType<TelemetryEventParams>(eventConfig)
+    );
   }
 
   public start(): TelemetryClientStart {

@@ -46,8 +46,9 @@ describe('TelemetryService', () => {
       service.setup(setupParams);
       const telemetry = service.start();
 
-      expect(telemetry).toHaveProperty('reportHostEntryClicked');
-      expect(telemetry).toHaveProperty('reportHostsViewQuerySubmitted');
+      expect(telemetry).toHaveProperty('reportAlertsGroupingChanged');
+      expect(telemetry).toHaveProperty('reportAlertsGroupingToggled');
+      expect(telemetry).toHaveProperty('reportAlertsGroupingTakeAction');
     });
   });
 
