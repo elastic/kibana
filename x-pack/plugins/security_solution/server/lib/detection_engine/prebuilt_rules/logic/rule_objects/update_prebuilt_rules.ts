@@ -9,20 +9,19 @@ import { chunk } from 'lodash/fp';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { RulesClient, PartialRule } from '@kbn/alerting-plugin/server';
 
-import type { PrebuiltRuleToInstall } from '../../../../../common/detection_engine/prebuilt_rules';
-import { transformAlertToRuleAction } from '../../../../../common/detection_engine/transform_actions';
-import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../common/constants';
+import { transformAlertToRuleAction } from '../../../../../../common/detection_engine/transform_actions';
+import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/constants';
 
-import { legacyMigrate } from '../../rule_management';
-import { createRules } from '../../rule_management/logic/crud/create_rules';
-import { readRules } from '../../rule_management/logic/crud/read_rules';
-import { patchRules } from '../../rule_management/logic/crud/patch_rules';
-import { deleteRules } from '../../rule_management/logic/crud/delete_rules';
+import { legacyMigrate } from '../../../rule_management';
+import { createRules } from '../../../rule_management/logic/crud/create_rules';
+import { readRules } from '../../../rule_management/logic/crud/read_rules';
+import { patchRules } from '../../../rule_management/logic/crud/patch_rules';
+import { deleteRules } from '../../../rule_management/logic/crud/delete_rules';
 
-import type { IRuleExecutionLogForRoutes } from '../../rule_monitoring';
-import type { RuleParams } from '../../rule_schema';
+import type { RuleParams } from '../../../rule_schema';
 
-import { PrepackagedRulesError } from '../api/install_prebuilt_rules_and_timelines/route';
+import { PrepackagedRulesError } from '../../api/install_prebuilt_rules_and_timelines/route';
+import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 
 /**
  * Updates existing prebuilt rules given a set of rules and output index.
@@ -35,17 +34,11 @@ import { PrepackagedRulesError } from '../api/install_prebuilt_rules_and_timelin
 export const updatePrebuiltRules = async (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
-  rules: PrebuiltRuleToInstall[],
-  ruleExecutionLog: IRuleExecutionLogForRoutes
+  rules: PrebuiltRuleAsset[]
 ): Promise<void> => {
   const ruleChunks = chunk(MAX_RULES_TO_UPDATE_IN_PARALLEL, rules);
   for (const ruleChunk of ruleChunks) {
-    const rulePromises = createPromises(
-      rulesClient,
-      savedObjectsClient,
-      ruleChunk,
-      ruleExecutionLog
-    );
+    const rulePromises = createPromises(rulesClient, savedObjectsClient, ruleChunk);
     await Promise.all(rulePromises);
   }
 };
@@ -60,8 +53,7 @@ export const updatePrebuiltRules = async (
 const createPromises = (
   rulesClient: RulesClient,
   savedObjectsClient: SavedObjectsClientContract,
-  rules: PrebuiltRuleToInstall[],
-  ruleExecutionLog: IRuleExecutionLogForRoutes
+  rules: PrebuiltRuleAsset[]
 ): Array<Promise<PartialRule<RuleParams> | null>> => {
   return rules.map(async (rule) => {
     const existingRule = await readRules({
