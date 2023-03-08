@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
+import type { SignificantTerm, FieldValuePair } from '@kbn/ml-agg-utils';
 
-export interface ChangePointDuplicateGroup {
-  keys: Pick<ChangePoint, keyof ChangePoint>;
-  group: ChangePoint[];
+export interface SignificantTermDuplicateGroup {
+  keys: Pick<SignificantTerm, keyof SignificantTerm>;
+  group: SignificantTerm[];
 }
 
 export type FieldValuePairCounts = Record<string, Record<string, number>>;

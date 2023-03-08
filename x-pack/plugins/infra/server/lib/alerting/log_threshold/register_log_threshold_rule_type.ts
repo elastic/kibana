@@ -26,6 +26,7 @@ import {
   orchestratorActionVariableDescription,
   tagsActionVariableDescription,
 } from '../common/messages';
+import { LogsRulesTypeAlertDefinition } from '../register_rule_types';
 
 const timestampActionVariableDescription = i18n.translate(
   'xpack.infra.logs.alerting.threshold.timestampActionVariableDescription',
@@ -171,5 +172,6 @@ export async function registerLogThresholdRuleType(
       extractReferences,
       injectReferences,
     },
+    alerts: LogsRulesTypeAlertDefinition,
   });
 }
