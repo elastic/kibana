@@ -232,7 +232,7 @@ afterAll(() => {
   Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
 });
 
-for (let index = 0; index < 50; index++) {
+for (let index = 0; index < 60; index++) {
   describe('AlertsTable', () => {
     const fetchAlertsData = {
       activePage: 0,
