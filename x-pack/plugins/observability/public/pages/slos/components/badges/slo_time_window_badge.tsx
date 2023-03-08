@@ -12,7 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { euiLightVars } from '@kbn/ui-theme';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-import { toI18nDuration, toMomentUnitOfTime } from '../../../../utils/slo/duration';
+import { toMomentUnitOfTime } from '../../../../utils/slo/duration';
+import { toDurationLabel } from '../../../../utils/slo/translations';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -29,7 +30,7 @@ export function SloTimeWindowBadge({ slo }: Props) {
           iconType="editorItemAlignRight"
           iconSide="left"
         >
-          {toI18nDuration(slo.timeWindow.duration)}
+          {toDurationLabel(slo.timeWindow.duration)}
         </EuiBadge>
       </div>
     );

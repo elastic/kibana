@@ -6,7 +6,6 @@
  */
 
 import moment from 'moment';
-import { i18n } from '@kbn/i18n';
 import { assertNever } from '@kbn/std';
 import { Duration, DurationUnit } from '../../typings';
 
@@ -48,54 +47,5 @@ export function toMomentUnitOfTime(unit: string): moment.unitOfTime.Diff | undef
       return 'quarters';
     case 'Y':
       return 'years';
-  }
-}
-
-export function toI18nDuration(durationStr: string): string {
-  const duration = toDuration(durationStr);
-
-  switch (duration.unit) {
-    case 'm':
-      return i18n.translate('xpack.observability.slo.duration.minute', {
-        defaultMessage: '{duration, plural, one {1 minute} other {# minutes}}',
-        values: {
-          duration: duration.value,
-        },
-      });
-    case 'h':
-      return i18n.translate('xpack.observability.slo.duration.hour', {
-        defaultMessage: '{duration, plural, one {1 hour} other {# hours}}',
-        values: {
-          duration: duration.value,
-        },
-      });
-    case 'd':
-      return i18n.translate('xpack.observability.slo.duration.day', {
-        defaultMessage: '{duration, plural, one {1 day} other {# days}}',
-        values: {
-          duration: duration.value,
-        },
-      });
-    case 'w':
-      return i18n.translate('xpack.observability.slo.duration.week', {
-        defaultMessage: '{duration, plural, one {1 week} other {# weeks}}',
-        values: {
-          duration: duration.value,
-        },
-      });
-    case 'M':
-      return i18n.translate('xpack.observability.slo.duration.month', {
-        defaultMessage: '{duration, plural, one {1 month} other {# months}}',
-        values: {
-          duration: duration.value,
-        },
-      });
-    case 'Y':
-      return i18n.translate('xpack.observability.slo.duration.year', {
-        defaultMessage: '{duration, plural, one {1 year} other {# years}}',
-        values: {
-          duration: duration.value,
-        },
-      });
   }
 }

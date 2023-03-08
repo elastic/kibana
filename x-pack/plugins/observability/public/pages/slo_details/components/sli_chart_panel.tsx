@@ -12,7 +12,7 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 
 import { useKibana } from '../../../utils/kibana_react';
-import { toI18nDuration } from '../../../utils/slo/duration';
+import { toDurationLabel } from '../../../utils/slo/translations';
 import { ChartData } from '../../../typings/slo';
 import { WideChart } from './wide_chart';
 
@@ -46,7 +46,7 @@ export function SliChartPanel({ data, isLoading, slo }: Props) {
             <EuiText color="subdued" size="s">
               {i18n.translate('xpack.observability.slo.sloDetails.sliHistoryChartPanel.duration', {
                 defaultMessage: 'Last {duration}',
-                values: { duration: toI18nDuration(slo.timeWindow.duration) },
+                values: { duration: toDurationLabel(slo.timeWindow.duration) },
               })}
             </EuiText>
           </EuiFlexItem>

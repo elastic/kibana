@@ -9,12 +9,11 @@ import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import React from 'react';
 
 import { toBudgetingMethodLabel, toIndicatorTypeLabel } from '../../../utils/slo/translations';
-import { toI18nDuration } from '../../../utils/slo/duration';
+import { toDurationLabel } from '../../../utils/slo/translations';
 import { useKibana } from '../../../utils/kibana_react';
 import { OverviewItem } from './overview_item';
 
@@ -112,7 +111,7 @@ function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): st
     return i18n.translate('xpack.observability.slo.sloDetails.overview.rollingTimeWindow', {
       defaultMessage: '{duration} rolling',
       values: {
-        duration: toI18nDuration(timeWindow.duration),
+        duration: toDurationLabel(timeWindow.duration),
       },
     });
   }

@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
+import { toDuration } from './duration';
 
 export const INDICATOR_CUSTOM_KQL = i18n.translate('xpack.observability.slo.indicators.customKql', {
   defaultMessage: 'Custom KQL',
@@ -52,4 +53,53 @@ export function toBudgetingMethodLabel(
   return i18n.translate('xpack.observability.slo.budgetingMethod.timeslices', {
     defaultMessage: 'Timeslices',
   });
+}
+
+export function toDurationLabel(durationStr: string): string {
+  const duration = toDuration(durationStr);
+
+  switch (duration.unit) {
+    case 'm':
+      return i18n.translate('xpack.observability.slo.duration.minute', {
+        defaultMessage: '{duration, plural, one {1 minute} other {# minutes}}',
+        values: {
+          duration: duration.value,
+        },
+      });
+    case 'h':
+      return i18n.translate('xpack.observability.slo.duration.hour', {
+        defaultMessage: '{duration, plural, one {1 hour} other {# hours}}',
+        values: {
+          duration: duration.value,
+        },
+      });
+    case 'd':
+      return i18n.translate('xpack.observability.slo.duration.day', {
+        defaultMessage: '{duration, plural, one {1 day} other {# days}}',
+        values: {
+          duration: duration.value,
+        },
+      });
+    case 'w':
+      return i18n.translate('xpack.observability.slo.duration.week', {
+        defaultMessage: '{duration, plural, one {1 week} other {# weeks}}',
+        values: {
+          duration: duration.value,
+        },
+      });
+    case 'M':
+      return i18n.translate('xpack.observability.slo.duration.month', {
+        defaultMessage: '{duration, plural, one {1 month} other {# months}}',
+        values: {
+          duration: duration.value,
+        },
+      });
+    case 'Y':
+      return i18n.translate('xpack.observability.slo.duration.year', {
+        defaultMessage: '{duration, plural, one {1 year} other {# years}}',
+        values: {
+          duration: duration.value,
+        },
+      });
+  }
 }
