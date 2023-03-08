@@ -38,7 +38,6 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
   varDef: RegistryVarsEntry;
   value: any;
   onChange: (newValue: any) => void;
-  options?: Array<{ value: string; text: string }>;
   errors?: string[] | null;
   forceShowErrors?: boolean;
   frozen?: boolean;
@@ -51,7 +50,6 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
     varDef,
     value,
     onChange,
-    options,
     errors: varErrors,
     forceShowErrors,
     frozen,
@@ -61,7 +59,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
     isEditPage = false,
   }) => {
     const [isDirty, setIsDirty] = useState<boolean>(false);
-    const { multi, required, type, title, name, description } = varDef;
+    const { multi, required, type, title, name, description, options } = varDef;
     const isInvalid = (isDirty || forceShowErrors) && !!varErrors;
     const errors = isInvalid ? varErrors : null;
     const fieldLabel = title || name;
@@ -159,7 +157,11 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
           );
         case 'select':
           return (
-            <EuiSelect options={options} value={value} onChange={(e) => onChange(e.target.value)} />
+            <EuiSelect
+              options={options}
+              value={value}
+              onChange={(e) => onChange(e.target.value)}
+            />
           );
         default:
           return (
@@ -179,7 +181,6 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
       type,
       value,
       onChange,
-      options,
       frozen,
       packageName,
       datastreams,
