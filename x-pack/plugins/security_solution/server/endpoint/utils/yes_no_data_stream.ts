@@ -5,20 +5,18 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-import type { SecuritySolutionRequestHandlerContext } from '../../types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
 export const doLogsEndpointActionDsExists = async ({
-  context,
+  esClient,
   logger,
   dataStreamName,
 }: {
-  context: SecuritySolutionRequestHandlerContext;
+  esClient: ElasticsearchClient;
   logger: Logger;
   dataStreamName: string;
 }): Promise<boolean> => {
   try {
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const doesIndexTemplateExist = await esClient.indices.existsIndexTemplate(
       {
         name: dataStreamName,
@@ -37,16 +35,15 @@ export const doLogsEndpointActionDsExists = async ({
 };
 
 export const doesLogsEndpointActionsIndexExist = async ({
-  context,
+  esClient,
   logger,
   indexName,
 }: {
-  context: SecuritySolutionRequestHandlerContext;
+  esClient: ElasticsearchClient;
   logger: Logger;
   indexName: string;
 }): Promise<boolean> => {
   try {
-    const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const doesIndexExist = await esClient.indices.exists(
       {
         index: indexName,
