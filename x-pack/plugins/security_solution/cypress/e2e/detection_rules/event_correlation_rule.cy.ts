@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { formatMitreAttackDescription } from '../../helpers/rules';
-import type { Mitre } from '../../objects/rule';
+import { formatMitreAttackDescription, getHumanizedDuration } from '../../helpers/rules';
 import { getEqlRule, getEqlSequenceRule, getIndexPatterns } from '../../objects/rule';
 
 import { ALERTS_COUNT, ALERT_DATA_GRID } from '../../screens/alerts';
@@ -48,7 +47,6 @@ import {
   goToRuleDetails,
   goToTheRuleDetailsOf,
 } from '../../tasks/alerts_detection_rules';
-import { createTimeline } from '../../tasks/api_calls/timelines';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import {
   createAndEnableRule,
@@ -63,7 +61,6 @@ import { login, visit } from '../../tasks/login';
 
 import { RULE_CREATION } from '../../urls/navigation';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
-import type { CompleteTimeline } from '../../objects/timeline';
 
 describe('EQL rules', () => {
   before(() => {
@@ -72,51 +69,39 @@ describe('EQL rules', () => {
     deleteAlertsAndRules();
   });
   describe('Detection rules, EQL', () => {
-    const expectedUrls = getEqlRule().referenceUrls?.join('');
-    const expectedFalsePositives = getEqlRule().falsePositivesExamples?.join('');
-    const expectedTags = getEqlRule().tags?.join('');
-    const mitreAttack = getEqlRule().mitre as Mitre[];
-    const expectedMitre = formatMitreAttackDescription(mitreAttack);
+    const rule = getEqlRule();
+    const expectedUrls = rule.references?.join('');
+    const expectedFalsePositives = rule.false_positives?.join('');
+    const expectedTags = rule.tags?.join('');
+    const mitreAttack = rule.threat;
+    const expectedMitre = formatMitreAttackDescription(mitreAttack ?? []);
     const expectedNumberOfRules = 1;
     const expectedNumberOfAlerts = '2 alerts';
-
-    beforeEach(() => {
-      const timeline = getEqlRule().timeline as CompleteTimeline;
-      createTimeline(timeline).then((response) => {
-        cy.wrap({
-          ...getEqlRule(),
-          timeline: {
-            ...timeline,
-            id: response.body.data.persistTimeline.timeline.savedObjectId,
-          },
-        }).as('rule');
-      });
-    });
 
     it('Creates and enables a new EQL rule', function () {
       visit(RULE_CREATION);
       selectEqlRuleType();
-      fillDefineEqlRuleAndContinue(this.rule);
-      fillAboutRuleAndContinue(this.rule);
-      fillScheduleRuleAndContinue(this.rule);
+      fillDefineEqlRuleAndContinue(rule);
+      fillAboutRuleAndContinue(rule);
+      fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
 
       cy.get(CUSTOM_RULES_BTN).should('have.text', 'Custom rules (1)');
 
       expectNumberOfRules(RULES_MANAGEMENT_TABLE, expectedNumberOfRules);
 
-      cy.get(RULE_NAME).should('have.text', this.rule.name);
-      cy.get(RISK_SCORE).should('have.text', this.rule.riskScore);
-      cy.get(SEVERITY).should('have.text', this.rule.severity);
+      cy.get(RULE_NAME).should('have.text', rule.name);
+      cy.get(RISK_SCORE).should('have.text', rule.risk_score);
+      cy.get(SEVERITY).should('have.text', 'High');
       cy.get(RULE_SWITCH).should('have.attr', 'aria-checked', 'true');
 
       goToRuleDetails();
 
-      cy.get(RULE_NAME_HEADER).should('contain', `${this.rule.name}`);
-      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', this.rule.description);
+      cy.get(RULE_NAME_HEADER).should('contain', `${rule.name}`);
+      cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', rule.description);
       cy.get(ABOUT_DETAILS).within(() => {
-        getDetails(SEVERITY_DETAILS).should('have.text', this.rule.severity);
-        getDetails(RISK_SCORE_DETAILS).should('have.text', this.rule.riskScore);
+        getDetails(SEVERITY_DETAILS).should('have.text', 'High');
+        getDetails(RISK_SCORE_DETAILS).should('have.text', rule.risk_score);
         getDetails(REFERENCE_URLS_DETAILS).should((details) => {
           expect(removeExternalLinkText(details.text())).equal(expectedUrls);
         });
@@ -130,19 +115,17 @@ describe('EQL rules', () => {
       cy.get(ABOUT_INVESTIGATION_NOTES).should('have.text', INVESTIGATION_NOTES_MARKDOWN);
       cy.get(DEFINITION_DETAILS).within(() => {
         getDetails(INDEX_PATTERNS_DETAILS).should('have.text', getIndexPatterns().join(''));
-        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', this.rule.customQuery);
+        getDetails(CUSTOM_QUERY_DETAILS).should('have.text', rule.query);
         getDetails(RULE_TYPE_DETAILS).should('have.text', 'Event Correlation');
         getDetails(TIMELINE_TEMPLATE_DETAILS).should('have.text', 'None');
       });
       cy.get(SCHEDULE_DETAILS).within(() => {
-        getDetails(RUNS_EVERY_DETAILS).should(
-          'have.text',
-          `${this.rule.runsEvery.interval}${this.rule.runsEvery.type}`
+        getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+        const humanizedDuration = getHumanizedDuration(
+          rule.from ?? 'now-6m',
+          rule.interval ?? '5m'
         );
-        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should(
-          'have.text',
-          `${this.rule.lookBack.interval}${this.rule.lookBack.type}`
-        );
+        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
       });
 
       waitForTheRuleToBeExecuted();
@@ -152,9 +135,9 @@ describe('EQL rules', () => {
       cy.get(ALERT_DATA_GRID)
         .invoke('text')
         .then((text) => {
-          expect(text).contains(this.rule.name);
-          expect(text).contains(this.rule.severity.toLowerCase());
-          expect(text).contains(this.rule.riskScore);
+          expect(text).contains(rule.name);
+          expect(text).contains(rule.severity);
+          expect(text).contains(rule.risk_score);
         });
     });
   });
@@ -162,20 +145,10 @@ describe('EQL rules', () => {
   describe('Detection rules, sequence EQL', () => {
     const expectedNumberOfSequenceAlerts = '2 alerts';
 
+    const rule = getEqlSequenceRule();
+
     before(() => {
       esArchiverLoad('auditbeat_big');
-    });
-    beforeEach(() => {
-      const timeline = getEqlSequenceRule().timeline as CompleteTimeline;
-      createTimeline(timeline).then((response) => {
-        cy.wrap({
-          ...getEqlSequenceRule(),
-          timeline: {
-            ...timeline,
-            id: response.body.data.persistTimeline.timeline.savedObjectId,
-          },
-        }).as('rule');
-      });
     });
     after(() => {
       esArchiverUnload('auditbeat_big');
@@ -184,11 +157,11 @@ describe('EQL rules', () => {
     it('Creates and enables a new EQL rule with a sequence', function () {
       visit(RULE_CREATION);
       selectEqlRuleType();
-      fillDefineEqlRuleAndContinue(this.rule);
-      fillAboutRuleAndContinue(this.rule);
-      fillScheduleRuleAndContinue(this.rule);
+      fillDefineEqlRuleAndContinue(rule);
+      fillAboutRuleAndContinue(rule);
+      fillScheduleRuleAndContinue(rule);
       createAndEnableRule();
-      goToTheRuleDetailsOf(this.rule.name);
+      goToTheRuleDetailsOf(rule.name);
       waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
@@ -197,8 +170,8 @@ describe('EQL rules', () => {
         .invoke('text')
         .then((text) => {
           cy.log('ALERT_DATA_GRID', text);
-          expect(text).contains(this.rule.name);
-          expect(text).contains(this.rule.severity.toLowerCase());
+          expect(text).contains(rule.name);
+          expect(text).contains(rule.severity);
         });
     });
   });

@@ -20,8 +20,9 @@ export const allowedExperimentalValues = Object.freeze({
   pendingActionResponsesWithAck: true,
   policyListEnabled: true,
   policyResponseInFleetEnabled: true,
-  chartEmbeddablesEnabled: false,
-
+  chartEmbeddablesEnabled: true,
+  donutChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 2 - 6
+  alertsPreviewChartEmbeddablesEnabled: false, // Depends on https://github.com/elastic/kibana/issues/136409 item 9
   /**
    * This is used for enabling the end-to-end tests for the security_solution telemetry.
    * We disable the telemetry since we don't have specific roles or permissions around it and
@@ -50,6 +51,12 @@ export const allowedExperimentalValues = Object.freeze({
    * - We show a table with plain execution logs on the Rule Details page.
    */
   extendedRuleExecutionLoggingEnabled: false,
+
+  /**
+   * Enables the new API and UI for https://github.com/elastic/security-team/issues/1974.
+   * It's a temporary feature flag that will be removed once the feature gets a basic production-ready implementation.
+   */
+  prebuiltRulesNewUpgradeAndInstallationWorkflowsEnabled: false,
 
   /**
    * Enables the SOC trends timerange and stats on D&R page

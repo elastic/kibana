@@ -42,10 +42,9 @@ describe('migration v2', () => {
   });
 
   it('clean ups if migration fails', async () => {
-    const { migrator, client } = await setupNextMinor();
-    migrator.prepareMigrations();
+    const { runMigrations, client } = await setupNextMinor();
 
-    await expect(migrator.runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(`
+    await expect(runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Unable to complete saved object migrations for the [${defaultKibanaIndex}] index: Migrations failed. Reason: 1 corrupt saved object documents were found: corrupt:2baf4de0-a6d4-11ed-ba5a-39196fc76e60
 
       To allow migrations to proceed, please delete or fix these documents.
@@ -135,13 +134,12 @@ const setupBaseline = async () => {
     },
   ];
 
-  const { migrator: baselineMigrator, client } = await getKibanaMigratorTestKit({
+  const { runMigrations, client } = await getKibanaMigratorTestKit({
     types: typesCurrent,
     logFilePath,
   });
 
-  baselineMigrator.prepareMigrations();
-  await baselineMigrator.runMigrations();
+  await runMigrations();
 
   // inject corrupt saved objects directly using esClient
   await Promise.all(
@@ -175,7 +173,7 @@ const setupNextMinor = async () => {
     },
   ];
 
-  const { migrator, client } = await getKibanaMigratorTestKit({
+  return await getKibanaMigratorTestKit({
     types: typesNextMinor,
     kibanaVersion: nextMinor,
     logFilePath,
@@ -203,6 +201,4 @@ const setupNextMinor = async () => {
       },
     },
   });
-
-  return { migrator, client };
 };
