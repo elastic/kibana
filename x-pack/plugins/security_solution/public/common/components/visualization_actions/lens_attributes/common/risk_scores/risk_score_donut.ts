@@ -44,7 +44,7 @@ export const getRiskScoreDonutAttributes: GetLensAttributes = (
         query: '',
         language: 'kuery',
       },
-      filters: [],
+      filters: extraOptions?.filters ?? [],
       datasourceStates: {
         formBased: {
           layers: {
