@@ -2073,7 +2073,6 @@
     "discover.searchGenerationWithDescriptionGrid": "Tableau généré par la recherche {searchTitle} ({searchDescription})",
     "discover.selectedDocumentsNumber": "{nr} documents sélectionnés",
     "discover.showingDefaultDataViewWarningDescription": "Affichage de la vue de données par défaut : \"{loadedDataViewTitle}\" ({loadedDataViewId})",
-    "discover.showingSavedDataViewWarningDescription": "Affichage de la vue de données enregistrée : \"{ownDataViewTitle}\" ({ownDataViewId})",
     "discover.singleDocRoute.errorMessage": "Aucune donnée correspondante pour l'ID {dataViewId}",
     "discover.topNav.optionsPopover.currentViewMode": "{viewModeLabel} : {currentViewMode}",
     "discover.utils.formatHit.moreFields": "et {count} {count, plural, one {autre champ} other {autres champs}}",
