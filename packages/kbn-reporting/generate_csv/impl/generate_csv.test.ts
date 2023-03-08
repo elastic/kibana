@@ -830,6 +830,16 @@ it('can override ignoring frozen indices', async () => {
     { maxRetries: 0, requestTimeout: '30s' }
   );
 
+  expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
+    {
+      ignore_unavailable: true,
+      ignore_throttled: false,
+      index: 'logstash-*',
+      keep_alive: '30s',
+    },
+    { maxRetries: 0, requestTimeout: '30s' }
+  );
+
   expect(mockDataClient.search).toBeCalledWith(
     {
       params: {
