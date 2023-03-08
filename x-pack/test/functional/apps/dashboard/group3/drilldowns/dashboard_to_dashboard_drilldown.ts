@@ -352,8 +352,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.dashboardControls.optionsListPopoverGetAvailableOptionsCount()
           ).to.equal(2);
           await PageObjects.dashboardControls.optionsListEnsurePopoverIsClosed(optionsListControl);
-
-          await PageObjects.dashboard.resetDashboardToLastSavedState();
         });
       });
     });
