@@ -36,7 +36,7 @@ export const getSelectedGroupButtonContent = (
       ) : undefined;
     case 'host.name':
       return <HostNameGroupContent hostName={bucket.key} />;
-    case 'user.name':
+    case 'kibana.alert.rule.category':
       return <UserNameGroupContent userName={bucket.key} />;
     case 'source.ip':
       return <SourceIpGroupContent sourceIp={bucket.key} />;

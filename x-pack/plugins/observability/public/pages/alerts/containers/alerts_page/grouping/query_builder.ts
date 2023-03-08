@@ -11,11 +11,7 @@ import type { NamedAggregation } from '@kbn/securitysolution-grouping';
 import { getGroupingQuery } from '@kbn/securitysolution-grouping';
 
 const getGroupFields = (groupValue: string) => {
-  if (groupValue === 'kibana.alert.rule.name') {
-    return [groupValue, 'kibana.alert.rule.description'];
-  } else {
-    return [groupValue];
-  }
+  return [groupValue];
 };
 
 interface AlertsGroupingQueryParams {
@@ -74,7 +70,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
     {
       unitCount0: {
         cardinality: {
-          field: 'kibana.alert.uuid',
+          field: 'kibana.alert.rule.uuid',
         },
       },
     },
@@ -100,7 +96,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
           {
             usersCountAggregation: {
               cardinality: {
-                field: 'user.name',
+                field: 'kibana.alert.rule.category',
               },
             },
           },
@@ -148,14 +144,14 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
           {
             usersCountAggregation: {
               cardinality: {
-                field: 'user.name',
+                field: 'kibana.alert.rule.category',
               },
             },
           },
         ]
       );
       break;
-    case 'user.name':
+    case 'kibana.alert.rule.category':
       aggMetrics.push(
         ...[
           {
@@ -189,14 +185,14 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
           {
             usersCountAggregation: {
               cardinality: {
-                field: 'user.name',
+                field: 'kibana.alert.rule.category',
               },
             },
           },
         ]
       );
       break;
-    case 'source.ip':
+    case 'event.action':
       aggMetrics.push(
         ...[
           {

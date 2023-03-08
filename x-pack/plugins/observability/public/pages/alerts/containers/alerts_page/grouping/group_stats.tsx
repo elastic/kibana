@@ -16,28 +16,28 @@ const getSingleGroupSeverity = (severity?: string) => {
       return (
         <>
           <EuiIcon type="dot" color="#54b399" />
-          {`i18n.STATS_GROUP_SEVERITY_LOW`}
+          {`Low`}
         </>
       );
     case 'medium':
       return (
         <>
           <EuiIcon type="dot" color="#d6bf57" />
-          {`i18n.STATS_GROUP_SEVERITY_MEDIUM`}
+          {`Medium`}
         </>
       );
     case 'high':
       return (
         <>
           <EuiIcon type="dot" color="#da8b45" />
-          {`i18n.STATS_GROUP_SEVERITY_HIGH`}
+          {`High`}
         </>
       );
     case 'critical':
       return (
         <>
           <EuiIcon type="dot" color="#e7664c" />
-          {`i18n.STATS_GROUP_SEVERITY_CRITICAL`}
+          {`Critical`}
         </>
       );
   }
@@ -69,7 +69,7 @@ export const getSelectedGroupBadgeMetrics = (
 ) => {
   const defaultBadges = [
     {
-      title: `i18n.STATS_GROUP_ALERTS`,
+      title: `Alerts`,
       value: bucket.doc_count,
       width: 50,
       color: '#a83632',
@@ -79,11 +79,11 @@ export const getSelectedGroupBadgeMetrics = (
     case 'kibana.alert.rule.name':
       return [
         {
-          title: `i18n.STATS_GROUP_USERS`,
+          title: `Users`,
           value: bucket.usersCountAggregation?.value ?? 0,
         },
         {
-          title: `i18n.STATS_GROUP_HOSTS`,
+          title: `Hosts`,
           value: bucket.hostsCountAggregation?.value ?? 0,
         },
         ...defaultBadges,
@@ -91,35 +91,35 @@ export const getSelectedGroupBadgeMetrics = (
     case 'host.name':
       return [
         {
-          title: `i18n.STATS_GROUP_USERS`,
+          title: `Users`,
           value: bucket.usersCountAggregation?.value ?? 0,
         },
         {
-          title: `i18n.STATS_GROUP_RULES`,
+          title: `Rules`,
           value: bucket.rulesCountAggregation?.value ?? 0,
         },
         ...defaultBadges,
       ];
-    case 'user.name':
+    case 'kibana.alert.rule.category':
       return [
         {
-          title: `i18n.STATS_GROUP_IPS`,
+          title: `IPs`,
           value: bucket.hostsCountAggregation?.value ?? 0,
         },
         {
-          title: `i18n.STATS_GROUP_RULES`,
+          title: `Rules`,
           value: bucket.rulesCountAggregation?.value ?? 0,
         },
         ...defaultBadges,
       ];
-    case 'source.ip':
+    case 'event.action':
       return [
         {
-          title: `i18n.STATS_GROUP_IPS`,
+          title: `Hosts`,
           value: bucket.hostsCountAggregation?.value ?? 0,
         },
         {
-          title: `i18n.STATS_GROUP_RULES`,
+          title: `Rules`,
           value: bucket.rulesCountAggregation?.value ?? 0,
         },
         ...defaultBadges,
@@ -127,7 +127,7 @@ export const getSelectedGroupBadgeMetrics = (
   }
   return [
     {
-      title: `i18n.STATS_GROUP_RULES`,
+      title: `Rules`,
       value: bucket.rulesCountAggregation?.value ?? 0,
     },
     ...defaultBadges,
@@ -153,21 +153,21 @@ export const getSelectedGroupCustomMetrics = (
     case 'kibana.alert.rule.name':
       return [
         {
-          title: `i18n.STATS_GROUP_SEVERITY`,
+          title: 'Severity',
           customStatRenderer: severityComponent,
         },
       ];
     case 'host.name':
       return [
         {
-          title: `i18n.STATS_GROUP_SEVERITY`,
+          title: 'Severity',
           customStatRenderer: severityComponent,
         },
       ];
-    case 'user.name':
+    case 'kibana.alert.rule.category':
       return [
         {
-          title: `i18n.STATS_GROUP_SEVERITY`,
+          title: 'Severity',
           customStatRenderer: severityComponent,
         },
       ];

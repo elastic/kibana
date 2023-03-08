@@ -16,6 +16,7 @@ import type {
   RawBucket,
 } from '@kbn/securitysolution-grouping';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useQueryAlerts } from '../../../../hooks/use_query_alerts';
 import { AlertsGroupingAggregation } from './grouping/types';
 import {
@@ -104,7 +105,11 @@ export const AlertsGroupingComponent: React.FC<OwnProps> = ({
     () =>
       isNoneGroup(selectedGroup) ? (
         <>
-          <>{groupSelector}</>
+          <EuiFlexGroup>
+            <EuiFlexItem />
+            <EuiFlexItem grow={false}>{groupSelector}</EuiFlexItem>
+          </EuiFlexGroup>
+
           <>{renderChildComponent([])}</>
         </>
       ) : (

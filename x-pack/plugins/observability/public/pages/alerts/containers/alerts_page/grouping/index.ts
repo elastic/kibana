@@ -14,20 +14,20 @@ export * from './query_builder';
 export const getDefaultGroupingOptions = (): GroupOption[] => {
   return [
     {
-      label: `i18n.ruleName`,
+      label: `Rule Name`,
       key: 'kibana.alert.rule.name',
     },
     {
-      label: `i18n.userName`,
-      key: 'user.name',
+      label: `Rule Category`,
+      key: 'kibana.alert.rule.category',
     },
     {
-      label: `i18n.hostName`,
+      label: `Host Name`,
       key: 'host.name',
     },
     {
-      label: `i18n.sourceIP`,
-      key: 'source.ip',
+      label: `Event Action`,
+      key: 'event.action',
     },
   ];
 };
