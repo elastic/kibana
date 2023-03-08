@@ -9,7 +9,11 @@ import { useInterpret, useSelector } from '@xstate/react';
 import createContainer from 'constate';
 import { useCallback, useState } from 'react';
 import { waitFor } from 'xstate/lib/waitFor';
-import { LogViewAttributes, LogViewReference } from '../../common/log_views';
+import {
+  LogViewAttributes,
+  LogViewReference,
+  persistedLogViewReferenceRT,
+} from '../../common/log_views';
 import {
   createLogViewNotificationChannel,
   createLogViewStateMachine,
@@ -119,6 +123,12 @@ export const useLogView = ({
     state.matches('checkingStatusFailed')
   );
 
+  const isPersistedLogView = useSelector(logViewStateService, (state) =>
+    persistedLogViewReferenceRT.is(state.context.logViewReference)
+  );
+
+  const isInlineLogView = !isPersistedLogView;
+
   const latestLoadLogViewFailures = useSelector(logViewStateService, (state) =>
     state.matches('loadingFailed') ||
     state.matches('resolutionFailed') ||
@@ -184,6 +194,8 @@ export const useLogView = ({
     resolvedLogView,
     logViewStatus,
     derivedDataView: resolvedLogView?.dataViewReference,
+    isInlineLogView,
+    isPersistedLogView,
 
     // Actions
     load: retry,

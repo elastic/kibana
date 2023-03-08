@@ -9,6 +9,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiPopover, EuiContextMenuItem, EuiContextMenuPanel, EuiHeaderLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useLogViewContext } from '../../../hooks/use_log_view';
 import { AlertFlyout } from './alert_flyout';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
@@ -33,7 +34,8 @@ export const AlertDropdown = () => {
       observability,
     },
   } = useKibanaContextForPlugin();
-  const canCreateAlerts = capabilities?.logs?.save ?? false;
+  const { isPersistedLogView } = useLogViewContext();
+  const canCreateAlerts = (capabilities?.logs?.save && isPersistedLogView) ?? false;
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
 
