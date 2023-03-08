@@ -209,7 +209,8 @@ export const useDataVisualizerGridData = (
           if (
             field.aggregatable === true &&
             !NON_AGGREGATABLE_FIELD_TYPES.has(field.type) &&
-            !field.esTypes?.some((d) => d === ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE)
+            !field.esTypes?.some((d) => d === ES_FIELD_TYPES.AGGREGATE_METRIC_DOUBLE) &&
+            field.timeSeriesMetric !== 'counter'
           ) {
             aggregatableFields.push(field.name);
           } else {
