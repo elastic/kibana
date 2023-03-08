@@ -46,13 +46,16 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
 
   const { euiTheme } = useEuiTheme();
 
-  const messageVariablesObject: Record<string, ActionVariable> | undefined =
-    messageVariables?.reduce((acc, variable) => {
-      return {
-        ...acc,
-        [variable.name]: variable,
-      };
-    }, {});
+  const messageVariablesObject: Record<string, ActionVariable> | undefined = useMemo(
+    () =>
+      messageVariables?.reduce((acc, variable) => {
+        return {
+          ...acc,
+          [variable.name]: variable,
+        };
+      }, {}),
+    [messageVariables]
+  );
 
   const shownOptions = useMemo(() => {
     return isShowAllPressed
@@ -141,7 +144,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           </EuiText>
           <EuiSpacer size="xs" />
           {option.description && (
-            <EuiText size="xs" color="subdued">
+            <>
               <EuiToolTip
                 display="block"
                 position="top"
@@ -150,7 +153,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
               >
                 <TruncatedText text={option.description || ''} />
               </EuiToolTip>
-            </EuiText>
+            </>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -6,21 +6,27 @@
  */
 
 import React from 'react';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
+import { css } from '@emotion/react';
+import { EuiText } from '@elastic/eui';
 
 const LINE_CLAMP = 2;
 
-const Text = styled.span`
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  -webkit-line-clamp: ${LINE_CLAMP};
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  word-break: break-word;
-`;
+const styles = {
+  truncatedText: css`
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: ${LINE_CLAMP};
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+  `,
+};
 
-const TruncatedTextComponent: React.FC<{ text: string }> = ({ text }) => <Text>{text}</Text>;
+const TruncatedTextComponent: React.FC<{ text: string }> = ({ text }) => (
+  <EuiText size="xs" color="subdued" css={styles.truncatedText}>
+    {text}
+  </EuiText>
+);
 
 TruncatedTextComponent.displayName = 'TruncatedText';
 
