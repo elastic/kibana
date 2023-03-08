@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './components';
-export * from './containers';
+export const DEFAULT_INTERVAL = '60s';
+export const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';

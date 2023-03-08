@@ -12,40 +12,37 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import React, { useEffect, useMemo, useCallback, useState } from 'react';
 
-import { observabilityFeatureId } from '../../../../../common';
-import type { ObservabilityAppServices } from '../../../../application/types';
-import {
-  DataSections,
-  LoadingObservability,
-  HeaderActions,
-  DataAssistantFlyout,
-} from '../../components';
-import { EmptySections } from '../../../../components/app/empty_sections';
-import { ObservabilityHeaderMenu } from '../../../../components/app/header';
-import { Resources } from '../../../../components/app/resources';
-import { NewsFeed } from '../../../../components/app/news_feed';
-import { SectionContainer } from '../../../../components/app/section';
-import { ObservabilityStatusProgress } from '../../../../components/app/observability_status/observability_status_progress';
-import { observabilityAlertFeatureIds, paths } from '../../../../config';
-import { useBreadcrumbs } from '../../../../hooks/use_breadcrumbs';
-import { useDatePickerContext } from '../../../../hooks/use_date_picker_context';
-import { useFetcher } from '../../../../hooks/use_fetcher';
-import { useGetUserCasesPermissions } from '../../../../hooks/use_get_user_cases_permissions';
-import { useGuidedSetupProgress } from '../../../../hooks/use_guided_setup_progress';
-import { useHasData } from '../../../../hooks/use_has_data';
-import { usePluginContext } from '../../../../hooks/use_plugin_context';
-import { useTimeBuckets } from '../../../../hooks/use_time_buckets';
-import { getNewsFeed } from '../../../../services/get_news_feed';
-import { buildEsQuery } from '../../../../utils/build_es_query';
-import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
+import { observabilityFeatureId } from '../../../common';
+import type { ObservabilityAppServices } from '../../application/types';
+import { LoadingObservability } from '../../components/loading_observability';
+import { HeaderActions } from './components/header_actions';
+import { DataAssistantFlyout } from './components/data_assistant_flyout';
+import { EmptySections } from './components/empty_sections';
+import { HeaderMenu } from './components/header_menu';
+import { Resources } from './components/resources';
+import { NewsFeed } from './components/news_feed';
+import { ObservabilityStatusProgress } from '../../components/app/observability_status/observability_status_progress';
+import { observabilityAlertFeatureIds, paths } from '../../config';
+import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
+import { useDatePickerContext } from '../../hooks/use_date_picker_context';
+import { useFetcher } from '../../hooks/use_fetcher';
+import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
+import { useGuidedSetupProgress } from '../../hooks/use_guided_setup_progress';
+import { useHasData } from '../../hooks/use_has_data';
+import { usePluginContext } from '../../hooks/use_plugin_context';
+import { useTimeBuckets } from '../../hooks/use_time_buckets';
+import { getNewsFeed } from '../../services/get_news_feed';
+import { buildEsQuery } from '../../utils/build_es_query';
+import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 
-import {
-  ALERTS_PER_PAGE,
-  ALERTS_TABLE_ID,
-  DEFAULT_DATE_FORMAT,
-  DEFAULT_INTERVAL,
-} from './constants';
-import { calculateBucketSize, useOverviewMetrics } from './helpers';
+import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../constants';
+import { calculateBucketSize } from './helpers/calculate_bucket_size';
+import { useOverviewMetrics } from './helpers/use_overview_metrics';
+import { SectionContainer } from '../../components/app/section';
+import { DataSections } from './components/data_sections';
+
+const ALERTS_PER_PAGE = 10;
+const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';
 
 export function OverviewPage() {
   const {
@@ -181,7 +178,7 @@ export function OverviewPage() {
         },
       }}
     >
-      <ObservabilityHeaderMenu />
+      <HeaderMenu />
 
       <ObservabilityStatusProgress
         onDismissClick={() => setGuidedSetupTourVisible(true)}

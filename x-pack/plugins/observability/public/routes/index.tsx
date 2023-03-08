@@ -12,7 +12,7 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { casesPath } from '../../common';
 import { CasesPage } from '../pages/cases';
 import { AlertsPage } from '../pages/alerts/containers/alerts_page';
-import { OverviewPage } from '../pages/overview';
+import { OverviewPage } from '../pages/overview/overview';
 import { jsonRt } from './json_rt';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 import { RulesPage } from '../pages/rules';

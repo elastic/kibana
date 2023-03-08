@@ -11,9 +11,9 @@ import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ObservabilityAppServices } from '../../../application/types';
 import { usePluginContext } from '../../../hooks/use_plugin_context';
-import HeaderMenuPortal from '../../shared/header_menu_portal';
+import HeaderMenuPortal from '../../../components/shared/header_menu_portal';
 
-export function ObservabilityHeaderMenu(): React.ReactElement | null {
+export function HeaderMenu(): React.ReactElement | null {
   const {
     appMountParameters: { setHeaderActionMenu },
   } = usePluginContext();

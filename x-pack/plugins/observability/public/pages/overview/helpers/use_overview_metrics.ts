@@ -8,10 +8,11 @@
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { useTrackPageview } from '../../../../..';
-import { useUiTracker } from '../../../../../hooks/use_track_metric';
-import { ObservabilityAppServices } from '../../../../../application/types';
-import { CAPABILITIES_KEYS } from '../constants';
+import { useTrackPageview } from '../../..';
+import { useUiTracker } from '../../../hooks/use_track_metric';
+import { ObservabilityAppServices } from '../../../application/types';
+
+const CAPABILITIES_KEYS = ['logs', 'infrastructure', 'apm', 'uptime'];
 
 export const useOverviewMetrics = ({ hasAnyData }: { hasAnyData: boolean | undefined }) => {
   const {
