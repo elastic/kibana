@@ -497,6 +497,7 @@ packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 packages/kbn-reporting/common @elastic/appex-sharedux
 x-pack/examples/reporting_example @elastic/appex-sharedux
 packages/kbn-reporting/generate_csv/impl @elastic/appex-sharedux
+packages/kbn-reporting/generate_csv/mocks @elastic/appex-sharedux
 packages/kbn-reporting/generate_csv/types @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
