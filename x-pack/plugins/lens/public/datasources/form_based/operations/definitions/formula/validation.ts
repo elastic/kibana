@@ -512,7 +512,7 @@ function checkMissingVariableOrFunctions(
         },
         locations: missingVariables.map(({ location }) => location),
       }),
-      extraInfo: { missingFields: missingVariables.map(({ value }) => value) },
+      extraInfo: { missingFields: [...new Set(missingVariables.map(({ value }) => value))] },
     });
   }
   const invalidVariableErrors = checkVariableEdgeCases(

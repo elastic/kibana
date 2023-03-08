@@ -37,6 +37,7 @@ import {
   Lowercase,
   NetworkDirection,
   Pipeline,
+  Redact,
   RegisteredDomain,
   Remove,
   Rename,
@@ -574,6 +575,24 @@ export const mapProcessorTypeToDescriptor: MapProcessorTypeToDescriptor = {
         defaultMessage: 'Runs the "{name}" ingest pipeline',
         values: {
           name,
+        },
+      }),
+  },
+  redact: {
+    FieldsComponent: Redact,
+    docLinkPath: '/redact-processor.html',
+    label: i18n.translate('xpack.ingestPipelines.processors.label.redact', {
+      defaultMessage: 'Redact',
+    }),
+    typeDescription: i18n.translate('xpack.ingestPipelines.processors.description.redact', {
+      defaultMessage:
+        'The Redact processor uses the Grok rules engine to obscure text in the input document matching the given Grok patterns.',
+    }),
+    getDefaultDescription: ({ field }) =>
+      i18n.translate('xpack.ingestPipelines.processors.defaultDescription.redact', {
+        defaultMessage: 'Redact values from "{field}" that match a grok pattern',
+        values: {
+          field,
         },
       }),
   },

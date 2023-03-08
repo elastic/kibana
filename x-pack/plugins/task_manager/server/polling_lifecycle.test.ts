@@ -31,6 +31,10 @@ jest.mock('./queries/task_claiming', () => {
   };
 });
 
+jest.mock('./constants', () => ({
+  CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],
+}));
+
 describe('TaskPollingLifecycle', () => {
   let clock: sinon.SinonFakeTimers;
   const taskManagerLogger = mockLogger();

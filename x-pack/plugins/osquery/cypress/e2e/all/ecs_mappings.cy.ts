@@ -6,8 +6,7 @@
  */
 
 import { getAdvancedButton } from '../../screens/integrations';
-import { login } from '../../tasks/login';
-import { ROLES } from '../../test';
+import { ROLE, login } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkResults,
@@ -20,12 +19,12 @@ import {
 } from '../../tasks/live_query';
 
 describe('EcsMapping', () => {
-  before(() => {
-    login(ROLES.soc_manager);
-    navigateTo('/app/osquery');
+  beforeEach(() => {
+    login(ROLE.soc_manager);
   });
 
   it('should properly show static values in form and results', () => {
+    navigateTo('/app/osquery');
     cy.contains('New live query').click();
     selectAllAgents();
     inputQuery('select * from processes;');
@@ -36,7 +35,7 @@ describe('EcsMapping', () => {
     submitQuery();
     checkResults();
     cy.contains('[ "test1", "test2" ]');
-    typeInECSFieldInput('labels{downArrow}{enter}', 1);
+    typeInECSFieldInput('client.domain{downArrow}{enter}', 1);
 
     getOsqueryFieldTypes('Static value', 1);
 
@@ -50,5 +49,23 @@ describe('EcsMapping', () => {
     checkResults();
     cy.contains('[ "test2" ]');
     cy.contains('test3');
+  });
+
+  it('should hide and show ecs mappings on Advanced accordion click', () => {
+    navigateTo('/app/osquery');
+    cy.contains('New live query').click();
+    selectAllAgents();
+    cy.getBySel('savedQuerySelect').within(() => {
+      cy.getBySel('comboBoxInput').type('processes_elastic{downArrow}{enter}');
+    });
+    cy.react('EuiAccordionClass', {
+      props: { buttonContent: 'Advanced', forceState: 'open' },
+    }).should('exist');
+    cy.getBySel('advanced-accordion-content').within(() => {
+      cy.contains('Advanced').click();
+    });
+    cy.react('EuiAccordionClass', {
+      props: { buttonContent: 'Advanced', forceState: 'closed' },
+    }).should('exist');
   });
 });
