@@ -241,17 +241,15 @@ function InternalAlertsPage() {
             features={{ alerts: { sync: false } }}
           >
             {esQuery && (
-              <>
-                <AlertsGrouping
-                  dataView={dataView}
-                  esQuery={esQuery}
-                  featureIds={observabilityAlertFeatureIds}
-                  renderChildComponent={renderAlertsTable}
-                  from={alertSearchBarStateProps.rangeFrom}
-                  tableId={ALERTS_TABLE_ID}
-                  to={alertSearchBarStateProps.rangeTo}
-                />
-              </>
+              <AlertsGrouping
+                dataView={dataView}
+                esQuery={esQuery}
+                featureIds={observabilityAlertFeatureIds}
+                renderChildComponent={renderAlertsTable}
+                from={alertSearchBarStateProps.rangeFrom}
+                tableId={ALERTS_TABLE_ID}
+                to={alertSearchBarStateProps.rangeTo}
+              />
             )}
           </CasesContext>
         </EuiFlexItem>
