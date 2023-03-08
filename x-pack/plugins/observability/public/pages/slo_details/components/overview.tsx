@@ -13,6 +13,7 @@ import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import React from 'react';
 
+import { toBudgetingMethodLabel, toIndicatorTypeLabel } from '../../../utils/slo/translations';
 import { toI18nDuration } from '../../../utils/slo/duration';
 import { useKibana } from '../../../utils/kibana_react';
 import { OverviewItem } from './overview_item';
@@ -71,7 +72,7 @@ export function Overview({ slo }: Props) {
                 defaultMessage: 'Budgeting method',
               }
             )}
-            subtitle={toBudgetingMethod(slo.budgetingMethod)}
+            subtitle={toBudgetingMethodLabel(slo.budgetingMethod)}
           />
         </EuiFlexGroup>
 
@@ -121,42 +122,5 @@ function toTimeWindowLabel(timeWindow: SLOWithSummaryResponse['timeWindow']): st
     values: {
       duration: timeWindow.duration,
     },
-  });
-}
-
-function toIndicatorTypeLabel(indicatorType: SLOWithSummaryResponse['indicator']['type']): string {
-  switch (indicatorType) {
-    case 'sli.kql.custom':
-      return i18n.translate('xpack.observability.slo.sloDetails.overview.customKqlIndicator', {
-        defaultMessage: 'Custom KQL',
-      });
-
-    case 'sli.apm.transactionDuration':
-      return i18n.translate('xpack.observability.slo.sloDetails.overview.apmLatencyIndicator', {
-        defaultMessage: 'APM latency',
-      });
-
-    case 'sli.apm.transactionErrorRate':
-      return i18n.translate(
-        'xpack.observability.slo.sloDetails.overview.apmAvailabilityIndicator',
-        {
-          defaultMessage: 'APM availability',
-        }
-      );
-    default:
-      assertNever(indicatorType);
-  }
-}
-
-function toBudgetingMethod(budgetingMethod: SLOWithSummaryResponse['budgetingMethod']): string {
-  if (budgetingMethod === 'occurrences') {
-    return i18n.translate(
-      'xpack.observability.slo.sloDetails.overview.occurrencesBudgetingMethod',
-      { defaultMessage: 'Occurrences' }
-    );
-  }
-
-  return i18n.translate('xpack.observability.slo.sloDetails.overview.timeslicesBudgetingMethod', {
-    defaultMessage: 'Timeslices',
   });
 }
