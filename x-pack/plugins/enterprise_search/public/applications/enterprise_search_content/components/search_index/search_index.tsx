@@ -75,7 +75,10 @@ export const SearchIndex: React.FC = () => {
    * This needs to be checked for any of the 3 registered search guideIds
    * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
    */
-  const { guidedOnboarding } = useValues(KibanaLogic);
+  const {
+    guidedOnboarding,
+    productAccess: { hasAppSearchAccess },
+  } = useValues(KibanaLogic);
   const isAppGuideActive = useObservable(
     guidedOnboarding.guidedOnboardingApi!.isGuideStepActive$('appSearch', 'add_data')
   );
@@ -222,7 +225,7 @@ export const SearchIndex: React.FC = () => {
       isLoading={isInitialLoading}
       pageHeader={{
         pageTitle: indexName,
-        rightSideItems: getHeaderActions(index),
+        rightSideItems: getHeaderActions(index, hasAppSearchAccess),
       }}
     >
       {isCrawlerIndex(index) && !index.connector ? (

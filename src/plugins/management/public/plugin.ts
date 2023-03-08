@@ -71,6 +71,8 @@ export class ManagementPlugin
 
   private hasAnyEnabledApps = true;
 
+  private isSidebarEnabled = true;
+
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, { home, share }: ManagementSetupDependencies) {
@@ -93,6 +95,7 @@ export class ManagementPlugin
         visible: () => this.hasAnyEnabledApps,
       });
     }
+    const managementPlugin = this;
 
     core.application.register({
       id: MANAGEMENT_APP_ID,
@@ -111,6 +114,7 @@ export class ManagementPlugin
           sections: getSectionsServiceStartPrivate(),
           kibanaVersion,
           setBreadcrumbs: coreStart.chrome.setBreadcrumbs,
+          getIsSidebarEnabled: () => managementPlugin.isSidebarEnabled,
         });
       },
     });
@@ -118,6 +122,9 @@ export class ManagementPlugin
     return {
       sections: this.managementSections.setup(),
       locator,
+      setIsSidebarEnabled: (enabled: boolean) => {
+        this.isSidebarEnabled = enabled;
+      },
     };
   }
 
