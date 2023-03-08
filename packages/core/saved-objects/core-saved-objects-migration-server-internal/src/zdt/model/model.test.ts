@@ -12,7 +12,6 @@ import { createContextMock, MockedMigratorContext } from '../test_helpers';
 import type { RetryableEsClientError } from '../../actions';
 import type { State, BaseState, FatalState, AllActionStates } from '../state';
 import type { StateActionResponse } from './types';
-import type { ResponseType } from '../next';
 import { model } from './model';
 
 describe('model', () => {
@@ -120,14 +119,14 @@ describe('model', () => {
         controlState,
       } as unknown as State);
 
-    const createStubResponse = (): ResponseType<AllActionStates> =>
+    const createStubResponse = () =>
       Either.right({
         '.kibana_7.11.0_001': {
           aliases: {},
           mappings: { properties: {} },
           settings: {},
         },
-      }) as StateActionResponse<'INIT'>;
+      });
 
     const stageMapping: Record<AllActionStates, Function> = {
       INIT: StageMocks.init,

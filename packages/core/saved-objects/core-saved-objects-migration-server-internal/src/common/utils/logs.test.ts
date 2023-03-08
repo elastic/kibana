@@ -45,7 +45,7 @@ describe('logStateTransition', () => {
     });
   });
 
-  it('logs a debug message with the ', () => {
+  it('logs a debug message with the correct meta', () => {
     const previous: LogAwareState = {
       controlState: 'PREVIOUS',
       logs: [],
