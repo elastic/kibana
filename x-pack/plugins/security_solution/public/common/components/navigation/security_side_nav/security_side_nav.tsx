@@ -6,18 +6,13 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { EuiHorizontalRule, EuiListGroupItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { SideNavigation } from '@kbn/shared-ux-side-navigation';
-import type {
-  CustomSideNavItem,
-  DefaultSideNavItem,
-  SideNavItem,
-} from '@kbn/shared-ux-side-navigation';
+import type { SideNavItem } from '@kbn/shared-ux-side-navigation';
 import { SecurityPageName } from '../../../../app/types';
 import { getAncestorLinksInfo, type NavigationLink } from '../../../links';
 import { useRouteSpy } from '../../../utils/route/use_route_spy';
-import { SecuritySolutionLinkAnchor, useGetSecuritySolutionLinkProps } from '../../links';
-import { EuiIconLaunch } from './icons/launch';
+import { useGetSecuritySolutionLinkProps } from '../../links';
 import { useShowTimeline } from '../../../utils/timeline/use_show_timeline';
 import { useIsPolicySettingsBarVisible } from '../../../../management/pages/policy/view/policy_hooks';
 import { bottomNavOffset } from '../../../lib/helpers';
@@ -30,31 +25,6 @@ const isFooterNavItem = (id: SecurityPageName) =>
 type FormatSideNavItems = (navItems: NavigationLink) => SideNavItem;
 
 /**
- * Renders the navigation item for "Get Started" custom link
- */
-const GetStartedCustomLinkComponent: React.FC<{
-  isSelected: boolean;
-  title: string;
-}> = ({ isSelected, title }) => (
-  <SecuritySolutionLinkAnchor
-    deepLinkId={SecurityPageName.landing}
-    color={isSelected ? 'primary' : 'text'}
-  >
-    <EuiListGroupItem
-      label={title.toUpperCase()}
-      size="xs"
-      color={isSelected ? 'primary' : 'text'}
-      iconType={EuiIconLaunch}
-      iconProps={{
-        color: isSelected ? 'primary' : 'text',
-      }}
-    />
-    <EuiHorizontalRule margin="xs" />
-  </SecuritySolutionLinkAnchor>
-);
-const GetStartedCustomLink = React.memo(GetStartedCustomLinkComponent);
-
-/**
  * Returns a function to format generic `NavigationLink` array to the `SideNavItem` type
  */
 const useFormatSideNavItem = (): FormatSideNavItems => {
@@ -62,7 +32,7 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
 
   const formatSideNavItem: FormatSideNavItems = useCallback(
     (navLinkItem) => {
-      const formatDefaultItem = (navItem: NavigationLink): DefaultSideNavItem => ({
+      const formatDefaultItem = (navItem: NavigationLink): SideNavItem => ({
         id: navItem.id,
         label: navItem.title,
         ...getSecuritySolutionLinkProps({
@@ -73,7 +43,7 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
           : {}),
         ...(navItem.links && navItem.links.length > 0
           ? {
-              items: navItem.links.reduce<DefaultSideNavItem[]>((acc, current) => {
+              items: navItem.links.reduce<SideNavItem[]>((acc, current) => {
                 if (!current.disabled) {
                   acc.push({
                     id: current.id,
@@ -90,11 +60,15 @@ const useFormatSideNavItem = (): FormatSideNavItems => {
           : {}),
       });
 
-      const formatGetStartedItem = (navItem: NavigationLink): CustomSideNavItem => ({
+      const formatGetStartedItem = (navItem: NavigationLink): SideNavItem => ({
         id: navItem.id,
-        render: (isSelected) => (
-          <GetStartedCustomLink isSelected={isSelected} title={navItem.title} />
-        ),
+        label: navItem.title.toUpperCase(),
+        labelSize: 'xs',
+        iconType: 'launch',
+        ...getSecuritySolutionLinkProps({
+          deepLinkId: navItem.id,
+        }),
+        appendSeparator: true,
       });
 
       if (navLinkItem.id === SecurityPageName.landing) {

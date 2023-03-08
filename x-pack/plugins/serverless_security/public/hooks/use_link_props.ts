@@ -15,7 +15,7 @@ interface LinkProps {
 }
 
 interface GetLinkPropsParams {
-  deepLinkId: SecurityPageName;
+  deepLinkId?: SecurityPageName;
   path?: string;
   appId?: string;
   onClick?: MouseEventHandler;

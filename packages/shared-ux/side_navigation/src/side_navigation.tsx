@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useCallback, useMemo, useRef, useState } from 'react';
+/* eslint-disable @elastic/eui/href-or-on-click */
+
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiListGroup,
   EuiFlexGroup,
@@ -15,13 +17,13 @@ import {
   useIsWithinBreakpoints,
   useEuiTheme,
   EuiListGroupItem,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { SideNavigationPanel } from './side_navigation_panel';
-import type { DefaultSideNavItem, SideNavItem, Tracker } from './types';
-import { isCustomItem, isDefaultItem, type LinkCategories } from './types';
+import type { LinkCategories, SideNavItem, Tracker } from './types';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { TelemetryContextProvider, useTelemetryContext } from './telemetry/telemetry_context';
 import { SideNavItemStyles } from './side_navigation.styles';
@@ -54,7 +56,7 @@ export interface SideNavigationItemProps {
 type ActivePanelNav = string | null;
 type NavItemsById = Record<
   string,
-  { title: string; panelItems: DefaultSideNavItem[]; categories?: LinkCategories }
+  { title: string; panelItems: SideNavItem[]; categories?: LinkCategories }
 >;
 
 export const SideNavigationComponent: React.FC<SideNavigationProps> = ({
@@ -95,7 +97,7 @@ export const SideNavigationComponent: React.FC<SideNavigationProps> = ({
   const navItemsById = useMemo<NavItemsById>(
     () =>
       [...items, ...footerItems].reduce<NavItemsById>((acc, navItem) => {
-        if (isDefaultItem(navItem) && navItem.items && navItem.items.length > 0) {
+        if (navItem.items && navItem.items.length > 0) {
           acc[navItem.id] = {
             title: navItem.label,
             panelItems: navItem.items,
@@ -195,11 +197,7 @@ const SideNavigationItemComponent: React.FC<SideNavigationItemProps> = ({
   const { euiTheme } = useEuiTheme();
   const { tracker } = useTelemetryContext();
 
-  if (isCustomItem(item)) {
-    return <Fragment key={item.id}>{item.render(isSelected)}</Fragment>;
-  }
-
-  const { id, href, label, onClick } = item;
+  const { id, href, label, onClick, labelSize, iconType, appendSeparator } = item;
 
   const onLinkClicked: React.MouseEventHandler = (ev) => {
     tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.NAVIGATION}${id}`);
@@ -225,35 +223,41 @@ const SideNavigationItemComponent: React.FC<SideNavigationItemProps> = ({
   };
 
   return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
-    <EuiLink
-      key={id}
-      href={href}
-      onClick={onLinkClicked}
-      color={isSelected ? 'primary' : 'text'}
-      data-test-subj={`groupedNavItemLink-${id}`}
-    >
-      <EuiListGroupItem
-        className={itemClassNames}
+    <>
+      <EuiLink
+        key={id}
+        href={href}
+        onClick={onLinkClicked}
         color={isSelected ? 'primary' : 'text'}
-        label={label}
-        size="s"
-        {...(hasPanelNav
-          ? {
-              extraAction: {
-                className: buttonClassNames,
-                color: isActive ? 'primary' : 'text',
-                onClick: onButtonClick,
-                iconType: 'spaces',
-                iconSize: 'm',
-                'aria-label': 'Toggle group nav',
-                'data-test-subj': `groupedNavItemButton-${id}`,
-                alwaysShow: true,
-              },
-            }
-          : {})}
-      />
-    </EuiLink>
+        data-test-subj={`groupedNavItemLink-${id}`}
+      >
+        <EuiListGroupItem
+          className={itemClassNames}
+          color={isSelected ? 'primary' : 'text'}
+          label={label}
+          size={labelSize ?? 's'}
+          {...(iconType && {
+            iconType,
+            iconProps: {
+              color: isSelected ? 'primary' : 'text',
+            },
+          })}
+          {...(hasPanelNav && {
+            extraAction: {
+              className: buttonClassNames,
+              color: isActive ? 'primary' : 'text',
+              onClick: onButtonClick,
+              iconType: 'spaces',
+              iconSize: 'm',
+              'aria-label': 'Toggle group nav',
+              'data-test-subj': `groupedNavItemButton-${id}`,
+              alwaysShow: true,
+            },
+          })}
+        />
+      </EuiLink>
+      {appendSeparator && <EuiHorizontalRule margin="xs" />}
+    </>
   );
 };
 const SideNavItem = React.memo(SideNavigationItemComponent);

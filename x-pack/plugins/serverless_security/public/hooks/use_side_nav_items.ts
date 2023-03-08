@@ -5,126 +5,137 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
-import type { NavigationLink } from '@kbn/security-solution-plugin/public/common/links';
-import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
-import type { SideNavItem, DefaultSideNavItem } from '@kbn/shared-ux-side-navigation';
+import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { matchPath, useLocation } from 'react-router-dom';
+import { partition } from 'lodash/fp';
+import { SecurityPageName } from '@kbn/security-solution-plugin/common';
+import type { SideNavItem } from '@kbn/shared-ux-side-navigation';
 import { useKibana } from '../services';
 import { useGetLinkProps } from './use_link_props';
-import { formatGetStartedItem } from '../components/side_navigation/get_started_nav_item';
 
-const isFooterNavItem = (id: SecurityPageName) =>
+const isFooterNavItem = (id: string) =>
   id === SecurityPageName.landing || id === SecurityPageName.administration;
 
-const isGetStartedNavItem = (id: SecurityPageName) => id === SecurityPageName.landing;
+const isGetStartedNavItem = (id: string) => id === SecurityPageName.landing;
 
-const useFindItemsByPath = () => {
-  const { getUrlForApp } = useKibana().services.application;
-
-  // DFS for the item that matches the path, returns all item hierarchy when found
-  const findItemsByPath = useCallback(
-    (navLinks: NavigationLink[], pathname: string): NavigationLink[] => {
-      for (const navLink of navLinks) {
-        if (navLink.links?.length) {
-          const found = findItemsByPath(navLink.links, pathname);
-          if (found.length) {
-            found.unshift(navLink);
-            return found;
-          }
-        }
-        const path = getUrlForApp(APP_UI_ID, { deepLinkId: navLink.id });
-        if (matchPath(pathname, { path })) {
-          return [navLink];
-        }
+// DFS for the sideNavItem matching the current `pathname`, returns all item hierarchy when found
+const findItemsByPath = (sideNavItems: SideNavItem[], pathname: string): SideNavItem[] => {
+  for (const sideNavItem of sideNavItems) {
+    if (sideNavItem.items?.length) {
+      const found = findItemsByPath(sideNavItem.items, pathname);
+      if (found.length) {
+        found.unshift(sideNavItem);
+        return found;
       }
-      return [];
-    },
-    [getUrlForApp]
-  );
-
-  return findItemsByPath;
+    }
+    if (matchPath(pathname, { path: sideNavItem.href })) {
+      return [sideNavItem];
+    }
+  }
+  return [];
 };
 
 /**
- * Returns the formatted `items` and `footerItems` to be rendered in the navigation
+ * Returns all the formatted SideNavItems, including external links
  */
-export const useSideNavItems = () => {
-  const { securitySolution, http } = useKibana().services;
+export const useSideNavItems = (): SideNavItem[] => {
+  const { securitySolution } = useKibana().services;
   const navLinks = useObservable(securitySolution.navLinks$, []);
   const getLinkProps = useGetLinkProps();
 
-  const formatDefaultItem = useCallback(
-    (navItem: NavigationLink): DefaultSideNavItem => ({
-      id: navItem.id,
-      label: navItem.title,
-      ...getLinkProps({ deepLinkId: navItem.id }),
-      ...(navItem.categories?.length && { categories: navItem.categories }),
-      ...(navItem.links?.length && {
-        items: navItem.links.reduce<DefaultSideNavItem[]>((acc, current) => {
-          if (!current.disabled) {
-            acc.push({
-              id: current.id,
-              label: current.title,
-              description: current.description,
-              isBeta: current.isBeta,
-              betaOptions: current.betaOptions,
-              ...getLinkProps({ deepLinkId: current.id }),
-            });
-          }
-          return acc;
-        }, []),
-      }),
-    }),
-    [getLinkProps]
+  const securitySideNavItems = useMemo(
+    () =>
+      navLinks.reduce<SideNavItem[]>((items, navLink) => {
+        if (navLink.disabled) {
+          return items;
+        }
+        if (isGetStartedNavItem(navLink.id)) {
+          items.push({
+            id: navLink.id,
+            label: navLink.title.toUpperCase(),
+            ...getLinkProps({ deepLinkId: navLink.id }),
+            labelSize: 'xs',
+            iconType: 'launch',
+            appendSeparator: true,
+          });
+        } else {
+          // default sideNavItem formatting
+          items.push({
+            id: navLink.id,
+            label: navLink.title,
+            ...getLinkProps({ deepLinkId: navLink.id }),
+            ...(navLink.categories?.length && { categories: navLink.categories }),
+            ...(navLink.links?.length && {
+              items: navLink.links.reduce<SideNavItem[]>((acc, current) => {
+                if (!current.disabled) {
+                  acc.push({
+                    id: current.id,
+                    label: current.title,
+                    description: current.description,
+                    isBeta: current.isBeta,
+                    betaOptions: current.betaOptions,
+                    ...getLinkProps({ deepLinkId: current.id }),
+                  });
+                }
+                return acc;
+              }, []),
+            }),
+          });
+        }
+        return items;
+      }, []),
+    [getLinkProps, navLinks]
   );
 
-  const sideNavItems = useMemo(() => {
-    const mainNavItems: SideNavItem[] = [];
-    const footerNavItems: SideNavItem[] = [];
-    navLinks.forEach((navLink) => {
-      if (navLink.disabled) {
-        return;
-      }
-      const sideNavItem = isGetStartedNavItem(navLink.id)
-        ? formatGetStartedItem(navLink)
-        : formatDefaultItem(navLink);
-
-      if (isFooterNavItem(navLink.id)) {
-        footerNavItems.push(sideNavItem);
-      } else {
-        mainNavItems.push(sideNavItem);
-      }
-    });
-
-    // TODO: remove, just extra external item for testing
-    mainNavItems.push({
-      id: 'discover',
-      label: 'Discover',
-      href: http.basePath.prepend('/app/discover'),
-    });
-
-    return [mainNavItems, footerNavItems];
-  }, [navLinks, formatDefaultItem, http]);
+  const sideNavItems = useAddExternalSideNavItems(securitySideNavItems);
 
   return sideNavItems;
 };
 
 /**
+ * @param securitySideNavItems the sideNavItems for Security pages
+ * @returns sideNavItems with Security and external links
+ */
+const useAddExternalSideNavItems = (securitySideNavItems: SideNavItem[]) => {
+  const getLinkProps = useGetLinkProps();
+
+  const sideNavItemsWithExternals = useMemo(
+    () => [
+      ...securitySideNavItems,
+      {
+        id: 'discover',
+        label: 'Discover',
+        ...getLinkProps({ appId: 'discover' }),
+      },
+    ],
+    [securitySideNavItems, getLinkProps]
+  );
+
+  return sideNavItemsWithExternals;
+};
+
+/**
+ * Partitions the sideNavItems into main and footer SideNavItems
+ * @param sideNavItems array for all SideNavItems
+ * @returns `[items, footerItems]` to be used in the side navigation component
+ */
+export const usePartitionFooterNavItems = (
+  sideNavItems: SideNavItem[]
+): [SideNavItem[], SideNavItem[]] =>
+  useMemo(() => partition((item) => !isFooterNavItem(item.id), sideNavItems), [sideNavItems]);
+
+/**
  * Returns the selected item id, which is the root item in the links hierarchy
  */
-export const useSideNavSelectedId = (): string => {
-  const { pathname } = useLocation(); // TODO: solve (not) updating problem
-  const { securitySolution } = useKibana().services;
-  const navLinks = useObservable(securitySolution.navLinks$, []);
-
-  const findItemsByPath = useFindItemsByPath();
+export const useSideNavSelectedId = (sideNavItems: SideNavItem[]): string => {
+  const { http } = useKibana().services;
+  const { pathname } = useLocation();
 
   const selectedId: string = useMemo(() => {
-    const [rootNavItem] = findItemsByPath(navLinks, pathname);
+    const [rootNavItem] = findItemsByPath(sideNavItems, http.basePath.prepend(pathname));
     return rootNavItem?.id ?? '';
-  }, [navLinks, findItemsByPath, pathname]);
+  }, [sideNavItems, pathname, http]);
 
   return selectedId;
 };

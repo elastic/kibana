@@ -7,13 +7,4 @@
  */
 
 export { SideNavigation, type SideNavigationProps } from './src';
-export type {
-  SideNavItem,
-  LinkCategory,
-  LinkCategories,
-  DefaultSideNavItem,
-  CustomSideNavItem,
-  isCustomItem,
-  isDefaultItem,
-  Tracker,
-} from './src/types';
+export type { SideNavItem, LinkCategory, LinkCategories, Tracker } from './src/types';

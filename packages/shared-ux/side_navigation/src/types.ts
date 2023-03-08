@@ -8,27 +8,24 @@
 
 import type React from 'react';
 import type { UiCounterMetricType } from '@kbn/analytics';
+import type { EuiListGroupItemProps, IconType } from '@elastic/eui';
 
-export interface DefaultSideNavItem<T extends string = string> {
+export interface SideNavItem<T extends string = string> {
   id: T;
   label: string;
   href: string;
   onClick?: React.MouseEventHandler;
   description?: string;
-  items?: Array<DefaultSideNavItem<T>>;
+  items?: Array<SideNavItem<T>>;
   categories?: LinkCategories<T>;
+  iconType?: IconType;
+  labelSize?: EuiListGroupItemProps['size'];
+  appendSeparator?: boolean;
   isBeta?: boolean;
   betaOptions?: {
     text: string;
   };
 }
-
-export interface CustomSideNavItem<T extends string = string> {
-  id: T;
-  render: (isSelected: boolean) => React.ReactNode;
-}
-
-export type SideNavItem<T extends string = string> = DefaultSideNavItem<T> | CustomSideNavItem<T>;
 
 export interface LinkCategory<T extends string = string> {
   label: string;
@@ -42,8 +39,3 @@ export type Tracker = (
   event: string | string[],
   count?: number | undefined
 ) => void;
-
-export const isCustomItem = (navItem: SideNavItem): navItem is CustomSideNavItem =>
-  'render' in navItem;
-export const isDefaultItem = (navItem: SideNavItem): navItem is DefaultSideNavItem =>
-  !isCustomItem(navItem);

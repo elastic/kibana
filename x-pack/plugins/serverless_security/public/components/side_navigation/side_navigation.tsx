@@ -17,7 +17,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { SideNavigation } from '@kbn/shared-ux-side-navigation';
-import { useSideNavItems, useSideNavSelectedId } from '../../hooks/use_side_nav_items';
+import {
+  usePartitionFooterNavItems,
+  useSideNavItems,
+  useSideNavSelectedId,
+} from '../../hooks/use_side_nav_items';
 
 const LOCAL_STORAGE_IS_OPEN_KEY = 'SECURITY_SERVERLESS_SIDE_NAVIGATION_OPEN' as const;
 
@@ -26,9 +30,10 @@ const translatedNavTitle = i18n.translate('xpack.securityServerless.navigation.m
 });
 
 export const SecuritySideNavigation: React.FC = () => {
-  const [items, footerItems] = useSideNavItems();
-  const selectedId = useSideNavSelectedId();
   const { euiTheme, colorMode } = useEuiTheme();
+  const sideNavItems = useSideNavItems();
+  const selectedId = useSideNavSelectedId(sideNavItems);
+  const [items, footerItems] = usePartitionFooterNavItems(sideNavItems);
 
   const [isOpen, setIsOpen] = useLocalStorage(LOCAL_STORAGE_IS_OPEN_KEY, true);
 
