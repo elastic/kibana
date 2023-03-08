@@ -65,25 +65,25 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
     }
 
     return (
-        <EuiPanel>
-          <SubChart
-            index={highlightedSubchart.Index}
-            color={highlightedSubchart.Color}
-            category={highlightedSubchart.Category}
-            label={highlightedSubchart.Label}
-            data={highlightedSubchart.Series}
-            percentage={highlightedSubchart.Percentage}
-            sample={highlightedSample}
-            showFrames={showFrames}
-            /* we don't show metadata in tooltips */
-            metadata={[]}
-            height={128}
-            width={MAX_TOOLTIP_WIDTH}
-            showAxes={false}
-            onShowMoreClick={null}
-            padTitle={false}
-          />
-        </EuiPanel>
+      <EuiPanel>
+        <SubChart
+          index={highlightedSubchart.Index}
+          color={highlightedSubchart.Color}
+          category={highlightedSubchart.Category}
+          label={highlightedSubchart.Label}
+          data={highlightedSubchart.Series}
+          percentage={highlightedSubchart.Percentage}
+          sample={highlightedSample}
+          showFrames={showFrames}
+          /* we don't show metadata in tooltips */
+          metadata={[]}
+          height={128}
+          width={MAX_TOOLTIP_WIDTH}
+          showAxes={false}
+          onShowMoreClick={null}
+          padTitle={false}
+        />
+      </EuiPanel>
     );
   }
 
