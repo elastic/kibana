@@ -327,10 +327,28 @@ for (let index = 0; index < 25; index++) {
     describe('Alerts table UI', () => {
       it('should support sorting', async () => {
         const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
-        userEvent.click(renderResult.container.querySelector('.euiDataGridHeaderCell__button')!);
+        userEvent.click(
+          renderResult.container.querySelector('.euiDataGridHeaderCell__button')!,
+          undefined,
+          {
+            skipPointerEventsCheck: true,
+          }
+        );
+
         await waitForEuiPopoverOpen();
-        userEvent.click(renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`));
-        userEvent.click(renderResult.getByTitle('Sort A-Z'));
+
+        userEvent.click(
+          renderResult.getByTestId(`dataGridHeaderCellActionGroup-${columns[0].id}`),
+          undefined,
+          {
+            skipPointerEventsCheck: true,
+          }
+        );
+
+        userEvent.click(renderResult.getByTitle('Sort A-Z'), undefined, {
+          skipPointerEventsCheck: true,
+        });
+
         expect(fetchAlertsData.onSortChange).toHaveBeenCalledWith([
           { direction: 'asc', id: 'kibana.alert.rule.name' },
         ]);
@@ -338,7 +356,11 @@ for (let index = 0; index < 25; index++) {
 
       it('should support pagination', async () => {
         const renderResult = render(<AlertsTableWithProviders {...tableProps} />);
-        userEvent.click(renderResult.getByTestId('pagination-button-1'));
+
+        userEvent.click(renderResult.getByTestId('pagination-button-1'), undefined, {
+          skipPointerEventsCheck: true,
+        });
+
         expect(fetchAlertsData.onPageChange).toHaveBeenCalledWith({ pageIndex: 1, pageSize: 1 });
       });
 
@@ -541,11 +563,13 @@ for (let index = 0; index < 25; index++) {
 
             // first row, first column
             expect(within(selectedOptions[0]).getByLabelText('Loading')).toBeDefined();
-            expect(within(selectedOptions[0]).queryByRole('checkbox')).not.toBeInTheDocument();
+            expect(
+              within(selectedOptions[0]).queryByTestId('bulk-actions-row-cell')
+            ).not.toBeInTheDocument();
 
             // second row, first column
             expect(within(selectedOptions[6]).queryByLabelText('Loading')).not.toBeInTheDocument();
-            expect(within(selectedOptions[6]).getByRole('checkbox')).toBeDefined();
+            expect(within(selectedOptions[6]).getByTestId('bulk-actions-row-cell')).toBeDefined();
           });
 
           it('should show the row loader when callback triggered with false', async () => {
