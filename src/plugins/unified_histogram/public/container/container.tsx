@@ -9,6 +9,7 @@
 import React, { forwardRef, useImperativeHandle, useMemo, useState } from 'react';
 import { Subject } from 'rxjs';
 import { pick } from 'lodash';
+import { LensSuggestionsApi } from '@kbn/lens-plugin/public';
 import { UnifiedHistogramLayout, UnifiedHistogramLayoutProps } from '../layout';
 import type { UnifiedHistogramInputMessage } from '../types';
 import {
@@ -99,6 +100,7 @@ export const UnifiedHistogramContainer = forwardRef<
   const [initialized, setInitialized] = useState(false);
   const [layoutProps, setLayoutProps] = useState<LayoutProps>();
   const [stateService, setStateService] = useState<UnifiedHistogramStateService>();
+  const [lensSuggestionsApi, setLensSuggestionsApi] = useState<LensSuggestionsApi>();
   const [input$] = useState(() => new Subject<UnifiedHistogramInputMessage>());
   const api = useMemo<UnifiedHistogramApi>(
     () => ({
@@ -111,6 +113,11 @@ export const UnifiedHistogramContainer = forwardRef<
           disabledActions,
           getRelativeTimeRange,
         } = options;
+
+        (async () => {
+          const apiHelper = await services.lens.stateHelperApi();
+          setLensSuggestionsApi(() => apiHelper.suggestionsApi);
+        })();
 
         setLayoutProps({
           services,
@@ -143,7 +150,7 @@ export const UnifiedHistogramContainer = forwardRef<
   // Expose the API to the parent component
   useImperativeHandle(ref, () => api, [api]);
 
-  const stateProps = useStateProps(stateService, layoutProps?.services);
+  const stateProps = useStateProps(stateService);
   const dataView = useStateSelector(stateService?.state$, dataViewSelector);
   const query = useStateSelector(stateService?.state$, querySelector);
   const filters = useStateSelector(stateService?.state$, filtersSelector);
@@ -151,7 +158,7 @@ export const UnifiedHistogramContainer = forwardRef<
   const topPanelHeight = useStateSelector(stateService?.state$, topPanelHeightSelector);
 
   // Don't render anything until the container is initialized
-  if (!layoutProps || !dataView) {
+  if (!layoutProps || !dataView || !lensSuggestionsApi) {
     return null;
   }
 
@@ -166,6 +173,7 @@ export const UnifiedHistogramContainer = forwardRef<
       timeRange={timeRange}
       topPanelHeight={topPanelHeight}
       input$={input$}
+      lensSuggestionsApi={lensSuggestionsApi}
     />
   );
 });

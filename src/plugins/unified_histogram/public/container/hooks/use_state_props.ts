@@ -5,13 +5,12 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { isEqual } from 'lodash';
+
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { UnifiedHistogramChartLoadEvent, UnifiedHistogramFetchStatus } from '../../types';
 import type { UnifiedHistogramStateService } from '../services/state_service';
-import type { UnifiedHistogramServices } from '../../types';
 import {
   breakdownFieldSelector,
   columnsSelector,
@@ -24,14 +23,10 @@ import {
   totalHitsResultSelector,
   totalHitsStatusSelector,
   currentSuggestionSelector,
-  allSuggestionsSelector,
 } from '../utils/state_selectors';
 import { useStateSelector } from '../utils/use_state_selector';
 
-export const useStateProps = (
-  stateService: UnifiedHistogramStateService | undefined,
-  services?: UnifiedHistogramServices
-) => {
+export const useStateProps = (stateService: UnifiedHistogramStateService | undefined) => {
   const breakdownField = useStateSelector(stateService?.state$, breakdownFieldSelector);
   const columns = useStateSelector(stateService?.state$, columnsSelector);
   const chartHidden = useStateSelector(stateService?.state$, chartHiddenSelector);
@@ -43,9 +38,6 @@ export const useStateProps = (
   const totalHitsResult = useStateSelector(stateService?.state$, totalHitsResultSelector);
   const totalHitsStatus = useStateSelector(stateService?.state$, totalHitsStatusSelector);
   const currentSuggestion = useStateSelector(stateService?.state$, currentSuggestionSelector);
-  const allSuggestions = useStateSelector(stateService?.state$, allSuggestionsSelector);
-
-  const columnsRef = useRef(columns);
 
   /**
    * Contexts
@@ -79,18 +71,11 @@ export const useStateProps = (
       return undefined;
     }
 
-    if (
-      isPlainRecord &&
-      (!currentSuggestion || currentSuggestion?.visualizationId === 'lnsDatatable')
-    ) {
-      return undefined;
-    }
-
     return {
       hidden: chartHidden,
       timeInterval,
     };
-  }, [chartHidden, isPlainRecord, isTimeBased, timeInterval, currentSuggestion]);
+  }, [chartHidden, isPlainRecord, isTimeBased, timeInterval]);
 
   const breakdown = useMemo(() => {
     if (isPlainRecord || !isTimeBased) {
@@ -177,49 +162,6 @@ export const useStateProps = (
     }
   }, [chart, chartHidden, stateService]);
 
-  useEffect(() => {
-    const getSuggestions = async () => {
-      const lensServices = await services?.lens.stateHelperApi();
-      if (lensServices && dataView) {
-        const context = {
-          dataViewSpec: dataView?.toSpec(),
-          fieldName: '',
-          contextualFields: columns,
-          query: query && isOfAggregateQueryType(query) ? query : undefined,
-        };
-        const lensSuggestions = isPlainRecord
-          ? lensServices.suggestionsApi(context, dataView)
-          : undefined;
-        const firstSuggestion = lensSuggestions?.length ? lensSuggestions[0] : undefined;
-        const restSuggestions = lensSuggestions?.filter((sug) => {
-          return !sug.hide && sug.visualizationId !== 'lnsLegacyMetric';
-        });
-        const firstSuggestionExists = restSuggestions?.find(
-          (sug) => sug.title === firstSuggestion?.title
-        );
-        if (firstSuggestion && !firstSuggestionExists) {
-          restSuggestions?.push(firstSuggestion);
-        }
-        stateService?.setCurrentSuggestion(firstSuggestion);
-        stateService?.setAllSuggestions(restSuggestions);
-        columnsRef.current = columns;
-      }
-    };
-    if (!isEqual(columns, columnsRef?.current)) {
-      getSuggestions();
-    }
-  }, [
-    chart,
-    columns,
-    dataView,
-    query,
-    services?.lens,
-    isPlainRecord,
-    stateService,
-    allSuggestions,
-    currentSuggestion,
-  ]);
-
   return {
     hits,
     chart,
@@ -227,7 +169,6 @@ export const useStateProps = (
     request,
     columns,
     currentSuggestion,
-    allSuggestions,
     isPlainRecord,
     onTopPanelHeightChange,
     onTimeIntervalChange,

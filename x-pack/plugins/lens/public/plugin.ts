@@ -235,12 +235,14 @@ export interface LensPublicStart {
   stateHelperApi: () => Promise<{
     formula: FormulaPublicApi;
     chartInfo: ChartInfoApi;
-    suggestionsApi: (
-      context: VisualizeFieldContext | VisualizeEditorContext,
-      dataViews: DataView
-    ) => Suggestion[] | undefined;
+    suggestionsApi: LensSuggestionsApi;
   }>;
 }
+
+export type LensSuggestionsApi = (
+  context: VisualizeFieldContext | VisualizeEditorContext,
+  dataViews: DataView
+) => Suggestion[] | undefined;
 
 export class LensPlugin {
   private datatableVisualization: DatatableVisualizationType | undefined;
