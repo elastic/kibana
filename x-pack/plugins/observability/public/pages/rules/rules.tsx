@@ -13,12 +13,12 @@ import { useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import type { RulesListVisibleColumns } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { Provider, rulesPageStateContainer, useRulesPageStateContainer } from './state_container';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
-import { RULES_PAGE_TITLE, RULES_BREADCRUMB_TEXT } from './translations';
+import { useRulesPageStateContainer } from './state_container/use_rules_page_state_container';
+import { rulesPageStateContainer, Provider } from './state_container/state_container';
 
 const RULES_LIST_COLUMNS_KEY = 'observability_rulesListColumns';
 const RULES_LIST_COLUMNS: RulesListVisibleColumns[] = [
@@ -35,7 +35,7 @@ function RulesPage() {
     http,
     docLinks,
     triggersActionsUi: {
-      getAddAlertFlyout: AddAlertFlyout,
+      getAddAlertFlyout: AddRuleFlyout,
       getRulesList: RuleList,
       getRulesSettingsLink: RulesSettingsLink,
     },
@@ -65,14 +65,18 @@ function RulesPage() {
       href: http.basePath.prepend('/app/observability/alerts'),
     },
     {
-      text: RULES_BREADCRUMB_TEXT,
+      text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
+        defaultMessage: 'Rules',
+      }),
     },
   ]);
 
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: <>{RULES_PAGE_TITLE}</>,
+        pageTitle: i18n.translate('xpack.observability.rulesTitle', {
+          defaultMessage: 'Rules',
+        }),
         rightSideItems: [
           <EuiButton
             fill
@@ -121,7 +125,7 @@ function RulesPage() {
       </EuiFlexGroup>
 
       {addRuleFlyoutVisibility && (
-        <AddAlertFlyout
+        <AddRuleFlyout
           consumer={ALERTS_FEATURE_ID}
           filteredRuleTypes={filteredRuleTypes}
           onClose={() => {
