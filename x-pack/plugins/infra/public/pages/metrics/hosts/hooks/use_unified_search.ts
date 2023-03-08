@@ -8,9 +8,10 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
 import { useCallback, useEffect } from 'react';
 import { buildEsQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
-import { debounceTime, map, skip, startWith } from 'rxjs/operators';
+import { map, skip, startWith } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
+import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useMetricsDataViewContext } from './use_data_view';
@@ -95,11 +96,11 @@ export const useUnifiedSearch = () => {
     }
   }, [timeFilterService, state.dateRange]);
 
-  useEffect(() => {
+  useEffectOnce(() => {
     loadFiltersFromState();
     loadQueryFromState();
     loadDateRangeFromState();
-  }, [loadDateRangeFromState, loadFiltersFromState, loadQueryFromState]);
+  });
 
   useEffect(() => {
     const filters$ = filterManagerService.getUpdates$().pipe(
@@ -122,7 +123,7 @@ export const useUnifiedSearch = () => {
       query: query$,
       dateRange: dateRange$,
     })
-      .pipe(debounceTime(100), skip(1))
+      .pipe(skip(1))
       .subscribe(({ filters, query, dateRange }) => {
         onSubmit({
           query,
@@ -144,12 +145,13 @@ export const useUnifiedSearch = () => {
     );
   }, [getDateRangeAsTimestamp, state, telemetry]);
 
+  const getAllFilters = useCallback(
+    () => [...filterManagerService.getFilters(), ...state.panelFilters],
+    [filterManagerService, state.panelFilters]
+  );
   const buildQuery = useCallback(() => {
-    return buildEsQuery(metricsDataView, state.query, [
-      ...state.filters,
-      ...(state.panelFilters ?? []),
-    ]);
-  }, [metricsDataView, state.query, state.filters, state.panelFilters]);
+    return buildEsQuery(metricsDataView, queryStringService.getQuery(), getAllFilters());
+  }, [metricsDataView, queryStringService, getAllFilters]);
 
   return {
     buildQuery,
