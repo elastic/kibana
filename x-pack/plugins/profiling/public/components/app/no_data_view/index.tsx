@@ -21,9 +21,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { AsyncStatus, useAsync } from '../hooks/use_async';
-import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
-import { ProfilingAppPageTemplate } from './profiling_app_page_template';
+import { AsyncStatus, useAsync } from '../../../hooks/use_async';
+import { useProfilingDependencies } from '../../contexts/profiling_dependencies/use_profiling_dependencies';
+import { ProfilingAppPageTemplate } from '../../profiling_app_page_template';
 
 export function NoDataPage({ subTitle }: { subTitle: string }) {
   const {

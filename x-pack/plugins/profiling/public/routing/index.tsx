@@ -16,8 +16,8 @@ import { FlameGraphsView } from '../components/app/flame_graphs_view';
 import { FunctionsView } from '../components/app/functions_view';
 import { RedirectTo } from '../components/redirect_to';
 import { RouteBreadcrumb } from '../components/route_breadcrumb';
-import { StackTracesView } from '../components/stack_traces_view';
-import { NoDataPage } from '../components/no_data_page';
+import { StackTracesView } from '../components/app/stack_traces_view';
+import { NoDataPage } from '../components/app/no_data_view';
 
 const routes = {
   '/': {
