@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './model/prebuilt_rule.mock';
+export * from './model/rule_assets/prebuilt_rule_asset.mock';

@@ -7,9 +7,9 @@
 
 import type { SavedObjectsType } from '@kbn/core/server';
 
-export const ruleAssetSavedObjectType = 'security-rule';
+export const PREBUILT_RULE_ASSETS_SO_TYPE = 'security-rule';
 
-export const ruleAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
+const prebuiltRuleAssetMappings: SavedObjectsType['mappings'] = {
   dynamic: false,
   properties: {
     name: {
@@ -24,13 +24,13 @@ export const ruleAssetSavedObjectMappings: SavedObjectsType['mappings'] = {
   },
 };
 
-export const ruleAssetType: SavedObjectsType = {
-  name: ruleAssetSavedObjectType,
+export const prebuiltRuleAssetType: SavedObjectsType = {
+  name: PREBUILT_RULE_ASSETS_SO_TYPE,
   hidden: false,
   management: {
     importableAndExportable: true,
     visibleInManagement: false,
   },
   namespaceType: 'agnostic',
-  mappings: ruleAssetSavedObjectMappings,
+  mappings: prebuiltRuleAssetMappings,
 };

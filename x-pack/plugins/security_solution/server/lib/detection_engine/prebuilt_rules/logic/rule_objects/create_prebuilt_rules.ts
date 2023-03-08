@@ -6,13 +6,13 @@
  */
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
-import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../common/constants';
-import type { PrebuiltRuleToInstall } from '../../../../../common/detection_engine/prebuilt_rules';
-import { initPromisePool } from '../../../../utils/promise_pool';
-import { withSecuritySpan } from '../../../../utils/with_security_span';
-import { createRules } from '../../rule_management/logic/crud/create_rules';
+import { MAX_RULES_TO_UPDATE_IN_PARALLEL } from '../../../../../../common/constants';
+import { initPromisePool } from '../../../../../utils/promise_pool';
+import { withSecuritySpan } from '../../../../../utils/with_security_span';
+import { createRules } from '../../../rule_management/logic/crud/create_rules';
+import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 
-export const createPrebuiltRules = (rulesClient: RulesClient, rules: PrebuiltRuleToInstall[]) =>
+export const createPrebuiltRules = (rulesClient: RulesClient, rules: PrebuiltRuleAsset[]) =>
   withSecuritySpan('createPrebuiltRules', async () => {
     const result = await initPromisePool({
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
