@@ -48,8 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
     ancestryArraySize: 2,
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/151604
-  describe.skip('event route', () => {
+  describe('event route', () => {
     let entityIDFilterArray: JsonObject[] | undefined;
     let entityIDFilter: string | undefined;
     before(async () => {
