@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`SavedObjectsFinder render with left button 1`] = `
+<EuiFlexGroup
+  direction="column"
+>
+  <EuiFlexItem />
+  <EuiFlexItem>
+    <EuiInMemoryTable
+      columns={
+        Array [
+          Object {
+            "data-test-subj": "savedObjectFinderTitle",
+            "dataType": "string",
+            "description": "Title of the saved object",
+            "field": "title",
+            "name": "Title",
+            "render": [Function],
+            "sortable": [Function],
+            "width": "55%",
+          },
+          Object {
+            "data-test-subj": "savedObjectFinderTags",
+            "description": "Tags associated with this saved object",
+            "field": "references",
+            "name": "Tags",
+            "render": [Function],
+            "sortable": [Function],
+          },
+        ]
+      }
+      data-test-subj="savedObjectsFinderTable"
+      itemId="id"
+      items={
+        Array [
+          Object {
+            "attributes": Object {
+              "title": "Example title",
+            },
+            "id": "1",
+            "name": "Example title",
+            "simple": Object {
+              "attributes": Object {
+                "title": "Example title",
+              },
+              "id": "1",
+              "type": "search",
+            },
+            "title": "Example title",
+            "type": "search",
+            "version": undefined,
+          },
+        ]
+      }
+      loading={false}
+      onTableChange={[Function]}
+      pagination={
+        Object {
+          "initialPageSize": 10,
+          "pageSizeOptions": Array [
+            5,
+            10,
+            15,
+            25,
+          ],
+          "showPerPageOptions": true,
+        }
+      }
+      responsive={true}
+      search={
+        Object {
+          "box": Object {
+            "data-test-subj": "savedObjectFinderSearchInput",
+            "incremental": true,
+          },
+          "filters": undefined,
+          "onChange": [Function],
+          "toolsLeft": <React.Fragment>
+            <EuiButton
+              color="primary"
+              size="m"
+            >
+              Hello
+            </EuiButton>
+          </React.Fragment>,
+          "toolsRight": undefined,
+        }
+      }
+      sorting={
+        Object {
+          "sort": Object {
+            "direction": "asc",
+            "field": "title",
+          },
+        }
+      }
+      tableLayout="fixed"
+    />
+  </EuiFlexItem>
+</EuiFlexGroup>
+`;
