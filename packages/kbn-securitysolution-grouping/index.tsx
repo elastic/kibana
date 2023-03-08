@@ -14,9 +14,10 @@ import {
   getGroupingQuery,
   isNoneGroup,
   useGrouping,
+  GroupingProps,
+  GroupsPagingSettingsById,
 } from './src';
 import type { NamedAggregation, GroupingFieldTotalAggregation, GroupingAggregation } from './src';
-import type { GroupingAggregation, GroupingFieldTotalAggregation, NamedAggregation } from './src';
 
 export const getGroupSelector = (
   props: GroupSelectorProps

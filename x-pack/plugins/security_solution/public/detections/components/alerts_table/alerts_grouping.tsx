@@ -54,16 +54,13 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
 }) => {
   const dispatch = useDispatch();
 
-  const groupingId = tableId;
   const { indexPattern } = useSourcererDataView(SourcererScopeName.detections);
-  const { groupSelector, getGrouping, initializeGrouping, selectedGroups, pagination } =
-    useGrouping({
-  const { groupSelector, getGrouping, selectedGroup, pagination } = useGrouping({
+  const { groupSelector, getGrouping, selectedGroups, pagination } = useGrouping({
     defaultGroupingOptions: getDefaultGroupingOptions(tableId),
     groupingId: tableId,
     fields: indexPattern.fields,
-      maxGroupingLevels: 3,
-    });
+    maxGroupingLevels: 3,
+  });
 
   useEffect(() => {
     dispatch(updateGroupSelector({ groupSelector }));
