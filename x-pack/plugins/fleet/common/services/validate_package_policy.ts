@@ -337,6 +337,24 @@ export const validatePackagePolicyConfig = (
     }
   }
 
+  if (varDef.type === 'select') {
+    if (!varDef.options) {
+      errors.push(
+        i18n.translate('xpack.fleet.packagePolicyValidation.missingSelectOptionsErrorMessage', {
+          defaultMessage: 'Options must be provided for select type'
+        })
+      )
+    } else {
+      if (varDef.options.length === 0) {
+        errors.push(
+          i18n.translate('xpack.fleet.packagePolicyValidation.emptySelectOptionsErrorMessage', {
+            defaultMessage: 'Options array must contain at least one entry'
+          })
+        )
+      }
+    }
+  }
+
   return errors.length ? errors : null;
 };
 
