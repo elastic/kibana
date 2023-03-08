@@ -7,7 +7,7 @@
 
 import { getNewRule } from '../../../objects/rule';
 
-import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   esArchiverLoad,
@@ -59,22 +59,20 @@ describe('Add endpoint exception from rule details', () => {
     deleteAlertsAndRules();
     // create rule with exception
     createEndpointExceptionList().then((response) => {
-      createCustomRule(
-        {
-          ...getNewRule(),
-          customQuery: 'event.code:*',
-          dataSource: { index: ['auditbeat*'], type: 'indexPatterns' },
-          exceptionLists: [
-            {
-              id: response.body.id,
-              list_id: response.body.list_id,
-              type: response.body.type,
-              namespace_type: response.body.namespace_type,
-            },
-          ],
-        },
-        '2'
-      );
+      createRule({
+        ...getNewRule(),
+        query: 'event.code:*',
+        index: ['auditbeat*'],
+        exceptions_list: [
+          {
+            id: response.body.id,
+            list_id: response.body.list_id,
+            type: response.body.type,
+            namespace_type: response.body.namespace_type,
+          },
+        ],
+        rule_id: '2',
+      });
     });
   });
 
