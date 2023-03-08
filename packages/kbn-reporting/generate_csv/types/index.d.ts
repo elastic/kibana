@@ -163,7 +163,7 @@ export const CsvConfig = schema.object({
   }),
 });
 
-export type CsvConfigType = typeof CsvConfigType;
+export type CsvConfigType = typeof CsvConfig;
 
 export interface CsvExportSettings {
   timezone: string;

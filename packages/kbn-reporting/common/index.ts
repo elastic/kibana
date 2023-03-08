@@ -7,7 +7,5 @@
  */
 
 export { CancellationToken } from './cancellation_token';
-
 export { AuthenticationExpiredError, ReportingError } from './errors';
-
 export { byteSizeValueToNumber } from './schema_utils';
