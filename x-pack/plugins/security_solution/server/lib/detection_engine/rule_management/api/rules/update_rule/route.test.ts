@@ -20,18 +20,8 @@ import { DETECTION_ENGINE_RULES_URL } from '../../../../../../../common/constant
 import { updateRuleRoute } from './route';
 import { getUpdateRulesSchemaMock } from '../../../../../../../common/detection_engine/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-// eslint-disable-next-line no-restricted-imports
-import { legacyMigrate } from '../../../logic/rule_actions/legacy_action_migration';
 
 jest.mock('../../../../../machine_learning/authz');
-
-jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
 
 describe('Update rule route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -48,8 +38,6 @@ describe('Update rule route', () => {
     clients.rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams())); // successful update
     clients.appClient.getSignalsIndex.mockReturnValue('.siem-signals-test-index');
 
-    (legacyMigrate as jest.Mock).mockResolvedValue(getRuleMock(getQueryRuleParams()));
-
     updateRuleRoute(server.router, ml);
   });
 
@@ -64,7 +52,7 @@ describe('Update rule route', () => {
 
     test('returns 404 when updating a single rule that does not exist', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
+
       const response = await server.inject(
         getUpdateRequest(),
         requestContextMock.convertContext(context)
@@ -78,7 +66,6 @@ describe('Update rule route', () => {
     });
 
     test('returns error when updating non-rule', async () => {
-      (legacyMigrate as jest.Mock).mockResolvedValue(null);
       clients.rulesClient.find.mockResolvedValue(nonRuleFindResult());
       const response = await server.inject(
         getUpdateRequest(),

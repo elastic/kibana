@@ -26,14 +26,6 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 
 jest.mock('../../../../../machine_learning/authz');
 
-jest.mock('../../../logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual('../../../logic/rule_actions/legacy_action_migration');
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
-
 describe('Bulk patch rules route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();

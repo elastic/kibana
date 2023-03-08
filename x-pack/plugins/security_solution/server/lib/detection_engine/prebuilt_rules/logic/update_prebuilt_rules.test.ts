@@ -19,16 +19,6 @@ import { getThreatRuleParams } from '../../rule_schema/mocks';
 
 jest.mock('../../rule_management/logic/crud/patch_rules');
 
-jest.mock('../../rule_management/logic/rule_actions/legacy_action_migration', () => {
-  const actual = jest.requireActual(
-    '../../rule_management/logic/rule_actions/legacy_action_migration'
-  );
-  return {
-    ...actual,
-    legacyMigrate: jest.fn(),
-  };
-});
-
 describe('updatePrebuiltRules', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
