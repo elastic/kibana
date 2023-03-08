@@ -22,7 +22,7 @@ import {
 } from '../../../tasks/alert_details_expandable_flyout';
 import { cleanKibana } from '../../../tasks/common';
 import { login, visit } from '../../../tasks/login';
-import { createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../objects/rule';
 import { ALERTS_URL } from '../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
@@ -33,7 +33,7 @@ describe.skip('Alert details expandable flyout right panel', { testIsolation: fa
   before(() => {
     cleanKibana();
     login();
-    createCustomRuleEnabled(getNewRule());
+    createRule(getNewRule());
     visit(ALERTS_URL);
     waitForAlertsToPopulate();
     expandFirstAlertExpandableFlyout();
