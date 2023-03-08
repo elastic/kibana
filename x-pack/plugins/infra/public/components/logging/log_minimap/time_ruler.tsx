@@ -9,6 +9,7 @@ import { scaleTime } from 'd3-scale';
 import * as React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import moment from 'moment';
 import { getTimeLabelFormat } from './time_label_formatter';
 
 interface TimeRulerProps {
@@ -19,11 +20,33 @@ interface TimeRulerProps {
   width: number;
 }
 
+const ONE_MINUTE = 60000;
+
+/**
+ * In order to get the correct timestamp for a custom timezone
+ * we need, from the current timestamp, to add:
+ * 1. The current timezone offset in milliseconds (positive or negative)
+ * 2. The UTC offeset in milliseconds (positive or negative)
+ * This guarantees the timestamp we return is related to the set timezone in momentjs.
+ */
+const applyTimezoneOffset = (utcTimestamp: number) => {
+  const timezoneOffsetMillis = new Date(utcTimestamp).getTimezoneOffset() * ONE_MINUTE;
+  const utcOffsetMillis = moment(utcTimestamp).utcOffset() * ONE_MINUTE;
+
+  return utcTimestamp + timezoneOffsetMillis + utcOffsetMillis;
+};
+
 export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCount, width }) => {
-  const yScale = scaleTime().domain([start, end]).range([0, height]);
+  const startWithOffset = React.useMemo(() => applyTimezoneOffset(start), [start]);
+  const endWithOffset = React.useMemo(() => applyTimezoneOffset(end), [end]);
+
+  const yScale = scaleTime().domain([startWithOffset, endWithOffset]).range([0, height]);
 
   const ticks = yScale.ticks(tickCount);
-  const formatTick = yScale.tickFormat(tickCount, getTimeLabelFormat(start, end));
+  const formatTick = yScale.tickFormat(
+    tickCount,
+    getTimeLabelFormat(startWithOffset, endWithOffset)
+  );
 
   return (
     <g>
