@@ -33,6 +33,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
 import { Server } from './server';
+import { MIGRATION_EXCEPTION_CODE } from './constants';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { InternalNodeServicePreboot } from '@kbn/core-node-server-internal';
@@ -281,7 +282,7 @@ test('migrator-only node throws exception during start', async () => {
   expect(migrationException).not.toBeUndefined();
   expect(migrationException).toBeInstanceOf(CriticalError);
   expect(migrationException!.message).toBe('Migrations completed, shutting down Kibana');
-  expect(migrationException!.code).toBe('MigrationOnlyNode');
+  expect(migrationException!.code).toBe(MIGRATION_EXCEPTION_CODE);
   expect(migrationException!.processExitCode).toBe(0);
   expect(migrationException!.cause).toBeUndefined();
 });
