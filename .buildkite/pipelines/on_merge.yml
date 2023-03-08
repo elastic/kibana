@@ -78,7 +78,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: '.buildkite/pipelines/on_merge_unsupported_ftrs.yml'
+  - command: '.buildkite/scripts/steps/functional/on_merge_unsupported_ftrs.sh'
     label: Trigger unsupported ftr tests
     timeout_in_minutes: 10
     agents:
