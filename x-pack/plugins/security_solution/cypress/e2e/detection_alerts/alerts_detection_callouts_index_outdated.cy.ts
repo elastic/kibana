@@ -12,7 +12,7 @@ import { PAGE_TITLE } from '../../screens/common/page';
 
 import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../tasks/login';
 import { goToRuleDetails } from '../../tasks/alerts_detection_rules';
-import { createCustomRule, deleteCustomRule } from '../../tasks/api_calls/rules';
+import { createRule, deleteCustomRule } from '../../tasks/api_calls/rules';
 import { getCallOut, waitForCallOutToBeShown } from '../../tasks/common/callouts';
 
 const loadPageAsPlatformEngineerUser = (url: string) => {
@@ -73,7 +73,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rule Details page', () => {
         beforeEach(() => {
-          createCustomRule(getNewRule());
+          createRule({ ...getNewRule(), rule_id: 'rule_testing' });
           loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();
@@ -123,7 +123,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rule Details page', () => {
         beforeEach(() => {
-          createCustomRule(getNewRule());
+          createRule({ ...getNewRule(), rule_id: 'rule_testing' });
           loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();
@@ -173,7 +173,7 @@ describe('Detections > Need Admin Callouts indicating an admin is needed to migr
 
       context('On Rule Details page', () => {
         beforeEach(() => {
-          createCustomRule(getNewRule());
+          createRule({ ...getNewRule(), rule_id: 'rule_testing' });
           loadPageAsPlatformEngineerUser(DETECTIONS_RULE_MANAGEMENT_URL);
           waitForPageTitleToBeShown();
           goToRuleDetails();

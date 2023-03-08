@@ -216,5 +216,6 @@ export const GetActionStatusRequestSchema = {
     page: schema.number({ defaultValue: 0 }),
     perPage: schema.number({ defaultValue: 20 }),
     kuery: schema.maybe(schema.string()),
+    errorSize: schema.number({ defaultValue: 5 }),
   }),
 };
