@@ -32,7 +32,7 @@ export function SloEditFormObjectives() {
       <EuiFlexGrid columns={3}>
         <EuiFlexItem>
           <EuiFormLabel>
-            {i18n.translate('xpack.observability.slos.sloEdit.budgetingMethod.label', {
+            {i18n.translate('xpack.observability.slo.sloEdit.budgetingMethod.label', {
               defaultMessage: 'Budgeting method',
             })}
           </EuiFormLabel>
@@ -54,7 +54,7 @@ export function SloEditFormObjectives() {
 
         <EuiFlexItem>
           <EuiFormLabel>
-            {i18n.translate('xpack.observability.slos.sloEdit.timeWindow.label', {
+            {i18n.translate('xpack.observability.slo.sloEdit.timeWindow.label', {
               defaultMessage: 'Time window',
             })}
           </EuiFormLabel>
@@ -77,7 +77,7 @@ export function SloEditFormObjectives() {
 
         <EuiFlexItem>
           <EuiFormLabel>
-            {i18n.translate('xpack.observability.slos.sloEdit.targetSlo.label', {
+            {i18n.translate('xpack.observability.slo.sloEdit.targetSlo.label', {
               defaultMessage: 'Target / SLO (%)',
             })}
           </EuiFormLabel>

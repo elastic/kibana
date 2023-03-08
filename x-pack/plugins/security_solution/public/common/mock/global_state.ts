@@ -45,7 +45,7 @@ import { getScopePatternListSelection } from '../store/sourcerer/helpers';
 import { mockBrowserFields, mockIndexFields, mockRuntimeMappings } from '../containers/source/mock';
 import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
-import { defaultGroup } from '../store/grouping/defaults';
+import { initialGroupingState } from '../store/grouping/reducer';
 
 export const mockSourcererState = {
   ...initialSourcererState,
@@ -415,13 +415,7 @@ export const mockGlobalState: State = {
       },
     },
   },
-  groups: {
-    groupById: {
-      testing: {
-        ...defaultGroup,
-      },
-    },
-  },
+  groups: initialGroupingState,
   sourcerer: {
     ...mockSourcererState,
     defaultDataView: {

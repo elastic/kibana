@@ -53,7 +53,6 @@ export async function queryMonitorStatus(
   const pageCount = Math.ceil(monitorQueryIds.length / idSize);
   let up = 0;
   let down = 0;
-  let pending = 0;
   const upConfigs: Record<string, OverviewStatusMetaData> = {};
   const downConfigs: Record<string, OverviewStatusMetaData> = {};
   const monitorsWithoutData = new Map(Object.entries(cloneDeep(monitorLocationsMap)));
@@ -135,8 +134,6 @@ export async function queryMonitorStatus(
         'getCurrentStatusOverview' + i
       );
 
-      pending += idsToQuery.length - (result.aggregations?.id.buckets.length ?? 0);
-
       result.aggregations?.id.buckets.forEach(({ location, key: queryId }) => {
         const locationSummaries = location.buckets.map(({ status, key: locationName }) => {
           const ping = status.hits.hits[0]._source;
@@ -188,8 +185,6 @@ export async function queryMonitorStatus(
             if (!monitorsWithoutData.get(monitorQueryId)?.length) {
               monitorsWithoutData.delete(monitorQueryId);
             }
-          } else {
-            pending += 1;
           }
         });
       });
@@ -212,7 +207,7 @@ export async function queryMonitorStatus(
   return {
     up,
     down,
-    pending,
+    pending: Object.values(pendingConfigs).length,
     upConfigs,
     downConfigs,
     pendingConfigs,

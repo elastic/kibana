@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import { ROLES } from '../../test';
-import { login } from '../../tasks/login';
+import { ROLE, login } from '../../tasks/login';
+import { NAV_SEARCH_INPUT_OSQUERY_RESULTS } from '../../tasks/navigation';
+import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 
 describe('None', () => {
   beforeEach(() => {
-    login(ROLES.none);
+    login(ROLE.none);
 
     cy.visit('/app/home');
   });
 
   it('should not see osquery in global search', () => {
     cy.getBySel('nav-search-input').type('Osquery');
-    cy.get('[title="Osquery • Management"]').should('not.exist');
-    cy.get('[title="Osquery Logs • Integration"]').should('not.exist');
-    cy.get('[title="Osquery Manager • Integration"]').should('not.exist');
+    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGEMENT}"]`).should('not.exist');
+    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.LOGS}"]`).should('not.exist');
+    cy.get(`[url="${NAV_SEARCH_INPUT_OSQUERY_RESULTS.MANAGER}"]`).should('not.exist');
   });
 
-  it('should get 403 forbidded response when trying to GET osquery', () => {
+  it('should get 403 forbidden response when trying to GET osquery', () => {
     cy.request({
       url: '/app/osquery/live_queries',
       failOnStatusCode: false,
@@ -43,15 +44,33 @@ describe('None', () => {
     });
   });
 
-  it('should not see osquery in alerts', () => {
-    cy.visit('/app/security/alerts');
-    cy.getBySel('expand-event').first().click({ force: true });
-    cy.getBySel('take-action-dropdown-btn').click();
-    cy.getBySel('osquery-action-item').should('not.exist');
+  describe('Detection Engine', () => {
+    let ruleId: string;
 
-    cy.getBySel('osquery-actions-notification').contains('0');
-    cy.contains('Osquery Results').click();
-    cy.contains('Permission denied').should('exist');
-    cy.contains('Error while fetching live queries').should('exist');
+    before(() => {
+      login(ROLE.soc_manager);
+      loadRule(true).then((data) => {
+        ruleId = data.id;
+      });
+      cy.visit(`/app/security/alerts`);
+      cy.getBySel('expand-event').should('exist');
+      login(ROLE.none);
+    });
+
+    after(() => {
+      cleanupRule(ruleId);
+    });
+
+    it('should not see osquery in alerts', () => {
+      cy.visit(`/app/security/rules/id/${ruleId}/alerts`);
+      cy.getBySel('expand-event').first().click();
+      cy.getBySel('take-action-dropdown-btn').click();
+      cy.getBySel('osquery-action-item').should('not.exist');
+
+      cy.getBySel('osquery-actions-notification').contains('0');
+      cy.contains('Osquery Results').click();
+      cy.contains('Permission denied').should('exist');
+      cy.contains('Error while fetching live queries').should('exist');
+    });
   });
 });

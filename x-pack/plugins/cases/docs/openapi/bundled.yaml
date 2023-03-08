@@ -124,7 +124,7 @@ paths:
   /s/{spaceId}/api/cases/_find:
     get:
       summary: Retrieves a paginated subset of cases.
-      operationId: getCases
+      operationId: findCases
       description: |
         You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
       tags:
@@ -783,7 +783,7 @@ paths:
   /s/{spaceId}/api/cases/configure/connectors/_find:
     get:
       summary: Retrieves information about connectors.
-      operationId: getCaseConnectors
+      operationId: findCaseConnectors
       description: |
         In particular, only the connectors that are supported for use in cases are returned. You must have `read` privileges for the **Actions and Connectors** feature in the **Management** section of the Kibana feature privileges.
       tags:
@@ -889,7 +889,7 @@ paths:
       summary: Returns the number of cases that are open, closed, and in progress.
       operationId: getCaseStatus
       description: |
-        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
+        Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; use the find cases API instead. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
       deprecated: true
       tags:
         - cases
@@ -977,7 +977,7 @@ paths:
         - $ref: '#/components/parameters/space_id'
         - in: query
           name: includeComments
-          description: Determines whether case comments are returned.
+          description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
           deprecated: true
           schema:
             type: boolean
@@ -1139,7 +1139,7 @@ paths:
       summary: Retrieves all the comments from a case.
       operationId: getAllCaseComments
       description: |
-        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
+        Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; instead, use the get case comment API, which requires a comment identifier in the path. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
       deprecated: true
       tags:
         - cases
@@ -1263,7 +1263,7 @@ paths:
     get:
       summary: Returns all user activity for a case.
       description: |
-        You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
+        Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; use the find user actions API instead. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
       deprecated: true
       operationId: getCaseActivity
       tags:

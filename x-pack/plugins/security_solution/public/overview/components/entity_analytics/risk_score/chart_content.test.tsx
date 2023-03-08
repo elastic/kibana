@@ -7,10 +7,12 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_strategy';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
 import { TestProviders } from '../../../../common/mock';
+import { generateSeverityFilter } from '../../../../explore/hosts/store/helpers';
 import { ChartContent } from './chart_content';
 import { mockSeverityCount } from './__mocks__';
 
@@ -22,6 +24,14 @@ jest.mock('../../../../common/hooks/use_space_id', () => ({
   useSpaceId: jest.fn(),
 }));
 describe('ChartContent', () => {
+  const props = {
+    dataExists: true,
+    kpiQueryId: 'mockQueryId',
+    riskEntity: RiskScoreEntity.host,
+    severityCount: undefined,
+    timerange: { from: '2022-04-05T12:00:00.000Z', to: '2022-04-08T12:00:00.000Z' },
+    selectedSeverity: [RiskSeverity.unknown],
+  };
   beforeEach(() => {
     jest.clearAllMocks();
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
@@ -30,15 +40,7 @@ describe('ChartContent', () => {
   it('renders VisualizationEmbeddable when isChartEmbeddablesEnabled = true and dataExists = true', () => {
     (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
 
-    const { getByTestId } = render(
-      <ChartContent
-        dataExists={true}
-        kpiQueryId="mockQueryId"
-        riskEntity={RiskScoreEntity.host}
-        severityCount={undefined}
-        timerange={{ from: '2022-04-05T12:00:00.000Z', to: '2022-04-08T12:00:00.000Z' }}
-      />
-    );
+    const { getByTestId } = render(<ChartContent {...props} />);
 
     expect(getByTestId('visualization-embeddable')).toBeInTheDocument();
   });
@@ -48,13 +50,7 @@ describe('ChartContent', () => {
 
     const { queryByTestId } = render(
       <TestProviders>
-        <ChartContent
-          dataExists={false}
-          kpiQueryId="mockQueryId"
-          riskEntity={RiskScoreEntity.host}
-          severityCount={undefined}
-          timerange={{ from: '2022-04-05T12:00:00.000Z', to: '2022-04-08T12:00:00.000Z' }}
-        />
+        <ChartContent {...props} dataExists={false} />
       </TestProviders>
     );
 
@@ -66,29 +62,30 @@ describe('ChartContent', () => {
     (useSpaceId as jest.Mock).mockReturnValue(undefined);
     const { queryByTestId } = render(
       <TestProviders>
-        <ChartContent
-          dataExists={false}
-          kpiQueryId="mockQueryId"
-          riskEntity={RiskScoreEntity.host}
-          severityCount={undefined}
-          timerange={{ from: '2022-04-05T12:00:00.000Z', to: '2022-04-08T12:00:00.000Z' }}
-        />
+        <ChartContent {...props} />
       </TestProviders>
     );
 
     expect(queryByTestId('visualization-embeddable')).not.toBeInTheDocument();
   });
 
+  it('should render filters if available', () => {
+    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
+    render(
+      <TestProviders>
+        <ChartContent {...props} />
+      </TestProviders>
+    );
+
+    expect(
+      (VisualizationEmbeddable as unknown as jest.Mock).mock.calls[0][0].extraOptions.filters
+    ).toEqual(generateSeverityFilter(props.selectedSeverity, props.riskEntity));
+  });
+
   it('renders RiskScoreDonutChart when isChartEmbeddablesEnabled = false', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <ChartContent
-          dataExists={true}
-          kpiQueryId="mockQueryId"
-          riskEntity={RiskScoreEntity.host}
-          severityCount={mockSeverityCount}
-          timerange={{ from: '2022-04-05T12:00:00.000Z', to: '2022-04-08T12:00:00.000Z' }}
-        />
+        <ChartContent {...props} severityCount={mockSeverityCount} />
       </TestProviders>
     );
 

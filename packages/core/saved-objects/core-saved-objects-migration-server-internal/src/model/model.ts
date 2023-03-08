@@ -424,7 +424,6 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'WAIT_FOR_YELLOW_SOURCE') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      // check the existing mappings to see if we can avoid reindexing
       if (
         // source exists
         Boolean(stateP.sourceIndexMappings._meta?.migrationMappingPropertyHashes) &&
@@ -434,9 +433,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           stateP.sourceIndexMappings,
           /* expected */
           stateP.targetIndexMappings
-        ) &&
-        Math.random() < 10
+        )
       ) {
+        // the existing mappings match, we can avoid reindexing
         return {
           ...stateP,
           controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
@@ -446,7 +445,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       } else {
         return {
           ...stateP,
-          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+          controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
         };
       }
     } else if (Either.isLeft(res)) {
@@ -461,6 +460,28 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
         return throwBadResponse(stateP, left);
+      }
+    } else {
+      return throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'UPDATE_SOURCE_MAPPINGS_PROPERTIES') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+        targetIndex: stateP.sourceIndex.value!, // We preserve the same index, source == target (E.g: ".xx8.7.0_001")
+        versionIndexReadyActions: Option.none,
+      };
+    } else if (Either.isLeft(res)) {
+      const left = res.left;
+      if (isTypeof(left, 'incompatible_mapping_exception')) {
+        return {
+          ...stateP,
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+        };
+      } else {
+        return throwBadResponse(stateP, left as never);
       }
     } else {
       return throwBadResponse(stateP, res);
@@ -571,7 +592,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (Either.isRight(res)) {
       return {
         ...stateP,
-        controlState: stateP.mustRefresh ? 'REFRESH_TARGET' : 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+        controlState: stateP.mustRefresh ? 'REFRESH_SOURCE' : 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
       };
     } else if (Either.isLeft(res)) {
       // Note: if multiple newer Kibana versions are competing with each other to perform a migration,
@@ -583,12 +604,22 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         return {
           ...stateP,
           controlState: stateP.mustRefresh
-            ? 'REFRESH_TARGET'
+            ? 'REFRESH_SOURCE'
             : 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
         };
       } else {
         throwBadResponse(stateP, res.left as never);
       }
+    } else {
+      throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'REFRESH_SOURCE') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return {
+        ...stateP,
+        controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+      };
     } else {
       throwBadResponse(stateP, res);
     }
@@ -949,7 +980,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         // index_not_found_exception means another instance already completed
         // the MARK_VERSION_INDEX_READY step and removed the temp index
         // We still perform the REFRESH_TARGET, OUTDATED_DOCUMENTS_* and
-        // UPDATE_TARGET_MAPPINGS steps since we might have plugins enabled
+        // UPDATE_TARGET_MAPPINGS_PROPERTIES steps since we might have plugins enabled
         // which the other instances don't.
         return {
           ...stateP,
@@ -1204,7 +1235,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       if (!res.right.match) {
         return {
           ...stateP,
-          controlState: 'UPDATE_TARGET_MAPPINGS',
+          controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
         };
       }
 
@@ -1216,18 +1247,18 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     } else {
       throwBadResponse(stateP, res as never);
     }
-  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS') {
+  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_PROPERTIES') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {
         ...stateP,
-        controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
+        controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK',
         updateTargetMappingsTaskId: res.right.taskId,
       };
     } else {
       throwBadResponse(stateP, res as never);
     }
-  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK') {
+  } else if (stateP.controlState === 'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
       return {

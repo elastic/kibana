@@ -21,20 +21,34 @@ import { MAX_NUMBER_OF_SIGNAL_MATCHES } from './enrich_signal_threat_matches';
 
 export type SignalsQueryMap = Map<string, ThreatMatchNamedQuery[]>;
 
-interface GetSignalsMatchesFromThreatIndexOptions {
+interface GetSignalsQueryMapFromThreatIndexOptionsTerms {
   threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'>;
   eventsCount: number;
-  signalValueMap?: SignalValuesMap;
+  signalValueMap: SignalValuesMap;
+  termsQueryAllowed: true;
+}
+
+interface GetSignalsQueryMapFromThreatIndexOptionsMatch {
+  threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'>;
+  eventsCount: number;
+  termsQueryAllowed: false;
 }
 
 /**
  * fetches threats and creates signals map from results, that matches signal is with list of threat queries
  */
-export const getSignalsQueryMapFromThreatIndex = async ({
-  threatSearchParams,
-  eventsCount,
-  signalValueMap,
-}: GetSignalsMatchesFromThreatIndexOptions): Promise<SignalsQueryMap> => {
+/**
+ * fetches threats and creates signals map from results, that matches signal is with list of threat queries
+ * @param options.termsQueryAllowed - if terms query allowed to be executed, then signalValueMap should be provided
+ * @param options.signalValueMap - map of signal values from terms query results
+ */
+export async function getSignalsQueryMapFromThreatIndex(
+  options:
+    | GetSignalsQueryMapFromThreatIndexOptionsTerms
+    | GetSignalsQueryMapFromThreatIndexOptionsMatch
+): Promise<SignalsQueryMap> {
+  const { threatSearchParams, eventsCount, termsQueryAllowed } = options;
+
   let threatList: Awaited<ReturnType<typeof getThreatList>> | undefined;
   const signalsQueryMap = new Map<string, ThreatMatchNamedQuery[]>();
   // number of threat matches per signal is limited by MAX_NUMBER_OF_SIGNAL_MATCHES. Once it hits this number, threats stop to be processed for a signal
@@ -50,9 +64,6 @@ export const getSignalsQueryMapFromThreatIndex = async ({
     decodedQuery: ThreatMatchNamedQuery | ThreatTermNamedQuery;
   }) => {
     const signalMatch = signalsQueryMap.get(signalId);
-    if (!signalMatch) {
-      signalsQueryMap.set(signalId, []);
-    }
 
     const threatQuery = {
       id: threatHit._id,
@@ -74,15 +85,9 @@ export const getSignalsQueryMapFromThreatIndex = async ({
     }
   };
 
-  while (
-    maxThreatsReachedMap.size < eventsCount &&
-    (threatList ? threatList?.hits.hits.length > 0 : true)
-  ) {
-    threatList = await getThreatList({
-      ...threatSearchParams,
-      searchAfter: threatList?.hits.hits[threatList.hits.hits.length - 1].sort || undefined,
-    });
+  threatList = await getThreatList({ ...threatSearchParams, searchAfter: undefined });
 
+  while (maxThreatsReachedMap.size < eventsCount && threatList?.hits.hits.length > 0) {
     threatList.hits.hits.forEach((threatHit) => {
       const matchedQueries = threatHit?.matched_queries || [];
 
@@ -90,13 +95,13 @@ export const getSignalsQueryMapFromThreatIndex = async ({
         const decodedQuery = decodeThreatMatchNamedQuery(matchedQuery);
         const signalId = decodedQuery.id;
 
-        if (decodedQuery.queryType === ThreatMatchQueryType.term) {
+        if (decodedQuery.queryType === ThreatMatchQueryType.term && termsQueryAllowed) {
           const threatValue = get(threatHit?._source, decodedQuery.value);
           const values = Array.isArray(threatValue) ? threatValue : [threatValue];
 
           values.forEach((value) => {
-            if (value && signalValueMap) {
-              const ids = signalValueMap[decodedQuery.field][value?.toString()];
+            if (value && options.signalValueMap) {
+              const ids = options.signalValueMap[decodedQuery.field][value?.toString()];
 
               ids?.forEach((id: string) => {
                 addSignalValueToMap({
@@ -120,7 +125,12 @@ export const getSignalsQueryMapFromThreatIndex = async ({
         }
       });
     });
+
+    threatList = await getThreatList({
+      ...threatSearchParams,
+      searchAfter: threatList.hits.hits[threatList.hits.hits.length - 1].sort,
+    });
   }
 
   return signalsQueryMap;
-};
+}

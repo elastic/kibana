@@ -28,6 +28,53 @@ export const addIntegration = (agentPolicy = DEFAULT_POLICY) => {
   closeModalIfVisible();
 };
 
+export const addCustomIntegration = (integrationName: string, policyName: string) => {
+  cy.getBySel(ADD_POLICY_BTN).click();
+  cy.getBySel(DATA_COLLECTION_SETUP_STEP).find('.euiLoadingSpinner').should('not.exist');
+  cy.getBySel('packagePolicyNameInput').type(`{selectall}{backspace}${integrationName}`);
+  cy.getBySel('createAgentPolicyNameField').type(`{selectall}{backspace}${policyName}`);
+  cy.getBySel(CREATE_PACKAGE_POLICY_SAVE_BTN).click();
+  // No agent is enrolled with this policy, close "Add agent" modal
+  cy.getBySel('confirmModalCancelButton').click();
+};
+
+export const policyContainsIntegration = (integrationName: string, policyName: string) => {
+  cy.visit('app/fleet/policies');
+  cy.contains(policyName).click();
+  integrationExistsWithinPolicyDetails(integrationName);
+};
+
+export const integrationExistsWithinPolicyDetails = (integrationName: string) => {
+  cy.contains('Actions').click();
+  cy.contains('View policy').click();
+  cy.contains(`name: ${integrationName}`);
+};
+
+export const interceptAgentPolicyId = (cb: (policyId: string) => void) => {
+  cy.intercept('POST', '**/api/fleet/agent_policies**', (req) => {
+    req.continue((res) => {
+      cb(res.body.item.id);
+
+      return res.send(res.body);
+    });
+  });
+};
+
+export const interceptPackId = (cb: (packId: string) => void) => {
+  cy.intercept('POST', '**/api/osquery/packs', (req) => {
+    req.continue((res) => {
+      if (res.body.data) {
+        cb(res.body.data.id);
+      }
+
+      return res.send(res.body);
+    });
+  });
+};
+
+export const generateRandomStringName = (length: number) =>
+  Array.from({ length }, () => Math.random().toString(36).substring(2));
+
 export function closeModalIfVisible() {
   cy.get('body').then(($body) => {
     if ($body.find(CONFIRM_MODAL_BTN_SEL).length) {
