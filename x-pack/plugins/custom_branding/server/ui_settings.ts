@@ -80,7 +80,7 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
     },
     [UI_SETTINGS_CUSTOMIZED_LOGO]: {
       name: i18n.translate('xpack.customBranding.customizedLogoLabel', {
-        defaultMessage: 'Company name',
+        defaultMessage: 'Organization name',
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.customizedLogoDescription', {
@@ -116,7 +116,7 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.faviconSVGDescription', {
-        defaultMessage: `A link to an icon that will appear on browser tabs. Recommended size is 16 x 16 pixels. {subscriptionLink}`,
+        defaultMessage: `The URL of an image that will appear on browser tabs.. Recommended size is 16 x 16 pixels. {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,
@@ -132,7 +132,7 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.faviconPNGDescription', {
-        defaultMessage: `An icon for use in browsers that don’t support svg. {subscriptionLink}`,
+        defaultMessage: `The URL of an image for use in browsers that don’t support SVG. {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,
