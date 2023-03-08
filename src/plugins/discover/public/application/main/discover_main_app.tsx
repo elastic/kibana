@@ -60,7 +60,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
     setBreadcrumbsTitle(savedSearch.title, chrome);
     return () => {
-      // data.search.session.clear();
+      data.search.session.clear();
     };
   }, [savedSearch.id, savedSearch.title, chrome, data]);
 
