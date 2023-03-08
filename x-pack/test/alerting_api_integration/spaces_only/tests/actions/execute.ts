@@ -8,6 +8,7 @@ import type { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/lib/action_execution_source';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -95,6 +96,7 @@ export default function ({ getService }: FtrProviderContext) {
         outcome: 'success',
         message: `action executed: test.index-record:${createdAction.id}: My action`,
         startMessage: `action started: test.index-record:${createdAction.id}: My action`,
+        source: ActionExecutionSourceType.HTTP_REQUEST,
       });
     });
 
@@ -138,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         outcome: 'failure',
         message: `action execution failure: test.failing:${createdAction.id}: failing action`,
         errorMessage: `an error occurred while running the action: expected failure for .kibana-alerting-test-data actions-failure-1:space1; retry: true`,
+        source: ActionExecutionSourceType.HTTP_REQUEST,
       });
     });
 
@@ -336,11 +339,20 @@ export default function ({ getService }: FtrProviderContext) {
     message: string;
     errorMessage?: string;
     startMessage?: string;
+    source?: string;
   }
 
   async function validateEventLog(params: ValidateEventLogParams): Promise<void> {
-    const { spaceId, actionId, actionTypeId, outcome, message, startMessage, errorMessage } =
-      params;
+    const {
+      spaceId,
+      actionId,
+      actionTypeId,
+      outcome,
+      message,
+      startMessage,
+      errorMessage,
+      source,
+    } = params;
 
     const events: IValidatedEvent[] = await retry.try(async () => {
       return await getEventLog({
@@ -396,6 +408,10 @@ export default function ({ getService }: FtrProviderContext) {
     }
 
     expect(executeEvent?.kibana?.task).to.eql(undefined);
+
+    if (source) {
+      expect(executeEvent?.kibana?.action?.execution?.source).to.eql(source.toLowerCase());
+    }
 
     if (errorMessage) {
       expect(executeEvent?.error?.message).to.eql(errorMessage);
