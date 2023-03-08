@@ -11,6 +11,7 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
+import { migrateRuleHook } from '../lib';
 
 export async function deleteRule(context: RulesClientContext, { id }: { id: string }) {
   return await retryIfConflicts(
@@ -24,6 +25,8 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
   let taskIdToRemove: string | undefined | null;
   let apiKeyToInvalidate: string | null = null;
   let attributes: RawRule;
+
+  await migrateRuleHook(context, { ruleId: id });
 
   try {
     const decryptedAlert =
