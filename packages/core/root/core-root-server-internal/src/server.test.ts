@@ -272,7 +272,11 @@ test('migrator-only node throws exception during start', async () => {
   await server.setup();
 
   let migrationException: undefined | CriticalError;
+  expect(mockSavedObjectsService.start).not.toHaveBeenCalled();
   await server.start().catch((e) => (migrationException = e));
+
+  expect(mockSavedObjectsService.start).toHaveBeenCalledTimes(1);
+  expect(mockSavedObjectsService.start).toHaveNthReturnedWith(1, expect.anything());
 
   expect(migrationException).not.toBeUndefined();
   expect(migrationException).toBeInstanceOf(CriticalError);
