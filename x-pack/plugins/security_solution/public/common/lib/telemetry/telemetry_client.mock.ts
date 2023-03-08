@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-export const createTelemetryClientMock = (): jest.Mocked<ITelemetryClient> => ({
-  reportHostEntryClicked: jest.fn(),
-  reportHostsViewQuerySubmitted: jest.fn(),
+import type { TelemetryClientStart } from './types';
+
+export const createTelemetryClientMock = (): jest.Mocked<TelemetryClientStart> => ({
+  reportAlertsGroupingChanged: jest.fn(),
+  reportAlertsGroupingToggled: jest.fn(),
+  reportAlertsGroupingTakeAction: jest.fn(),
 });
