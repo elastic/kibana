@@ -54,7 +54,8 @@
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
     "@kbn/cases-plugin",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-router",
+    "@kbn/core-http-browser-internal"
   ],
   "exclude": ["target/**/*"]
 }
