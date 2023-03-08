@@ -19,22 +19,18 @@ import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permi
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { useToasts } from '../../hooks/use_toast';
-import { LoadingObservability } from '../overview';
 import { ObservabilityAlertSearchBar } from '../../components/shared/alert_search_bar';
+import { LoadingObservability } from '../../components/loading_observability';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
 import {
   alertSearchBarStateContainer,
   Provider,
   useAlertSearchBarStateContainer,
 } from '../../components/shared/alert_search_bar/containers';
-import { calculateTimeRangeBucketSize } from '../overview/containers/overview_page/helpers/calculate_bucket_size';
+import { calculateTimeRangeBucketSize } from '../overview/helpers/calculate_bucket_size';
 import { getNoDataConfig } from '../../utils/no_data_config';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 import { observabilityFeatureId } from '../../../common';
-import {
-  DEFAULT_DATE_FORMAT,
-  DEFAULT_INTERVAL,
-} from '../overview/containers/overview_page/constants';
 import { observabilityAlertFeatureIds } from '../../config';
 import type { ObservabilityAppServices } from '../../application/types';
 
@@ -42,6 +38,9 @@ const ALERTS_SEARCH_BAR_ID = 'alerts-search-bar-o11y';
 const ALERTS_PER_PAGE = 50;
 const ALERTS_TABLE_ID = 'xpack.observability.alerts.alert.table';
 const URL_STORAGE_KEY = '_a';
+
+const DEFAULT_INTERVAL = '60s';
+const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 
 function InternalAlertsPage() {
   const {
