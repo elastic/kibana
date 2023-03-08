@@ -16,11 +16,11 @@ import { OverviewPage } from '../pages/overview';
 import { jsonRt } from './json_rt';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 import { RulesPage } from '../pages/rules/rules';
-import { RuleDetailsPage } from '../pages/rule_details';
+import { RuleDetailsPage } from '../pages/rule_details/rule_details';
 import { AlertingPages } from '../config';
 import { AlertDetails } from '../pages/alert_details';
 import { DatePickerContextProvider } from '../context/date_picker_context';
-import { SlosPage } from '../pages/slos/slos';
+import { SlosPage } from '../pages/slos';
 import { SloDetailsPage } from '../pages/slo_details';
 import { SloEditPage } from '../pages/slo_edit';
 
