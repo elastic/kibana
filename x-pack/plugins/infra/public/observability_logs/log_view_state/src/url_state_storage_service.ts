@@ -21,10 +21,19 @@ const defaultLegacySourceIdKey = 'sourceId';
 interface LogViewUrlStateDependencies {
   logViewKey?: string;
   sourceIdKey?: string;
-  savedQueryIdKey?: string;
   toastsService: IToasts;
   urlStateStorage: IKbnUrlStateStorage;
 }
+
+export const updateContextInUrl =
+  ({ urlStateStorage, logViewKey = defaultLogViewKey }: LogViewUrlStateDependencies) =>
+  (context: LogViewContext, _event: LogViewEvent) => {
+    if (!('logViewReference' in context)) {
+      throw new Error('Missing keys from context needed to sync to the URL');
+    }
+
+    urlStateStorage.set(logViewKey, logViewStateInUrlRT.encode(context.logViewReference));
+  };
 
 export const initializeFromUrl =
   ({
