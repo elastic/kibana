@@ -69,7 +69,6 @@ function InternalAlertsPage() {
   } = useKibana<ObservabilityAppServices>().services;
   const alertSearchBarStateProps = useAlertSearchBarStateContainer(URL_STORAGE_KEY);
   const [dataView, setDataView] = useState<DataView | null>(null);
-  const [groupSelector, setGroupSelector] = useState<React.ReactElement | null>(null);
   const chartThemes = {
     theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
@@ -166,9 +165,8 @@ function InternalAlertsPage() {
   const userCasesPermissions = useGetUserCasesPermissions();
 
   const renderAlertsTable = useCallback(
-    (groupingFilters: Filter[]) => {
-      console.log('esQuery', esQuery);
-      return esQuery ? (
+    (groupingFilters: Filter[]) =>
+      esQuery ? (
         <AlertsStateTable
           alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
           configurationId={AlertConsumers.OBSERVABILITY}
@@ -191,8 +189,7 @@ function InternalAlertsPage() {
         />
       ) : (
         <></>
-      );
-    },
+      ),
     [AlertsStateTable, alertsTableConfigurationRegistry, esQuery]
   );
 
@@ -245,13 +242,12 @@ function InternalAlertsPage() {
           >
             {esQuery && (
               <>
-                <>{groupSelector}</>
                 <AlertsGrouping
                   dataView={dataView}
                   esQuery={esQuery}
+                  featureIds={observabilityAlertFeatureIds}
                   renderChildComponent={renderAlertsTable}
                   from={alertSearchBarStateProps.rangeFrom}
-                  setGroupSelector={setGroupSelector}
                   tableId={ALERTS_TABLE_ID}
                   to={alertSearchBarStateProps.rangeTo}
                 />

@@ -182,6 +182,14 @@ const bucketAggsTempsSchemas: t.Type<BucketAggsSchemas> = t.exact(
         ]),
       })
     ),
+    // this is a pipeline agg
+    bucket_sort: t.exact(
+      t.partial({
+        sort: t.union([t.array(t.object), t.undefined]),
+        from: t.union([t.number, t.undefined]),
+        size: t.union([t.number, t.undefined]),
+      })
+    ),
   })
 );
 
@@ -277,6 +285,11 @@ export const metricsAggsSchemas = t.exact(
           field: t.string,
           missing: t.number,
         }),
+      })
+    ),
+    value_count: t.exact(
+      t.partial({
+        field: t.string,
       })
     ),
   })

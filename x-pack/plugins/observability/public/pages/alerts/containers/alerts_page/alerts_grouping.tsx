@@ -9,41 +9,39 @@ import React, { useEffect, useMemo } from 'react';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { isNoneGroup, useGrouping, RawBucket } from '@kbn/securitysolution-grouping';
+import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
+import type {
+  GroupingFieldTotalAggregation,
+  GroupingAggregation,
+  RawBucket,
+} from '@kbn/securitysolution-grouping';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { useQueryAlerts } from '../../../../hooks/use_query_alerts';
 import { AlertsGroupingAggregation } from './grouping/types';
 import {
   getAlertsGroupingQuery,
   getDefaultGroupingOptions,
   getSelectedGroupBadgeMetrics,
-  getSelectedGroupButtonContent,
   getSelectedGroupCustomMetrics,
+  getSelectedGroupButtonContent,
 } from './grouping';
 
 interface OwnProps {
   dataView: DataView | null;
   from: string;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
-  setGroupSelector: (selector: React.ReactElement) => void;
   esQuery: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   tableId: string;
   to: string;
+  featureIds: AlertConsumers[];
 }
 export const AlertsGroupingComponent: React.FC<OwnProps> = ({
-  // defaultFilters = [],
   dataView,
   esQuery,
+  featureIds,
   from,
-  setGroupSelector,
-  // globalFilters,
-  // globalQuery,
-  // hasIndexMaintenance,
-  // hasIndexWrite,
-  // loading,
   tableId,
   to,
-  // runtimeMappings,
-  // signalIndexName,
-  // currentAlertStatusFilterValue,
   renderChildComponent,
 }) => {
   const { groupSelector, getGrouping, selectedGroup, pagination } = useGrouping({
@@ -51,10 +49,6 @@ export const AlertsGroupingComponent: React.FC<OwnProps> = ({
     groupingId: tableId,
     fields: dataView != null ? dataView.fields : [],
   });
-
-  useEffect(() => {
-    setGroupSelector(groupSelector);
-  }, [setGroupSelector, groupSelector]);
 
   const resetPagination = pagination.reset;
 
@@ -83,24 +77,58 @@ export const AlertsGroupingComponent: React.FC<OwnProps> = ({
     [additionalFilters, selectedGroup, from, to, pagination.pageSize, pagination.pageIndex]
   );
 
+  const {
+    data: alertsGroupsData,
+    loading: isLoadingGroups,
+    // refetch,
+    // request,
+    // response,
+    setQuery: setAlertsQuery,
+  } = useQueryAlerts<
+    {},
+    GroupingAggregation<AlertsGroupingAggregation> & GroupingFieldTotalAggregation
+  >({
+    featureIds,
+    query: queryGroups,
+    indexName: dataView?.getName(),
+    skip: isNoneGroup(selectedGroup),
+  });
+
+  useEffect(() => {
+    if (!isNoneGroup(selectedGroup)) {
+      setAlertsQuery(queryGroups);
+    }
+  }, [queryGroups, selectedGroup, setAlertsQuery]);
+
   return useMemo(
     () =>
-      isNoneGroup(selectedGroup)
-        ? renderChildComponent([])
-        : getGrouping({
-            badgeMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
-              getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket),
-            customMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
-              getSelectedGroupCustomMetrics(selectedGroup, fieldBucket),
-            data: {}, // alertsGroupsData?.aggregations,
-            groupPanelRenderer: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
-              getSelectedGroupButtonContent(selectedGroup, fieldBucket),
-            inspectButton: <></>,
-            isLoading: false,
-            renderChildComponent,
-            takeActionItems: () => [],
-          }),
-    [getGrouping, renderChildComponent, selectedGroup]
+      isNoneGroup(selectedGroup) ? (
+        <>
+          <>{groupSelector}</>
+          <>{renderChildComponent([])}</>
+        </>
+      ) : (
+        getGrouping({
+          badgeMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
+            getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket),
+          customMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
+            getSelectedGroupCustomMetrics(selectedGroup, fieldBucket),
+          data: alertsGroupsData?.aggregations,
+          groupPanelRenderer: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
+            getSelectedGroupButtonContent(selectedGroup, fieldBucket),
+          inspectButton: <></>,
+          isLoading: isLoadingGroups,
+          renderChildComponent,
+          takeActionItems: () => [],
+        })
+      ),
+    [
+      alertsGroupsData?.aggregations,
+      getGrouping,
+      groupSelector,
+      renderChildComponent,
+      selectedGroup,
+    ]
   );
 };
 

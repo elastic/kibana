@@ -282,7 +282,6 @@ export class AlertsClient {
       }
 
       const config = getEsQueryConfig();
-
       let queryBody: estypes.SearchRequest['body'] = {
         fields: [ALERT_RULE_TYPE_ID, ALERT_RULE_CONSUMER, ALERT_WORKFLOW_STATUS, SPACE_IDS],
         query: await this.buildEsQueryWithAuthz(query, id, alertSpaceId, operation, config),
@@ -303,6 +302,7 @@ export class AlertsClient {
       if (lastSortIds.length > 0) {
         queryBody = {
           ...queryBody,
+          _source: false,
           search_after: lastSortIds,
         };
       }
