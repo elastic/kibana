@@ -35,6 +35,7 @@ import { getCasesMockMap } from './cases/index.mock';
 import { createAppMockRenderer } from '../test_utils';
 import { createCasesServiceMock } from './index.mock';
 import { useCaseViewNavigation } from './cases/use_case_view_navigation';
+import { act } from 'react-dom/test-utils';
 
 const mockCaseService = createCasesServiceMock();
 
@@ -194,7 +195,44 @@ const mockedUseCellActions: UseCellActions = () => {
   };
 };
 
-for (let index = 0; index < 25; index++) {
+const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
+beforeAll(() => {
+  // The JSDOM implementation is too slow
+  // Especially for dropdowns that try to position themselves
+  // perf issue - https://github.com/jsdom/jsdom/issues/3234
+  Object.defineProperty(window, 'getComputedStyle', {
+    value: (el: HTMLElement) => {
+      /**
+       * This is based on the jsdom implementation of getComputedStyle
+       * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+       *
+       * It is missing global style parsing and will only return styles applied directly to an element.
+       * Will not return styles that are global or from emotion
+       */
+      const declaration = new CSSStyleDeclaration();
+      const { style } = el;
+
+      Array.prototype.forEach.call(style, (property: string) => {
+        declaration.setProperty(
+          property,
+          style.getPropertyValue(property),
+          style.getPropertyPriority(property)
+        );
+      });
+
+      return declaration;
+    },
+    configurable: true,
+    writable: true,
+  });
+});
+
+afterAll(() => {
+  Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+});
+
+for (let index = 0; index < 50; index++) {
   describe('AlertsTable', () => {
     const fetchAlertsData = {
       activePage: 0,
@@ -556,7 +594,9 @@ for (let index = 0; index < 25; index++) {
             fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
 
             // the callback given to our clients to run when they want to update the loading state
-            mockedFn.mock.calls[0][0].setIsActionLoading(true);
+            act(() => {
+              mockedFn.mock.calls[0][0].setIsActionLoading(true);
+            });
 
             expect(await screen.findAllByTestId('row-loader')).toHaveLength(1);
             const selectedOptions = await screen.findAllByTestId('dataGridRowCell');
@@ -587,7 +627,9 @@ for (let index = 0; index < 25; index++) {
             fireEvent.click((await screen.findAllByTestId('testActionColumn'))[0]);
 
             // the callback given to our clients to run when they want to update the loading state
-            mockedFn.mock.calls[0][0].setIsActionLoading(false);
+            act(() => {
+              mockedFn.mock.calls[0][0].setIsActionLoading(false);
+            });
 
             expect(screen.queryByTestId('row-loader')).not.toBeInTheDocument();
           });
