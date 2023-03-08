@@ -15,7 +15,7 @@ import {
   UnifiedHistogramState,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
-import { AggregateQuery, Query } from '@kbn/es-query';
+import { AggregateQuery, Query, isOfAggregateQueryType } from '@kbn/es-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { distinctUntilChanged, map, Observable } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -219,10 +219,19 @@ export const useDiscoverHistogram = ({
 
   const columns = useAppStateSelector((state) => state.columns);
   const documentState = useDataState(savedSearchData$.documents$);
+
   useEffect(() => {
+    const currentQueryIsTextBased = query && isOfAggregateQueryType(query);
+    const initialQueryIsTextBased =
+      prev.current.query && isOfAggregateQueryType(prev.current.query);
     // Update the columns only when the query changes
     if (!isEqual(columns, prev.current.columns) && !isEqual(query, prev.current.query)) {
-      unifiedHistogram?.setColumns(columns);
+      // transitioning from dataview mode to text based mode should set the columns to []
+      if (currentQueryIsTextBased && !initialQueryIsTextBased) {
+        unifiedHistogram?.setColumns([]);
+      } else {
+        unifiedHistogram?.setColumns(columns);
+      }
       prev.current.query = query;
       prev.current.columns = columns;
     }
