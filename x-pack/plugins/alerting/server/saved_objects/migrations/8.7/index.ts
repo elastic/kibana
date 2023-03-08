@@ -7,7 +7,6 @@
 
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
-import { v4 as uuidv4 } from 'uuid';
 import { extractedSavedObjectParamReferenceNamePrefix } from '../../../rules_client/common/constants';
 import {
   createEsoMigration,
@@ -36,27 +35,6 @@ function addGroupByToEsQueryRule(
   }
 
   return doc;
-}
-
-function addActionUuid(
-  doc: SavedObjectUnsanitizedDoc<RawRule>
-): SavedObjectUnsanitizedDoc<RawRule> {
-  const {
-    attributes: { actions },
-  } = doc;
-
-  return {
-    ...doc,
-    attributes: {
-      ...doc.attributes,
-      actions: actions
-        ? actions.map((action) => ({
-            ...action,
-            uuid: uuidv4(),
-          }))
-        : [],
-    },
-  };
 }
 
 function addLogViewRefToLogThresholdRule(
@@ -116,10 +94,5 @@ export const getMigrations870 = (encryptedSavedObjects: EncryptedSavedObjectsPlu
   createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(
-      addGroupByToEsQueryRule,
-      addLogViewRefToLogThresholdRule,
-      addOutcomeOrder,
-      addActionUuid
-    )
+    pipeMigrations(addGroupByToEsQueryRule, addLogViewRefToLogThresholdRule, addOutcomeOrder)
   );

@@ -34,7 +34,7 @@ import {
 import {
   generateActionHash,
   getSummaryActionsFromTaskState,
-  isSummaryActionOnInterval,
+  isActionOnInterval,
   isSummaryAction,
   isSummaryActionThrottled,
   isSummaryActionPerRuleRun,
@@ -47,7 +47,7 @@ enum Reasons {
 }
 
 export interface RunResult {
-  throttledActions: ThrottledActions;
+  throttledSummaryActions: ThrottledActions;
 }
 
 export class ExecutionHandler<
@@ -129,11 +129,11 @@ export class ExecutionHandler<
   public async run(
     alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
   ): Promise<RunResult> {
-    const executables = this.generateExecutables(alerts);
-    const throttledActions: ThrottledActions = getSummaryActionsFromTaskState({
+    const throttledSummaryActions: ThrottledActions = getSummaryActionsFromTaskState({
       actions: this.rule.actions,
       summaryActions: this.taskInstance.state?.summaryActions,
     });
+    const executables = this.generateExecutables(alerts, throttledSummaryActions);
 
     if (!!executables.length) {
       const {
@@ -232,8 +232,8 @@ export class ExecutionHandler<
             bulkActions,
           });
 
-          if (isSummaryActionOnInterval(action)) {
-            throttledActions[generateActionHash(action)] = { date: new Date() };
+          if (isActionOnInterval(action)) {
+            throttledSummaryActions[action.uuid!] = { date: new Date() };
           }
 
           logActions.push({
@@ -289,10 +289,11 @@ export class ExecutionHandler<
           });
 
           if (!this.isRecoveredAlert(actionGroup)) {
-            if (isSummaryActionOnInterval(action)) {
+            if (isActionOnInterval(action)) {
               executableAlert.updateLastScheduledActions(
                 action.group as ActionGroupIds,
-                generateActionHash(action)
+                generateActionHash(action),
+                action.uuid
               );
             } else {
               executableAlert.updateLastScheduledActions(action.group as ActionGroupIds);
@@ -314,7 +315,7 @@ export class ExecutionHandler<
         }
       }
     }
-    return { throttledActions };
+    return { throttledSummaryActions };
   }
 
   private hasAlerts(
@@ -379,7 +380,8 @@ export class ExecutionHandler<
       const throttled = action.frequency?.throttle
         ? alert.isThrottled({
             throttle: action.frequency.throttle ?? null,
-            actionHash: generateActionHash(action),
+            actionHash: generateActionHash(action), // generateActionHash must be removed once all the hash identifiers removed from the task state
+            uuid: action.uuid,
           })
         : alert.isThrottled({ throttle: rule.throttle ?? null });
 
@@ -462,7 +464,8 @@ export class ExecutionHandler<
   }
 
   private generateExecutables(
-    alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
+    alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>,
+    summaryActions: ThrottledActions
   ) {
     const executables = [];
 
@@ -472,7 +475,7 @@ export class ExecutionHandler<
           this.canFetchSummarizedAlerts(action) &&
           !isSummaryActionThrottled({
             action,
-            summaryActions: this.taskInstance.state?.summaryActions,
+            summaryActions,
             logger: this.logger,
           })
         ) {
@@ -525,7 +528,7 @@ export class ExecutionHandler<
   }) {
     let options;
 
-    if (isSummaryActionOnInterval(action)) {
+    if (isActionOnInterval(action)) {
       const throttleMills = parseDuration(action.frequency!.throttle!);
       const start = new Date(Date.now() - throttleMills);
 

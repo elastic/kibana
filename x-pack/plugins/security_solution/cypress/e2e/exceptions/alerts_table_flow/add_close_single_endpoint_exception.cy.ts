@@ -13,7 +13,7 @@ import { deleteAlertsAndRules } from '../../../tasks/common';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
 import { getEndpointRule } from '../../../objects/rule';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
-import { createCustomRuleEnabled } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import {
   waitForAlertsToPopulate,
   waitForTheRuleToBeExecuted,
@@ -45,7 +45,7 @@ describe('Validate close single endpoint exception', () => {
     esArchiverLoad('endpoint');
     login();
     deleteAlertsAndRules();
-    createCustomRuleEnabled(getEndpointRule());
+    createRule(getEndpointRule());
   });
   beforeEach(() => {
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);

@@ -20,17 +20,17 @@ import { createGroupFilter } from './accordion_panel/helpers';
 import type { BadgeMetric, CustomMetric } from './accordion_panel';
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
-import { EmptyGroupingComponent } from './empty_resuls_panel';
+import { EmptyGroupingComponent } from './empty_results_panel';
 import { groupingContainerCss, groupsUnitCountCss } from './styles';
 import { GROUPS_UNIT } from './translations';
 import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } from './types';
 
-export interface GroupingProps {
-  badgeMetricStats?: (fieldBucket: RawBucket) => BadgeMetric[];
-  customMetricStats?: (fieldBucket: RawBucket) => CustomMetric[];
-  data?: GroupingAggregation & GroupingFieldTotalAggregation;
-  groupPanelRenderer?: (fieldBucket: RawBucket) => JSX.Element | undefined;
-  groupsSelector?: JSX.Element;
+export interface GroupingProps<T> {
+  badgeMetricStats?: (fieldBucket: RawBucket<T>) => BadgeMetric[];
+  customMetricStats?: (fieldBucket: RawBucket<T>) => CustomMetric[];
+  data?: GroupingAggregation<T> & GroupingFieldTotalAggregation;
+  groupPanelRenderer?: (fieldBucket: RawBucket<T>) => JSX.Element | undefined;
+  groupSelector?: JSX.Element;
   inspectButton?: JSX.Element;
   isLoading: boolean;
   pagination: {
@@ -46,12 +46,12 @@ export interface GroupingProps {
   unit?: (n: number) => string;
 }
 
-const GroupingComponent = ({
+const GroupingComponent = <T,>({
   badgeMetricStats,
   customMetricStats,
   data,
   groupPanelRenderer,
-  groupsSelector,
+  groupSelector,
   inspectButton,
   isLoading,
   pagination,
@@ -59,9 +59,9 @@ const GroupingComponent = ({
   selectedGroup,
   takeActionItems,
   unit = defaultUnit,
-}: GroupingProps) => {
+}: GroupingProps<T>) => {
   const [trigger, setTrigger] = useState<
-    Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket }>
+    Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket<T> }>
   >({});
 
   const groupsNumber = data?.groupsNumber?.value ?? 0;
@@ -163,7 +163,7 @@ const GroupingComponent = ({
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs">
             {inspectButton && <EuiFlexItem>{inspectButton}</EuiFlexItem>}
-            <EuiFlexItem>{groupsSelector}</EuiFlexItem>
+            <EuiFlexItem>{groupSelector}</EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -196,4 +196,4 @@ const GroupingComponent = ({
   );
 };
 
-export const Grouping = React.memo(GroupingComponent);
+export const Grouping = React.memo(GroupingComponent) as typeof GroupingComponent;

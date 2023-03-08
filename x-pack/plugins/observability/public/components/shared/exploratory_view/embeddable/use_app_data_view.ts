@@ -63,7 +63,7 @@ export const useAppDataView = ({
       loadIndexPattern({ dataType: seriesDataType });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seriesDataType, loadIndexPattern, JSON.stringify(series)]);
+  }, [dataViewTitle, seriesDataType, loadIndexPattern, JSON.stringify(series)]);
 
   return { dataViews, loading };
 };
