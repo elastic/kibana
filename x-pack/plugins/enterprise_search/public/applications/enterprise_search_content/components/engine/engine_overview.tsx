@@ -9,7 +9,15 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiStat, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  useEuiTheme,
+  EuiSpacer,
+  EuiStat,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
@@ -17,6 +25,7 @@ import { EuiLinkTo } from '../../../shared/react_router_helpers';
 import { EngineViewTabs, ENGINE_TAB_PATH } from '../../routes';
 import { EnterpriseSearchEnginesPageTemplate } from '../layout/engines_page_template';
 
+import { EngineAnalytics } from './engine_analytics';
 import { EngineOverviewLogic } from './engine_overview_logic';
 import { EngineViewHeaderActions } from './engine_view_header_actions';
 
@@ -124,6 +133,12 @@ export const EngineOverview: React.FC = () => {
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiPanel>
+        <EuiSpacer />
+        <EuiFlexGroup>
+          <EuiFlexItem>
+            <EngineAnalytics />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </>
     </EnterpriseSearchEnginesPageTemplate>
   );

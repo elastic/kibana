@@ -50,5 +50,7 @@
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/core-http-browser",
+    "@kbn/embeddable-plugin",
+    "@kbn/lens-plugin",
   ]
 }

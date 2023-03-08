@@ -4,16 +4,38 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { ApplicationStart, Capabilities } from '@kbn/core/public';
-
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+// import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 import { securityMock } from '@kbn/security-plugin/public/mocks';
 
 import { mockHistory } from '../react_router/state.mock';
 
+// Mock data view and formula
+
+// const mockDataView = createStubDataView({
+//   spec: {
+//     id: '12345-*',
+//     title: 'logs-elastic_analytics.events-*',
+//     timeFieldName: '@timestamp',
+//     fields: {
+//       '@timestamp': {
+//         name: '@timestamp',
+//         type: 'date',
+//         esTypes: ['date'],
+//         searchable: true,
+//         aggregatable: true,
+//         readFromDocValues: true,
+//       },
+//     },
+//   },
+// });
+// const lensPluginMockStart = lensPluginMock.createStartContract();
+// const mockformula = async () => (await lensPluginMockStart.stateHelperApi()).formula;
 export const mockKibanaValues = {
   application: {
     getUrlForApp: jest.fn(
@@ -43,6 +65,14 @@ export const mockKibanaValues = {
   setChromeIsVisible: jest.fn(),
   setDocTitle: jest.fn(),
   renderHeaderActions: jest.fn(),
+  lens: {
+    ...lensPluginMock.createStartContract(),
+  },
+  defaultDataView: {},
+  formula: {},
+  data: {
+    ...dataPluginMock.createStartContract(),
+  },
 };
 
 jest.mock('../../shared/kibana', () => ({

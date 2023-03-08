@@ -20,6 +20,7 @@ import {
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 
@@ -58,6 +59,7 @@ export interface PluginsStart {
   guidedOnboarding: GuidedOnboardingPluginStart;
   licensing: LicensingPluginStart;
   security: SecurityPluginStart;
+  lens: LensPublicStart;
 }
 
 export class EnterpriseSearchPlugin implements Plugin {
