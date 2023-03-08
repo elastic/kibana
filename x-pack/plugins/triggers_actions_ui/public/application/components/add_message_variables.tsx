@@ -57,26 +57,24 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     [messageVariables]
   );
 
-  const shownOptions = useMemo(() => {
-    return isShowAllPressed
-      ? messageVariables?.map((variable) => ({
-          label: variable.name,
-          ...(variable.deprecated ? { disabled: true } : {}),
-          data: {
-            description: variable.description,
-          },
-          'data-test-subj': `${variable.name}-selectableOption`,
-        }))
-      : messageVariables
-          ?.filter((variable) => !variable.deprecated)
-          .map((variable) => ({
-            label: variable.name,
-            data: {
-              description: variable.description,
-            },
-            'data-test-subj': `${variable.name}-selectableOption`,
-          }));
-  }, [isShowAllPressed, messageVariables]);
+  const messageVariablesToShow = useMemo(
+    () =>
+      isShowAllPressed
+        ? messageVariables
+        : messageVariables?.filter((variable) => !variable.deprecated),
+    [messageVariables, isShowAllPressed]
+  );
+
+  const optionsToShow = useMemo(() => {
+    return messageVariablesToShow?.map((variable) => ({
+      label: variable.name,
+      ...(variable.deprecated ? { disabled: true } : {}),
+      data: {
+        description: variable.description,
+      },
+      'data-test-subj': `${variable.name}-selectableOption`,
+    }));
+  }, [messageVariablesToShow]);
 
   const addVariableButtonTitle = buttonTitle ? buttonTitle : i18n.ADD_VARIABLE_TITLE;
 
@@ -174,7 +172,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
         height={300}
         data-test-subj={'messageVariablesSelectableList'}
         isLoading={false}
-        options={shownOptions}
+        options={optionsToShow}
         listProps={{
           rowHeight: 70,
           showIcons: false,
