@@ -14,6 +14,7 @@ import { riskScoresRequestSchema } from '../../../../common/risk_engine/risk_sco
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { buildRiskScoreService } from '../risk_score_service';
+import { getRiskInputsIndex } from '../helpers';
 
 export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.post(
@@ -27,17 +28,38 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+      const soClient = (await context.core).savedObjects.client;
+      const siemClient = (await context.securitySolution).getAppClient();
       const options = request.body; // TODO why is this any???
       const riskScoreService = buildRiskScoreService({
         esClient,
       });
 
+      const {
+        data_view_id: dataViewId,
+        enrich_inputs: enrichInputs,
+        identifier_type: identifierType,
+        filter,
+        range: userRange,
+      } = options;
+
+      const index =
+        (dataViewId &&
+          (await getRiskInputsIndex({
+            dataViewId,
+            logger,
+            soClient,
+          }))) ??
+        siemClient.getAlertsIndex();
+      const range = userRange ?? { start: 'now-15d', end: 'now' };
+
       try {
         const result = await riskScoreService.getScores({
-          enrichInputs: options.enrich_inputs,
-          filter: options.filter,
-          range: options.range ?? { start: 'now-15d', end: 'now' },
-          identifierType: options.identifier_type as IdentifierType, // TODO validate
+          enrichInputs,
+          index,
+          filter,
+          range,
+          identifierType: identifierType as IdentifierType, // TODO
         });
 
         return response.ok({ body: result });
