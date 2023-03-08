@@ -33,7 +33,7 @@ const GroupSelectorComponent = ({
   onGroupChange,
   options,
   title = i18n.GROUP_BY,
-  maxGroupingLevels = 2,
+  maxGroupingLevels = 1,
 }: GroupSelectorProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const isGroupSelected = useCallback(
