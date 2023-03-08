@@ -28,6 +28,7 @@ import { LogColumnsConfigurationPanel } from './log_columns_configuration_panel'
 import { NameConfigurationPanel } from './name_configuration_panel';
 import { LogSourceConfigurationFormErrors } from './source_configuration_form_errors';
 import { useLogSourceConfigurationFormState } from './source_configuration_form_state';
+import { InlineLogViewCallout } from './inline_log_view_callout';
 
 export const LogsSettingsPage = () => {
   const uiCapabilities = useKibana().services.application?.capabilities;
@@ -46,8 +47,16 @@ export const LogsSettingsPage = () => {
     },
   ]);
 
-  const { logView, hasFailedLoadingLogView, isLoading, isUninitialized, update, resolvedLogView } =
-    useLogViewContext();
+  const {
+    logView,
+    hasFailedLoadingLogView,
+    isLoading,
+    isUninitialized,
+    update,
+    resolvedLogView,
+    isInlineLogView,
+    revertToDefaultLogView,
+  } = useLogViewContext();
 
   const availableFields = useMemo(
     () => resolvedLogView?.fields.map((field) => field.name) ?? [],
@@ -136,6 +145,12 @@ export const LogsSettingsPage = () => {
                 </EuiFlexGroup>
               ) : (
                 <>
+                  {isInlineLogView && (
+                    <EuiFlexGroup>
+                      <InlineLogViewCallout revertToDefaultLogView={revertToDefaultLogView} />
+                      <EuiSpacer />
+                    </EuiFlexGroup>
+                  )}
                   <EuiFlexGroup justifyContent="flexEnd">
                     <EuiFlexItem grow={false}>
                       <EuiButton

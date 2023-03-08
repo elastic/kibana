@@ -169,6 +169,10 @@ export const useLogView = ({
     [logViewStateService]
   );
 
+  const revertToDefaultLogView = useCallback(() => {
+    changeLogViewReference(DEFAULT_LOG_VIEW);
+  }, [changeLogViewReference]);
+
   return {
     // Underlying state machine
     logViewStateService,
@@ -202,6 +206,7 @@ export const useLogView = ({
     retry,
     update,
     changeLogViewReference,
+    revertToDefaultLogView,
   };
 };
 
