@@ -70,7 +70,7 @@ export const UninstallCommandFlyout: React.FunctionComponent<Props> = ({ policyI
           <p>
             <FormattedMessage
               id="xpack.fleet.agentUninstallCommand.description"
-              defaultMessage="Select the platform to uninstall... [TODO]"
+              defaultMessage="Use the below uninstall command to... [TODO]"
             />
           </p>
         </EuiText>
