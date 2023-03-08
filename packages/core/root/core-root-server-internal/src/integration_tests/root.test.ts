@@ -24,7 +24,7 @@ describe('migrator-only node', () => {
 
   it('starts Kibana, runs migrations and then exits with a "0" status code', async () => {
     const expectedLog = /Detected migrator node role/;
-    
+
     let proc: undefined | ChildProcess.ChildProcess;
     let logsSub: undefined | Rx.Subscription;
     try {
