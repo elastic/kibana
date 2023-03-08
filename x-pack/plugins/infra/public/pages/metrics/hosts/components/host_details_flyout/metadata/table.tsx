@@ -7,13 +7,10 @@
 
 import {
   EuiText,
-  // EuiToolTip,
-  // EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiBasicTable,
-  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
@@ -27,24 +24,33 @@ interface Row {
 
 interface Props {
   rows: Row[];
-  title: string;
-  onClick(item: Row): void;
 }
 
+/**
+ * Columns translations
+ */
+const FIELD_LABEL = i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.field', {
+  defaultMessage: 'Field',
+});
+
+const VALUE_LABEL = i18n.translate('xpack.infra.hostsViewPage.hostDetail.metadata.value', {
+  defaultMessage: 'Value',
+});
+
 export const Table = (props: Props) => {
-  const { rows, title, onClick } = props;
+  const { rows } = props;
   const columns = useMemo(
     () => [
       {
         field: 'name',
-        name: 'Field',
+        name: FIELD_LABEL,
         width: '35%',
         sortable: false,
-        render: (name: string, item: Row) => <EuiText size="s">{item.name}</EuiText>,
+        render: (name: string, item: Row) => <EuiText size="s">{name}</EuiText>,
       },
       {
         field: 'value',
-        name: 'Value',
+        name: VALUE_LABEL,
         width: '65%',
         sortable: false,
         render: (_name: string, item: Row) => {
@@ -56,47 +62,12 @@ export const Table = (props: Props) => {
           );
         },
       },
-      // {
-      //   field: 'value',
-      //   name: 'Action',
-      //   width: '10%',
-      //   sortable: false,
-      //   render: (_name: string, item: Row) => {
-      //     return (
-      //       <EuiToolTip
-      //         content={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.setFilterTooltip', {
-      //           defaultMessage: 'View event with filter',
-      //         })}
-      //       >
-      //         <EuiButtonIcon
-      //           color="text"
-      //           size="s"
-      //           iconType="filter"
-      //           aria-label={i18n.translate(
-      //             'xpack.infra.nodeDetails.tabs.metadata.filterAriaLabel',
-      //             {
-      //               defaultMessage: 'Filter',
-      //             }
-      //           )}
-      //           onClick={() => onClick(item)}
-      //         />
-      //       </EuiToolTip>
-      //     );
-      //   },
-      // },
     ],
     []
-    // [onClick]
   );
 
   return (
-    <>
-      <EuiText>
-        <h4>{title}</h4>
-      </EuiText>
-      <EuiSpacer size={'s'} />
       <EuiBasicTable tableLayout={'fixed'} responsive={false} columns={columns} items={rows} />
-    </>
   );
 };
 

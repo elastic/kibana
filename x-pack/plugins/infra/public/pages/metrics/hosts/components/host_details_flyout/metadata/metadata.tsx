@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -15,7 +15,7 @@ import { InventoryItemType } from '../../../../../../../common/inventory_models/
 import { useMetadata } from '../../../../metric_detail/hooks/use_metadata';
 import { Table } from './table';
 import { useWaffleTimeContext } from '../../../../inventory_view/hooks/use_waffle_time';
-import { getFields } from './build_fields';
+import { getAllFields } from './build_fields';
 import { TabProps } from '../types';
 
 const TabComponent = (props: TabProps) => {
@@ -32,22 +32,11 @@ const TabComponent = (props: TabProps) => {
     currentTimeRange
   );
 
-  const hostFields = useMemo(() => {
-    if (!metadata) return null;
-    return getFields(metadata, 'host');
+  const fields = useMemo(() => {
+    if (!metadata) return [];
+    return getAllFields(metadata);
   }, [metadata]);
 
-  const cloudFields = useMemo(() => {
-    if (!metadata) return null;
-    return getFields(metadata, 'cloud');
-  }, [metadata]);
-
-  const agentFields = useMemo(() => {
-    if (!metadata) return null;
-    return getFields(metadata, 'agent');
-  }, [metadata]);
-
-  const onFilter = useCallback((item: { name: string; value: string }) => {}, []);
 
   if (metadataLoading) {
     return <LoadingPlaceholder />;
@@ -55,36 +44,10 @@ const TabComponent = (props: TabProps) => {
 
   return (
     <>
-      {hostFields && hostFields.length > 0 && (
+      {metadata && (
         <TableWrapper>
           <Table
-            title={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.hostsHeader', {
-              defaultMessage: 'Hosts',
-            })}
-            onClick={onFilter}
-            rows={hostFields}
-          />
-        </TableWrapper>
-      )}
-      {cloudFields && cloudFields.length > 0 && (
-        <TableWrapper>
-          <Table
-            title={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.cloudHeader', {
-              defaultMessage: 'Cloud',
-            })}
-            onClick={onFilter}
-            rows={cloudFields}
-          />
-        </TableWrapper>
-      )}
-      {agentFields && agentFields.length > 0 && (
-        <TableWrapper>
-          <Table
-            title={i18n.translate('xpack.infra.nodeDetails.tabs.metadata.agentHeader', {
-              defaultMessage: 'Agent',
-            })}
-            onClick={onFilter}
-            rows={agentFields}
+            rows={fields}
           />
         </TableWrapper>
       )}
