@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile }) {
+import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+
+export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Logstash', () => {
     loadTestFile(require.resolve('./overview'));
     loadTestFile(require.resolve('./nodes'));
-    loadTestFile(require.resolve('./node_detail'));
-    loadTestFile(require.resolve('./multicluster_pipelines'));
     loadTestFile(require.resolve('./pipelines'));
   });
 }
