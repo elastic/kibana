@@ -68,6 +68,18 @@ export const EXCEPTION_ITEM_CONTAINER = '[data-test-subj="exceptionEntriesContai
 export const EXCEPTION_FIELD_LIST =
   '[data-test-subj="comboBoxOptionsList fieldAutocompleteComboBox-optionsList"]';
 
+export const EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP =
+  '[data-test-subj="mappingConflictsTooltip"]';
+
+export const EXCEPTION_FIELD_MAPPING_CONFLICTS_ICON =
+  '[data-test-subj="mappingConflictsWarningIcon"]';
+
+export const EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON =
+  '[data-test-subj="mappingConflictsAccordionIcon"]';
+
+export const EXCEPTION_FIELD_MAPPING_CONFLICTS_DESCRIPTION =
+  '[data-test-subj="mappingConflictsDescription"]';
+
 export const EXCEPTION_FLYOUT_TITLE = '[data-test-subj="exceptionFlyoutTitle"]';
 
 export const EXCEPTION_EDIT_FLYOUT_SAVE_BTN = '[data-test-subj="editExceptionConfirmButton"]';

@@ -6,7 +6,6 @@
  */
 
 import sinon from 'sinon';
-import { ExecutorError } from './executor_error';
 import { ActionExecutor } from './action_executor';
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { TaskRunnerFactory } from './task_runner_factory';
@@ -20,6 +19,7 @@ import { actionsClientMock } from '../mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { pick } from 'lodash';
+import { isRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 
 const executeParamsFields = [
   'actionId',
@@ -421,9 +421,7 @@ test('throws an error with suggested retry logic when return status is error', a
     await taskRunner.run();
     throw new Error('Should have thrown');
   } catch (e) {
-    expect(e instanceof ExecutorError).toEqual(true);
-    expect(e.data).toEqual({ foo: true });
-    expect(e.retry).toEqual(false);
+    expect(isRetryableError(e)).toEqual(false);
   }
 });
 
@@ -728,13 +726,11 @@ test(`throws an error when license doesn't support the action type`, async () =>
     await taskRunner.run();
     throw new Error('Should have thrown');
   } catch (e) {
-    expect(e instanceof ExecutorError).toEqual(true);
-    expect(e.data).toEqual({});
-    expect(e.retry).toEqual(true);
+    expect(isRetryableError(e)).toEqual(true);
   }
 });
 
-test(`treats errors as errors if the task is retryable`, async () => {
+test(`will throw an error with retry: false if the task is not retryable`, async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: {
       ...mockedTaskInstance,
@@ -774,9 +770,7 @@ test(`treats errors as errors if the task is retryable`, async () => {
     err = e;
   }
   expect(err).toBeDefined();
-  expect(err instanceof ExecutorError).toEqual(true);
-  expect(err.data).toEqual({ foo: true });
-  expect(err.retry).toEqual(false);
+  expect(isRetryableError(err)).toEqual(false);
   expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
     `Action '2' failed and will not retry: Error message`
   );
@@ -827,7 +821,7 @@ test(`treats errors as successes if the task is not retryable`, async () => {
   );
 });
 
-test('treats errors as errors if the error is thrown instead of returned', async () => {
+test('will throw a retry error if the error is thrown instead of returned', async () => {
   const taskRunner = taskRunnerFactory.create({
     taskInstance: {
       ...mockedTaskInstance,
@@ -861,9 +855,7 @@ test('treats errors as errors if the error is thrown instead of returned', async
     err = e;
   }
   expect(err).toBeDefined();
-  expect(err instanceof ExecutorError).toEqual(true);
-  expect(err.data).toEqual({});
-  expect(err.retry).toEqual(true);
+  expect(isRetryableError(err)).toEqual(true);
   expect(taskRunnerFactoryInitializerParams.logger.error as jest.Mock).toHaveBeenCalledWith(
     `Action '2' failed and will retry: undefined`
   );
