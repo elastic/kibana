@@ -112,7 +112,7 @@ const EntityAnalyticsPageNewComponent = () => {
       const data = await http.fetch(RISK_SCORES_URL, {
         method: 'POST',
         body: JSON.stringify({
-          filters: q,
+          filter: q,
           range: {
             start: range.from,
             end: range.to,
