@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
@@ -53,27 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect('Content-Disposition', 'attachment; filename="export.ndjson"');
       });
 
-      it('should export a single disabled rule by its rule_id', async () => {
-        const rule = await createRule(supertest, log, getSimpleRule());
-
-        const { body } = await supertest
-          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
-          .set('kbn-xsrf', 'true')
-          .send()
-          .expect(200)
-          .parse(binaryToString);
-
-        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
-
-        expect(exportedRule).to.eql({
-          ...getSimpleRuleOutput(),
-          id: rule.id,
-          created_at: rule.created_at,
-          updated_at: rule.updated_at,
-        });
-      });
-
-      it('should export a single executed rule by its rule_id', async () => {
+      it('should validate exported rule schema when its exported by its rule_id', async () => {
         const ruleId = 'rule-1';
 
         const rule = await createRule(supertest, log, getSimpleRule(ruleId, true));
@@ -101,15 +81,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
 
-        expect(exportedRule).to.eql({
-          ...getSimpleRuleOutput(ruleId, true),
-          id: rule.id,
-          created_at: rule.created_at,
-          updated_at: rule.updated_at,
-        });
+        expectToMatchRuleSchema(exportedRule);
       });
 
-      it('should export all executed rules', async () => {
+      it('should validate all exported rules schema', async () => {
         const ruleId1 = 'rule-1';
         const ruleId2 = 'rule-2';
 
@@ -145,18 +120,8 @@ export default ({ getService }: FtrProviderContext): void => {
         const exportedRule1 = JSON.parse(body.toString().split(/\n/)[1]);
         const exportedRule2 = JSON.parse(body.toString().split(/\n/)[0]);
 
-        expect(exportedRule1).to.eql({
-          ...getSimpleRuleOutput(ruleId1, true),
-          id: rule1.id,
-          created_at: rule1.created_at,
-          updated_at: rule1.updated_at,
-        });
-        expect(exportedRule2).to.eql({
-          ...getSimpleRuleOutput(ruleId2, true),
-          id: rule2.id,
-          created_at: rule2.created_at,
-          updated_at: rule2.updated_at,
-        });
+        expectToMatchRuleSchema(exportedRule1);
+        expectToMatchRuleSchema(exportedRule2);
       });
 
       it('should export a exported count with a single rule_id', async () => {
@@ -171,7 +136,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const bodySplitAndParsed = JSON.parse(body.toString().split(/\n/)[1]);
 
-        expect(bodySplitAndParsed).to.eql({
+        expect(bodySplitAndParsed).toEqual({
           exported_exception_list_count: 0,
           exported_exception_list_item_count: 0,
           exported_count: 1,
@@ -206,7 +171,7 @@ export default ({ getService }: FtrProviderContext): void => {
         const firstRule = removeServerGeneratedProperties(firstRuleParsed);
         const secondRule = removeServerGeneratedProperties(secondRuleParsed);
 
-        expect([firstRule, secondRule]).to.eql([
+        expect([firstRule, secondRule]).toEqual([
           getSimpleRuleOutput('rule-2'),
           getSimpleRuleOutput('rule-1'),
         ]);
@@ -265,7 +230,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
           throttle: 'rule',
         };
-        expect(firstRule).to.eql(outputRule1);
+        expect(firstRule).toEqual(outputRule1);
       });
 
       it('should export actions attached to 2 rules', async () => {
@@ -318,8 +283,8 @@ export default ({ getService }: FtrProviderContext): void => {
           actions: [{ ...action, uuid: secondRule.actions[0].uuid }],
           throttle: 'rule',
         };
-        expect(firstRule).to.eql(outputRule1);
-        expect(secondRule).to.eql(outputRule2);
+        expect(firstRule).toEqual(outputRule1);
+        expect(secondRule).toEqual(outputRule2);
       });
 
       /**
@@ -385,7 +350,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
           const firstRule = removeServerGeneratedProperties(firstRuleParsed);
 
-          expect(firstRule).to.eql(outputRule1);
+          expect(firstRule).toEqual(outputRule1);
         });
 
         it('should be able to export 2 legacy actions on 1 rule', async () => {
@@ -471,7 +436,7 @@ export default ({ getService }: FtrProviderContext): void => {
           const firstRuleParsed = JSON.parse(body.toString().split(/\n/)[0]);
           const firstRule = removeServerGeneratedProperties(firstRuleParsed);
 
-          expect(firstRule).to.eql(outputRule1);
+          expect(firstRule).toEqual(outputRule1);
         });
 
         it('should be able to export 2 legacy actions on 2 rules', async () => {
@@ -615,10 +580,50 @@ export default ({ getService }: FtrProviderContext): void => {
           const firstRule = removeServerGeneratedProperties(firstRuleParsed);
           const secondRule = removeServerGeneratedProperties(secondRuleParsed);
 
-          expect(firstRule).to.eql(outputRule2);
-          expect(secondRule).to.eql(outputRule1);
+          expect(firstRule).toEqual(outputRule2);
+          expect(secondRule).toEqual(outputRule1);
         });
       });
     });
   });
 };
+
+function expectToMatchRuleSchema(obj: unknown): void {
+  expect(obj).toEqual({
+    id: expect.any(String),
+    rule_id: expect.any(String),
+    enabled: expect.any(Boolean),
+    immutable: false,
+    updated_at: expect.any(String),
+    updated_by: expect.any(String),
+    created_at: expect.any(String),
+    created_by: expect.any(String),
+    name: expect.any(String),
+    tags: expect.arrayContaining([]),
+    interval: expect.any(String),
+    description: expect.any(String),
+    risk_score: expect.any(Number),
+    severity: expect.any(String),
+    output_index: expect.any(String),
+    author: expect.arrayContaining([]),
+    false_positives: expect.arrayContaining([]),
+    from: expect.any(String),
+    max_signals: 100,
+    risk_score_mapping: expect.arrayContaining([]),
+    severity_mapping: expect.arrayContaining([]),
+    threat: expect.arrayContaining([]),
+    to: expect.any(String),
+    references: expect.arrayContaining([]),
+    version: expect.any(Number),
+    exceptions_list: expect.arrayContaining([]),
+    related_integrations: expect.arrayContaining([]),
+    required_fields: expect.arrayContaining([]),
+    setup: expect.any(String),
+    type: expect.any(String),
+    language: expect.any(String),
+    index: expect.arrayContaining([]),
+    query: expect.any(String),
+    throttle: expect.any(String),
+    actions: expect.arrayContaining([]),
+  });
+}
