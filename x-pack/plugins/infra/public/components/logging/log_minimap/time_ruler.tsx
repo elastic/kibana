@@ -27,7 +27,7 @@ const ONE_MINUTE = 60000;
  * we need, from the current timestamp, to add:
  * 1. The current timezone offset in milliseconds (positive or negative)
  * 2. The UTC offset in milliseconds (positive or negative)
- * This guarantees the timestamp we return is related to the set timezone in momentjs.
+ * This guarantees the timestamp we return is related to the timezone set globally in moment-js.
  */
 const applyTimezoneOffset = (utcTimestamp: number) => {
   const timezoneOffsetMillis = new Date(utcTimestamp).getTimezoneOffset() * ONE_MINUTE;
