@@ -24,17 +24,17 @@
 [
   {
     "name": "apm",
-    "version": "8.7.0-preview-1675078021",
+    "version": "8.7.0-preview-1677040036",
     "forceAlignStackVersion": true,
     "allowSyncToPrerelease": true
   },
   {
     "name": "elastic_agent",
-    "version": "1.5.1"
+    "version": "1.5.2"
   },
   {
     "name": "endpoint",
-    "version": "8.7.0"
+    "version": "8.7.1"
   },
   {
     "name": "fleet_server",
@@ -46,6 +46,6 @@
   },
   {
     "name": "security_detection_engine",
-    "version": "8.4.2"
+    "version": "8.7.1"
   }
 ]
