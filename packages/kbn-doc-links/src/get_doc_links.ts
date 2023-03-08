@@ -501,6 +501,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       healthMonitoring: `${KIBANA_DOCS}task-manager-health-monitoring.html`,
     },
     maps: {
+      connectToEms: `${KIBANA_DOCS}maps-connect-to-ems.html`,
       guide: `${KIBANA_DOCS}maps.html`,
       importGeospatialPrivileges: `${KIBANA_DOCS}import-geospatial-data.html#import-geospatial-privileges`,
       gdalTutorial: `${ELASTIC_WEBSITE_URL}blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,
