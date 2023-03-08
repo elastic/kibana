@@ -16,6 +16,7 @@ import {
   DEFAULT_ALERTS_ILM_POLICY,
   DEFAULT_ALERTS_ILM_POLICY_NAME,
   ECS_COMPONENT_TEMPLATE_NAME,
+  type PublicFrameworkAlertsService,
 } from '@kbn/alerting-plugin/server';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 import { technicalComponentTemplate } from '../../common/assets/component_templates/technical_component_template';
@@ -31,7 +32,7 @@ interface ConstructorOptions {
   logger: Logger;
   isWriteEnabled: boolean;
   disabledRegistrationContexts: string[];
-  areFrameworkAlertsEnabled: boolean;
+  frameworkAlerts: PublicFrameworkAlertsService;
   pluginStop$: Observable<void>;
 }
 
@@ -96,14 +97,14 @@ export class ResourceInstaller {
    */
   public async installCommonResources(): Promise<void> {
     await this.installWithTimeout('common resources shared between all indices', async () => {
-      const { logger, areFrameworkAlertsEnabled } = this.options;
+      const { logger, frameworkAlerts } = this.options;
 
       try {
         // We can install them in parallel
         await Promise.all([
-          // Install ILM policy only if framework alerts are not enabled
-          // If framework alerts are enabled, the alerting framework will install this ILM policy
-          ...(areFrameworkAlertsEnabled
+          // Install ILM policy and ECS component template only if framework alerts are not enabled
+          // If framework alerts are enabled, the alerting framework will install these
+          ...(frameworkAlerts.enabled()
             ? []
             : [
                 this.createOrUpdateLifecyclePolicy({
@@ -139,7 +140,8 @@ export class ResourceInstaller {
    */
   public async installIndexLevelResources(indexInfo: IndexInfo): Promise<void> {
     await this.installWithTimeout(`resources for index ${indexInfo.baseName}`, async () => {
-      const { componentTemplates, ilmPolicy } = indexInfo.indexOptions;
+      const { frameworkAlerts } = this.options;
+      const { componentTemplates, ilmPolicy, additionalPrefix } = indexInfo.indexOptions;
       if (ilmPolicy != null) {
         await this.createOrUpdateLifecyclePolicy({
           name: indexInfo.getIlmPolicyName(),
@@ -147,20 +149,22 @@ export class ResourceInstaller {
         });
       }
 
-      await Promise.all(
-        componentTemplates.map(async (ct) => {
-          await this.createOrUpdateComponentTemplate({
-            name: indexInfo.getComponentTemplateName(ct.name),
-            body: {
-              template: {
-                settings: ct.settings ?? {},
-                mappings: ct.mappings,
+      if (!frameworkAlerts.enabled() || additionalPrefix) {
+        await Promise.all(
+          componentTemplates.map(async (ct) => {
+            await this.createOrUpdateComponentTemplate({
+              name: indexInfo.getComponentTemplateName(ct.name),
+              body: {
+                template: {
+                  settings: ct.settings ?? {},
+                  mappings: ct.mappings,
+                },
+                _meta: ct._meta,
               },
-              _meta: ct._meta,
-            },
-          });
-        })
-      );
+            });
+          })
+        );
+      }
     });
   }
 
@@ -252,9 +256,27 @@ export class ResourceInstaller {
     indexInfo: IndexInfo,
     namespace: string
   ): Promise<void> {
-    const { logger } = this.options;
+    const { logger, frameworkAlerts } = this.options;
 
     const alias = indexInfo.getPrimaryAlias(namespace);
+
+    if (
+      namespace === 'default' &&
+      !indexInfo.indexOptions.additionalPrefix &&
+      frameworkAlerts.enabled()
+    ) {
+      const { result: initialized, error } = await frameworkAlerts.getContextInitializationPromise(
+        indexInfo.indexOptions.registrationContext
+      );
+
+      if (!initialized) {
+        throw new Error(
+          `There was an error in the framework installing namespace-level resources and creating concrete indices for ${alias} - ${error}`
+        );
+      } else {
+        return;
+      }
+    }
 
     logger.info(`Installing namespace-level resources and creating concrete index for ${alias}`);
 
