@@ -80,7 +80,10 @@ export default function createGetSummarizedAlertsTest({ getService }: FtrProvide
         isWriteEnabled: true,
         isWriterCacheEnabled: false,
         disabledRegistrationContexts: [] as string[],
-        areFrameworkAlertsEnabled: false,
+        frameworkAlerts: {
+          enabled: () => false,
+          getContextInitializationPromise: async () => ({ result: false }),
+        },
         pluginStop$,
       });
 
