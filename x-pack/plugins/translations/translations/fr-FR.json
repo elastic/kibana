@@ -2282,8 +2282,6 @@
     "discover.helpMenu.appName": "Découverte",
     "discover.inspectorRequestDataTitleDocuments": "Documents",
     "discover.inspectorRequestDescriptionDocument": "Cette requête interroge Elasticsearch afin de récupérer les documents.",
-    "discover.invalidFiltersWarnToast.description": "Les références d'ID de la vue de données dans certains filtres appliqués diffèrent de la vue de données actuelle.",
-    "discover.invalidFiltersWarnToast.title": "Références d'index différentes",
     "discover.json.codeEditorAriaLabel": "Affichage JSON en lecture seule d’un document Elasticsearch",
     "discover.json.copyToClipboardLabel": "Copier dans le presse-papiers",
     "discover.loadingDocuments": "Chargement des documents",

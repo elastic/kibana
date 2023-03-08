@@ -2284,8 +2284,6 @@
     "discover.helpMenu.appName": "Discover",
     "discover.inspectorRequestDataTitleDocuments": "文档",
     "discover.inspectorRequestDescriptionDocument": "此请求将查询 Elasticsearch 以获取文档。",
-    "discover.invalidFiltersWarnToast.description": "某些应用的筛选中的数据视图 ID 引用与当前数据视图不同。",
-    "discover.invalidFiltersWarnToast.title": "不同的索引引用",
     "discover.json.codeEditorAriaLabel": "Elasticsearch 文档的只读 JSON 视图",
     "discover.json.copyToClipboardLabel": "复制到剪贴板",
     "discover.loadingDocuments": "正在加载文档",
