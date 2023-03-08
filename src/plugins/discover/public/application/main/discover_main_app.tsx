@@ -60,9 +60,16 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
     chrome.docTitle.change(`Discover${pageTitleSuffix}`);
     setBreadcrumbsTitle(savedSearch.title, chrome);
     return () => {
-      data.search.session.clear();
+      // data.search.session.clear();
     };
   }, [savedSearch.id, savedSearch.title, chrome, data]);
+
+  useEffect(() => {
+    return () => {
+      // clear session when navigating away from discover main
+      data.search.session.clear();
+    };
+  }, [data.search.session]);
 
   /**
    * Initializing syncing with state and help menu
