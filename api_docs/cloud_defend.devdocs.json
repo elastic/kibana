@@ -2,10 +2,188 @@
   "id": "cloudDefend",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
+    "functions": [
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-public.getSecuritySolutionLink",
+        "type": "Function",
+        "tags": [],
+        "label": "getSecuritySolutionLink",
+        "description": [
+          "\nGets the cloud_defend link properties of a Cloud Defend page for navigation in the security solution."
+        ],
+        "signature": [
+          "<TId extends string = \"cloud_defend-policies\">(cloudDefendPage: \"policies\") => CloudDefendLinkItem<TId>"
+        ],
+        "path": "x-pack/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-public.getSecuritySolutionLink.$1",
+            "type": "string",
+            "tags": [],
+            "label": "cloudDefendPage",
+            "description": [
+              "the name of the cloud defend page."
+            ],
+            "signature": [
+              "\"policies\""
+            ],
+            "path": "x-pack/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-public.getSecuritySolutionNavTab",
+        "type": "Function",
+        "tags": [],
+        "label": "getSecuritySolutionNavTab",
+        "description": [
+          "\nGets the link properties of a Cloud Defend page for navigation in the old security solution navigation."
+        ],
+        "signature": [
+          "<TId extends string = \"cloud_defend-policies\">(cloudDefendPage: \"policies\", basePath: string) => CloudDefendNavTab<TId>"
+        ],
+        "path": "x-pack/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-public.getSecuritySolutionNavTab.$1",
+            "type": "string",
+            "tags": [],
+            "label": "cloudDefendPage",
+            "description": [
+              "the name of the cloud defend page."
+            ],
+            "signature": [
+              "\"policies\""
+            ],
+            "path": "x-pack/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-public.getSecuritySolutionNavTab.$2",
+            "type": "string",
+            "tags": [],
+            "label": "basePath",
+            "description": [
+              "the base path for links."
+            ],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-public.CloudDefendSecuritySolutionContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudDefendSecuritySolutionContext",
+        "description": [],
+        "path": "x-pack/plugins/cloud_defend/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-public.CloudDefendSecuritySolutionContext.getFiltersGlobalComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getFiltersGlobalComponent",
+            "description": [
+              "Gets the `FiltersGlobal` component for embedding a filter bar in the security solution application."
+            ],
+            "signature": [
+              "() => React.ComponentType<{ children: React.ReactNode; }>"
+            ],
+            "path": "x-pack/plugins/cloud_defend/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "cloudDefend",
+            "id": "def-public.CloudDefendSecuritySolutionContext.getSpyRouteComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "getSpyRouteComponent",
+            "description": [
+              "Gets the `SpyRoute` component for navigation highlighting and breadcrumbs."
+            ],
+            "signature": [
+              "() => React.ComponentType<{ pageName: \"cloud_defend-policies\"; state?: Record<string, string | undefined> | undefined; }>"
+            ],
+            "path": "x-pack/plugins/cloud_defend/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-public.CLOUD_DEFEND_BASE_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_DEFEND_BASE_PATH",
+        "description": [
+          "The base path for all cloud defend pages."
+        ],
+        "signature": [
+          "\"/cloud_defend\""
+        ],
+        "path": "x-pack/plugins/cloud_defend/public/common/navigation/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "cloudDefend",
+        "id": "def-public.CloudDefendPageId",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudDefendPageId",
+        "description": [
+          "\nAll the IDs for the cloud defend pages.\nThis needs to match the cloud defend page entries in `SecurityPageName` in `x-pack/plugins/security_solution/common/constants.ts`."
+        ],
+        "signature": [
+          "\"cloud_defend-policies\""
+        ],
+        "path": "x-pack/plugins/cloud_defend/public/common/navigation/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "cloudDefend",
@@ -13,7 +191,9 @@
       "type": "Interface",
       "tags": [],
       "label": "CloudDefendPluginSetup",
-      "description": [],
+      "description": [
+        "\ncloud_defend plugin types"
+      ],
       "path": "x-pack/plugins/cloud_defend/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
@@ -31,7 +211,28 @@
       "path": "x-pack/plugins/cloud_defend/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [],
+      "children": [
+        {
+          "parentPluginId": "cloudDefend",
+          "id": "def-public.CloudDefendPluginStart.getCloudDefendRouter",
+          "type": "Function",
+          "tags": [],
+          "label": "getCloudDefendRouter",
+          "description": [
+            "Gets the cloud defend router component for embedding in the security solution."
+          ],
+          "signature": [
+            "() => React.ComponentType<",
+            "CloudDefendRouterProps",
+            ">"
+          ],
+          "path": "x-pack/plugins/cloud_defend/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
       "lifecycle": "start",
       "initialIsOpen": true
     }
@@ -42,7 +243,35 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "cloudDefend",
+      "id": "def-server.CloudDefendPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "CloudDefendPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/cloud_defend/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "cloudDefend",
+      "id": "def-server.CloudDefendPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "CloudDefendPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/cloud_defend/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [],

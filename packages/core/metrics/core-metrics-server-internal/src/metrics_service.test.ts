@@ -52,7 +52,7 @@ describe('MetricsService', () => {
       expect(OpsMetricsCollector).toHaveBeenCalledTimes(1);
       expect(OpsMetricsCollector).toHaveBeenCalledWith(
         httpMock.server,
-        esServiceMock.agentStore,
+        esServiceMock.agentStatsProvider,
         expect.objectContaining({ logger: logger.get('metrics') })
       );
 

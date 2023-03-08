@@ -34,6 +34,7 @@ import {
 import { getInstanceId } from '../../legacy_uptime/lib/alerts/status_check';
 import { UMServerLibs } from '../../legacy_uptime/uptime_server';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import { UptimeRuleTypeAlertDefinition } from '../../legacy_uptime/lib/alerts/common';
 
 export type ActionGroupIds = ActionGroupIdsOf<typeof MONITOR_STATUS>;
 
@@ -84,7 +85,7 @@ export const registerSyntheticsStatusCheckRule = (
         syntheticsMonitorClient
       );
 
-      const { downConfigs, staleDownConfigs } = await statusRule.getDownChecks(
+      const { downConfigs, staleDownConfigs, upConfigs } = await statusRule.getDownChecks(
         ruleState.meta?.downConfigs as OverviewStatus['downConfigs']
       );
 
@@ -129,11 +130,13 @@ export const registerSyntheticsStatusCheckRule = (
         getAlertUuid,
         spaceId,
         staleDownConfigs,
+        upConfigs,
       });
 
       return {
         state: updateState(ruleState, !isEmpty(downConfigs), { downConfigs }),
       };
     },
+    alerts: UptimeRuleTypeAlertDefinition,
   });
 };

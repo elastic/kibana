@@ -25,12 +25,12 @@ import { RedirectToDefaultServiceRouteView } from '../service_detail/redirect_to
 
 export function page({
   title,
-  tab,
+  tabKey,
   element,
   searchBarOptions,
 }: {
   title: string;
-  tab: React.ComponentProps<typeof MobileServiceTemplate>['selectedTab'];
+  tabKey: React.ComponentProps<typeof MobileServiceTemplate>['selectedTabKey'];
   element: React.ReactElement<any, any>;
   searchBarOptions?: {
     showKueryBar?: boolean;
@@ -46,7 +46,7 @@ export function page({
     element: (
       <MobileServiceTemplate
         title={title}
-        selectedTab={tab}
+        selectedTabKey={tabKey}
         searchBarOptions={searchBarOptions}
       >
         {element}
@@ -100,7 +100,7 @@ export const mobileServiceDetail = {
       '/mobile-services/{serviceName}/overview': {
         ...page({
           element: <MobileServiceOverview />,
-          tab: 'overview',
+          tabKey: 'overview',
           title: i18n.translate('xpack.apm.views.overview.title', {
             defaultMessage: 'Overview',
           }),
@@ -125,7 +125,7 @@ export const mobileServiceDetail = {
       },
       '/mobile-services/{serviceName}/transactions': {
         ...page({
-          tab: 'transactions',
+          tabKey: 'transactions',
           title: i18n.translate('xpack.apm.views.transactions.title', {
             defaultMessage: 'Transactions',
           }),
@@ -178,7 +178,7 @@ export const mobileServiceDetail = {
         },
       },
       '/mobile-services/{serviceName}/service-map': page({
-        tab: 'service-map',
+        tabKey: 'service-map',
         title: i18n.translate('xpack.apm.views.serviceMap.title', {
           defaultMessage: 'Service Map',
         }),
@@ -189,7 +189,7 @@ export const mobileServiceDetail = {
       }),
       '/mobile-services/{serviceName}/alerts': {
         ...page({
-          tab: 'alerts',
+          tabKey: 'alerts',
           title: i18n.translate('xpack.apm.views.alerts.title', {
             defaultMessage: 'Alerts',
           }),
