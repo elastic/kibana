@@ -87,7 +87,6 @@ describe('Action List Route', () => {
       logFactory: loggingSystemMock.create(),
       service: endpointAppContextService,
       config: () => Promise.resolve(createMockConfig()),
-      getStartServices: jest.fn(),
       experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
     });
 
