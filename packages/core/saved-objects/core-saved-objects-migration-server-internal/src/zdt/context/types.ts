@@ -11,16 +11,21 @@ import type {
   ISavedObjectTypeRegistry,
   ISavedObjectsSerializer,
 } from '@kbn/core-saved-objects-server';
+import type { ModelVersionMap } from '@kbn/core-saved-objects-base-server-internal';
 import type { DocLinks } from '@kbn/doc-links';
 
 /**
  * The set of static, precomputed values and services used by the ZDT migration
  */
 export interface MigratorContext {
+  /** The current Kibana version */
+  readonly kibanaVersion: string;
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
   readonly indexPrefix: string;
   /** Name of the types that are living in the index */
   readonly types: string[];
+  /** Model versions for the registered types */
+  readonly typeModelVersions: ModelVersionMap;
   /** The client to use for communications with ES */
   readonly elasticsearchClient: ElasticsearchClient;
   /** The maximum number of retries to attempt for a failing action */
@@ -31,4 +36,6 @@ export interface MigratorContext {
   readonly serializer: ISavedObjectsSerializer;
   /** The SO type registry to use for the migration */
   readonly typeRegistry: ISavedObjectTypeRegistry;
+  /** List of types that are no longer registered */
+  readonly deletedTypes: string[];
 }
