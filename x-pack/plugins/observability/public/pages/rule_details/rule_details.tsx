@@ -68,7 +68,7 @@ export const EVENT_ERROR_LOG_TAB = 'rule_error_log_list';
 export const RULE_DETAILS_PAGE_ID = 'rule-details-alerts-o11y';
 export const RULE_DETAILS_ALERTS_SEARCH_BAR_ID = 'rule-details-alerts-search-bar-o11y';
 
-type TabId = typeof ALERTS_TAB | typeof EXECUTION_TAB;
+export type TabId = typeof ALERTS_TAB | typeof EXECUTION_TAB;
 
 export interface RuleDetailsPathParams {
   ruleId: string;

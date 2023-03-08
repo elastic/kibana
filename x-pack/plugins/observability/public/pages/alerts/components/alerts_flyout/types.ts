@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TopAlert } from '../../containers';
+import type { TopAlert } from '../../../../typings/alerts';
 
 export interface FlyoutProps {
   alert: TopAlert;

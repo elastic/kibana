@@ -6,7 +6,7 @@
  */
 
 import { ACTIVE_ALERTS } from '../components/shared/alert_search_bar/constants';
-import { EXECUTION_TAB, ALERTS_TAB } from '../pages/rule_details/constants';
+import { EXECUTION_TAB, ALERTS_TAB } from '../pages/rule_details/rule_details';
 import { getRuleDetailsPath, RuleDetailsLocatorDefinition } from './rule_details';
 
 describe('RuleDetailsLocator', () => {

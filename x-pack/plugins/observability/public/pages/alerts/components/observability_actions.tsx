@@ -27,11 +27,11 @@ import { parseAlert } from './parse_alert';
 import { translations, paths } from '../../../config';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../containers/alerts_table/translations';
 import { ObservabilityAppServices } from '../../../application/types';
-import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
-import type { TopAlert } from '../containers/alerts_page/types';
+import { RULE_DETAILS_PAGE_ID } from '../../rule_details/rule_details';
 import { ObservabilityRuleTypeRegistry } from '../../..';
 import { ALERT_DETAILS_PAGE_ID } from '../../alert_details/types';
 import { ConfigSchema } from '../../../plugin';
+import type { TopAlert } from '../../../typings/alerts';
 
 export interface ObservabilityActionsProps {
   data: TimelineNonEcsData[];

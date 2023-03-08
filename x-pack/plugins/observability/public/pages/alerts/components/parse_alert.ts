@@ -17,9 +17,9 @@ import {
 import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { parseExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
-import type { TopAlert } from '..';
 import { asDuration, asPercent } from '../../../../common/utils/formatters';
 import { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
+import type { TopAlert } from '../../../typings/alerts';
 
 export const parseAlert =
   (observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) =>

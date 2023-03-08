@@ -14,7 +14,7 @@ import {
   ALERT_RULE_TYPE_ID,
   ALERT_EVALUATION_THRESHOLD,
 } from '@kbn/rule-data-utils';
-import { TopAlert } from '@kbn/observability-plugin/public/pages/alerts';
+import { TopAlert } from '@kbn/observability-plugin/public/typings/alerts';
 import { filterNil } from '../../../../shared/charts/latency_chart';
 import { TimeseriesChart } from '../../../../shared/charts/timeseries_chart';
 import {

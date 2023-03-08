@@ -29,7 +29,7 @@ import {
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import moment from 'moment-timezone';
 import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
-import { RULE_DETAILS_PAGE_ID } from '../../../rule_details/constants';
+import { RULE_DETAILS_PAGE_ID } from '../../../rule_details/rule_details';
 import { asDuration } from '../../../../../common/utils/formatters';
 import { translations, paths } from '../../../../config';
 import { FlyoutProps } from './types';

@@ -14,8 +14,8 @@ import {
   ALERTS_TAB,
   EXECUTION_TAB,
   SEARCH_BAR_URL_STORAGE_KEY,
-} from '../pages/rule_details/constants';
-import type { TabId } from '../pages/rule_details/types';
+} from '../pages/rule_details/rule_details';
+import type { TabId } from '../pages/rule_details/rule_details';
 import type { AlertStatus } from '../../common/typings';
 
 export interface RuleDetailsLocatorParams extends SerializableRecord {

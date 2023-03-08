@@ -6,4 +6,3 @@
  */
 
 export { AlertsPage } from './alerts_page';
-export type { TopAlert } from './types';

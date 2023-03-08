@@ -21,9 +21,9 @@ import { AlertStatusIndicator } from '../../../../components/shared/alert_status
 import { TimestampTooltip } from '../../../../components/shared/timestamp_tooltip';
 import { asDuration } from '../../../../../common/utils/formatters';
 import { SeverityBadge } from '../severity_badge';
-import { TopAlert } from '../..';
 import { parseAlert } from '../parse_alert';
 import { ObservabilityRuleTypeRegistry } from '../../../../rules/create_observability_rule_type_registry';
+import type { TopAlert } from '../../../../typings/alerts';
 
 export const getMappedNonEcsValue = ({
   data,

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/alerting-plugin/common';
-import { TopAlert } from '@kbn/observability-plugin/public/pages/alerts';
-import { AlertSummaryField } from '@kbn/observability-plugin/public/pages/alert_details/types';
-import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { TopAlert } from '@kbn/observability-plugin/public/typings/alerts';
+import type { AlertSummaryField } from '@kbn/observability-plugin/public/pages/alert_details/components/alert_summary';
+import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 
 export const SERVICE_NAME = 'service.name' as const;
