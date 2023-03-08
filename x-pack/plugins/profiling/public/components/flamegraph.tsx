@@ -30,8 +30,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../common/flamegraph';
 import { asPercentage } from '../utils/formatters/as_percentage';
 import { getFlamegraphModel } from '../utils/get_flamegraph_model';
-import { FlamegraphInformationWindow } from './flame_graphs_view/flamegraph_information_window';
-import { FlameGraphLegend } from './flame_graphs_view/flame_graph_legend';
+import { FlamegraphInformationWindow } from './app/flame_graphs_view/flamegraph_information_window';
+import { FlameGraphLegend } from './app/flame_graphs_view/flame_graph_legend';
 
 function TooltipRow({
   value,

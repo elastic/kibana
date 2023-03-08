@@ -19,7 +19,7 @@ import React, { useState } from 'react';
 import { AsyncStatus, useAsync } from '../hooks/use_async';
 import { useAutoAbortedHttpClient } from '../hooks/use_auto_aborted_http_client';
 import { useProfilingDependencies } from './contexts/profiling_dependencies/use_profiling_dependencies';
-import { NoDataPage } from './no_data_page';
+import { NoDataPage } from './app/no_data_view';
 import { ProfilingAppPageTemplate } from './profiling_app_page_template';
 
 export function CheckSetup({ children }: { children: React.ReactElement }) {
