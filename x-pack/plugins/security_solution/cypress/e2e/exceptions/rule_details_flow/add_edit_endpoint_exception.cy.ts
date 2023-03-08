@@ -128,7 +128,7 @@ describe('Add endpoint exception from rule details', () => {
   it('edits an endpoint exception item', () => {
     const NEW_ITEM_NAME = 'Exception item-EDITED';
     const ITEM_FIELD = 'event.code';
-    const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
+    const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.type';
 
     // displays existing exception items
     cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
@@ -157,7 +157,7 @@ describe('Add endpoint exception from rule details', () => {
 
     // check that updates stuck
     cy.get(EXCEPTION_CARD_ITEM_NAME).should('have.text', NEW_ITEM_NAME);
-    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.nameIS foo');
+    cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.typeIS foo');
   });
 
   it('allows user to search for items', () => {
