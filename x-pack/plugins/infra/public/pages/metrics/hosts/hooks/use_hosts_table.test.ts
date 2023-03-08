@@ -73,6 +73,7 @@ describe('useHostTable hook', () => {
       {
         name: 'host-0',
         os: '-',
+        index: 0,
         title: {
           cloudProvider: 'aws',
           name: 'host-0',
@@ -102,6 +103,7 @@ describe('useHostTable hook', () => {
       {
         name: 'host-1',
         os: 'macOS',
+        index: 1,
         title: {
           cloudProvider: null,
           name: 'host-1',
