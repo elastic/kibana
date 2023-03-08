@@ -27,7 +27,7 @@ describe('Case View Page files tab', () => {
   useGetCaseAttachmentsMock.mockReturnValue({
     data: {
       pageOfItems: [basicAttachment],
-      availableTypes: [basicAttachment.fileType],
+      availableTypes: [basicAttachment.mimeType],
       totalItemCount: 1,
     },
     isLoading: false,

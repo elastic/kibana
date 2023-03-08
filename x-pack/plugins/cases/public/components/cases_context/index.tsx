@@ -5,27 +5,33 @@
  * 2.0.
  */
 
-import type { Dispatch } from 'react';
-import React, { useState, useEffect, useReducer } from 'react';
+import type { Dispatch, ReactNode } from 'react';
+
 import { merge } from 'lodash';
+import React, { useCallback, useEffect, useState, useReducer } from 'react';
+import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 
 import type { FilesStart } from '@kbn/files-plugin/public';
+
 import { FilesContext } from '@kbn/shared-ux-file-context';
-import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
-import { DEFAULT_FEATURES } from '../../../common/constants';
-import { DEFAULT_BASE_PATH } from '../../common/navigation';
-import { useApplication } from './use_application';
+
 import type { CasesContextStoreAction } from './cases_context_reducer';
-import { casesContextReducer, getInitialCasesContextState } from './cases_context_reducer';
 import type {
   CasesFeaturesAllRequired,
   CasesFeatures,
   CasesPermissions,
 } from '../../containers/types';
-import { CasesGlobalComponents } from './cases_global_components';
 import type { ReleasePhase } from '../types';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
+import type { Owner } from '../../../common/constants/types';
+
+import { CasesGlobalComponents } from './cases_global_components';
+import { DEFAULT_FEATURES } from '../../../common/constants';
+import { DEFAULT_BASE_PATH } from '../../common/navigation';
+import { useApplication } from './use_application';
+import { casesContextReducer, getInitialCasesContextState } from './cases_context_reducer';
+import { CASES_FILE_KINDS } from '../../files';
 
 export type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
@@ -119,13 +125,37 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     }
   }, [appTitle, appId]);
 
+  const applyFilesContext = useCallback(
+    (contextChildren: ReactNode) => {
+      if (owner.length === 0) {
+        return contextChildren;
+      }
+
+      if (owner[0] in CASES_FILE_KINDS) {
+        return (
+          <FilesContext
+            client={filesPlugin.filesClientFactory.asScoped(CASES_FILE_KINDS[owner[0] as Owner].id)}
+          >
+            {contextChildren}
+          </FilesContext>
+        );
+      } else {
+        throw new Error(
+          'Invalid owner provided to cases context. See https://github.com/elastic/kibana/blob/main/x-pack/plugins/cases/README.md#casescontext-setup'
+        );
+      }
+    },
+    [filesPlugin.filesClientFactory, owner]
+  );
+
   return isCasesContextValue(value) ? (
     <CasesContext.Provider value={value}>
-      {/* need to check if owner exists */}
-      <FilesContext client={filesPlugin.filesClientFactory.asScoped(owner[0])}>
-        <CasesGlobalComponents state={state} />
-        {children}
-      </FilesContext>
+      {applyFilesContext(
+        <>
+          <CasesGlobalComponents state={state} />
+          {children}
+        </>
+      )}
     </CasesContext.Provider>
   ) : null;
 };

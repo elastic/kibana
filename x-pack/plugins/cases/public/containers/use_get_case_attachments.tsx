@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 import type { UseQueryResult } from '@tanstack/react-query';
 
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 import { useQuery } from '@tanstack/react-query';
 
 import type { ServerError } from '../types';
-import type { Attachment } from './types';
 
 import { APP_ID } from '../../common';
 import { useToasts } from '../common/lib/kibana';
@@ -23,26 +23,25 @@ export interface GetCaseAttachmentsParams {
   caseId: string;
   page: number;
   perPage: number;
-  // extension?: string[];
-  // mimeType?: string[];
-  // searchTerm?: string;
+  searchTerm?: string;
 }
 
 export const useGetCaseAttachments = ({
   caseId,
   page,
   perPage,
-}: GetCaseAttachmentsParams): UseQueryResult<{ files: Attachment[]; total: number }> => {
+  searchTerm,
+}: GetCaseAttachmentsParams): UseQueryResult<{ files: FileJSON[]; total: number }> => {
   const toasts = useToasts();
   const { client: filesClient } = useFilesContext();
-  const filePage = page + 1;
 
   return useQuery(
-    casesQueriesKeys.caseAttachments({ caseId, page: filePage, perPage }),
+    casesQueriesKeys.caseAttachments({ caseId, page, perPage, searchTerm }),
     () => {
       return filesClient.list({
         kind: CASES_FILE_KINDS[APP_ID].id,
-        page: filePage,
+        page: page + 1,
+        ...(searchTerm && { name: searchTerm }),
         perPage,
         meta: { caseId },
       });

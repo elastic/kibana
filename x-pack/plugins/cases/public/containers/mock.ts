@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import type { ActionLicense, Cases, Case, CasesStatus, CaseUserActions, Comment } from './types';
 
@@ -18,7 +19,6 @@ import type {
   FindCaseUserActions,
   CaseUsers,
   CaseUserActionsStats,
-  Attachment,
 } from '../../common/ui/types';
 import type {
   CaseConnector,
@@ -241,11 +241,18 @@ export const basicCase: Case = {
   assignees: [{ uid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0' }],
 };
 
-export const basicAttachment: Attachment = {
+export const basicAttachment: FileJSON = {
   id: '7d47d130-bcec-11ed-afa1-0242ac120002',
-  fileName: 'my-super-cool-screenshot',
-  fileType: 'png',
-  dateAdded: basicCreatedAt,
+  name: 'my-super-cool-screenshot',
+  mimeType: 'png',
+  created: basicCreatedAt,
+  updated: basicCreatedAt,
+  size: 999,
+  meta: '',
+  alt: '',
+  fileKind: '',
+  status: 'READY',
+  extension: '.png',
 };
 
 export const caseWithAlerts = {

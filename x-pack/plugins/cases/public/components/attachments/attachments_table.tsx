@@ -4,11 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import type { EuiBasicTableColumn, Pagination, EuiBasicTableProps } from '@elastic/eui';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 
 import {
+  EuiModalBody,
+  EuiModalFooter,
   EuiButtonIcon,
   EuiLink,
   EuiBasicTable,
@@ -17,20 +20,20 @@ import {
   EuiText,
   EuiEmptyPrompt,
   EuiButton,
+  EuiModal,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
-
-import type { Attachment, Attachments } from '../../../common/ui/types';
+import { FileImage } from '@kbn/shared-ux-file-image';
 
 import { APP_ID } from '../../../common';
 import { CASES_FILE_KINDS } from '../../files';
 
 interface AttachmentsTableProps {
   isLoading: boolean;
-  items: Attachments;
-  onChange: EuiBasicTableProps<Attachment>['onChange'];
-  onDownload: () => void;
-  onDelete: () => void;
+  items: FileJSON[];
+  onChange: EuiBasicTableProps<FileJSON>['onChange'];
   pagination: Pagination;
 }
 
@@ -38,21 +41,24 @@ export const AttachmentsTable = ({
   items,
   pagination,
   onChange,
-  onDelete,
-  onDownload,
   isLoading,
 }: AttachmentsTableProps) => {
   const { client: filesClient } = useFilesContext();
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<FileJSON>();
 
-  const columns: Array<EuiBasicTableColumn<Attachment>> = [
+  const closeModal = () => setIsModalVisible(false);
+  const showModal = (file: FileJSON) => {
+    setSelectedFile(file);
+    setIsModalVisible(true);
+  };
+
+  const columns: Array<EuiBasicTableColumn<FileJSON>> = [
     {
-      field: 'name',
       name: 'Name',
       'data-test-subj': 'attachments-table-filename',
-      render: (name: Attachment['fileName']) => (
-        <EuiLink color="primary" href="#" target="_blank" external={false}>
-          {name}
-        </EuiLink>
+      render: (attachment: FileJSON) => (
+        <EuiLink onClick={() => showModal(attachment)}>{attachment.name}</EuiLink>
       ),
       width: '60%',
     },
@@ -75,7 +81,7 @@ export const AttachmentsTable = ({
           name: 'Download',
           isPrimary: true,
           description: 'Download this file',
-          render: (attachment: Attachment) => {
+          render: (attachment: FileJSON) => {
             return (
               <EuiButtonIcon
                 iconType={'download'}
@@ -96,7 +102,7 @@ export const AttachmentsTable = ({
           color: 'danger',
           icon: 'trash',
           type: 'icon',
-          onClick: onDelete,
+          onClick: () => {},
           'data-test-subj': 'attachments-table-action-delete',
         },
       ],
@@ -148,12 +154,34 @@ export const AttachmentsTable = ({
                 iconType="plusInCircle"
                 data-test-subj="case-detail-attachments-table-upload-file"
               >
-                {'Upload File'}
+                {'Add File'}
               </EuiButton>
             }
           />
         }
       />
+      {isModalVisible && (
+        <EuiModal onClose={closeModal}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>{selectedFile?.name}</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <FileImage
+              size="l"
+              alt=""
+              src={filesClient.getDownloadHref({
+                id: selectedFile?.id || '',
+                fileKind: CASES_FILE_KINDS[APP_ID].id,
+              })}
+            />
+          </EuiModalBody>
+          <EuiModalFooter>
+            <EuiButton size="s" onClick={closeModal} fill>
+              {'Close'}
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      )}
     </>
   );
 };

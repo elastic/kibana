@@ -4,14 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import { isEqual } from 'lodash/fp';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { Criteria } from '@elastic/eui';
+import type { FileJSON } from '@kbn/shared-ux-file-types';
 
-import { EuiFlexItem, EuiFlexGroup, EuiFieldSearch, EuiSelect, EuiButtonGroup } from '@elastic/eui';
+import { EuiFlexItem, EuiFlexGroup, EuiFieldSearch, EuiButtonGroup } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 
-import type { Case, Attachment } from '../../../../common/ui/types';
+import type { Case } from '../../../../common/ui/types';
 import type { GetCaseAttachmentsParams } from '../../../containers/use_get_case_attachments';
 
 import { CaseViewTabs } from '../case_view_tabs';
@@ -34,15 +36,35 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
   });
   const { data: attachmentsData, isLoading } = useGetCaseAttachments(filteringOptions);
 
-  const onTableChange = ({ page }: Criteria<Attachment>) => {
-    if (page) {
-      setFilteringOptions({
-        ...filteringOptions,
-        page: page.index,
-        perPage: page.size,
-      });
-    }
-  };
+  const onTableChange = useCallback(
+    ({ page }: Criteria<FileJSON>) => {
+      if (page) {
+        setFilteringOptions({
+          ...filteringOptions,
+          page: page.index,
+          perPage: page.size,
+        });
+      }
+    },
+    [filteringOptions]
+  );
+
+  const onSearchChange = useCallback(
+    (newSearch) => {
+      const trimSearch = newSearch.trim();
+      if (!isEqual(trimSearch, filteringOptions.searchTerm)) {
+        setFilteringOptions({
+          ...filteringOptions,
+          searchTerm: trimSearch,
+        });
+      }
+    },
+    [filteringOptions]
+  );
+
+  const refreshAttachmentsTable = useCallback(() => {
+    queryClient.invalidateQueries(casesQueriesKeys.caseAttachments({ ...filteringOptions }));
+  }, [filteringOptions, queryClient]);
 
   const pagination = useMemo(
     () => ({
@@ -54,9 +76,6 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
     }),
     [filteringOptions.page, filteringOptions.perPage, attachmentsData]
   );
-
-  const selectOptions = [{ value: 'any', text: 'any' }];
-  const [selectValue, setSelectValue] = useState(selectOptions[0].value);
 
   const tableViewSelectedId = 'tableViewSelectedId';
   const toggleButtonsIcons = [
@@ -73,10 +92,6 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
     },
   ];
 
-  const refreshAttachmentsTable = () => {
-    queryClient.invalidateQueries(casesQueriesKeys.caseAttachments({ ...filteringOptions }));
-  };
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -91,27 +106,9 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
                 <EuiFieldSearch
                   fullWidth
                   placeholder="Search"
-                  // value={filteringOptions.searchTerm}
-                  value={''}
-                  disabled={isLoading || attachmentsData?.total === 0}
-                  onChange={
-                    (event) => {}
-                    // setFilteringOptions({
-                    //   ...filteringOptions,
-                    //   searchTerm: event.target.value,
-                    // })
-                  }
-                  isClearable={true}
+                  onSearch={onSearchChange}
+                  incremental={false}
                   data-test-subj="case-detail-search-file"
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSelect
-                  options={selectOptions}
-                  value={selectValue}
-                  disabled={isLoading || attachmentsData?.total === 0}
-                  onChange={(e) => setSelectValue(e.target.value)}
-                  data-test-subj="case-detail-select-file-type"
                 />
               </EuiFlexItem>
               <EuiFlexItem />
@@ -121,6 +118,7 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
                   options={toggleButtonsIcons}
                   idSelected={tableViewSelectedId}
                   onChange={() => {}}
+                  hidden
                   isIconOnly
                 />
               </EuiFlexItem>
@@ -129,8 +127,6 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
               isLoading={isLoading}
               items={attachmentsData?.files ?? []}
               onChange={onTableChange}
-              onDelete={() => {}}
-              onDownload={() => {}}
               pagination={pagination}
             />
           </EuiFlexItem>

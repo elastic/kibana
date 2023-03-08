@@ -63,21 +63,24 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId, onFileAdded }) => {
               },
               externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
               externalReferenceMetadata: {
-                file: {
-                  name: file.fileJSON.name,
-                  extension: file.fileJSON.extension ?? '',
-                  mimeType: file.fileJSON.mimeType ?? '',
-                  createdAt: file.fileJSON.created,
-                },
+                file: [
+                  {
+                    name: file.fileJSON.name,
+                    extension: file.fileJSON.extension ?? '',
+                    mimeType: file.fileJSON.mimeType ?? '',
+                    createdAt: file.fileJSON.created,
+                  },
+                ],
               },
             },
           ],
           updateCase: onFileAdded,
+          throwOnError: true,
         });
 
         notifications.toasts.addSuccess({
           title: 'File uploaded successfuly!',
-          text: `File ID: ${file.id}`,
+          text: `File Name: ${file.fileJSON.name}`,
         });
 
         // used to refresh the attachments table
