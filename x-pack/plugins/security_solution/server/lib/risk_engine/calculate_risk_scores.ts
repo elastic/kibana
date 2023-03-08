@@ -59,13 +59,11 @@ const reduceScript = `
       scores.addAll(state.scores)
     }
     Collections.sort(scores, Collections.reverseOrder());
-
     double num_inputs_to_score = Math.min(scores.length, params.max_risk_inputs_per_identity);
     results['notes'] = [];
     if (num_inputs_to_score == params.max_risk_inputs_per_identity) {
       results['notes'].add('Number of risk inputs (' + scores.length + ') exceeded the maximum allowed (' + params.max_risk_inputs_per_identity + ').');
     }
-
     double total_score = 0;
     for (int i = 0; i < num_inputs_to_score; i++) {
       total_score += scores[i] / Math.pow(i + 1, params.p);
@@ -73,7 +71,6 @@ const reduceScript = `
     double score_norm = 100 * total_score / params.risk_cap;
     results['score'] = total_score;
     results['normalized_score'] = score_norm;
-
     if (score_norm < 20) {
       results['level'] = 'Unknown'
     }
@@ -89,7 +86,6 @@ const reduceScript = `
     else if (score_norm >= 90) {
       results['level'] = 'Critical'
     }
-
     return results;
   `;
 
@@ -161,15 +157,7 @@ export const calculateRiskScores = async ({
     index,
     query: {
       bool: {
-        must: [
-          filter,
-          {
-            bool: {
-              must: [{ exists: { field: ALERT_RISK_SCORE } }],
-              filter: filterFromRange(range),
-            },
-          },
-        ],
+        filter,
       },
     },
     aggs: identifierTypes.reduce(
