@@ -6,15 +6,15 @@
  */
 
 import { EuiFlexGroup, EuiPanel } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import React from 'react';
-import { toI18nDuration } from '../../../utils/slo/duration';
 
+import { toI18nDuration } from '../../../utils/slo/duration';
 import { useKibana } from '../../../utils/kibana_react';
-import { toHighPrecisionPercentage } from '../helpers/number';
 import { OverviewItem } from './overview_item';
 
 export interface Props {
@@ -24,6 +24,7 @@ export interface Props {
 export function Overview({ slo }: Props) {
   const { uiSettings } = useKibana().services;
   const dateFormat = uiSettings.get('dateFormat');
+  const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const hasNoData = slo.summary.status === 'NO_DATA';
 
   return (
@@ -42,8 +43,8 @@ export function Overview({ slo }: Props) {
               {
                 defaultMessage: '{value} (objective is {objective})',
                 values: {
-                  value: hasNoData ? '-' : `${toHighPrecisionPercentage(slo.summary.sliValue)}%`,
-                  objective: `${toHighPrecisionPercentage(slo.objective.target)}%`,
+                  value: hasNoData ? '-' : numeral(slo.summary.sliValue).format(percentFormat),
+                  objective: numeral(slo.objective.target).format(percentFormat),
                 },
               }
             )}

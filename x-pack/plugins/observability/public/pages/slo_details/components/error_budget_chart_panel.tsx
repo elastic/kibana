@@ -6,13 +6,14 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from '@elastic/eui';
+import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-import { toI18nDuration } from '../../../utils/slo/duration';
 
+import { useKibana } from '../../../utils/kibana_react';
+import { toI18nDuration } from '../../../utils/slo/duration';
 import { ChartData } from '../../../typings/slo';
-import { toHighPrecisionPercentage } from '../helpers/number';
 import { WideChart } from './wide_chart';
 
 export interface Props {
@@ -22,6 +23,9 @@ export interface Props {
 }
 
 export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
+  const { uiSettings } = useKibana().services;
+  const percentFormat = uiSettings.get('format:percent:defaultPattern');
+
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
 
   return (
@@ -51,7 +55,7 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
           <EuiFlexItem grow={false}>
             <EuiStat
               titleColor={isSloFailed ? 'danger' : 'success'}
-              title={`${toHighPrecisionPercentage(slo.summary.errorBudget.remaining)}%`}
+              title={numeral(slo.summary.errorBudget.remaining).format(percentFormat)}
               titleSize="s"
               description={i18n.translate(
                 'xpack.observability.slo.sloDetails.errorBudgetChartPanel.remaining',
