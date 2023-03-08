@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { LeftPanelProps } from '.';
 
 export interface LeftPanelContext {
@@ -29,10 +29,10 @@ export type LeftPanelProviderProps = {
 } & Partial<LeftPanelProps['params']>;
 
 export const LeftPanelProvider = ({ id, indexName, children }: LeftPanelProviderProps) => {
-  const contextValue = {
-    eventId: id as string,
-    indexName: indexName as string,
-  };
+  const contextValue = useMemo(
+    () => (id && indexName ? { eventId: id, indexName } : undefined),
+    [id, indexName]
+  );
 
   return <LeftFlyoutContext.Provider value={contextValue}>{children}</LeftFlyoutContext.Provider>;
 };

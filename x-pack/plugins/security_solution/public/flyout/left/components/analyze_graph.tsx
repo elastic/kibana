@@ -8,15 +8,15 @@
 import type { FC } from 'react';
 import React from 'react';
 import { EuiText } from '@elastic/eui';
-import { ANALYSER_GRAPH_TEST_ID } from './test_ids';
+import { ANALYZER_GRAPH_TEST_ID } from './test_ids';
 
 export const ANALYZE_GRAPH_ID = 'analyze_graph';
 
 /**
- * Analyser graph view displayed in the document details expandable flyout left section under the Visualize tab
+ * Analyzer graph view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const AnalyzeGraph: FC = () => {
-  return <EuiText data-test-subj={ANALYSER_GRAPH_TEST_ID}>{'Analyzer graph'}</EuiText>;
+  return <EuiText data-test-subj={ANALYZER_GRAPH_TEST_ID}>{'Analyzer graph'}</EuiText>;
 };
 
 AnalyzeGraph.displayName = 'AnalyzeGraph';

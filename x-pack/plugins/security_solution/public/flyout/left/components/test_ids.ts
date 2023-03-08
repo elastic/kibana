@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export const ANALYSER_GRAPH_TEST_ID = 'securitySolutionDocumentDetailsFlyoutAnalyserGraph';
+export const ANALYZER_GRAPH_TEST_ID = 'securitySolutionDocumentDetailsFlyoutAnalyzerGraph';
 export const SESSION_VIEW_TEST_ID = 'securitySolutionDocumentDetailsFlyoutSessionView';

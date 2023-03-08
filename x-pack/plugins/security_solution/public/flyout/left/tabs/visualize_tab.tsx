@@ -11,7 +11,7 @@ import { EuiButtonGroup, EuiSpacer } from '@elastic/eui';
 import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/button/button_group/button_group';
 import {
   VISUALIZE_TAB_BUTTON_GROUP_TEST_ID,
-  VISUALIZE_TAB_GRAPH_ANALYSER_BUTTON_TEST_ID,
+  VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID,
   VISUALIZE_TAB_SESSION_VIEW_BUTTON_TEST_ID,
 } from './test_ids';
 import { ANALYZE_GRAPH_ID, AnalyzeGraph } from '../components/analyze_graph';
@@ -31,7 +31,7 @@ const visualizeButtons: EuiButtonGroupOptionProps[] = [
   {
     id: ANALYZE_GRAPH_ID,
     label: ANALYZER_GRAPH_BUTTON,
-    'data-test-subj': VISUALIZE_TAB_GRAPH_ANALYSER_BUTTON_TEST_ID,
+    'data-test-subj': VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID,
   },
 ];
 

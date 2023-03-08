@@ -15,7 +15,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB,
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB,
-  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYSER_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON,
   DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON,
 } from '../screens/document_expandable_flyout';
 import { EXPAND_ALERT_BTN } from '../screens/alerts';
@@ -70,10 +70,10 @@ export const openSessionView = () =>
   cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_SESSION_VIEW_BUTTON).should('be.visible').click();
 
 /**
- * Open the Graph Analyser under the Visuablize tab in the document details expandable flyout left section
+ * Open the Graph Analyzer under the Visuablize tab in the document details expandable flyout left section
  */
-export const openGraphAnalyser = () =>
-  cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYSER_BUTTON).should('be.visible').click();
+export const openGraphAnalyzer = () =>
+  cy.get(DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON).should('be.visible').click();
 
 /**
  * Open the Insights tab in the document details expandable flyout left section

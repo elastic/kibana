@@ -22,7 +22,7 @@ export const SESSION_VIEW_BUTTON = i18n.translate(
 );
 
 export const ANALYZER_GRAPH_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.documentDetails.analyserGraphButton',
+  'xpack.securitySolution.flyout.documentDetails.analyzerGraphButton',
   {
     defaultMessage: 'Analyzer Graph',
   }
