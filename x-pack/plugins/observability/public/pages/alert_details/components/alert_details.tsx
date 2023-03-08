@@ -9,7 +9,6 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useParams } from 'react-router-dom';
 import { EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
-
 import { ALERT_RULE_TYPE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { getTimeZone } from '../../../utils/get_time_zone';
@@ -25,7 +24,7 @@ import { CenterJustifiedSpinner } from '../../rule_details/components/center_jus
 import PageNotFound from '../../404';
 
 import { ObservabilityAppServices } from '../../../application/types';
-import { AlertDetailsPathParams } from '../types';
+import { AlertDetailsPathParams, AlertSummaryField } from '../types';
 import { observabilityFeatureId } from '../../../../common';
 import { paths } from '../../../config/paths';
 
@@ -50,6 +49,7 @@ export function AlertDetails() {
     ruleId: alert?.fields[ALERT_RULE_UUID],
     http,
   });
+  const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
 
   useEffect(() => {
     if (alert) {
@@ -116,10 +116,15 @@ export function AlertDetails() {
       }}
       data-test-subj="alertDetails"
     >
-      <AlertSummary alert={alert} />
+      <AlertSummary alert={alert} alertSummaryFields={summaryFields} />
       <EuiSpacer size="l" />
       {AlertDetailsAppSection && rule && (
-        <AlertDetailsAppSection alert={alert} rule={rule} timeZone={timeZone} />
+        <AlertDetailsAppSection
+          alert={alert}
+          rule={rule}
+          timeZone={timeZone}
+          setAlertSummaryFields={setSummaryFields}
+        />
       )}
     </ObservabilityPageTemplate>
   );
