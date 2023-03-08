@@ -95,7 +95,7 @@ export const getTrailingBreadcrumbs = (
     ];
   }
 
-  if (params.state && !params.state.isExistingRule) {
+  if (!isRuleEditPage(params.pathName) && params.state && !params.state.isExistingRule) {
     breadcrumb = [...breadcrumb, { text: 'Deleted rule', href: '' }];
   }
 
