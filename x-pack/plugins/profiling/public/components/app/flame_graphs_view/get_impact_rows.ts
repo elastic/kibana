@@ -6,11 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { asCost } from '../../utils/formatters/as_cost';
-import { asDuration } from '../../utils/formatters/as_duration';
-import { asNumber } from '../../utils/formatters/as_number';
-import { asPercentage } from '../../utils/formatters/as_percentage';
-import { asWeight } from '../../utils/formatters/as_weight';
+import { asCost } from '../../../utils/formatters/as_cost';
+import { asDuration } from '../../../utils/formatters/as_duration';
+import { asNumber } from '../../../utils/formatters/as_number';
+import { asPercentage } from '../../../utils/formatters/as_percentage';
+import { asWeight } from '../../../utils/formatters/as_weight';
 
 const ANNUAL_SECONDS = 60 * 60 * 24 * 365;
 

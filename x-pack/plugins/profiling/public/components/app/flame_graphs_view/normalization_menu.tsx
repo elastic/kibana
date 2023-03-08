@@ -25,7 +25,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
-import { FlameGraphNormalizationMode } from '../../../common/flamegraph';
+import { FlameGraphNormalizationMode } from '../../../../common/flamegraph';
 
 export interface FlameGraphNormalizationOptions {
   baselineScale: number;
