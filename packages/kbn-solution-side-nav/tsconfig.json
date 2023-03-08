@@ -13,6 +13,9 @@
     ]
   },
   "include": ["**/*.ts", "**/*.tsx"],
-  "kbn_references": ["@kbn/i18n", "@kbn/test-jest-helpers"],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/analytics",
+  ],
   "exclude": ["target/**/*"]
 }
