@@ -24,9 +24,10 @@ import { CenterJustifiedSpinner } from '../../../components/center_justified_spi
 import PageNotFound from '../../404';
 
 import { ObservabilityAppServices } from '../../../application/types';
-import { AlertDetailsPathParams, AlertSummaryField } from '../types';
+import { AlertDetailsPathParams } from '../types';
 import { observabilityFeatureId } from '../../../../common';
 import { paths } from '../../../config/paths';
+import type { AlertSummaryField } from './alert_summary';
 
 export function AlertDetails() {
   const {
