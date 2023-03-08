@@ -86,6 +86,7 @@ export const createEventSignal = async ({
       threatSearchParams,
       eventsCount: currentEventList.length,
       signalValueMap: getSignalValueMap({ eventList: currentEventList, threatMatchedFields }),
+      termsQueryAllowed: true,
     });
 
     const ids = Array.from(signalsQueryMap.keys());

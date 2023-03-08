@@ -1,6 +1,7 @@
 post:
-  summary: Agent - Bulk Request Diagnostics
-  tags: []
+  summary: Bulk request diagnostics from agents
+  tags:
+    - Agents
   responses:
     '200':
       description: OK
@@ -35,4 +36,4 @@ post:
           required:
             - agents
         example:
-          agents: "fleet-agents.policy_id : (\"policy1\" or \"policy2\")"  
+          agents: 'fleet-agents.policy_id : ("policy1" or "policy2")'

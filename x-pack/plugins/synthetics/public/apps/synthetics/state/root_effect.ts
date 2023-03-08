@@ -45,7 +45,6 @@ export const rootEffect = function* root(): Generator {
     fork(fetchAgentPoliciesEffect),
     fork(fetchDynamicSettingsEffect),
     fork(setDynamicSettingsEffect),
-    fork(fetchAgentPoliciesEffect),
     fork(fetchAlertConnectorsEffect),
     fork(syncGlobalParamsEffect),
     fork(enableDefaultAlertingEffect),
