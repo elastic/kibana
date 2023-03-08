@@ -63,6 +63,7 @@ const DEFAULT_SORT = {
 };
 
 interface Props {
+  hideTitle?: boolean;
   hideViewTransactionsLink?: boolean;
   isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
@@ -79,6 +80,7 @@ interface Props {
 export function TransactionsTable({
   fixedHeight = false,
   hideViewTransactionsLink = false,
+  hideTitle = false,
   isSingleColumn = true,
   numberOfTransactionsPerPage = 5,
   showPerPageOptions = true,
@@ -281,32 +283,36 @@ export function TransactionsTable({
       gutterSize="s"
       data-test-subj="transactionsGroupTable"
     >
-      <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h2>
-                {i18n.translate('xpack.apm.transactionsTable.title', {
-                  defaultMessage: 'Transactions',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          {!hideViewTransactionsLink && (
+      {/* hide the transactions table title for mobile transactions tabs */}
+      {!hideTitle && (
+        <EuiFlexItem>
+          <EuiFlexGroup justifyContent="spaceBetween" responsive={false}>
             <EuiFlexItem grow={false}>
-              <TransactionOverviewLink
-                serviceName={serviceName}
-                latencyAggregationType={latencyAggregationType}
-                transactionType={transactionType}
-              >
-                {i18n.translate('xpack.apm.transactionsTable.linkText', {
-                  defaultMessage: 'View transactions',
-                })}
-              </TransactionOverviewLink>
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate('xpack.apm.transactionsTable.title', {
+                    defaultMessage: 'Transactions',
+                  })}
+                </h2>
+              </EuiTitle>
             </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
+            {!hideViewTransactionsLink && (
+              <EuiFlexItem grow={false}>
+                <TransactionOverviewLink
+                  serviceName={serviceName}
+                  latencyAggregationType={latencyAggregationType}
+                  transactionType={transactionType}
+                >
+                  {i18n.translate('xpack.apm.transactionsTable.linkText', {
+                    defaultMessage: 'View transactions',
+                  })}
+                </TransactionOverviewLink>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
+      )}
+
       {showMaxTransactionGroupsExceededWarning && maxTransactionGroupsExceeded && (
         <EuiFlexItem>
           <EuiCallOut
