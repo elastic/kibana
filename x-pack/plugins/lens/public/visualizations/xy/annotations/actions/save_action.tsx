@@ -12,30 +12,27 @@ import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public'
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { MountPoint } from '@kbn/core-mount-utils-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
+import {
+  OnSaveProps as SavedObjectOnSaveProps,
+  SavedObjectSaveModal,
+} from '@kbn/saved-objects-plugin/public';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-plugin/common';
 import { EuiIcon } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { LayerAction, StateSetter } from '../../../../types';
 import { XYByReferenceAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
 
-// exported for testing only
+type ModalOnSaveProps = SavedObjectOnSaveProps & { newTags: string[]; closeModal: () => void };
+
+/** @internal exported for testing only */
 export const SaveModal = ({
   domElement,
-  state,
-  layer,
-  setState,
-  eventAnnotationService,
-  toasts,
   savedObjectsTagging,
+  onSave,
 }: {
   domElement: HTMLDivElement;
-  state: XYState;
-  layer: XYAnnotationLayerConfig;
-  setState: StateSetter<XYState, unknown>;
-  eventAnnotationService: EventAnnotationServiceType;
-  toasts: ToastsStart;
-  savedObjectsTagging?: SavedObjectTaggingPluginStart;
+  savedObjectsTagging: SavedObjectTaggingPluginStart | undefined;
+  onSave: (props: ModalOnSaveProps) => void;
 }) => {
   const initialTags: string[] = [];
 
@@ -45,81 +42,10 @@ export const SaveModal = ({
 
   return (
     <SavedObjectSaveModal
-      onSave={async ({ newTitle, newDescription }) => {
-        let savedId: string;
-
-        try {
-          const { id } = await eventAnnotationService.createAnnotationGroup({
-            ...layer,
-            title: newTitle,
-            description: newDescription,
-            tags: selectedTags,
-          });
-
-          savedId = id;
-        } catch (err) {
-          toasts.addError(err, {
-            title: i18n.translate(
-              'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.errorToastTitle',
-              {
-                defaultMessage: 'Failed to save "{title}"',
-                values: {
-                  title: newTitle,
-                },
-              }
-            ),
-          });
-
-          return;
-        }
-
-        const newLayer: XYByReferenceAnnotationLayerConfig = {
-          ...layer,
-          annotationGroupId: savedId,
-          __lastSaved: {
-            ...layer,
-            title: newTitle,
-            description: newDescription,
-            tags: selectedTags,
-          },
-        };
-
-        setState({
-          ...state,
-          layers: state.layers.map((existingLayer) =>
-            existingLayer.layerId === newLayer.layerId ? newLayer : existingLayer
-          ),
-        });
-
-        closeModal();
-
-        toasts.addSuccess({
-          title: i18n.translate(
-            'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastTitle',
-            {
-              defaultMessage: 'Saved "{title}"',
-              values: {
-                title: newTitle,
-              },
-            }
-          ),
-          text: ((element) =>
-            render(
-              <div>
-                <FormattedMessage
-                  id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
-                  defaultMessage="View or manage in the {link}"
-                  values={{
-                    link: <a href="#">annotation library</a>,
-                  }}
-                />
-              </div>,
-              element
-            )) as MountPoint,
-        });
-      }}
+      onSave={async (props) => onSave({ ...props, closeModal, newTags: selectedTags })}
       onClose={closeModal}
-      title=""
+      title={''}
+      description={''}
       showCopyOnSave={false}
       objectType={EVENT_ANNOTATION_GROUP_TYPE}
       showDescription={true}
@@ -148,7 +74,103 @@ export const SaveModal = ({
   );
 };
 
-export const getSaveLayerAction = (props: {
+/** @internal exported for testing only */
+export const onSave = async ({
+  state,
+  layer,
+  setState,
+  eventAnnotationService,
+  toasts,
+  modalOnSaveProps: { newTitle, newDescription, newTags: selectedTags, closeModal },
+}: {
+  state: XYState;
+  layer: XYAnnotationLayerConfig;
+  setState: StateSetter<XYState, unknown>;
+  eventAnnotationService: EventAnnotationServiceType;
+  toasts: ToastsStart;
+  modalOnSaveProps: ModalOnSaveProps;
+}) => {
+  let savedId: string;
+
+  try {
+    const { id } = await eventAnnotationService.createAnnotationGroup({
+      ...layer,
+      title: newTitle,
+      description: newDescription,
+      tags: selectedTags,
+    });
+
+    savedId = id;
+  } catch (err) {
+    toasts.addError(err, {
+      title: i18n.translate(
+        'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.errorToastTitle',
+        {
+          defaultMessage: 'Failed to save "{title}"',
+          values: {
+            title: newTitle,
+          },
+        }
+      ),
+    });
+
+    return;
+  }
+
+  const newLayer: XYByReferenceAnnotationLayerConfig = {
+    ...layer,
+    annotationGroupId: savedId,
+    __lastSaved: {
+      ...layer,
+      title: newTitle,
+      description: newDescription,
+      tags: selectedTags,
+    },
+  };
+
+  setState({
+    ...state,
+    layers: state.layers.map((existingLayer) =>
+      existingLayer.layerId === newLayer.layerId ? newLayer : existingLayer
+    ),
+  });
+
+  closeModal();
+
+  toasts.addSuccess({
+    title: i18n.translate(
+      'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastTitle',
+      {
+        defaultMessage: 'Saved "{title}"',
+        values: {
+          title: newTitle,
+        },
+      }
+    ),
+    text: ((element) =>
+      render(
+        <div>
+          <FormattedMessage
+            id="xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.successToastBody"
+            defaultMessage="View or manage in the {link}"
+            values={{
+              link: <a href="#">annotation library</a>,
+            }}
+          />
+        </div>,
+        element
+      )) as MountPoint,
+  });
+};
+
+export const getSaveLayerAction = ({
+  state,
+  layer,
+  setState,
+  eventAnnotationService,
+  toasts,
+  savedObjectsTagging,
+}: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
   setState: StateSetter<XYState, unknown>;
@@ -157,13 +179,14 @@ export const getSaveLayerAction = (props: {
   toasts: ToastsStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }): LayerAction => {
-  const displayName = props.isNew
+  const displayName = false
     ? i18n.translate('xpack.lens.xyChart.annotations.addAnnotationGroupToLibrary', {
         defaultMessage: 'Add to library',
       })
     : i18n.translate('xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary', {
         defaultMessage: 'Save to library',
       });
+
   return {
     displayName,
     description: i18n.translate(
@@ -171,10 +194,24 @@ export const getSaveLayerAction = (props: {
       { defaultMessage: 'Saves annotation group as separate saved object' }
     ),
     execute: async (domElement) => {
-      if (props.isNew && domElement) {
-        render(<SaveModal {...props} domElement={domElement} />, domElement);
-      } else {
-        return props.eventAnnotationService.createAnnotationGroup(props.layer).then();
+      if (domElement) {
+        render(
+          <SaveModal
+            domElement={domElement}
+            savedObjectsTagging={savedObjectsTagging}
+            onSave={async (props) => {
+              await onSave({
+                state,
+                layer,
+                setState,
+                eventAnnotationService,
+                toasts,
+                modalOnSaveProps: props,
+              });
+            }}
+          />,
+          domElement
+        );
       }
     },
     icon: 'save',

@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`annotation group save action successful initial save 1`] = `
+exports[`annotation group save action save routine successful initial save 1`] = `
 Array [
   Array [
     Object {
@@ -17,17 +17,15 @@ Array [
                 "type": "manual",
               },
             ],
-            "description": "description",
+            "description": "my description",
             "ignoreGlobalFilters": false,
             "indexPatternId": "some-index-pattern",
             "layerId": "mylayerid",
             "layerType": "annotations",
             "tags": Array [
-              "my",
-              "many",
-              "tags",
+              "my-tag",
             ],
-            "title": "title",
+            "title": "my title",
           },
           "annotationGroupId": "saved-id-123",
           "annotations": Array [
