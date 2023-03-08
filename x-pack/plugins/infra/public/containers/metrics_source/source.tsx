@@ -52,7 +52,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
         }
 
         return fetchService
-          .get<MetricsSourceConfigurationResponse>(`${API_URL}`)
+          .fetch<MetricsSourceConfigurationResponse>(API_URL, { method: 'GET' })
           .catch(throwLoadSourceError);
       },
       onResolve: (response) => {
@@ -73,6 +73,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
 
         return await fetchService
           .patch<MetricsSourceConfigurationResponse>(API_URL, {
+            method: 'PATCH',
             body: JSON.stringify(sourceProperties),
           })
           .catch(throwLoadSourceError);
