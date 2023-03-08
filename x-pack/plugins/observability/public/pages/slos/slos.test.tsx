@@ -19,7 +19,7 @@ import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
 import { useLicense } from '../../hooks/use_license';
-import { SlosPage } from '.';
+import { SlosPage } from './slos';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import type { ConfigSchema } from '../../plugin';
 import type { Subset } from '../../typings';
