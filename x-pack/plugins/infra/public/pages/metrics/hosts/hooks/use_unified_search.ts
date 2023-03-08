@@ -134,7 +134,7 @@ export const useUnifiedSearch = () => {
     return () => {
       subscription.unsubscribe();
     };
-  });
+  }, [filterManagerService, getTime, onSubmit, queryStringService, timeFilterService.timefilter]);
 
   // Track telemetry event on query/filter/date changes
   useEffect(() => {
