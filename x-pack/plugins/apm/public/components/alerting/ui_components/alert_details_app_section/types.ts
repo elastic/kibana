@@ -6,7 +6,7 @@
  */
 
 import { Rule } from '@kbn/alerting-plugin/common';
-import { TopAlert } from '@kbn/observability-plugin/public/pages/alerts';
+import { TopAlert } from '@kbn/observability-plugin/public/typings/alerts';
 import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 

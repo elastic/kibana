@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TopAlert } from '../alerts/containers/alerts_page/types';
+import type { TopAlert } from '../../typings/alerts';
 
 export interface AlertSummaryProps {
   alert: TopAlert | null;
@@ -14,5 +14,3 @@ export interface AlertSummaryProps {
 export interface AlertDetailsPathParams {
   alertId: string;
 }
-
-export const ALERT_DETAILS_PAGE_ID = 'alert-details-o11y';
