@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { assertNever } from '@kbn/std';
 import { Duration, DurationUnit } from '../../typings';
@@ -33,6 +34,21 @@ export function toMinutes(duration: Duration) {
   }
 
   assertNever(duration.unit);
+}
+
+export function toMomentUnitOfTime(unit: string): moment.unitOfTime.Diff | undefined {
+  switch (unit) {
+    case 'd':
+      return 'days';
+    case 'w':
+      return 'weeks';
+    case 'M':
+      return 'months';
+    case 'Q':
+      return 'quarters';
+    case 'Y':
+      return 'years';
+  }
 }
 
 export function toI18nDuration(durationStr: string): string {
