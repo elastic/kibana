@@ -168,12 +168,45 @@ export interface GetViewInAppRelativeUrlFnOpts<Params extends RuleTypeParams> {
 export type GetViewInAppRelativeUrlFn<Params extends RuleTypeParams> = (
   opts: GetViewInAppRelativeUrlFnOpts<Params>
 ) => string;
-export interface IRuleTypeAlerts {
-  context: string;
-  namespace?: string;
+
+interface ComponentTemplateSpec {
+  dynamic?: 'strict' | false; // defaults to 'strict'
   fieldMap: FieldMap;
+}
+
+export interface IRuleTypeAlerts {
+  /**
+   * Specifies the target alerts-as-data resource
+   * for this rule type. All alerts created with the same
+   * context are written to the same alerts-as-data index.
+   *
+   * All custom mappings defined for a context must be the same!
+   */
+  context: string;
+
+  /**
+   * Specifies custom mappings for the target alerts-as-data
+   * index. These mappings will be translated into a component template
+   * and used in the index template for the index.
+   */
+  mappings: ComponentTemplateSpec;
+
+  /**
+   * Optional flag to include a reference to the ECS component template.
+   */
   useEcs?: boolean;
+
+  /**
+   * Optional flag to include a reference to the legacy alert component template.
+   * Any rule type that is migrating from the rule registry should set this
+   * flag to true to ensure their alerts-as-data indices are backwards compatible.
+   */
   useLegacyAlerts?: boolean;
+
+  /**
+   * Optional secondary alias to use. This alias should not include the namespace.
+   */
+  secondaryAlias?: string;
 }
 
 export interface RuleType<

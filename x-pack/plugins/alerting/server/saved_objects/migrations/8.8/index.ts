@@ -7,6 +7,7 @@
 
 import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
 import { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { v4 as uuidv4 } from 'uuid';
 import { createEsoMigration, pipeMigrations } from '../utils';
 import { RawRule } from '../../../types';
 
@@ -20,9 +21,30 @@ function addRevision(doc: SavedObjectUnsanitizedDoc<RawRule>): SavedObjectUnsani
   };
 }
 
+function addActionUuid(
+  doc: SavedObjectUnsanitizedDoc<RawRule>
+): SavedObjectUnsanitizedDoc<RawRule> {
+  const {
+    attributes: { actions },
+  } = doc;
+
+  return {
+    ...doc,
+    attributes: {
+      ...doc.attributes,
+      actions: actions
+        ? actions.map((action) => ({
+            ...action,
+            uuid: uuidv4(),
+          }))
+        : [],
+    },
+  };
+}
+
 export const getMigrations880 = (encryptedSavedObjects: EncryptedSavedObjectsPluginSetup) =>
   createEsoMigration(
     encryptedSavedObjects,
     (doc: SavedObjectUnsanitizedDoc<RawRule>): doc is SavedObjectUnsanitizedDoc<RawRule> => true,
-    pipeMigrations(addRevision)
+    pipeMigrations(addActionUuid, addRevision)
   );
