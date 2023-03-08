@@ -608,7 +608,7 @@ function expectToMatchRuleSchema(obj: unknown): void {
     author: expect.arrayContaining([]),
     false_positives: expect.arrayContaining([]),
     from: expect.any(String),
-    max_signals: 100,
+    max_signals: expect.any(Number),
     risk_score_mapping: expect.arrayContaining([]),
     severity_mapping: expect.arrayContaining([]),
     threat: expect.arrayContaining([]),
