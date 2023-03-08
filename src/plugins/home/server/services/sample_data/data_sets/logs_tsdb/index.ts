@@ -12,10 +12,10 @@ import { getSavedObjects } from './saved_objects';
 import { fieldMappings } from './field_mappings';
 import { SampleDatasetSchema } from '../../lib/sample_dataset_registry_types';
 
-const logsName = i18n.translate('home.sampleData.logsSpecTitle', {
+const logsName = i18n.translate('home.sampleData.logsTsdbSpecTitle', {
   defaultMessage: 'Sample web logs (TSDB)',
 });
-const logsDescription = i18n.translate('home.sampleData.logsSpecDescription', {
+const logsDescription = i18n.translate('home.sampleData.logsTsdbSpecDescription', {
   defaultMessage: 'Sample data, visualizations, and dashboards for monitoring web logs.',
 });
 
