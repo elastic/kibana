@@ -7,12 +7,11 @@
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { DataViewId } from '../../../common/detection_engine/rule_schema';
 
 export type IdentifierType = 'user' | 'host';
 
 export interface GetScoresParams {
-  dataViewId?: DataViewId;
+  index: string;
   filter?: unknown;
   identifierType?: IdentifierType;
   enrichInputs?: boolean;
