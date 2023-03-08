@@ -107,6 +107,7 @@ export const calculateRiskScores = async ({
 
   const results = await esClient.search<never, CalculateRiskScoreAggregations>({
     size: 0,
+    _source: false,
     index,
     query: {
       bool: {
