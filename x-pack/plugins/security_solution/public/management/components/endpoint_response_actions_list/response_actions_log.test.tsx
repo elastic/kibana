@@ -661,7 +661,9 @@ describe('Response actions history', () => {
 
         const executeAccordions = getByTestId(`${testPrefix}-executeResponseOutput`);
         expect(executeAccordions).toBeTruthy();
-        expect(executeAccordions).toHaveTextContent('Execution outputExecution error');
+        const accordionButtons = Array.from(executeAccordions.querySelectorAll('.euiAccordion'));
+        expect(accordionButtons[0]).toHaveTextContent('Execution output (truncated)');
+        expect(accordionButtons[1]).toHaveTextContent('Execution error (truncated)');
       });
 
       it('should contain execute output for `execute` action WITHOUT execute operation privilege', async () => {

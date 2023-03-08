@@ -32,6 +32,36 @@ export const model = (
   switch (current.controlState) {
     case 'INIT':
       return Stages.init(current, response as StateActionResponse<'INIT'>, context);
+    case 'CREATE_TARGET_INDEX':
+      return Stages.createTargetIndex(
+        current,
+        response as StateActionResponse<'CREATE_TARGET_INDEX'>,
+        context
+      );
+    case 'UPDATE_ALIASES':
+      return Stages.updateAliases(
+        current,
+        response as StateActionResponse<'UPDATE_ALIASES'>,
+        context
+      );
+    case 'UPDATE_INDEX_MAPPINGS':
+      return Stages.updateIndexMappings(
+        current,
+        response as StateActionResponse<'UPDATE_INDEX_MAPPINGS'>,
+        context
+      );
+    case 'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK':
+      return Stages.updateIndexMappingsWaitForTask(
+        current,
+        response as StateActionResponse<'UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK'>,
+        context
+      );
+    case 'UPDATE_MAPPING_MODEL_VERSIONS':
+      return Stages.updateMappingModelVersion(
+        current,
+        response as StateActionResponse<'UPDATE_MAPPING_MODEL_VERSIONS'>,
+        context
+      );
     case 'DONE':
     case 'FATAL':
       // The state-action machine will never call the model in the terminating states
