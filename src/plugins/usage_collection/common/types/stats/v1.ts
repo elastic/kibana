@@ -24,14 +24,22 @@ export interface UsageObject {
   xpack?: UsageObject;
   [key: string]: unknown | UsageObject;
 }
+
+export interface ClusterUuidLegacy {
+  clusterUuid?: string;
+}
+export interface ClusterUuid {
+  cluster_uuid?: string;
+}
 /**
  * Extended usage stats.
+ * @remarks
  * Legacy implementation used to conditionally include kibana usage metrics
  * as of https://github.com/elastic/kibana/pull/151082, usage is no longer reported
  * and set to an empty object to prevent breaking changes to existing consumers.
  */
 export interface ExtendedStats {
-  [key: string]: unknown;
+  [key: string]: unknown | UsageObject;
   clusterUuid?: string; // camel case if legacy === true
   cluster_uuid?: string; // snake_case if legacy === false
 }

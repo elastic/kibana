@@ -82,7 +82,7 @@ export function registerStatsRoute({
         const extendedClusterUuid = isLegacy ? { clusterUuid } : { cluster_uuid: clusterUuid };
         extended = {
           usage: {},
-          extendedClusterUuid,
+          ...extendedClusterUuid,
         };
       }
 

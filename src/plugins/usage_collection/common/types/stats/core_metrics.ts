@@ -162,6 +162,7 @@ export interface OpsOsMetrics {
 }
 
 /**
+ * {@link OpsServerMetrics}
  * server related metrics
  * @public
  */
@@ -187,9 +188,10 @@ export interface OpsServerMetrics {
 }
 
 /**
+ * {@link OpsMetrics}
  * Regroups metrics gathered by all the collectors.
  * This contains metrics about the os/runtime, the kibana process and the http server.
- *
+
  * @public
  */
 export interface OpsMetrics {
