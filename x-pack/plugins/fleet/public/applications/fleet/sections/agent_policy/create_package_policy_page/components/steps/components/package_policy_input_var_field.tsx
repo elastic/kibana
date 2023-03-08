@@ -187,6 +187,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<{
       isEditPage,
       isInvalid,
       fieldLabel,
+      options,
     ]);
 
     // Boolean cannot be optional by default set to false
