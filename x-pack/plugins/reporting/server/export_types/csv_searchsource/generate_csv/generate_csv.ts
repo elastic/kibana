@@ -66,6 +66,12 @@ export class CsvGenerator {
           index: indexPatternTitle,
           keep_alive: duration,
           ignore_unavailable: true,
+          // TODO: currently this doesn't do anything as es has a bug that throttled indices are always included when using PIT api
+          // if es fixes the issue, everything should work as expected. Just needs to be tested and this comment removed
+          // if es decides to not fix, then we can close the issue and remove the `ignore_throttled` code from here
+          // https://github.com/elastic/kibana/issues/152884
+          // @ts-expect-error ignore_throttled is not in the type definition, but it is accepted by es
+          ignore_throttled: settings.includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
         },
         {
           requestTimeout: duration,
@@ -91,7 +97,7 @@ export class CsvGenerator {
     settings: CsvExportSettings,
     searchAfter?: estypes.SortResults
   ) {
-    const { scroll: scrollSettings, includeFrozen } = settings;
+    const { scroll: scrollSettings } = settings;
     searchSource.setField('size', scrollSettings.size);
 
     if (searchAfter) {
@@ -112,7 +118,6 @@ export class CsvGenerator {
     const searchParams = {
       params: {
         body: searchBody,
-        ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
       },
     };
 

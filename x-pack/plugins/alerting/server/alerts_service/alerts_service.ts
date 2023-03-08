@@ -13,13 +13,11 @@ import {
 import { get, isEmpty, isEqual } from 'lodash';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { firstValueFrom, Observable } from 'rxjs';
+import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import {
-  alertFieldMap,
-  ecsFieldMap,
-  legacyAlertFieldMap,
-  type FieldMap,
-} from '@kbn/alerts-as-data-utils';
-import { IndicesGetIndexTemplateIndexTemplateItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+  IndicesGetIndexTemplateIndexTemplateItem,
+  Metadata,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { asyncForEach } from '@kbn/std';
 import {
   DEFAULT_ALERTS_ILM_POLICY_NAME,
@@ -30,23 +28,28 @@ import {
   getComponentTemplateName,
   getIndexTemplateAndPattern,
   IIndexPatternString,
-} from './types';
+} from './resource_installer_utils';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 import { IRuleTypeAlerts } from '../types';
 import {
   createResourceInstallationHelper,
+  errorResult,
+  InitializationPromise,
   ResourceInstallationHelper,
+  successResult,
 } from './create_resource_installation_helper';
 
 const TOTAL_FIELDS_LIMIT = 2500;
 const INSTALLATION_TIMEOUT = 20 * 60 * 1000; // 20 minutes
 const LEGACY_ALERT_CONTEXT = 'legacy-alert';
 export const ECS_CONTEXT = `ecs`;
-export const ECS_COMPONENT_TEMPLATE_NAME = getComponentTemplateName(ECS_CONTEXT);
+export const ECS_COMPONENT_TEMPLATE_NAME = getComponentTemplateName({ name: ECS_CONTEXT });
 interface AlertsServiceParams {
   logger: Logger;
   pluginStop$: Observable<void>;
+  kibanaVersion: string;
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
+  timeoutMs?: number;
 }
 
 interface ConcreteIndexInfo {
@@ -54,17 +57,8 @@ interface ConcreteIndexInfo {
   alias: string;
   isWriteIndex: boolean;
 }
-interface IAlertsService {
-  /**
-   * Initializes the common ES resources needed for framework alerts as data
-   * - ILM policy - common policy shared by all AAD indices
-   * - Component template - common mappings for fields populated and used by the framework
-   *
-   * Once common resource initialization is complete, look for any solution-specific
-   * resources that have been registered and are awaiting initialization.
-   */
-  initialize(timeoutMs?: number): void;
 
+interface IAlertsService {
   /**
    * Register solution specific resources. If common resource initialization is
    * complete, go ahead and install those resources, otherwise add to queue to
@@ -78,16 +72,37 @@ interface IAlertsService {
   register(opts: IRuleTypeAlerts, timeoutMs?: number): void;
 
   isInitialized(): boolean;
+
+  /**
+   * Returns promise that resolves when the resources for the given
+   * context are installed. These include the context specific component template,
+   * the index template for the default namespace and the concrete write index
+   * for the default namespace.
+   */
+  getContextInitializationPromise(context: string): Promise<InitializationPromise>;
 }
+
+export type PublicAlertsService = Pick<IAlertsService, 'getContextInitializationPromise'>;
+export type PublicFrameworkAlertsService = PublicAlertsService & {
+  enabled: () => boolean;
+};
 
 export class AlertsService implements IAlertsService {
   private initialized: boolean;
   private resourceInitializationHelper: ResourceInstallationHelper;
-  private registeredContexts: Map<string, FieldMap> = new Map();
+  private registeredContexts: Map<string, IRuleTypeAlerts> = new Map();
+  private commonInitPromise: Promise<InitializationPromise>;
 
   constructor(private readonly options: AlertsServiceParams) {
     this.initialized = false;
+
+    // Kick off initialization of common assets and save the promise
+    this.commonInitPromise = this.initializeCommon(this.options.timeoutMs);
+
+    // Create helper for initializing context-specific resources
     this.resourceInitializationHelper = createResourceInstallationHelper(
+      this.options.logger,
+      this.commonInitPromise,
       this.initializeContext.bind(this)
     );
   }
@@ -96,88 +111,118 @@ export class AlertsService implements IAlertsService {
     return this.initialized;
   }
 
-  public async isContextInitialized(context: string) {
-    return (await this.resourceInitializationHelper.getInitializedContexts().get(context)) ?? false;
-  }
-
-  public initialize(timeoutMs?: number) {
-    // Only initialize once
-    if (this.initialized) return;
-
-    this.options.logger.debug(`Initializing resources for AlertsService`);
-
-    // Use setImmediate to execute async fns as soon as possible
-    setImmediate(async () => {
-      try {
-        const esClient = await this.options.elasticsearchClientPromise;
-
-        // Common initialization installs ILM policy and shared component template
-        const initFns = [
-          () => this.createOrUpdateIlmPolicy(esClient),
-          () => this.createOrUpdateComponentTemplate(esClient, getComponentTemplate(alertFieldMap)),
-          () =>
-            this.createOrUpdateComponentTemplate(
-              esClient,
-              getComponentTemplate(legacyAlertFieldMap, LEGACY_ALERT_CONTEXT)
-            ),
-          () =>
-            this.createOrUpdateComponentTemplate(
-              esClient,
-              getComponentTemplate(ecsFieldMap, ECS_CONTEXT)
-            ),
-        ];
-
-        for (const fn of initFns) {
-          await this.installWithTimeout(async () => await fn(), timeoutMs);
-        }
-
-        this.initialized = true;
-      } catch (err) {
-        this.options.logger.error(
-          `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted.`
-        );
-        this.initialized = false;
-      }
-
-      if (this.initialized) {
-        this.resourceInitializationHelper.setReadyToInitialize(timeoutMs);
-      }
-    });
+  public async getContextInitializationPromise(
+    context: string,
+    timeoutMs?: number
+  ): Promise<InitializationPromise> {
+    if (!this.registeredContexts.has(context)) {
+      const errMsg = `Error getting initialized status for context ${context} - context has not been registered.`;
+      this.options.logger.error(errMsg);
+      return Promise.resolve(errorResult(errMsg));
+    }
+    return this.resourceInitializationHelper.getInitializedContext(context, timeoutMs);
   }
 
   public register(opts: IRuleTypeAlerts, timeoutMs?: number) {
-    const { context, fieldMap } = opts;
+    const { context } = opts;
     // check whether this context has been registered before
     if (this.registeredContexts.has(context)) {
-      const registeredFieldMap = this.registeredContexts.get(context);
-      if (!isEqual(fieldMap, registeredFieldMap)) {
-        throw new Error(`${context} has already been registered with a different mapping`);
+      const registeredOptions = this.registeredContexts.get(context);
+      if (!isEqual(opts, registeredOptions)) {
+        throw new Error(`${context} has already been registered with different options`);
       }
       this.options.logger.debug(`Resources for context "${context}" have already been registered.`);
       return;
     }
 
     this.options.logger.info(`Registering resources for context "${context}".`);
-    this.registeredContexts.set(context, fieldMap);
+    this.registeredContexts.set(context, opts);
     this.resourceInitializationHelper.add(opts, timeoutMs);
   }
 
+  /**
+   * Initializes the common ES resources needed for framework alerts as data
+   * - ILM policy - common policy shared by all AAD indices
+   * - Component template - common mappings for fields populated and used by the framework
+   */
+  private async initializeCommon(timeoutMs?: number): Promise<InitializationPromise> {
+    try {
+      this.options.logger.debug(`Initializing resources for AlertsService`);
+      const esClient = await this.options.elasticsearchClientPromise;
+
+      // Common initialization installs ILM policy and shared component template
+      const initFns = [
+        () => this.createOrUpdateIlmPolicy(esClient),
+        () =>
+          this.createOrUpdateComponentTemplate(
+            esClient,
+            getComponentTemplate({ fieldMap: alertFieldMap, includeSettings: true })
+          ),
+        () =>
+          this.createOrUpdateComponentTemplate(
+            esClient,
+            getComponentTemplate({
+              fieldMap: legacyAlertFieldMap,
+              name: LEGACY_ALERT_CONTEXT,
+              includeSettings: true,
+            })
+          ),
+        () =>
+          this.createOrUpdateComponentTemplate(
+            esClient,
+            getComponentTemplate({
+              fieldMap: ecsFieldMap,
+              name: ECS_CONTEXT,
+              includeSettings: true,
+            })
+          ),
+      ];
+
+      for (const fn of initFns) {
+        await this.installWithTimeout(async () => await fn(), timeoutMs);
+      }
+
+      this.initialized = true;
+      return successResult();
+    } catch (err) {
+      this.options.logger.error(
+        `Error installing common resources for AlertsService. No additional resources will be installed and rule execution may be impacted. - ${err.message}`
+      );
+      this.initialized = false;
+      return errorResult(err.message);
+    }
+  }
+
   private async initializeContext(
-    { context, fieldMap, useEcs, useLegacyAlerts }: IRuleTypeAlerts,
+    { context, mappings, useEcs, useLegacyAlerts, secondaryAlias }: IRuleTypeAlerts,
     timeoutMs?: number
   ) {
     const esClient = await this.options.elasticsearchClientPromise;
 
-    const indexTemplateAndPattern = getIndexTemplateAndPattern(context);
+    const indexTemplateAndPattern = getIndexTemplateAndPattern({ context, secondaryAlias });
 
     let initFns: Array<() => Promise<void>> = [];
 
     // List of component templates to reference
+    // Order matters in this list - templates specified last take precedence over those specified first
+    // 1. ECS component template, if using
+    // 2. Context specific component template, if defined during registration
+    // 3. Legacy alert component template, if using
+    // 4. Framework common component template, always included
     const componentTemplateRefs: string[] = [];
 
-    // If fieldMap is not empty, create a context specific component template
-    if (!isEmpty(fieldMap)) {
-      const componentTemplate = getComponentTemplate(fieldMap, context);
+    // If useEcs is set to true, add the ECS component template to the references
+    if (useEcs) {
+      componentTemplateRefs.push(getComponentTemplateName({ name: ECS_CONTEXT }));
+    }
+
+    // If fieldMap is not empty, create a context specific component template and add to the references
+    if (!isEmpty(mappings.fieldMap)) {
+      const componentTemplate = getComponentTemplate({
+        fieldMap: mappings.fieldMap,
+        dynamic: mappings.dynamic,
+        context,
+      });
       initFns.push(
         async () => await this.createOrUpdateComponentTemplate(esClient, componentTemplate)
       );
@@ -186,12 +231,7 @@ export class AlertsService implements IAlertsService {
 
     // If useLegacy is set to true, add the legacy alert component template to the references
     if (useLegacyAlerts) {
-      componentTemplateRefs.push(getComponentTemplateName(LEGACY_ALERT_CONTEXT));
-    }
-
-    // If useEcs is set to true, add the ECS component template to the references
-    if (useEcs) {
-      componentTemplateRefs.push(getComponentTemplateName(ECS_CONTEXT));
+      componentTemplateRefs.push(getComponentTemplateName({ name: LEGACY_ALERT_CONTEXT }));
     }
 
     // Add framework component template to the references
@@ -326,6 +366,14 @@ export class AlertsService implements IAlertsService {
   ) {
     this.options.logger.info(`Installing index template ${indexPatterns.template}`);
 
+    const indexMetadata: Metadata = {
+      kibana: {
+        version: this.options.kibanaVersion,
+      },
+      managed: true,
+      namespace: 'default', // hard-coded to default here until we start supporting space IDs
+    };
+
     const indexTemplate = {
       name: indexPatterns.template,
       body: {
@@ -343,12 +391,21 @@ export class AlertsService implements IAlertsService {
           },
           mappings: {
             dynamic: false,
+            _meta: indexMetadata,
           },
+          ...(indexPatterns.secondaryAlias
+            ? {
+                aliases: {
+                  [indexPatterns.secondaryAlias]: {
+                    is_write_index: false,
+                  },
+                },
+              }
+            : {}),
         },
-        _meta: {
-          managed: true,
-        },
-        // do we need metadata? like kibana version? doesn't that get updated every version? or just the first version its installed
+        _meta: indexMetadata,
+
+        // TODO - set priority of this template when we start supporting spaces
       },
     };
 
@@ -484,8 +541,11 @@ export class AlertsService implements IAlertsService {
     // check if a concrete write index already exists
     let concreteIndices: ConcreteIndexInfo[] = [];
     try {
+      // Specify both the index pattern for the backing indices and their aliases
+      // The alias prevents the request from finding other namespaces that could match the -* pattern
       const response = await esClient.indices.getAlias({
         index: indexPatterns.pattern,
+        name: indexPatterns.basePattern,
       });
 
       concreteIndices = Object.entries(response).flatMap(([index, { aliases }]) =>
