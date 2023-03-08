@@ -47,6 +47,7 @@ import {
   ResultView,
   ResultsPerPageView,
   ResultsView,
+  Sorting,
 } from './search_ui_components';
 
 class InternalEngineTransporter implements Transporter {
@@ -85,7 +86,7 @@ export const EngineSearchPreview: React.FC = () => {
   const [showAPICallFlyout, setShowAPICallFlyout] = useState<boolean>(false);
   const [lastAPICall, setLastAPICall] = useState<null | APICallData>(null);
   const { engineName, isLoadingEngine } = useValues(EngineViewLogic);
-  const { resultFields, searchableFields } = useValues(EngineSearchPreviewLogic);
+  const { resultFields, searchableFields, sortableFields } = useValues(EngineSearchPreviewLogic);
   const { engineData } = useValues(EngineIndicesLogic);
 
   const config: SearchDriverOptions = useMemo(() => {
@@ -140,6 +141,8 @@ export const EngineSearchPreview: React.FC = () => {
           <EuiFlexGroup>
             <EuiFlexItem grow={false} css={{ minWidth: '240px' }}>
               <ResultsPerPage view={ResultsPerPageView} options={RESULTS_PER_PAGE_OPTIONS} />
+              <EuiSpacer size="m" />
+              <Sorting sortableFields={sortableFields} />
               <EuiSpacer size="m" />
               <EuiLink href={docLinks.enterpriseSearchEngines} target="_blank">
                 <FormattedMessage
