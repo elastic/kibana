@@ -24,7 +24,8 @@ describe('migrator-only node', () => {
     const log = new ToolingLog({ writeTo: process.stdout, level: 'debug' });
     log.indent(4);
     const es = createTestEsCluster({ log });
-    let proc: ChildProcess.ChildProcess | undefined;
+    let proc: undefined | ChildProcess.ChildProcess;
+    let logsSub: undefined | Rx.Subscription;
     try {
       await es.start();
 
@@ -46,7 +47,7 @@ describe('migrator-only node', () => {
 
       let sawExpectedLog = false;
 
-      Rx.merge(
+      logsSub = Rx.merge(
         observeLines(proc.stdout!).pipe(
           Rx.tap((line) => {
             log.debug(line);
@@ -74,6 +75,7 @@ describe('migrator-only node', () => {
       expect(sawExpectedLog).toBe(true);
       expect(exitCode).toBe(0);
     } finally {
+      logsSub?.unsubscribe();
       await es.stop();
       if (proc?.exitCode == null) proc?.kill(1);
     }
