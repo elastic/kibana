@@ -29,8 +29,7 @@ export interface MetricExplorerViewState {
 
 export const useMetricsExplorerState = (
   source: MetricsSourceConfigurationProperties,
-  derivedIndexPattern: DataViewBase,
-  shouldLoadImmediately = true
+  derivedIndexPattern: DataViewBase
 ) => {
   const [refreshSignal, setRefreshSignal] = useState(0);
   const [afterKey, setAfterKey] = useState<string | null | Record<string, string | null>>(null);
@@ -44,14 +43,11 @@ export const useMetricsExplorerState = (
     setOptions,
   } = useMetricsExplorerOptionsContainerContext();
 
-  const { loading, error, data, loadData } = useMetricsExplorerData(
+  const { isLoading, error, data, loadData, fetchNextPage } = useMetricsExplorerData(
     options,
     source,
     derivedIndexPattern,
-    currentTimerange,
-    afterKey,
-    refreshSignal,
-    shouldLoadImmediately
+    currentTimerange
   );
 
   const handleRefresh = useCallback(() => {
@@ -137,7 +133,7 @@ export const useMetricsExplorerState = (
   );
 
   return {
-    loading,
+    loading: isLoading,
     error,
     data,
     currentTimerange,
@@ -150,7 +146,7 @@ export const useMetricsExplorerState = (
     handleGroupByChange,
     handleTimeChange,
     handleRefresh,
-    handleLoadMore: setAfterKey,
+    handleLoadMore: fetchNextPage,
     defaultViewState,
     onViewStateChange,
     loadData,

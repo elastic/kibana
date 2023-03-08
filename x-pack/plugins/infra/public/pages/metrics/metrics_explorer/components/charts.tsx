@@ -20,17 +20,17 @@ import { InfraLoadingPanel } from '../../../../components/loading';
 import { NoData } from '../../../../components/empty_states/no_data';
 import { MetricsExplorerChart } from './chart';
 
-type StringOrNull = string | null;
-
 interface Props {
   loading: boolean;
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
-  onLoadMore: (afterKey: StringOrNull | Record<string, StringOrNull>) => void;
+  onLoadMore: () => void;
   onRefetch: () => void;
   onFilter: (filter: string) => void;
   onTimeChange: (start: string, end: string) => void;
-  data: MetricsExplorerResponse | null;
+  data?: {
+    pages: MetricsExplorerResponse[];
+  };
   source: MetricsSourceConfigurationProperties | undefined;
   timeRange: MetricsExplorerTimeOptions;
 }
@@ -59,7 +59,8 @@ export const MetricsExplorerCharts = ({
     );
   }
 
-  if (!data || data.series.length === 0) {
+  // TODO Improve checking existence of data
+  if (!data || data.pages[0].series.length === 0) {
     return (
       <NoData
         titleText={i18n.translate('xpack.infra.metricsExplorer.noDataTitle', {
@@ -78,28 +79,31 @@ export const MetricsExplorerCharts = ({
   }
 
   const and = i18n.translate('xpack.infra.metricsExplorer.andLabel', { defaultMessage: '" and "' });
+  const lastPageIndex = data.pages.length - 1;
 
   return (
     <div style={{ width: '100%' }}>
-      <EuiFlexGrid gutterSize="s" columns={data.series.length === 1 ? 1 : 3}>
-        {data.series.map((series) => (
-          <EuiFlexItem key={series.id} style={{ minWidth: 0 }}>
-            <MetricsExplorerChart
-              key={`chart-${series.id}`}
-              onFilter={onFilter}
-              options={options}
-              chartOptions={chartOptions}
-              title={options.groupBy ? series.id : null}
-              height={data.series.length > 1 ? 200 : 400}
-              series={series}
-              source={source}
-              timeRange={timeRange}
-              onTimeChange={onTimeChange}
-            />
-          </EuiFlexItem>
-        ))}
+      <EuiFlexGrid gutterSize="s" columns={data.pages[0].series.length === 1 ? 1 : 3}>
+        {data.pages.map((page) =>
+          page.series.map((series) => (
+            <EuiFlexItem key={series.id} style={{ minWidth: 0 }}>
+              <MetricsExplorerChart
+                key={`chart-${series.id}`}
+                onFilter={onFilter}
+                options={options}
+                chartOptions={chartOptions}
+                title={options.groupBy ? series.id : null}
+                height={page.series.length > 1 ? 200 : 400}
+                series={series}
+                source={source}
+                timeRange={timeRange}
+                onTimeChange={onTimeChange}
+              />
+            </EuiFlexItem>
+          ))
+        )}
       </EuiFlexGrid>
-      {data.series.length > 1 ? (
+      {data.pages[0].series.length > 1 ? (
         <div style={{ textAlign: 'center', marginBottom: 16 }}>
           <EuiHorizontalRule />
           <EuiText color="subdued">
@@ -108,8 +112,8 @@ export const MetricsExplorerCharts = ({
                 id="xpack.infra.metricsExplorer.footerPaginationMessage"
                 defaultMessage='Displaying {length} of {total} charts grouped by "{groupBy}".'
                 values={{
-                  length: data.series.length,
-                  total: data.pageInfo.total,
+                  length: data.pages[0].series.length,
+                  total: data.pages[0].pageInfo.total,
                   groupBy: Array.isArray(options.groupBy)
                     ? options.groupBy.join(and)
                     : options.groupBy,
@@ -117,13 +121,9 @@ export const MetricsExplorerCharts = ({
               />
             </p>
           </EuiText>
-          {data.pageInfo.afterKey ? (
+          {data?.pages[lastPageIndex].pageInfo.afterKey ? (
             <div style={{ margin: '16px 0' }}>
-              <EuiButton
-                isLoading={loading}
-                size="s"
-                onClick={() => onLoadMore(data.pageInfo.afterKey || null)}
-              >
+              <EuiButton isLoading={loading} size="s" onClick={onLoadMore}>
                 <FormattedMessage
                   id="xpack.infra.metricsExplorer.loadMoreChartsButton"
                   defaultMessage="Load More Charts"

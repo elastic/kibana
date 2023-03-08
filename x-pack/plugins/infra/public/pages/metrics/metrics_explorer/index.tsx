@@ -44,7 +44,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     handleLoadMore,
     onViewStateChange,
     loadData,
-  } = useMetricsExplorerState(source, derivedIndexPattern, false);
+  } = useMetricsExplorerState(source, derivedIndexPattern);
   const { currentView, shouldLoadDefault } = useSavedViewContext();
 
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });

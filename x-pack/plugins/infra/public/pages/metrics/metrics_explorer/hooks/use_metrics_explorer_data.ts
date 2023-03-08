@@ -6,9 +6,8 @@
  */
 
 import DateMath from '@kbn/datemath';
-import { useEffect, useState } from 'react';
 import { DataViewBase } from '@kbn/es-query';
-import { isEqual } from 'lodash';
+import { useInfiniteQuery } from '@tanstack/react-query';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
@@ -19,50 +18,33 @@ import {
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
 import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
-import { useTrackedPromise } from '../../../../utils/use_tracked_promise';
-
-function isSameOptions(current: MetricsExplorerOptions, next: MetricsExplorerOptions) {
-  return isEqual(current, next);
-}
 
 export function useMetricsExplorerData(
   options: MetricsExplorerOptions,
   source: MetricsSourceConfigurationProperties | undefined,
   derivedIndexPattern: DataViewBase,
-  timerange: MetricsExplorerTimeOptions,
-  afterKey: string | null | Record<string, string | null>,
-  signal: any,
-  shouldLoadImmediately = true
+  timerange: MetricsExplorerTimeOptions
 ) {
-  const kibana = useKibana();
-  const fetchFn = kibana.services.http?.fetch;
-  const [error, setError] = useState<Error | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [data, setData] = useState<MetricsExplorerResponse | null>(null);
-  const [lastOptions, setLastOptions] = useState<MetricsExplorerOptions | null>(null);
-  const [lastTimerange, setLastTimerange] = useState<MetricsExplorerTimeOptions | null>(null);
+  const { http } = useKibana().services;
 
   const from = DateMath.parse(timerange.from);
   const to = DateMath.parse(timerange.to, { roundUp: true });
-  const [, makeRequest] = useTrackedPromise(
-    {
-      cancelPreviousOn: 'creation',
-      createPromise: () => {
-        setLoading(true);
+  const { isInitialLoading, isLoading, isRefetching, data, error, refetch, fetchNextPage } =
+    useInfiniteQuery<MetricsExplorerResponse, Error>({
+      queryKey: ['metricExplorer', options.aggregation, options, timerange],
+      queryFn: async ({ signal, pageParam = { afterKey: null } }) => {
         if (!from || !to) {
-          return Promise.reject(new Error('Unalble to parse timerange'));
+          throw new Error('Unable to parse timerange');
         }
-        if (!fetchFn) {
-          return Promise.reject(new Error('HTTP service is unavailable'));
+        if (!http) {
+          throw new Error('HTTP service is unavailable');
         }
         if (!source) {
-          return Promise.reject(new Error('Source is unavailable'));
-        }
-        if (!fetchFn) {
-          return Promise.reject(new Error('HTTP service is unavailable'));
+          throw new Error('Source is unavailable');
         }
 
-        return fetchFn('/api/infra/metrics_explorer', {
+        const { afterKey } = pageParam;
+        const response = await http.post<MetricsExplorerResponse>('/api/infra/metrics_explorer', {
           method: 'POST',
           body: JSON.stringify({
             forceInterval: options.forceInterval,
@@ -82,47 +64,21 @@ export function useMetricsExplorerData(
               to: to.valueOf(),
             },
           }),
+          signal,
         });
-      },
-      onResolve: (resp: unknown) => {
-        setLoading(false);
-        const response = decodeOrThrow(metricsExplorerResponseRT)(resp);
-        if (response) {
-          if (
-            data &&
-            lastOptions &&
-            data.pageInfo.afterKey !== response.pageInfo.afterKey &&
-            isSameOptions(lastOptions, options) &&
-            isEqual(timerange, lastTimerange) &&
-            afterKey
-          ) {
-            const { series } = data;
-            setData({
-              ...response,
-              series: [...series, ...response.series],
-            });
-          } else {
-            setData(response);
-          }
-          setLastOptions(options);
-          setLastTimerange(timerange);
-          setError(null);
-        }
-      },
-      onReject: (e: unknown) => {
-        setError(e as Error);
-        setData(null);
-        setLoading(false);
-      },
-    },
-    [source, timerange, options, signal, afterKey]
-  );
 
-  useEffect(() => {
-    if (!shouldLoadImmediately) {
-      return;
-    }
-    makeRequest();
-  }, [makeRequest, shouldLoadImmediately]);
-  return { error, loading, data, loadData: makeRequest };
+        return decodeOrThrow(metricsExplorerResponseRT)(response);
+      },
+      getNextPageParam: (lastPage) => lastPage.pageInfo,
+      enabled: !!from && !!to && !!http && !!source,
+      refetchOnWindowFocus: false,
+    });
+
+  return {
+    data,
+    isLoading: isInitialLoading || isLoading || isRefetching,
+    loadData: refetch,
+    error,
+    fetchNextPage,
+  };
 }

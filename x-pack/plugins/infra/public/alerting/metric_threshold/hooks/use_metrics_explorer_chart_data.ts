@@ -61,14 +61,7 @@ export const useMetricsExplorerChartData = (
     [timeSize, timeUnit]
   );
 
-  return useMetricsExplorerData(
-    options,
-    source?.configuration,
-    derivedIndexPattern,
-    timerange,
-    null,
-    null
-  );
+  return useMetricsExplorerData(options, source?.configuration, derivedIndexPattern, timerange);
 };
 
 const mapMetricThresholdMetricToMetricsExplorerMetric = (metric: MetricExpressionCustomMetric) => {
