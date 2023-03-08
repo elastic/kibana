@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ChangePointGroup } from '@kbn/ml-agg-utils';
+import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
 
-export const changePointGroups: ChangePointGroup[] = [
+export const significantTermGroups: SignificantTermGroup[] = [
   {
     id: 'group-1',
     group: [
