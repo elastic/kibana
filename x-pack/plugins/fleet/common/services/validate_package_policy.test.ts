@@ -945,4 +945,59 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       expect(res).toBeNull();
     });
   });
+
+  describe('Select', () => {
+    it('should return an error message if options are missing', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: undefined,
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Options must be provided for select type']);
+    });
+
+    it('should return an error message if options are empty', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: undefined,
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [],
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Options array must contain at least one entry']);
+    });
+
+    it('should accept a select with valid options', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: undefined,
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [{ value: 'a', text: 'A' }, { value: 'b', text: 'B' }],
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toBeNull();
+    });
+  });
 });
