@@ -32,15 +32,18 @@ import {
   waitForTheRuleToBeExecuted,
 } from '../../../tasks/rule_details';
 import {
+  addExceptionComment,
   addExceptionConditions,
   addExceptionFlyoutItemName,
   editException,
   editExceptionFlyoutItemName,
+  copyCommentToClipboard,
   selectAddToRuleRadio,
   selectBulkCloseAlerts,
   selectSharedListToAddExceptionTo,
   submitEditedExceptionItem,
   submitNewExceptionItem,
+  showComments,
 } from '../../../tasks/exceptions';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/common';
@@ -123,7 +126,33 @@ describe('Add/edit exception from rule details', () => {
       goToRuleDetails();
       goToExceptionsTab();
     });
+    it('Creates an exception item and copy comment', () => {
+      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('not.exist');
 
+      // open add exception modal
+      addExceptionFlyoutFromViewerHeader();
+
+      // add exception item conditions
+      addExceptionConditions(getException());
+
+      // add exception item name
+      addExceptionFlyoutItemName('My item name');
+
+      // add exception comment
+      addExceptionComment('new comment');
+
+      // submit
+      submitNewExceptionItem();
+
+      // new exception item displays
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
+
+      // click on show comments
+      showComments();
+
+      // copy the first comment to clipboard
+      copyCommentToClipboard();
+    });
     it('Edits an exception item', () => {
       const NEW_ITEM_NAME = 'Exception item-EDITED';
       const ITEM_NAME = 'Sample Exception List Item 2';

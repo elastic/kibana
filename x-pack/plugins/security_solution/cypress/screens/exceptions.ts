@@ -135,3 +135,15 @@ export const MANAGE_EXCEPTION_CREATE_BUTTON_EXCEPTION =
   '[data-test-subj="manageExceptionListCreateExceptionButton"]';
 
 export const RULE_ACTION_LINK_RULE_SWITCH = '[data-test-subj="ruleActionLinkRuleSwitch"]';
+
+export const EXCEPTION_COMMENTS_ACCORDION_BTN = '[data-test-subj="exceptionItemCommentsAccordion"]';
+
+export const EXCEPTION_COMMENT_TEXT_AREA = '[data-test-subj="newExceptionItemCommentTextArea"]';
+
+export const EXCEPTION_ITEM_VIEWER_CONTAINER_SHOW_COMMENTS_BTN =
+  '[data-test-subj="exceptionsViewerCommentAccordion"]';
+
+export const EXCEPTION_ITEM_COMMENTS_CONTAINER =
+  '[data-test-subj="exceptionsViewerCommentAccordion"] li';
+
+export const EXCEPTION_ITEM_COMMENT_COPY_BTN = '[data-test-subj="clipboard"]';

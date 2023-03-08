@@ -28,6 +28,11 @@ import {
   EXCEPTION_FIELD_MAPPING_CONFLICTS_TOOLTIP,
   EXCEPTION_FIELD_MAPPING_CONFLICTS_ACCORDION_ICON,
   EXCEPTION_FIELD_MAPPING_CONFLICTS_DESCRIPTION,
+  EXCEPTION_COMMENT_TEXT_AREA,
+  EXCEPTION_COMMENTS_ACCORDION_BTN,
+  EXCEPTION_ITEM_VIEWER_CONTAINER_SHOW_COMMENTS_BTN,
+  EXCEPTION_ITEM_COMMENTS_CONTAINER,
+  EXCEPTION_ITEM_COMMENT_COPY_BTN,
 } from '../screens/exceptions';
 
 export const addExceptionEntryFieldValueOfItemX = (
@@ -164,4 +169,27 @@ export const selectSharedListToAddExceptionTo = (numListsToCheck = 1) => {
 export const selectOs = (os: string) => {
   cy.get(OS_SELECTION_SECTION).should('exist');
   cy.get(OS_INPUT).type(`${os}{downArrow}{enter}`);
+};
+
+export const addExceptionComment = (comment: string) => {
+  cy.get(EXCEPTION_COMMENTS_ACCORDION_BTN).click();
+  cy.root()
+    .pipe(($el) => {
+      return $el.find(EXCEPTION_COMMENT_TEXT_AREA);
+    })
+    .clear()
+    .type(`${comment}`)
+    .should('have.value', comment);
+};
+export const showComments = () => {
+  cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER_SHOW_COMMENTS_BTN).click();
+};
+
+export const copyCommentToClipboard = () => {
+  // Disable window prompt which is used in link creation by copy-to-clipboard library
+  // This prompt pauses test execution during `cypress open`
+  cy.window().then((win) => {
+    cy.stub(win, 'prompt').returns('DISABLED WINDOW PROMPT');
+  });
+  cy.get(EXCEPTION_ITEM_COMMENTS_CONTAINER).first().find(EXCEPTION_ITEM_COMMENT_COPY_BTN).click();
 };
