@@ -53,6 +53,8 @@ export const ResponseActionsLog = memo<
       startDate: startDateFromUrl,
       endDate: endDateFromUrl,
       users: usersFromUrl,
+      withOutputs: withOutputsFromUrl,
+      setUrlWithOutputs,
     } = useActionHistoryUrlParams();
 
     const getTestId = useTestIdGenerator(dataTestSubj);
@@ -67,6 +69,7 @@ export const ResponseActionsLog = memo<
       commands: [],
       statuses: [],
       userIds: [],
+      withOutputs: [],
     });
 
     // update query state from URL params
@@ -82,9 +85,18 @@ export const ResponseActionsLog = memo<
             ? (statusesFromUrl as ResponseActionStatus[])
             : prevState.statuses,
           userIds: usersFromUrl?.length ? usersFromUrl : prevState.userIds,
+          withOutputs: withOutputsFromUrl?.length ? withOutputsFromUrl : prevState.withOutputs,
         }));
       }
-    }, [commandsFromUrl, agentIdsFromUrl, isFlyout, statusesFromUrl, setQueryParams, usersFromUrl]);
+    }, [
+      commandsFromUrl,
+      agentIdsFromUrl,
+      isFlyout,
+      statusesFromUrl,
+      setQueryParams,
+      usersFromUrl,
+      withOutputsFromUrl,
+    ]);
 
     // date range picker state and handlers
     const { dateRangePickerState, onRefreshChange, onTimeChange } = useDateRangePicker(isFlyout);
@@ -201,6 +213,18 @@ export const ResponseActionsLog = memo<
       [isFlyout, reFetchEndpointActionList, setQueryParams, setPaginationOnUrlParams]
     );
 
+    // handle on details open
+    const onShowActionDetails = useCallback(
+      (actionIds: string[]) => {
+        setQueryParams((prevState) => ({ ...prevState, withOutputs: actionIds }));
+        if (!isFlyout) {
+          // set and show `withOutputs` URL param on history page
+          setUrlWithOutputs(actionIds.join());
+        }
+      },
+      [isFlyout, setUrlWithOutputs]
+    );
+
     if (error?.body?.statusCode === 404 && error?.body?.message === 'index_not_found_exception') {
       return <ActionsLogEmptyState data-test-subj={getTestId('empty-state')} />;
     } else if (isFetching && isFirstAttempt) {
@@ -257,6 +281,7 @@ export const ResponseActionsLog = memo<
             isFlyout={isFlyout}
             loading={isFetching}
             onChange={handleTableOnChange}
+            onShowActionDetails={onShowActionDetails}
             queryParams={queryParams}
             showHostNames={showHostNames}
             totalItemCount={totalItemCount}

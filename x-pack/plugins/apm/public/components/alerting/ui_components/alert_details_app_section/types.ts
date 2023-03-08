@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { Rule } from '@kbn/alerting-plugin/common';
-import { TopAlert } from '@kbn/observability-plugin/public/typings/alerts';
-import { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
-import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { AlertSummaryField } from '@kbn/observability-plugin/public/pages/alert_details/components/alert_summary';
+import type { TopAlert } from '@kbn/observability-plugin/public/typings/alerts';
+import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
+import type { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 
 export const SERVICE_NAME = 'service.name' as const;
 export const TRANSACTION_TYPE = 'transaction.type' as const;
@@ -25,4 +26,7 @@ export interface AlertDetailsAppSectionProps {
     [SERVICE_ENVIRONMENT]: string;
   }>;
   timeZone: string;
+  setAlertSummaryFields: React.Dispatch<
+    React.SetStateAction<AlertSummaryField[] | undefined>
+  >;
 }

@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-import type { TopAlert } from '../../typings/alerts';
-
-export interface AlertSummaryProps {
-  alert: TopAlert | null;
-}
-
 export interface AlertDetailsPathParams {
   alertId: string;
 }
