@@ -18,7 +18,9 @@ import { COUNT_TABLE_TITLE } from '../alerts_count_panel/translations';
 import { CELL_ACTIONS_DEFAULT_TRIGGER } from '../../../../../common/constants';
 import * as i18n from './translations';
 
-export const getAlertsTypeTableColumns = (): Array<EuiBasicTableColumn<AlertsTypeData>> => [
+export const getAlertsTypeTableColumns = (
+  isAlertTypeEnabled: boolean
+): Array<EuiBasicTableColumn<AlertsTypeData>> => [
   {
     field: 'rule',
     name: ALERTS_HEADERS_RULE_NAME,
@@ -39,35 +41,39 @@ export const getAlertsTypeTableColumns = (): Array<EuiBasicTableColumn<AlertsTyp
       </EuiText>
     ),
   },
-  {
-    field: 'type',
-    name: i18n.ALERTS_TYPE_COLUMN_TITLE,
-    'data-test-subj': 'detectionsTable-type',
-    truncateText: true,
-    render: (type: string) => {
-      return (
-        <EuiHealth color={ALERT_TYPE_COLOR[type as AlertType]}>
-          <EuiText grow={false} size="xs">
-            <CellActions
-              mode={CellActionsMode.HOVER}
-              visibleCellActions={4}
-              showActionTooltips
-              triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
-              field={{
-                name: 'event.type',
-                value: 'denied',
-                type: 'keyword',
-              }}
-              metadata={{ negateFilters: type === 'Detection' }} // Detection: event.type != denied
-            >
-              {ALERT_TYPE_LABEL[type as AlertType]}
-            </CellActions>
-          </EuiText>
-        </EuiHealth>
-      );
-    },
-    width: '30%',
-  },
+  ...(isAlertTypeEnabled
+    ? [
+        {
+          field: 'type',
+          name: i18n.ALERTS_TYPE_COLUMN_TITLE,
+          'data-test-subj': 'detectionsTable-type',
+          truncateText: true,
+          render: (type: string) => {
+            return (
+              <EuiHealth color={ALERT_TYPE_COLOR[type as AlertType]}>
+                <EuiText grow={false} size="xs">
+                  <CellActions
+                    mode={CellActionsMode.HOVER}
+                    visibleCellActions={4}
+                    showActionTooltips
+                    triggerId={CELL_ACTIONS_DEFAULT_TRIGGER}
+                    field={{
+                      name: 'event.type',
+                      value: 'denied',
+                      type: 'keyword',
+                    }}
+                    metadata={{ negateFilters: type === 'Detection' }} // Detection: event.type != denied
+                  >
+                    {ALERT_TYPE_LABEL[type as AlertType]}
+                  </CellActions>
+                </EuiText>
+              </EuiHealth>
+            );
+          },
+          width: '30%',
+        },
+      ]
+    : []),
   {
     field: 'value',
     name: COUNT_TABLE_TITLE,
