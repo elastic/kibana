@@ -21,8 +21,11 @@ import { LogEntryCategoriesPage } from './log_entry_categories';
 import { LogEntryRatePage } from './log_entry_rate';
 import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
+import { isDevMode } from '../../utils/dev_mode';
+import { StateMachinePlayground } from '../../observability_logs/xstate_helpers';
 
 export const LogsPageContent: React.FunctionComponent = () => {
+  const enableDeveloperRoutes = isDevMode();
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
@@ -87,6 +90,9 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <Route path={anomaliesTab.pathname} component={LogEntryRatePage} />
         <Route path={logCategoriesTab.pathname} component={LogEntryCategoriesPage} />
         <Route path={settingsTab.pathname} component={LogsSettingsPage} />
+        {enableDeveloperRoutes && (
+          <Route path={'/state-machine-playground'} component={StateMachinePlayground} />
+        )}
         <RedirectWithQueryParams from={'/analysis'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />

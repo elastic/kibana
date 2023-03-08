@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { InlineLogViewSplashPage } from '../../../components/logging/inline_log_view_splash_page';
 import { persistedLogViewReferenceRT } from '../../../../common/log_views';
 import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
@@ -17,12 +18,14 @@ import { useLogViewContext } from '../../../hooks/use_log_view';
 import { ConnectedLogViewErrorPage } from '../shared/page_log_view_error';
 
 export const LogEntryRatePageProviders: React.FunctionComponent = ({ children }) => {
-  const { hasFailedLoading, isLoading, isUninitialized, logViewReference, resolvedLogView } =
-    useLogViewContext();
-
-  if (!persistedLogViewReferenceRT.is(logViewReference)) {
-    throw new Error('Logs ML features only support persisted Log Views');
-  }
+  const {
+    hasFailedLoading,
+    isLoading,
+    isUninitialized,
+    logViewReference,
+    resolvedLogView,
+    isPersistedLogView,
+  } = useLogViewContext();
 
   const { space } = useActiveKibanaSpace();
 
@@ -31,11 +34,16 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
   // React concurrent mode and Suspense in order to handle that more gracefully.
   if (space == null) {
     return null;
+  } else if (!isPersistedLogView) {
+    return <InlineLogViewSplashPage />;
   } else if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoading) {
     return <ConnectedLogViewErrorPage />;
   } else if (resolvedLogView != null) {
+    if (!persistedLogViewReferenceRT.is(logViewReference)) {
+      throw new Error('Logs ML features only support persisted Log Views');
+    }
     return (
       <LogEntryFlyoutProvider>
         <LogEntryRateModuleProvider

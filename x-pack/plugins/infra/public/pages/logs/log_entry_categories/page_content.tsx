@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
-import { InlineLogViewSplashPage } from '../../../components/logging/inline_log_view_splash_page';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -33,8 +32,6 @@ const logCategoriesTitle = i18n.translate('xpack.infra.logs.logCategoriesTitle',
 });
 
 export const LogEntryCategoriesPageContent = () => {
-  const { isPersistedLogView } = useLogViewContext();
-
   const {
     hasLogAnalysisCapabilites,
     hasLogAnalysisReadCapabilities,
@@ -55,9 +52,7 @@ export const LogEntryCategoriesPageContent = () => {
     }
   }, [fetchJobStatus, hasLogAnalysisReadCapabilities]);
 
-  if (!isPersistedLogView) {
-    return <InlineLogViewSplashPage />;
-  } else if (!hasLogAnalysisCapabilites) {
+  if (!hasLogAnalysisCapabilites) {
     return (
       <SubscriptionSplashPage
         data-test-subj="logsLogEntryCategoriesPage"

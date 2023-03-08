@@ -115,13 +115,16 @@ export class LogViewsClient implements ILogViewsClient {
     if (inlineLogViewReferenceRT.is(logViewReference)) {
       const { id } = logViewReference;
       const attributes = decodeOrThrow(
-        logViewAttributesRT,
+        rt.partial(logViewAttributesRT.type.props),
         (message: string) =>
           new PutLogViewError(`Failed to decode inline log view "${id}": ${message}"`)
       )(logViewAttributes);
       return {
         id,
-        attributes,
+        attributes: {
+          ...logViewReference.attributes,
+          ...attributes,
+        },
         origin: 'inline',
       };
     } else {

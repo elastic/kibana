@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import React, { memo, useCallback, useEffect } from 'react';
 import useInterval from 'react-use/lib/useInterval';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-plugin/public';
-import { InlineLogViewSplashPage } from '../../../components/logging/inline_log_view_splash_page';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { LoadingPage } from '../../../components/loading_page';
 import {
@@ -37,8 +36,6 @@ const anomaliesTitle = i18n.translate('xpack.infra.logs.anomaliesPageTitle', {
 });
 
 export const LogEntryRatePageContent = memo(() => {
-  const { isPersistedLogView } = useLogViewContext();
-
   const {
     hasLogAnalysisCapabilites,
     hasLogAnalysisReadCapabilities,
@@ -92,9 +89,7 @@ export const LogEntryRatePageContent = memo(() => {
     }
   }, JOB_STATUS_POLLING_INTERVAL);
 
-  if (!isPersistedLogView) {
-    return <InlineLogViewSplashPage />;
-  } else if (!hasLogAnalysisCapabilites) {
+  if (!hasLogAnalysisCapabilites) {
     return (
       <SubscriptionSplashPage
         data-test-subj="logsLogEntryRatePage"
