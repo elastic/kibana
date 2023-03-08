@@ -73,7 +73,7 @@ const OptionsFlexItem = styled(EuiFlexItem)`
 
 export const LEGEND_WITH_COUNTS_WIDTH = 300; // px
 
-const ChartHeight = '170px';
+const ChartHeight = '100%';
 
 interface AlertsHistogramPanelProps {
   alignHeader?: 'center' | 'baseline' | 'stretch' | 'flexStart' | 'flexEnd';
@@ -449,7 +449,7 @@ export const AlertsHistogramPanel = memo<AlertsHistogramPanelProps>(
                 }}
                 getLensAttributes={getLensAttributes}
                 height={ChartHeight}
-                id={`alerts-histogram-embeddable-${uniqueQueryId}`}
+                id={`alerts-trend-embeddable-${uniqueQueryId}`}
                 inspectTitle={inspectTitle}
                 scopeId={SourcererScopeName.detections}
                 stackByField={selectedStackByOption}
