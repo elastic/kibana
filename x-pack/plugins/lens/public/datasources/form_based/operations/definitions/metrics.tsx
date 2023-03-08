@@ -48,6 +48,10 @@ const typeToFn: Record<string, string> = {
 
 const supportedTypes = ['number', 'histogram'];
 
+function isTimeSeriesCompatible(type: string, timeSeriesMetric?: string) {
+  return timeSeriesMetric !== 'counter' || ['min', 'max'].includes(type);
+}
+
 function buildMetricOperation<T extends MetricColumn<string>>({
   type,
   displayName,
@@ -103,7 +107,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       if (
         (supportedTypes.includes(fieldType) || (supportsDate && fieldType === 'date')) &&
         aggregatable &&
-        (timeSeriesMetric !== 'counter' || ['min', 'max'].includes(type)) &&
+        isTimeSeriesCompatible(type, timeSeriesMetric) &&
         (!aggregationRestrictions || aggregationRestrictions[type])
       ) {
         return {
@@ -119,7 +123,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         newField &&
           supportedTypes.includes(newField.type) &&
           newField.aggregatable &&
-          (newField.timeSeriesMetric !== 'counter' || ['min', 'max'].includes(type)) &&
+          isTimeSeriesCompatible(type, newField.timeSeriesMetric) &&
           (!newField.aggregationRestrictions || newField.aggregationRestrictions![type])
       );
     },
