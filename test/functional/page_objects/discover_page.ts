@@ -392,7 +392,7 @@ export class DiscoverPageObject extends FtrService {
     const $ = await sidebar.parseDomContent();
     return $('.dscSidebarField__name')
       .toArray()
-      .map((field) => $(field).text());
+      .map((field) => $(field).attr('title'));
   }
 
   public async editField(field: string) {
