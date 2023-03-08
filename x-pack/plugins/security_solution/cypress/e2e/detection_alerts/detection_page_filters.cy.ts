@@ -17,7 +17,7 @@ import {
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
 } from '../../screens/common/filter_group';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
@@ -102,7 +102,7 @@ describe('Detections : Page Filters', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     login();
-    createCustomRuleEnabled(getNewRule(), 'custom_rule_filters');
+    createRule({ ...getNewRule(), rule_id: 'custom_rule_filters' });
     visit(ALERTS_URL);
     waitForAlerts();
     waitForPageFilters();
