@@ -57,8 +57,8 @@ export function getEventAnnotationService(core: CoreStart): EventAnnotationServi
 
     return {
       title: savedObject.attributes.title,
-      // description: groupResponse.saved_object.attributes.description,
-      // tags: groupResponse.saved_object.attributes.tags,
+      description: savedObject.attributes.description,
+      tags: savedObject.attributes.tags,
       ignoreGlobalFilters: savedObject.attributes.ignoreGlobalFilters,
       indexPatternId: savedObject.references.find((ref) => ref.type === 'index-pattern')?.id!,
       annotations: savedObject.attributes.annotations,
@@ -105,26 +105,26 @@ export function getEventAnnotationService(core: CoreStart): EventAnnotationServi
     return { id: groupSavedObjectId };
   };
 
-  // const updateAnnotationGroup = async (
-  //   group: EventAnnotationGroupConfig,
-  //   savedObjectId: string
-  // ): Promise<void> => {
-  //   const { title, description, tags, ignoreGlobalFilters, indexPatternId } = group;
-  //   await client.update(
-  //     EVENT_ANNOTATION_GROUP_TYPE,
-  //     savedObjectId,
-  //     { title, description, tags, ignoreGlobalFilters },
-  //     {
-  //       references: [
-  //         {
-  //           type: 'index-pattern',
-  //           id: indexPatternId,
-  //           name: `event-annotation-group_dataView-ref-${indexPatternId}`,
-  //         },
-  //       ],
-  //     }
-  //   );
-  // };
+  const updateAnnotationGroup = async (
+    group: EventAnnotationGroupConfig,
+    annotationGroupId: string
+  ): Promise<void> => {
+    const { title, description, tags, ignoreGlobalFilters, indexPatternId, annotations } = group;
+    await client.update(
+      EVENT_ANNOTATION_GROUP_TYPE,
+      annotationGroupId,
+      { title, description, tags, ignoreGlobalFilters, annotations },
+      {
+        references: [
+          {
+            type: 'index-pattern',
+            id: indexPatternId,
+            name: `event-annotation-group_dataView-ref-${indexPatternId}`,
+          },
+        ],
+      }
+    );
+  };
 
   // const updateAnnotations = async (
   //   savedObjectId: string,
@@ -157,7 +157,7 @@ export function getEventAnnotationService(core: CoreStart): EventAnnotationServi
   return {
     loadAnnotationGroup,
     // updateAnnotations,
-    // updateAnnotationGroup,
+    updateAnnotationGroup,
     createAnnotationGroup,
     // deleteAnnotationGroup,
     renderEventAnnotationGroupSavedObjectFinder: (props: {

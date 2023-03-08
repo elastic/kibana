@@ -16,11 +16,15 @@ import {
   OnSaveProps as SavedObjectOnSaveProps,
   SavedObjectSaveModal,
 } from '@kbn/saved-objects-plugin/public';
-import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-plugin/common';
+import {
+  EventAnnotationGroupConfig,
+  EVENT_ANNOTATION_GROUP_TYPE,
+} from '@kbn/event-annotation-plugin/common';
 import { EuiIcon } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { LayerAction, StateSetter } from '../../../../types';
 import { XYByReferenceAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
+import { isByReferenceAnnotationsLayer } from '../../visualization_helpers';
 
 type ModalOnSaveProps = SavedObjectOnSaveProps & { newTags: string[]; closeModal: () => void };
 
@@ -29,14 +33,20 @@ export const SaveModal = ({
   domElement,
   savedObjectsTagging,
   onSave,
+  title,
+  description,
+  tags,
+  showCopyOnSave,
 }: {
   domElement: HTMLDivElement;
   savedObjectsTagging: SavedObjectTaggingPluginStart | undefined;
   onSave: (props: ModalOnSaveProps) => void;
+  title: string;
+  description: string;
+  tags: string[];
+  showCopyOnSave: boolean;
 }) => {
-  const initialTags: string[] = [];
-
-  const [selectedTags, setSelectedTags] = useState<string[]>(initialTags);
+  const [selectedTags, setSelectedTags] = useState<string[]>(tags);
 
   const closeModal = () => unmountComponentAtNode(domElement);
 
@@ -44,9 +54,9 @@ export const SaveModal = ({
     <SavedObjectSaveModal
       onSave={async (props) => onSave({ ...props, closeModal, newTags: selectedTags })}
       onClose={closeModal}
-      title={''}
-      description={''}
-      showCopyOnSave={false}
+      title={title}
+      description={description}
+      showCopyOnSave={showCopyOnSave}
       objectType={EVENT_ANNOTATION_GROUP_TYPE}
       showDescription={true}
       confirmButtonLabel={
@@ -65,13 +75,48 @@ export const SaveModal = ({
       options={
         savedObjectsTagging ? (
           <savedObjectsTagging.ui.components.SavedObjectSaveModalTagSelector
-            initialSelection={initialTags}
+            initialSelection={selectedTags}
             onTagsSelected={setSelectedTags}
           />
         ) : undefined
       }
     />
   );
+};
+
+const saveAnnotationGroupToLibrary = async (
+  layer: XYAnnotationLayerConfig,
+  {
+    newTitle,
+    newDescription,
+    newTags,
+    newCopyOnSave,
+  }: Pick<ModalOnSaveProps, 'newTitle' | 'newDescription' | 'newTags' | 'newCopyOnSave'>,
+  eventAnnotationService: EventAnnotationServiceType
+): Promise<{ id: string; config: EventAnnotationGroupConfig }> => {
+  let savedId: string;
+
+  const saveAsNew = !isByReferenceAnnotationsLayer(layer) || newCopyOnSave;
+
+  const groupConfig: EventAnnotationGroupConfig = {
+    annotations: layer.annotations,
+    indexPatternId: layer.indexPatternId,
+    ignoreGlobalFilters: layer.ignoreGlobalFilters,
+    title: newTitle,
+    description: newDescription,
+    tags: newTags,
+  };
+
+  if (saveAsNew) {
+    const { id } = await eventAnnotationService.createAnnotationGroup(groupConfig);
+    savedId = id;
+  } else {
+    await eventAnnotationService.updateAnnotationGroup(groupConfig, layer.annotationGroupId);
+
+    savedId = layer.annotationGroupId;
+  }
+
+  return { id: savedId, config: groupConfig };
 };
 
 /** @internal exported for testing only */
@@ -81,7 +126,7 @@ export const onSave = async ({
   setState,
   eventAnnotationService,
   toasts,
-  modalOnSaveProps: { newTitle, newDescription, newTags: selectedTags, closeModal },
+  modalOnSaveProps: { newTitle, newDescription, newTags, closeModal, newCopyOnSave },
 }: {
   state: XYState;
   layer: XYAnnotationLayerConfig;
@@ -90,17 +135,13 @@ export const onSave = async ({
   toasts: ToastsStart;
   modalOnSaveProps: ModalOnSaveProps;
 }) => {
-  let savedId: string;
-
+  let savedInfo: Awaited<ReturnType<typeof saveAnnotationGroupToLibrary>>;
   try {
-    const { id } = await eventAnnotationService.createAnnotationGroup({
-      ...layer,
-      title: newTitle,
-      description: newDescription,
-      tags: selectedTags,
-    });
-
-    savedId = id;
+    savedInfo = await saveAnnotationGroupToLibrary(
+      layer,
+      { newTitle, newDescription, newTags, newCopyOnSave },
+      eventAnnotationService
+    );
   } catch (err) {
     toasts.addError(err, {
       title: i18n.translate(
@@ -119,13 +160,8 @@ export const onSave = async ({
 
   const newLayer: XYByReferenceAnnotationLayerConfig = {
     ...layer,
-    annotationGroupId: savedId,
-    __lastSaved: {
-      ...layer,
-      title: newTitle,
-      description: newDescription,
-      tags: selectedTags,
-    },
+    annotationGroupId: savedInfo.id,
+    __lastSaved: savedInfo.config,
   };
 
   setState({
@@ -175,11 +211,12 @@ export const getSaveLayerAction = ({
   layer: XYAnnotationLayerConfig;
   setState: StateSetter<XYState, unknown>;
   eventAnnotationService: EventAnnotationServiceType;
-  isNew?: boolean;
   toasts: ToastsStart;
   savedObjectsTagging?: SavedObjectTaggingPluginStart;
 }): LayerAction => {
-  const displayName = false
+  const neverSaved = !isByReferenceAnnotationsLayer(layer);
+
+  const displayName = neverSaved
     ? i18n.translate('xpack.lens.xyChart.annotations.addAnnotationGroupToLibrary', {
         defaultMessage: 'Add to library',
       })
@@ -209,6 +246,10 @@ export const getSaveLayerAction = ({
                 modalOnSaveProps: props,
               });
             }}
+            title={neverSaved ? '' : layer.__lastSaved.title}
+            description={neverSaved ? '' : layer.__lastSaved.description}
+            tags={neverSaved ? [] : layer.__lastSaved.tags}
+            showCopyOnSave={!neverSaved}
           />,
           domElement
         );

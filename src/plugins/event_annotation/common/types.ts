@@ -84,19 +84,19 @@ export type EventAnnotationConfig =
 
 export interface EventAnnotationGroupAttributes {
   title: string;
-  description?: string;
-  tags?: string[];
-  ignoreGlobalFilters?: boolean;
+  description: string;
+  tags: string[];
+  ignoreGlobalFilters: boolean;
   annotations: EventAnnotationConfig[];
 }
 
 export interface EventAnnotationGroupConfig {
   annotations: EventAnnotationConfig[];
   indexPatternId: string;
-  ignoreGlobalFilters?: boolean; // TODO - can this be a required attribute?
-  title?: string; // TODO - can this be a required attribute?
-  description?: string; // TODO - can this be a required attribute?
-  tags?: string[]; // TODO - can this be a required attribute?
+  ignoreGlobalFilters: boolean;
+  title: string;
+  description: string;
+  tags: string[];
 }
 
 export type EventAnnotationArgs =

@@ -46,27 +46,27 @@ export const createAnnotationActions = ({
     core.application.capabilities.visualize.save && isSaveable
   );
 
-  if (savingToLibraryPermitted) {
-    // check if the annotation is saved as a saved object or in inline - same as we check for save modal for visualization
-    if (isByReferenceAnnotationsLayer(layer)) {
-      // check if Annotation group hasUnsavedChanges to know if we should allow reverting and saving - similar to how we do it for persistedDoc vs currentDoc on app level
-      const hasUnsavedChanges = true;
+  const hasUnsavedChanges = true;
+  if (
+    !isByReferenceAnnotationsLayer(layer) ||
+    (savingToLibraryPermitted && isByReferenceAnnotationsLayer(layer) && hasUnsavedChanges)
+  ) {
+    actions.push(
+      getSaveLayerAction({
+        state,
+        layer,
+        setState,
+        eventAnnotationService,
+        toasts: core.notifications.toasts,
+        savedObjectsTagging,
+      })
+    );
+  }
 
-      if (hasUnsavedChanges) {
-        const saveAction = getSaveLayerAction({
-          state,
-          layer,
-          setState,
-          eventAnnotationService,
-          toasts: core.notifications.toasts,
-          savedObjectsTagging,
-        });
-        actions.push(saveAction);
-      }
-
-      const editDetailsAction = getEditDetailsAction({ state, layer, layerIndex, setState, core });
-
-      const unlinkAction = getUnlinkLayerAction({
+  if (isByReferenceAnnotationsLayer(layer)) {
+    actions.push(getEditDetailsAction({ state, layer, layerIndex, setState, core }));
+    actions.push(
+      getUnlinkLayerAction({
         execute: () => {
           const title = 'Annotation group name'; // TODO: pass the title from Annotation group state
           // save to Lens Saved object state - there's nothing we should do with the Annotation group Saved Object
@@ -79,24 +79,11 @@ export const createAnnotationActions = ({
           );
         },
         core,
-      });
-      actions.push(editDetailsAction, unlinkAction);
-    } else {
-      actions.push(
-        getSaveLayerAction({
-          isNew: true,
-          state,
-          layer,
-          setState,
-          eventAnnotationService,
-          toasts: core.notifications.toasts,
-          savedObjectsTagging,
-        })
-      );
-    }
+      })
+    );
   }
 
-  const ignoreGlobalFiltersAction = getIgnoreFilterAction({ state, layer, layerIndex, setState });
-  actions.push(ignoreGlobalFiltersAction);
+  actions.push(getIgnoreFilterAction({ state, layer, layerIndex, setState }));
+
   return actions;
 };

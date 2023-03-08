@@ -489,6 +489,7 @@ describe('Event Annotation Service', () => {
         description: 'my description',
         tags: ['my', 'many', 'tags'],
         indexPatternId: 'ipid',
+        ignoreGlobalFilters: false,
         annotations,
       });
       expect(core.savedObjects.client.create).toHaveBeenCalledWith(
@@ -511,16 +512,23 @@ describe('Event Annotation Service', () => {
       );
     });
   });
-  describe.skip('updateAnnotationGroupAttributes', () => {
+  describe('updateAnnotationGroup', () => {
     it('updates annotation group attributes', async () => {
       await eventAnnotationService.updateAnnotationGroup(
-        { title: 'newTitle', indexPatternId: 'newId', annotations: [] },
+        {
+          title: 'newTitle',
+          description: '',
+          tags: [],
+          indexPatternId: 'newId',
+          annotations: [],
+          ignoreGlobalFilters: false,
+        },
         'multiAnnotations'
       );
       expect(core.savedObjects.client.update).toHaveBeenCalledWith(
         'event-annotation-group',
         'multiAnnotations',
-        { title: 'newTitle' },
+        { title: 'newTitle', description: '', tags: [], annotations: [] },
         {
           references: [
             {

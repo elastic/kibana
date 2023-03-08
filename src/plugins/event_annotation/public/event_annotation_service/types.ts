@@ -18,10 +18,10 @@ export interface EventAnnotationServiceType {
   //   savedObjectId: string,
   //   modifications: { delete?: string[]; upsert?: EventAnnotationConfig[] }
   // ) => Promise<void>;
-  // updateAnnotationGroup: (
-  //   group: EventAnnotationGroupConfig,
-  //   savedObjectId: string
-  // ) => Promise<void>;
+  updateAnnotationGroup: (
+    group: EventAnnotationGroupConfig,
+    savedObjectId: string
+  ) => Promise<void>;
   toExpression: (props: EventAnnotationConfig[]) => ExpressionAstExpression[];
   toFetchExpression: (props: {
     interval: string;

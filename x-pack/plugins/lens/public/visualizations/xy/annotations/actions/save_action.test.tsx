@@ -8,7 +8,12 @@
 import React from 'react';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';
 import { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
-import { XYByValueAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
+import {
+  XYByValueAnnotationLayerConfig,
+  XYAnnotationLayerConfig,
+  XYState,
+  XYByReferenceAnnotationLayerConfig,
+} from '../../types';
 import { onSave, SaveModal } from './save_action';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { PointInTimeEventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
@@ -31,6 +36,10 @@ describe('annotation group save action', () => {
           domElement={document.createElement('div')}
           onSave={onSaveMock}
           savedObjectsTagging={savedObjectsTagging}
+          title=""
+          description=""
+          tags={[]}
+          showCopyOnSave={false}
         />
       );
 
@@ -68,6 +77,35 @@ describe('annotation group save action', () => {
         ]
       `);
     });
+
+    it('shows existing saved object attributes', async () => {
+      const savedObjectsTagging = taggingApiMock.create();
+
+      const title = 'my title';
+      const description = 'my description';
+      const tags = ['my', 'tags'];
+
+      const wrapper = shallowWithIntl(
+        <SaveModal
+          domElement={document.createElement('div')}
+          onSave={() => {}}
+          savedObjectsTagging={savedObjectsTagging}
+          title={title}
+          description={description}
+          tags={tags}
+          showCopyOnSave={true}
+        />
+      );
+
+      const saveModal = wrapper.find(SavedObjectSaveModal);
+
+      expect(saveModal.prop('title')).toBe(title);
+      expect(saveModal.prop('description')).toBe(description);
+      expect(saveModal.prop('showCopyOnSave')).toBe(true);
+      expect((saveModal.prop('options') as React.ReactElement).props.initialSelection).toEqual(
+        tags
+      );
+    });
   });
 
   describe('save routine', () => {
@@ -102,6 +140,7 @@ describe('annotation group save action', () => {
       setState: jest.fn(),
       eventAnnotationService: {
         createAnnotationGroup: jest.fn(() => Promise.resolve({ id: savedId })),
+        updateAnnotationGroup: jest.fn(),
         loadAnnotationGroup: jest.fn(),
         toExpression: jest.fn(),
         toFetchExpression: jest.fn(),
@@ -128,11 +167,15 @@ describe('annotation group save action', () => {
       await onSave(props);
 
       expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith({
-        ...props.layer,
+        annotations: props.layer.annotations,
+        indexPatternId: props.layer.indexPatternId,
+        ignoreGlobalFilters: props.layer.ignoreGlobalFilters,
         title: props.modalOnSaveProps.newTitle,
         description: props.modalOnSaveProps.newDescription,
         tags: props.modalOnSaveProps.newTags,
       });
+
+      expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
 
       expect((props.setState as jest.Mock).mock.calls).toMatchSnapshot();
 
@@ -147,7 +190,9 @@ describe('annotation group save action', () => {
       await onSave(props);
 
       expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith({
-        ...props.layer,
+        annotations: props.layer.annotations,
+        indexPatternId: props.layer.indexPatternId,
+        ignoreGlobalFilters: props.layer.ignoreGlobalFilters,
         title: props.modalOnSaveProps.newTitle,
         description: props.modalOnSaveProps.newDescription,
         tags: props.modalOnSaveProps.newTags,
@@ -155,9 +200,86 @@ describe('annotation group save action', () => {
 
       expect(props.toasts.addError).toHaveBeenCalledTimes(1);
 
+      expect(props.modalOnSaveProps.closeModal).not.toHaveBeenCalled();
+
       expect(props.setState).not.toHaveBeenCalled();
 
       expect(props.toasts.addSuccess).not.toHaveBeenCalled();
+    });
+
+    test('updating an existing group', async () => {
+      const annotationGroupId = 'my-group-id';
+
+      const byReferenceLayer: XYByReferenceAnnotationLayerConfig = {
+        ...props.layer,
+        annotationGroupId,
+        __lastSaved: {
+          ...props.layer,
+          title: 'old title',
+          description: 'old description',
+          tags: [],
+        },
+      };
+
+      await onSave({ ...props, layer: byReferenceLayer });
+
+      expect(props.eventAnnotationService.createAnnotationGroup).not.toHaveBeenCalled();
+
+      expect(props.eventAnnotationService.updateAnnotationGroup).toHaveBeenCalledWith(
+        {
+          annotations: props.layer.annotations,
+          indexPatternId: props.layer.indexPatternId,
+          ignoreGlobalFilters: props.layer.ignoreGlobalFilters,
+          title: props.modalOnSaveProps.newTitle,
+          description: props.modalOnSaveProps.newDescription,
+          tags: props.modalOnSaveProps.newTags,
+        },
+        annotationGroupId
+      );
+
+      expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
+
+      expect((props.setState as jest.Mock).mock.calls).toMatchSnapshot();
+
+      expect(props.toasts.addSuccess).toHaveBeenCalledTimes(1);
+    });
+
+    test('saving an existing group as new', async () => {
+      const annotationGroupId = 'my-group-id';
+
+      const byReferenceLayer: XYByReferenceAnnotationLayerConfig = {
+        ...props.layer,
+        annotationGroupId,
+        __lastSaved: {
+          ...props.layer,
+          title: 'old title',
+          description: 'old description',
+          tags: [],
+        },
+      };
+
+      await onSave({
+        ...props,
+        layer: byReferenceLayer,
+        modalOnSaveProps: { ...props.modalOnSaveProps, newCopyOnSave: true },
+      });
+
+      expect(props.eventAnnotationService.updateAnnotationGroup).not.toHaveBeenCalled();
+
+      expect(props.eventAnnotationService.createAnnotationGroup).toHaveBeenCalledWith({
+        annotations: props.layer.annotations,
+        indexPatternId: props.layer.indexPatternId,
+        ignoreGlobalFilters: props.layer.ignoreGlobalFilters,
+        title: props.modalOnSaveProps.newTitle,
+        description: props.modalOnSaveProps.newDescription,
+        tags: props.modalOnSaveProps.newTags,
+      });
+
+      expect(props.modalOnSaveProps.closeModal).toHaveBeenCalled();
+
+      expect((props.setState as jest.Mock).mock.calls).toMatchSnapshot();
+
+      expect(props.toasts.addSuccess).toHaveBeenCalledTimes(1);
     });
   });
 });
