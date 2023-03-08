@@ -440,7 +440,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     }
 
     appContextService.writeCustomAuditLog({
-      message: `User accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
+      message: `User has accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${id}]`,
       event: {
         action: 'saved_object_get',
         category: ['database'],
@@ -479,7 +479,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     for (const packagePolicy of packagePolicies) {
       appContextService.writeCustomAuditLog({
-        message: `User accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
+        message: `User has accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
         event: {
           action: 'saved_object_find',
           category: ['database'],
@@ -535,7 +535,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     for (const packagePolicy of packagePolicies) {
       appContextService.writeCustomAuditLog({
-        message: `User accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
+        message: `User has accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
         event: {
           action: 'saved_object_get',
           category: ['database'],
@@ -571,7 +571,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     for (const packagePolicy of packagePolicies.saved_objects) {
       appContextService.writeCustomAuditLog({
-        message: `User accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
+        message: `User has accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
         event: {
           action: 'saved_object_find',
           category: ['database'],
@@ -617,7 +617,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     for (const packagePolicy of packagePolicies.saved_objects) {
       appContextService.writeCustomAuditLog({
-        message: `User accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
+        message: `User has accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
         event: {
           action: 'saved_object_find',
           category: ['database'],

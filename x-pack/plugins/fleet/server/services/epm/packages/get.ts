@@ -114,6 +114,24 @@ export async function getPackages(
     .concat(uploadedPackagesNotInRegistry as Installable<any>)
     .sort(sortByName);
 
+  for (const pkg of packageList) {
+    appContextService.writeCustomAuditLog({
+      message: `User has accessed ${PACKAGES_SAVED_OBJECT_TYPE} [id=${pkg.id}]`,
+      event: {
+        action: 'saved_object_find',
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id: pkg.id,
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+        },
+      },
+    });
+  }
+
   if (!excludeInstallStatus) {
     return packageList;
   }
@@ -154,18 +172,59 @@ export async function getLimitedPackages(options: {
       });
     })
   );
-  return installedPackagesInfo.filter(isPackageLimited).map((pkgInfo) => pkgInfo.name);
+
+  const packages = installedPackagesInfo.filter(isPackageLimited).map((pkgInfo) => pkgInfo.name);
+
+  for (const pkg of installedPackages) {
+    appContextService.writeCustomAuditLog({
+      message: `User has accessed ${PACKAGES_SAVED_OBJECT_TYPE} [id=${pkg.id}]`,
+      event: {
+        action: 'saved_object_find',
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id: pkg.id,
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+        },
+      },
+    });
+  }
+
+  return packages;
 }
 
 export async function getPackageSavedObjects(
   savedObjectsClient: SavedObjectsClientContract,
   options?: Omit<SavedObjectsFindOptions, 'type'>
 ) {
-  return savedObjectsClient.find<Installation>({
+  const result = await savedObjectsClient.find<Installation>({
     ...(options || {}),
     type: PACKAGES_SAVED_OBJECT_TYPE,
     perPage: SO_SEARCH_LIMIT,
   });
+
+  for (const savedObject of result.saved_objects) {
+    appContextService.writeCustomAuditLog({
+      message: `User has accessed ${PACKAGES_SAVED_OBJECT_TYPE} [id=${savedObject.id}]`,
+      event: {
+        action: 'saved_object_find',
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id: savedObject.id,
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+        },
+      },
+    });
+  }
+
+  return result;
 }
 
 export const getInstallations = getPackageSavedObjects;
@@ -266,6 +325,24 @@ export const getPackageUsageStats = async ({
       page: page++,
       filter,
     });
+
+    for (const packagePolicy of packagePolicies.saved_objects) {
+      appContextService.writeCustomAuditLog({
+        message: `User has accessed ${PACKAGE_POLICY_SAVED_OBJECT_TYPE} [id=${packagePolicy.id}]`,
+        event: {
+          action: 'saved_object_find',
+          category: ['database'],
+          outcome: 'unknown',
+          type: ['access'],
+        },
+        kibana: {
+          saved_object: {
+            id: packagePolicy.id,
+            type: PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+          },
+        },
+      });
+    }
 
     for (let index = 0, total = packagePolicies.saved_objects.length; index < total; index++) {
       agentPolicyCount.add(packagePolicies.saved_objects[index].attributes.policy_id);
@@ -375,10 +452,34 @@ export async function getInstallationObject(options: {
   logger?: Logger;
 }) {
   const { savedObjectsClient, pkgName, logger } = options;
-  return savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName).catch((e) => {
-    logger?.error(e);
-    return undefined;
+  const installation = await savedObjectsClient
+    .get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName)
+    .catch((e) => {
+      logger?.error(e);
+      return undefined;
+    });
+
+  if (!installation) {
+    return;
+  }
+
+  appContextService.writeCustomAuditLog({
+    message: `User has accessed ${PACKAGES_SAVED_OBJECT_TYPE} [id=${installation.id}]`,
+    event: {
+      action: 'saved_object_find',
+      category: ['database'],
+      outcome: 'unknown',
+      type: ['access'],
+    },
+    kibana: {
+      saved_object: {
+        id: installation.id,
+        type: PACKAGES_SAVED_OBJECT_TYPE,
+      },
+    },
   });
+
+  return installation;
 }
 
 export async function getInstallationObjects(options: {
@@ -390,7 +491,27 @@ export async function getInstallationObjects(options: {
     pkgNames.map((pkgName) => ({ id: pkgName, type: PACKAGES_SAVED_OBJECT_TYPE }))
   );
 
-  return res.saved_objects.filter((so) => so?.attributes);
+  const installations = res.saved_objects.filter((so) => so?.attributes);
+
+  for (const installation of installations) {
+    appContextService.writeCustomAuditLog({
+      message: `User has accessed ${PACKAGES_SAVED_OBJECT_TYPE} [id=${installation.id}]`,
+      event: {
+        action: 'saved_object_find',
+        category: ['database'],
+        outcome: 'unknown',
+        type: ['access'],
+      },
+      kibana: {
+        saved_object: {
+          id: installation.id,
+          type: PACKAGES_SAVED_OBJECT_TYPE,
+        },
+      },
+    });
+  }
+
+  return installations;
 }
 
 export async function getInstallation(options: {
