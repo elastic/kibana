@@ -18,6 +18,9 @@ import { TestProviders } from '../../../../common/mock';
 import { ChartContextMenu } from '../../../pages/detection_engine/chart_panels/chart_context_menu';
 import { TABLE } from '../../../pages/detection_engine/chart_panels/chart_select/translations';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { LensEmbeddable } from '../../../../common/components/visualization_actions/lens_embeddable';
+import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { allowedExperimentalValues } from '../../../../../common/experimental_features';
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
@@ -61,6 +64,9 @@ jest.mock('../common/hooks', () => ({
   useStackByFields: jest.fn(),
 }));
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as jest.Mock;
+const getMockUseIsExperimentalFeatureEnabled =
+  (mockMapping?: Partial<ExperimentalFeatures>) => (flag: keyof typeof allowedExperimentalValues) =>
+    mockMapping ? mockMapping?.[flag] : allowedExperimentalValues?.[flag];
 jest.mock('../../../../common/hooks/use_experimental_features');
 
 const defaultProps = {
@@ -83,8 +89,12 @@ describe('AlertsCountPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
-    mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for chartEmbeddablesEnabled flag
-    mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for alertsPageChartsEnabled flag
+    mockUseIsExperimentalFeatureEnabled.mockImplementation(
+      getMockUseIsExperimentalFeatureEnabled({
+        chartEmbeddablesEnabled: false,
+        alertsPageChartsEnabled: false,
+      })
+    );
   });
 
   it('renders correctly', async () => {
@@ -218,10 +228,13 @@ describe('AlertsCountPanel', () => {
     });
 
     it('alertsPageChartsEnabled is true and isExpanded=true, render', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for chartEmbeddablesEnabled flag
-      mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(true); // for alertsPageChartsEnabled flag
+      mockUseIsExperimentalFeatureEnabled.mockImplementation(
+        getMockUseIsExperimentalFeatureEnabled({
+          chartEmbeddablesEnabled: false,
+          alertsPageChartsEnabled: true,
+        })
+      );
       await act(async () => {
-        mockUseIsExperimentalFeatureEnabled('charts', true);
         const wrapper = mount(
           <TestProviders>
             <AlertsCountPanel {...defaultProps} />
@@ -231,8 +244,12 @@ describe('AlertsCountPanel', () => {
       });
     });
     it('alertsPageChartsEnabled is true and isExpanded=false, hide', async () => {
-      mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for chartEmbeddablesEnabled flag
-      mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(true); // for alertsPageChartsEnabled flag
+      mockUseIsExperimentalFeatureEnabled.mockImplementation(
+        getMockUseIsExperimentalFeatureEnabled({
+          chartEmbeddablesEnabled: false,
+          alertsPageChartsEnabled: true,
+        })
+      );
       await act(async () => {
         const wrapper = mount(
           <TestProviders>
@@ -245,12 +262,16 @@ describe('AlertsCountPanel', () => {
   });
 });
 
-describe('when isChartEmbeddablesEnabled = true', () => {
+describe('when the isChartEmbeddablesEnabled experimental feature flag is enabled', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: mockSetToggle });
-    mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(true); // for chartEmbeddablesEnabled flag
-    mockUseIsExperimentalFeatureEnabled.mockReturnValueOnce(false); // for alertsPageChartsEnabled flag
+    mockUseIsExperimentalFeatureEnabled.mockImplementation(
+      getMockUseIsExperimentalFeatureEnabled({
+        chartEmbeddablesEnabled: true,
+        alertsPageChartsEnabled: false,
+      })
+    );
   });
 
   it('renders LensEmbeddable', async () => {
@@ -261,6 +282,17 @@ describe('when isChartEmbeddablesEnabled = true', () => {
         </TestProviders>
       );
       expect(wrapper.find('[data-test-subj="embeddable-count-table"]').exists()).toBeTruthy();
+    });
+  });
+
+  it('renders LensEmbeddable with 100% height', async () => {
+    await act(async () => {
+      mount(
+        <TestProviders>
+          <AlertsCountPanel {...defaultProps} />
+        </TestProviders>
+      );
+      expect((LensEmbeddable as unknown as jest.Mock).mock.calls[0][0].height).toEqual('100%');
     });
   });
 
