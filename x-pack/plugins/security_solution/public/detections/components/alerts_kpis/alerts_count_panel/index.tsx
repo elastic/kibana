@@ -9,7 +9,7 @@ import { EuiProgress } from '@elastic/eui';
 import type { EuiComboBox } from '@elastic/eui';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
-import React, { memo, useMemo, useState, useEffect, useCallback } from 'react';
+import React, { memo, useMemo, useEffect, useCallback } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import type { Filter, Query } from '@kbn/es-query';
@@ -58,7 +58,7 @@ interface AlertsCountPanelProps {
   isExpanded?: boolean;
   setIsExpanded?: (status: boolean) => void;
 }
-const CHART_HEIGHT = '180px';
+const CHART_HEIGHT = '100%';
 
 export const AlertsCountPanel = memo<AlertsCountPanelProps>(
   ({
@@ -108,17 +108,6 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
     }, [query, filters]);
 
     const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTIONS_ALERTS_COUNT_ID);
-    const [querySkip, setQuerySkip] = useState(
-      isAlertsPageChartsEnabled ? !isExpanded : !toggleStatus
-    );
-    useEffect(() => {
-      if (isAlertsPageChartsEnabled) {
-        setQuerySkip(!isExpanded);
-      } else {
-        setQuerySkip(!toggleStatus);
-      }
-    }, [toggleStatus, isAlertsPageChartsEnabled, isExpanded]);
-
     const toggleQuery = useCallback(
       (newToggleStatus: boolean) => {
         if (isAlertsPageChartsEnabled && setIsExpanded) {
@@ -126,10 +115,13 @@ export const AlertsCountPanel = memo<AlertsCountPanelProps>(
         } else {
           setToggleStatus(newToggleStatus);
         }
-        // toggle on = skipQuery false
-        setQuerySkip(!newToggleStatus);
       },
-      [setQuerySkip, setToggleStatus, setIsExpanded, isAlertsPageChartsEnabled]
+      [setToggleStatus, setIsExpanded, isAlertsPageChartsEnabled]
+    );
+
+    const querySkip = useMemo(
+      () => (isAlertsPageChartsEnabled ? !isExpanded : !toggleStatus),
+      [isAlertsPageChartsEnabled, isExpanded, toggleStatus]
     );
 
     const timerange = useMemo(() => ({ from, to }), [from, to]);

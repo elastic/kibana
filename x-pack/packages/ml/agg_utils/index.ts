@@ -20,11 +20,11 @@ export type {
 } from './src/fetch_histograms_for_fields';
 export type {
   AggCardinality,
-  ChangePoint,
-  ChangePointGroup,
-  ChangePointGroupHistogram,
-  ChangePointHistogram,
-  ChangePointHistogramItem,
+  SignificantTerm,
+  SignificantTermGroup,
+  SignificantTermGroupHistogram,
+  SignificantTermHistogram,
+  SignificantTermHistogramItem,
   HistogramField,
   NumericColumnStats,
   NumericColumnStatsMap,
