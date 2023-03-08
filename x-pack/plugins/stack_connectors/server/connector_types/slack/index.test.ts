@@ -122,7 +122,7 @@ describe('validate config, secrets and connector', () => {
     validateConfig(connectorType, {}, { configurationUtilities });
   });
 
-  test('should validate and pass when config is invalid', () => {
+  test('should fail when config is invalid', () => {
     expect(() => {
       validateConfig(connectorType, { type: 'not_webhook' }, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
@@ -208,7 +208,7 @@ describe('validate config, secrets and connector', () => {
   });
 
   describe('Web API', () => {
-    test('should validate and pass when config and secrets are invalid together', () => {
+    test('should fail when config and secrets are invalid together', () => {
       expect(() => {
         validateConnector(connectorType, {
           config: { type: 'web_api' },
