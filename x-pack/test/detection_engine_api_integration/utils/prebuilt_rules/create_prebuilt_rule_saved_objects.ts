@@ -6,11 +6,11 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
+import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import {
   getPrebuiltRuleMock,
   getPrebuiltRuleWithExceptionsMock,
-} from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules/model/prebuilt_rule.mock';
-import { PrebuiltRuleToInstall } from '@kbn/security-solution-plugin/common/detection_engine/prebuilt_rules';
+} from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 
 /**
@@ -19,7 +19,7 @@ import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
  * @param overrideParams Params to override the default mock
  * @returns Created rule asset saved object
  */
-export const createRuleAssetSavedObject = (overrideParams: Partial<PrebuiltRuleToInstall>) => ({
+export const createRuleAssetSavedObject = (overrideParams: Partial<PrebuiltRuleAsset>) => ({
   'security-rule': {
     ...getPrebuiltRuleMock(),
     ...overrideParams,

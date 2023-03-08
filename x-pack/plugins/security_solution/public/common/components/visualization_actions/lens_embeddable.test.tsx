@@ -89,6 +89,11 @@ describe('LensEmbeddable', () => {
         lens: {
           EmbeddableComponent: mockEmbeddableComponent,
         },
+        data: {
+          actions: {
+            createFiltersFromValueClickAction: jest.fn(),
+          },
+        },
       },
     });
     (useActions as jest.Mock).mockReturnValue(mockActions);
