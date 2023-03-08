@@ -338,7 +338,7 @@ export const validatePackagePolicyConfig = (
   }
 
   if (varDef.type === 'select' && parsedValue) {
-    if (!varDef.options?.map(o => o.value).includes(parsedValue)) {
+    if (!varDef.options?.map((o) => o.value).includes(parsedValue)) {
       errors.push(
         i18n.translate('xpack.fleet.packagePolicyValidation.invalidSelectValueErrorMessage', {
           defaultMessage: 'Invalid value for select type',
