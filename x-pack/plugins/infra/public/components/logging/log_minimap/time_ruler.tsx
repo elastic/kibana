@@ -26,7 +26,7 @@ const ONE_MINUTE = 60000;
  * In order to get the correct timestamp for a custom timezone
  * we need, from the current timestamp, to add:
  * 1. The current timezone offset in milliseconds (positive or negative)
- * 2. The UTC offeset in milliseconds (positive or negative)
+ * 2. The UTC offset in milliseconds (positive or negative)
  * This guarantees the timestamp we return is related to the set timezone in momentjs.
  */
 const applyTimezoneOffset = (utcTimestamp: number) => {
