@@ -6,8 +6,10 @@
  */
 
 import type { Rule } from '@kbn/alerting-plugin/common';
-import type { AlertSummaryField } from '@kbn/observability-plugin/public/pages/alert_details/components/alert_summary';
-import type { TopAlert } from '@kbn/observability-plugin/public/typings/alerts';
+import type {
+  TopAlert,
+  AlertSummaryField,
+} from '@kbn/observability-plugin/public';
 import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 
