@@ -45,10 +45,10 @@ export interface FullRiskScore extends BaseRiskScore {
 }
 
 export interface CalculateRiskScoreAggregations {
-  users: {
+  user?: {
     buckets: RiskScoreBucket[];
   };
-  hosts: {
+  host?: {
     buckets: RiskScoreBucket[];
   };
 }
