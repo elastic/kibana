@@ -69,6 +69,9 @@
     "@kbn/core-custom-branding-server-mocks",
     "@kbn/repo-packages",
     "@kbn/core-node-server",
+    "@kbn/tooling-log",
+    "@kbn/test",
+    "@kbn/stdio-dev-helpers",
   ],
   "exclude": [
     "target/**/*",
