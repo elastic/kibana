@@ -448,7 +448,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
       });
 
-      describe('assignees filtering', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/152928
+      describe.skip('assignees filtering', () => {
         it('filters cases by the first cases all user assignee', async () => {
           await cases.casesTable.filterByAssignee('all');
           await cases.casesTable.validateCasesTableHasNthRows(1);
@@ -590,9 +591,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/148468
-      // FLAKY: https://github.com/elastic/kibana/issues/148469
-      describe.skip('Severity', () => {
+      describe('Severity', () => {
         before(async () => {
           await cases.api.createNthRandomCases(1);
           await header.waitUntilLoadingHasFinished();
