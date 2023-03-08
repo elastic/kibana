@@ -16,6 +16,7 @@ const ruleName = 'Rule name';
 const ruleDesc = 'Rule description';
 
 const testProps = {
+  isLoading: false,
   groupBucket: {
     key: [ruleName, ruleDesc],
     key_as_string: `${ruleName}|${ruleDesc}`,

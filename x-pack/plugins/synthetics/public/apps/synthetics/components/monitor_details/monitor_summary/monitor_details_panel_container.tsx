@@ -9,12 +9,15 @@ import React from 'react';
 import { EuiLoadingContent } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { MonitorDetailsPanel } from '../../common/components/monitor_details_panel';
+import {
+  MonitorDetailsPanelProps,
+  MonitorDetailsPanel,
+} from '../../common/components/monitor_details_panel';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { ConfigKey } from '../../../../../../common/runtime_types';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 
-export const MonitorDetailsPanelContainer = () => {
+export const MonitorDetailsPanelContainer = (props: Partial<MonitorDetailsPanelProps>) => {
   const { latestPing } = useMonitorLatestPing();
 
   const { monitorId: configId } = useParams<{ monitorId: string }>();
@@ -34,6 +37,7 @@ export const MonitorDetailsPanelContainer = () => {
       monitor={monitor}
       loading={loading}
       configId={configId}
+      {...props}
     />
   );
 };

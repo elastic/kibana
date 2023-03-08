@@ -8,7 +8,7 @@
 import { getNewRule } from '../../objects/rule';
 import { SELECTED_ALERTS } from '../../screens/alerts';
 import { SERVER_SIDE_EVENT_COUNT } from '../../screens/timeline';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import {
   bulkInvestigateSelectedEventsInTimeline,
@@ -57,7 +57,7 @@ describe('Bulk Investigate in Timeline', () => {
 
   context('Alerts', () => {
     before(() => {
-      createCustomRuleEnabled(getNewRule());
+      createRule(getNewRule());
     });
 
     beforeEach(() => {

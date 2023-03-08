@@ -13,6 +13,7 @@ import { JourneyScreenshotDialog } from '../screenshot/journey_screenshot_dialog
 import { ScreenshotImage } from '../screenshot/screenshot_image';
 
 export interface StepImagePopoverProps {
+  timestamp?: string;
   checkGroup: string | undefined;
   stepName?: string;
   stepNumber: number;
@@ -26,6 +27,7 @@ export interface StepImagePopoverProps {
 }
 
 export const JourneyScreenshotPreview: React.FC<StepImagePopoverProps> = ({
+  timestamp,
   checkGroup,
   stepName,
   stepNumber,
@@ -96,6 +98,7 @@ export const JourneyScreenshotPreview: React.FC<StepImagePopoverProps> = ({
           maxSteps={maxSteps}
           isOpen={isImageDialogOpen}
           onClose={onDialogClose}
+          timestamp={timestamp}
         />
       ) : null}
       <EuiPopover

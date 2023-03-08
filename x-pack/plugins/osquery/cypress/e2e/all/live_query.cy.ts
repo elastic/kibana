@@ -68,6 +68,7 @@ describe('ALL - Live Query', () => {
     checkResults();
     cy.react('Cell', { props: { columnIndex: 0 } })
       .should('exist')
+      .first()
       .click();
     cy.url().should('include', 'app/fleet/agents/');
   });

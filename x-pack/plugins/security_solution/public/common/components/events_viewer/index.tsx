@@ -559,7 +559,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
                     additionalMenuOptions={additionalRightMenuOptions}
                   />
 
-                  {!hasAlerts && !loading && !graphOverlay && <EmptyTable height="short" />}
+                  {!hasAlerts && !loading && !graphOverlay && <EmptyTable />}
                   {hasAlerts && (
                     <FullWidthFlexGroupTable
                       $visible={!graphEventId && graphOverlay == null}
