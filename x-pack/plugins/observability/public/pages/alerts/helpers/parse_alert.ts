@@ -14,7 +14,7 @@ import {
   ALERT_RULE_NAME,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { experimentalRuleFieldMap } from '@kbn/rule-registry-plugin/common/assets/field_maps/experimental_rule_field_map';
+import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { parseTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { parseExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
 import { asDuration, asPercent } from '../../../../common/utils/formatters';
@@ -24,7 +24,7 @@ import type { TopAlert } from '../../../typings/alerts';
 export const parseAlert =
   (observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry) =>
   (alert: Record<string, unknown>): TopAlert => {
-    const experimentalFields = Object.keys(experimentalRuleFieldMap);
+    const experimentalFields = Object.keys(legacyExperimentalFieldMap);
     const alertWithExperimentalFields = experimentalFields.reduce((acc, key) => {
       if (alert[key]) {
         return { ...acc, [key]: alert[key] };
