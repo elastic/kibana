@@ -56,7 +56,7 @@ export const JourneyScreenshotDialog = ({
   const { basePath } = useContext(SyntheticsSettingsContext);
   const imgPath = `${basePath}/internal/uptime/journey/screenshot/${checkGroup}/${stepNumber}`;
 
-  const imageResult = useRetrieveStepImage({
+  const { imageResult, isLoading } = useRetrieveStepImage({
     hasIntersected: true,
     stepStatus: 'complete',
     imgPath,
@@ -121,7 +121,7 @@ export const JourneyScreenshotDialog = ({
           <ScreenshotImage
             label={stepCountLabel}
             imgSrc={imgSrc}
-            isLoading={loading ?? false}
+            isLoading={isLoading || !!loading}
             animateLoading={false}
             hasBorder={false}
             size={'full'}
@@ -141,7 +141,7 @@ export const JourneyScreenshotDialog = ({
             // we don't want this to be captured by row click which leads to step list page
             evt.stopPropagation();
           }}
-          onKeyDown={(evt) => {
+          onKeyDown={(_evt) => {
             // Just to satisfy ESLint
           }}
         >
