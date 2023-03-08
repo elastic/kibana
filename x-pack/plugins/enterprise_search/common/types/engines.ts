@@ -35,7 +35,6 @@ export interface EnterpriseSearchEngineIndex {
   count: number;
   health: HealthStatus | 'unknown';
   name: string;
-  source: 'api' | 'connector' | 'crawler';
 }
 
 export interface EnterpriseSearchEngineFieldCapabilities {
