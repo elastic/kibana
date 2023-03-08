@@ -25,6 +25,7 @@
     }
   },
   "action_task_params": {
+    "dynamic": false,
     "properties": {
       "actionId": {
         "type": "keyword"
@@ -45,10 +46,6 @@
       "relatedSavedObjects": {
         "enabled": false,
         "type": "object"
-      },
-      "source": {
-        "index": false,
-        "type": "keyword"
       }
     }
   },
