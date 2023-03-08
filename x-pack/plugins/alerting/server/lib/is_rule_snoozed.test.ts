@@ -6,6 +6,7 @@
  */
 
 import sinon from 'sinon';
+import moment from 'moment';
 import { RRule } from '@kbn/rrule';
 import { isRuleSnoozed } from './is_rule_snoozed';
 import { RRuleRecord } from '../types';
@@ -286,35 +287,39 @@ describe('isRuleSnoozed', () => {
   });
 
   test('using a timezone, returns as expected for a recurring snooze on a day of the week', () => {
-    const snoozeScheduleA = [
-      {
-        duration: 60 * 1000,
-        rRule: {
-          freq: RRule.WEEKLY,
-          interval: 1,
-          byweekday: ['WE'],
-          tzid: 'Asia/Taipei',
-          dtstart: DATE_2019,
-        } as RRuleRecord,
-      },
-    ];
+    try {
+      const snoozeScheduleA = [
+        {
+          duration: 60 * 1000,
+          rRule: {
+            freq: RRule.WEEKLY,
+            interval: 1,
+            byweekday: ['WE'],
+            tzid: 'Asia/Taipei',
+            dtstart: DATE_2019,
+          } as RRuleRecord,
+        },
+      ];
 
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, muteAll: false })).toBe(false);
-    const snoozeScheduleB = [
-      {
-        duration: 60 * 1000,
-        rRule: {
-          freq: RRule.WEEKLY,
-          interval: 1,
-          byweekday: ['WE'],
-          byhour: [0],
-          byminute: [0],
-          tzid: 'UTC',
-          dtstart: DATE_2019,
-        } as RRuleRecord,
-      },
-    ];
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, muteAll: false })).toBe(true);
+      expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, muteAll: false })).toBe(false);
+      const snoozeScheduleB = [
+        {
+          duration: 60 * 1000,
+          rRule: {
+            freq: RRule.WEEKLY,
+            interval: 1,
+            byweekday: ['WE'],
+            byhour: [0],
+            byminute: [0],
+            tzid: 'UTC',
+            dtstart: DATE_2019,
+          } as RRuleRecord,
+        },
+      ];
+      expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleB, muteAll: false })).toBe(true);
+    } catch (e) {
+      throw new Error(`In timezone ${process.env.TZ ?? moment.tz.guess()}: ${e}`);
+    }
   });
 
   test('returns as expected for a manually skipped recurring snooze', () => {
