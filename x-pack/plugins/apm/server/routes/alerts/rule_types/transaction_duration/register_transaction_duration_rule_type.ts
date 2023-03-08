@@ -53,7 +53,10 @@ import {
 import { getApmIndices } from '../../../settings/apm_indices/get_apm_indices';
 import { apmActionVariables } from '../../action_variables';
 import { alertingEsClient } from '../../alerting_es_client';
-import { RegisterRuleDependencies } from '../../register_apm_rule_types';
+import {
+  ApmRuleTypeAlertDefinition,
+  RegisterRuleDependencies,
+} from '../../register_apm_rule_types';
 import {
   getServiceGroupFields,
   getServiceGroupFieldsAgg,
@@ -293,6 +296,7 @@ export function registerTransactionDurationRuleType({
 
       return { state: {} };
     },
+    alerts: ApmRuleTypeAlertDefinition,
   });
 
   alerting.registerType(ruleType);

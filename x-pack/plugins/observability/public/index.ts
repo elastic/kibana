@@ -124,3 +124,4 @@ export { calculateTimeRangeBucketSize } from './pages/overview/helpers/calculate
 
 export type { NavigationSection } from './services/navigation_registry';
 export { convertTo } from '../common/utils/formatters/duration';
+export { formatAlertEvaluationValue } from './utils/format_alert_evaluation_value';

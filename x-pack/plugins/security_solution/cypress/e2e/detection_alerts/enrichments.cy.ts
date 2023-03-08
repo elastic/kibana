@@ -17,7 +17,7 @@ import {
 import { ENRICHED_DATA_ROW } from '../../screens/alerts_details';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
 
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, deleteAlertsAndRules } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import {
@@ -45,7 +45,7 @@ describe('Enrichment', () => {
     beforeEach(() => {
       esArchiverLoad('risk_hosts');
       deleteAlertsAndRules();
-      createCustomRuleEnabled(getNewRule(), 'rule1');
+      createRule({ ...getNewRule(), rule_id: 'rule1' });
       visit(ALERTS_URL);
       waitForAlertsToPopulate();
     });
