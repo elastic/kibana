@@ -947,42 +947,49 @@ describe('Fleet - validatePackagePolicyConfig', () => {
   });
 
   describe('Select', () => {
-    it('should return an error message if options are missing', () => {
+    it('should return an error message if the value is not an option value', () => {
       const res = validatePackagePolicyConfig(
         {
           type: 'select',
-          value: undefined,
+          value: 'c',
         },
         {
           name: 'myvariable',
           type: 'select',
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
         },
         'myvariable',
         safeLoad
       );
 
-      expect(res).toEqual(['Options must be provided for select type']);
+      expect(res).toEqual(['Invalid value for select type']);
     });
 
-    it('should return an error message if options are empty', () => {
+    it('should accept a select with a valid value', () => {
       const res = validatePackagePolicyConfig(
         {
           type: 'select',
-          value: undefined,
+          value: 'b',
         },
         {
           name: 'myvariable',
           type: 'select',
-          options: [],
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
         },
         'myvariable',
         safeLoad
       );
 
-      expect(res).toEqual(['Options array must contain at least one entry']);
+      expect(res).toBeNull();
     });
 
-    it('should accept a select with valid options', () => {
+    it('should accept a select with undefined value', () => {
       const res = validatePackagePolicyConfig(
         {
           type: 'select',
