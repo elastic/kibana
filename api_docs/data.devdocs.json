@@ -16646,7 +16646,7 @@
             "tags": [],
             "label": "refreshFields",
             "description": [
-              "\nRefresh field list for a given index pattern."
+              "\nRefresh field list for a given data view."
             ],
             "signature": [
               "(dataView: ",
@@ -25137,7 +25137,7 @@
             "tags": [],
             "label": "refreshFields",
             "description": [
-              "\nRefresh field list for a given index pattern."
+              "\nRefresh field list for a given data view."
             ],
             "signature": [
               "(dataView: ",
