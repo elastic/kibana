@@ -50,7 +50,7 @@ import { TagsAddRemove } from './components/tags_add_remove';
 import { AgentActivityFlyout } from './components';
 import { TableRowActions } from './components/table_row_actions';
 import { AgentListTable } from './components/agent_list_table';
-import { getKuery } from './utils/getKuery';
+import { getKuery } from './utils/get_kuery';
 
 const REFRESH_INTERVAL_MS = 30000;
 
