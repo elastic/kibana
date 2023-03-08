@@ -19,12 +19,12 @@ import {
 } from '../../tasks/live_query';
 
 describe('EcsMapping', () => {
-  before(() => {
+  beforeEach(() => {
     login(ROLE.soc_manager);
-    navigateTo('/app/osquery');
   });
 
   it('should properly show static values in form and results', () => {
+    navigateTo('/app/osquery');
     cy.contains('New live query').click();
     selectAllAgents();
     inputQuery('select * from processes;');
@@ -49,5 +49,23 @@ describe('EcsMapping', () => {
     checkResults();
     cy.contains('[ "test2" ]');
     cy.contains('test3');
+  });
+
+  it('should hide and show ecs mappings on Advanced accordion click', () => {
+    navigateTo('/app/osquery');
+    cy.contains('New live query').click();
+    selectAllAgents();
+    cy.getBySel('savedQuerySelect').within(() => {
+      cy.getBySel('comboBoxInput').type('processes_elastic{downArrow}{enter}');
+    });
+    cy.react('EuiAccordionClass', {
+      props: { buttonContent: 'Advanced', forceState: 'open' },
+    }).should('exist');
+    cy.getBySel('advanced-accordion-content').within(() => {
+      cy.contains('Advanced').click();
+    });
+    cy.react('EuiAccordionClass', {
+      props: { buttonContent: 'Advanced', forceState: 'closed' },
+    }).should('exist');
   });
 });
