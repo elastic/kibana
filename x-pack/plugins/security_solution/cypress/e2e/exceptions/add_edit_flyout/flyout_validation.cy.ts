@@ -9,7 +9,7 @@ import { getNewRule } from '../../../objects/rule';
 
 import { RULE_STATUS } from '../../../screens/create_new_rule';
 
-import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { goToRuleDetails } from '../../../tasks/alerts_detection_rules';
 import {
   esArchiverLoad,
@@ -78,13 +78,11 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
     esArchiverLoad('conflicts_2');
     login();
     createExceptionList(getExceptionList(), getExceptionList().list_id).then((response) =>
-      createCustomRule({
+      createRule({
         ...getNewRule(),
-        dataSource: {
-          index: ['auditbeat-*', 'exceptions-*', 'conflicts-*'],
-          type: 'indexPatterns',
-        },
-        exceptionLists: [
+        index: ['auditbeat-*', 'exceptions-*', 'conflicts-*'],
+        enabled: false,
+        exceptions_list: [
           {
             id: response.body.id,
             list_id: getExceptionList().list_id,
