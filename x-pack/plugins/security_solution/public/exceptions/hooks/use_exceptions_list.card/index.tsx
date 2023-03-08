@@ -125,7 +125,19 @@ export const useExceptionsListCard = ({
         key: 'Export',
         icon: 'exportAction',
         label: i18n.EXPORT_EXCEPTION_LIST,
-        onClick: (e: React.MouseEvent<Element, MouseEvent>) => setShowExportModal(true),
+        onClick: (e: React.MouseEvent<Element, MouseEvent>) => {
+          if (listType === ExceptionListTypeEnum.ENDPOINT) {
+            handleExport({
+              id: exceptionsList.id,
+              listId: exceptionsList.list_id,
+              name: exceptionsList.name,
+              namespaceType: exceptionsList.namespace_type,
+              includeExpiredExceptions: true,
+            })();
+          } else {
+            setShowExportModal(true);
+          }
+        },
       },
       {
         key: 'Delete',
@@ -153,11 +165,14 @@ export const useExceptionsListCard = ({
     [
       exceptionsList.id,
       exceptionsList.list_id,
+      exceptionsList.name,
       exceptionsList.namespace_type,
       handleDelete,
       setShowExportModal,
       listCannotBeEdited,
       handleManageRules,
+      handleExport,
+      listType,
     ]
   );
 

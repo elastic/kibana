@@ -142,6 +142,7 @@
     "@kbn/securitysolution-ecs",
     "@kbn/cell-actions",
     "@kbn/shared-ux-router",
+    "@kbn/charts-plugin",
     "@kbn/alerts-as-data-utils",
     "@kbn/expandable-flyout",
     "@kbn/securitysolution-grouping",

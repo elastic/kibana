@@ -83,7 +83,7 @@ export const EXCEPTION_LIST_HEADER_LINKED_RULES = (noOfRules: number) =>
 export const EXCEPTION_LIST_HEADER_BREADCRUMB = i18n.translate(
   'exceptionList-components.exception_list_header_breadcrumb',
   {
-    defaultMessage: 'Rule exceptions',
+    defaultMessage: 'Shared Exception Lists',
   }
 );
 
