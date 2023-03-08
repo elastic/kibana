@@ -13,7 +13,7 @@ import { useParams } from 'react-router-dom';
 import { useLicense } from '../../hooks/use_license';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { render } from '../../utils/test_helper';
-import { SloDetailsPage } from '.';
+import { SloDetailsPage } from './slo_details';
 import { buildSlo } from '../../data/slo/slo';
 import type { ConfigSchema } from '../../plugin';
 import type { Subset } from '../../typings';
