@@ -9,24 +9,32 @@ import { i18n } from '@kbn/i18n';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 
+export const INDICATOR_CUSTOM_KQL = i18n.translate('xpack.observability.slo.indicators.customKql', {
+  defaultMessage: 'Custom KQL',
+});
+
+export const INDICATOR_APM_LATENCY = i18n.translate(
+  'xpack.observability.slo.indicators.apmLatency',
+  { defaultMessage: 'APM latency' }
+);
+
+export const INDICATOR_APM_AVAILABILITY = i18n.translate(
+  'xpack.observability.slo.indicators.apmAvailability',
+  { defaultMessage: 'APM availability' }
+);
+
 export function toIndicatorTypeLabel(
   indicatorType: SLOWithSummaryResponse['indicator']['type']
 ): string {
   switch (indicatorType) {
     case 'sli.kql.custom':
-      return i18n.translate('xpack.observability.slo.indicators.customKql', {
-        defaultMessage: 'Custom KQL',
-      });
+      return INDICATOR_CUSTOM_KQL;
 
     case 'sli.apm.transactionDuration':
-      return i18n.translate('xpack.observability.slo.indicators.apmLatency', {
-        defaultMessage: 'APM latency',
-      });
+      return INDICATOR_APM_LATENCY;
 
     case 'sli.apm.transactionErrorRate':
-      return i18n.translate('xpack.observability.slo.indicators.apmAvailability', {
-        defaultMessage: 'APM availability',
-      });
+      return INDICATOR_APM_AVAILABILITY;
     default:
       assertNever(indicatorType);
   }
