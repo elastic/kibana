@@ -988,6 +988,8 @@
       "@kbn/reporting-example-plugin/*": ["x-pack/examples/reporting_example/*"],
       "@kbn/reporting-generate-csv": ["packages/kbn-reporting/generate_csv/impl"],
       "@kbn/reporting-generate-csv/*": ["packages/kbn-reporting/generate_csv/impl/*"],
+      "@kbn/reporting-generate-csv-mocks": ["packages/kbn-reporting/generate_csv/mocks"],
+      "@kbn/reporting-generate-csv-mocks/*": ["packages/kbn-reporting/generate_csv/mocks/*"],
       "@kbn/reporting-generate-csv-types": ["packages/kbn-reporting/generate_csv/types"],
       "@kbn/reporting-generate-csv-types/*": ["packages/kbn-reporting/generate_csv/types/*"],
       "@kbn/reporting-plugin": ["x-pack/plugins/reporting"],

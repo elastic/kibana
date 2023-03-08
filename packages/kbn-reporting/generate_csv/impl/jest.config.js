@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../..',
-  roots: ['<rootDir>/packages/kbn-reporting/generate-csv'],
+  roots: ['<rootDir>/packages/kbn-reporting/generate_csv/impl'],
 };

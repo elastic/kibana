@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export function foo() {
-  return 'hello world';
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../../../..',
+  roots: ['<rootDir>/packages/kbn-reporting/generate_csv/mocks'],
+};

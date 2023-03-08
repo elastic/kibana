@@ -4709,6 +4709,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-generate-csv-mocks@link:packages/kbn-reporting/generate_csv/mocks":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-generate-csv-types@link:packages/kbn-reporting/generate_csv/types":
   version "0.0.0"
   uid ""

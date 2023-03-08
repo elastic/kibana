@@ -500,6 +500,7 @@
     "@kbn/reporting-common": "link:packages/kbn-reporting/common",
     "@kbn/reporting-example-plugin": "link:x-pack/examples/reporting_example",
     "@kbn/reporting-generate-csv": "link:packages/kbn-reporting/generate_csv/impl",
+    "@kbn/reporting-generate-csv-mocks": "link:packages/kbn-reporting/generate_csv/mocks",
     "@kbn/reporting-generate-csv-types": "link:packages/kbn-reporting/generate_csv/types",
     "@kbn/reporting-plugin": "link:x-pack/plugins/reporting",
     "@kbn/resolver-test-plugin": "link:x-pack/test/plugin_functional/plugins/resolver_test",
