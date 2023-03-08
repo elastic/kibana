@@ -48,7 +48,7 @@ const filterFromRange = (range: GetScoresParams['range']): QueryDslQueryContaine
 });
 
 export const calculateRiskScores = async ({
-  dataViewId,
+  index,
   enrichInputs,
   esClient,
   filter: userFilter,
@@ -58,7 +58,6 @@ export const calculateRiskScores = async ({
   esClient: ElasticsearchClient;
 } & GetScoresParams): Promise<SimpleRiskScore[] | FullRiskScore[]> => {
   const now = new Date().toISOString();
-  const index = '.alerts-security*';
 
   const reduceScript = `
     Map results = new HashMap();
