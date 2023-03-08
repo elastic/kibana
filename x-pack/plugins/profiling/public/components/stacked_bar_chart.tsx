@@ -16,7 +16,6 @@ import {
   timeFormatter,
   Tooltip,
   XYChartElementEvent,
-  TooltipContainer,
   TooltipInfo,
 } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
@@ -66,7 +65,6 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
     }
 
     return (
-      <TooltipContainer>
         <EuiPanel>
           <SubChart
             index={highlightedSubchart.Index}
@@ -86,7 +84,6 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
             padTitle={false}
           />
         </EuiPanel>
-      </TooltipContainer>
     );
   }
 
