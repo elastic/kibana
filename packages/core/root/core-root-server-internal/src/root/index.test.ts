@@ -10,11 +10,11 @@ import { rawConfigService, configService, logger, mockServer } from './index.tes
 
 import { BehaviorSubject } from 'rxjs';
 import { filter, first } from 'rxjs/operators';
+import { CriticalError } from '@kbn/core-base-server-internal';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { Root } from '.';
-import { CriticalError } from '@kbn/core-base-server-internal';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
