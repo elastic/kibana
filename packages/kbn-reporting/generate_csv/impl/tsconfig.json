@@ -10,7 +10,7 @@
   },
   "include": [
     "**/*.ts",
-      "**/*.tsx",
+    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"
@@ -24,5 +24,6 @@
     "@kbn/reporting-generate-csv-types",
     "@kbn/config-schema",
     "@kbn/i18n",
+    "@kbn/reporting-generate-csv-mocks",
   ]
 }
