@@ -473,6 +473,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       createAlerts: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/create-alerts.html`,
       syntheticsCommandReference: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-configuration.html#synthetics-configuration-playwright-options`,
       syntheticsProjectMonitors: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetic-run-tests.html#synthetic-monitor-choose-project`,
+      syntheticsMigrateFromIntegration: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/synthetics-migrate-from-integration.html`,
     },
     alerting: {
       guide: `${KIBANA_DOCS}create-and-manage-rules.html`,
@@ -500,6 +501,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       healthMonitoring: `${KIBANA_DOCS}task-manager-health-monitoring.html`,
     },
     maps: {
+      connectToEms: `${KIBANA_DOCS}maps-connect-to-ems.html`,
       guide: `${KIBANA_DOCS}maps.html`,
       importGeospatialPrivileges: `${KIBANA_DOCS}import-geospatial-data.html#import-geospatial-privileges`,
       gdalTutorial: `${ELASTIC_WEBSITE_URL}blog/how-to-ingest-geospatial-data-into-elasticsearch-with-gdal`,

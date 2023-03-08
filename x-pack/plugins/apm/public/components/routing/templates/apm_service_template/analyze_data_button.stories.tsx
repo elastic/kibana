@@ -49,6 +49,7 @@ export default {
             <APMServiceContext.Provider
               value={{
                 agentName,
+                transactionTypeStatus: FETCH_STATUS.SUCCESS,
                 transactionTypes: [],
                 serviceName,
                 fallbackToTransactions: false,

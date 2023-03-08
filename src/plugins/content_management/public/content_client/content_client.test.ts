@@ -10,7 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import { takeWhile, toArray } from 'rxjs/operators';
 import { createCrudClientMock } from '../crud_client/crud_client.mock';
 import { ContentClient } from './content_client';
-import type { GetIn, CreateIn, UpdateIn, DeleteIn, SearchIn, SearchOut } from '../../common';
+import type { GetIn, CreateIn, UpdateIn, DeleteIn, SearchIn } from '../../common';
 
 const setup = () => {
   const crudClient = createCrudClientMock();
@@ -21,7 +21,7 @@ const setup = () => {
 describe('#get', () => {
   it('calls rpcClient.get with input and returns output', async () => {
     const { crudClient, contentClient } = setup();
-    const input: GetIn = { id: 'test', contentType: 'testType' };
+    const input: GetIn = { id: 'test', contentTypeId: 'testType' };
     const output = { test: 'test' };
     crudClient.get.mockResolvedValueOnce(output);
     expect(await contentClient.get(input)).toEqual(output);
@@ -30,7 +30,7 @@ describe('#get', () => {
 
   it('calls rpcClient.get$ with input and returns output', async () => {
     const { crudClient, contentClient } = setup();
-    const input: GetIn = { id: 'test', contentType: 'testType' };
+    const input: GetIn = { id: 'test', contentTypeId: 'testType' };
     const output = { test: 'test' };
     crudClient.get.mockResolvedValueOnce(output);
     const get$ = contentClient.get$(input).pipe(
@@ -53,7 +53,7 @@ describe('#get', () => {
 describe('#create', () => {
   it('calls rpcClient.create with input and returns output', async () => {
     const { crudClient, contentClient } = setup();
-    const input: CreateIn = { contentType: 'testType', data: { foo: 'bar' } };
+    const input: CreateIn = { contentTypeId: 'testType', data: { foo: 'bar' } };
     const output = { test: 'test' };
     crudClient.create.mockResolvedValueOnce(output);
 
@@ -65,7 +65,7 @@ describe('#create', () => {
 describe('#update', () => {
   it('calls rpcClient.update with input and returns output', async () => {
     const { crudClient, contentClient } = setup();
-    const input: UpdateIn = { contentType: 'testType', data: { id: 'test', foo: 'bar' } };
+    const input: UpdateIn = { contentTypeId: 'testType', id: 'test', data: { foo: 'bar' } };
     const output = { test: 'test' };
     crudClient.update.mockResolvedValueOnce(output);
 
@@ -77,7 +77,7 @@ describe('#update', () => {
 describe('#delete', () => {
   it('calls rpcClient.delete with input and returns output', async () => {
     const { crudClient, contentClient } = setup();
-    const input: DeleteIn = { contentType: 'testType', data: { id: 'test' } };
+    const input: DeleteIn = { contentTypeId: 'testType', id: 'test' };
     const output = { test: 'test' };
     crudClient.delete.mockResolvedValueOnce(output);
 
@@ -89,8 +89,8 @@ describe('#delete', () => {
 describe('#search', () => {
   it('calls rpcClient.search with input and returns output', async () => {
     const { crudClient, contentClient } = setup();
-    const input: SearchIn = { contentType: 'testType', params: {} };
-    const output: SearchOut = { hits: [{ test: 'test' }] };
+    const input: SearchIn = { contentTypeId: 'testType', query: {} };
+    const output = { hits: [{ id: 'test' }] };
     crudClient.search.mockResolvedValueOnce(output);
     expect(await contentClient.search(input)).toEqual(output);
     expect(crudClient.search).toBeCalledWith(input);
@@ -98,8 +98,8 @@ describe('#search', () => {
 
   it('calls rpcClient.search$ with input and returns output', async () => {
     const { crudClient, contentClient } = setup();
-    const input: SearchIn = { contentType: 'testType', params: {} };
-    const output: SearchOut = { hits: [{ test: 'test' }] };
+    const input: SearchIn = { contentTypeId: 'testType', query: {} };
+    const output = { hits: [{ id: 'test' }] };
     crudClient.search.mockResolvedValueOnce(output);
     const search$ = contentClient.search$(input).pipe(
       takeWhile((result) => {

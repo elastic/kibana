@@ -19,7 +19,7 @@ export const useSimpleRunOnceMonitors = ({
   expectSummaryDocs: number;
   testRunId: string;
 }) => {
-  const { refreshTimer, lastRefresh } = useTickTick(2 * 1000, false);
+  const { refreshTimer, lastRefresh } = useTickTick(2 * 1000);
 
   const { data, loading } = useEsSearch(
     createEsParams({

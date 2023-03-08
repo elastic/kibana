@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { esArchiverResetKibana } from '../../../tasks/es_archiver';
 import { cleanKibana } from '../../../tasks/common';
 import { ROLES } from '../../../../common/test';
 import { getExceptionList } from '../../../objects/exception';
@@ -22,6 +23,7 @@ const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 
 describe('All exception lists - read only', () => {
   before(() => {
+    esArchiverResetKibana();
     cleanKibana();
   });
 

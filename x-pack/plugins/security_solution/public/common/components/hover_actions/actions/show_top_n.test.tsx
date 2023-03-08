@@ -13,6 +13,7 @@ import { ShowTopNButton } from './show_top_n';
 import { TimelineId } from '../../../../../common/types';
 
 jest.mock('../../visualization_actions/actions');
+jest.mock('../../visualization_actions/visualization_embeddable');
 
 jest.mock('../../../lib/kibana', () => {
   const original = jest.requireActual('../../../lib/kibana');

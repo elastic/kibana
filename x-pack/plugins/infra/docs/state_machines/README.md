@@ -6,3 +6,4 @@ implementation patterns:
 
 - [Patterns for designing XState state machines](./xstate_machine_patterns.md)
 - [Patterns for using XState with React](./xstate_react_patterns.md)
+- [Patterns for working with URLs and URL precedence](./xstate_url_patterns_and_precedence.md)

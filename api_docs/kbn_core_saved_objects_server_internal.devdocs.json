@@ -192,7 +192,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData, logger }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_create.ts",
         "deprecated": false,
@@ -218,7 +218,7 @@
             "id": "def-common.registerBulkCreateRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData, logger }",
+            "label": "{ config, coreUsageData, logger }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -242,7 +242,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData, logger }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_delete.ts",
         "deprecated": false,
@@ -268,7 +268,7 @@
             "id": "def-common.registerBulkDeleteRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData, logger }",
+            "label": "{ config, coreUsageData, logger }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -292,7 +292,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData, logger }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_get.ts",
         "deprecated": false,
@@ -318,7 +318,7 @@
             "id": "def-common.registerBulkGetRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData, logger }",
+            "label": "{ config, coreUsageData, logger }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -342,7 +342,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData, logger }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_resolve.ts",
         "deprecated": false,
@@ -368,7 +368,7 @@
             "id": "def-common.registerBulkResolveRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData, logger }",
+            "label": "{ config, coreUsageData, logger }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -392,7 +392,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData, logger }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/bulk_update.ts",
         "deprecated": false,
@@ -418,7 +418,7 @@
             "id": "def-common.registerBulkUpdateRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData, logger }",
+            "label": "{ config, coreUsageData, logger }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -442,7 +442,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData, logger }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/create.ts",
         "deprecated": false,
@@ -468,7 +468,7 @@
             "id": "def-common.registerCreateRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData, logger }",
+            "label": "{ config, coreUsageData, logger }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -492,7 +492,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData, logger }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/delete.ts",
         "deprecated": false,
@@ -518,7 +518,7 @@
             "id": "def-common.registerDeleteRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData, logger }",
+            "label": "{ config, coreUsageData, logger }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -642,7 +642,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData, logger }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/find.ts",
         "deprecated": false,
@@ -668,7 +668,7 @@
             "id": "def-common.registerFindRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData, logger }",
+            "label": "{ config, coreUsageData, logger }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -692,7 +692,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData, logger }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/get.ts",
         "deprecated": false,
@@ -718,7 +718,7 @@
             "id": "def-common.registerGetRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData, logger }",
+            "label": "{ config, coreUsageData, logger }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -1102,7 +1102,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData, logger }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/resolve.ts",
         "deprecated": false,
@@ -1128,7 +1128,7 @@
             "id": "def-common.registerResolveRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData, logger }",
+            "label": "{ config, coreUsageData, logger }",
             "description": [],
             "signature": [
               "RouteDependencies"
@@ -1152,7 +1152,7 @@
         "signature": [
           "(router: ",
           "InternalSavedObjectRouter",
-          ", { coreUsageData, logger }: RouteDependencies) => void"
+          ", { config, coreUsageData, logger }: RouteDependencies) => void"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-server-internal/src/routes/update.ts",
         "deprecated": false,
@@ -1178,7 +1178,7 @@
             "id": "def-common.registerUpdateRoute.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ coreUsageData, logger }",
+            "label": "{ config, coreUsageData, logger }",
             "description": [],
             "signature": [
               "RouteDependencies"

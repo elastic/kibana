@@ -27,7 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { escapeKuery } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
+import type { SignificantTerm, FieldValuePair } from '@kbn/ml-agg-utils';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
@@ -56,14 +56,14 @@ const viewInDiscoverMessage = i18n.translate(
 );
 
 interface SpikeAnalysisTableProps {
-  changePoints: ChangePoint[];
+  significantTerms: SignificantTerm[];
   groupTableItems: GroupTableItem[];
   dataViewId?: string;
   loading: boolean;
 }
 
 export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
-  changePoints,
+  significantTerms,
   groupTableItems,
   dataViewId,
   loading,
@@ -84,24 +84,24 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     useSpikeAnalysisTableRowContext();
 
   const pushExpandedTableItem = (
-    expandedTableItems: ChangePoint[],
+    expandedTableItems: SignificantTerm[],
     items: FieldValuePair[],
     unique = false
   ) => {
     for (const groupItem of items) {
       const { fieldName, fieldValue } = groupItem;
       const itemToPush = {
-        ...(changePoints.find(
-          (changePoint) =>
-            (changePoint.fieldName === fieldName ||
-              changePoint.fieldName === `${fieldName}.keyword`) &&
-            (changePoint.fieldValue === fieldValue ||
-              changePoint.fieldValue === `${fieldValue}.keyword`)
+        ...(significantTerms.find(
+          (significantTerm) =>
+            (significantTerm.fieldName === fieldName ||
+              significantTerm.fieldName === `${fieldName}.keyword`) &&
+            (significantTerm.fieldValue === fieldValue ||
+              significantTerm.fieldValue === `${fieldValue}.keyword`)
         ) ?? {}),
         fieldName: `${fieldName}`,
         fieldValue: `${fieldValue}`,
         unique,
-      } as ChangePoint;
+      } as SignificantTerm;
 
       expandedTableItems.push(itemToPush);
     }
@@ -114,14 +114,14 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
       const { group, repeatedValues } = item;
-      const expandedTableItems: ChangePoint[] = [];
+      const expandedTableItems: SignificantTerm[] = [];
 
       pushExpandedTableItem(expandedTableItems, group, true);
       pushExpandedTableItem(expandedTableItems, repeatedValues);
 
       itemIdToExpandedRowMapValues[item.id] = (
         <SpikeAnalysisTable
-          changePoints={expandedTableItems as ChangePoint[]}
+          significantTerms={expandedTableItems as SignificantTerm[]}
           loading={loading}
           dataViewId={dataViewId}
           isExpandedRow
@@ -328,7 +328,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.logRateColumnTooltip',
             {
               defaultMessage:
-                'A visual representation of the impact of the group on the message rate difference',
+                'A visual representation of the impact of the group on the message rate difference.',
             }
           )}
         >
@@ -377,7 +377,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
             'xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.pValueColumnTooltip',
             {
               defaultMessage:
-                'The significance of changes in the frequency of values; lower values indicate greater change',
+                'The significance of changes in the frequency of values; lower values indicate greater change.',
             }
           )}
         >
