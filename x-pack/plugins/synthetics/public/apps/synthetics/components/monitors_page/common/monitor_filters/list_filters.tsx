@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { FilterGroup } from './filter_group';
 import { SearchField } from '../search_field';
 import { SyntheticsMonitorFilterChangeHandler } from './filter_fields';
 
-export const ListFilters = memo(function ({
+export const ListFilters = function ({
   handleFilterChange,
 }: {
   handleFilterChange: SyntheticsMonitorFilterChangeHandler;
@@ -27,4 +27,4 @@ export const ListFilters = memo(function ({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-});
+};

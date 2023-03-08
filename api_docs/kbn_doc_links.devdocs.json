@@ -700,7 +700,7 @@
             "label": "maps",
             "description": [],
             "signature": [
-              "{ readonly guide: string; readonly importGeospatialPrivileges: string; readonly gdalTutorial: string; readonly termJoinsExample: string; }"
+              "{ readonly connectToEms: string; readonly guide: string; readonly importGeospatialPrivileges: string; readonly gdalTutorial: string; readonly termJoinsExample: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,

@@ -22,6 +22,7 @@ import { profilingRouter } from './routing';
 import { Services } from './services';
 import { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
 import { ProfilingHeaderActionMenu } from './components/profiling_header_action_menu';
+import { RouterErrorBoundary } from './routing/router_error_boundary';
 
 interface Props {
   profilingFetchServices: Services;
@@ -82,21 +83,23 @@ function App({
         <i18nCore.Context>
           <RedirectAppLinks coreStart={coreStart} currentAppId="profiling">
             <RouterProvider router={profilingRouter as any} history={history}>
-              <TimeRangeContextProvider>
-                <ProfilingDependenciesContextProvider value={profilingDependencies}>
-                  <CheckSetup>
-                    <RedirectWithDefaultDateRange>
-                      <RouteBreadcrumbsContextProvider>
-                        <RouteRenderer />
-                      </RouteBreadcrumbsContextProvider>
-                    </RedirectWithDefaultDateRange>
-                  </CheckSetup>
-                  <MountProfilingActionMenu
-                    setHeaderActionMenu={setHeaderActionMenu}
-                    theme$={theme$}
-                  />
-                </ProfilingDependenciesContextProvider>
-              </TimeRangeContextProvider>
+              <RouterErrorBoundary>
+                <TimeRangeContextProvider>
+                  <ProfilingDependenciesContextProvider value={profilingDependencies}>
+                    <CheckSetup>
+                      <RedirectWithDefaultDateRange>
+                        <RouteBreadcrumbsContextProvider>
+                          <RouteRenderer />
+                        </RouteBreadcrumbsContextProvider>
+                      </RedirectWithDefaultDateRange>
+                    </CheckSetup>
+                    <MountProfilingActionMenu
+                      setHeaderActionMenu={setHeaderActionMenu}
+                      theme$={theme$}
+                    />
+                  </ProfilingDependenciesContextProvider>
+                </TimeRangeContextProvider>
+              </RouterErrorBoundary>
             </RouterProvider>
           </RedirectAppLinks>
         </i18nCore.Context>

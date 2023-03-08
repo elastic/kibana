@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageHeaderContentProps } from '@elastic/eui';
+import {
+  EuiBetaBadge,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeaderContentProps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import { NoDataPageProps } from '@kbn/shared-ux-page-no-data-types';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { PrimaryProfilingSearchBar } from './primary_profiling_search_bar';
+
+const PROFILING_FEEDBACK_LINK = 'https://ela.st/profiling-feedback';
 
 export function ProfilingAppPageTemplate({
   children,
@@ -46,8 +54,34 @@ export function ProfilingAppPageTemplate({
     <ObservabilityPageTemplate
       noDataConfig={noDataConfig}
       pageHeader={{
-        pageTitle,
-        tabs,
+        rightSideItems: [
+          <EuiButton
+            href={PROFILING_FEEDBACK_LINK}
+            target="_blank"
+            color="warning"
+            iconType="editorComment"
+          >
+            {i18n.translate('xpack.profiling.header.giveFeedbackLink', {
+              defaultMessage: 'Give feedback',
+            })}
+          </EuiButton>,
+        ],
+        pageTitle: (
+          <EuiFlexGroup gutterSize="s" alignItems="baseline">
+            <EuiFlexItem grow={false}>
+              <h1>{pageTitle}</h1>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBetaBadge
+                label="Beta"
+                color="hollow"
+                tooltipContent={i18n.translate('xpack.profiling.header.betaBadgeTooltip', {
+                  defaultMessage: 'This module is not GA. Please help us by reporting any bugs.',
+                })}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
       }}
       restrictWidth={restrictWidth}
       pageSectionProps={{
