@@ -38,7 +38,6 @@ const TabComponent = (props: TabProps) => {
     return getAllFields(metadata);
   }, [metadata]);
 
-
   if (metadataLoading) {
     return <LoadingPlaceholder />;
   }
@@ -47,9 +46,7 @@ const TabComponent = (props: TabProps) => {
     <>
       {metadata && (
         <TableWrapper>
-          <Table
-            rows={fields}
-          />
+          <Table rows={fields} />
         </TableWrapper>
       )}
     </>
