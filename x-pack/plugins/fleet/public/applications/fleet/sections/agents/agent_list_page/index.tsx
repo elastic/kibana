@@ -7,18 +7,14 @@
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { differenceBy, isEqual } from 'lodash';
 import type { EuiBasicTable } from '@elastic/eui';
-import { EuiLink } from '@elastic/eui';
 import { EuiSpacer, EuiPortal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-import { FormattedMessage } from '@kbn/i18n-react';
 
 import { agentStatusesToSummary } from '../../../../../../common/services';
 
 import type { Agent, AgentPolicy, SimplifiedAgentStatus } from '../../../types';
 import {
   usePagination,
-  useAuthz,
   useGetAgentPolicies,
   sendGetAgents,
   sendGetAgentStatus,
@@ -35,7 +31,7 @@ import {
   ExperimentalFeaturesService,
   policyHasFleetServer,
 } from '../../../services';
-import { AGENTS_PREFIX, SO_SEARCH_LIMIT } from '../../../constants';
+import { SO_SEARCH_LIMIT } from '../../../constants';
 import {
   AgentReassignAgentPolicyModal,
   AgentUnenrollAgentModal,
@@ -54,7 +50,7 @@ import { TagsAddRemove } from './components/tags_add_remove';
 import { AgentActivityFlyout } from './components';
 import { TableRowActions } from './components/table_row_actions';
 import { AgentListTable } from './components/agent_list_table';
-import { EmptyPrompt } from './components/empty_prompt';
+import { getKuery } from './utils/getKuery';
 
 const REFRESH_INTERVAL_MS = 30000;
 
@@ -64,7 +60,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const { notifications, cloud } = useStartServices();
   useBreadcrumbs('agent_list');
   const defaultKuery: string = (useUrlParams().urlParams.kuery as string) || '';
-  const hasFleetAllPrivileges = useAuthz().fleet.all;
 
   // Agent data states
   const [showUpgradeable, setShowUpgradeable] = useState<boolean>(false);
@@ -114,6 +109,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     selectedAgentPolicies.length ||
     selectedStatus.length ||
     selectedTags.length ||
+    setActionsFilteredAgents.length ||
     showUpgradeable
   );
 
@@ -174,69 +170,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSortOrder(sort!.direction);
   };
 
-  // Kuery
-  const kuery = useMemo(() => {
-    let kueryBuilder = search.trim();
-    if (selectedAgentPolicies.length) {
-      if (kueryBuilder) {
-        kueryBuilder = `(${kueryBuilder}) and`;
-      }
-      kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.policy_id : (${selectedAgentPolicies
-        .map((agentPolicy) => `"${agentPolicy}"`)
-        .join(' or ')})`;
-    }
-
-    if (selectedTags.length) {
-      if (kueryBuilder) {
-        kueryBuilder = `(${kueryBuilder}) and`;
-      }
-      kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.tags : (${selectedTags
-        .map((tag) => `"${tag}"`)
-        .join(' or ')})`;
-    }
-
-    if (selectedStatus.length) {
-      const kueryStatus = selectedStatus
-        .map((status) => {
-          switch (status) {
-            case 'healthy':
-              return AgentStatusKueryHelper.buildKueryForOnlineAgents();
-            case 'unhealthy':
-              return AgentStatusKueryHelper.buildKueryForErrorAgents();
-            case 'offline':
-              return AgentStatusKueryHelper.buildKueryForOfflineAgents();
-            case 'updating':
-              return AgentStatusKueryHelper.buildKueryForUpdatingAgents();
-            case 'inactive':
-              return AgentStatusKueryHelper.buildKueryForInactiveAgents();
-            case 'unenrolled':
-              return AgentStatusKueryHelper.buildKueryForUnenrolledAgents();
-          }
-
-          return undefined;
-        })
-        .filter((statusKuery) => statusKuery !== undefined)
-        .join(' or ');
-
-      if (actionsFilteredAgents.length) {
-        if (kueryBuilder) {
-          kueryBuilder = `(${kueryBuilder}) and`;
-        }
-        kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.agent.id : (${actionsFilteredAgents
-          .map((id) => `"${id}"`)
-          .join(' or ')})`;
-      }
-
-      if (kueryBuilder) {
-        kueryBuilder = `(${kueryBuilder}) and (${kueryStatus})`;
-      } else {
-        kueryBuilder = kueryStatus;
-      }
-    }
-
-    return kueryBuilder;
-  }, [search, selectedAgentPolicies, selectedTags, selectedStatus, actionsFilteredAgents]);
-
   const showInactive = useMemo(() => {
     return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
   }, [selectedStatus]);
@@ -296,6 +229,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         currentRequestRef.current++;
         const currentRequest = currentRequestRef.current;
         isLoadingVar.current = true;
+
+        const kuery = getKuery(
+          search,
+          selectedAgentPolicies,
+          selectedTags,
+          selectedStatus,
+          actionsFilteredAgents
+        );
+
         try {
           setIsLoading(true);
           const [agentsResponse, totalInactiveAgentsResponse, agentTagsResponse] =
@@ -372,16 +314,20 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       fetchDataAsync();
     },
     [
+      search,
+      selectedAgentPolicies,
+      selectedTags,
+      selectedStatus,
+      actionsFilteredAgents,
       pagination.currentPage,
       pagination.pageSize,
-      kuery,
-      showInactive,
-      showUpgradeable,
-      allTags,
-      notifications.toasts,
       sortField,
       sortOrder,
+      showInactive,
+      showUpgradeable,
       displayAgentMetrics,
+      allTags,
+      notifications.toasts,
     ]
   );
 
@@ -471,33 +417,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setShowAgentActivityTour({ isOpen: true });
   };
 
-  const noItemsMessage =
-    isLoading && currentRequestRef?.current === 1 ? (
-      <FormattedMessage
-        id="xpack.fleet.agentList.loadingAgentsMessage"
-        defaultMessage="Loading agents…"
-      />
-    ) : isUsingFilter ? (
-      <FormattedMessage
-        id="xpack.fleet.agentList.noFilteredAgentsPrompt"
-        defaultMessage="No agents found. {clearFiltersLink}"
-        values={{
-          clearFiltersLink: (
-            <EuiLink onClick={() => clearFilters()}>
-              <FormattedMessage
-                id="xpack.fleet.agentList.clearFiltersLinkText"
-                defaultMessage="Clear filters"
-              />
-            </EuiLink>
-          ),
-        }}
-      />
-    ) : (
-      <EmptyPrompt
-        hasFleetAllPrivileges={hasFleetAllPrivileges}
-        setEnrollmentFlyoutState={setEnrollmentFlyoutState}
-      />
-    );
+  const currentKuery = getKuery(
+    search,
+    selectedAgentPolicies,
+    selectedTags,
+    selectedStatus,
+    actionsFilteredAgents
+  );
+
+  const isCurrentRequestIncremented = currentRequestRef?.current === 1;
   return (
     <>
       {isAgentActivityFlyoutOpen ? (
@@ -612,7 +540,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         totalAgents={totalAgents}
         totalInactiveAgents={totalInactiveAgents}
         selectionMode={selectionMode}
-        currentQuery={kuery}
+        currentQuery={currentKuery}
         selectedAgents={selectedAgents}
         refreshAgents={refreshAgents}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
@@ -637,6 +565,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             setSelectionMode('manual');
           }
         }}
+        clearFilters={clearFilters}
       />
       <EuiSpacer size="s" />
       {/* Agent list table */}
@@ -653,8 +582,11 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         showUpgradeable={showUpgradeable}
         onTableChange={onTableChange}
         pagination={pagination}
-        noItemsMessage={noItemsMessage}
         totalAgents={Math.min(totalAgents, SO_SEARCH_LIMIT)}
+        isUsingFilter={isUsingFilter}
+        setEnrollmentFlyoutState={setEnrollmentFlyoutState}
+        clearFilters={clearFilters}
+        isCurrentRequestIncremented={isCurrentRequestIncremented}
       />
     </>
   );
