@@ -71,6 +71,26 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const flyOutCancelButton = await testSubjects.find('euiFlyoutCloseButton');
       await flyOutCancelButton.click();
     });
+
+    it('slack connector screenshots', async () => {
+      await pageObjects.common.navigateToApp('connectors');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await actions.common.openNewConnectorForm('slack');
+      await testSubjects.setValue('nameInput', 'Slack test connector');
+      await testSubjects.click('webApiButton');
+      await testSubjects.setValue('secrets.token-input', 'xoxb-XXXX-XXXX-XXXX');
+      await commonScreenshots.takeScreenshot('slack-connector-web-api', screenshotDirectories);
+      await testSubjects.click('webhookButton');
+      await testSubjects.setValue(
+        'slackWebhookUrlInput',
+        'https://hooks.slack.com/services/abcd/ljklmnopqrstuvwxz'
+      );
+      await commonScreenshots.takeScreenshot('slack-connector-webhook', screenshotDirectories);
+      await testSubjects.click('create-connector-flyout-save-test-btn');
+      await commonScreenshots.takeScreenshot('slack-params-test', screenshotDirectories);
+      await testSubjects.click('euiFlyoutCloseButton');
+    });
+
     after(async () => {
       await es.indices.delete({ index: testIndex });
     });
