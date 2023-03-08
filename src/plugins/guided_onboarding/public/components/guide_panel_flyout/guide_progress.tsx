@@ -12,6 +12,7 @@ import type { GuideConfig, GuideStep as GuideStepType, StepConfig } from '@kbn/g
 import { i18n } from '@kbn/i18n';
 import { GuideStep } from '../guide_panel_step';
 import type { PluginState } from '../../../common';
+import { getGuidePanelStyles } from '../guide_panel.styles';
 
 export const GuideProgress = ({
   guideConfig,
@@ -23,7 +24,7 @@ export const GuideProgress = ({
   handleStepButtonClick,
 }: {
   guideConfig: GuideConfig;
-  styles: any;
+  styles: ReturnType<typeof getGuidePanelStyles>;
   pluginState: PluginState;
   isLoading: boolean;
   stepsCompleted: number;

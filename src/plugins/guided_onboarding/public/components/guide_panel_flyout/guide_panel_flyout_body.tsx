@@ -23,6 +23,7 @@ import wellDoneAnimatedDarkGif from '../../../assets/well_done_animated_dark.gif
 import { PluginState } from '../../../common';
 import { GuideProgress } from './guide_progress';
 import wellDoneAnimatedGif from '../../../assets/well_done_animated.gif';
+import { getGuidePanelStyles } from '../guide_panel.styles';
 
 export const GuidePanelFlyoutBody = ({
   styles,
@@ -35,7 +36,7 @@ export const GuidePanelFlyoutBody = ({
   isLoading,
   completeGuide,
 }: {
-  styles: any;
+  styles: ReturnType<typeof getGuidePanelStyles>;
   guideConfig?: GuideConfig;
   isDarkTheme: boolean;
   stepsCompleted: number;

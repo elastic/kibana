@@ -21,6 +21,7 @@ import { GuidePanelFlyoutHeader } from './guide_panel_flyout_header';
 import { GuidePanelFlyoutBody } from './guide_panel_flyout_body';
 import type { PluginState } from '../../../common';
 import { GuidePanelFlyoutFooter } from './guide_panel_flyout_footer';
+import { getGuidePanelStyles } from '../guide_panel.styles';
 
 export const GuidePanelFlyout = ({
   isOpen,
@@ -43,7 +44,7 @@ export const GuidePanelFlyout = ({
   toggleGuide: () => void;
   isGuideReadyToComplete: boolean;
   guideConfig?: GuideConfig;
-  styles: any;
+  styles: ReturnType<typeof getGuidePanelStyles>;
   navigateToLandingPage: () => void;
   stepsCompleted: number;
   pluginState?: PluginState;

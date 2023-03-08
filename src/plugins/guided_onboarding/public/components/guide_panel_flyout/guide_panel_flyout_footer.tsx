@@ -9,13 +9,14 @@
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText, EuiThemeComputed } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { getGuidePanelStyles } from '../guide_panel.styles';
 
 export const GuidePanelFlyoutFooter = ({
   styles,
   euiTheme,
   openQuitGuideModal,
 }: {
-  styles: any;
+  styles: ReturnType<typeof getGuidePanelStyles>;
   euiTheme: EuiThemeComputed;
   openQuitGuideModal: () => void;
 }) => {

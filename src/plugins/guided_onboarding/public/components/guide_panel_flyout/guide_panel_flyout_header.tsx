@@ -10,6 +10,7 @@ import React, { ReactElement } from 'react';
 import { EuiButtonIcon, EuiHorizontalRule, EuiSpacer, EuiTitle, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { GuideConfig } from '@kbn/guided-onboarding';
+import { getGuidePanelStyles } from '../guide_panel.styles';
 
 export const GuidePanelFlyoutHeader = ({
   styles,
@@ -20,7 +21,7 @@ export const GuidePanelFlyoutHeader = ({
   guideConfig,
   backButton,
 }: {
-  styles: any;
+  styles: ReturnType<typeof getGuidePanelStyles>;
   titleId: string;
   toggleGuide: () => void;
   hasError: boolean;
