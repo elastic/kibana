@@ -14,6 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { Root } from '.';
+import { CriticalError } from '@kbn/core-base-server-internal';
 
 const env = Env.createDefault(REPO_ROOT, getEnvOptions());
 
@@ -238,4 +239,18 @@ test('stops services if consequent logger upgrade fails', async () => {
   expect(mockServer.stop).toHaveBeenCalledTimes(1);
 
   expect(mockConsoleError.mock.calls).toMatchSnapshot();
+});
+
+test('handles migrator node exception', async () => {
+  const errorImplementation = () => {
+    throw new CriticalError('Test', 'MigratioOnlyNode', 0);
+  };
+  const mockOnShutdown = jest.fn();
+  const root = new Root(rawConfigService, env, mockOnShutdown);
+  mockServer.start.mockImplementation(errorImplementation);
+  await root.preboot();
+  await root.setup();
+  await expect(() => root.start()).rejects.toBeInstanceOf(CriticalError);
+  expect(mockServer.stop).toHaveBeenCalledTimes(1);
+  expect(mockOnShutdown).toHaveBeenCalledTimes(1);
 });
