@@ -13,7 +13,7 @@ import {
   EuiProvider,
 } from '@elastic/eui';
 // @ts-expect-error no definitions in component folder
-import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/alert';
+import { icon as EuiIconAlert } from '@elastic/eui/lib/components/icon/assets/warning';
 // @ts-expect-error no definitions in component folder
 import { appendIconComponentCache } from '@elastic/eui/lib/components/icon/icon';
 import createCache from '@emotion/cache';
