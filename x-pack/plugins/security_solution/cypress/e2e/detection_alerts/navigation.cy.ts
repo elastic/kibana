@@ -6,12 +6,11 @@
  */
 
 import { expandFirstAlert, waitForAlerts } from '../../tasks/alerts';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 
 import { getNewRule } from '../../objects/rule';
-import type { CustomRule } from '../../objects/rule';
 
 import { ALERTS_URL } from '../../urls/navigation';
 import {
@@ -24,12 +23,11 @@ import { OPEN_ALERT_DETAILS_PAGE } from '../../screens/alerts_details';
 
 describe('Alert Details Page Navigation', () => {
   describe('navigating to alert details page', () => {
-    let rule: CustomRule;
+    const rule = getNewRule();
     before(() => {
-      rule = getNewRule();
       cleanKibana();
       login();
-      createCustomRuleEnabled(rule, 'rule1');
+      createRule({ ...rule, rule_id: 'rule1' });
     });
 
     describe('context menu', () => {
