@@ -23,7 +23,7 @@ import {
 } from '../../tasks/alerts_detection_rules';
 import { createExceptionList, deleteExceptionList } from '../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../objects/exception';
-import { createCustomRule } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../tasks/common';
 import { login, visitWithoutDateRange } from '../../tasks/login';
 
@@ -45,7 +45,7 @@ describe('Export rules', () => {
     // Rules get exported via _bulk_action endpoint
     cy.intercept('POST', '/api/detection_engine/rules/_bulk_action').as('bulk_action');
     visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
-    createCustomRule(getNewRule()).as('ruleResponse');
+    createRule(getNewRule()).as('ruleResponse');
   });
 
   it('Exports a custom rule', function () {
@@ -104,21 +104,19 @@ describe('Export rules', () => {
       deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
       // create rule with exceptions
       createExceptionList(exceptionList, exceptionList.list_id).then((response) =>
-        createCustomRule(
-          {
-            ...getNewRule(),
-            name: 'rule with exceptions',
-            exceptionLists: [
-              {
-                id: response.body.id,
-                list_id: exceptionList.list_id,
-                type: exceptionList.type,
-                namespace_type: exceptionList.namespace_type,
-              },
-            ],
-          },
-          '2'
-        )
+        createRule({
+          ...getNewRule(),
+          name: 'rule with exceptions',
+          exceptions_list: [
+            {
+              id: response.body.id,
+              list_id: exceptionList.list_id,
+              type: exceptionList.type,
+              namespace_type: exceptionList.namespace_type,
+            },
+          ],
+          rule_id: '2',
+        })
       );
     });
 

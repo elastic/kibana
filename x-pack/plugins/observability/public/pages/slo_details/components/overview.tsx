@@ -11,9 +11,9 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import React from 'react';
-import { DEFAULT_DATE_FORMAT } from '../constants';
-import { toHighPrecisionPercentage } from '../helpers/number';
 
+import { useKibana } from '../../../utils/kibana_react';
+import { toHighPrecisionPercentage } from '../helpers/number';
 import { OverviewItem } from './overview_item';
 
 export interface Props {
@@ -21,7 +21,10 @@ export interface Props {
 }
 
 export function Overview({ slo }: Props) {
+  const { uiSettings } = useKibana().services;
+  const dateFormat = uiSettings.get('dateFormat');
   const hasNoData = slo.summary.status === 'NO_DATA';
+
   return (
     <EuiPanel paddingSize="none" color="transparent">
       <EuiFlexGroup direction="column" gutterSize="l">
@@ -81,13 +84,13 @@ export function Overview({ slo }: Props) {
             title={i18n.translate('xpack.observability.slo.sloDetails.overview.createdAtTitle', {
               defaultMessage: 'Created at',
             })}
-            subtitle={moment(slo.createdAt).format(DEFAULT_DATE_FORMAT)}
+            subtitle={moment(slo.createdAt).format(dateFormat)}
           />
           <OverviewItem
             title={i18n.translate('xpack.observability.slo.sloDetails.overview.updatedAtTitle', {
               defaultMessage: 'Last update at',
             })}
-            subtitle={moment(slo.updatedAt).format(DEFAULT_DATE_FORMAT)}
+            subtitle={moment(slo.updatedAt).format(dateFormat)}
           />
           <OverviewItem
             title={i18n.translate('xpack.observability.slo.sloDetails.overview.tagsTitle', {

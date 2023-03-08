@@ -8,13 +8,13 @@
 import type { FilesSetup } from '@kbn/files-plugin/public';
 import type { FileKindBrowser } from '@kbn/shared-ux-file-types';
 import { ALLOWED_MIME_TYPES } from '../../common/constants/mime_types';
-import { MAX_FILE_SIZE } from '../../common/constants';
+import { constructFileKindIdByOwner, MAX_FILE_SIZE } from '../../common/constants';
 import type { Owner } from '../../common/constants/types';
 import { APP_ID, OBSERVABILITY_OWNER, SECURITY_SOLUTION_OWNER } from '../../common';
 
 const buildFileKind = (owner: Owner): FileKindBrowser => {
   return {
-    id: owner,
+    id: constructFileKindIdByOwner(owner),
     allowedMimeTypes: ALLOWED_MIME_TYPES,
     maxSizeBytes: MAX_FILE_SIZE,
   };

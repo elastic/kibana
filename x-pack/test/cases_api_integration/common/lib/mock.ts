@@ -22,6 +22,8 @@ import {
   CommentRequestExternalReferenceSOType,
   CommentRequestExternalReferenceNoSOType,
   CommentRequestPersistableStateType,
+  FILE_ATTACHMENT_TYPE,
+  FileAttachmentMetadata,
 } from '@kbn/cases-plugin/common/api';
 
 export const defaultUser = { email: null, full_name: null, username: 'elastic' };
@@ -120,6 +122,28 @@ export const postExternalReferenceESReq: CommentRequestExternalReferenceNoSOType
 export const postExternalReferenceSOReq: CommentRequestExternalReferenceSOType = {
   ...postExternalReferenceESReq,
   externalReferenceStorage: { type: ExternalReferenceStorageType.savedObject, soType: 'test-type' },
+};
+
+export const fileMetadata = () => ({
+  name: 'test_file',
+  extension: 'png',
+  mimeType: 'image/png',
+  createdAt: '2023-02-27T20:26:54.345Z',
+});
+
+export const fileAttachmentMetadata: FileAttachmentMetadata = {
+  files: [fileMetadata()],
+};
+
+export const getFilesAttachmentReq = (
+  req?: Partial<CommentRequestExternalReferenceSOType>
+): CommentRequestExternalReferenceSOType => {
+  return {
+    ...postExternalReferenceSOReq,
+    externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
+    externalReferenceMetadata: { ...fileAttachmentMetadata },
+    ...req,
+  };
 };
 
 export const persistableStateAttachment: CommentRequestPersistableStateType = {
