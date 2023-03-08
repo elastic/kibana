@@ -25,7 +25,8 @@ export async function updateIndexSettings(
         })
       );
     } catch (err) {
-      throw new Error(`could not update index settings for ${index}`);
+      // @todo: revert change
+      throw new Error(`could not update index settings for ${index} because ${err}`);
     }
   }
 }

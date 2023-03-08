@@ -11,3 +11,7 @@ export { getAsset } from '../../archive';
 export const TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX = '.latest';
 // Index alias that points to all of the destination indices from all the package versions
 export const TRANSFORM_DEST_IDX_ALIAS_ALL_SFX = '.all';
+
+export interface SecondaryAuthorizationHeader {
+  headers?: { 'es-secondary-authorization': string | string[] };
+}

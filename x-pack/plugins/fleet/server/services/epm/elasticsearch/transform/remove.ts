@@ -12,6 +12,8 @@ import type { EsAssetReference } from '../../../../types';
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common/constants';
 import { appContextService } from '../../../app_context';
 
+import type { SecondaryAuthorizationHeader } from './common';
+
 export const stopTransforms = async (transformIds: string[], esClient: ElasticsearchClient) => {
   for (const transformId of transformIds) {
     await esClient.transform.stopTransform(
@@ -24,7 +26,8 @@ export const stopTransforms = async (transformIds: string[], esClient: Elasticse
 export const deleteTransforms = async (
   esClient: ElasticsearchClient,
   transformIds: string[],
-  deleteDestinationIndices = false
+  deleteDestinationIndices = false,
+  secondaryAuth?: SecondaryAuthorizationHeader
 ) => {
   const logger = appContextService.getLogger();
   if (transformIds.length) {
@@ -41,7 +44,7 @@ export const deleteTransforms = async (
       await stopTransforms([transformId], esClient);
       await esClient.transform.deleteTransform(
         { force: true, transform_id: transformId },
-        { ignore: [404] }
+        { ...(secondaryAuth ? secondaryAuth : {}), ignore: [404] }
       );
       logger.info(`Deleted: ${transformId}`);
       if (deleteDestinationIndices && transformResponse?.transforms) {

@@ -14,6 +14,8 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
+import { appContextService } from '..';
+
 import type { PackageList } from '../../../common';
 
 import type {
@@ -91,11 +93,13 @@ export class PackageServiceImpl implements PackageService {
       this.internalEsClient,
       this.internalSoClient,
       this.logger,
-      preflightCheck
+      preflightCheck,
+      request
     );
   }
 
   public get asInternalUser() {
+    console.log('--@@packageService asInternalUser');
     return new PackageClientImpl(this.internalEsClient, this.internalSoClient, this.logger);
   }
 }
@@ -105,7 +109,8 @@ class PackageClientImpl implements PackageClient {
     private readonly internalEsClient: ElasticsearchClient,
     private readonly internalSoClient: SavedObjectsClientContract,
     private readonly logger: Logger,
-    private readonly preflightCheck?: () => void | Promise<void>
+    private readonly preflightCheck?: () => void | Promise<void>,
+    private readonly request?: KibanaRequest
   ) {}
 
   public async getInstallation(pkgName: string) {
@@ -121,9 +126,17 @@ class PackageClientImpl implements PackageClient {
     pkgVersion?: string;
     spaceId?: string;
   }): Promise<Installation | undefined> {
+    console.log('ensureInstalledPackage this.request', this.request);
     await this.#runPreflight();
+    const apiKeyWithCurrentUserPermission = await appContextService
+      .getSecurity()
+      .authc.apiKeys.grantAsInternalUser(this.request, {
+        name: `auto-generated-transform-api-key`,
+        role_descriptors: {},
+      });
+
     return ensureInstalledPackage({
-      ...options,
+      ...{ ...options, apiKeyWithCurrentUserPermission },
       esClient: this.internalEsClient,
       savedObjectsClient: this.internalSoClient,
     });

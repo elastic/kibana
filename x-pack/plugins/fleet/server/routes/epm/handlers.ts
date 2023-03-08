@@ -54,7 +54,7 @@ import {
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
-import { checkAllowedPackages, licenseService } from '../../services';
+import { appContextService, checkAllowedPackages, licenseService } from '../../services';
 import { getArchiveEntry } from '../../services/epm/archive/cache';
 import { getAsset } from '../../services/epm/archive/storage';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
@@ -284,6 +284,14 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const { pkgName, pkgVersion } = request.params;
 
+  const apiKeyWithCurrentUserPermission = await appContextService
+    .getSecurity()
+    .authc.apiKeys.grantAsInternalUser(request, {
+      name: `auto-generated-transform-api-key`,
+      role_descriptors: {},
+    });
+
+  console.log('installPackageFromRegistryHandler', apiKeyWithCurrentUserPermission);
   const spaceId = fleetContext.spaceId;
   const res = await installPackage({
     installSource: 'registry',
@@ -294,6 +302,7 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     force: request.body?.force,
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
+    apiKeyWithCurrentUserPermission,
   });
 
   if (!res.error) {
@@ -334,6 +343,19 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
   const savedObjectsClient = fleetContext.internalSoClient;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const spaceId = fleetContext.spaceId;
+
+  const apiKeyWithCurrentUserPermission = await appContextService
+    .getSecurity()
+    .authc.apiKeys.grantAsInternalUser(request, {
+      name: `auto-generated-transform-api-key`,
+      role_descriptors: {},
+    });
+
+  console.log(
+    '\nbulkInstallPackagesFromRegistryHandler request',
+    JSON.stringify(apiKeyWithCurrentUserPermission)
+  );
+
   const bulkInstalledResponses = await bulkInstallPackages({
     savedObjectsClient,
     esClient,
@@ -341,6 +363,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
     spaceId,
     prerelease: request.query.prerelease,
     force: request.body.force,
+    apiKeyWithCurrentUserPermission,
   });
   const payload = bulkInstalledResponses.map(bulkInstallServiceResponseToHttpEntry);
   const body: BulkInstallPackagesResponse = {
@@ -361,6 +384,19 @@ export const installPackageByUploadHandler: FleetRequestHandler<
       body: { message: 'Requires Enterprise license' },
     });
   }
+
+  const apiKeyWithCurrentUserPermission = await appContextService
+    .getSecurity()
+    .authc.apiKeys.grantAsInternalUser(request, {
+      name: `auto-generated-transform-api-key`,
+      role_descriptors: {},
+    });
+
+  console.log(
+    '\ninstallPackageByUploadHandler request',
+    JSON.stringify(apiKeyWithCurrentUserPermission)
+  );
+
   const coreContext = await context.core;
   const fleetContext = await context.fleet;
   const savedObjectsClient = fleetContext.internalSoClient;
@@ -375,6 +411,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     archiveBuffer,
     spaceId,
     contentType,
+    apiKeyWithCurrentUserPermission,
   });
   if (!res.error) {
     const body: InstallPackageResponse = {
@@ -395,6 +432,8 @@ export const deletePackageHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof DeletePackageRequestSchema.body>
 > = async (context, request, response) => {
+  console.log('\ndeletePackageHandler request', JSON.stringify(request.headers));
+
   try {
     const { pkgName, pkgVersion } = request.params;
     const coreContext = await context.core;

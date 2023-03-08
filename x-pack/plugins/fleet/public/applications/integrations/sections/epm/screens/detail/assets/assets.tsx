@@ -25,6 +25,8 @@ import {
   useUIExtension,
 } from '../../../../../hooks';
 
+import { DeferredAssetsAccordion } from './deferred_assets_accordion';
+
 import type { AssetSavedObject } from './types';
 import { allowedAssetTypes } from './constants';
 import { AssetsAccordion } from './assets_accordion';
@@ -54,6 +56,9 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasPermissionError, setHasPermissionError] = useState<boolean>(false);
 
+  const [deferredInstallations, setDeferredInstallations] = useState<any[]>();
+
+  console.log('deferredInstallations', deferredInstallations);
   useEffect(() => {
     const fetchAssetSavedObjects = async () => {
       if ('savedObject' in packageInfo) {
@@ -73,18 +78,30 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
         } = packageInfo;
 
         if (
+          Array.isArray(packageAttributes.installed_es) &&
+          packageAttributes.installed_es?.length > 0
+        ) {
+          console.log('packageAttributes.installed_es', packageAttributes.installed_es);
+          const deferredTransforms = packageAttributes.installed_es.filter(
+            (asset) => asset.type === 'transform'
+          );
+          setDeferredInstallations(deferredTransforms);
+        }
+
+        if (
           !packageAttributes.installed_kibana ||
           packageAttributes.installed_kibana.length === 0
         ) {
           setIsLoading(false);
           return;
         }
-
         try {
           const objectsToGet = packageAttributes.installed_kibana.map(({ id, type }) => ({
             id,
             type,
           }));
+
+          console.log('packageAttributes.installed_kibana', packageAttributes.installed_kibana);
 
           // We don't have an API to know which SO types a user has access to, so instead we make a request for each
           // SO type and ignore the 403 errors
@@ -179,6 +196,10 @@ export const AssetsPage = ({ packageInfo }: AssetsPanelProps) => {
           defaultMessage="You do not have permission to retrieve the Kibana saved object for that integration. Contact your administrator."
         />
       </EuiCallOut>
+    );
+  } else if (Array.isArray(deferredInstallations) && deferredInstallations.length > 0) {
+    content = (
+      <DeferredAssetsAccordion deferredInstallations={deferredInstallations} type={'transform'} />
     );
   } else if (assetSavedObjects === undefined || assetSavedObjects.length === 0) {
     if (customAssetsExtension) {

@@ -5,11 +5,19 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  Logger,
+  SavedObjectsClientContract,
+  FakeRawRequest,
+  Headers,
+} from '@kbn/core/server';
 import { errors } from '@elastic/elasticsearch';
 import { safeLoad } from 'js-yaml';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { uniqBy } from 'lodash';
+
+import { CoreKibanaRequest } from '@kbn/core/server';
 
 import {
   PACKAGE_TEMPLATE_SUFFIX,
@@ -36,7 +44,11 @@ import { getInstallation } from '../../packages';
 import { retryTransientEsErrors } from '../retry';
 
 import { deleteTransforms } from './remove';
-import { getAsset, TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX } from './common';
+import {
+  getAsset,
+  type SecondaryAuthorizationHeader,
+  TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX,
+} from './common';
 
 const DEFAULT_TRANSFORM_TEMPLATES_PRIORITY = 250;
 enum TRANSFORM_SPECS_TYPES {
@@ -370,6 +382,7 @@ const installTransformsAssets = async (
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
+  apiKeyWithCurrentUserPermission: APIKey,
   esReferences: EsAssetReference[] = [],
   previousInstalledTransformEsAssets: EsAssetReference[] = []
 ) => {
@@ -393,12 +406,22 @@ const installTransformsAssets = async (
       previousInstalledTransformEsAssets
     );
 
+    const secondaryAuth =
+      apiKeyWithCurrentUserPermission?.api_key !== undefined
+        ? {
+            headers: {
+              'es-secondary-authorization': `ApiKey ${apiKeyWithCurrentUserPermission?.encoded}`,
+            },
+          }
+        : {};
+
+    console.log('secondaryAuth', secondaryAuth);
     // ensure the .latest alias points to only the latest
     // by removing any associate of old destination indices
     await Promise.all(
       aliasesRefs
         .filter((a) => a.endsWith(TRANSFORM_DEST_IDX_ALIAS_LATEST_SFX))
-        .map((alias) => deleteAliasFromIndices({ esClient, logger, alias }))
+        .map((alias) => deleteAliasFromIndices({ esClient, logger, alias, secondaryAuth }))
     );
 
     // delete all previous transform
@@ -407,13 +430,15 @@ const installTransformsAssets = async (
         esClient,
         transformsToRemoveWithDestIndex.map((asset) => asset.id),
         // Delete destination indices if specified or if from old json schema
-        true
+        true,
+        secondaryAuth
       ),
       deleteTransforms(
         esClient,
         transformsToRemove.map((asset) => asset.id),
         // Else, keep destination indices by default
-        false
+        false,
+        secondaryAuth
       ),
     ]);
 
@@ -509,6 +534,7 @@ const installTransformsAssets = async (
                   aliases,
                 },
                 { ignore: [400] }
+                // @todo: remove { ...(secondaryAuth ? secondaryAuth : {}), ignore: [400] }
               ),
             { logger }
           );
@@ -520,11 +546,14 @@ const installTransformsAssets = async (
           if (resp.status === 400 && aliases) {
             await retryTransientEsErrors(
               () =>
-                esClient.indices.updateAliases({
-                  body: {
-                    actions: Object.keys(aliases).map((alias) => ({ add: { index, alias } })),
-                  },
-                }),
+                esClient.indices.updateAliases(
+                  {
+                    body: {
+                      actions: Object.keys(aliases).map((alias) => ({ add: { index, alias } })),
+                    },
+                  }
+                  // @todo { ...(secondaryAuth ? secondaryAuth : {}) }
+                ),
               { logger }
             );
             logger.debug(`Created aliases for destination index: ${index}`);
@@ -555,6 +584,7 @@ const installTransformsAssets = async (
           logger,
           transform,
           startTransform: transformsSpecifications.get(transform.transformModuleId)?.get('start'),
+          secondaryAuth,
         });
         installedTransforms.push(installTransform);
       }
@@ -566,6 +596,7 @@ const installTransformsAssets = async (
           logger,
           transform,
           startTransform: transformsSpecifications.get(transform.transformModuleId)?.get('start'),
+          secondaryAuth,
         });
       });
 
@@ -575,15 +606,63 @@ const installTransformsAssets = async (
 
   return { installedTransforms, esReferences };
 };
+
+// @todo: remove
+interface APIKey {
+  id: string;
+  name: string;
+  api_key: string;
+  encoded: string;
+}
+
+function getFakeRequest(apiKey?: string) {
+  const requestHeaders: Headers = {};
+  requestHeaders.authorization = 'Basic ZWxhc3RpYzptbHFhX2FkbWlu';
+
+  const fakeRawRequest: FakeRawRequest = {
+    headers: requestHeaders,
+    path: '/',
+  };
+
+  // Since we're using API keys and accessing elasticsearch can only be done
+  // via a request, we're faking one with the proper authorization headers.
+  const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
+
+  return fakeRequest;
+}
+
 export const installTransforms = async (
   installablePackage: InstallablePackage,
   paths: string[],
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
+  apiKeyWithCurrentUserPermission: APIKey,
   esReferences?: EsAssetReference[]
 ) => {
   const transformPaths = paths.filter((path) => isTransform(path));
+
+  // const apiKeyWithCurrentUserPermission: APIKey = {
+  //   id: 'vUn_mIYBzlOGyiCiERTa',
+  //   name: 'fleet-api-key',
+  //   api_key: 'lsIiJojhT0y1wK9UYqRvMw',
+  //   encoded: 'dlVuX21JWUJ6bE9HeWlDaUVSVGE6bHNJaUpvamhUMHkxd0s5VVlxUnZNdw==',
+  // };
+  // if (transformPaths.length > 0) {
+  //   const isApiKeysEnabled = await appContextService
+  //     .getSecurity()
+  //     .authc.apiKeys.areAPIKeysEnabled();
+  //   console.log('isApiKeysEnabled', isApiKeysEnabled);
+  //
+  //   const createAPIKeyResult = await appContextService
+  //     .getSecurity()
+  //     .authc.apiKeys.grantAsInternalUser(getFakeRequest(), {
+  //       name: `auto-generated-${installablePackage.name}-transform-api-key`,
+  //       role_descriptors: {},
+  //     });
+  //
+  //   console.log('createAPIKeyResult', createAPIKeyResult);
+  // }
 
   const installation = await getInstallation({
     savedObjectsClient,
@@ -627,6 +706,7 @@ export const installTransforms = async (
     esClient,
     savedObjectsClient,
     logger,
+    apiKeyWithCurrentUserPermission,
     esReferences,
     previousInstalledTransformEsAssets
   );
@@ -641,10 +721,12 @@ async function deleteAliasFromIndices({
   esClient,
   logger,
   alias,
+  secondaryAuth,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   alias: string;
+  secondaryAuth;
 }) {
   try {
     const resp = await esClient.indices.getAlias({ name: alias });
@@ -657,52 +739,73 @@ async function deleteAliasFromIndices({
           // defer validation on put if the source index is not available
           esClient.indices.deleteAlias(
             { index: indicesMatchingAlias, name: alias },
-            { ignore: [404] }
+            { ignore: [404] } // @todo { ...(secondaryAuth ? secondaryAuth : {}), ignore: [404] }
           ),
         { logger }
       );
       logger.debug(`Deleted alias: '${alias}' matching indices ${indicesMatchingAlias}`);
     }
   } catch (err) {
-    logger.error(`Error deleting alias: ${alias}`);
+    logger.error(`Error deleting alias: ${alias} because ${err}`);
   }
 }
+
 async function handleTransformInstall({
   esClient,
   logger,
   transform,
   startTransform,
+  secondaryAuth,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   transform: TransformInstallation;
   startTransform?: boolean;
+  secondaryAuth?: SecondaryAuthorizationHeader;
 }): Promise<EsAssetReference> {
+  let isUnauthorizedAPIKey = false;
   try {
+    console.log(
+      '--@@secondaryAuth',
+      secondaryAuth,
+      '\nBODY\n',
+      JSON.stringify({
+        transform_id: transform.installationName,
+        defer_validation: true,
+        body: transform.content,
+      })
+    );
     await retryTransientEsErrors(
       () =>
         // defer validation on put if the source index is not available
-        esClient.transform.putTransform({
-          transform_id: transform.installationName,
-          defer_validation: true,
-          body: transform.content,
-        }),
+        esClient.transform.putTransform(
+          {
+            transform_id: transform.installationName,
+            defer_validation: true,
+            body: transform.content,
+          },
+          { ...(secondaryAuth ? secondaryAuth : {}) }
+        ),
       { logger }
     );
     logger.debug(`Created transform: ${transform.installationName}`);
   } catch (err) {
+    const isResponseError = err instanceof errors.ResponseError;
+    isUnauthorizedAPIKey =
+      isResponseError &&
+      err?.body?.error?.type === 'security_exception' &&
+      err?.body?.error?.reason?.includes('unauthorized for API key');
     // swallow the error if the transform already exists.
     const isAlreadyExistError =
-      err instanceof errors.ResponseError &&
-      err?.body?.error?.type === 'resource_already_exists_exception';
-    if (!isAlreadyExistError) {
+      isResponseError && err?.body?.error?.type === 'resource_already_exists_exception';
+    if (!isUnauthorizedAPIKey && !isAlreadyExistError) {
       throw err;
     }
   }
 
   // start transform by default if not set in yml file
   // else, respect the setting
-  if (startTransform === undefined || startTransform === true) {
+  if (isUnauthorizedAPIKey === false && (startTransform === undefined || startTransform === true)) {
     await retryTransientEsErrors(
       () =>
         esClient.transform.startTransform(

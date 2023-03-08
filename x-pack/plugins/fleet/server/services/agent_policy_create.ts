@@ -48,7 +48,11 @@ async function createPackagePolicy(
   esClient: ElasticsearchClient,
   agentPolicy: AgentPolicy,
   packageToInstall: string,
-  options: { spaceId: string; user: AuthenticatedUser | undefined }
+  options: {
+    spaceId: string;
+    user: AuthenticatedUser | undefined;
+    apiKeyWithCurrentUserPermission: object;
+  }
 ) {
   const newPackagePolicy = await packagePolicyService
     .buildPackagePolicyFromPackage(soClient, packageToInstall)
@@ -66,10 +70,12 @@ async function createPackagePolicy(
   newPackagePolicy.namespace = agentPolicy.namespace;
   newPackagePolicy.name = await incrementPackageName(soClient, packageToInstall);
 
+  console.log('--@@createPackagePolicy', options.apiKeyWithCurrentUserPermission);
   await packagePolicyService.create(soClient, esClient, newPackagePolicy, {
     spaceId: options.spaceId,
     user: options.user,
     bumpRevision: false,
+    apiKeyWithCurrentUserPermission: options.apiKeyWithCurrentUserPermission,
   });
 }
 
@@ -93,6 +99,7 @@ export async function createAgentPolicyWithPackages({
   monitoringEnabled,
   spaceId,
   user,
+  apiKeyWithCurrentUserPermission,
 }: CreateAgentPolicyParams) {
   let agentPolicyId = newPolicy.id;
   const packagesToInstall = [];
@@ -112,11 +119,13 @@ export async function createAgentPolicyWithPackages({
     packagesToInstall.push(FLEET_ELASTIC_AGENT_PACKAGE);
   }
   if (packagesToInstall.length > 0) {
+    console.log('--@@createAgentPolicyWithPackages');
     await bulkInstallPackages({
       savedObjectsClient: soClient,
       esClient,
       packagesToInstall,
       spaceId,
+      apiKeyWithCurrentUserPermission,
     });
   }
 
@@ -132,6 +141,7 @@ export async function createAgentPolicyWithPackages({
     await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SERVER_PACKAGE, {
       spaceId,
       user,
+      apiKeyWithCurrentUserPermission,
     });
   }
 
@@ -140,6 +150,7 @@ export async function createAgentPolicyWithPackages({
     await createPackagePolicy(soClient, esClient, agentPolicy, FLEET_SYSTEM_PACKAGE, {
       spaceId,
       user,
+      apiKeyWithCurrentUserPermission,
     });
   }
 

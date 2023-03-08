@@ -111,8 +111,11 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
         tags: ['access:ml:canGetJobs'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ mlClient, response, request }) => {
       try {
+        // @todo:
+        console.log('getAuthorizationHeader(request)', getAuthorizationHeader(request));
+
         const body = await mlClient.getJobStats();
         return response.ok({
           body,
@@ -181,6 +184,7 @@ export function jobRoutes({ router, routeGuard }: RouteInitialization) {
     routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
       try {
         const { jobId } = request.params;
+
         const body = await mlClient.putJob(
           {
             job_id: jobId,

@@ -248,6 +248,13 @@ export const createPackagePolicyHandler: FleetRequestHandler<
     }
 
     // Create package policy
+    const apiKeyWithCurrentUserPermission = await appContextService
+      .getSecurity()
+      .authc.apiKeys.grantAsInternalUser(request, {
+        name: `auto-generated-transform-api-key`,
+        role_descriptors: {},
+      });
+
     const packagePolicy = await fleetContext.packagePolicyService.asCurrentUser.create(
       soClient,
       esClient,
@@ -256,6 +263,7 @@ export const createPackagePolicyHandler: FleetRequestHandler<
         user,
         force,
         spaceId,
+        apiKeyWithCurrentUserPermission,
       },
       context,
       request
