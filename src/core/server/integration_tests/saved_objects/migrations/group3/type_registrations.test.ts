@@ -107,6 +107,7 @@ const previouslyRegisteredTypes = [
   'siem-ui-timeline',
   'siem-ui-timeline-note',
   'siem-ui-timeline-pinned-event',
+  'slo',
   'space',
   'spaces-usage-stats',
   'synthetics-monitor',
