@@ -32,7 +32,9 @@ export interface ConfiguredLimits {
 
 export interface ProductAccess {
   hasAppSearchAccess: boolean;
+  hasNativeConnectorsAccess: boolean;
   hasSearchEnginesAccess: boolean;
+  hasWebCrawlerAccess: boolean;
   hasWorkplaceSearchAccess: boolean;
 }
 
@@ -50,6 +52,11 @@ export interface MetaPage {
 
 export interface Meta {
   page: MetaPage;
+}
+
+export interface ClientConfigType {
+  canDeployEntSearch: boolean;
+  host?: string;
 }
 
 export type { ElasticsearchIndexWithPrivileges } from './indices';

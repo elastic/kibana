@@ -21,7 +21,7 @@ import {
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 
-import { ProductAccess } from '../../../../common/types';
+import { ClientConfigType, ProductAccess } from '../../../../common/types';
 
 import { HttpLogic } from '../http';
 import { createHref, CreateHrefOptions } from '../react_router_helpers';
@@ -31,7 +31,7 @@ type RequiredFieldsOnly<T> = {
 };
 interface KibanaLogicProps {
   application: ApplicationStart;
-  config: { host?: string };
+  config: ClientConfigType;
   productAccess: ProductAccess;
   // Kibana core
   capabilities: Capabilities;

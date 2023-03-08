@@ -32,13 +32,9 @@ import {
   WORKPLACE_SEARCH_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
 } from '../common/constants';
-import { InitialAppData } from '../common/types';
+import { ClientConfigType, InitialAppData } from '../common/types';
 
 import { docLinks } from './applications/shared/doc_links';
-
-export interface ClientConfigType {
-  host?: string;
-}
 
 export interface ClientData extends InitialAppData {
   publicUrl?: string;

@@ -25,12 +25,16 @@ interface CheckAccess {
 
 const ALLOW_ALL_PLUGINS: ProductAccess = {
   hasAppSearchAccess: true,
+  hasNativeConnectorsAccess: true,
   hasSearchEnginesAccess: false, // still false unless Feature Flag explicitly enabled on backend
+  hasWebCrawlerAccess: true,
   hasWorkplaceSearchAccess: true,
 };
 const DENY_ALL_PLUGINS: ProductAccess = {
   hasAppSearchAccess: false,
+  hasNativeConnectorsAccess: false,
   hasSearchEnginesAccess: false,
+  hasWebCrawlerAccess: false,
   hasWorkplaceSearchAccess: false,
 };
 

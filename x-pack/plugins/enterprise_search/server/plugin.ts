@@ -172,7 +172,8 @@ export class EnterpriseSearchPlugin implements Plugin {
       const dependencies = { config, security, spaces, request, log, ml };
 
       const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
-      const showEnterpriseSearch = hasAppSearchAccess || hasWorkplaceSearchAccess;
+      const showEnterpriseSearch =
+        hasAppSearchAccess || hasWorkplaceSearchAccess || !config.canDeployEntSearch;
 
       return {
         navLinks: {
@@ -180,8 +181,8 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
           elasticsearch: showEnterpriseSearch,
-          appSearch: hasAppSearchAccess,
-          workplaceSearch: hasWorkplaceSearchAccess,
+          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
+          workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
           searchExperiences: showEnterpriseSearch,
         },
         catalogue: {
@@ -189,8 +190,8 @@ export class EnterpriseSearchPlugin implements Plugin {
           enterpriseSearchContent: showEnterpriseSearch,
           enterpriseSearchAnalytics: showEnterpriseSearch,
           elasticsearch: showEnterpriseSearch,
-          appSearch: hasAppSearchAccess,
-          workplaceSearch: hasWorkplaceSearchAccess,
+          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
+          workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
           searchExperiences: showEnterpriseSearch,
         },
       };

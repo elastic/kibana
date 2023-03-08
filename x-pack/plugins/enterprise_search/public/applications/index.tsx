@@ -18,8 +18,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { InitialAppData, ProductAccess } from '../../common/types';
-import { PluginsStart, ClientConfigType, ClientData } from '../plugin';
+import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
+import { PluginsStart, ClientData } from '../plugin';
 
 import { externalUrl } from './shared/enterprise_search_url';
 import { mountFlashMessagesLogic, Toasts } from './shared/flash_messages';
@@ -45,7 +45,9 @@ export const renderApp = (
 
   const noProductAccess: ProductAccess = {
     hasAppSearchAccess: false,
+    hasNativeConnectorsAccess: false,
     hasSearchEnginesAccess: false,
+    hasWebCrawlerAccess: false,
     hasWorkplaceSearchAccess: false,
   };
   const productAccess = data.access || noProductAccess;
