@@ -173,7 +173,7 @@ export function DiscoverSidebarComponent({
               },
               fieldName,
               onDelete: async () => {
-                await onFieldEdited();
+                await onFieldEdited({ removedFieldName: fieldName });
               },
             });
             if (setFieldEditorRef) {

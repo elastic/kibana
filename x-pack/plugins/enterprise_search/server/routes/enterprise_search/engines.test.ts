@@ -7,6 +7,19 @@
 
 import { mockDependencies, mockRequestHandler, MockRouter } from '../../__mocks__';
 
+jest.mock('../../utils/fetch_enterprise_search', () => ({
+  ...jest.requireActual('../../utils/fetch_enterprise_search'),
+  fetchEnterpriseSearch: jest.fn(),
+}));
+jest.mock('../../lib/engines/field_capabilities', () => ({
+  fetchEngineFieldCapabilities: jest.fn(),
+}));
+
+import { RequestHandlerContext } from '@kbn/core/server';
+
+import { fetchEngineFieldCapabilities } from '../../lib/engines/field_capabilities';
+import { fetchEnterpriseSearch } from '../../utils/fetch_enterprise_search';
+
 import { registerEnginesRoutes } from './engines';
 
 describe('engines routes', () => {
@@ -296,6 +309,120 @@ describe('engines routes', () => {
       const request = { params: {} };
 
       mockRouter.shouldThrow(request);
+    });
+  });
+
+  describe('GET /internal/enterprise_search/engines/{engine_name}/field_capabilities', () => {
+    let mockRouter: MockRouter;
+    const mockClient = {
+      asCurrentUser: {},
+    };
+    const mockCore = {
+      elasticsearch: { client: mockClient },
+      savedObjects: { client: {} },
+    };
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+
+      const context = {
+        core: Promise.resolve(mockCore),
+      } as unknown as jest.Mocked<RequestHandlerContext>;
+
+      mockRouter = new MockRouter({
+        context,
+        method: 'get',
+        path: '/internal/enterprise_search/engines/{engine_name}/field_capabilities',
+      });
+
+      registerEnginesRoutes({
+        ...mockDependencies,
+        router: mockRouter.router,
+      });
+    });
+
+    it('fetches engine fields', async () => {
+      const engineResult = {
+        created: '1999-12-31T23:59:59.999Z',
+        indices: [],
+        name: 'unit-test',
+        updated: '1999-12-31T23:59:59.999Z',
+      };
+      const fieldCapabilitiesResult = {
+        name: 'unit-test',
+      };
+
+      (fetchEnterpriseSearch as jest.Mock).mockResolvedValueOnce(engineResult);
+      (fetchEngineFieldCapabilities as jest.Mock).mockResolvedValueOnce(fieldCapabilitiesResult);
+
+      await mockRouter.callRoute({
+        params: { engine_name: 'unit-test' },
+      });
+
+      expect(fetchEnterpriseSearch).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        '/api/engines/unit-test'
+      );
+      expect(fetchEngineFieldCapabilities).toHaveBeenCalledWith(mockClient, engineResult);
+      expect(mockRouter.response.ok).toHaveBeenCalledWith({
+        body: fieldCapabilitiesResult,
+        headers: { 'content-type': 'application/json' },
+      });
+    });
+    it('returns 404 when fetch engine is undefined', async () => {
+      (fetchEnterpriseSearch as jest.Mock).mockResolvedValueOnce(undefined);
+      await mockRouter.callRoute({
+        params: { engine_name: 'unit-test' },
+      });
+
+      expect(mockRouter.response.customError).toHaveBeenCalledWith({
+        body: {
+          attributes: {
+            error_code: 'engine_not_found',
+          },
+          message: 'Could not find engine',
+        },
+        statusCode: 404,
+      });
+    });
+    it('returns 404 when fetch engine is returns 404', async () => {
+      (fetchEnterpriseSearch as jest.Mock).mockResolvedValueOnce({
+        responseStatus: 404,
+        responseStatusText: 'NOT_FOUND',
+      });
+      await mockRouter.callRoute({
+        params: { engine_name: 'unit-test' },
+      });
+
+      expect(mockRouter.response.customError).toHaveBeenCalledWith({
+        body: {
+          attributes: {
+            error_code: 'engine_not_found',
+          },
+          message: 'Could not find engine',
+        },
+        statusCode: 404,
+      });
+    });
+    it('returns error when fetch engine returns an error', async () => {
+      (fetchEnterpriseSearch as jest.Mock).mockResolvedValueOnce({
+        responseStatus: 500,
+        responseStatusText: 'INTERNAL_SERVER_ERROR',
+      });
+      await mockRouter.callRoute({
+        params: { engine_name: 'unit-test' },
+      });
+
+      expect(mockRouter.response.customError).toHaveBeenCalledWith({
+        body: {
+          attributes: {
+            error_code: 'uncaught_exception',
+          },
+          message: 'Error fetching engine',
+        },
+        statusCode: 500,
+      });
     });
   });
 });

@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { LogStreamQueryContext, ParsedQuery } from './types';
+import { RefreshInterval } from '@kbn/data-plugin/public';
+import { ExtendedTimeRange, LogStreamQueryContext, ParsedQuery, Timestamps } from './types';
+
+export interface TimeChangedEvent {
+  type: 'TIME_CHANGED';
+  timeRange: ExtendedTimeRange;
+  refreshInterval: RefreshInterval;
+  timestamps: Timestamps;
+}
 
 export type LogStreamQueryNotificationEvent =
   | {
@@ -16,7 +24,8 @@ export type LogStreamQueryNotificationEvent =
       type: 'INVALID_QUERY_CHANGED';
       parsedQuery: ParsedQuery;
       error: Error;
-    };
+    }
+  | TimeChangedEvent;
 
 export const logStreamQueryNotificationEventSelectors = {
   validQueryChanged: (context: LogStreamQueryContext) =>
@@ -34,4 +43,14 @@ export const logStreamQueryNotificationEventSelectors = {
           error: context.validationError,
         } as LogStreamQueryNotificationEvent)
       : undefined,
+  timeChanged: (context: LogStreamQueryContext) => {
+    return 'timeRange' in context && 'refreshInterval' in context && 'timestamps' in context
+      ? ({
+          type: 'TIME_CHANGED',
+          timeRange: context.timeRange,
+          refreshInterval: context.refreshInterval,
+          timestamps: context.timestamps,
+        } as LogStreamQueryNotificationEvent)
+      : undefined;
+  },
 };

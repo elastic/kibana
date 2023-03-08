@@ -14,11 +14,16 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { Core } from './core';
+import { initRpcRoutes, registerProcedures, RpcService } from './rpc';
+import type { Context as RpcContext } from './rpc';
 import {
   ContentManagementServerSetup,
   ContentManagementServerStart,
   SetupDependencies,
 } from './types';
+import { procedureNames } from '../common';
+
+type CreateRouterFn = CoreSetup['http']['createRouter'];
 
 export class ContentManagementPlugin
   implements Plugin<ContentManagementServerSetup, ContentManagementServerStart, SetupDependencies>
@@ -26,13 +31,22 @@ export class ContentManagementPlugin
   private readonly logger: Logger;
   private readonly core: Core;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(initializerContext: { logger: PluginInitializerContext['logger'] }) {
     this.logger = initializerContext.logger.get();
     this.core = new Core({ logger: this.logger });
   }
 
-  public setup(core: CoreSetup) {
-    const { api: coreApi } = this.core.setup();
+  public setup(core: { http: { createRouter: CreateRouterFn } }) {
+    const { api: coreApi, contentRegistry } = this.core.setup();
+
+    const rpc = new RpcService<RpcContext>();
+    registerProcedures(rpc);
+
+    const router = core.http.createRouter();
+    initRpcRoutes(procedureNames, router, {
+      rpc,
+      contentRegistry,
+    });
 
     return {
       ...coreApi,

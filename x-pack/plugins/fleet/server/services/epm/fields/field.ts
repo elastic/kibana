@@ -17,6 +17,7 @@ export interface Field {
   description?: string;
   value?: string;
   format?: string;
+  date_format?: string;
   fields?: Fields;
   enabled?: boolean;
   path?: string;

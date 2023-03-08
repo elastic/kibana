@@ -18,22 +18,54 @@ const chance = new Chance();
 
 type TableProps = PropsOf<typeof FindingsTable>;
 
-describe('<FindingsTable />', () => {
-  it('renders the zero state when status success and data has a length of zero ', async () => {
-    const props: TableProps = {
-      loading: false,
-      items: [],
-      sorting: { sort: { field: '@timestamp', direction: 'desc' } },
-      pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
-      setTableOptions: jest.fn(),
-      onAddFilter: jest.fn(),
-    };
+const onAddFilter = jest.fn();
+const onOpenFlyout = jest.fn();
+const onCloseFlyout = jest.fn();
 
-    render(
-      <TestProvider>
-        <FindingsTable {...props} />
-      </TestProvider>
-    );
+describe('<FindingsTable />', () => {
+  const TestComponent = ({ ...overrideProps }) => (
+    <TestProvider>
+      <FindingsTable
+        loading={false}
+        items={[]}
+        sorting={{ sort: { field: '@timestamp', direction: 'desc' } }}
+        pagination={{ pageSize: 10, pageIndex: 0, totalItemCount: 0 }}
+        setTableOptions={jest.fn()}
+        onAddFilter={onAddFilter}
+        onOpenFlyout={onOpenFlyout}
+        onCloseFlyout={onCloseFlyout}
+        onPaginateFlyout={jest.fn()}
+        flyoutFindingIndex={-1}
+        {...overrideProps}
+      />
+    </TestProvider>
+  );
+
+  const renderWrapper = (overrideProps: Partial<TableProps> = {}) => {
+    return render(<TestComponent {...overrideProps} />);
+  };
+
+  it('opens/closes the flyout when clicked on expand/close buttons ', async () => {
+    const props = {
+      items: [getFindingsFixture()],
+    };
+    const { rerender } = renderWrapper(props);
+
+    expect(screen.queryByTestId(TEST_SUBJECTS.FINDINGS_FLYOUT)).not.toBeInTheDocument();
+    expect(screen.queryByTestId(TEST_SUBJECTS.FINDINGS_TABLE_EXPAND_COLUMN)).toBeInTheDocument();
+
+    userEvent.click(screen.getByTestId(TEST_SUBJECTS.FINDINGS_TABLE_EXPAND_COLUMN));
+    expect(onOpenFlyout).toHaveBeenCalled();
+    rerender(<TestComponent {...props} flyoutFindingIndex={0} />);
+
+    userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+    expect(onCloseFlyout).toHaveBeenCalled();
+    rerender(<TestComponent {...props} />);
+    expect(screen.queryByTestId(TEST_SUBJECTS.FINDINGS_FLYOUT)).not.toBeInTheDocument();
+  });
+
+  it('renders the zero state when status success and data has a length of zero ', async () => {
+    renderWrapper({ items: [] });
 
     expect(
       screen.getByTestId(TEST_SUBJECTS.LATEST_FINDINGS_TABLE_NO_FINDINGS_EMPTY_STATE)
@@ -42,47 +74,26 @@ describe('<FindingsTable />', () => {
 
   it('renders the table with provided items', () => {
     const names = chance.unique(chance.sentence, 10);
-    const data = names.map(getFindingsFixture);
+    const data = names.map((name) => {
+      const fixture = getFindingsFixture();
+      return { ...fixture, rule: { ...fixture.rule, name } };
+    });
 
-    const props: TableProps = {
-      loading: false,
-      items: data,
-      sorting: { sort: { field: '@timestamp', direction: 'desc' } },
-      pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
-      setTableOptions: jest.fn(),
-      onAddFilter: jest.fn(),
-    };
-
-    render(
-      <TestProvider>
-        <FindingsTable {...props} />
-      </TestProvider>
-    );
+    renderWrapper({ items: data });
 
     data.forEach((item) => {
-      expect(screen.getByText(item.rule.name)).toBeInTheDocument();
+      expect(screen.getAllByText(item.rule.name)[0]).toBeInTheDocument();
     });
   });
 
   it('adds filter with a cell button click', () => {
     const names = chance.unique(chance.sentence, 10);
-    const data = names.map(getFindingsFixture);
+    const data = names.map((name) => {
+      const fixture = getFindingsFixture();
+      return { ...fixture, rule: { ...fixture.rule, name } };
+    });
 
-    const filterProps = { onAddFilter: jest.fn() };
-    const props: TableProps = {
-      loading: false,
-      items: data,
-      sorting: { sort: { field: '@timestamp', direction: 'desc' } },
-      pagination: { pageSize: 10, pageIndex: 1, totalItemCount: 0 },
-      setTableOptions: jest.fn(),
-      ...filterProps,
-    };
-
-    render(
-      <TestProvider>
-        <FindingsTable {...props} />
-      </TestProvider>
-    );
+    renderWrapper({ items: data });
 
     const row = data[0];
 
@@ -113,10 +124,10 @@ describe('<FindingsTable />', () => {
       expect(addNegatedFilterElement).toBeVisible();
 
       userEvent.click(addFilterElement);
-      expect(props.onAddFilter).toHaveBeenCalledWith(field, value, false);
+      expect(onAddFilter).toHaveBeenCalledWith(field, value, false);
 
       userEvent.click(addNegatedFilterElement);
-      expect(props.onAddFilter).toHaveBeenCalledWith(field, value, true);
+      expect(onAddFilter).toHaveBeenCalledWith(field, value, true);
     });
   });
 });

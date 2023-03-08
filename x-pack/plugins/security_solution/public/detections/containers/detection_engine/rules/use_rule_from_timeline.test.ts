@@ -177,6 +177,9 @@ describe('useRuleFromTimeline', () => {
     });
 
     it('when from timeline data view id === selected data view id and browser fields is not empty, set rule data to match from timeline query', async () => {
+      (useGetInitialUrlParamValue as jest.Mock)
+        .mockReturnValueOnce(() => timelineId)
+        .mockReturnValue(() => undefined);
       const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
       expect(result.current.loading).toEqual(true);
       await waitForNextUpdate();
@@ -219,6 +222,45 @@ describe('useRuleFromTimeline', () => {
           query: { query: 'host.name:* AND user.name:*', language: 'kuery' },
           saved_id: null,
         },
+      });
+    });
+
+    it('when timeline has eql, set rule data to match from eql query', async () => {
+      const eqlOptions = {
+        eventCategoryField: 'category',
+        tiebreakerField: '',
+        timestampField: '@timestamp',
+        query: 'find it EQL',
+        size: 100,
+      };
+      const eqlTimeline = {
+        data: {
+          timeline: {
+            ...mockTimeline,
+            id: timelineId,
+            savedObjectId: timelineId,
+            indexNames: ['awesome-*'],
+            dataViewId: 'custom-data-view-id',
+            eqlOptions,
+          },
+        },
+      };
+      (resolveTimeline as jest.Mock).mockResolvedValue(eqlTimeline);
+      (useGetInitialUrlParamValue as jest.Mock)
+        .mockReturnValueOnce(() => undefined)
+        .mockReturnValue(() => timelineId);
+      const { result, waitForNextUpdate } = renderHook(() => useRuleFromTimeline(setRuleQuery));
+      expect(result.current.loading).toEqual(true);
+      await waitForNextUpdate();
+      expect(result.current.loading).toEqual(false);
+      expect(setRuleQuery).toHaveBeenCalledWith({
+        index: ['awesome-*'],
+        queryBar: {
+          filters: [],
+          query: { query: 'find it EQL', language: 'eql' },
+          saved_id: null,
+        },
+        eqlOptions,
       });
     });
 

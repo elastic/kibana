@@ -19,7 +19,6 @@ interface FleetStatusState {
   error?: Error;
   missingRequirements?: GetFleetStatusResponse['missing_requirements'];
   missingOptionalFeatures?: GetFleetStatusResponse['missing_optional_features'];
-  packageVerificationKeyId?: GetFleetStatusResponse['package_verification_key_id'];
 }
 
 interface FleetStatus extends FleetStatusState {
@@ -60,7 +59,6 @@ export const FleetStatusProvider: React.FC = ({ children }) => {
           isReady: res.data?.isReady ?? false,
           missingRequirements: res.data?.missing_requirements,
           missingOptionalFeatures: res.data?.missing_optional_features,
-          packageVerificationKeyId: res.data?.package_verification_key_id,
         }));
       } catch (error) {
         setState((s) => ({ ...s, isLoading: false, error }));

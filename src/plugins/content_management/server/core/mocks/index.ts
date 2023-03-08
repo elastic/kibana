@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export { createMemoryStorage } from './in_memory_storage';
-export type { MockContent } from './in_memory_storage';
+export { createMemoryStorage, createMockedStorage } from './in_memory_storage';
+export type { FooContent } from './in_memory_storage';

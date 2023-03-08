@@ -1,0 +1,18 @@
+title: Settings definition
+description: Defines properties for settings.
+type: object
+properties:
+  timestampField:
+    description: >
+      The timestamp field used in the source indice. Particularly useful for custom kql indicator type, when the index
+      does not use the default '@timestamp' field
+    type: string
+    example: timestamp
+  syncDelay:
+    description: The synch delay to apply to the transform. Default 1m
+    type: string
+    example: 5m
+  frequency:
+    description: Configure how often the transform runs, default 1m
+    type: string
+    example: 5m

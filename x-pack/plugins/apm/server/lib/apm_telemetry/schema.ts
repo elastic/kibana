@@ -42,6 +42,7 @@ const timeframeMapSchema: MakeSchemaFrom<TimeframeMap> = {
 const agentSchema: MakeSchemaFrom<APMUsage>['agents'][ElasticAgentName] = {
   agent: {
     version: { type: 'array', items: { type: 'keyword' } },
+    activation_method: { type: 'array', items: { type: 'keyword' } },
   },
   service: {
     framework: {
@@ -134,6 +135,7 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService> = {
   agent: {
     name: keyword,
     version: keyword,
+    activation_method: keyword,
   },
   service: {
     language: {

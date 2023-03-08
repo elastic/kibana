@@ -8,7 +8,7 @@
 import sinon from 'sinon';
 import { v4 as uuidv4 } from 'uuid';
 import { getMigrations } from '.';
-import { RawRule } from '../../types';
+import { RawRule, RawRuleAction } from '../../types';
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
@@ -2630,6 +2630,30 @@ describe('successful migrations', () => {
     });
   });
 
+  describe('8.8.0', () => {
+    test('adds uuid to rule actions', () => {
+      const migration880 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.8.0'];
+      const rule = getMockData(
+        {
+          params: { foo: true },
+          alertTypeId: '.not-es-query',
+        },
+        true
+      );
+      const migratedAlert880 = migration880(rule, migrationContext);
+
+      expect(migratedAlert880.attributes.actions).toEqual([
+        {
+          group: 'default',
+          actionRef: '1',
+          actionTypeId: '1',
+          params: { foo: true },
+          uuid: expect.stringMatching(/.*\S.*/), // non-empty string
+        },
+      ]);
+    });
+  });
+
   describe('Metrics Inventory Threshold rule', () => {
     test('Migrates incorrect action group spelling', () => {
       const migration800 = getMigrations(encryptedSavedObjectsSetup, {}, isPreconfigured)['8.0.0'];
@@ -2974,7 +2998,7 @@ function getMockData(
           params: {
             foo: true,
           },
-        },
+        } as unknown as RawRuleAction,
       ],
       ...overwrites,
     },
