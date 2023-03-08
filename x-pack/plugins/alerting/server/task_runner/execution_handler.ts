@@ -198,14 +198,21 @@ export class ExecutionHandler<
         ruleRunMetricsStore.incrementNumberOfTriggeredActionsByConnectorType(actionTypeId);
 
         if (isSummaryAction(action)) {
-          if (isSummaryActionPerRuleRun(action) && !this.hasAlerts(alerts)) {
-            continue;
-          }
           const summarizedAlerts = await this.getSummarizedAlerts({
             action,
             spaceId,
             ruleId,
           });
+          this.logNumberOfFilteredAlerts({
+            numberOfAlerts: Object.keys(alerts).length,
+            numberOfSummarizedAlerts: summarizedAlerts.all.count,
+            action,
+          });
+
+          if (isSummaryActionPerRuleRun(action) && summarizedAlerts.all.count === 0) {
+            continue;
+          }
+
           const actionToRun = {
             ...action,
             params: injectActionParams({
@@ -318,10 +325,23 @@ export class ExecutionHandler<
     return { throttledSummaryActions };
   }
 
-  private hasAlerts(
-    alerts: Record<string, Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>>
-  ) {
-    return Object.keys(alerts).length > 0;
+  private logNumberOfFilteredAlerts({
+    numberOfAlerts = 0,
+    numberOfSummarizedAlerts = 0,
+    action,
+  }: {
+    numberOfAlerts: number;
+    numberOfSummarizedAlerts: number;
+    action: RuleAction;
+  }) {
+    const count = numberOfAlerts - numberOfSummarizedAlerts;
+    if (count > 0) {
+      this.logger.debug(
+        `(${count}) alert${count > 1 ? 's' : ''} ${
+          count > 1 ? 'have' : 'has'
+        } been filtered out for: ${action.actionTypeId}:${action.uuid}`
+      );
+    }
   }
 
   private isAlertMuted(alertId: string) {

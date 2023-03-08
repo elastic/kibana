@@ -146,6 +146,7 @@ export class RulesClient {
       params.references,
       params.includeLegacyId,
       params.excludeFromPublicApi,
-      params.includeSnoozeData
+      params.includeSnoozeData,
+      params.omitGeneratedValues
     );
 }

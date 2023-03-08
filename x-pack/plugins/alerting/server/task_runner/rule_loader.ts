@@ -116,6 +116,7 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
     rawRule: rawRule.attributes as RawRule,
     references: rawRule.references,
     includeLegacyId: false,
+    omitGeneratedValues: false,
   });
 
   return {

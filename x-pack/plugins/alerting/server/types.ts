@@ -253,7 +253,7 @@ export interface RawRuleAction extends SavedObjectAttributes {
   alertsFilter?: {
     query: null | {
       kql: string;
-      dsl?: string;
+      dsl: string;
     };
     timeframe: null | AlertsFilterTimeframe;
   };

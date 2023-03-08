@@ -275,6 +275,9 @@ export async function bulkEdit<Params extends RuleTypeParams>(
       attributes.alertTypeId as string,
       attributes as RawRule,
       references,
+      false,
+      false,
+      false,
       false
     );
   });
