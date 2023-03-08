@@ -17,10 +17,9 @@ import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
-
 import { PageTitle } from './components/page_title';
 import { HeaderActions } from './components/header_actions';
-import { AlertSummary } from './components/alert_summary';
+import { AlertSummary, AlertSummaryField } from './components/alert_summary';
 import { CenterJustifiedSpinner } from '../rule_details/components/center_justified_spinner';
 import PageNotFound from '../404';
 import { getTimeZone } from '../../utils/get_time_zone';
@@ -56,6 +55,7 @@ export function AlertDetails() {
     ruleId: alert?.fields[ALERT_RULE_UUID],
     http,
   });
+  const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
 
   useEffect(() => {
     if (alert) {
@@ -122,10 +122,15 @@ export function AlertDetails() {
       }}
       data-test-subj="alertDetails"
     >
-      <AlertSummary alert={alert} />
+      <AlertSummary alert={alert} alertSummaryFields={summaryFields} />
       <EuiSpacer size="l" />
       {AlertDetailsAppSection && rule && (
-        <AlertDetailsAppSection alert={alert} rule={rule} timeZone={timeZone} />
+        <AlertDetailsAppSection
+          alert={alert}
+          rule={rule}
+          timeZone={timeZone}
+          setAlertSummaryFields={setSummaryFields}
+        />
       )}
     </ObservabilityPageTemplate>
   );
