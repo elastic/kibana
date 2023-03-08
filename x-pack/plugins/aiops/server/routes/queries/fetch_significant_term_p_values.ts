@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Logger } from '@kbn/logging';
-import { type ChangePoint, RANDOM_SAMPLER_SEED } from '@kbn/ml-agg-utils';
+import { type SignificantTerm, RANDOM_SAMPLER_SEED } from '@kbn/ml-agg-utils';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { SPIKE_ANALYSIS_THRESHOLD } from '../../../common/constants';
 import type { AiopsExplainLogRateSpikesSchema } from '../../../common/api/explain_log_rate_spikes';
@@ -22,7 +22,7 @@ import { getRequestBase } from './get_request_base';
 // TODO Consolidate with duplicate `fetchDurationFieldCandidates` in
 // `x-pack/plugins/apm/server/routes/correlations/queries/fetch_failed_events_correlation_p_values.ts`
 
-export const getChangePointRequest = (
+export const getSignificantTermRequest = (
   params: AiopsExplainLogRateSpikesSchema,
   fieldName: string,
   // The default value of 1 means no sampling will be used
@@ -121,7 +121,7 @@ function isRandomSamplerAggregation(arg: unknown): arg is RandomSamplerAggregati
   return isPopulatedObject(arg, ['sample']);
 }
 
-export const fetchChangePointPValues = async (
+export const fetchSignificantTermPValues = async (
   esClient: ElasticsearchClient,
   params: AiopsExplainLogRateSpikesSchema,
   fieldNames: string[],
@@ -130,13 +130,13 @@ export const fetchChangePointPValues = async (
   sampleProbability: number = 1,
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
-): Promise<ChangePoint[]> => {
-  const result: ChangePoint[] = [];
+): Promise<SignificantTerm[]> => {
+  const result: SignificantTerm[] = [];
 
   const settledPromises = await Promise.allSettled(
     fieldNames.map((fieldName) =>
       esClient.search<unknown, { sample: PValuesAggregation } | { change_point_p_value: Aggs }>(
-        getChangePointRequest(params, fieldName, sampleProbability),
+        getSignificantTermRequest(params, fieldName, sampleProbability),
         { signal: abortSignal, maxRetries: 0 }
       )
     )

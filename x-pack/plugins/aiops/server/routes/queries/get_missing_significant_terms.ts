@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { ChangePoint, ChangePointGroup } from '@kbn/ml-agg-utils';
+import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
-export function getMissingChangePoints(
-  deduplicatedChangePoints: ChangePoint[],
-  changePointGroups: ChangePointGroup[]
+export function getMissingSignificantTerms(
+  deduplicatedSignificantTerms: SignificantTerm[],
+  significantTermGroups: SignificantTermGroup[]
 ) {
-  return deduplicatedChangePoints.filter((cp) => {
-    return !changePointGroups.some((cpg) => {
+  return deduplicatedSignificantTerms.filter((cp) => {
+    return !significantTermGroups.some((cpg) => {
       return cpg.group.some((d) => d.fieldName === cp.fieldName && d.fieldValue === cp.fieldValue);
     });
   });

@@ -10,12 +10,16 @@ import { significantTerms } from '../../../common/__mocks__/artificial_logs/sign
 
 import { duplicateIdentifier } from './duplicate_identifier';
 import { getGroupsWithReaddedDuplicates } from './get_groups_with_readded_duplicates';
-import { groupDuplicates } from './fetch_frequent_item_sets';
+import { dropDuplicates, groupDuplicates } from './fetch_frequent_item_sets';
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
 import { getMarkedDuplicates } from './get_marked_duplicates';
+import { getMissingSignificantTerms } from './get_missing_significant_terms';
+import { transformSignificantTermToGroup } from './transform_significant_term_to_group';
 
-describe('getGroupsWithReaddedDuplicates', () => {
-  it('gets groups with readded duplicates', () => {
+describe('getMissingSignificantTerms', () => {
+  it('get missing significant terms', () => {
+    const deduplicatedSignificantTerms = dropDuplicates(significantTerms, duplicateIdentifier);
+
     const groupedSignificantTerms = groupDuplicates(significantTerms, duplicateIdentifier).filter(
       (g) => g.group.length > 1
     );
@@ -27,29 +31,21 @@ describe('getGroupsWithReaddedDuplicates', () => {
       groupedSignificantTerms
     );
 
-    expect(groupsWithReaddedDuplicates).toEqual([
-      {
-        docCount: 792,
-        group: [
-          {
-            duplicate: false,
-            fieldName: 'response_code',
-            fieldValue: '500',
-          },
-          {
-            duplicate: false,
-            fieldName: 'url',
-            fieldValue: 'home.php',
-          },
-          {
-            duplicate: false,
-            fieldName: 'url',
-            fieldValue: 'login.php',
-          },
-        ],
-        id: '2038579476',
-        pValue: 0.010770456205312423,
-      },
-    ]);
+    const missingSignificantTerms = getMissingSignificantTerms(
+      deduplicatedSignificantTerms,
+      groupsWithReaddedDuplicates
+    );
+
+    const transformed = transformSignificantTermToGroup(
+      missingSignificantTerms[0],
+      groupedSignificantTerms
+    );
+
+    expect(transformed).toEqual({
+      docCount: 1981,
+      group: [{ duplicate: false, fieldName: 'user', fieldValue: 'Peter' }],
+      id: '817080373',
+      pValue: 2.7454255728359757e-21,
+    });
   });
 });

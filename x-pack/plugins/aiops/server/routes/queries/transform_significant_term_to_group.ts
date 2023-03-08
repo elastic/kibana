@@ -6,17 +6,17 @@
  */
 
 import { stringHash } from '@kbn/ml-string-hash';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
-import type { ChangePointDuplicateGroup } from '../../../common/types';
+import type { SignificantTermDuplicateGroup } from '../../../common/types';
 
-export function transformChangePointToGroup(
-  changePoint: ChangePoint,
-  groupedChangePoints: ChangePointDuplicateGroup[]
+export function transformSignificantTermToGroup(
+  significantTerm: SignificantTerm,
+  groupedSignificantTerms: SignificantTermDuplicateGroup[]
 ) {
-  const { fieldName, fieldValue, doc_count: docCount, pValue } = changePoint;
+  const { fieldName, fieldValue, doc_count: docCount, pValue } = significantTerm;
 
-  const duplicates = groupedChangePoints.find((d) =>
+  const duplicates = groupedSignificantTerms.find((d) =>
     d.group.some((dg) => dg.fieldName === fieldName && dg.fieldValue === fieldValue)
   );
 
