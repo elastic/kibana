@@ -70,7 +70,7 @@ export function SloBadges({ slo, activeAlerts }: Props) {
 
 function toAlertsPageQuery(activeAlerts: ActiveAlerts): string {
   const kuery = activeAlerts.ruleIds
-    .map((ruleId) => `kibana.alert.rule.uuid:"${activeAlerts.ruleIds[0]}"`)
+    .map((ruleId) => `kibana.alert.rule.uuid:"${ruleId}"`)
     .join(' or ');
 
   const query = `(kuery:'${kuery}',rangeFrom:now-15m,rangeTo:now,status:all)`;
