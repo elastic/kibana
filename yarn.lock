@@ -5145,6 +5145,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/solution-side-nav@link:packages/kbn-solution-side-nav":
+  version "0.0.0"
+  uid ""
+
 "@kbn/some-dev-log@link:packages/kbn-some-dev-log":
   version "0.0.0"
   uid ""

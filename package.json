@@ -607,6 +607,7 @@
     "@kbn/shared-ux-utility": "link:packages/kbn-shared-ux-utility",
     "@kbn/slo-schema": "link:packages/kbn-slo-schema",
     "@kbn/snapshot-restore-plugin": "link:x-pack/plugins/snapshot_restore",
+    "@kbn/solution-side-nav": "link:packages/kbn-solution-side-nav",
     "@kbn/spaces-plugin": "link:x-pack/plugins/spaces",
     "@kbn/spaces-test-plugin": "link:x-pack/test/spaces_api_integration/common/plugins/spaces_test_plugin",
     "@kbn/stack-alerts-plugin": "link:x-pack/plugins/stack_alerts",

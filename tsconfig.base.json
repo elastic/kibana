@@ -1204,6 +1204,8 @@
       "@kbn/slo-schema/*": ["packages/kbn-slo-schema/*"],
       "@kbn/snapshot-restore-plugin": ["x-pack/plugins/snapshot_restore"],
       "@kbn/snapshot-restore-plugin/*": ["x-pack/plugins/snapshot_restore/*"],
+      "@kbn/solution-side-nav": ["packages/kbn-solution-side-nav"],
+      "@kbn/solution-side-nav/*": ["packages/kbn-solution-side-nav/*"],
       "@kbn/some-dev-log": ["packages/kbn-some-dev-log"],
       "@kbn/some-dev-log/*": ["packages/kbn-some-dev-log/*"],
       "@kbn/sort-package-json": ["packages/kbn-sort-package-json"],
