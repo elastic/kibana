@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/kbn-reporting/generate-csv/types'],
-};
+export { CancellationToken } from './cancellation_token';
+
+export { AuthenticationExpiredError, ReportingError } from './errors';
+
+export { byteSizeValueToNumber } from './schema_utils';
