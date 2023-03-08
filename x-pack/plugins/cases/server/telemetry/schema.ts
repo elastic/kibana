@@ -14,6 +14,7 @@ import type {
   TypeString,
   SolutionTelemetrySchema,
   AssigneesSchema,
+  AttachmentFrameworkSchema,
 } from './types';
 
 const long: TypeLong = { type: 'long' };
@@ -26,6 +27,27 @@ const countSchema: CountSchema = {
   daily: long,
 };
 
+const attachmentSchema = {
+  type: 'array' as const,
+  items: {
+    average: long,
+    maxOnACase: long,
+    total: long,
+    type: string,
+  },
+};
+
+const attachmentFrameworkSchema: AttachmentFrameworkSchema = {
+  persistableAttachments: attachmentSchema,
+  externalAttachments: attachmentSchema,
+  files: {
+    average: long,
+    averageSize: long,
+    maxOnACase: long,
+    total: long,
+  },
+};
+
 const assigneesSchema: AssigneesSchema = {
   total: long,
   totalWithZero: long,
@@ -35,6 +57,7 @@ const assigneesSchema: AssigneesSchema = {
 const solutionTelemetry: SolutionTelemetrySchema = {
   ...countSchema,
   assignees: assigneesSchema,
+  attachmentFramework: attachmentFrameworkSchema,
 };
 
 const statusSchema: StatusSchema = {

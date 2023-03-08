@@ -19,9 +19,16 @@ import type {
   CasesTelemetry,
   MaxBucketOnCaseAggregation,
   SolutionTelemetry,
+  AttachmentFramework,
+  AttachmentAggregationResult,
+  BucketsWithMaxOnCase,
+  AttachmentStats,
+  FileAttachmentStats,
+  FileAttachmentAggregationResult,
 } from '../types';
 import { buildFilter } from '../../client/utils';
-import type { OWNERS } from '../constants';
+import type { Owner } from '../../../common/constants/types';
+import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
 
 export const getCountsAggregationQuery = (savedObjectType: string) => ({
   counts: {
@@ -154,22 +161,38 @@ export const getBucketFromAggregation = ({
   aggs?: Record<string, unknown>;
 }): Buckets['buckets'] => (get(aggs, `${key}.buckets`) ?? []) as Buckets['buckets'];
 
-export const getSolutionValues = (
-  aggregations: CaseAggregationResult | undefined,
-  owner: typeof OWNERS[number]
-): SolutionTelemetry => {
+export const getSolutionValues = ({
+  caseAggregations,
+  attachmentAggregations,
+  filesAggregations,
+  owner,
+}: {
+  caseAggregations?: CaseAggregationResult;
+  attachmentAggregations?: AttachmentAggregationResult;
+  filesAggregations?: FileAttachmentAggregationResult;
+  owner: Owner;
+}): SolutionTelemetry => {
   const aggregationsBuckets = getAggregationsBuckets({
-    aggs: aggregations,
+    aggs: caseAggregations,
     keys: ['totalsByOwner', 'securitySolution.counts', 'observability.counts', 'cases.counts'],
   });
 
+  const totalCasesForOwner = findValueInBuckets(aggregationsBuckets.totalsByOwner, owner);
+
   return {
-    total: findValueInBuckets(aggregationsBuckets.totalsByOwner, owner),
+    total: totalCasesForOwner,
     ...getCountsFromBuckets(aggregationsBuckets[`${owner}.counts`]),
+    ...getAttachmentsFrameworkStats({
+      attachmentAggregations,
+      filesAggregations,
+      totalCasesForOwner,
+      owner,
+    }),
     assignees: {
-      total: aggregations?.[owner].totalAssignees.value ?? 0,
-      totalWithZero: aggregations?.[owner].assigneeFilters.buckets.zero.doc_count ?? 0,
-      totalWithAtLeastOne: aggregations?.[owner].assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
+      total: caseAggregations?.[owner].totalAssignees.value ?? 0,
+      totalWithZero: caseAggregations?.[owner].assigneeFilters.buckets.zero.doc_count ?? 0,
+      totalWithAtLeastOne:
+        caseAggregations?.[owner].assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
     },
   };
 };
@@ -191,6 +214,95 @@ export const getAggregationsBuckets = ({
     }),
     {}
   );
+
+export const getAttachmentsFrameworkStats = ({
+  attachmentAggregations,
+  filesAggregations,
+  totalCasesForOwner,
+  owner,
+}: {
+  attachmentAggregations?: AttachmentAggregationResult;
+  filesAggregations?: FileAttachmentAggregationResult;
+  totalCasesForOwner: number;
+  owner: Owner;
+}): AttachmentFramework => {
+  if (!attachmentAggregations) {
+    return emptyAttachmentFramework();
+  }
+  const attachmentOwnerStats = attachmentAggregations[owner];
+  const averageFileSize = filesAggregations?.[owner]?.averageSize;
+
+  return {
+    attachmentFramework: {
+      externalAttachments: getAttachmentRegistryStats(
+        attachmentOwnerStats.externalReferenceTypes,
+        totalCasesForOwner
+      ),
+      persistableAttachments: getAttachmentRegistryStats(
+        attachmentOwnerStats.persistableReferenceTypes,
+        totalCasesForOwner
+      ),
+      files: getFileAttachmentStats({
+        registryResults: attachmentOwnerStats.externalReferenceTypes,
+        averageFileSize,
+        totalCasesForOwner,
+      }),
+    },
+  };
+};
+
+const getAttachmentRegistryStats = (
+  registryResults: BucketsWithMaxOnCase,
+  totalCasesForOwner: number
+): AttachmentStats[] => {
+  const stats: AttachmentStats[] = [];
+
+  for (const bucket of registryResults.buckets) {
+    const commonFields = {
+      average: calculateTypePerCaseAverage(bucket.doc_count, totalCasesForOwner),
+      maxOnACase: bucket.references.cases.max.value,
+      total: bucket.doc_count,
+    };
+
+    stats.push({
+      type: bucket.key,
+      ...commonFields,
+    });
+  }
+
+  return stats;
+};
+
+const calculateTypePerCaseAverage = (typeDocCount: number, totalCases: number) => {
+  if (totalCases === 0) {
+    return 0;
+  }
+
+  return Math.round(typeDocCount / totalCases);
+};
+
+const getFileAttachmentStats = ({
+  registryResults,
+  averageFileSize,
+  totalCasesForOwner,
+}: {
+  registryResults: BucketsWithMaxOnCase;
+  averageFileSize?: number;
+  totalCasesForOwner: number;
+}): FileAttachmentStats => {
+  const fileBucket = registryResults.buckets.find((bucket) => bucket.key === FILE_ATTACHMENT_TYPE);
+
+  if (!fileBucket || averageFileSize == null) {
+    return emptyFileAttachment();
+  }
+
+  return {
+    averageSize: averageFileSize,
+    average: calculateTypePerCaseAverage(fileBucket.doc_count, totalCasesForOwner),
+    maxOnACase: fileBucket.references.cases.max.value,
+    total: fileBucket.doc_count,
+  };
+};
 
 export const getOnlyAlertsCommentsFilter = () =>
   buildFilter({
@@ -244,6 +356,7 @@ export const getTelemetryDataEmptyState = (): CasesTelemetry => ({
       weekly: 0,
       daily: 0,
       assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
+      ...emptyAttachmentFramework(),
     },
     obs: {
       total: 0,
@@ -251,6 +364,7 @@ export const getTelemetryDataEmptyState = (): CasesTelemetry => ({
       weekly: 0,
       daily: 0,
       assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
+      ...emptyAttachmentFramework(),
     },
     main: {
       total: 0,
@@ -258,6 +372,7 @@ export const getTelemetryDataEmptyState = (): CasesTelemetry => ({
       weekly: 0,
       daily: 0,
       assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
+      ...emptyAttachmentFramework(),
     },
   },
   userActions: { all: { total: 0, monthly: 0, weekly: 0, daily: 0, maxOnACase: 0 } },
@@ -285,4 +400,19 @@ export const getTelemetryDataEmptyState = (): CasesTelemetry => ({
       },
     },
   },
+});
+
+const emptyAttachmentFramework = (): AttachmentFramework => ({
+  attachmentFramework: {
+    persistableAttachments: [],
+    externalAttachments: [],
+    files: emptyFileAttachment(),
+  },
+});
+
+const emptyFileAttachment = (): FileAttachmentStats => ({
+  average: 0,
+  averageSize: 0,
+  maxOnACase: 0,
+  total: 0,
 });

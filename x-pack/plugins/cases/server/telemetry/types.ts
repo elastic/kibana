@@ -7,7 +7,7 @@
 
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import type { OWNERS } from './constants';
+import type { Owner } from '../../common/constants/types';
 
 export interface Buckets {
   buckets: Array<{
@@ -57,8 +57,32 @@ export interface AssigneesFilters {
   };
 }
 
+export interface FileAttachmentAverageSize {
+  averageSize: number;
+}
+
+export type FileAttachmentAggregationResult = Record<Owner, FileAttachmentAverageSize>;
+
+export interface BucketsWithMaxOnCase {
+  buckets: Array<
+    {
+      doc_count: number;
+      key: string;
+    } & MaxBucketOnCaseAggregation
+  >;
+}
+
+export interface AttachmentFrameworkAggsResult {
+  externalReferenceTypes: BucketsWithMaxOnCase;
+  persistableReferenceTypes: BucketsWithMaxOnCase;
+}
+
+export type AttachmentAggregationResult = Record<Owner, AttachmentFrameworkAggsResult> & {
+  participants: Cardinality;
+};
+
 export type CaseAggregationResult = Record<
-  typeof OWNERS[number],
+  Owner,
   {
     counts: Buckets;
     totalAssignees: ValueCount;
@@ -81,7 +105,29 @@ export interface Assignees {
   totalWithAtLeastOne: number;
 }
 
-export interface SolutionTelemetry extends Count {
+interface CommonAttachmentStats {
+  average: number;
+  maxOnACase: number;
+  total: number;
+}
+
+export interface AttachmentStats extends CommonAttachmentStats {
+  type: string;
+}
+
+export interface FileAttachmentStats extends CommonAttachmentStats {
+  averageSize: number;
+}
+
+export interface AttachmentFramework {
+  attachmentFramework: {
+    externalAttachments: AttachmentStats[];
+    persistableAttachments: AttachmentStats[];
+    files: FileAttachmentStats;
+  };
+}
+
+export interface SolutionTelemetry extends Count, AttachmentFramework {
   assignees: Assignees;
 }
 
@@ -147,4 +193,5 @@ export type StatusSchema = MakeSchemaFrom<Status>;
 export type LatestDatesSchema = MakeSchemaFrom<LatestDates>;
 export type CasesTelemetrySchema = MakeSchemaFrom<CasesTelemetry>;
 export type AssigneesSchema = MakeSchemaFrom<Assignees>;
+export type AttachmentFrameworkSchema = MakeSchemaFrom<AttachmentFramework['attachmentFramework']>;
 export type SolutionTelemetrySchema = MakeSchemaFrom<SolutionTelemetry>;
