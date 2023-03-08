@@ -36,8 +36,15 @@ export enum UpdateSourceMappingsPropertiesResult {
 }
 
 /**
- * Updates an index's mappings and runs an pickupUpdatedMappings task so that the mapping
- * changes are "picked up". Returns a taskId to track progress.
+ * This action performs the following operations:
+ *   - Checks the source mappings for any changes.
+ *   - If there are no changes and the version migration is completed, it returns `Updated`.
+ *   - If there are no changes and the version migration is incomplete, it returns `Compatible`.
+ *   - If there are changes it tries to patch the source mappings.
+ *   - If the patch is successful and the version migration is completed, it returns `Updated`.
+ *   - If the patch is successful and the version migration is incomplete, it returns `Compatible`.
+ *   - If the patch is unsuccessful and the version migration is incomplete, it returns `Incompatible`.
+ *   - If the patch is unsuccessful and the version migration is completed, it returns an error. It is likely an incompatible change caused by the newly enabled plugin or code change.
  */
 export const updateSourceMappingsProperties = ({
   client,

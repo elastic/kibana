@@ -90,6 +90,16 @@ export const checkClusterRoutingAllocationEnabledTask =
       .catch(catchRetryableEsClientErrors);
   };
 
+/**
+ * This action gathers information about indices and aliases used by the migration system and performs some checks to validate the migration state.
+ * All the operations are performed one by one and resulting in the keys of the returned object.
+ * The following checks are performed:
+ *   - Check that the cluster routing allocation is enabled.
+ *   - Check that the `.kibana` alias is pointing to a single index.
+ *   - Check that the `.kibana` alias is pointing to an index that belongs to the current or lower version of Kibana.
+ * @param params Initialization parameters.
+ * @returns The initialization result that is partially used to generate a post initialization state.
+ */
 export const initAction = ({
   client,
   currentAlias,
