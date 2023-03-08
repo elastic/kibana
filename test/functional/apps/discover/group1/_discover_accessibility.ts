@@ -31,7 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
   };
 
-  describe('discover accessibility', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/152938
+  describe.skip('discover accessibility', () => {
     before(async () => {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
