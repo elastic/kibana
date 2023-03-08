@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { ChangePointGroup } from '@kbn/ml-agg-utils';
+import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import type { FieldValuePairCounts } from '../../../common/types';
 
 /**
  * Get a nested record of field/value pairs with counts
  */
-export function getFieldValuePairCounts(cpgs: ChangePointGroup[]): FieldValuePairCounts {
+export function getFieldValuePairCounts(cpgs: SignificantTermGroup[]): FieldValuePairCounts {
   return cpgs.reduce<FieldValuePairCounts>((p, { group }) => {
     group.forEach(({ fieldName, fieldValue }) => {
       if (p[fieldName] === undefined) {

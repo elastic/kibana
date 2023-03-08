@@ -51,7 +51,7 @@ import {
   TaskStatus,
 } from '../task';
 import { TaskTypeDictionary } from '../task_type_dictionary';
-import { isUnrecoverableError } from './errors';
+import { isRetryableError, isUnrecoverableError } from './errors';
 import type { EventLoopDelayConfig } from '../config';
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -645,8 +645,7 @@ export class TaskManagerRunner implements TaskRunner {
     attempts: number;
     addDuration?: string;
   }): Date | undefined {
-    // Use custom retry logic, if any, otherwise we'll use the default logic
-    const retry: boolean | Date = this.definition.getRetry?.(attempts, error) ?? true;
+    const retry: boolean | Date = isRetryableError(error) ?? true;
 
     let result;
     if (retry instanceof Date) {

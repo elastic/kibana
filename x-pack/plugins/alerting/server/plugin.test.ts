@@ -135,9 +135,8 @@ describe('Alerting Plugin', () => {
       const setupContract = await plugin.setup(setupMocks, mockPlugins);
 
       expect(AlertsService).toHaveBeenCalled();
-      expect(mockAlertService.initialize).toHaveBeenCalled();
 
-      expect(setupContract.getFrameworkAlertsEnabled()).toEqual(true);
+      expect(setupContract.frameworkAlerts.enabled()).toEqual(true);
     });
 
     it(`exposes configured minimumScheduleInterval()`, async () => {
@@ -153,7 +152,7 @@ describe('Alerting Plugin', () => {
         minimumScheduleInterval: { value: '1m', enforce: false },
       });
 
-      expect(setupContract.getFrameworkAlertsEnabled()).toEqual(false);
+      expect(setupContract.frameworkAlerts.enabled()).toEqual(false);
     });
 
     describe('registerType()', () => {
