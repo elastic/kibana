@@ -18,15 +18,16 @@ import { useWaffleTimeContext } from '../../../../inventory_view/hooks/use_waffl
 import { getAllFields } from './build_fields';
 import { TabProps } from '../types';
 
+const NODE_TYPE = 'host' as InventoryItemType;
+
 const TabComponent = (props: TabProps) => {
   const nodeId = props.node.name;
-  const nodeType = props.nodeType as InventoryItemType;
-  const inventoryModel = findInventoryModel(nodeType);
+  const inventoryModel = findInventoryModel(NODE_TYPE);
   const { sourceId } = useSourceContext();
   const { currentTimeRange } = useWaffleTimeContext();
   const { loading: metadataLoading, metadata } = useMetadata(
     nodeId,
-    nodeType,
+    NODE_TYPE,
     inventoryModel.requiredMetrics,
     sourceId,
     currentTimeRange

@@ -29,6 +29,7 @@ export const HostsTable = () => {
     }
   );
 
+  // Used as currentTime to get the metadata
   const { to } = getDateRangeAsTimestamp();
 
   const onClose = () => setIsFlyoutOpen(!isFlyoutOpen);
@@ -100,9 +101,7 @@ export const HostsTable = () => {
         columns={columns}
         onTableChange={onTableChange}
       />
-      {isFlyoutOpen && (
-        <Flyout node={items[clickedItemIndex]} nodeType="host" currentTime={to} onClose={onClose} />
-      )}
+      {isFlyoutOpen && <Flyout node={items[clickedItemIndex]} currentTime={to} onClose={onClose} />}
     </>
   );
 };

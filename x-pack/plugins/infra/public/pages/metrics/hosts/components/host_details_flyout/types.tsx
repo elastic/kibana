@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { HostNodeRow } from '../../hooks/use_hosts_table';
 
 export interface TabProps {
   currentTime: number;
   node: HostNodeRow;
-  nodeType: InventoryItemType;
   onClose?(): void;
 }

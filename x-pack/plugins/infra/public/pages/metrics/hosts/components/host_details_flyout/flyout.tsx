@@ -8,7 +8,6 @@
 import React, { useMemo, useState } from 'react';
 import { EuiPortal, EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { PropertiesTab } from './metadata/metadata';
 import { HostNodeRow } from '../../hooks/use_hosts_table';
 
@@ -16,20 +15,19 @@ interface Props {
   onClose(): void;
   currentTime: number;
   node: HostNodeRow;
-  nodeType: InventoryItemType;
 }
 
-export const Flyout = ({ node, nodeType, currentTime, onClose }: Props) => {
+export const Flyout = ({ node, currentTime, onClose }: Props) => {
   const tabs = useMemo(() => {
     const tabConfigs = [PropertiesTab];
     return tabConfigs.map((m) => {
       const TabContent = m.content;
       return {
         ...m,
-        content: <TabContent node={node} nodeType={nodeType} currentTime={currentTime} />,
+        content: <TabContent node={node} currentTime={currentTime} />,
       };
     });
-  }, [node, nodeType, currentTime]);
+  }, [node, currentTime]);
 
   const [selectedTab, setSelectedTab] = useState(0);
 
