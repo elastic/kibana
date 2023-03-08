@@ -201,7 +201,7 @@ async function getInputChanges(
   const keyComparePromises = keys.map(
     (key) =>
       new Promise<{ key: keyof DashboardContainerByValueInput; isEqual: boolean }>((resolve) => {
-        if (input[key] === undefined && input[key] === undefined) {
+        if (input[key] === undefined && lastInput[key] === undefined) {
           resolve({ key, isEqual: true });
         }
 
