@@ -19,7 +19,6 @@ import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import PageNotFound from '../404';
-import { isSloFeatureEnabled } from '../slos/helpers/is_slo_feature_enabled';
 import { SloDetails } from './components/slo_details';
 import { HeaderTitle } from './components/header_title';
 import { paths } from '../../config';
@@ -32,7 +31,7 @@ export function SloDetailsPage() {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana<ObservabilityAppServices>().services;
-  const { ObservabilityPageTemplate, config } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
   const hasRightLicense = hasAtLeast('platinum');
 
@@ -41,7 +40,7 @@ export function SloDetailsPage() {
   useBreadcrumbs(getBreadcrumbs(basePath, slo));
 
   const isSloNotFound = !isLoading && slo === undefined;
-  if (!isSloFeatureEnabled(config) || isSloNotFound) {
+  if (isSloNotFound) {
     return <PageNotFound />;
   }
 
