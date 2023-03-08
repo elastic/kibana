@@ -8,6 +8,7 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/detection_engine/rule_monitoring';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   binaryToString,
@@ -19,11 +20,14 @@ import {
   getSimpleRuleOutput,
   getWebHookAction,
   removeServerGeneratedProperties,
+  waitForEventLogExecuteComplete,
+  waitForRuleSuccessOrStatus,
 } from '../../utils';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const es = getService('es');
   const log = getService('log');
 
   describe('export_rules', () => {
@@ -49,8 +53,8 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect('Content-Disposition', 'attachment; filename="export.ndjson"');
       });
 
-      it('should export a single rule with a rule_id', async () => {
-        await createRule(supertest, log, getSimpleRule());
+      it('should export a single disabled rule by its rule_id', async () => {
+        const rule = await createRule(supertest, log, getSimpleRule());
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -59,10 +63,100 @@ export default ({ getService }: FtrProviderContext): void => {
           .expect(200)
           .parse(binaryToString);
 
-        const bodySplitAndParsed = JSON.parse(body.toString().split(/\n/)[0]);
-        const bodyToTest = removeServerGeneratedProperties(bodySplitAndParsed);
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
 
-        expect(bodyToTest).to.eql(getSimpleRuleOutput());
+        expect(exportedRule).to.eql({
+          ...getSimpleRuleOutput(),
+          id: rule.id,
+          created_at: rule.created_at,
+          updated_at: rule.updated_at,
+        });
+      });
+
+      it('should export a single executed rule by its rule_id', async () => {
+        const ruleId = 'rule-1';
+
+        const rule = await createRule(supertest, log, getSimpleRule(ruleId, true));
+
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          rule.id,
+          RuleExecutionStatus['partial failure']
+        );
+        // to properly execute the test on rule's data with runtime fields some delay is needed as
+        // ES Search API may return outdated data
+        // it causes a reliable delay so exported rule's SO contains runtime fields returned via ES Search API
+        // and will be removed after addressing this issue
+        await waitForEventLogExecuteComplete(es, log, rule.id);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .send({
+            objects: [{ rule_id: 'rule-1' }],
+          })
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRule = JSON.parse(body.toString().split(/\n/)[0]);
+
+        expect(exportedRule).to.eql({
+          ...getSimpleRuleOutput(ruleId, true),
+          id: rule.id,
+          created_at: rule.created_at,
+          updated_at: rule.updated_at,
+        });
+      });
+
+      it('should export all executed rules', async () => {
+        const ruleId1 = 'rule-1';
+        const ruleId2 = 'rule-2';
+
+        const rule1 = await createRule(supertest, log, getSimpleRule(ruleId1, true));
+        const rule2 = await createRule(supertest, log, getSimpleRule(ruleId2, true));
+
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          rule1.id,
+          RuleExecutionStatus['partial failure']
+        );
+        await waitForRuleSuccessOrStatus(
+          supertest,
+          log,
+          rule2.id,
+          RuleExecutionStatus['partial failure']
+        );
+        // to properly execute the test on rule's data with runtime fields some delay is needed as
+        // ES Search API may return outdated data
+        // it causes a reliable delay so exported rule's SO contains runtime fields returned via ES Search API
+        // and will be removed after addressing this issue
+        await waitForEventLogExecuteComplete(es, log, rule1.id);
+        await waitForEventLogExecuteComplete(es, log, rule2.id);
+
+        const { body } = await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
+          .set('kbn-xsrf', 'true')
+          .send()
+          .expect(200)
+          .parse(binaryToString);
+
+        const exportedRule1 = JSON.parse(body.toString().split(/\n/)[1]);
+        const exportedRule2 = JSON.parse(body.toString().split(/\n/)[0]);
+
+        expect(exportedRule1).to.eql({
+          ...getSimpleRuleOutput(ruleId1, true),
+          id: rule1.id,
+          created_at: rule1.created_at,
+          updated_at: rule1.updated_at,
+        });
+        expect(exportedRule2).to.eql({
+          ...getSimpleRuleOutput(ruleId2, true),
+          id: rule2.id,
+          created_at: rule2.created_at,
+          updated_at: rule2.updated_at,
+        });
       });
 
       it('should export a exported count with a single rule_id', async () => {
