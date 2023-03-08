@@ -16,7 +16,7 @@ import { loadSavedSearch } from '../utils/load_saved_search';
 import { updateSavedSearch } from '../utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import { AppState, DiscoverAppStateContainer } from './discover_app_state_container';
+import { AppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { persistSavedSearch } from '../utils/persist_saved_search';
@@ -37,6 +37,7 @@ export interface UpdateParams {
 
 export type PersistFunction = (
   nextSavedSearch: SavedSearch,
+  appState: AppState,
   params: SavedObjectSaveOpts,
   dataView?: DataView
 ) => Promise<{ id: string | undefined } | undefined>;
@@ -54,17 +55,14 @@ export interface SavedSearchContainer {
   persist: PersistFunction;
   reset: (id?: string) => Promise<SavedSearch | undefined>;
   set: (savedSearch: SavedSearch) => SavedSearch;
-  undo: () => void;
   update: (params: UpdateParams) => SavedSearch;
 }
 
 export function getSavedSearchContainer({
   savedSearch,
-  appStateContainer,
   services,
 }: {
   savedSearch: SavedSearch;
-  appStateContainer: DiscoverAppStateContainer;
   services: DiscoverServices;
 }): SavedSearchContainer {
   const savedSearchPersisted$ = new BehaviorSubject(savedSearch);
@@ -113,14 +111,6 @@ export function getSavedSearchContainer({
     return newSavedSearch;
   };
 
-  const resetUrl = async (nextSavedSearch: SavedSearch) => {
-    addLog('🔎 [resetUrl] ', nextSavedSearch);
-    await set(nextSavedSearch);
-    const newAppState = getDefaultAppState(nextSavedSearch, services);
-    await appStateContainer.replaceUrlState(newAppState);
-    return nextSavedSearch;
-  };
-
   const newSavedSearch = async (nextDataView: DataView | undefined, appState?: AppState) => {
     addLog('🔎 [savedSearch] new', { nextDataView, appState });
     const dataView = nextDataView ?? get().searchSource.getField('index');
@@ -151,12 +141,12 @@ export function getSavedSearchContainer({
     return nextSavedSearchToSet;
   };
 
-  const persist: PersistFunction = async (nextSavedSearch, params) => {
+  const persist: PersistFunction = async (nextSavedSearch, appState: AppState, params) => {
     addLog('🔎 [savedSearch] persist', nextSavedSearch);
 
     const id = await persistSavedSearch(nextSavedSearch, {
       dataView: nextSavedSearch.searchSource.getField('index')!,
-      state: appStateContainer.getState(),
+      state: appState,
       services,
       saveOptions: params,
     });
@@ -215,14 +205,10 @@ export function getSavedSearchContainer({
     }
     return nextSavedSearch;
   };
-  const undo = () => {
-    return resetUrl(savedSearchPersisted$.getValue());
-  };
 
   const load = async (id: string, params: LoadParams): Promise<SavedSearch> => {
-    const loadedSavedSearch = await loadSavedSearch(id, {
+    const loadedSavedSearch = await loadSavedSearch(id, params.appState?.index, {
       services,
-      appStateContainer,
       dataViewList: params.dataViewList,
       dataViewSpec: params.dataViewSpec,
     });
@@ -249,12 +235,11 @@ export function getSavedSearchContainer({
     persist,
     reset,
     set,
-    undo,
     update,
   };
 }
 
-function getDefaultAppState(savedSearch: SavedSearch, services: DiscoverServices) {
+export function getDefaultAppState(savedSearch: SavedSearch, services: DiscoverServices) {
   return handleSourceColumnState(
     getStateDefaults({
       savedSearch,

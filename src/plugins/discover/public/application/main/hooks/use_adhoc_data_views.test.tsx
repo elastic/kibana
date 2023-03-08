@@ -65,6 +65,7 @@ const mockDataView = {
   isPersisted: () => false,
   getName: () => 'mock-data-view',
   toSpec: () => ({}),
+  isTimeBased: () => true,
 } as DataView;
 
 const savedSearchMock = {

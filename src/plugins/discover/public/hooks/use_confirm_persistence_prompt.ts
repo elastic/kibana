@@ -100,7 +100,7 @@ export const useConfirmPersistencePrompt = (stateContainer: DiscoverStateContain
   const updateSavedSearch = useCallback(
     async ({ savedSearch }) => {
       try {
-        await stateContainer.savedSearchState.persist(savedSearch, {});
+        await stateContainer.savedSearchState.persist(savedSearch, {}, {});
         onUpdateSuccess(savedSearch);
       } catch (e) {
         onUpdateError(e, savedSearch);

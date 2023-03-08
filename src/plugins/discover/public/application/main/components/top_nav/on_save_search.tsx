@@ -48,7 +48,7 @@ async function saveDataSource({
           navigateTo(`/view/${encodeURIComponent(id)}`);
         } else {
           // Update defaults so that "reload saved query" functions correctly
-          state.savedSearchState.undo();
+          state.actions.undoChanges();
         }
       }
     }
@@ -67,7 +67,12 @@ async function saveDataSource({
   }
 
   try {
-    const nextSavedSearch = await state.savedSearchState.persist(savedSearch, saveOptions);
+    const appState = state.appState.getState();
+    const nextSavedSearch = await state.savedSearchState.persist(
+      savedSearch,
+      appState,
+      saveOptions
+    );
     if (nextSavedSearch) {
       onSuccess(nextSavedSearch.id!);
     }

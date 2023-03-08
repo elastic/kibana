@@ -42,7 +42,11 @@ import {
   InternalStateContainer,
 } from './discover_internal_state_container';
 import { DiscoverServices } from '../../../build_services';
-import { getSavedSearchContainer, SavedSearchContainer } from './discover_saved_search_container';
+import {
+  getDefaultAppState,
+  getSavedSearchContainer,
+  SavedSearchContainer,
+} from './discover_saved_search_container';
 import { updateFiltersReferences } from '../utils/update_filter_references';
 interface DiscoverStateContainerParams {
   /**
@@ -216,6 +220,7 @@ export interface DiscoverStateContainer {
       dataView?: DataView | undefined,
       dataViewSpec?: DataViewSpec
     ) => Promise<SavedSearch | undefined>;
+    undoChanges: () => void;
   };
 }
 
@@ -259,7 +264,6 @@ export function getDiscoverStateContainer({
 
   const savedSearchContainer = getSavedSearchContainer({
     savedSearch: initialSavedSearch,
-    appStateContainer,
     services,
   });
 
@@ -343,7 +347,7 @@ export function getDiscoverStateContainer({
     const currentSavedSearch = savedSearchContainer.get();
     if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
       addLog("🧭 [discoverState] undo changes since saved search didn't change");
-      await savedSearchContainer.undo();
+      await undoChanges();
     } else {
       addLog('🧭 [discoverState] onOpenSavedSearch open view URL');
       history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
@@ -433,6 +437,14 @@ export function getDiscoverStateContainer({
     }
   };
 
+  const undoChanges = async () => {
+    const nextSavedSearch = savedSearchContainer.getPersisted$().getValue();
+    await savedSearchContainer.set(nextSavedSearch);
+    const newAppState = getDefaultAppState(nextSavedSearch, services);
+    await appStateContainer.replaceUrlState(newAppState);
+    return nextSavedSearch;
+  };
+
   return {
     kbnUrlStateStorage: stateStorage,
     appState: appStateContainer,
@@ -454,6 +466,7 @@ export function getDiscoverStateContainer({
       removeAdHocDataViewById,
       updateAdHocDataViewId,
       initializeAndSync,
+      undoChanges,
     },
   };
 }

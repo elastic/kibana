@@ -8,21 +8,19 @@
 
 import { DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/common';
 import { getSavedSearch } from '@kbn/saved-search-plugin/public';
-import { DiscoverAppStateContainer } from '../services/discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { loadDataViewBySavedSearch } from './load_data_view_by_saved_search';
 import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 
 export const loadSavedSearch = async (
   id: string,
+  dataViewId: string | undefined,
   {
     services,
-    appStateContainer,
     dataViewList,
     dataViewSpec,
   }: {
     services: DiscoverServices;
-    appStateContainer: DiscoverAppStateContainer;
     dataViewList: DataViewListItem[];
     dataViewSpec?: DataViewSpec;
   }
@@ -36,7 +34,7 @@ export const loadSavedSearch = async (
 
   const currentDataView = await loadDataViewBySavedSearch(
     currentSavedSearch,
-    appStateContainer,
+    dataViewId,
     dataViewList,
     services,
     dataViewSpec

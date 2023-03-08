@@ -111,7 +111,7 @@ const mountComponent = async ({
 
   const stateContainer = getStateContainer(savedSearch);
   stateContainer.dataState.data$ = savedSearchData$;
-  stateContainer.savedSearchState.undo = jest.fn();
+  stateContainer.actions.undoChanges = jest.fn();
 
   const props: DiscoverHistogramLayoutProps = {
     isPlainRecord,
@@ -180,7 +180,7 @@ describe('Discover histogram layout component', () => {
       const { component, stateContainer } = await mountComponent();
       expect(component.find(ResetSearchButton).exists()).toBe(true);
       component.find(ResetSearchButton).find('button').simulate('click');
-      expect(stateContainer.savedSearchState.undo).toHaveBeenCalled();
+      expect(stateContainer.actions.undoChanges).toHaveBeenCalled();
     });
   });
 });
