@@ -94,7 +94,9 @@ export const PreviewHistogram = ({
   const isEqlRule = useMemo(() => ruleType === 'eql', [ruleType]);
   const isMlRule = useMemo(() => ruleType === 'machine_learning', [ruleType]);
 
-  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+  const isAlertsPreviewChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled(
+    'alertsPreviewChartEmbeddablesEnabled'
+  );
   const timerange = useMemo(() => ({ from: startDate, to: endDate }), [startDate, endDate]);
 
   const extraVisualizationOptions = useMemo(
@@ -112,7 +114,7 @@ export const PreviewHistogram = ({
     spaceId,
     indexPattern,
     ruleType,
-    skip: isChartEmbeddablesEnabled,
+    skip: isAlertsPreviewChartEmbeddablesEnabled,
   });
   const license = useLicense();
   const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.detections);
@@ -145,7 +147,7 @@ export const PreviewHistogram = ({
     isInitializing,
     refetch,
     previewId,
-    isChartEmbeddablesEnabled,
+    isAlertsPreviewChartEmbeddablesEnabled,
     previewQueryId,
   ]);
 
@@ -193,13 +195,13 @@ export const PreviewHistogram = ({
               id={previewQueryId}
               title={i18n.QUERY_GRAPH_HITS_TITLE}
               titleSize="xs"
-              showInspectButton={!isChartEmbeddablesEnabled}
+              showInspectButton={!isAlertsPreviewChartEmbeddablesEnabled}
             />
           </EuiFlexItem>
           <EuiFlexItem grow={1}>
             {isLoading ? (
               <LoadingChart size="l" data-test-subj="preview-histogram-loading" />
-            ) : isChartEmbeddablesEnabled ? (
+            ) : isAlertsPreviewChartEmbeddablesEnabled ? (
               <VisualizationEmbeddable
                 applyGlobalQueriesAndFilters={false}
                 extraOptions={extraVisualizationOptions}

@@ -799,10 +799,6 @@
               },
               {
                 "plugin": "synthetics",
-                "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/settings/private_locations/hooks/use_locations_api.ts"
-              },
-              {
-                "plugin": "synthetics",
                 "path": "x-pack/plugins/synthetics/public/apps/synthetics/components/monitor_add_edit/hooks/use_monitor_name.ts"
               },
               {
