@@ -241,7 +241,7 @@ test('stops services if consequent logger upgrade fails', async () => {
   expect(mockConsoleError.mock.calls).toMatchSnapshot();
 });
 
-test('handles migrator node exception', async () => {
+test('handles migrator-only node exception', async () => {
   const errorImplementation = () => {
     throw new CriticalError('Test', 'MigratioOnlyNode', 0);
   };
