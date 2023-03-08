@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import DateMath from '@kbn/datemath';
 import { DataViewBase } from '@kbn/es-query';
 import { useInfiniteQuery } from '@tanstack/react-query';
 
@@ -16,69 +15,72 @@ import {
   metricsExplorerResponseRT,
 } from '../../../../../common/http_api/metrics_explorer';
 import { convertKueryToElasticSearchQuery } from '../../../../utils/kuery';
-import { MetricsExplorerOptions, MetricsExplorerTimeOptions } from './use_metrics_explorer_options';
+import {
+  MetricsExplorerOptions,
+  MetricsExplorerTimestampsRT,
+} from './use_metrics_explorer_options';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 
 export function useMetricsExplorerData(
   options: MetricsExplorerOptions,
   source: MetricsSourceConfigurationProperties | undefined,
   derivedIndexPattern: DataViewBase,
-  timerange: MetricsExplorerTimeOptions
+  { fromTimestamp, toTimestamp, interval }: MetricsExplorerTimestampsRT
 ) {
   const { http } = useKibana().services;
 
-  const from = DateMath.parse(timerange.from);
-  const to = DateMath.parse(timerange.to, { roundUp: true });
-  const { isInitialLoading, isLoading, isRefetching, data, error, refetch, fetchNextPage } =
-    useInfiniteQuery<MetricsExplorerResponse, Error>({
-      queryKey: ['metricExplorer', options.aggregation, options, timerange],
-      queryFn: async ({ signal, pageParam = { afterKey: null } }) => {
-        if (!from || !to) {
-          throw new Error('Unable to parse timerange');
-        }
-        if (!http) {
-          throw new Error('HTTP service is unavailable');
-        }
-        if (!source) {
-          throw new Error('Source is unavailable');
-        }
+  const { isLoading, data, error, refetch, fetchNextPage } = useInfiniteQuery<
+    MetricsExplorerResponse,
+    Error
+  >({
+    queryKey: ['metricExplorer', options.aggregation, options, fromTimestamp, toTimestamp],
+    queryFn: async ({ signal, pageParam = { afterKey: null } }) => {
+      if (!fromTimestamp || !toTimestamp) {
+        throw new Error('Unable to parse timerange');
+      }
+      if (!http) {
+        throw new Error('HTTP service is unavailable');
+      }
+      if (!source) {
+        throw new Error('Source is unavailable');
+      }
 
-        const { afterKey } = pageParam;
-        const response = await http.post<MetricsExplorerResponse>('/api/infra/metrics_explorer', {
-          method: 'POST',
-          body: JSON.stringify({
-            forceInterval: options.forceInterval,
-            dropLastBucket: options.dropLastBucket != null ? options.dropLastBucket : true,
-            metrics: options.aggregation === 'count' ? [{ aggregation: 'count' }] : options.metrics,
-            groupBy: options.groupBy,
-            afterKey,
-            limit: options.limit,
-            indexPattern: source.metricAlias,
-            filterQuery:
-              (options.filterQuery &&
-                convertKueryToElasticSearchQuery(options.filterQuery, derivedIndexPattern)) ||
-              void 0,
-            timerange: {
-              ...timerange,
-              from: from.valueOf(),
-              to: to.valueOf(),
-            },
-          }),
-          signal,
-        });
+      const { afterKey } = pageParam;
+      const response = await http.post<MetricsExplorerResponse>('/api/infra/metrics_explorer', {
+        method: 'POST',
+        body: JSON.stringify({
+          forceInterval: options.forceInterval,
+          dropLastBucket: options.dropLastBucket != null ? options.dropLastBucket : true,
+          metrics: options.aggregation === 'count' ? [{ aggregation: 'count' }] : options.metrics,
+          groupBy: options.groupBy,
+          afterKey,
+          limit: options.limit,
+          indexPattern: source.metricAlias,
+          filterQuery:
+            (options.filterQuery &&
+              convertKueryToElasticSearchQuery(options.filterQuery, derivedIndexPattern)) ||
+            void 0,
+          timerange: {
+            interval,
+            from: fromTimestamp,
+            to: toTimestamp,
+          },
+        }),
+        signal,
+      });
 
-        return decodeOrThrow(metricsExplorerResponseRT)(response);
-      },
-      getNextPageParam: (lastPage) => lastPage.pageInfo,
-      enabled: !!from && !!to && !!http && !!source,
-      refetchOnWindowFocus: false,
-    });
+      return decodeOrThrow(metricsExplorerResponseRT)(response);
+    },
+    getNextPageParam: (lastPage) => lastPage.pageInfo,
+    enabled: !!fromTimestamp && !!toTimestamp && !!http && !!source,
+    refetchOnWindowFocus: false,
+  });
 
   return {
     data,
-    isLoading: isInitialLoading || isLoading || isRefetching,
-    loadData: refetch,
     error,
     fetchNextPage,
+    isLoading,
+    refetch,
   };
 }

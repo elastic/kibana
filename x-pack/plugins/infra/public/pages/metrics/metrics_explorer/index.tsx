@@ -28,10 +28,10 @@ interface MetricsExplorerPageProps {
 
 export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExplorerPageProps) => {
   const {
-    loading,
+    isLoading,
     error,
     data,
-    currentTimerange,
+    timeRange,
     options,
     chartOptions,
     setChartOptions,
@@ -40,10 +40,9 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     handleFilterQuerySubmit,
     handleGroupByChange,
     handleTimeChange,
-    handleRefresh,
     handleLoadMore,
     onViewStateChange,
-    loadData,
+    refetch,
   } = useMetricsExplorerState(source, derivedIndexPattern);
   const { currentView, shouldLoadDefault } = useSavedViewContext();
 
@@ -59,11 +58,11 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
 
   useEffect(() => {
     if (currentView != null || !shouldLoadDefault) {
-      // load metrics explorer data after default view loaded, unless we're not loading a view
-      loadData();
+      // load metrics explorer data after default view loaded, unless we're not isLoading a view
+      refetch();
     }
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [loadData, shouldLoadDefault]);
+  }, [refetch, shouldLoadDefault]);
 
   useMetricsBreadcrumbs([
     {
@@ -82,7 +81,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
               viewState={{
                 options,
                 chartOptions,
-                currentTimerange,
+                currentTimerange: timeRange,
               }}
             />,
           ],
@@ -90,10 +89,10 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
       >
         <MetricsExplorerToolbar
           derivedIndexPattern={derivedIndexPattern}
-          timeRange={currentTimerange}
+          timeRange={timeRange}
           options={options}
           chartOptions={chartOptions}
-          onRefresh={handleRefresh}
+          onRefresh={refetch}
           onTimeChange={handleTimeChange}
           onGroupByChange={handleGroupByChange}
           onFilterQuerySubmit={handleFilterQuerySubmit}
@@ -108,20 +107,20 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
               defaultMessage: 'It looks like the request failed with "{message}"',
               values: { message: error.message },
             })}
-            onRefetch={handleRefresh}
+            onRefetch={refetch}
             refetchText="Try Again"
           />
         ) : (
           <MetricsExplorerCharts
-            timeRange={currentTimerange}
-            loading={loading}
+            timeRange={timeRange}
+            isLoading={isLoading}
             data={data}
             source={source}
             options={options}
             chartOptions={chartOptions}
             onLoadMore={handleLoadMore}
             onFilter={handleFilterQuerySubmit}
-            onRefetch={handleRefresh}
+            onRefetch={refetch}
             onTimeChange={handleTimeChange}
           />
         )}

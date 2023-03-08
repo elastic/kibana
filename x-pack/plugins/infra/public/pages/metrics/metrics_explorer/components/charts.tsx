@@ -21,7 +21,7 @@ import { NoData } from '../../../../components/empty_states/no_data';
 import { MetricsExplorerChart } from './chart';
 
 interface Props {
-  loading: boolean;
+  isLoading: boolean;
   options: MetricsExplorerOptions;
   chartOptions: MetricsExplorerChartOptions;
   onLoadMore: () => void;
@@ -35,7 +35,7 @@ interface Props {
   timeRange: MetricsExplorerTimeOptions;
 }
 export const MetricsExplorerCharts = ({
-  loading,
+  isLoading,
   data,
   onLoadMore,
   options,
@@ -47,7 +47,7 @@ export const MetricsExplorerCharts = ({
   timeRange,
   onTimeChange,
 }: Props) => {
-  if (loading) {
+  if (isLoading) {
     return (
       <InfraLoadingPanel
         height={800}
@@ -123,7 +123,7 @@ export const MetricsExplorerCharts = ({
           </EuiText>
           {data?.pages[lastPageIndex].pageInfo.afterKey ? (
             <div style={{ margin: '16px 0' }}>
-              <EuiButton isLoading={loading} size="s" onClick={onLoadMore}>
+              <EuiButton isLoading={isLoading} size="s" onClick={onLoadMore}>
                 <FormattedMessage
                   id="xpack.infra.metricsExplorer.loadMoreChartsButton"
                   defaultMessage="Load More Charts"

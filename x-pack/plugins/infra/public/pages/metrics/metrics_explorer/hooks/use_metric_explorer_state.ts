@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useState, useCallback } from 'react';
+import DateMath from '@kbn/datemath';
+import { useCallback } from 'react';
 import { DataViewBase } from '@kbn/es-query';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
@@ -31,41 +32,46 @@ export const useMetricsExplorerState = (
   source: MetricsSourceConfigurationProperties,
   derivedIndexPattern: DataViewBase
 ) => {
-  const [refreshSignal, setRefreshSignal] = useState(0);
-  const [afterKey, setAfterKey] = useState<string | null | Record<string, string | null>>(null);
   const {
     defaultViewState,
     options,
-    currentTimerange,
+    timeRange,
     chartOptions,
     setChartOptions,
     setTimeRange,
     setOptions,
+    timestamps,
+    setTimestamps,
   } = useMetricsExplorerOptionsContainerContext();
 
-  const { isLoading, error, data, loadData, fetchNextPage } = useMetricsExplorerData(
+  const { data, error, fetchNextPage, isLoading } = useMetricsExplorerData(
     options,
     source,
     derivedIndexPattern,
-    currentTimerange
+    timestamps
   );
-
-  const handleRefresh = useCallback(() => {
-    setAfterKey(null);
-    setRefreshSignal(refreshSignal + 1);
-  }, [refreshSignal]);
 
   const handleTimeChange = useCallback(
     (start: string, end: string) => {
-      setAfterKey(null);
-      setTimeRange({ ...currentTimerange, from: start, to: end });
+      const fromTimestamp = DateMath.parse(start)!.valueOf();
+      const toTimestamp = DateMath.parse(end, { roundUp: true })!.valueOf();
+      setTimeRange({ ...timeRange, from: start, to: end });
+      setTimestamps({ ...timestamps, fromTimestamp, toTimestamp });
     },
-    [currentTimerange, setTimeRange]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [timeRange.to, timeRange.from, setTimeRange]
   );
+
+  const onRefetch = useCallback(() => {
+    const { from, to } = timeRange;
+    const fromTimestamp = DateMath.parse(from)!.valueOf();
+    const toTimestamp = DateMath.parse(to, { roundUp: true })!.valueOf();
+    setTimestamps({ ...timestamps, fromTimestamp, toTimestamp });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setTimeRange]);
 
   const handleGroupByChange = useCallback(
     (groupBy: string | null | string[]) => {
-      setAfterKey(null);
       setOptions({
         ...options,
         groupBy: groupBy || void 0,
@@ -76,7 +82,6 @@ export const useMetricsExplorerState = (
 
   const handleFilterQuerySubmit = useCallback(
     (query: string) => {
-      setAfterKey(null);
       setOptions({
         ...options,
         filterQuery: query,
@@ -87,7 +92,6 @@ export const useMetricsExplorerState = (
 
   const handleMetricsChange = useCallback(
     (metrics: MetricsExplorerMetric[]) => {
-      setAfterKey(null);
       setOptions({
         ...options,
         metrics,
@@ -98,7 +102,6 @@ export const useMetricsExplorerState = (
 
   const handleAggregationChange = useCallback(
     (aggregation: MetricsExplorerAggregation) => {
-      setAfterKey(null);
       const metrics =
         aggregation === 'count'
           ? [{ aggregation }]
@@ -133,24 +136,21 @@ export const useMetricsExplorerState = (
   );
 
   return {
-    loading: isLoading,
-    error,
-    data,
-    currentTimerange,
-    options,
     chartOptions,
-    setChartOptions,
+    timeRange,
+    data,
+    defaultViewState,
+    error,
+    isLoading,
     handleAggregationChange,
     handleMetricsChange,
     handleFilterQuerySubmit,
     handleGroupByChange,
     handleTimeChange,
-    handleRefresh,
     handleLoadMore: fetchNextPage,
-    defaultViewState,
     onViewStateChange,
-    loadData,
-    refreshSignal,
-    afterKey,
+    options,
+    setChartOptions,
+    refetch: onRefetch,
   };
 };
