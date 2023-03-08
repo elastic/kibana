@@ -49,9 +49,7 @@ const reducer = (state: HostsState, action: Action): HostsState => {
     case 'setFilter':
       return { ...state, filters: [...action.payload] };
     case 'setQuery':
-      const payload = Object.fromEntries(
-        Object.entries(action.payload).filter(([_, v]) => v !== undefined)
-      );
+      const payload = Object.fromEntries(Object.entries(action.payload).filter(([_, v]) => !!v));
 
       return {
         ...state,

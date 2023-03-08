@@ -8,7 +8,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import createContainer from 'constate';
 import { useCallback, useEffect } from 'react';
 import { buildEsQuery, type Filter, type Query, type TimeRange } from '@kbn/es-query';
-import { debounceTime, map, skip, startWith, tap } from 'rxjs/operators';
+import { debounceTime, map, skip, startWith } from 'rxjs/operators';
 import { combineLatest } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import { telemetryTimeRangeFormatter } from '../../../../../common/formatters/telemetry_time_range';
@@ -55,7 +55,14 @@ export const useUnifiedSearch = () => {
       filters?: Filter[];
       panelFilters?: Filter[];
     }) => {
-      const { query, dateRange = getTime(), filters, panelFilters } = data ?? {};
+      const {
+        panelFilters,
+        query,
+        // Makes sure default values are set in case `onSubmit` is called outside the unified search observables subscription
+        // and prevents their state values from being cleared.
+        dateRange = getTime(),
+        filters = filterManagerService.getFilters(),
+      } = data ?? {};
 
       dispatch({
         type: 'setQuery',
@@ -67,7 +74,7 @@ export const useUnifiedSearch = () => {
         },
       });
     },
-    [dispatch, getTime]
+    [dispatch, filterManagerService, getTime]
   );
 
   const loadFiltersFromState = useCallback(() => {
@@ -115,18 +122,14 @@ export const useUnifiedSearch = () => {
       query: query$,
       dateRange: dateRange$,
     })
-      .pipe(
-        debounceTime(100),
-        skip(1),
-        tap(({ filters, query, dateRange }) => {
-          onSubmit({
-            query,
-            filters,
-            dateRange,
-          });
-        })
-      )
-      .subscribe();
+      .pipe(debounceTime(100), skip(1))
+      .subscribe(({ filters, query, dateRange }) => {
+        onSubmit({
+          query,
+          filters,
+          dateRange,
+        });
+      });
 
     return () => {
       subscription.unsubscribe();
