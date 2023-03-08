@@ -16,6 +16,7 @@ import {
 } from '../../../common/mock/endpoint';
 import { ResponseActionsLog } from './response_actions_log';
 import type {
+  ActionDetailsApiResponse,
   ActionFileInfoApiResponse,
   ActionListApiResponse,
 } from '../../../../common/endpoint/types';
@@ -138,6 +139,20 @@ jest.mock('../../hooks/response_actions/use_get_file_info', () => {
   };
 });
 
+let mockUseGetActionDetails: {
+  isFetching?: boolean;
+  isFetched?: boolean;
+  error?: Partial<IHttpFetchError> | null;
+  data?: ActionDetailsApiResponse;
+};
+jest.mock('../../hooks/response_actions/use_get_action_details', () => {
+  const original = jest.requireActual('../../hooks/response_actions/use_get_action_details');
+  return {
+    ...original,
+    useGetActionDetails: () => mockUseGetActionDetails,
+  };
+});
+
 const mockUseGetEndpointsList = useGetEndpointsList as jest.Mock;
 
 const getBaseMockedActionList = () => ({
@@ -147,7 +162,7 @@ const getBaseMockedActionList = () => ({
   refetch: jest.fn(),
 });
 describe('Response actions history', () => {
-  const testPrefix = 'response-actions-list';
+  const testPrefix = 'test';
 
   let render: (
     props?: React.ComponentProps<typeof ResponseActionsLog>
@@ -161,7 +176,9 @@ describe('Response actions history', () => {
     mockedContext = createAppRootMockRenderer();
     ({ history } = mockedContext);
     render = (props?: React.ComponentProps<typeof ResponseActionsLog>) =>
-      (renderResult = mockedContext.render(<ResponseActionsLog {...(props ?? {})} />));
+      (renderResult = mockedContext.render(
+        <ResponseActionsLog data-test-subj={testPrefix} {...(props ?? {})} />
+      ));
     reactTestingLibrary.act(() => {
       history.push(`${MANAGEMENT_PATH}/response_actions`);
     });
@@ -246,7 +263,7 @@ describe('Response actions history', () => {
 
       const { getByTestId } = renderResult;
 
-      expect(getByTestId(`${testPrefix}-table-view`)).toBeTruthy();
+      expect(getByTestId(`${testPrefix}`)).toBeTruthy();
       expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 1-10 of 13 response actions'
       );
@@ -256,9 +273,7 @@ describe('Response actions history', () => {
       render({ agentIds: 'agent-a' });
 
       expect(
-        Array.from(
-          renderResult.getByTestId(`${testPrefix}-table-view`).querySelectorAll('thead th')
-        )
+        Array.from(renderResult.getByTestId(`${testPrefix}`).querySelectorAll('thead th'))
           .slice(0, 6)
           .map((col) => col.textContent)
       ).toEqual(['Time', 'Command', 'User', 'Comments', 'Status', 'Expand rows']);
@@ -268,9 +283,7 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
 
       expect(
-        Array.from(
-          renderResult.getByTestId(`${testPrefix}-table-view`).querySelectorAll('thead th')
-        )
+        Array.from(renderResult.getByTestId(`${testPrefix}`).querySelectorAll('thead th'))
           .slice(0, 7)
           .map((col) => col.textContent)
       ).toEqual(['Time', 'Command', 'User', 'Hosts', 'Comments', 'Status', 'Expand rows']);
@@ -347,7 +360,7 @@ describe('Response actions history', () => {
       render();
       const { getByTestId } = renderResult;
 
-      expect(getByTestId(`${testPrefix}-table-view`)).toBeTruthy();
+      expect(getByTestId(`${testPrefix}`)).toBeTruthy();
       expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 1-10 of 13 response actions'
       );
@@ -368,7 +381,7 @@ describe('Response actions history', () => {
       render();
       const { getByTestId } = renderResult;
 
-      expect(getByTestId(`${testPrefix}-table-view`)).toBeTruthy();
+      expect(getByTestId(`${testPrefix}`)).toBeTruthy();
       expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 1-10 of 33 response actions'
       );
@@ -438,91 +451,6 @@ describe('Response actions history', () => {
       );
     });
 
-    it('should contain download link in expanded row for `get-file` action WITH file operation permission', async () => {
-      mockUseGetEndpointActionList = {
-        ...getBaseMockedActionList(),
-        data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
-      };
-
-      mockUseGetFileInfo = {
-        isFetching: false,
-        error: null,
-        data: apiMocks.responseProvider.fileInfo(),
-      };
-
-      render();
-
-      const { getByTestId } = renderResult;
-      const expandButton = getByTestId(`${testPrefix}-expand-button`);
-      userEvent.click(expandButton);
-
-      await waitFor(() => {
-        expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
-      });
-
-      const downloadLink = getByTestId(`${testPrefix}-getFileDownloadLink`);
-      expect(downloadLink).toBeTruthy();
-      expect(downloadLink.textContent).toEqual(
-        'Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
-      );
-    });
-
-    it('should show file unavailable for download for `get-file` action WITH file operation permission when file is deleted', async () => {
-      mockUseGetEndpointActionList = {
-        ...getBaseMockedActionList(),
-        data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
-      };
-
-      const fileInfo = apiMocks.responseProvider.fileInfo();
-      fileInfo.data.status = 'DELETED';
-
-      apiMocks.responseProvider.fileInfo.mockReturnValue(fileInfo);
-
-      mockUseGetFileInfo = {
-        isFetching: false,
-        error: null,
-        data: apiMocks.responseProvider.fileInfo(),
-      };
-
-      render();
-
-      const { getByTestId } = renderResult;
-      const expandButton = getByTestId(`${testPrefix}-expand-button`);
-      userEvent.click(expandButton);
-
-      await waitFor(() => {
-        expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
-      });
-
-      const unavailableText = getByTestId(
-        `${testPrefix}-getFileDownloadLink-fileNoLongerAvailable`
-      );
-      expect(unavailableText).toBeTruthy();
-    });
-
-    it('should not contain download link in expanded row for `get-file` action when NO file operation permission', async () => {
-      useUserPrivilegesMock.mockReturnValue({
-        endpointPrivileges: getEndpointAuthzInitialStateMock({
-          canWriteFileOperations: false,
-        }),
-      });
-
-      mockUseGetEndpointActionList = {
-        ...getBaseMockedActionList(),
-        data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
-      };
-
-      render();
-      const { getByTestId, queryByTestId } = renderResult;
-
-      const expandButton = getByTestId(`${testPrefix}-expand-button`);
-      userEvent.click(expandButton);
-      const output = getByTestId(`${testPrefix}-details-tray-output`);
-      expect(output).toBeTruthy();
-      expect(output.textContent).toEqual('get-file completed successfully');
-      expect(queryByTestId(`${testPrefix}-getFileDownloadLink`)).toBeNull();
-    });
-
     it('should refresh data when autoRefresh is toggled on', async () => {
       mockUseGetEndpointActionList = getBaseMockedActionList();
       render();
@@ -569,6 +497,217 @@ describe('Response actions history', () => {
       await waitForEuiPopoverOpen();
       userEvent.click(getByTestId('superDatePickerCommonlyUsed_Last_15 minutes'));
       expect(startDatePopoverButton).toHaveTextContent('Last 15 minutes');
+    });
+
+    describe('`get-file` action', () => {
+      it('should contain download link in expanded row for `get-file` action WITH file operation permission', async () => {
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({
+            canWriteExecuteOperations: false,
+          }),
+        });
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
+        };
+
+        mockUseGetFileInfo = {
+          isFetching: false,
+          error: null,
+          data: apiMocks.responseProvider.fileInfo(),
+        };
+
+        render();
+
+        const { getByTestId } = renderResult;
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+        });
+
+        const downloadLink = getByTestId(`${testPrefix}-getFileDownloadLink`);
+        expect(downloadLink).toBeTruthy();
+        expect(downloadLink.textContent).toEqual(
+          'Click here to download(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+        );
+      });
+
+      it('should not contain download link in expanded row for `get-file` action when NO file operation permission', async () => {
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({
+            canWriteFileOperations: false,
+          }),
+        });
+
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
+        };
+
+        render();
+        const { getByTestId, queryByTestId } = renderResult;
+
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
+        const output = getByTestId(`${testPrefix}-details-tray-output`);
+        expect(output).toBeTruthy();
+        expect(output.textContent).toEqual('get-file completed successfully');
+        expect(queryByTestId(`${testPrefix}-getFileDownloadLink`)).toBeNull();
+      });
+    });
+
+    describe('`execute` action', () => {
+      it('should contain full output download link in expanded row for `execute` action WITH execute operation privilege', async () => {
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({
+            canWriteExecuteOperations: true,
+            canWriteFileOperations: false,
+          }),
+        });
+        const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: actionDetails,
+        };
+
+        mockUseGetFileInfo = {
+          isFetching: false,
+          error: null,
+          data: apiMocks.responseProvider.fileInfo(),
+        };
+
+        mockUseGetActionDetails = {
+          isFetching: false,
+          isFetched: true,
+          error: null,
+          data: {
+            ...apiMocks.responseProvider.actionDetails({
+              path: `/api/endpoint/action/${actionDetails.data[0].id}`,
+            }),
+            data: {
+              ...apiMocks.responseProvider.actionDetails({
+                path: `/api/endpoint/action/${actionDetails.data[0].id}`,
+              }).data,
+              outputs: {
+                [actionDetails.data[0].agents[0]]: {
+                  content: {},
+                  type: 'json',
+                },
+              },
+            },
+          },
+        };
+
+        render();
+
+        const { getByTestId } = renderResult;
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+        });
+
+        const downloadExecuteLink = getByTestId(`${testPrefix}-getExecuteLink`);
+        expect(downloadExecuteLink).toBeTruthy();
+        expect(downloadExecuteLink.textContent).toEqual(
+          'Click here to download full output(ZIP file passcode: elastic).Files are periodically deleted to clear storage space. Download and save file locally if needed.'
+        );
+      });
+
+      it('should contain execute output and error for `execute` action WITH execute operation privilege', async () => {
+        const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: actionDetails,
+        };
+
+        mockUseGetFileInfo = {
+          isFetching: false,
+          error: null,
+          data: apiMocks.responseProvider.fileInfo(),
+        };
+
+        mockUseGetActionDetails = {
+          isFetching: false,
+          isFetched: true,
+          error: null,
+          data: {
+            data: {
+              ...apiMocks.responseProvider.actionDetails({
+                path: `/api/endpoint/action/${actionDetails.data[0].id}`,
+              }).data,
+              outputs: {
+                [actionDetails.data[0].agents[0]]: {
+                  content: {},
+                  type: 'json',
+                },
+              },
+            },
+          },
+        };
+
+        render();
+
+        const { getByTestId } = renderResult;
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
+
+        await waitFor(() => {
+          expect(apiMocks.responseProvider.fileInfo).toHaveBeenCalled();
+        });
+
+        const executeAccordions = getByTestId(`${testPrefix}-executeResponseOutput`);
+        expect(executeAccordions).toBeTruthy();
+        expect(executeAccordions).toHaveTextContent('Execution outputExecution error');
+      });
+
+      it('should contain execute output for `execute` action WITHOUT execute operation privilege', async () => {
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({
+            canWriteExecuteOperations: false,
+          }),
+        });
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
+        };
+
+        render();
+
+        const { getByTestId } = renderResult;
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
+
+        const executeAccordions = getByTestId(`${testPrefix}-executeResponseOutput`);
+        expect(executeAccordions).toBeTruthy();
+      });
+
+      it('should not contain full output download link in expanded row for `execute` action WITHOUT execute operation privilege', async () => {
+        useUserPrivilegesMock.mockReturnValue({
+          endpointPrivileges: getEndpointAuthzInitialStateMock({
+            canWriteExecuteOperations: false,
+          }),
+        });
+
+        mockUseGetEndpointActionList = {
+          ...getBaseMockedActionList(),
+          data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
+        };
+
+        render();
+        const { getByTestId, queryByTestId } = renderResult;
+
+        const expandButton = getByTestId(`${testPrefix}-expand-button`);
+        userEvent.click(expandButton);
+        expect(queryByTestId(`${testPrefix}-getExecuteLink`)).toBeNull();
+
+        const output = getByTestId(`${testPrefix}-details-tray-output`);
+        expect(output).toBeTruthy();
+        expect(output.textContent).toContain('execute completed successfully');
+      });
     });
   });
 

@@ -34,20 +34,20 @@ export const initGetLogEntryCategoryExamplesRoute = ({
         data: {
           categoryId,
           exampleCount,
-          sourceId,
+          logView,
           timeRange: { startTime, endTime },
         },
       } = request.body;
 
       const [, , { logViews }] = await getStartServices();
-      const resolvedLogView = await logViews.getScopedClient(request).getResolvedLogView(sourceId);
+      const resolvedLogView = await logViews.getScopedClient(request).getResolvedLogView(logView);
 
       try {
         const infraMlContext = await assertHasInfraMlPlugins(requestContext);
 
         const { data: logEntryCategoryExamples, timing } = await getLogEntryCategoryExamples(
           { infra: await infraMlContext.infra, core: await infraMlContext.core },
-          sourceId,
+          logView,
           startTime,
           endTime,
           categoryId,
