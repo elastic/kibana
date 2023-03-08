@@ -17,6 +17,13 @@ import { ActionsAuthorization } from '@kbn/actions-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
+import { migrateRuleHook } from '../lib';
+
+jest.mock('../lib/migrate_rule_hook', () => {
+  return {
+    migrateRuleHook: jest.fn(),
+  };
+});
 
 jest.mock('../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => ({
   bulkMarkApiKeysForInvalidation: jest.fn(),
@@ -197,6 +204,12 @@ describe('delete()', () => {
     await expect(rulesClient.delete({ id: '1' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"TM Fail"`
     );
+  });
+
+  test('should call migrateRuleHook', async () => {
+    await rulesClient.delete({ id: '1' });
+
+    expect(migrateRuleHook).toHaveBeenCalledWith(expect.any(Object), { ruleId: '1' });
   });
 
   describe('authorization', () => {
