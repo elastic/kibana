@@ -49,6 +49,7 @@ export interface CspmAccountsStats {
   pods_count: number;
 }
 export interface CspmRulesStats {
+  account_id: string;
   rule_id: string;
   rule_name: string;
   rule_section: string;
