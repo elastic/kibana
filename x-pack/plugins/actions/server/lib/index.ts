@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { ExecutorError } from './executor_error';
 export {
   validateParams,
   validateConfig,
