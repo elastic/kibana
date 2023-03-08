@@ -27,8 +27,8 @@ export const logsTSDBSpecProvider = function (): SampleDatasetSchema {
     description: logsDescription,
     previewImagePath: '/plugins/home/assets/sample_data_resources/logs/dashboard.webp',
     darkPreviewImagePath: '/plugins/home/assets/sample_data_resources/logs/dashboard_dark.webp',
-    overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
-    defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0b247',
+    overviewDashboard: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef8f5b',
+    defaultIndex: '90943e30-9a47-11e8-b64d-95841ca0c247',
     savedObjects: getSavedObjects(),
     dataIndices: [
       {
