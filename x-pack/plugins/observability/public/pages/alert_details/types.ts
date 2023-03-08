@@ -5,10 +5,16 @@
  * 2.0.
  */
 
+import { ReactNode } from 'react';
 import { TopAlert } from '../alerts/containers/alerts_page/types';
 
+export interface AlertSummaryField {
+  label: ReactNode | string;
+  value: string | number;
+}
 export interface AlertSummaryProps {
   alert: TopAlert | null;
+  alertSummaryFields?: AlertSummaryField[];
 }
 
 export interface AlertDetailsPathParams {
