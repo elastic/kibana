@@ -11,23 +11,17 @@ import {
   KibanaContextProvider,
   useKibana as useKibanaReact,
 } from '@kbn/kibana-react-plugin/public';
-import { BrowserRouter } from 'react-router-dom';
-import { ServerlessSecurityPluginStartDependencies } from './types';
+import type { ServerlessSecurityPluginStartDependencies } from './types';
 
 export type Services = CoreStart & ServerlessSecurityPluginStartDependencies;
 
-// TODO: Replace <BrowserRouter> by <Router history> with global history
 export const getKibanaServicesProvider = (
   core: CoreStart,
   pluginsStart: ServerlessSecurityPluginStartDependencies
 ): React.FC => {
   const services: Services = { ...core, ...pluginsStart };
   return ({ children }) => {
-    return (
-      <KibanaContextProvider services={services}>
-        <BrowserRouter>{children}</BrowserRouter>
-      </KibanaContextProvider>
-    );
+    return <KibanaContextProvider services={services}>{children}</KibanaContextProvider>;
   };
 };
 

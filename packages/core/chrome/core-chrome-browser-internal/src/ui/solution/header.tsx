@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { Router } from 'react-router-dom';
 import { EuiHeader, EuiHeaderLogo, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
 import {
   ChromeBreadcrumb,
@@ -73,7 +74,7 @@ export const SolutionHeader = ({
           </EuiHeaderSectionItem>
         </EuiHeaderSection>
       </EuiHeader>
-      {navigation}
+      <Router history={application.history}>{navigation}</Router>
     </>
   );
 };
