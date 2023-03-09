@@ -14,6 +14,19 @@ export * from './rule';
 export * from './rules_settings';
 export * from './rule_type';
 export * from '@kbn/alerting-state-types';
+export type {
+  ThrottledActions,
+  LastScheduledActions,
+  AlertInstanceMeta,
+  AlertInstanceState,
+  AlertInstanceContext,
+  RawAlertInstance,
+  TrackedLifecycleAlertState, 
+  WrappedLifecycleRuleState,
+  RuleTaskState, 
+  RuleTaskParams
+} from '@kbn/alerting-state-types';
+export { ActionsCompletion } from '@kbn/alerting-state-types';
 export * from './alert_summary';
 export * from './builtin_action_groups';
 export * from './bulk_edit';
