@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALERT_RISK_SCORE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
+import { withSecuritySpan } from '../../utils/with_security_span';
 import type {
   CalculateRiskScoreAggregations,
   FullRiskScore,
@@ -100,7 +101,7 @@ const buildIdentifierTypeAggregation = (
   [identifierType]: {
     terms: {
       field: getFieldForIdentifierAgg(identifierType),
-      size: 1000,
+      size: 65536,
     },
     aggs: {
       riskiest_inputs: {
@@ -146,69 +147,73 @@ export const calculateRiskScores = async ({
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-} & GetScoresParams): Promise<GetScoresResponse> => {
-  const now = new Date().toISOString();
+} & GetScoresParams): Promise<GetScoresResponse> =>
+  withSecuritySpan('calculateRiskScores', async () => {
+    const now = new Date().toISOString();
 
-  const filter = [{ exists: { field: ALERT_RISK_SCORE } }, filterFromRange(range)];
-  if (userFilter) {
-    filter.push(userFilter as QueryDslQueryContainer);
-  }
-  const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];
+    const filter = [{ exists: { field: ALERT_RISK_SCORE } }, filterFromRange(range)];
+    if (userFilter) {
+      filter.push(userFilter as QueryDslQueryContainer);
+    }
+    const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];
 
-  const request = {
-    size: 0,
-    _source: false,
-    index,
-    query: {
-      bool: {
-        filter,
+    const request = {
+      size: 0,
+      _source: false,
+      index,
+      query: {
+        bool: {
+          filter,
+        },
       },
-    },
-    aggs: identifierTypes.reduce(
-      (aggs, _identifierType) => ({ ...aggs, ...buildIdentifierTypeAggregation(_identifierType) }),
-      {}
-    ),
-  };
+      aggs: identifierTypes.reduce(
+        (aggs, _identifierType) => ({
+          ...aggs,
+          ...buildIdentifierTypeAggregation(_identifierType),
+        }),
+        {}
+      ),
+    };
 
-  if (debug) {
-    logger.info(`Executing Risk Score query:\n${JSON.stringify(request)}`);
-  }
+    if (debug) {
+      logger.info(`Executing Risk Score query:\n${JSON.stringify(request)}`);
+    }
 
-  const response = await esClient.search<never, CalculateRiskScoreAggregations>(request);
+    const response = await esClient.search<never, CalculateRiskScoreAggregations>(request);
 
-  if (debug) {
-    logger.info(`Received Risk Score response:\n${JSON.stringify(response)}`);
-  }
+    if (debug) {
+      logger.info(`Received Risk Score response:\n${JSON.stringify(response)}`);
+    }
 
-  if (response.aggregations == null) {
-    return { ...(debug ? { request, response } : {}), scores: [] };
-  }
+    if (response.aggregations == null) {
+      return { ...(debug ? { request, response } : {}), scores: [] };
+    }
 
-  const userBuckets = response.aggregations.user?.buckets ?? [];
-  const hostBuckets = response.aggregations.host?.buckets ?? [];
+    const userBuckets = response.aggregations.user?.buckets ?? [];
+    const hostBuckets = response.aggregations.host?.buckets ?? [];
 
-  const scores = userBuckets
-    .map((bucket) =>
-      bucketToResponse({
-        bucket,
-        enrichInputs,
-        identifierField: 'user.name',
-        now,
-      })
-    )
-    .concat(
-      hostBuckets.map((bucket) =>
+    const scores = userBuckets
+      .map((bucket) =>
         bucketToResponse({
           bucket,
           enrichInputs,
-          identifierField: 'host.name',
+          identifierField: 'user.name',
           now,
         })
       )
-    );
+      .concat(
+        hostBuckets.map((bucket) =>
+          bucketToResponse({
+            bucket,
+            enrichInputs,
+            identifierField: 'host.name',
+            now,
+          })
+        )
+      );
 
-  return {
-    ...(debug ? { request, response } : {}),
-    scores,
-  };
-};
+    return {
+      ...(debug ? { request, response } : {}),
+      scores,
+    };
+  });
