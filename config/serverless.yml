@@ -9,3 +9,4 @@ xpack.ccr.enabled: false
 xpack.ilm.enabled: false
 xpack.remote_clusters.enabled: false
 xpack.snapshot_restore.enabled: false
+xpack.license_management.enabled: false
