@@ -17050,7 +17050,6 @@
     "xpack.infra.nodeDetails.yes": "Oui",
     "xpack.infra.nodesToWaffleMap.groupsWithGroups.allName": "Tous",
     "xpack.infra.nodesToWaffleMap.groupsWithNodes.allName": "Tous",
-    "xpack.infra.notFoundPage.noContentFoundErrorTitle": "Aucun contenu trouvé",
     "xpack.infra.openView.actionNames.deleteConfirmation": "Supprimer la vue ?",
     "xpack.infra.openView.cancelButton": "Annuler",
     "xpack.infra.openView.columnNames.actions": "Actions",
