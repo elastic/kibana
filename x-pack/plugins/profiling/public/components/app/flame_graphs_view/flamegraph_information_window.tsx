@@ -18,18 +18,20 @@ import React from 'react';
 import { getImpactRows } from './get_impact_rows';
 import { getInformationRows } from './get_information_rows';
 
+export interface Frame {
+  fileID: string;
+  frameType: number;
+  exeFileName: string;
+  addressOrLine: number;
+  functionName: string;
+  sourceFileName: string;
+  sourceLine: number;
+  countInclusive: number;
+  countExclusive: number;
+}
+
 interface Props {
-  frame?: {
-    fileID: string;
-    frameType: number;
-    exeFileName: string;
-    addressOrLine: number;
-    functionName: string;
-    sourceFileName: string;
-    sourceLine: number;
-    countInclusive: number;
-    countExclusive: number;
-  };
+  frame?: Frame;
   totalSamples: number;
   totalSeconds: number;
   onClose: () => void;

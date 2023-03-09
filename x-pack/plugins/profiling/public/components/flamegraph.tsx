@@ -10,6 +10,7 @@ import {
   Datum,
   Flame,
   FlameLayerValue,
+  FlameNodeControl,
   PartialTheme,
   Settings,
   TooltipContainer,
@@ -30,7 +31,10 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ElasticFlameGraph, FlameGraphComparisonMode } from '../../common/flamegraph';
 import { asPercentage } from '../utils/formatters/as_percentage';
 import { getFlamegraphModel } from '../utils/get_flamegraph_model';
-import { FlamegraphInformationWindow } from './app/flame_graphs_view/flamegraph_information_window';
+import {
+  FlamegraphInformationWindow,
+  Frame,
+} from './app/flame_graphs_view/flamegraph_information_window';
 import { FlameGraphLegend } from './app/flame_graphs_view/flame_graph_legend';
 
 function TooltipRow({
@@ -202,7 +206,9 @@ export interface FlameGraphProps {
   onInformationWindowClose: () => void;
 }
 
-export const FlameGraph: React.FC<FlameGraphProps> = ({
+let focusOnNodeControl: FlameNodeControl;
+
+export function FlameGraph({
   id,
   comparisonMode,
   primaryFlamegraph,
@@ -211,7 +217,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
   comparison,
   showInformationWindow,
   onInformationWindowClose,
-}) => {
+}: FlameGraphProps) {
   const theme = useEuiTheme();
 
   const columnarData = useMemo(() => {
@@ -245,7 +251,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
 
   const [highlightedVmIndex, setHighlightedVmIndex] = useState<number | undefined>(undefined);
 
-  const selected: undefined | React.ComponentProps<typeof FlamegraphInformationWindow>['frame'] =
+  const selected: undefined | Frame =
     primaryFlamegraph && highlightedVmIndex !== undefined
       ? {
           fileID: primaryFlamegraph.FileID[highlightedVmIndex],
@@ -261,7 +267,17 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
       : undefined;
 
   useEffect(() => {
-    setHighlightedVmIndex(undefined);
+    // This is a workaround needed while this issue is not fixed https://github.com/elastic/elastic-charts/issues/1766
+    // Once it's fixed we can remove the "key" prop from the Chart comp and the flamegraph will keep the state
+    const timeoutId = setTimeout(() => {
+      if (focusOnNodeControl && highlightedVmIndex) {
+        focusOnNodeControl(highlightedVmIndex);
+      }
+    }, 100);
+    return () => {
+      clearTimeout(timeoutId);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [columnarData.key]);
 
   return (
@@ -318,12 +334,14 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
                   valueAccessor={(d: Datum) => d.value as number}
                   valueFormatter={(value) => `${value}`}
                   animation={{ duration: 100 }}
-                  controlProviderCallback={{}}
+                  controlProviderCallback={{
+                    focusOnNode: (control) => (focusOnNodeControl = control),
+                  }}
                 />
               </Chart>
             </EuiFlexItem>
           )}
-          {showInformationWindow ? (
+          {showInformationWindow && (
             <EuiFlexItem grow={false}>
               <FlamegraphInformationWindow
                 frame={selected}
@@ -334,7 +352,7 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
                 }}
               />
             </EuiFlexItem>
-          ) : undefined}
+          )}
         </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -342,4 +360,4 @@ export const FlameGraph: React.FC<FlameGraphProps> = ({
       </EuiFlexItem>
     </EuiFlexGroup>
   );
-};
+}
