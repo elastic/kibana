@@ -27,7 +27,7 @@ export interface CreateSavedObjectsParams<T> {
    * If true, Kibana will apply various adjustments to the data that's being imported to maintain compatibility between
    * different Kibana versions (e.g. generate legacy URL aliases for all imported objects that have to change IDs).
    */
-  compatibilityMode: boolean;
+  compatibilityMode?: boolean;
 }
 
 export interface CreateSavedObjectsResult<T> {
@@ -118,7 +118,10 @@ export const createSavedObjects = async <T>({
   // Remap results to reflect the object IDs that were submitted for import this ensures that consumers understand the
   // results, and collect legacy URL aliases if in compatibility mode.
   const remappedResults: Array<CreatedObject<T>> = [];
-  const legacyUrlAliases: SavedObjectsBulkCreateObject[] = [];
+  const legacyUrlAliases = new Map<
+    string,
+    SavedObjectsBulkCreateObject<{ sourceId: string; targetType: string; targetId: string }>
+  >();
   for (const result of expectedResults) {
     const { id } = objectIdMap.get(`${result.type}:${result.id}`)!;
     // also, include a `destinationId` field if the object create attempt was made with a different ID
@@ -131,8 +134,9 @@ export const createSavedObjects = async <T>({
     // In compatibility mode we generate legacy URL aliases for all objects that require them and that were
     // successfully imported.
     if (compatibilityMode && objectRequiresLegacyUrlAlias && !result.error) {
-      legacyUrlAliases.push({
-        id: `${legacyUrlTargetNamespace}:${result.type}:${result.originId}`,
+      const legacyUrlAliasId = `${legacyUrlTargetNamespace}:${result.type}:${result.originId}`;
+      legacyUrlAliases.set(legacyUrlAliasId, {
+        id: legacyUrlAliasId,
         type: LEGACY_URL_ALIAS_TYPE,
         attributes: {
           sourceId: result.originId,
@@ -145,14 +149,20 @@ export const createSavedObjects = async <T>({
     }
   }
 
+  // Create legacy URL aliases if needed.
   const legacyUrlAliasResults =
-    legacyUrlAliases.length > 0
-      ? (await savedObjectsClient.bulkCreate(legacyUrlAliases, { namespace, overwrite, refresh }))
-          .saved_objects
+    legacyUrlAliases.size > 0
+      ? (
+          await savedObjectsClient.bulkCreate([...legacyUrlAliases.values()], {
+            namespace,
+            overwrite,
+            refresh,
+          })
+        ).saved_objects
       : [];
 
   return {
     createdObjects: remappedResults.filter((obj) => !obj.error),
-    errors: extractErrors(remappedResults, legacyUrlAliasResults, objects),
+    errors: extractErrors(remappedResults, objects, legacyUrlAliasResults, legacyUrlAliases),
   };
 };

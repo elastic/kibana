@@ -8,14 +8,17 @@
 
 import type { SavedObjectsImportFailure } from '@kbn/core-saved-objects-common';
 import type { CreatedObject, SavedObject } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 
 export function extractErrors(
   // TODO: define saved object type
   savedObjectResults: Array<CreatedObject<unknown>>,
-  legacyUrlAliasResults: Array<
-    CreatedObject<{ sourceId: string; targetType: string; targetId: string }>
-  >,
-  savedObjectsToImport: Array<SavedObject<any>>
+  savedObjectsToImport: Array<SavedObject<any>>,
+  legacyUrlAliasResults: Array<CreatedObject<unknown>>,
+  legacyUrlAliasesToCreate: Map<
+    string,
+    SavedObjectsBulkCreateObject<{ sourceId: string; targetType: string; targetId: string }>
+  >
 ) {
   const errors: SavedObjectsImportFailure[] = [];
   const originalSavedObjectsMap = new Map<string, SavedObject<{ title: string }>>();
@@ -53,21 +56,23 @@ export function extractErrors(
     }
   }
 
-  for (const legacyUrlAlias of legacyUrlAliasResults) {
-    if (!legacyUrlAlias.error) {
+  for (const legacyUrlAliasResult of legacyUrlAliasResults) {
+    if (!legacyUrlAliasResult.error) {
       continue;
     }
 
-    // TODO: what type of info would be useful?
-    errors.push({
-      id: legacyUrlAlias.attributes.sourceId,
-      type: legacyUrlAlias.type,
-      error: {
-        ...legacyUrlAlias.error,
-        type: 'unknown',
-        destinationId: legacyUrlAlias.attributes.targetId,
-      },
-    });
+    const legacyUrlAlias = legacyUrlAliasesToCreate.get(legacyUrlAliasResult.id);
+    if (legacyUrlAlias) {
+      errors.push({
+        id: legacyUrlAlias.attributes.sourceId,
+        type: legacyUrlAlias.type,
+        error: {
+          ...legacyUrlAliasResult.error,
+          type: 'unknown',
+          destinationId: legacyUrlAlias.attributes.targetId,
+        },
+      });
+    }
   }
 
   return errors;

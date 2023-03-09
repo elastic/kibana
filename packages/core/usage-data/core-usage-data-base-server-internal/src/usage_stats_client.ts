@@ -18,7 +18,7 @@ export interface BaseIncrementOptions {
 export type IncrementSavedObjectsImportOptions = BaseIncrementOptions & {
   overwrite: boolean;
   createNewCopies: boolean;
-  compatibilityMode: boolean;
+  compatibilityMode?: boolean;
 };
 
 /** @internal */

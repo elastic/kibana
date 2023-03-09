@@ -878,6 +878,14 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           );
         });
       });
+
+      test('#getCurrentNamespace', () => {
+        mockSpacesExt.getCurrentNamespace.mockReturnValue('ns-from-ext');
+
+        expect(repository.getCurrentNamespace('ns-from-arg')).toBe('ns-from-ext');
+        expect(mockSpacesExt.getCurrentNamespace).toBeCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('ns-from-arg');
+      });
     });
   });
 
