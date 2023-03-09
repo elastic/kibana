@@ -6,20 +6,14 @@
  */
 import React, { useMemo, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiScreenReaderOnly,
-  EuiButtonIcon,
-} from '@elastic/eui';
-import { buildQueryFromFilters, buildEsQuery } from '@kbn/es-query';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSwitch, EuiButtonEmpty } from '@elastic/eui';
+import { buildEsQuery } from '@kbn/es-query';
 import { Panel } from '../../common/components/panel';
 import { ENTITY_ANALYTICS } from '../../app/translations';
 import { HeaderSection } from '../../common/components/header_section';
 import { InspectButtonContainer } from '../../common/components/inspect';
 import { inputsSelectors } from '../../common/store/inputs';
-import { useDeepEqualSelector, useShallowEqualSelector } from '../../common/hooks/use_selector';
+import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { useSourcererDataView } from '../../common/containers/sourcerer';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { HeaderPage } from '../../common/components/header_page';
@@ -30,9 +24,9 @@ import { StyledBasicTable } from '../components/entity_analytics/common/styled_b
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useKibana } from '../../common/lib/kibana';
 import { RISK_SCORES_URL, ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../common/constants';
-import { GroupedAlertsTable } from '../../detections/components/alerts_table/grouped_alerts';
+
 import { AlertsTableComponent } from '../../detections/components/alerts_table';
-import { convertToBuildEsQuery } from '../../common/lib/kuery';
+import { ModalInspectQuery } from '../../common/components/inspect/modal';
 
 const StyledFullHeightContainer = styled.div`
   display: flex;
@@ -97,6 +91,9 @@ const EntityAnalyticsPageNewComponent = () => {
 
   const [hostRiskList, setHostRiskList] = useState([]);
   const [userRiskList, setUserRiskList] = useState([]);
+  const [debugInfo, setDebugInfo] = useState(null);
+  const [withDebug, setWithDebug] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const query = useDeepEqualSelector(getGlobalQuerySelector);
@@ -105,13 +102,11 @@ const EntityAnalyticsPageNewComponent = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      // const q = buildQueryFromFilters(filters, query, filters);
-
       const q = buildEsQuery(undefined, query, filters);
-      console.log('q', q);
       const data = await http.fetch(RISK_SCORES_URL, {
         method: 'POST',
         body: JSON.stringify({
+          debug: withDebug,
           filter: q,
           range: {
             start: range.from,
@@ -119,8 +114,17 @@ const EntityAnalyticsPageNewComponent = () => {
           },
         }),
       });
-      setHostRiskList(data.filter((item) => item.identifierField === 'host.name'));
-      setUserRiskList(data.filter((item) => item.identifierField === 'user.name'));
+      setHostRiskList(data.scores.filter((item) => item.identifierField === 'host.name'));
+      setUserRiskList(data.scores.filter((item) => item.identifierField === 'user.name'));
+      setDebugInfo(
+        data.request
+          ? {
+              request: { body: data.request, index: [data.request.index] },
+              response: data.response,
+            }
+          : null
+      );
+
       console.log(data);
     };
 
@@ -129,7 +133,7 @@ const EntityAnalyticsPageNewComponent = () => {
     } catch (error) {
       console.log('error', error);
     }
-  }, [range, filters, query]);
+  }, [range, filters, query, withDebug]);
 
   console.log('query', query);
   console.log('filters', filters);
@@ -247,7 +251,29 @@ const EntityAnalyticsPageNewComponent = () => {
         </FiltersGlobal>
         <HeaderPage title={ENTITY_ANALYTICS} />
         <EuiFlexGroup direction="column" data-test-subj="entityAnalyticsSections">
-          <EuiFlexItem />
+          <div>
+            <EuiSwitch
+              checked={withDebug}
+              onChange={(e) => setWithDebug(e.target.checked)}
+              label="With Debug info"
+            />
+
+            <div>
+              {withDebug && (
+                <EuiButtonEmpty onClick={(e) => setShowModal(true)}>Show Debug Info</EuiButtonEmpty>
+              )}
+              {showModal && (
+                <ModalInspectQuery
+                  closeModal={() => setShowModal(false)}
+                  data-test-subj="inspect-modal"
+                  // inputId={inputId}
+                  request={JSON.stringify(debugInfo?.request)}
+                  response={JSON.stringify(debugInfo?.response)}
+                  title={'Inspect query'}
+                />
+              )}
+            </div>
+          </div>
           <EuiFlexItem>
             <InspectButtonContainer>
               <Panel hasBorder>
