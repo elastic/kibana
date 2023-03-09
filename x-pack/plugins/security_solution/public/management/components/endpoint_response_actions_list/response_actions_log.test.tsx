@@ -278,6 +278,21 @@ describe('Response actions history', () => {
 
       const { getByTestId } = renderResult;
 
+      // Ensure API was called with no filters set aside from the date timeframe
+      expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith(
+        {
+          agentIds: undefined,
+          commands: [],
+          endDate: 'now',
+          page: 1,
+          pageSize: 10,
+          startDate: 'now-24h/h',
+          statuses: [],
+          userIds: [],
+          withOutputs: [],
+        },
+        expect.anything()
+      );
       expect(getByTestId(`${testPrefix}`)).toBeTruthy();
       expect(getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
         'Showing 1-10 of 13 response actions'
