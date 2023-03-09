@@ -32,7 +32,7 @@ const HOST_TABLE_METRICS: Array<{ type: SnapshotMetricType }> = [
 
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
-  const { getDateRangeAsTimestamp, buildQuery } = useUnifiedSearchContext();
+  const { buildQuery, getDateRangeAsTimestamp } = useUnifiedSearchContext();
 
   const baseRequest = useMemo(
     () =>
