@@ -5,72 +5,58 @@
  * 2.0.
  */
 
+import { closeAllToasts } from '../../tasks/close_all_toasts';
 import { login } from '../../tasks/login';
 
 describe('When defining a kibana role for Endpoint security access', () => {
-  const privilegesChecks: ReadonlyArray<{
-    label: string;
-    testSubj: string[];
-  }> = [
-    {
-      label: 'Endpoint List',
-      testSubj: ['endpoint_list_all', 'endpoint_list_read'],
-    },
-    {
-      label: 'Trusted Applications',
-      testSubj: ['trusted_applications_all', 'trusted_applications_read'],
-    },
-    {
-      label: 'Host Isolation Exceptions',
-      testSubj: ['host_isolation_exceptions_all', 'host_isolation_exceptions_read'],
-    },
-    {
-      label: 'Blocklist',
-      testSubj: ['blocklist_all', 'blocklist_read'],
-    },
-    {
-      label: 'Event Filters',
-      testSubj: ['event_filters_all', 'event_filters_read'],
-    },
-    {
-      label: 'Policy Management',
-      testSubj: ['policy_management_all', 'policy_management_read'],
-    },
-    {
-      label: 'Response Actions History',
-      testSubj: ['actions_log_management_all', 'actions_log_management_read'],
-    },
-    {
-      label: 'Host Isolation',
-      testSubj: ['host_isolation_all'],
-    },
-    {
-      label: 'Process Operations',
-      testSubj: ['process_operations_all'],
-    },
-    {
-      label: 'File Operations',
-      testSubj: ['file_operations_all'],
-    },
-    {
-      label: 'Execute Operations',
-      testSubj: ['execute_operations_all'],
-    },
-  ];
+  const getAllSubFeatureRows = (): Cypress.Chainable<JQuery<HTMLElement>> => {
+    return cy
+      .get('#featurePrivilegeControls_siem')
+      .findByTestSubj('mutexSubFeaturePrivilegeControl')
+      .closest('.euiFlexGroup');
+  };
 
   beforeEach(() => {
     login();
     cy.visit('/app/management/security/roles/edit');
+    closeAllToasts();
     cy.getByTestSubj('addSpacePrivilegeButton').click();
-    cy.get('button[aria-controls="featureCategory_securitySolution"]');
-    cy.get('button[aria-controls="featurePrivilegeControls_siem"]');
+    cy.getByTestSubj('featureCategoryButton_securitySolution').closest('button').click();
+    cy.get('.featurePrivilegeName:contains("Security")').closest('button').click();
   });
 
-  it.todo('should displays the expected number of RBAC entries');
+  it('should display the expected number of RBAC entries', () => {
+    getAllSubFeatureRows().should('have.length', 11);
+  });
 
-  it.todo('should display all RBAC entries set to None by default');
+  it('should display RBAC entries with expected controls', () => {
+    getAllSubFeatureRows()
+      .then(($subFeatures) => {
+        const featureRows: string[] = [];
+        $subFeatures.each((_, $subFeature) => {
+          featureRows.push($subFeature.textContent ?? '');
+        });
 
-  for (const privilegesCheck of privilegesChecks) {
-    //
-  }
+        return featureRows;
+      })
+      .should('deep.equal', [
+        'Endpoint List Displays all hosts running Elastic Defend and their relevant integration details.Endpoint List sub-feature privilegeAllReadNone',
+        'Trusted Applications Helps mitigate conflicts with other software, usually other antivirus or endpoint security applications.Trusted Applications sub-feature privilegeAllReadNone',
+        'Host Isolation Exceptions Add specific IP addresses that isolated hosts are still allowed to communicate with, even when isolated from the rest of the network.Host Isolation Exceptions sub-feature privilegeAllReadNone',
+        'Blocklist Extend Elastic Defend’s protection against malicious processes and protect against potentially harmful applications.Blocklist sub-feature privilegeAllReadNone',
+        'Event Filters Filter out endpoint events that you do not need or want stored in Elasticsearch.Event Filters sub-feature privilegeAllReadNone',
+        'Elastic Defend Policy Management Access the Elastic Defend integration policy to configure protections, event collection, and advanced policy features.Elastic Defend Policy Management sub-feature privilegeAllReadNone',
+        'Response Actions History Access the history of response actions performed on endpoints.Response Actions History sub-feature privilegeAllReadNone',
+        'Host Isolation Perform the "isolate" and "release" response actions.Host Isolation sub-feature privilegeAllNone',
+        'Process Operations Perform process-related response actions in the response console.Process Operations sub-feature privilegeAllNone',
+        'File Operations Perform file-related response actions in the response console.File Operations sub-feature privilegeAllNone',
+        'Execute Operations Perform script execution on the endpoint.Execute Operations sub-feature privilegeAllNone',
+      ]);
+  });
+
+  it('should display all RBAC entries set to None by default', () => {
+    getAllSubFeatureRows()
+      .findByTestSubj('none')
+      .should('have.class', 'euiButtonGroupButton-isSelected');
+  });
 });
