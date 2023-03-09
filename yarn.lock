@@ -4225,7 +4225,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/generate-csv@link:packages/kbn-reporting/generate_csv":
+"@kbn/generate-csv@link:packages/kbn-generate-csv":
   version "0.0.0"
   uid ""
 

@@ -27,7 +27,7 @@ export interface CsvExportSettings {
 
 export const getExportSettings = async (
   client: IUiSettingsClient,
-  config: CsvConfigType,
+  config: ReportingConfig['csv'],
   timezone: string | undefined,
   logger: Logger
 ): Promise<CsvExportSettings> => {

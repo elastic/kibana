@@ -9,3 +9,8 @@
 export { CancellationToken } from './cancellation_token';
 export { AuthenticationExpiredError, ReportingError } from './errors';
 export { byteSizeValueToNumber } from './schema_utils';
+
+export const CONTENT_TYPE_CSV = 'text/csv';
+export const CSV_REPORTING_ACTION = 'downloadCsvReport';
+export const CSV_BOM_CHARS = '\ufeff';
+export const CSV_FORMULA_CHARS = ['=', '+', '-', '@'];
