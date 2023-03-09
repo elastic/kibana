@@ -99,7 +99,6 @@ export { updateMappings, type IncompatibleMappingException } from './update_mapp
 
 export {
   type UpdateSourceMappingsPropertiesParams,
-  UpdateSourceMappingsPropertiesResult,
   updateSourceMappingsProperties,
 } from './update_source_mappings_properties';
 

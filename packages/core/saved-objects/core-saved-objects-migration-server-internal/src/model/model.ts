@@ -10,7 +10,7 @@ import * as Either from 'fp-ts/lib/Either';
 import * as Option from 'fp-ts/lib/Option';
 import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal';
 
-import { isTypeof, UpdateSourceMappingsPropertiesResult } from '../actions';
+import { isTypeof } from '../actions';
 import type { AliasAction } from '../actions';
 import type { AllActionStates, State } from '../state';
 import type { ResponseType } from '../next';
@@ -34,6 +34,7 @@ import {
   addMustClausesToBoolQuery,
   addMustNotClausesToBoolQuery,
   getAliases,
+  getMigrationType,
   indexBelongsToLaterVersion,
   indexVersion,
   mergeMigrationMappingPropertyHashes,
@@ -41,6 +42,7 @@ import {
   throwBadResponse,
   versionMigrationCompleted,
   buildRemoveAliasActions,
+  MigrationType,
 } from './helpers';
 import { createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
@@ -433,50 +435,50 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     }
   } else if (stateP.controlState === 'UPDATE_SOURCE_MAPPINGS_PROPERTIES') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
-    if (Either.isRight(res)) {
-      switch (res.right) {
-        case UpdateSourceMappingsPropertiesResult.Compatible:
-          return {
-            ...stateP,
-            controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
-          };
-        case UpdateSourceMappingsPropertiesResult.Incompatible:
-          return {
-            ...stateP,
-            controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-          };
-        case UpdateSourceMappingsPropertiesResult.Updated:
-          return {
-            ...stateP,
-            // Skip to 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' so that if a new plugin was
-            // installed / enabled we can transform any old documents and update
-            // the mappings for this plugin's types.
-            controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
-            // Source is a none because we didn't do any migration from a source index
-            sourceIndex: Option.none,
-            targetIndex: stateP.sourceIndex.value,
-            // in this scenario, a .kibana_X.Y.Z_001 index exists that matches the current kibana version
-            // aka we are NOT upgrading to a newer version
-            // we inject the source index's current mappings in the state, to check them later
-            targetIndexMappings: mergeMigrationMappingPropertyHashes(
-              stateP.targetIndexMappings,
-              stateP.sourceIndexMappings.value
-            ),
-          };
-      }
-    } else if (Either.isLeft(res)) {
-      const left = res.left;
-      if (isTypeof(left, 'incompatible_mapping_exception')) {
+    const migrationType = getMigrationType({
+      isMappingsCompatible: Either.isRight(res),
+      isVersionMigrationCompleted: versionMigrationCompleted(
+        stateP.currentAlias,
+        stateP.versionAlias,
+        stateP.aliases
+      ),
+    });
+
+    switch (migrationType) {
+      case MigrationType.Compatible:
+        return {
+          ...stateP,
+          controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+        };
+      case MigrationType.Incompatible:
+        return {
+          ...stateP,
+          controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+        };
+      case MigrationType.Unnecessary:
+        return {
+          ...stateP,
+          // Skip to 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT' so that if a new plugin was
+          // installed / enabled we can transform any old documents and update
+          // the mappings for this plugin's types.
+          controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT',
+          // Source is a none because we didn't do any migration from a source index
+          sourceIndex: Option.none,
+          targetIndex: stateP.sourceIndex.value,
+          // in this scenario, a .kibana_X.Y.Z_001 index exists that matches the current kibana version
+          // aka we are NOT upgrading to a newer version
+          // we inject the source index's current mappings in the state, to check them later
+          targetIndexMappings: mergeMigrationMappingPropertyHashes(
+            stateP.targetIndexMappings,
+            stateP.sourceIndexMappings.value
+          ),
+        };
+      case MigrationType.Invalid:
         return {
           ...stateP,
           controlState: 'FATAL',
           reason: 'Incompatible mappings change on already migrated Kibana instance.',
         };
-      } else {
-        return throwBadResponse(stateP, left as never);
-      }
-    } else {
-      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'CLEANUP_UNKNOWN_AND_EXCLUDED') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;

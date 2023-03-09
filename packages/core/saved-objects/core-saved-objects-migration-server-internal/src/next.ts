@@ -77,18 +77,12 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>
       Actions.waitForIndexStatus({ client, index: state.sourceIndex.value, status: 'yellow' }),
     UPDATE_SOURCE_MAPPINGS_PROPERTIES: ({
-      aliases,
-      currentAlias,
-      versionAlias,
       sourceIndex,
       sourceIndexMappings,
       targetIndexMappings,
     }: UpdateSourceMappingsPropertiesState) =>
       Actions.updateSourceMappingsProperties({
         client,
-        aliases,
-        currentAlias,
-        versionAlias,
         sourceIndex: sourceIndex.value,
         sourceMappings: sourceIndexMappings.value,
         targetMappings: targetIndexMappings,

@@ -239,3 +239,35 @@ export const createBulkIndexOperationTuple = (doc: SavedObjectsRawDoc): BulkInde
 export const createBulkDeleteOperationBody = (_id: string): BulkOperationContainer => ({
   delete: { _id },
 });
+
+/** @internal */
+export enum MigrationType {
+  Compatible = 'compatible',
+  Incompatible = 'incompatible',
+  Unnecessary = 'unnecessary',
+  Invalid = 'invalid',
+}
+
+interface MigrationTypeParams {
+  isMappingsCompatible: boolean;
+  isVersionMigrationCompleted: boolean;
+}
+
+export function getMigrationType({
+  isMappingsCompatible,
+  isVersionMigrationCompleted,
+}: MigrationTypeParams): MigrationType {
+  if (isMappingsCompatible && isVersionMigrationCompleted) {
+    return MigrationType.Unnecessary;
+  }
+
+  if (isMappingsCompatible && !isVersionMigrationCompleted) {
+    return MigrationType.Compatible;
+  }
+
+  if (!isMappingsCompatible && !isVersionMigrationCompleted) {
+    return MigrationType.Incompatible;
+  }
+
+  return MigrationType.Invalid;
+}

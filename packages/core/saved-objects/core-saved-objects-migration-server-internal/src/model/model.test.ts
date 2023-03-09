@@ -53,11 +53,7 @@ import type {
   WaitForYellowSourceState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
-import {
-  type AliasAction,
-  type RetryableEsClientError,
-  UpdateSourceMappingsPropertiesResult,
-} from '../actions';
+import type { AliasAction, RetryableEsClientError } from '../actions';
 import type { ResponseType } from '../next';
 import { createInitialProgress } from './progress';
 import { model } from './model';
@@ -1181,6 +1177,9 @@ describe('migrations v2 model', () => {
     describe('UPDATE_SOURCE_MAPPINGS_PROPERTIES', () => {
       const updateSourceMappingsPropertiesState: UpdateSourceMappingsPropertiesState = {
         ...postInitState,
+        aliases: {
+          '.kibana_7.11.0': '.kibana_7.11.0_001',
+        },
         controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
         sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
         sourceIndexMappings: Option.some(
@@ -1192,9 +1191,9 @@ describe('migrations v2 model', () => {
       };
 
       describe('if action succeeds', () => {
-        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED if mappings changes are compatible', () => {
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED if mappings changes are compatible and index is not migrated yet', () => {
           const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.right(
-            UpdateSourceMappingsPropertiesResult.Compatible
+            'update_mappings_succeeded'
           );
           const newState = model(updateSourceMappingsPropertiesState, res);
 
@@ -1203,22 +1202,17 @@ describe('migrations v2 model', () => {
           });
         });
 
-        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CHECK_UNKNOWN_DOCUMENTS if mappings changes are incompatible', () => {
-          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.right(
-            UpdateSourceMappingsPropertiesResult.Incompatible
-          );
-          const newState = model(updateSourceMappingsPropertiesState, res);
-
-          expect(newState).toMatchObject({
-            controlState: 'CHECK_UNKNOWN_DOCUMENTS',
-          });
-        });
-
         test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if mappings changes are compatible and index is already migrated', () => {
           const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.right(
-            UpdateSourceMappingsPropertiesResult.Updated
+            'update_mappings_succeeded'
           );
-          const newState = model(updateSourceMappingsPropertiesState, res);
+          const newState = model(
+            chain(updateSourceMappingsPropertiesState)
+              .cloneDeep()
+              .set(['aliases', '.kibana'], '.kibana_7.11.0_001')
+              .value(),
+            res
+          );
 
           expect(newState).toEqual(
             expect.objectContaining({
@@ -1235,11 +1229,28 @@ describe('migrations v2 model', () => {
       });
 
       describe('if action fails', () => {
-        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> FATAL', () => {
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CHECK_UNKNOWN_DOCUMENTS if mappings changes are incompatible', () => {
           const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.left({
             type: 'incompatible_mapping_exception',
           });
           const newState = model(updateSourceMappingsPropertiesState, res);
+
+          expect(newState).toMatchObject({
+            controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+          });
+        });
+
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> FATAL', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.left({
+            type: 'incompatible_mapping_exception',
+          });
+          const newState = model(
+            chain(updateSourceMappingsPropertiesState)
+              .cloneDeep()
+              .set(['aliases', '.kibana'], '.kibana_7.11.0_001')
+              .value(),
+            res
+          );
 
           expect(newState).toMatchObject({
             controlState: 'FATAL',
