@@ -151,13 +151,10 @@ export const useUnifiedSearch = () => {
   return {
     buildQuery,
     clearSavedQuery,
-    controlPanelFilters: state.panelFilters,
     onSubmit: debounceOnSubmit,
     saveQuery,
     getDateRangeAsTimestamp,
-    unifiedSearchQuery: state.query,
-    unifiedSearchDateRange: state.dateRange,
-    unifiedSearchFilters: state.filters,
+    searchCriteria: { ...state },
   };
 };
 

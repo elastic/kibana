@@ -15,6 +15,7 @@ import { JourneyScreenshotPreview } from '../monitor_test_result/journey_screens
 import { ScreenshotImageSize, THUMBNAIL_SCREENSHOT_SIZE } from './screenshot_size';
 
 interface Props {
+  timestamp?: string;
   checkGroup?: string;
   stepStatus?: string;
   initialStepNumber?: number;
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export const JourneyStepScreenshotContainer = ({
+  timestamp,
   checkGroup,
   stepStatus,
   allStepsLoaded,
@@ -55,6 +57,7 @@ export const JourneyStepScreenshotContainer = ({
     imgPath,
     retryFetchOnRevisit,
     checkGroup,
+    timestamp,
   });
 
   const { url, loading, stepName, maxSteps } = imageResult?.[imgPath] ?? {};
@@ -72,6 +75,7 @@ export const JourneyStepScreenshotContainer = ({
         size={size}
         unavailableMessage={unavailableMessage}
         borderRadius={borderRadius}
+        timestamp={timestamp}
       />
     </div>
   );

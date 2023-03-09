@@ -20,7 +20,7 @@ import {
   startTour,
 } from '../../tasks/guided_onboarding';
 import { cleanKibana } from '../../tasks/common';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { getNewRule } from '../../objects/rule';
 import { ALERTS_URL, DASHBOARDS_URL } from '../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
@@ -32,7 +32,7 @@ describe('Guided onboarding tour', () => {
   before(() => {
     cleanKibana();
     login();
-    createCustomRuleEnabled({ ...getNewRule(), customQuery: 'user.name:*' });
+    createRule({ ...getNewRule(), query: 'user.name:*' });
   });
   beforeEach(() => {
     startAlertsCasesTour();

@@ -7,11 +7,16 @@
 
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  type Filter,
+  type Query,
+  type TimeRange,
+} from '@kbn/es-query';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
@@ -22,15 +27,7 @@ export const UnifiedSearchBar = () => {
     services: { unifiedSearch, application },
   } = useKibana<InfraClientStartDeps>();
   const { dataView } = useMetricsDataViewContext();
-  const {
-    unifiedSearchDateRange,
-    unifiedSearchQuery,
-    unifiedSearchFilters,
-    controlPanelFilters,
-    onSubmit,
-    saveQuery,
-    clearSavedQuery,
-  } = useUnifiedSearchContext();
+  const { searchCriteria, onSubmit, saveQuery, clearSavedQuery } = useUnifiedSearchContext();
 
   const { SearchBar } = unifiedSearch.ui;
 
@@ -39,8 +36,7 @@ export const UnifiedSearchBar = () => {
   };
 
   const onPanelFiltersChange = (panelFilters: Filter[]) => {
-    // <ControlsContent /> triggers this event 2 times during its loading lifecycle
-    if (!deepEqual(controlPanelFilters, panelFilters)) {
+    if (!compareFilters(searchCriteria.panelFilters, panelFilters, COMPARE_ALL_OPTIONS)) {
       onQueryChange({ panelFilters });
     }
   };
@@ -71,9 +67,9 @@ export const UnifiedSearchBar = () => {
           defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
         })}
         indexPatterns={dataView && [dataView]}
-        query={unifiedSearchQuery}
-        dateRangeFrom={unifiedSearchDateRange.from}
-        dateRangeTo={unifiedSearchDateRange.to}
+        query={searchCriteria.query}
+        dateRangeFrom={searchCriteria.dateRange.from}
+        dateRangeTo={searchCriteria.dateRange.to}
         onQuerySubmit={onQuerySubmit}
         onSaved={onQuerySave}
         onSavedQueryUpdated={onQuerySave}
@@ -83,11 +79,11 @@ export const UnifiedSearchBar = () => {
         displayStyle="inPage"
       />
       <ControlsContent
-        timeRange={unifiedSearchDateRange}
+        timeRange={searchCriteria.dateRange}
         dataView={dataView}
-        query={unifiedSearchQuery}
-        filters={unifiedSearchFilters}
-        onFilterChange={onPanelFiltersChange}
+        query={searchCriteria.query}
+        filters={searchCriteria.filters}
+        onFiltersChange={onPanelFiltersChange}
       />
     </EuiFlexGrid>
   );
