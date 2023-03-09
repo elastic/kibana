@@ -14,23 +14,21 @@ import { findInventoryModel } from '../../../../../../../common/inventory_models
 import type { InventoryItemType } from '../../../../../../../common/inventory_models/types';
 import { useMetadata } from '../../../../metric_detail/hooks/use_metadata';
 import { Table } from './table';
-import { useWaffleTimeContext } from '../../../../inventory_view/hooks/use_waffle_time';
 import { getAllFields } from './build_fields';
-import { HostNodeRow } from '../../../hooks/use_hosts_table';
+import type { HostNodeRow } from '../../../hooks/use_hosts_table';
+import type { MetricsTimeInput } from '../../../../metric_detail/hooks/use_metrics_time';
 
 const NODE_TYPE = 'host' as InventoryItemType;
 
 export interface TabProps {
-  currentTime: number;
+  currentTimeRange: MetricsTimeInput;
   node: HostNodeRow;
-  onClose?(): void;
 }
 
-const TabComponent = (props: TabProps) => {
-  const nodeId = props.node.name;
+const TabComponent = ({ node, currentTimeRange }: TabProps) => {
+  const nodeId = node.name;
   const inventoryModel = findInventoryModel(NODE_TYPE);
   const { sourceId } = useSourceContext();
-  const { currentTimeRange } = useWaffleTimeContext();
   const { loading: metadataLoading, metadata } = useMetadata(
     nodeId,
     NODE_TYPE,

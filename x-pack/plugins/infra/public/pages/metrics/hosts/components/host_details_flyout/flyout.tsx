@@ -10,24 +10,25 @@ import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eu
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 import { PropertiesTab } from './metadata/metadata';
 import type { HostNodeRow } from '../../hooks/use_hosts_table';
+import type { MetricsTimeInput } from '../../../metric_detail/hooks/use_metrics_time';
 
 interface Props {
   onClose(): void;
-  currentTime: number;
+  currentTimeRange: MetricsTimeInput;
   node: HostNodeRow;
 }
 
-export const Flyout = ({ node, currentTime, onClose }: Props) => {
+export const Flyout = ({ node, currentTimeRange, onClose }: Props) => {
   const tabs = useMemo(() => {
     const tabConfigs = [PropertiesTab];
     return tabConfigs.map((m) => {
       const TabContent = m.content;
       return {
         ...m,
-        content: <TabContent node={node} currentTime={currentTime} />,
+        content: <TabContent node={node} currentTimeRange={currentTimeRange} />,
       };
     });
-  }, [node, currentTime]);
+  }, [node, currentTimeRange]);
 
   const [selectedTab, setSelectedTab] = useState(0);
 
