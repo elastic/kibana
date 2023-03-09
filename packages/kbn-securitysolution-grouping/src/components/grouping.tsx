@@ -21,7 +21,7 @@ import type { BadgeMetric, CustomMetric } from './accordion_panel';
 import { GroupPanel } from './accordion_panel';
 import { GroupStats } from './accordion_panel/group_stats';
 import { EmptyGroupingComponent } from './empty_results_panel';
-import { groupingContainerCss, groupsUnitCountCss } from './styles';
+import { groupingContainerCss, countCss } from './styles';
 import { GROUPS_UNIT } from './translations';
 import type { GroupingAggregation, GroupingFieldTotalAggregation, RawBucket } from './types';
 
@@ -64,15 +64,15 @@ const GroupingComponent = <T,>({
     Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket<T> }>
   >({});
 
-  const groupsNumber = data?.groupsNumber?.value ?? 0;
+  const unitCount = data?.unitCount0?.value ?? 0;
   const unitCountText = useMemo(() => {
-    const count = data?.alertsCount?.value ?? 0;
-    return `${count.toLocaleString()} ${unit && unit(count)}`;
-  }, [data?.alertsCount?.value, unit]);
+    return `${unitCount.toLocaleString()} ${unit && unit(unitCount)}`;
+  }, [unitCount, unit]);
 
-  const unitGroupsCountText = useMemo(
-    () => `${groupsNumber.toLocaleString()} ${GROUPS_UNIT(groupsNumber)}`,
-    [groupsNumber]
+  const groupCount = data?.groupCount0?.value ?? 0;
+  const groupCountText = useMemo(
+    () => `${groupCount.toLocaleString()} ${GROUPS_UNIT(groupCount)}`,
+    [groupCount]
   );
 
   const groupPanels = useMemo(
@@ -129,8 +129,8 @@ const GroupingComponent = <T,>({
     ]
   );
   const pageCount = useMemo(
-    () => (groupsNumber && pagination.pageSize ? Math.ceil(groupsNumber / pagination.pageSize) : 1),
-    [groupsNumber, pagination.pageSize]
+    () => (groupCount && pagination.pageSize ? Math.ceil(groupCount / pagination.pageSize) : 1),
+    [groupCount, pagination.pageSize]
   );
   return (
     <>
@@ -141,20 +141,16 @@ const GroupingComponent = <T,>({
         style={{ paddingBottom: 20, paddingTop: 20 }}
       >
         <EuiFlexItem grow={false}>
-          {groupsNumber > 0 ? (
+          {groupCount > 0 && unitCount > 0 ? (
             <EuiFlexGroup gutterSize="none">
               <EuiFlexItem grow={false}>
-                <span css={groupsUnitCountCss} data-test-subj="alert-count">
+                <span css={countCss} data-test-subj="unit-count">
                   {unitCountText}
                 </span>
               </EuiFlexItem>
               <EuiFlexItem>
-                <span
-                  css={groupsUnitCountCss}
-                  data-test-subj="groups-count"
-                  style={{ borderRight: 'none' }}
-                >
-                  {unitGroupsCountText}
+                <span css={countCss} data-test-subj="group-count" style={{ borderRight: 'none' }}>
+                  {groupCountText}
                 </span>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -168,7 +164,7 @@ const GroupingComponent = <T,>({
         </EuiFlexItem>
       </EuiFlexGroup>
       <div css={groupingContainerCss} className="eui-xScroll">
-        {groupsNumber > 0 ? (
+        {groupCount > 0 ? (
           <>
             {groupPanels}
             <EuiSpacer size="m" />

@@ -1,0 +1,23 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+export const getCurrentIndexMock = jest.fn();
+export const checkVersionCompatibilityMock = jest.fn();
+export const buildIndexMappingsMock = jest.fn();
+export const generateAdditiveMappingDiffMock = jest.fn();
+
+jest.doMock('../../utils', () => {
+  const realModule = jest.requireActual('../../utils');
+  return {
+    ...realModule,
+    getCurrentIndex: getCurrentIndexMock,
+    checkVersionCompatibility: checkVersionCompatibilityMock,
+    buildIndexMappings: buildIndexMappingsMock,
+    generateAdditiveMappingDiff: generateAdditiveMappingDiffMock,
+  };
+});
