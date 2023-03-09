@@ -7,7 +7,6 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { FileJSON, BaseFileMetadata, FileCompression } from '@kbn/files-plugin/common';
-import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import type {
   ActionStatusRequestSchema,
   NoParametersRequestSchema,
