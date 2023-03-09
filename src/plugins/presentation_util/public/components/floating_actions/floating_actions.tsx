@@ -29,28 +29,32 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     uiActions: { getTriggerCompatibleActions },
   } = pluginServices.getServices();
 
-  const [floatingActions, setFloatingActions] = useState<JSX.Element>();
+  const [floatingActions, setFloatingActions] = useState<JSX.Element | undefined>(undefined);
 
   useEffect(() => {
     if (!embeddable) return;
 
     const getActions = async () => {
-      console.log('get actions');
       const context = {
         embeddable,
         trigger: panelHoverTrigger,
       };
-      const actions = await getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context);
+      const actions = (await getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context)).sort(
+        (a, b) => (a.order || 0) - (b.order || 0)
+      );
       if (actions.length > 0) {
-        const components = actions.map((action) =>
-          action.MenuItem && embeddable
-            ? React.createElement(action.MenuItem, {
-                key: action.id,
-                context,
-              })
-            : undefined
+        setFloatingActions(
+          <>
+            {actions.map((action) =>
+              action.MenuItem && embeddable
+                ? React.createElement(action.MenuItem, {
+                    key: action.id,
+                    context,
+                  })
+                : undefined
+            )}
+          </>
         );
-        setFloatingActions(<>{components}</>);
       } else {
         setFloatingActions(undefined);
       }

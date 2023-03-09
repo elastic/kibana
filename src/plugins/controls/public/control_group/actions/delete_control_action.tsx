@@ -26,7 +26,7 @@ export interface DeleteControlActionContext {
 export class DeleteControlAction implements Action<DeleteControlActionContext> {
   public readonly type = ACTION_DELETE_CONTROL;
   public readonly id = ACTION_DELETE_CONTROL;
-  public order = 30; // TODO: use these
+  public order = 2;
 
   private openConfirm;
 

@@ -30,7 +30,7 @@ export interface EditControlActionContext {
 export class EditControlAction implements Action<EditControlActionContext> {
   public readonly type = ACTION_EDIT_CONTROL;
   public readonly id = ACTION_EDIT_CONTROL;
-  public order = 15;
+  public order = 1;
 
   private getEmbeddableFactory;
   private openFlyout;
