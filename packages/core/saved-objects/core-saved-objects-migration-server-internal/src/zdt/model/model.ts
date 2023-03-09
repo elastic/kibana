@@ -12,9 +12,9 @@ import type { ResponseType } from '../next';
 import { delayRetryState, resetRetryState } from '../../model/retry_state';
 import { throwBadControlState } from '../../model/helpers';
 import { isTypeof } from '../actions';
-import { MigratorContext } from '../context';
+import type { MigratorContext } from '../context';
+import type { StateActionResponse } from './types';
 import * as Stages from './stages';
-import { StateActionResponse } from './types';
 
 export const model = (
   current: State,
@@ -62,6 +62,23 @@ export const model = (
         response as StateActionResponse<'UPDATE_MAPPING_MODEL_VERSIONS'>,
         context
       );
+    // TODO: implement
+    case 'INDEX_STATE_UPDATE_DONE':
+    case 'DOCUMENTS_UPDATE_INIT':
+    case 'SET_DOC_MIGRATION_STARTED':
+    case 'SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES':
+    case 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS':
+    case 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK':
+    case 'REFRESH_INDEX_AFTER_CLEANUP':
+    case 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT':
+    case 'OUTDATED_DOCUMENTS_SEARCH_READ':
+    case 'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM':
+    case 'OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX':
+    case 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT':
+    case 'UPDATE_DOCUMENT_MODEL_VERSIONS':
+    case 'UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES':
+      return throwBadControlState(current as never);
+    // TODO - end
     case 'DONE':
     case 'FATAL':
       // The state-action machine will never call the model in the terminating states

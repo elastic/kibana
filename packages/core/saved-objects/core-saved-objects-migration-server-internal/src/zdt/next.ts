@@ -15,6 +15,20 @@ import type {
   UpdateIndexMappingsWaitForTaskState,
   UpdateMappingModelVersionState,
   UpdateAliasesState,
+  CleanupUnknownAndExcludedDocsState,
+  CleanupUnknownAndExcludedDocsWaitForTaskState,
+  DocumentsUpdateInitState,
+  IndexStateUpdateDoneState,
+  OutdatedDocumentsSearchBulkIndexState,
+  OutdatedDocumentsSearchClosePitState,
+  OutdatedDocumentsSearchOpenPitState,
+  OutdatedDocumentsSearchReadState,
+  OutdatedDocumentsSearchTransformState,
+  RefreshIndexAfterCleanupState,
+  SetDocMigrationStartedState,
+  SetDocMigrationStartedWaitForInstancesState,
+  UpdateDocumentModelVersionsState,
+  UpdateDocumentModelVersionsWaitForInstancesState,
 } from './state';
 import type { MigratorContext } from './context';
 import * as Actions from './actions';
@@ -31,6 +45,9 @@ export type ActionMap = ReturnType<typeof nextActionMap>;
 export type ResponseType<ControlState extends AllActionStates> = Awaited<
   ReturnType<ReturnType<ActionMap[ControlState]>>
 >;
+
+/** @deprecated */
+const NOT_IMPLEMENTED_YET = () => Promise.resolve({} as any);
 
 export const nextActionMap = (context: MigratorContext) => {
   const client = context.elasticsearchClient;
@@ -72,6 +89,33 @@ export const nextActionMap = (context: MigratorContext) => {
         client,
         aliasActions: state.aliasActions,
       }),
+    INDEX_STATE_UPDATE_DONE: (state: IndexStateUpdateDoneState) => NOT_IMPLEMENTED_YET,
+    DOCUMENTS_UPDATE_INIT: (state: DocumentsUpdateInitState) => NOT_IMPLEMENTED_YET,
+    SET_DOC_MIGRATION_STARTED: (state: SetDocMigrationStartedState) => NOT_IMPLEMENTED_YET,
+    SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES: (
+      state: SetDocMigrationStartedWaitForInstancesState
+    ) => NOT_IMPLEMENTED_YET,
+    CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS: (state: CleanupUnknownAndExcludedDocsState) =>
+      NOT_IMPLEMENTED_YET,
+    CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK: (
+      state: CleanupUnknownAndExcludedDocsWaitForTaskState
+    ) => NOT_IMPLEMENTED_YET,
+    REFRESH_INDEX_AFTER_CLEANUP: (state: RefreshIndexAfterCleanupState) => NOT_IMPLEMENTED_YET,
+    OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: (state: OutdatedDocumentsSearchOpenPitState) =>
+      NOT_IMPLEMENTED_YET,
+    OUTDATED_DOCUMENTS_SEARCH_READ: (state: OutdatedDocumentsSearchReadState) =>
+      NOT_IMPLEMENTED_YET,
+    OUTDATED_DOCUMENTS_SEARCH_TRANSFORM: (state: OutdatedDocumentsSearchTransformState) =>
+      NOT_IMPLEMENTED_YET,
+    OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX: (state: OutdatedDocumentsSearchBulkIndexState) =>
+      NOT_IMPLEMENTED_YET,
+    OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePitState) =>
+      NOT_IMPLEMENTED_YET,
+    UPDATE_DOCUMENT_MODEL_VERSIONS: (state: UpdateDocumentModelVersionsState) =>
+      NOT_IMPLEMENTED_YET,
+    UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES: (
+      state: UpdateDocumentModelVersionsWaitForInstancesState
+    ) => NOT_IMPLEMENTED_YET,
   };
 };
 

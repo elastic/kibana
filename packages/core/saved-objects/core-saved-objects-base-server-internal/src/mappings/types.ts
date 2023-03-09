@@ -77,4 +77,19 @@ export interface IndexMappingMeta {
    * @remark: Only defined for indices using the zdt migration algorithm.
    */
   docVersions?: { [k: string]: number };
+  /**
+   * Info about the current state of the migration.
+   * Should only be present if a migration is in progress or was interrupted.
+   *
+   * @remark: Only defined for indices using the zdt migration algorithm.
+   */
+  migrationState?: IndexMappingMigrationStateMeta;
+}
+
+/** @internal */
+export interface IndexMappingMigrationStateMeta {
+  /**
+   * Indicates that the algorithm is currently converting the documents.
+   */
+  convertingDocuments: boolean;
 }

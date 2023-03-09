@@ -12,7 +12,7 @@ import type { ModelStage } from '../types';
 
 export const updateMappingModelVersion: ModelStage<
   'UPDATE_MAPPING_MODEL_VERSIONS',
-  'DONE' | 'FATAL'
+  'INDEX_STATE_UPDATE_DONE' | 'FATAL'
 > = (state, res, context) => {
   if (Either.isLeft(res)) {
     throwBadResponse(state, res as never);
@@ -20,6 +20,6 @@ export const updateMappingModelVersion: ModelStage<
 
   return {
     ...state,
-    controlState: 'DONE',
+    controlState: 'INDEX_STATE_UPDATE_DONE',
   };
 };

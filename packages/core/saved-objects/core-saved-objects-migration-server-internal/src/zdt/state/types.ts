@@ -72,6 +72,62 @@ export interface UpdateAliasesState extends PostInitState {
   readonly controlState: 'UPDATE_ALIASES';
 }
 
+export interface IndexStateUpdateDoneState extends PostInitState {
+  readonly controlState: 'INDEX_STATE_UPDATE_DONE';
+}
+
+export interface DocumentsUpdateInitState extends PostInitState {
+  readonly controlState: 'DOCUMENTS_UPDATE_INIT';
+}
+
+export interface SetDocMigrationStartedState extends PostInitState {
+  readonly controlState: 'SET_DOC_MIGRATION_STARTED';
+}
+
+export interface SetDocMigrationStartedWaitForInstancesState extends PostInitState {
+  readonly controlState: 'SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES';
+}
+
+export interface CleanupUnknownAndExcludedDocsState extends PostInitState {
+  readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS';
+}
+
+export interface CleanupUnknownAndExcludedDocsWaitForTaskState extends PostInitState {
+  readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK';
+}
+
+export interface RefreshIndexAfterCleanupState extends PostInitState {
+  readonly controlState: 'REFRESH_INDEX_AFTER_CLEANUP';
+}
+
+export interface OutdatedDocumentsSearchOpenPitState extends PostInitState {
+  readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT';
+}
+
+export interface OutdatedDocumentsSearchReadState extends PostInitState {
+  readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ';
+}
+
+export interface OutdatedDocumentsSearchTransformState extends PostInitState {
+  readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM';
+}
+
+export interface OutdatedDocumentsSearchBulkIndexState extends PostInitState {
+  readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX';
+}
+
+export interface OutdatedDocumentsSearchClosePitState extends PostInitState {
+  readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT';
+}
+
+export interface UpdateDocumentModelVersionsState extends PostInitState {
+  readonly controlState: 'UPDATE_DOCUMENT_MODEL_VERSIONS';
+}
+
+export interface UpdateDocumentModelVersionsWaitForInstancesState extends PostInitState {
+  readonly controlState: 'UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES';
+}
+
 /** Migration completed successfully */
 export interface DoneState extends BaseState {
   readonly controlState: 'DONE';
@@ -92,7 +148,21 @@ export type State =
   | UpdateIndexMappingsState
   | UpdateIndexMappingsWaitForTaskState
   | UpdateMappingModelVersionState
-  | UpdateAliasesState;
+  | UpdateAliasesState
+  | IndexStateUpdateDoneState
+  | DocumentsUpdateInitState
+  | SetDocMigrationStartedState
+  | SetDocMigrationStartedWaitForInstancesState
+  | CleanupUnknownAndExcludedDocsState
+  | CleanupUnknownAndExcludedDocsWaitForTaskState
+  | RefreshIndexAfterCleanupState
+  | OutdatedDocumentsSearchOpenPitState
+  | OutdatedDocumentsSearchReadState
+  | OutdatedDocumentsSearchTransformState
+  | OutdatedDocumentsSearchBulkIndexState
+  | OutdatedDocumentsSearchClosePitState
+  | UpdateDocumentModelVersionsState
+  | UpdateDocumentModelVersionsWaitForInstancesState;
 
 export type AllControlStates = State['controlState'];
 
@@ -110,6 +180,20 @@ export interface ControlStateMap {
   UPDATE_INDEX_MAPPINGS_WAIT_FOR_TASK: UpdateIndexMappingsWaitForTaskState;
   UPDATE_MAPPING_MODEL_VERSIONS: UpdateMappingModelVersionState;
   UPDATE_ALIASES: UpdateAliasesState;
+  INDEX_STATE_UPDATE_DONE: IndexStateUpdateDoneState;
+  DOCUMENTS_UPDATE_INIT: DocumentsUpdateInitState;
+  SET_DOC_MIGRATION_STARTED: SetDocMigrationStartedState;
+  SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES: SetDocMigrationStartedWaitForInstancesState;
+  CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS: CleanupUnknownAndExcludedDocsState;
+  CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK: CleanupUnknownAndExcludedDocsWaitForTaskState;
+  REFRESH_INDEX_AFTER_CLEANUP: RefreshIndexAfterCleanupState;
+  OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: OutdatedDocumentsSearchOpenPitState;
+  OUTDATED_DOCUMENTS_SEARCH_READ: OutdatedDocumentsSearchReadState;
+  OUTDATED_DOCUMENTS_SEARCH_TRANSFORM: OutdatedDocumentsSearchTransformState;
+  OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX: OutdatedDocumentsSearchBulkIndexState;
+  OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: OutdatedDocumentsSearchClosePitState;
+  UPDATE_DOCUMENT_MODEL_VERSIONS: UpdateDocumentModelVersionsState;
+  UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES: UpdateDocumentModelVersionsWaitForInstancesState;
 }
 
 /**
