@@ -187,23 +187,14 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 > {
   return async (context, req, res) => {
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { comment, endpoint_ids, parameters } = req.body;
 
     const casesClient = await endpointContext.service.getCasesClient(req);
     let action;
 
     try {
-      action = await endpointContext.service.getActionCreateService().createAction(
-        {
-          endpoint_ids,
-          parameters,
-          user,
-          command,
-          comment,
-        },
-        casesClient
-      );
+      action = await endpointContext.service
+        .getActionCreateService()
+        .createAction({ ...req.body, command, user }, casesClient);
     } catch (err) {
       return res.customError({
         statusCode: 500,

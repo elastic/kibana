@@ -459,13 +459,3 @@ export type UploadedFileInfo = Pick<
 export interface ActionFileInfoApiResponse {
   data: UploadedFileInfo;
 }
-
-export interface CreateActionPayload {
-  endpoint_ids: string[];
-  command: ResponseActionsApiCommandNames;
-  comment?: string;
-  user?: AuthenticatedUser | null;
-  case_ids?: string[];
-  alert_ids?: string[];
-  parameters?: EndpointActionDataParameterTypes | {};
-}

@@ -109,10 +109,6 @@ describe('Response actions', () => {
       const routerMock = httpServiceMock.createRouter();
       mockResponse = httpServerMock.createResponseFactory();
       const startContract = createMockEndpointAppContextServiceStartContract();
-      startContract.actionCreateService = new ActionCreateService(
-        mockScopedClient.asInternalUser,
-        startContract
-      );
       (startContract.messageSigningService?.sign as jest.Mock).mockImplementation(() => {
         return {
           data: 'thisisthedata',
@@ -126,19 +122,25 @@ describe('Response actions', () => {
       licenseService = new LicenseService();
       licenseService.start(licenseEmitter);
 
-      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
-      endpointAppContextService.start({
-        ...startContract,
-        licenseService,
-      });
-
-      // add the host isolation route handlers to routerMock
-      registerResponseActionRoutes(routerMock, {
+      const endpointContext = {
         logFactory: loggingSystemMock.create(),
         service: endpointAppContextService,
         config: () => Promise.resolve(createMockConfig()),
         experimentalFeatures: parseExperimentalConfigValue(createMockConfig().enableExperimental),
+      };
+
+      endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
+      endpointAppContextService.start({
+        ...startContract,
+        actionCreateService: new ActionCreateService(
+          mockScopedClient.asInternalUser,
+          endpointContext
+        ),
+        licenseService,
       });
+
+      // add the host isolation route handlers to routerMock
+      registerResponseActionRoutes(routerMock, endpointContext);
 
       getActionDetailsByIdSpy = jest
         .spyOn(ActionDetailsService, 'getActionDetailsById')
@@ -182,7 +184,7 @@ describe('Response actions', () => {
         ctx.core.elasticsearch.client.asInternalUser.index.mockResponseImplementation(
           () => withIdxResp
         );
-        mockScopedClient.asInternalUser.search.mockResponseImplementation(() => {
+        ctx.core.elasticsearch.client.asInternalUser.search.mockResponseImplementation(() => {
           return {
             body: legacyMetadataSearchResponseMock(searchResponse),
           };

@@ -13,6 +13,9 @@ import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { CasesByAlertId } from '@kbn/cases-plugin/common/api';
 import { CommentType } from '@kbn/cases-plugin/common';
+import type { AuthenticationServiceStart } from '@kbn/security-plugin/server';
+import type { TypeOf } from '@kbn/config-schema';
+import type { ResponseActionBodySchema } from '../../../../common/endpoint/schema/actions';
 import { APP_ID } from '../../../../common/constants';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../common/endpoint/service/response_actions/constants';
@@ -30,7 +33,6 @@ import type {
   LogsEndpointAction,
   LogsEndpointActionResponse,
   ResponseActionsExecuteParameters,
-  CreateActionPayload,
 } from '../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../types';
 import type { FeatureKeys } from '../feature_usage';
@@ -52,7 +54,10 @@ export class ActionCreateService {
   constructor(private esClient: ElasticsearchClient, private endpointContext: EndpointAppContext) {}
 
   async createAction(
-    payload: CreateActionPayload,
+    payload: TypeOf<typeof ResponseActionBodySchema> & {
+      command: ResponseActionsApiCommandNames;
+      user?: ReturnType<AuthenticationServiceStart['getCurrentUser']>;
+    },
     casesClient?: CasesClient
   ): Promise<{ data: ActionDetails }> {
     const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
@@ -193,9 +198,9 @@ export class ActionCreateService {
           },
           logger,
         });
-
-        throw e;
       }
+
+      throw e;
     }
 
     if (casesClient) {
