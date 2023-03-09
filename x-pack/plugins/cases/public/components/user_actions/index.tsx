@@ -105,6 +105,7 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
         manualAlertsData={manualAlertsData}
         commentRefs={commentRefs}
         handleManageQuote={handleManageQuote}
+        bottomActions={lastPage === 0 ? bottomActions : []}
         isExpandable
       />
       {lastPage > 0 && (

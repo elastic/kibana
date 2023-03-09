@@ -360,6 +360,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
       it('filters by history successfully', async () => {
+        const historyBadge = await find.byCssSelector(
+          '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
+        );
+
+        expect(await historyBadge.getVisibleText()).equal('1');
+
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
 
         await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
@@ -368,11 +374,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click('user-actions-filter-activity-button-history');
 
-        const historyBadge = await find.byCssSelector(
-          '[data-test-subj="user-actions-filter-activity-button-history"] span.euiNotificationBadge'
-        );
-
-        expect(await historyBadge.getVisibleText()).equal('2');
+        expect(await historyBadge.getVisibleText()).equal('3');
       });
 
       it('filters by comment successfully', async () => {
@@ -403,7 +405,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           '[data-test-subj="user-actions-filter-activity-button-all"] span.euiNotificationBadge'
         );
 
-        expect(await AllBadge.getVisibleText()).equal('3');
+        expect(await AllBadge.getVisibleText()).equal('4');
 
         const sortDesc = await find.byCssSelector(
           '[data-test-subj="user-actions-sort-select"] [value="desc"]'
@@ -413,11 +415,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        const userActions = await find.byCssSelector('[data-test-subj="user-actions"]');
+        const userActionsLists = await find.allByCssSelector('[data-test-subj="user-actions-list"]');
 
-        const actionsList = await userActions.findAllByClassName('euiComment');
+        const firstActionsList = await userActionsLists[0].findAllByClassName('euiComment');
 
-        expect(await actionsList[0].getAttribute('data-test-subj')).contain(
+        expect(await firstActionsList[0].getAttribute('data-test-subj')).contain(
           'comment-create-action'
         );
       });
