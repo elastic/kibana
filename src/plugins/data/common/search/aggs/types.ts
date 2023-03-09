@@ -35,6 +35,7 @@ import {
   aggMedian,
   aggMin,
   aggMovingAvg,
+  aggRate,
   AggParamsAvg,
   AggParamsBucketAvg,
   AggParamsBucketAvgSerialized,
@@ -304,4 +305,5 @@ export interface AggFunctionsMapping {
   aggSum: ReturnType<typeof aggSum>;
   aggTopHit: ReturnType<typeof aggTopHit>;
   aggTopMetrics: ReturnType<typeof aggTopMetrics>;
+  aggRate: ReturnType<typeof aggRate>;
 }
