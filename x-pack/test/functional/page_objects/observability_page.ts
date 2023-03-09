@@ -47,7 +47,7 @@ export function ObservabilityPageProvider({ getService, getPageObjects }: FtrPro
 
     async expectAddCommentButton() {
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.setValue('add-comment', textValue);   
+      await testSubjects.setValue('add-comment', textValue);
       const button = await testSubjects.find('submit-comment', 20000);
       const disabledAttr = await button.getAttribute('disabled');
       expect(disabledAttr).to.be(null);

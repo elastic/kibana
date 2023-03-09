@@ -415,7 +415,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        const userActionsLists = await find.allByCssSelector('[data-test-subj="user-actions-list"]');
+        const userActionsLists = await find.allByCssSelector(
+          '[data-test-subj="user-actions-list"]'
+        );
 
         const firstActionsList = await userActionsLists[0].findAllByClassName('euiComment');
 
