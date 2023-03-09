@@ -15,7 +15,6 @@ import {
   type UpdatePackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import chalk from 'chalk';
-import { inspect } from 'util';
 import { getEndpointPackageInfo } from '../../../common/endpoint/index_data';
 import { indexFleetEndpointPolicy } from '../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
@@ -26,6 +25,7 @@ import {
 } from '../common/fleet_services';
 import { getRuntimeServices } from './runtime';
 import { type PolicyData, ProtectionModes } from '../../../common/endpoint/types';
+import { dump } from './utils';
 
 interface ElasticArtifactSearchResponse {
   manifest: {
@@ -56,7 +56,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
   log.indent(4);
 
   try {
-    const uniqueId = Math.random().toString(32).substring(2).substring(0, 4);
+    const uniqueId = Math.random().toString().substring(2, 6);
     const username = userInfo().username.toLowerCase();
     const policyId: string = policy || (await getOrCreateAgentPolicyId());
 
@@ -85,7 +85,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
     log.info(`Creating VM named: ${vmName}`);
 
-    await execa.command(`multipass launch --name ${vmName}`);
+    await execa.command(`multipass launch --name ${vmName} --disk 8G`);
 
     log.verbose(await execa('multipass', ['info', vmName]));
 
@@ -102,7 +102,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
     await execa.command(`multipass exec ${vmName} -- tar -zxf ${agentDownloadedFile}`);
     await execa.command(`multipass exec ${vmName} -- rm -f ${agentDownloadedFile}`);
 
-    const agentEnrollArgs = [
+    const agentInstallArguments = [
       'exec',
 
       vmName,
@@ -116,7 +116,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
       './elastic-agent',
 
-      'enroll',
+      'install',
 
       '--insecure',
 
@@ -130,25 +130,9 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
     ];
 
     log.info(`Enrolling elastic agent with Fleet`);
-    log.verbose(`Command: multipass ${agentEnrollArgs.join(' ')}`);
+    log.verbose(`Command: multipass ${agentInstallArguments.join(' ')}`);
 
-    await execa(`multipass`, agentEnrollArgs);
-
-    const runAgentCommand = `multipass exec ${vmName} --working-directory /home/ubuntu/${vmDirName} -- sudo ./elastic-agent \&>/dev/null`;
-
-    log.info(`Running elastic agent`);
-    log.verbose(`Command: ${runAgentCommand}`);
-
-    // About `timeout` option below
-    // The `multipass exec` command seems to have some issues when a command pass to it redirects output,
-    // as is with the command that runs endpoint. See https://github.com/canonical/multipass/issues/667
-    // To get around it, `timeout` is set to 5s, which should be enough time for the command to be executed
-    // in the VM.
-    await execa.command(runAgentCommand, { timeout: 5000 }).catch((error) => {
-      if (error.originalMessage !== 'Timed out') {
-        throw error;
-      }
-    });
+    await execa(`multipass`, agentInstallArguments);
 
     log.info(`Waiting for Agent to check-in with Fleet`);
     await waitForHostToEnroll(kbnClient, vmName);
@@ -161,7 +145,7 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
     Delete VM:    ${chalk.bold(`multipass delete -p ${vmName}${await getVmCountNotice()}`)}
 `);
   } catch (error) {
-    log.error(inspect(error, { depth: 4 }));
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }
@@ -173,8 +157,9 @@ export const enrollEndpointHost = async (): Promise<string | undefined> => {
 
 const getAgentDownloadUrl = async (version: string): Promise<string> => {
   const { log } = getRuntimeServices();
-  // TODO:PT use arch and platform of VM to build download file name below (will be needed if tools ever supports different types of VMs)
-  const agentFile = `elastic-agent-${version}-linux-arm64.tar.gz`;
+  const downloadArch =
+    { arm64: 'arm64', x64: 'x86_64' }[process.arch] ?? `UNSUPPORTED_ARCHITECTURE_${process.arch}`;
+  const agentFile = `elastic-agent-${version}-linux-${downloadArch}.tar.gz`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${version}/${agentFile}`;
 
   log.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
