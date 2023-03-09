@@ -18,11 +18,13 @@
       "encryptedSavedObjects",
       "eventLog",
       "features",
+      "kibanaReact",
       "kibanaUtils",
       "licensing",
       "taskManager",
       "kibanaReact",
       "management",
+      "esUiShared",
     ],
     "optionalPlugins": [
       "usageCollection",

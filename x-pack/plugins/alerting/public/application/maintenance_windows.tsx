@@ -19,7 +19,7 @@ import { AlertingPluginStart, ConfigSchema } from '../plugin';
 import { routes } from '../routes';
 import { PluginContext } from '../context/plugin_context';
 
-function App() {
+const App = React.memo(() => {
   return (
     <>
       <Switch>
@@ -34,7 +34,8 @@ function App() {
       </Switch>
     </>
   );
-}
+});
+App.displayName = 'App';
 
 export const renderApp = ({
   core,

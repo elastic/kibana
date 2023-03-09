@@ -9,6 +9,23 @@ import { i18n } from '@kbn/i18n';
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import { MouseEvent, useEffect } from 'react';
 import { useKibana } from '../utils/kibana_react';
+import { AlertingDeepLinkId, IAlertingDeepLinkId, useNavigation } from './use_navigation';
+import { APP_ID } from '../config/paths';
+
+const alertingBreadcrumbTitle: Record<IAlertingDeepLinkId, string> = {
+  [AlertingDeepLinkId.maintenanceWindows]: i18n.translate(
+    'xpack.alerting.breadcrumbs.maintenanceWindowsLinkText',
+    {
+      defaultMessage: 'Maintenance Windows',
+    }
+  ),
+  [AlertingDeepLinkId.maintenanceWindowsCreate]: i18n.translate(
+    'xpack.alerting.breadcrumbs.createMaintenanceWindowsLinkText',
+    {
+      defaultMessage: 'Create',
+    }
+  ),
+};
 
 function addClickHandlers(
   breadcrumbs: ChromeBreadcrumb[],
@@ -33,36 +50,46 @@ function getTitleFromBreadCrumbs(breadcrumbs: ChromeBreadcrumb[]) {
   return breadcrumbs.map(({ text }) => text?.toString() ?? '').reverse();
 }
 
-export const useBreadcrumbs = (
-  extraCrumbs: ChromeBreadcrumb[],
-  app?: { id: string; label: string }
-) => {
+export const useBreadcrumbs = (pageDeepLink: IAlertingDeepLinkId) => {
   const {
     services: {
       chrome: { docTitle, setBreadcrumbs },
-      application: { getUrlForApp, navigateToUrl },
+      application: { navigateToUrl },
     },
   } = useKibana();
   const setTitle = docTitle.change;
-  const appPath = getUrlForApp(app?.id ?? 'management') ?? '';
+  const { getAppUrl } = useNavigation(APP_ID);
 
   useEffect(() => {
     const breadcrumbs = [
       {
-        text:
-          app?.label ??
-          i18n.translate('xpack.alerting.breadcrumbs.stackManagementLinkText', {
-            defaultMessage: 'Stack Management',
-          }),
-        href: appPath,
+        text: i18n.translate('xpack.alerting.breadcrumbs.stackManagementLinkText', {
+          defaultMessage: 'Stack Management',
+        }),
+        href: getAppUrl(),
       },
-      ...extraCrumbs,
+      {
+        text: alertingBreadcrumbTitle[AlertingDeepLinkId.maintenanceWindows],
+        ...(pageDeepLink !== AlertingDeepLinkId.maintenanceWindows
+          ? {
+              href: getAppUrl({ deepLinkId: AlertingDeepLinkId.maintenanceWindows }),
+            }
+          : {}),
+      },
+      ...(pageDeepLink !== AlertingDeepLinkId.maintenanceWindows
+        ? [
+            {
+              text: alertingBreadcrumbTitle[pageDeepLink],
+            },
+          ]
+        : []),
     ];
+
     if (setBreadcrumbs) {
       setBreadcrumbs(addClickHandlers(breadcrumbs, navigateToUrl));
     }
     if (setTitle) {
       setTitle(getTitleFromBreadCrumbs(breadcrumbs));
     }
-  }, [app?.label, appPath, extraCrumbs, navigateToUrl, setBreadcrumbs, setTitle]);
+  }, [pageDeepLink, getAppUrl, navigateToUrl, setBreadcrumbs, setTitle]);
 };
