@@ -787,7 +787,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it('should not get a case in a space the user does not have permissions to', async () => {
+      it('should not get connectors in a space the user does not have permissions to', async () => {
         const { postedCase } = await createCaseWithConnector({
           supertest: supertestWithoutAuth,
           serviceNowSimulatorURL,

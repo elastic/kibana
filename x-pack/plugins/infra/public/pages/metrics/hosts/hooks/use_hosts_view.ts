@@ -51,7 +51,13 @@ export const useHostsView = () => {
     loading,
     error,
     nodes: hostNodes,
-  } = useSnapshot({ ...baseRequest, metrics: HOST_TABLE_METRICS });
+  } = useSnapshot(
+    {
+      ...baseRequest,
+      metrics: HOST_TABLE_METRICS,
+    },
+    { abortable: true }
+  );
 
   return {
     baseRequest,
