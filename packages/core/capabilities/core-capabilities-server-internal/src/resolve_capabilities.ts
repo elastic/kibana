@@ -54,12 +54,34 @@ export const resolveCapabilities = async (
     }, capabilities.navLinks),
   });
 
-  return switchers.reduce(async (caps, switcher) => {
-    const resolvedCaps = await caps;
-    const changes = await switcher(request, resolvedCaps, useDefaultCapabilities);
-    return recursiveApplyChanges(resolvedCaps, changes);
-  }, Promise.resolve(mergedCaps));
+  const deltas = await Promise.all(
+    switchers.map(async (switcher) => {
+      const changes = await switcher(request, mergedCaps, useDefaultCapabilities);
+      return generateDelta(mergedCaps, changes);
+    })
+  );
+
+  return deltas.reduce<Capabilities>((caps, delta) => {
+    return recursiveApplyChanges(caps, delta);
+  }, mergedCaps);
 };
+
+function generateDelta<TSource extends Record<string, any>>(
+  source: TSource,
+  changes: Partial<TSource>
+): Partial<TSource> {
+  return Object.entries(source).reduce((delta, [key, orig]) => {
+    const changed = changes[key];
+    if (orig != null && changed != null) {
+      if (typeof orig === 'object' && typeof changed === 'object') {
+        delta[key as keyof TSource] = generateDelta(orig, changed) as TSource[keyof TSource];
+      } else if (orig !== changed) {
+        delta[key as keyof TSource] = changed;
+      }
+    }
+    return delta;
+  }, {} as Partial<TSource>);
+}
 
 function recursiveApplyChanges<
   TDestination extends Record<string, any>,
