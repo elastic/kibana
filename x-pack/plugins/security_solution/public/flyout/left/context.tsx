@@ -6,9 +6,9 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
-import type { RightPanelProps } from '.';
+import type { LeftPanelProps } from '.';
 
-export interface RightPanelContext {
+export interface LeftPanelContext {
   /**
    * Id of the document
    */
@@ -19,29 +19,29 @@ export interface RightPanelContext {
   indexName: string;
 }
 
-export const RightPanelContext = createContext<RightPanelContext | undefined>(undefined);
+export const LeftFlyoutContext = createContext<LeftPanelContext | undefined>(undefined);
 
-export type RightPanelProviderProps = {
+export type LeftPanelProviderProps = {
   /**
    * React components to render
    */
   children: React.ReactNode;
-} & Partial<RightPanelProps['params']>;
+} & Partial<LeftPanelProps['params']>;
 
-export const RightPanelProvider = ({ id, indexName, children }: RightPanelProviderProps) => {
+export const LeftPanelProvider = ({ id, indexName, children }: LeftPanelProviderProps) => {
   const contextValue = useMemo(
     () => (id && indexName ? { eventId: id, indexName } : undefined),
     [id, indexName]
   );
 
-  return <RightPanelContext.Provider value={contextValue}>{children}</RightPanelContext.Provider>;
+  return <LeftFlyoutContext.Provider value={contextValue}>{children}</LeftFlyoutContext.Provider>;
 };
 
-export const useRightPanelContext = (): RightPanelContext => {
-  const contextValue = useContext(RightPanelContext);
+export const useLeftPanelContext = () => {
+  const contextValue = useContext(LeftFlyoutContext);
 
   if (!contextValue) {
-    throw new Error('RightPanelContext can only be used within RightPanelContext provider');
+    throw new Error('LeftPanelContext can only be used within LeftPanelContext provider');
   }
 
   return contextValue;

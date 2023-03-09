@@ -5,24 +5,22 @@
  * 2.0.
  */
 
-import { EuiFlyoutHeader, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiTab, EuiTabs } from '@elastic/eui';
 import type { VFC } from 'react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
-import type { RightPanelPaths } from '.';
+import type { LeftPanelPaths } from '.';
 import { tabs } from './tabs';
-import { HeaderTitle } from './components/header_title';
-import { ExpandDetailButton } from './components/expand_detail_button';
 
 export interface PanelHeaderProps {
-  selectedTabId: RightPanelPaths;
-  setSelectedTabId: (selected: RightPanelPaths) => void;
+  selectedTabId: LeftPanelPaths;
+  setSelectedTabId: (selected: LeftPanelPaths) => void;
   handleOnEventClosed?: () => void;
 }
 
 export const PanelHeader: VFC<PanelHeaderProps> = memo(
   ({ selectedTabId, setSelectedTabId, handleOnEventClosed }) => {
-    const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
+    const onSelectedTabChanged = (id: LeftPanelPaths) => setSelectedTabId(id);
     const renderTabs = tabs.map((tab, index) => (
       <EuiTab
         onClick={() => onSelectedTabChanged(tab.id)}
@@ -35,23 +33,7 @@ export const PanelHeader: VFC<PanelHeaderProps> = memo(
     ));
 
     return (
-      <EuiFlyoutHeader
-        hasBorder
-        css={css`
-          margin-bottom: -24px;
-        `}
-      >
-        <div
-          css={css`
-            margin-top: -24px;
-            margin-left: -8px;
-          `}
-        >
-          <ExpandDetailButton />
-        </div>
-        <EuiSpacer size="m" />
-        <HeaderTitle />
-        <EuiSpacer size="m" />
+      <EuiFlyoutHeader hasBorder>
         <EuiTabs
           size="l"
           expand
