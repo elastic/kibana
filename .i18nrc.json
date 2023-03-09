@@ -79,7 +79,7 @@
     "server": "src/legacy/server",
     "share": "src/plugins/share",
     "sharedUXPackages": "packages/shared-ux",
-    "solutionSideNav": "packages/kbn-security-solution-side-nav",
+    "securitySolutionSideNav": "packages/kbn-security-solution-side-nav",
     "coloring": "packages/kbn-coloring/src",
     "languageDocumentationPopover": "packages/kbn-language-documentation-popover/src",
     "statusPage": "src/legacy/core_plugins/status_page",
