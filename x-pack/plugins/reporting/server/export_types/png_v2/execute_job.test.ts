@@ -9,7 +9,7 @@ import * as Rx from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
 import { ReportingCore } from '../..';
-import { CancellationToken } from '../../../common/cancellation_token';
+import { CancellationToken } from '@kbn/reporting-common';
 import { LocatorParams } from '../../../common/types';
 import { cryptoFactory } from '../../lib';
 import {

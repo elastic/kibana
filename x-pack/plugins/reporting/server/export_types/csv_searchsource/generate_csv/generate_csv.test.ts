@@ -23,7 +23,6 @@ import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
 import type { DeepPartial } from 'utility-types';
-import { CancellationToken } from '../../../../common/cancellation_token';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
@@ -32,6 +31,7 @@ import {
 import { ReportingConfigType } from '../../../config';
 import { createMockConfig, createMockConfigSchema } from '../../../test_helpers';
 import { JobParamsCSV } from '../types';
+import { CancellationToken } from '@kbn/reporting-common';
 import { CsvGenerator } from './generate_csv';
 
 const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
