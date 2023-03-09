@@ -198,7 +198,12 @@ This known issue only impacts the Observability Rules page. To work around this 
 *Details* +
 When you upgrade to 8.6.0, progress bars on existing *Lens* metric visualizations are hidden.
 
-To show the progress bar again, open the visualization in the Lens editor. Click the dimension button for the primary metric to open the dimension editor. Then, under "Supporting visualization," select "Bar."
+To display progress bars in existing *Lens* metric visualizations:
+. Open the main menu, then click *Visualize Library*.
+. From the *Visualize Library* list, click the metric visualization. 
+. In *Lens*, click the *Primary metric* field in the layer pane.
+. In the *Type* field, select *Bar*.
+. Click *Close*.
 ====
 
 [float]
