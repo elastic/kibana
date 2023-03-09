@@ -22,10 +22,11 @@ export const useTabId = (initialValue: TabId = TabIds.METRICS): [TabId, TabIdUpd
   });
 };
 
-const TabIdRT = rt.union([rt.literal('alerts'), rt.literal('metrics')]);
+const TabIdRT = rt.union([rt.literal('alerts'), rt.literal('logs'), rt.literal('metrics')]);
 
 export enum TabIds {
   ALERTS = 'alerts',
+  LOGS = 'logs',
   METRICS = 'metrics',
 }
 
