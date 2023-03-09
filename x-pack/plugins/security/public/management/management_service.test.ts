@@ -25,6 +25,7 @@ import { rolesManagementApp } from './roles';
 import { usersManagementApp } from './users';
 
 const mockSection = createManagementSectionMock();
+const mockSetIsSidebarEnabled = (enabled: boolean) => {};
 
 describe('ManagementService', () => {
   describe('setup()', () => {
@@ -41,6 +42,7 @@ describe('ManagementService', () => {
           } as DefinedSections,
         },
         locator: {} as any,
+        setIsSidebarEnabled: mockSetIsSidebarEnabled,
       };
 
       const service = new ManagementService();
@@ -103,6 +105,7 @@ describe('ManagementService', () => {
           } as DefinedSections,
         },
         locator: {} as any,
+        setIsSidebarEnabled: mockSetIsSidebarEnabled,
       };
 
       service.setup({
