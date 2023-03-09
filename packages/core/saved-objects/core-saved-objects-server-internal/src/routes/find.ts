@@ -11,7 +11,7 @@ import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-serve
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { catchAndReturnBoomErrors, throwOnHttpHiddenTypes } from './utils';
-
+import { logWarnOnExternalRequest } from './utils';
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
   logger: Logger;
@@ -61,7 +61,12 @@ export const registerFindRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
-      logger.warn("The find saved object API '/api/saved_objects/_find' is deprecated.");
+      logWarnOnExternalRequest({
+        method: 'get',
+        path: '/api/saved_objects/_find',
+        req,
+        logger,
+      });
       const query = req.query;
 
       const namespaces =

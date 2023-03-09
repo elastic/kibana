@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { throwIfTypeNotVisibleByAPI } from './utils';
+import { throwIfTypeNotVisibleByAPI, logWarnOnExternalRequest } from './utils';
 
 interface RouteDependencies {
   coreUsageData: InternalCoreUsageDataSetup;
@@ -32,9 +32,12 @@ export const registerResolveRoute = (
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
-      logger.warn(
-        "The resolve saved object API '/api/saved_objects/resolve/{type}/{id}' is deprecated."
-      );
+      logWarnOnExternalRequest({
+        method: 'get',
+        path: '/api/saved_objects/resolve/{type}/{id}',
+        req,
+        logger,
+      });
       const { type, id } = req.params;
       const { savedObjects } = await context.core;
 
