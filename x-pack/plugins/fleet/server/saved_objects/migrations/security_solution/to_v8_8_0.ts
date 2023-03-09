@@ -23,8 +23,8 @@ export const migratePackagePolicyToV880: SavedObjectMigrationFn<PackagePolicy, P
   if (input && input.config) {
     const policy = input.config.policy.value;
 
-    // For the migration, we add 'basic', and the license watcher will correct it if needed.
-    policy.license = 'basic';
+    // For the migration, we add an empty string, and the license watcher will correct it if needed.
+    policy.meta = { license: '' };
   }
 
   return updatedPackagePolicyDoc;

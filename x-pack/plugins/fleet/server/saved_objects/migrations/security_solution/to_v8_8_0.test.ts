@@ -39,7 +39,7 @@ describe('8.8.0 Endpoint Package Policy migration', () => {
             config: {
               policy: {
                 value: {
-                  ...meta,
+                  meta: { ...meta },
                   windows: {},
                   mac: {},
                   linux: {},
