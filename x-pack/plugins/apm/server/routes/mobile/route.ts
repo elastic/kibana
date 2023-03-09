@@ -26,6 +26,7 @@ import {
   getMobileTermsByField,
   MobileTermsByFieldResponse,
 } from './get_mobile_terms_by_field';
+import { getMobileMainStatisticsByField } from './get_mobile_main_statistics_by_field';
 
 const mobileFiltersRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/mobile/filters',
@@ -266,6 +267,47 @@ const mobileTermsByFieldRoute = createApmServerRoute({
   },
 });
 
+const mobileMainStatisticsByField = createApmServerRoute({
+  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/main_statistics',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+    query: t.intersection([
+      kueryRt,
+      rangeRt,
+      environmentRt,
+      t.type({
+        field: t.string,
+      }),
+    ]),
+  }),
+  options: {
+    tags: ['access:apm'],
+  },
+  handler: async (
+    resources
+  ): Promise<{
+    mainStatistics: Awaited<ReturnType<typeof getMobileMainStatisticsByField>>;
+  }> => {
+    const apmEventClient = await getApmEventClient(resources);
+    const { params } = resources;
+    const { serviceName } = params.path;
+    const { kuery, environment, start, end, field } = params.query;
+
+    const mainStatistics = await getMobileMainStatisticsByField({
+      kuery,
+      environment,
+      start,
+      end,
+      serviceName,
+      apmEventClient,
+      field,
+    });
+    return { mainStatistics };
+  },
+});
+
 export const mobileRouteRepository = {
   ...mobileFiltersRoute,
   ...sessionsChartRoute,
@@ -273,4 +315,5 @@ export const mobileRouteRepository = {
   ...mobileStatsRoute,
   ...mobileLocationStatsRoute,
   ...mobileTermsByFieldRoute,
+  ...mobileMainStatisticsByField,
 };
