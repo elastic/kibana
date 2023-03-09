@@ -17,13 +17,16 @@ interface Props extends Omit<ChartBaseProps, 'type'> {
 export const Tile = ({ type, ...props }: Props) => {
   const { baseRequest } = useHostsViewContext();
 
-  const { nodes, loading } = useSnapshot({
-    ...baseRequest,
-    metrics: [{ type }],
-    groupBy: null,
-    includeTimeseries: true,
-    dropPartialBuckets: false,
-  });
+  const { nodes, loading } = useSnapshot(
+    {
+      ...baseRequest,
+      metrics: [{ type }],
+      groupBy: null,
+      includeTimeseries: true,
+      dropPartialBuckets: false,
+    },
+    { abortable: true }
+  );
 
   return <KPIChart id={`$metric-${type}`} type={type} nodes={nodes} loading={loading} {...props} />;
 };

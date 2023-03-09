@@ -631,403 +631,6 @@
       },
       {
         "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.ChangePoint",
-        "type": "Interface",
-        "tags": [],
-        "label": "ChangePoint",
-        "description": [
-          "\nChange point meta data for a field/value pair."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/ml-agg-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.ChangePoint",
-            "text": "ChangePoint"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/ml-agg-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.FieldValuePair",
-            "text": "FieldValuePair"
-          }
-        ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePoint.doc_count",
-            "type": "number",
-            "tags": [],
-            "label": "doc_count",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePoint.bg_count",
-            "type": "number",
-            "tags": [],
-            "label": "bg_count",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePoint.total_doc_count",
-            "type": "number",
-            "tags": [],
-            "label": "total_doc_count",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePoint.total_bg_count",
-            "type": "number",
-            "tags": [],
-            "label": "total_bg_count",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePoint.score",
-            "type": "number",
-            "tags": [],
-            "label": "score",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePoint.pValue",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "pValue",
-            "description": [],
-            "signature": [
-              "number | null"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePoint.normalizedScore",
-            "type": "number",
-            "tags": [],
-            "label": "normalizedScore",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePoint.histogram",
-            "type": "Array",
-            "tags": [],
-            "label": "histogram",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/ml-agg-utils",
-                "scope": "common",
-                "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.ChangePointHistogramItem",
-                "text": "ChangePointHistogramItem"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePoint.unique",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "unique",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.ChangePointGroup",
-        "type": "Interface",
-        "tags": [],
-        "label": "ChangePointGroup",
-        "description": [
-          "\nTree leaves"
-        ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePointGroup.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePointGroup.group",
-            "type": "Array",
-            "tags": [],
-            "label": "group",
-            "description": [],
-            "signature": [
-              "ChangePointGroupItem[]"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePointGroup.docCount",
-            "type": "number",
-            "tags": [],
-            "label": "docCount",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePointGroup.pValue",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "pValue",
-            "description": [],
-            "signature": [
-              "number | null"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePointGroup.histogram",
-            "type": "Array",
-            "tags": [],
-            "label": "histogram",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/ml-agg-utils",
-                "scope": "common",
-                "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.ChangePointHistogramItem",
-                "text": "ChangePointHistogramItem"
-              },
-              "[] | undefined"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.ChangePointGroupHistogram",
-        "type": "Interface",
-        "tags": [],
-        "label": "ChangePointGroupHistogram",
-        "description": [
-          "\nChange point histogram data for a group of field/value pairs."
-        ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePointGroupHistogram.id",
-            "type": "string",
-            "tags": [],
-            "label": "id",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePointGroupHistogram.histogram",
-            "type": "Array",
-            "tags": [],
-            "label": "histogram",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/ml-agg-utils",
-                "scope": "common",
-                "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.ChangePointHistogramItem",
-                "text": "ChangePointHistogramItem"
-              },
-              "[]"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.ChangePointHistogram",
-        "type": "Interface",
-        "tags": [],
-        "label": "ChangePointHistogram",
-        "description": [
-          "\nChange point histogram data for a field/value pair."
-        ],
-        "signature": [
-          {
-            "pluginId": "@kbn/ml-agg-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.ChangePointHistogram",
-            "text": "ChangePointHistogram"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/ml-agg-utils",
-            "scope": "common",
-            "docId": "kibKbnMlAggUtilsPluginApi",
-            "section": "def-common.FieldValuePair",
-            "text": "FieldValuePair"
-          }
-        ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePointHistogram.histogram",
-            "type": "Array",
-            "tags": [],
-            "label": "histogram",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/ml-agg-utils",
-                "scope": "common",
-                "docId": "kibKbnMlAggUtilsPluginApi",
-                "section": "def-common.ChangePointHistogramItem",
-                "text": "ChangePointHistogramItem"
-              },
-              "[]"
-            ],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-agg-utils",
-        "id": "def-common.ChangePointHistogramItem",
-        "type": "Interface",
-        "tags": [],
-        "label": "ChangePointHistogramItem",
-        "description": [
-          "\nChange point histogram data item."
-        ],
-        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePointHistogramItem.doc_count_overall",
-            "type": "number",
-            "tags": [],
-            "label": "doc_count_overall",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePointHistogramItem.doc_count_change_point",
-            "type": "number",
-            "tags": [],
-            "label": "doc_count_change_point",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePointHistogramItem.key",
-            "type": "number",
-            "tags": [],
-            "label": "key",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-agg-utils",
-            "id": "def-common.ChangePointHistogramItem.key_as_string",
-            "type": "string",
-            "tags": [],
-            "label": "key_as_string",
-            "description": [],
-            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ml-agg-utils",
         "id": "def-common.FieldValuePair",
         "type": "Interface",
         "tags": [],
@@ -1346,6 +949,403 @@
               ".NUMBER"
             ],
             "path": "x-pack/packages/ml/agg_utils/src/fetch_histograms_for_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SignificantTerm",
+        "type": "Interface",
+        "tags": [],
+        "label": "SignificantTerm",
+        "description": [
+          "\nSignificant term meta data for a field/value pair."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-common.SignificantTerm",
+            "text": "SignificantTerm"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-common.FieldValuePair",
+            "text": "FieldValuePair"
+          }
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTerm.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTerm.bg_count",
+            "type": "number",
+            "tags": [],
+            "label": "bg_count",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTerm.total_doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "total_doc_count",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTerm.total_bg_count",
+            "type": "number",
+            "tags": [],
+            "label": "total_bg_count",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTerm.score",
+            "type": "number",
+            "tags": [],
+            "label": "score",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTerm.pValue",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pValue",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTerm.normalizedScore",
+            "type": "number",
+            "tags": [],
+            "label": "normalizedScore",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTerm.histogram",
+            "type": "Array",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-common.SignificantTermHistogramItem",
+                "text": "SignificantTermHistogramItem"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTerm.unique",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "unique",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SignificantTermGroup",
+        "type": "Interface",
+        "tags": [],
+        "label": "SignificantTermGroup",
+        "description": [
+          "\nTree leaves"
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermGroup.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermGroup.group",
+            "type": "Array",
+            "tags": [],
+            "label": "group",
+            "description": [],
+            "signature": [
+              "SignificantTermGroupItem[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermGroup.docCount",
+            "type": "number",
+            "tags": [],
+            "label": "docCount",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermGroup.pValue",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "pValue",
+            "description": [],
+            "signature": [
+              "number | null"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermGroup.histogram",
+            "type": "Array",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-common.SignificantTermHistogramItem",
+                "text": "SignificantTermHistogramItem"
+              },
+              "[] | undefined"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SignificantTermGroupHistogram",
+        "type": "Interface",
+        "tags": [],
+        "label": "SignificantTermGroupHistogram",
+        "description": [
+          "\nHistogram data for a group of field/value pairs."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermGroupHistogram.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermGroupHistogram.histogram",
+            "type": "Array",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-common.SignificantTermHistogramItem",
+                "text": "SignificantTermHistogramItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SignificantTermHistogram",
+        "type": "Interface",
+        "tags": [],
+        "label": "SignificantTermHistogram",
+        "description": [
+          "\nHistogram data for a field/value pair."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-common.SignificantTermHistogram",
+            "text": "SignificantTermHistogram"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/ml-agg-utils",
+            "scope": "common",
+            "docId": "kibKbnMlAggUtilsPluginApi",
+            "section": "def-common.FieldValuePair",
+            "text": "FieldValuePair"
+          }
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermHistogram.histogram",
+            "type": "Array",
+            "tags": [],
+            "label": "histogram",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-agg-utils",
+                "scope": "common",
+                "docId": "kibKbnMlAggUtilsPluginApi",
+                "section": "def-common.SignificantTermHistogramItem",
+                "text": "SignificantTermHistogramItem"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-agg-utils",
+        "id": "def-common.SignificantTermHistogramItem",
+        "type": "Interface",
+        "tags": [],
+        "label": "SignificantTermHistogramItem",
+        "description": [
+          "\nSignificant term histogram data item."
+        ],
+        "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermHistogramItem.doc_count_overall",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count_overall",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermHistogramItem.doc_count_significant_term",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count_significant_term",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermHistogramItem.key",
+            "type": "number",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-agg-utils",
+            "id": "def-common.SignificantTermHistogramItem.key_as_string",
+            "type": "string",
+            "tags": [],
+            "label": "key_as_string",
+            "description": [],
+            "path": "x-pack/packages/ml/agg_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
