@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import type { ChangePointGroup, FieldValuePair } from '@kbn/ml-agg-utils';
+import type { SignificantTermGroup, FieldValuePair } from '@kbn/ml-agg-utils';
 
 import type { GroupTableItem } from './types';
 
-export function getGroupTableItems(changePointsGroups: ChangePointGroup[]): GroupTableItem[] {
-  const tableItems = changePointsGroups.map(({ id, group, docCount, histogram, pValue }) => {
+export function getGroupTableItems(
+  significantTermsGroups: SignificantTermGroup[]
+): GroupTableItem[] {
+  const tableItems = significantTermsGroups.map(({ id, group, docCount, histogram, pValue }) => {
     const sortedGroup = group.sort((a, b) =>
       a.fieldName > b.fieldName ? 1 : b.fieldName > a.fieldName ? -1 : 0
     );

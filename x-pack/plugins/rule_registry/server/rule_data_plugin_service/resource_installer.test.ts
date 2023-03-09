@@ -16,6 +16,11 @@ import { ECS_COMPONENT_TEMPLATE_NAME } from '@kbn/alerting-plugin/server';
 import { elasticsearchServiceMock, ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { TECHNICAL_COMPONENT_TEMPLATE_NAME } from '../../common/assets';
 
+const frameworkAlertsService = {
+  enabled: () => false,
+  getContextInitializationPromise: async () => ({ result: false, error: `failed` }),
+};
+
 describe('resourceInstaller', () => {
   let pluginStop$: Subject<void>;
 
@@ -38,7 +43,7 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: jest.fn(),
         getClusterClient,
-        areFrameworkAlertsEnabled: false,
+        frameworkAlerts: frameworkAlertsService,
         pluginStop$,
       });
       installer.installCommonResources();
@@ -55,7 +60,7 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: jest.fn(),
         getClusterClient,
-        areFrameworkAlertsEnabled: false,
+        frameworkAlerts: frameworkAlertsService,
         pluginStop$,
       });
       const indexOptions = {
@@ -86,7 +91,7 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: jest.fn(),
         getClusterClient,
-        areFrameworkAlertsEnabled: false,
+        frameworkAlerts: frameworkAlertsService,
         pluginStop$,
       });
 
@@ -113,7 +118,10 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: jest.fn(),
         getClusterClient,
-        areFrameworkAlertsEnabled: true,
+        frameworkAlerts: {
+          ...frameworkAlertsService,
+          enabled: () => true,
+        },
         pluginStop$,
       });
 
@@ -128,6 +136,7 @@ describe('resourceInstaller', () => {
         expect.objectContaining({ name: TECHNICAL_COMPONENT_TEMPLATE_NAME })
       );
     });
+
     it('should install index level resources', async () => {
       const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
       const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
@@ -137,7 +146,7 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: jest.fn(),
         getClusterClient,
-        areFrameworkAlertsEnabled: false,
+        frameworkAlerts: frameworkAlertsService,
         pluginStop$,
       });
 
@@ -157,6 +166,265 @@ describe('resourceInstaller', () => {
       await installer.installIndexLevelResources(indexInfo);
       expect(mockClusterClient.cluster.putComponentTemplate).toHaveBeenCalledWith(
         expect.objectContaining({ name: '.alerts-observability.logs.alerts-mappings' })
+      );
+    });
+
+    it('should not install index level component template when framework alerts are enabled', async () => {
+      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+      const installer = new ResourceInstaller({
+        logger: loggerMock.create(),
+        isWriteEnabled: true,
+        disabledRegistrationContexts: [],
+        getResourceName: jest.fn(),
+        getClusterClient,
+        frameworkAlerts: {
+          ...frameworkAlertsService,
+          enabled: () => true,
+        },
+        pluginStop$,
+      });
+
+      const indexOptions = {
+        feature: AlertConsumers.LOGS,
+        registrationContext: 'observability.logs',
+        dataset: Dataset.alerts,
+        componentTemplateRefs: [],
+        componentTemplates: [
+          {
+            name: 'mappings',
+          },
+        ],
+      };
+      const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: '8.1.0' });
+
+      await installer.installIndexLevelResources(indexInfo);
+      expect(mockClusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
+    });
+
+    it('should install namespace level resources for the default space', async () => {
+      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      mockClusterClient.indices.simulateTemplate.mockImplementation(async () => ({
+        template: {
+          aliases: {
+            alias_name_1: {
+              is_hidden: true,
+            },
+            alias_name_2: {
+              is_hidden: true,
+            },
+          },
+          mappings: { enabled: false },
+          settings: {},
+        },
+      }));
+      mockClusterClient.indices.getAlias.mockImplementation(async () => ({
+        real_index: {
+          aliases: {
+            alias_1: {
+              is_hidden: true,
+            },
+            alias_2: {
+              is_hidden: true,
+            },
+          },
+        },
+      }));
+      const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+      const installer = new ResourceInstaller({
+        logger: loggerMock.create(),
+        isWriteEnabled: true,
+        disabledRegistrationContexts: [],
+        getResourceName: jest.fn(),
+        getClusterClient,
+        frameworkAlerts: frameworkAlertsService,
+        pluginStop$,
+      });
+
+      const indexOptions = {
+        feature: AlertConsumers.LOGS,
+        registrationContext: 'observability.logs',
+        dataset: Dataset.alerts,
+        componentTemplateRefs: [],
+        componentTemplates: [
+          {
+            name: 'mappings',
+          },
+        ],
+      };
+      const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: '8.1.0' });
+
+      await installer.installAndUpdateNamespaceLevelResources(indexInfo, 'default');
+      expect(mockClusterClient.indices.simulateTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: '.alerts-observability.logs.alerts-default-index-template',
+        })
+      );
+      expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: '.alerts-observability.logs.alerts-default-index-template',
+        })
+      );
+      expect(mockClusterClient.indices.getAlias).toHaveBeenCalledWith(
+        expect.objectContaining({ name: '.alerts-observability.logs.alerts-*' })
+      );
+      expect(mockClusterClient.indices.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: '.internal.alerts-observability.logs.alerts-default-000001',
+        })
+      );
+    });
+
+    it('should not install namespace level resources for the default space when framework alerts are available', async () => {
+      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+      const installer = new ResourceInstaller({
+        logger: loggerMock.create(),
+        isWriteEnabled: true,
+        disabledRegistrationContexts: [],
+        getResourceName: jest.fn(),
+        getClusterClient,
+        frameworkAlerts: {
+          ...frameworkAlertsService,
+          enabled: () => true,
+          getContextInitializationPromise: async () => ({ result: true }),
+        },
+        pluginStop$,
+      });
+
+      const indexOptions = {
+        feature: AlertConsumers.LOGS,
+        registrationContext: 'observability.logs',
+        dataset: Dataset.alerts,
+        componentTemplateRefs: [],
+        componentTemplates: [
+          {
+            name: 'mappings',
+          },
+        ],
+      };
+      const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: '8.1.0' });
+
+      await installer.installAndUpdateNamespaceLevelResources(indexInfo, 'default');
+      expect(mockClusterClient.indices.simulateTemplate).not.toHaveBeenCalled();
+      expect(mockClusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(mockClusterClient.indices.getAlias).not.toHaveBeenCalled();
+      expect(mockClusterClient.indices.create).not.toHaveBeenCalled();
+    });
+
+    it('should throw error if framework was unable to install namespace level resources', async () => {
+      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+      const installer = new ResourceInstaller({
+        logger: loggerMock.create(),
+        isWriteEnabled: true,
+        disabledRegistrationContexts: [],
+        getResourceName: jest.fn(),
+        getClusterClient,
+        frameworkAlerts: {
+          ...frameworkAlertsService,
+          enabled: () => true,
+        },
+        pluginStop$,
+      });
+
+      const indexOptions = {
+        feature: AlertConsumers.LOGS,
+        registrationContext: 'observability.logs',
+        dataset: Dataset.alerts,
+        componentTemplateRefs: [],
+        componentTemplates: [
+          {
+            name: 'mappings',
+          },
+        ],
+      };
+      const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: '8.1.0' });
+
+      await expect(
+        installer.installAndUpdateNamespaceLevelResources(indexInfo, 'default')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"There was an error in the framework installing namespace-level resources and creating concrete indices for .alerts-observability.logs.alerts-default - failed"`
+      );
+      expect(mockClusterClient.indices.simulateTemplate).not.toHaveBeenCalled();
+      expect(mockClusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+      expect(mockClusterClient.indices.getAlias).not.toHaveBeenCalled();
+      expect(mockClusterClient.indices.create).not.toHaveBeenCalled();
+    });
+
+    it('should install namespace level resources for non-default space even when framework alerts are available', async () => {
+      const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+      mockClusterClient.indices.simulateTemplate.mockImplementation(async () => ({
+        template: {
+          aliases: {
+            alias_name_1: {
+              is_hidden: true,
+            },
+            alias_name_2: {
+              is_hidden: true,
+            },
+          },
+          mappings: { enabled: false },
+          settings: {},
+        },
+      }));
+      mockClusterClient.indices.getAlias.mockImplementation(async () => ({
+        real_index: {
+          aliases: {
+            alias_1: {
+              is_hidden: true,
+            },
+            alias_2: {
+              is_hidden: true,
+            },
+          },
+        },
+      }));
+      const getClusterClient = jest.fn(() => Promise.resolve(mockClusterClient));
+      const installer = new ResourceInstaller({
+        logger: loggerMock.create(),
+        isWriteEnabled: true,
+        disabledRegistrationContexts: [],
+        getResourceName: jest.fn(),
+        getClusterClient,
+        frameworkAlerts: {
+          ...frameworkAlertsService,
+          enabled: () => true,
+        },
+        pluginStop$,
+      });
+
+      const indexOptions = {
+        feature: AlertConsumers.LOGS,
+        registrationContext: 'observability.logs',
+        dataset: Dataset.alerts,
+        componentTemplateRefs: [],
+        componentTemplates: [
+          {
+            name: 'mappings',
+          },
+        ],
+      };
+      const indexInfo = new IndexInfo({ indexOptions, kibanaVersion: '8.1.0' });
+
+      await installer.installAndUpdateNamespaceLevelResources(indexInfo, 'my-staging-space');
+      expect(mockClusterClient.indices.simulateTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: '.alerts-observability.logs.alerts-my-staging-space-index-template',
+        })
+      );
+      expect(mockClusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: '.alerts-observability.logs.alerts-my-staging-space-index-template',
+        })
+      );
+      expect(mockClusterClient.indices.getAlias).toHaveBeenCalledWith(
+        expect.objectContaining({ name: '.alerts-observability.logs.alerts-*' })
+      );
+      expect(mockClusterClient.indices.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          index: '.internal.alerts-observability.logs.alerts-my-staging-space-000001',
+        })
       );
     });
   });
@@ -209,7 +477,7 @@ describe('resourceInstaller', () => {
         disabledRegistrationContexts: [],
         getResourceName: jest.fn(),
         getClusterClient: async () => mockClusterClient,
-        areFrameworkAlertsEnabled: false,
+        frameworkAlerts: frameworkAlertsService,
         pluginStop$,
       };
       const indexOptions = {
