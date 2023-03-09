@@ -129,13 +129,13 @@ export interface AddAuditEventParams {
    */
   deleteFromSpaces?: readonly string[];
   /**
-   * Array of types being requested for authorization.
-   * Used with actions that do not audit per object
-   * (FIND and OPEN_POINT_IN_TIME_FOR_TYPE actions)
+   * Array of saved object types not authorized for the action.
+   * Used with FIND and OPEN_POINT_IN_TIME_FOR_TYPE actions
    */
   unauthorizedTypes?: readonly string[];
   /**
-   * Array of spaces being requested for authorization.
+   * Array of spaces not authorized for the action.
+   * Used with FIND and OPEN_POINT_IN_TIME_FOR_TYPE actions
    */
   unauthorizedSpaces?: readonly string[];
   /**
