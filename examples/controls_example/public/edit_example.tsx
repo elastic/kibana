@@ -79,7 +79,12 @@ export const EditExample = () => {
               iconType="plusInCircle"
               isDisabled={controlGroup === undefined}
               onClick={() => {
-                controlGroup!.openAddDataControlFlyout();
+                controlGroup!.openAddDataControlFlyout({
+                  // default placeholder for options list control
+                  placeholder: 'Custom placeholder',
+                  // default value for range slider
+                  value: ['0', '4'],
+                });
               }}
             >
               Add control

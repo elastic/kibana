@@ -24,7 +24,12 @@ import {
   DEFAULT_CONTROL_WIDTH,
 } from '../../../common/control_group/control_group_constants';
 
-export function openAddDataControlFlyout(this: ControlGroupContainer) {
+export function openAddDataControlFlyout(
+  this: ControlGroupContainer,
+  overrideControlInput?: Partial<
+    AddOptionsListControlProps & AddDataControlProps & AddRangeSliderControlProps
+  >
+) {
   const {
     overlays: { openFlyout, openConfirm },
     controls: { getControlFactory },
@@ -33,7 +38,7 @@ export function openAddDataControlFlyout(this: ControlGroupContainer) {
   const ControlsServicesProvider = pluginServices.getContextProvider();
   const ReduxWrapper = this.getReduxEmbeddableTools().Wrapper;
 
-  let controlInput: Partial<DataControlInput> = {};
+  let controlInput: Partial<DataControlInput> = overrideControlInput ?? {};
   const onCancel = () => {
     if (Object.keys(controlInput).length === 0) {
       this.closeAllFlyouts();
