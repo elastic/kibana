@@ -9,27 +9,15 @@ import React, { useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import { RuleStatus, useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import type { RulesListVisibleColumns } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
-import { useRulesPageStateContainer } from './state_container/use_rules_page_state_container';
-import { rulesPageStateContainer, Provider } from './state_container/state_container';
 
-const RULES_LIST_COLUMNS_KEY = 'observability_rulesListColumns';
-const RULES_LIST_COLUMNS: RulesListVisibleColumns[] = [
-  'ruleName',
-  'ruleExecutionStatusLastDate',
-  'ruleSnoozeNotify',
-  'ruleExecutionStatus',
-  'ruleExecutionState',
-];
-
-function RulesPage() {
+export function RulesPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const {
     http,
@@ -41,21 +29,21 @@ function RulesPage() {
     },
   } = useKibana().services;
 
-  const { status, setStatus, lastResponse, setLastResponse } = useRulesPageStateContainer();
-
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const { ruleTypes } = useLoadRuleTypes({
     filteredRuleTypes,
   });
 
-  const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
-  const [refresh, setRefresh] = useState(new Date());
-
   const authorizedRuleTypes = [...ruleTypes.values()];
-
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
     (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );
+
+  const [status, setStatus] = useState<RuleStatus[]>([]);
+  const [lastResponse, setLastResponse] = useState<string[]>([]);
+  const [refresh, setRefresh] = useState(new Date());
+
+  const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
 
   useBreadcrumbs([
     {
@@ -71,6 +59,16 @@ function RulesPage() {
     },
   ]);
 
+  const handleLastResponseFilterChange = (newLastResponse: string[]) => {
+    setLastResponse(newLastResponse);
+    return { lastResponse: newLastResponse, status };
+  };
+
+  const handleStatusFilterChange = (newStatus: RuleStatus[]) => {
+    setStatus(newStatus);
+    return { lastResponse, status: newStatus };
+  };
+
   return (
     <ObservabilityPageTemplate
       pageHeader={{
@@ -79,11 +77,11 @@ function RulesPage() {
         }),
         rightSideItems: [
           <EuiButton
-            fill
-            key="create-alert"
-            iconType="plusInCircle"
             data-test-subj="createRuleButton"
             disabled={!authorizedToCreateAnyRules}
+            fill
+            iconType="plusInCircle"
+            key="create-alert"
             onClick={() => setAddRuleFlyoutVisibility(true)}
           >
             <FormattedMessage
@@ -93,10 +91,10 @@ function RulesPage() {
           </EuiButton>,
           <RulesSettingsLink />,
           <EuiButtonEmpty
-            href={docLinks.links.observability.createAlerts}
-            target="_blank"
-            iconType="help"
             data-test-subj="documentationLink"
+            href={docLinks.links.observability.createAlerts}
+            iconType="help"
+            target="_blank"
           >
             <FormattedMessage
               id="xpack.observability.rules.docsLinkText"
@@ -111,15 +109,21 @@ function RulesPage() {
         <EuiFlexItem>
           <RuleList
             filteredRuleTypes={filteredRuleTypes}
-            showActionFilter={false}
-            ruleDetailsRoute="alerts/rules/:ruleId"
-            statusFilter={status}
-            onStatusFilterChange={setStatus}
             lastResponseFilter={lastResponse}
-            onLastResponseFilterChange={setLastResponse}
             refresh={refresh}
-            rulesListKey={RULES_LIST_COLUMNS_KEY}
-            visibleColumns={RULES_LIST_COLUMNS}
+            ruleDetailsRoute="alerts/rules/:ruleId"
+            rulesListKey="observability_rulesListColumns"
+            showActionFilter={false}
+            statusFilter={status}
+            visibleColumns={[
+              'ruleName',
+              'ruleExecutionStatusLastDate',
+              'ruleSnoozeNotify',
+              'ruleExecutionStatus',
+              'ruleExecutionState',
+            ]}
+            onLastResponseFilterChange={handleLastResponseFilterChange}
+            onStatusFilterChange={handleStatusFilterChange}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -140,13 +144,3 @@ function RulesPage() {
     </ObservabilityPageTemplate>
   );
 }
-
-function WrappedRulesPage() {
-  return (
-    <Provider value={rulesPageStateContainer}>
-      <RulesPage />
-    </Provider>
-  );
-}
-
-export { WrappedRulesPage as RulesPage };
