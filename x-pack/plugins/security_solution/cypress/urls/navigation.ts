@@ -32,6 +32,7 @@ export const TIMELINES_URL = '/app/security/timelines';
 export const TIMELINE_TEMPLATES_URL = '/app/security/timelines/template';
 export const CASES_URL = '/app/security/cases';
 export const EXCEPTIONS_URL = 'app/security/exceptions';
+export const EXCEPTIONS_LIST_URL = 'app/security/exceptions/details';
 export const HOSTS_URL = '/app/security/hosts/allHosts';
 export const CSP_FINDINGS_URL = 'app/security/cloud_security_posture/findings';
 export const DETECTIONS_RULE_MANAGEMENT_URL = 'app/security/rules';
@@ -66,3 +67,5 @@ export const hostDetailsUrl = (hostName: string) =>
   `/app/security/hosts/${hostName}/authentications`;
 
 export const userDetailsUrl = (userName: string) => `/app/security/users/${userName}/allUsers`;
+
+export const exceptionsListDetailsUrl = (listId: string) => `${EXCEPTIONS_LIST_URL}/${listId}`;

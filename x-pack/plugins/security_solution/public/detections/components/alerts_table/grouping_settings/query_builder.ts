@@ -43,12 +43,12 @@ export const getAlertsGroupingQuery = ({
     additionalFilters,
     additionalAggregationsRoot: [
       {
-        alertsCount: { value_count: { field: selectedGroup } },
+        unitCount0: { value_count: { field: selectedGroup } },
       },
       ...(selectedGroup !== 'none'
         ? [
             {
-              groupsNumber: {
+              groupCount0: {
                 cardinality: {
                   field: selectedGroup,
                 },
@@ -72,7 +72,7 @@ export const getAlertsGroupingQuery = ({
 const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   const aggMetrics: NamedAggregation[] = [
     {
-      alertsCount: {
+      unitCount0: {
         cardinality: {
           field: 'kibana.alert.uuid',
         },
