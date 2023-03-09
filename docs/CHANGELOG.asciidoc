@@ -192,7 +192,7 @@ This known issue only impacts the Observability Rules page. To work around this 
 ====
 
 [[known-issue-152847]]
-.Metric visualization progress bars get turned off on upgrade
+.Progress bars are hidden in Lens metric visualizations
 [%collapsible]
 ====
 *Details* +
