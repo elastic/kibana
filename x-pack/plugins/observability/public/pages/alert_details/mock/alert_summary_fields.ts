@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { AlertSummaryField } from '../types';
 import { alertWithTags } from './alert';
+import type { AlertSummaryField } from '../components/alert_summary';
+
 export const alertSummaryFieldsMock: AlertSummaryField[] = [
   {
     label: 'Actual value',

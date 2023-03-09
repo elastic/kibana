@@ -15,6 +15,7 @@ export class DashboardAddPanelService extends FtrService {
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
   private readonly savedObjectsFinder = this.ctx.getService('savedObjectsFinder');
+  private readonly browser = this.ctx.getService('browser');
 
   async clickOpenAddPanel() {
     this.log.debug('DashboardAddPanel.clickOpenAddPanel');
@@ -26,6 +27,8 @@ export class DashboardAddPanelService extends FtrService {
   async clickCreateNewLink() {
     this.log.debug('DashboardAddPanel.clickAddNewPanelButton');
     await this.retry.try(async () => {
+      // prevent query bar auto suggest from blocking button
+      await this.browser.pressKeys(this.browser.keys.ESCAPE);
       await this.testSubjects.click('dashboardAddNewPanelButton');
       await this.testSubjects.waitForDeleted('dashboardAddNewPanelButton');
       await this.header.waitUntilLoadingHasFinished();

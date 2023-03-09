@@ -319,6 +319,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
                   ruleTypeId: response.body.rule_type_id,
                   rule: undefined,
                   consumer: 'alertsFixture',
+                  source: 'alert',
                 });
                 break;
             }
@@ -1138,6 +1139,7 @@ interface ValidateEventLogParams {
     namespace?: string;
   };
   flapping?: boolean;
+  source?: string;
 }
 
 export function validateEvent(event: IValidatedEvent, params: ValidateEventLogParams): void {
@@ -1157,6 +1159,7 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
     consumer,
     ruleTypeId,
     flapping,
+    source,
   } = params;
   const { status, actionGroupId, instanceId, reason, shouldHaveEventEnd } = params;
 
@@ -1208,6 +1211,10 @@ export function validateEvent(event: IValidatedEvent, params: ValidateEventLogPa
 
   if (flapping !== undefined) {
     expect(event?.kibana?.alert?.flapping).to.be(flapping);
+  }
+
+  if (source) {
+    expect(event?.kibana?.action?.execution?.source).to.be(source);
   }
 
   expect(event?.kibana?.alert?.rule?.rule_type_id).to.be(ruleTypeId);
