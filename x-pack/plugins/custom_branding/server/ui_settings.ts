@@ -116,7 +116,7 @@ export function registerUiSettings(core: CoreSetup<object, unknown>) {
       }),
       value: null,
       description: i18n.translate('xpack.customBranding.faviconSVGDescription', {
-        defaultMessage: `The URL of an image that will appear on browser tabs.. Recommended size is 16 x 16 pixels. {subscriptionLink}`,
+        defaultMessage: `The URL of an image that will appear on browser tabs. Recommended size is 16 x 16 pixels. {subscriptionLink}`,
         values: { subscriptionLink },
       }),
       sensitive: true,
