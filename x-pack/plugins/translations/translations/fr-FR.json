@@ -24311,7 +24311,6 @@
     "xpack.observability.alertDetails.errorPromptTitle": "Impossible de charger les détails de l'alerte",
     "xpack.observability.alertDetails.viewRuleDetails": "Afficher les détails de la règle",
     "xpack.observability.alerts.actions.addToCase": "Ajouter à un cas existant",
-    "xpack.observability.alerts.actions.addToCaseDisabled": "L'ajout au cas n'est pas pris en charge pour cette sélection",
     "xpack.observability.alerts.actions.addToNewCase": "Ajouter au nouveau cas",
     "xpack.observability.alerts.alertStatusFilter.active": "Actif",
     "xpack.observability.alerts.alertStatusFilter.recovered": "Récupéré",
