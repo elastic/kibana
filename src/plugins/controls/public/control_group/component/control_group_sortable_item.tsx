@@ -66,7 +66,15 @@ const SortableControlInner = forwardRef<
   SortableControlProps & { style: HTMLAttributes<HTMLButtonElement>['style'] }
 >(
   (
-    { embeddableId, embeddableType, dragInfo, style, isEditable, ...dragHandleProps },
+    {
+      embeddableId,
+      embeddableType,
+      dragInfo,
+      style,
+      isEditable,
+      disabledFloatingActions,
+      ...dragHandleProps
+    },
     dragHandleRef
   ) => {
     const { isOver, isDragging, draggingIndex, index } = dragInfo;
@@ -110,6 +118,7 @@ const SortableControlInner = forwardRef<
           embeddableId={embeddableId}
           embeddableType={embeddableType}
           customPrepend={isEditable ? dragHandle : undefined}
+          disabledFloatingActions={disabledFloatingActions}
         />
       </EuiFlexItem>
     );

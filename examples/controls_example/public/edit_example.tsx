@@ -10,6 +10,8 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingContent,
@@ -19,16 +21,44 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { LazyControlGroupRenderer, ControlGroupContainer } from '@kbn/controls-plugin/public';
+import {
+  LazyControlGroupRenderer,
+  ControlGroupContainer,
+  ControlGroupInput,
+} from '@kbn/controls-plugin/public';
 import { withSuspense } from '@kbn/presentation-util-plugin/public';
+import styled from '@emotion/react';
 
 const ControlGroupRenderer = withSuspense(LazyControlGroupRenderer);
 
 const INPUT_KEY = 'kbnControls:saveExample:input';
 
+const disabledActionOptions = [
+  {
+    label: 'edit',
+  },
+  {
+    label: 'remove',
+  },
+  {
+    label: 'all',
+  },
+  {
+    label: 'none',
+  },
+];
+
+// @ts-expect-error update types
+const CustomCombobox = styled(EuiComboBox)`
+  .euiFormControlLayout__prepend {
+    width: 127px;
+  }
+`;
+
 export const EditExample = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [selectedOptions, setSelected] = useState([disabledActionOptions[3]]);
   const [controlGroup, setControlGroup] = useState<ControlGroupContainer>();
 
   async function onSave() {
@@ -61,6 +91,22 @@ export const EditExample = () => {
     setIsLoading(false);
     return input;
   }
+
+  const disableControl = (option?: 'edit' | 'remove' | 'all') => {
+    controlGroup?.updateInput({
+      disabledFloatingActions: option,
+    });
+  };
+
+  const onOptionsListChange = (selectedNewOpts: EuiComboBoxOptionOption[]) => {
+    setSelected(selectedNewOpts);
+
+    const newLabel = selectedNewOpts[0].label;
+    const newOption =
+      newLabel === 'none' ? undefined : (newLabel as ControlGroupInput['disabledFloatingActions']);
+
+    disableControl(newOption);
+  };
 
   return (
     <>
@@ -95,6 +141,17 @@ export const EditExample = () => {
             >
               Save
             </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <CustomCombobox
+              prepend={'Disabled Actions'}
+              aria-label="Accessible screen reader label"
+              placeholder="Select a single option"
+              singleSelection={{ asPlainText: true }}
+              options={disabledActionOptions}
+              selectedOptions={selectedOptions}
+              onChange={onOptionsListChange}
+            />
           </EuiFlexItem>
         </EuiFlexGroup>
         {isLoading ? (

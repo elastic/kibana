@@ -31,6 +31,7 @@ export interface ControlGroupInput extends EmbeddableInput, ControlInput {
   defaultControlGrow?: boolean;
   controlStyle: ControlStyle;
   panels: ControlsPanels;
+  disabledFloatingActions?: 'edit' | 'remove' | 'all';
 }
 
 /**

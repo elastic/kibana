@@ -50,6 +50,7 @@ export const ControlGroup = () => {
   const viewMode = select((state) => state.explicitInput.viewMode);
   const controlStyle = select((state) => state.explicitInput.controlStyle);
   const showAddButton = select((state) => state.componentState.showAddButton);
+  const disabledFloatingActions = select((state) => state.explicitInput.disabledFloatingActions);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -142,6 +143,7 @@ export const ControlGroup = () => {
                         panels[controlId] && (
                           <SortableControl
                             isEditable={isEditable}
+                            disabledFloatingActions={disabledFloatingActions}
                             dragInfo={{ index, draggingIndex }}
                             embeddableId={controlId}
                             embeddableType={panels[controlId].type}
