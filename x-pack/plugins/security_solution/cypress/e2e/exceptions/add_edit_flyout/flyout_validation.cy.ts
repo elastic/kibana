@@ -359,8 +359,6 @@ describe('Exceptions flyout', { testIsolation: false }, () => {
     // set an expiration date in the future
     editExceptionFlyoutExpireTime(new Date(Date.now() + 1000000).toISOString());
     cy.get(CONFIRM_BTN).should('be.enabled');
-
-    closeExceptionBuilderFlyout();
   });
 
   // TODO - Add back in error states into modal
