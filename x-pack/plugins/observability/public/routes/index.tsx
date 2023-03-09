@@ -10,7 +10,7 @@ import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { casesPath } from '../../common';
-import { CasesPage } from '../pages/cases';
+import { CasesPage } from '../pages/cases/cases';
 import { AlertsPage } from '../pages/alerts/containers/alerts_page';
 import { OverviewPage } from '../pages/overview/overview';
 import { jsonRt } from './json_rt';
