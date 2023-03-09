@@ -113,14 +113,37 @@ export async function validateActions(
     }
   }
 
-  // check for actions throttled shorter than the rule schedule
   const scheduleInterval = parseDuration(data.schedule.interval);
-  const actionsWithInvalidThrottles = actions.filter(
-    (action) =>
+  const actionsWithInvalidThrottles = [];
+  const actionWithoutQueryAndTimeframe = [];
+  const actionsWithInvalidTimeRange = [];
+
+  for (const action of actions) {
+    const { alertsFilter } = action;
+
+    // check for actions throttled shorter than the rule schedule
+    if (
       action.frequency?.notifyWhen === RuleNotifyWhen.THROTTLE &&
       parseDuration(action.frequency.throttle!) < scheduleInterval
-  );
-  if (actionsWithInvalidThrottles.length) {
+    ) {
+      actionsWithInvalidThrottles.push(action);
+    }
+
+    if (alertsFilter) {
+      // alertsFilter must have at least one of query and timeframe
+      if (!alertsFilter.query && !alertsFilter.timeframe) {
+        actionWithoutQueryAndTimeframe.push(action);
+      }
+      // alertsFilter time range filter's start time can't be before end time
+      if (alertsFilter?.timeframe?.hours) {
+        if (alertsFilter.timeframe.hours.end < alertsFilter.timeframe.hours.start) {
+          actionsWithInvalidTimeRange.push(action);
+        }
+      }
+    }
+  }
+
+  if (actionsWithInvalidThrottles.length > 0) {
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidThrottles', {
         defaultMessage:
@@ -135,10 +158,6 @@ export async function validateActions(
     );
   }
 
-  const actionWithoutQueryAndTimeframe = actions.filter((action) => {
-    return !!(action.alertsFilter && !action.alertsFilter.query && !action.alertsFilter.timeframe);
-  });
-
   if (actionWithoutQueryAndTimeframe.length > 0) {
     errors.push(
       i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidAlertsFilter', {
@@ -146,6 +165,24 @@ export async function validateActions(
         values: {
           groups: actionWithoutQueryAndTimeframe
             .map((a) => `${a.group} (${a.frequency?.throttle})`)
+            .join(', '),
+        },
+      })
+    );
+  }
+
+  if (actionsWithInvalidTimeRange.length > 0) {
+    errors.push(
+      i18n.translate('xpack.alerting.rulesClient.validateActions.actionsWithInvalidTimeRange', {
+        defaultMessage: `Action's alertsFilter time range has a start time later then end time: {hours}`,
+        values: {
+          hours: actionsWithInvalidTimeRange
+            .map(
+              (a) =>
+                `start(${a.alertsFilter!.timeframe!.hours.start}) > end(${
+                  a.alertsFilter!.timeframe!.hours.end
+                })`
+            )
             .join(', '),
         },
       })

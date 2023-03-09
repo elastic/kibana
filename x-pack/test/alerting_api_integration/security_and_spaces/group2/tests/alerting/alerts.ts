@@ -1306,7 +1306,7 @@ instanceStateValue: true
             summary: true,
             alertsFilter: {
               timeframe: null,
-              query: { kql: 'kibana.alert.rule.name:foo' },
+              query: { kql: 'kibana.alert.instance.id:1' },
             },
           });
 
@@ -1349,7 +1349,7 @@ instanceStateValue: true
               expect(searchResult.body.hits.total.value).to.eql(1);
               // @ts-expect-error _source: unknown
               expect(searchResult.body.hits.hits[0]._source.params.message).to.eql(
-                'Alerts, all:0, new:0 IDs:[], ongoing:0 IDs:[], recovered:0 IDs:[]'
+                'Alerts, all:1, new:1 IDs:[1,], ongoing:0 IDs:[], recovered:0 IDs:[]'
               );
               break;
             default:
