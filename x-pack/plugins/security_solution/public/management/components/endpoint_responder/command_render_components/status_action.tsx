@@ -168,12 +168,12 @@ export const EndpointStatusActionResult = memo<
       {
         title: (
           <ConsoleCodeBlock>
-            {i18n.translate('xpack.securitySolution.endpointResponseActions.status.agentPlatform', {
-              defaultMessage: 'Agent platform',
+            {i18n.translate('xpack.securitySolution.endpointResponseActions.status.platform', {
+              defaultMessage: 'Platform',
             })}
           </ConsoleCodeBlock>
         ),
-        description: <ConsoleCodeBlock>{endpointDetails.metadata.host.os.family}</ConsoleCodeBlock>,
+        description: <ConsoleCodeBlock>{endpointDetails.metadata.host.os.full}</ConsoleCodeBlock>,
       },
       {
         title: (
