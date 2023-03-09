@@ -44,17 +44,17 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
         range: userRange,
       } = request.body;
 
-      const index =
-        (dataViewId &&
-          (await getRiskInputsIndex({
-            dataViewId,
-            logger,
-            soClient,
-          }))) ??
-        siemClient.getAlertsIndex();
-      const range = userRange ?? { start: 'now-15d', end: 'now' };
-
       try {
+        const index =
+          (dataViewId &&
+            (await getRiskInputsIndex({
+              dataViewId,
+              logger,
+              soClient,
+            }))) ??
+          siemClient.getAlertsIndex();
+
+        const range = userRange ?? { start: 'now-15d', end: 'now' };
         const result = await riskScoreService.getScores({
           debug,
           enrichInputs,
@@ -67,7 +67,11 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
         return response.ok({ body: result });
       } catch (e) {
         const error = transformError(e);
-        return siemResponse.error({ statusCode: error.statusCode, body: error.message });
+
+        return siemResponse.error({
+          statusCode: error.statusCode,
+          body: { message: error.message, full_error: JSON.stringify(e) },
+        });
       }
     }
   );
