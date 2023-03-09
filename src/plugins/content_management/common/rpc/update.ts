@@ -7,6 +7,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { Version } from '../types';
+import { versionSchema } from './constants';
 
 import type { ProcedureSchemas } from './types';
 
@@ -15,6 +16,7 @@ export const updateSchemas: ProcedureSchemas = {
     {
       contentTypeId: schema.string(),
       id: schema.string({ minLength: 1 }),
+      version: versionSchema,
       // --> "data" to update a content will be defined by each content type
       data: schema.recordOf(schema.string(), schema.any()),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),

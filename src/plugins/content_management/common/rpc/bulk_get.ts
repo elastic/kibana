@@ -7,6 +7,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import type { Version } from '../types';
+import { versionSchema } from './constants';
 
 import type { ProcedureSchemas } from './types';
 
@@ -14,6 +15,7 @@ export const bulkGetSchemas: ProcedureSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
+      version: versionSchema,
       ids: schema.arrayOf(schema.string({ minLength: 1 }), { minSize: 1 }),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
     },

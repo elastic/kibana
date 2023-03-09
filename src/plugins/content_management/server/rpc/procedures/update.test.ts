@@ -7,6 +7,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { omit } from 'lodash';
+
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
@@ -32,37 +34,42 @@ const fooDataSchema = schema.object({ title: schema.string() }, { unknowns: 'for
 
 describe('RPC -> update()', () => {
   describe('Input/Output validation', () => {
-    /**
-     * These tests are for the procedure call itself. Every RPC needs to declare in/out schema
-     * We will test _specific_ validation schema inside the procedure suite below.
-     */
-    test('should validate that a "contentTypeId", an "id" and "data" object is passed', () => {
-      const data = { title: 'hello' };
+    const data = { title: 'hello' };
+    const validInput = { contentTypeId: 'foo', id: '123', version: 'v1', data };
 
+    test('should validate that a "contentTypeId", an "id" and "data" object is passed', () => {
       [
-        { input: { contentTypeId: 'foo', id: '123', data } },
+        { input: validInput },
         {
-          input: { id: '123', data }, // contentTypeId missing
+          input: omit(validInput, 'contentTypeId'),
           expectedError: '[contentTypeId]: expected value of type [string] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo', data }, // id missing
+          input: omit(validInput, 'id'),
           expectedError: '[id]: expected value of type [string] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo', id: '' }, // id must have min 1 char
+          input: { ...validInput, id: '' }, // id must have min 1 char
           expectedError: '[id]: value has length [0] but it must have a minimum length of [1].',
         },
         {
-          input: { contentTypeId: 'foo', id: '123' }, // data missing
+          input: omit(validInput, 'version'),
+          expectedError: '[version]: expected value of type [string] but got [undefined]',
+        },
+        {
+          input: { ...validInput, version: '1' }, // invalid version format
+          expectedError: '[version]: must follow the pattern [v${number}]',
+        },
+        {
+          input: omit(validInput, 'data'),
           expectedError: '[data]: expected value of type [object] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo', id: '123', data: 123 }, // data is not an object
+          input: { ...validInput, data: 123 }, // data is not an object
           expectedError: '[data]: expected value of type [object] but got [number]',
         },
         {
-          input: { contentTypeId: 'foo', id: '123', data, unknown: 'foo' },
+          input: { ...validInput, unknown: 'foo' },
           expectedError: '[unknown]: definition for this key is missing',
         },
       ].forEach(({ input, expectedError }) => {
@@ -81,6 +88,7 @@ describe('RPC -> update()', () => {
         {
           contentTypeId: 'foo',
           id: '123',
+          version: 'v1',
           data: { title: 'hello' },
           options: { any: 'object' },
         },
@@ -94,6 +102,7 @@ describe('RPC -> update()', () => {
           contentTypeId: 'foo',
           data: { title: 'hello' },
           id: '123',
+          version: 'v1',
           options: 123, // Not an object
         },
         inputSchema

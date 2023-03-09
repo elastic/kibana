@@ -7,6 +7,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { omit } from 'lodash';
+
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
@@ -32,29 +34,34 @@ const fooDataSchema = schema.object({ title: schema.string() }, { unknowns: 'for
 
 describe('RPC -> search()', () => {
   describe('Input/Output validation', () => {
-    /**
-     * These tests are for the procedure call itself. Every RPC needs to declare in/out schema
-     * We will test _specific_ validation schema inside the procedure in separate tests.
-     */
-    test('should validate that a contentTypeId and "query" object is passed', () => {
-      const query = { title: 'hello' };
+    const query = { title: 'hello' };
+    const validInput = { contentTypeId: 'foo', version: 'v1', query };
 
+    test('should validate that a contentTypeId and "query" object is passed', () => {
       [
-        { input: { contentTypeId: 'foo', query } },
+        { input: validInput },
         {
           input: { query }, // contentTypeId missing
           expectedError: '[contentTypeId]: expected value of type [string] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo' }, // query missing
+          input: omit(validInput, 'version'),
+          expectedError: '[version]: expected value of type [string] but got [undefined]',
+        },
+        {
+          input: { ...validInput, version: '1' }, // invalid version format
+          expectedError: '[version]: must follow the pattern [v${number}]',
+        },
+        {
+          input: omit(validInput, 'query'),
           expectedError: '[query]: expected value of type [object] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo', query: 123 }, // query is not an object
+          input: { ...validInput, query: 123 }, // query is not an object
           expectedError: '[query]: expected value of type [object] but got [number]',
         },
         {
-          input: { contentTypeId: 'foo', query, unknown: 'foo' },
+          input: { ...validInput, unknown: 'foo' },
           expectedError: '[unknown]: definition for this key is missing',
         },
       ].forEach(({ input, expectedError }) => {
@@ -77,6 +84,7 @@ describe('RPC -> search()', () => {
         {
           contentTypeId: 'foo',
           query: { title: 'hello' },
+          version: 'v1',
           options: { any: 'object' },
         },
         inputSchema
@@ -87,6 +95,7 @@ describe('RPC -> search()', () => {
       error = validate(
         {
           contentTypeId: 'foo',
+          version: 'v1',
           query: { title: 'hello' },
           options: 123, // Not an object
         },

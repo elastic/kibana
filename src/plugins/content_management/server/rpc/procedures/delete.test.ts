@@ -7,6 +7,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { omit } from 'lodash';
+
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
@@ -31,24 +33,30 @@ const FOO_CONTENT_ID = 'foo';
 
 describe('RPC -> delete()', () => {
   describe('Input/Output validation', () => {
-    /**
-     * These tests are for the procedure call itself. Every RPC needs to declare in/out schema
-     * We will test _specific_ validation schema inside the procedure in separate tests.
-     */
+    const validInput = { contentTypeId: 'foo', id: '123', version: 'v1' };
+
     test('should validate that a contentTypeId and an id is passed', () => {
       [
-        { input: { contentTypeId: 'foo', id: '123' } },
+        { input: validInput },
         {
-          input: { id: '777' }, // contentTypeId missing
+          input: omit(validInput, 'contentTypeId'),
           expectedError: '[contentTypeId]: expected value of type [string] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo', id: '123', unknown: 'foo' },
+          input: { ...validInput, unknown: 'foo' },
           expectedError: '[unknown]: definition for this key is missing',
         },
         {
-          input: { contentTypeId: 'foo', id: '' }, // id must have min 1 char
+          input: { ...validInput, id: '' }, // id must have min 1 char
           expectedError: '[id]: value has length [0] but it must have a minimum length of [1].',
+        },
+        {
+          input: omit(validInput, 'version'),
+          expectedError: '[version]: expected value of type [string] but got [undefined]',
+        },
+        {
+          input: { ...validInput, version: '1' }, // invalid version format
+          expectedError: '[version]: must follow the pattern [v${number}]',
         },
       ].forEach(({ input, expectedError }) => {
         const error = validate(input, inputSchema);
@@ -70,6 +78,7 @@ describe('RPC -> delete()', () => {
         {
           contentTypeId: 'foo',
           id: '123',
+          version: 'v1',
           options: { any: 'object' },
         },
         inputSchema
@@ -81,6 +90,7 @@ describe('RPC -> delete()', () => {
         {
           contentTypeId: 'foo',
           id: '123',
+          version: 'v1',
           options: 123, // Not an object
         },
         inputSchema
