@@ -32,6 +32,7 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
         groupById: {
           ...groupsById,
           [id]: {
+            ...defaultGroup,
             ...groupsById[id],
             activeGroups,
           },
@@ -45,6 +46,7 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
         groupById: {
           ...groupsById,
           [id]: {
+            ...defaultGroup,
             ...groupsById[id],
             pagingSettings: {
               ...groupsById[id].pagingSettings,
@@ -64,6 +66,7 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
         groupById: {
           ...groupsById,
           [id]: {
+            ...defaultGroup,
             ...groupsById[id],
             pagingSettings: {
               ...groupsById[id].pagingSettings,
@@ -94,14 +97,26 @@ const groupsReducer = (state: GroupMap, action: Action, groupsById: GroupsById) 
   throw Error(`Unknown grouping action`);
 };
 export const groupsReducerWithStorage = (state: GroupMap, action: Action) => {
-  let groupsInStorage = {};
+  let groupsInStorage: GroupsById = {};
   if (storage) {
     groupsInStorage = getAllGroupsInStorage(storage);
   }
+  const trackedGroupIds = Object.keys(state.groupById);
+
+  const adjustedStorageGroups = Object.entries(groupsInStorage).reduce(
+    (acc: GroupsById, [key, group]) => ({
+      ...acc,
+      [key]: {
+        // reset page to 0 if is initial state
+        ...(trackedGroupIds.includes(key) ? group : { ...group, activePage: 0 }),
+      },
+    }),
+    {} as GroupsById
+  );
 
   const groupsById: GroupsById = {
     ...state.groupById,
-    ...groupsInStorage,
+    ...adjustedStorageGroups,
   };
 
   const newState = groupsReducer(state, action, groupsById);

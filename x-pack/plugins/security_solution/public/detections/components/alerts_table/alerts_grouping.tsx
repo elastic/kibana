@@ -61,6 +61,7 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     fields: indexPattern.fields,
     maxGroupingLevels: 3,
   });
+  const resetPagination = pagination.reset;
 
   useEffect(() => {
     dispatch(updateGroupSelector({ groupSelector }));
@@ -72,7 +73,8 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
         selectedGroups,
       })
     );
-  }, [dispatch, selectedGroups]);
+    resetPagination();
+  }, [dispatch, resetPagination, selectedGroups]);
 
   const getLevel = useCallback(
     (level: number, selectedGroup: string, parentGroupingFilter?: Filter[]) => {

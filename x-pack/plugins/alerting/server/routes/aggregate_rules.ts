@@ -8,8 +8,14 @@
 import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import {
+  AggregateOptions,
+  DefaultRuleAggregationResult,
+  formatDefaultAggregationResult,
+  getDefaultRuleAggregation,
+  RuleAggregationFormattedResult,
+} from '../../common';
 import { ILicenseState } from '../lib';
-import { AggregateResult, AggregateOptions } from '../rules_client';
 import { RewriteResponseCase, RewriteRequestCase, verifyAccessAndContext } from './lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { trackLegacyTerminology } from './lib/track_legacy_terminology';
@@ -45,8 +51,8 @@ const rewriteQueryReq: RewriteRequestCase<AggregateOptions> = ({
   ...(hasReference ? { hasReference } : {}),
   ...(searchFields ? { searchFields } : {}),
 });
-const rewriteBodyRes: RewriteResponseCase<AggregateResult> = ({
-  alertExecutionStatus,
+const rewriteBodyRes: RewriteResponseCase<RuleAggregationFormattedResult> = ({
+  ruleExecutionStatus,
   ruleLastRunOutcome,
   ruleEnabledStatus,
   ruleMutedStatus,
@@ -55,7 +61,7 @@ const rewriteBodyRes: RewriteResponseCase<AggregateResult> = ({
   ...rest
 }) => ({
   ...rest,
-  rule_execution_status: alertExecutionStatus,
+  rule_execution_status: ruleExecutionStatus,
   rule_last_run_outcome: ruleLastRunOutcome,
   rule_enabled_status: ruleEnabledStatus,
   rule_muted_status: ruleMutedStatus,
@@ -86,9 +92,12 @@ export const aggregateRulesRoute = (
           [req.query.search, req.query.search_fields].filter(Boolean) as string[],
           usageCounter
         );
-        const aggregateResult = await rulesClient.aggregate({ options });
+        const aggregateResult = await rulesClient.aggregate<DefaultRuleAggregationResult>({
+          aggs: getDefaultRuleAggregation(),
+          options,
+        });
         return res.ok({
-          body: rewriteBodyRes(aggregateResult),
+          body: rewriteBodyRes(formatDefaultAggregationResult(aggregateResult)),
         });
       })
     )
@@ -111,9 +120,12 @@ export const aggregateRulesRoute = (
           [req.body.search, req.body.search_fields].filter(Boolean) as string[],
           usageCounter
         );
-        const aggregateResult = await rulesClient.aggregate({ options });
+        const aggregateResult = await rulesClient.aggregate<DefaultRuleAggregationResult>({
+          aggs: getDefaultRuleAggregation(),
+          options,
+        });
         return res.ok({
-          body: rewriteBodyRes(aggregateResult),
+          body: rewriteBodyRes(formatDefaultAggregationResult(aggregateResult)),
         });
       })
     )

@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useReducer } from 'react';
 import { groupsReducerWithStorage, initialState } from './state/reducer';
 import { GroupingProps, GroupSelectorProps } from '..';
 import { useGroupingPagination } from './use_grouping_pagination';
-import { groupByIdSelector } from './state';
+import { groupActions, groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';
 import { defaultGroup, GroupOption, GroupsPagingSettingsById } from './types';
 import { Grouping as GroupingComponent } from '../components/grouping';
@@ -23,6 +23,7 @@ interface Grouping<T> {
   groupSelector: React.ReactElement<GroupSelectorProps>;
   pagination: {
     pagingSettings: GroupsPagingSettingsById;
+    reset: () => void;
   };
   selectedGroups: string[];
 }
@@ -65,6 +66,14 @@ export const useGrouping = <T,>({
     [pagination]
   );
 
+  const resetPagination = useCallback(() => {
+    selectedGroups.forEach((selectedGroup, i, arr) => {
+      dispatch(
+        groupActions.updateGroupActivePage({ id: groupingId, activePage: 0, selectedGroup })
+      );
+    });
+  }, [groupingId, selectedGroups]);
+
   return useMemo(
     () => ({
       getGrouping,
@@ -72,25 +81,9 @@ export const useGrouping = <T,>({
       selectedGroups,
       pagination: {
         pagingSettings: pagination.pagingSettings,
+        reset: resetPagination,
       },
     }),
-    [getGrouping, groupSelector, pagination.pagingSettings, selectedGroups]
+    [getGrouping, groupSelector, pagination.pagingSettings, resetPagination, selectedGroups]
   );
-};
-
-interface GroupPagingArgs {
-  selectedGroup: string;
-  groupingId: string;
-}
-export const useGroupPaging = ({
-  selectedGroup,
-  groupingId,
-}: GroupPagingArgs): {
-  pageIndex: number;
-  pageSize: number;
-} => {
-  return {
-    pageIndex: 0,
-    pageSize: 10,
-  };
 };

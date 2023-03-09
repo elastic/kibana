@@ -60,7 +60,49 @@ export const useGetGroupSelector = ({
     [dispatch, groupingId]
   );
 
+  const onGroupChange = useCallback(
+    (groupSelection: string) => {
+      if (selectedGroups.find((selected) => selected === groupSelection)) {
+        const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
+        setSelectedGroups(groups);
+        if (groups.length === 0) {
+          setSelectedGroups(['none']);
+        }
+        return;
+      }
+      setGroupsActivePage(groupSelection, 0);
+      setSelectedGroups(
+        isNoneGroup([groupSelection])
+          ? [groupSelection]
+          : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection]
+      );
+
+      // only update options if the new selection is a custom field
+      if (
+        !isNoneGroup([groupSelection]) &&
+        !options.find((o: GroupOption) => o.key === groupSelection)
+      ) {
+        setOptions([
+          ...defaultGroupingOptions,
+          {
+            label: groupSelection,
+            key: groupSelection,
+          },
+        ]);
+      }
+    },
+    [
+      defaultGroupingOptions,
+      options,
+      selectedGroups,
+      setGroupsActivePage,
+      setOptions,
+      setSelectedGroups,
+    ]
+  );
+
   useEffect(() => {
+    // only set options the first time, all other updates will be taken care of by onGroupChange
     if (options.length > 0) return;
     setOptions(
       defaultGroupingOptions.find((o) => selectedGroups.find((selected) => selected === o.key))
@@ -80,38 +122,7 @@ export const useGetGroupSelector = ({
   return getGroupSelector({
     groupsSelected: selectedGroups,
     'data-test-subj': 'alerts-table-group-selector',
-    onGroupChange: (groupSelection: string) => {
-      if (selectedGroups.find((selected) => selected === groupSelection)) {
-        const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
-        setSelectedGroups(groups);
-        if (groups.length === 0) {
-          setSelectedGroups(['none']);
-        }
-        return;
-      }
-
-      setGroupsActivePage(groupSelection, 0);
-      setSelectedGroups(
-        isNoneGroup([groupSelection])
-          ? [groupSelection]
-          : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection]
-      );
-
-      if (
-        !isNoneGroup([groupSelection]) &&
-        !options.find((o: GroupOption) => o.key === groupSelection)
-      ) {
-        setOptions([
-          ...defaultGroupingOptions,
-          {
-            label: groupSelection,
-            key: groupSelection,
-          },
-        ]);
-      } else {
-        setOptions(defaultGroupingOptions);
-      }
-    },
+    onGroupChange,
     fields,
     options,
     maxGroupingLevels,

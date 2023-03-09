@@ -18,11 +18,15 @@ export const NONE_GROUP_KEY = 'none';
 export type RawBucket<T> = GenericBuckets & T;
 
 /** Defines the shape of the aggregation returned by Elasticsearch */
+// TODO: write developer docs for these fields
 export interface GroupingAggregation<T> {
   groupByFields?: {
     buckets?: Array<RawBucket<T>>;
   };
   groupsNumber?: {
+    value?: number | null;
+  };
+  unitCount0?: {
     value?: number | null;
   };
 }
