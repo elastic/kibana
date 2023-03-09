@@ -74,6 +74,7 @@
     "@kbn/shared-ux-prompt-not-found",
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
+    "@kbn/alerts-as-data-utils",
   ],
   "exclude": [
     "target/**/*",

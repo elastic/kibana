@@ -9,6 +9,9 @@
 import type { InitState, State } from './types';
 import type { MigratorContext } from '../context';
 
+/**
+ * Create the initial state to be used for the ZDT migrator.
+ */
 export const createInitialState = (context: MigratorContext): State => {
   const initialState: InitState = {
     controlState: 'INIT',
