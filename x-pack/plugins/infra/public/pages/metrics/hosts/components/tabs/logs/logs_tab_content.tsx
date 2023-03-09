@@ -14,28 +14,31 @@ import { SnapshotNode } from '../../../../../../../common/http_api';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
+import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state';
 
 export const LogsTabContent = () => {
-  const [textQuery, setTextQuery] = useState('');
-  const [filterQuery, setFilterQuery] = useState('');
+  const [filterQuery, setFilterQuery] = useLogsSearchUrlState();
+  const [searchText, setSearchText] = useState(filterQuery.query);
 
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
-  const { from, to } = getDateRangeAsTimestamp();
+  const { from, to } = useMemo(() => getDateRangeAsTimestamp(), [getDateRangeAsTimestamp]);
   const { hostNodes } = useHostsViewContext();
 
   const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setTextQuery(e.target.value);
+    setSearchText(e.target.value);
   }, []);
 
   const hostsFilterQuery = useMemo(() => createHostsFilter(hostNodes), [hostNodes]);
   const searchQuery = useMemo(() => {
     return {
       language: 'kuery',
-      query: filterQuery,
+      query: filterQuery.query,
     };
   }, [filterQuery]);
 
-  useDebounce(() => setFilterQuery(textQuery), debounceIntervalInMs, [textQuery]);
+  useDebounce(() => setFilterQuery({ ...filterQuery, query: searchText }), debounceIntervalInMs, [
+    searchText,
+  ]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-logs">
@@ -51,7 +54,7 @@ export const LogsTabContent = () => {
               }
             )}
             onChange={onQueryChange}
-            value={textQuery}
+            value={searchText}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -72,17 +75,16 @@ export const LogsTabContent = () => {
 };
 
 const createHostsFilter = (hostNodes: SnapshotNode[]): Filter[] => {
-  const hostsFilter = constructHostsQuery(hostNodes);
+  const hostsFilter = {
+    query: {
+      terms: {
+        'host.name': hostNodes.map((p) => p.name),
+      },
+    },
+    meta: {},
+  };
+
   return [hostsFilter].filter(Boolean) as Filter[];
 };
-
-const constructHostsQuery = (hosts: SnapshotNode[]): Filter => ({
-  query: {
-    terms: {
-      'host.name': hosts.map((p) => p.name),
-    },
-  },
-  meta: {},
-});
 
 const debounceIntervalInMs = 1000;
