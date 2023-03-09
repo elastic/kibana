@@ -25,7 +25,8 @@ export function useMetricsExplorerData(
   options: MetricsExplorerOptions,
   source: MetricsSourceConfigurationProperties | undefined,
   derivedIndexPattern: DataViewBase,
-  { fromTimestamp, toTimestamp, interval }: MetricsExplorerTimestampsRT
+  { fromTimestamp, toTimestamp, interval }: MetricsExplorerTimestampsRT,
+  enabled = true
 ) {
   const { http } = useKibana().services;
 
@@ -33,7 +34,7 @@ export function useMetricsExplorerData(
     MetricsExplorerResponse,
     Error
   >({
-    queryKey: ['metricExplorer', options.aggregation, options, fromTimestamp, toTimestamp],
+    queryKey: ['metricExplorer', options, fromTimestamp, toTimestamp],
     queryFn: async ({ signal, pageParam = { afterKey: null } }) => {
       if (!fromTimestamp || !toTimestamp) {
         throw new Error('Unable to parse timerange');
@@ -72,7 +73,7 @@ export function useMetricsExplorerData(
       return decodeOrThrow(metricsExplorerResponseRT)(response);
     },
     getNextPageParam: (lastPage) => lastPage.pageInfo,
-    enabled: !!fromTimestamp && !!toTimestamp && !!http && !!source,
+    enabled: enabled && !!fromTimestamp && !!toTimestamp && !!http && !!source,
     refetchOnWindowFocus: false,
   });
 

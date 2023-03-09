@@ -7,7 +7,7 @@
 
 import { EuiErrorBoundary } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
 import { MetricsSourceConfigurationProperties } from '../../../../common/metrics_sources';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
@@ -27,6 +27,7 @@ interface MetricsExplorerPageProps {
 }
 
 export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExplorerPageProps) => {
+  const [enabled, setEnabled] = useState(false);
   const {
     isLoading,
     error,
@@ -43,7 +44,7 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
     handleLoadMore,
     onViewStateChange,
     refetch,
-  } = useMetricsExplorerState(source, derivedIndexPattern);
+  } = useMetricsExplorerState(source, derivedIndexPattern, enabled);
   const { currentView, shouldLoadDefault } = useSavedViewContext();
 
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
@@ -59,10 +60,9 @@ export const MetricsExplorerPage = ({ source, derivedIndexPattern }: MetricsExpl
   useEffect(() => {
     if (currentView != null || !shouldLoadDefault) {
       // load metrics explorer data after default view loaded, unless we're not isLoading a view
-      refetch();
+      setEnabled(true);
     }
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [refetch, shouldLoadDefault]);
+  }, [currentView, shouldLoadDefault]);
 
   useMetricsBreadcrumbs([
     {

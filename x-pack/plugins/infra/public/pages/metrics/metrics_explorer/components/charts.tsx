@@ -9,6 +9,7 @@ import { EuiButton, EuiFlexGrid, EuiFlexItem, EuiText, EuiHorizontalRule } from 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
+import { first, last, sumBy } from 'lodash';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { MetricsExplorerResponse } from '../../../../../common/http_api/metrics_explorer';
 import {
@@ -59,8 +60,7 @@ export const MetricsExplorerCharts = ({
     );
   }
 
-  // TODO Improve checking existence of data
-  if (!data || data.pages[0].series.length === 0) {
+  if (!data || first(data.pages)!.series.length === 0) {
     return (
       <NoData
         titleText={i18n.translate('xpack.infra.metricsExplorer.noDataTitle', {
@@ -79,11 +79,11 @@ export const MetricsExplorerCharts = ({
   }
 
   const and = i18n.translate('xpack.infra.metricsExplorer.andLabel', { defaultMessage: '" and "' });
-  const lastPageIndex = data.pages.length - 1;
+  const firstPage = first(data.pages)!;
 
   return (
     <div style={{ width: '100%' }}>
-      <EuiFlexGrid gutterSize="s" columns={data.pages[0].series.length === 1 ? 1 : 3}>
+      <EuiFlexGrid gutterSize="s" columns={firstPage.series.length === 1 ? 1 : 3}>
         {data.pages.map((page) =>
           page.series.map((series) => (
             <EuiFlexItem key={series.id} style={{ minWidth: 0 }}>
@@ -103,7 +103,7 @@ export const MetricsExplorerCharts = ({
           ))
         )}
       </EuiFlexGrid>
-      {data.pages[0].series.length > 1 ? (
+      {firstPage.series.length > 1 ? (
         <div style={{ textAlign: 'center', marginBottom: 16 }}>
           <EuiHorizontalRule />
           <EuiText color="subdued">
@@ -112,8 +112,8 @@ export const MetricsExplorerCharts = ({
                 id="xpack.infra.metricsExplorer.footerPaginationMessage"
                 defaultMessage='Displaying {length} of {total} charts grouped by "{groupBy}".'
                 values={{
-                  length: data.pages[0].series.length,
-                  total: data.pages[0].pageInfo.total,
+                  length: sumBy(data.pages, 'series.length'),
+                  total: firstPage.pageInfo.total,
                   groupBy: Array.isArray(options.groupBy)
                     ? options.groupBy.join(and)
                     : options.groupBy,
@@ -121,7 +121,7 @@ export const MetricsExplorerCharts = ({
               />
             </p>
           </EuiText>
-          {data?.pages[lastPageIndex].pageInfo.afterKey ? (
+          {last(data.pages)!.pageInfo.afterKey ? (
             <div style={{ margin: '16px 0' }}>
               <EuiButton isLoading={isLoading} size="s" onClick={onLoadMore}>
                 <FormattedMessage

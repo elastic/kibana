@@ -6,7 +6,7 @@
  */
 
 import DateMath from '@kbn/datemath';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import { DataViewBase } from '@kbn/es-query';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import {
@@ -28,9 +28,20 @@ export interface MetricExplorerViewState {
   id?: string;
 }
 
+const getTimestamps = (from: string, to: string) => {
+  const fromTimestamp = DateMath.parse(from)!.valueOf();
+  const toTimestamp = DateMath.parse(to, { roundUp: true })!.valueOf();
+
+  return {
+    fromTimestamp,
+    toTimestamp,
+  };
+};
+
 export const useMetricsExplorerState = (
   source: MetricsSourceConfigurationProperties,
-  derivedIndexPattern: DataViewBase
+  derivedIndexPattern: DataViewBase,
+  enabled = true
 ) => {
   const {
     defaultViewState,
@@ -48,27 +59,30 @@ export const useMetricsExplorerState = (
     options,
     source,
     derivedIndexPattern,
-    timestamps
+    timestamps,
+    enabled
   );
+
+  useEffect(() => {
+    setTimestamps({
+      interval: timeRange.interval,
+      ...getTimestamps(timeRange.from, timeRange.to),
+    });
+  }, [timeRange, setTimestamps, options, setOptions]);
 
   const handleTimeChange = useCallback(
     (start: string, end: string) => {
-      const fromTimestamp = DateMath.parse(start)!.valueOf();
-      const toTimestamp = DateMath.parse(end, { roundUp: true })!.valueOf();
-      setTimeRange({ ...timeRange, from: start, to: end });
-      setTimestamps({ ...timestamps, fromTimestamp, toTimestamp });
+      setTimeRange({ interval: timeRange.interval, from: start, to: end });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [timeRange.to, timeRange.from, setTimeRange]
+    [setTimeRange, timeRange.interval]
   );
 
-  const onRefetch = useCallback(() => {
-    const { from, to } = timeRange;
-    const fromTimestamp = DateMath.parse(from)!.valueOf();
-    const toTimestamp = DateMath.parse(to, { roundUp: true })!.valueOf();
-    setTimestamps({ ...timestamps, fromTimestamp, toTimestamp });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setTimeRange]);
+  const refetch = useCallback(() => {
+    setTimestamps({
+      interval: timeRange.interval,
+      ...getTimestamps(timeRange.from, timeRange.to),
+    });
+  }, [setTimestamps, timeRange]);
 
   const handleGroupByChange = useCallback(
     (groupBy: string | null | string[]) => {
@@ -151,6 +165,6 @@ export const useMetricsExplorerState = (
     onViewStateChange,
     options,
     setChartOptions,
-    refetch: onRefetch,
+    refetch,
   };
 };
