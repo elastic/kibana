@@ -20,8 +20,7 @@ interface GetAssetsOptions extends ElasticsearchAccessorOptions {
 
 export async function getAssets({
   esClient,
-  // TODO: Put default back to 100 after writing tests, but while writing tests this finds bugs with the passed in size
-  size = 1,
+  size = 100,
   filters = {},
 }: GetAssetsOptions): Promise<Asset[]> {
   const { from = 'now-24h', to = 'now' } = filters;

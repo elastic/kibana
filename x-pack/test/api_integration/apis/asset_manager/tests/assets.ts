@@ -56,6 +56,21 @@ export default function ({ getService }: FtrProviderContext) {
         expect(getResponse.body.results[0]['@timestamp']).to.equal(oneHourAgo.toISOString());
       });
 
+      // TODO: should allow for sorting? right now the returned subset is somewhat random
+      it('should allow caller to request n assets', async () => {
+        await createSampleAssets(supertest);
+
+        expect(sampleAssetDocs.length).to.be.greaterThan(5);
+
+        const getResponse = await supertest
+          .get(ASSETS_ENDPOINT)
+          .query({ size: 5, from: 'now-1d' })
+          .expect(200);
+
+        expect(getResponse.body).to.have.property('results');
+        expect(getResponse.body.results.length).to.equal(5);
+      });
+
       it('should return assets filtered by a single type', async () => {
         await createSampleAssets(supertest);
 
