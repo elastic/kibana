@@ -35,6 +35,5 @@ export type FilterGroupProps = {
   onFilterChange?: (newFilters: Filter[]) => void;
   initialControls: FilterItemObj[];
   spaceId: string;
-  initialParam: FilterItemObj[];
   onInit?: (controlGroupHandler: FilterGroupHandler | undefined) => void;
 } & Pick<ControlGroupInput, 'timeRange' | 'filters' | 'query' | 'chainingSystem'>;

@@ -55,7 +55,7 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
     },
   };
 
-  const onElementClick = useCallback(
+  const onDonutPartitionClicked = useCallback(
     (level: string) => {
       if (addFilter) {
         addFilter({ field: ALERT_SEVERITY, value: level.toLowerCase() });
@@ -86,7 +86,7 @@ export const SeverityLevelChart: React.FC<SeverityLevelProps> = ({
             label={TOTAL_COUNT_OF_ALERTS}
             title={<ChartLabel count={count} />}
             totalCount={count}
-            onElementClick={onElementClick}
+            onDonutPartitionClicked={onDonutPartitionClicked}
           />
         )}
       </EuiFlexItem>
