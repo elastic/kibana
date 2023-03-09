@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import moment from 'moment-timezone';
-import { RRule, Frequency } from '@kbn/rrule';
+import { Frequency } from '@kbn/rrule';
 import { isRuleSnoozed } from './is_rule_snoozed';
 import { RRuleRecord } from '../types';
 
