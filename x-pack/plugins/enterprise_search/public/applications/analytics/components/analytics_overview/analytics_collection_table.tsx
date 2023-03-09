@@ -38,7 +38,7 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
       render: (name: string, collection: AnalyticsCollection) => (
         <EuiLinkTo
           to={generateEncodedPath(COLLECTION_VIEW_PATH, {
-            id: collection.id,
+            name: collection.name,
             section: 'events',
           })}
         >
@@ -57,7 +57,7 @@ export const AnalyticsCollectionTable: React.FC<AnalyticsCollectionTableProps> =
           onClick: (collection) =>
             navigateToUrl(
               generateEncodedPath(COLLECTION_VIEW_PATH, {
-                id: collection.id,
+                name: collection.name,
                 section: 'events',
               })
             ),
