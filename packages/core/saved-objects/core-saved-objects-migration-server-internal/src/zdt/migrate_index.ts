@@ -25,6 +25,7 @@ import { model } from './model';
 import { createInitialState } from './state';
 
 export interface MigrateIndexOptions {
+  kibanaVersion: string;
   indexPrefix: string;
   types: string[];
   /** The SO type registry to use for the migration */

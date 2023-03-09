@@ -8,8 +8,8 @@
 // We're using the mocks for jest unit tests as expected data in the integration tests here.
 // This makes sure should the assertions for the integration tests need to be updated,
 // that also the jest unit tests use mocks that are not outdated.
-import { changePoints as artificialLogChangePoints } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/change_points';
-import { finalChangePointGroups as artificialLogsChangePointGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_change_point_groups';
+import { significantTerms as artificialLogSignificantTerms } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/significant_terms';
+import { finalSignificantTermGroups as artificialLogsSignificantTermGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_term_groups';
 
 import type { TestData } from './types';
 
@@ -34,12 +34,12 @@ export const explainLogRateSpikesTestData: TestData[] = [
       actionsLength: 34,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
-      changePointFilter: 'add_change_points',
-      groupFilter: 'add_change_point_group',
-      groupHistogramFilter: 'add_change_point_group_histogram',
-      histogramFilter: 'add_change_points_histogram',
+      significantTermFilter: 'add_significant_terms',
+      groupFilter: 'add_significant_terms_group',
+      groupHistogramFilter: 'add_significant_terms_group_histogram',
+      histogramFilter: 'add_significant_terms_histogram',
       errorFilter: 'add_error',
-      changePoints: [
+      significantTerms: [
         {
           fieldName: 'day_of_week',
           fieldValue: 'Wednesday',
@@ -87,13 +87,13 @@ export const explainLogRateSpikesTestData: TestData[] = [
       actionsLength: 24,
       noIndexChunksLength: 4,
       noIndexActionsLength: 3,
-      changePointFilter: 'add_change_points',
-      groupFilter: 'add_change_point_group',
-      groupHistogramFilter: 'add_change_point_group_histogram',
-      histogramFilter: 'add_change_points_histogram',
+      significantTermFilter: 'add_significant_terms',
+      groupFilter: 'add_significant_terms_group',
+      groupHistogramFilter: 'add_significant_terms_group_histogram',
+      histogramFilter: 'add_significant_terms_histogram',
       errorFilter: 'add_error',
-      changePoints: artificialLogChangePoints,
-      groups: artificialLogsChangePointGroups,
+      significantTerms: artificialLogSignificantTerms,
+      groups: artificialLogsSignificantTermGroups,
       histogramLength: 20,
     },
   },
