@@ -417,7 +417,43 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/core-root-server-internal",
+        "id": "def-common.registerServiceConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "registerServiceConfig",
+        "description": [],
+        "signature": [
+          "(configService: ",
+          "ConfigService",
+          ") => void"
+        ],
+        "path": "packages/core/root/core-root-server-internal/src/register_service_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-root-server-internal",
+            "id": "def-common.registerServiceConfig.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "configService",
+            "description": [],
+            "signature": [
+              "ConfigService"
+            ],
+            "path": "packages/core/root/core-root-server-internal/src/register_service_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [],
     "enums": [],
     "misc": [],

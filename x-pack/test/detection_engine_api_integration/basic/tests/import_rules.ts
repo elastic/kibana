@@ -11,7 +11,7 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
-  deleteAllAlerts,
+  deleteAllRules,
   deleteSignalsIndex,
   getSimpleRule,
   getSimpleRuleAsNdjson,
@@ -33,7 +33,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
       afterEach(async () => {
         await deleteSignalsIndex(supertest, log);
-        await deleteAllAlerts(supertest, log);
+        await deleteAllRules(supertest, log);
       });
 
       it('should set the response content types to be expected', async () => {

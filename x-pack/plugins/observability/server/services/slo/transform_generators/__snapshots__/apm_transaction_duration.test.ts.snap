@@ -5,8 +5,20 @@ Object {
   "bool": Object {
     "filter": Array [
       Object {
-        "match": Object {
-          "transaction.root": true,
+        "terms": Object {
+          "processor.event": Array [
+            "metric",
+          ],
+        },
+      },
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "exists": Object {
+          "field": "transaction.duration.histogram",
         },
       },
       Object {
@@ -99,8 +111,20 @@ Object {
   "bool": Object {
     "filter": Array [
       Object {
-        "match": Object {
-          "transaction.root": true,
+        "terms": Object {
+          "processor.event": Array [
+            "metric",
+          ],
+        },
+      },
+      Object {
+        "term": Object {
+          "metricset.name": "transaction",
+        },
+      },
+      Object {
+        "exists": Object {
+          "field": "transaction.duration.histogram",
         },
       },
       Object {
@@ -189,8 +213,20 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "match": Object {
-              "transaction.root": true,
+            "terms": Object {
+              "processor.event": Array [
+                "metric",
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "metricset.name": "transaction",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.duration.histogram",
             },
           },
           Object {
@@ -313,8 +349,20 @@ Object {
       "bool": Object {
         "filter": Array [
           Object {
-            "match": Object {
-              "transaction.root": true,
+            "terms": Object {
+              "processor.event": Array [
+                "metric",
+              ],
+            },
+          },
+          Object {
+            "term": Object {
+              "metricset.name": "transaction",
+            },
+          },
+          Object {
+            "exists": Object {
+              "field": "transaction.duration.histogram",
             },
           },
           Object {

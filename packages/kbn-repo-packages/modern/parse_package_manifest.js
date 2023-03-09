@@ -19,6 +19,7 @@ const {
   isArrOfStrings,
   PACKAGE_TYPES,
 } = require('./parse_helpers');
+const { getGitRepoRootSync } = require('./get_git_repo_root');
 const { parse } = require('../utils/jsonc');
 const { isValidPluginCategoryInfo, PLUGIN_CATEGORY } = require('./plugin_category_info');
 
@@ -43,10 +44,11 @@ const isValidOwner = (v) => typeof v === 'string' && v.startsWith('@');
 
 /**
  * @param {unknown} plugin
+ * @param {string} repoRoot
  * @param {string} path
  * @returns {import('./types').PluginPackageManifest['plugin']} plugin
  */
-function validatePackageManifestPlugin(plugin, path) {
+function validatePackageManifestPlugin(plugin, repoRoot, path) {
   if (!isObj(plugin)) {
     throw err('plugin', plugin, 'must be an object');
   }
@@ -118,7 +120,11 @@ function validatePackageManifestPlugin(plugin, path) {
   }
 
   const segs = path.split(Path.sep);
-  const isBuild = segs.includes('node_modules') || segs.includes('build');
+  const gitRepoRoot = getGitRepoRootSync(repoRoot);
+  const isBuild =
+    segs.includes('node_modules') ||
+    (gitRepoRoot && path.startsWith(Path.join(gitRepoRoot, 'build', 'kibana')));
+  // TODO: evaluate if __category__ should be removed
   if (__category__ !== undefined) {
     if (!isBuild) {
       throw err(
@@ -195,10 +201,11 @@ function validatePackageManifestBuild(build) {
 /**
  * Validate the contents of a parsed kibana.jsonc file.
  * @param {unknown} parsed
+ * @param {string} repoRoot
  * @param {string} path
  * @returns {import('./types').KibanaPackageManifest}
  */
-function validatePackageManifest(parsed, path) {
+function validatePackageManifest(parsed, repoRoot, path) {
   if (!isObj(parsed)) {
     throw new Error('expected manifest root to be an object');
   }
@@ -273,7 +280,7 @@ function validatePackageManifest(parsed, path) {
     return {
       type,
       ...base,
-      plugin: validatePackageManifestPlugin(plugin, path),
+      plugin: validatePackageManifestPlugin(plugin, repoRoot, path),
     };
   }
 
@@ -290,9 +297,10 @@ function validatePackageManifest(parsed, path) {
 
 /**
  * Parse a kibana.jsonc file from the filesystem
+ * @param {string} repoRoot
  * @param {string} path
  */
-function readPackageManifest(path) {
+function readPackageManifest(repoRoot, path) {
   let content;
   try {
     content = Fs.readFileSync(path, 'utf8');
@@ -313,7 +321,7 @@ function readPackageManifest(path) {
       throw new Error(`Invalid JSONc: ${error.message}`);
     }
 
-    return validatePackageManifest(parsed, path);
+    return validatePackageManifest(parsed, repoRoot, path);
   } catch (error) {
     throw new Error(`Unable to parse [${path}]: ${error.message}`);
   }

@@ -203,6 +203,11 @@ export interface EndpointAction extends ActionRequestFields {
   // wait to send back an action result before it will timeout
   timeout?: number;
   data: EndpointActionData;
+  // signature of the endpoint action
+  signed?: {
+    data: string;
+    signature: string;
+  };
 }
 
 export interface EndpointActionResponse {

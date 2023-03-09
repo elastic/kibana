@@ -489,7 +489,7 @@ interface FieldlessOperationDefinition<C extends BaseIndexPatternColumn, P = {}>
    * Returns the meta data of the operation if applied. Undefined
    * if the field is not applicable.
    */
-  getPossibleOperation: () => OperationMetadata;
+  getPossibleOperation: (index?: IndexPattern) => OperationMetadata | undefined;
   /**
    * Function turning a column into an agg config passed to the `esaggs` function
    * together with the agg configs returned from other columns.

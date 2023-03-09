@@ -6,16 +6,8 @@
  */
 
 import expect from '@kbn/expect';
+import { ReportingUsageType } from '@kbn/reporting-plugin/server/usage/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { UsageStats } from '../../services/usage';
-
-type ReportingUsage = UsageStats['reporting'];
-interface ReportingUsageApiResponse {
-  all: ReportingUsage['_all'];
-  csv_searchsource: ReportingUsage['csv_searchsource'];
-  pngv_2: ReportingUsage['PNGV2'];
-  printable_pdf_v_2: ReportingUsage['printable_pdf_v2'];
-}
 
 const DATA_ARCHIVE_PATH = 'x-pack/test/functional/es_archives/reporting/errors';
 
@@ -26,12 +18,13 @@ export default function ({ getService }: FtrProviderContext) {
   const usageAPI = getService('usageAPI');
 
   describe(`error codes`, () => {
-    let reporting: ReportingUsageApiResponse;
+    let reporting: ReportingUsageType;
 
     before(async () => {
       await reportingAPI.deleteAllReports();
       await esArchiver.load(DATA_ARCHIVE_PATH);
-      ({ reporting } = await usageAPI.getUsageStats());
+      const [{ stats }] = await usageAPI.getTelemetryStats({ unencrypted: true });
+      reporting = stats.stack_stats.kibana.plugins.reporting;
     });
 
     after(async () => {
@@ -40,10 +33,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes error code statistics', async () => {
-      expect(reporting.all).equal(3);
+      expect(reporting._all).equal(3);
       expectSnapshot(
-        ['csv_searchsource', 'pngv_2', 'printable_pdf_v_2'].map((k) => {
-          const field = reporting[k as keyof Omit<ReportingUsageApiResponse, 'all'>];
+        (['csv_searchsource', 'PNGV2', 'printable_pdf_v2'] as const).map((k) => {
+          const field = reporting[k];
           return { key: k, error_codes: field.error_codes, total: field.total };
         })
       ).toMatchInline(`
@@ -55,7 +48,7 @@ export default function ({ getService }: FtrProviderContext) {
           },
           Object {
             "error_codes": undefined,
-            "key": "pngv_2",
+            "key": "PNGV2",
             "total": 0,
           },
           Object {
@@ -63,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
               "queue_timeout_error": 1,
               "unknown_error": 1,
             },
-            "key": "printable_pdf_v_2",
+            "key": "printable_pdf_v2",
             "total": 3,
           },
         ]

@@ -9,10 +9,13 @@ import { get, has } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
+import { DEFAULT_TRIAL_BUFFER } from '../common/constants';
+
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
   chatURL: schema.maybe(schema.string()),
   chatIdentitySecret: schema.maybe(schema.string()),
+  trialBuffer: schema.number({ defaultValue: DEFAULT_TRIAL_BUFFER }),
 });
 
 export type CloudChatConfigType = TypeOf<typeof configSchema>;
@@ -20,6 +23,7 @@ export type CloudChatConfigType = TypeOf<typeof configSchema>;
 export const config: PluginConfigDescriptor<CloudChatConfigType> = {
   exposeToBrowser: {
     chatURL: true,
+    trialBuffer: true,
   },
   schema: configSchema,
   deprecations: () => [

@@ -19,7 +19,7 @@ import { registerChatRoute } from './chat';
 describe('chat route', () => {
   test('do not add the route if security is not enabled', async () => {
     const router = httpServiceMock.createRouter();
-    registerChatRoute({ router, isDev: false, chatIdentitySecret: 'secret' });
+    registerChatRoute({ router, isDev: false, chatIdentitySecret: 'secret', trialBuffer: 60 });
     expect(router.get.mock.calls).toEqual([]);
   });
 
@@ -28,7 +28,14 @@ describe('chat route', () => {
     security.authc.getCurrentUser.mockReturnValueOnce(null);
 
     const router = httpServiceMock.createRouter();
-    registerChatRoute({ router, security, isDev: false, chatIdentitySecret: 'secret' });
+    registerChatRoute({
+      router,
+      security,
+      isDev: false,
+      chatIdentitySecret: 'secret',
+      trialBuffer: 60,
+      trialEndDate: new Date(),
+    });
 
     const [_config, handler] = router.get.mock.calls[0];
 
@@ -39,6 +46,79 @@ describe('chat route', () => {
             "body": "User has no email or username",
           },
           "payload": "User has no email or username",
+          "status": 400,
+        }
+      `);
+  });
+
+  test('error if no trial end date specified', async () => {
+    const security = securityMock.createSetup();
+    const username = 'user.name';
+    const email = 'user@elastic.co';
+
+    security.authc.getCurrentUser.mockReturnValueOnce({
+      username,
+      metadata: {
+        saml_email: [email],
+      },
+    });
+
+    const router = httpServiceMock.createRouter();
+    registerChatRoute({
+      router,
+      security,
+      isDev: false,
+      chatIdentitySecret: 'secret',
+      trialBuffer: 2,
+    });
+
+    const [_config, handler] = router.get.mock.calls[0];
+
+    await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
+      .toMatchInlineSnapshot(`
+        KibanaResponse {
+          "options": Object {
+            "body": "Chat can only be started if a trial end date is specified",
+          },
+          "payload": "Chat can only be started if a trial end date is specified",
+          "status": 400,
+        }
+      `);
+  });
+
+  test('error if not in trial window', async () => {
+    const security = securityMock.createSetup();
+    const username = 'user.name';
+    const email = 'user@elastic.co';
+
+    security.authc.getCurrentUser.mockReturnValueOnce({
+      username,
+      metadata: {
+        saml_email: [email],
+      },
+    });
+
+    const router = httpServiceMock.createRouter();
+    const trialEndDate = new Date();
+    trialEndDate.setDate(trialEndDate.getDate() - 30);
+    registerChatRoute({
+      router,
+      security,
+      isDev: false,
+      chatIdentitySecret: 'secret',
+      trialBuffer: 2,
+      trialEndDate,
+    });
+
+    const [_config, handler] = router.get.mock.calls[0];
+
+    await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
+      .toMatchInlineSnapshot(`
+        KibanaResponse {
+          "options": Object {
+            "body": "Chat can only be started during trial and trial chat buffer",
+          },
+          "payload": "Chat can only be started during trial and trial chat buffer",
           "status": 400,
         }
       `);
@@ -57,7 +137,14 @@ describe('chat route', () => {
     });
 
     const router = httpServiceMock.createRouter();
-    registerChatRoute({ router, security, isDev: false, chatIdentitySecret: 'secret' });
+    registerChatRoute({
+      router,
+      security,
+      isDev: false,
+      chatIdentitySecret: 'secret',
+      trialBuffer: 60,
+      trialEndDate: new Date(),
+    });
     const [_config, handler] = router.get.mock.calls[0];
     await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
       .toMatchInlineSnapshot(`
@@ -87,7 +174,14 @@ describe('chat route', () => {
     security.authc.getCurrentUser.mockReturnValueOnce({});
 
     const router = httpServiceMock.createRouter();
-    registerChatRoute({ router, security, isDev: true, chatIdentitySecret: 'secret' });
+    registerChatRoute({
+      router,
+      security,
+      isDev: true,
+      chatIdentitySecret: 'secret',
+      trialBuffer: 60,
+      trialEndDate: new Date(),
+    });
     const [_config, handler] = router.get.mock.calls[0];
     await expect(handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory)).resolves
       .toMatchInlineSnapshot(`

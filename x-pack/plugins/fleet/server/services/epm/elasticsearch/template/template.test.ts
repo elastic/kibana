@@ -447,6 +447,27 @@ describe('EPM template', () => {
     expect(mappings).toEqual(keywordWithMultiFieldsMapping);
   });
 
+  it('tests processing date field with format', () => {
+    const dateWithFormatYml = `
+- name: dateWithFormat
+  type: date
+  date_format: yyyy-MM-dd
+`;
+
+    const dateWithMapping = {
+      properties: {
+        dateWithFormat: {
+          type: 'date',
+          format: 'yyyy-MM-dd',
+        },
+      },
+    };
+    const fields: Field[] = safeLoad(dateWithFormatYml);
+    const processedFields = processFields(fields);
+    const mappings = generateMappings(processedFields);
+    expect(mappings).toEqual(dateWithMapping);
+  });
+
   it('tests processing wildcard field with multi fields', () => {
     const keywordWithMultiFieldsLiteralYml = `
 - name: keywordWithMultiFields

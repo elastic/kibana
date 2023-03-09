@@ -87,6 +87,8 @@ export function isFullLicense() {
 
 /**
  * Check to see if the current license is trial.
+ * Note, this is not accurate for cloud trials.
+ * For cloud trials use isCloudTrial returned from the mlInfo endpoint
  *
  * @export
  * @returns {boolean}
