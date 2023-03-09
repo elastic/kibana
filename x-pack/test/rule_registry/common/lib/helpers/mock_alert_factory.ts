@@ -7,6 +7,8 @@
 
 // implements a minimal mock alert factory used by a few tests
 
+let UUIDCounter = 1;
+
 class MockAlert {
   id: string;
 
@@ -14,7 +16,7 @@ class MockAlert {
     this.id = alertId;
   }
   getUuid() {
-    return 'uuid-1';
+    return `uuid-${UUIDCounter++}`;
   }
 }
 
