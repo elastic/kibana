@@ -7,8 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import { SolutionSideNav } from '@kbn/solution-side-nav';
-import type { SolutionSideNavItem } from '@kbn/solution-side-nav';
+import { SolutionSideNav, type SolutionSideNavItem } from '@kbn/security-solution-side-nav';
 import useObservable from 'react-use/lib/useObservable';
 import { SecurityPageName } from '../../../../app/types';
 import { getAncestorLinksInfo } from '../../../links';

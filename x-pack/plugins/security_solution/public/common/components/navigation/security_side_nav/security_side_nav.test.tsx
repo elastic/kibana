@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { SecurityPageName } from '../../../../app/types';
 import { TestProviders } from '../../../mock';
 import { BOTTOM_BAR_HEIGHT, EUI_HEADER_HEIGHT, SecuritySideNav } from './security_side_nav';
-import type { SolutionSideNavProps } from '@kbn/solution-side-nav';
+import type { SolutionSideNavProps } from '@kbn/security-solution-side-nav';
 import type { NavLinkItem } from '../types';
 import { track } from '../../../lib/telemetry';
 import { useKibana } from '../../../lib/kibana';
@@ -37,7 +37,7 @@ const alertsNavLink: NavLinkItem = {
 };
 
 const mockSolutionSideNav = jest.fn((_: SolutionSideNavProps) => <></>);
-jest.mock('@kbn/solution-side-nav', () => ({
+jest.mock('@kbn/security-solution-side-nav', () => ({
   SolutionSideNav: (props: SolutionSideNavProps) => mockSolutionSideNav(props),
 }));
 jest.mock('../../../lib/kibana');

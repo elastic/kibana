@@ -104,8 +104,8 @@ const selectedId = 'linkSelected';
 
 export const Template = ({}: {}) => (
   <SolutionNav
-    name={'Observability'}
-    icon={'logoObservability'}
+    name={'Security'}
+    icon={'logoSecurity'}
     isOpenOnDesktop={true}
     children={
       <SolutionSideNav

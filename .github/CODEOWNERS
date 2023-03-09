@@ -605,7 +605,7 @@ packages/shared-ux/storybook/mock @elastic/appex-sharedux
 packages/kbn-shared-ux-utility @elastic/appex-sharedux
 packages/kbn-slo-schema @elastic/actionable-observability
 x-pack/plugins/snapshot_restore @elastic/platform-deployment-management
-packages/kbn-solution-side-nav @elastic/security-threat-hunting-explore
+packages/kbn-security-solution-side-nav @elastic/security-threat-hunting-explore
 packages/kbn-some-dev-log @elastic/kibana-operations
 packages/kbn-sort-package-json @elastic/kibana-operations
 x-pack/plugins/spaces @elastic/kibana-security

@@ -9,5 +9,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-solution-side-nav'],
+  roots: ['<rootDir>/packages/kbn-security-solution-side-nav'],
 };
