@@ -16,6 +16,7 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/analytics",
+    "@kbn/shared-ux-page-solution-nav",
   ],
   "exclude": ["target/**/*"]
 }
