@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { escapeKuery } from '@kbn/es-query';
-import type { ChangePoint } from '@kbn/ml-agg-utils';
+import type { SignificantTerm } from '@kbn/ml-agg-utils';
 
 import { SEARCH_QUERY_LANGUAGE } from '../../application/utils/search_utils';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
@@ -49,14 +49,14 @@ const viewInDiscoverMessage = i18n.translate(
 );
 
 interface SpikeAnalysisTableProps {
-  changePoints: ChangePoint[];
+  significantTerms: SignificantTerm[];
   dataViewId?: string;
   loading: boolean;
   isExpandedRow?: boolean;
 }
 
 export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
-  changePoints,
+  significantTerms,
   dataViewId,
   loading,
   isExpandedRow,
@@ -64,12 +64,16 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
 
-  const { pinnedChangePoint, selectedChangePoint, setPinnedChangePoint, setSelectedChangePoint } =
-    useSpikeAnalysisTableRowContext();
+  const {
+    pinnedSignificantTerm,
+    selectedSignificantTerm,
+    setPinnedSignificantTerm,
+    setSelectedSignificantTerm,
+  } = useSpikeAnalysisTableRowContext();
 
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
-  const [sortField, setSortField] = useState<keyof ChangePoint>(DEFAULT_SORT_FIELD);
+  const [sortField, setSortField] = useState<keyof SignificantTerm>(DEFAULT_SORT_FIELD);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>(DEFAULT_SORT_DIRECTION);
 
   const { application, share, data } = useAiopsAppContext();
@@ -112,7 +116,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     }
   }, [application.capabilities.discover?.show, dataViewId, discoverLocator]);
 
-  const generateDiscoverUrl = async (changePoint: ChangePoint) => {
+  const generateDiscoverUrl = async (significantTerm: SignificantTerm) => {
     if (discoverLocator !== undefined) {
       const url = await discoverLocator.getRedirectUrl({
         indexPatternId: dataViewId,
@@ -120,8 +124,8 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         filters: data.query.filterManager.getFilters(),
         query: {
           language: SEARCH_QUERY_LANGUAGE.KUERY,
-          query: `${escapeKuery(changePoint.fieldName)}:${escapeKuery(
-            String(changePoint.fieldValue)
+          query: `${escapeKuery(significantTerm.fieldName)}:${escapeKuery(
+            String(significantTerm.fieldValue)
           )}`,
         },
       });
@@ -130,7 +134,7 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     }
   };
 
-  const columns: Array<EuiBasicTableColumn<ChangePoint>> = [
+  const columns: Array<EuiBasicTableColumn<SignificantTerm>> = [
     {
       'data-test-subj': 'aiopsSpikeAnalysisTableColumnFieldName',
       field: 'fieldName',
@@ -268,8 +272,8 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
           ),
           description: viewInDiscoverMessage,
           type: 'button',
-          onClick: async (changePoint) => {
-            const openInDiscoverUrl = await generateDiscoverUrl(changePoint);
+          onClick: async (significantTerm) => {
+            const openInDiscoverUrl = await generateDiscoverUrl(significantTerm);
             if (typeof openInDiscoverUrl === 'string') {
               await application.navigateToUrl(openInDiscoverUrl);
             }
@@ -322,10 +326,10 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
 
   const { pagination, pageOfItems, sorting } = useMemo(() => {
     const pageStart = pageIndex * pageSize;
-    const itemCount = changePoints?.length ?? 0;
+    const itemCount = significantTerms?.length ?? 0;
 
-    let items: ChangePoint[] = changePoints ?? [];
-    items = sortBy(changePoints, (item) => {
+    let items: SignificantTerm[] = significantTerms ?? [];
+    items = sortBy(significantTerms, (item) => {
       if (item && typeof item[sortField] === 'string') {
         // @ts-ignore Object is possibly null or undefined
         return item[sortField].toLowerCase();
@@ -349,13 +353,13 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
         },
       },
     };
-  }, [pageIndex, pageSize, sortField, sortDirection, changePoints]);
+  }, [pageIndex, pageSize, sortField, sortDirection, significantTerms]);
 
-  const getRowStyle = (changePoint: ChangePoint) => {
+  const getRowStyle = (significantTerm: SignificantTerm) => {
     if (
-      pinnedChangePoint &&
-      pinnedChangePoint.fieldName === changePoint.fieldName &&
-      pinnedChangePoint.fieldValue === changePoint.fieldValue
+      pinnedSignificantTerm &&
+      pinnedSignificantTerm.fieldName === significantTerm.fieldName &&
+      pinnedSignificantTerm.fieldValue === significantTerm.fieldValue
     ) {
       return {
         backgroundColor: primaryBackgroundColor,
@@ -363,9 +367,9 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
     }
 
     if (
-      selectedChangePoint &&
-      selectedChangePoint.fieldName === changePoint.fieldName &&
-      selectedChangePoint.fieldValue === changePoint.fieldValue
+      selectedSignificantTerm &&
+      selectedSignificantTerm.fieldName === significantTerm.fieldName &&
+      selectedSignificantTerm.fieldValue === significantTerm.fieldValue
     ) {
       return {
         backgroundColor: euiTheme.euiColorLightestShade,
@@ -393,27 +397,27 @@ export const SpikeAnalysisTable: FC<SpikeAnalysisTableProps> = ({
       onChange={onChange}
       pagination={pagination}
       loading={false}
-      sorting={sorting as EuiTableSortingType<ChangePoint>}
-      rowProps={(changePoint) => {
+      sorting={sorting as EuiTableSortingType<SignificantTerm>}
+      rowProps={(significantTerm) => {
         return {
-          'data-test-subj': `aiopsSpikeAnalysisTableRow row-${changePoint.fieldName}-${changePoint.fieldValue}`,
+          'data-test-subj': `aiopsSpikeAnalysisTableRow row-${significantTerm.fieldName}-${significantTerm.fieldValue}`,
           onClick: () => {
             if (
-              changePoint.fieldName === pinnedChangePoint?.fieldName &&
-              changePoint.fieldValue === pinnedChangePoint?.fieldValue
+              significantTerm.fieldName === pinnedSignificantTerm?.fieldName &&
+              significantTerm.fieldValue === pinnedSignificantTerm?.fieldValue
             ) {
-              setPinnedChangePoint(null);
+              setPinnedSignificantTerm(null);
             } else {
-              setPinnedChangePoint(changePoint);
+              setPinnedSignificantTerm(significantTerm);
             }
           },
           onMouseEnter: () => {
-            setSelectedChangePoint(changePoint);
+            setSelectedSignificantTerm(significantTerm);
           },
           onMouseLeave: () => {
-            setSelectedChangePoint(null);
+            setSelectedSignificantTerm(null);
           },
-          style: getRowStyle(changePoint),
+          style: getRowStyle(significantTerm),
         };
       }}
     />
