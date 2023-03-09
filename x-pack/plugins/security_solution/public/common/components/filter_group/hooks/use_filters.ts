@@ -12,7 +12,7 @@ export const useFilters = () => {
   const context = useContext(FilterContext);
 
   if (!context) {
-    throw new Error('hook must be used within FilterGroup Component');
+    throw new Error('hook must be used with in FilterGroup Component');
   }
 
   return context;

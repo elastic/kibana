@@ -95,14 +95,13 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
   }, []);
 
   const onUrlParamInit = (param: FilterItemObj[] | null) => {
-    if (!param) setInitialUrlParam([]);
+    if (param == null) return;
     try {
-      setInitialUrlParam(param ?? []);
+      setInitialUrlParam(param);
     } catch (err) {
       // if there is an error ignore url Param
       // eslint-disable-next-line no-console
       console.error(err);
-      setInitialUrlParam([]);
     }
   };
 
@@ -186,7 +185,7 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     const localInitialControls = cloneDeep(initialControls);
 
     let overridingControls = initialUrlParam;
-    if ((!initialUrlParam || initialUrlParam.length === 0) && controlGroupInputUpdates) {
+    if (!initialUrlParam && controlGroupInputUpdates) {
       // if nothing is found in URL Param.. read from local storage
       const urlParamsFromLocalStorage: FilterItemObj[] = Object.keys(
         controlGroupInputUpdates?.panels
@@ -335,12 +334,10 @@ const FilterGroupComponent = (props: PropsWithChildren<FilterGroupProps>) => {
     <FilterWrapper className="filter-group__wrapper">
       <EuiFlexGroup alignItems="center" justifyContent="center" gutterSize="s">
         <EuiFlexItem grow={true} data-test-subj="filter_group__items">
-          {Array.isArray(initialUrlParam) ? (
-            <ControlGroupRenderer
-              onLoadComplete={onControlGroupLoadHandler}
-              getCreationOptions={setOptions}
-            />
-          ) : null}
+          <ControlGroupRenderer
+            onLoadComplete={onControlGroupLoadHandler}
+            getCreationOptions={setOptions}
+          />
           {!controlGroup ? <FilterGroupLoading /> : null}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
