@@ -13,13 +13,13 @@ import { usePluginContext } from '../../../hooks/use_plugin_context';
 import { useFetchAlertDetail } from '../../../hooks/use_fetch_alert_detail';
 import { useFetchAlertData } from '../../../hooks/use_fetch_alert_data';
 import { LazyAlertsFlyout } from '../../..';
-import { paths } from '../../../config';
+import { paths } from '../../../config/paths';
 
-interface CasesProps {
+interface Props {
   permissions: CasesPermissions;
 }
 
-export const Cases = React.memo<CasesProps>(({ permissions }) => {
+export const Cases = React.memo<Props>(({ permissions }) => {
   const {
     application: { navigateToUrl },
     cases: {

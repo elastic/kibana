@@ -6,67 +6,85 @@
  */
 
 import React from 'react';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
+import { render, fireEvent, screen } from '@testing-library/react';
 import { AddMessageVariables } from './add_message_variables';
 
 describe('AddMessageVariables', () => {
-  test('renders variables with double brances by default', () => {
-    const onSelectEventHandler = jest.fn();
-    const wrapper = mountWithIntl(
+  test('it renders variables and filter bar', async () => {
+    render(
       <AddMessageVariables
         messageVariables={[
           {
             name: 'myVar',
             description: 'My variable description',
           },
+          {
+            name: 'myVar2',
+            description: 'This variable is deprecated',
+          },
         ]}
         paramsProperty="foo"
-        onSelectEventHandler={onSelectEventHandler}
+        onSelectEventHandler={jest.fn()}
       />
     );
 
-    wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-
-    expect(
-      wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().text()
-    ).toEqual('{{myVar}}');
+    fireEvent.click(await screen.findByTestId('fooAddVariableButton'));
+    expect(screen.getByPlaceholderText('Filter options')).toBeInTheDocument();
+    expect(screen.getByTestId('myVar-selectableOption')).toBeInTheDocument();
+    expect(screen.getByTestId('myVar2-selectableOption')).toBeInTheDocument();
   });
 
-  test('renders variables with tripple braces when specified', () => {
-    const onSelectEventHandler = jest.fn();
-    const wrapper = mountWithIntl(
+  test('it renders variables title and description', async () => {
+    render(
       <AddMessageVariables
         messageVariables={[
           {
             name: 'myVar',
-            description: 'My variable description',
-            useWithTripleBracesInTemplates: true,
+            description: 'My variable description ',
           },
         ]}
         paramsProperty="foo"
-        onSelectEventHandler={onSelectEventHandler}
+        onSelectEventHandler={jest.fn()}
       />
     );
 
-    wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-
-    expect(
-      wrapper.find('[data-test-subj="variableMenuButton-0-templated-name"]').last().text()
-    ).toEqual('{{{myVar}}}');
+    fireEvent.click(await screen.findByTestId('fooAddVariableButton'));
+    expect(screen.getByText('myVar')).toBeInTheDocument();
+    expect(screen.getByText('My variable description')).toBeInTheDocument();
   });
 
-  test('onSelectEventHandler is called with proper action variable', () => {
+  test('it renders tooltip when click on variable', async () => {
+    render(
+      <AddMessageVariables
+        messageVariables={[
+          {
+            name: 'myVar',
+            description: 'My variable description ',
+          },
+        ]}
+        paramsProperty="foo"
+        onSelectEventHandler={jest.fn()}
+      />
+    );
+
+    fireEvent.click(await screen.findByTestId('fooAddVariableButton'));
+    fireEvent.mouseOver(screen.getByText('My variable description'));
+    expect(await screen.findByTestId('myVar-tooltip')).toBeInTheDocument();
+  });
+
+  test('onSelectEventHandler is called with proper action variable', async () => {
     const onSelectEventHandler = jest.fn();
-    const wrapper = mountWithIntl(
+    render(
       <AddMessageVariables
         messageVariables={[
           {
             name: 'myVar1',
             description: 'My variable 1 description',
+            useWithTripleBracesInTemplates: true,
           },
           {
             name: 'myVar2',
-            description: 'My variable 1 description',
+            description: 'My variable 2 description',
             useWithTripleBracesInTemplates: true,
           },
         ]}
@@ -75,19 +93,19 @@ describe('AddMessageVariables', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-    wrapper.find('[data-test-subj="variableMenuButton-1-templated-name"]').last().simulate('click');
+    fireEvent.click(await screen.findByTestId('fooAddVariableButton'));
+    fireEvent.click(screen.getByTestId('myVar2-selectableOption'));
 
     expect(onSelectEventHandler).toHaveBeenCalledTimes(1);
     expect(onSelectEventHandler).toHaveBeenCalledWith({
       name: 'myVar2',
-      description: 'My variable 1 description',
+      description: 'My variable 2 description',
       useWithTripleBracesInTemplates: true,
     });
   });
 
-  test('it renders deprecated variables as disabled', () => {
-    const wrapper = mountWithIntl(
+  test('it renders deprecated variables as disabled', async () => {
+    render(
       <AddMessageVariables
         messageVariables={[
           {
@@ -105,18 +123,14 @@ describe('AddMessageVariables', () => {
       />
     );
 
-    wrapper.find('[data-test-subj="fooAddVariableButton"]').first().simulate('click');
-
-    expect(
-      wrapper.find('button[data-test-subj="variableMenuButton-myVar"]').getDOMNode()
-    ).not.toBeDisabled();
-    expect(
-      wrapper.find('button[data-test-subj="variableMenuButton-deprecatedVar"]').getDOMNode()
-    ).toBeDisabled();
+    fireEvent.click(await screen.findByTestId('fooAddVariableButton'));
+    fireEvent.click(screen.getByText('Show all'));
+    expect(screen.queryByTestId('myVar-selectableOption')).toBeInTheDocument();
+    expect(screen.queryByTestId('deprecatedVar-selectableOption')).toBeInTheDocument();
   });
 
-  test(`it does't render when no variables exist`, () => {
-    const wrapper = mountWithIntl(
+  test(`it does't render when no variables exist`, async () => {
+    render(
       <AddMessageVariables
         messageVariables={[]}
         paramsProperty="foo"
@@ -124,11 +138,11 @@ describe('AddMessageVariables', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="fooAddVariableButton"]')).toHaveLength(0);
+    expect(screen.queryByTestId('fooAddVariableButton')).not.toBeInTheDocument();
   });
 
-  test('it renders button title when passed', () => {
-    const wrapper = mountWithIntl(
+  test('it renders button title when passed', async () => {
+    render(
       <AddMessageVariables
         messageVariables={[
           {
@@ -142,6 +156,6 @@ describe('AddMessageVariables', () => {
       />
     );
 
-    expect(wrapper.find('[data-test-subj="fooAddVariableButton-Title"]').exists()).toEqual(true);
+    expect(await screen.findByText('Add variable')).toBeInTheDocument();
   });
 });
