@@ -11,14 +11,20 @@ import { EuiLoadingChart } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useSourceContext } from '../../../../../../containers/metrics_source';
 import { findInventoryModel } from '../../../../../../../common/inventory_models';
-import { InventoryItemType } from '../../../../../../../common/inventory_models/types';
+import type { InventoryItemType } from '../../../../../../../common/inventory_models/types';
 import { useMetadata } from '../../../../metric_detail/hooks/use_metadata';
 import { Table } from './table';
 import { useWaffleTimeContext } from '../../../../inventory_view/hooks/use_waffle_time';
 import { getAllFields } from './build_fields';
-import { TabProps } from '../types';
+import { HostNodeRow } from '../../../hooks/use_hosts_table';
 
 const NODE_TYPE = 'host' as InventoryItemType;
+
+export interface TabProps {
+  currentTime: number;
+  node: HostNodeRow;
+  onClose?(): void;
+}
 
 const TabComponent = (props: TabProps) => {
   const nodeId = props.node.name;
@@ -38,7 +44,6 @@ const TabComponent = (props: TabProps) => {
     return getAllFields(metadata);
   }, [metadata]);
 
-
   if (metadataLoading) {
     return <LoadingPlaceholder />;
   }
@@ -47,9 +52,7 @@ const TabComponent = (props: TabProps) => {
     <>
       {metadata && (
         <TableWrapper>
-          <Table
-            rows={fields}
-          />
+          <Table rows={fields} />
         </TableWrapper>
       )}
     </>

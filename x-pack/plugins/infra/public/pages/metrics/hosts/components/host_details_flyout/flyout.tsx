@@ -6,10 +6,10 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiPortal, EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 import { EuiSpacer, EuiTabs, EuiTab } from '@elastic/eui';
 import { PropertiesTab } from './metadata/metadata';
-import { HostNodeRow } from '../../hooks/use_hosts_table';
+import type { HostNodeRow } from '../../hooks/use_hosts_table';
 
 interface Props {
   onClose(): void;
@@ -32,29 +32,21 @@ export const Flyout = ({ node, currentTime, onClose }: Props) => {
   const [selectedTab, setSelectedTab] = useState(0);
 
   return (
-    <>
-      <EuiPortal>
-        <EuiFlyout onClose={onClose} ownFocus={false}>
-          <EuiFlyoutHeader hasBorder>
-            <EuiTitle size="m">
-              <h2>{node.name}</h2>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <EuiTabs style={{ marginBottom: '-25px' }} size="s">
-              {tabs.map((tab, i) => (
-                <EuiTab
-                  key={tab.id}
-                  isSelected={i === selectedTab}
-                  onClick={() => setSelectedTab(i)}
-                >
-                  {tab.name}
-                </EuiTab>
-              ))}
-            </EuiTabs>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>{tabs[selectedTab].content}</EuiFlyoutBody>
-        </EuiFlyout>
-      </EuiPortal>
-    </>
+    <EuiFlyout onClose={onClose} ownFocus={false}>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="m">
+          <h2>{node.name}</h2>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiTabs style={{ marginBottom: '-25px' }} size="s">
+          {tabs.map((tab, i) => (
+            <EuiTab key={tab.id} isSelected={i === selectedTab} onClick={() => setSelectedTab(i)}>
+              {tab.name}
+            </EuiTab>
+          ))}
+        </EuiTabs>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>{tabs[selectedTab].content}</EuiFlyoutBody>
+    </EuiFlyout>
   );
 };

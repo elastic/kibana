@@ -5,13 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiBasicTable,
-} from '@elastic/eui';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiLink, EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { first } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -66,9 +60,7 @@ export const Table = (props: Props) => {
     []
   );
 
-  return (
-      <EuiBasicTable tableLayout={'fixed'} responsive={false} columns={columns} items={rows} />
-  );
+  return <EuiBasicTable tableLayout={'fixed'} responsive={false} columns={columns} items={rows} />;
 };
 
 interface MoreProps {
