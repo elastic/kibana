@@ -28,7 +28,7 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
     cases: {
       hooks: { getUseCasesAddToExistingCaseModal },
     },
-    triggersActionsUi: { getEditAlertFlyout, getRuleSnoozeModal },
+    triggersActionsUi: { getEditAlertFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
   } = useKibana<ObservabilityAppServices>().services;
 
   const { rule, reloadRule } = useFetchRule({
@@ -137,24 +137,24 @@ export function HeaderActions({ alert }: HeaderActionsProps) {
         </EuiFlexGroup>
       </EuiPopover>
 
-      {rule && ruleConditionsFlyoutOpen
-        ? getEditAlertFlyout({
-            initialRule: rule,
-            onClose: () => {
-              setRuleConditionsFlyoutOpen(false);
-            },
-            onSave: reloadRule,
-          })
-        : null}
+      {rule && ruleConditionsFlyoutOpen ? (
+        <EditRuleFlyout
+          initialRule={rule}
+          onClose={() => {
+            setRuleConditionsFlyoutOpen(false);
+          }}
+          onSave={reloadRule}
+        />
+      ) : null}
 
-      {rule && snoozeModalOpen
-        ? getRuleSnoozeModal({
-            rule,
-            onClose: () => setSnoozeModalOpen(false),
-            onRuleChanged: reloadRule,
-            onLoading: noop,
-          })
-        : null}
+      {rule && snoozeModalOpen ? (
+        <RuleSnoozeModal
+          rule={rule}
+          onClose={() => setSnoozeModalOpen(false)}
+          onRuleChanged={reloadRule}
+          onLoading={noop}
+        />
+      ) : null}
     </>
   );
 }

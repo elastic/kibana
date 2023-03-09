@@ -20,7 +20,7 @@ import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { PageTitle } from './components/page_title';
 import { HeaderActions } from './components/header_actions';
 import { AlertSummary, AlertSummaryField } from './components/alert_summary';
-import { CenterJustifiedSpinner } from '../rule_details/components/center_justified_spinner';
+import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
 import PageNotFound from '../404';
 import { getTimeZone } from '../../utils/get_time_zone';
 import { isAlertDetailsEnabledPerApp } from '../../utils/is_alert_details_enabled';
