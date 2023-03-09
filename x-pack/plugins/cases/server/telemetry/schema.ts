@@ -15,6 +15,7 @@ import type {
   SolutionTelemetrySchema,
   AssigneesSchema,
   AttachmentFrameworkSchema,
+  AttachmentItemsSchema,
 } from './types';
 
 const long: TypeLong = { type: 'long' };
@@ -27,8 +28,13 @@ const countSchema: CountSchema = {
   daily: long,
 };
 
-const attachmentSchema = {
-  type: 'array' as const,
+interface AttachmentRegistrySchema {
+  type: 'array';
+  items: AttachmentItemsSchema;
+}
+
+const attachmentRegistrySchema: AttachmentRegistrySchema = {
+  type: 'array',
   items: {
     average: long,
     maxOnACase: long,
@@ -38,8 +44,8 @@ const attachmentSchema = {
 };
 
 const attachmentFrameworkSchema: AttachmentFrameworkSchema = {
-  persistableAttachments: attachmentSchema,
-  externalAttachments: attachmentSchema,
+  persistableAttachments: attachmentRegistrySchema,
+  externalAttachments: attachmentRegistrySchema,
   files: {
     average: long,
     averageSize: long,
