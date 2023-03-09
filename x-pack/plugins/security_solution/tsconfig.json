@@ -146,6 +146,6 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/expandable-flyout",
     "@kbn/securitysolution-grouping",
-    "@kbn/solution-side-nav",
+    "@kbn/security-solution-side-nav",
   ]
 }
