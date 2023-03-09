@@ -1,11 +1,6 @@
 {
   "journeyName": "POST /api/telemetry/v2/clusters/_stats - no cache - 1600 dataviews",
   "scalabilitySetup": {
-    "responseTimeThreshold": {
-      "threshold1": 10000,
-      "threshold2": 20000,
-      "threshold3": 30000
-    },
     "warmup": [
       {
         "action": "constantUsersPerSec",
