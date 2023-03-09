@@ -18,7 +18,7 @@ export interface PackageInfo {
   location: 'custom' | 'common';
 }
 
-const REVISION = 1036745;
+const REVISION = 1095492;
 
 enum BaseUrl {
   // see https://www.chromium.org/getting-involved/download-chromium
@@ -66,9 +66,9 @@ export class ChromiumArchivePaths {
     {
       platform: 'linux',
       architecture: 'x64',
-      archiveFilename: 'chromium-749e738-locales-linux_x64.zip',
-      archiveChecksum: '09ba194e6c720397728fbec3d3895b0b',
-      binaryChecksum: 'df1c957f41dcca8e33369b1d255406c2',
+      archiveFilename: 'chromium-7abd50c-locales-linux_x64.zip',
+      archiveChecksum: 'dc141a6cae734c29a1144d3d9f8ca7ee',
+      binaryChecksum: '9b9611ba0c65fc34d1be1e40ae80c036',
       binaryRelativePath: 'headless_shell-linux_x64/headless_shell',
       location: 'custom',
       isPreInstalled: true,
@@ -76,9 +76,9 @@ export class ChromiumArchivePaths {
     {
       platform: 'linux',
       architecture: 'arm64',
-      archiveFilename: 'chromium-749e738-locales-linux_arm64.zip',
-      archiveChecksum: '1f535b1c2875d471829c6ff128a13262',
-      binaryChecksum: 'ca6b91d0ba8a65712554572dabc66968',
+      archiveFilename: 'chromium-7abd50c-locales-linux_arm64.zip',
+      archiveChecksum: '1ce431a6cd7b3d7e5aa63fc8f7327b0f',
+      binaryChecksum: 'ef21a88efa18f000e6da6d9c51ee2fd7',
       binaryRelativePath: 'headless_shell-linux_arm64/headless_shell',
       location: 'custom',
       isPreInstalled: true,
