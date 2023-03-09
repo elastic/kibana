@@ -53,7 +53,40 @@ export const useGetGroupSelector = ({
     [dispatch, groupingId]
   );
 
+  const onGroupChange = useCallback(
+    (groupSelection: string) => {
+      if (groupSelection === selectedGroup) {
+        return;
+      }
+      setGroupsActivePage(0);
+      setSelectedGroup(groupSelection);
+
+      // only update options if the new selection is a custom field
+      if (
+        !isNoneGroup(groupSelection) &&
+        !options.find((o: GroupOption) => o.key === groupSelection)
+      ) {
+        setOptions([
+          ...defaultGroupingOptions,
+          {
+            label: groupSelection,
+            key: groupSelection,
+          },
+        ]);
+      }
+    },
+    [
+      defaultGroupingOptions,
+      options,
+      selectedGroup,
+      setGroupsActivePage,
+      setOptions,
+      setSelectedGroup,
+    ]
+  );
+
   useEffect(() => {
+    // only set options the first time, all other updates will be taken care of by onGroupChange
     if (options.length > 0) return;
     setOptions(
       defaultGroupingOptions.find((o) => o.key === selectedGroup)
@@ -70,33 +103,12 @@ export const useGetGroupSelector = ({
               : []),
           ]
     );
-  }, [defaultGroupingOptions, selectedGroup, setOptions, options]);
+  }, [defaultGroupingOptions, options.length, selectedGroup, setOptions]);
 
   return getGroupSelector({
     groupSelected: selectedGroup,
     'data-test-subj': 'alerts-table-group-selector',
-    onGroupChange: (groupSelection: string) => {
-      if (groupSelection === selectedGroup) {
-        return;
-      }
-      setGroupsActivePage(0);
-      setSelectedGroup(groupSelection);
-
-      if (
-        !isNoneGroup(groupSelection) &&
-        !options.find((o: GroupOption) => o.key === groupSelection)
-      ) {
-        setOptions([
-          ...defaultGroupingOptions,
-          {
-            label: groupSelection,
-            key: groupSelection,
-          },
-        ]);
-      } else {
-        setOptions(defaultGroupingOptions);
-      }
-    },
+    onGroupChange,
     fields,
     options,
   });

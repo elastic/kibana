@@ -7,82 +7,70 @@
 
 import { filterInstalledRules, getRulesToUpdate, mergeExceptionLists } from './get_rules_to_update';
 import { getRuleMock } from '../../routes/__mocks__/request_responses';
-import { getPrebuiltRuleMock } from '../../../../../common/detection_engine/prebuilt_rules/mocks';
+import { getPrebuiltRuleMock } from '../mocks';
 import { getQueryRuleParams } from '../../rule_schema/mocks';
-import { prebuiltRulesToMap, rulesToMap } from './utils';
+import { rulesToMap } from './utils';
 
 describe('get_rules_to_update', () => {
   test('should return empty array if both rule sets are empty', () => {
-    const update = getRulesToUpdate(prebuiltRulesToMap([]), rulesToMap([]));
+    const update = getRulesToUpdate([], rulesToMap([]));
     expect(update).toEqual([]);
   });
 
   test('should return empty array if the rule_id of the two rules do not match', () => {
-    const ruleFromFileSystem = getPrebuiltRuleMock();
-    ruleFromFileSystem.rule_id = 'rule-1';
-    ruleFromFileSystem.version = 2;
+    const ruleAsset = getPrebuiltRuleMock();
+    ruleAsset.rule_id = 'rule-1';
+    ruleAsset.version = 2;
 
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-2';
     installedRule.params.version = 1;
-    const update = getRulesToUpdate(
-      prebuiltRulesToMap([ruleFromFileSystem]),
-      rulesToMap([installedRule])
-    );
+    const update = getRulesToUpdate([ruleAsset], rulesToMap([installedRule]));
     expect(update).toEqual([]);
   });
 
   test('should return empty array if the version of file system rule is less than the installed version', () => {
-    const ruleFromFileSystem = getPrebuiltRuleMock();
-    ruleFromFileSystem.rule_id = 'rule-1';
-    ruleFromFileSystem.version = 1;
+    const ruleAsset = getPrebuiltRuleMock();
+    ruleAsset.rule_id = 'rule-1';
+    ruleAsset.version = 1;
 
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-1';
     installedRule.params.version = 2;
-    const update = getRulesToUpdate(
-      prebuiltRulesToMap([ruleFromFileSystem]),
-      rulesToMap([installedRule])
-    );
+    const update = getRulesToUpdate([ruleAsset], rulesToMap([installedRule]));
     expect(update).toEqual([]);
   });
 
   test('should return empty array if the version of file system rule is the same as the installed version', () => {
-    const ruleFromFileSystem = getPrebuiltRuleMock();
-    ruleFromFileSystem.rule_id = 'rule-1';
-    ruleFromFileSystem.version = 1;
+    const ruleAsset = getPrebuiltRuleMock();
+    ruleAsset.rule_id = 'rule-1';
+    ruleAsset.version = 1;
 
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-1';
     installedRule.params.version = 1;
-    const update = getRulesToUpdate(
-      prebuiltRulesToMap([ruleFromFileSystem]),
-      rulesToMap([installedRule])
-    );
+    const update = getRulesToUpdate([ruleAsset], rulesToMap([installedRule]));
     expect(update).toEqual([]);
   });
 
   test('should return the rule to update if the version of file system rule is greater than the installed version', () => {
-    const ruleFromFileSystem = getPrebuiltRuleMock();
-    ruleFromFileSystem.rule_id = 'rule-1';
-    ruleFromFileSystem.version = 2;
+    const ruleAsset = getPrebuiltRuleMock();
+    ruleAsset.rule_id = 'rule-1';
+    ruleAsset.version = 2;
 
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-1';
     installedRule.params.version = 1;
     installedRule.params.exceptionsList = [];
 
-    const update = getRulesToUpdate(
-      prebuiltRulesToMap([ruleFromFileSystem]),
-      rulesToMap([installedRule])
-    );
-    expect(update).toEqual([ruleFromFileSystem]);
+    const update = getRulesToUpdate([ruleAsset], rulesToMap([installedRule]));
+    expect(update).toEqual([ruleAsset]);
   });
 
   test('should return 1 rule out of 2 to update if the version of file system rule is greater than the installed version of just one', () => {
-    const ruleFromFileSystem = getPrebuiltRuleMock();
-    ruleFromFileSystem.rule_id = 'rule-1';
-    ruleFromFileSystem.version = 2;
+    const ruleAsset = getPrebuiltRuleMock();
+    ruleAsset.rule_id = 'rule-1';
+    ruleAsset.version = 2;
 
     const installedRule1 = getRuleMock(getQueryRuleParams());
     installedRule1.params.ruleId = 'rule-1';
@@ -94,21 +82,18 @@ describe('get_rules_to_update', () => {
     installedRule2.params.version = 1;
     installedRule2.params.exceptionsList = [];
 
-    const update = getRulesToUpdate(
-      prebuiltRulesToMap([ruleFromFileSystem]),
-      rulesToMap([installedRule1, installedRule2])
-    );
-    expect(update).toEqual([ruleFromFileSystem]);
+    const update = getRulesToUpdate([ruleAsset], rulesToMap([installedRule1, installedRule2]));
+    expect(update).toEqual([ruleAsset]);
   });
 
   test('should return 2 rules out of 2 to update if the version of file system rule is greater than the installed version of both', () => {
-    const ruleFromFileSystem1 = getPrebuiltRuleMock();
-    ruleFromFileSystem1.rule_id = 'rule-1';
-    ruleFromFileSystem1.version = 2;
+    const ruleAsset1 = getPrebuiltRuleMock();
+    ruleAsset1.rule_id = 'rule-1';
+    ruleAsset1.version = 2;
 
-    const ruleFromFileSystem2 = getPrebuiltRuleMock();
-    ruleFromFileSystem2.rule_id = 'rule-2';
-    ruleFromFileSystem2.version = 2;
+    const ruleAsset2 = getPrebuiltRuleMock();
+    ruleAsset2.rule_id = 'rule-2';
+    ruleAsset2.version = 2;
 
     const installedRule1 = getRuleMock(getQueryRuleParams());
     installedRule1.params.ruleId = 'rule-1';
@@ -121,15 +106,15 @@ describe('get_rules_to_update', () => {
     installedRule2.params.exceptionsList = [];
 
     const update = getRulesToUpdate(
-      prebuiltRulesToMap([ruleFromFileSystem1, ruleFromFileSystem2]),
+      [ruleAsset1, ruleAsset2],
       rulesToMap([installedRule1, installedRule2])
     );
-    expect(update).toEqual([ruleFromFileSystem1, ruleFromFileSystem2]);
+    expect(update).toEqual([ruleAsset1, ruleAsset2]);
   });
 
   test('should add back an exception_list if it was removed by the end user on an immutable rule during an upgrade', () => {
-    const ruleFromFileSystem1 = getPrebuiltRuleMock();
-    ruleFromFileSystem1.exceptions_list = [
+    const ruleAsset1 = getPrebuiltRuleMock();
+    ruleAsset1.exceptions_list = [
       {
         id: 'endpoint_list',
         list_id: 'endpoint_list',
@@ -137,24 +122,21 @@ describe('get_rules_to_update', () => {
         type: 'endpoint',
       },
     ];
-    ruleFromFileSystem1.rule_id = 'rule-1';
-    ruleFromFileSystem1.version = 2;
+    ruleAsset1.rule_id = 'rule-1';
+    ruleAsset1.version = 2;
 
     const installedRule1 = getRuleMock(getQueryRuleParams());
     installedRule1.params.ruleId = 'rule-1';
     installedRule1.params.version = 1;
     installedRule1.params.exceptionsList = [];
 
-    const [update] = getRulesToUpdate(
-      prebuiltRulesToMap([ruleFromFileSystem1]),
-      rulesToMap([installedRule1])
-    );
-    expect(update.exceptions_list).toEqual(ruleFromFileSystem1.exceptions_list);
+    const [update] = getRulesToUpdate([ruleAsset1], rulesToMap([installedRule1]));
+    expect(update.exceptions_list).toEqual(ruleAsset1.exceptions_list);
   });
 
   test('should not remove an additional exception_list if an additional one was added by the end user on an immutable rule during an upgrade', () => {
-    const ruleFromFileSystem1 = getPrebuiltRuleMock();
-    ruleFromFileSystem1.exceptions_list = [
+    const ruleAsset1 = getPrebuiltRuleMock();
+    ruleAsset1.exceptions_list = [
       {
         id: 'endpoint_list',
         list_id: 'endpoint_list',
@@ -162,8 +144,8 @@ describe('get_rules_to_update', () => {
         type: 'endpoint',
       },
     ];
-    ruleFromFileSystem1.rule_id = 'rule-1';
-    ruleFromFileSystem1.version = 2;
+    ruleAsset1.rule_id = 'rule-1';
+    ruleAsset1.version = 2;
 
     const installedRule1 = getRuleMock(getQueryRuleParams());
     installedRule1.params.ruleId = 'rule-1';
@@ -177,19 +159,16 @@ describe('get_rules_to_update', () => {
       },
     ];
 
-    const [update] = getRulesToUpdate(
-      prebuiltRulesToMap([ruleFromFileSystem1]),
-      rulesToMap([installedRule1])
-    );
+    const [update] = getRulesToUpdate([ruleAsset1], rulesToMap([installedRule1]));
     expect(update.exceptions_list).toEqual([
-      ...ruleFromFileSystem1.exceptions_list,
+      ...ruleAsset1.exceptions_list,
       ...installedRule1.params.exceptionsList,
     ]);
   });
 
   test('should not remove an existing exception_list if they are the same between the current installed one and the upgraded one', () => {
-    const ruleFromFileSystem1 = getPrebuiltRuleMock();
-    ruleFromFileSystem1.exceptions_list = [
+    const ruleAsset1 = getPrebuiltRuleMock();
+    ruleAsset1.exceptions_list = [
       {
         id: 'endpoint_list',
         list_id: 'endpoint_list',
@@ -197,8 +176,8 @@ describe('get_rules_to_update', () => {
         type: 'endpoint',
       },
     ];
-    ruleFromFileSystem1.rule_id = 'rule-1';
-    ruleFromFileSystem1.version = 2;
+    ruleAsset1.rule_id = 'rule-1';
+    ruleAsset1.version = 2;
 
     const installedRule1 = getRuleMock(getQueryRuleParams());
     installedRule1.params.ruleId = 'rule-1';
@@ -212,18 +191,15 @@ describe('get_rules_to_update', () => {
       },
     ];
 
-    const [update] = getRulesToUpdate(
-      prebuiltRulesToMap([ruleFromFileSystem1]),
-      rulesToMap([installedRule1])
-    );
-    expect(update.exceptions_list).toEqual(ruleFromFileSystem1.exceptions_list);
+    const [update] = getRulesToUpdate([ruleAsset1], rulesToMap([installedRule1]));
+    expect(update.exceptions_list).toEqual(ruleAsset1.exceptions_list);
   });
 
   test('should not remove an existing exception_list if the rule has an empty exceptions list', () => {
-    const ruleFromFileSystem1 = getPrebuiltRuleMock();
-    ruleFromFileSystem1.exceptions_list = [];
-    ruleFromFileSystem1.rule_id = 'rule-1';
-    ruleFromFileSystem1.version = 2;
+    const ruleAsset1 = getPrebuiltRuleMock();
+    ruleAsset1.exceptions_list = [];
+    ruleAsset1.rule_id = 'rule-1';
+    ruleAsset1.version = 2;
 
     const installedRule1 = getRuleMock(getQueryRuleParams());
     installedRule1.params.ruleId = 'rule-1';
@@ -237,23 +213,20 @@ describe('get_rules_to_update', () => {
       },
     ];
 
-    const [update] = getRulesToUpdate(
-      prebuiltRulesToMap([ruleFromFileSystem1]),
-      rulesToMap([installedRule1])
-    );
+    const [update] = getRulesToUpdate([ruleAsset1], rulesToMap([installedRule1]));
     expect(update.exceptions_list).toEqual(installedRule1.params.exceptionsList);
   });
 
   test('should not remove an existing exception_list if the rule has an empty exceptions list for multiple rules', () => {
-    const ruleFromFileSystem1 = getPrebuiltRuleMock();
-    ruleFromFileSystem1.exceptions_list = [];
-    ruleFromFileSystem1.rule_id = 'rule-1';
-    ruleFromFileSystem1.version = 2;
+    const ruleAsset1 = getPrebuiltRuleMock();
+    ruleAsset1.exceptions_list = [];
+    ruleAsset1.rule_id = 'rule-1';
+    ruleAsset1.version = 2;
 
-    const ruleFromFileSystem2 = getPrebuiltRuleMock();
-    ruleFromFileSystem2.exceptions_list = [];
-    ruleFromFileSystem2.rule_id = 'rule-2';
-    ruleFromFileSystem2.version = 2;
+    const ruleAsset2 = getPrebuiltRuleMock();
+    ruleAsset2.exceptions_list = [];
+    ruleAsset2.rule_id = 'rule-2';
+    ruleAsset2.version = 2;
 
     const installedRule1 = getRuleMock(getQueryRuleParams());
     installedRule1.params.ruleId = 'rule-1';
@@ -279,7 +252,7 @@ describe('get_rules_to_update', () => {
     ];
 
     const [update1, update2] = getRulesToUpdate(
-      prebuiltRulesToMap([ruleFromFileSystem1, ruleFromFileSystem2]),
+      [ruleAsset1, ruleAsset2],
       rulesToMap([installedRule1, installedRule2])
     );
     expect(update1.exceptions_list).toEqual(installedRule1.params.exceptionsList);
@@ -287,16 +260,16 @@ describe('get_rules_to_update', () => {
   });
 
   test('should not remove an existing exception_list if the rule has an empty exceptions list for mixed rules', () => {
-    const ruleFromFileSystem1 = getPrebuiltRuleMock();
-    ruleFromFileSystem1.exceptions_list = [];
-    ruleFromFileSystem1.rule_id = 'rule-1';
-    ruleFromFileSystem1.version = 2;
+    const ruleAsset1 = getPrebuiltRuleMock();
+    ruleAsset1.exceptions_list = [];
+    ruleAsset1.rule_id = 'rule-1';
+    ruleAsset1.version = 2;
 
-    const ruleFromFileSystem2 = getPrebuiltRuleMock();
-    ruleFromFileSystem2.exceptions_list = [];
-    ruleFromFileSystem2.rule_id = 'rule-2';
-    ruleFromFileSystem2.version = 2;
-    ruleFromFileSystem2.exceptions_list = [
+    const ruleAsset2 = getPrebuiltRuleMock();
+    ruleAsset2.exceptions_list = [];
+    ruleAsset2.rule_id = 'rule-2';
+    ruleAsset2.version = 2;
+    ruleAsset2.exceptions_list = [
       {
         id: 'second_list',
         list_id: 'second_list',
@@ -330,12 +303,12 @@ describe('get_rules_to_update', () => {
     ];
 
     const [update1, update2] = getRulesToUpdate(
-      prebuiltRulesToMap([ruleFromFileSystem1, ruleFromFileSystem2]),
+      [ruleAsset1, ruleAsset2],
       rulesToMap([installedRule1, installedRule2])
     );
     expect(update1.exceptions_list).toEqual(installedRule1.params.exceptionsList);
     expect(update2.exceptions_list).toEqual([
-      ...ruleFromFileSystem2.exceptions_list,
+      ...ruleAsset2.exceptions_list,
       ...installedRule2.params.exceptionsList,
     ]);
   });
@@ -343,60 +316,60 @@ describe('get_rules_to_update', () => {
 
 describe('filterInstalledRules', () => {
   test('should return "false" if the id of the two rules do not match', () => {
-    const ruleFromFileSystem = getPrebuiltRuleMock();
-    ruleFromFileSystem.rule_id = 'rule-1';
-    ruleFromFileSystem.version = 2;
+    const ruleAsset = getPrebuiltRuleMock();
+    ruleAsset.rule_id = 'rule-1';
+    ruleAsset.version = 2;
 
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-2';
     installedRule.params.version = 1;
-    const shouldUpdate = filterInstalledRules(ruleFromFileSystem, rulesToMap([installedRule]));
+    const shouldUpdate = filterInstalledRules(ruleAsset, rulesToMap([installedRule]));
     expect(shouldUpdate).toEqual(false);
   });
 
   test('should return "false" if the version of file system rule is less than the installed version', () => {
-    const ruleFromFileSystem = getPrebuiltRuleMock();
-    ruleFromFileSystem.rule_id = 'rule-1';
-    ruleFromFileSystem.version = 1;
+    const ruleAsset = getPrebuiltRuleMock();
+    ruleAsset.rule_id = 'rule-1';
+    ruleAsset.version = 1;
 
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-1';
     installedRule.params.version = 2;
-    const shouldUpdate = filterInstalledRules(ruleFromFileSystem, rulesToMap([installedRule]));
+    const shouldUpdate = filterInstalledRules(ruleAsset, rulesToMap([installedRule]));
     expect(shouldUpdate).toEqual(false);
   });
 
   test('should return "false" if the version of file system rule is the same as the installed version', () => {
-    const ruleFromFileSystem = getPrebuiltRuleMock();
-    ruleFromFileSystem.rule_id = 'rule-1';
-    ruleFromFileSystem.version = 1;
+    const ruleAsset = getPrebuiltRuleMock();
+    ruleAsset.rule_id = 'rule-1';
+    ruleAsset.version = 1;
 
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-1';
     installedRule.params.version = 1;
-    const shouldUpdate = filterInstalledRules(ruleFromFileSystem, rulesToMap([installedRule]));
+    const shouldUpdate = filterInstalledRules(ruleAsset, rulesToMap([installedRule]));
     expect(shouldUpdate).toEqual(false);
   });
 
   test('should return "true" to update if the version of file system rule is greater than the installed version', () => {
-    const ruleFromFileSystem = getPrebuiltRuleMock();
-    ruleFromFileSystem.rule_id = 'rule-1';
-    ruleFromFileSystem.version = 2;
+    const ruleAsset = getPrebuiltRuleMock();
+    ruleAsset.rule_id = 'rule-1';
+    ruleAsset.version = 2;
 
     const installedRule = getRuleMock(getQueryRuleParams());
     installedRule.params.ruleId = 'rule-1';
     installedRule.params.version = 1;
     installedRule.params.exceptionsList = [];
 
-    const shouldUpdate = filterInstalledRules(ruleFromFileSystem, rulesToMap([installedRule]));
+    const shouldUpdate = filterInstalledRules(ruleAsset, rulesToMap([installedRule]));
     expect(shouldUpdate).toEqual(true);
   });
 });
 
 describe('mergeExceptionLists', () => {
   test('should add back an exception_list if it was removed by the end user on an immutable rule during an upgrade', () => {
-    const ruleFromFileSystem1 = getPrebuiltRuleMock();
-    ruleFromFileSystem1.exceptions_list = [
+    const ruleAsset1 = getPrebuiltRuleMock();
+    ruleAsset1.exceptions_list = [
       {
         id: 'endpoint_list',
         list_id: 'endpoint_list',
@@ -404,21 +377,21 @@ describe('mergeExceptionLists', () => {
         type: 'endpoint',
       },
     ];
-    ruleFromFileSystem1.rule_id = 'rule-1';
-    ruleFromFileSystem1.version = 2;
+    ruleAsset1.rule_id = 'rule-1';
+    ruleAsset1.version = 2;
 
     const installedRule1 = getRuleMock(getQueryRuleParams());
     installedRule1.params.ruleId = 'rule-1';
     installedRule1.params.version = 1;
     installedRule1.params.exceptionsList = [];
 
-    const update = mergeExceptionLists(ruleFromFileSystem1, rulesToMap([installedRule1]));
-    expect(update.exceptions_list).toEqual(ruleFromFileSystem1.exceptions_list);
+    const update = mergeExceptionLists(ruleAsset1, rulesToMap([installedRule1]));
+    expect(update.exceptions_list).toEqual(ruleAsset1.exceptions_list);
   });
 
   test('should not remove an additional exception_list if an additional one was added by the end user on an immutable rule during an upgrade', () => {
-    const ruleFromFileSystem1 = getPrebuiltRuleMock();
-    ruleFromFileSystem1.exceptions_list = [
+    const ruleAsset1 = getPrebuiltRuleMock();
+    ruleAsset1.exceptions_list = [
       {
         id: 'endpoint_list',
         list_id: 'endpoint_list',
@@ -426,8 +399,8 @@ describe('mergeExceptionLists', () => {
         type: 'endpoint',
       },
     ];
-    ruleFromFileSystem1.rule_id = 'rule-1';
-    ruleFromFileSystem1.version = 2;
+    ruleAsset1.rule_id = 'rule-1';
+    ruleAsset1.version = 2;
 
     const installedRule1 = getRuleMock(getQueryRuleParams());
     installedRule1.params.ruleId = 'rule-1';
@@ -441,16 +414,16 @@ describe('mergeExceptionLists', () => {
       },
     ];
 
-    const update = mergeExceptionLists(ruleFromFileSystem1, rulesToMap([installedRule1]));
+    const update = mergeExceptionLists(ruleAsset1, rulesToMap([installedRule1]));
     expect(update.exceptions_list).toEqual([
-      ...ruleFromFileSystem1.exceptions_list,
+      ...ruleAsset1.exceptions_list,
       ...installedRule1.params.exceptionsList,
     ]);
   });
 
   test('should not remove an existing exception_list if they are the same between the current installed one and the upgraded one', () => {
-    const ruleFromFileSystem1 = getPrebuiltRuleMock();
-    ruleFromFileSystem1.exceptions_list = [
+    const ruleAsset1 = getPrebuiltRuleMock();
+    ruleAsset1.exceptions_list = [
       {
         id: 'endpoint_list',
         list_id: 'endpoint_list',
@@ -458,8 +431,8 @@ describe('mergeExceptionLists', () => {
         type: 'endpoint',
       },
     ];
-    ruleFromFileSystem1.rule_id = 'rule-1';
-    ruleFromFileSystem1.version = 2;
+    ruleAsset1.rule_id = 'rule-1';
+    ruleAsset1.version = 2;
 
     const installedRule1 = getRuleMock(getQueryRuleParams());
     installedRule1.params.ruleId = 'rule-1';
@@ -473,15 +446,15 @@ describe('mergeExceptionLists', () => {
       },
     ];
 
-    const update = mergeExceptionLists(ruleFromFileSystem1, rulesToMap([installedRule1]));
-    expect(update.exceptions_list).toEqual(ruleFromFileSystem1.exceptions_list);
+    const update = mergeExceptionLists(ruleAsset1, rulesToMap([installedRule1]));
+    expect(update.exceptions_list).toEqual(ruleAsset1.exceptions_list);
   });
 
   test('should not remove an existing exception_list if the rule has an empty exceptions list', () => {
-    const ruleFromFileSystem1 = getPrebuiltRuleMock();
-    ruleFromFileSystem1.exceptions_list = [];
-    ruleFromFileSystem1.rule_id = 'rule-1';
-    ruleFromFileSystem1.version = 2;
+    const ruleAsset1 = getPrebuiltRuleMock();
+    ruleAsset1.exceptions_list = [];
+    ruleAsset1.rule_id = 'rule-1';
+    ruleAsset1.version = 2;
 
     const installedRule1 = getRuleMock(getQueryRuleParams());
     installedRule1.params.ruleId = 'rule-1';
@@ -495,7 +468,7 @@ describe('mergeExceptionLists', () => {
       },
     ];
 
-    const update = mergeExceptionLists(ruleFromFileSystem1, rulesToMap([installedRule1]));
+    const update = mergeExceptionLists(ruleAsset1, rulesToMap([installedRule1]));
     expect(update.exceptions_list).toEqual(installedRule1.params.exceptionsList);
   });
 });
