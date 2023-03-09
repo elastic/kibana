@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
+import { EuiSideNavItemType, EuiPageSectionProps, EuiErrorBoundary } from '@elastic/eui';
 import { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -178,13 +178,15 @@ export function ObservabilityPageTemplate({
                   : undefined
               }
             >
-              <KibanaPageTemplate.Section
-                component="div"
-                alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
-                {...pageSectionProps}
-              >
-                {children}
-              </KibanaPageTemplate.Section>
+              <EuiErrorBoundary>
+                <KibanaPageTemplate.Section
+                  component="div"
+                  alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
+                  {...pageSectionProps}
+                >
+                  {children}
+                </KibanaPageTemplate.Section>
+              </EuiErrorBoundary>
               {bottomBar && (
                 <KibanaPageTemplate.BottomBar {...bottomBarProps}>
                   {bottomBar}
