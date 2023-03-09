@@ -80,7 +80,7 @@
           ") => ",
           "BucketSize"
         ],
-        "path": "x-pack/plugins/observability/public/pages/overview/containers/overview_page/helpers/calculate_bucket_size.ts",
+        "path": "x-pack/plugins/observability/public/pages/overview/helpers/calculate_bucket_size.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -100,7 +100,7 @@
                 "text": "TimeRange"
               }
             ],
-            "path": "x-pack/plugins/observability/public/pages/overview/containers/overview_page/helpers/calculate_bucket_size.ts",
+            "path": "x-pack/plugins/observability/public/pages/overview/helpers/calculate_bucket_size.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -121,7 +121,7 @@
                 "text": "TimeBuckets"
               }
             ],
-            "path": "x-pack/plugins/observability/public/pages/overview/containers/overview_page/helpers/calculate_bucket_size.ts",
+            "path": "x-pack/plugins/observability/public/pages/overview/helpers/calculate_bucket_size.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -662,6 +662,54 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-public.formatAlertEvaluationValue",
+        "type": "Function",
+        "tags": [],
+        "label": "formatAlertEvaluationValue",
+        "description": [],
+        "signature": [
+          "(ruleTypeId?: string | undefined, evaluationValue?: number | undefined) => any"
+        ],
+        "path": "x-pack/plugins/observability/public/utils/format_alert_evaluation_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.formatAlertEvaluationValue.$1",
+            "type": "string",
+            "tags": [],
+            "label": "ruleTypeId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/utils/format_alert_evaluation_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-public.formatAlertEvaluationValue.$2",
+            "type": "number",
+            "tags": [],
+            "label": "evaluationValue",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/observability/public/utils/format_alert_evaluation_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -10024,7 +10072,7 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "{ \"PUT /api/observability/slos/{id}\"?: ",
+          "{ \"PUT /api/observability/slos/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10248,7 +10296,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
+          ">; \"GET /api/observability/slos/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10278,7 +10326,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"GET /api/observability/slos\"?: ",
+          ">; \"GET /api/observability/slos\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10326,7 +10374,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /internal/observability/slos/_historical_summary\"?: ",
+          ">; \"POST /internal/observability/slos/_historical_summary\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10358,7 +10406,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /api/observability/slos/{id}/enable\"?: ",
+          ">; \"POST /api/observability/slos/{id}/enable\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10388,7 +10436,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /api/observability/slos/{id}/disable\"?: ",
+          ">; \"POST /api/observability/slos/{id}/disable\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10418,7 +10466,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
+          ">; \"DELETE /api/observability/slos/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10448,7 +10496,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /api/observability/slos\"?: ",
+          ">; \"POST /api/observability/slos\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10672,7 +10720,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
+          ">; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10731,7 +10779,7 @@
         "label": "ObservabilityConfig",
         "description": [],
         "signature": [
-          "{ readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { slo: Readonly<{} & { enabled: boolean; }>; alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
+          "{ readonly annotations: Readonly<{} & { enabled: boolean; index: string; }>; readonly unsafe: Readonly<{} & { alertDetails: Readonly<{} & { uptime: Readonly<{} & { enabled: boolean; }>; apm: Readonly<{} & { enabled: boolean; }>; metrics: Readonly<{} & { enabled: boolean; }>; logs: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
         ],
         "path": "x-pack/plugins/observability/server/index.ts",
         "deprecated": false,
@@ -10746,7 +10794,7 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"PUT /api/observability/slos/{id}\"?: ",
+          "{ \"PUT /api/observability/slos/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -10970,7 +11018,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"GET /api/observability/slos/{id}\"?: ",
+          ">; \"GET /api/observability/slos/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -11000,7 +11048,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"GET /api/observability/slos\"?: ",
+          ">; \"GET /api/observability/slos\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -11048,7 +11096,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /internal/observability/slos/_historical_summary\"?: ",
+          ">; \"POST /internal/observability/slos/_historical_summary\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -11080,7 +11128,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /api/observability/slos/{id}/enable\"?: ",
+          ">; \"POST /api/observability/slos/{id}/enable\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -11110,7 +11158,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /api/observability/slos/{id}/disable\"?: ",
+          ">; \"POST /api/observability/slos/{id}/disable\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -11140,7 +11188,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"DELETE /api/observability/slos/{id}\"?: ",
+          ">; \"DELETE /api/observability/slos/{id}\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -11170,7 +11218,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"POST /api/observability/slos\"?: ",
+          ">; \"POST /api/observability/slos\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -11394,7 +11442,7 @@
             "section": "def-server.ObservabilityRouteCreateOptions",
             "text": "ObservabilityRouteCreateOptions"
           },
-          "> | undefined; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
+          ">; \"GET /api/observability/rules/alerts/dynamic_index_pattern\": ",
           {
             "pluginId": "@kbn/server-route-repository",
             "scope": "common",
@@ -13616,6 +13664,72 @@
     "functions": [
       {
         "parentPluginId": "observability",
+        "id": "def-common.asPercent",
+        "type": "Function",
+        "tags": [],
+        "label": "asPercent",
+        "description": [],
+        "signature": [
+          "(numerator: ",
+          "Maybe",
+          "<number>, denominator: number | undefined, fallbackResult: any) => any"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asPercent.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "numerator",
+            "description": [],
+            "signature": [
+              "Maybe",
+              "<number>"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asPercent.$2",
+            "type": "number",
+            "tags": [],
+            "label": "denominator",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.asPercent.$3",
+            "type": "Any",
+            "tags": [],
+            "label": "fallbackResult",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/formatters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
         "id": "def-common.formatDurationFromTimeUnitChar",
         "type": "Function",
         "tags": [],
@@ -13674,6 +13788,42 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.getDurationFormatter",
+        "type": "Function",
+        "tags": [],
+        "label": "getDurationFormatter",
+        "description": [],
+        "signature": [
+          "(max: number) => ",
+          {
+            "pluginId": "observability",
+            "scope": "common",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-common.TimeFormatter",
+            "text": "TimeFormatter"
+          }
+        ],
+        "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.getDurationFormatter.$1",
+            "type": "number",
+            "tags": [],
+            "label": "max",
+            "description": [],
+            "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -14564,6 +14714,54 @@
         "path": "x-pack/plugins/observability/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.TimeFormatter",
+        "type": "Type",
+        "tags": [],
+        "label": "TimeFormatter",
+        "description": [],
+        "signature": [
+          "(value: ",
+          "Maybe",
+          "<number>, options?: FormatterOptions | undefined) => ConvertedDuration"
+        ],
+        "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.TimeFormatter.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "number | null | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observability",
+            "id": "def-common.TimeFormatter.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "FormatterOptions | undefined"
+            ],
+            "path": "x-pack/plugins/observability/common/utils/formatters/duration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
