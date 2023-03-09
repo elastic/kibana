@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { omit } from 'lodash';
 
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createSignalsIndex,
@@ -29,7 +30,6 @@ import {
   getSimpleRuleOutput,
   ruleToUpdateSchema,
 } from '../../utils';
-import { ELASTIC_SECURITY_RULE_ID } from '../../utils/prebuilt_rules/create_prebuilt_rule_saved_objects';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
