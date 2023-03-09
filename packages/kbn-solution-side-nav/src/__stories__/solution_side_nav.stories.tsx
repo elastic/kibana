@@ -15,7 +15,7 @@ import type { SolutionSideNavItem } from '../types';
 const items: SolutionSideNavItem[] = [
   {
     id: 'link1',
-    label: 'Single link',
+    label: 'I am a simple link',
     href: '#',
   },
   {
@@ -27,13 +27,14 @@ const items: SolutionSideNavItem[] = [
         id: 'link3',
         label: 'I am the first nested',
         href: '#',
-        description: 'This is the first nested link',
+        description:
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dignissim, velit ac dignissim maximus, orci justo mattis neque, non eleifend lectus velit sit amet dolor',
       },
       {
         id: 'link4',
         label: 'I am the second nested',
         href: '#',
-        description: 'This is the second nested link',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
       {
         id: 'linkBeta',
@@ -59,33 +60,33 @@ const items: SolutionSideNavItem[] = [
     label: 'I have categories',
     href: '#',
     categories: [
-      { label: 'First Category', linkIds: ['link6', 'link8'] },
-      { label: 'Second Category', linkIds: ['link7', 'link9'] },
+      { label: 'First Category', linkIds: ['link6', 'link7'] },
+      { label: 'Second Category', linkIds: ['link8', 'link9'] },
     ],
     items: [
       {
         id: 'link6',
-        label: 'First Category first nested',
+        label: 'I am the first nested',
         href: '#',
-        description: 'This is the first nested link of the first category',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
       {
         id: 'link7',
-        label: 'Second Category first nested',
+        label: 'I am the second nested',
         href: '#',
-        description: 'This is the first nested link of the second category',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
       {
         id: 'link8',
-        label: 'First Category second nested',
+        label: 'I am the third nested',
         href: '#',
-        description: 'This is the second nested link of the first category',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
       {
         id: 'link9',
-        label: 'First Category first nested',
+        label: 'I am the fourth nested',
         href: '#',
-        description: 'This is the second nested link of the second category',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
     ],
   },
@@ -103,8 +104,8 @@ const selectedId = 'linkSelected';
 
 export const Template = ({}: {}) => (
   <SolutionNav
-    name={'Security'}
-    icon={'logoSecurity'}
+    name={'Observability'}
+    icon={'logoObservability'}
     isOpenOnDesktop={true}
     children={
       <SolutionSideNav
