@@ -35,7 +35,7 @@ const disableCommonProtections = (policy: PolicyConfig) => {
 
   for (const key in policyOutput) {
     if (Object.prototype.hasOwnProperty.call(policyOutput, key)) {
-      const os = key as keyof PolicyConfig;
+      const os = key as keyof Omit<PolicyConfig, 'meta'>;
 
       policyOutput = {
         ...policyOutput,
@@ -53,7 +53,10 @@ const disableCommonProtections = (policy: PolicyConfig) => {
   return policyOutput;
 };
 
-const getDisabledCommonProtectionsForOS = (policy: PolicyConfig, os: keyof PolicyConfig) => ({
+const getDisabledCommonProtectionsForOS = (
+  policy: PolicyConfig,
+  os: keyof Omit<PolicyConfig, 'meta'>
+) => ({
   behavior_protection: {
     ...policy[os].behavior_protection,
     mode: ProtectionModes.off,
@@ -69,7 +72,10 @@ const getDisabledCommonProtectionsForOS = (policy: PolicyConfig, os: keyof Polic
   },
 });
 
-const getDisabledCommonPopupsForOS = (policy: PolicyConfig, os: keyof PolicyConfig) => ({
+const getDisabledCommonPopupsForOS = (
+  policy: PolicyConfig,
+  os: keyof Omit<PolicyConfig, 'meta'>
+) => ({
   behavior_protection: {
     ...policy[os].popup.behavior_protection,
     enabled: false,

@@ -13,6 +13,9 @@ import { ProtectionModes } from '../types';
  */
 export const policyFactory = (): PolicyConfig => {
   return {
+    meta: {
+      license: '',
+    },
     windows: {
       events: {
         credential_access: true,
