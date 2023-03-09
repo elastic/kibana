@@ -11,18 +11,20 @@ import type { SearchIn } from '../../../common';
 import type { StorageContext, ContentCrud } from '../../core';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
+import { validateRequestVersion } from './utils';
 
 export const search: ProcedureDefinition<Context, SearchIn<string>> = {
   schemas: rpcSchemas.search,
-  fn: async (ctx, { contentTypeId, version, query, options }) => {
+  fn: async (ctx, { contentTypeId, version: _version, query, options }) => {
     const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
+    const version = validateRequestVersion(_version, contentDefinition.version.latest);
 
     // Execute CRUD
     const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(contentTypeId);
     const storageContext: StorageContext = {
       requestHandlerContext: ctx.requestHandlerContext,
       version: {
-        request: version!,
+        request: version,
         latest: contentDefinition.version.latest,
       },
     };

@@ -11,18 +11,20 @@ import type { CreateIn } from '../../../common';
 import type { StorageContext, ContentCrud } from '../../core';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
+import { validateRequestVersion } from './utils';
 
 export const create: ProcedureDefinition<Context, CreateIn<string>> = {
   schemas: rpcSchemas.create,
-  fn: async (ctx, { contentTypeId, version, data, options }) => {
+  fn: async (ctx, { contentTypeId, version: _version, data, options }) => {
     const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
+    const version = validateRequestVersion(_version, contentDefinition.version.latest);
 
     // Execute CRUD
     const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(contentTypeId);
     const storageContext: StorageContext = {
       requestHandlerContext: ctx.requestHandlerContext,
       version: {
-        request: version!,
+        request: version,
         latest: contentDefinition.version.latest,
       },
     };

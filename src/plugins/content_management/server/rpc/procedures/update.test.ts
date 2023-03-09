@@ -196,6 +196,18 @@ describe('RPC -> update()', () => {
           fn(ctx, { contentTypeId: 'unknown', id: '123', data: { title: 'Hello' } })
         ).rejects.toEqual(new Error('Content [unknown] is not registered.'));
       });
+
+      test('should throw if the request version is higher than the registered version', () => {
+        const { ctx } = setup();
+        expect(() =>
+          fn(ctx, {
+            contentTypeId: FOO_CONTENT_ID,
+            id: '123',
+            data: { title: 'Hello' },
+            version: 'v7',
+          })
+        ).rejects.toEqual(new Error('Invalid version. Latest version is [v2].'));
+      });
     });
   });
 });
