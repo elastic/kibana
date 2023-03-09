@@ -1616,7 +1616,7 @@
         "tags": [],
         "label": "CommentType",
         "description": [],
-        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
+        "path": "x-pack/plugins/cases/common/api/cases/comment/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1628,7 +1628,7 @@
         "tags": [],
         "label": "ExternalReferenceStorageType",
         "description": [],
-        "path": "x-pack/plugins/cases/common/api/cases/comment.ts",
+        "path": "x-pack/plugins/cases/common/api/cases/comment/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

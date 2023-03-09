@@ -20,6 +20,12 @@ import {
   CREATE_SHARED_EXCEPTION_LIST_NAME_INPUT,
   CREATE_SHARED_EXCEPTION_LIST_DESCRIPTION_INPUT,
   CREATE_SHARED_EXCEPTION_LIST_BTN,
+  EXCEPTIONS_LIST_MANAGEMENT_NAME,
+  EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN,
+  EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT,
+  EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT,
+  EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN,
+  EXCEPTIONS_LIST_DETAILS_HEADER,
 } from '../screens/exceptions';
 
 export const clearSearchSelection = () => {
@@ -84,4 +90,46 @@ export const createSharedExceptionList = (
   if (submit) {
     cy.get(CREATE_SHARED_EXCEPTION_LIST_BTN).first().click();
   }
+};
+
+export const waitForExceptionListDetailToBeLoaded = () => {
+  cy.get(EXCEPTIONS_LIST_DETAILS_HEADER).should('exist');
+};
+
+export const editExceptionLisDetails = ({
+  name,
+  description,
+}: {
+  name?: { original: string; updated: string };
+  description?: { original: string; updated: string | null };
+}) => {
+  cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('exist');
+  cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN).first().click();
+
+  if (name != null) {
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', name.original);
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT)
+      .should('have.value', name.original)
+      .clear({ force: true })
+      .type(`${name.updated}`);
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT).should('have.value', name.updated);
+  }
+
+  if (description != null) {
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT)
+      .should('have.value', description.original)
+      .clear({ force: true })
+      .should('not.have.value');
+    if (description.updated != null) {
+      cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT).type(
+        `${description.updated}`
+      );
+      cy.get(EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT).should(
+        'have.value',
+        description.updated
+      );
+    }
+  }
+
+  cy.get(EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN).first().click();
 };

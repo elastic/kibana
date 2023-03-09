@@ -67,7 +67,15 @@ export class Alert<
     return this.scheduledExecutionOptions !== undefined;
   }
 
-  isThrottled({ throttle, actionHash }: { throttle: string | null; actionHash?: string }) {
+  isThrottled({
+    throttle,
+    actionHash,
+    uuid,
+  }: {
+    throttle: string | null;
+    actionHash?: string;
+    uuid?: string;
+  }) {
     if (this.scheduledExecutionOptions === undefined) {
       return false;
     }
@@ -79,9 +87,12 @@ export class Alert<
         this.scheduledExecutionOptions
       )
     ) {
-      if (actionHash) {
+      if (uuid && actionHash) {
         if (this.meta.lastScheduledActions.actions) {
-          const lastTriggerDate = this.meta.lastScheduledActions.actions[actionHash]?.date;
+          const actionInState =
+            this.meta.lastScheduledActions.actions[uuid] ||
+            this.meta.lastScheduledActions.actions[actionHash]; // actionHash must be removed once all the hash identifiers removed from the task state
+          const lastTriggerDate = actionInState?.date;
           return !!(lastTriggerDate && lastTriggerDate.getTime() + throttleMills > Date.now());
         }
         return false;
@@ -169,7 +180,7 @@ export class Alert<
     return this;
   }
 
-  updateLastScheduledActions(group: ActionGroupIds, actionHash?: string | null) {
+  updateLastScheduledActions(group: ActionGroupIds, actionHash?: string | null, uuid?: string) {
     if (!this.meta.lastScheduledActions) {
       this.meta.lastScheduledActions = {} as LastScheduledActions;
     }
@@ -179,11 +190,15 @@ export class Alert<
 
     if (this.meta.lastScheduledActions.group !== group) {
       this.meta.lastScheduledActions.actions = {};
-    } else if (actionHash) {
+    } else if (uuid) {
       if (!this.meta.lastScheduledActions.actions) {
         this.meta.lastScheduledActions.actions = {};
       }
-      this.meta.lastScheduledActions.actions[actionHash] = { date };
+      // remove deprecated actionHash
+      if (!!actionHash && this.meta.lastScheduledActions.actions[actionHash]) {
+        delete this.meta.lastScheduledActions.actions[actionHash];
+      }
+      this.meta.lastScheduledActions.actions[uuid] = { date };
     }
   }
 
