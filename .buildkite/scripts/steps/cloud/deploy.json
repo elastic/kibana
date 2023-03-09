@@ -201,7 +201,10 @@
           ],
           "kibana": {
             "version": null,
-            "docker_image": null
+            "docker_image": null,
+            "user_settings_json": {
+              "xpack.securitySolution.enableExperimental": ["riskScoringRouteEnabled"]
+            }
           }
         },
         "ref_id": "main-kibana"
