@@ -2690,7 +2690,7 @@
                     "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; }>>"
                 ],
                 "path": "src/plugins/data/public/plugin.ts",
                 "deprecated": false,
@@ -7444,6 +7444,59 @@
             "path": "src/plugins/data/common/search/aggs/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.AggFunctionsMapping.aggRate",
+            "type": "Object",
+            "tags": [],
+            "label": "aggRate",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExpressionFunctionDefinition",
+                "text": "ExpressionFunctionDefinition"
+              },
+              "<\"aggRate\", any, AggArgs, ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.AggExpressionType",
+                "text": "AggExpressionType"
+              },
+              ", ",
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.ExecutionContext",
+                "text": "ExecutionContext"
+              },
+              "<",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              ", ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">>"
+            ],
+            "path": "src/plugins/data/common/search/aggs/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -9139,7 +9192,7 @@
         "label": "AggConfigOptions",
         "description": [],
         "signature": [
-          "{ schema?: string | undefined; type: ",
+          "{ type: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -9147,7 +9200,7 @@
             "section": "def-common.IAggType",
             "text": "IAggType"
           },
-          "; params?: {} | ",
+          "; id?: string | undefined; params?: {} | ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -9155,7 +9208,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; id?: string | undefined; enabled?: boolean | undefined; }"
+          " | undefined; schema?: string | undefined; enabled?: boolean | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
         "deprecated": false,
@@ -10092,7 +10145,19 @@
             "section": "def-common.SearchSource",
             "text": "SearchSource"
           },
-          "; history: ",
+          "; fetch: (options?: ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
+          },
+          ") => Promise<",
+          "SearchResponse",
+          "<unknown, Record<string, ",
+          "AggregationsAggregate",
+          ">>>; history: ",
           "SearchRequest",
           "[]; setOverwriteDataViewType: (overwriteType: string | false | undefined) => void; setField: <K extends keyof ",
           {
@@ -10260,19 +10325,7 @@
           "SearchResponse",
           "<T, Record<string, ",
           "AggregationsAggregate",
-          ">>>>; fetch: (options?: ",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.SearchSourceSearchOptions",
-            "text": "SearchSourceSearchOptions"
-          },
-          ") => Promise<",
-          "SearchResponse",
-          "<unknown, Record<string, ",
-          "AggregationsAggregate",
-          ">>>; onRequestStart: (handler: (searchSource: ",
+          ">>>>; onRequestStart: (handler: (searchSource: ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -10547,38 +10600,6 @@
           },
           {
             "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
           },
           {
@@ -10594,18 +10615,6 @@
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
             "plugin": "@kbn/core-saved-objects-browser-internal",
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
           },
@@ -10682,7 +10691,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -10774,14 +10783,6 @@
             "path": "src/plugins/data_views/server/utils.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
             "plugin": "dataViews",
             "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
           },
@@ -10816,18 +10817,6 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
           },
           {
             "plugin": "fleet",
@@ -10942,18 +10931,6 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts"
           },
@@ -11010,7 +10987,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/types/index.ts"
           },
           {
@@ -13123,7 +13100,7 @@
               "section": "def-common.FieldFormatsRegistry",
               "text": "FieldFormatsRegistry"
             },
-            ", \"init\" | \"register\"> & { deserialize: ",
+            ", \"register\" | \"init\"> & { deserialize: ",
             {
               "pluginId": "fieldFormats",
               "scope": "common",
@@ -13163,35 +13140,35 @@
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             },
             {
               "plugin": "expressionPartitionVis",
-              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_layers.test.ts"
+              "path": "src/plugins/chart_expressions/expression_partition_vis/public/utils/layers/get_color.test.ts"
             }
           ]
         },
@@ -13316,7 +13293,7 @@
                     "section": "def-common.PluginInitializerContext",
                     "text": "PluginInitializerContext"
                   },
-                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; }>; }>; }>>"
+                  "<Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; }>>"
                 ],
                 "path": "src/plugins/data/server/plugin.ts",
                 "deprecated": false,
@@ -13623,7 +13600,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -13635,7 +13612,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -13806,6 +13783,14 @@
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
               },
               {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -13828,14 +13813,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
                 "plugin": "controls",
@@ -13868,10 +13845,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/no_results/no_results_suggestions/use_fetch_occurances_range.ts"
               },
               {
                 "plugin": "aiops",
@@ -14032,14 +14005,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_dataset.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_log_level.tsx"
               },
               {
                 "plugin": "fleet",
@@ -15330,16 +15295,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
               },
               " | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
               },
               ") => ",
               {
@@ -15368,16 +15333,16 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewField",
-                    "text": "DataViewField"
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
                   },
                   " | ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldSpec",
-                    "text": "FieldSpec"
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -16734,7 +16699,7 @@
             "tags": [],
             "label": "refreshFields",
             "description": [
-              "\nRefresh field list for a given index pattern."
+              "\nRefresh field list for a given data view."
             ],
             "signature": [
               "(dataView: ",
@@ -17478,7 +17443,7 @@
               "\nReturns the default data view as an object.\nIf no default is found, or it is missing\nanother data view is selected as default and returned.\nIf no possible data view found to become a default returns null.\n"
             ],
             "signature": [
-              "(refreshFields?: boolean | undefined) => Promise<",
+              "(options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -17495,19 +17460,43 @@
               {
                 "parentPluginId": "data",
                 "id": "def-server.DataViewsService.getDefaultDataView.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
-                "label": "refreshFields",
-                "description": [
-                  "- if true, will refresh the fields of the default data view"
-                ],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "label": "options",
+                "description": [],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.DataViewsService.getDefaultDataView.$1.displayErrors",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "displayErrors",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-server.DataViewsService.getDefaultDataView.$1.refreshFields",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "refreshFields",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": [
@@ -18156,7 +18145,59 @@
                 "label": "elasticsearchClient",
                 "description": [],
                 "signature": [
-                  "{ name: string | symbol; get: { <TDocument = unknown>(this: That, params: ",
+                  "{ create: { <TDocument = unknown>(this: That, params: ",
+                  "CreateRequest",
+                  "<TDocument> | ",
+                  "CreateRequest",
+                  "<TDocument>, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; <TDocument = unknown>(this: That, params: ",
+                  "CreateRequest",
+                  "<TDocument> | ",
+                  "CreateRequest",
+                  "<TDocument>, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "WriteResponseBase",
+                  ", unknown>>; <TDocument = unknown>(this: That, params: ",
+                  "CreateRequest",
+                  "<TDocument> | ",
+                  "CreateRequest",
+                  "<TDocument>, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+                  "UpdateRequest",
+                  "<TDocument, TPartialDocument> | ",
+                  "UpdateRequest",
+                  "<TDocument, TPartialDocument>, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "UpdateResponse",
+                  "<TDocumentR>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+                  "UpdateRequest",
+                  "<TDocument, TPartialDocument> | ",
+                  "UpdateRequest",
+                  "<TDocument, TPartialDocument>, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "UpdateResponse",
+                  "<TDocumentR>, unknown>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
+                  "UpdateRequest",
+                  "<TDocument, TPartialDocument> | ",
+                  "UpdateRequest",
+                  "<TDocument, TPartialDocument>, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "UpdateResponse",
+                  "<TDocumentR>>; }; get: { <TDocument = unknown>(this: That, params: ",
                   "GetRequest",
                   " | ",
                   "GetRequest",
@@ -18208,9 +18249,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "WriteResponseBase",
-                  ">; }; cluster: ",
-                  "default",
-                  "; eql: ",
+                  ">; }; helpers: ",
                   "default",
                   "; search: { <TDocument = unknown, TAggregations = Record<string, ",
                   "AggregationsAggregate",
@@ -18244,97 +18283,87 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; create: { <TDocument = unknown>(this: That, params: ",
-                  "CreateRequest",
-                  "<TDocument> | ",
-                  "CreateRequest",
-                  "<TDocument>, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; <TDocument = unknown>(this: That, params: ",
-                  "CreateRequest",
-                  "<TDocument> | ",
-                  "CreateRequest",
-                  "<TDocument>, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "WriteResponseBase",
-                  ", unknown>>; <TDocument = unknown>(this: That, params: ",
-                  "CreateRequest",
-                  "<TDocument> | ",
-                  "CreateRequest",
-                  "<TDocument>, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; }; monitoring: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; monitoring: ",
                   "default",
-                  "; security: ",
+                  "; count: { (this: That, params?: ",
+                  "CountRequest",
+                  " | ",
+                  "CountRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "CountResponse",
+                  ">; (this: That, params?: ",
+                  "CountRequest",
+                  " | ",
+                  "CountRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "CountResponse",
+                  ", unknown>>; (this: That, params?: ",
+                  "CountRequest",
+                  " | ",
+                  "CountRequest",
+                  " | undefined, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "CountResponse",
+                  ">; }; exists: { (this: That, params: ",
+                  "ExistsRequest",
+                  " | ",
+                  "ExistsRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<boolean>; (this: That, params: ",
+                  "ExistsRequest",
+                  " | ",
+                  "ExistsRequest",
+                  ", options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<boolean, unknown>>; (this: That, params: ",
+                  "ExistsRequest",
+                  " | ",
+                  "ExistsRequest",
+                  ", options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<boolean>; }; security: ",
                   "default",
-                  "; index: { <TDocument = unknown>(this: That, params: ",
-                  "IndexRequest",
-                  "<TDocument> | ",
-                  "IndexRequest",
-                  "<TDocument>, options?: ",
+                  "; ping: { (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; <TDocument = unknown>(this: That, params: ",
-                  "IndexRequest",
-                  "<TDocument> | ",
-                  "IndexRequest",
-                  "<TDocument>, options?: ",
+                  " | undefined): Promise<boolean>; (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
                   "TransportRequestOptionsWithMeta",
                   " | undefined): Promise<",
                   "TransportResult",
-                  "<",
-                  "WriteResponseBase",
-                  ", unknown>>; <TDocument = unknown>(this: That, params: ",
-                  "IndexRequest",
-                  "<TDocument> | ",
-                  "IndexRequest",
-                  "<TDocument>, options?: ",
+                  "<boolean, unknown>>; (this: That, params?: ",
+                  "PingRequest",
+                  " | ",
+                  "PingRequest",
+                  " | undefined, options?: ",
                   "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "WriteResponseBase",
-                  ">; }; update: { <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-                  "UpdateRequest",
-                  "<TDocument, TPartialDocument> | ",
-                  "UpdateRequest",
-                  "<TDocument, TPartialDocument>, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "UpdateResponse",
-                  "<TDocumentR>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-                  "UpdateRequest",
-                  "<TDocument, TPartialDocument> | ",
-                  "UpdateRequest",
-                  "<TDocument, TPartialDocument>, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "UpdateResponse",
-                  "<TDocumentR>, unknown>>; <TDocument = unknown, TPartialDocument = unknown, TDocumentR = unknown>(this: That, params: ",
-                  "UpdateRequest",
-                  "<TDocument, TPartialDocument> | ",
-                  "UpdateRequest",
-                  "<TDocument, TPartialDocument>, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "UpdateResponse",
-                  "<TDocumentR>>; }; asyncSearch: ",
+                  " | undefined): Promise<boolean>; }; nodes: ",
+                  "default",
+                  "; indices: ",
                   "default",
                   "; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kRollup]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
-                  "default",
-                  "; helpers: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
                   ") => ",
+                  "default",
+                  "; asyncSearch: ",
                   "default",
                   "; autoscaling: ",
                   "default",
@@ -18420,33 +18449,9 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "ClosePointInTimeResponse",
-                  ">; }; count: { (this: That, params?: ",
-                  "CountRequest",
-                  " | ",
-                  "CountRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<",
-                  "CountResponse",
-                  ">; (this: That, params?: ",
-                  "CountRequest",
-                  " | ",
-                  "CountRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<",
-                  "CountResponse",
-                  ", unknown>>; (this: That, params?: ",
-                  "CountRequest",
-                  " | ",
-                  "CountRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<",
-                  "CountResponse",
-                  ">; }; danglingIndices: ",
+                  ">; }; cluster: ",
+                  "default",
+                  "; danglingIndices: ",
                   "default",
                   "; deleteByQuery: { (this: That, params: ",
                   "DeleteByQueryRequest",
@@ -18528,27 +18533,9 @@
                   "AcknowledgedResponseBase",
                   ">; }; enrich: ",
                   "default",
-                  "; exists: { (this: That, params: ",
-                  "ExistsRequest",
-                  " | ",
-                  "ExistsRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<boolean>; (this: That, params: ",
-                  "ExistsRequest",
-                  " | ",
-                  "ExistsRequest",
-                  ", options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<boolean, unknown>>; (this: That, params: ",
-                  "ExistsRequest",
-                  " | ",
-                  "ExistsRequest",
-                  ", options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<boolean>; }; existsSource: { (this: That, params: ",
+                  "; eql: ",
+                  "default",
+                  "; existsSource: { (this: That, params: ",
                   "ExistsSourceRequest",
                   " | ",
                   "ExistsSourceRequest",
@@ -18726,9 +18713,33 @@
                   "default",
                   "; ilm: ",
                   "default",
-                  "; indices: ",
-                  "default",
-                  "; info: { (this: That, params?: ",
+                  "; index: { <TDocument = unknown>(this: That, params: ",
+                  "IndexRequest",
+                  "<TDocument> | ",
+                  "IndexRequest",
+                  "<TDocument>, options?: ",
+                  "TransportRequestOptionsWithOutMeta",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; <TDocument = unknown>(this: That, params: ",
+                  "IndexRequest",
+                  "<TDocument> | ",
+                  "IndexRequest",
+                  "<TDocument>, options?: ",
+                  "TransportRequestOptionsWithMeta",
+                  " | undefined): Promise<",
+                  "TransportResult",
+                  "<",
+                  "WriteResponseBase",
+                  ", unknown>>; <TDocument = unknown>(this: That, params: ",
+                  "IndexRequest",
+                  "<TDocument> | ",
+                  "IndexRequest",
+                  "<TDocument>, options?: ",
+                  "TransportRequestOptions",
+                  " | undefined): Promise<",
+                  "WriteResponseBase",
+                  ">; }; info: { (this: That, params?: ",
                   "InfoRequest",
                   " | ",
                   "InfoRequest",
@@ -18906,9 +18917,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "MtermvectorsResponse",
-                  ">; }; nodes: ",
-                  "default",
-                  "; openPointInTime: { (this: That, params: ",
+                  ">; }; openPointInTime: { (this: That, params: ",
                   "OpenPointInTimeRequest",
                   " | ",
                   "OpenPointInTimeRequest",
@@ -18934,27 +18943,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "OpenPointInTimeResponse",
-                  ">; }; ping: { (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithOutMeta",
-                  " | undefined): Promise<boolean>; (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptionsWithMeta",
-                  " | undefined): Promise<",
-                  "TransportResult",
-                  "<boolean, unknown>>; (this: That, params?: ",
-                  "PingRequest",
-                  " | ",
-                  "PingRequest",
-                  " | undefined, options?: ",
-                  "TransportRequestOptions",
-                  " | undefined): Promise<boolean>; }; putScript: { (this: That, params: ",
+                  ">; }; putScript: { (this: That, params: ",
                   "PutScriptRequest",
                   " | ",
                   "PutScriptRequest",
@@ -19532,7 +19521,7 @@
             "label": "timeSeriesMetric",
             "description": [],
             "signature": [
-              "\"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined"
+              "\"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined"
             ],
             "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
             "deprecated": false,
@@ -21234,7 +21223,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/index.tsx"
+                "path": "x-pack/plugins/security_solution/public/detections/components/alerts_table/alerts_grouping.tsx"
               },
               {
                 "plugin": "securitySolution",
@@ -21246,7 +21235,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/signals/get_query_filter.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/utils/get_query_filter.ts"
               },
               {
                 "plugin": "timelines",
@@ -21417,6 +21406,14 @@
                 "path": "src/plugins/data_views/common/data_views/data_view.ts"
               },
               {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
+                "plugin": "savedObjectsManagement",
+                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
+              },
+              {
                 "plugin": "unifiedSearch",
                 "path": "src/plugins/unified_search/public/autocomplete/providers/value_suggestion_provider.ts"
               },
@@ -21439,14 +21436,6 @@
               {
                 "plugin": "triggersActionsUi",
                 "path": "x-pack/plugins/triggers_actions_ui/public/common/lib/data_apis.ts"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
-              },
-              {
-                "plugin": "savedObjectsManagement",
-                "path": "src/plugins/saved_objects_management/public/management_section/objects_table/components/flyout.tsx"
               },
               {
                 "plugin": "controls",
@@ -21479,10 +21468,6 @@
               {
                 "plugin": "lens",
                 "path": "x-pack/plugins/lens/public/app_plugin/lens_top_nav.tsx"
-              },
-              {
-                "plugin": "discover",
-                "path": "src/plugins/discover/public/application/main/components/no_results/no_results_suggestions/use_fetch_occurances_range.ts"
               },
               {
                 "plugin": "aiops",
@@ -21643,14 +21628,6 @@
               {
                 "plugin": "infra",
                 "path": "x-pack/plugins/infra/public/pages/logs/settings/validation_errors.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_dataset.tsx"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/public/applications/fleet/sections/agents/agent_details_page/components/agent_logs/filter_log_level.tsx"
               },
               {
                 "plugin": "fleet",
@@ -22941,16 +22918,16 @@
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.DataViewField",
-                "text": "DataViewField"
+                "section": "def-common.FieldSpec",
+                "text": "FieldSpec"
               },
               " | ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
                 "docId": "kibDataViewsPluginApi",
-                "section": "def-common.FieldSpec",
-                "text": "FieldSpec"
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
               },
               ") => ",
               {
@@ -22979,16 +22956,16 @@
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.DataViewField",
-                    "text": "DataViewField"
+                    "section": "def-common.FieldSpec",
+                    "text": "FieldSpec"
                   },
                   " | ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
                     "docId": "kibDataViewsPluginApi",
-                    "section": "def-common.FieldSpec",
-                    "text": "FieldSpec"
+                    "section": "def-common.DataViewField",
+                    "text": "DataViewField"
                   }
                 ],
                 "path": "src/plugins/data_views/common/data_views/data_view.ts",
@@ -23770,7 +23747,7 @@
                 "section": "def-common.RuntimeFieldSpec",
                 "text": "RuntimeFieldSpec"
               },
-              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+              " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -24137,7 +24114,7 @@
               "\nreturns type of TSDB metric or undefined"
             ],
             "signature": [
-              "\"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined"
+              "\"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -25213,7 +25190,7 @@
             "tags": [],
             "label": "refreshFields",
             "description": [
-              "\nRefresh field list for a given index pattern."
+              "\nRefresh field list for a given data view."
             ],
             "signature": [
               "(dataView: ",
@@ -25957,7 +25934,7 @@
               "\nReturns the default data view as an object.\nIf no default is found, or it is missing\nanother data view is selected as default and returned.\nIf no possible data view found to become a default returns null.\n"
             ],
             "signature": [
-              "(refreshFields?: boolean | undefined) => Promise<",
+              "(options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -25974,19 +25951,43 @@
               {
                 "parentPluginId": "data",
                 "id": "def-common.DataViewsService.getDefaultDataView.$1",
-                "type": "CompoundType",
+                "type": "Object",
                 "tags": [],
-                "label": "refreshFields",
-                "description": [
-                  "- if true, will refresh the fields of the default data view"
-                ],
-                "signature": [
-                  "boolean | undefined"
-                ],
+                "label": "options",
+                "description": [],
                 "path": "src/plugins/data_views/common/data_views/data_views.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.DataViewsService.getDefaultDataView.$1.displayErrors",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "displayErrors",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-common.DataViewsService.getDefaultDataView.$1.refreshFields",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "refreshFields",
+                    "description": [],
+                    "signature": [
+                      "boolean | undefined"
+                    ],
+                    "path": "src/plugins/data_views/common/data_views/data_views.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": [
@@ -27733,15 +27734,7 @@
           "\nData views service interface"
         ],
         "signature": [
-          "{ get: (id: string, displayErrors?: boolean, refreshFields?: boolean) => Promise<",
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataView",
-            "text": "DataView"
-          },
-          ">; delete: (indexPatternId: string) => Promise<{}>; create: (spec: ",
+          "{ create: (spec: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -27757,7 +27750,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; find: (search: string, size?: number) => Promise<",
+          ">; get: (id: string, displayErrors?: boolean, refreshFields?: boolean) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          ">; delete: (indexPatternId: string) => Promise<{}>; find: (search: string, size?: number) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -27949,7 +27950,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          ">; getDefaultDataView: (refreshFields?: boolean | undefined) => Promise<",
+          ">; getDefaultDataView: (options?: { displayErrors?: boolean | undefined; refreshFields?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -28135,7 +28136,7 @@
             "section": "def-common.RuntimeFieldSpec",
             "text": "RuntimeFieldSpec"
           },
-          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"gauge\" | \"histogram\" | \"summary\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+          " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: \"histogram\" | \"summary\" | \"gauge\" | \"counter\" | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,
@@ -28376,38 +28377,6 @@
           },
           {
             "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/base.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/resolve.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/update.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/apis/find.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
           },
           {
@@ -28423,18 +28392,6 @@
             "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_repository.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-api-server",
-            "path": "packages/core/saved-objects/core-saved-objects-api-server/src/saved_objects_client.ts"
-          },
-          {
             "plugin": "@kbn/core-saved-objects-browser-internal",
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/simple_saved_object.ts"
           },
@@ -28511,7 +28468,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-internal/src/saved_objects_client.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/public/index.ts"
           },
           {
@@ -28603,14 +28560,6 @@
             "path": "src/plugins/data_views/server/utils.ts"
           },
           {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
-            "plugin": "discover",
-            "path": "src/plugins/discover/public/application/main/components/layout/__stories__/get_layout_props.ts"
-          },
-          {
             "plugin": "dataViews",
             "path": "src/plugins/data_views/public/saved_objects_client_wrapper.ts"
           },
@@ -28645,18 +28594,6 @@
           {
             "plugin": "savedObjectsTagging",
             "path": "x-pack/plugins/saved_objects_tagging/public/ui_api/get_table_column_definition.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
-          },
-          {
-            "plugin": "savedObjectsFinder",
-            "path": "src/plugins/saved_objects_finder/public/finder/saved_object_finder.tsx"
           },
           {
             "plugin": "fleet",
@@ -28771,18 +28708,6 @@
             "path": "packages/core/saved-objects/core-saved-objects-browser-mocks/src/simple_saved_object.mock.ts"
           },
           {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
-            "plugin": "@kbn/core-saved-objects-server",
-            "path": "packages/core/saved-objects/core-saved-objects-server/src/extensions/security.ts"
-          },
-          {
             "plugin": "@kbn/core-saved-objects-import-export-server-internal",
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/import/errors.ts"
           },
@@ -28839,7 +28764,7 @@
             "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/apply_export_transforms.ts"
           },
           {
-            "plugin": "core",
+            "plugin": "@kbn/core",
             "path": "src/core/types/index.ts"
           },
           {

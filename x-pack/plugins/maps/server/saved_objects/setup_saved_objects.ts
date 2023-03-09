@@ -61,23 +61,6 @@ export function setupSavedObjects(
       );
     },
   });
-
-  /*
-   * The maps-telemetry saved object type isn't used, but in order to remove these fields from
-   * the mappings we register this type with `type: 'object', enabled: true` to remove all
-   * previous fields from the mappings until https://github.com/elastic/kibana/issues/67086 is
-   * solved.
-   */
-  core.savedObjects.registerType({
-    name: 'maps-telemetry',
-    hidden: false,
-    namespaceType: 'agnostic',
-    mappings: {
-      // @ts-ignore Core types don't support this since it's only really valid when removing a previously registered type
-      type: 'object',
-      enabled: false,
-    },
-  });
 }
 
 /**

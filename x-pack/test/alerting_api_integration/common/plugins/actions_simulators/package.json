@@ -1,5 +1,5 @@
 {
-  "name": "actions_simulators",
+  "name": "@kbn/actions-simulators-plugin",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",

@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { calculateTimeRangeBucketSize } from '../../../overview/helpers/calculate_bucket_size';
+import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../../constants';
 import { useToasts } from '../../../../hooks/use_toast';
 import {
   alertSearchBarStateContainer,
@@ -28,7 +30,7 @@ import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../../../hooks/use_time_buckets';
 import { getNoDataConfig } from '../../../../utils/no_data_config';
 import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
-import { LoadingObservability } from '../../../overview';
+import { LoadingObservability } from '../../../../components/loading_observability';
 import './styles.scss';
 import { renderRuleStats } from '../../components/rule_stats';
 import { ObservabilityAppServices } from '../../../../application/types';
@@ -77,9 +79,9 @@ function InternalAlertsPage() {
   const { hasAnyData, isAllRequestsComplete } = useHasData();
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
   const timeBuckets = useTimeBuckets();
-  const alertSummaryTimeRange = useMemo(
+  const bucketSize = useMemo(
     () =>
-      getAlertSummaryTimeRange(
+      calculateTimeRangeBucketSize(
         {
           from: alertSearchBarStateProps.rangeFrom,
           to: alertSearchBarStateProps.rangeTo,
@@ -87,6 +89,18 @@ function InternalAlertsPage() {
         timeBuckets
       ),
     [alertSearchBarStateProps.rangeFrom, alertSearchBarStateProps.rangeTo, timeBuckets]
+  );
+  const alertSummaryTimeRange = useMemo(
+    () =>
+      getAlertSummaryTimeRange(
+        {
+          from: alertSearchBarStateProps.rangeFrom,
+          to: alertSearchBarStateProps.rangeTo,
+        },
+        bucketSize?.intervalString || DEFAULT_INTERVAL,
+        bucketSize?.dateFormat || DEFAULT_DATE_FORMAT
+      ),
+    [alertSearchBarStateProps.rangeFrom, alertSearchBarStateProps.rangeTo, bucketSize]
   );
 
   useBreadcrumbs([

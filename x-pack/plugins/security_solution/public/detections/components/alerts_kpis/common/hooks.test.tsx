@@ -7,22 +7,76 @@
 
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import type { UseInspectButtonParams } from './hooks';
+import type { BrowserField } from '@kbn/timelines-plugin/common';
+
+import type { GetAggregatableFields, UseInspectButtonParams } from './hooks';
 import { getAggregatableFields, useInspectButton, useStackByFields } from './hooks';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { TestProviders } from '../../../../common/mock';
+import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
   return { ...actual, useLocation: jest.fn().mockReturnValue({ pathname: '' }) };
 });
+jest.mock('../../../../common/containers/sourcerer', () => ({
+  useSourcererDataView: jest.fn(),
+  getScopeFromPath: jest.fn(),
+}));
 
-test('getAggregatableFields', () => {
-  expect(getAggregatableFields(mockBrowserFields)).toMatchSnapshot();
+describe('getAggregatableFields', () => {
+  test('getAggregatableFields when useLensCompatibleFields = false', () => {
+    expect(getAggregatableFields(mockBrowserFields.base?.fields as GetAggregatableFields))
+      .toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "label": "@timestamp",
+          "value": "@timestamp",
+        },
+      ]
+    `);
+  });
+
+  test('getAggregatableFields when useLensCompatibleFields = true', () => {
+    const useLensCompatibleFields = true;
+    expect(
+      getAggregatableFields(
+        mockBrowserFields?.base?.fields as GetAggregatableFields,
+        useLensCompatibleFields
+      )
+    ).toHaveLength(0);
+  });
+
+  describe.each([
+    { field: 'destination.domain' },
+    { field: 'destination.bytes' },
+    { field: 'destination.ip' },
+  ])('$field', ({ field }) => {
+    test(`type ${mockBrowserFields?.destination?.fields?.[field].type} should be supported by Lens Embeddable`, () => {
+      const useLensCompatibleFields = true;
+
+      expect(
+        getAggregatableFields(
+          { [field]: mockBrowserFields?.destination?.fields?.[field] as Partial<BrowserField> },
+          useLensCompatibleFields
+        )
+      ).toHaveLength(1);
+    });
+  });
 });
 
 describe('hooks', () => {
+  const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
+
   describe('useInspectButton', () => {
+    beforeEach(() => {
+      mockUseSourcererDataView.mockReturnValue({
+        browserFields: mockBrowserFields,
+      });
+
+      jest.clearAllMocks();
+    });
+
     const defaultParams: UseInspectButtonParams = {
       setQuery: jest.fn(),
       response: '',
@@ -58,9 +112,13 @@ describe('hooks', () => {
   });
 
   describe('useStackByFields', () => {
-    jest.mock('../../../../common/containers/sourcerer', () => ({
-      useSourcererDataView: jest.fn().mockReturnValue({ browserFields: mockBrowserFields }),
-    }));
+    beforeEach(() => {
+      mockUseSourcererDataView.mockReturnValue({
+        browserFields: mockBrowserFields,
+      });
+
+      jest.clearAllMocks();
+    });
     it('returns only aggregateable fields', () => {
       const wrapper = ({ children }: { children: JSX.Element }) => (
         <TestProviders>{children}</TestProviders>
@@ -72,6 +130,41 @@ describe('hooks', () => {
       expect(
         aggregateableFields?.find((field) => field.label === 'nestedField.firstAttributes')
       ).toBe(undefined);
+    });
+
+    it('returns only Lens compatible fields (check if one of esTypes is keyword)', () => {
+      mockUseSourcererDataView.mockReturnValue({
+        browserFields: { base: mockBrowserFields.base },
+      });
+
+      const wrapper = ({ children }: { children: JSX.Element }) => (
+        <TestProviders>{children}</TestProviders>
+      );
+      const useLensCompatibleFields = true;
+      const { result, unmount } = renderHook(() => useStackByFields(useLensCompatibleFields), {
+        wrapper,
+      });
+      const aggregateableFields = result.current;
+      unmount();
+      expect(aggregateableFields?.find((field) => field.label === '@timestamp')).toBeUndefined();
+      expect(aggregateableFields?.find((field) => field.label === '_id')).toBeUndefined();
+    });
+
+    it('returns only Lens compatible fields (check if it is a nested field)', () => {
+      mockUseSourcererDataView.mockReturnValue({
+        browserFields: { nestedField: mockBrowserFields.nestedField },
+      });
+
+      const wrapper = ({ children }: { children: JSX.Element }) => (
+        <TestProviders>{children}</TestProviders>
+      );
+      const useLensCompatibleFields = true;
+      const { result, unmount } = renderHook(() => useStackByFields(useLensCompatibleFields), {
+        wrapper,
+      });
+      const aggregateableFields = result.current;
+      unmount();
+      expect(aggregateableFields).toHaveLength(0);
     });
   });
 });

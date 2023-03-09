@@ -150,7 +150,7 @@ export function getRuleType(
         { name: 'value', description: actionVariableContextValueLabel },
         { name: 'hits', description: actionVariableContextHitsLabel },
         { name: 'conditions', description: actionVariableContextConditionsLabel },
-        { name: 'link', description: actionVariableContextLinkLabel },
+        { name: 'link', description: actionVariableContextLinkLabel, usesPublicBaseUrl: true },
       ],
       params: [
         { name: 'size', description: actionVariableContextSizeLabel },

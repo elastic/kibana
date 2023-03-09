@@ -24,7 +24,7 @@ import {
   OWNER_INFO,
 } from '../../common/constants';
 import type { CASE_VIEW_PAGE_TABS } from '../../common/types';
-import type { AlertInfo, CaseSavedObject } from './types';
+import type { AlertInfo, CaseSavedObject, FileAttachmentRequest } from './types';
 
 import type {
   CaseAttributes,
@@ -47,8 +47,10 @@ import {
   CommentType,
   ConnectorTypes,
   ExternalReferenceStorageType,
+  ExternalReferenceSORt,
+  FileAttachmentMetadataRt,
 } from '../../common/api';
-import type { UpdateAlertRequest } from '../client/alerts/types';
+import type { UpdateAlertStatusRequest } from '../client/alerts/types';
 import {
   parseCommentString,
   getLensVisualizations,
@@ -265,15 +267,27 @@ export const isCommentRequestTypeExternalReferenceSO = (
 };
 
 /**
+ * A type narrowing function for file attachments.
+ */
+export const isFileAttachmentRequest = (
+  context: Partial<CommentRequest>
+): context is FileAttachmentRequest => {
+  return (
+    ExternalReferenceSORt.is(context) &&
+    FileAttachmentMetadataRt.is(context.externalReferenceMetadata)
+  );
+};
+
+/**
  * Adds the ids and indices to a map of statuses
  */
-export function createAlertUpdateRequest({
+export function createAlertUpdateStatusRequest({
   comment,
   status,
 }: {
   comment: CommentRequest;
   status: CaseStatuses;
-}): UpdateAlertRequest[] {
+}): UpdateAlertStatusRequest[] {
   return getAlertInfoFromComments([comment]).map((alert) => ({ ...alert, status }));
 }
 

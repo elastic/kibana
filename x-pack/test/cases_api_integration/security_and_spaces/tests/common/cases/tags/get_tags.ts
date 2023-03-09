@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
-import { deleteCasesByESQuery, createCase, getTags } from '../../../../../common/lib/utils';
+import { deleteCasesByESQuery, createCase, getTags } from '../../../../../common/lib/api';
 import { getPostCaseRequest } from '../../../../../common/lib/mock';
 import {
   secOnly,

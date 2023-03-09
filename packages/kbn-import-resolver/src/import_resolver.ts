@@ -7,12 +7,10 @@
  */
 
 import Path from 'path';
-import Fs from 'fs';
 
 import Resolve from 'resolve';
-import { readPackageManifest, type KibanaPackageManifest } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { readPackageMap, PackageMap } from '@kbn/repo-packages';
+import { getPackages, type Package } from '@kbn/repo-packages';
 
 import { safeStat, readFileSync } from './helpers/fs';
 import { ResolveResult } from './resolve_result';
@@ -22,21 +20,8 @@ import { memoize } from './helpers/memoize';
 const NODE_MODULE_SEG = Path.sep + 'node_modules' + Path.sep;
 
 export class ImportResolver {
-  static create(repoRoot: string) {
-    const pkgMap = readPackageMap();
-
-    const manifests = new Map(
-      Array.from(pkgMap.entries()).flatMap(([id, repoRelPath]) => {
-        const manifestPath = Path.resolve(repoRoot, repoRelPath, 'kibana.jsonc');
-        if (!Fs.existsSync(manifestPath)) {
-          return [];
-        }
-
-        return [[id, readPackageManifest(manifestPath)] as const];
-      })
-    );
-
-    return new ImportResolver(repoRoot, pkgMap, manifests);
+  static create(repoRoot: string, packages: Package[] = getPackages(repoRoot)) {
+    return new ImportResolver(repoRoot, new Map(packages.map((p) => [p.id, p])));
   }
 
   private safeStat = memoize(safeStat);
@@ -69,32 +54,33 @@ export class ImportResolver {
      * Map of package ids to normalized root-relative directories
      * for each package
      */
-    private readonly pkgMap: PackageMap,
-    /**
-     * Map of package ids to pkg manifests, if there is no manifest it is
-     * assumed to be a legacy plugin
-     */
-    private readonly pkgManifests: Map<string, KibanaPackageManifest>
+    private readonly pkgsById: Map<string, Package>
   ) {
-    // invert the pkgMap, we will update this map with new results as we determine them.
-    this._dirToPkgId = new Map(Array.from(this.pkgMap).map(([k, v]) => [v, k]));
+    this._dirToPkg = new Map(
+      Array.from(this.pkgsById.values()).map((p) => [p.normalizedRepoRelativeDir, p])
+    );
   }
 
-  private readonly _dirToPkgId: Map<string, string | null>;
-  private pkgIdForDir(dir: string): string | null {
-    const cached = this._dirToPkgId.get(dir);
+  /**
+   * map of repoRels and the packages they point to or are contained within.
+   * This map is initially populated with the position of the packages, and
+   * from then on serves as a cache for `pkgForDir(dir)`
+   */
+  private readonly _dirToPkg: Map<string, Package | null>;
+  private pkgForDir(dir: string): Package | null {
+    const cached = this._dirToPkg.get(dir);
     if (cached !== undefined) {
       return cached;
     }
 
     const parent = Path.dirname(dir);
     if (parent === '.') {
-      this._dirToPkgId.set(dir, null);
+      this._dirToPkg.set(dir, null);
       return null;
     }
 
-    const pkgId = this.pkgIdForDir(parent);
-    this._dirToPkgId.set(dir, pkgId);
+    const pkgId = this.pkgForDir(parent);
+    this._dirToPkg.set(dir, pkgId);
     return pkgId;
   }
 
@@ -104,7 +90,7 @@ export class ImportResolver {
       return null;
     }
 
-    return this.pkgIdForDir(Path.dirname(relative));
+    return this.pkgForDir(Path.dirname(relative))?.id ?? null;
   }
 
   getPackageManifestForPath(path: string) {
@@ -113,20 +99,15 @@ export class ImportResolver {
   }
 
   getAbsolutePackageDir(pkgId: string) {
-    const dir = this.pkgMap.get(pkgId);
-    return dir ? Path.resolve(this.cwd, dir) : null;
+    return this.pkgsById.get(pkgId)?.directory ?? null;
   }
 
-  /**
-   * Is the package a bazel package?
-   * @deprecated
-   */
-  isBazelPackage(pkgId: string) {
-    return !!this.getPkgManifest(pkgId);
+  isRepoPkg(pkgId: string) {
+    return this.pkgsById.has(pkgId);
   }
 
   getPkgManifest(pkgId: string) {
-    return this.pkgManifests.get(pkgId);
+    return this.pkgsById.get(pkgId)?.manifest;
   }
 
   private shouldIgnore(req: string): boolean {
@@ -274,17 +255,15 @@ export class ImportResolver {
     if (req[0] !== '.') {
       const parts = req.split('/');
       const pkgId = parts[0].startsWith('@') ? `${parts[0]}/${parts[1]}` : `${parts[0]}`;
-      if (this.pkgMap.has(pkgId)) {
-        const pkgDir = this.getAbsolutePackageDir(pkgId);
-        if (pkgDir) {
-          return this.resolve(
-            `./${Path.relative(
-              dirname,
-              parts.length > 2 ? Path.resolve(pkgDir, ...parts.slice(2)) : pkgDir
-            )}`,
-            dirname
-          );
-        }
+      const pkgDir = this.getAbsolutePackageDir(pkgId);
+      if (pkgDir) {
+        return this.resolve(
+          `./${Path.relative(
+            dirname,
+            parts.length > 2 ? Path.resolve(pkgDir, ...parts.slice(2)) : pkgDir
+          )}`,
+          dirname
+        );
       }
     }
 

@@ -10,9 +10,8 @@ import expect from '@kbn/expect';
 import http from 'http';
 import getPort from 'get-port';
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
+import { getSlackServer } from '@kbn/actions-simulators-plugin/server/plugin';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
-
-import { getSlackServer } from '../../../../../common/plugins/actions_simulators/server/plugin';
 
 // eslint-disable-next-line import/no-default-export
 export default function slackTest({ getService }: FtrProviderContext) {

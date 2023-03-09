@@ -30,7 +30,7 @@ export const callGetLogEntryAnomaliesAPI = async (requestArgs: RequestArgs, fetc
     body: JSON.stringify(
       getLogEntryAnomaliesRequestPayloadRT.encode({
         data: {
-          sourceId,
+          logView: { type: 'log-view-reference', logViewId: sourceId },
           timeRange: {
             startTime,
             endTime,

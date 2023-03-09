@@ -136,4 +136,56 @@ describe('ServerLogParamsFields renders', () => {
 
     expect(editAction).not.toHaveBeenCalledWith('message', 'Some different default message', 0);
   });
+
+  test('when useDefaultMessage is set to true and the default message changes, the underlying message is replaced with the default message', () => {
+    const actionParams = {
+      level: ServerLogLevelOptions.TRACE,
+    };
+
+    const editAction = jest.fn();
+    const wrapper = mountWithIntl(
+      <ServerLogParamsFields
+        actionParams={{ ...actionParams, message: 'not the default message' }}
+        errors={{ message: [] }}
+        editAction={editAction}
+        defaultMessage={'Some default message'}
+        index={0}
+      />
+    );
+    const text = wrapper.find('[data-test-subj="messageTextArea"]').first().text();
+    expect(text).toEqual('not the default message');
+
+    wrapper.setProps({
+      useDefaultMessage: true,
+      defaultMessage: 'Some different default message',
+    });
+
+    expect(editAction).toHaveBeenCalledWith('message', 'Some different default message', 0);
+  });
+
+  test('when useDefaultMessage is set to false and the default message changes, the underlying message is not changed', () => {
+    const actionParams = {
+      level: ServerLogLevelOptions.TRACE,
+    };
+
+    const editAction = jest.fn();
+    const wrapper = mountWithIntl(
+      <ServerLogParamsFields
+        actionParams={{ ...actionParams, message: 'not the default message' }}
+        errors={{ message: [] }}
+        editAction={editAction}
+        defaultMessage={'Some default message'}
+        index={0}
+      />
+    );
+    const text = wrapper.find('[data-test-subj="messageTextArea"]').first().text();
+    expect(text).toEqual('not the default message');
+
+    wrapper.setProps({
+      useDefaultMessage: false,
+      defaultMessage: 'Some different default message',
+    });
+
+    expect(editAction).not.toHaveBeenCalled();
+  });
 });

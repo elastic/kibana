@@ -55,7 +55,11 @@ const PercentageInfo = ({
 
   return (
     <EuiTitle
-      css={{ fontSize: compact ? euiTheme.size.l : euiTheme.size.xxl }}
+      css={{
+        fontSize: compact ? euiTheme.size.l : euiTheme.size.xxl,
+        paddingLeft: compact ? euiTheme.size.s : euiTheme.size.xs,
+        marginBottom: compact ? euiTheme.size.s : 'none',
+      }}
       data-test-subj={DASHBOARD_COMPLIANCE_SCORE_CHART.COMPLIANCE_SCORE}
     >
       <h3>{percentage}</h3>

@@ -17,12 +17,12 @@ import {
 } from '@kbn/utils';
 import Boom from '@hapi/boom';
 import type { RequestHandlerWrapper } from '@kbn/core-http-server';
-import type {
+import {
   SavedObject,
   ISavedObjectTypeRegistry,
   SavedObjectsExportResultDetails,
+  SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
-import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-utils-server';
 
 export async function createSavedObjectsStreamFromNdJson(ndJsonStream: Readable) {
   const savedObjects = await createPromiseFromStreams([

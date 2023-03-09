@@ -13,6 +13,13 @@ export const ALERTS_TYPE_TITLE = i18n.translate(
   }
 );
 
+export const ALERTS_RULE_TITLE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByType.alertRuleChartTitle',
+  {
+    defaultMessage: 'Alerts by name',
+  }
+);
+
 export const ALERTS_TYPE_COLUMN_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.alertsByType.typeColumn',
   {
@@ -31,5 +38,19 @@ export const DETECTIONS = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.alertsByType.detections',
   {
     defaultMessage: 'Detections',
+  }
+);
+
+export const PREVENTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByType.prevention',
+  {
+    defaultMessage: 'Prevention',
+  }
+);
+
+export const DETECTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.alertsByType.detection',
+  {
+    defaultMessage: 'Detection',
   }
 );

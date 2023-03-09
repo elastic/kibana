@@ -54,7 +54,7 @@ interface Props {
 export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
   const {
     services: {
-      savedObjects,
+      http,
       uiSettings,
       data: { dataViews },
     },
@@ -171,7 +171,7 @@ export const ChangeDataViewModal: FC<Props> = ({ onClose }) => {
                 ]}
                 fixedPageSize={fixedPageSize}
                 uiSettings={uiSettings}
-                savedObjects={savedObjects}
+                http={http}
               />
             </>
           )}

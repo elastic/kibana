@@ -1,0 +1,10 @@
+{
+  "type": "plugin",
+  "id": "@kbn/elasticsearch-client-xpack-plugin",
+  "owner": "@elastic/kibana-core",
+  "plugin": {
+    "id": "elasticsearchClientXpack",
+    "server": true,
+    "browser": false
+  }
+}

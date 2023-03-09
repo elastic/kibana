@@ -12,6 +12,7 @@ import { TestProviders } from '../../common/mock';
 import { DashboardsLandingPage } from './dashboards';
 import type { NavLinkItem } from '../../common/components/navigation/types';
 import { useCapabilities } from '../../common/lib/kibana';
+import * as telemetry from '../../common/lib/telemetry';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
@@ -22,6 +23,7 @@ jest.mock('../../common/components/dashboards/dashboards_table', () => ({
 const DEFAULT_DASHBOARD_CAPABILITIES = { show: true, createNew: true };
 const mockUseCapabilities = useCapabilities as jest.Mock;
 mockUseCapabilities.mockReturnValue(DEFAULT_DASHBOARD_CAPABILITIES);
+const spyTrack = jest.spyOn(telemetry, 'track');
 
 const OVERVIEW_ITEM_LABEL = 'Overview';
 const DETECTION_RESPONSE_ITEM_LABEL = 'Detection & Response';
@@ -149,6 +151,15 @@ describe('Dashboards landing', () => {
         const result = renderDashboardLanding();
 
         expect(result.getByTestId('createDashboardButton')).toHaveAttribute('href', URL);
+      });
+
+      it('should send telemetry', () => {
+        const result = renderDashboardLanding();
+        result.getByTestId('createDashboardButton').click();
+        expect(spyTrack).toHaveBeenCalledWith(
+          telemetry.METRIC_TYPE.CLICK,
+          telemetry.TELEMETRY_EVENT.CREATE_DASHBOARD
+        );
       });
     });
   });

@@ -27,13 +27,17 @@ export const useTestRunDetailsBreadcrumbs = (
       text: MONITOR_MANAGEMENT_CRUMB,
       href: `${appPath}${MONITORS_ROUTE}`,
     },
-    {
-      text: monitor?.name ?? '',
-      href: `${appPath}${MONITOR_ROUTE.replace(
-        ':monitorId',
-        monitor?.[ConfigKey.CONFIG_ID] ?? ''
-      )}?locationId=${selectedLocation?.id ?? ''}`,
-    },
+    ...(monitor
+      ? [
+          {
+            text: monitor?.name ?? '',
+            href: `${appPath}${MONITOR_ROUTE.replace(
+              ':monitorId',
+              monitor?.[ConfigKey.CONFIG_ID] ?? ''
+            )}?locationId=${selectedLocation?.id ?? ''}`,
+          },
+        ]
+      : []),
     ...(extraCrumbs ?? []),
   ]);
 };

@@ -7,18 +7,23 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
+import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
 import { throwIfTypeNotVisibleByAPI } from './utils';
 
 interface RouteDependencies {
+  config: SavedObjectConfig;
   coreUsageData: InternalCoreUsageDataSetup;
+  logger: Logger;
 }
 
 export const registerResolveRoute = (
   router: InternalSavedObjectRouter,
-  { coreUsageData }: RouteDependencies
+  { config, coreUsageData, logger }: RouteDependencies
 ) => {
+  const { allowHttpApiAccess } = config;
   router.get(
     {
       path: '/resolve/{type}/{id}',
@@ -30,14 +35,17 @@ export const registerResolveRoute = (
       },
     },
     router.handleLegacyErrors(async (context, req, res) => {
+      logger.warn(
+        "The resolve saved object API '/api/saved_objects/resolve/{type}/{id}' is deprecated."
+      );
       const { type, id } = req.params;
       const { savedObjects } = await context.core;
 
       const usageStatsClient = coreUsageData.getClient();
       usageStatsClient.incrementSavedObjectsResolve({ request: req }).catch(() => {});
-
-      throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
-
+      if (!allowHttpApiAccess) {
+        throwIfTypeNotVisibleByAPI(type, savedObjects.typeRegistry);
+      }
       const result = await savedObjects.client.resolve(type, id);
       return res.ok({ body: result });
     })

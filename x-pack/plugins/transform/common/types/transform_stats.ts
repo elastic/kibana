@@ -10,6 +10,13 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { type TransformHealth, type TransformState, TRANSFORM_STATE } from '../constants';
 import { TransformId } from './transform';
 
+export interface TransformHealthIssue {
+  issue: string;
+  details?: string;
+  count: number;
+  first_occurrence?: number;
+}
+
 export interface TransformStats {
   id: TransformId;
   checkpointing: {
@@ -29,12 +36,7 @@ export interface TransformStats {
   };
   health: {
     status: TransformHealth;
-    issues?: Array<{
-      issue: string;
-      details?: string;
-      count: number;
-      first_occurrence?: number;
-    }>;
+    issues?: TransformHealthIssue[];
   };
   node?: {
     id: string;

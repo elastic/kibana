@@ -30,21 +30,21 @@
         "label": "CapabilitiesServiceContract",
         "description": [],
         "signature": [
-          "{ setup: (setupDeps: SetupDeps) => ",
-          {
-            "pluginId": "@kbn/core-capabilities-server",
-            "scope": "common",
-            "docId": "kibKbnCoreCapabilitiesServerPluginApi",
-            "section": "def-common.CapabilitiesSetup",
-            "text": "CapabilitiesSetup"
-          },
-          "; start: () => ",
+          "{ start: () => ",
           {
             "pluginId": "@kbn/core-capabilities-server",
             "scope": "common",
             "docId": "kibKbnCoreCapabilitiesServerPluginApi",
             "section": "def-common.CapabilitiesStart",
             "text": "CapabilitiesStart"
+          },
+          "; setup: (setupDeps: SetupDeps) => ",
+          {
+            "pluginId": "@kbn/core-capabilities-server",
+            "scope": "common",
+            "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+            "section": "def-common.CapabilitiesSetup",
+            "text": "CapabilitiesSetup"
           },
           "; preboot: (prebootDeps: PrebootSetupDeps) => void; }"
         ],

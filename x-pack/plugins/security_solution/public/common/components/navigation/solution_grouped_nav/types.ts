@@ -6,9 +6,16 @@
  */
 
 import type React from 'react';
+import type { UiCounterMetricType } from '@kbn/analytics';
+
 import type { SecurityPageName } from '../../../../app/types';
 import type { LinkCategories } from '../../../links/types';
 
+export type Tracker = (
+  type: UiCounterMetricType,
+  event: string | string[],
+  count?: number | undefined
+) => void;
 export interface DefaultSideNavItem {
   id: SecurityPageName;
   label: string;

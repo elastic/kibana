@@ -43,6 +43,7 @@ import type {
 } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
+import type { MessageSigningServiceInterface } from '..';
 
 import type { BulkActionsResolver } from './agents';
 
@@ -67,6 +68,7 @@ class AppContextService {
   private telemetryEventsSender: TelemetryEventsSender | undefined;
   private savedObjectsTagging: SavedObjectTaggingStart | undefined;
   private bulkActionsResolver: BulkActionsResolver | undefined;
+  private messageSigningService: MessageSigningServiceInterface | undefined;
 
   public start(appContext: FleetAppContext) {
     this.data = appContext.data;
@@ -86,6 +88,7 @@ class AppContextService {
     this.telemetryEventsSender = appContext.telemetryEventsSender;
     this.savedObjectsTagging = appContext.savedObjectsTagging;
     this.bulkActionsResolver = appContext.bulkActionsResolver;
+    this.messageSigningService = appContext.messageSigningService;
 
     if (appContext.config$) {
       this.config$ = appContext.config$;
@@ -242,6 +245,10 @@ class AppContextService {
 
   public getBulkActionsResolver() {
     return this.bulkActionsResolver;
+  }
+
+  public getMessageSigningService() {
+    return this.messageSigningService;
   }
 }
 

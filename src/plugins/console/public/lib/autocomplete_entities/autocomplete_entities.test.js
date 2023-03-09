@@ -83,6 +83,7 @@ describe('Autocomplete entities', () => {
         });
 
         expect(mapping.getMappings('index').sort(fc)).toEqual([]);
+        expect(httpMock.get).not.toHaveBeenCalled();
       });
     });
 
@@ -117,6 +118,90 @@ describe('Autocomplete entities', () => {
         expect(loadingIndicator).toBe(false);
         expect(autoCompleteContext.asyncResultsState.isLoading).toBe(false);
         expect(fields).toEqual([{ name: '@timestamp', type: 'date' }]);
+      });
+
+      test('caches mappings for wildcard requests', async () => {
+        httpMock.get.mockReturnValue(
+          Promise.resolve({
+            mappings: {
+              'my-index-01': { mappings: { properties: { '@timestamp': { type: 'date' } } } },
+              'my-index-02': { mappings: { properties: { name: { type: 'keyword' } } } },
+            },
+          })
+        );
+
+        const autoCompleteContext = {};
+
+        mapping.getMappings('my-index*', [], autoCompleteContext);
+
+        const fields = await autoCompleteContext.asyncResultsState.results;
+
+        const expectedResult = [
+          {
+            name: '@timestamp',
+            type: 'date',
+          },
+          {
+            name: 'name',
+            type: 'keyword',
+          },
+        ];
+
+        expect(fields).toEqual(expectedResult);
+        expect(mapping.getMappings('my-index*', [], autoCompleteContext)).toEqual(expectedResult);
+      });
+
+      test('returns mappings for data streams', () => {
+        dataStream.loadDataStreams({
+          data_streams: [
+            { name: 'test_index1', indices: [{ index_name: '.ds-index-1' }] },
+            {
+              name: 'test_index3',
+              indices: [{ index_name: '.ds-index-3' }, { index_name: '.ds-index-4' }],
+            },
+          ],
+        });
+        mapping.loadMappings({
+          '.ds-index-3': {
+            properties: {
+              first_name: {
+                type: 'string',
+                index: 'analyzed',
+                path: 'just_name',
+                fields: {
+                  any_name: { type: 'string', index: 'analyzed' },
+                },
+              },
+              last_name: {
+                type: 'string',
+                index: 'no',
+                fields: {
+                  raw: { type: 'string', index: 'analyzed' },
+                },
+              },
+            },
+          },
+        });
+
+        const result = mapping.getMappings('test_index3', []);
+        expect(result).toEqual([
+          {
+            name: 'first_name',
+            type: 'string',
+          },
+          {
+            name: 'any_name',
+            type: 'string',
+          },
+          {
+            name: 'last_name',
+            type: 'string',
+          },
+          {
+            name: 'last_name.raw',
+            type: 'string',
+          },
+        ]);
       });
 
       test('Multi fields 1.0 style', function () {
@@ -377,11 +462,38 @@ describe('Autocomplete entities', () => {
   describe('Data streams', function () {
     test('data streams', function () {
       dataStream.loadDataStreams({
-        data_streams: [{ name: 'test_index1' }, { name: 'test_index2' }, { name: 'test_index3' }],
+        data_streams: [
+          { name: 'test_index1', indices: [{ index_name: '.ds-index-1' }] },
+          { name: 'test_index2', indices: [{ index_name: '.ds-index-2' }] },
+          {
+            name: 'test_index3',
+            indices: [{ index_name: '.ds-index-3' }, { index_name: '.ds-index-4' }],
+          },
+        ],
       });
 
       const expectedResult = ['test_index1', 'test_index2', 'test_index3'];
       expect(dataStream.getDataStreams()).toEqual(expectedResult);
+      expect(dataStream.perDataStreamIndices).toEqual({
+        test_index1: ['.ds-index-1'],
+        test_index2: ['.ds-index-2'],
+        test_index3: ['.ds-index-3', '.ds-index-4'],
+      });
+    });
+
+    test('extracts indices from a data stream', () => {
+      dataStream.loadDataStreams({
+        data_streams: [
+          { name: 'test_index1', indices: [{ index_name: '.ds-index-1' }] },
+          {
+            name: 'test_index3',
+            indices: [{ index_name: '.ds-index-3' }, { index_name: '.ds-index-4' }],
+          },
+        ],
+      });
+
+      expect(expandAliases('test_index1')).toEqual('.ds-index-1');
+      expect(expandAliases('test_index3')).toEqual(['.ds-index-3', '.ds-index-4']);
     });
   });
 });

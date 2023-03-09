@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { pick } from 'lodash';
 import type { Client, estypes } from '@elastic/elasticsearch';
 import type {
   Agent,
@@ -14,7 +15,6 @@ import type {
   GetAgentsResponse,
 } from '@kbn/fleet-plugin/common';
 import { AGENT_API_ROUTES, agentPolicyRouteService, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
-import { pick } from 'lodash';
 import { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import type { GetFleetServerHostsResponse } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';

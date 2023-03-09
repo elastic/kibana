@@ -33,17 +33,15 @@ import {
   deleteAllCaseItems,
   pushCase,
   updateCase,
-} from '../../../../common/lib/utils';
-import { getCaseUserActions } from '../../../../common/lib/user_actions';
-import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
-import {
   createCaseWithConnector,
   createConnector,
   getConnectors,
   getJiraConnector,
   getServiceNowConnector,
   getServiceNowSimulationServer,
-} from '../../../../common/lib/connectors';
+} from '../../../../common/lib/api';
+import { getCaseUserActions } from '../../../../common/lib/api/user_actions';
+import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -789,7 +787,7 @@ export default ({ getService }: FtrProviderContext): void => {
         }
       });
 
-      it('should not get a case in a space the user does not have permissions to', async () => {
+      it('should not get connectors in a space the user does not have permissions to', async () => {
         const { postedCase } = await createCaseWithConnector({
           supertest: supertestWithoutAuth,
           serviceNowSimulatorURL,

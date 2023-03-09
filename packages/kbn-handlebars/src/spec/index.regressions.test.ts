@@ -5,7 +5,7 @@
  * See `packages/kbn-handlebars/LICENSE` for more information.
  */
 
-import Handlebars from '../..';
+import Handlebars, { type HelperOptions } from '../..';
 import { expectTemplate, forEachCompileFunctionName } from '../__jest__/test_bench';
 
 describe('Regressions', () => {
@@ -99,10 +99,10 @@ describe('Regressions', () => {
       '{{#inverse}} {{#blk}} Unexpected {{/blk}} {{else}} {{#blk}} Expected {{/blk}} {{/inverse}}';
 
     const helpers = {
-      blk(block: Handlebars.HelperOptions) {
+      blk(block: HelperOptions) {
         return block.fn('');
       },
-      inverse(block: Handlebars.HelperOptions) {
+      inverse(block: HelperOptions) {
         return block.inverse('');
       },
     };
@@ -204,7 +204,7 @@ describe('Regressions', () => {
   it('GH-1054: Should handle simple safe string responses', () => {
     expectTemplate('{{#wrap}}{{>partial}}{{/wrap}}')
       .withHelpers({
-        wrap(options: Handlebars.HelperOptions) {
+        wrap(options: HelperOptions) {
           return new Handlebars.SafeString(options.fn());
         },
       })
@@ -279,7 +279,7 @@ describe('Regressions', () => {
     )
       .withInput({ array: [1], name: 'John' })
       .withHelpers({
-        myif(conditional, options: Handlebars.HelperOptions) {
+        myif(conditional, options: HelperOptions) {
           if (conditional) {
             return options.fn(this);
           } else {
@@ -325,7 +325,7 @@ describe('Regressions', () => {
     expectTemplate('{{helpa length="foo"}}')
       .withInput({ array: [1], name: 'John' })
       .withHelpers({
-        helpa(options: Handlebars.HelperOptions) {
+        helpa(options: HelperOptions) {
           return options.hash.length;
         },
       })
@@ -371,7 +371,7 @@ describe('Regressions', () => {
   describe("GH-1639: TypeError: Cannot read property 'apply' of undefined\" when handlebars version > 4.6.0 (undocumented, deprecated usage)", () => {
     it('should treat undefined helpers like non-existing helpers', () => {
       expectTemplate('{{foo}}')
-        .withHelper('foo', undefined)
+        .withHelper('foo', undefined as any)
         .withInput({ foo: 'bar' })
         .toCompileTo('bar');
     });

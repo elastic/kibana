@@ -35,8 +35,11 @@ export const querySavedObjectType: SavedObjectsType = {
       query: {
         properties: { language: { type: 'keyword' }, query: { type: 'keyword', index: false } },
       },
-      filters: { type: 'object', enabled: false },
-      timefilter: { type: 'object', enabled: false },
+      filters: {
+        dynamic: false,
+        properties: {},
+      },
+      timefilter: { dynamic: false, properties: {} },
     },
   },
   migrations: savedQueryMigrations,

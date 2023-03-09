@@ -14,7 +14,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import { Subscription } from 'rxjs';
 import { Unsubscribe } from 'redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { type Filter, compareFilters, type TimeRange, type Query } from '@kbn/es-query';
+import { type Filter } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import {
   Embeddable,
@@ -24,6 +24,7 @@ import {
   VALUE_CLICK_TRIGGER,
   omitGenericEmbeddableInput,
   FilterableEmbeddable,
+  shouldFetch$,
 } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
@@ -104,6 +105,10 @@ function getIsRestore(searchSessionId?: string) {
   return searchSessionOptions ? searchSessionOptions.isRestore : false;
 }
 
+export function getControlledBy(id: string) {
+  return `mapEmbeddablePanel${id}`;
+}
+
 export class MapEmbeddable
   extends Embeddable<MapEmbeddableInput, MapEmbeddableOutput>
   implements ReferenceOrValueEmbeddable<MapByValueInput, MapByReferenceInput>, FilterableEmbeddable
@@ -114,15 +119,10 @@ export class MapEmbeddable
   private _isActive: boolean;
   private _savedMap: SavedMap;
   private _renderTooltipContent?: RenderToolTipContent;
-  private _subscription: Subscription;
+  private _subscriptions: Subscription[] = [];
   private _prevIsRestore: boolean = false;
   private _prevMapExtent?: MapExtent;
-  private _prevTimeRange?: TimeRange;
-  private _prevTimeslice?: [number, number];
-  private _prevQuery?: Query;
-  private _prevFilters: Filter[] = [];
   private _prevSyncColors?: boolean;
-  private _prevSearchSessionId?: string;
   private _domNode?: HTMLElement;
   private _unsubscribeFromStore?: Unsubscribe;
   private _isInitialized = false;
@@ -145,8 +145,8 @@ export class MapEmbeddable
     this._isActive = true;
     this._savedMap = new SavedMap({ mapEmbeddableInput: initialInput });
     this._initializeSaveMap();
-    this._subscription = this.getUpdated$().subscribe(() => this.onUpdate());
-    this._controlledBy = `mapEmbeddablePanel${this.id}`;
+    this._subscriptions.push(this.getUpdated$().subscribe(() => this.onUpdate()));
+    this._controlledBy = getControlledBy(this.id);
   }
 
   public reportsEmbeddableLoad() {
@@ -193,9 +193,20 @@ export class MapEmbeddable
     // Passing callback into redux store instead of regular pattern of getting redux state changes for performance reasons
     store.dispatch(setOnMapMove(this._propogateMapMovement));
 
-    this._dispatchSetQuery({
-      forceRefresh: false,
-    });
+    this._dispatchSetQuery({ forceRefresh: false });
+    this._subscriptions.push(
+      shouldFetch$<MapEmbeddableInput>(this.getUpdated$(), () => {
+        return {
+          ...this.getInput(),
+          filters: this._getInputFilters(),
+          searchSessionId: this._getSearchSessionId(),
+        };
+      }).subscribe(() => {
+        this._dispatchSetQuery({
+          forceRefresh: false,
+        });
+      })
+    );
 
     const mapStateJSON = this._savedMap.getAttributes().mapStateJSON;
     if (mapStateJSON) {
@@ -309,18 +320,6 @@ export class MapEmbeddable
   }
 
   onUpdate() {
-    if (
-      !_.isEqual(this.input.timeRange, this._prevTimeRange) ||
-      !_.isEqual(this.input.timeslice, this._prevTimeslice) ||
-      !_.isEqual(this.input.query, this._prevQuery) ||
-      !compareFilters(this._getFilters(), this._prevFilters) ||
-      this._getSearchSessionId() !== this._prevSearchSessionId
-    ) {
-      this._dispatchSetQuery({
-        forceRefresh: false,
-      });
-    }
-
     if (this.input.syncColors !== this._prevSyncColors) {
       this._dispatchSetChartsPaletteServiceGetColor(this.input.syncColors);
     }
@@ -382,7 +381,7 @@ export class MapEmbeddable
     }
   };
 
-  _getFilters() {
+  _getInputFilters() {
     return this.input.filters
       ? this.input.filters.filter(
           (filter) => !filter.meta.disabled && filter.meta.controlledBy !== this._controlledBy
@@ -401,15 +400,9 @@ export class MapEmbeddable
   }
 
   _dispatchSetQuery({ forceRefresh }: { forceRefresh: boolean }) {
-    const filters = this._getFilters();
-    this._prevTimeRange = this.input.timeRange;
-    this._prevTimeslice = this.input.timeslice;
-    this._prevQuery = this.input.query;
-    this._prevFilters = filters;
-    this._prevSearchSessionId = this._getSearchSessionId();
     this._savedMap.getStore().dispatch<any>(
       setQuery({
-        filters,
+        filters: this._getInputFilters(),
         query: this.input.query,
         timeFilters: this.input.timeRange,
         timeslice: this.input.timeslice
@@ -675,9 +668,9 @@ export class MapEmbeddable
       unmountComponentAtNode(this._domNode);
     }
 
-    if (this._subscription) {
-      this._subscription.unsubscribe();
-    }
+    this._subscriptions.forEach((subscription) => {
+      subscription.unsubscribe();
+    });
   }
 
   reload() {

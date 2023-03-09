@@ -30,7 +30,7 @@ import {
   createCase,
   updateCase,
   createComment,
-} from '../../../../common/lib/utils';
+} from '../../../../common/lib/api';
 import {
   obsOnly,
   secOnly,

@@ -14,14 +14,19 @@ import { useMonitorLatestPing } from './hooks/use_monitor_latest_ping';
 export const MonitorDetailsStatus = () => {
   const { latestPing, loading: pingsLoading } = useMonitorLatestPing();
 
-  const { monitor } = useSelectedMonitor();
+  const { monitor, isMonitorMissing } = useSelectedMonitor();
 
   if (!monitor) {
     return (
       <EuiDescriptionList
         align="left"
         compressed={false}
-        listItems={[{ title: STATUS_LABEL, description: <EuiLoadingContent lines={1} /> }]}
+        listItems={[
+          {
+            title: STATUS_LABEL,
+            description: isMonitorMissing ? <></> : <EuiLoadingContent lines={1} />,
+          },
+        ]}
       />
     );
   }

@@ -23,7 +23,6 @@
     "@kbn/logging-mocks",
     "@kbn/core-saved-objects-base-server-mocks",
     "@kbn/core-http-router-server-internal",
-    "@kbn/core-saved-objects-utils-server",
   ],
   "exclude": [
     "target/**/*",

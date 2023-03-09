@@ -215,7 +215,7 @@
             "label": "guideId",
             "description": [],
             "signature": [
-              "\"kubernetes\" | \"siem\" | \"appSearch\" | \"websiteSearch\" | \"databaseSearch\" | \"testGuide\""
+              "\"siem\" | \"kubernetes\" | \"appSearch\" | \"websiteSearch\" | \"databaseSearch\" | \"testGuide\""
             ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
@@ -292,7 +292,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"rules\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\""
+              "\"rules\" | \"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\""
             ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
@@ -306,7 +306,7 @@
             "label": "status",
             "description": [],
             "signature": [
-              "\"complete\" | \"in_progress\" | \"active\" | \"inactive\" | \"ready_to_complete\""
+              "\"active\" | \"complete\" | \"inactive\" | \"in_progress\" | \"ready_to_complete\""
             ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
@@ -334,7 +334,7 @@
             "label": "id",
             "description": [],
             "signature": [
-              "\"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"rules\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\""
+              "\"rules\" | \"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\""
             ],
             "path": "packages/kbn-guided-onboarding/src/types.ts",
             "deprecated": false,
@@ -549,7 +549,7 @@
         "label": "GuideId",
         "description": [],
         "signature": [
-          "\"kubernetes\" | \"siem\" | \"appSearch\" | \"websiteSearch\" | \"databaseSearch\" | \"testGuide\""
+          "\"siem\" | \"kubernetes\" | \"appSearch\" | \"websiteSearch\" | \"databaseSearch\" | \"testGuide\""
         ],
         "path": "packages/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
@@ -581,7 +581,7 @@
         "label": "GuideStepIds",
         "description": [],
         "signature": [
-          "\"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"rules\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\""
+          "\"rules\" | \"add_data\" | \"view_dashboard\" | \"tour_observability\" | \"alertsCases\" | \"search_experience\" | \"step1\" | \"step2\" | \"step3\""
         ],
         "path": "packages/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
@@ -598,7 +598,7 @@
           "\nAllowed states for each step in a guide:\n inactive: Step has not started\n active: Step is ready to start (i.e., the guide has been started)\n in_progress: Step has been started and is in progress\n ready_to_complete: Step can be manually completed\n complete: Step has been completed"
         ],
         "signature": [
-          "\"complete\" | \"in_progress\" | \"active\" | \"inactive\" | \"ready_to_complete\""
+          "\"active\" | \"complete\" | \"inactive\" | \"in_progress\" | \"ready_to_complete\""
         ],
         "path": "packages/kbn-guided-onboarding/src/types.ts",
         "deprecated": false,
@@ -613,7 +613,7 @@
         "label": "testGuideId",
         "description": [],
         "signature": [
-          "\"kubernetes\" | \"siem\" | \"appSearch\" | \"websiteSearch\" | \"databaseSearch\" | \"testGuide\""
+          "\"siem\" | \"kubernetes\" | \"appSearch\" | \"websiteSearch\" | \"databaseSearch\" | \"testGuide\""
         ],
         "path": "packages/kbn-guided-onboarding/src/common/test_guide_config.ts",
         "deprecated": false,

@@ -153,7 +153,7 @@ export const useListDetailsView = (exceptionListId: string) => {
               list_id: exceptionListId,
               type: list.type,
               name: listDetails.name,
-              description: listDetails.description || list.description,
+              description: listDetails.description ?? '',
               namespace_type: list.namespace_type,
             },
           });
@@ -175,7 +175,7 @@ export const useListDetailsView = (exceptionListId: string) => {
           onError: (error: Error) => handleErrorStatus(error),
           onSuccess: (blob) => {
             setExportedList(blob);
-            toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(list.list_id));
+            toasts?.addSuccess(i18n.EXCEPTION_LIST_EXPORTED_SUCCESSFULLY(list.name));
           },
         });
       } catch (error) {
@@ -189,6 +189,10 @@ export const useListDetailsView = (exceptionListId: string) => {
     },
     [list, exportExceptionList, handleErrorStatus, toasts]
   );
+
+  const handleOnDownload = useCallback(() => {
+    setExportedList(undefined);
+  }, []);
 
   // #region DeleteList
 
@@ -366,6 +370,7 @@ export const useListDetailsView = (exceptionListId: string) => {
     canUserEditList,
     linkedRules,
     exportedList,
+    handleOnDownload,
     viewerStatus,
     showManageRulesFlyout,
     headerBackOptions,

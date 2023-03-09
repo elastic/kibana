@@ -52,8 +52,8 @@ export const EditMonitorConfig = ({ monitor, throttling }: Props) => {
         [ConfigKey.TLS_VERSION]: monitor[ConfigKey.TLS_VERSION],
       };
 
-      enableTLS = Boolean(monitor[ConfigKey.TLS_VERIFICATION_MODE]);
-      enableZipUrlTLS = Boolean(monitor[ConfigKey.ZIP_URL_TLS_VERIFICATION_MODE]);
+      enableTLS = Boolean(monitor[ConfigKey.METADATA]?.is_tls_enabled);
+      enableZipUrlTLS = Boolean(monitor[ConfigKey.METADATA]?.is_zip_url_tls_enabled);
 
       const formattedDefaultConfig: Partial<PolicyConfig> = {
         [type]: monitor,

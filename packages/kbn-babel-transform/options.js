@@ -21,14 +21,7 @@ const cwd = process.cwd();
 function getBabelOptions(path, config = {}) {
   return {
     filename: path,
-    presets: [
-      [
-        NODE_PRESET,
-        {
-          'kibana/ignoredPkgIds': config.ignoredPkgIds,
-        },
-      ],
-    ],
+    presets: [NODE_PRESET],
     cwd,
     babelrc: false,
     sourceMaps: config.disableSourceMaps ? false : 'both',

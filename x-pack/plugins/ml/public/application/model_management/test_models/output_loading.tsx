@@ -6,14 +6,16 @@
  */
 
 import React, { FC } from 'react';
-import { EuiLoadingContent } from '@elastic/eui';
-import { LineRange } from '@elastic/eui/src/components/loading/loading_content';
+import { EuiLoadingContent, EuiLoadingContentProps } from '@elastic/eui';
 
 export const OutputLoadingContent: FC<{ text: string }> = ({ text }) => {
   const actualLines = text.split(/\r\n|\r|\n/).length + 1;
   const lines = actualLines > 4 && actualLines <= 10 ? actualLines : 4;
 
   return (
-    <EuiLoadingContent data-test-subj={'mlTestModelLoadingContent'} lines={lines as LineRange} />
+    <EuiLoadingContent
+      data-test-subj={'mlTestModelLoadingContent'}
+      lines={lines as EuiLoadingContentProps['lines']}
+    />
   );
 };

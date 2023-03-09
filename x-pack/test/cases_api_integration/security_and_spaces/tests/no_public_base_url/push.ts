@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { RecordingServiceNowSimulator } from '@kbn/actions-simulators-plugin/server/servicenow_simulation';
 import {
   postCommentUserReq,
   postCommentAlertReq,
@@ -18,12 +19,13 @@ import {
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 
-import { pushCase, deleteAllCaseItems, bulkCreateAttachments } from '../../../common/lib/utils';
 import {
+  pushCase,
+  deleteAllCaseItems,
+  bulkCreateAttachments,
   createCaseWithConnector,
   getRecordingServiceNowSimulatorServer,
-} from '../../../common/lib/connectors';
-import { RecordingServiceNowSimulator } from '../../../../alerting_api_integration/common/plugins/actions_simulators/server/servicenow_simulation';
+} from '../../../common/lib/api';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

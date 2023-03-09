@@ -53,7 +53,7 @@ describe('FindSLO', () => {
                 service: 'irrelevant',
                 transactionName: 'irrelevant',
                 transactionType: 'irrelevant',
-                'threshold.us': 500000,
+                threshold: 500,
               },
               type: 'sli.apm.transactionDuration',
             },

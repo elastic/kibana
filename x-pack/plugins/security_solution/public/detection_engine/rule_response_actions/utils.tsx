@@ -6,7 +6,7 @@
  */
 
 import unified from 'unified';
-import markdown from 'remark-parse';
+import markdown from 'remark-parse-no-trim';
 import { filter, reduce } from 'lodash';
 
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';

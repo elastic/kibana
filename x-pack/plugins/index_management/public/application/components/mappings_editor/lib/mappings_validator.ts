@@ -207,7 +207,14 @@ export const mappingsConfigurationSchema = t.exact(
   t.partial({
     properties: t.UnknownRecord,
     runtime: t.UnknownRecord,
-    dynamic: t.union([t.literal(true), t.literal(false), t.literal('strict')]),
+    dynamic: t.union([
+      t.literal(true),
+      t.literal(false),
+      t.literal('strict'),
+      t.literal('true'),
+      t.literal('false'),
+      t.literal('runtime'),
+    ]),
     date_detection: t.boolean,
     numeric_detection: t.boolean,
     dynamic_date_formats: t.array(t.string),

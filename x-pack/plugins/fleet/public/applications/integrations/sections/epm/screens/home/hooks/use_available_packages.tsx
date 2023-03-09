@@ -11,7 +11,7 @@ import { uniq, xorBy } from 'lodash';
 import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
-import { usePackages, useCategories } from '../../../../../hooks';
+import { useGetPackagesQuery, useGetCategoriesQuery } from '../../../../../hooks';
 import {
   useGetAppendCustomIntegrations,
   useGetReplacementCustomIntegrations,
@@ -130,7 +130,7 @@ export const useAvailablePackages = () => {
     data: eprPackages,
     isLoading: isLoadingAllPackages,
     error: eprPackageLoadingError,
-  } = usePackages(prereleaseIntegrationsEnabled);
+  } = useGetPackagesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
   // Remove Kubernetes package granularity
   if (eprPackages?.items) {
@@ -185,7 +185,7 @@ export const useAvailablePackages = () => {
     data: eprCategoriesRes,
     isLoading: isLoadingCategories,
     error: eprCategoryLoadingError,
-  } = useCategories(prereleaseIntegrationsEnabled);
+  } = useGetCategoriesQuery({ prerelease: prereleaseIntegrationsEnabled });
 
   const eprCategories = useMemo(() => eprCategoriesRes?.items || [], [eprCategoriesRes]);
   // Subcategories

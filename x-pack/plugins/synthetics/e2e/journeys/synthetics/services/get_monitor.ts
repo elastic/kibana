@@ -6,8 +6,12 @@
  */
 
 import axios from 'axios';
+import { SyntheticsMonitor } from '../../../../common/runtime_types';
 
-export const getMonitor = async (kibanaUrl: string, monitorId: string) => {
+export const getMonitor = async (
+  kibanaUrl: string,
+  monitorId: string
+): Promise<SyntheticsMonitor | null> => {
   try {
     const response = await axios.get(kibanaUrl + `/internal/uptime/service/monitors/${monitorId}`, {
       auth: { username: 'elastic', password: 'changeme' },
@@ -17,5 +21,6 @@ export const getMonitor = async (kibanaUrl: string, monitorId: string) => {
   } catch (e) {
     // eslint-disable-next-line no-console
     console.log(e);
+    return null;
   }
 };

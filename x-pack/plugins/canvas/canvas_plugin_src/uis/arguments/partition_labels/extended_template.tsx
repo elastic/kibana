@@ -25,7 +25,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
-import { set } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { defaultExpression } from './default_expression';
 import { Fields } from './types';
 import { getFieldPath, getFieldValue } from './utils';

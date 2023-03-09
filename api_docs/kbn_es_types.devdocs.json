@@ -319,9 +319,9 @@
           "SearchResponse",
           "<TDocument, Record<string, ",
           "AggregationsAggregate",
-          ">>, \"hits\" | \"aggregations\"> & (TSearchRequest[\"body\"] extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest[\"body\"], TDocument>> : TSearchRequest extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest, TDocument>> : { aggregations?: unknown; }) & { hits: Omit<",
+          ">>, \"aggregations\" | \"hits\"> & (TSearchRequest[\"body\"] extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest[\"body\"], TDocument>> : TSearchRequest extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest, TDocument>> : { aggregations?: unknown; }) & { hits: Omit<",
           "SearchHitsMetadata",
-          "<TDocument>, \"hits\" | \"total\"> & (TOptions[\"restTotalHitsAsInt\"] extends true ? { total: number; } : { total: { value: number; relation: \"gte\" | \"eq\"; }; }) & { hits: HitsOf<TSearchRequest extends ",
+          "<TDocument>, \"total\" | \"hits\"> & (TOptions[\"restTotalHitsAsInt\"] extends true ? { total: number; } : { total: { value: number; relation: \"gte\" | \"eq\"; }; }) & { hits: HitsOf<TSearchRequest extends ",
           "SearchRequest",
           " ? TSearchRequest[\"body\"] : TSearchRequest, TDocument>; }; }"
         ],
@@ -357,9 +357,9 @@
           "SearchResponse",
           "<TDocument, Record<string, ",
           "AggregationsAggregate",
-          ">>, \"hits\" | \"aggregations\"> & (TSearchRequest[\"body\"] extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest[\"body\"], TDocument>> : TSearchRequest extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest, TDocument>> : { aggregations?: unknown; }) & { hits: Omit<",
+          ">>, \"aggregations\" | \"hits\"> & (TSearchRequest[\"body\"] extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest[\"body\"], TDocument>> : TSearchRequest extends TopLevelAggregationRequest ? WrapAggregationResponse<SubAggregateOf<TSearchRequest, TDocument>> : { aggregations?: unknown; }) & { hits: Omit<",
           "SearchHitsMetadata",
-          "<TDocument>, \"hits\" | \"total\"> & (TOptions[\"restTotalHitsAsInt\"] extends true ? { total: number; } : { total: { value: number; relation: \"gte\" | \"eq\"; }; }) & { hits: HitsOf<TSearchRequest extends ",
+          "<TDocument>, \"total\" | \"hits\"> & (TOptions[\"restTotalHitsAsInt\"] extends true ? { total: number; } : { total: { value: number; relation: \"gte\" | \"eq\"; }; }) & { hits: HitsOf<TSearchRequest extends ",
           "SearchRequest",
           " ? TSearchRequest[\"body\"] : TSearchRequest, TDocument>; }; }"
         ],

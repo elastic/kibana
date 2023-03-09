@@ -8,9 +8,9 @@ import React from 'react';
 import type { VisualizationActionsProps } from '../types';
 
 export const VisualizationActions = (props: VisualizationActionsProps) => {
-  const { title, ...testProps } = props;
+  const { title, className } = props;
   return (
-    <div data-test-subj="visualizationActions" {...testProps}>
+    <div data-test-subj="visualizationActions" className={className}>
       {title}
     </div>
   );

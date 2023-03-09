@@ -21,7 +21,7 @@ import {
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
-import { useReduxEmbeddableContext } from '@kbn/presentation-util-plugin/public';
+import { useReduxEmbeddableContext, FloatingActions } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupReduxState } from '../types';
 import { pluginServices } from '../../services';
 import { EditControlButton } from '../editor/edit_control';
@@ -127,12 +127,7 @@ export const ControlFrame = ({
   }, [embeddable, embeddableRoot]);
 
   const floatingActions = (
-    <div
-      className={classNames('controlFrameFloatingActions', {
-        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
-        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
-      })}
-    >
+    <>
       {!fatalError && embeddableType !== TIME_SLIDER_CONTROL && (
         <EuiToolTip content={ControlGroupStrings.floatingActions.getEditButtonTitle()}>
           <EditControlButton embeddableId={embeddableId} />
@@ -158,7 +153,7 @@ export const ControlFrame = ({
           color="danger"
         />
       </EuiToolTip>
-    </div>
+    </>
   );
 
   const embeddableParentClassNames = classNames('controlFrame__control', {
@@ -219,8 +214,14 @@ export const ControlFrame = ({
   );
 
   return (
-    <>
-      {embeddable && enableActions && floatingActions}
+    <FloatingActions
+      className={classNames({
+        'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
+        'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
+      })}
+      actions={floatingActions}
+      isEnabled={embeddable && enableActions}
+    >
       <EuiFormRow
         data-test-subj="control-frame-title"
         fullWidth
@@ -232,6 +233,6 @@ export const ControlFrame = ({
       >
         {form}
       </EuiFormRow>
-    </>
+    </FloatingActions>
   );
 };

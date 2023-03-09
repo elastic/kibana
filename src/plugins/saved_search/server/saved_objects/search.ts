@@ -49,7 +49,7 @@ export function getSavedSearchObjectType(
         },
         sort: { type: 'keyword', index: false, doc_values: false },
         title: { type: 'text' },
-        grid: { type: 'object', enabled: false },
+        grid: { dynamic: false, properties: {} },
         version: { type: 'integer' },
         rowHeight: { type: 'text' },
         timeRestore: { type: 'boolean', index: false, doc_values: false },

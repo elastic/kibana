@@ -46,28 +46,27 @@ export const useFetchOccurrencesRange = (params: Params): Result => {
   const fetchOccurrences = useCallback(
     async (dataView?: DataView, query?: Query | AggregateQuery, filters?: Filter[]) => {
       let occurrencesRange = null;
-      if (!dataView?.timeFieldName || !query || !mountedRef.current) {
-        return null;
-      }
 
-      abortControllerRef.current?.abort();
-      abortControllerRef.current = new AbortController();
+      if (dataView?.isTimeBased() && query && mountedRef.current) {
+        abortControllerRef.current?.abort();
+        abortControllerRef.current = new AbortController();
 
-      try {
-        const dslQuery = buildEsQuery(
-          dataView,
-          query ?? [],
-          filters ?? [],
-          getEsQueryConfig(uiSettings)
-        );
-        occurrencesRange = await fetchDocumentsTimeRange({
-          data,
-          dataView,
-          dslQuery,
-          abortSignal: abortControllerRef.current?.signal,
-        });
-      } catch (error) {
-        //
+        try {
+          const dslQuery = buildEsQuery(
+            dataView,
+            query ?? [],
+            filters ?? [],
+            getEsQueryConfig(uiSettings)
+          );
+          occurrencesRange = await fetchDocumentsTimeRange({
+            data,
+            dataView,
+            dslQuery,
+            abortSignal: abortControllerRef.current?.signal,
+          });
+        } catch (error) {
+          //
+        }
       }
 
       if (mountedRef.current) {
@@ -115,7 +114,7 @@ async function fetchDocumentsTimeRange({
     data.search.search(
       {
         params: {
-          index: dataView.title,
+          index: dataView.getIndexPattern(),
           size: 0,
           body: {
             query: dslQuery ?? { match_all: {} },

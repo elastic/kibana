@@ -1,5 +1,5 @@
 {
-  "name": "analytics_ftr_helpers",
+  "name": "@kbn/analytics-ftr-helpers-plugin",
   "version": "1.0.0",
   "kibana": {
     "version": "kibana",
@@ -7,7 +7,7 @@
   },
   "license": "SSPL-1.0 OR Elastic License 2.0",
   "scripts": {
-    "kbn": "node ../../../../../scripts/kbn.js",
-    "build": "rm -rf './target' && ../../../../../node_modules/.bin/tsc"
+    "kbn": "node ../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../node_modules/.bin/tsc"
   }
 }

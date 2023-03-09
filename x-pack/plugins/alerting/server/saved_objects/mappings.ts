@@ -41,6 +41,7 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
       type: 'keyword',
     },
     actions: {
+      dynamic: false,
       type: 'nested',
       properties: {
         group: {
@@ -53,8 +54,8 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
           type: 'keyword',
         },
         params: {
-          enabled: false,
-          type: 'object',
+          dynamic: false,
+          properties: {},
         },
         frequency: {
           properties: {

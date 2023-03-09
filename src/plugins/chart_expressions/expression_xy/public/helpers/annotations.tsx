@@ -29,13 +29,19 @@ type PartialReferenceLineDecorationConfig = Pick<
 
 type PartialMergedAnnotation = Pick<
   MergedAnnotation,
-  'position' | 'icon' | 'textVisibility' | 'label'
+  'position' | 'icon' | 'textVisibility' | 'label' | 'isGrouped'
 >;
 
 const isExtendedDecorationConfig = (
   config: PartialReferenceLineDecorationConfig | PartialMergedAnnotation | undefined
 ): config is PartialReferenceLineDecorationConfig =>
   (config as PartialReferenceLineDecorationConfig)?.iconPosition ? true : false;
+
+export const isAnnotationConfig = (
+  config: PartialReferenceLineDecorationConfig | PartialMergedAnnotation
+): config is PartialMergedAnnotation => {
+  return 'isGrouped' in config;
+};
 
 // Note: it does not take into consideration whether the reference line is in view or not
 export const getLinesCausedPaddings = (
@@ -52,8 +58,9 @@ export const getLinesCausedPaddings = (
     }
     const { position, icon, textVisibility } = config;
     const iconPosition = isExtendedDecorationConfig(config) ? config.iconPosition : undefined;
+    const isLabelVisible = textVisibility && (isAnnotationConfig(config) ? config.label : true);
 
-    if (position && (hasIcon(icon) || (textVisibility && 'label' in config))) {
+    if (position && (hasIcon(icon) || isLabelVisible)) {
       const placement = getBaseIconPlacement(
         iconPosition,
         axesMap,
@@ -61,7 +68,7 @@ export const getLinesCausedPaddings = (
       );
       paddings[placement] = Math.max(
         paddings[placement] || 0,
-        LINES_MARKER_SIZE * (textVisibility && 'label' in config && config.label ? 2 : 1) // double the padding size if there's text
+        LINES_MARKER_SIZE * (isLabelVisible ? 2 : 1) // double the padding size if there's text
       );
       icons[placement] = (icons[placement] || 0) + (hasIcon(icon) ? 1 : 0);
     }
