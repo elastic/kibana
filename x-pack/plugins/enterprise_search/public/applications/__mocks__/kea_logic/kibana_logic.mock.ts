@@ -31,6 +31,7 @@ export const mockKibanaValues = {
   guidedOnboarding: {},
   history: mockHistory,
   isCloud: false,
+  isSidebarEnabled: true,
   navigateToUrl: jest.fn(),
   productAccess: {
     hasAppSearchAccess: true,
