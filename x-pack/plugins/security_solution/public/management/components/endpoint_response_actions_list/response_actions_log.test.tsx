@@ -159,6 +159,7 @@ const getBaseMockedActionList = () => ({
 });
 describe('Response actions history', () => {
   const testPrefix = 'test';
+  const hostsFilterPrefix = 'hosts-filter';
 
   let render: (
     props?: React.ComponentProps<typeof ResponseActionsLog>
@@ -167,6 +168,24 @@ describe('Response actions history', () => {
   let history: AppContextTestRender['history'];
   let mockedContext: AppContextTestRender;
   let apiMocks: ReturnType<typeof responseActionsHttpMocks>;
+
+  const filterByHosts = (selectedOptionIndexes: number[]) => {
+    const { getByTestId, getAllByTestId } = renderResult;
+    const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
+
+    userEvent.click(popoverButton);
+
+    if (selectedOptionIndexes.length) {
+      const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
+
+      allFilterOptions.forEach((option, i) => {
+        if (selectedOptionIndexes.includes(i)) {
+          option.style.pointerEvents = 'all';
+          userEvent.click(option);
+        }
+      });
+    }
+  };
 
   beforeEach(async () => {
     mockedContext = createAppRootMockRenderer();
@@ -868,20 +887,35 @@ describe('Response actions history', () => {
   });
 
   describe('Hosts Filter', () => {
-    const filterPrefix = 'hosts-filter';
+    beforeEach(() => {
+      const getEndpointListHookResponse = {
+        data: Array.from({ length: 50 }).map((_, index) => {
+          return {
+            id: `id-${index}`,
+            name: `Host-${index}`,
+          };
+        }),
+        page: 0,
+        pageSize: 50,
+        total: 50,
+      };
+      mockUseGetEndpointsList.mockReturnValue(getEndpointListHookResponse);
+    });
 
     it('should show hosts filter for non-flyout or page', () => {
       render({ showHostNames: true });
 
-      expect(renderResult.getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`)).toBeTruthy();
+      expect(
+        renderResult.getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`)
+      ).toBeTruthy();
     });
 
     it('should have a search bar ', () => {
       render({ showHostNames: true });
       const { getByTestId } = renderResult;
 
-      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
-      const searchBar = getByTestId(`${testPrefix}-${filterPrefix}-search`);
+      userEvent.click(getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`));
+      const searchBar = getByTestId(`${testPrefix}-${hostsFilterPrefix}-search`);
       expect(searchBar).toBeTruthy();
       expect(searchBar.querySelector('input')?.getAttribute('placeholder')).toEqual('Search hosts');
     });
@@ -890,13 +924,13 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
-      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
       userEvent.click(popoverButton);
-      const filterList = getByTestId(`${testPrefix}-${filterPrefix}-popoverList`);
+      const filterList = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverList`);
       expect(filterList).toBeTruthy();
-      expect(getAllByTestId(`${filterPrefix}-option`).length).toEqual(9);
+      expect(getAllByTestId(`${hostsFilterPrefix}-option`).length).toEqual(9);
       expect(
-        getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`).querySelector(
+        getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`).querySelector(
           '.euiNotificationBadge'
         )?.textContent
       ).toEqual('50');
@@ -906,9 +940,9 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
-      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
       userEvent.click(popoverButton);
-      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click 3 options skip alternates
       allFilterOptions.forEach((option, i) => {
         if ([1, 3, 5].includes(i)) {
@@ -917,7 +951,7 @@ describe('Response actions history', () => {
         }
       });
 
-      const selectedFilterOptions = getAllByTestId(`${filterPrefix}-option`).reduce<number[]>(
+      const selectedFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`).reduce<number[]>(
         (acc, curr, i) => {
           if (curr.getAttribute('aria-checked') === 'true') {
             acc.push(i);
@@ -934,9 +968,9 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
-      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
       userEvent.click(popoverButton);
-      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click 3 options skip alternates
       allFilterOptions.forEach((option, i) => {
         if ([1, 3, 5].includes(i)) {
@@ -951,7 +985,7 @@ describe('Response actions history', () => {
       // re-open
       userEvent.click(popoverButton);
 
-      const selectedFilterOptions = getAllByTestId(`${filterPrefix}-option`).reduce<number[]>(
+      const selectedFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`).reduce<number[]>(
         (acc, curr, i) => {
           if (curr.getAttribute('aria-checked') === 'true') {
             acc.push(i);
@@ -968,9 +1002,9 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
-      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
       userEvent.click(popoverButton);
-      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click 3 options skip alternates
       allFilterOptions.forEach((option, i) => {
         if ([1, 3, 5].includes(i)) {
@@ -985,7 +1019,7 @@ describe('Response actions history', () => {
       // re-open
       userEvent.click(popoverButton);
 
-      const newSetAllFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      const newSetAllFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click new options
       newSetAllFilterOptions.forEach((option, i) => {
         if ([4, 6, 8].includes(i)) {
@@ -994,7 +1028,7 @@ describe('Response actions history', () => {
         }
       });
 
-      const selectedFilterOptions = getAllByTestId(`${filterPrefix}-option`).reduce<number[]>(
+      const selectedFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`).reduce<number[]>(
         (acc, curr, i) => {
           if (curr.getAttribute('aria-checked') === 'true') {
             acc.push(i);
@@ -1018,9 +1052,9 @@ describe('Response actions history', () => {
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
-      const popoverButton = getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`);
+      const popoverButton = getByTestId(`${testPrefix}-${hostsFilterPrefix}-popoverButton`);
       userEvent.click(popoverButton);
-      const allFilterOptions = getAllByTestId(`${filterPrefix}-option`);
+      const allFilterOptions = getAllByTestId(`${hostsFilterPrefix}-option`);
       // click 3 options skip alternates
       allFilterOptions.forEach((option, i) => {
         if ([0, 2, 4, 6].includes(i)) {
@@ -1030,8 +1064,26 @@ describe('Response actions history', () => {
       });
 
       expect(popoverButton.textContent).toEqual('Hosts4');
+    });
 
-      expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith({});
+    it('should call the API with the selected host ids', async () => {
+      render({ showHostNames: true });
+      filterByHosts([0, 2, 4, 6]);
+
+      expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith(
+        {
+          agentIds: ['id-0', 'id-2', 'id-4', 'id-6'],
+          commands: [],
+          endDate: 'now',
+          page: 1,
+          pageSize: 10,
+          startDate: 'now-24h/h',
+          statuses: [],
+          userIds: [],
+          withOutputs: [],
+        },
+        expect.anything()
+      );
     });
   });
 });
