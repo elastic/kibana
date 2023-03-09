@@ -18,7 +18,7 @@ import type {
 } from '@kbn/field-formats-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import type { Writable } from 'stream';
-import type { CancellationToken } from '../../../../common/cancellation_token';
+import type { CancellationToken } from '@kbn/reporting-common';
 import { CONTENT_TYPE_CSV } from '../../../../common/constants';
 import { AuthenticationExpiredError, ReportingError } from '../../../../common/errors';
 import { byteSizeValueToNumber } from '../../../../common/schema_utils';

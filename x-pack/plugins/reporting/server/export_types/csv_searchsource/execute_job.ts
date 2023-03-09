@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { CsvGenerator } from '@kbn/generate-csv';
 import { getFieldFormats } from '../../services';
 import { RunTaskFn, RunTaskFnFactory } from '../../types';
 import { decryptJobHeaders } from '../common';
-import { CsvGenerator } from './generate_csv/generate_csv';
 import { TaskPayloadCSV } from './types';
 
 export const runTaskFnFactory: RunTaskFnFactory<RunTaskFn<TaskPayloadCSV>> = (
