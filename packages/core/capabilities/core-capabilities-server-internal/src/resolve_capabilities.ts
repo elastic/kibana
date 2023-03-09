@@ -11,6 +11,7 @@ import { withSpan } from '@kbn/apm-utils';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { CapabilitiesSwitcher } from '@kbn/core-capabilities-server';
+import { generateDelta } from './utils';
 
 export type CapabilitiesResolver = (
   request: KibanaRequest,
@@ -65,23 +66,6 @@ export const resolveCapabilities = async (
     return recursiveApplyChanges(caps, delta);
   }, mergedCaps);
 };
-
-function generateDelta<TSource extends Record<string, any>>(
-  source: TSource,
-  changes: Partial<TSource>
-): Partial<TSource> {
-  return Object.entries(source).reduce((delta, [key, orig]) => {
-    const changed = changes[key];
-    if (orig != null && changed != null) {
-      if (typeof orig === 'object' && typeof changed === 'object') {
-        delta[key as keyof TSource] = generateDelta(orig, changed) as TSource[keyof TSource];
-      } else if (orig !== changed) {
-        delta[key as keyof TSource] = changed;
-      }
-    }
-    return delta;
-  }, {} as Partial<TSource>);
-}
 
 function recursiveApplyChanges<
   TDestination extends Record<string, any>,
