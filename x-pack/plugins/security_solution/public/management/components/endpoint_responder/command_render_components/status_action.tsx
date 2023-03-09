@@ -202,6 +202,20 @@ export const EndpointStatusActionResult = memo<
       {
         title: (
           <ConsoleCodeBlock>
+            {i18n.translate('xpack.securitySolution.endpointResponseActions.status.policyVersion', {
+              defaultMessage: 'Policy version',
+            })}
+          </ConsoleCodeBlock>
+        ),
+        description: (
+          <ConsoleCodeBlock>
+            {endpointDetails.metadata.Endpoint.policy.applied.version}
+          </ConsoleCodeBlock>
+        ),
+      },
+      {
+        title: (
+          <ConsoleCodeBlock>
             {i18n.translate('xpack.securitySolution.endpointResponseActions.status.policyName', {
               defaultMessage: 'Policy name',
             })}
