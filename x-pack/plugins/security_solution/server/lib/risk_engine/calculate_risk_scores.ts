@@ -171,13 +171,13 @@ export const calculateRiskScores = async ({
   };
 
   if (debug) {
-    logger.debug(`Executing Risk Score query:\n${JSON.stringify(request)}`);
+    logger.info(`Executing Risk Score query:\n${JSON.stringify(request)}`);
   }
 
   const response = await esClient.search<never, CalculateRiskScoreAggregations>(request);
 
   if (debug) {
-    logger.debug(`Received Risk Score response:\n${JSON.stringify(response)}`);
+    logger.info(`Received Risk Score response:\n${JSON.stringify(response)}`);
   }
 
   if (response.aggregations == null) {
