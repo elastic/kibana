@@ -80,7 +80,7 @@ export const createPerPolicyArtifact = (name: string, body: object, policyId?: '
   });
 };
 
-export const yieldFirstPolicyID = () =>
+export const yieldFirstPolicyID = (): Cypress.Chainable<string> =>
   request<GetPackagePoliciesResponse>({
     method: 'GET',
     url: `${PACKAGE_POLICY_API_ROOT}?page=1&perPage=1&kuery=ingest-package-policies.package.name: endpoint`,
