@@ -14,6 +14,10 @@ import type { Version } from '../../common';
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
   requestHandlerContext: RequestHandlerContext;
+  version: {
+    request: Version;
+    latest: Version;
+  };
 }
 
 export interface ContentStorage {
