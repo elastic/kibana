@@ -16,3 +16,5 @@ export enum FactoryQueryType {
   IndicatorGrid = 'indicatorGrid',
   Barchart = 'barchart',
 }
+
+export const CASE_ATTACHMENT_TYPE_ID = 'indicator';

@@ -39,7 +39,7 @@ const CLUSTER_DEFAULT_SORT_ORDER = 'asc';
 export const getClusterIdQuery = (cluster: Cluster): NavFilter => {
   if (cluster.meta.benchmark.posture_type === CSPM_POLICY_TEMPLATE) {
     // TODO: remove assertion after typing CspFinding as discriminating union
-    return { 'cloud.account.name': cluster.meta.cloud!.account.name };
+    return { 'cloud.account.id': cluster.meta.cloud!.account.id };
   }
   return { cluster_id: cluster.meta.assetIdentifierId };
 };

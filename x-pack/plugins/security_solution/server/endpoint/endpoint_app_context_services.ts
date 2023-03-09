@@ -7,10 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
-import type {
-  CasesClient,
-  PluginStartContract as CasesPluginStartContract,
-} from '@kbn/cases-plugin/server';
+import type { CasesClient, CasesStart } from '@kbn/cases-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { FleetStartContract, MessageSigningServiceInterface } from '@kbn/fleet-plugin/server';
 import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/alerting-plugin/server';
@@ -58,7 +55,7 @@ export interface EndpointAppContextServiceStartContract {
   registerListsServerExtension?: ListsServerExtensionRegistrar;
   licenseService: LicenseService;
   exceptionListsClient: ExceptionListClient | undefined;
-  cases: CasesPluginStartContract | undefined;
+  cases: CasesStart | undefined;
   featureUsageService: FeatureUsageService;
   experimentalFeatures: ExperimentalFeatures;
   messageSigningService: MessageSigningServiceInterface | undefined;
