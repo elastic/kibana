@@ -154,7 +154,7 @@ Note:
 Run the Jest tests:
 
 ```
-node scripts/jest --config ./packages/kbn-apm-synthtrace/jest.config.js
+node scripts/jest --config ./packages/kbn-apm-synthtrace/jest.config.js [--updateSnapshot]
 ```
 
 ## Typescript
