@@ -13,8 +13,7 @@
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/es-errors",
-    "@kbn/core-http-server",
-    "@kbn/core-elasticsearch-client-server-internal"
+    "@kbn/core-http-server"
   ],
   "exclude": [
     "target/**/*",

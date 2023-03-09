@@ -11,7 +11,6 @@ export { ClusterClient } from './src/cluster_client';
 export { configureClient } from './src/configure_client';
 export { type AgentStatsProvider, AgentManager, type NetworkAgent } from './src/agent_manager';
 export {
-  type ElasticsearchPotentiallyLeakingApi,
   type RequestDebugMeta,
   getRequestDebugMeta,
   getErrorMessage,

@@ -19,4 +19,8 @@ export type {
   UnauthorizedErrorHandlerRetryResult,
   UnauthorizedErrorHandlerNotHandledResult,
 } from './unauthorized_error_handler';
-export type { ElasticsearchClientConfig, ElasticsearchClientSslConfig } from './client_config';
+export type {
+  ElasticsearchClientConfig,
+  ElasticsearchClientSslConfig,
+  ElasticsearchPotentiallyLeakingApi,
+} from './client_config';

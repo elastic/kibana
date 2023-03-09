@@ -7,7 +7,23 @@
  */
 
 import type { Duration } from 'moment';
-import { ElasticsearchPotentiallyLeakingApi } from '@kbn/core-elasticsearch-client-server-internal';
+
+/**
+ * Definition of a potentially leaking API
+ */
+export interface ElasticsearchPotentiallyLeakingApi {
+  /**
+   * The ES path.
+   * - If specified as a string, it'll be checked as `contains`.
+   * - If specified as a RegExp, it'll be tested against the path.
+   */
+  path: string | RegExp;
+  /**
+   * HTTP method.
+   * If not provided, the path will be checked for all methods.
+   */
+  method?: string;
+}
 
 /**
  * Configuration options to be used to create a {@link IClusterClient | cluster client}

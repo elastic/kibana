@@ -22,6 +22,7 @@ export type {
   FakeRequest,
   ElasticsearchClientSslConfig,
   ElasticsearchClientConfig,
+  ElasticsearchPotentiallyLeakingApi,
 } from './src/client';
 
 export type {

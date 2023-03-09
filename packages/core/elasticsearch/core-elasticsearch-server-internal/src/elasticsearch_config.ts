@@ -13,8 +13,11 @@ import { Duration } from 'moment';
 import { readFileSync } from 'fs';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { ConfigDeprecationProvider } from '@kbn/config';
-import type { IElasticsearchConfig, ElasticsearchSslConfig } from '@kbn/core-elasticsearch-server';
-import type { ElasticsearchPotentiallyLeakingApi } from '@kbn/core-elasticsearch-client-server-internal';
+import type {
+  IElasticsearchConfig,
+  ElasticsearchSslConfig,
+  ElasticsearchPotentiallyLeakingApi,
+} from '@kbn/core-elasticsearch-server';
 import { getReservedHeaders } from './default_headers';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });

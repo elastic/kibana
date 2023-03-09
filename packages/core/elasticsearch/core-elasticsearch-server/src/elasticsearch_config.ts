@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ElasticsearchPotentiallyLeakingApi } from '@kbn/core-elasticsearch-client-server-internal';
 import type { Duration } from 'moment';
+import type { ElasticsearchPotentiallyLeakingApi } from './client';
 
 /**
  * @public

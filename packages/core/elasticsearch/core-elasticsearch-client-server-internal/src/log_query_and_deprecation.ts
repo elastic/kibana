@@ -13,6 +13,7 @@ import { errors, DiagnosticResult, RequestBody, Client } from '@elastic/elastics
 import numeral from '@elastic/numeral';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
+import type { ElasticsearchPotentiallyLeakingApi } from '@kbn/core-elasticsearch-server';
 import { getEcsResponseLog } from './get_ecs_response_log';
 
 /**
@@ -35,23 +36,6 @@ export interface RequestDebugMeta {
    * The status code of the response
    */
   statusCode: number | null;
-}
-
-/**
- * Definition of a potentially leaking API
- */
-export interface ElasticsearchPotentiallyLeakingApi {
-  /**
-   * The ES path.
-   * - If specified as a string, it'll be checked as `contains`.
-   * - If specified as a RegExp, it'll be tested against the path.
-   */
-  path: string | RegExp;
-  /**
-   * HTTP method.
-   * If not provided, the path will be checked for all methods.
-   */
-  method?: string;
 }
 
 const POTENTIALLY_LEAKING_API: ElasticsearchPotentiallyLeakingApi[] = [
