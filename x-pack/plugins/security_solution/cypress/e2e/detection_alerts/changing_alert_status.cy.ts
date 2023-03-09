@@ -27,6 +27,7 @@ import {
   openAlerts,
   openFirstAlert,
   selectCountTable,
+  waitForPageFilters,
   sumAlertCountFromAlertCountTable,
   parseAlertsCountToInt,
 } from '../../tasks/alerts';
@@ -56,6 +57,7 @@ describe('Changing alert status', () => {
       cy.get(SELECTED_ALERTS).should('have.text', `Selected 3 alerts`);
       closeAlerts();
       waitForAlerts();
+      waitForPageFilters();
       selectCountTable();
     });
 
