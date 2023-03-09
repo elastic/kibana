@@ -22,7 +22,7 @@ import { HeaderMenu } from './components/header_menu';
 import { Resources } from './components/resources';
 import { NewsFeed } from './components/news_feed';
 import { ObservabilityStatusProgress } from '../../components/app/observability_status/observability_status_progress';
-import { observabilityAlertFeatureIds, paths } from '../../config';
+import { observabilityAlertFeatureIds, paths } from '../../config/alert_feature_ids';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useDatePickerContext } from '../../hooks/use_date_picker_context';
 import { useFetcher } from '../../hooks/use_fetcher';
