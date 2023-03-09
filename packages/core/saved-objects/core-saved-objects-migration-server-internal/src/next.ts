@@ -50,6 +50,7 @@ import type {
   WaitForMigrationCompletionState,
   WaitForYellowSourceState,
 } from './state';
+import { createDelayFn } from './common/utils';
 import type { TransformRawDocs } from './types';
 import * as Actions from './actions';
 import { REMOVED_TYPES } from './core';
@@ -253,13 +254,7 @@ export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: Tra
 export const next = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
   const map = nextActionMap(client, transformRawDocs);
   return (state: State) => {
-    const delay = <F extends (...args: any) => any>(fn: F): (() => ReturnType<F>) => {
-      return () => {
-        return state.retryDelay > 0
-          ? new Promise((resolve) => setTimeout(resolve, state.retryDelay)).then(fn)
-          : fn();
-      };
-    };
+    const delay = createDelayFn(state);
 
     if (state.controlState === 'DONE' || state.controlState === 'FATAL') {
       // Return null if we're in one of the terminating states

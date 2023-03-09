@@ -36,6 +36,7 @@ import type {
   PostFleetServerHostsResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/fleet_server_hosts';
 import chalk from 'chalk';
+import { dump } from './utils';
 import { isLocalhost } from '../common/localhost_services';
 import {
   fetchFleetAgents,
@@ -79,7 +80,7 @@ export const runFleetServerIfNeeded = async (): Promise<
       serviceToken,
     });
   } catch (error) {
-    log.error(error);
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }
@@ -280,9 +281,10 @@ export const startFleetServerWithDocker = async ({
 
   View running output:  ${chalk.bold(`docker attach ---sig-proxy=false ${containerName}`)}
   Shell access:         ${chalk.bold(`docker exec -it ${containerName} /bin/bash`)}
+  Kill container:       ${chalk.bold(`docker kill ${containerId}`)}
 `);
   } catch (error) {
-    log.error(error);
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }
@@ -349,7 +351,7 @@ const configureFleetIfNeeded = async () => {
       }
     }
   } catch (error) {
-    log.error(error);
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }
@@ -387,7 +389,7 @@ const addFleetServerHostToFleetSettings = async (
 
     return item;
   } catch (error) {
-    log.error(error);
+    log.error(dump(error));
     log.indent(-4);
     throw error;
   }

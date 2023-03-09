@@ -141,3 +141,24 @@ export const RULE_ACTION_LINK_RULE_SWITCH = '[data-test-subj="ruleActionLinkRule
 
 export const EXCEPTION_ITEM_EXPIRE_TIME_INPUT =
   '[data-test-subj="exceptionExpireTimeInputRow"] input.euiDatePicker';
+
+// Exception list management
+export const EXCEPTIONS_LIST_MANAGEMENT_NAME =
+  '[data-test-subj="exceptionListManagementTitleText"]';
+
+export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_NAME_BTN =
+  '[data-test-subj="exceptionListManagementTitleEditIcon"]';
+
+export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_NAME_INPUT =
+  '[data-test-subj="editModalNameTextField"]';
+
+export const EXCEPTIONS_LIST_MANAGEMENT_DESCRIPTION =
+  '[data-test-subj="exceptionListManagementDescriptionText"]';
+
+export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT =
+  '[data-test-subj="editModalDescriptionTextField"]';
+
+export const EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN = '[data-test-subj="editModalSaveBtn"]';
+
+export const EXCEPTIONS_LIST_DETAILS_HEADER =
+  '[data-test-subj="exceptionListManagementPageHeader"]';
