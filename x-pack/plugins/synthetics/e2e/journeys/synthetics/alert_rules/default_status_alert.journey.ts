@@ -92,6 +92,8 @@ journey(`DefaultStatusAlert`, async ({ page, params }) => {
     await page.click(byTestId('syntheticsMonitorManagementTab'));
     await page.click(byTestId('syntheticsMonitorOverviewTab'));
 
+    await page.waitForTimeout(5 * 1000);
+
     const totalDown = await page.textContent(
       byTestId('xpack.uptime.synthetics.overview.status.down')
     );
