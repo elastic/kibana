@@ -9,7 +9,7 @@ import { ROLES } from '../../../../common/test';
 import { getExceptionList, expectedExportedExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
-import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../../tasks/login';
 
 import { EXCEPTIONS_URL } from '../../../urls/navigation';
@@ -17,15 +17,12 @@ import {
   deleteExceptionListWithRuleReference,
   deleteExceptionListWithoutRuleReference,
   exportExceptionList,
-  searchForExceptionList,
   waitForExceptionsTableToBeLoaded,
-  clearSearchSelection,
   createSharedExceptionList,
 } from '../../../tasks/exceptions_table';
 import {
   EXCEPTIONS_LIST_MANAGEMENT_NAME,
   EXCEPTIONS_OVERFLOW_ACTIONS_BTN,
-  EXCEPTIONS_TABLE_LIST_NAME,
   EXCEPTIONS_TABLE_SHOWING_LISTS,
 } from '../../../screens/exceptions';
 import { createExceptionList } from '../../../tasks/api_calls/exceptions';
@@ -51,9 +48,9 @@ describe('Manage shared exception list', () => {
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
-      createCustomRule({
+      createRule({
         ...getNewRule(),
-        exceptionLists: [
+        exceptions_list: [
           {
             id: response.body.id,
             list_id: getExceptionList2().list_id,
@@ -75,13 +72,6 @@ describe('Manage shared exception list', () => {
     waitForExceptionsTableToBeLoaded();
   });
 
-  it('Create exception list', function () {
-    createSharedExceptionList({ name: EXCEPTION_LIST_NAME, description: 'This is my list.' }, true);
-
-    // After creation - directed to list detail page
-    cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', EXCEPTION_LIST_NAME);
-  });
-
   it('Export exception list', function () {
     cy.intercept(/(\/api\/exception_lists\/_export)/).as('export');
 
@@ -98,6 +88,13 @@ describe('Manage shared exception list', () => {
         `Exception list "${EXCEPTION_LIST_NAME}" exported successfully`
       );
     });
+  });
+
+  it('Create exception list', function () {
+    createSharedExceptionList({ name: EXCEPTION_LIST_NAME, description: 'This is my list.' }, true);
+
+    // After creation - directed to list detail page
+    cy.get(EXCEPTIONS_LIST_MANAGEMENT_NAME).should('have.text', EXCEPTION_LIST_NAME);
   });
 
   it('Delete exception list without rule reference', () => {
