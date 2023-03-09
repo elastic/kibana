@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import { useTimeZone } from '@kbn/observability-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
@@ -99,10 +99,23 @@ export function useMonitorErrors(monitorIdArg?: string) {
       return loc.summary.hits.hits?.[0]._source as PingState;
     });
 
+    const hasActiveError: boolean =
+      errorStates?.some((errorState) => isActiveState(errorState)) || false;
+
     return {
       errorStates,
       loading,
       data,
+      hasActiveError,
     };
   }, [data, loading]);
 }
+
+export const isActiveState = (item: PingState) => {
+  const timestamp = item['@timestamp'];
+  const interval = moment(item.monitor.timespan?.lt).diff(
+    moment(item.monitor.timespan?.gte),
+    'milliseconds'
+  );
+  return moment().diff(moment(timestamp), 'milliseconds') < interval;
+};

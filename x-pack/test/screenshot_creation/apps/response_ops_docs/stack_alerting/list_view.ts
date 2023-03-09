@@ -33,6 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ruleTypeId: '.index-threshold',
       schedule: { interval: '1m' },
       tags: [],
+      actions: [],
     };
 
     before(async () => {
