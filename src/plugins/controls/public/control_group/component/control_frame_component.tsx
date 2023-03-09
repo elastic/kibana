@@ -10,7 +10,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import {
   EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
@@ -78,7 +77,6 @@ export interface ControlFrameProps {
 
 export const ControlFrame = ({
   customPrepend,
-  enableActions,
   embeddableId,
   embeddableType,
 }: ControlFrameProps) => {
@@ -96,6 +94,7 @@ export const ControlFrame = ({
     uiActions: { getTriggerCompatibleActions },
   } = pluginServices.getServices();
 
+  const viewMode = select((state) => state.explicitInput.viewMode);
   const controlStyle = select((state) => state.explicitInput.controlStyle);
 
   const embeddable = useChildEmbeddable({
@@ -105,7 +104,7 @@ export const ControlFrame = ({
   });
 
   const [title, setTitle] = useState<string>();
-  const [actionComponents, setActionComponents] = useState<JSX.Element[]>();
+  const [floatingActions, setFloatingActions] = useState<JSX.Element>();
 
   useEffect(() => {
     if (!embeddable) return;
@@ -116,22 +115,23 @@ export const ControlFrame = ({
         trigger: panelHoverTrigger,
       };
       const actions = await getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context);
-      console.log('actions', actions);
-      const components = actions.map((action) =>
-        action.MenuItem && embeddable ? (
-          React.createElement(action.MenuItem, {
-            key: action.id,
-            context,
-          })
-        ) : (
-          <></>
-        )
-      );
-      setActionComponents(components);
+      if (actions.length > 0) {
+        const components = actions.map((action) =>
+          action.MenuItem && embeddable
+            ? React.createElement(action.MenuItem, {
+                key: action.id,
+                context,
+              })
+            : undefined
+        );
+        setFloatingActions(<>{components}</>);
+      } else {
+        setFloatingActions(undefined);
+      }
     };
 
     getActions();
-  }, [embeddable, getTriggerCompatibleActions]);
+  }, [embeddable, getTriggerCompatibleActions, viewMode]);
 
   const usingTwoLineLayout = controlStyle === 'twoLine';
 
@@ -150,8 +150,6 @@ export const ControlFrame = ({
       errorSubscription?.unsubscribe();
     };
   }, [embeddable, embeddableRoot]);
-
-  const floatingActions = <>{actionComponents}</>;
 
   const embeddableParentClassNames = classNames('controlFrame__control', {
     'controlFrame--twoLine': controlStyle === 'twoLine',
@@ -217,7 +215,7 @@ export const ControlFrame = ({
         'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
       actions={floatingActions}
-      isEnabled={embeddable && enableActions}
+      isEnabled={Boolean(embeddable)}
     >
       <EuiFormRow
         data-test-subj="control-frame-title"

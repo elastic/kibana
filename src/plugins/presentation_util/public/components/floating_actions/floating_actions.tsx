@@ -26,7 +26,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   return (
     <div className="presentationUtil__floatingActionsWrapper">
       {children}
-      {isEnabled && (
+      {isEnabled && actions && (
         <div className={classNames('presentationUtil__floatingActions', className)}>{actions}</div>
       )}
     </div>

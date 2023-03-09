@@ -8,10 +8,10 @@
 
 import React from 'react';
 
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { ControlGroupContainer } from '..';
 import { pluginServices } from '../../services';
@@ -20,7 +20,6 @@ import { DeleteControlAction } from './delete_control_action';
 import { ControlGroupStrings } from '../control_group_strings';
 import { ControlEmbeddable, DataControlInput } from '../../types';
 import { isControlGroup, setFlyoutRef } from '../embeddable/control_group_container';
-import { isTimeSliderControl } from '../../time_slider/embeddable/time_slider_embeddable';
 
 export const ACTION_EDIT_CONTROL = 'editControl';
 
@@ -76,13 +75,13 @@ export class EditControlAction implements Action<EditControlActionContext> {
 
   public async isCompatible({ embeddable }: EditControlActionContext) {
     if (isErrorEmbeddable(embeddable)) return false;
-
     const controlGroup = embeddable.parent;
     const factory = this.getEmbeddableFactory(embeddable.type);
     return Boolean(
       !isErrorEmbeddable(embeddable) &&
         controlGroup &&
         isControlGroup(controlGroup) &&
+        controlGroup.getInput().viewMode === ViewMode.EDIT &&
         factory &&
         (await factory.isEditable())
     );

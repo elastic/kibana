@@ -9,8 +9,8 @@
 import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ViewMode, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { pluginServices } from '../../services';
 import { ControlGroupStrings } from '../control_group_strings';
@@ -67,7 +67,12 @@ export class DeleteControlAction implements Action<DeleteControlActionContext> {
   public async isCompatible({ embeddable }: DeleteControlActionContext) {
     if (isErrorEmbeddable(embeddable)) return false;
     const controlGroup = embeddable.parent;
-    return Boolean(!isErrorEmbeddable(embeddable) && controlGroup && isControlGroup(controlGroup));
+    return Boolean(
+      !isErrorEmbeddable(embeddable) &&
+        controlGroup &&
+        isControlGroup(controlGroup) &&
+        controlGroup.getInput().viewMode === ViewMode.EDIT
+    );
   }
 
   public async execute({ embeddable }: DeleteControlActionContext) {
