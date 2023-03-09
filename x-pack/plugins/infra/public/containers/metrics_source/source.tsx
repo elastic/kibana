@@ -9,7 +9,7 @@ import createContainer from 'constate';
 import { useEffect, useState } from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
+import type {
   MetricsSourceConfigurationResponse,
   MetricsSourceConfiguration,
   PartialMetricsSourceConfigurationProperties,

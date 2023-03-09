@@ -7,13 +7,13 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { HttpFetchError } from '@kbn/core-http-browser-internal/src/http_fetch_error';
+import type { HttpFetchError } from '@kbn/core-http-browser-internal/src/http_fetch_error';
 import { i18n } from '@kbn/i18n';
 
 const NO_SUCH_REMOTE_CLUSTER = 'no_such_remote_cluster_exception';
 
 const defaultTitle = i18n.translate('xpack.infra.sourceConfiguration.failedToFetchSource', {
-  defaultMessage: 'Failed source request.',
+  defaultMessage: 'Failed to load source configuration',
 });
 
 const noSuchRemoteClusterMessage = i18n.translate(
@@ -25,7 +25,7 @@ const noSuchRemoteClusterMessage = i18n.translate(
 );
 
 const missingHttpMessage = i18n.translate('xpack.infra.sourceConfiguration.missingHttp', {
-  defaultMessage: 'Failed to load source: No http client available.',
+  defaultMessage: 'Failed to load source: No HTTP client available.',
 });
 
 /**
@@ -56,6 +56,8 @@ export const throwLoadSourceError = (error: HttpFetchError) => {
   if (isNoSuchRemoteClusterMessage(message)) {
     throw new NoSuchRemoteClusterException();
   }
+
+  throw error;
 };
 
 const isNoSuchRemoteClusterMessage = (message: string) => {
