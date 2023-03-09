@@ -16,6 +16,7 @@ import {
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
+import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type {
   BrowserFields,
@@ -95,16 +96,16 @@ const AlertsTableWithBulkActionsContextComponent: React.FunctionComponent<{
 
 const AlertsTableWithBulkActionsContext = React.memo(AlertsTableWithBulkActionsContextComponent);
 
-type AlertWithCaseIds = Alert & Required<Pick<Alert, 'kibana.alert.case_ids'>>;
+type AlertWithCaseIds = Alert & Required<Pick<Alert, typeof ALERT_CASE_IDS>>;
 
 const getCaseIdsFromAlerts = (alerts: Alerts): Set<string> =>
   new Set(
     alerts
-      .filter(
-        (alert): alert is AlertWithCaseIds =>
-          alert['kibana.alert.case_ids'] != null && alert['kibana.alert.case_ids'].length > 0
-      )
-      .map((alert) => alert['kibana.alert.case_ids'])
+      .filter((alert): alert is AlertWithCaseIds => {
+        const caseIds = alert[ALERT_CASE_IDS];
+        return caseIds != null && caseIds.length > 0;
+      })
+      .map((alert) => alert[ALERT_CASE_IDS])
       .flat()
   );
 
