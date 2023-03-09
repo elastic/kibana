@@ -8005,7 +8005,7 @@
     "@types/estree" "*"
     "@types/json-schema" "*"
 
-"@types/estree@*", "@types/estree@^0.0.50":
+"@types/estree@*":
   version "0.0.50"
   resolved "https://registry.yarnpkg.com/@types/estree/-/estree-0.0.50.tgz#1e0caa9364d3fccd2931c3ed96fdbeaa5d4cca83"
   integrity sha512-C6N5s2ZFtuZRj54k2/zyRhNDjJwwcViAM3Nbm8zjBpbqAdZ00mr0CFxvSKeO8Y/e03WVFLpQMdHYVfUd6SB+Hw==
@@ -28378,21 +28378,13 @@ vega-event-selector@^3.0.1, vega-event-selector@~3.0.0, vega-event-selector@~3.0
   resolved "https://registry.yarnpkg.com/vega-event-selector/-/vega-event-selector-3.0.1.tgz#b99e92147b338158f8079d81b28b2e7199c2e259"
   integrity sha512-K5zd7s5tjr1LiOOkjGpcVls8GsH/f2CWCrWcpKy74gTCp+llCdwz0Enqo013ZlGaRNjfgD/o1caJRt3GSaec4A==
 
-vega-expression@^5.0.1, vega-expression@~5.0.1:
+vega-expression@^5.0.1, vega-expression@~5.0.0, vega-expression@~5.0.1:
   version "5.0.1"
   resolved "https://registry.yarnpkg.com/vega-expression/-/vega-expression-5.0.1.tgz#e6a6eff564d2a93496a9bf34cbc78d8942f236a8"
   integrity sha512-atfzrMekrcsuyUgZCMklI5ki8cV763aeo1Y6YrfYU7FBwcQEoFhIV/KAJ1vae51aPDGtfzvwbtVIo3WShFCP2Q==
   dependencies:
     "@types/estree" "^1.0.0"
     vega-util "^1.17.1"
-
-vega-expression@~5.0.0:
-  version "5.0.0"
-  resolved "https://registry.yarnpkg.com/vega-expression/-/vega-expression-5.0.0.tgz#938f26689693a1e0d26716030cdaed43ca7abdfb"
-  integrity sha512-y5+c2frq0tGwJ7vYXzZcfVcIRF/QGfhf2e+bV1Z0iQs+M2lI1II1GPDdmOcMKimpoCVp/D61KUJDIGE1DSmk2w==
-  dependencies:
-    "@types/estree" "^0.0.50"
-    vega-util "^1.16.0"
 
 vega-force@~4.2.0:
   version "4.2.0"
@@ -28621,7 +28613,7 @@ vega-typings@~0.24.0:
     vega-expression "^5.0.1"
     vega-util "^1.17.1"
 
-vega-util@^1.15.2, vega-util@^1.16.0, vega-util@^1.17.0, vega-util@^1.17.1, vega-util@~1.17.0, vega-util@~1.17.1:
+vega-util@^1.15.2, vega-util@^1.17.0, vega-util@^1.17.1, vega-util@~1.17.0, vega-util@~1.17.1:
   version "1.17.1"
   resolved "https://registry.yarnpkg.com/vega-util/-/vega-util-1.17.1.tgz#717865fc6b660ceb3ae16273d21166ed471c2db4"
   integrity sha512-ToPkWoBdP6awoK+bnYaFhgdqZhsNwKxWbuMnFell+4K/Cb6Q1st5Pi9I7iI5Y6n5ZICDDsd6eL7/IhBjEg1NUQ==
