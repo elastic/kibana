@@ -9,6 +9,8 @@
 import apm from 'elastic-apm-node';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { Logger, LoggerFactory } from '@kbn/logging';
+import type { NodeRoles } from '@kbn/core-node-server';
+import { CriticalError } from '@kbn/core-base-server-internal';
 import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
 import { DocLinksService } from '@kbn/core-doc-links-server-internal';
 import { LoggingService, ILoggingSystem } from '@kbn/core-logging-server-internal';
@@ -51,6 +53,7 @@ import type {
 import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { registerServiceConfig } from './register_service_config';
+import { MIGRATION_EXCEPTION_CODE } from './constants';
 
 const coreId = Symbol('core');
 const KIBANA_STARTED_EVENT = 'kibana_started';
@@ -103,6 +106,7 @@ export class Server {
   private coreStart?: InternalCoreStart;
   private discoveredPlugins?: DiscoveredPlugins;
   private readonly logger: LoggerFactory;
+  private nodeRoles?: NodeRoles;
 
   private readonly uptimePerStep: Partial<UptimeSteps> = {};
 
@@ -158,6 +162,8 @@ export class Server {
 
     const environmentPreboot = await this.environment.preboot({ analytics: analyticsPreboot });
     const nodePreboot = await this.node.preboot({ loggingSystem: this.loggingSystem });
+
+    this.nodeRoles = nodePreboot.roles;
 
     // Discover any plugins before continuing. This allows other systems to utilize the plugin dependency graph.
     this.discoveredPlugins = await this.plugins.discover({
@@ -364,6 +370,17 @@ export class Server {
     await this.resolveSavedObjectsStartPromise!(savedObjectsStart);
 
     soStartSpan?.end();
+
+    if (this.nodeRoles?.migrator === true) {
+      startTransaction?.end();
+      this.log.info('Detected migrator node role; shutting down Kibana...');
+      throw new CriticalError(
+        'Migrations completed, shutting down Kibana',
+        MIGRATION_EXCEPTION_CODE,
+        0
+      );
+    }
+
     const capabilitiesStart = this.capabilities.start();
     const uiSettingsStart = await this.uiSettings.start();
     const customBrandingStart = this.customBranding.start();
