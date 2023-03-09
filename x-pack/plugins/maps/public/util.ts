@@ -10,6 +10,7 @@ import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { FONTS_API_PATH } from '../common/constants';
 import {
+  getDocLinks,
   getHttp,
   getTilemap,
   getEMSSettings,
@@ -85,7 +86,9 @@ async function canAccessEmsFonts(): Promise<boolean> {
       } catch (error) {
         // eslint-disable-next-line no-console
         console.warn(
-          `Unable to access fonts from Elastic Maps Service (EMS). Set kibana.yml 'map.includeElasticMapsService: false' to avoid unnecessary EMS requests.`
+          `Unable to access fonts from Elastic Maps Service (EMS). To avoid unnecessary EMS requests, set 'map.includeElasticMapsService: false' in 'kibana.yml'. For more details please visit: ${
+            getDocLinks().links.maps.connectToEms
+          }`
         );
         resolve(false);
       }

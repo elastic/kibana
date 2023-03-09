@@ -70,6 +70,7 @@
     "@kbn/securitysolution-ecs",
     "@kbn/shared-ux-router",
     "@kbn/alerts-ui-shared",
+    "@kbn/alerts-as-data-utils",
     "@kbn/core-application-browser",
     "@kbn/files-plugin",
   ],

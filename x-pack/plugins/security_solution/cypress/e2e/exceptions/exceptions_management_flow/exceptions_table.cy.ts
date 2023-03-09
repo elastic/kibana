@@ -9,7 +9,7 @@ import { ROLES } from '../../../../common/test';
 import { getExceptionList, expectedExportedExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
-import { createCustomRule } from '../../../tasks/api_calls/rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import { login, visitWithoutDateRange, waitForPageWithoutDateRange } from '../../../tasks/login';
 
 import { EXCEPTIONS_URL } from '../../../urls/navigation';
@@ -48,9 +48,9 @@ describe('Exceptions Table', () => {
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList2(), getExceptionList2().list_id).then((response) =>
-      createCustomRule({
+      createRule({
         ...getNewRule(),
-        exceptionLists: [
+        exceptions_list: [
           {
             id: response.body.id,
             list_id: getExceptionList2().list_id,
