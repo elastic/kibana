@@ -15,16 +15,16 @@ import type { Context } from '../types';
 
 export const get: ProcedureDefinition<Context, GetIn<string>> = {
   schemas: rpcSchemas.get,
-  fn: async (ctx, input) => {
-    const contentDefinition = ctx.contentRegistry.getDefinition(input.contentTypeId);
+  fn: async (ctx, { contentTypeId, id, version, options }) => {
+    const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
     const { get: schemas } = contentDefinition.schemas.content;
 
-    if (input.options) {
+    if (options) {
       // Validate the options provided
       if (!schemas?.in?.options) {
         throw new Error(`Schema missing for rpc procedure [get.in.options].`);
       }
-      const error = validate(input.options, schemas.in.options);
+      const error = validate(options, schemas.in.options);
       if (error) {
         // TODO: Improve error handling
         throw error;
@@ -32,11 +32,15 @@ export const get: ProcedureDefinition<Context, GetIn<string>> = {
     }
 
     // Execute CRUD
-    const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(input.contentTypeId);
+    const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(contentTypeId);
     const storageContext: StorageContext = {
       requestHandlerContext: ctx.requestHandlerContext,
+      version: {
+        request: version!,
+        latest: contentDefinition.version.latest,
+      },
     };
-    const result = await crudInstance.get(storageContext, input.id, input.options);
+    const result = await crudInstance.get(storageContext, id, options);
 
     // Validate result
     const resultSchema = schemas?.out?.result;

@@ -15,7 +15,7 @@ import { validate } from '../../utils';
 
 export const search: ProcedureDefinition<Context, SearchIn<string>> = {
   schemas: rpcSchemas.search,
-  fn: async (ctx, { contentTypeId, query, options }) => {
+  fn: async (ctx, { contentTypeId, version, query, options }) => {
     const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
     const { search: schemas } = contentDefinition.schemas.content;
 
@@ -48,6 +48,10 @@ export const search: ProcedureDefinition<Context, SearchIn<string>> = {
     const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(contentTypeId);
     const storageContext: StorageContext = {
       requestHandlerContext: ctx.requestHandlerContext,
+      version: {
+        request: version!,
+        latest: contentDefinition.version.latest,
+      },
     };
     const result = await crudInstance.search(storageContext, query, options);
 

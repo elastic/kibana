@@ -15,13 +15,13 @@ import { validate } from '../../utils';
 
 export const create: ProcedureDefinition<Context, CreateIn<string>> = {
   schemas: rpcSchemas.create,
-  fn: async (ctx, input) => {
-    const contentDefinition = ctx.contentRegistry.getDefinition(input.contentTypeId);
+  fn: async (ctx, { contentTypeId, version, data, options }) => {
+    const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
     const { create: schemas } = contentDefinition.schemas.content;
 
     // Validate data to be stored
     if (schemas?.in?.data) {
-      const error = validate(input.data, schemas.in.data);
+      const error = validate(data, schemas.in.data);
       if (error) {
         // TODO: Improve error handling
         throw error;
@@ -32,12 +32,12 @@ export const create: ProcedureDefinition<Context, CreateIn<string>> = {
     }
 
     // Validate the possible options
-    if (input.options) {
+    if (options) {
       if (!schemas.in?.options) {
         // TODO: Improve error handling
         throw new Error('Schema missing for rpc procedure [create.in.options].');
       }
-      const error = validate(input.options, schemas.in.options);
+      const error = validate(options, schemas.in.options);
       if (error) {
         // TODO: Improve error handling
         throw error;
@@ -45,11 +45,15 @@ export const create: ProcedureDefinition<Context, CreateIn<string>> = {
     }
 
     // Execute CRUD
-    const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(input.contentTypeId);
+    const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(contentTypeId);
     const storageContext: StorageContext = {
       requestHandlerContext: ctx.requestHandlerContext,
+      version: {
+        request: version!,
+        latest: contentDefinition.version.latest,
+      },
     };
-    const result = await crudInstance.create(storageContext, input.data, input.options);
+    const result = await crudInstance.create(storageContext, data, options);
 
     // Validate result
     const resultSchema = schemas.out?.result;

@@ -186,7 +186,11 @@ describe('RPC -> bulkGet()', () => {
       const expected = ['Item1', 'Item2'];
       storage.bulkGet.mockResolvedValueOnce(expected);
 
-      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, ids: ['123', '456'] });
+      const result = await fn(ctx, {
+        contentTypeId: FOO_CONTENT_ID,
+        version: 'v1',
+        ids: ['123', '456'],
+      });
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
@@ -194,7 +198,13 @@ describe('RPC -> bulkGet()', () => {
       });
 
       expect(storage.bulkGet).toHaveBeenCalledWith(
-        { requestHandlerContext: ctx.requestHandlerContext },
+        {
+          requestHandlerContext: ctx.requestHandlerContext,
+          version: {
+            request: 'v1',
+            latest: 'v2', // from the registry
+          },
+        },
         ['123', '456'],
         undefined
       );

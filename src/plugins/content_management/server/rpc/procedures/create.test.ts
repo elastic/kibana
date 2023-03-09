@@ -158,7 +158,11 @@ describe('RPC -> create()', () => {
       const expected = 'CreateResult';
       storage.create.mockResolvedValueOnce(expected);
 
-      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, data: { title: 'Hello' } });
+      const result = await fn(ctx, {
+        contentTypeId: FOO_CONTENT_ID,
+        version: 'v1',
+        data: { title: 'Hello' },
+      });
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
@@ -166,7 +170,13 @@ describe('RPC -> create()', () => {
       });
 
       expect(storage.create).toHaveBeenCalledWith(
-        { requestHandlerContext: ctx.requestHandlerContext },
+        {
+          requestHandlerContext: ctx.requestHandlerContext,
+          version: {
+            request: 'v1',
+            latest: 'v2', // from the registry
+          },
+        },
         { title: 'Hello' },
         undefined
       );

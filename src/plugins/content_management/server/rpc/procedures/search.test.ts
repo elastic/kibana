@@ -174,7 +174,11 @@ describe('RPC -> search()', () => {
       const expected = 'SearchResult';
       storage.search.mockResolvedValueOnce(expected);
 
-      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, query: { title: 'Hello' } });
+      const result = await fn(ctx, {
+        contentTypeId: FOO_CONTENT_ID,
+        version: 'v1', // version in request
+        query: { title: 'Hello' },
+      });
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
@@ -182,7 +186,13 @@ describe('RPC -> search()', () => {
       });
 
       expect(storage.search).toHaveBeenCalledWith(
-        { requestHandlerContext: ctx.requestHandlerContext },
+        {
+          requestHandlerContext: ctx.requestHandlerContext,
+          version: {
+            request: 'v1',
+            latest: 'v2', // from the registry
+          },
+        },
         { title: 'Hello' },
         undefined
       );

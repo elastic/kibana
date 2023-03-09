@@ -16,7 +16,7 @@ import { BulkGetResponse } from '../../core/crud';
 
 export const bulkGet: ProcedureDefinition<Context, BulkGetIn<string>, BulkGetResponse> = {
   schemas: rpcSchemas.bulkGet,
-  fn: async (ctx, { contentTypeId, ids, options }) => {
+  fn: async (ctx, { contentTypeId, version, ids, options }) => {
     const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
     const { bulkGet: schemas } = contentDefinition.schemas.content;
 
@@ -37,6 +37,10 @@ export const bulkGet: ProcedureDefinition<Context, BulkGetIn<string>, BulkGetRes
     const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(contentTypeId);
     const storageContext: StorageContext = {
       requestHandlerContext: ctx.requestHandlerContext,
+      version: {
+        request: version!,
+        latest: contentDefinition.version.latest,
+      },
     };
     const result = await crudInstance.bulkGet(storageContext, ids, options);
 

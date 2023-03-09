@@ -169,6 +169,7 @@ describe('RPC -> update()', () => {
       const result = await fn(ctx, {
         contentTypeId: FOO_CONTENT_ID,
         id: '123',
+        version: 'v1',
         data: { title: 'Hello' },
       });
 
@@ -178,7 +179,13 @@ describe('RPC -> update()', () => {
       });
 
       expect(storage.update).toHaveBeenCalledWith(
-        { requestHandlerContext: ctx.requestHandlerContext },
+        {
+          requestHandlerContext: ctx.requestHandlerContext,
+          version: {
+            request: 'v1',
+            latest: 'v2', // from the registry
+          },
+        },
         '123',
         { title: 'Hello' },
         undefined

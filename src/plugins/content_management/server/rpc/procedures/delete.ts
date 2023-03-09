@@ -14,7 +14,7 @@ import { validate } from '../../utils';
 
 export const deleteProc: ProcedureDefinition<Context, DeleteIn<string>> = {
   schemas: rpcSchemas.delete,
-  fn: async (ctx, { contentTypeId, id, options }) => {
+  fn: async (ctx, { contentTypeId, id, version, options }) => {
     const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
     const { delete: schemas } = contentDefinition.schemas.content;
 
@@ -34,6 +34,10 @@ export const deleteProc: ProcedureDefinition<Context, DeleteIn<string>> = {
     const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(contentTypeId);
     const storageContext: StorageContext = {
       requestHandlerContext: ctx.requestHandlerContext,
+      version: {
+        request: version!,
+        latest: contentDefinition.version.latest,
+      },
     };
     const result = await crudInstance.delete(storageContext, id, options);
 

@@ -148,7 +148,7 @@ describe('RPC -> delete()', () => {
       const expected = 'DeleteResult';
       storage.delete.mockResolvedValueOnce(expected);
 
-      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234' });
+      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, version: 'v1', id: '1234' });
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
@@ -156,7 +156,13 @@ describe('RPC -> delete()', () => {
       });
 
       expect(storage.delete).toHaveBeenCalledWith(
-        { requestHandlerContext: ctx.requestHandlerContext },
+        {
+          requestHandlerContext: ctx.requestHandlerContext,
+          version: {
+            request: 'v1',
+            latest: 'v2', // from the registry
+          },
+        },
         '1234',
         undefined
       );

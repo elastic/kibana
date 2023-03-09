@@ -14,7 +14,7 @@ import { validate } from '../../utils';
 
 export const update: ProcedureDefinition<Context, UpdateIn<string>> = {
   schemas: rpcSchemas.update,
-  fn: async (ctx, { contentTypeId, id, data, options }) => {
+  fn: async (ctx, { contentTypeId, id, version, data, options }) => {
     const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
     const { update: schemas } = contentDefinition.schemas.content;
 
@@ -47,6 +47,10 @@ export const update: ProcedureDefinition<Context, UpdateIn<string>> = {
     const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(contentTypeId);
     const storageContext: StorageContext = {
       requestHandlerContext: ctx.requestHandlerContext,
+      version: {
+        request: version!,
+        latest: contentDefinition.version.latest,
+      },
     };
     const result = await crudInstance.update(storageContext, id, data, options);
 
