@@ -196,7 +196,7 @@ This known issue only impacts the Observability Rules page. To work around this 
 [%collapsible]
 ====
 *Details* +
-When upgrading to 8.6, progress bars on existing Lens metric visualizations get hidden.
+When you upgrade to 8.6.0, progress bars on existing *Lens* metric visualizations are hidden.
 
 To show the progress bar again, open the visualization in the Lens editor. Click the dimension button for the primary metric to open the dimension editor. Then, under "Supporting visualization," select "Bar."
 ====
