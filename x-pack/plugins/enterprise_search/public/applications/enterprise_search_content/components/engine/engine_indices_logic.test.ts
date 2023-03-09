@@ -26,13 +26,11 @@ const mockEngineData: EnterpriseSearchEngineDetails = {
       count: 10,
       health: 'green',
       name: 'search-001',
-      source: 'api',
     },
     {
       count: 1000,
       health: 'yellow',
       name: 'search-002',
-      source: 'crawler',
     },
   ],
   name: DEFAULT_VALUES.engineName,

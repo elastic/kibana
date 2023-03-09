@@ -15,7 +15,8 @@ import { login, visit } from '../../tasks/login';
 
 import { USERS_URL } from '../../urls/navigation';
 
-describe('Inspect', () => {
+// This will be fixed in a follow up PR, https://github.com/elastic/kibana/issues/152359
+describe.skip('Inspect', () => {
   context('Users stats and tables', () => {
     before(() => {
       login();

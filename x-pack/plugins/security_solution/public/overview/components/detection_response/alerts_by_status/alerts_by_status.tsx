@@ -109,7 +109,9 @@ export const AlertsByStatus = ({
     deepLinkId: SecurityPageName.alerts,
   });
 
-  const isChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled('chartEmbeddablesEnabled');
+  const isDonutChartEmbeddablesEnabled = useIsExperimentalFeatureEnabled(
+    'donutChartEmbeddablesEnabled'
+  );
   const { to, from } = useGlobalTime();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
 
@@ -136,7 +138,7 @@ export const AlertsByStatus = ({
     additionalFilters,
     entityFilter,
     signalIndexName,
-    skip: !toggleStatus || isChartEmbeddablesEnabled,
+    skip: !toggleStatus || isDonutChartEmbeddablesEnabled,
     queryId: DETECTION_RESPONSE_ALERTS_BY_STATUS_ID,
     to,
     from,
@@ -160,7 +162,7 @@ export const AlertsByStatus = ({
 
   const { total: visualizationTotalAlerts } = useAlertsByStatusVisualizationData();
 
-  const totalAlertsCount = isChartEmbeddablesEnabled ? visualizationTotalAlerts : totalAlerts;
+  const totalAlertsCount = isDonutChartEmbeddablesEnabled ? visualizationTotalAlerts : totalAlerts;
 
   const fillColor: FillColor = useCallback((d: ShapeTreeNode) => {
     return chartConfigs.find((cfg) => cfg.label === d.dataName)?.color ?? emptyDonutColor;
@@ -186,7 +188,7 @@ export const AlertsByStatus = ({
             inspectMultiple
             toggleStatus={toggleStatus}
             toggleQuery={setToggleStatus}
-            showInspectButton={!isChartEmbeddablesEnabled}
+            showInspectButton={!isDonutChartEmbeddablesEnabled}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
@@ -203,7 +205,7 @@ export const AlertsByStatus = ({
           {toggleStatus && (
             <>
               <EuiFlexGroup justifyContent="center" gutterSize="none">
-                <EuiFlexItem grow={isChartEmbeddablesEnabled}>
+                <EuiFlexItem grow={isDonutChartEmbeddablesEnabled}>
                   <EuiText className="eui-textCenter" size="s">
                     {totalAlerts !== 0 ||
                       (visualizationTotalAlerts !== 0 && (
@@ -219,8 +221,8 @@ export const AlertsByStatus = ({
 
                   <EuiSpacer size="l" />
                   <EuiFlexGroup justifyContent="center">
-                    <StyledFlexItem key="alerts-status-open" grow={isChartEmbeddablesEnabled}>
-                      {isChartEmbeddablesEnabled ? (
+                    <StyledFlexItem key="alerts-status-open" grow={isDonutChartEmbeddablesEnabled}>
+                      {isDonutChartEmbeddablesEnabled ? (
                         <VisualizationEmbeddable
                           applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
                           extraOptions={openDonutOptions}
@@ -247,9 +249,9 @@ export const AlertsByStatus = ({
                     </StyledFlexItem>
                     <StyledFlexItem
                       key="alerts-status-acknowledged"
-                      grow={isChartEmbeddablesEnabled}
+                      grow={isDonutChartEmbeddablesEnabled}
                     >
-                      {isChartEmbeddablesEnabled ? (
+                      {isDonutChartEmbeddablesEnabled ? (
                         <VisualizationEmbeddable
                           applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
                           extraOptions={acknowledgedDonutOptions}
@@ -274,8 +276,11 @@ export const AlertsByStatus = ({
                         />
                       )}
                     </StyledFlexItem>
-                    <StyledFlexItem key="alerts-status-closed" grow={isChartEmbeddablesEnabled}>
-                      {isChartEmbeddablesEnabled ? (
+                    <StyledFlexItem
+                      key="alerts-status-closed"
+                      grow={isDonutChartEmbeddablesEnabled}
+                    >
+                      {isDonutChartEmbeddablesEnabled ? (
                         <VisualizationEmbeddable
                           applyGlobalQueriesAndFilters={applyGlobalQueriesAndFilters}
                           extraOptions={closedDonutOptions}
@@ -302,7 +307,7 @@ export const AlertsByStatus = ({
                     </StyledFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                {!isChartEmbeddablesEnabled && (
+                {!isDonutChartEmbeddablesEnabled && (
                   <StyledLegendFlexItem grow={false}>
                     {legendItems.length > 0 && <Legend legendItems={legendItems} />}
                   </StyledLegendFlexItem>

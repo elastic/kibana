@@ -6,32 +6,51 @@
  */
 
 import {
-  addLastLiveQueryToCase,
+  addLiveQueryToCase,
   checkActionItemsInResults,
   viewRecentCaseAndCheckResults,
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
-import { ArchiverMethod, runKbnArchiverScript } from '../../tasks/archiver';
-import { login } from '../../tasks/login';
-import { ROLES } from '../../test';
+import { ROLE, login } from '../../tasks/login';
+import { loadLiveQuery, loadCase, cleanupCase } from '../../tasks/api_fixtures';
 
 describe('Add to Cases', () => {
+  let liveQueryId: string;
+  let liveQueryQuery: string;
+
+  before(() => {
+    loadLiveQuery({
+      agent_all: true,
+      query: "SELECT * FROM os_version where name='Ubuntu';",
+    }).then((liveQuery) => {
+      liveQueryId = liveQuery.action_id;
+      liveQueryQuery = liveQuery.queries[0].query;
+    });
+  });
+
   describe('observability', () => {
+    let caseId: string;
+    let caseTitle: string;
+
     before(() => {
-      runKbnArchiverScript(ArchiverMethod.LOAD, 'case_observability');
-      login(ROLES.soc_manager);
+      loadCase('observability').then((caseInfo) => {
+        caseId = caseInfo.id;
+        caseTitle = caseInfo.title;
+      });
+      login(ROLE.soc_manager);
       navigateTo('/app/osquery');
     });
 
     after(() => {
-      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_observability');
+      cleanupCase(caseId);
     });
+
     it('should add result a case and not have add to timeline in result', () => {
-      addLastLiveQueryToCase();
-      cy.contains('Test Obs case has been updated');
+      addLiveQueryToCase(liveQueryId, caseId);
+      cy.contains(`${caseTitle} has been updated`);
       viewRecentCaseAndCheckResults();
 
-      cy.contains("SELECT * FROM os_version where name='Ubuntu';");
+      cy.contains(liveQueryQuery);
       checkActionItemsInResults({
         lens: true,
         discover: true,
@@ -40,20 +59,27 @@ describe('Add to Cases', () => {
       });
     });
   });
+
   describe('security', () => {
+    let caseId: string;
+    let caseTitle: string;
+
     before(() => {
-      runKbnArchiverScript(ArchiverMethod.LOAD, 'case_security');
-      login(ROLES.soc_manager);
+      loadCase('securitySolution').then((caseInfo) => {
+        caseId = caseInfo.id;
+        caseTitle = caseInfo.title;
+      });
+      login(ROLE.soc_manager);
       navigateTo('/app/osquery');
     });
 
     after(() => {
-      runKbnArchiverScript(ArchiverMethod.UNLOAD, 'case_security');
+      cleanupCase(caseId);
     });
 
     it('should add result a case and have add to timeline in result', () => {
-      addLastLiveQueryToCase();
-      cy.contains('Test Security Case has been updated');
+      addLiveQueryToCase(liveQueryId, caseId);
+      cy.contains(`${caseTitle} has been updated`);
       viewRecentCaseAndCheckResults();
 
       cy.contains("SELECT * FROM os_version where name='Ubuntu';");
