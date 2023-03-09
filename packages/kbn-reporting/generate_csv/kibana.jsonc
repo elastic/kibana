@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
-  "id": "@kbn/reporting-generate-csv-mocks",
+  "id": "@kbn/generate-csv",
   "owner": "@elastic/appex-sharedux"
 }

@@ -25,15 +25,7 @@ import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
 import type { DeepPartial } from 'utility-types';
 import { CsvGenerator } from './generate_csv';
-import {
-  JobParamsCSV,
-  CsvConfigType,
-  UI_SETTINGS_CSV_QUOTE_VALUES,
-  UI_SETTINGS_CSV_SEPARATOR,
-  UI_SETTINGS_DATEFORMAT_TZ,
-} from '@kbn/reporting-generate-csv-types';
 import { CancellationToken } from '@kbn/reporting-common';
-import { createMockConfig, createMockConfigSchema } from '@kbn/reporting-generate-csv-mocks';
 
 const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
   ...baseObj,

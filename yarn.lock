@@ -4225,6 +4225,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/generate-csv@link:packages/kbn-reporting/generate_csv":
+  version "0.0.0"
+  uid ""
+
 "@kbn/generate@link:packages/kbn-generate":
   version "0.0.0"
   uid ""
@@ -4706,18 +4710,6 @@
   uid ""
 
 "@kbn/reporting-example-plugin@link:x-pack/examples/reporting_example":
-  version "0.0.0"
-  uid ""
-
-"@kbn/reporting-generate-csv-mocks@link:packages/kbn-reporting/generate_csv/mocks":
-  version "0.0.0"
-  uid ""
-
-"@kbn/reporting-generate-csv-types@link:packages/kbn-reporting/generate_csv/types":
-  version "0.0.0"
-  uid ""
-
-"@kbn/reporting-generate-csv@link:packages/kbn-reporting/generate_csv/impl":
   version "0.0.0"
   uid ""
 

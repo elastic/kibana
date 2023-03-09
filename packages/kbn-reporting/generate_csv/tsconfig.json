@@ -21,9 +21,9 @@
     "@kbn/expressions-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/reporting-common",
-    "@kbn/reporting-generate-csv-types",
+    "@kbn/generate-csv-types",
     "@kbn/config-schema",
     "@kbn/i18n",
-    "@kbn/reporting-generate-csv-mocks",
+    "@kbn/generate-csv-mocks",
   ]
 }
