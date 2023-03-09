@@ -51,17 +51,22 @@ const addVersion = <I extends { contentTypeId: string; version?: Version }>(
 
 const createQueryOptionBuilder = ({
   crudClientProvider,
+  contentTypeRegistry,
 }: {
   crudClientProvider: (contentType: string) => CrudClient;
+  contentTypeRegistry: ContentTypeRegistry;
 }) => {
   return {
-    get: <I extends GetIn = GetIn, O = unknown>(input: I) => {
+    get: <I extends GetIn = GetIn, O = unknown>(_input: I) => {
+      const input = addVersion(_input, contentTypeRegistry);
       return {
         queryKey: queryKeyBuilder.item(input.contentTypeId, input.id),
         queryFn: () => crudClientProvider(input.contentTypeId).get(input) as Promise<O>,
       };
     },
-    search: <I extends SearchIn = SearchIn, O = unknown>(input: I) => {
+    search: <I extends SearchIn = SearchIn, O = unknown>(_input: I) => {
+      const input = addVersion(_input, contentTypeRegistry);
+
       return {
         queryKey: queryKeyBuilder.search(input.contentTypeId, input.query),
         queryFn: () => crudClientProvider(input.contentTypeId).search(input) as Promise<O>,
@@ -81,20 +86,16 @@ export class ContentClient {
     this.queryClient = new QueryClient();
     this.queryOptionBuilder = createQueryOptionBuilder({
       crudClientProvider: this.crudClientProvider,
+      contentTypeRegistry: this.contentTypeRegistry,
     });
   }
 
   get<I extends GetIn = GetIn, O = unknown>(input: I): Promise<O> {
-    return this.queryClient.fetchQuery(
-      this.queryOptionBuilder.get(addVersion(input, this.contentTypeRegistry))
-    );
+    return this.queryClient.fetchQuery(this.queryOptionBuilder.get(input));
   }
 
   get$<I extends GetIn = GetIn, O = unknown>(input: I) {
-    return createQueryObservable(
-      this.queryClient,
-      this.queryOptionBuilder.get<I, O>(addVersion(input, this.contentTypeRegistry))
-    );
+    return createQueryObservable(this.queryClient, this.queryOptionBuilder.get<I, O>(input));
   }
 
   create<I extends CreateIn, O = unknown>(input: I): Promise<O> {
