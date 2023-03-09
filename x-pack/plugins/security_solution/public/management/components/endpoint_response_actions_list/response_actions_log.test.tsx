@@ -18,7 +18,6 @@ import { ResponseActionsLog } from './response_actions_log';
 import type {
   ActionDetailsApiResponse,
   ActionFileInfoApiResponse,
-  ActionListApiResponse,
 } from '../../../../common/endpoint/types';
 import { MANAGEMENT_PATH } from '../../../../common/constants';
 import { getActionListMock } from './mocks';
@@ -29,19 +28,16 @@ import { useUserPrivileges as _useUserPrivileges } from '../../../common/compone
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
 import { waitFor } from '@testing-library/react';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import { useGetEndpointActionList as _useGetEndpointActionList } from '../../hooks/response_actions/use_get_endpoint_action_list';
 
-let mockUseGetEndpointActionList: {
-  isFetched?: boolean;
-  isFetching?: boolean;
-  error?: Partial<IHttpFetchError> | null;
-  data?: ActionListApiResponse;
-  refetch: () => unknown;
-};
+const useGetEndpointActionListMock = _useGetEndpointActionList as jest.Mock;
+
 jest.mock('../../hooks/response_actions/use_get_endpoint_action_list', () => {
   const original = jest.requireActual('../../hooks/response_actions/use_get_endpoint_action_list');
   return {
     ...original,
-    useGetEndpointActionList: () => mockUseGetEndpointActionList,
+    // Make hook a mocked function
+    useGetEndpointActionList: jest.fn(original.useGetEndpointActionList),
   };
 });
 
@@ -183,10 +179,10 @@ describe('Response actions history', () => {
       history.push(`${MANAGEMENT_PATH}/response_actions`);
     });
 
-    mockUseGetEndpointActionList = {
+    useGetEndpointActionListMock.mockReturnValue({
       ...getBaseMockedActionList(),
       data: await getActionListMock({ actionCount: 13 }),
-    };
+    });
 
     mockUseGetEndpointsList.mockReturnValue({
       data: Array.from({ length: 50 }).map(() => {
@@ -206,27 +202,27 @@ describe('Response actions history', () => {
   });
 
   afterEach(() => {
-    mockUseGetEndpointActionList = getBaseMockedActionList();
+    useGetEndpointActionListMock.mockReturnValue(getBaseMockedActionList());
     useUserPrivilegesMock.mockReset();
   });
 
   describe('When index does not exist yet', () => {
     it('should show global loader when waiting for response', () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         isFetched: false,
         isFetching: true,
-      };
+      });
       render();
       expect(renderResult.getByTestId(`${testPrefix}-global-loader`)).toBeTruthy();
     });
     it('should show empty page when there is no index', () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         error: {
           body: { statusCode: 404, message: 'index_not_found_exception' },
         },
-      };
+      });
       render();
       expect(renderResult.getByTestId(`${testPrefix}-empty-state`)).toBeTruthy();
     });
@@ -244,10 +240,10 @@ describe('Response actions history', () => {
     });
 
     it('should show empty state when there is no data', async () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 0 }),
-      };
+      });
       render();
       expect(renderResult.getByTestId(`${testPrefix}-empty-prompt`)).toBeTruthy();
     });
@@ -301,10 +297,10 @@ describe('Response actions history', () => {
         },
       };
 
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data,
-      };
+      });
       render({ showHostNames: true });
 
       expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
@@ -322,10 +318,10 @@ describe('Response actions history', () => {
         },
       };
 
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data,
-      };
+      });
       render({ showHostNames: true });
 
       expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
@@ -345,10 +341,10 @@ describe('Response actions history', () => {
         },
       };
 
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data,
-      };
+      });
       render({ showHostNames: true });
 
       expect(renderResult.getByTestId(`${testPrefix}-column-hostname`)).toHaveTextContent(
@@ -373,10 +369,10 @@ describe('Response actions history', () => {
     });
 
     it('should update per page rows on the table', async () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 33 }),
-      };
+      });
 
       render();
       const { getByTestId } = renderResult;
@@ -404,10 +400,10 @@ describe('Response actions history', () => {
     });
 
     it('should show 1-1 record label when only 1 record', async () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 1 }),
-      };
+      });
       render();
 
       expect(renderResult.getByTestId(`${testPrefix}-endpointListTableTotal`)).toHaveTextContent(
@@ -452,7 +448,8 @@ describe('Response actions history', () => {
     });
 
     it('should refresh data when autoRefresh is toggled on', async () => {
-      mockUseGetEndpointActionList = getBaseMockedActionList();
+      const listHookResponse = getBaseMockedActionList();
+      useGetEndpointActionListMock.mockReturnValue(listHookResponse);
       render();
       const { getByTestId } = renderResult;
 
@@ -467,18 +464,19 @@ describe('Response actions history', () => {
       reactTestingLibrary.fireEvent.change(intervalInput, { target: { value: 1 } });
 
       await reactTestingLibrary.waitFor(() => {
-        expect(mockUseGetEndpointActionList.refetch).toHaveBeenCalledTimes(3);
+        expect(listHookResponse.refetch).toHaveBeenCalledTimes(3);
       });
     });
 
     it('should refresh data when super date picker refresh button is clicked', async () => {
-      mockUseGetEndpointActionList = getBaseMockedActionList();
+      const listHookResponse = getBaseMockedActionList();
+      useGetEndpointActionListMock.mockReturnValue(listHookResponse);
       render();
 
       const superRefreshButton = renderResult.getByTestId(`${testPrefix}-super-refresh-button`);
       userEvent.click(superRefreshButton);
       await waitFor(() => {
-        expect(mockUseGetEndpointActionList.refetch).toHaveBeenCalled();
+        expect(listHookResponse.refetch).toHaveBeenCalled();
       });
     });
 
@@ -506,10 +504,10 @@ describe('Response actions history', () => {
             canWriteExecuteOperations: false,
           }),
         });
-        mockUseGetEndpointActionList = {
+        useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
           data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
-        };
+        });
 
         mockUseGetFileInfo = {
           isFetching: false,
@@ -541,10 +539,10 @@ describe('Response actions history', () => {
           }),
         });
 
-        mockUseGetEndpointActionList = {
+        useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
           data: await getActionListMock({ actionCount: 1, commands: ['get-file'] }),
-        };
+        });
 
         render();
         const { getByTestId, queryByTestId } = renderResult;
@@ -567,10 +565,10 @@ describe('Response actions history', () => {
           }),
         });
         const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
-        mockUseGetEndpointActionList = {
+        useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
           data: actionDetails,
-        };
+        });
 
         mockUseGetFileInfo = {
           isFetching: false,
@@ -619,10 +617,10 @@ describe('Response actions history', () => {
 
       it('should contain execute output and error for `execute` action WITH execute operation privilege', async () => {
         const actionDetails = await getActionListMock({ actionCount: 1, commands: ['execute'] });
-        mockUseGetEndpointActionList = {
+        useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
           data: actionDetails,
-        };
+        });
 
         mockUseGetFileInfo = {
           isFetching: false,
@@ -672,10 +670,10 @@ describe('Response actions history', () => {
             canWriteExecuteOperations: false,
           }),
         });
-        mockUseGetEndpointActionList = {
+        useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
           data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
-        };
+        });
 
         render();
 
@@ -694,10 +692,10 @@ describe('Response actions history', () => {
           }),
         });
 
-        mockUseGetEndpointActionList = {
+        useGetEndpointActionListMock.mockReturnValue({
           ...getBaseMockedActionList(),
           data: await getActionListMock({ actionCount: 1, commands: ['execute'] }),
-        };
+        });
 
         render();
         const { getByTestId, queryByTestId } = renderResult;
@@ -724,10 +722,10 @@ describe('Response actions history', () => {
     };
 
     it('shows completed status badge for successfully completed actions', async () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 2 }),
-      };
+      });
       render();
 
       const outputs = expandRows();
@@ -741,10 +739,10 @@ describe('Response actions history', () => {
     });
 
     it('shows Failed status badge for failed actions', async () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 2, wasSuccessful: false, status: 'failed' }),
-      };
+      });
       render();
 
       const outputs = expandRows();
@@ -755,7 +753,7 @@ describe('Response actions history', () => {
     });
 
     it('shows Failed status badge for expired actions', async () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data: await getActionListMock({
           actionCount: 2,
@@ -763,7 +761,7 @@ describe('Response actions history', () => {
           isExpired: true,
           status: 'failed',
         }),
-      };
+      });
       render();
 
       const outputs = expandRows();
@@ -777,10 +775,10 @@ describe('Response actions history', () => {
     });
 
     it('shows Pending status badge for pending actions', async () => {
-      mockUseGetEndpointActionList = {
+      useGetEndpointActionListMock.mockReturnValue({
         ...getBaseMockedActionList(),
         data: await getActionListMock({ actionCount: 2, isCompleted: false, status: 'pending' }),
-      };
+      });
       render();
 
       const outputs = expandRows();
@@ -1009,7 +1007,14 @@ describe('Response actions history', () => {
       expect(selectedFilterOptions).toEqual([0, 1, 2, 4, 6, 8]);
     });
 
-    it('should update the selected options count correctly', () => {
+    it('should update the selected options count correctly', async () => {
+      const data = await getActionListMock({ actionCount: 1 });
+
+      useGetEndpointActionListMock.mockReturnValue({
+        ...getBaseMockedActionList(),
+        data,
+      });
+
       render({ showHostNames: true });
       const { getByTestId, getAllByTestId } = renderResult;
 
@@ -1025,6 +1030,8 @@ describe('Response actions history', () => {
       });
 
       expect(popoverButton.textContent).toEqual('Hosts4');
+
+      expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith({});
     });
   });
 });
