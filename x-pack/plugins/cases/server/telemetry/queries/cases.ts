@@ -28,6 +28,7 @@ import type {
 import {
   findValueInBuckets,
   getAggregationsBuckets,
+  getAttachmentsFrameworkStats,
   getCountsAggregationQuery,
   getCountsFromBuckets,
   getMaxBucketOnCaseAggregationQuery,
@@ -56,9 +57,9 @@ export const getLatestCasesDates = async ({
   ]);
 
   return {
-    createdAt: savedObjects?.[0].saved_objects?.[0].attributes?.created_at ?? null,
-    updatedAt: savedObjects?.[1].saved_objects?.[0].attributes?.updated_at ?? null,
-    closedAt: savedObjects?.[2].saved_objects?.[0].attributes?.closed_at ?? null,
+    createdAt: savedObjects?.[0]?.saved_objects?.[0]?.attributes?.created_at ?? null,
+    updatedAt: savedObjects?.[1]?.saved_objects?.[0]?.attributes?.updated_at ?? null,
+    closedAt: savedObjects?.[2]?.saved_objects?.[0]?.attributes?.closed_at ?? null,
   };
 };
 
@@ -66,8 +67,6 @@ export const getCasesTelemetryData = async ({
   savedObjectsClient,
   logger,
 }: CollectTelemetryDataParams): Promise<CasesTelemetry['cases']> => {
-  console.log('*****collecting telemetry');
-
   try {
     const [casesRes, commentsRes, totalAlertsRes, totalConnectorsRes, latestDates, filesRes] =
       await Promise.all([
@@ -79,13 +78,15 @@ export const getCasesTelemetryData = async ({
         getFilesTelemetry(savedObjectsClient),
       ]);
 
-    console.log('****finished collection telemetry');
-    console.log('casesRes ', JSON.stringify(casesRes, null, 2));
-    console.log('filesRes ', JSON.stringify(filesRes, null, 2));
-
     const aggregationsBuckets = getAggregationsBuckets({
       aggs: casesRes.aggregations,
       keys: ['counts', 'syncAlerts', 'status', 'users', 'totalAssignees'],
+    });
+
+    const allAttachmentFrameworkStats = getAttachmentsFrameworkStats({
+      attachmentAggregations: commentsRes.aggregations,
+      totalCasesForOwner: casesRes.total,
+      filesAggregations: filesRes.aggregations,
     });
 
     return {
@@ -113,6 +114,7 @@ export const getCasesTelemetryData = async ({
           totalWithAtLeastOne:
             casesRes.aggregations?.assigneeFilters.buckets.atLeastOne.doc_count ?? 0,
         },
+        ...allAttachmentFrameworkStats,
       },
       sec: getSolutionValues({
         caseAggregations: casesRes.aggregations,
@@ -228,6 +230,25 @@ const getAssigneesAggregations = () => ({
 const getCommentsSavedObjectTelemetry = async (
   savedObjectsClient: ISavedObjectsRepository
 ): Promise<SavedObjectsFindResponse<unknown, AttachmentAggregationResult>> => {
+  const attachmentRegistries = () => ({
+    externalReferenceTypes: {
+      terms: {
+        field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.externalReferenceAttachmentTypeId`,
+      },
+      aggs: {
+        ...getMaxBucketOnCaseAggregationQuery(CASE_COMMENT_SAVED_OBJECT),
+      },
+    },
+    persistableReferenceTypes: {
+      terms: {
+        field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.persistableStateAttachmentTypeId`,
+      },
+      aggs: {
+        ...getMaxBucketOnCaseAggregationQuery(CASE_COMMENT_SAVED_OBJECT),
+      },
+    },
+  });
+
   const attachmentsByOwnerAggregationQuery = OWNERS.reduce(
     (aggQuery, owner) => ({
       ...aggQuery,
@@ -238,29 +259,12 @@ const getCommentsSavedObjectTelemetry = async (
           },
         },
         aggs: {
-          externalReferenceTypes: {
-            terms: {
-              field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.externalReferenceAttachmentTypeId`,
-            },
-            aggs: {
-              ...getMaxBucketOnCaseAggregationQuery(CASE_COMMENT_SAVED_OBJECT),
-            },
-          },
-          persistableReferenceTypes: {
-            terms: {
-              field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.persistableStateAttachmentTypeId`,
-            },
-            aggs: {
-              ...getMaxBucketOnCaseAggregationQuery(CASE_COMMENT_SAVED_OBJECT),
-            },
-          },
+          ...attachmentRegistries(),
         },
       },
     }),
     {}
   );
-
-  console.log('****collecting attachments telemetry');
 
   return savedObjectsClient.find<unknown, AttachmentAggregationResult>({
     page: 0,
@@ -268,6 +272,7 @@ const getCommentsSavedObjectTelemetry = async (
     type: CASE_COMMENT_SAVED_OBJECT,
     aggs: {
       ...attachmentsByOwnerAggregationQuery,
+      ...attachmentRegistries(),
       participants: {
         cardinality: {
           field: `${CASE_COMMENT_SAVED_OBJECT}.attributes.created_by.username`,
@@ -280,6 +285,14 @@ const getCommentsSavedObjectTelemetry = async (
 const getFilesTelemetry = async (
   savedObjectsClient: ISavedObjectsRepository
 ): Promise<SavedObjectsFindResponse<unknown, FileAttachmentAggregationResult>> => {
+  const averageSize = () => ({
+    averageSize: {
+      avg: {
+        field: `${FILE_SO_TYPE}.attributes.size`,
+      },
+    },
+  });
+
   const filesByOwnerAggregationQuery = OWNERS.reduce(
     (aggQuery, owner) => ({
       ...aggQuery,
@@ -290,11 +303,7 @@ const getFilesTelemetry = async (
           },
         },
         aggs: {
-          averageSize: {
-            avg: {
-              field: `${FILE_SO_TYPE}.attributes.size`,
-            },
-          },
+          ...averageSize(),
         },
       },
     }),
@@ -307,8 +316,8 @@ const getFilesTelemetry = async (
     page: 0,
     perPage: 0,
     type: FILE_SO_TYPE,
-    // filter: filterCaseIdExists,
-    aggs: filesByOwnerAggregationQuery,
+    filter: filterCaseIdExists,
+    aggs: { ...filesByOwnerAggregationQuery, ...averageSize() },
   });
 };
 

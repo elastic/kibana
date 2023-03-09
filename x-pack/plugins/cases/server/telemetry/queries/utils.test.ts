@@ -165,6 +165,7 @@ describe('utils', () => {
       participants: {
         value: 5,
       },
+      ...attachmentFramework,
     };
 
     const filesRes: FileAttachmentAggregationResult = {
@@ -177,6 +178,7 @@ describe('utils', () => {
       cases: {
         averageSize: 500,
       },
+      averageSize: 500,
     };
 
     it('constructs the solution values correctly', () => {
@@ -353,8 +355,7 @@ describe('utils', () => {
 
   describe('getAttachmentsFrameworkStats', () => {
     it('returns empty stats if the aggregation is undefined', () => {
-      expect(getAttachmentsFrameworkStats({ totalCasesForOwner: 0, owner: 'securitySolution' }))
-        .toMatchInlineSnapshot(`
+      expect(getAttachmentsFrameworkStats({ totalCasesForOwner: 0 })).toMatchInlineSnapshot(`
         Object {
           "attachmentFramework": Object {
             "externalAttachments": Array [],
@@ -403,20 +404,10 @@ describe('utils', () => {
         },
       };
 
-      const aggs: AttachmentAggregationResult = {
-        securitySolution: { ...attachmentFramework },
-        observability: { ...attachmentFramework },
-        cases: { ...attachmentFramework },
-        participants: {
-          value: 1,
-        },
-      };
-
       it('populates the externalAttachments array', () => {
         const stats = getAttachmentsFrameworkStats({
-          attachmentAggregations: aggs,
+          attachmentAggregations: attachmentFramework,
           totalCasesForOwner: 5,
-          owner: 'securitySolution',
         });
 
         expect(stats.attachmentFramework.externalAttachments[0]).toEqual({
@@ -470,20 +461,10 @@ describe('utils', () => {
         },
       };
 
-      const aggs: AttachmentAggregationResult = {
-        securitySolution: { ...attachmentFramework },
-        observability: { ...attachmentFramework },
-        cases: { ...attachmentFramework },
-        participants: {
-          value: 1,
-        },
-      };
-
       it('populates the externalAttachments array', () => {
         const stats = getAttachmentsFrameworkStats({
-          attachmentAggregations: aggs,
+          attachmentAggregations: attachmentFramework,
           totalCasesForOwner: 5,
-          owner: 'securitySolution',
         });
 
         expect(stats.attachmentFramework.persistableAttachments[0]).toEqual({
@@ -527,33 +508,11 @@ describe('utils', () => {
           },
         };
 
-        const aggs: AttachmentAggregationResult = {
-          securitySolution: { ...attachmentFramework },
-          observability: { ...attachmentFramework },
-          cases: { ...attachmentFramework },
-          participants: {
-            value: 1,
-          },
-        };
-
-        const filesRes: FileAttachmentAggregationResult = {
-          securitySolution: {
-            averageSize: 500,
-          },
-          observability: {
-            averageSize: 500,
-          },
-          cases: {
-            averageSize: 500,
-          },
-        };
-
         expect(
           getAttachmentsFrameworkStats({
-            attachmentAggregations: aggs,
+            attachmentAggregations: attachmentFramework,
             totalCasesForOwner: 5,
-            filesAggregations: filesRes,
-            owner: 'securitySolution',
+            filesAggregations: { averageSize: 500 },
           }).attachmentFramework.files
         ).toMatchInlineSnapshot(`
           Object {
@@ -587,33 +546,11 @@ describe('utils', () => {
           },
         };
 
-        const aggs: AttachmentAggregationResult = {
-          securitySolution: { ...attachmentFramework },
-          observability: { ...attachmentFramework },
-          cases: { ...attachmentFramework },
-          participants: {
-            value: 1,
-          },
-        };
-
-        const filesRes: FileAttachmentAggregationResult = {
-          securitySolution: {
-            averageSize: 500,
-          },
-          observability: {
-            averageSize: 500,
-          },
-          cases: {
-            averageSize: 500,
-          },
-        };
-
         expect(
           getAttachmentsFrameworkStats({
-            attachmentAggregations: aggs,
-            filesAggregations: filesRes,
+            attachmentAggregations: attachmentFramework,
+            filesAggregations: { averageSize: 500 },
             totalCasesForOwner: 5,
-            owner: 'securitySolution',
           }).attachmentFramework.files
         ).toMatchInlineSnapshot(`
           Object {

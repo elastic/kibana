@@ -76,6 +76,7 @@ export const casesSchema: CasesTelemetrySchema = {
   cases: {
     all: {
       ...countSchema,
+      attachmentFramework: attachmentFrameworkSchema,
       assignees: assigneesSchema,
       status: statusSchema,
       syncAlertsOn: long,

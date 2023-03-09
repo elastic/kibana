@@ -4796,6 +4796,36 @@
                     }
                   }
                 },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "average": "long",
+                        "maxOnACase": "long",
+                        "total": "long",
+                        "type": "string"
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "average": "long",
+                        "maxOnACase": "long",
+                        "total": "long",
+                        "type": "string"
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": "long",
+                        "averageSize": "long",
+                        "maxOnACase": "long",
+                        "total": "long"
+                      }
+                    }
+                  }
+                },
                 "status": {
                   "properties": {
                     "open": {
@@ -4871,6 +4901,36 @@
                       "type": "long"
                     }
                   }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "average": "long",
+                        "maxOnACase": "long",
+                        "total": "long",
+                        "type": "string"
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "average": "long",
+                        "maxOnACase": "long",
+                        "total": "long",
+                        "type": "string"
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": "long",
+                        "averageSize": "long",
+                        "maxOnACase": "long",
+                        "total": "long"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -4900,6 +4960,36 @@
                       "type": "long"
                     }
                   }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "average": "long",
+                        "maxOnACase": "long",
+                        "total": "long",
+                        "type": "string"
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "average": "long",
+                        "maxOnACase": "long",
+                        "total": "long",
+                        "type": "string"
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": "long",
+                        "averageSize": "long",
+                        "maxOnACase": "long",
+                        "total": "long"
+                      }
+                    }
+                  }
                 }
               }
             },
@@ -4927,6 +5017,36 @@
                     },
                     "totalWithAtLeastOne": {
                       "type": "long"
+                    }
+                  }
+                },
+                "attachmentFramework": {
+                  "properties": {
+                    "persistableAttachments": {
+                      "type": "array",
+                      "items": {
+                        "average": "long",
+                        "maxOnACase": "long",
+                        "total": "long",
+                        "type": "string"
+                      }
+                    },
+                    "externalAttachments": {
+                      "type": "array",
+                      "items": {
+                        "average": "long",
+                        "maxOnACase": "long",
+                        "total": "long",
+                        "type": "string"
+                      }
+                    },
+                    "files": {
+                      "properties": {
+                        "average": "long",
+                        "averageSize": "long",
+                        "maxOnACase": "long",
+                        "total": "long"
+                      }
                     }
                   }
                 }

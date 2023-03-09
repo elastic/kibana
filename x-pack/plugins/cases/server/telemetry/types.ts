@@ -61,7 +61,8 @@ export interface FileAttachmentAverageSize {
   averageSize: number;
 }
 
-export type FileAttachmentAggregationResult = Record<Owner, FileAttachmentAverageSize>;
+export type FileAttachmentAggregationResult = Record<Owner, FileAttachmentAverageSize> &
+  FileAttachmentAverageSize;
 
 export interface BucketsWithMaxOnCase {
   buckets: Array<
@@ -79,7 +80,7 @@ export interface AttachmentFrameworkAggsResult {
 
 export type AttachmentAggregationResult = Record<Owner, AttachmentFrameworkAggsResult> & {
   participants: Cardinality;
-};
+} & AttachmentFrameworkAggsResult;
 
 export type CaseAggregationResult = Record<
   Owner,
@@ -145,18 +146,19 @@ export interface LatestDates {
 
 export interface CasesTelemetry {
   cases: {
-    all: Count & {
-      assignees: Assignees;
-      status: Status;
-      syncAlertsOn: number;
-      syncAlertsOff: number;
-      totalUsers: number;
-      totalParticipants: number;
-      totalTags: number;
-      totalWithAlerts: number;
-      totalWithConnectors: number;
-      latestDates: LatestDates;
-    };
+    all: Count &
+      AttachmentFramework & {
+        assignees: Assignees;
+        status: Status;
+        syncAlertsOn: number;
+        syncAlertsOff: number;
+        totalUsers: number;
+        totalParticipants: number;
+        totalTags: number;
+        totalWithAlerts: number;
+        totalWithConnectors: number;
+        latestDates: LatestDates;
+      };
     sec: SolutionTelemetry;
     obs: SolutionTelemetry;
     main: SolutionTelemetry;

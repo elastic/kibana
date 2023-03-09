@@ -25,6 +25,8 @@ import type {
   AttachmentStats,
   FileAttachmentStats,
   FileAttachmentAggregationResult,
+  FileAttachmentAverageSize,
+  AttachmentFrameworkAggsResult,
 } from '../types';
 import { buildFilter } from '../../client/utils';
 import type { Owner } from '../../../common/constants/types';
@@ -178,15 +180,16 @@ export const getSolutionValues = ({
   });
 
   const totalCasesForOwner = findValueInBuckets(aggregationsBuckets.totalsByOwner, owner);
+  const attachmentsAggsForOwner = attachmentAggregations?.[owner];
+  const fileAttachmentsForOwner = filesAggregations?.[owner];
 
   return {
     total: totalCasesForOwner,
     ...getCountsFromBuckets(aggregationsBuckets[`${owner}.counts`]),
     ...getAttachmentsFrameworkStats({
-      attachmentAggregations,
-      filesAggregations,
+      attachmentAggregations: attachmentsAggsForOwner,
+      filesAggregations: fileAttachmentsForOwner,
       totalCasesForOwner,
-      owner,
     }),
     assignees: {
       total: caseAggregations?.[owner].totalAssignees.value ?? 0,
@@ -219,31 +222,28 @@ export const getAttachmentsFrameworkStats = ({
   attachmentAggregations,
   filesAggregations,
   totalCasesForOwner,
-  owner,
 }: {
-  attachmentAggregations?: AttachmentAggregationResult;
-  filesAggregations?: FileAttachmentAggregationResult;
+  attachmentAggregations?: AttachmentFrameworkAggsResult;
+  filesAggregations?: FileAttachmentAverageSize;
   totalCasesForOwner: number;
-  owner: Owner;
 }): AttachmentFramework => {
   if (!attachmentAggregations) {
     return emptyAttachmentFramework();
   }
-  const attachmentOwnerStats = attachmentAggregations[owner];
-  const averageFileSize = filesAggregations?.[owner]?.averageSize;
+  const averageFileSize = filesAggregations?.averageSize;
 
   return {
     attachmentFramework: {
       externalAttachments: getAttachmentRegistryStats(
-        attachmentOwnerStats.externalReferenceTypes,
+        attachmentAggregations.externalReferenceTypes,
         totalCasesForOwner
       ),
       persistableAttachments: getAttachmentRegistryStats(
-        attachmentOwnerStats.persistableReferenceTypes,
+        attachmentAggregations.persistableReferenceTypes,
         totalCasesForOwner
       ),
       files: getFileAttachmentStats({
-        registryResults: attachmentOwnerStats.externalReferenceTypes,
+        registryResults: attachmentAggregations.externalReferenceTypes,
         averageFileSize,
         totalCasesForOwner,
       }),
@@ -349,6 +349,7 @@ export const getTelemetryDataEmptyState = (): CasesTelemetry => ({
         updatedAt: null,
         closedAt: null,
       },
+      ...emptyAttachmentFramework(),
     },
     sec: {
       total: 0,
