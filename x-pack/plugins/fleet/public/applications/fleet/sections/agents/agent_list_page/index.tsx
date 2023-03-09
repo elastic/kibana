@@ -162,6 +162,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     return selectedStatus.some((status) => status === 'inactive' || status === 'unenrolled');
   }, [selectedStatus]);
 
+  const kuery = useMemo(() => {
+    return getKuery({
+      search,
+      selectedAgentPolicies,
+      selectedTags,
+      selectedStatus,
+    });
+  }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
+
   const [agents, setAgents] = useState<Agent[]>([]);
   const [agentsStatus, setAgentsStatus] = useState<
     { [key in SimplifiedAgentStatus]: number } | undefined
@@ -204,15 +213,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   };
 
   const isLoadingVar = useRef<boolean>(false);
-
-  const kuery = useMemo(() => {
-    return getKuery({
-      search,
-      selectedAgentPolicies,
-      selectedTags,
-      selectedStatus,
-    });
-  }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
 
   // Request to fetch agents and agent status
   const currentRequestRef = useRef<number>(0);
@@ -543,6 +543,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
           }
         }}
         clearFilters={clearFilters}
+        isUsingFilter={isUsingFilter}
       />
       <EuiSpacer size="s" />
       {/* Agent list table */}

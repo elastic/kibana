@@ -27,6 +27,7 @@ export const AgentTableHeader: React.FunctionComponent<{
   selectedAgents: Agent[];
   setSelectedAgents: (agents: Agent[]) => void;
   clearFilters: () => void;
+  isUsingFilter: boolean;
 }> = ({
   agentStatus,
   totalAgents,
@@ -37,6 +38,7 @@ export const AgentTableHeader: React.FunctionComponent<{
   setSelectedAgents,
   showInactive,
   clearFilters,
+  isUsingFilter,
 }) => {
   return (
     <>
@@ -52,15 +54,16 @@ export const AgentTableHeader: React.FunctionComponent<{
               setSelectedAgents={setSelectedAgents}
             />
           </EuiFlexItem>
-          {/* If filter */}
-          <EuiFlexItem grow={false}>
-            <EuiLink onClick={() => clearFilters()}>
-              <FormattedMessage
-                id="xpack.fleet.agentList.clearFiltersLinkText"
-                defaultMessage="Clear filters"
-              />
-            </EuiLink>
-          </EuiFlexItem>
+          {isUsingFilter ? (
+            <EuiFlexItem grow={false}>
+              <EuiLink onClick={() => clearFilters()}>
+                <FormattedMessage
+                  id="xpack.fleet.agentList.clearFiltersLinkText"
+                  defaultMessage="Clear all filters"
+                />
+              </EuiLink>
+            </EuiFlexItem>
+          ) : null}
         </EuiFlexGroup>
         <EuiFlexItem grow={false}>
           {agentStatus && (
