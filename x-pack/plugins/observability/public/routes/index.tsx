@@ -12,7 +12,7 @@ import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { casesPath } from '../../common';
 import { CasesPage } from '../pages/cases';
 import { AlertsPage } from '../pages/alerts/containers/alerts_page';
-import { OverviewPage } from '../pages/overview';
+import { OverviewPage } from '../pages/overview/overview';
 import { jsonRt } from './json_rt';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
 import { RulesPage } from '../pages/rules';
@@ -21,8 +21,8 @@ import { AlertingPages } from '../config';
 import { AlertDetails } from '../pages/alert_details';
 import { DatePickerContextProvider } from '../context/date_picker_context';
 import { SlosPage } from '../pages/slos';
-import { SloDetailsPage } from '../pages/slo_details';
-import { SloEditPage } from '../pages/slo_edit';
+import { SloDetailsPage } from '../pages/slo_details/slo_details';
+import { SloEditPage } from '../pages/slo_edit/slo_edit';
 
 export type RouteParams<T extends keyof typeof routes> = DecodeParams<typeof routes[T]['params']>;
 

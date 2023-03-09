@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChangePoint, FieldValuePair } from '@kbn/ml-agg-utils';
+import type { SignificantTerm, FieldValuePair } from '@kbn/ml-agg-utils';
 
 export interface GroupTableItem {
   id: string;
@@ -13,5 +13,5 @@ export interface GroupTableItem {
   pValue: number | null;
   group: FieldValuePair[];
   repeatedValues: FieldValuePair[];
-  histogram: ChangePoint['histogram'];
+  histogram: SignificantTerm['histogram'];
 }
