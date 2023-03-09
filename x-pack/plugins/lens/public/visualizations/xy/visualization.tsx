@@ -106,6 +106,32 @@ import { onDropForVisualization } from '../../editor_frame_service/editor_frame/
 import { createAnnotationActions } from './annotations/actions';
 import { AddLayerButton } from './add_layer';
 
+// Will be used later for dirty checking
+// const hasUnsavedChanges = (layer: XYAnnotationLayerConfig) => {
+//   if (!isByReferenceAnnotationsLayer(layer)) {
+//     return false;
+//   }
+
+//   type PropsToCompare = Pick<
+//     EventAnnotationGroupConfig,
+//     'annotations' | 'ignoreGlobalFilters' | 'indexPatternId'
+//   >;
+
+//   const currentConfig: PropsToCompare = {
+//     annotations: layer.annotations,
+//     ignoreGlobalFilters: layer.ignoreGlobalFilters,
+//     indexPatternId: layer.indexPatternId,
+//   };
+
+//   const savedConfig: PropsToCompare = {
+//     annotations: layer.__lastSaved.annotations,
+//     ignoreGlobalFilters: layer.__lastSaved.ignoreGlobalFilters,
+//     indexPatternId: layer.__lastSaved.indexPatternId,
+//   };
+
+//   return !fastIsEqual(currentConfig, savedConfig);
+// };
+
 const XY_ID = 'lnsXY';
 export const getXyVisualization = ({
   core,

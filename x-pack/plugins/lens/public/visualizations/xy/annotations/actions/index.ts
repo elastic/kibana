@@ -13,7 +13,6 @@ import type { LayerAction, StateSetter } from '../../../../types';
 import { XYState, XYAnnotationLayerConfig } from '../../types';
 import { getUnlinkLayerAction } from './unlink_action';
 import { getIgnoreFilterAction } from './ignore_filters_action';
-import { getEditDetailsAction } from './edit_details_action';
 import { getSaveLayerAction } from './save_action';
 import { isByReferenceAnnotationsLayer } from '../../visualization_helpers';
 export {
@@ -46,11 +45,7 @@ export const createAnnotationActions = ({
     core.application.capabilities.visualize.save && isSaveable
   );
 
-  const hasUnsavedChanges = true;
-  if (
-    !isByReferenceAnnotationsLayer(layer) ||
-    (savingToLibraryPermitted && isByReferenceAnnotationsLayer(layer) && hasUnsavedChanges)
-  ) {
+  if (savingToLibraryPermitted) {
     actions.push(
       getSaveLayerAction({
         state,
@@ -64,7 +59,6 @@ export const createAnnotationActions = ({
   }
 
   if (isByReferenceAnnotationsLayer(layer)) {
-    actions.push(getEditDetailsAction({ state, layer, layerIndex, setState, core }));
     actions.push(
       getUnlinkLayerAction({
         execute: () => {
