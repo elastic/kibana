@@ -13,10 +13,15 @@ import * as Either from 'fp-ts/lib/Either';
 import { identity, pipe } from 'fp-ts/lib/function';
 import { map } from 'rxjs';
 import { createPlainError, formatErrors } from '../../../../common/runtime_types';
-import { logViewReferenceRT, PersistedLogViewReference } from '../../../../common/log_views';
+import {
+  LogViewReference,
+  logViewReferenceRT,
+  PersistedLogViewReference,
+} from '../../../../common/log_views';
 import { LogViewContext, LogViewEvent } from './types';
+import { replaceStateKeyInQueryString } from '../../../utils/url_state';
 
-const defaultLogViewKey = 'logView';
+export const defaultLogViewKey = 'logView';
 const defaultLegacySourceIdKey = 'sourceId';
 
 interface LogViewUrlStateDependencies {
@@ -124,3 +129,7 @@ const convertSourceIdToReference = (sourceId: string): PersistedLogViewReference
     logViewId: sourceId,
   };
 };
+
+// NOTE: Used by link-to components
+export const replaceLogViewInQueryString = (logViewReference: LogViewReference) =>
+  replaceStateKeyInQueryString(defaultLogViewKey, logViewReference);
