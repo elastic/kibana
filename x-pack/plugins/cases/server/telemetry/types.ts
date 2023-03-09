@@ -196,4 +196,5 @@ export type LatestDatesSchema = MakeSchemaFrom<LatestDates>;
 export type CasesTelemetrySchema = MakeSchemaFrom<CasesTelemetry>;
 export type AssigneesSchema = MakeSchemaFrom<Assignees>;
 export type AttachmentFrameworkSchema = MakeSchemaFrom<AttachmentFramework['attachmentFramework']>;
+export type AttachmentItemsSchema = MakeSchemaFrom<AttachmentStats>;
 export type SolutionTelemetrySchema = MakeSchemaFrom<SolutionTelemetry>;
