@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { GetScoresParams, GetScoresResponse } from './types';
 import { calculateRiskScores } from './calculate_risk_scores';
 
@@ -15,8 +15,10 @@ export interface RiskScoreService {
 
 export const buildRiskScoreService = ({
   esClient,
+  logger,
 }: {
   esClient: ElasticsearchClient;
+  logger: Logger;
 }): RiskScoreService => ({
-  getScores: (params) => calculateRiskScores({ ...params, esClient }),
+  getScores: (params) => calculateRiskScores({ ...params, esClient, logger }),
 });

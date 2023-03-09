@@ -32,6 +32,7 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
       const siemClient = (await context.securitySolution).getAppClient();
       const riskScoreService = buildRiskScoreService({
         esClient,
+        logger,
       });
 
       const {
