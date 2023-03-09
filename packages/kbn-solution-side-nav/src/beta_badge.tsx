@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiBetaBadge, useEuiTheme } from '@elastic/eui';
 
-export const BETA_LABEL = i18n.translate('sharedUXPackages.side_navigation.beta.label', {
+export const BETA_LABEL = i18n.translate('solutionSideNav.betaBadge.label', {
   defaultMessage: 'Beta',
 });
 
