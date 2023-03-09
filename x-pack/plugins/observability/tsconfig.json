@@ -73,6 +73,7 @@
     "@kbn/alerts-as-data-utils",
     "@kbn/core-application-browser",
     "@kbn/files-plugin",
+    "@kbn/core-theme-browser",
   ],
   "exclude": [
     "target/**/*",
