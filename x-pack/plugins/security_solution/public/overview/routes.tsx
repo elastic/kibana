@@ -91,7 +91,7 @@ export const routes: SecuritySubPluginRoutes = [
     render: EntityAnalyticsRoutes,
   },
   {
-    path: ENTITY_ANALYTICS_PATH + '_new',
+    path: `${ENTITY_ANALYTICS_PATH}_new`,
     render: EntityAnalyticsNewRoutes,
   },
   {
