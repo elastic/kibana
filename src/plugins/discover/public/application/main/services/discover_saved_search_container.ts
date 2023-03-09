@@ -41,17 +41,64 @@ export type PersistFunction = (
   dataView?: DataView
 ) => Promise<{ id: string | undefined } | undefined>;
 
+/**
+ * Container for the saved search state, allowing to load, update and persist the saved search
+ * Can also be used to track changes to the saved search
+ */
 export interface SavedSearchContainer {
+  /**
+   * Get the current state of the saved search
+   */
   get: () => SavedSearch;
+  /**
+   * Get the id of the current saved search
+   */
   getId: () => string | undefined;
+  /**
+   * Get the title of the current saved search
+   */
   getTitle: () => string;
-  getPersisted$: () => BehaviorSubject<SavedSearch>;
-  getVolatile$: () => BehaviorSubject<SavedSearch>;
-  hasChanged$: BehaviorSubject<boolean>;
+  /**
+   * Get an BehaviorSubject which contains the initial state of the current saved search
+   */
+  getInitial$: () => BehaviorSubject<SavedSearch>;
+  /**
+   * Get an BehaviorSubject which contains the current state of the current saved search
+   */
+  getCurrent$: () => BehaviorSubject<SavedSearch>;
+  /**
+   * Get an BehaviorSubject containing the state if there have been changes to the initial state of the saved search
+   */
+  getHasChanged$: () => BehaviorSubject<boolean>;
+  /**
+   * Load a saved search by the given id
+   * Resets the initial and current state of the saved search
+   * @param id
+   * @param params
+   */
   load: (id: string, params: LoadParams) => Promise<SavedSearch>;
+  /**
+   * Initialize a new saved search
+   * Resets the initial and current state of the saved search
+   * @param dataView
+   * @param appState
+   */
   new: (dataView?: DataView, appState?: AppState) => Promise<SavedSearch>;
+  /**
+   * Persist the given saved search
+   * Resets the initial and current state of the saved search
+   */
   persist: PersistFunction;
+  /**
+   * Set the persisted & current state of the saved search
+   * Happens when a saved search is loaded or a new one is created
+   * @param savedSearch
+   */
   set: (savedSearch: SavedSearch) => SavedSearch;
+  /**
+   * Updates the current state of the saved search
+   * @param params
+   */
   update: (params: UpdateParams) => SavedSearch;
 }
 
@@ -62,25 +109,26 @@ export function getSavedSearchContainer({
   savedSearch: SavedSearch;
   services: DiscoverServices;
 }): SavedSearchContainer {
-  const savedSearchPersisted$ = new BehaviorSubject(savedSearch);
-  const savedSearchVolatile$ = new BehaviorSubject(savedSearch);
+  const savedSearchInitial$ = new BehaviorSubject(savedSearch);
+  const savedSearchCurrent$ = new BehaviorSubject(savedSearch);
   const hasChanged$ = new BehaviorSubject(false);
   const set = (newSavedSearch: SavedSearch) => {
     addLog('[savedSearch] set', newSavedSearch);
     hasChanged$.next(false);
-    savedSearchVolatile$.next(newSavedSearch);
+    savedSearchCurrent$.next(newSavedSearch);
     const persistedSavedSearch = {
       ...newSavedSearch,
       ...{ searchSource: newSavedSearch.searchSource.createCopy() },
     };
-    savedSearchPersisted$.next(persistedSavedSearch);
+    savedSearchInitial$.next(persistedSavedSearch);
     return newSavedSearch;
   };
-  const get = () => savedSearchVolatile$.getValue();
-  const getPersisted$ = () => savedSearchPersisted$;
-  const getVolatile$ = () => savedSearchVolatile$;
-  const getTitle = () => savedSearchVolatile$.getValue().title ?? '';
-  const getId = () => savedSearchVolatile$.getValue().id;
+  const get = () => savedSearchCurrent$.getValue();
+  const getInitial$ = () => savedSearchInitial$;
+  const getCurrent$ = () => savedSearchCurrent$;
+  const getHasChanged$ = () => hasChanged$;
+  const getTitle = () => savedSearchCurrent$.getValue().title ?? '';
+  const getId = () => savedSearchCurrent$.getValue().id;
 
   const newSavedSearch = async (nextDataView: DataView | undefined, appState?: AppState) => {
     addLog('[savedSearch] new', { nextDataView, appState });
@@ -113,7 +161,7 @@ export function getSavedSearchContainer({
   };
 
   const persist: PersistFunction = async (nextSavedSearch, appState: AppState, params) => {
-    addLog('🔎 [savedSearch] persist', nextSavedSearch);
+    addLog('[savedSearch] persist', nextSavedSearch);
 
     const id = await persistSavedSearch(nextSavedSearch, {
       dataView: nextSavedSearch.searchSource.getField('index')!,
@@ -122,7 +170,7 @@ export function getSavedSearchContainer({
       saveOptions: params,
     });
     if (id) {
-      savedSearchPersisted$.next(nextSavedSearch);
+      savedSearchInitial$.next(nextSavedSearch);
     }
     return { id };
   };
@@ -148,8 +196,7 @@ export function getSavedSearchContainer({
       set(nextSavedSearch);
     } else {
       // detect changes to persisted version
-      const { searchSource: prevSearchSource, ...prevSavedSearch } =
-        savedSearchPersisted$.getValue();
+      const { searchSource: prevSearchSource, ...prevSavedSearch } = savedSearchInitial$.getValue();
       const { searchSource: nextSearchSource, ...nextSavedSearchWithoutSearchSource } =
         nextSavedSearch;
 
@@ -169,8 +216,8 @@ export function getSavedSearchContainer({
       }
 
       hasChanged$.next(hasChanged);
-      savedSearchVolatile$.next(nextSavedSearch);
-      addLog('🔎 [savedSearch] updated savedSearch', nextSavedSearch);
+      savedSearchCurrent$.next(nextSavedSearch);
+      addLog('[savedSearch] updated savedSearch', nextSavedSearch);
     }
     return nextSavedSearch;
   };
@@ -193,11 +240,11 @@ export function getSavedSearchContainer({
 
   return {
     get,
+    getCurrent$,
+    getHasChanged$,
     getId,
+    getInitial$,
     getTitle,
-    getPersisted$,
-    getVolatile$,
-    hasChanged$,
     load,
     new: newSavedSearch,
     persist,
