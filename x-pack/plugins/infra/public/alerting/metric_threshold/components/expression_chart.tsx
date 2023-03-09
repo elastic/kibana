@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { InfiniteData } from '@tanstack/react-query';
 import React from 'react';
 import { Axis, Chart, niceTimeFormatter, Position, Settings } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
@@ -15,12 +14,7 @@ import { first, last } from 'lodash';
 
 import { MetricsSourceConfiguration } from '../../../../common/metrics_sources';
 import { Color } from '../../../../common/color_palette';
-import {
-  MetricsExplorerRow,
-  MetricsExplorerAggregation,
-  MetricsExplorerResponse,
-  MetricsExplorerSeries,
-} from '../../../../common/http_api';
+import { MetricsExplorerRow, MetricsExplorerAggregation } from '../../../../common/http_api';
 import { MetricExplorerSeriesChart } from '../../../pages/metrics/metrics_explorer/components/series_chart';
 import { MetricExpression } from '../types';
 import {
@@ -51,9 +45,6 @@ interface Props {
   groupBy?: string | string[];
 }
 
-const getFirstSeries = (data: InfiniteData<MetricsExplorerResponse>): MetricsExplorerSeries =>
-  first(first(data.pages)!.series)!;
-
 export const ExpressionChart: React.FC<Props> = ({
   expression,
   derivedIndexPattern,
@@ -75,12 +66,12 @@ export const ExpressionChart: React.FC<Props> = ({
     return <LoadingState />;
   }
 
-  if (!data || !data.pages || !data.pages[0] || !data.pages[0].series) {
+  if (!data) {
     return <NoDataState />;
   }
 
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
-  const firstSeries = getFirstSeries(data);
+  const firstSeries = first(first(data.pages)!.series)!;
   // Creating a custom series where the ID is changed to 0
   // so that we can get a proper domain
   if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
