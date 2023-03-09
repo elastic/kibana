@@ -26,17 +26,33 @@ export class ContentManagementPlugin
       StartDependencies
     >
 {
+  private contentTypeRegistry: ContentTypeRegistry;
+
+  constructor() {
+    this.contentTypeRegistry = new ContentTypeRegistry();
+  }
+
   public setup() {
-    return {};
+    return {
+      registry: {
+        register: this.contentTypeRegistry.register.bind(this.contentTypeRegistry),
+      },
+    };
   }
 
   public start(core: CoreStart, deps: StartDependencies) {
     const rpcClient = new RpcClient(core.http);
-    const contentTypeRegistry = new ContentTypeRegistry();
+
     const contentClient = new ContentClient(
-      (contentType) => contentTypeRegistry.get(contentType)?.crud ?? rpcClient,
-      contentTypeRegistry
+      (contentType) => this.contentTypeRegistry.get(contentType)?.crud ?? rpcClient,
+      this.contentTypeRegistry
     );
-    return { client: contentClient, registry: contentTypeRegistry };
+    return {
+      client: contentClient,
+      registry: {
+        get: this.contentTypeRegistry.get.bind(this.contentTypeRegistry),
+        getAll: this.contentTypeRegistry.getAll.bind(this.contentTypeRegistry),
+      },
+    };
   }
 }
