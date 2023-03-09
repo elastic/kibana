@@ -109,6 +109,13 @@ const averageMemoryUsageLabel = i18n.translate(
   }
 );
 
+const ToggleDialogActionLabel = i18n.translate(
+  'xpack.infra.hostsViewPage.table.toggleDialogWithDetails',
+  {
+    defaultMessage: 'Toggle dialog with details',
+  }
+);
+
 /**
  * Build a table columns and items starting from the snapshot nodes.
  */
@@ -141,7 +148,7 @@ export const useHostsTable = (nodes: SnapshotNode[], { time }: HostTableParams) 
         actions: [
           {
             name: '',
-            description: 'Expand',
+            description: ToggleDialogActionLabel,
             icon: ({ index }) =>
               isFlyoutOpen && index === clickedItemIndex ? 'minimize' : 'expand',
             type: 'icon',
