@@ -19,21 +19,21 @@ function createStateHelpers() {
   const useSavedSearch = () => {
     const container = useContainer();
     return useObservable<SavedSearch>(
-      container!.savedSearchState.getVolatile$(),
-      container!.savedSearchState.getVolatile$().getValue()
+      container!.savedSearchState.getCurrent$(),
+      container!.savedSearchState.getCurrent$().getValue()
     );
   };
-  const useSavedSearchPersisted = () => {
+  const useSavedSearchInitial = () => {
     const container = useContainer();
     return useObservable<SavedSearch>(
-      container!.savedSearchState.getPersisted$(),
-      container!.savedSearchState.getVolatile$().getValue()
+      container!.savedSearchState.getInitial$(),
+      container!.savedSearchState.getInitial$().getValue()
     );
   };
   return {
     Provider: context.Provider,
     useSavedSearch,
-    useSavedSearchPersisted,
+    useSavedSearchPersisted: useSavedSearchInitial,
   };
 }
 

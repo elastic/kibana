@@ -23,7 +23,7 @@ export function useDiscoverState({
   stateContainer: DiscoverStateContainer;
 }) {
   const { dataViews, trackUiMetric } = services;
-  const savedSearch = stateContainer.savedSearchState.getPersisted$().getValue();
+  const savedSearch = stateContainer.savedSearchState.getInitial$().getValue();
 
   const { setUrlTracking } = useUrlTracking(savedSearch);
 

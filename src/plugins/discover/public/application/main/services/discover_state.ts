@@ -369,7 +369,7 @@ export function getDiscoverStateContainer({
   };
 
   const undoChanges = async () => {
-    const nextSavedSearch = savedSearchContainer.getPersisted$().getValue();
+    const nextSavedSearch = savedSearchContainer.getInitial$().getValue();
     await savedSearchContainer.set(nextSavedSearch);
     const newAppState = getDefaultAppState(nextSavedSearch, services);
     await appStateContainer.replaceUrlState(newAppState);
