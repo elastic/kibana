@@ -129,6 +129,7 @@ const PanelRT = rt.type({
       dataViewId: rt.string,
       fieldName: rt.string,
       title: rt.union([rt.string, rt.undefined]),
+      selectedOptions: rt.array(rt.string),
     }),
   ]),
 });

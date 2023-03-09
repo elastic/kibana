@@ -21,8 +21,6 @@ import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_
 import { useLicense } from '../../hooks/use_license';
 import { SlosPage } from '.';
 import { emptySloList, sloList } from '../../data/slo/slo';
-import type { ConfigSchema } from '../../plugin';
-import type { Subset } from '../../typings';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 
@@ -83,12 +81,6 @@ const mockKibana = () => {
   });
 };
 
-const config: Subset<ConfigSchema> = {
-  unsafe: {
-    slo: { enabled: true },
-  },
-};
-
 describe('SLOs Page', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -96,51 +88,68 @@ describe('SLOs Page', () => {
     useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
   });
 
-  describe('when the feature flag is not enabled', () => {
-    it('renders the not found page ', async () => {
+  describe('when the incorrect license is found', () => {
+    it('renders the welcome prompt with subscription buttons', async () => {
       useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
-      useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+      useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
 
       await act(async () => {
-        render(<SlosPage />, { unsafe: { slo: { enabled: false } } });
+        render(<SlosPage />);
       });
 
-      expect(screen.queryByTestId('pageNotFound')).toBeTruthy();
+      expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
+      expect(screen.queryByTestId('slosPageWelcomePromptSignupForCloudButton')).toBeTruthy();
+      expect(screen.queryByTestId('slosPageWelcomePromptSignupForLicenseButton')).toBeTruthy();
     });
   });
 
-  describe('when the feature flag is enabled', () => {
-    describe('when the incorrect license is found', () => {
-      it('renders the welcome prompt with subscription buttons', async () => {
-        useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
-        useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
-
-        await act(async () => {
-          render(<SlosPage />, config);
-        });
-
-        expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
-        expect(screen.queryByTestId('slosPageWelcomePromptSignupForCloudButton')).toBeTruthy();
-        expect(screen.queryByTestId('slosPageWelcomePromptSignupForLicenseButton')).toBeTruthy();
-      });
+  describe('when the correct license is found', () => {
+    beforeEach(() => {
+      useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
     });
 
-    describe('when the correct license is found', () => {
-      beforeEach(() => {
-        useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+    it('renders the SLOs Welcome Prompt when the API has finished loading and there are no results', async () => {
+      useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
+
+      await act(async () => {
+        render(<SlosPage />);
       });
 
-      it('renders the SLOs Welcome Prompt when the API has finished loading and there are no results', async () => {
-        useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
+      expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
+    });
 
-        await act(async () => {
-          render(<SlosPage />, config);
-        });
+    it('should have a create new SLO button', async () => {
+      useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
 
-        expect(screen.queryByTestId('slosPageWelcomePrompt')).toBeTruthy();
+      useFetchHistoricalSummaryMock.mockReturnValue({
+        isLoading: false,
+        sloHistoricalSummaryResponse: historicalSummaryData,
       });
 
-      it('should have a create new SLO button', async () => {
+      await act(async () => {
+        render(<SlosPage />);
+      });
+
+      expect(screen.getByText('Create new SLO')).toBeTruthy();
+    });
+
+    it('should have an Auto Refresh button', async () => {
+      useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
+
+      useFetchHistoricalSummaryMock.mockReturnValue({
+        isLoading: false,
+        sloHistoricalSummaryResponse: historicalSummaryData,
+      });
+
+      await act(async () => {
+        render(<SlosPage />);
+      });
+
+      expect(screen.getByTestId('autoRefreshButton')).toBeTruthy();
+    });
+
+    describe('when API has returned results', () => {
+      it('renders the SLO list with SLO items', async () => {
         useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
 
         useFetchHistoricalSummaryMock.mockReturnValue({
@@ -149,13 +158,16 @@ describe('SLOs Page', () => {
         });
 
         await act(async () => {
-          render(<SlosPage />, config);
+          render(<SlosPage />);
         });
 
-        expect(screen.getByText('Create new SLO')).toBeTruthy();
+        expect(screen.queryByTestId('slosPage')).toBeTruthy();
+        expect(screen.queryByTestId('sloList')).toBeTruthy();
+        expect(screen.queryAllByTestId('sloItem')).toBeTruthy();
+        expect(screen.queryAllByTestId('sloItem').length).toBe(sloList.results.length);
       });
 
-      it('should have an Auto Refresh button', async () => {
+      it('allows editing an SLO', async () => {
         useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
 
         useFetchHistoricalSummaryMock.mockReturnValue({
@@ -164,107 +176,72 @@ describe('SLOs Page', () => {
         });
 
         await act(async () => {
-          render(<SlosPage />, config);
+          render(<SlosPage />);
         });
 
-        expect(screen.getByTestId('autoRefreshButton')).toBeTruthy();
+        screen.getAllByLabelText('Actions').at(0)?.click();
+
+        await waitForEuiPopoverOpen();
+
+        const button = screen.getByTestId('sloActionsEdit');
+
+        expect(button).toBeTruthy();
+
+        button.click();
+
+        expect(mockNavigate).toBeCalled();
       });
 
-      describe('when API has returned results', () => {
-        it('renders the SLO list with SLO items', async () => {
-          useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
+      it('allows deleting an SLO', async () => {
+        useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
 
-          useFetchHistoricalSummaryMock.mockReturnValue({
-            isLoading: false,
-            sloHistoricalSummaryResponse: historicalSummaryData,
-          });
-
-          await act(async () => {
-            render(<SlosPage />, config);
-          });
-
-          expect(screen.queryByTestId('slosPage')).toBeTruthy();
-          expect(screen.queryByTestId('sloList')).toBeTruthy();
-          expect(screen.queryAllByTestId('sloItem')).toBeTruthy();
-          expect(screen.queryAllByTestId('sloItem').length).toBe(sloList.results.length);
+        useFetchHistoricalSummaryMock.mockReturnValue({
+          isLoading: false,
+          sloHistoricalSummaryResponse: historicalSummaryData,
         });
 
-        it('allows editing an SLO', async () => {
-          useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
-
-          useFetchHistoricalSummaryMock.mockReturnValue({
-            isLoading: false,
-            sloHistoricalSummaryResponse: historicalSummaryData,
-          });
-
-          await act(async () => {
-            render(<SlosPage />, config);
-          });
-
-          screen.getAllByLabelText('Actions').at(0)?.click();
-
-          await waitForEuiPopoverOpen();
-
-          const button = screen.getByTestId('sloActionsEdit');
-
-          expect(button).toBeTruthy();
-
-          button.click();
-
-          expect(mockNavigate).toBeCalled();
+        await act(async () => {
+          render(<SlosPage />);
         });
 
-        it('allows deleting an SLO', async () => {
-          useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
+        screen.getAllByLabelText('Actions').at(0)?.click();
 
-          useFetchHistoricalSummaryMock.mockReturnValue({
-            isLoading: false,
-            sloHistoricalSummaryResponse: historicalSummaryData,
-          });
+        await waitForEuiPopoverOpen();
 
-          await act(async () => {
-            render(<SlosPage />, config);
-          });
+        const button = screen.getByTestId('sloActionsDelete');
 
-          screen.getAllByLabelText('Actions').at(0)?.click();
+        expect(button).toBeTruthy();
 
-          await waitForEuiPopoverOpen();
+        button.click();
 
-          const button = screen.getByTestId('sloActionsDelete');
+        screen.getByTestId('confirmModalConfirmButton').click();
 
-          expect(button).toBeTruthy();
+        expect(mockDeleteSlo).toBeCalledWith({ id: sloList.results.at(0)?.id });
+      });
 
-          button.click();
+      it('allows cloning an SLO', async () => {
+        useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
 
-          screen.getByTestId('confirmModalConfirmButton').click();
-
-          expect(mockDeleteSlo).toBeCalledWith({ id: sloList.results.at(0)?.id });
+        useFetchHistoricalSummaryMock.mockReturnValue({
+          isLoading: false,
+          sloHistoricalSummaryResponse: historicalSummaryData,
         });
 
-        it('allows cloning an SLO', async () => {
-          useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
-
-          useFetchHistoricalSummaryMock.mockReturnValue({
-            isLoading: false,
-            sloHistoricalSummaryResponse: historicalSummaryData,
-          });
-
-          await act(async () => {
-            render(<SlosPage />, config);
-          });
-
-          screen.getAllByLabelText('Actions').at(0)?.click();
-
-          await waitForEuiPopoverOpen();
-
-          const button = screen.getByTestId('sloActionsClone');
-
-          expect(button).toBeTruthy();
-
-          button.click();
-
-          expect(mockCloneSlo).toBeCalled();
+        await act(async () => {
+          render(<SlosPage />);
         });
+
+        screen.getAllByLabelText('Actions').at(0)?.click();
+
+        await waitForEuiPopoverOpen();
+
+        const button = screen.getByTestId('sloActionsClone');
+
+        expect(button).toBeTruthy();
+
+        button.click();
+
+        expect(mockCloneSlo).toBeCalled();
       });
     });
   });

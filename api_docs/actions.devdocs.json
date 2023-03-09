@@ -940,6 +940,42 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-server.asNotificationExecutionSource",
+        "type": "Function",
+        "tags": [],
+        "label": "asNotificationExecutionSource",
+        "description": [],
+        "signature": [
+          "(source: ",
+          "NotificationSource",
+          ") => ",
+          "NotificationExecutionSource"
+        ],
+        "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.asNotificationExecutionSource.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              "NotificationSource"
+            ],
+            "path": "x-pack/plugins/actions/server/lib/action_execution_source.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-server.asSavedObjectExecutionSource",
         "type": "Function",
         "tags": [],
@@ -3586,6 +3622,17 @@
             "type": "boolean",
             "tags": [],
             "label": "timed_out",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/execution_log_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.IExecutionLog.source",
+            "type": "string",
+            "tags": [],
+            "label": "source",
             "description": [],
             "path": "x-pack/plugins/actions/common/execution_log_types.ts",
             "deprecated": false,
