@@ -24,7 +24,6 @@ import {
   defaultInfiniteUseFindCaseUserActions,
 } from '../case_view/mocks';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
-import { useUpdateComment } from '../../containers/use_update_comment';
 
 const fetchUserActions = jest.fn();
 const onUpdateField = jest.fn();
@@ -82,17 +81,10 @@ const defaultProps = {
 
 jest.mock('../../containers/use_infinite_find_case_user_actions');
 jest.mock('../../containers/use_find_case_user_actions');
-jest.mock('../../containers/use_update_comment');
-jest.mock('./timestamp', () => ({
-  UserActionTimestamp: () => <></>,
-}));
 jest.mock('../../common/lib/kibana');
 
 const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
 const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
-const useUpdateCommentMock = useUpdateComment as jest.Mock;
-const patchComment = jest.fn();
-const fetchNextPage = jest.fn();
 
 describe(`UserActionsList`, () => {
   let appMockRender: AppMockRenderer;
@@ -100,14 +92,7 @@ describe(`UserActionsList`, () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
-    useInfiniteFindCaseUserActionsMock.mockReturnValue({
-      ...defaultInfiniteUseFindCaseUserActions,
-      fetchNextPage,
-    });
-    useUpdateCommentMock.mockReturnValue({
-      isLoadingIds: [],
-      patchComment,
-    });
+    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
 
     jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
     appMockRender = createAppMockRenderer();

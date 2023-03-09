@@ -135,24 +135,6 @@ export const UserActionsList = React.memo(
       !isExpandable
     );
 
-    useEffect(() => {
-      if (
-        !isLoadingInfiniteUserActions &&
-        !isLoadingUserActions &&
-        commentId != null &&
-        initLoading
-      ) {
-        setInitLoading(false);
-        handleOutlineComment(commentId);
-      }
-    }, [
-      commentId,
-      initLoading,
-      handleOutlineComment,
-      isLoadingInfiniteUserActions,
-      isLoadingUserActions,
-    ]);
-
     const caseUserActions = useMemo<CaseUserActions[]>(() => {
       if (!isExpandable) {
         return caseUserActionsData?.userActions ?? [];
@@ -160,11 +142,13 @@ export const UserActionsList = React.memo(
         return [];
       }
 
-      const data: CaseUserActions[] = [];
+      const userActionsData: CaseUserActions[] = [];
 
-      caseInfiniteUserActionsData.pages.forEach((page) => data.push(...page.userActions));
+      caseInfiniteUserActionsData.pages.forEach((page) =>
+        userActionsData.push(...page.userActions)
+      );
 
-      return data;
+      return userActionsData;
     }, [caseUserActionsData, caseInfiniteUserActionsData, isExpandable]);
 
     const builtUserActions: EuiCommentProps[] = useMemo(() => {
@@ -247,6 +231,24 @@ export const UserActionsList = React.memo(
         fetchNextPage();
       }
     }, [fetchNextPage]);
+
+    useEffect(() => {
+      if (
+        !isLoadingInfiniteUserActions &&
+        !isLoadingUserActions &&
+        commentId != null &&
+        initLoading
+      ) {
+        setInitLoading(false);
+        handleOutlineComment(commentId);
+      }
+    }, [
+      commentId,
+      initLoading,
+      handleOutlineComment,
+      isLoadingInfiniteUserActions,
+      isLoadingUserActions,
+    ]);
 
     return (
       <>

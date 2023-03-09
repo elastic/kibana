@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { TitleUserAction } from '../../../common/api';
+import type { CreateCaseUserAction } from '../../../common/api';
 import type { UserActionBuilder, UserActionResponse } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
 
-const getLabelTitle = (userAction: UserActionResponse<TitleUserAction>) =>
+const getLabelTitle = (userAction: UserActionResponse<CreateCaseUserAction>) =>
   `${i18n.CREATE_CASE.toLowerCase()} "${userAction.payload.title}"`;
 
 export const createCaseUserActionBuilder: UserActionBuilder = ({
@@ -19,8 +19,8 @@ export const createCaseUserActionBuilder: UserActionBuilder = ({
   handleOutlineComment,
 }) => ({
   build: () => {
-    const titleUserAction = userAction as UserActionResponse<TitleUserAction>;
-    const label = getLabelTitle(titleUserAction);
+    const createCaseUserAction = userAction as UserActionResponse<CreateCaseUserAction>;
+    const label = getLabelTitle(createCaseUserAction);
     const commonBuilder = createCommonUpdateUserActionBuilder({
       userAction,
       userProfiles,

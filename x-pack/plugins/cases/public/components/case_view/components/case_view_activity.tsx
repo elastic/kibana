@@ -225,14 +225,13 @@ export const CaseViewActivity = ({
           />
         </EuiFlexItem>
         <EuiSpacer size="l" />
-        {!showUserActions && (
+        {(isLoadingUserActionsStats || isLoadingCaseConnectors) && (
           <EuiLoadingSpinner data-test-subj="case-view-loading-content" size="l" />
         )}
         {showUserActions ? (
           <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-activity">
             <EuiFlexItem>
               <UserActions
-                key={`user-actions-${userActivityQueryParams.type}-${userActivityQueryParams.sortOrder}`}
                 userProfiles={userProfiles}
                 currentUserProfile={currentUserProfile}
                 getRuleDetailsHref={ruleDetailsNavigation?.href}

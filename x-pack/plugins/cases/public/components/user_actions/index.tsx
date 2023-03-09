@@ -43,12 +43,15 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
 
     const perPage = userActivityQueryParams.perPage;
 
-    if (userActivityQueryParams.type === 'action') {
-      return Math.ceil(userActionsStats.totalOtherActions / perPage);
-    } else if (userActivityQueryParams.type === 'user') {
-      return Math.ceil(userActionsStats.totalComments / perPage);
+    switch (userActivityQueryParams.type) {
+      case 'action':
+        return Math.ceil(userActionsStats.totalOtherActions / perPage);
+      case 'user':
+        return Math.ceil(userActionsStats.totalComments / perPage);
+      case 'all':
+      default:
+        return Math.ceil(userActionsStats.total / perPage);
     }
-    return Math.ceil(userActionsStats.total / perPage);
   }, [userActionsStats, userActivityQueryParams]);
 
   const alertIdsWithoutRuleInfo = useMemo(
@@ -100,7 +103,6 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     <>
       <UserActionsList
         {...props}
-        key={`top-user-actions-${userActivityQueryParams.type}-${userActivityQueryParams.sortOrder}`}
         loadingAlertData={loadingAlertData}
         manualAlertsData={manualAlertsData}
         commentRefs={commentRefs}
