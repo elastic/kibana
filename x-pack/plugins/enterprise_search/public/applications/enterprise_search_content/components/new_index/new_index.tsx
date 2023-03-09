@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 
 import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 
-import { ProductAccess } from '../../../../../common/types';
+import { ProductFeatures } from '../../../../../common/types';
 import { BETA_LABEL } from '../../../shared/constants/labels';
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 import { parseQueryParams } from '../../../shared/query_params';
@@ -122,12 +122,12 @@ const METHOD_BUTTON_GROUP_OPTIONS: Record<INGESTION_METHOD_IDS, ButtonGroupOptio
   },
 };
 
-const getAvailableMethodOptions = (productAccess: ProductAccess): ButtonGroupOption[] => {
+const getAvailableMethodOptions = (productFeatures: ProductFeatures): ButtonGroupOption[] => {
   return [
-    ...(productAccess.hasWebCrawlerAccess
+    ...(productFeatures.hasWebCrawler
       ? [METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.crawler]]
       : []),
-    ...(productAccess.hasNativeConnectorsAccess
+    ...(productFeatures.hasNativeConnectors
       ? [METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.native_connector]]
       : []),
     METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.api],
@@ -137,9 +137,9 @@ const getAvailableMethodOptions = (productAccess: ProductAccess): ButtonGroupOpt
 
 export const NewIndex: React.FC = () => {
   const { search } = useLocation();
-  const { capabilities, productAccess } = useValues(KibanaLogic);
+  const { capabilities, productFeatures } = useValues(KibanaLogic);
   const { method: methodParam } = parseQueryParams(search);
-  const availableIngestionMethodOptions = getAvailableMethodOptions(productAccess);
+  const availableIngestionMethodOptions = getAvailableMethodOptions(productFeatures);
 
   const initialSelectedMethod =
     availableIngestionMethodOptions.find((option) => option.id === methodParam) ??

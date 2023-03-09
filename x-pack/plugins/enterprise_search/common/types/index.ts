@@ -19,6 +19,7 @@ export interface InitialAppData {
   appSearch?: AppSearchAccount;
   configuredLimits?: ConfiguredLimits;
   enterpriseSearchVersion?: string;
+  features?: ProductFeatures;
   kibanaVersion?: string;
   readOnlyMode?: boolean;
   searchOAuth?: SearchOAuth;
@@ -32,10 +33,14 @@ export interface ConfiguredLimits {
 
 export interface ProductAccess {
   hasAppSearchAccess: boolean;
-  hasNativeConnectorsAccess: boolean;
   hasSearchEnginesAccess: boolean;
-  hasWebCrawlerAccess: boolean;
   hasWorkplaceSearchAccess: boolean;
+}
+
+export interface ProductFeatures {
+  hasNativeConnectors: boolean;
+  hasSearchApplications: boolean;
+  hasWebCrawler: boolean;
 }
 
 export interface SearchOAuth {

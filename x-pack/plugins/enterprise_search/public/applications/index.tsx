@@ -18,6 +18,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
+import { DEFAULT_PRODUCT_FEATURES } from '../../common/constants';
 import { ClientConfigType, InitialAppData, ProductAccess } from '../../common/types';
 import { PluginsStart, ClientData } from '../plugin';
 
@@ -45,12 +46,11 @@ export const renderApp = (
 
   const noProductAccess: ProductAccess = {
     hasAppSearchAccess: false,
-    hasNativeConnectorsAccess: false,
     hasSearchEnginesAccess: false,
-    hasWebCrawlerAccess: false,
     hasWorkplaceSearchAccess: false,
   };
   const productAccess = data.access || noProductAccess;
+  const productFeatures = data.features ?? { ...DEFAULT_PRODUCT_FEATURES };
 
   const EmptyContext: FC = ({ children }) => <>{children}</>;
   const CloudContext = plugins.cloud?.CloudContextProvider || EmptyContext;
@@ -63,6 +63,7 @@ export const renderApp = (
     capabilities: core.application.capabilities,
     config,
     productAccess,
+    productFeatures,
     charts: plugins.charts,
     cloud: plugins.cloud,
     uiSettings: core.uiSettings,

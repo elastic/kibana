@@ -87,10 +87,13 @@ export const callEnterpriseSearchConfigAPI = async ({
       kibanaVersion: kibanaPackageJson.version,
       access: {
         hasAppSearchAccess: !!data?.current_user?.access?.app_search,
-        hasNativeConnectorsAccess: config.hasNativeConnectors,
         hasSearchEnginesAccess: !!data?.current_user?.access?.search_engines,
-        hasWebCrawlerAccess: config.hasWebCrawler,
         hasWorkplaceSearchAccess: !!data?.current_user?.access?.workplace_search,
+      },
+      features: {
+        hasNativeConnectors: config.hasNativeConnectors,
+        hasSearchApplications: !!data?.current_user?.access?.search_engines,
+        hasWebCrawler: config.hasWebCrawler,
       },
       publicUrl: stripTrailingSlash(data?.settings?.external_url),
       readOnlyMode: !!data?.settings?.read_only_mode,

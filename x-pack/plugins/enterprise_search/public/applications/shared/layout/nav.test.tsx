@@ -19,9 +19,7 @@ import { useEnterpriseSearchNav, useEnterpriseSearchEngineNav } from './nav';
 
 const DEFAULT_PRODUCT_ACCESS: ProductAccess = {
   hasAppSearchAccess: true,
-  hasNativeConnectorsAccess: true,
   hasSearchEnginesAccess: false,
-  hasWebCrawlerAccess: true,
   hasWorkplaceSearchAccess: true,
 };
 

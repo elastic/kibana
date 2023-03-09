@@ -29,10 +29,13 @@ export const DEFAULT_INITIAL_APP_DATA = {
   },
   access: {
     hasAppSearchAccess: true,
-    hasNativeConnectorsAccess: true,
     hasSearchEnginesAccess: false,
-    hasWebCrawlerAccess: true,
     hasWorkplaceSearchAccess: true,
+  },
+  features: {
+    hasNativeConnectors: true,
+    hasSearchApplications: false,
+    hasWebCrawler: true,
   },
   appSearch: {
     accountId: 'some-id-string',

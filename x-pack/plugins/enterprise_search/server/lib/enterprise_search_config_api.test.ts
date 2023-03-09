@@ -29,6 +29,8 @@ describe('callEnterpriseSearchConfigAPI', () => {
     host: 'http://localhost:3002',
     accessCheckTimeout: 200,
     accessCheckTimeoutWarning: 100,
+    hasNativeConnectors: true,
+    hasWebCrawler: true,
   };
   const mockRequest = {
     headers: { authorization: '==someAuth' },
@@ -127,6 +129,11 @@ describe('callEnterpriseSearchConfigAPI', () => {
         hasSearchEnginesAccess: true,
         hasWorkplaceSearchAccess: false,
       },
+      features: {
+        hasNativeConnectors: true,
+        hasSearchApplications: true,
+        hasWebCrawler: true,
+      },
       publicUrl: 'http://some.vanity.url',
     });
   });
@@ -140,6 +147,11 @@ describe('callEnterpriseSearchConfigAPI', () => {
         hasAppSearchAccess: false,
         hasSearchEnginesAccess: false,
         hasWorkplaceSearchAccess: false,
+      },
+      features: {
+        hasNativeConnectors: true,
+        hasSearchApplications: false,
+        hasWebCrawler: true,
       },
       publicUrl: undefined,
       readOnlyMode: false,
