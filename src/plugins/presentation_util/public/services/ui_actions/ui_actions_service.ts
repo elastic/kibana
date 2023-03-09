@@ -6,22 +6,20 @@
  * Side Public License, v 1.
  */
 
-import { KibanaPluginServiceFactory } from '@kbn/presentation-util-plugin/public';
-import { ControlsPluginStartDeps } from '../../types';
-import { ControlsUiActionsService } from './types';
+import { PresentationUtilPluginStartDeps } from '../../types';
+import { PresentationUiActionsService } from './types';
+import { KibanaPluginServiceFactory } from '../create';
 
 export type UiActionsServiceFactory = KibanaPluginServiceFactory<
-  ControlsUiActionsService,
-  ControlsPluginStartDeps
+  PresentationUiActionsService,
+  PresentationUtilPluginStartDeps
 >;
 
 export const uiActionsServiceFactory: UiActionsServiceFactory = ({ startPlugins }) => {
   const {
-    uiActions: { getTrigger, getTriggerCompatibleActions },
+    uiActions: { getTriggerCompatibleActions },
   } = startPlugins;
-
   return {
-    getTrigger,
     getTriggerCompatibleActions,
   };
 };

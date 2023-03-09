@@ -28,7 +28,6 @@ export interface ControlsServices {
   http: ControlsHTTPService;
   settings: ControlsSettingsService;
   theme: ControlsThemeService;
-  uiActions: ControlsUiActionsService;
 
   // controls plugin's own services
   controls: ControlsServiceType;

@@ -17,13 +17,11 @@ import {
   EuiPopover,
   EuiToolTip,
 } from '@elastic/eui';
-import { panelHoverTrigger, PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/kibana-react-plugin/public';
 import { useReduxEmbeddableContext, FloatingActions } from '@kbn/presentation-util-plugin/public';
 import { ControlGroupReduxState } from '../types';
-import { pluginServices } from '../../services';
 import { ControlGroupStrings } from '../control_group_strings';
 import { useChildEmbeddable } from '../../hooks/use_child_embeddable';
 import { controlGroupReducers } from '../state/control_group_reducers';
@@ -77,6 +75,7 @@ export interface ControlFrameProps {
 
 export const ControlFrame = ({
   customPrepend,
+  enableActions,
   embeddableId,
   embeddableType,
 }: ControlFrameProps) => {
@@ -90,10 +89,6 @@ export const ControlFrame = ({
       ControlGroupContainer
     >();
 
-  const {
-    uiActions: { getTriggerCompatibleActions },
-  } = pluginServices.getServices();
-
   const viewMode = select((state) => state.explicitInput.viewMode);
   const controlStyle = select((state) => state.explicitInput.controlStyle);
 
@@ -104,34 +99,6 @@ export const ControlFrame = ({
   });
 
   const [title, setTitle] = useState<string>();
-  const [floatingActions, setFloatingActions] = useState<JSX.Element>();
-
-  useEffect(() => {
-    if (!embeddable) return;
-
-    const getActions = async () => {
-      const context = {
-        embeddable,
-        trigger: panelHoverTrigger,
-      };
-      const actions = await getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context);
-      if (actions.length > 0) {
-        const components = actions.map((action) =>
-          action.MenuItem && embeddable
-            ? React.createElement(action.MenuItem, {
-                key: action.id,
-                context,
-              })
-            : undefined
-        );
-        setFloatingActions(<>{components}</>);
-      } else {
-        setFloatingActions(undefined);
-      }
-    };
-
-    getActions();
-  }, [embeddable, getTriggerCompatibleActions, viewMode]);
 
   const usingTwoLineLayout = controlStyle === 'twoLine';
 
@@ -214,8 +181,8 @@ export const ControlFrame = ({
         'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
         'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
-      actions={floatingActions}
-      isEnabled={Boolean(embeddable)}
+      isEnabled={embeddable && enableActions}
+      embeddable={embeddable}
     >
       <EuiFormRow
         data-test-subj="control-frame-title"

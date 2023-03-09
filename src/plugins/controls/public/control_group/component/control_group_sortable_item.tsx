@@ -106,7 +106,7 @@ const SortableControlInner = forwardRef<
         style={style}
       >
         <ControlFrame
-          enableActions={draggingIndex === -1}
+          enableActions={isEditable && draggingIndex === -1}
           embeddableId={embeddableId}
           embeddableType={embeddableType}
           customPrepend={isEditable ? dragHandle : undefined}

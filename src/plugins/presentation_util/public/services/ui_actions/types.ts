@@ -8,7 +8,6 @@
 
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-export interface ControlsUiActionsService {
-  getTrigger: UiActionsStart['getTrigger'];
+export interface PresentationUiActionsService {
   getTriggerCompatibleActions: UiActionsStart['getTriggerCompatibleActions'];
 }
