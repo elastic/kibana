@@ -14,9 +14,13 @@ import { getAssets } from '../lib/get_assets';
 import { SetupRouteOptions } from './types';
 import { getEsClientFromContext } from './utils';
 
+export type GetAssetsQueryOptions = AssetFilters & {
+  size?: number;
+};
+
 export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupRouteOptions<T>) {
   // GET assets
-  router.get<unknown, AssetFilters | undefined, unknown>(
+  router.get<unknown, GetAssetsQueryOptions | undefined, unknown>(
     {
       path: `${ASSET_MANAGER_API_BASE}/assets`,
       validate: {
@@ -24,11 +28,11 @@ export function assetsRoutes<T extends RequestHandlerContext>({ router }: SetupR
       },
     },
     async (context, req, res) => {
-      const filters = req.query || {};
+      const { size, ...filters } = req.query || {};
       const esClient = await getEsClientFromContext(context);
 
       try {
-        const results = await getAssets({ esClient, filters });
+        const results = await getAssets({ esClient, size, filters });
         return res.ok({ body: { results } });
       } catch (error: unknown) {
         debug('error looking up asset records', error);
