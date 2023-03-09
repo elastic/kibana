@@ -12,7 +12,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elas
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ComplianceScoreChart } from '../compliance_charts/compliance_score_chart';
 import type {
   Cluster,
   ComplianceDashboardData,
