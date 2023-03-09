@@ -68,8 +68,7 @@ export async function mountManagementSection(
   const canSaveGlobalSettings = globalSettings.save as boolean;
   const canShowGlobalSettings = globalSettings.show as boolean;
   const trackUiMetric = usageCollection?.reportUiCounter.bind(usageCollection, 'advanced_settings');
-
-  if (!canSaveAdvancedSettings || !canSaveGlobalSettings) {
+  if (!canSaveAdvancedSettings || (!canSaveGlobalSettings && canShowGlobalSettings)) {
     chrome.setBadge(readOnlyBadge);
   }
 

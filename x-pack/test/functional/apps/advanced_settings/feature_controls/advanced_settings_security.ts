@@ -88,6 +88,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             {
               feature: {
                 advancedSettings: ['read'],
+                globalSettings: ['show'],
               },
               spaces: ['*'],
             },
