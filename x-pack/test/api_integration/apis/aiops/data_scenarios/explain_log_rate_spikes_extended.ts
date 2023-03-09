@@ -51,40 +51,40 @@ export default ({ getService }: FtrProviderContext) => {
     actionsLength: 170,
     noIndexChunksLength: 4,
     noIndexActionsLength: 3,
-    changePointFilter: 'add_change_points',
-    histogramFilter: 'add_change_points_histogram',
+    significantTermFilter: 'add_significant_terms',
+    histogramFilter: 'add_significant_terms_histogram',
     errorFilter: 'add_error',
-    changePointsLength: 40,
-    changePoints: [
+    significantTermsLength: 40,
+    significantTerms: [
       {
         fieldName: 'beat.hostname.keyword',
         fieldValue: 'ip-172-27-97-204',
         doc_count: 12000,
-        bg_count: 30000,
+        bg_count: 29000,
       },
       {
         fieldName: 'beat.name.keyword',
         fieldValue: 'i-0852e3f99b6c512fd',
         doc_count: 12000,
-        bg_count: 30000,
+        bg_count: 29000,
       },
       {
         fieldName: 'docker.container.id.keyword',
         fieldValue: 'aa5a7e792e226ccc4f7bbf34dc0e999e17b4f561fd36fbf746365bad5a8112f7',
         doc_count: 12000,
-        bg_count: 30000,
+        bg_count: 29000,
       },
       {
         fieldName: 'docker.container.id.keyword',
         fieldValue: 'dc1e531f6598b1f828fc1ccc1939cfc1fceeebd23378fab8f1ba2e8133e53b21',
         doc_count: 2000,
-        bg_count: 4000,
+        bg_count: 3900,
       },
       {
         fieldName: 'docker.container.image.keyword',
         fieldValue: 'docker.elastic.co/cloud-assets/apm:7.13.1-0',
         doc_count: 2000,
-        bg_count: 4000,
+        bg_count: 3900,
       },
       {
         fieldName: 'docker.container.image.keyword',
@@ -96,13 +96,13 @@ export default ({ getService }: FtrProviderContext) => {
         fieldName: 'docker.container.image.keyword',
         fieldValue: 'docker.elastic.co/cloud-assets/apm:7.15.2-0',
         doc_count: 14000,
-        bg_count: 37000,
+        bg_count: 36000,
       },
       {
         fieldName: 'docker.container.labels.co.elastic.cloud.allocator.cluster_id.keyword',
         fieldValue: 'eb3713439fcd4fdfa60e355f0e57afc0',
         doc_count: 12000,
-        bg_count: 30000,
+        bg_count: 29000,
       },
       {
         fieldName: 'docker.container.labels.co.elastic.cloud.allocator.cluster_id.keyword',
@@ -163,10 +163,10 @@ export default ({ getService }: FtrProviderContext) => {
         expect(typeof d.type).to.be('string');
       });
 
-      const addChangePointsActions = data.filter((d) => d.type === expected.changePointFilter);
-      expect(addChangePointsActions.length).to.greaterThan(0);
+      const addSignificantTermsActions = data.filter((d) => d.type === expected.significantTermFilter);
+      expect(addSignificantTermsActions.length).to.greaterThan(0);
 
-      const changePoints = addChangePointsActions
+      const significantTerms = addSignificantTermsActions
         .flatMap((d) => d.payload)
         .sort(function (a, b) {
           if (a.fieldName === b.fieldName) {
@@ -175,12 +175,12 @@ export default ({ getService }: FtrProviderContext) => {
           return a.fieldName > b.fieldName ? 1 : -1;
         });
 
-      expect(changePoints.length).to.above(
-        expected.changePointsLength,
-        `Expected 'changePoints.length' to above ${expected.changePointsLength}, got ${changePoints.length}.`
+      expect(significantTerms.length).to.above(
+        expected.significantTermsLength,
+        `Expected 'significantTerms.length' to above ${expected.significantTermsLength}, got ${significantTerms.length}.`
       );
-      // changePoints.forEach((cp, index) => {
-      //   const ecp = expected.changePoints[index];
+      // significantTerms.forEach((cp, index) => {
+      //   const ecp = expected.significantTerms[index];
       //   expect(cp.fieldName).to.equal(ecp.fieldName);
       //   expect(cp.fieldValue).to.equal(ecp.fieldValue);
       //   expect(cp.doc_count).to.equal(ecp.doc_count);
@@ -190,7 +190,7 @@ export default ({ getService }: FtrProviderContext) => {
       const histogramActions = data.filter((d) => d.type === expected.histogramFilter);
       const histograms = histogramActions.flatMap((d) => d.payload);
       // for each change point we should get a histogram
-      expect(histogramActions.length).to.be(changePoints.length);
+      expect(histogramActions.length).to.be(significantTerms.length);
       // each histogram should have a length of 20 items.
       histograms.forEach((h, index) => {
         expect(h.histogram.length).to.be(20);
@@ -256,10 +256,10 @@ export default ({ getService }: FtrProviderContext) => {
           `Expected 'data.length' to above ${expected.actionsLength}, got ${data.length}.`
         );
 
-        const addChangePointsActions = data.filter((d) => d.type === expected.changePointFilter);
-        expect(addChangePointsActions.length).to.greaterThan(0);
+        const addSignificantTermsActions = data.filter((d) => d.type === expected.significantTermFilter);
+        expect(addSignificantTermsActions.length).to.greaterThan(0);
 
-        const changePoints = addChangePointsActions
+        const significantTerms = addSignificantTermsActions
           .flatMap((d) => d.payload)
           .sort(function (a, b) {
             if (a.fieldName === b.fieldName) {
@@ -268,18 +268,18 @@ export default ({ getService }: FtrProviderContext) => {
             return a.fieldName > b.fieldName ? 1 : -1;
           });
 
-        expect(changePoints.length).to.above(
-          expected.changePointsLength,
-          `Expected 'changePoints.length' to above ${expected.changePointsLength}, got ${changePoints.length}.`
+        expect(significantTerms.length).to.above(
+          expected.significantTermsLength,
+          `Expected 'significantTerms.length' to above ${expected.significantTermsLength}, got ${significantTerms.length}.`
         );
-        // Check only up to 10 changePoints even if there's more
-        changePoints.slice(0, 9).forEach((cp, index) => {
-          const ecp = expected.changePoints.find(
+        // Check only up to 10 significantTerms even if there's more
+        significantTerms.slice(0, 9).forEach((cp, index) => {
+          const ecp = expected.significantTerms.find(
             (d) => d.fieldName === cp.fieldName && d.fieldValue === cp.fieldValue
           );
           expect(ecp).not.to.eql(
             undefined,
-            `Expected changePoint width 'fieldName:${cp.fieldName}'/'fieldValue:${cp.fieldValue}' to not be undefined`
+            `Expected significantTerm width 'fieldName:${cp.fieldName}'/'fieldValue:${cp.fieldValue}' to not be undefined`
           );
           if (ecp !== undefined) {
             expect(cp.doc_count).to.above(
@@ -296,7 +296,7 @@ export default ({ getService }: FtrProviderContext) => {
         const histogramActions = data.filter((d) => d.type === expected.histogramFilter);
         const histograms = histogramActions.flatMap((d) => d.payload);
         // for each change point we should get a histogram
-        expect(histogramActions.length).to.be(changePoints.length);
+        expect(histogramActions.length).to.be(significantTerms.length);
         // each histogram should have a length of 20 items.
         histograms.forEach((h, index) => {
           expect(h.histogram.length).to.be(20);
