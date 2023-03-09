@@ -27,6 +27,20 @@ const readOnlyUserTooltipTitle = i18n.translate(
   }
 );
 
+const inlineLogViewTooltipTitle = i18n.translate(
+  'xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertTitle',
+  {
+    defaultMessage: 'Inline Log View',
+  }
+);
+
+const inlineLogViewTooltipContent = i18n.translate(
+  'xpack.infra.logs.alertDropdown.inlineLogViewCreateAlertContent',
+  {
+    defaultMessage: 'Creating alerts is not supported with inline Log Views',
+  }
+);
+
 export const AlertDropdown = () => {
   const {
     services: {
@@ -35,7 +49,8 @@ export const AlertDropdown = () => {
     },
   } = useKibanaContextForPlugin();
   const { isPersistedLogView } = useLogViewContext();
-  const canCreateAlerts = (capabilities?.logs?.save && isPersistedLogView) ?? false;
+  const readOnly = !capabilities?.logs?.save;
+  const canCreateAlerts = (!readOnly && isPersistedLogView) ?? false;
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [flyoutVisible, setFlyoutVisible] = useState(false);
 
@@ -63,8 +78,20 @@ export const AlertDropdown = () => {
         icon="bell"
         key="createLink"
         onClick={openFlyout}
-        toolTipContent={!canCreateAlerts ? readOnlyUserTooltipContent : undefined}
-        toolTipTitle={!canCreateAlerts ? readOnlyUserTooltipTitle : undefined}
+        toolTipContent={
+          !canCreateAlerts
+            ? readOnly
+              ? readOnlyUserTooltipContent
+              : inlineLogViewTooltipContent
+            : undefined
+        }
+        toolTipTitle={
+          !canCreateAlerts
+            ? readOnly
+              ? readOnlyUserTooltipTitle
+              : inlineLogViewTooltipTitle
+            : undefined
+        }
       >
         <FormattedMessage
           id="xpack.infra.alerting.logs.createAlertButton"
@@ -78,7 +105,7 @@ export const AlertDropdown = () => {
         />
       </EuiContextMenuItem>,
     ];
-  }, [manageRulesLinkProps, canCreateAlerts, openFlyout]);
+  }, [canCreateAlerts, openFlyout, readOnly, manageRulesLinkProps]);
 
   return (
     <>
