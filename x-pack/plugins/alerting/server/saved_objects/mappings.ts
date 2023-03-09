@@ -8,6 +8,7 @@
 import { SavedObjectsTypeMappingDefinition } from '@kbn/core/server';
 
 export const alertMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
   properties: {
     enabled: {
       type: 'boolean',
@@ -59,18 +60,18 @@ export const alertMappings: SavedObjectsTypeMappingDefinition = {
         },
         frequency: {
           properties: {
-            summary: {
-              index: false,
-              type: 'boolean',
-            },
-            notifyWhen: {
-              index: false,
-              type: 'keyword',
-            },
-            throttle: {
-              index: false,
-              type: 'keyword',
-            },
+            // summary: {
+            //   index: false,
+            //   type: 'boolean',
+            // },
+            // notifyWhen: {
+            //   index: false,
+            //   type: 'keyword',
+            // },
+            // throttle: {
+            //   index: false,
+            //   type: 'keyword',
+            // },
           },
         },
       },

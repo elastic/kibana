@@ -14,11 +14,12 @@ export const apmServerSettings: SavedObjectsType = {
   hidden: false,
   namespaceType: 'agnostic',
   mappings: {
+    dynamic: false,
     properties: {
-      schemaJson: {
-        type: 'text',
-        index: false,
-      },
+      // schemaJson: {
+      //   type: 'text',
+      //   index: false,
+      // },
     },
   },
   management: {

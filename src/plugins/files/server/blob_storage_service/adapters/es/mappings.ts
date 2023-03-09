@@ -23,22 +23,23 @@ export interface FileChunkDocument {
    */
   data: string;
 
-  /**
-   * Blob ID field that tags a set of blobs as belonging to the same file.
-   */
-  bid: string;
+  // /**
+  //  * Blob ID field that tags a set of blobs as belonging to the same file.
+  //  */
+  // bid: string;
 
-  /**
-   * Whether this is the last chunk in a sequence.
-   */
-  last?: boolean;
+  // /**
+  //  * Whether this is the last chunk in a sequence.
+  //  */
+  // last?: boolean;
 }
 
 export const mappings: MappingTypeMapping = {
   dynamic: false,
   properties: {
+    dynamic: false,
     data: { type: 'binary' }, // Binary fields are automatically marked as not searchable by ES
-    bid: { type: 'keyword', index: false },
-    last: { type: 'boolean', index: false },
+    // bid: { type: 'keyword', index: false },
+    // last: { type: 'boolean', index: false },
   } as Record<keyof FileChunkDocument, MappingProperty>, // Ensure that our ES types and TS types stay somewhat in sync
 } as const;

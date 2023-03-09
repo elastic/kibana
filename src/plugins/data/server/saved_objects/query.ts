@@ -29,12 +29,13 @@ export const querySavedObjectType: SavedObjectsType = {
     },
   },
   mappings: {
+    dynamic: false,
     properties: {
       title: { type: 'text' },
       description: { type: 'text' },
-      query: {
-        properties: { language: { type: 'keyword' }, query: { type: 'keyword', index: false } },
-      },
+      // query: {
+      //   properties: { language: { type: 'keyword' }, query: { type: 'keyword', index: false } },
+      // },
       filters: {
         dynamic: false,
         properties: {},

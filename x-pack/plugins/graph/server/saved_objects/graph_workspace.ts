@@ -29,6 +29,7 @@ export const graphWorkspace: SavedObjectsType = {
   },
   migrations: graphMigrations,
   mappings: {
+    dynamic: false,
     properties: {
       description: {
         type: 'text',
@@ -55,10 +56,10 @@ export const graphWorkspace: SavedObjectsType = {
       wsState: {
         type: 'text',
       },
-      legacyIndexPatternRef: {
-        type: 'text',
-        index: false,
-      },
+      // legacyIndexPatternRef: {
+      //   type: 'text',
+      //   index: false,
+      // },
     },
   },
 };

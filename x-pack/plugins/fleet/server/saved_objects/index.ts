@@ -74,7 +74,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     mappings: {
       properties: {
         fleet_server_hosts: { type: 'keyword' },
-        has_seen_add_data_notice: { type: 'boolean', index: false },
+        // has_seen_add_data_notice: { type: 'boolean', index: false },
         prerelease_integrations_enabled: { type: 'boolean' },
       },
     },
@@ -106,7 +106,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         updated_at: { type: 'date' },
         updated_by: { type: 'keyword' },
         revision: { type: 'integer' },
-        monitoring_enabled: { type: 'keyword', index: false },
+        // monitoring_enabled: { type: 'keyword', index: false },
         is_preconfigured: { type: 'keyword' },
         data_output_id: { type: 'keyword' },
         monitoring_output_id: { type: 'keyword' },
@@ -136,17 +136,17 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     },
     mappings: {
       properties: {
-        output_id: { type: 'keyword', index: false },
+        // output_id: { type: 'keyword', index: false },
         name: { type: 'keyword' },
         type: { type: 'keyword' },
         is_default: { type: 'boolean' },
         is_default_monitoring: { type: 'boolean' },
         hosts: { type: 'keyword' },
-        ca_sha256: { type: 'keyword', index: false },
-        ca_trusted_fingerprint: { type: 'keyword', index: false },
+        // ca_sha256: { type: 'keyword', index: false },
+        // ca_trusted_fingerprint: { type: 'keyword', index: false },
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
-        is_preconfigured: { type: 'boolean', index: false },
+        // is_preconfigured: { type: 'boolean', index: false },
         ssl: { type: 'binary' },
         proxy_id: { type: 'keyword' },
         shipper: {
@@ -222,11 +222,12 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       importableAndExportable: false,
     },
     mappings: {
+      dynamic: false,
       properties: {
         name: { type: 'keyword' },
         version: { type: 'keyword' },
         internal: { type: 'boolean' },
-        keep_policies_up_to_date: { type: 'boolean', index: false },
+        // keep_policies_up_to_date: { type: 'boolean', index: false },
         es_index_patterns: {
           dynamic: false,
           properties: {},
@@ -295,7 +296,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         install_source: { type: 'keyword' },
         asset_path: { type: 'keyword' },
         media_type: { type: 'keyword' },
-        data_utf8: { type: 'text', index: false },
+        // data_utf8: { type: 'text', index: false },
         data_base64: { type: 'binary' },
       },
     },
@@ -322,7 +323,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     },
     mappings: {
       properties: {
-        source_id: { type: 'keyword', index: false },
+        // source_id: { type: 'keyword', index: false },
         name: { type: 'keyword' },
         is_default: { type: 'boolean' },
         host: { type: 'keyword' },
@@ -340,7 +341,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       properties: {
         name: { type: 'keyword' },
         is_default: { type: 'boolean' },
-        host_urls: { type: 'keyword', index: false },
+        // host_urls: { type: 'keyword', index: false },
         is_preconfigured: { type: 'boolean' },
         proxy_id: { type: 'keyword' },
       },
@@ -356,11 +357,11 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
     mappings: {
       properties: {
         name: { type: 'keyword' },
-        url: { type: 'keyword', index: false },
-        proxy_headers: { type: 'text', index: false },
-        certificate_authorities: { type: 'keyword', index: false },
-        certificate: { type: 'keyword', index: false },
-        certificate_key: { type: 'keyword', index: false },
+        // url: { type: 'keyword', index: false },
+        // proxy_headers: { type: 'text', index: false },
+        // certificate_authorities: { type: 'keyword', index: false },
+        // certificate: { type: 'keyword', index: false },
+        // certificate_key: { type: 'keyword', index: false },
         is_preconfigured: { type: 'boolean' },
       },
     },

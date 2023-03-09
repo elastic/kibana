@@ -39,6 +39,7 @@ export function setupSavedObjects(
         customVisualizationMigrations
       ),
     mappings: {
+      dynamic: false,
       properties: {
         title: {
           type: 'text',
@@ -52,11 +53,11 @@ export function setupSavedObjects(
         state: {
           type: 'flattened',
         },
-        expression: {
-          index: false,
-          doc_values: false,
-          type: 'keyword',
-        },
+        // expression: {
+        //   index: false,
+        //   doc_values: false,
+        //   type: 'keyword',
+        // },
       },
     },
   });
