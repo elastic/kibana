@@ -102,12 +102,12 @@ describe('Endpoints page', () => {
     cy.visit(APP_ENDPOINTS_PATH);
 
     cy.getByTestSubj('policyListRevNo')
-      .eq(0)
+      .first()
       .invoke('text')
       .then(parseRevNumber)
       .then((initialRevisionNumber) => {
         // Update policy
-        cy.getByTestSubj('policyNameCellLink').eq(0).click();
+        cy.getByTestSubj('policyNameCellLink').first().click();
 
         cy.getByTestSubj('policyDetailsSaveButton').click();
         cy.getByTestSubj('policyDetailsConfirmModal').should('exist');
@@ -120,10 +120,10 @@ describe('Endpoints page', () => {
         cy.getByTestSubj('rowPolicyOutOfDate').should('exist');
         cy.getByTestSubj('rowPolicyOutOfDate').should('not.exist'); // depends on the 10s auto-refresh
 
-        cy.getByTestSubj('policyStatusCellLink').eq(0).should('contain', 'Success');
+        cy.getByTestSubj('policyStatusCellLink').first().should('contain', 'Success');
 
         cy.getByTestSubj('policyListRevNo')
-          .eq(0)
+          .first()
           .invoke('text')
           .then(parseRevNumber)
           .should('equal', initialRevisionNumber + 1);

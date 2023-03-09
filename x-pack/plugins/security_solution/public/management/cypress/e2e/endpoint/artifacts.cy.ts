@@ -61,7 +61,7 @@ describe('Artifact pages', () => {
         cy.visit(APP_ENDPOINTS_PATH);
 
         cy.getByTestSubj('policyListRevNo')
-          .eq(0)
+          .first()
           .invoke('text')
           .then(parseRevNumber)
           .then((initialRevisionNumber) => {
@@ -80,7 +80,7 @@ describe('Artifact pages', () => {
 
             // depends on the 10s auto refresh
             cy.getByTestSubj('policyListRevNo')
-              .eq(0)
+              .first()
               .should(($div) => {
                 const revisionNumber = parseRevNumber($div.text());
                 expect(revisionNumber).to.eq(initialRevisionNumber + 1);
