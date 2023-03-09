@@ -884,6 +884,35 @@ describe('Response actions history', () => {
       const clearAllButton = getByTestId(`${testPrefix}-${filterPrefix}-clearAllButton`);
       expect(clearAllButton.hasAttribute('disabled')).toBeTruthy();
     });
+
+    it('should use selected statuses on api call', () => {
+      render();
+      const { getByTestId, getAllByTestId } = renderResult;
+
+      userEvent.click(getByTestId(`${testPrefix}-${filterPrefix}-popoverButton`));
+      const statusOptions = getAllByTestId(`${filterPrefix}-option`);
+
+      statusOptions[0].style.pointerEvents = 'all';
+      userEvent.click(statusOptions[0]);
+
+      statusOptions[1].style.pointerEvents = 'all';
+      userEvent.click(statusOptions[1]);
+
+      expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith(
+        {
+          agentIds: undefined,
+          commands: [],
+          endDate: 'now',
+          page: 1,
+          pageSize: 10,
+          startDate: 'now-24h/h',
+          statuses: ['failed', 'pending'],
+          userIds: [],
+          withOutputs: [],
+        },
+        expect.anything()
+      );
+    });
   });
 
   describe('Hosts Filter', () => {
