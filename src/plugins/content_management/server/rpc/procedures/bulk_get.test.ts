@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
 
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
-import type { RpcSchemas } from '../../core';
 import { EventBus } from '../../core/event_bus';
 import { bulkGet } from './bulk_get';
 
@@ -30,7 +28,6 @@ if (!outputSchema) {
 }
 
 const FOO_CONTENT_ID = 'foo';
-const fooDataSchema = schema.object({ title: schema.string() }, { unknowns: 'forbid' });
 
 describe('RPC -> bulkGet()', () => {
   describe('Input/Output validation', () => {
@@ -150,25 +147,12 @@ describe('RPC -> bulkGet()', () => {
   });
 
   describe('procedure', () => {
-    const createSchemas = (): RpcSchemas => {
-      return {
-        bulkGet: {
-          in: {
-            query: fooDataSchema,
-          },
-        },
-      } as any;
-    };
-
-    const setup = ({ contentSchemas = createSchemas() } = {}) => {
+    const setup = () => {
       const contentRegistry = new ContentRegistry(new EventBus());
       const storage = createMockedStorage();
       contentRegistry.register({
         id: FOO_CONTENT_ID,
         storage,
-        schemas: {
-          content: contentSchemas,
-        },
         version: {
           latest: 'v2',
         },
@@ -216,55 +200,6 @@ describe('RPC -> bulkGet()', () => {
         expect(() => fn(ctx, { contentTypeId: 'unknown', ids: ['123', '456'] })).rejects.toEqual(
           new Error('Content [unknown] is not registered.')
         );
-      });
-
-      test('should enforce a schema for options if options are passed', () => {
-        const { ctx } = setup();
-        expect(() =>
-          fn(ctx, {
-            contentTypeId: FOO_CONTENT_ID,
-            ids: ['123', '456'],
-            options: { foo: 'bar' },
-          })
-        ).rejects.toEqual(new Error('Schema missing for rpc procedure [bulkGet.in.options].'));
-      });
-
-      test('should validate the options', () => {
-        const { ctx } = setup({
-          contentSchemas: {
-            bulkGet: {
-              in: {
-                query: fooDataSchema,
-                options: schema.object({ validOption: schema.maybe(schema.boolean()) }),
-              },
-            },
-          } as any,
-        });
-        expect(() =>
-          fn(ctx, {
-            contentTypeId: FOO_CONTENT_ID,
-            ids: ['123', '456'],
-            options: { foo: 'bar' },
-          })
-        ).rejects.toEqual(new Error('[foo]: definition for this key is missing'));
-      });
-
-      test('should validate the result if schema is provided', () => {
-        const { ctx, storage } = setup({
-          contentSchemas: {
-            bulkGet: {
-              in: { query: fooDataSchema },
-              out: { result: schema.object({ validField: schema.maybe(schema.boolean()) }) },
-            },
-          } as any,
-        });
-
-        const invalidResult = { wrongField: 'bad' };
-        storage.bulkGet.mockResolvedValueOnce(invalidResult);
-
-        expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, ids: ['123', '456'] })
-        ).rejects.toEqual(new Error('[wrongField]: definition for this key is missing'));
       });
     });
   });

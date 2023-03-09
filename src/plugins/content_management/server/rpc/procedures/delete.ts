@@ -10,25 +10,11 @@ import type { DeleteIn } from '../../../common';
 import type { StorageContext, ContentCrud } from '../../core';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
-import { validate } from '../../utils';
 
 export const deleteProc: ProcedureDefinition<Context, DeleteIn<string>> = {
   schemas: rpcSchemas.delete,
   fn: async (ctx, { contentTypeId, id, version, options }) => {
     const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
-    const { delete: schemas } = contentDefinition.schemas.content;
-
-    if (options) {
-      // Validate the options provided
-      if (!schemas?.in?.options) {
-        throw new Error(`Schema missing for rpc procedure [delete.in.options].`);
-      }
-      const error = validate(options, schemas.in.options);
-      if (error) {
-        // TODO: Improve error handling
-        throw error;
-      }
-    }
 
     // Execute CRUD
     const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(contentTypeId);
@@ -40,16 +26,6 @@ export const deleteProc: ProcedureDefinition<Context, DeleteIn<string>> = {
       },
     };
     const result = await crudInstance.delete(storageContext, id, options);
-
-    // Validate result
-    const resultSchema = schemas?.out?.result;
-    if (resultSchema) {
-      const error = validate(result.result, resultSchema);
-      if (error) {
-        // TODO: Improve error handling
-        throw error;
-      }
-    }
 
     return result;
   },

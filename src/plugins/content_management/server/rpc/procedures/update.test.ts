@@ -146,9 +146,6 @@ describe('RPC -> update()', () => {
       contentRegistry.register({
         id: FOO_CONTENT_ID,
         storage,
-        schemas: {
-          content: contentSchemas,
-        },
         version: {
           latest: 'v2',
         },
@@ -198,84 +195,6 @@ describe('RPC -> update()', () => {
         expect(() =>
           fn(ctx, { contentTypeId: 'unknown', id: '123', data: { title: 'Hello' } })
         ).rejects.toEqual(new Error('Content [unknown] is not registered.'));
-      });
-
-      test('should enforce a schema for the data', () => {
-        const { ctx } = setup({ contentSchemas: {} as any });
-        expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '123', data: {} })
-        ).rejects.toEqual(new Error('Schema missing for rpc procedure [update.in.data].'));
-      });
-
-      test('should validate the data sent in input - missing field', () => {
-        const { ctx } = setup();
-        expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '123', data: {} })
-        ).rejects.toEqual(
-          new Error('[title]: expected value of type [string] but got [undefined]')
-        );
-      });
-
-      test('should validate the data sent in input - unknown field', () => {
-        const { ctx } = setup();
-        expect(() =>
-          fn(ctx, {
-            contentTypeId: FOO_CONTENT_ID,
-            id: '123',
-            data: { title: 'Hello', unknownField: 'Hello' },
-          })
-        ).rejects.toEqual(new Error('[unknownField]: definition for this key is missing'));
-      });
-
-      test('should enforce a schema for options if options are passed', () => {
-        const { ctx } = setup();
-        expect(() =>
-          fn(ctx, {
-            contentTypeId: FOO_CONTENT_ID,
-            id: '123',
-            data: { title: 'Hello' },
-            options: { foo: 'bar' },
-          })
-        ).rejects.toEqual(new Error('Schema missing for rpc procedure [update.in.options].'));
-      });
-
-      test('should validate the options', () => {
-        const { ctx } = setup({
-          contentSchemas: {
-            update: {
-              in: {
-                data: fooDataSchema,
-                options: schema.object({ validOption: schema.maybe(schema.boolean()) }),
-              },
-            },
-          } as any,
-        });
-        expect(() =>
-          fn(ctx, {
-            contentTypeId: FOO_CONTENT_ID,
-            id: '123',
-            data: { title: 'Hello' },
-            options: { foo: 'bar' },
-          })
-        ).rejects.toEqual(new Error('[foo]: definition for this key is missing'));
-      });
-
-      test('should validate the result if schema is provided', () => {
-        const { ctx, storage } = setup({
-          contentSchemas: {
-            update: {
-              in: { data: fooDataSchema },
-              out: { result: schema.object({ validField: schema.maybe(schema.boolean()) }) },
-            },
-          } as any,
-        });
-
-        const invalidResult = { wrongField: 'bad' };
-        storage.update.mockResolvedValueOnce(invalidResult);
-
-        expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '123', data: { title: 'Hello' } })
-        ).rejects.toEqual(new Error('[wrongField]: definition for this key is missing'));
       });
     });
   });

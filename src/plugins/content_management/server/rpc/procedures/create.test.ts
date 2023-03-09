@@ -6,12 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
-import type { RpcSchemas } from '../../core';
 import { EventBus } from '../../core/event_bus';
 import { create } from './create';
 
@@ -29,7 +27,6 @@ if (!outputSchema) {
 }
 
 const FOO_CONTENT_ID = 'foo';
-const fooDataSchema = schema.object({ title: schema.string() }, { unknowns: 'forbid' });
 
 describe('RPC -> create()', () => {
   describe('Input/Output validation', () => {
@@ -122,25 +119,12 @@ describe('RPC -> create()', () => {
   });
 
   describe('procedure', () => {
-    const createSchemas = (): RpcSchemas => {
-      return {
-        create: {
-          in: {
-            data: fooDataSchema,
-          },
-        },
-      } as any;
-    };
-
-    const setup = ({ contentSchemas = createSchemas() } = {}) => {
+    const setup = () => {
       const contentRegistry = new ContentRegistry(new EventBus());
       const storage = createMockedStorage();
       contentRegistry.register({
         id: FOO_CONTENT_ID,
         storage,
-        schemas: {
-          content: contentSchemas,
-        },
         version: {
           latest: 'v2',
         },
@@ -188,79 +172,6 @@ describe('RPC -> create()', () => {
         expect(() =>
           fn(ctx, { contentTypeId: 'unknown', data: { title: 'Hello' } })
         ).rejects.toEqual(new Error('Content [unknown] is not registered.'));
-      });
-
-      test('should enforce a schema for the data', () => {
-        const { ctx } = setup({ contentSchemas: {} as any });
-        expect(() => fn(ctx, { contentTypeId: FOO_CONTENT_ID, data: {} })).rejects.toEqual(
-          new Error('Schema missing for rpc procedure [create.in.data].')
-        );
-      });
-
-      test('should validate the data sent in input - missing field', () => {
-        const { ctx } = setup();
-        expect(() => fn(ctx, { contentTypeId: FOO_CONTENT_ID, data: {} })).rejects.toEqual(
-          new Error('[title]: expected value of type [string] but got [undefined]')
-        );
-      });
-
-      test('should validate the data sent in input - unknown field', () => {
-        const { ctx } = setup();
-        expect(() =>
-          fn(ctx, {
-            contentTypeId: FOO_CONTENT_ID,
-            data: { title: 'Hello', unknownField: 'Hello' },
-          })
-        ).rejects.toEqual(new Error('[unknownField]: definition for this key is missing'));
-      });
-
-      test('should enforce a schema for options if options are passed', () => {
-        const { ctx } = setup();
-        expect(() =>
-          fn(ctx, {
-            contentTypeId: FOO_CONTENT_ID,
-            data: { title: 'Hello' },
-            options: { foo: 'bar' },
-          })
-        ).rejects.toEqual(new Error('Schema missing for rpc procedure [create.in.options].'));
-      });
-
-      test('should validate the options', () => {
-        const { ctx } = setup({
-          contentSchemas: {
-            create: {
-              in: {
-                data: fooDataSchema,
-                options: schema.object({ validOption: schema.maybe(schema.boolean()) }),
-              },
-            },
-          } as any,
-        });
-        expect(() =>
-          fn(ctx, {
-            contentTypeId: FOO_CONTENT_ID,
-            data: { title: 'Hello' },
-            options: { foo: 'bar' },
-          })
-        ).rejects.toEqual(new Error('[foo]: definition for this key is missing'));
-      });
-
-      test('should validate the result if schema is provided', () => {
-        const { ctx, storage } = setup({
-          contentSchemas: {
-            create: {
-              in: { data: fooDataSchema },
-              out: { result: schema.object({ validField: schema.maybe(schema.boolean()) }) },
-            },
-          } as any,
-        });
-
-        const invalidResult = { wrongField: 'bad' };
-        storage.create.mockResolvedValueOnce(invalidResult);
-
-        expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, data: { title: 'Hello' } })
-        ).rejects.toEqual(new Error('[wrongField]: definition for this key is missing'));
       });
     });
   });

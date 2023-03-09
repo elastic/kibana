@@ -6,13 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
 import { omit } from 'lodash';
 
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
-import type { RpcSchemas } from '../../core';
 import { EventBus } from '../../core/event_bus';
 import { deleteProc } from './delete';
 
@@ -118,19 +116,12 @@ describe('RPC -> delete()', () => {
   });
 
   describe('procedure', () => {
-    const createSchemas = (): RpcSchemas => {
-      return {} as any;
-    };
-
-    const setup = ({ contentSchemas = createSchemas() } = {}) => {
+    const setup = () => {
       const contentRegistry = new ContentRegistry(new EventBus());
       const storage = createMockedStorage();
       contentRegistry.register({
         id: FOO_CONTENT_ID,
         storage,
-        schemas: {
-          content: contentSchemas,
-        },
         version: {
           latest: 'v2',
         },
@@ -173,45 +164,6 @@ describe('RPC -> delete()', () => {
         const { ctx } = setup();
         expect(() => fn(ctx, { contentTypeId: 'unknown', id: '1234' })).rejects.toEqual(
           new Error('Content [unknown] is not registered.')
-        );
-      });
-
-      test('should enforce a schema for options if options are passed', () => {
-        const { ctx } = setup();
-        expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', options: { foo: 'bar' } })
-        ).rejects.toEqual(new Error('Schema missing for rpc procedure [delete.in.options].'));
-      });
-
-      test('should validate the options', () => {
-        const { ctx } = setup({
-          contentSchemas: {
-            delete: {
-              in: {
-                options: schema.object({ validOption: schema.maybe(schema.boolean()) }),
-              },
-            },
-          } as any,
-        });
-        expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234', options: { foo: 'bar' } })
-        ).rejects.toEqual(new Error('[foo]: definition for this key is missing'));
-      });
-
-      test('should validate the result if schema is provided', () => {
-        const { ctx, storage } = setup({
-          contentSchemas: {
-            delete: {
-              out: { result: schema.object({ validField: schema.maybe(schema.boolean()) }) },
-            },
-          } as any,
-        });
-
-        const invalidResult = { wrongField: 'bad' };
-        storage.delete.mockResolvedValueOnce(invalidResult);
-
-        expect(() => fn(ctx, { contentTypeId: FOO_CONTENT_ID, id: '1234' })).rejects.toEqual(
-          new Error('[wrongField]: definition for this key is missing')
         );
       });
     });

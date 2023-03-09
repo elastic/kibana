@@ -11,38 +11,11 @@ import type { CreateIn } from '../../../common';
 import type { StorageContext, ContentCrud } from '../../core';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
-import { validate } from '../../utils';
 
 export const create: ProcedureDefinition<Context, CreateIn<string>> = {
   schemas: rpcSchemas.create,
   fn: async (ctx, { contentTypeId, version, data, options }) => {
     const contentDefinition = ctx.contentRegistry.getDefinition(contentTypeId);
-    const { create: schemas } = contentDefinition.schemas.content;
-
-    // Validate data to be stored
-    if (schemas?.in?.data) {
-      const error = validate(data, schemas.in.data);
-      if (error) {
-        // TODO: Improve error handling
-        throw error;
-      }
-    } else {
-      // TODO: Improve error handling
-      throw new Error('Schema missing for rpc procedure [create.in.data].');
-    }
-
-    // Validate the possible options
-    if (options) {
-      if (!schemas.in?.options) {
-        // TODO: Improve error handling
-        throw new Error('Schema missing for rpc procedure [create.in.options].');
-      }
-      const error = validate(options, schemas.in.options);
-      if (error) {
-        // TODO: Improve error handling
-        throw error;
-      }
-    }
 
     // Execute CRUD
     const crudInstance: ContentCrud = ctx.contentRegistry.getCrud(contentTypeId);
@@ -54,16 +27,6 @@ export const create: ProcedureDefinition<Context, CreateIn<string>> = {
       },
     };
     const result = await crudInstance.create(storageContext, data, options);
-
-    // Validate result
-    const resultSchema = schemas.out?.result;
-    if (resultSchema) {
-      const error = validate(result.result, resultSchema);
-      if (error) {
-        // TODO: Improve error handling
-        throw error;
-      }
-    }
 
     return result;
   },
