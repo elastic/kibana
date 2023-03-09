@@ -8,9 +8,8 @@
 import { getExceptionList } from '../../../objects/exception';
 import { getNewRule } from '../../../objects/rule';
 
-import { createCustomRule } from '../../../tasks/api_calls/rules';
 import { login, visitWithoutDateRange } from '../../../tasks/login';
-
+import { createRule } from '../../../tasks/api_calls/rules';
 import { exceptionsListDetailsUrl } from '../../../urls/navigation';
 import {
   editExceptionLisDetails,
@@ -42,9 +41,9 @@ describe('Exception list management page', () => {
 
     // Create exception list associated with a rule
     createExceptionList(getExceptionList1(), getExceptionList1().list_id).then((response) =>
-      createCustomRule({
+      createRule({
         ...getNewRule(),
-        exceptionLists: [
+        exceptions_list: [
           {
             id: response.body.id,
             list_id: getExceptionList1().list_id,
