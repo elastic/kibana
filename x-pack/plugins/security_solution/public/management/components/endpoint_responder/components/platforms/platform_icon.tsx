@@ -11,10 +11,10 @@ import linuxSvg from './logos/linux.svg';
 import windowsSvg from './logos/windows.svg';
 import macosSvg from './logos/macos.svg';
 
-export type Platform = 'darwin' | 'linux' | 'windows';
+export type Platform = 'macos' | 'linux' | 'windows';
 const getPlatformIcon = (platform: Platform) => {
   switch (platform) {
-    case 'darwin':
+    case 'macos':
       return macosSvg;
     case 'linux':
       return linuxSvg;

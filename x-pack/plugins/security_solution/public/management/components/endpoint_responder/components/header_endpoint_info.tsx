@@ -70,7 +70,7 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
       <EuiFlexItem grow={false}>
         <IconContainer>
           <PlatformIcon
-            platform={endpointDetails.metadata.host.os.platform.toLowerCase() as Platform}
+            platform={endpointDetails.metadata.host.os.name.toLowerCase() as Platform}
           />
         </IconContainer>
       </EuiFlexItem>
