@@ -8,16 +8,25 @@
 import { AgentStatusKueryHelper } from '../../../../services';
 import { AGENTS_PREFIX } from '../../../../constants';
 
-// Kuery
-export const getKuery = (
-  search: string,
-  selectedAgentPolicies: string[],
-  selectedTags: string[],
-  selectedStatus: string[],
-  actionsFilteredAgents: string[]
-) => {
-  let kueryBuilder = search.trim();
-  if (selectedAgentPolicies.length) {
+export const getKuery = ({
+  search,
+  selectedAgentPolicies,
+  selectedTags,
+  selectedStatus,
+  selectedAgentIds,
+}: {
+  search?: string;
+  selectedAgentPolicies?: string[];
+  selectedTags?: string[];
+  selectedStatus?: string[];
+  selectedAgentIds?: string[];
+}) => {
+  let kueryBuilder = '';
+  if (search) {
+    kueryBuilder = search.trim();
+  }
+
+  if (selectedAgentPolicies?.length) {
     if (kueryBuilder) {
       kueryBuilder = `(${kueryBuilder}) and`;
     }
@@ -26,7 +35,7 @@ export const getKuery = (
       .join(' or ')})`;
   }
 
-  if (selectedTags.length) {
+  if (selectedTags?.length) {
     if (kueryBuilder) {
       kueryBuilder = `(${kueryBuilder}) and`;
     }
@@ -35,7 +44,16 @@ export const getKuery = (
       .join(' or ')})`;
   }
 
-  if (selectedStatus.length) {
+  if (selectedAgentIds?.length) {
+    if (kueryBuilder) {
+      kueryBuilder = `(${kueryBuilder}) and`;
+    }
+    kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.agent.id : (${selectedAgentIds
+      .map((id) => `"${id}"`)
+      .join(' or ')})`;
+  }
+
+  if (selectedStatus?.length) {
     const kueryStatus = selectedStatus
       .map((status) => {
         switch (status) {
@@ -58,20 +76,11 @@ export const getKuery = (
       .filter((statusKuery) => statusKuery !== undefined)
       .join(' or ');
 
-    if (actionsFilteredAgents.length) {
-      if (kueryBuilder) {
-        kueryBuilder = `(${kueryBuilder}) and`;
-      }
-      kueryBuilder = `${kueryBuilder} ${AGENTS_PREFIX}.agent.id : (${actionsFilteredAgents
-        .map((id) => `"${id}"`)
-        .join(' or ')})`;
-    }
-
     if (kueryBuilder) {
       kueryBuilder = `(${kueryBuilder}) and (${kueryStatus})`;
     } else {
       kueryBuilder = kueryStatus;
     }
   }
-  return kueryBuilder;
+  return kueryBuilder.trim();
 };

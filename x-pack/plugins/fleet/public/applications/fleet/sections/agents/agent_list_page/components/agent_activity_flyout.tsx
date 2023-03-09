@@ -39,6 +39,8 @@ import { SO_SEARCH_LIMIT } from '../../../../constants';
 
 import { Loading } from '../../components';
 
+import { getKuery } from '../utils/get_kuery';
+
 import { getTodayActions, getOtherDaysActions } from './agent_activity_helper';
 import { ViewErrors } from './view_errors';
 
@@ -56,8 +58,8 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   onClose: () => void;
   onAbortSuccess: () => void;
   refreshAgentActivity: boolean;
-  setActionsFilteredAgents: (actionIds: string[]) => void;
-}> = ({ onClose, onAbortSuccess, refreshAgentActivity, setActionsFilteredAgents }) => {
+  setSearch: (search: string) => void;
+}> = ({ onClose, onAbortSuccess, refreshAgentActivity, setSearch }) => {
   const { data: agentPoliciesData } = useGetAgentPolicies({
     perPage: SO_SEARCH_LIMIT,
   });
@@ -87,7 +89,10 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   const onClickViewAgents = async (action: ActionStatus) => {
     const agents = await sendPostRetrieveAgentsByActions({ actionIds: [action.actionId] });
 
-    if (agents?.data?.items?.length) setActionsFilteredAgents(agents.data.items);
+    if (agents?.data?.items?.length) {
+      const kuery = getKuery({ selectedAgentIds: agents.data.items });
+      setSearch(kuery);
+    }
     onClose();
   };
 
