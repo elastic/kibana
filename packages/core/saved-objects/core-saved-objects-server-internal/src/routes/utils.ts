@@ -154,7 +154,7 @@ export interface BulkGetItem {
   namespaces?: string[];
 }
 
-export function getIsKibanaRequest({ headers }: KibanaRequest) {
+export function isKibanaRequest({ headers }: KibanaRequest) {
   // The presence of these two request headers gives us a good indication that this is a first-party request from the Kibana client.
   // We can't be 100% certain, but this is a reasonable attempt.
   return headers && headers['kbn-version'] && headers.referer;
@@ -173,7 +173,7 @@ export interface LogWarnOnExternalRequest {
  */
 export function logWarnOnExternalRequest(params: LogWarnOnExternalRequest) {
   const { method, path, req, logger } = params;
-  if (!getIsKibanaRequest(req)) {
+  if (!isKibanaRequest(req)) {
     logger.warn(`The ${method} saved object API ${path} is deprecated.`);
   }
 }
