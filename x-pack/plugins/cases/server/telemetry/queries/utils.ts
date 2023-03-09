@@ -16,7 +16,6 @@ import {
 import type {
   CaseAggregationResult,
   Buckets,
-  CasesTelemetry,
   MaxBucketOnCaseAggregation,
   SolutionTelemetry,
   AttachmentFramework,
@@ -319,89 +318,6 @@ export const getOnlyConnectorsFilter = () =>
     operator: 'or',
     type: CASE_USER_ACTION_SAVED_OBJECT,
   });
-
-export const getTelemetryDataEmptyState = (): CasesTelemetry => ({
-  cases: {
-    all: {
-      assignees: {
-        total: 0,
-        totalWithZero: 0,
-        totalWithAtLeastOne: 0,
-      },
-      total: 0,
-      monthly: 0,
-      weekly: 0,
-      daily: 0,
-      status: {
-        open: 0,
-        inProgress: 0,
-        closed: 0,
-      },
-      syncAlertsOn: 0,
-      syncAlertsOff: 0,
-      totalUsers: 0,
-      totalParticipants: 0,
-      totalTags: 0,
-      totalWithAlerts: 0,
-      totalWithConnectors: 0,
-      latestDates: {
-        createdAt: null,
-        updatedAt: null,
-        closedAt: null,
-      },
-      ...emptyAttachmentFramework(),
-    },
-    sec: {
-      total: 0,
-      monthly: 0,
-      weekly: 0,
-      daily: 0,
-      assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
-      ...emptyAttachmentFramework(),
-    },
-    obs: {
-      total: 0,
-      monthly: 0,
-      weekly: 0,
-      daily: 0,
-      assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
-      ...emptyAttachmentFramework(),
-    },
-    main: {
-      total: 0,
-      monthly: 0,
-      weekly: 0,
-      daily: 0,
-      assignees: { total: 0, totalWithAtLeastOne: 0, totalWithZero: 0 },
-      ...emptyAttachmentFramework(),
-    },
-  },
-  userActions: { all: { total: 0, monthly: 0, weekly: 0, daily: 0, maxOnACase: 0 } },
-  comments: { all: { total: 0, monthly: 0, weekly: 0, daily: 0, maxOnACase: 0 } },
-  alerts: { all: { total: 0, monthly: 0, weekly: 0, daily: 0, maxOnACase: 0 } },
-  connectors: {
-    all: {
-      all: { totalAttached: 0 },
-      itsm: { totalAttached: 0 },
-      sir: { totalAttached: 0 },
-      jira: { totalAttached: 0 },
-      resilient: { totalAttached: 0 },
-      swimlane: { totalAttached: 0 },
-      maxAttachedToACase: 0,
-    },
-  },
-  pushes: {
-    all: { total: 0, maxOnACase: 0 },
-  },
-  configuration: {
-    all: {
-      closure: {
-        manually: 0,
-        automatic: 0,
-      },
-    },
-  },
-});
 
 const emptyAttachmentFramework = (): AttachmentFramework => ({
   attachmentFramework: {

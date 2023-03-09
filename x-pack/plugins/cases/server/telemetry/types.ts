@@ -139,9 +139,9 @@ export interface Status {
 }
 
 export interface LatestDates {
-  createdAt: string | null;
-  updatedAt: string | null;
-  closedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+  closedAt: string;
 }
 
 export interface CasesTelemetry {

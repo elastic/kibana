@@ -57,9 +57,9 @@ export const getLatestCasesDates = async ({
   ]);
 
   return {
-    createdAt: savedObjects?.[0]?.saved_objects?.[0]?.attributes?.created_at ?? null,
-    updatedAt: savedObjects?.[1]?.saved_objects?.[0]?.attributes?.updated_at ?? null,
-    closedAt: savedObjects?.[2]?.saved_objects?.[0]?.attributes?.closed_at ?? null,
+    createdAt: savedObjects?.[0]?.saved_objects?.[0]?.attributes?.created_at ?? '',
+    updatedAt: savedObjects?.[1]?.saved_objects?.[0]?.attributes?.updated_at ?? '',
+    closedAt: savedObjects?.[2]?.saved_objects?.[0]?.attributes?.closed_at ?? '',
   };
 };
 
