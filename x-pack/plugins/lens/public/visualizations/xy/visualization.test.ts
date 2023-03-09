@@ -25,6 +25,9 @@ import type {
   XYByValueAnnotationLayerConfig,
   XYByReferenceAnnotationLayerConfig,
   XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
+  XYAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
 } from './types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { IconChartBar, IconCircle } from '@kbn/chart-icons';
@@ -47,6 +50,7 @@ import { layerTypes, Visualization } from '../..';
 import { set } from '@kbn/safer-lodash-set';
 import { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { getAnnotationsLayers } from './visualization_helpers';
+import { cloneDeep } from 'lodash';
 
 const exampleAnnotation: EventAnnotationConfig = {
   id: 'an1',
@@ -246,7 +250,7 @@ describe('xy_visualization', () => {
                 layerType: layerTypes.ANNOTATIONS,
                 annotations: [exampleAnnotation2],
                 ignoreGlobalFilters: true,
-              },
+              } as XYPersistedByValueAnnotationLayerConfig,
             ],
           } as XYPersistedState,
           undefined,
@@ -288,6 +292,8 @@ describe('xy_visualization', () => {
                 layerType: layerTypes.ANNOTATIONS,
                 annotations: [exampleAnnotation2],
                 ignoreGlobalFilters: true,
+                hide: undefined,
+                simpleView: undefined,
               },
             ],
           },
@@ -351,12 +357,16 @@ describe('xy_visualization', () => {
                 indexPatternId: 'data-view-123',
                 ignoreGlobalFilters: true,
                 title: 'my title!',
+                description: '',
+                tags: [],
               },
               [annotationGroupId2]: {
                 annotations: [exampleAnnotation2],
                 indexPatternId: 'data-view-773203',
                 ignoreGlobalFilters: true,
                 title: 'my other title!',
+                description: '',
+                tags: [],
               },
             },
             {
@@ -366,11 +376,13 @@ describe('xy_visualization', () => {
                 {
                   layerId: 'annotation',
                   layerType: layerTypes.ANNOTATIONS,
+                  persistanceType: 'byReference',
                   annotationGroupRef: refName1,
                 } as XYPersistedByReferenceAnnotationLayerConfig,
                 {
                   layerId: 'annotation',
                   layerType: layerTypes.ANNOTATIONS,
+                  persistanceType: 'byReference',
                   annotationGroupRef: refName2,
                 } as XYPersistedByReferenceAnnotationLayerConfig,
               ],
@@ -380,6 +392,117 @@ describe('xy_visualization', () => {
           ).layers
         )
       ).toMatchSnapshot();
+    });
+
+    it('should hydrate linked by-value annotation groups', () => {
+      const annotationGroupId1 = 'my-annotation-group-id1';
+      const annotationGroupId2 = 'my-annotation-group-id2';
+
+      const refName1 = 'my-reference';
+      const refName2 = 'my-other-reference';
+
+      const dataViewId = 'some-index-pattern-*';
+
+      const references: SavedObjectReference[] = [
+        {
+          name: refName1,
+          id: annotationGroupId1,
+          type: 'event-annotation-group',
+        },
+        {
+          name: refName2,
+          id: annotationGroupId2,
+          type: 'event-annotation-group',
+        },
+        {
+          name: 'some-name',
+          id: dataViewId,
+          type: 'index-pattern',
+        },
+      ];
+
+      const persistedAnnotationLayers: XYPersistedLinkedByValueAnnotationLayerConfig[] = [
+        {
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          persistanceType: 'linked',
+          annotationGroupRef: refName1,
+          ignoreGlobalFilters: false, // different from the persisted group
+          annotations: [], // different from the persisted group
+          hide: undefined,
+          simpleView: undefined,
+        },
+        {
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          persistanceType: 'linked',
+          annotationGroupRef: refName2,
+          ignoreGlobalFilters: false, // different from the persisted group
+          annotations: [], // different from the persisted group
+          hide: undefined,
+          simpleView: undefined,
+        },
+      ];
+
+      const libraryAnnotationGroups = {
+        [annotationGroupId1]: {
+          annotations: [exampleAnnotation],
+          indexPatternId: 'data-view-123',
+          ignoreGlobalFilters: true,
+          title: 'my title!',
+          description: '',
+          tags: [],
+        },
+        [annotationGroupId2]: {
+          annotations: [exampleAnnotation2],
+          indexPatternId: 'data-view-773203',
+          ignoreGlobalFilters: true,
+          title: 'my other title!',
+          description: '',
+          tags: [],
+        },
+      };
+
+      const expectedAnnotationLayers: XYAnnotationLayerConfig[] = [
+        {
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotationGroupId: annotationGroupId1,
+          ignoreGlobalFilters: persistedAnnotationLayers[0].ignoreGlobalFilters,
+          annotations: persistedAnnotationLayers[0].annotations,
+          hide: persistedAnnotationLayers[0].hide,
+          simpleView: persistedAnnotationLayers[0].simpleView,
+          indexPatternId: dataViewId,
+          __lastSaved: libraryAnnotationGroups[annotationGroupId1],
+        },
+        {
+          layerId: 'annotation',
+          layerType: layerTypes.ANNOTATIONS,
+          annotationGroupId: annotationGroupId2,
+          ignoreGlobalFilters: persistedAnnotationLayers[1].ignoreGlobalFilters,
+          annotations: persistedAnnotationLayers[1].annotations,
+          hide: persistedAnnotationLayers[1].hide,
+          simpleView: persistedAnnotationLayers[1].simpleView,
+          indexPatternId: dataViewId,
+          __lastSaved: libraryAnnotationGroups[annotationGroupId2],
+        },
+      ];
+
+      const baseState = exampleState();
+      expect(
+        getAnnotationsLayers(
+          xyVisualization.initialize!(
+            () => 'first',
+            libraryAnnotationGroups,
+            {
+              ...baseState,
+              layers: [...baseState.layers, ...persistedAnnotationLayers],
+            } as XYPersistedState,
+            undefined,
+            references
+          ).layers
+        )
+      ).toEqual<XYAnnotationLayerConfig[]>(expectedAnnotationLayers);
     });
   });
 
@@ -2963,27 +3086,30 @@ describe('xy_visualization', () => {
 
   describe('#getUniqueLabels', () => {
     it('creates unique labels for single annotations layer with repeating labels', async () => {
-      const xyState = {
-        layers: [
+      const annotationLayer: XYAnnotationLayerConfig = {
+        layerId: 'layerId',
+        layerType: 'annotations',
+        indexPatternId: 'some-id',
+        ignoreGlobalFilters: true,
+        simpleView: undefined,
+        hide: undefined,
+        annotations: [
           {
-            layerId: 'layerId',
-            layerType: 'annotations',
-            annotations: [
-              {
-                label: 'Event',
-                id: '1',
-              },
-              {
-                label: 'Event',
-                id: '2',
-              },
-              {
-                label: 'Custom',
-                id: '3',
-              },
-            ],
+            label: 'Event',
+            id: '1',
           },
-        ],
+          {
+            label: 'Event',
+            id: '2',
+          },
+          {
+            label: 'Custom',
+            id: '3',
+          },
+        ] as XYAnnotationLayerConfig['annotations'],
+      };
+      const xyState = {
+        layers: [annotationLayer],
       } as XYState;
 
       expect(xyVisualization.getUniqueLabels!(xyState)).toEqual({
@@ -2993,45 +3119,54 @@ describe('xy_visualization', () => {
       });
     });
     it('creates unique labels for multiple annotations layers with repeating labels', async () => {
+      const annotationLayers: XYAnnotationLayerConfig[] = [
+        {
+          layerId: 'layer1',
+          layerType: 'annotations',
+          indexPatternId: 'some-id',
+          ignoreGlobalFilters: true,
+          simpleView: undefined,
+          hide: undefined,
+          annotations: [
+            {
+              label: 'Event',
+              id: '1',
+            },
+            {
+              label: 'Event',
+              id: '2',
+            },
+            {
+              label: 'Custom',
+              id: '3',
+            },
+          ] as XYAnnotationLayerConfig['annotations'],
+        },
+        {
+          layerId: 'layer2',
+          layerType: 'annotations',
+          indexPatternId: 'some-id',
+          ignoreGlobalFilters: true,
+          simpleView: undefined,
+          hide: undefined,
+          annotations: [
+            {
+              label: 'Event',
+              id: '4',
+            },
+            {
+              label: 'Event [1]',
+              id: '5',
+            },
+            {
+              label: 'Custom',
+              id: '6',
+            },
+          ] as XYAnnotationLayerConfig['annotations'],
+        },
+      ];
       const xyState = {
-        layers: [
-          {
-            layerId: 'layer1',
-            layerType: 'annotations',
-            annotations: [
-              {
-                label: 'Event',
-                id: '1',
-              },
-              {
-                label: 'Event',
-                id: '2',
-              },
-              {
-                label: 'Custom',
-                id: '3',
-              },
-            ],
-          },
-          {
-            layerId: 'layer2',
-            layerType: 'annotations',
-            annotations: [
-              {
-                label: 'Event',
-                id: '4',
-              },
-              {
-                label: 'Event [1]',
-                id: '5',
-              },
-              {
-                label: 'Custom',
-                id: '6',
-              },
-            ],
-          },
-        ],
+        layers: annotationLayers,
       } as XYState;
 
       expect(xyVisualization.getUniqueLabels!(xyState)).toEqual({
@@ -3063,6 +3198,8 @@ describe('xy_visualization', () => {
             },
           } as PointInTimeEventAnnotationConfig,
         ],
+        hide: undefined,
+        simpleView: undefined,
       };
       state.layers = [layer];
 
@@ -3082,9 +3219,12 @@ describe('xy_visualization', () => {
                 "type": "manual",
               },
             ],
+            "hide": undefined,
             "ignoreGlobalFilters": false,
             "layerId": "layer-id",
             "layerType": "annotations",
+            "persistanceType": "byValue",
+            "simpleView": undefined,
           },
         ]
       `);
@@ -3140,7 +3280,12 @@ describe('xy_visualization', () => {
       ).map((byValueLayer, index) => ({
         ...byValueLayer,
         annotationGroupId: `annotation-group-id-${index}`,
-        __lastSaved: { ...byValueLayer, title: 'My saved object title' },
+        __lastSaved: {
+          ...byValueLayer,
+          title: 'My saved object title',
+          description: 'some description',
+          tags: [],
+        },
       }));
 
       state.layers = layers;
@@ -3153,11 +3298,17 @@ describe('xy_visualization', () => {
           annotationGroupRef: savedObjectReferences[0].name,
           layerId: 'layer-id',
           layerType: 'annotations',
+          persistanceType: 'byReference',
+          hide: undefined,
+          simpleView: undefined,
         },
         {
           annotationGroupRef: savedObjectReferences[1].name,
           layerId: 'layer-id2',
           layerType: 'annotations',
+          persistanceType: 'byReference',
+          hide: undefined,
+          simpleView: undefined,
         },
       ]);
 
@@ -3177,6 +3328,88 @@ describe('xy_visualization', () => {
       ]);
 
       expect(savedObjectReferences[0].name).not.toBe(savedObjectReferences[1].name);
+    });
+
+    it('should persist unsaved changes to by-reference annotation layers', () => {
+      const state = exampleState();
+      const layers: XYByReferenceAnnotationLayerConfig[] = (
+        [
+          {
+            layerId: 'layer-id',
+            layerType: 'annotations',
+            indexPatternId: 'some-index-pattern',
+            ignoreGlobalFilters: false,
+            annotations: [
+              {
+                id: 'some-annotation-id',
+                type: 'manual',
+                key: {
+                  type: 'point_in_time',
+                  timestamp: 'timestamp',
+                },
+              } as PointInTimeEventAnnotationConfig,
+            ],
+          },
+          {
+            layerId: 'layer-id2',
+            layerType: 'annotations',
+            indexPatternId: 'some-index-pattern',
+            ignoreGlobalFilters: false,
+            annotations: [
+              {
+                id: 'some-annotation-id2',
+                type: 'manual',
+                key: {
+                  type: 'point_in_time',
+                  timestamp: 'timestamp',
+                },
+              } as PointInTimeEventAnnotationConfig,
+            ],
+          },
+        ] as XYByValueAnnotationLayerConfig[]
+      ).map((byValueLayer, index) => ({
+        ...byValueLayer,
+        annotationGroupId: `annotation-group-id-${index}`,
+        __lastSaved: {
+          ...byValueLayer,
+          annotations: cloneDeep(byValueLayer.annotations),
+          title: 'My saved object title',
+          description: 'some description',
+          tags: [],
+        },
+      }));
+
+      // introduce some changes
+      layers[0].ignoreGlobalFilters = true;
+      layers[1].annotations[0].color = '#new-color';
+
+      state.layers = layers;
+
+      const { state: persistableState, savedObjectReferences } =
+        xyVisualization.getPersistableState!(state);
+
+      expect(persistableState.layers).toEqual([
+        {
+          annotationGroupRef: savedObjectReferences[0].name,
+          layerId: 'layer-id',
+          layerType: 'annotations',
+          persistanceType: 'linked',
+          annotations: layers[0].annotations,
+          hide: layers[0].hide,
+          ignoreGlobalFilters: layers[0].ignoreGlobalFilters,
+          simpleView: layers[0].simpleView,
+        },
+        {
+          annotationGroupRef: savedObjectReferences[1].name,
+          layerId: 'layer-id2',
+          layerType: 'annotations',
+          persistanceType: 'linked',
+          annotations: layers[1].annotations,
+          hide: layers[1].hide,
+          ignoreGlobalFilters: layers[1].ignoreGlobalFilters,
+          simpleView: layers[1].simpleView,
+        },
+      ]);
     });
   });
 

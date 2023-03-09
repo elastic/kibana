@@ -22,6 +22,9 @@ import {
   XYByReferenceAnnotationLayerConfig,
   XYPersistedAnnotationLayerConfig,
   XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedLinkedByValueAnnotationLayerConfig,
+  XYPersistedLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
 } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
@@ -141,11 +144,19 @@ export const getReferenceLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'
 
 export const isAnnotationsLayer = (
   layer: Pick<XYLayerConfig, 'layerType'>
-): layer is XYAnnotationLayerConfig => layer.layerType === layerTypes.ANNOTATIONS;
+): layer is XYAnnotationLayerConfig =>
+  layer.layerType === layerTypes.ANNOTATIONS && 'indexPatternId' in layer;
+
+export const isPersistedAnnotationsLayer = (
+  layer: XYPersistedLayerConfig
+): layer is XYPersistedAnnotationLayerConfig =>
+  layer.layerType === layerTypes.ANNOTATIONS && !('indexPatternId' in layer);
 
 export const isPersistedByValueAnnotationsLayer = (
-  layer: Pick<XYLayerConfig, 'layerType'>
-): layer is XYAnnotationLayerConfig => layer.layerType === layerTypes.ANNOTATIONS;
+  layer: XYPersistedLayerConfig
+): layer is XYPersistedByValueAnnotationLayerConfig =>
+  isPersistedAnnotationsLayer(layer) &&
+  (layer.persistanceType === 'byValue' || !layer.persistanceType);
 
 export const isByReferenceAnnotationsLayer = (
   layer: XYAnnotationLayerConfig
@@ -154,7 +165,13 @@ export const isByReferenceAnnotationsLayer = (
 
 export const isPersistedByReferenceAnnotationsLayer = (
   layer: XYPersistedAnnotationLayerConfig
-): layer is XYPersistedByReferenceAnnotationLayerConfig => 'annotationGroupRef' in layer;
+): layer is XYPersistedByReferenceAnnotationLayerConfig =>
+  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'byReference';
+
+export const isPersistedLinkedByValueAnnotationsLayer = (
+  layer: XYPersistedAnnotationLayerConfig
+): layer is XYPersistedLinkedByValueAnnotationLayerConfig =>
+  isPersistedAnnotationsLayer(layer) && layer.persistanceType === 'linked';
 
 export const getAnnotationsLayers = (layers: Array<Pick<XYLayerConfig, 'layerType'>>) =>
   (layers || []).filter((layer): layer is XYAnnotationLayerConfig => isAnnotationsLayer(layer));

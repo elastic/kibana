@@ -119,27 +119,49 @@ export interface XYByValueAnnotationLayerConfig {
   layerId: string;
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
-  hide?: boolean;
+  hide: boolean | undefined;
   indexPatternId: string;
-  simpleView?: boolean;
+  simpleView: boolean | undefined;
   ignoreGlobalFilters: boolean;
 }
 
 export type XYPersistedByValueAnnotationLayerConfig = Omit<
   XYByValueAnnotationLayerConfig,
   'indexPatternId'
->;
+> & { persistanceType?: 'byValue' }; // optional for backwards compatibility
 
 export type XYByReferenceAnnotationLayerConfig = XYByValueAnnotationLayerConfig & {
   annotationGroupId: string;
   __lastSaved: EventAnnotationGroupConfig;
 };
 
-export interface XYPersistedByReferenceAnnotationLayerConfig {
-  layerId: string;
-  layerType: 'annotations';
+export type XYPersistedByReferenceAnnotationLayerConfig = Pick<
+  XYPersistedByValueAnnotationLayerConfig,
+  'layerId' | 'layerType' | 'hide' | 'simpleView'
+> & {
+  persistanceType: 'byReference';
   annotationGroupRef: string;
-}
+};
+
+/**
+ * This is the type of hybrid layer we get after the user has made a change to
+ * a by-reference annotation layer and saved the visualization without
+ * first saving the changes to the library annotation layer.
+ *
+ * We maintain the link to the library annotation group, but allow the users
+ * changes (persisted in the visualization state) to override the attributes in
+ * the library version until the user
+ * - saves the changes to the library annotation group
+ * - reverts the changes
+ * - unlinks the layer from the library annotation group
+ */
+export type XYPersistedLinkedByValueAnnotationLayerConfig = Omit<
+  XYPersistedByValueAnnotationLayerConfig,
+  'persistanceType'
+> &
+  Omit<XYPersistedByReferenceAnnotationLayerConfig, 'persistanceType'> & {
+    persistanceType: 'linked';
+  };
 
 export type XYAnnotationLayerConfig =
   | XYByReferenceAnnotationLayerConfig
@@ -147,7 +169,8 @@ export type XYAnnotationLayerConfig =
 
 export type XYPersistedAnnotationLayerConfig =
   | XYPersistedByReferenceAnnotationLayerConfig
-  | XYPersistedByValueAnnotationLayerConfig;
+  | XYPersistedByValueAnnotationLayerConfig
+  | XYPersistedLinkedByValueAnnotationLayerConfig;
 
 export type XYPersistedLayerConfig =
   | XYDataLayerConfig
