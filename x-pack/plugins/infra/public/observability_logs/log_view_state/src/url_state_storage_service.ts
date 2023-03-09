@@ -11,6 +11,7 @@ import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugi
 import { InvokeCreator } from 'xstate';
 import * as Either from 'fp-ts/lib/Either';
 import { identity, pipe } from 'fp-ts/lib/function';
+import { map } from 'rxjs';
 import { createPlainError, formatErrors } from '../../../../common/runtime_types';
 import { logViewReferenceRT, PersistedLogViewReference } from '../../../../common/log_views';
 import { LogViewContext, LogViewEvent } from './types';
@@ -32,7 +33,9 @@ export const updateContextInUrl =
       throw new Error('Missing keys from context needed to sync to the URL');
     }
 
-    urlStateStorage.set(logViewKey, logViewStateInUrlRT.encode(context.logViewReference));
+    urlStateStorage.set(logViewKey, logViewStateInUrlRT.encode(context.logViewReference), {
+      replace: true,
+    });
   };
 
 export const initializeFromUrl =
@@ -80,6 +83,28 @@ export const initializeFromUrl =
         ),
       });
     }
+  };
+
+// NOTE: Certain navigations within the Logs solution will remove the logView URL key,
+// we want to ensure the logView key is present in the URL at all times by monitoring for it's removal.
+export const listenForUrlChanges =
+  ({
+    urlStateStorage,
+    logViewKey = defaultLogViewKey,
+  }: {
+    urlStateStorage: LogViewUrlStateDependencies['urlStateStorage'];
+    logViewKey?: LogViewUrlStateDependencies['logViewKey'];
+  }): InvokeCreator<LogViewContext, LogViewEvent> =>
+  (context, event) => {
+    return urlStateStorage
+      .change$(logViewKey)
+      .pipe(
+        map((value) =>
+          value === undefined || value === null
+            ? { type: 'LOG_VIEW_URL_KEY_REMOVED' }
+            : { type: 'LOG_VIEW_URL_KEY_CHANGED' }
+        )
+      );
   };
 
 const logViewStateInUrlRT = rt.union([logViewReferenceRT, rt.null]);

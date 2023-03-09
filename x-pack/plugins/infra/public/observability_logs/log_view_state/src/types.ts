@@ -152,7 +152,9 @@ export type LogViewEvent =
   | { type: 'PERSISTING_INLINE_LOG_VIEW_SUCCEEDED'; logView: LogView }
   | {
       type: 'RETRY_PERSISTING_INLINE_LOG_VIEW';
-    };
+    }
+  | { type: 'LOG_VIEW_URL_KEY_REMOVED' }
+  | { type: 'LOG_VIEW_URL_KEY_CHANGED' };
 
 export type LogViewActorRef = ActorRef<LogViewEvent, LogViewContext>;
 export type LogViewNotificationChannel = NotificationChannel<
