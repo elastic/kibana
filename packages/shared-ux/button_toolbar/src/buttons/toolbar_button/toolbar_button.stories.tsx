@@ -7,18 +7,12 @@
  */
 
 import React from 'react';
-import { ToolbarButton as Component } from './toolbar_button';
-import mdx from '../../../README.mdx';
 
-export default {
-  title: 'Button Toolbar/Buttons',
-  description: 'A button that is a part of a toolbar.',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
-};
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
+
+import { ToolbarButton as Component } from './toolbar_button';
+
+import content, { attributes } from '../../../README.mdx';
 
 const argTypes = {
   buttonType: {
@@ -43,6 +37,13 @@ export const ToolbarButton = ({ buttonType, iconSide }: Params) => {
   return (
     <Component label="Toolbar button" iconType="lensApp" type={buttonType} iconSide={iconSide} />
   );
+};
+
+export default {
+  title: 'Button Toolbar/Buttons',
+  description: 'A button that is a part of a toolbar.',
+  parameters: getMetaElementParameters(attributes, content),
+  argTypes,
 };
 
 ToolbarButton.argTypes = argTypes;

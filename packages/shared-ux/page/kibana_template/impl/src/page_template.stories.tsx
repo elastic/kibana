@@ -19,21 +19,18 @@ import type {
   SolutionNavStorybookParams,
   InnerPageTemplateStorybookParams,
 } from '@kbn/shared-ux-page-kibana-template-mocks';
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
 
 import { KibanaPageTemplateProvider } from './services';
 
 import { KibanaPageTemplate as Component } from './page_template';
-import mdx from '../README.mdx';
+import content, { attributes } from '../README.mdx';
 
 export default {
   title: 'Page/Page Template',
   description:
     'A thin wrapper around `EuiTemplate`. Takes care of styling, empty state and no data config',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
 };
 
 const templateMock = new KibanaPageTemplateStorybookMock();

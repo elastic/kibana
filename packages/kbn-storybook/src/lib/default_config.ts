@@ -32,6 +32,10 @@ export const defaultConfig: StorybookConfig = {
   typescript: {
     reactDocgen: false,
   },
+  core: {
+    builder: 'webpack4',
+    disableTelemetry: true,
+  },
   features: {
     postcss: false,
   },

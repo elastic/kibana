@@ -9,9 +9,11 @@
 import React from 'react';
 
 import { EuiContextMenu } from '@elastic/eui';
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
 
 import { ToolbarPopover as Component } from './popover';
-import mdx from '../../README.mdx';
+
+import content, { attributes } from '../../README.mdx';
 
 const argTypes = {
   showIcon: {
@@ -34,11 +36,7 @@ type Params = Record<keyof typeof argTypes, any>;
 export default {
   title: 'Button Toolbar',
   description: 'A popover that is a part of a toolbar.',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
   argTypes,
 };
 

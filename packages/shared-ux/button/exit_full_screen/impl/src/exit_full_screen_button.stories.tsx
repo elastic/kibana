@@ -9,21 +9,18 @@
 import React from 'react';
 import { ExitFullScreenButtonStorybookMock } from '@kbn/shared-ux-button-exit-full-screen-mocks';
 import type { ExitFullScreenButtonStorybookParams } from '@kbn/shared-ux-button-exit-full-screen-mocks';
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
 
 import { ExitFullScreenButtonProvider } from './services';
 import { ExitFullScreenButton as Component } from './exit_full_screen_button';
 
-import mdx from '../README.mdx';
+import mdx, { attributes } from '../README.mdx';
 
 export default {
   title: 'Button/Exit Full Screen Button',
   description:
     'A button that floats over the plugin workspace and allows one to exit "full screen" mode.',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, mdx),
 };
 
 const mock = new ExitFullScreenButtonStorybookMock();

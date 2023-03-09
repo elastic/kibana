@@ -10,22 +10,19 @@ import React from 'react';
 
 import { NoDataConfigPageStorybookMock } from '@kbn/shared-ux-page-no-data-config-mocks';
 import type { NoDataConfigPageStorybookParams } from '@kbn/shared-ux-page-no-data-config-mocks';
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
 
 import { NoDataConfigPage as Component } from './no_data_config_page';
-
 import { NoDataConfigPageProvider } from './services';
-import mdx from '../README.mdx';
+
+import content, { attributes } from '../README.mdx';
 
 const mock = new NoDataConfigPageStorybookMock();
 
 export default {
   title: 'No Data/Page/No Data Config Page',
   description: 'A component to display when there is no data available',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
 };
 
 export const NoDataConfigPage = (params: NoDataConfigPageStorybookParams) => {

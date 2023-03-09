@@ -11,20 +11,17 @@ import {
   NoDataViewsPromptStorybookMock,
   NoDataViewsPromptStorybookParams,
 } from '@kbn/shared-ux-prompt-no-data-views-mocks';
+import { getMetaElementParameters } from '@kbn/shared-ux-storybook-docs';
 
 import { NoDataViewsPrompt } from './no_data_views';
 import { NoDataViewsPromptProvider } from './services';
 
-import mdx from '../README.mdx';
+import content, { attributes } from '../README.mdx';
 
 export default {
   title: 'No Data/Prompt',
   description: 'A component to display when there are no user-created data views available.',
-  parameters: {
-    docs: {
-      page: mdx,
-    },
-  },
+  parameters: getMetaElementParameters(attributes, content),
 };
 
 const mock = new NoDataViewsPromptStorybookMock();
