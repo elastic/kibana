@@ -12,7 +12,7 @@ import windowsSvg from './logos/windows.svg';
 import macosSvg from './logos/macos.svg';
 
 export type Platform = 'macos' | 'linux' | 'windows';
-const getPlatformIcon = (platform: Platform) => {
+const getPlatformIcon = (platform: Platform): string | null => {
   switch (platform) {
     case 'macos':
       return macosSvg;
@@ -21,7 +21,7 @@ const getPlatformIcon = (platform: Platform) => {
     case 'windows':
       return windowsSvg;
     default:
-      return `${platform}`;
+      return null;
   }
 };
 
@@ -31,7 +31,7 @@ export const PlatformIcon = memo<{
 }>(({ platform, size = 'xl' }) => {
   const platformIcon = useMemo(() => getPlatformIcon(platform), [platform]);
 
-  return <EuiIcon type={platformIcon} title={platform} size={size} />;
+  return <EuiIcon type={!platformIcon ? 'empty' : platformIcon} title={platform} size={size} />;
 });
 
 PlatformIcon.displayName = 'PlatformIcon';
