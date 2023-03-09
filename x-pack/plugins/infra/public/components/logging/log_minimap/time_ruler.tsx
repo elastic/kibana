@@ -9,7 +9,7 @@ import { scaleTime } from 'd3-scale';
 import * as React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import moment from 'moment';
+import { useKibanaTimeZoneSetting } from '../../../hooks/use_kibana_time_zone_setting';
 import { getTimeLabelFormat } from './time_label_formatter';
 
 interface TimeRulerProps {
@@ -20,32 +20,23 @@ interface TimeRulerProps {
   width: number;
 }
 
-const ONE_MINUTE = 60000;
+const useZonedDate = (timestamp: number) => {
+  const timeZone = useKibanaTimeZoneSetting();
 
-/**
- * In order to get the correct timestamp for a custom timezone
- * we need, from the current timestamp, to add:
- * 1. The current timezone offset in milliseconds (positive or negative)
- * 2. The UTC offset in milliseconds (positive or negative)
- * This guarantees the timestamp we return is related to the timezone set globally in moment-js.
- */
-const applyTimezoneOffset = (utcTimestamp: number) => {
-  const timezoneOffsetMillis = new Date(utcTimestamp).getTimezoneOffset() * ONE_MINUTE;
-  const utcOffsetMillis = moment(utcTimestamp).utcOffset() * ONE_MINUTE;
-
-  return utcTimestamp + timezoneOffsetMillis + utcOffsetMillis;
+  const options = timeZone !== 'local' ? { timeZone } : undefined;
+  return new Date(new Date(timestamp).toLocaleString('en-US', options));
 };
 
 export const TimeRuler: React.FC<TimeRulerProps> = ({ end, height, start, tickCount, width }) => {
-  const startWithOffset = React.useMemo(() => applyTimezoneOffset(start), [start]);
-  const endWithOffset = React.useMemo(() => applyTimezoneOffset(end), [end]);
+  const startWithOffset = useZonedDate(start);
+  const endWithOffset = useZonedDate(end);
 
   const yScale = scaleTime().domain([startWithOffset, endWithOffset]).range([0, height]);
 
   const ticks = yScale.ticks(tickCount);
   const formatTick = yScale.tickFormat(
     tickCount,
-    getTimeLabelFormat(startWithOffset, endWithOffset)
+    getTimeLabelFormat(startWithOffset.getTime(), endWithOffset.getTime())
   );
 
   return (
