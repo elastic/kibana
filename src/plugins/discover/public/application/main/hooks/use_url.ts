@@ -7,6 +7,7 @@
  */
 import { useEffect } from 'react';
 import { History } from 'history';
+import { FetchStatus } from '../../types';
 import { DiscoverStateContainer } from '../services/discover_state';
 export function useUrl({
   history,
@@ -23,9 +24,11 @@ export function useUrl({
     // which could be set through pressing "New" button in top nav or go to "Discover" plugin from the sidebar
     // to reload the page in a right way
     const unlistenHistoryBasePath = history.listen(async ({ pathname, search, hash }) => {
-      if (!search && !hash && pathname === '/') {
+      if (!search && !hash && pathname === '/' && !stateContainer.savedSearchState.get().id) {
         await stateContainer.actions.loadSavedSearch();
-        await stateContainer.dataState.fetch();
+        if (stateContainer.dataState.getInitialFetchStatus() === FetchStatus.LOADING) {
+          stateContainer.dataState.fetch();
+        }
       }
     });
     return () => unlistenHistoryBasePath();

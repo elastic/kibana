@@ -23,7 +23,8 @@ import { DataView, DataViewSpec, DataViewType } from '@kbn/data-views-plugin/pub
 import { getEmptySavedSearch, SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
-import { AggregateQuery, TimeRange, Query } from '@kbn/es-query';
+import { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import { loadSavedSearch as loadNextSavedSearch } from './load_saved_search';
 import { buildStateSubscribe } from '../hooks/utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
 import { getUrlTracker } from '../../../kibana_services';
@@ -48,6 +49,7 @@ import {
   SavedSearchContainer,
 } from './discover_saved_search_container';
 import { updateFiltersReferences } from '../utils/update_filter_references';
+
 interface DiscoverStateContainerParams {
   /**
    * Browser history
@@ -62,67 +64,6 @@ interface DiscoverStateContainerParams {
    */
   services: DiscoverServices;
 }
-
-const loadPersistedSavedSearch = async (
-  id: string,
-  dataView: DataView | undefined,
-  {
-    appStateContainer,
-    internalStateContainer,
-    savedSearchContainer,
-  }: {
-    appStateContainer: DiscoverAppStateContainer;
-    internalStateContainer: InternalStateContainer;
-    savedSearchContainer: SavedSearchContainer;
-  }
-): Promise<SavedSearch> => {
-  addLog('🧭 [discoverState] loadSavedSearch');
-  const isEmptyURL = appStateContainer.isEmptyURL();
-  if (isEmptyURL) {
-    appStateContainer.set({});
-  }
-  const currentSavedSearch = await savedSearchContainer.load(id, {
-    dataViewList: internalStateContainer.getState().savedDataViews,
-    appState: !isEmptyURL ? appStateContainer.getState() : undefined,
-  });
-  if (dataView?.id && dataView?.id !== currentSavedSearch.searchSource.getField('index')?.id) {
-    savedSearchContainer.update({
-      nextDataView: dataView,
-      nextState: appStateContainer.getState(),
-    });
-  }
-  if (currentSavedSearch) {
-    await appStateContainer.resetWithSavedSearch(currentSavedSearch);
-  }
-  return currentSavedSearch;
-};
-
-const loadNewSavedSearch = async (
-  nextDataView: DataView,
-  {
-    appStateContainer,
-    savedSearchContainer,
-  }: {
-    appStateContainer: DiscoverAppStateContainer;
-    savedSearchContainer: SavedSearchContainer;
-  }
-) => {
-  addLog('🧭 [discoverState] loadNewSavedSearch', { nextDataView });
-  const isEmptyURL = appStateContainer.isEmptyURL();
-  const nextSavedSearch = await savedSearchContainer.new(
-    nextDataView,
-    !isEmptyURL ? appStateContainer.getState() : undefined
-  );
-
-  appStateContainer.resetWithSavedSearch(nextSavedSearch);
-  /**
-  await savedSearchContainer.update({
-    nextDataView,
-    nextState: appStateContainer.getState(),
-    resetSavedSearch: true,
-  }); **/
-  return nextSavedSearch;
-};
 
 export interface DiscoverStateContainer {
   /**
@@ -343,13 +284,13 @@ export function getDiscoverStateContainer({
   };
 
   const onOpenSavedSearch = async (newSavedSearchId: string) => {
-    addLog('🧭 [discoverState] onOpenSavedSearch', newSavedSearchId);
+    addLog('[discoverState] onOpenSavedSearch', newSavedSearchId);
     const currentSavedSearch = savedSearchContainer.get();
     if (currentSavedSearch.id && currentSavedSearch.id === newSavedSearchId) {
-      addLog("🧭 [discoverState] undo changes since saved search didn't change");
+      addLog('[discoverState] undo changes since saved search did not change');
       await undoChanges();
     } else {
-      addLog('🧭 [discoverState] onOpenSavedSearch open view URL');
+      addLog('[discoverState] onOpenSavedSearch open view URL');
       history.push(`/view/${encodeURIComponent(newSavedSearchId)}`);
     }
   };
@@ -359,26 +300,16 @@ export function getDiscoverStateContainer({
     nextDataView?: DataView,
     dataViewSpec?: DataViewSpec
   ): Promise<SavedSearch> => {
-    let nextSavedSearch: SavedSearch;
     const { dataView } = nextDataView
       ? { dataView: nextDataView }
       : await loadAndResolveDataView(appStateContainer.getState().index, dataViewSpec);
-    if (typeof id === 'string') {
-      const isEmptyURL = appStateContainer.isEmptyURL();
-      if (isEmptyURL) {
-        appStateContainer.set({});
-      }
-      nextSavedSearch = await loadPersistedSavedSearch(id, isEmptyURL ? undefined : dataView, {
-        appStateContainer,
-        internalStateContainer,
-        savedSearchContainer,
-      });
-    } else {
-      nextSavedSearch = await loadNewSavedSearch(dataView, {
-        appStateContainer,
-        savedSearchContainer,
-      });
-    }
+
+    const nextSavedSearch = await loadNextSavedSearch(id, dataView, {
+      appStateContainer,
+      internalStateContainer,
+      savedSearchContainer,
+    });
+
     const actualDataView = nextSavedSearch.searchSource.getField('index');
     if (actualDataView) {
       setDataView(actualDataView);

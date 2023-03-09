@@ -18,7 +18,6 @@ import { addLog } from '../../../utils/add_log';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { AppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
-import { restoreStateFromSavedSearch } from '../../../services/saved_searches/restore_from_saved_search';
 import { persistSavedSearch } from '../utils/persist_saved_search';
 import { getStateDefaults } from '../utils/get_state_defaults';
 
@@ -49,11 +48,9 @@ export interface SavedSearchContainer {
   getPersisted$: () => BehaviorSubject<SavedSearch>;
   getVolatile$: () => BehaviorSubject<SavedSearch>;
   hasChanged$: BehaviorSubject<boolean>;
-  isPersisted: () => boolean;
   load: (id: string, params: LoadParams) => Promise<SavedSearch>;
-  new: (initialDataView: DataView, appState?: AppState) => Promise<SavedSearch>;
+  new: (dataView?: DataView, appState?: AppState) => Promise<SavedSearch>;
   persist: PersistFunction;
-  reset: (id?: string) => Promise<SavedSearch | undefined>;
   set: (savedSearch: SavedSearch) => SavedSearch;
   update: (params: UpdateParams) => SavedSearch;
 }
@@ -69,7 +66,7 @@ export function getSavedSearchContainer({
   const savedSearchVolatile$ = new BehaviorSubject(savedSearch);
   const hasChanged$ = new BehaviorSubject(false);
   const set = (newSavedSearch: SavedSearch) => {
-    addLog('🔎 [savedSearch] set', newSavedSearch);
+    addLog('[savedSearch] set', newSavedSearch);
     hasChanged$.next(false);
     savedSearchVolatile$.next(newSavedSearch);
     const persistedSavedSearch = {
@@ -79,40 +76,14 @@ export function getSavedSearchContainer({
     savedSearchPersisted$.next(persistedSavedSearch);
     return newSavedSearch;
   };
-  const get = () => {
-    return savedSearchVolatile$.getValue();
-  };
+  const get = () => savedSearchVolatile$.getValue();
   const getPersisted$ = () => savedSearchPersisted$;
   const getVolatile$ = () => savedSearchVolatile$;
-  const getTitle = () => {
-    return savedSearchVolatile$.getValue().title ?? '';
-  };
-  const getId = () => {
-    return savedSearchVolatile$.getValue().id;
-  };
-
-  const reset = async (id: string | undefined) => {
-    // any undefined if means it's a new saved search generated
-    const dataView = get().searchSource.getField('index');
-    const newSavedSearch = await getSavedSearch(id, {
-      search: services.data.search,
-      savedObjectsClient: services.core.savedObjects.client,
-      spaces: services.spaces,
-      savedObjectsTagging: services.savedObjectsTagging,
-    });
-    if (!newSavedSearch.searchSource.getField('index')) {
-      newSavedSearch.searchSource.setField('index', dataView);
-    }
-    restoreStateFromSavedSearch({
-      savedSearch: newSavedSearch,
-      timefilter: services.timefilter,
-    });
-    set(newSavedSearch);
-    return newSavedSearch;
-  };
+  const getTitle = () => savedSearchVolatile$.getValue().title ?? '';
+  const getId = () => savedSearchVolatile$.getValue().id;
 
   const newSavedSearch = async (nextDataView: DataView | undefined, appState?: AppState) => {
-    addLog('🔎 [savedSearch] new', { nextDataView, appState });
+    addLog('[savedSearch] new', { nextDataView, appState });
     const dataView = nextDataView ?? get().searchSource.getField('index');
     const nextSavedSearch = await getSavedSearch('', {
       search: services.data.search,
@@ -155,10 +126,8 @@ export function getSavedSearchContainer({
     }
     return { id };
   };
-
-  const isPersisted = () => Boolean(savedSearchVolatile$.getValue().id);
   const update = ({ nextDataView, nextState, resetSavedSearch, filterAndQuery }: UpdateParams) => {
-    addLog('🔎 [savedSearch] update', { nextDataView, nextState, resetSavedSearch });
+    addLog('[savedSearch] update', { nextDataView, nextState, resetSavedSearch });
 
     const previousSavedSearch = get();
     const dataView = nextDataView
@@ -229,11 +198,9 @@ export function getSavedSearchContainer({
     getPersisted$,
     getVolatile$,
     hasChanged$,
-    isPersisted,
     load,
     new: newSavedSearch,
     persist,
-    reset,
     set,
     update,
   };

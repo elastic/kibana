@@ -16,7 +16,6 @@ import { useCallback, useEffect, useRef } from 'react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { DiscoverStateContainer } from '../services/discover_state';
-import type { DataDocuments$ } from '../services/discover_data_state_container';
 import { FetchStatus } from '../../types';
 
 const MAX_NUM_OF_COLUMNS = 50;
@@ -26,12 +25,10 @@ const MAX_NUM_OF_COLUMNS = 50;
  * If necessary this is setting displayed columns and selected data view
  */
 export function useTextBasedQueryLanguage({
-  documents$,
   dataViews,
   stateContainer,
   savedSearch,
 }: {
-  documents$: DataDocuments$;
   stateContainer: DiscoverStateContainer;
   dataViews: DataViewsContract;
   savedSearch: SavedSearch;
@@ -52,7 +49,7 @@ export function useTextBasedQueryLanguage({
   }, []);
 
   useEffect(() => {
-    const subscription = documents$.subscribe(async (next) => {
+    const subscription = stateContainer.dataState.data$.documents$.subscribe(async (next) => {
       const { query, recordRawType } = next;
       if (!query || next.fetchStatus === FetchStatus.ERROR) {
         return;
@@ -127,5 +124,5 @@ export function useTextBasedQueryLanguage({
       cleanup();
       subscription.unsubscribe();
     };
-  }, [documents$, dataViews, stateContainer, savedSearch, cleanup]);
+  }, [dataViews, stateContainer, savedSearch, cleanup]);
 }

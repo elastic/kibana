@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import { createSearchSourceMock } from '@kbn/data-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { renderHook } from '@testing-library/react-hooks';
 import { useAdHocDataViews } from './use_adhoc_data_views';
@@ -67,16 +66,10 @@ const mockDataView = {
   isTimeBased: () => true,
 } as DataView;
 
-const savedSearchMock = {
-  id: 'some-id',
-  searchSource: createSearchSourceMock({ index: mockDataView }),
-};
-
 describe('useAdHocDataViews', () => {
   it('should save data view with new id and update saved search', async () => {
     const stateContainer = getDiscoverStateMock({
       isTimeBased: true,
-      savedSearch: savedSearchMock,
     });
     stateContainer.actions.setDataView(mockDataView);
 

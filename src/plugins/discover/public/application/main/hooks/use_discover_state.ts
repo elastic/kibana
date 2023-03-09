@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 import { useEffect, useCallback } from 'react';
+import { FetchStatus } from '../../types';
 import { changeDataView } from './utils/change_data_view';
 import { useSearchSession } from './use_search_session';
-import { FetchStatus } from '../../types';
 import { useTextBasedQueryLanguage } from './use_text_based_query_language';
 import { useUrlTracking } from './use_url_tracking';
 import { DiscoverStateContainer } from '../services/discover_state';
@@ -41,14 +41,9 @@ export function useDiscoverState({
   });
 
   /**
-   * Data fetching logic
-   */
-  const { data$ } = stateContainer.dataState;
-  /**
    * State changes (data view, columns), when a text base query result is returned
    */
   useTextBasedQueryLanguage({
-    documents$: data$.documents$,
     dataViews,
     stateContainer,
     savedSearch,
