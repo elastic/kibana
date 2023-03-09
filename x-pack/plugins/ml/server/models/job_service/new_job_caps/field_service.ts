@@ -10,7 +10,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import type { Field, FieldId, NewJobCaps, RollupFields } from '../../../../common/types/fields';
+import type { Field, NewJobCaps, RollupFields } from '../../../../common/types/fields';
 import { combineFieldsAndAggs } from '../../../../common/util/fields_utils';
 import { rollupServiceProvider } from './rollup';
 import { aggregations, mlOnlyAggregations } from '../../../../common/constants/aggregation_types';
@@ -62,7 +62,7 @@ class FieldsService {
     this._dataViewsService = dataViewsService;
   }
 
-  private async loadFieldCaps(): Promise<any> {
+  private async loadFieldCaps() {
     return await this._mlClusterClient.asCurrentUser.fieldCaps(
       {
         index: this._indexPattern,
@@ -77,7 +77,7 @@ class FieldsService {
     const fieldCaps = await this.loadFieldCaps();
     const fields: Field[] = [];
     if (fieldCaps && fieldCaps.fields) {
-      Object.keys(fieldCaps.fields).forEach((k: FieldId) => {
+      Object.keys(fieldCaps.fields).forEach((k) => {
         const fc = fieldCaps.fields[k];
         const firstKey = Object.keys(fc)[0];
         if (firstKey !== undefined) {
@@ -90,8 +90,8 @@ class FieldsService {
             fields.push({
               id: k,
               name: k,
-              type: field.type,
-              aggregatable: field.aggregatable,
+              type: field.type as ES_FIELD_TYPES,
+              aggregatable: field.time_series_metric !== 'counter' ?? field.aggregatable,
               aggs: [],
             });
           }
