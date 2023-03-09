@@ -140,5 +140,5 @@ const getRefetchDeps = ({
     filters,
     query,
     relativeTimeRange,
-    currentSuggestion,
+    currentSuggestion?.visualizationId,
   ]);

@@ -52,15 +52,25 @@ export const useLensSuggestions = ({
 
   const [allSuggestions, setAllSuggestions] = useState(suggestions.restSuggestions);
   const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
-  const previousColumn = useRef(columns);
+  const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
 
   useEffect(() => {
-    if (!isEqual(columns, previousColumn.current)) {
+    const newSuggestionsDeps = getSuggestionDeps({ dataView, query, columns });
+
+    if (!isEqual(suggestionDeps.current, newSuggestionsDeps)) {
       setAllSuggestions(suggestions.restSuggestions);
       onSuggestionChange?.(suggestions.firstSuggestion);
-      previousColumn.current = columns;
+
+      suggestionDeps.current = newSuggestionsDeps;
     }
-  }, [columns, onSuggestionChange, suggestions.firstSuggestion, suggestions.restSuggestions]);
+  }, [
+    columns,
+    dataView,
+    onSuggestionChange,
+    query,
+    suggestions.firstSuggestion,
+    suggestions.restSuggestions,
+  ]);
 
   return {
     allSuggestions,
@@ -70,3 +80,13 @@ export const useLensSuggestions = ({
       (!currentSuggestion || currentSuggestion?.visualizationId === 'lnsDatatable'),
   };
 };
+
+const getSuggestionDeps = ({
+  dataView,
+  query,
+  columns,
+}: {
+  dataView: DataView;
+  query?: Query | AggregateQuery;
+  columns?: string[];
+}) => [dataView.id, columns, query];

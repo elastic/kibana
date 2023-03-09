@@ -27,6 +27,7 @@ import type { DataFetch$, SavedSearchData } from '../../services/discover_data_s
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
 import type { DiscoverStateContainer } from '../../services/discover_state';
+import type { Suggestion } from '@kbn/lens-plugin/public';
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
@@ -324,6 +325,25 @@ export const useDiscoverHistogram = ({
     };
   }, [savedSearchFetch$, unifiedHistogram]);
 
+  // Reload the chart when the current suggestion changes
+  const [currentSuggestion, setCurrentSuggestion] = useState<Suggestion>();
+
+  useEffect(() => {
+    if (currentSuggestion) {
+      unifiedHistogram?.refetch();
+    }
+  }, [currentSuggestion, unifiedHistogram]);
+
+  useEffect(() => {
+    const subscription = createCurrentSuggestionObservable(unifiedHistogram?.state$)?.subscribe(
+      setCurrentSuggestion
+    );
+
+    return () => {
+      subscription?.unsubscribe();
+    };
+  }, [unifiedHistogram]);
+
   return { hideChart, setUnifiedHistogramApi };
 };
 
@@ -348,5 +368,12 @@ const createTotalHitsObservable = (state$?: Observable<UnifiedHistogramState>) =
   return state$?.pipe(
     map((state) => ({ status: state.totalHitsStatus, result: state.totalHitsResult })),
     distinctUntilChanged((prev, curr) => prev.status === curr.status && prev.result === curr.result)
+  );
+};
+
+const createCurrentSuggestionObservable = (state$?: Observable<UnifiedHistogramState>) => {
+  return state$?.pipe(
+    map((state) => state.currentSuggestion),
+    distinctUntilChanged(isEqual)
   );
 };
