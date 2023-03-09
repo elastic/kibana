@@ -103,18 +103,22 @@ export function Overview({ slo }: Props) {
               defaultMessage: 'Tags',
             })}
             subtitle={
-              <EuiFlexGroup
-                direction="row"
-                alignItems="flexStart"
-                gutterSize="s"
-                responsive={false}
-              >
-                {slo.tags.map((tag) => (
-                  <EuiFlexItem grow={false} key={tag}>
-                    <EuiBadge color="hollow">{tag}</EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
+              slo.tags.length > 0 ? (
+                <EuiFlexGroup
+                  direction="row"
+                  alignItems="flexStart"
+                  gutterSize="s"
+                  responsive={false}
+                >
+                  {slo.tags.map((tag) => (
+                    <EuiFlexItem grow={false} key={tag}>
+                      <EuiBadge color="hollow">{tag}</EuiBadge>
+                    </EuiFlexItem>
+                  ))}
+                </EuiFlexGroup>
+              ) : (
+                <EuiText size="s">-</EuiText>
+              )
             }
           />
         </EuiFlexGroup>
