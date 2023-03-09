@@ -36,7 +36,7 @@ const getShouldScheduleTask = async (
   if (!scheduledTaskId) return true;
   try {
     // make sure scheduledTaskId exist
-    await withSpan({ name: 'getShouldScheduleTask', type: 'rules' }, async () => {
+    return await withSpan({ name: 'getShouldScheduleTask', type: 'rules' }, async () => {
       const task = await context.taskManager.get(scheduledTaskId);
 
       // Check whether task status is unrecognized. If so, we want to delete
@@ -45,8 +45,9 @@ const getShouldScheduleTask = async (
         await context.taskManager.removeIfExists(scheduledTaskId);
         return true;
       }
+
+      return false;
     });
-    return false;
   } catch (err) {
     return true;
   }
