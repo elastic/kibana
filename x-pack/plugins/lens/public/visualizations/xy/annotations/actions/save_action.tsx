@@ -16,10 +16,7 @@ import {
   OnSaveProps as SavedObjectOnSaveProps,
   SavedObjectSaveModal,
 } from '@kbn/saved-objects-plugin/public';
-import {
-  EventAnnotationGroupConfig,
-  EVENT_ANNOTATION_GROUP_TYPE,
-} from '@kbn/event-annotation-plugin/common';
+import { EventAnnotationGroupConfig } from '@kbn/event-annotation-plugin/common';
 import { EuiIcon } from '@elastic/eui';
 import { type SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { LayerAction, StateSetter } from '../../../../types';
@@ -57,7 +54,10 @@ export const SaveModal = ({
       title={title}
       description={description}
       showCopyOnSave={showCopyOnSave}
-      objectType={EVENT_ANNOTATION_GROUP_TYPE}
+      objectType={i18n.translate(
+        'xpack.lens.xyChart.annotations.saveAnnotationGroupToLibrary.objectType',
+        { defaultMessage: 'annotation group' }
+      )}
       showDescription={true}
       confirmButtonLabel={
         <>
