@@ -30,6 +30,103 @@ beforeEach(() => {
   jest.resetAllMocks();
 });
 
+const aggregateResult = {
+  status: {
+    buckets: [
+      {
+        key: 'ok',
+        doc_count: 15,
+      },
+      {
+        key: 'error',
+        doc_count: 2,
+      },
+      {
+        key: 'active',
+        doc_count: 23,
+      },
+      {
+        key: 'pending',
+        doc_count: 1,
+      },
+      {
+        key: 'unknown',
+        doc_count: 0,
+      },
+      {
+        key: 'warning',
+        doc_count: 10,
+      },
+    ],
+  },
+  outcome: {
+    buckets: [
+      {
+        key: 'succeeded',
+        doc_count: 2,
+      },
+      {
+        key: 'failed',
+        doc_count: 4,
+      },
+      {
+        key: 'warning',
+        doc_count: 6,
+      },
+    ],
+  },
+  enabled: {
+    buckets: [
+      {
+        key: 0,
+        key_as_string: '0',
+        doc_count: 2,
+      },
+      {
+        key: 1,
+        key_as_string: '1',
+        doc_count: 28,
+      },
+    ],
+  },
+  muted: {
+    buckets: [
+      {
+        key: 0,
+        key_as_string: '0',
+        doc_count: 27,
+      },
+      {
+        key: 1,
+        key_as_string: '1',
+        doc_count: 3,
+      },
+    ],
+  },
+  snoozed: {
+    doc_count: 0,
+    count: {
+      doc_count: 0,
+    },
+  },
+  tags: {
+    buckets: [
+      {
+        key: 'a',
+        doc_count: 10,
+      },
+      {
+        key: 'b',
+        doc_count: 20,
+      },
+      {
+        key: 'c',
+        doc_count: 30,
+      },
+    ],
+  },
+};
+
 describe('aggregateRulesRoute', () => {
   it('aggregate rules with proper parameters', async () => {
     const licenseState = licenseStateMock.create();
@@ -41,32 +138,6 @@ describe('aggregateRulesRoute', () => {
 
     expect(config.path).toMatchInlineSnapshot(`"/internal/alerting/rules/_aggregate"`);
 
-    const aggregateResult = {
-      alertExecutionStatus: {
-        ok: 15,
-        error: 2,
-        active: 23,
-        pending: 1,
-        unknown: 0,
-      },
-      ruleLastRunOutcome: {
-        succeeded: 1,
-        failed: 2,
-        warning: 3,
-      },
-      ruleEnabledStatus: {
-        disabled: 1,
-        enabled: 40,
-      },
-      ruleMutedStatus: {
-        muted: 2,
-        unmuted: 39,
-      },
-      ruleSnoozedStatus: {
-        snoozed: 4,
-      },
-      ruleTags: ['a', 'b', 'c'],
-    };
     rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
 
     const [context, req, res] = mockHandlerArguments(
@@ -83,8 +154,8 @@ describe('aggregateRulesRoute', () => {
       Object {
         "body": Object {
           "rule_enabled_status": Object {
-            "disabled": 1,
-            "enabled": 40,
+            "disabled": 2,
+            "enabled": 28,
           },
           "rule_execution_status": Object {
             "active": 23,
@@ -92,18 +163,19 @@ describe('aggregateRulesRoute', () => {
             "ok": 15,
             "pending": 1,
             "unknown": 0,
+            "warning": 10,
           },
           "rule_last_run_outcome": Object {
-            "failed": 2,
-            "succeeded": 1,
-            "warning": 3,
+            "failed": 4,
+            "succeeded": 2,
+            "warning": 6,
           },
           "rule_muted_status": Object {
-            "muted": 2,
-            "unmuted": 39,
+            "muted": 3,
+            "unmuted": 27,
           },
           "rule_snoozed_status": Object {
-            "snoozed": 4,
+            "snoozed": 0,
           },
           "rule_tags": Array [
             "a",
@@ -118,6 +190,51 @@ describe('aggregateRulesRoute', () => {
     expect(rulesClient.aggregate.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "aggs": Object {
+            "enabled": Object {
+              "terms": Object {
+                "field": "alert.attributes.enabled",
+              },
+            },
+            "muted": Object {
+              "terms": Object {
+                "field": "alert.attributes.muteAll",
+              },
+            },
+            "outcome": Object {
+              "terms": Object {
+                "field": "alert.attributes.lastRun.outcome",
+              },
+            },
+            "snoozed": Object {
+              "aggs": Object {
+                "count": Object {
+                  "filter": Object {
+                    "exists": Object {
+                      "field": "alert.attributes.snoozeSchedule.duration",
+                    },
+                  },
+                },
+              },
+              "nested": Object {
+                "path": "alert.attributes.snoozeSchedule",
+              },
+            },
+            "status": Object {
+              "terms": Object {
+                "field": "alert.attributes.executionStatus.status",
+              },
+            },
+            "tags": Object {
+              "terms": Object {
+                "field": "alert.attributes.tags",
+                "order": Object {
+                  "_key": "asc",
+                },
+                "size": 50,
+              },
+            },
+          },
           "options": Object {
             "defaultSearchOperator": "AND",
           },
@@ -128,8 +245,8 @@ describe('aggregateRulesRoute', () => {
     expect(res.ok).toHaveBeenCalledWith({
       body: {
         rule_enabled_status: {
-          disabled: 1,
-          enabled: 40,
+          disabled: 2,
+          enabled: 28,
         },
         rule_execution_status: {
           ok: 15,
@@ -137,18 +254,19 @@ describe('aggregateRulesRoute', () => {
           active: 23,
           pending: 1,
           unknown: 0,
+          warning: 10,
         },
         rule_last_run_outcome: {
-          succeeded: 1,
-          failed: 2,
-          warning: 3,
+          failed: 4,
+          succeeded: 2,
+          warning: 6,
         },
         rule_muted_status: {
-          muted: 2,
-          unmuted: 39,
+          muted: 3,
+          unmuted: 27,
         },
         rule_snoozed_status: {
-          snoozed: 4,
+          snoozed: 0,
         },
         rule_tags: ['a', 'b', 'c'],
       },
@@ -163,20 +281,7 @@ describe('aggregateRulesRoute', () => {
 
     const [, handler] = router.get.mock.calls[0];
 
-    rulesClient.aggregate.mockResolvedValueOnce({
-      alertExecutionStatus: {
-        ok: 15,
-        error: 2,
-        active: 23,
-        pending: 1,
-        unknown: 0,
-      },
-      ruleLastRunOutcome: {
-        succeeded: 2,
-        failed: 4,
-        warning: 6,
-      },
-    });
+    rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
 
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
@@ -221,22 +326,10 @@ describe('aggregateRulesRoute', () => {
     const router = httpServiceMock.createRouter();
 
     aggregateRulesRoute(router, licenseState, mockUsageCounter);
-    const aggregateResult = {
-      alertExecutionStatus: {
-        ok: 15,
-        error: 2,
-        active: 23,
-        pending: 1,
-        unknown: 0,
-      },
-      ruleLastRunOutcome: {
-        succeeded: 2,
-        failed: 4,
-        warning: 6,
-      },
-    };
-    rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
     const [, handler] = router.get.mock.calls[0];
+
+    rulesClient.aggregate.mockResolvedValueOnce(aggregateResult);
+
     const [context, req, res] = mockHandlerArguments(
       { rulesClient },
       {
