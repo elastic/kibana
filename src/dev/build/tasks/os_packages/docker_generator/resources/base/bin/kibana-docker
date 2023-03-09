@@ -300,7 +300,6 @@ kibana_vars=(
     xpack.ingestManager.fleet.tlsCheckDisabled
     xpack.ingestManager.registryUrl
     xpack.observability.annotations.index
-    xpack.observability.unsafe.slo.enabled
     xpack.observability.unsafe.alertDetails.apm.enabled
     xpack.observability.unsafe.alertDetails.metrics.enabled
     xpack.observability.unsafe.alertDetails.logs.enabled
