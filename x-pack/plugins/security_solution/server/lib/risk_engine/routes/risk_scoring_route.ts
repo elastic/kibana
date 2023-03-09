@@ -15,6 +15,7 @@ import type { SecuritySolutionPluginRouter } from '../../../types';
 import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
 import { buildRiskScoreService } from '../risk_score_service';
 import { getRiskInputsIndex } from '../helpers';
+import { withSecuritySpan } from '../../../utils/with_security_span';
 
 export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.post(
@@ -55,16 +56,18 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
           siemClient.getAlertsIndex();
 
         const range = userRange ?? { start: 'now-15d', end: 'now' };
-        const result = await riskScoreService.getScores({
-          debug,
-          enrichInputs,
-          index,
-          filter,
-          range,
-          identifierType: identifierType as IdentifierType, // TODO
-        });
+        withSecuritySpan('getRiskScores', async () => {
+          const result = await riskScoreService.getScores({
+            debug,
+            enrichInputs,
+            index,
+            filter,
+            range,
+            identifierType: identifierType as IdentifierType, // TODO
+          });
 
-        return response.ok({ body: result });
+          return response.ok({ body: result });
+        });
       } catch (e) {
         const error = transformError(e);
 
