@@ -8,7 +8,7 @@
 
 import React from 'react';
 
-import { Action } from '@kbn/ui-actions-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
@@ -33,11 +33,13 @@ export class EditControlAction implements Action<EditControlActionContext> {
   public readonly id = ACTION_EDIT_CONTROL;
   public order = 15;
 
+  private getEmbeddableFactory;
   private openFlyout;
   private theme$;
 
   constructor(private deleteControlAction: DeleteControlAction) {
     ({
+      embeddable: { getEmbeddableFactory: this.getEmbeddableFactory },
       overlays: { openFlyout: this.openFlyout },
       theme: { theme$: this.theme$ },
     } = pluginServices.getServices());
@@ -59,16 +61,16 @@ export class EditControlAction implements Action<EditControlActionContext> {
   };
 
   public getDisplayName({ embeddable }: EditControlActionContext) {
-    // if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-    //   throw new IncompatibleActionError();
-    // }
+    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
+      throw new IncompatibleActionError();
+    }
     return ControlGroupStrings.floatingActions.getEditButtonTitle();
   }
 
   public getIconType({ embeddable }: EditControlActionContext) {
-    // if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-    //   throw new IncompatibleActionError();
-    // }
+    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
+      throw new IncompatibleActionError();
+    }
     return 'pencil';
   }
 
@@ -76,23 +78,20 @@ export class EditControlAction implements Action<EditControlActionContext> {
     if (isErrorEmbeddable(embeddable)) return false;
 
     const controlGroup = embeddable.parent;
-    const dashboard = embeddable.getRoot();
+    const factory = this.getEmbeddableFactory(embeddable.type);
     return Boolean(
       !isErrorEmbeddable(embeddable) &&
-        dashboard &&
-        dashboard.isContainer &&
-        dashboard.getInput()?.viewMode === ViewMode.EDIT &&
         controlGroup &&
         isControlGroup(controlGroup) &&
-        !isTimeSliderControl(embeddable)
+        factory &&
+        (await factory.isEditable())
     );
   }
 
   public async execute({ embeddable }: EditControlActionContext) {
-    // if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-    //   throw new IncompatibleActionError();
-    // }
-
+    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
+      throw new IncompatibleActionError();
+    }
     const controlGroup = embeddable.parent as ControlGroupContainer;
     const ControlsServicesProvider = pluginServices.getContextProvider();
     const ReduxWrapper = controlGroup.getReduxEmbeddableTools().Wrapper;

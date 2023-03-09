@@ -9,7 +9,7 @@
 import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { Action } from '@kbn/ui-actions-plugin/public';
+import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ViewMode, isErrorEmbeddable } from '@kbn/embeddable-plugin/public';
 
 import { pluginServices } from '../../services';
@@ -51,35 +51,30 @@ export class DeleteControlAction implements Action<DeleteControlActionContext> {
   };
 
   public getDisplayName({ embeddable }: DeleteControlActionContext) {
-    // if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-    //   throw new IncompatibleActionError();
-    // }
+    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
+      throw new IncompatibleActionError();
+    }
     return ControlGroupStrings.floatingActions.getRemoveButtonTitle();
   }
 
   public getIconType({ embeddable }: DeleteControlActionContext) {
-    // if (!embeddable.getRoot() || !embeddable.getRoot().isContainer) {
-    //   throw new IncompatibleActionError();
-    // }
+    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
+      throw new IncompatibleActionError();
+    }
     return 'cross';
   }
 
   public async isCompatible({ embeddable }: DeleteControlActionContext) {
     if (isErrorEmbeddable(embeddable)) return false;
-
     const controlGroup = embeddable.parent;
-    const dashboard = embeddable.getRoot();
-    return Boolean(
-      !isErrorEmbeddable(embeddable) &&
-        dashboard &&
-        dashboard.isContainer &&
-        dashboard.getInput()?.viewMode === ViewMode.EDIT &&
-        controlGroup &&
-        isControlGroup(controlGroup)
-    );
+    return Boolean(!isErrorEmbeddable(embeddable) && controlGroup && isControlGroup(controlGroup));
   }
 
   public async execute({ embeddable }: DeleteControlActionContext) {
+    if (!embeddable.parent || !isControlGroup(embeddable.parent)) {
+      throw new IncompatibleActionError();
+    }
+
     this.openConfirm(ControlGroupStrings.management.deleteControls.getSubtitle(), {
       confirmButtonText: ControlGroupStrings.management.deleteControls.getConfirm(),
       cancelButtonText: ControlGroupStrings.management.deleteControls.getCancel(),

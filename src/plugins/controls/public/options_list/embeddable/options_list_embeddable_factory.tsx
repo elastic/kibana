@@ -67,7 +67,7 @@ export class OptionsListEmbeddableFactory
 
   public controlEditorOptionsComponent = OptionsListEditorOptions;
 
-  public isEditable = () => Promise.resolve(false);
+  public isEditable = () => Promise.resolve(true);
 
   public getDisplayName = () =>
     i18n.translate('controls.optionsList.displayName', {
