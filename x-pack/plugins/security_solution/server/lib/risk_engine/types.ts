@@ -11,11 +11,20 @@ import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 export type IdentifierType = 'user' | 'host';
 
 export interface GetScoresParams {
+  debug?: boolean;
   index: string;
   filter?: unknown;
   identifierType?: IdentifierType;
   enrichInputs?: boolean;
   range: { start: string; end: string };
+}
+
+export interface GetScoresResponse {
+  debug?: {
+    request: unknown;
+    response: unknown;
+  };
+  scores: SimpleRiskScore[] | FullRiskScore[];
 }
 
 export interface SimpleRiskInput {
