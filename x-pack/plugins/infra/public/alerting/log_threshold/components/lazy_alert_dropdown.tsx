@@ -5,5 +5,12 @@
  * 2.0.
  */
 
-export * from './log_threshold_rule_type';
-export { LazyAlertDropdownWrapper } from './components/lazy_alert_dropdown';
+import React from 'react';
+
+const LazyAlertDropdown = React.lazy(() => import('./alert_dropdown'));
+
+export const LazyAlertDropdownWrapper = () => (
+  <React.Suspense fallback={<div />}>
+    <LazyAlertDropdown />
+  </React.Suspense>
+);

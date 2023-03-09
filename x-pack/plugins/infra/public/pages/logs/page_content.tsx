@@ -12,7 +12,7 @@ import { Switch } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-plugin/public';
-import { AlertDropdown } from '../../alerting/log_threshold';
+import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
@@ -73,7 +73,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
             <EuiHeaderLink color={'text'} {...settingsLinkProps}>
               {settingsTabTitle}
             </EuiHeaderLink>
-            <AlertDropdown />
+            <LazyAlertDropdownWrapper />
             <EuiHeaderLink
               href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
               color="primary"
