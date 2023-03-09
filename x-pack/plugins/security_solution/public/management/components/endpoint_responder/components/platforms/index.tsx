@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { PlatformIcon } from './platform_icon';
+export { PlatformIcon, type Platform } from './platform_icon';

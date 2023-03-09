@@ -20,6 +20,7 @@ import { useGetEndpointDetails } from '../../../hooks/endpoint/use_get_endpoint_
 import type { EndpointHostIsolationStatusProps } from '../../../../common/components/endpoint/host_isolation';
 import { EndpointAgentAndIsolationStatus } from '../../endpoint_agent_and_isolation_status';
 import { useGetEndpointPendingActionsSummary } from '../../../hooks/response_actions/use_get_endpoint_pending_actions_summary';
+import type { Platform } from './platforms';
 import { PlatformIcon } from './platforms';
 
 const IconContainer = euiStyled.div`
@@ -68,7 +69,9 @@ export const HeaderEndpointInfo = memo<HeaderEndpointInfoProps>(({ endpointId })
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>
         <IconContainer>
-          <PlatformIcon platform={endpointDetails.metadata.host.os.platform.toLowerCase()} />
+          <PlatformIcon
+            platform={endpointDetails.metadata.host.os.platform.toLowerCase() as Platform}
+          />
         </IconContainer>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
