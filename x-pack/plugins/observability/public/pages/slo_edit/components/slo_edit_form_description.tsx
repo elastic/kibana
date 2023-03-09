@@ -26,32 +26,6 @@ export function SloEditFormDescription() {
   const descriptionId = useGeneratedHtmlId({ prefix: 'sloDescription' });
   const tagsId = useGeneratedHtmlId({ prefix: 'tags' });
 
-  const onCreateOption = (
-    searchValue: string,
-    flattenedOptions: EuiComboBoxOptionOption[] = []
-  ) => {
-    const normalizedSearchValue = searchValue.trim().toLowerCase();
-
-    if (!normalizedSearchValue) {
-      return;
-    }
-
-    const newOption = {
-      label: searchValue,
-    };
-
-    if (
-      flattenedOptions.findIndex(
-        (option) => option.label.trim().toLowerCase() === normalizedSearchValue
-      ) === -1
-    ) {
-      setOptions([...options, newOption]);
-    }
-
-    // Select the option.
-    setSelected([...selectedOptions, newOption]);
-  };
-
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
       <EuiFlexItem>
@@ -125,6 +99,7 @@ export function SloEditFormDescription() {
           render={({ field: { ref, ...field }, fieldState }) => (
             <EuiComboBox
               {...field}
+              id={tagsId}
               fullWidth
               aria-label={i18n.translate('xpack.observability.slo.sloEdit.tags.placeholder', {
                 defaultMessage: 'Add tags',
