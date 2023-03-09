@@ -12,6 +12,7 @@ import type {
   CalculateRiskScoreAggregations,
   FullRiskScore,
   GetScoresParams,
+  GetScoresResponse,
   IdentifierType,
   RiskScoreBucket,
   SimpleRiskScore,
@@ -134,15 +135,16 @@ const buildIdentifierTypeAggregation = (
 });
 
 export const calculateRiskScores = async ({
-  index,
+  debug,
   enrichInputs,
   esClient,
   filter: userFilter,
   identifierType,
+  index,
   range,
 }: {
   esClient: ElasticsearchClient;
-} & GetScoresParams): Promise<SimpleRiskScore[] | FullRiskScore[]> => {
+} & GetScoresParams): Promise<GetScoresResponse> => {
   const now = new Date().toISOString();
 
   const filter = [{ exists: { field: ALERT_RISK_SCORE } }, filterFromRange(range)];
@@ -151,7 +153,7 @@ export const calculateRiskScores = async ({
   }
   const identifierTypes: IdentifierType[] = identifierType ? [identifierType] : ['host', 'user'];
 
-  const results = await esClient.search<never, CalculateRiskScoreAggregations>({
+  const request = {
     size: 0,
     _source: false,
     index,
@@ -164,16 +166,18 @@ export const calculateRiskScores = async ({
       (aggs, _identifierType) => ({ ...aggs, ...buildIdentifierTypeAggregation(_identifierType) }),
       {}
     ),
-  });
+  };
 
-  if (results.aggregations == null) {
-    return [];
+  const response = await esClient.search<never, CalculateRiskScoreAggregations>(request);
+
+  if (response.aggregations == null) {
+    return { ...(debug ? { request, response } : {}), scores: [] };
   }
 
-  const userBuckets = results.aggregations.user?.buckets ?? [];
-  const hostBuckets = results.aggregations.host?.buckets ?? [];
+  const userBuckets = response.aggregations.user?.buckets ?? [];
+  const hostBuckets = response.aggregations.host?.buckets ?? [];
 
-  return userBuckets
+  const scores = userBuckets
     .map((bucket) =>
       bucketToResponse({
         bucket,
@@ -192,4 +196,9 @@ export const calculateRiskScores = async ({
         })
       )
     );
+
+  return {
+    ...(debug ? { request, response } : {}),
+    scores,
+  };
 };

@@ -30,18 +30,18 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
       const esClient = (await context.core).elasticsearch.client.asCurrentUser;
       const soClient = (await context.core).savedObjects.client;
       const siemClient = (await context.securitySolution).getAppClient();
-      const options = request.body; // TODO why is this any???
       const riskScoreService = buildRiskScoreService({
         esClient,
       });
 
       const {
         data_view_id: dataViewId,
+        debug,
         enrich_inputs: enrichInputs,
         identifier_type: identifierType,
         filter,
         range: userRange,
-      } = options;
+      } = request.body;
 
       const index =
         (dataViewId &&
@@ -55,6 +55,7 @@ export const riskScoringRoute = (router: SecuritySolutionPluginRouter, logger: L
 
       try {
         const result = await riskScoreService.getScores({
+          debug,
           enrichInputs,
           index,
           filter,
