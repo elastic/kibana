@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
     deviationMin,
     start: minTime,
     end: maxTime,
-    index: index,
+    index,
     searchQuery: '{"bool":{"filter":[],"must":[{"match_all":{}}],"must_not":[]}}',
     timeFieldName: '@timestamp',
   };
@@ -154,7 +154,6 @@ export default ({ getService }: FtrProviderContext) => {
         data = chunks.map((c) => JSON.parse(c));
       }).not.to.throwError();
 
-
       expect(data.length).to.above(
         expected.actionsLength,
         `Expected 'data.length' to above ${expected.actionsLength}, got ${data.length}.`
@@ -163,7 +162,9 @@ export default ({ getService }: FtrProviderContext) => {
         expect(typeof d.type).to.be('string');
       });
 
-      const addSignificantTermsActions = data.filter((d) => d.type === expected.significantTermFilter);
+      const addSignificantTermsActions = data.filter(
+        (d) => d.type === expected.significantTermFilter
+      );
       expect(addSignificantTermsActions.length).to.greaterThan(0);
 
       const significantTerms = addSignificantTermsActions
@@ -256,7 +257,9 @@ export default ({ getService }: FtrProviderContext) => {
           `Expected 'data.length' to above ${expected.actionsLength}, got ${data.length}.`
         );
 
-        const addSignificantTermsActions = data.filter((d) => d.type === expected.significantTermFilter);
+        const addSignificantTermsActions = data.filter(
+          (d) => d.type === expected.significantTermFilter
+        );
         expect(addSignificantTermsActions.length).to.greaterThan(0);
 
         const significantTerms = addSignificantTermsActions

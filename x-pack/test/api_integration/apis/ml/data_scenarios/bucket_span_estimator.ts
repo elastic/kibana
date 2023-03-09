@@ -12,27 +12,26 @@ import { USER } from '../../../../functional/services/ml/security_common';
 import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
-
   const supertest = getService('supertestWithoutAuth');
   const ml = getService('ml');
 
   const index = 'iowa*';
 
-  const testData =  {
-      user: USER.ML_POWERUSER,
-      requestBody: {
-        aggTypes: ['sum'],
-        duration: { start: 1325548800000, end: 1538092800000 },
-        fields: ['sale_dollars'],
-        index: index,
-        query: { bool: { must: [{ match_all: {} }] } },
-        timeField: 'date',
-      },
-      expected: {
-        responseCode: 200,
-        responseBody: { name: '2d', ms: 172800000 },
-      },
-    };
+  const testData = {
+    user: USER.ML_POWERUSER,
+    requestBody: {
+      aggTypes: ['sum'],
+      duration: { start: 1325548800000, end: 1538092800000 },
+      fields: ['sale_dollars'],
+      index,
+      query: { bool: { must: [{ match_all: {} }] } },
+      timeField: 'date',
+    },
+    expected: {
+      responseCode: 200,
+      responseBody: { name: '2d', ms: 172800000 },
+    },
+  };
 
   describe('Kibana data scenario - bucket span estimator', function () {
     before(async () => {
@@ -40,14 +39,14 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it(`estimates the bucket span`, async () => {
-          const { body, status } = await supertest
-            .post('/api/ml/validate/estimate_bucket_span')
-            .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
-            .set(COMMON_REQUEST_HEADERS)
-            .send(testData.requestBody);
-          ml.api.assertResponseStatusCode(testData.expected.responseCode, status, body);
+      const { body, status } = await supertest
+        .post('/api/ml/validate/estimate_bucket_span')
+        .auth(testData.user, ml.securityCommon.getPasswordForUser(testData.user))
+        .set(COMMON_REQUEST_HEADERS)
+        .send(testData.requestBody);
+      ml.api.assertResponseStatusCode(testData.expected.responseCode, status, body);
 
-          expect(body).to.eql(testData.expected.responseBody);
-        });
+      expect(body).to.eql(testData.expected.responseBody);
+    });
   });
 };
