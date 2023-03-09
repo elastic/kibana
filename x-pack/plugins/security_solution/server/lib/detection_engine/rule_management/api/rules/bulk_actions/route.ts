@@ -358,31 +358,10 @@ export const performBulkActionRoute = (
             mlAuthz,
           });
 
-          // migrate legacy rule actions
-          const migrationOutcome = await initPromisePool({
-            concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
-            items: rules,
-            executor: async (rule) => {
-              // actions only get fired when rule running, so we should be fine to migrate only enabled
-              if (rule.enabled) {
-                return migrateRuleActions({
-                  rulesClient,
-                  savedObjectsClient,
-                  rule,
-                });
-              } else {
-                return rule;
-              }
-            },
-            abortSignal: abortController.signal,
-          });
-
           return buildBulkResponse(response, {
-            updated: migrationOutcome.results
-              .filter(({ result }) => result)
-              .map(({ result }) => result),
+            updated: rules,
             skipped,
-            errors: [...errors, ...migrationOutcome.errors],
+            errors,
           });
         }
 

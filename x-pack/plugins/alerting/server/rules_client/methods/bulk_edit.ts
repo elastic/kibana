@@ -64,6 +64,8 @@ import {
   NormalizedAlertActionWithUuid,
 } from '../types';
 
+import { migrateRuleHook } from '../lib';
+
 export type BulkEditFields = keyof Pick<
   Rule,
   'actions' | 'tags' | 'schedule' | 'throttle' | 'notifyWhen' | 'snoozeSchedule' | 'apiKey'
@@ -406,6 +408,8 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
   errors: BulkOperationError[];
   username: string | null;
 }): Promise<void> {
+  await migrateRuleHook(context, { ruleId: rule.id });
+
   try {
     if (rule.attributes.apiKey) {
       apiKeysMap.set(rule.id, { oldApiKey: rule.attributes.apiKey });

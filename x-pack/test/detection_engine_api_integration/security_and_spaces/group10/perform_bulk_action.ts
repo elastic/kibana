@@ -1515,6 +1515,76 @@ export default ({ getService }: FtrProviderContext): void => {
 
             expect(readRule.actions).to.eql([]);
           });
+
+          it('should migrate legacy actions on edit when actions edited', async () => {
+            const ruleId = 'ruleId';
+            const [connector, createdRule] = await Promise.all([
+              supertest
+                .post(`/api/actions/connector`)
+                .set('kbn-xsrf', 'foo')
+                .send({
+                  name: 'My action',
+                  connector_type_id: '.slack',
+                  secrets: {
+                    webhookUrl: 'http://localhost:1234',
+                  },
+                }),
+              createRule(supertest, log, getSimpleRule(ruleId, true)),
+            ]);
+            // create a new connector
+            const webHookConnector = await createWebHookConnector();
+
+            await createLegacyRuleAction(supertest, createdRule.id, connector.body.id);
+
+            // check for legacy sidecar action
+            const sidecarActionsResults = await getLegacyActionSO(es);
+            expect(sidecarActionsResults.hits.hits.length).to.eql(1);
+            expect(sidecarActionsResults.hits.hits[0]?._source?.references[0].id).to.eql(
+              createdRule.id
+            );
+
+            const { body } = await postBulkAction()
+              .send({
+                ids: [createdRule.id],
+                action: BulkActionType.edit,
+                [BulkActionType.edit]: [
+                  {
+                    type: BulkActionEditType.set_rule_actions,
+                    value: {
+                      throttle: '1h',
+                      actions: [
+                        {
+                          ...webHookActionMock,
+                          id: webHookConnector.id,
+                        },
+                      ],
+                    },
+                  },
+                ],
+              })
+              .expect(200);
+
+            const expectedRuleActions = [
+              {
+                ...webHookActionMock,
+                id: webHookConnector.id,
+                action_type_id: '.webhook',
+                uuid: body.attributes.results.updated[0].actions[0].uuid,
+              },
+            ];
+
+            // Check that the updated rule is returned with the response
+            expect(body.attributes.results.updated[0].actions).to.eql(expectedRuleActions);
+
+            // Check that the updates have been persisted
+            const { body: readRule } = await fetchRule(ruleId).expect(200);
+
+            expect(readRule.actions).to.eql(expectedRuleActions);
+
+            // Sidecar should be removed
+            const sidecarActionsPostResults = await getLegacyActionSO(es);
+            expect(sidecarActionsPostResults.hits.hits.length).to.eql(0);
+          });
         });
 
         describe('add_rule_actions', () => {
