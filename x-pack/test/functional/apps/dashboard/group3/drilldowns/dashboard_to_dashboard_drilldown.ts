@@ -219,7 +219,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
           );
 
-          // ensuure that the unrelated filter has been carried over.
+          // ensure that the unrelated filter has been carried over.
           expect(await filterBar.hasFilter('machine.os', 'ios')).to.be(true);
         });
 
@@ -239,7 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             dashboardDrilldownsManage.DASHBOARD_WITH_AREA_CHART_NAME
           );
 
-          // ensuure that the time range has been carried over.
+          // ensure that the time range has been carried over.
           expect(await PageObjects.timePicker.getTimeDurationInHours()).to.be(24);
 
           // reset time range
