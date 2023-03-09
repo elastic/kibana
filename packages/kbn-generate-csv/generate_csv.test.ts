@@ -23,17 +23,21 @@ import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
-import type { DeepPartial } from 'utility-types';
-import { CsvGenerator } from './generate_csv';
+import { CsvConfig, CsvGenerator, JobParams } from './generate_csv';
 import { CancellationToken } from '@kbn/reporting-common';
+import {
+  UI_SETTINGS_CSV_QUOTE_VALUES,
+  UI_SETTINGS_CSV_SEPARATOR,
+  UI_SETTINGS_DATEFORMAT_TZ,
+} from '@kbn/reporting-plugin/common/constants';
 
-const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
+const createMockJob = (baseObj: any = {}): JobParams => ({
   ...baseObj,
 });
 
 let mockEsClient: IScopedClusterClient;
 let mockDataClient: IScopedSearchClient;
-let mockConfig: CsvConfigType;
+let mockConfig: CsvConfig;
 let mockLogger: jest.Mocked<Logger>;
 let uiSettingsClient: IUiSettingsClient;
 let stream: jest.Mocked<Writable>;
@@ -76,10 +80,10 @@ const mockFieldFormatsRegistry = {
     .mockImplementation(() => ({ id: 'string', convert: jest.fn().mockImplementation(identity) })),
 } as unknown as FieldFormatsRegistry;
 
-const getMockConfig = (properties: DeepPartial<CsvConfigType> = {}) => {
-  const config = createMockConfig(createMockConfigSchema(properties));
-  return config.get('csv');
-};
+// const getMockConfig = (properties: DeepPartial<CsvConfig>) => {
+//   const config = createMockConfig(properties);
+//   return config.get('csv');
+// };
 
 beforeEach(async () => {
   content = '';
@@ -104,14 +108,13 @@ beforeEach(async () => {
     }
   });
 
-  mockConfig = getMockConfig({
-    csv: {
-      checkForFormulas: true,
-      escapeFormulaValues: true,
-      maxSizeBytes: 180000,
-      scroll: { size: 500, duration: '30s' },
-    },
-  });
+  mockConfig = {
+    checkForFormulas: true,
+    escapeFormulaValues: true,
+    maxSizeBytes: 180000,
+    useByteOrderMarkEncoding: false,
+    scroll: { size: 500, duration: '30s' },
+  };
 
   searchSourceMock.getField = jest.fn((key: string) => {
     switch (key) {
@@ -231,14 +234,13 @@ it('calculates the bytes of the content', async () => {
 
 it('warns if max size was reached', async () => {
   const TEST_MAX_SIZE = 500;
-  mockConfig = getMockConfig({
-    csv: {
-      checkForFormulas: true,
-      escapeFormulaValues: true,
-      maxSizeBytes: TEST_MAX_SIZE,
-      scroll: { size: 500, duration: '30s' },
-    },
-  });
+  mockConfig = {
+    checkForFormulas: true,
+    escapeFormulaValues: true,
+    maxSizeBytes: TEST_MAX_SIZE,
+    useByteOrderMarkEncoding: false,
+    scroll: { size: 500, duration: '30s' },
+  };
 
   mockDataClient.search = jest.fn().mockImplementation(() =>
     Rx.of({
@@ -745,14 +747,13 @@ describe('formulas', () => {
   });
 
   it('can check for formulas, without escaping them', async () => {
-    mockConfig = getMockConfig({
-      csv: {
-        checkForFormulas: true,
-        escapeFormulaValues: false,
-        maxSizeBytes: 180000,
-        scroll: { size: 500, duration: '30s' },
-      },
-    });
+    mockConfig = {
+      checkForFormulas: true,
+      escapeFormulaValues: false,
+      maxSizeBytes: 180000,
+      useByteOrderMarkEncoding: false,
+      scroll: { size: 500, duration: '30s' },
+    };
     mockDataClient.search = jest.fn().mockImplementation(() =>
       Rx.of({
         rawResponse: getMockRawResponse([

@@ -8,7 +8,11 @@
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type {
+  ISearchSource,
+  ISearchStartSearchSource,
+  SerializedSearchSourceFields,
+} from '@kbn/data-plugin/common';
 import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { Datatable } from '@kbn/expressions-plugin/server';
@@ -24,9 +28,13 @@ import {
   AuthenticationExpiredError,
   ReportingError,
   byteSizeValueToNumber,
+  CONTENT_TYPE_CSV,
 } from '@kbn/reporting-common';
+import type { TaskRunResult } from '@kbn/reporting-plugin/server/lib/tasks';
+import { ByteSizeValue } from '@kbn/config-schema';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 import { i18nTexts } from './i18n_texts';
+import { CsvExportSettings, getExportSettings } from './get_export_settings';
 
 interface Clients {
   es: IScopedClusterClient;
@@ -39,14 +47,31 @@ interface Dependencies {
   fieldFormatsRegistry: IFieldFormatsRegistry;
 }
 
+export interface JobParams {
+  searchSource: SerializedSearchSourceFields;
+  columns?: string[];
+  browserTimezone?: string;
+}
+
+export interface CsvConfig {
+  checkForFormulas: boolean;
+  escapeFormulaValues: boolean;
+  maxSizeBytes: number | ByteSizeValue;
+  useByteOrderMarkEncoding: boolean;
+  scroll: {
+    duration: string;
+    size: number;
+  };
+}
+
 export class CsvGenerator {
   private csvContainsFormulas = false;
   private maxSizeReached = false;
   private csvRowCount = 0;
 
   constructor(
-    private job: Omit<JobParamsCSV, 'version'>,
-    private config: CsvConfigType,
+    private job: Omit<JobParams, 'version'>,
+    private config: CsvConfig,
     private clients: Clients,
     private dependencies: Dependencies,
     private cancellationToken: CancellationToken,

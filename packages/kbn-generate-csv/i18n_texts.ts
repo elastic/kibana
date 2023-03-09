@@ -9,12 +9,12 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nTexts = {
-  escapedFormulaValuesMessage: i18n.translate('reporting.generateCsv.escapedFormulaValues', {
+  escapedFormulaValuesMessage: i18n.translate('generateCsv.escapedFormulaValues', {
     defaultMessage: 'CSV may contain formulas whose values have been escaped',
   }),
   authenticationError: {
     partialResultsMessage: i18n.translate(
-      'reporting.generateCsv.authenticationExpired.partialResultsMessage',
+      'generateCsv.authenticationExpired.partialResultsMessage',
       {
         defaultMessage:
           'This report contains partial CSV results because the authentication token expired. Export a smaller amount of data or increase the timeout of the authentication token.',
@@ -22,23 +22,23 @@ export const i18nTexts = {
     ),
   },
   esErrorMessage: (statusCode: number, message: string) =>
-    i18n.translate('reporting.generateCsv.esErrorMessage', {
+    i18n.translate('generateCsv.esErrorMessage', {
       defaultMessage: 'Received a {statusCode} response from Elasticsearch: {message}',
       values: { statusCode, message },
     }),
   unknownError: (message: string = 'unknown') =>
-    i18n.translate('reporting.generateCsv.unknownErrorMessage', {
+    i18n.translate('generateCsv.unknownErrorMessage', {
       defaultMessage: 'Encountered an unknown error: {message}',
       values: { message },
     }),
   csvRowCountError: ({ expected, received }: { expected?: number; received: number }) =>
-    i18n.translate('reporting.generateCsv.incorrectRowCount', {
+    i18n.translate('generateCsv.incorrectRowCount', {
       defaultMessage:
         'Encountered an error with the number of CSV rows generated from the search: expected {expected}, received {received}.',
       values: { expected, received },
     }),
   csvUnableToClosePit: () =>
-    i18n.translate('reporting.generateCsv.csvUnableToClosePit', {
+    i18n.translate('generateCsv.csvUnableToClosePit', {
       defaultMessage:
         'Unable to close the Point-In-Time used for search. Check the Kibana server logs.',
     }),
