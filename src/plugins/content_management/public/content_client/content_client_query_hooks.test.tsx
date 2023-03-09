@@ -18,6 +18,10 @@ import { ContentTypeRegistry } from '../registry';
 const setup = () => {
   const crudClient = createCrudClientMock();
   const contentTypeRegistry = new ContentTypeRegistry();
+  contentTypeRegistry.register({
+    id: 'testType',
+    version: { latest: 'v2' },
+  });
   const contentClient = new ContentClient(() => crudClient, contentTypeRegistry);
 
   const Wrapper: React.FC = ({ children }) => (
