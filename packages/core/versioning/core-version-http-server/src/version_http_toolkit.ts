@@ -120,9 +120,9 @@ type InValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
  */
 interface FullValidationConfig<P, Q, B, R> {
   /** Validation to run against route inputs: params, query and body */
-  in: false | InValidation<P, Q, B>;
+  in?: InValidation<P, Q, B>;
   /** Validation to run against route output */
-  out: false | Type<R>;
+  out?: Type<R>;
 }
 
 /**
