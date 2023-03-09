@@ -70,8 +70,8 @@ export type ResponseType<ControlState extends AllActionStates> = Awaited<
 
 export const nextActionMap = (client: ElasticsearchClient, transformRawDocs: TransformRawDocs) => {
   return {
-    INIT: ({ currentAlias, kibanaVersion, versionAlias }: InitState) =>
-      Actions.initAction({ client, currentAlias, kibanaVersion, versionAlias }),
+    INIT: (state: InitState) =>
+      Actions.initAction({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_MIGRATION_COMPLETION: (state: WaitForMigrationCompletionState) =>
       Actions.fetchIndices({ client, indices: [state.currentAlias, state.versionAlias] }),
     WAIT_FOR_YELLOW_SOURCE: (state: WaitForYellowSourceState) =>

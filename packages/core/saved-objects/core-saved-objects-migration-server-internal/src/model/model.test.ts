@@ -128,23 +128,6 @@ describe('migrations v2 model', () => {
     versionIndexReadyActions: Option.none,
     targetIndex: '.kibana_7.11.0_001',
   };
-  const initResult = {
-    aliases: {
-      '.kibana': '.kibana_7.11.0_001',
-      '.kibana_7.11.0': '.kibana_7.11.0_001',
-    },
-    indices: {
-      '.kibana_7.11.0_001': {
-        aliases: {
-          '.kibana': {},
-          '.kibana_7.11.0': {},
-        },
-        mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-        settings: {},
-      },
-    },
-    source: '.kibana_7.11.0_001',
-  };
 
   const aProcessedDoc = {
     _id: 'a:b',
@@ -228,7 +211,16 @@ describe('migrations v2 model', () => {
     });
 
     test('resets retryCount, retryDelay when an action succeeds', () => {
-      const res: ResponseType<'INIT'> = Either.right(initResult);
+      const res: ResponseType<'INIT'> = Either.right({
+        '.kibana_7.11.0_001': {
+          aliases: {
+            '.kibana': {},
+            '.kibana_7.11.0': {},
+          },
+          mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+          settings: {},
+        },
+      });
       const newState = model({ ...state, ...{ retryCount: 5, retryDelay: 32000 } }, res);
 
       expect(newState.retryCount).toEqual(0);
@@ -255,7 +247,18 @@ describe('migrations v2 model', () => {
         controlState: 'INIT',
       };
 
-      const res: ResponseType<'INIT'> = Either.right(initResult);
+      const res: ResponseType<'INIT'> = Either.right({
+        '.kibana_7.11.0_001': {
+          aliases: {
+            '.kibana': {},
+            '.kibana_7.11.0': {},
+          },
+          mappings: {
+            properties: {},
+          },
+          settings: {},
+        },
+      });
       const newState = model(initState, res);
       expect(newState).not.toBe(initState);
     });
@@ -302,10 +305,20 @@ describe('migrations v2 model', () => {
           `);
         });
         test("INIT -> FATAL when .kibana points to newer version's index", () => {
-          const res: ResponseType<'INIT'> = Either.left({
-            type: 'index_belongs_to_later_version',
-            alias: '.kibana',
-            version: '7.12.0',
+          const res: ResponseType<'INIT'> = Either.right({
+            '.kibana_7.12.0_001': {
+              aliases: {
+                '.kibana': {},
+                '.kibana_7.12.0': {},
+              },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana_7.11.0': {} },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
           });
           const newState = model(initState, res) as FatalState;
 
@@ -315,10 +328,20 @@ describe('migrations v2 model', () => {
           );
         });
         test('INIT -> FATAL when .kibana points to multiple indices', () => {
-          const res: ResponseType<'INIT'> = Either.left({
-            type: 'multiple_indices_per_alias',
-            alias: '.kibana',
-            indices: ['.kibana_7.12.0_001', '.kibana_7.11.0_001'],
+          const res: ResponseType<'INIT'> = Either.right({
+            '.kibana_7.12.0_001': {
+              aliases: {
+                '.kibana': {},
+                '.kibana_7.12.0': {},
+              },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
           });
           const newState = model(initState, res) as FatalState;
 
@@ -335,41 +358,45 @@ describe('migrations v2 model', () => {
           // lenient and assume it's an older index and perform a migration.
           // If the tampered index belonged to a newer version the migration
           // will fail when we start transforming documents.
-          const res: ResponseType<'INIT'> = Either.right(
-            chain(initResult)
-              .cloneDeep()
-              .set(['indices', '.kibana_7.11.0_001', 'aliases', '.kibana'], undefined)
-              .set(['indices', '.kibana_7.invalid.0_001'], {
-                aliases: {
-                  '.kibana': {},
-                  '.kibana_7.12.0': {},
-                },
-                mappings: mappingsWithUnknownType,
-                settings: {},
-              })
-              .set(['aliases', '.kibana'], '.kibana_7.invalid.0_001')
-              .value()
-          );
+          const res: ResponseType<'INIT'> = Either.right({
+            '.kibana_7.invalid.0_001': {
+              aliases: {
+                '.kibana': {},
+                '.kibana_7.12.0': {},
+              },
+              mappings: mappingsWithUnknownType,
+              settings: {},
+            },
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana_7.11.0': {} },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
+          });
           const newState = model(initState, res) as WaitForYellowSourceState;
 
           expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
           expect(newState.retryDelay).toBe(2000);
         });
         test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a v2 migrations index (>= 7.11.0)', () => {
-          const res: ResponseType<'INIT'> = Either.right(
-            chain(initResult)
-              .cloneDeep()
-              .set(['indices', '.kibana_3'], {
-                aliases: {},
-                mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-                settings: {},
-              })
-              .value()
-          );
+          const res: ResponseType<'INIT'> = Either.right({
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
+              mappings: mappingsWithUnknownType,
+              settings: {},
+            },
+            '.kibana_3': {
+              aliases: {},
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
+          });
           const newState = model(
             {
               ...initState,
+              kibanaVersion: '7.12.0',
               versionAlias: '.kibana_7.12.0',
+              versionIndex: '.kibana_7.12.0_001',
             },
             res
           ) as WaitForYellowSourceState;
@@ -379,17 +406,12 @@ describe('migrations v2 model', () => {
         });
         test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a v1 migrations index (>= 6.5 < 7.11.0)', () => {
           const res: ResponseType<'INIT'> = Either.right({
-            aliases: {
-              '.kibana': '.kibana_3',
-            },
-            indices: {
-              '.kibana_3': {
-                aliases: {
-                  '.kibana': {},
-                },
-                mappings: mappingsWithUnknownType,
-                settings: {},
+            '.kibana_3': {
+              aliases: {
+                '.kibana': {},
               },
+              mappings: mappingsWithUnknownType,
+              settings: {},
             },
           });
           const newState = model(initState, res) as WaitForYellowSourceState;
@@ -399,13 +421,10 @@ describe('migrations v2 model', () => {
         });
         test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a legacy index (>= 6.0.0 < 6.5)', () => {
           const res: ResponseType<'INIT'> = Either.right({
-            aliases: {},
-            indices: {
-              '.kibana': {
-                aliases: {},
-                mappings: mappingsWithUnknownType,
-                settings: {},
-              },
+            '.kibana': {
+              aliases: {},
+              mappings: mappingsWithUnknownType,
+              settings: {},
             },
           });
           const newState = model(initState, res);
@@ -415,23 +434,21 @@ describe('migrations v2 model', () => {
         });
         test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a custom kibana.index name (>= 6.5 < 7.11.0)', () => {
           const res: ResponseType<'INIT'> = Either.right({
-            aliases: {
-              'my-saved-objects': 'my-saved-objects_3',
-            },
-            indices: {
-              'my-saved-objects_3': {
-                aliases: {
-                  'my-saved-objects': {},
-                },
-                mappings: mappingsWithUnknownType,
-                settings: {},
+            'my-saved-objects_3': {
+              aliases: {
+                'my-saved-objects': {},
               },
+              mappings: mappingsWithUnknownType,
+              settings: {},
             },
           });
           const newState = model(
             {
               ...initState,
               controlState: 'INIT',
+              currentAlias: 'my-saved-objects',
+              versionAlias: 'my-saved-objects_7.11.0',
+              versionIndex: 'my-saved-objects_7.11.0_001',
             },
             res
           ) as WaitForYellowSourceState;
@@ -441,23 +458,22 @@ describe('migrations v2 model', () => {
         });
         test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when migrating from a custom kibana.index v2 migrations index (>= 7.11.0)', () => {
           const res: ResponseType<'INIT'> = Either.right({
-            aliases: {
-              'my-saved-objects': 'my-saved-objects_7.11.0',
-            },
-            indices: {
-              'my-saved-objects_7.11.0': {
-                aliases: {
-                  'my-saved-objects': {},
-                },
-                mappings: mappingsWithUnknownType,
-                settings: {},
+            'my-saved-objects_7.11.0': {
+              aliases: {
+                'my-saved-objects': {},
               },
+              mappings: mappingsWithUnknownType,
+              settings: {},
             },
           });
           const newState = model(
             {
               ...initState,
               controlState: 'INIT',
+              kibanaVersion: '7.12.0',
+              currentAlias: 'my-saved-objects',
+              versionAlias: 'my-saved-objects_7.12.0',
+              versionIndex: 'my-saved-objects_7.12.0_001',
             },
             res
           ) as WaitForYellowSourceState;
@@ -466,10 +482,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(2000);
         });
         test('INIT -> WAIT_FOR_MIGRATION_COMPLETION when no indices/aliases exist', () => {
-          const res: ResponseType<'INIT'> = Either.right({
-            aliases: {},
-            indices: {},
-          });
+          const res: ResponseType<'INIT'> = Either.right({});
           const newState = model(initState, res);
 
           expect(newState.controlState).toBe('WAIT_FOR_MIGRATION_COMPLETION');
@@ -498,10 +511,20 @@ describe('migrations v2 model', () => {
           `);
         });
         test("INIT -> FATAL when .kibana points to newer version's index", () => {
-          const res: ResponseType<'INIT'> = Either.left({
-            type: 'index_belongs_to_later_version',
-            alias: '.kibana',
-            version: '7.12.0',
+          const res: ResponseType<'INIT'> = Either.right({
+            '.kibana_7.12.0_001': {
+              aliases: {
+                '.kibana': {},
+                '.kibana_7.12.0': {},
+              },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana_7.11.0': {} },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
           });
           const newState = model(initState, res) as FatalState;
 
@@ -511,10 +534,20 @@ describe('migrations v2 model', () => {
           );
         });
         test('INIT -> FATAL when .kibana points to multiple indices', () => {
-          const res: ResponseType<'INIT'> = Either.left({
-            type: 'multiple_indices_per_alias',
-            alias: '.kibana',
-            indices: ['.kibana_7.12.0_001', '.kibana_7.11.0_001'],
+          const res: ResponseType<'INIT'> = Either.right({
+            '.kibana_7.12.0_001': {
+              aliases: {
+                '.kibana': {},
+                '.kibana_7.12.0': {},
+              },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
           });
           const newState = model(initState, res) as FatalState;
 
@@ -531,44 +564,51 @@ describe('migrations v2 model', () => {
           // lenient and assume it's an older index and perform a migration.
           // If the tampered index belonged to a newer version the migration
           // will fail when we start transforming documents.
-          const res: ResponseType<'INIT'> = Either.right(
-            chain(initResult)
-              .cloneDeep()
-              .set(['indices', '.kibana_7.11.0_001', 'aliases', '.kibana'], undefined)
-              .set(['indices', '.kibana_7.invalid.0_001'], {
-                aliases: {
-                  '.kibana': {},
-                  '.kibana_7.12.0': {},
-                },
-                mappings: mappingsWithUnknownType,
-                settings: {},
-              })
-              .set(['aliases', '.kibana'], '.kibana_7.invalid.0_001')
-              .set(['aliases', '.kibana_7.12.0'], '.kibana_7.invalid.0_001')
-              .set('source', '.kibana_7.invalid.0_001')
-              .value()
-          );
+          const res: ResponseType<'INIT'> = Either.right({
+            '.kibana_7.invalid.0_001': {
+              aliases: {
+                '.kibana': {},
+                '.kibana_7.12.0': {},
+              },
+              mappings: mappingsWithUnknownType,
+              settings: {},
+            },
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana_7.11.0': {} },
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
+          });
           const newState = model(initState, res) as WaitForYellowSourceState;
 
           expect(newState.controlState).toBe('WAIT_FOR_YELLOW_SOURCE');
           expect(newState.sourceIndex.value).toBe('.kibana_7.invalid.0_001');
+          expect(newState.aliases).toEqual({
+            '.kibana': '.kibana_7.invalid.0_001',
+            '.kibana_7.11.0': '.kibana_7.11.0_001',
+            '.kibana_7.12.0': '.kibana_7.invalid.0_001',
+          });
         });
 
         test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a v2 migrations index (>= 7.11.0)', () => {
-          const res: ResponseType<'INIT'> = Either.right(
-            chain(initResult)
-              .cloneDeep()
-              .set(['indices', '.kibana_3'], {
-                aliases: {},
-                mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
-                settings: {},
-              })
-              .value()
-          );
+          const res: ResponseType<'INIT'> = Either.right({
+            '.kibana_7.11.0_001': {
+              aliases: { '.kibana': {}, '.kibana_7.11.0': {} },
+              mappings: mappingsWithUnknownType,
+              settings: {},
+            },
+            '.kibana_3': {
+              aliases: {},
+              mappings: { properties: {}, _meta: { migrationMappingPropertyHashes: {} } },
+              settings: {},
+            },
+          });
           const newState = model(
             {
               ...initState,
+              kibanaVersion: '7.12.0',
               versionAlias: '.kibana_7.12.0',
+              versionIndex: '.kibana_7.12.0_001',
             },
             res
           ) as WaitForYellowSourceState;
@@ -577,23 +617,21 @@ describe('migrations v2 model', () => {
           expect(newState.sourceIndex.value).toBe('.kibana_7.11.0_001');
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
+          expect(newState.aliases).toEqual({
+            '.kibana': '.kibana_7.11.0_001',
+            '.kibana_7.11.0': '.kibana_7.11.0_001',
+          });
         });
 
         test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a v1 migrations index (>= 6.5 < 7.11.0)', () => {
           const res: ResponseType<'INIT'> = Either.right({
-            aliases: {
-              '.kibana': '.kibana_3',
-            },
-            indices: {
-              '.kibana_3': {
-                aliases: {
-                  '.kibana': {},
-                },
-                mappings: mappingsWithUnknownType,
-                settings: {},
+            '.kibana_3': {
+              aliases: {
+                '.kibana': {},
               },
+              mappings: mappingsWithUnknownType,
+              settings: {},
             },
-            source: '.kibana_3',
           });
           const newState = model(initState, res) as WaitForYellowSourceState;
 
@@ -601,16 +639,16 @@ describe('migrations v2 model', () => {
           expect(newState.sourceIndex.value).toBe('.kibana_3');
           expect(newState.retryCount).toEqual(0);
           expect(newState.retryDelay).toEqual(0);
+          expect(newState.aliases).toEqual({
+            '.kibana': '.kibana_3',
+          });
         });
         test('INIT -> LEGACY_SET_WRITE_BLOCK when migrating from a legacy index (>= 6.0.0 < 6.5)', () => {
           const res: ResponseType<'INIT'> = Either.right({
-            aliases: {},
-            indices: {
-              '.kibana': {
-                aliases: {},
-                mappings: mappingsWithUnknownType,
-                settings: {},
-              },
+            '.kibana': {
+              aliases: {},
+              mappings: mappingsWithUnknownType,
+              settings: {},
             },
           });
           const newState = model(initState, res);
@@ -646,24 +684,21 @@ describe('migrations v2 model', () => {
         });
         test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a custom kibana.index name (>= 6.5 < 7.11.0)', () => {
           const res: ResponseType<'INIT'> = Either.right({
-            aliases: {
-              'my-saved-objects': 'my-saved-objects_3',
-            },
-            indices: {
-              'my-saved-objects_3': {
-                aliases: {
-                  'my-saved-objects': {},
-                },
-                mappings: mappingsWithUnknownType,
-                settings: {},
+            'my-saved-objects_3': {
+              aliases: {
+                'my-saved-objects': {},
               },
+              mappings: mappingsWithUnknownType,
+              settings: {},
             },
-            source: 'my-saved-objects_3',
           });
           const newState = model(
             {
               ...baseState,
               controlState: 'INIT',
+              currentAlias: 'my-saved-objects',
+              versionAlias: 'my-saved-objects_7.11.0',
+              versionIndex: 'my-saved-objects_7.11.0_001',
             },
             res
           ) as WaitForYellowSourceState;
@@ -675,24 +710,22 @@ describe('migrations v2 model', () => {
         });
         test('INIT -> WAIT_FOR_YELLOW_SOURCE when migrating from a custom kibana.index v2 migrations index (>= 7.11.0)', () => {
           const res: ResponseType<'INIT'> = Either.right({
-            aliases: {
-              'my-saved-objects': 'my-saved-objects_7.11.0',
-            },
-            indices: {
-              'my-saved-objects_7.11.0': {
-                aliases: {
-                  'my-saved-objects': {},
-                },
-                mappings: mappingsWithUnknownType,
-                settings: {},
+            'my-saved-objects_7.11.0': {
+              aliases: {
+                'my-saved-objects': {},
               },
+              mappings: mappingsWithUnknownType,
+              settings: {},
             },
-            source: 'my-saved-objects_7.11.0',
           });
           const newState = model(
             {
               ...baseState,
               controlState: 'INIT',
+              kibanaVersion: '7.12.0',
+              currentAlias: 'my-saved-objects',
+              versionAlias: 'my-saved-objects_7.12.0',
+              versionIndex: 'my-saved-objects_7.12.0_001',
             },
             res
           ) as WaitForYellowSourceState;
@@ -704,10 +737,7 @@ describe('migrations v2 model', () => {
           expect(newState.retryDelay).toEqual(0);
         });
         test('INIT -> CREATE_NEW_TARGET when no indices/aliases exist', () => {
-          const res: ResponseType<'INIT'> = Either.right({
-            aliases: {},
-            indices: {},
-          });
+          const res: ResponseType<'INIT'> = Either.right({});
           const newState = model(initState, res);
 
           expect(newState).toMatchObject({

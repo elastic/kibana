@@ -34,6 +34,7 @@ import {
   addMustClausesToBoolQuery,
   addMustNotClausesToBoolQuery,
   getAliases,
+  indexBelongsToLaterVersion,
   indexVersion,
   mergeMigrationMappingPropertyHashes,
   throwBadControlState,
@@ -75,138 +76,159 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isLeft(res)) {
       const left = res.left;
-      switch (left.type) {
-        case 'incompatible_cluster_routing_allocation':
-          const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
-          return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
-        case 'multiple_indices_per_alias':
-          return {
-            ...stateP,
-            controlState: 'FATAL',
-            reason: `The ${left.alias} alias is pointing to multiple indices: ${left.indices.join(
-              ','
-            )}.`,
-          };
-        case 'index_belongs_to_later_version':
-          return {
-            ...stateP,
-            controlState: 'FATAL',
-            reason: `The ${left.alias} alias is pointing to a newer version of Kibana: v${left.version}`,
-          };
-        default:
-          return throwBadResponse(stateP, left);
-      }
-    }
-
-    // cluster routing allocation is enabled and we can continue with the migration as normal
-    const { aliases, indices, source } = res.right;
-    const postInitState = {
-      aliases,
-      sourceIndex: Option.fromNullable(source),
-      sourceIndexMappings: Option.fromNullable(source ? indices[source]?.mappings : undefined),
-      versionIndexReadyActions: Option.none,
-    };
-
-    if (
-      // Don't actively participate in this migration but wait for another instance to complete it
-      stateP.waitForMigrationCompletion === true
-    ) {
-      return {
-        ...stateP,
-        ...postInitState,
-        sourceIndex: Option.none,
-        targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
-        controlState: 'WAIT_FOR_MIGRATION_COMPLETION',
-        // Wait for 2s before checking again if the migration has completed
-        retryDelay: 2000,
-        logs: [
-          ...stateP.logs,
-          {
-            level: 'info',
-            message: `Migration required. Waiting until another Kibana instance completes the migration.`,
-          },
-        ],
-      };
-    } else if (
-      // If the `.kibana` alias exists
-      Option.isSome(postInitState.sourceIndex)
-    ) {
-      // CHECKPOINT here we decide to go for yellow source
-      return {
-        ...stateP,
-        ...postInitState,
-        controlState: 'WAIT_FOR_YELLOW_SOURCE',
-        sourceIndex: postInitState.sourceIndex,
-        sourceIndexMappings: postInitState.sourceIndexMappings as Option.Some<IndexMapping>,
-        targetIndex: postInitState.sourceIndex.value, // We preserve the same index, source == target (E.g: ".xx8.7.0_001")
-      };
-    } else if (indices[stateP.legacyIndex] != null) {
-      // Migrate from a legacy index
-
-      // If the user used default index names we can narrow the version
-      // number we use when creating a backup index. This is purely to help
-      // users more easily identify how "old" and index is so that they can
-      // decide if it's safe to delete these rollback backups. Because
-      // backups are kept for rollback, a version number is more useful than
-      // a date.
-      let legacyVersion = '';
-      if (stateP.indexPrefix === '.kibana') {
-        legacyVersion = 'pre6.5.0';
-      } else if (stateP.indexPrefix === '.kibana_task_manager') {
-        legacyVersion = 'pre7.4.0';
+      if (isTypeof(left, 'incompatible_cluster_routing_allocation')) {
+        const retryErrorMessage = `[${left.type}] Incompatible Elasticsearch cluster settings detected. Remove the persistent and transient Elasticsearch cluster setting 'cluster.routing.allocation.enable' or set it to a value of 'all' to allow migrations to proceed. Refer to ${stateP.migrationDocLinks.routingAllocationDisabled} for more information on how to resolve the issue.`;
+        return delayRetryState(stateP, retryErrorMessage, stateP.retryAttempts);
       } else {
-        legacyVersion = 'pre' + stateP.kibanaVersion;
+        return throwBadResponse(stateP, left);
+      }
+    } else if (Either.isRight(res)) {
+      // cluster routing allocation is enabled and we can continue with the migration as normal
+      const indices = res.right;
+      const aliasesRes = getAliases(indices);
+
+      if (Either.isLeft(aliasesRes)) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `The ${
+            aliasesRes.left.alias
+          } alias is pointing to multiple indices: ${aliasesRes.left.indices.join(',')}.`,
+        };
       }
 
-      const legacyReindexTarget = `${stateP.indexPrefix}_${legacyVersion}_001`;
+      const aliases = aliasesRes.right;
 
-      const target = stateP.versionIndex;
-      return {
-        ...stateP,
-        ...postInitState,
-        controlState: 'LEGACY_SET_WRITE_BLOCK',
-        sourceIndex: Option.some(legacyReindexTarget) as Option.Some<string>,
-        sourceIndexMappings: Option.some(
-          indices[stateP.legacyIndex].mappings
-        ) as Option.Some<IndexMapping>,
-        targetIndex: target,
-        legacyPreMigrationDoneActions: [
-          { remove_index: { index: stateP.legacyIndex } },
-          {
-            add: {
-              index: legacyReindexTarget,
-              alias: stateP.currentAlias,
-            },
-          },
-        ],
-        versionIndexReadyActions: Option.some<AliasAction[]>([
-          {
-            remove: {
-              index: legacyReindexTarget,
-              alias: stateP.currentAlias,
-              must_exist: true,
-            },
-          },
-          { add: { index: target, alias: stateP.currentAlias } },
-          { add: { index: target, alias: stateP.versionAlias } },
-          { remove_index: { index: stateP.tempIndex } },
-        ]),
+      if (
+        // `.kibana` is pointing to an index that belongs to a later
+        // version of Kibana .e.g. a 7.11.0 instance found the `.kibana` alias
+        // pointing to `.kibana_7.12.0_001`
+        indexBelongsToLaterVersion(stateP.kibanaVersion, aliases[stateP.currentAlias])
+      ) {
+        return {
+          ...stateP,
+          controlState: 'FATAL',
+          reason: `The ${
+            stateP.currentAlias
+          } alias is pointing to a newer version of Kibana: v${indexVersion(
+            aliases[stateP.currentAlias]
+          )}`,
+        };
+      }
+
+      // The source index .kibana is pointing to. E.g: ".kibana_8.7.0_001"
+      const source = aliases[stateP.currentAlias];
+
+      const postInitState = {
+        aliases,
+        sourceIndex: Option.fromNullable(source),
+        sourceIndexMappings: Option.fromNullable(source ? indices[source]?.mappings : undefined),
+        versionIndexReadyActions: Option.none,
       };
+
+      if (
+        // Don't actively participate in this migration but wait for another instance to complete it
+        stateP.waitForMigrationCompletion === true
+      ) {
+        return {
+          ...stateP,
+          ...postInitState,
+          sourceIndex: Option.none,
+          targetIndex: `${stateP.indexPrefix}_${stateP.kibanaVersion}_001`,
+          controlState: 'WAIT_FOR_MIGRATION_COMPLETION',
+          // Wait for 2s before checking again if the migration has completed
+          retryDelay: 2000,
+          logs: [
+            ...stateP.logs,
+            {
+              level: 'info',
+              message: `Migration required. Waiting until another Kibana instance completes the migration.`,
+            },
+          ],
+        };
+      } else if (
+        // If the `.kibana` alias exists
+        Option.isSome(postInitState.sourceIndex)
+      ) {
+        // CHECKPOINT here we decide to go for yellow source
+        return {
+          ...stateP,
+          ...postInitState,
+          controlState: 'WAIT_FOR_YELLOW_SOURCE',
+          sourceIndex: postInitState.sourceIndex,
+          sourceIndexMappings: postInitState.sourceIndexMappings as Option.Some<IndexMapping>,
+          targetIndex: postInitState.sourceIndex.value, // We preserve the same index, source == target (E.g: ".xx8.7.0_001")
+        };
+      } else if (indices[stateP.legacyIndex] != null) {
+        // Migrate from a legacy index
+
+        // If the user used default index names we can narrow the version
+        // number we use when creating a backup index. This is purely to help
+        // users more easily identify how "old" and index is so that they can
+        // decide if it's safe to delete these rollback backups. Because
+        // backups are kept for rollback, a version number is more useful than
+        // a date.
+        let legacyVersion = '';
+        if (stateP.indexPrefix === '.kibana') {
+          legacyVersion = 'pre6.5.0';
+        } else if (stateP.indexPrefix === '.kibana_task_manager') {
+          legacyVersion = 'pre7.4.0';
+        } else {
+          legacyVersion = 'pre' + stateP.kibanaVersion;
+        }
+
+        const legacyReindexTarget = `${stateP.indexPrefix}_${legacyVersion}_001`;
+
+        const target = stateP.versionIndex;
+        return {
+          ...stateP,
+          ...postInitState,
+          controlState: 'LEGACY_SET_WRITE_BLOCK',
+          sourceIndex: Option.some(legacyReindexTarget) as Option.Some<string>,
+          sourceIndexMappings: Option.some(
+            indices[stateP.legacyIndex].mappings
+          ) as Option.Some<IndexMapping>,
+          targetIndex: target,
+          legacyPreMigrationDoneActions: [
+            { remove_index: { index: stateP.legacyIndex } },
+            {
+              add: {
+                index: legacyReindexTarget,
+                alias: stateP.currentAlias,
+              },
+            },
+          ],
+          versionIndexReadyActions: Option.some<AliasAction[]>([
+            {
+              remove: {
+                index: legacyReindexTarget,
+                alias: stateP.currentAlias,
+                must_exist: true,
+              },
+            },
+            { add: { index: target, alias: stateP.currentAlias } },
+            { add: { index: target, alias: stateP.versionAlias } },
+            { remove_index: { index: stateP.tempIndex } },
+          ]),
+        };
+      } else {
+        // This cluster doesn't have an existing Saved Object index, create a
+        // new version specific index.
+        const target = stateP.versionIndex;
+        return {
+          ...stateP,
+          ...postInitState,
+          controlState: 'CREATE_NEW_TARGET',
+          sourceIndex: Option.none as Option.None,
+          targetIndex: target,
+          versionIndexReadyActions: Option.some([
+            { add: { index: target, alias: stateP.currentAlias } },
+            { add: { index: target, alias: stateP.versionAlias } },
+          ]) as Option.Some<AliasAction[]>,
+        };
+      }
     } else {
-      // This cluster doesn't have an existing Saved Object index, create a
-      // new version specific index.
-      const target = stateP.versionIndex;
-      return {
-        ...stateP,
-        ...postInitState,
-        controlState: 'CREATE_NEW_TARGET',
-        sourceIndex: Option.none as Option.None,
-        targetIndex: target,
-        versionIndexReadyActions: Option.some([
-          { add: { index: target, alias: stateP.currentAlias } },
-          { add: { index: target, alias: stateP.versionAlias } },
-        ]) as Option.Some<AliasAction[]>,
-      };
+      return throwBadResponse(stateP, res);
     }
   } else if (stateP.controlState === 'WAIT_FOR_MIGRATION_COMPLETION') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
