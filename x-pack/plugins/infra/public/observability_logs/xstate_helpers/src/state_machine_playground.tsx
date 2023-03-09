@@ -10,7 +10,8 @@ import React, { useCallback } from 'react';
 import { useLogViewContext } from '../../../hooks/use_log_view';
 
 export const StateMachinePlayground = () => {
-  const { changeLogViewReference, revertToDefaultLogView, update, isLoading } = useLogViewContext();
+  const { changeLogViewReference, revertToDefaultLogView, update, isLoading, logViewStateService } =
+    useLogViewContext();
 
   const switchToInlineLogView = useCallback(() => {
     changeLogViewReference({
@@ -38,14 +39,23 @@ export const StateMachinePlayground = () => {
     });
   }, [update]);
 
+  const persistInlineLogView = useCallback(() => {
+    logViewStateService.send({
+      type: 'PERSIST_INLINE_LOG_VIEW',
+    });
+  }, [logViewStateService]);
+
   return (
     <>
       {isLoading && 'Is loading'}
       <EuiButton fill onClick={() => switchToInlineLogView()}>
         {'Switch to inline Log View'}
       </EuiButton>
+      <EuiButton fill onClick={() => persistInlineLogView()}>
+        {'Persist inline Log View'}
+      </EuiButton>
       <EuiButton fill onClick={() => revertToDefaultLogView()}>
-        {'Revert to default Log View'}
+        {'Revert to default (persisted) Log View'}
       </EuiButton>
       <EuiButton fill onClick={() => updateLogView()}>
         {'Update log view'}

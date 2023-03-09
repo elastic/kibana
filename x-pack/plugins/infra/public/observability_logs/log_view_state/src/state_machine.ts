@@ -115,7 +115,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
           invoke: {
             src: 'listenForUrlChanges',
           },
-          entry: 'notifyLoadingSucceeded',
+          entry: ['notifyLoadingSucceeded', 'updateContextInUrl'],
           on: {
             PERSIST_INLINE_LOG_VIEW: undefined,
             RELOAD_LOG_VIEW: {
@@ -130,7 +130,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
           invoke: {
             src: 'listenForUrlChanges',
           },
-          entry: 'notifyLoadingSucceeded',
+          entry: ['notifyLoadingSucceeded', 'updateContextInUrl'],
           on: {
             PERSIST_INLINE_LOG_VIEW: {
               target: 'persistingInlineLogView',
@@ -263,7 +263,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
             : {}
         ),
         convertInlineLogViewReferenceToPersistedLogViewReference: assign((context, event) =>
-          'logView' in event && inlineLogViewReferenceRT.is(context.logViewReference)
+          'logView' in event && context.logViewReference.type === 'log-view-inline'
             ? ({
                 logViewReference: {
                   type: 'log-view-reference',
@@ -367,6 +367,30 @@ export const createLogViewStateMachine = ({
           catchError((error) =>
             of<LogViewEvent>({
               type: 'UPDATING_FAILED',
+              error,
+            })
+          )
+        ),
+      persistInlineLogView: (context, event) =>
+        from(
+          'logViewReference' in context &&
+            event.type === 'PERSIST_INLINE_LOG_VIEW' &&
+            context.logViewReference.type === 'log-view-inline'
+            ? logViews.putLogView(
+                { type: 'log-view-reference', logViewId: context.logViewReference.id },
+                context.logViewReference.attributes
+              )
+            : throwError(() => new Error('Failed to persist inline Log View.'))
+        ).pipe(
+          map(
+            (logView): LogViewEvent => ({
+              type: 'PERSISTING_INLINE_LOG_VIEW_SUCCEEDED',
+              logView,
+            })
+          ),
+          catchError((error) =>
+            of<LogViewEvent>({
+              type: 'PERSISTING_INLINE_LOG_VIEW_FAILED',
               error,
             })
           )
