@@ -7,17 +7,17 @@
 
 import React from 'react';
 import { KibanaReactStorybookDecorator } from '../../../utils/kibana_react.storybook_decorator';
-import { Cases } from './cases';
+import { Cases as Component } from './cases';
 
 export default {
   title: 'app/Cases',
-  component: Cases,
+  component: Component,
   decorators: [KibanaReactStorybookDecorator],
 };
 
 export function AllPermissions() {
   return (
-    <Cases
+    <Component
       permissions={{ read: true, all: true, create: true, delete: true, push: true, update: true }}
     />
   );
