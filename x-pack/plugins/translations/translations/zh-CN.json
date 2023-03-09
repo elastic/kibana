@@ -16245,7 +16245,6 @@
     "xpack.infra.alerting.metricsDropdownMenu": "指标",
     "xpack.infra.alerting.metricsDropdownTitle": "指标规则",
     "xpack.infra.alerts.charts.errorMessage": "哇哦，出问题了",
-    "xpack.infra.alerts.charts.loadingMessage": "正在加载",
     "xpack.infra.alerts.charts.noDataMessage": "没有可用图表数据",
     "xpack.infra.alerts.timeLabels.days": "天",
     "xpack.infra.alerts.timeLabels.hours": "小时",
