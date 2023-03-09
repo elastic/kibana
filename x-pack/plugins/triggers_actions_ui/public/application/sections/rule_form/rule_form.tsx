@@ -97,6 +97,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   metadata?: MetaData;
   filteredRuleTypes?: string[];
+  hideInterval?: boolean;
   connectorFeatureId?: string;
   onChangeMetaData: (metadata: MetaData) => void;
 }
@@ -114,6 +115,7 @@ export const RuleForm = ({
   actionTypeRegistry,
   metadata,
   filteredRuleTypes: ruleTypeToFilter,
+  hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
   onChangeMetaData,
 }: RuleFormProps) => {
@@ -582,7 +584,7 @@ export const RuleForm = ({
           </Suspense>
         </EuiErrorBoundary>
       ) : null}
-      {rule.params.canEditInterval !== false && (
+      {hideInterval !== true && (
         <EuiFlexItem>
           <EuiFormRow
             fullWidth

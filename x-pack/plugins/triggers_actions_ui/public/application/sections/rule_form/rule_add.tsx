@@ -48,6 +48,7 @@ const RuleAdd = ({
   initialValues,
   reloadRules,
   onSave,
+  hideInterval,
   metadata: initialMetadata,
   filteredRuleTypes,
   ...props
@@ -264,6 +265,7 @@ const RuleAdd = ({
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}
                 filteredRuleTypes={filteredRuleTypes}
+                hideInterval={hideInterval}
                 onChangeMetaData={onChangeMetaData}
               />
             </EuiFlyoutBody>
