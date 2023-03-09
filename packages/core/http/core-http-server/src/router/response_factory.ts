@@ -27,7 +27,7 @@ export interface KibanaSuccessResponseFactory {
    * Status code: `200`.
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
-  ok<T extends HttpResponsePayload = HttpResponsePayload>(
+  ok<T extends HttpResponsePayload | ResponseError = any>(
     options?: HttpResponseOptions<T>
   ): IKibanaResponse<T>;
 
@@ -36,7 +36,7 @@ export interface KibanaSuccessResponseFactory {
    * Status code: `202`.
    * @param options - {@link HttpResponseOptions} configures HTTP response body & headers.
    */
-  accepted<T extends HttpResponsePayload = HttpResponsePayload>(
+  accepted<T extends HttpResponsePayload | ResponseError = any>(
     options?: HttpResponseOptions<T>
   ): IKibanaResponse<T>;
 

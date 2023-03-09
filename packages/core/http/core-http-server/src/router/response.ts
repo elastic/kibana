@@ -13,7 +13,7 @@ import type { ResponseHeaders } from './headers';
  * HTTP response parameters
  * @public
  */
-export interface HttpResponseOptions<T extends HttpResponsePayload = HttpResponsePayload> {
+export interface HttpResponseOptions<T extends HttpResponsePayload | ResponseError = any> {
   /** HTTP message to send to the client */
   body?: T;
   /** HTTP Headers with additional information about response */
