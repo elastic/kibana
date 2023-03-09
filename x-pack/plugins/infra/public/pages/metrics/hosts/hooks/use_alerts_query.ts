@@ -23,14 +23,14 @@ export interface AlertsEsQuery {
 export const useAlertsQueryImpl = () => {
   const { hostNodes } = useHostsViewContext();
 
-  const { unifiedSearchDateRange } = useUnifiedSearchContext();
+  const { searchCriteria } = useUnifiedSearchContext();
 
   const [alertStatus, setAlertStatus] = useState<AlertStatus>('all');
 
   const getAlertsEsQuery = useCallback(
     (status?: AlertStatus) =>
-      createAlertsEsQuery({ dateRange: unifiedSearchDateRange, hostNodes, status }),
-    [hostNodes, unifiedSearchDateRange]
+      createAlertsEsQuery({ dateRange: searchCriteria.dateRange, hostNodes, status }),
+    [hostNodes, searchCriteria.dateRange]
   );
 
   // Regenerate the query when status change even if is not used.
