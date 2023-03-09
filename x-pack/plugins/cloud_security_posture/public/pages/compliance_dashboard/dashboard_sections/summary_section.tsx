@@ -152,7 +152,7 @@ export const SummarySection = ({
       </EuiFlexItem>
       <EuiFlexItem grow={dashboardColumnsGrow.second}>
         <ChartPanel title={chartTitle}>
-          <CloudPostureScoreChart
+          <ComplianceScoreChart
             id="cloud_posture_score_chart"
             data={complianceData.stats}
             trend={complianceData.trend}
