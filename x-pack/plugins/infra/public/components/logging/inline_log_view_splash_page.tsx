@@ -48,7 +48,7 @@ export const InlineLogViewSplashPrompt: React.FC = () => {
   const description = (
     <FormattedMessage
       id="xpack.infra.ml.splash.inlineLogView.description"
-      defaultMessage="This feature does not support inline Log Views, you may switch to a persisted Log View via the settings page"
+      defaultMessage="This feature does not support inline Log Views, you can switch to a persisted Log View via the settings page"
     />
   );
 
