@@ -23,7 +23,7 @@ export const doLogsEndpointActionDsExists = async ({
       },
       { meta: true }
     );
-    return doesIndexTemplateExist.statusCode === 404 ? false : true;
+    return doesIndexTemplateExist.statusCode !== 404;
   } catch (error) {
     const errorType = error?.type ?? '';
     if (errorType !== 'resource_not_found_exception') {
@@ -50,7 +50,7 @@ export const doesLogsEndpointActionsIndexExist = async ({
       },
       { meta: true }
     );
-    return doesIndexExist.statusCode === 404 ? false : true;
+    return doesIndexExist.statusCode !== 404;
   } catch (error) {
     const errorType = error?.type ?? '';
     if (errorType !== 'index_not_found_exception') {

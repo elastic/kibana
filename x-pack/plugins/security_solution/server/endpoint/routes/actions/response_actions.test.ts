@@ -67,6 +67,7 @@ import { registerResponseActionRoutes } from './response_actions';
 import * as ActionDetailsService from '../../services/actions/action_details_by_id';
 import { CaseStatuses } from '@kbn/cases-components';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import { ActionCreateService } from '../../services';
 
 interface CallRouteInterface {
   body?: ResponseActionRequestBody;
@@ -108,6 +109,10 @@ describe('Response actions', () => {
       const routerMock = httpServiceMock.createRouter();
       mockResponse = httpServerMock.createResponseFactory();
       const startContract = createMockEndpointAppContextServiceStartContract();
+      startContract.actionCreateService = new ActionCreateService(
+        mockScopedClient.asInternalUser,
+        startContract
+      );
       (startContract.messageSigningService?.sign as jest.Mock).mockImplementation(() => {
         return {
           data: 'thisisthedata',
@@ -177,7 +182,7 @@ describe('Response actions', () => {
         ctx.core.elasticsearch.client.asInternalUser.index.mockResponseImplementation(
           () => withIdxResp
         );
-        ctx.core.elasticsearch.client.asInternalUser.search.mockResponseImplementation(() => {
+        mockScopedClient.asInternalUser.search.mockResponseImplementation(() => {
           return {
             body: legacyMetadataSearchResponseMock(searchResponse),
           };

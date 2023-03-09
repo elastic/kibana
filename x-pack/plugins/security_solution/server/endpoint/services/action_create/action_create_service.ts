@@ -26,12 +26,11 @@ import { doLogsEndpointActionDsExists } from '../../utils';
 import type {
   ActionDetails,
   EndpointAction,
-  EndpointActionData,
   HostMetadata,
   LogsEndpointAction,
   LogsEndpointActionResponse,
-  ResponseActionApiResponse,
   ResponseActionsExecuteParameters,
+  CreateActionPayload,
 } from '../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../types';
 import type { FeatureKeys } from '../feature_usage';
@@ -52,10 +51,10 @@ const returnActionIdCommands: ResponseActionsApiCommandNames[] = ['isolate', 'un
 export class ActionCreateService {
   constructor(private esClient: ElasticsearchClient, private endpointContext: EndpointAppContext) {}
 
-  async createAction<T>(
-    payload,
+  async createAction(
+    payload: CreateActionPayload,
     casesClient?: CasesClient
-  ): Promise<ResponseActionApiResponse<ActionDetails>> {
+  ): Promise<{ data: ActionDetails }> {
     const featureKey = commandToFeatureKeyMap.get(payload.command) as FeatureKeys;
     if (featureKey) {
       this.endpointContext.service.getFeatureUsageService().notifyUsage(featureKey);
@@ -105,7 +104,7 @@ export class ActionCreateService {
           command: payload.command,
           comment: payload.comment ?? undefined,
           parameters: getActionParameters() ?? undefined,
-        } as EndpointActionData<T>,
+        },
       } as Omit<EndpointAction, 'agents' | 'user_id' | '@timestamp'>,
       user: {
         id: payload.user ? payload.user.username : 'unknown',
@@ -204,9 +203,9 @@ export class ActionCreateService {
       let caseIDs: string[] = payload.case_ids?.slice() || [];
       if (payload.alert_ids && payload.alert_ids.length > 0) {
         const newIDs: string[][] = await Promise.all(
-          payload.alert_ids.map(async (a: string) => {
+          payload.alert_ids.map(async (alertID: string) => {
             const cases: CasesByAlertId = await casesClient.cases.getCasesByAlertID({
-              alertID: a,
+              alertID,
               options: { owner: APP_ID },
             });
             return cases.map((caseInfo): string => {
