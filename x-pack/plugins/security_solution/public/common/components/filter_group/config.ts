@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { ConfigSchema } from '../../../plugin';
-
-export function isSloFeatureEnabled(config: ConfigSchema): boolean {
-  return config.unsafe.slo.enabled === true;
-}
+export const NUM_OF_CONTROLS = {
+  MIN: 2,
+  MAX: 6,
+};
