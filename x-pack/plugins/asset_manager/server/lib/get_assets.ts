@@ -12,15 +12,21 @@ import { ASSETS_INDEX_PREFIX } from '../constants';
 import { ElasticsearchAccessorOptions } from '../types';
 
 interface GetAssetsOptions extends ElasticsearchAccessorOptions {
+  size?: number;
   filters?: AssetFilters;
   from?: string;
   to?: string;
 }
 
-export async function getAssets({ esClient, filters = {} }: GetAssetsOptions): Promise<Asset[]> {
+export async function getAssets({
+  esClient,
+  size = 100,
+  filters = {},
+}: GetAssetsOptions): Promise<Asset[]> {
   const { from = 'now-24h', to = 'now' } = filters;
   const dsl: SearchRequest = {
     index: ASSETS_INDEX_PREFIX + '*',
+    size,
     query: {
       bool: {
         filter: [
