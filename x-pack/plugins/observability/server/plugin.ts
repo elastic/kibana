@@ -167,76 +167,72 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const { ruleDataService } = plugins.ruleRegistry;
 
-    if (config.unsafe.slo.enabled) {
-      plugins.features.registerKibanaFeature({
-        id: sloFeatureId,
-        name: i18n.translate('xpack.observability.featureRegistry.linkSloTitle', {
-          defaultMessage: 'SLOs',
-        }),
-        order: 1200,
-        category: DEFAULT_APP_CATEGORIES.observability,
-        app: [sloFeatureId, 'kibana'],
-        catalogue: [sloFeatureId, 'observability'],
-        alerting: [SLO_BURN_RATE_RULE_ID],
-        privileges: {
-          all: {
-            app: [sloFeatureId, 'kibana'],
-            catalogue: [sloFeatureId, 'observability'],
-            api: ['slo_write', 'slo_read', 'rac'],
-            savedObject: {
-              all: [SO_SLO_TYPE],
-              read: [],
-            },
-            alerting: {
-              rule: {
-                all: [SLO_BURN_RATE_RULE_ID],
-              },
-              alert: {
-                all: [SLO_BURN_RATE_RULE_ID],
-              },
-            },
-            ui: ['read', 'write'],
+    plugins.features.registerKibanaFeature({
+      id: sloFeatureId,
+      name: i18n.translate('xpack.observability.featureRegistry.linkSloTitle', {
+        defaultMessage: 'SLOs',
+      }),
+      order: 1200,
+      category: DEFAULT_APP_CATEGORIES.observability,
+      app: [sloFeatureId, 'kibana'],
+      catalogue: [sloFeatureId, 'observability'],
+      alerting: [SLO_BURN_RATE_RULE_ID],
+      privileges: {
+        all: {
+          app: [sloFeatureId, 'kibana'],
+          catalogue: [sloFeatureId, 'observability'],
+          api: ['slo_write', 'slo_read', 'rac'],
+          savedObject: {
+            all: [SO_SLO_TYPE],
+            read: [],
           },
-          read: {
-            app: [sloFeatureId, 'kibana'],
-            catalogue: [sloFeatureId, 'observability'],
-            api: ['slo_read', 'rac'],
-            savedObject: {
-              all: [],
-              read: [SO_SLO_TYPE],
+          alerting: {
+            rule: {
+              all: [SLO_BURN_RATE_RULE_ID],
             },
-            alerting: {
-              rule: {
-                read: [SLO_BURN_RATE_RULE_ID],
-              },
-              alert: {
-                read: [SLO_BURN_RATE_RULE_ID],
-              },
+            alert: {
+              all: [SLO_BURN_RATE_RULE_ID],
             },
-            ui: ['read'],
           },
+          ui: ['read', 'write'],
         },
-      });
-
-      core.savedObjects.registerType(slo);
-
-      const ruleDataClient = ruleDataService.initializeIndex({
-        feature: sloFeatureId,
-        registrationContext: SLO_RULE_REGISTRATION_CONTEXT,
-        dataset: Dataset.alerts,
-        componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
-        componentTemplates: [
-          {
-            name: 'mappings',
-            mappings: mappingFromFieldMap(legacyExperimentalFieldMap, 'strict'),
+        read: {
+          app: [sloFeatureId, 'kibana'],
+          catalogue: [sloFeatureId, 'observability'],
+          api: ['slo_read', 'rac'],
+          savedObject: {
+            all: [],
+            read: [SO_SLO_TYPE],
           },
-        ],
-      });
+          alerting: {
+            rule: {
+              read: [SLO_BURN_RATE_RULE_ID],
+            },
+            alert: {
+              read: [SLO_BURN_RATE_RULE_ID],
+            },
+          },
+          ui: ['read'],
+        },
+      },
+    });
 
-      registerRuleTypes(plugins.alerting, this.logger, ruleDataClient);
+    core.savedObjects.registerType(slo);
 
-      registerSloUsageCollector(plugins.usageCollection);
-    }
+    const ruleDataClient = ruleDataService.initializeIndex({
+      feature: sloFeatureId,
+      registrationContext: SLO_RULE_REGISTRATION_CONTEXT,
+      dataset: Dataset.alerts,
+      componentTemplateRefs: [ECS_COMPONENT_TEMPLATE_NAME],
+      componentTemplates: [
+        {
+          name: 'mappings',
+          mappings: mappingFromFieldMap(legacyExperimentalFieldMap, 'strict'),
+        },
+      ],
+    });
+    registerRuleTypes(plugins.alerting, this.logger, ruleDataClient);
+    registerSloUsageCollector(plugins.usageCollection);
 
     registerRoutes({
       core,
@@ -244,7 +240,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         ruleDataService,
       },
       logger: this.logger,
-      repository: getObservabilityServerRouteRepository(config),
+      repository: getObservabilityServerRouteRepository(),
     });
 
     /**
