@@ -60,6 +60,10 @@ interface BucketAggsSchemas {
       _key: string;
     };
   };
+  multi_terms?: {
+    terms?: Array<{ field: string }>;
+    size?: number;
+  };
   nested?: {
     path: string;
   };
@@ -164,6 +168,12 @@ const bucketAggsTempsSchemas: t.Type<BucketAggsSchemas> = t.exact(
     nested: t.type({
       path: t.string,
     }),
+    multi_terms: t.exact(
+      t.partial({
+        terms: t.array(t.type({ field: t.string })),
+        size: t.number,
+      })
+    ),
     terms: t.exact(
       t.partial({
         field: t.string,

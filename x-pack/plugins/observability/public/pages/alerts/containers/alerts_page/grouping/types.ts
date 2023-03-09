@@ -12,10 +12,19 @@ export interface AlertsGroupingAggregation {
   unitCount0?: {
     value?: NumberOrNull;
   };
-  severitiesSubAggregation?: {
+  statusSubAggregation?: {
     buckets?: GenericBuckets[];
   };
-  countSeveritySubAggregation?: {
+  countStatusSubAggregation?: {
+    value?: NumberOrNull;
+  };
+  hostIpCountAggregation?: {
+    value?: NumberOrNull;
+  };
+  agentCountAggregation?: {
+    value?: NumberOrNull;
+  };
+  logSumAggregation?: {
     value?: NumberOrNull;
   };
   usersCountAggregation?: {

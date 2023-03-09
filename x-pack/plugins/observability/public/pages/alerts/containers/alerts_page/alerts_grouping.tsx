@@ -30,6 +30,7 @@ import {
 interface OwnProps {
   dataView: DataView | null;
   from: string;
+  isTableLoading: boolean;
   renderChildComponent: (groupingFilters: Filter[]) => React.ReactElement;
   esQuery: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   tableId: string;
@@ -41,6 +42,7 @@ export const AlertsGroupingComponent: React.FC<OwnProps> = ({
   esQuery,
   featureIds,
   from,
+  isTableLoading,
   tableId,
   to,
   renderChildComponent,
@@ -97,9 +99,15 @@ export const AlertsGroupingComponent: React.FC<OwnProps> = ({
 
   useEffect(() => {
     if (!isNoneGroup(selectedGroup)) {
+      console.log({ queryGroups });
       setAlertsQuery(queryGroups);
     }
   }, [queryGroups, selectedGroup, setAlertsQuery]);
+
+  const isLoading = useMemo(
+    () => isTableLoading || isLoadingGroups,
+    [isLoadingGroups, isTableLoading]
+  );
 
   return useMemo(
     () =>
@@ -122,7 +130,7 @@ export const AlertsGroupingComponent: React.FC<OwnProps> = ({
           groupPanelRenderer: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
             getSelectedGroupButtonContent(selectedGroup, fieldBucket),
           inspectButton: <></>,
-          isLoading: isLoadingGroups,
+          isLoading,
           renderChildComponent,
           takeActionItems: () => [],
         })

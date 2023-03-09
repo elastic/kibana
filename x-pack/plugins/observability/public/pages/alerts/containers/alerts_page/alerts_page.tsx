@@ -164,6 +164,12 @@ function InternalAlertsPage() {
   const CasesContext = cases.ui.getCasesContext();
   const userCasesPermissions = useGetUserCasesPermissions();
 
+  const [isTableLoading, setIsTableLoading] = useState(false);
+
+  const onTableUpdate = useCallback(({ isLoading }) => {
+    setIsTableLoading(isLoading);
+  }, []);
+
   const renderAlertsTable = useCallback(
     (groupingFilters: Filter[]) =>
       esQuery ? (
@@ -183,6 +189,7 @@ function InternalAlertsPage() {
               ],
             },
           }}
+          onUpdate={onTableUpdate}
           showExpandToDetails={false}
           showAlertStatusWithFlapping
           pageSize={ALERTS_PER_PAGE}
@@ -190,7 +197,7 @@ function InternalAlertsPage() {
       ) : (
         <></>
       ),
-    [AlertsStateTable, alertsTableConfigurationRegistry, esQuery]
+    [AlertsStateTable, alertsTableConfigurationRegistry, esQuery, onTableUpdate]
   );
 
   if (!hasAnyData && !isAllRequestsComplete) {
@@ -245,6 +252,7 @@ function InternalAlertsPage() {
                 dataView={dataView}
                 esQuery={esQuery}
                 featureIds={observabilityAlertFeatureIds}
+                isTableLoading={isTableLoading}
                 renderChildComponent={renderAlertsTable}
                 from={alertSearchBarStateProps.rangeFrom}
                 tableId={ALERTS_TABLE_ID}

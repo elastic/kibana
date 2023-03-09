@@ -75,59 +75,57 @@ const GroupingComponent = <T,>({
     [groupCount]
   );
 
-  const groupPanels = useMemo(
-    () =>
-      data?.stackByMultipleFields0?.buckets?.map((groupBucket) => {
-        const group = firstNonNullValue(groupBucket.key);
-        const groupKey = `group0-${group}`;
+  const groupPanels = useMemo(() => {
+    return data?.stackByMultipleFields0?.buckets?.map((groupBucket) => {
+      const group = firstNonNullValue(groupBucket.key);
+      const groupKey = `group0-${group}`;
 
-        return (
-          <span key={groupKey}>
-            <GroupPanel
-              extraAction={
-                <GroupStats
-                  bucket={groupBucket}
-                  takeActionItems={takeActionItems(createGroupFilter(selectedGroup, group))}
-                  badgeMetricStats={badgeMetricStats && badgeMetricStats(groupBucket)}
-                  customMetricStats={customMetricStats && customMetricStats(groupBucket)}
-                />
-              }
-              forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
-              groupBucket={groupBucket}
-              groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
-              isLoading={isLoading}
-              onToggleGroup={(isOpen) => {
-                setTrigger({
-                  // ...trigger, -> this change will keep only one group at a time expanded and one table displayed
-                  [groupKey]: {
-                    state: isOpen ? 'open' : 'closed',
-                    selectedBucket: groupBucket,
-                  },
-                });
-              }}
-              renderChildComponent={
-                trigger[groupKey] && trigger[groupKey].state === 'open'
-                  ? renderChildComponent
-                  : () => null
-              }
-              selectedGroup={selectedGroup}
-            />
-            <EuiSpacer size="s" />
-          </span>
-        );
-      }),
-    [
-      badgeMetricStats,
-      customMetricStats,
-      data?.stackByMultipleFields0?.buckets,
-      groupPanelRenderer,
-      isLoading,
-      renderChildComponent,
-      selectedGroup,
-      takeActionItems,
-      trigger,
-    ]
-  );
+      return (
+        <span key={groupKey}>
+          <GroupPanel
+            extraAction={
+              <GroupStats
+                bucket={groupBucket}
+                takeActionItems={takeActionItems(createGroupFilter(selectedGroup, group))}
+                badgeMetricStats={badgeMetricStats && badgeMetricStats(groupBucket)}
+                customMetricStats={customMetricStats && customMetricStats(groupBucket)}
+              />
+            }
+            forceState={(trigger[groupKey] && trigger[groupKey].state) ?? 'closed'}
+            groupBucket={groupBucket}
+            groupPanelRenderer={groupPanelRenderer && groupPanelRenderer(groupBucket)}
+            isLoading={isLoading}
+            onToggleGroup={(isOpen) => {
+              setTrigger({
+                // ...trigger, -> this change will keep only one group at a time expanded and one table displayed
+                [groupKey]: {
+                  state: isOpen ? 'open' : 'closed',
+                  selectedBucket: groupBucket,
+                },
+              });
+            }}
+            renderChildComponent={
+              trigger[groupKey] && trigger[groupKey].state === 'open'
+                ? renderChildComponent
+                : () => null
+            }
+            selectedGroup={selectedGroup}
+          />
+          <EuiSpacer size="s" />
+        </span>
+      );
+    });
+  }, [
+    badgeMetricStats,
+    customMetricStats,
+    data?.stackByMultipleFields0?.buckets,
+    groupPanelRenderer,
+    isLoading,
+    renderChildComponent,
+    selectedGroup,
+    takeActionItems,
+    trigger,
+  ]);
   const pageCount = useMemo(
     () => (groupCount && pagination.pageSize ? Math.ceil(groupCount / pagination.pageSize) : 1),
     [groupCount, pagination.pageSize]
@@ -164,6 +162,9 @@ const GroupingComponent = <T,>({
         </EuiFlexItem>
       </EuiFlexGroup>
       <div css={groupingContainerCss} className="eui-xScroll">
+        {isLoading && (
+          <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
+        )}
         {groupCount > 0 ? (
           <>
             {groupPanels}
@@ -181,9 +182,6 @@ const GroupingComponent = <T,>({
           </>
         ) : (
           <>
-            {isLoading && (
-              <EuiProgress data-test-subj="is-loading-grouping-table" size="xs" color="accent" />
-            )}
             <EmptyGroupingComponent />
           </>
         )}

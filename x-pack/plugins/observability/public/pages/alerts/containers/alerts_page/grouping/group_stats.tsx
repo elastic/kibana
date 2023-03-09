@@ -10,56 +10,58 @@ import React from 'react';
 import type { RawBucket } from '@kbn/securitysolution-grouping';
 import type { AlertsGroupingAggregation } from './types';
 
-const getSingleGroupSeverity = (severity?: string) => {
-  switch (severity) {
-    case 'low':
+export const ACTIVE_COLOR = '#bd271e';
+export const RECOVERED_COLOR = '#6eccb1';
+export const ALL_COLOR = '#6092c0';
+export const FLAPPING_COLOR = '#ff7e62';
+
+const getSingleGroupStatus = (status?: string) => {
+  switch (status) {
+    case 'active':
       return (
         <>
-          <EuiIcon type="dot" color="#54b399" />
-          {`Low`}
+          <EuiIcon type="dot" color={ACTIVE_COLOR} />
+          {`Active`}
         </>
       );
-    case 'medium':
+    case 'recovered':
       return (
         <>
-          <EuiIcon type="dot" color="#d6bf57" />
-          {`Medium`}
+          <EuiIcon type="dot" color={RECOVERED_COLOR} />
+          {`Recovered`}
         </>
       );
-    case 'high':
+    case 'flapping':
       return (
         <>
-          <EuiIcon type="dot" color="#da8b45" />
-          {`High`}
-        </>
-      );
-    case 'critical':
-      return (
-        <>
-          <EuiIcon type="dot" color="#e7664c" />
-          {`Critical`}
+          <EuiIcon type="dot" color={FLAPPING_COLOR} />
+          {`Flapping`}
         </>
       );
   }
-  return null;
+  return (
+    <>
+      <EuiIcon type="dot" color={ALL_COLOR} />
+      {`All`}
+    </>
+  );
 };
 
-const multiSeverity = (
+const multiStatus = (
   <>
     <span className="smallDot">
-      <EuiIcon type="dot" color="#54b399" />
+      <EuiIcon type="dot" color={ACTIVE_COLOR} />
     </span>
     <span className="smallDot">
-      <EuiIcon type="dot" color="#d6bf57" />
+      <EuiIcon type="dot" color={FLAPPING_COLOR} />
     </span>
     <span className="smallDot">
-      <EuiIcon type="dot" color="#da8b45" />
+      <EuiIcon type="dot" color={RECOVERED_COLOR} />
     </span>
-
     <span>
-      <EuiIcon type="dot" color="#e7664c" />
+      <EuiIcon type="dot" color={ALL_COLOR} />
     </span>
-    {`i18n.STATS_GROUP_SEVERITY_MULTI`}
+    {`Multiple`}
   </>
 );
 
@@ -79,8 +81,8 @@ export const getSelectedGroupBadgeMetrics = (
     case 'kibana.alert.rule.name':
       return [
         {
-          title: `Users`,
-          value: bucket.usersCountAggregation?.value ?? 0,
+          title: `Agents`,
+          value: bucket.agentCountAggregation?.value ?? 0,
         },
         {
           title: `Hosts`,
@@ -91,19 +93,19 @@ export const getSelectedGroupBadgeMetrics = (
     case 'host.name':
       return [
         {
-          title: `Users`,
-          value: bucket.usersCountAggregation?.value ?? 0,
+          title: `Host IPs`,
+          value: bucket.hostIpCountAggregation?.value ?? 0,
         },
         {
-          title: `Rules`,
-          value: bucket.rulesCountAggregation?.value ?? 0,
+          title: `Log Entries`,
+          value: bucket.logSumAggregation?.value ?? 0,
         },
         ...defaultBadges,
       ];
     case 'kibana.alert.rule.category':
       return [
         {
-          title: `IPs`,
+          title: `Hosts`,
           value: bucket.hostsCountAggregation?.value ?? 0,
         },
         {
@@ -112,7 +114,7 @@ export const getSelectedGroupBadgeMetrics = (
         },
         ...defaultBadges,
       ];
-    case 'event.action':
+    case 'agent.name':
       return [
         {
           title: `Hosts`,
@@ -138,37 +140,37 @@ export const getSelectedGroupCustomMetrics = (
   selectedGroup: string,
   bucket: RawBucket<AlertsGroupingAggregation>
 ) => {
-  const singleSeverityComponent =
-    bucket.severitiesSubAggregation?.buckets && bucket.severitiesSubAggregation?.buckets?.length
-      ? getSingleGroupSeverity(bucket.severitiesSubAggregation?.buckets[0].key.toString())
+  const singleStatusComponent =
+    bucket.statusSubAggregation?.buckets && bucket.statusSubAggregation?.buckets?.length
+      ? getSingleGroupStatus(bucket.statusSubAggregation?.buckets[0].key.toString())
       : null;
-  const severityComponent =
-    bucket.countSeveritySubAggregation?.value && bucket.countSeveritySubAggregation?.value > 1
-      ? multiSeverity
-      : singleSeverityComponent;
-  if (!severityComponent) {
+  const statusComponent =
+    bucket.countStatusSubAggregation?.value && bucket.countStatusSubAggregation?.value > 1
+      ? multiStatus
+      : singleStatusComponent;
+  if (!statusComponent) {
     return [];
   }
   switch (selectedGroup) {
     case 'kibana.alert.rule.name':
       return [
         {
-          title: 'Severity',
-          customStatRenderer: severityComponent,
+          title: 'Status',
+          customStatRenderer: statusComponent,
         },
       ];
     case 'host.name':
       return [
         {
-          title: 'Severity',
-          customStatRenderer: severityComponent,
+          title: 'Status',
+          customStatRenderer: statusComponent,
         },
       ];
     case 'kibana.alert.rule.category':
       return [
         {
-          title: 'Severity',
-          customStatRenderer: severityComponent,
+          title: 'Status',
+          customStatRenderer: statusComponent,
         },
       ];
   }

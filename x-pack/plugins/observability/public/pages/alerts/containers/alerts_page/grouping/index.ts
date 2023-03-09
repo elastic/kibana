@@ -26,8 +26,8 @@ export const getDefaultGroupingOptions = (): GroupOption[] => {
       key: 'host.name',
     },
     {
-      label: `Event Action`,
-      key: 'event.action',
+      label: `Agent Name`,
+      key: 'agent.name',
     },
   ];
 };

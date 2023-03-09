@@ -11,7 +11,11 @@ import type { NamedAggregation } from '@kbn/securitysolution-grouping';
 import { getGroupingQuery } from '@kbn/securitysolution-grouping';
 
 const getGroupFields = (groupValue: string) => {
-  return [groupValue];
+  if (groupValue === 'kibana.alert.rule.name') {
+    return [groupValue, 'kibana.alert.rule.category'];
+  } else {
+    return [groupValue];
+  }
 };
 
 interface AlertsGroupingQueryParams {
@@ -80,23 +84,23 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
       aggMetrics.push(
         ...[
           {
-            countSeveritySubAggregation: {
+            countStatusSubAggregation: {
               cardinality: {
-                field: 'kibana.alert.severity',
+                field: 'kibana.alert.status',
               },
             },
           },
           {
-            severitiesSubAggregation: {
+            statusSubAggregation: {
               terms: {
-                field: 'kibana.alert.severity',
+                field: 'kibana.alert.status',
               },
             },
           },
           {
-            usersCountAggregation: {
+            agentCountAggregation: {
               cardinality: {
-                field: 'kibana.alert.rule.category',
+                field: 'agent.name',
               },
             },
           },
@@ -121,30 +125,30 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
       aggMetrics.push(
         ...[
           {
-            rulesCountAggregation: {
-              cardinality: {
-                field: 'kibana.alert.rule.rule_id',
+            logSumAggregation: {
+              sum: {
+                field: 'kibana.alert.evaluation.value',
               },
             },
           },
           {
-            countSeveritySubAggregation: {
+            countStatusSubAggregation: {
               cardinality: {
-                field: 'kibana.alert.severity',
+                field: 'kibana.alert.status',
               },
             },
           },
           {
-            severitiesSubAggregation: {
+            statusSubAggregation: {
               terms: {
-                field: 'kibana.alert.severity',
+                field: 'kibana.alert.status',
               },
             },
           },
           {
-            usersCountAggregation: {
+            hostIpCountAggregation: {
               cardinality: {
-                field: 'kibana.alert.rule.category',
+                field: 'host.ip',
               },
             },
           },
@@ -157,26 +161,26 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
           {
             rulesCountAggregation: {
               cardinality: {
-                field: 'kibana.alert.rule.rule_id',
+                field: 'kibana.alert.rule.name',
               },
             },
           },
           {
-            countSeveritySubAggregation: {
+            countStatusSubAggregation: {
               cardinality: {
-                field: 'kibana.alert.severity',
+                field: 'kibana.alert.status',
               },
             },
           },
           {
-            severitiesSubAggregation: {
+            statusSubAggregation: {
               terms: {
-                field: 'kibana.alert.severity',
+                field: 'kibana.alert.status',
               },
             },
           },
           {
-            usersCountAggregation: {
+            hostsCountAggregation: {
               cardinality: {
                 field: 'host.name',
               },
@@ -192,32 +196,32 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
         ]
       );
       break;
-    case 'event.action':
+    case 'agent.name':
       aggMetrics.push(
         ...[
           {
             rulesCountAggregation: {
               cardinality: {
-                field: 'kibana.alert.rule.rule_id',
+                field: 'kibana.alert.rule.name',
               },
             },
           },
           {
-            countSeveritySubAggregation: {
+            countStatusSubAggregation: {
               cardinality: {
-                field: 'kibana.alert.severity',
+                field: 'kibana.alert.status',
               },
             },
           },
           {
-            severitiesSubAggregation: {
+            statusSubAggregation: {
               terms: {
-                field: 'kibana.alert.severity',
+                field: 'kibana.alert.status',
               },
             },
           },
           {
-            usersCountAggregation: {
+            hostsCountAggregation: {
               cardinality: {
                 field: 'host.name',
               },
@@ -230,7 +234,7 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
       aggMetrics.push({
         rulesCountAggregation: {
           cardinality: {
-            field: 'kibana.alert.rule.rule_id',
+            field: 'kibana.alert.rule.name',
           },
         },
       });

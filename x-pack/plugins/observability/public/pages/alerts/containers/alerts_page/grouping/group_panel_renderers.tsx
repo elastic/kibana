@@ -19,8 +19,8 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { isArray } from 'lodash/fp';
 import React from 'react';
 import type { RawBucket } from '@kbn/securitysolution-grouping';
+import { PopoverItems } from './popover_items';
 import type { AlertsGroupingAggregation } from './types';
-
 export const getSelectedGroupButtonContent = (
   selectedGroup: string,
   bucket: RawBucket<AlertsGroupingAggregation>
@@ -34,12 +34,14 @@ export const getSelectedGroupButtonContent = (
           tags={bucket.ruleTags?.buckets}
         />
       ) : undefined;
+    case 'kibana.alert.rule.category':
+      return <UserNameGroupContent userName={bucket.key} />;
     case 'host.name':
       return <HostNameGroupContent hostName={bucket.key} />;
     case 'kibana.alert.rule.category':
       return <UserNameGroupContent userName={bucket.key} />;
-    case 'source.ip':
-      return <SourceIpGroupContent sourceIp={bucket.key} />;
+    case 'agent.name':
+      return <AgentNameGroupContent sourceIp={bucket.key} />;
   }
 };
 
@@ -54,6 +56,7 @@ const RuleNameGroupContent = React.memo<{
       {tag}
     </EuiBadge>
   );
+  console.log({ euiThemeVars });
   return (
     <>
       <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="m" alignItems="center">
@@ -61,27 +64,25 @@ const RuleNameGroupContent = React.memo<{
           <EuiTitle size="xs">
             <h5 className="eui-textTruncate">{ruleName.trim()}</h5>
           </EuiTitle>
+          <EuiText size="s">
+            <p className="eui-textTruncate">
+              <EuiTextColor color="subdued">{ruleDescription}</EuiTextColor>
+            </p>
+          </EuiText>
         </EuiFlexItem>
         {tags && tags.length > 0 ? (
           <EuiFlexItem onClick={(e) => e.stopPropagation()} grow={false}>
-            {'TO DO'}
-            {/* <PopoverItems*/}
-            {/*  items={tags.map((tag) => tag.key.toString())}*/}
-            {/*  popoverTitle={COLUMN_TAGS}*/}
-            {/*  popoverButtonTitle={tags.length.toString()}*/}
-            {/*  popoverButtonIcon="tag"*/}
-            {/*  dataTestPrefix="tags"*/}
-            {/*  renderItem={renderItem}*/}
-            {/* />*/}
+            <PopoverItems
+              items={tags.map((tag) => tag.key.toString())}
+              popoverTitle={'Tags'}
+              popoverButtonTitle={tags.length.toString()}
+              popoverButtonIcon="tag"
+              dataTestPrefix="tags"
+              renderItem={renderItem}
+            />
           </EuiFlexItem>
         ) : null}
       </EuiFlexGroup>
-
-      <EuiText size="s">
-        <p className="eui-textTruncate">
-          <EuiTextColor color="subdued">{ruleDescription}</EuiTextColor>
-        </p>
-      </EuiText>
     </>
   );
 });
@@ -131,16 +132,16 @@ const UserNameGroupContent = React.memo<{ userName: string | string[] }>(({ user
 });
 UserNameGroupContent.displayName = 'UserNameGroupContent';
 
-const SourceIpGroupContent = React.memo<{ sourceIp: string | string[] }>(({ sourceIp }) => (
-  <EuiFlexGroup data-test-subj="source-ip-group-renderer" gutterSize="s" alignItems="center">
+const AgentNameGroupContent = React.memo<{ sourceIp: string | string[] }>(({ sourceIp }) => (
+  <EuiFlexGroup data-test-subj="agent-name-group-renderer" gutterSize="s" alignItems="center">
     <EuiFlexItem
       grow={false}
       style={{
-        backgroundColor: euiThemeVars.euiColorVis3_behindText,
+        backgroundColor: euiThemeVars.euiColorVis2_behindText,
         borderRadius: '50%',
       }}
     >
-      <EuiIcon style={{ padding: 4 }} type="ip" size="l" />
+      <EuiIcon style={{ padding: 4 }} type="reporter" size="l" />
     </EuiFlexItem>
     <EuiFlexItem>
       <EuiTitle size="xs">
@@ -149,4 +150,4 @@ const SourceIpGroupContent = React.memo<{ sourceIp: string | string[] }>(({ sour
     </EuiFlexItem>
   </EuiFlexGroup>
 ));
-SourceIpGroupContent.displayName = 'SourceIpGroupContent';
+AgentNameGroupContent.displayName = 'AgentNameGroupContent';

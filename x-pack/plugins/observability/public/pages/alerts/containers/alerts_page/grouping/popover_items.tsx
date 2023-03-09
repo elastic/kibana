@@ -51,7 +51,7 @@ const PopoverWrapper = styled(EuiBadgeGroup)`
  * @param numberOfItemsToDisplay - number of items to render that are no in popover, defaults to 0
  * @param dataTestPrefix - data-test-subj prefix to apply to elements
  */
-const PopoverItemsComponent = <T extends unknown>({
+function PopoverItemsComponent<T extends unknown>({
   items,
   renderItem,
   popoverTitle,
@@ -59,13 +59,13 @@ const PopoverItemsComponent = <T extends unknown>({
   popoverButtonIcon,
   numberOfItemsToDisplay = 0,
   dataTestPrefix = 'items',
-}: PopoverItemsProps<T>) => {
+}: PopoverItemsProps<T>) {
   const [isExceptionOverflowPopoverOpen, setIsExceptionOverflowPopoverOpen] = useState(false);
 
-  const OverflowList = ({ items: itemsToRender }: OverflowListProps<T>) => (
-    <>{itemsToRender.map(renderItem)}</>
-  );
-  console.log('PopoverItemsComponent', { items });
+  function OverflowList({ items: itemsToRender }: OverflowListProps<T>) {
+    return <>{itemsToRender.map(renderItem)}</>;
+  }
+
   if (items.length <= numberOfItemsToDisplay) {
     return (
       <PopoverItemsWrapper data-test-subj={dataTestPrefix} alignItems="center" gutterSize="s">
@@ -110,7 +110,7 @@ const PopoverItemsComponent = <T extends unknown>({
       </EuiPopover>
     </PopoverItemsWrapper>
   );
-};
+}
 
 const MemoizedPopoverItems = React.memo(PopoverItemsComponent);
 MemoizedPopoverItems.displayName = 'PopoverItems';

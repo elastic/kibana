@@ -57,6 +57,7 @@ const RuleNameGroupContent = React.memo<{
       {tag}
     </EuiBadge>
   );
+  console.log('tags?', tags);
   return (
     <>
       <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="m" alignItems="center">
@@ -66,7 +67,11 @@ const RuleNameGroupContent = React.memo<{
           </EuiTitle>
         </EuiFlexItem>
         {tags && tags.length > 0 ? (
-          <EuiFlexItem onClick={(e) => e.stopPropagation()} grow={false}>
+          <EuiFlexItem
+            onClick={(e) => e.stopPropagation()}
+            grow={false}
+            data-test-subj="look_at_me"
+          >
             <PopoverItems
               items={tags.map((tag) => tag.key.toString())}
               popoverTitle={COLUMN_TAGS}
