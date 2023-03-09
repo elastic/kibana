@@ -6,11 +6,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { FullRiskScore, GetScoresParams, SimpleRiskScore } from './types';
+import type { GetScoresParams, GetScoresResponse } from './types';
 import { calculateRiskScores } from './calculate_risk_scores';
 
 export interface RiskScoreService {
-  getScores: (params: GetScoresParams) => Promise<SimpleRiskScore[] | FullRiskScore[]>;
+  getScores: (params: GetScoresParams) => Promise<GetScoresResponse>;
 }
 
 export const buildRiskScoreService = ({
