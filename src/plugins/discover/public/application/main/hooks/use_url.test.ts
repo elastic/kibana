@@ -9,22 +9,39 @@ import { renderHook } from '@testing-library/react-hooks';
 import { createSearchSessionMock } from '../../../__mocks__/search_session';
 import { useUrl } from './use_url';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
+import {
+  savedSearchMockWithTimeField,
+  savedSearchMockWithTimeFieldNew,
+} from '../../../__mocks__/saved_search';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 
-describe('test useUrl', () => {
-  test('resetSavedSearch is triggered once path it changed to /', () => {
-    const { history } = createSearchSessionMock();
-    const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-    history.push('/view');
-    const load = jest.fn();
-    stateContainer.actions.loadSavedSearch = load;
-    const props = {
+function prepareTest(savedSearch: SavedSearch, path: string) {
+  const { history } = createSearchSessionMock();
+  const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
+  stateContainer.actions.loadSavedSearch = jest.fn();
+
+  renderHook(() =>
+    useUrl({
       history,
       stateContainer,
-    };
-    renderHook(() => useUrl(props));
-    history.push('/new');
+    })
+  );
+  history.push(path);
+  return { load: stateContainer.actions.loadSavedSearch };
+}
+describe('test useUrl when the url is changed to /', () => {
+  test('loadSavedSearch is not triggered when the url is e.g. /new', () => {
+    // the switch to loading the new saved search is taken care in the main route
+    const { load } = prepareTest(savedSearchMockWithTimeFieldNew, '/new');
     expect(load).toHaveBeenCalledTimes(0);
-    history.push('/');
+  });
+  test('loadSavedSearch is not triggered when a persisted saved search is pre-selected', () => {
+    // the switch to loading the new saved search is taken care in the main route
+    const { load } = prepareTest(savedSearchMockWithTimeField, '/');
+    expect(load).toHaveBeenCalledTimes(0);
+  });
+  test('loadSavedSearch is triggered when a new saved search is pre-selected ', () => {
+    const { load } = prepareTest(savedSearchMockWithTimeFieldNew, '/');
     expect(load).toHaveBeenCalledTimes(1);
   });
 });
