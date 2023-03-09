@@ -7,12 +7,16 @@
 
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import {
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  type Filter,
+  type Query,
+  type TimeRange,
+} from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SavedQuery } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid } from '@elastic/eui';
-import deepEqual from 'fast-deep-equal';
 import type { InfraClientStartDeps } from '../../../../types';
 import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
@@ -25,35 +29,14 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   const {
     services: { unifiedSearch, application },
   } = useKibana<InfraClientStartDeps>();
-  const {
-    unifiedSearchDateRange,
-    unifiedSearchQuery,
-    unifiedSearchFilters,
-    controlPanelFilters,
-    onSubmit,
-    saveQuery,
-    clearSavedQuery,
-  } = useUnifiedSearchContext();
+  const { searchCriteria, onSubmit } = useUnifiedSearchContext();
 
   const { SearchBar } = unifiedSearch.ui;
 
-  const onQuerySubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
-    onQueryChange({ payload });
-  };
-
   const onPanelFiltersChange = (panelFilters: Filter[]) => {
-    // <ControlsContent /> triggers this event 2 times during its loading lifecycle
-    if (!deepEqual(controlPanelFilters, panelFilters)) {
+    if (!compareFilters(searchCriteria.panelFilters, panelFilters, COMPARE_ALL_OPTIONS)) {
       onQueryChange({ panelFilters });
     }
-  };
-
-  const onClearSavedQuery = () => {
-    clearSavedQuery();
-  };
-
-  const onQuerySave = (savedQuery: SavedQuery) => {
-    saveQuery(savedQuery);
   };
 
   const onQueryChange = ({
@@ -66,31 +49,36 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
     onSubmit({ query: payload?.query, dateRange: payload?.dateRange, panelFilters });
   };
 
+  const handleRefresh = (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => {
+    // This makes sure `onQueryChange` is only called when the submit button is clicked
+    if (isUpdate === false) {
+      onQueryChange({ payload });
+    }
+  };
+
   return (
     <EuiFlexGrid gutterSize="s">
       <SearchBar
         appName={'Infra Hosts'}
+        displayStyle="inPage"
+        indexPatterns={[dataView]}
         placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
           defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
         })}
-        indexPatterns={[dataView]}
-        query={unifiedSearchQuery}
-        dateRangeFrom={unifiedSearchDateRange.from}
-        dateRangeTo={unifiedSearchDateRange.to}
-        onQuerySubmit={onQuerySubmit}
-        onSaved={onQuerySave}
-        onSavedQueryUpdated={onQuerySave}
-        onClearSavedQuery={onClearSavedQuery}
+        onQuerySubmit={handleRefresh}
         showSaveQuery={Boolean(application?.capabilities?.visualize?.saveQuery)}
+        showDatePicker
+        showFilterBar
         showQueryInput
-        displayStyle="inPage"
+        showQueryMenu
+        useDefaultBehaviors
       />
       <ControlsContent
-        timeRange={unifiedSearchDateRange}
+        timeRange={searchCriteria.dateRange}
         dataView={dataView}
-        query={unifiedSearchQuery}
-        filters={unifiedSearchFilters}
-        onFilterChange={onPanelFiltersChange}
+        query={searchCriteria.query}
+        filters={searchCriteria.filters}
+        onFiltersChange={onPanelFiltersChange}
       />
     </EuiFlexGrid>
   );
