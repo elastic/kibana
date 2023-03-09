@@ -5,37 +5,363 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import moment, { Moment } from 'moment-timezone';
 
-import { isDate, isString, mapValues } from 'lodash';
-import moment from 'moment-timezone';
-import { RRule as OrigRRule, Options } from 'rrule';
-
-// rrule.js has a bizarre handling of timezone offsets in date strings. It completely ignores any timezone information expressed
-// in a Javascript Date object, and just applies its specified TZID to whatever date string it receives. But it doesn't calculate
-// this in absolute unix time or anything, it just reads the date string from the Date object. So basically we can work with
-// - System local time (variable, unstable, unpredictable), or
-// - UTC (always the same)
-// Except GET THIS!!! You can EXPRESS A TIME IN UTC like "2023-03-07T22:00:00Z" and then rrule.js is like, "Oh, ok, March 7 at 10pm"
-// even if the computer doing all the computering is in Japan, where it's already March 8th at 10pm UTC, but NOPE NOBODY CARES, TOO
-// BAD FOR YOU, GEE WILLICKERS TIME ZONES SURE ARE HARD, GOOD LUCK END USER, so basically that's why we have a function that
-// takes a date and time and then just plops a Z at the end of it so that we don't break everything.
-function UTCSpoofedDate(dt: string, tzid: string) {
-  return new Date(moment(dt).tz(tzid).format('YYYY-MM-DDTHH:mm:ss') + 'Z');
+export enum Frequency {
+  YEARLY = 0,
+  MONTHLY = 1,
+  WEEKLY = 2,
+  DAILY = 3,
+  HOURLY = 4,
+  MINUTELY = 5,
 }
 
-const keysToUTCSpoof = ['dtstart', 'until'];
+export enum Weekday {
+  MO = 1,
+  TU = 2,
+  WE = 3,
+  TH = 4,
+  FR = 5,
+  SA = 6,
+  SU = 7,
+}
 
-export class RRule extends OrigRRule {
-  constructor(options: Partial<Options>) {
-    const tzid = options.tzid ?? 'UTC';
+export type WeekdayStr = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';
+interface IterOptions {
+  refDT: Moment;
+  wkst?: Weekday | WeekdayStr | number | null;
+  byyearday?: number[] | null;
+  bymonth?: number[] | null;
+  bysetpos?: number[] | null;
+  bymonthday?: number[] | null;
+  byweekday?: Weekday[] | string[] | null;
+  byhour?: number[] | null;
+  byminute?: number[] | null;
+  bysecond?: number[] | null;
+}
 
-    const tzCorrectedOptions = mapValues(options, (val, key) => {
-      if (keysToUTCSpoof.includes(key) && (isDate(val) || isString(val))) {
-        const dt = isDate(val) ? val.toISOString() : val;
-        return UTCSpoofedDate(dt, tzid);
+export type Options = Omit<IterOptions, 'refDT'> & {
+  dtstart: Date;
+  freq: Frequency;
+  interval?: number;
+  until?: string | null;
+  count?: number;
+  tzid: string;
+};
+
+const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
+
+export class RRule {
+  private options: Options;
+  constructor(options: Options) {
+    this.options = options;
+    const weekdayParseResult = parseByWeekdayPos(options.byweekday);
+    if (weekdayParseResult) {
+      this.options.byweekday = weekdayParseResult[0];
+      this.options.bysetpos = weekdayParseResult[1];
+    }
+  }
+
+  private *dateset(start?: Date, end?: Date): Generator<Date, null> {
+    function isInBounds(current: Date) {
+      const afterStart = !start || current.getTime() >= start.getTime();
+      const beforeEnd = !end || current.getTime() <= end.getTime();
+      return afterStart && beforeEnd;
+    }
+
+    const { dtstart, tzid, count, until } = this.options;
+    let iter = 1;
+    let current: Date = moment(dtstart ?? new Date())
+      .tz(tzid)
+      .toDate();
+    if (isInBounds(current)) yield current;
+
+    const nextRecurrences: Moment[] = [];
+
+    while (
+      (!count && !until) ||
+      (count && iter < count) ||
+      (until && current.getTime() < new Date(until).getTime())
+    ) {
+      const next = nextRecurrences.shift()?.toDate();
+      if (next) {
+        iter++;
+        current = next;
+        if (isInBounds(current)) {
+          yield current;
+        } else if (start && current.getTime() > start.getTime()) {
+          return null;
+        }
+      } else {
+        getNextRecurrences({
+          refDT: moment(current).tz(tzid),
+          ...this.options,
+          wkst: this.options.wkst ? (this.options.wkst as Weekday) : Weekday.MO,
+        }).forEach((r) => nextRecurrences.push(r));
+        if (nextRecurrences.length === 0) {
+          return null;
+        }
       }
-      return val;
-    }) as Options;
-    super(tzCorrectedOptions);
+    }
+
+    return null;
+  }
+
+  between(start: Date, end: Date) {
+    const dates = this.dateset(start, end);
+    return [...dates];
+  }
+
+  before(dt: Date) {
+    const dates = [...this.dateset(this.options.dtstart, dt)];
+    return dates[dates.length - 1];
+  }
+
+  after(dt: Date) {
+    const dates = this.dateset(dt);
+    return dates.next().value;
   }
 }
+
+const parseByWeekdayPos = function (byweekday: Options['byweekday']) {
+  if (byweekday?.some((d) => typeof d === 'string' && !Object.keys(Weekday).includes(d))) {
+    const pos: number[] = [];
+    const newByweekday = byweekday.map((d) => {
+      if (typeof d !== 'string') return d;
+      const [sign, number, ...rest] = d.split('');
+      if (sign === '-') pos.push(-Number(number));
+      else pos.push(Number(number));
+      return Weekday[rest.join('') as WeekdayStr];
+    });
+    return [newByweekday, pos];
+  } else return null;
+};
+
+export const getNextRecurrences = function ({
+  refDT,
+  wkst = Weekday.MO,
+  byyearday,
+  bymonth,
+  bymonthday,
+  byweekday,
+  byhour,
+  byminute,
+  bysecond,
+  bysetpos,
+  freq,
+  interval = 1,
+}: IterOptions & {
+  freq: Frequency;
+  interval?: number;
+}) {
+  const opts = {
+    wkst,
+    byyearday,
+    bymonth,
+    bymonthday,
+    byweekday,
+    byhour,
+    byminute,
+    bysecond,
+    bysetpos,
+  };
+  switch (freq) {
+    case Frequency.YEARLY: {
+      const nextRef = moment(refDT).add(interval, 'y');
+      return getYearOfRecurrences({
+        refDT: nextRef,
+        ...opts,
+      });
+    }
+    case Frequency.MONTHLY: {
+      const nextRef = moment(refDT).add(interval, 'M');
+      return getMonthOfRecurrences({
+        refDT: nextRef,
+        ...opts,
+      });
+    }
+    case Frequency.WEEKLY: {
+      const nextRef = moment(refDT).add(interval, 'w');
+      return getWeekOfRecurrences({
+        refDT: nextRef,
+        ...opts,
+      });
+    }
+    case Frequency.DAILY: {
+      const nextRef = moment(refDT).add(interval, 'd');
+      return getDayOfRecurrences({
+        refDT: nextRef,
+        ...opts,
+      });
+    }
+    case Frequency.HOURLY: {
+      const nextRef = moment(refDT).add(interval, 'h');
+      return getHourOfRecurrences({
+        refDT: nextRef,
+        ...opts,
+      });
+    }
+    case Frequency.MINUTELY: {
+      const nextRef = moment(refDT).add(interval, 'm');
+      return getMinuteOfRecurrences({
+        refDT: nextRef,
+        ...opts,
+      });
+    }
+  }
+};
+
+const sortByweekday = function ({
+  wkst,
+  byweekday,
+}: {
+  wkst?: Weekday | null;
+  byweekday: Weekday[];
+}) {
+  const weekStart = wkst ?? Weekday.MO;
+  const weekdays = ISO_WEEKDAYS.slice(weekStart - 1).concat(ISO_WEEKDAYS.slice(0, weekStart - 1));
+  return [...byweekday].sort((a, b) => weekdays.indexOf(a) - weekdays.indexOf(b));
+};
+
+const getYearOfRecurrences = function ({
+  refDT,
+  wkst,
+  byyearday,
+  bymonth,
+  bymonthday,
+  byweekday,
+  byhour,
+  byminute,
+  bysecond,
+  bysetpos,
+}: IterOptions) {
+  const derivedByweekday = byweekday ?? ISO_WEEKDAYS;
+
+  if (bymonth) {
+    return bymonth.flatMap((month) => {
+      const currentMonth = moment(refDT).month(month);
+      return getMonthOfRecurrences({
+        refDT: currentMonth,
+        wkst,
+        bymonthday,
+        byweekday,
+        byhour,
+        byminute,
+        bysecond,
+        bysetpos,
+      });
+    });
+  }
+
+  const derivedByyearday = byyearday ?? [refDT.dayOfYear()];
+
+  return derivedByyearday.flatMap((dayOfYear) => {
+    const currentDate = moment(refDT).dayOfYear(dayOfYear);
+    if (!derivedByweekday.includes(currentDate.isoWeekday())) return [];
+    return getDayOfRecurrences({ refDT: currentDate, byhour, byminute, bysecond });
+  });
+};
+
+const getMonthOfRecurrences = function ({
+  refDT,
+  wkst,
+  bymonthday,
+  bymonth,
+  byweekday,
+  byhour,
+  byminute,
+  bysecond,
+  bysetpos,
+}: IterOptions) {
+  const derivedByweekday = byweekday ?? ISO_WEEKDAYS;
+  const currentMonth = refDT.month();
+  if (bymonth && !bymonth.includes(currentMonth)) return [];
+
+  let derivedBymonthday = bymonthday ?? [refDT.date()];
+  if (bysetpos) {
+    const posPositions = [
+      ...bysetpos
+        .filter((p) => p > 0)
+        .map((p) => p - 1)
+        .sort(),
+    ]; // Start with positive numbers in ascending order
+    const negPositions = [...bysetpos.filter((p) => p < 0).sort((a, b) => a - b)]; // then negative numbers in descending order]
+    const firstOfMonth = moment(refDT).month(currentMonth).date(1);
+    const dowLookup: Record<Weekday, number[]> = {
+      1: [],
+      2: [],
+      3: [],
+      4: [],
+      5: [],
+      6: [],
+      7: [],
+    };
+    const trackedDate = firstOfMonth;
+    while (trackedDate.month() === currentMonth) {
+      const currentDow = trackedDate.isoWeekday() as Weekday;
+      dowLookup[currentDow].push(trackedDate.date());
+      trackedDate.add(1, 'd');
+    }
+    const sortedByweekday = sortByweekday({ wkst, byweekday: derivedByweekday });
+    derivedBymonthday = [...posPositions, ...negPositions].map((pos) => {
+      const foundWeekdays = sortedByweekday
+        .map((day) => {
+          const lookup = dowLookup[day];
+          if (pos > 0) return lookup[pos];
+          return lookup.slice(pos)[0];
+        })
+        .sort();
+      return foundWeekdays[0];
+    });
+  }
+
+  return derivedBymonthday.flatMap((date) => {
+    const currentDate = moment(refDT).date(date);
+    if (!derivedByweekday.includes(currentDate.isoWeekday())) return [];
+    return getDayOfRecurrences({ refDT: currentDate, byhour, byminute, bysecond });
+  });
+};
+
+const getWeekOfRecurrences = function ({
+  refDT,
+  wkst = Weekday.MO,
+  byweekday,
+  byhour,
+  byminute,
+  bysecond,
+}: IterOptions) {
+  const derivedByweekday = byweekday ? sortByweekday({ wkst, byweekday }) : [refDT.isoWeekday()];
+
+  return derivedByweekday.flatMap((day) => {
+    const currentDay = moment(refDT).isoWeekday(day);
+    return getDayOfRecurrences({ refDT: currentDay, byhour, byminute, bysecond });
+  });
+};
+
+const getDayOfRecurrences = function ({ refDT, byhour, byminute, bysecond }: IterOptions) {
+  const derivedByhour =
+    byhour ?? (byminute || bysecond) ? Array.from(Array(24), (_, i) => i) : [refDT.hour()];
+
+  return derivedByhour.flatMap((h) => {
+    const currentHour = moment(refDT).hour(h);
+    return getHourOfRecurrences({ refDT: currentHour, byminute, bysecond });
+  });
+};
+
+const getHourOfRecurrences = function ({ refDT, byminute, bysecond }: IterOptions) {
+  const derivedByminute =
+    byminute ?? bysecond ? Array.from(Array(60), (_, i) => i) : [refDT.minute()];
+
+  return derivedByminute.flatMap((m) => {
+    const currentMinute = moment(refDT).minute(m);
+    return getMinuteOfRecurrences({ refDT: currentMinute, bysecond });
+  });
+};
+
+const getMinuteOfRecurrences = function ({ refDT, bysecond }: IterOptions) {
+  const derivedBysecond = bysecond ?? [refDT.second()];
+
+  return derivedBysecond.map((s) => {
+    return moment(refDT).second(s);
+  });
+};

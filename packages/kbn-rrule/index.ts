@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 
-export { RRuleSet, rrulestr, Frequency, Weekday, datetime } from 'rrule';
-export type { ByWeekday, Options, WeekdayStr, RRuleStrOptions } from 'rrule';
+export { RRuleSet, rrulestr, datetime } from 'rrule';
+export type { ByWeekday, RRuleStrOptions } from 'rrule';
 
-export { RRule } from './rrule';
+export { RRule, Frequency, Weekday } from './rrule';
+export type { Options } from './rrule';
+export declare type WeekdayStr = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';

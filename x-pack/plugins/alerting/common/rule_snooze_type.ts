@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { WeekdayStr } from '@kbn/rrule';
+import type { WeekdayStr, Frequency } from '@kbn/rrule';
 
-type SnoozeRRule = Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
+type SnoozeRRule = Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid' | 'freq'>;
 
 export interface RuleSnoozeSchedule {
   duration: number;
@@ -30,12 +30,12 @@ export type RuleSnooze = Array<{
 export interface RRuleRecord {
   dtstart: string;
   tzid: string;
-  freq?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+  freq: Frequency;
   until?: string;
   count?: number;
   interval?: number;
   wkst?: WeekdayStr;
-  byweekday?: Array<string | number>;
+  byweekday?: Array<WeekdayStr | number>;
   bymonth?: number[];
   bysetpos?: number[];
   bymonthday: number[];

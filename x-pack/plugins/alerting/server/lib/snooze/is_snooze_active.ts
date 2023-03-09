@@ -10,7 +10,7 @@ import { RuleSnoozeSchedule } from '../../types';
 
 const MAX_TIMESTAMP = 8640000000000000;
 
-export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
+export function isSnoozeActive(snooze: RuleSnoozeSchedule, debug: boolean = false) {
   const { duration, rRule, id } = snooze;
   if (duration === -1)
     return {
@@ -35,12 +35,15 @@ export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
       ...rRule,
       dtstart: new Date(rRule.dtstart),
       until: rRule.until ? new Date(rRule.until) : null,
-      wkst: rRule.wkst ? Weekday.fromStr(rRule.wkst) : null,
-      byweekday: rRule.byweekday ? parseByWeekday(rRule.byweekday) : null,
+      byweekday: rRule.byweekday
+        ? rRule.byweekday.map((d) => (typeof d === 'number' ? d : Weekday[d] ?? d))
+        : null,
+      wkst: rRule.wkst ? Weekday[rRule.wkst] : null,
     };
 
     const recurrenceRule = new RRule(rRuleOptions);
-    const lastOccurrence = recurrenceRule.before(new Date(now), true);
+    const lastOccurrence = recurrenceRule.before(new Date(now));
+
     if (!lastOccurrence) return null;
     // Check if the current recurrence has been skipped manually
     if (snooze.skipRecurrences?.includes(lastOccurrence.toISOString())) return null;

@@ -7,7 +7,7 @@
 
 import { RRule, Weekday } from '@kbn/rrule';
 import { RuleSnoozeSchedule } from '../../types';
-import { isSnoozeActive, parseByWeekday } from './is_snooze_active';
+import { isSnoozeActive } from './is_snooze_active';
 
 export function isSnoozeExpired(snooze: RuleSnoozeSchedule) {
   if (isSnoozeActive(snooze)) {
@@ -22,8 +22,10 @@ export function isSnoozeExpired(snooze: RuleSnoozeSchedule) {
       ...rRule,
       dtstart: new Date(rRule.dtstart),
       until: rRule.until ? new Date(rRule.until) : null,
-      wkst: rRule.wkst ? Weekday.fromStr(rRule.wkst) : null,
-      byweekday: rRule.byweekday ? parseByWeekday(rRule.byweekday) : null,
+      byweekday: rRule.byweekday
+        ? rRule.byweekday.map((d) => (typeof d === 'number' ? d : Weekday[d] ?? d))
+        : null,
+      wkst: rRule.wkst ? Weekday[rRule.wkst] : null,
     };
 
     const recurrenceRule = new RRule(rRuleOptions);
