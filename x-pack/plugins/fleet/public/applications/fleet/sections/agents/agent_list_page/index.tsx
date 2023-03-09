@@ -74,9 +74,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
   const [sortField, setSortField] = useState<keyof Agent>('enrolled_at');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-  // Agents filtered by "view agents" in activity flyout
-  const [actionsFilteredAgents, setActionsFilteredAgents] = useState<string[]>([]);
-
   const VERSION_FIELD = 'local_metadata.elastic.agent.version';
   const HOSTNAME_FIELD = 'local_metadata.host.hostname';
 
@@ -109,7 +106,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     selectedAgentPolicies.length ||
     selectedStatus.length ||
     selectedTags.length ||
-    setActionsFilteredAgents.length ||
     showUpgradeable
   );
 
@@ -120,15 +116,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setSelectedStatus([]);
     setSelectedTags([]);
     setShowUpgradeable(false);
-    setActionsFilteredAgents([]);
-  }, [
-    setSearch,
-    setDraftKuery,
-    setSelectedAgentPolicies,
-    setSelectedStatus,
-    setShowUpgradeable,
-    setActionsFilteredAgents,
-  ]);
+  }, [setSearch, setDraftKuery, setSelectedAgentPolicies, setSelectedStatus, setShowUpgradeable]);
 
   // Agent enrollment flyout state
   const [enrollmentFlyout, setEnrollmentFlyoutState] = useState<{
@@ -217,6 +205,15 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const isLoadingVar = useRef<boolean>(false);
 
+  const kuery = useMemo(() => {
+    return getKuery({
+      search,
+      selectedAgentPolicies,
+      selectedTags,
+      selectedStatus,
+    });
+  }, [search, selectedAgentPolicies, selectedStatus, selectedTags]);
+
   // Request to fetch agents and agent status
   const currentRequestRef = useRef<number>(0);
   const fetchData = useCallback(
@@ -229,14 +226,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         currentRequestRef.current++;
         const currentRequest = currentRequestRef.current;
         isLoadingVar.current = true;
-
-        const kuery = getKuery(
-          search,
-          selectedAgentPolicies,
-          selectedTags,
-          selectedStatus,
-          actionsFilteredAgents
-        );
 
         try {
           setIsLoading(true);
@@ -314,13 +303,9 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
       fetchDataAsync();
     },
     [
-      search,
-      selectedAgentPolicies,
-      selectedTags,
-      selectedStatus,
-      actionsFilteredAgents,
       pagination.currentPage,
       pagination.pageSize,
+      kuery,
       sortField,
       sortOrder,
       showInactive,
@@ -417,14 +402,6 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     setShowAgentActivityTour({ isOpen: true });
   };
 
-  const currentKuery = getKuery(
-    search,
-    selectedAgentPolicies,
-    selectedTags,
-    selectedStatus,
-    actionsFilteredAgents
-  );
-
   const isCurrentRequestIncremented = currentRequestRef?.current === 1;
   return (
     <>
@@ -434,7 +411,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             onAbortSuccess={fetchData}
             onClose={() => setAgentActivityFlyoutOpen(false)}
             refreshAgentActivity={isLoading}
-            setActionsFilteredAgents={setActionsFilteredAgents}
+            setSearch={setSearch}
           />
         </EuiPortal>
       ) : null}
@@ -540,7 +517,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         totalAgents={totalAgents}
         totalInactiveAgents={totalInactiveAgents}
         selectionMode={selectionMode}
-        currentQuery={currentKuery}
+        currentQuery={kuery}
         selectedAgents={selectedAgents}
         refreshAgents={refreshAgents}
         onClickAddAgent={() => setEnrollmentFlyoutState({ isOpen: true })}
