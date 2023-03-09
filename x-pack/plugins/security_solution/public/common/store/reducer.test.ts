@@ -12,6 +12,7 @@ import { mockIndexPattern, mockSourcererState } from '../mock';
 import { useSourcererDataView } from '../containers/sourcerer';
 import { useDeepEqualSelector } from '../hooks/use_selector';
 import { renderHook } from '@testing-library/react-hooks';
+import { initialGroupingState } from './grouping/reducer';
 
 jest.mock('../hooks/use_selector');
 jest.mock('../lib/kibana', () => ({
@@ -45,7 +46,7 @@ describe('createInitialState', () => {
         dataTable: { tableById: {} },
       },
       {
-        groups: { groupById: {} },
+        groups: initialGroupingState,
       }
     );
     beforeEach(() => {
@@ -82,9 +83,7 @@ describe('createInitialState', () => {
           },
         },
         {
-          groups: {
-            groupById: {},
-          },
+          groups: initialGroupingState,
         }
       );
       (useDeepEqualSelector as jest.Mock).mockImplementation((cb) => cb(state));

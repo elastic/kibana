@@ -220,6 +220,31 @@ export interface TopNSubchart {
   Metadata: StackFrameMetadata[];
 }
 
+export function getCategoryColor({
+  category,
+  subChartSize,
+  colors,
+}: {
+  category: string;
+  subChartSize: number;
+  colors: ReturnType<typeof euiPaletteColorBlind>;
+}) {
+  // We want the mapping from the category string to the color to be constant,
+  // so that the same category string will always map to the same color.
+  const stringhash = (s: string): number => {
+    let hash: number = 0;
+    for (let i = 0; i < s.length; i++) {
+      const ch = s.charCodeAt(i);
+      hash = (hash << 5) - hash + ch; // eslint-disable-line no-bitwise
+      // Apply bit mask to ensure positive value.
+      hash &= 0x7fffffff; // eslint-disable-line no-bitwise
+    }
+    return hash % subChartSize;
+  };
+
+  return colors[stringhash(category)];
+}
+
 export function groupSamplesByCategory({
   samples,
   totalCount,
@@ -264,22 +289,10 @@ export function groupSamplesByCategory({
     rotations: Math.ceil(subcharts.length / 10),
   });
 
-  // We want the mapping from the category string to the color to be constant,
-  // so that the same category string will always map to the same color.
-  const stringhash = (s: string): number => {
-    let hash: number = 0;
-    for (let i = 0; i < s.length; i++) {
-      const ch = s.charCodeAt(i);
-      hash = (hash << 5) - hash + ch; // eslint-disable-line no-bitwise
-      hash &= hash; // eslint-disable-line no-bitwise
-    }
-    return hash % subcharts.length;
-  };
-
   return orderBy(subcharts, ['Percentage', 'Category'], ['desc', 'asc']).map((chart, index) => {
     return {
       ...chart,
-      Color: colors[stringhash(chart.Category)],
+      Color: getCategoryColor({ category: chart.Category, colors, subChartSize: subcharts.length }),
       Index: index + 1,
       Series: chart.Series.map((value) => {
         return {

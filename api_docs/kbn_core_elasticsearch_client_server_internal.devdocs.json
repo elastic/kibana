@@ -255,32 +255,35 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-        "id": "def-common.AgentStore",
+        "id": "def-common.AgentStatsProvider",
         "type": "Interface",
         "tags": [],
-        "label": "AgentStore",
-        "description": [],
+        "label": "AgentStatsProvider",
+        "description": [
+          "\nExposes the APIs to fetch stats of the existing agents."
+        ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/agent_manager.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "id": "def-common.AgentStore.getAgents",
+            "id": "def-common.AgentStatsProvider.getAgentsStats",
             "type": "Function",
             "tags": [],
-            "label": "getAgents",
-            "description": [],
+            "label": "getAgentsStats",
+            "description": [
+              "\nReturns the {@link ElasticsearchClientsMetrics}, to understand the load on the Elasticsearch HTTP agents."
+            ],
             "signature": [
-              "() => Set<",
+              "() => ",
               {
-                "pluginId": "@kbn/core-elasticsearch-client-server-internal",
+                "pluginId": "@kbn/core-metrics-server",
                 "scope": "common",
-                "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
-                "section": "def-common.NetworkAgent",
-                "text": "NetworkAgent"
-              },
-              ">"
+                "docId": "kibKbnCoreMetricsServerPluginApi",
+                "section": "def-common.ElasticsearchClientsMetrics",
+                "text": "ElasticsearchClientsMetrics"
+              }
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-internal/src/agent_manager.ts",
             "deprecated": false,

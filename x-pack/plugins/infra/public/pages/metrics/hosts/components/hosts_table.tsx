@@ -19,13 +19,13 @@ import { Flyout } from './host_details_flyout/flyout';
 
 export const HostsTable = () => {
   const { hostNodes, loading } = useHostsViewContext();
-  const { onSubmit, unifiedSearchDateRange, getDateRangeAsTimestamp } = useUnifiedSearchContext();
+  const { onSubmit, searchCriteria, getDateRangeAsTimestamp } = useUnifiedSearchContext();
   const [properties, setProperties] = useTableProperties();
 
   const { columns, items, isFlyoutOpen, setIsFlyoutOpen, clickedItemIndex } = useHostsTable(
     hostNodes,
     {
-      time: unifiedSearchDateRange,
+      time: searchCriteria.dateRange,
     }
   );
 
