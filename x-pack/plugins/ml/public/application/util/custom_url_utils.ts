@@ -10,6 +10,7 @@
 import { get, flow } from 'lodash';
 import moment from 'moment';
 import rison, { type RisonValue } from '@kbn/rison';
+import { TimeRange } from '@kbn/es-query';
 import { parseInterval } from '../../../common/util/parse_interval';
 import { escapeForElasticsearchQuery, replaceStringTokens } from './string_utils';
 import {
@@ -22,6 +23,28 @@ import { AnomalyRecordDoc } from '../../../common/types/anomalies';
 // Value of custom_url time_range property indicating drilldown time range is calculated automatically
 // depending on the context in which the URL is being opened.
 const TIME_RANGE_AUTO = 'auto';
+
+// Replaces the $ delimited tokens in the url_value of the custom URL configuration
+// with values from the supplied document.
+export function replaceTokensInDFAUrlValue(
+  customUrlConfig: UrlConfig | KibanaUrlConfig,
+  doc: AnomalyRecordDoc,
+  // timeFieldName?: string,
+  timeRange?: TimeRange
+) {
+  // If urlValue contains $earliest$ and $latest$ tokens, add in times to the test doc.
+  const urlValue = customUrlConfig.url_value;
+  const record = { ...doc } as any;
+  if (urlValue.includes('$earliest$') && timeRange !== undefined) {
+    record.earliest = timeRange.from;
+  }
+
+  if (urlValue.includes('$latest$') && timeRange !== undefined) {
+    record.latest = timeRange.to;
+  }
+
+  return getUrlForRecord(customUrlConfig, record);
+}
 
 // Replaces the $ delimited tokens in the url_value of the custom URL configuration
 // with values from the supplied document.

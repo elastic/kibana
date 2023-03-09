@@ -6,6 +6,7 @@
  */
 
 import React, { Component } from 'react';
+import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,34 +22,45 @@ import {
   EuiModalFooter,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { DataView } from '@kbn/data-views-plugin/public';
 
 import { i18n } from '@kbn/i18n';
 import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { CustomUrlEditor, CustomUrlList } from '../../../../components/custom_url_editor';
+import { MlKibanaReactContextValue } from '../../contexts/kibana';
+import { CustomUrlEditor, CustomUrlList } from './custom_url_editor';
 import {
   getNewCustomUrlDefaults,
   getQueryEntityFieldNames,
+  getSupportedFieldNames,
   isValidCustomUrlSettings,
   buildCustomUrlFromSettings,
   getTestUrl,
   CustomUrlSettings,
-} from '../../../../components/custom_url_editor/utils';
-import { loadSavedDashboards, loadDataViewListItems } from '../edit_utils';
-import { openCustomUrlWindow } from '../../../../../util/custom_url_utils';
-import { Job } from '../../../../../../../common/types/anomaly_detection_jobs';
-import { UrlConfig } from '../../../../../../../common/types/custom_urls';
-import { MlKibanaReactContextValue } from '../../../../../contexts/kibana';
+} from './custom_url_editor/utils';
+import {
+  loadSavedDashboards,
+  loadDataViewListItems,
+} from '../../jobs/jobs_list/components/edit_job_flyout/edit_utils';
+import { openCustomUrlWindow } from '../../util/custom_url_utils';
+import { Job, isAnomalyDetectionJob } from '../../../../common/types/anomaly_detection_jobs';
+import { UrlConfig } from '../../../../common/types/custom_urls';
+import type { CustomUrlsWrapperProps } from './custom_urls_wrapper';
+import {
+  isDataFrameAnalyticsConfigs,
+  type DataFrameAnalyticsConfig,
+} from '../../../../common/types/data_frame_analytics';
+
+function getDropDownOptions(job: Job | DataFrameAnalyticsConfig, dataView?: DataView) {
+  if (isAnomalyDetectionJob(job)) {
+    return getQueryEntityFieldNames(job);
+  } else if (isDataFrameAnalyticsConfigs(job) && dataView !== undefined) {
+    return getSupportedFieldNames(dataView);
+  }
+  return [];
+}
 
 const MAX_NUMBER_DASHBOARDS = 1000;
-
-interface CustomUrlsProps {
-  job: Job;
-  jobCustomUrls: UrlConfig[];
-  setCustomUrls: (customUrls: UrlConfig[]) => void;
-  editMode: 'inline' | 'modal';
-  kibana: MlKibanaReactContextValue;
-}
 
 interface CustomUrlsState {
   customUrls: UrlConfig[];
@@ -57,6 +69,12 @@ interface CustomUrlsState {
   queryEntityFieldNames: string[];
   editorOpen: boolean;
   editorSettings?: CustomUrlSettings;
+  supportedFilterFields: string[];
+}
+interface CustomUrlsProps extends CustomUrlsWrapperProps {
+  kibana: MlKibanaReactContextValue;
+  dataView?: DataView;
+  currentTimeFilter?: EsQueryTimeRange;
 }
 
 class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
@@ -69,6 +87,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
       dataViewListItems: [],
       queryEntityFieldNames: [],
       editorOpen: false,
+      supportedFilterFields: [],
     };
   }
 
@@ -76,7 +95,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
     return {
       job: props.job,
       customUrls: props.jobCustomUrls,
-      queryEntityFieldNames: getQueryEntityFieldNames(props.job),
+      queryEntityFieldNames: getDropDownOptions(props.job, props.dataView),
     };
   }
 
@@ -134,7 +153,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
       editorSettings: customUrl,
     });
   };
-
+  // TODO: update to handle DFA jobs
   addNewCustomUrl = () => {
     buildCustomUrlFromSettings(this.state.editorSettings as CustomUrlSettings)
       .then((customUrl) => {
@@ -166,7 +185,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
     const job = this.props.job;
     buildCustomUrlFromSettings(this.state.editorSettings as CustomUrlSettings)
       .then((customUrl) => {
-        getTestUrl(job, customUrl)
+        getTestUrl(job, customUrl, this.props.currentTimeFilter)
           .then((testUrl) => {
             openCustomUrlWindow(testUrl, customUrl, basePath.get());
           })

@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export { JobDetails } from './job_details';
-export { Detectors } from './detectors';
-export { Datafeed } from './datafeed';
+export { CustomUrlsWrapper } from './custom_urls_wrapper';
+export { isValidCustomUrls } from './is_valid_custom_urls';

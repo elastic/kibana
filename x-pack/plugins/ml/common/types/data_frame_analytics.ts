@@ -59,6 +59,7 @@ export type AnalysisConfig = estypes.MlDataframeAnalysisContainer;
 export interface DataFrameAnalyticsConfig
   extends Omit<estypes.MlDataframeAnalyticsSummary, 'analyzed_fields'> {
   analyzed_fields?: estypes.MlDataframeAnalysisAnalyzedFields;
+  _meta?: Record<string, any>;
 }
 
 export interface UpdateDataFrameAnalyticsConfig {
@@ -66,6 +67,11 @@ export interface UpdateDataFrameAnalyticsConfig {
   description?: string;
   model_memory_limit?: string;
   max_num_threads?: number;
+  _meta?: Record<string, any>;
+}
+
+export function isDataFrameAnalyticsConfigs(arg: any): arg is DataFrameAnalyticsConfig {
+  return arg.dest && arg.analysis && arg.id;
 }
 
 export type DataFrameAnalysisConfigType =

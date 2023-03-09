@@ -228,13 +228,14 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
         />
       ),
       rowCellRender: function RowCellRender({ rowIndex }) {
+        // const item = tableItems[rowIndex];
         const [isPopoverVisible, setIsPopoverVisible] = useState(false);
         const closePopover = () => setIsPopoverVisible(false);
 
         const actions = [
           <EuiContextMenuItem
             icon="discoverApp"
-            key="custom-discover-url"
+            key="custom_discover_url"
             disabled={discoverUrlError !== undefined}
             onClick={async () => {
               const openInDiscoverUrl = await generateDiscoverUrl(rowIndex);
@@ -258,6 +259,30 @@ export const ExpandableSectionResults: FC<ExpandableSectionResultsProps> = ({
             )}
           </EuiContextMenuItem>,
         ];
+
+        // TO TEST - REMOVE ONCE REAL CUSTOM URLS ARE AVAILABLE
+        // jobConfig._meta?.customUrls = [];
+        // END TO TEST
+
+        // @ts-ignore - can be removed once _meta field is added to DataFrameAnalyticsConfig
+        if (jobConfig && jobConfig._meta?.customUrls !== undefined) {
+          // @ts-ignore
+          jobConfig._meta.customUrls.forEach((customUrl, index) => {
+            actions.push(
+              <EuiContextMenuItem
+                key={`custom_url_${index}`}
+                icon="popout"
+                onClick={() => {
+                  closePopover();
+                  // openCustomUrl(customUrl);
+                }}
+                data-test-subj={`mlExplorationDataGridRowActionCustomUrlButton_${index}`}
+              >
+                {customUrl.url_name}
+              </EuiContextMenuItem>
+            );
+          });
+        }
 
         return (
           <EuiPopover

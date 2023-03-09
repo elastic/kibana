@@ -25,6 +25,10 @@ import { isValidLabel, openCustomUrlWindow } from '../../../util/custom_url_util
 import { getTestUrl } from './utils';
 
 import { parseInterval } from '../../../../../common/util/parse_interval';
+import {
+  // isDataFrameAnalyticsConfigs,
+  type DataFrameAnalyticsConfig,
+} from '../../../../../common/types/data_frame_analytics';
 import { TIME_RANGE_TYPE } from './constants';
 import { UrlConfig, KibanaUrlConfig } from '../../../../../common/types/custom_urls';
 import { Job } from '../../../../../common/types/anomaly_detection_jobs';
@@ -40,7 +44,7 @@ function isValidTimeRange(timeRange: KibanaUrlConfig['time_range']): boolean {
 }
 
 export interface CustomUrlListProps {
-  job: Job;
+  job: Job | DataFrameAnalyticsConfig;
   customUrls: UrlConfig[];
   setCustomUrls: (customUrls: UrlConfig[]) => void;
 }
