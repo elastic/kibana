@@ -7,10 +7,13 @@
 
 import { journey, step, expect } from '@elastic/synthetics';
 import { recordVideo } from '@kbn/observability-plugin/e2e/record_video';
+import { RetryService } from '@kbn/ftr-common-functional-services';
 import { loginPageProvider } from '../../page_objects/login';
 
 journey('StepsDuration', async ({ page, params }) => {
   recordVideo(page);
+
+  const retry: RetryService = params.getService('retry');
 
   const login = loginPageProvider({ page });
 
@@ -39,10 +42,14 @@ journey('StepsDuration', async ({ page, params }) => {
   });
 
   step('Check for monitor duration', async () => {
-    await page.hover('text=8.9 sec');
-    await page.waitForSelector('text=Explore');
-    expect(await page.$('text=Explore')).toBeTruthy();
-    await page.waitForSelector('text=area chart');
-    expect(await page.$('text=area chart')).toBeTruthy();
+    await retry.tryForTime(90 * 1000, async () => {
+      await page.click('text="6 Steps - 3 succeeded"');
+      await page.waitForTimeout(2 * 1000);
+      await page.hover('text=8.9 sec');
+      await page.waitForSelector('text=Explore');
+      expect(await page.$('text=Explore')).toBeTruthy();
+      await page.waitForSelector('text=area chart');
+      expect(await page.$('text=area chart')).toBeTruthy();
+    });
   });
 });

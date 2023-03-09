@@ -36,7 +36,7 @@ export const AlertsTabContent = () => {
 
   const { alertStatus, setAlertStatus, alertsEsQueryByStatus } = useAlertsQuery();
 
-  const { unifiedSearchDateRange } = useUnifiedSearchContext();
+  const { searchCriteria } = useUnifiedSearchContext();
 
   const { application, cases, triggersActionsUi } = services;
 
@@ -58,7 +58,7 @@ export const AlertsTabContent = () => {
         <EuiFlexItem>
           <MemoAlertSummaryWidget
             alertsQuery={alertsEsQueryByStatus}
-            dateRange={unifiedSearchDateRange}
+            dateRange={searchCriteria.dateRange}
           />
         </EuiFlexItem>
         {alertsEsQueryByStatus && (
