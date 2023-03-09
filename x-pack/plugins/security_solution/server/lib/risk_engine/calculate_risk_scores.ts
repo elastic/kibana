@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ALERT_RISK_SCORE } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import type {
   CalculateRiskScoreAggregations,
@@ -141,9 +141,11 @@ export const calculateRiskScores = async ({
   filter: userFilter,
   identifierType,
   index,
+  logger,
   range,
 }: {
   esClient: ElasticsearchClient;
+  logger: Logger;
 } & GetScoresParams): Promise<GetScoresResponse> => {
   const now = new Date().toISOString();
 
@@ -168,7 +170,15 @@ export const calculateRiskScores = async ({
     ),
   };
 
+  if (debug) {
+    logger.debug(`Executing Risk Score query:\n${JSON.stringify(request)}`);
+  }
+
   const response = await esClient.search<never, CalculateRiskScoreAggregations>(request);
+
+  if (debug) {
+    logger.debug(`Received Risk Score response:\n${JSON.stringify(response)}`);
+  }
 
   if (response.aggregations == null) {
     return { ...(debug ? { request, response } : {}), scores: [] };
