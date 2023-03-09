@@ -35,7 +35,7 @@ export const Flyout = ({ node, currentTimeRange, onClose }: Props) => {
   return (
     <EuiFlyout onClose={onClose} ownFocus={false}>
       <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
+        <EuiTitle size="xs">
           <h2>{node.name}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
