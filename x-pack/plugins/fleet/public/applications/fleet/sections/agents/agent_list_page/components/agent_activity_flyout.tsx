@@ -8,6 +8,7 @@
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -60,6 +61,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   refreshAgentActivity: boolean;
   setSearch: (search: string) => void;
 }> = ({ onClose, onAbortSuccess, refreshAgentActivity, setSearch }) => {
+  const { notifications } = useStartServices();
   const { data: agentPoliciesData } = useGetAgentPolicies({
     perPage: SO_SEARCH_LIMIT,
   });
@@ -87,13 +89,21 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   const otherDays = getOtherDaysActions(completedActions);
 
   const onClickViewAgents = async (action: ActionStatus) => {
-    const agents = await sendPostRetrieveAgentsByActions({ actionIds: [action.actionId] });
+    try {
+      const { data } = await sendPostRetrieveAgentsByActions({ actionIds: [action.actionId] });
 
-    if (agents?.data?.items?.length) {
-      const kuery = getKuery({ selectedAgentIds: agents.data.items });
-      setSearch(kuery);
+      if (data?.items?.length) {
+        const kuery = getKuery({ selectedAgentIds: data.items });
+        setSearch(kuery);
+      }
+      onClose();
+    } catch (err) {
+      notifications.toasts.addError(err, {
+        title: i18n.translate('xpack.fleet.agentActivityFlyout.error', {
+          defaultMessage: 'Error viewing selected agents',
+        }),
+      });
     }
-    onClose();
   };
 
   return (

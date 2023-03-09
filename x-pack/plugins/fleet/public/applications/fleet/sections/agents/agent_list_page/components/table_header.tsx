@@ -58,8 +58,8 @@ export const AgentTableHeader: React.FunctionComponent<{
             <EuiFlexItem grow={false}>
               <EuiLink onClick={() => clearFilters()}>
                 <FormattedMessage
-                  id="xpack.fleet.agentList.clearFiltersLinkText"
-                  defaultMessage="Clear all filters"
+                  id="xpack.fleet.agentList.header.clearFiltersLinkText"
+                  defaultMessage="Clear filters"
                 />
               </EuiLink>
             </EuiFlexItem>
