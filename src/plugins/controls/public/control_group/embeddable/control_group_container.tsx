@@ -220,11 +220,6 @@ export class ControlGroupContainer extends Container<
     return Object.keys(this.getInput().panels).length;
   };
 
-  public updatePanelState = (id: string, panelState: Partial<ControlPanelState>) => {
-    const panels = this.getExplicitInput().panels;
-    this.updateInput({ panels: { ...panels, [id]: { ...panels[id], ...panelState } } });
-  };
-
   public updateFilterContext = (filters: Filter[]) => {
     this.updateInput({ filters });
   };

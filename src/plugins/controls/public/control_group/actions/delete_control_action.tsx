@@ -40,7 +40,7 @@ export class DeleteControlAction implements Action<DeleteControlActionContext> {
     return (
       <EuiToolTip content={this.getDisplayName(context)}>
         <EuiButtonIcon
-          data-test-subj={`control-action-${context.embeddable.id}-edit`}
+          data-test-subj={`control-action-${context.embeddable.id}-delete`}
           aria-label={this.getDisplayName(context)}
           iconType={this.getIconType(context)}
           onClick={() => this.execute(context)}

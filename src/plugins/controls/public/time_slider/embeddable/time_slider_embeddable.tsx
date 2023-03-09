@@ -9,7 +9,7 @@
 import _ from 'lodash';
 import { debounceTime, first, map } from 'rxjs/operators';
 import moment from 'moment-timezone';
-import { Embeddable, IContainer, IEmbeddable } from '@kbn/embeddable-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableTools, ReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
@@ -36,12 +36,6 @@ import {
   roundUpToNextStepSizeFactor,
 } from '../time_utils';
 import { getIsAnchored, getRoundedTimeRangeBounds } from '../time_slider_selectors';
-
-export const isTimeSliderControl = (
-  embeddable: IEmbeddable
-): embeddable is TimeSliderControlEmbeddable => {
-  return embeddable.type === TIME_SLIDER_CONTROL;
-};
 
 export class TimeSliderControlEmbeddable extends Embeddable<
   TimeSliderControlEmbeddableInput,
