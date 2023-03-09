@@ -14,14 +14,17 @@ import { ElasticsearchAccessorOptions } from '../types';
 interface WriteAssetsOptions extends ElasticsearchAccessorOptions {
   assetDocs: Asset[];
   namespace?: string;
+  refresh?: boolean | 'wait_for';
 }
 
 export async function writeAssets({
   esClient,
   assetDocs,
   namespace = 'default',
+  refresh = false,
 }: WriteAssetsOptions) {
   const dsl: BulkRequest<Asset> = {
+    refresh,
     operations: assetDocs.flatMap((asset) => [
       { create: { _index: `${ASSETS_INDEX_PREFIX}-${asset['asset.type']}-${namespace}` } },
       asset,

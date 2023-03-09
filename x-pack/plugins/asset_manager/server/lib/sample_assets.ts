@@ -11,14 +11,14 @@ import { Asset, AssetWithoutTimestamp } from '../../common/types_api';
 // appearing assets over time.
 export function getSampleAssetDocs({
   baseDateTime = new Date(),
-  remove = [],
+  excludeEans = [],
 }: {
   baseDateTime?: Date;
-  remove?: string[];
+  excludeEans?: string[];
 }): Asset[] {
   const timestamp = baseDateTime.toISOString();
   return sampleAssets
-    .filter((asset) => !remove.includes(asset['asset.ean']))
+    .filter((asset) => !excludeEans.includes(asset['asset.ean']))
     .map((asset) => {
       return {
         '@timestamp': timestamp,

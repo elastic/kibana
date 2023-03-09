@@ -13,7 +13,11 @@ import { writeAssets } from '../lib/write_assets';
 import { SetupRouteOptions } from './types';
 import { getEsClientFromContext } from './utils';
 
-type WriteSamplesPostBody = { baseDateTime?: string | number; remove?: string[] } | null;
+export type WriteSamplesPostBody = {
+  baseDateTime?: string | number;
+  excludeEans?: string[];
+  refresh?: boolean | 'wait_for';
+} | null;
 
 export function sampleAssetsRoutes<T extends RequestHandlerContext>({
   router,
@@ -27,7 +31,7 @@ export function sampleAssetsRoutes<T extends RequestHandlerContext>({
       validate: {},
     },
     async (context, req, res) => {
-      return res.ok({ body: { assets: sampleAssets } });
+      return res.ok({ body: { results: sampleAssets } });
     }
   );
 
@@ -41,13 +45,14 @@ export function sampleAssetsRoutes<T extends RequestHandlerContext>({
             baseDateTime: schema.maybe(
               schema.oneOf<string, number>([schema.string(), schema.number()])
             ),
-            remove: schema.maybe(schema.arrayOf(schema.string())),
+            excludeEans: schema.maybe(schema.arrayOf(schema.string())),
+            refresh: schema.maybe(schema.oneOf([schema.boolean(), schema.literal('wait_for')])),
           })
         ),
       },
     },
     async (context, req, res) => {
-      const { baseDateTime, remove } = req.body || {};
+      const { baseDateTime, excludeEans, refresh } = req.body || {};
       const parsed = baseDateTime === undefined ? undefined : new Date(baseDateTime);
       if (parsed?.toString() === 'Invalid Date') {
         return res.customError({
@@ -58,20 +63,34 @@ export function sampleAssetsRoutes<T extends RequestHandlerContext>({
         });
       }
       const esClient = await getEsClientFromContext(context);
-      const assetDocs = getSampleAssetDocs({ baseDateTime: parsed, remove });
+      const assetDocs = getSampleAssetDocs({ baseDateTime: parsed, excludeEans });
 
-      const response = await writeAssets({ esClient, assetDocs, namespace: 'sample_data' });
+      try {
+        const response = await writeAssets({
+          esClient,
+          assetDocs,
+          namespace: 'sample_data',
+          refresh,
+        });
 
-      if (response.errors) {
+        if (response.errors) {
+          return res.customError({
+            statusCode: 500,
+            body: {
+              message: JSON.stringify(response.errors),
+            },
+          });
+        }
+
+        return res.ok({ body: response });
+      } catch (error: any) {
         return res.customError({
           statusCode: 500,
           body: {
-            message: JSON.stringify(response.errors),
+            message: error.message || 'unknown error occurred while creating sample assets',
           },
         });
       }
-
-      return res.ok({ body: response });
     }
   );
 
