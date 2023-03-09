@@ -24,7 +24,6 @@ export const TotalDocuments = ({ totalHitCount }: { totalHitCount: number }) => 
         values={{
           totalDocuments: (
             <strong>
-              {' '}
               <FormattedNumber value={totalHitCount} />
             </strong>
           ),
