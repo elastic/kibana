@@ -14,6 +14,7 @@ import { readFileSync } from 'fs';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import type { ConfigDeprecationProvider } from '@kbn/config';
 import type { IElasticsearchConfig, ElasticsearchSslConfig } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchPotentiallyLeakingApi } from '@kbn/core-elasticsearch-client-server-internal';
 import { getReservedHeaders } from './default_headers';
 
 const hostURISchema = schema.uri({ scheme: ['http', 'https'] });
@@ -168,6 +169,13 @@ export const configSchema = schema.object({
       defaultValue: false,
     }),
     schema.boolean({ defaultValue: false })
+  ),
+  apisToRedactInLogs: schema.arrayOf(
+    schema.object({
+      path: schema.string(),
+      method: schema.maybe(schema.string()),
+    }),
+    { defaultValue: [] }
   ),
 });
 
@@ -402,6 +410,11 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
    */
   public readonly customHeaders: ElasticsearchConfigType['customHeaders'];
 
+  /**
+   * Extends the list of APIs that should be redacted in logs.
+   */
+  public readonly apisToRedactInLogs: ElasticsearchPotentiallyLeakingApi[];
+
   constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;
     this.apiVersion = rawConfig.apiVersion;
@@ -425,6 +438,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.idleSocketTimeout = rawConfig.idleSocketTimeout;
     this.compression = rawConfig.compression;
     this.skipStartupConnectionCheck = rawConfig.skipStartupConnectionCheck;
+    this.apisToRedactInLogs = rawConfig.apisToRedactInLogs;
 
     const { alwaysPresentCertificate, verificationMode } = rawConfig.ssl;
     const { key, keyPassphrase, certificate, certificateAuthorities } = readKeyAndCerts(rawConfig);

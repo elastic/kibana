@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { ElasticsearchPotentiallyLeakingApi } from '@kbn/core-elasticsearch-client-server-internal';
 import type { Duration } from 'moment';
 
 /**
@@ -139,6 +140,11 @@ export interface IElasticsearchConfig {
    * either `certificate` or `full`.
    */
   readonly ssl: ElasticsearchSslConfig;
+
+  /**
+   * Extends the list of APIs that should be redacted in logs.
+   */
+  readonly apisToRedactInLogs: ElasticsearchPotentiallyLeakingApi[];
 }
 
 /**

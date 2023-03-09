@@ -7,6 +7,7 @@
  */
 
 import type { Duration } from 'moment';
+import { ElasticsearchPotentiallyLeakingApi } from '@kbn/core-elasticsearch-client-server-internal';
 
 /**
  * Configuration options to be used to create a {@link IClusterClient | cluster client}
@@ -32,6 +33,7 @@ export interface ElasticsearchClientConfig {
   requestTimeout?: Duration | number;
   caFingerprint?: string;
   ssl?: ElasticsearchClientSslConfig;
+  apisToRedactInLogs?: ElasticsearchPotentiallyLeakingApi[];
 }
 
 /**
