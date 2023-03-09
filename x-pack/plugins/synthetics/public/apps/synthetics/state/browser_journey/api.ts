@@ -97,8 +97,12 @@ export async function getJourneyScreenshot(
     while (response?.status !== 200) {
       const imgRequest = new Request(imgSrc);
 
+      if (retryCount > maxRetry) break;
+
       response = await fetch(imgRequest);
-      if (!shouldBackoff || retryCount >= maxRetry || response.status !== 404) break;
+
+      if (!shouldBackoff || response.status !== 404) break;
+
       await new Promise((r) => setTimeout(r, (backoff *= 2)));
       retryCount++;
     }

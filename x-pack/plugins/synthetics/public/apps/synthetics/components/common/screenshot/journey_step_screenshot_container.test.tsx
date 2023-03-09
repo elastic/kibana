@@ -71,13 +71,17 @@ describe('JourneyStepScreenshotContainer', () => {
   });
 
   it('displays image when img src is available from useFetcher', () => {
-    jest.spyOn(retrieveHooks, 'useRetrieveStepImage').mockReturnValue(testImageDataResult);
+    jest
+      .spyOn(retrieveHooks, 'useRetrieveStepImage')
+      .mockReturnValue({ imageResult: testImageDataResult, isLoading: false });
     const { container } = render(<JourneyStepScreenshotContainer checkGroup={checkGroup} />);
     expect(container.querySelector('img')?.src).toBe(testImageDataResult[imgPath1].url);
   });
 
   it('displays popover image when mouse enters img caption, and hides onLeave', async () => {
-    jest.spyOn(retrieveHooks, 'useRetrieveStepImage').mockReturnValue(testImageDataResult);
+    jest
+      .spyOn(retrieveHooks, 'useRetrieveStepImage')
+      .mockReturnValue({ imageResult: testImageDataResult, isLoading: false });
     const { getByAltText, getByText, queryByText } = render(
       <JourneyStepScreenshotContainer checkGroup={checkGroup} />
     );
@@ -95,7 +99,9 @@ describe('JourneyStepScreenshotContainer', () => {
   });
 
   it('opens dialog when img is clicked and shows step numbers', async () => {
-    jest.spyOn(retrieveHooks, 'useRetrieveStepImage').mockReturnValue(testImageDataResult);
+    jest
+      .spyOn(retrieveHooks, 'useRetrieveStepImage')
+      .mockReturnValue({ imageResult: testImageDataResult, isLoading: false });
 
     const { getByAltText, getByText } = render(
       <JourneyStepScreenshotContainer checkGroup={checkGroup} />
