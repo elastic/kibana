@@ -20,7 +20,6 @@ export const wrapErrorIfNeeded = (error: Error): EndpointDataLoadingError =>
 
 // Use it in Promise's `.catch()` as `.catch(wrapErrorAndRejectPromise)`
 export const wrapErrorAndRejectPromise = (error: Error) => {
-  console.log('my error', error);
   Promise.reject(wrapErrorIfNeeded(error));
 };
 
