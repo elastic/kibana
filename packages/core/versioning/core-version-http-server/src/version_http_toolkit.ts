@@ -16,6 +16,7 @@ import type {
   RouteConfigOptions,
   RouteValidatorFullConfig,
   RequestHandlerContextBase,
+  RouteValidationFunction,
 } from '@kbn/core-http-server';
 
 type RqCtx = RequestHandlerContextBase;
@@ -122,7 +123,7 @@ interface FullValidationConfig<P, Q, B, R> {
   /** Validation to run against route inputs: params, query and body */
   in?: InValidation<P, Q, B>;
   /** Validation to run against route output */
-  out?: Type<R>;
+  out?: RouteValidationFunction<R> | Type<R>;
 }
 
 /**
