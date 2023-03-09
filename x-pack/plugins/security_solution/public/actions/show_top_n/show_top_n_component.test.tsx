@@ -21,6 +21,7 @@ jest.mock('react-router-dom', () => {
   };
 });
 jest.mock('../../common/components/visualization_actions/actions');
+jest.mock('../../common/components/visualization_actions/lens_embeddable');
 
 const casesService = {
   ui: { getCasesContext: () => mockCasesContext },
