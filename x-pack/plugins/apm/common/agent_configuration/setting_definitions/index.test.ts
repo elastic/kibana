@@ -182,7 +182,13 @@ describe('filterByAgent', () => {
 
     it('android/java', () => {
       expect(getSettingKeysForAgent('android/java')).toEqual(
-        expect.arrayContaining(['recording'])
+        ['recording']
+      );
+    });
+
+    it('iOS/swift', () => {
+      expect(getSettingKeysForAgent('iOS/swift')).toEqual(
+        ['recording']
       );
     });
 

@@ -36,6 +36,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'nodejs',
       'php',
       'android/java',
+      'iOS/swift',
     ],
   },
 
@@ -62,6 +63,7 @@ export const generalSettings: RawSettingDefinition[] = [
       'nodejs',
       'php',
       'android/java',
+      'iOS/swift',
     ],
   },
 
@@ -87,7 +89,7 @@ export const generalSettings: RawSettingDefinition[] = [
       { text: 'transactions', value: 'transactions' },
       { text: 'all', value: 'all' },
     ],
-    excludeAgents: ['js-base', 'rum-js', 'php', 'android/java'],
+    excludeAgents: ['js-base', 'rum-js', 'php', 'android/java', 'iOS/swift'],
   },
 
   {
@@ -128,7 +130,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'If set to `true`, the agent will capture HTTP request and response headers (including cookies), as well as message headers/properties when using messaging frameworks (like Kafka).\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.',
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php', 'android/java'],
+    excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php', 'android/java', 'iOS/swift'],
   },
 
   {
@@ -424,7 +426,7 @@ export const generalSettings: RawSettingDefinition[] = [
           '(Deprecated, use `span_stack_trace_min_duration` instead!) In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.',
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php', 'android/java'],
+    excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php', 'android/java', 'iOS/swift'],
   },
 
   {
@@ -525,7 +527,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'Limits the amount of spans that are recorded per transaction.',
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'android/java'],
+    excludeAgents: ['js-base', 'rum-js', 'android/java', 'iOS/swift'],
   },
 
   // Transaction sample rate
@@ -543,7 +545,7 @@ export const generalSettings: RawSettingDefinition[] = [
           'By default, the agent will sample every transaction (e.g. request to your service). To reduce overhead and storage requirements, you can set the sample rate to a value between 0.0 and 1.0. We still record overall time and the result for unsampled transactions, but not context information, labels, or spans.',
       }
     ),
-    excludeAgents: ['android/java'],
+    excludeAgents: ['android/java', 'iOS/swift'],
   },
 
   // Sanitize field names
