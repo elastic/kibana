@@ -8,21 +8,24 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { SavedObjectFinderUi } from '@kbn/saved-objects-plugin/public';
 import { CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
+import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '../../common';
 
 export const EventAnnotationGroupSavedObjectFinder = ({
   uiSettings,
   http,
+  savedObjectsManagement,
   fixedPageSize = 10,
   onChoose,
 }: {
   uiSettings: IUiSettingsClient;
   http: CoreStart['http'];
+  savedObjectsManagement: SavedObjectsManagementPluginStart;
   fixedPageSize: number;
   onChoose: (value: {
     id: string;
@@ -32,7 +35,7 @@ export const EventAnnotationGroupSavedObjectFinder = ({
   }) => void;
 }) => {
   return (
-    <SavedObjectFinderUi
+    <SavedObjectFinder
       key="searchSavedObjectFinder"
       fixedPageSize={fixedPageSize}
       onChoose={(id, type, fullName, savedObject) => {
@@ -46,8 +49,11 @@ export const EventAnnotationGroupSavedObjectFinder = ({
         />
       }
       savedObjectMetaData={savedObjectMetaData}
-      uiSettings={uiSettings}
-      http={http}
+      services={{
+        uiSettings,
+        http,
+        savedObjectsManagement,
+      }}
     />
   );
 };

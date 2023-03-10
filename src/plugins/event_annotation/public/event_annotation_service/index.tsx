@@ -7,15 +7,28 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 // import { EventAnnotationGroupConfig } from '../../common';
 import { EventAnnotationServiceType } from './types';
 
 export class EventAnnotationService {
   private eventAnnotationService?: EventAnnotationServiceType;
-  public async getService(core: CoreStart) {
+
+  private core: CoreStart;
+  private savedObjectsManagement: SavedObjectsManagementPluginStart;
+
+  constructor(core: CoreStart, savedObjectsManagement: SavedObjectsManagementPluginStart) {
+    this.core = core;
+    this.savedObjectsManagement = savedObjectsManagement;
+  }
+
+  public async getService() {
     if (!this.eventAnnotationService) {
       const { getEventAnnotationService } = await import('./service');
-      this.eventAnnotationService = getEventAnnotationService(core);
+      this.eventAnnotationService = getEventAnnotationService(
+        this.core,
+        this.savedObjectsManagement
+      );
     }
     return this.eventAnnotationService;
   }

@@ -12,6 +12,7 @@ import { queryToAst } from '@kbn/data-plugin/common';
 import { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { CoreStart, SavedObjectsClientContract } from '@kbn/core/public';
 import { SavedObjectCommon } from '@kbn/saved-objects-plugin/common';
+import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import {
   EventAnnotationConfig,
   EventAnnotationGroupAttributes,
@@ -32,7 +33,10 @@ export function hasIcon(icon: string | undefined): icon is string {
   return icon != null && icon !== 'empty';
 }
 
-export function getEventAnnotationService(core: CoreStart): EventAnnotationServiceType {
+export function getEventAnnotationService(
+  core: CoreStart,
+  savedObjectsManagement: SavedObjectsManagementPluginStart
+): EventAnnotationServiceType {
   const client: SavedObjectsClientContract = core.savedObjects.client;
 
   const loadAnnotationGroup = async (
@@ -173,6 +177,7 @@ export function getEventAnnotationService(core: CoreStart): EventAnnotationServi
         <EventAnnotationGroupSavedObjectFinder
           http={core.http}
           uiSettings={core.uiSettings}
+          savedObjectsManagement={savedObjectsManagement}
           {...props}
         />
       );

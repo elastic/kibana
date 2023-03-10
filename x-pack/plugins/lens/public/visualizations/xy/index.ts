@@ -7,7 +7,6 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { EventAnnotationPluginSetup } from '@kbn/event-annotation-plugin/public';
 import type { ExpressionsSetup } from '@kbn/expressions-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { LEGACY_TIME_AXIS } from '@kbn/charts-plugin/common';
@@ -20,7 +19,6 @@ export interface XyVisualizationPluginSetupPlugins {
   formatFactory: FormatFactory;
   editorFrame: EditorFrameSetup;
   charts: ChartsPluginSetup;
-  eventAnnotation: EventAnnotationPluginSetup;
 }
 
 export class XyVisualization {
@@ -36,7 +34,7 @@ export class XyVisualization {
       ] = await core.getStartServices();
       const [palettes, eventAnnotationService] = await Promise.all([
         charts.palettes.getPalettes(),
-        eventAnnotation.getService(coreStart),
+        eventAnnotation.getService(),
       ]);
       const useLegacyTimeAxis = core.uiSettings.get(LEGACY_TIME_AXIS);
       return getXyVisualization({

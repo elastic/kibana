@@ -9,8 +9,11 @@
     "browser": true,
     "requiredPlugins": [
       "expressions",
+      "savedObjectsManagement",
       "data",
-      "savedObjects"
+    ],
+    "requiredBundles": [
+      "savedObjectsFinder"
     ],
     "extraPublicDirs": [
       "common"
