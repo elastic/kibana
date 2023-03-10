@@ -116,7 +116,7 @@ describe(`UserActions`, () => {
       <UserActions {...{ ...defaultProps, currentUserProfile: userProfiles[0] }} />
     );
 
-    expect(screen.getAllByTestId('user-actions-loading')).toHaveLength(2);
+    expect(screen.getByTestId('user-actions-loading')).toBeInTheDocument();
   });
 
   it('renders two user actions list', () => {

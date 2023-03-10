@@ -6,27 +6,18 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
-import { EuiCommentList, EuiBadge, EuiButton, EuiSkeletonText } from '@elastic/eui';
+import { EuiCommentList } from '@elastic/eui';
 
-import React, { useMemo, useCallback, useEffect, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import styled from 'styled-components';
 
-import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import type { CaseUserActions } from '../../containers/types';
-import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
-import * as i18n from './translations';
 import type { AddCommentMarkdown, UserActionBuilderArgs, UserActionTreeProps } from './types';
-import { NEW_COMMENT_ID } from './constants';
 import { isUserActionTypeSupported } from './helpers';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { builderMap } from './builder';
 import { useCaseViewParams } from '../../common/navigation';
 import { useUserActionsHandler } from './use_user_actions_handler';
-
-const MyEuiButton = styled(EuiButton)`
-  margin-top: 16px;
-  height: 100px;
-`;
 
 const MyEuiCommentList = styled(EuiCommentList)`
   ${({ theme }) => `
@@ -78,8 +69,16 @@ const MyEuiCommentList = styled(EuiCommentList)`
   `}
 `;
 
-export type UserActionListProps = UserActionTreeProps &
+export type UserActionListProps = Omit<
+  UserActionTreeProps,
+  | 'userActivityQueryParams'
+  | 'userActionsStats'
+  | 'useFetchAlertData'
+  | 'onUpdateField'
+  | 'statusActionButton'
+> &
   Pick<UserActionBuilderArgs, 'commentRefs' | 'handleManageQuote'> & {
+    caseUserActions: CaseUserActions[];
     loadingAlertData: boolean;
     manualAlertsData: Record<string, unknown>;
     bottomActions?: AddCommentMarkdown[];
@@ -88,6 +87,7 @@ export type UserActionListProps = UserActionTreeProps &
 
 export const UserActionsList = React.memo(
   ({
+    caseUserActions,
     caseConnectors,
     userProfiles,
     currentUserProfile,
@@ -100,7 +100,6 @@ export const UserActionsList = React.memo(
     manualAlertsData,
     commentRefs,
     handleManageQuote,
-    userActivityQueryParams,
     bottomActions,
     isExpandable = false,
   }: UserActionListProps) => {
@@ -121,35 +120,6 @@ export const UserActionsList = React.memo(
       handleSaveComment,
       handleDeleteComment,
     } = useUserActionsHandler();
-
-    const {
-      data: caseInfiniteUserActionsData,
-      isLoading: isLoadingInfiniteUserActions,
-      hasNextPage,
-      fetchNextPage,
-    } = useInfiniteFindCaseUserActions(caseData.id, userActivityQueryParams, isExpandable);
-
-    const { data: caseUserActionsData, isLoading: isLoadingUserActions } = useFindCaseUserActions(
-      caseData.id,
-      userActivityQueryParams,
-      !isExpandable
-    );
-
-    const caseUserActions = useMemo<CaseUserActions[]>(() => {
-      if (!isExpandable) {
-        return caseUserActionsData?.userActions ?? [];
-      } else if (!caseInfiniteUserActionsData || !caseInfiniteUserActionsData?.pages?.length) {
-        return [];
-      }
-
-      const userActionsData: CaseUserActions[] = [];
-
-      caseInfiniteUserActionsData.pages.forEach((page) =>
-        userActionsData.push(...page.userActions)
-      );
-
-      return userActionsData;
-    }, [caseUserActionsData, caseInfiniteUserActionsData, isExpandable]);
 
     const builtUserActions: EuiCommentProps[] = useMemo(() => {
       if (!caseUserActions) {
@@ -226,53 +196,19 @@ export const UserActionsList = React.memo(
       ? [...builtUserActions, ...bottomActions]
       : [...builtUserActions];
 
-    const handleShowMore = useCallback(() => {
-      if (fetchNextPage) {
-        fetchNextPage();
-      }
-    }, [fetchNextPage]);
-
     useEffect(() => {
-      if (
-        !isLoadingInfiniteUserActions &&
-        !isLoadingUserActions &&
-        commentId != null &&
-        initLoading
-      ) {
+      if (commentId != null && initLoading) {
         setInitLoading(false);
         handleOutlineComment(commentId);
       }
-    }, [
-      commentId,
-      initLoading,
-      handleOutlineComment,
-      isLoadingInfiniteUserActions,
-      isLoadingUserActions,
-    ]);
+    }, [commentId, initLoading, handleOutlineComment]);
 
     return (
-      <>
-        <EuiSkeletonText
-          lines={8}
-          data-test-subj="user-actions-loading"
-          isLoading={
-            isExpandable
-              ? isLoadingInfiniteUserActions
-              : isLoadingUserActions || loadingCommentIds.includes(NEW_COMMENT_ID)
-          }
-        >
-          <MyEuiCommentList comments={comments} data-test-subj="user-actions-list" />
-        </EuiSkeletonText>
-        {hasNextPage && isExpandable && !isLoadingInfiniteUserActions && (
-          <MyEuiButton
-            onClick={handleShowMore}
-            color="text"
-            data-test-subj="show-more-user-actions"
-          >
-            <EuiBadge>{i18n.SHOW_MORE}</EuiBadge>
-          </MyEuiButton>
-        )}
-      </>
+      <MyEuiCommentList
+        className={isExpandable ? 'commentList--hasShowMore' : ''}
+        comments={comments}
+        data-test-subj="user-actions-list"
+      />
     );
   }
 );

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexItem } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiButton, EuiFlexItem, EuiPanel, EuiSkeletonText, useEuiTheme } from '@elastic/eui';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
+import { css } from '@emotion/react';
 
 import { AddComment } from '../add_comment';
 import { useCaseViewParams } from '../../common/navigation';
@@ -20,6 +21,8 @@ import { UserToolTip } from '../user_profiles/user_tooltip';
 import { Username } from '../user_profiles/username';
 import { HoverableAvatar } from '../user_profiles/hoverable_avatar';
 import { UserActionsList } from './user_actions_list';
+import * as i18n from './translations';
+import { useUserActionsPagination } from './use_user_actions_pagination';
 
 const BottomUserActionsListWrapper = styled(EuiFlexItem)`
   padding-top: 16px;
@@ -35,24 +38,27 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
     userActionsStats,
   } = props;
   const { detailName: caseId } = useCaseViewParams();
+  const {
+    isLoadingInfiniteUserActions,
+    lastPage,
+    caseUserActions: infiniteUserActions,
+    hasNextPage,
+    fetchNextPage,
+    showLoadMore,
+    showBottomList,
+  } = useUserActionsPagination({
+    userActivityQueryParams,
+    userActionsStats,
+    caseId: caseData.id,
+    isExpandable: true,
+  });
 
-  const lastPage = useMemo(() => {
-    if (!userActionsStats) {
-      return 1;
-    }
-
-    const perPage = userActivityQueryParams.perPage;
-
-    switch (userActivityQueryParams.type) {
-      case 'action':
-        return Math.ceil(userActionsStats.totalOtherActions / perPage);
-      case 'user':
-        return Math.ceil(userActionsStats.totalComments / perPage);
-      case 'all':
-      default:
-        return Math.ceil(userActionsStats.total / perPage);
-    }
-  }, [userActionsStats, userActivityQueryParams]);
+  const { caseUserActions, isLoadingUserActions } = useUserActionsPagination({
+    userActivityQueryParams: { ...userActivityQueryParams, page: lastPage },
+    userActionsStats,
+    caseId: caseData.id,
+    isExpandable: false,
+  });
 
   const alertIdsWithoutRuleInfo = useMemo(
     () => getManualAlertIdsWithNoRuleId(caseData.comments),
@@ -65,8 +71,13 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
 
   const showCommentEditor = permissions.create && userActivityQueryParams.type !== 'action'; // add-comment markdown is not visible in History filter
 
-  const { commentRefs, handleManageMarkdownEditId, handleManageQuote, handleUpdate } =
-    useUserActionsHandler();
+  const {
+    commentRefs,
+    handleManageMarkdownEditId,
+    handleManageQuote,
+    handleUpdate,
+    loadingCommentIds,
+  } = useUserActionsHandler();
 
   const MarkdownNewComment = useMemo(
     () => (
@@ -99,31 +110,106 @@ export const UserActions = React.memo((props: UserActionTreeProps) => {
       ]
     : [];
 
+  const handleShowMore = useCallback(() => {
+    if (fetchNextPage) {
+      fetchNextPage();
+    }
+  }, [fetchNextPage]);
+
+  const { euiTheme } = useEuiTheme();
+
+  const customSize =
+    showLoadMore && hasNextPage
+      ? {
+          showMoreSectionSize: euiTheme.size.xxxl,
+          marginTopShowMoreSectionSize: euiTheme.size.xl,
+          marginBottomShowMoreSectionSize: euiTheme.size.xl,
+        }
+      : {
+          showMoreSectionSize: euiTheme.size.s,
+          marginTopShowMoreSectionSize: euiTheme.size.s,
+          marginBottomShowMoreSectionSize: euiTheme.size.s,
+        };
+
   return (
-    <>
-      <UserActionsList
-        {...props}
-        loadingAlertData={loadingAlertData}
-        manualAlertsData={manualAlertsData}
-        commentRefs={commentRefs}
-        handleManageQuote={handleManageQuote}
-        bottomActions={lastPage === 0 ? bottomActions : []}
-        isExpandable
-      />
-      {lastPage > 0 && (
-        <BottomUserActionsListWrapper>
-          <UserActionsList
-            {...props}
-            loadingAlertData={loadingAlertData}
-            manualAlertsData={manualAlertsData}
-            bottomActions={bottomActions}
-            commentRefs={commentRefs}
-            handleManageQuote={handleManageQuote}
-            userActivityQueryParams={{ ...userActivityQueryParams, page: lastPage }}
-          />
-        </BottomUserActionsListWrapper>
-      )}
-    </>
+    <EuiSkeletonText
+      lines={8}
+      data-test-subj="user-actions-loading"
+      isLoading={
+        showLoadMore && hasNextPage
+          ? isLoadingInfiniteUserActions
+          : isLoadingUserActions || loadingCommentIds.includes(NEW_COMMENT_ID)
+      }
+    >
+      <EuiPanel
+        color="plain"
+        hasShadow={false}
+        css={css`
+          .commentList--hasShowMore
+            [class*='euiTimelineItem-center']:last-child:not(:only-child)
+            > [class*='euiTimelineItemIcon-']::before {
+            block-size: calc(
+              100% + ${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
+                ${customSize.marginBottomShowMoreSectionSize}
+            );
+          }
+          .commentList--hasShowMore
+            [class*='euiTimelineItem-center']:first-child
+            > [class*='euiTimelineItemIcon-']::before {
+            inset-block-start: 0%;
+            block-size: calc(
+              100% + ${customSize.showMoreSectionSize} + ${customSize.marginTopShowMoreSectionSize} +
+                ${customSize.marginBottomShowMoreSectionSize}
+            );
+          }
+        `}
+      >
+        <UserActionsList
+          {...props}
+          caseUserActions={infiniteUserActions}
+          loadingAlertData={loadingAlertData}
+          manualAlertsData={manualAlertsData}
+          commentRefs={commentRefs}
+          handleManageQuote={handleManageQuote}
+          bottomActions={lastPage === 0 ? bottomActions : []}
+          isExpandable
+        />
+        {showLoadMore && hasNextPage && (
+          <EuiPanel
+            color="subdued"
+            css={css`
+              display: flex;
+              justify-content: center;
+              margin-block: ${euiTheme.size.base};
+              margin-inline-start: ${euiTheme.size.xxxl};
+            `}
+          >
+            <EuiButton
+              fill
+              color="text"
+              size="s"
+              onClick={handleShowMore}
+              data-test-subj="show-more-user-actions"
+            >
+              {i18n.SHOW_MORE}
+            </EuiButton>
+          </EuiPanel>
+        )}
+        {showBottomList ? (
+          <BottomUserActionsListWrapper>
+            <UserActionsList
+              {...props}
+              caseUserActions={caseUserActions}
+              loadingAlertData={loadingAlertData}
+              manualAlertsData={manualAlertsData}
+              bottomActions={bottomActions}
+              commentRefs={commentRefs}
+              handleManageQuote={handleManageQuote}
+            />
+          </BottomUserActionsListWrapper>
+        ) : null}
+      </EuiPanel>
+    </EuiSkeletonText>
   );
 });
 

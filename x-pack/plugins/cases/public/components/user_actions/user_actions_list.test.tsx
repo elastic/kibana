@@ -11,39 +11,19 @@ import userEvent from '@testing-library/user-event';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import routeData from 'react-router';
 
-import { basicCase, getUserAction } from '../../containers/mock';
+import { basicCase, caseUserActions, getUserAction } from '../../containers/mock';
 import { UserActionsList } from './user_actions_list';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { Actions } from '../../../common/api';
 import { connectorsMock, getCaseConnectorsMockResponse } from '../../common/mock/connectors';
-import type { UserActivityParams } from '../user_actions_activity_bar/types';
-import { useFindCaseUserActions } from '../../containers/use_find_case_user_actions';
-import {
-  defaultUseFindCaseUserActions,
-  defaultInfiniteUseFindCaseUserActions,
-} from '../case_view/mocks';
-import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 
 const fetchUserActions = jest.fn();
-const onUpdateField = jest.fn();
 const updateCase = jest.fn();
 const onShowAlertDetails = jest.fn();
 
-const userActivityQueryParams: UserActivityParams = {
-  type: 'all',
-  sortOrder: 'asc',
-  page: 1,
-  perPage: 10,
-};
-
-const userActionsStats = {
-  total: 25,
-  totalComments: 9,
-  totalOtherActions: 16,
-};
-
 const defaultProps = {
+  caseUserActions,
   caseConnectors: getCaseConnectorsMockResponse(),
   userProfiles: new Map(),
   currentUserProfile: undefined,
@@ -54,18 +34,10 @@ const defaultProps = {
   data: basicCase,
   fetchUserActions,
   isLoadingUserActions: false,
-  onUpdateField,
   selectedAlertPatterns: ['some-test-pattern'],
-  statusActionButton: null,
   updateCase,
-  useFetchAlertData: (): [boolean, Record<string, unknown>] => [
-    false,
-    { 'some-id': { _id: 'some-id' } },
-  ],
   alerts: {},
   onShowAlertDetails,
-  userActivityQueryParams,
-  userActionsStats,
   loadingCommentIds: [],
   commentRefs: { current: {} },
   manageMarkdownEditIds: [],
@@ -79,30 +51,16 @@ const defaultProps = {
   manualAlertsData: { 'some-id': { _id: 'some-id' } },
 };
 
-jest.mock('../../containers/use_infinite_find_case_user_actions');
-jest.mock('../../containers/use_find_case_user_actions');
 jest.mock('../../common/lib/kibana');
-
-const useFindCaseUserActionsMock = useFindCaseUserActions as jest.Mock;
-const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as jest.Mock;
 
 describe(`UserActionsList`, () => {
   let appMockRender: AppMockRenderer;
 
   beforeEach(() => {
     jest.clearAllMocks();
-    useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
-    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
 
     jest.spyOn(routeData, 'useParams').mockReturnValue({ detailName: 'case-id' });
     appMockRender = createAppMockRenderer();
-  });
-
-  it('shows loading skeleton', () => {
-    useFindCaseUserActionsMock.mockReturnValue({ isLoading: true });
-    appMockRender.render(<UserActionsList {...defaultProps} />);
-
-    expect(screen.getByTestId('user-actions-loading')).toBeInTheDocument();
   });
 
   it('renders list correctly with isExpandable option', async () => {
@@ -110,16 +68,6 @@ describe(`UserActionsList`, () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
-      expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
-        defaultProps.data.id,
-        userActivityQueryParams,
-        true
-      );
-      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-        defaultProps.data.id,
-        userActivityQueryParams,
-        false
-      );
     });
   });
 
@@ -128,16 +76,6 @@ describe(`UserActionsList`, () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
-      expect(useFindCaseUserActionsMock).toHaveBeenCalledWith(
-        defaultProps.data.id,
-        userActivityQueryParams,
-        true
-      );
-      expect(useInfiniteFindCaseUserActionsMock).toHaveBeenCalledWith(
-        defaultProps.data.id,
-        userActivityQueryParams,
-        false
-      );
     });
   });
 
@@ -162,29 +100,18 @@ describe(`UserActionsList`, () => {
     });
   });
 
-  it('renders show more button correctly', async () => {
-    useInfiniteFindCaseUserActionsMock.mockReturnValue({ hasNextPage: true, isLoading: false });
-    appMockRender.render(<UserActionsList {...defaultProps} isExpandable />);
-
-    await waitFor(() => {
-      expect(screen.getByTestId('user-actions-list')).toBeInTheDocument();
-      expect(screen.getByTestId('show-more-user-actions')).toBeInTheDocument();
-    });
-  });
-
   it('Outlines comment when url param is provided', async () => {
     const commentId = 'basic-comment-id';
     jest.spyOn(routeData, 'useParams').mockReturnValue({ commentId });
 
     const ourActions = [getUserAction('comment', Actions.create)];
 
-    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
-    useFindCaseUserActionsMock.mockReturnValue({
-      isLoading: false,
-      data: { ...defaultUseFindCaseUserActions.data, userActions: ourActions },
-    });
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+    };
 
-    appMockRender.render(<UserActionsList {...defaultProps} />);
+    appMockRender.render(<UserActionsList {...props} />);
 
     expect(
       await screen.findAllByTestId(`comment-create-action-${commentId}`)
@@ -197,29 +124,28 @@ describe(`UserActionsList`, () => {
       getUserAction('comment', Actions.update),
     ];
 
-    useInfiniteFindCaseUserActionsMock.mockReturnValue(defaultInfiniteUseFindCaseUserActions);
-    useFindCaseUserActionsMock.mockReturnValue({
-      ...defaultUseFindCaseUserActions,
-      data: { userActions: ourActions },
-    });
+    const props = {
+      ...defaultProps,
+      caseUserActions: ourActions,
+    };
 
-    appMockRender.render(<UserActionsList {...defaultProps} />);
+    appMockRender.render(<UserActionsList {...props} />);
     expect(
       screen
-        .queryAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[0]
+        .queryAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[0]
         ?.classList.contains('outlined')
     ).toBe(false);
 
     expect(
       screen
-        .queryAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)[0]
+        .queryAllByTestId(`comment-create-action-${props.data.comments[0].id}`)[0]
         ?.classList.contains('outlined')
     ).toBe(false);
 
     userEvent.click(screen.getByTestId(`comment-update-action-${ourActions[1].id}`));
 
     expect(
-      await screen.findAllByTestId(`comment-create-action-${defaultProps.data.comments[0].id}`)
+      await screen.findAllByTestId(`comment-create-action-${props.data.comments[0].id}`)
     )[0]?.classList.contains('outlined');
   });
 });
