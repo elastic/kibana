@@ -22,9 +22,6 @@ export function KibanaReactStorybookDecorator(Story: ComponentType) {
 
   const config: ConfigSchema = {
     unsafe: {
-      slo: {
-        enabled: false,
-      },
       alertDetails: {
         logs: { enabled: false },
         metrics: { enabled: false },

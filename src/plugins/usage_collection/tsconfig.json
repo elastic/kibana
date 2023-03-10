@@ -7,7 +7,7 @@
   "include": [
     "public/**/*",
     "server/**/*",
-    "common/*",
+    "common/**/*",
     "../../../typings/**/*"
   ],
   "kbn_references": [

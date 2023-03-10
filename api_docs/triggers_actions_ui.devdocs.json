@@ -1109,7 +1109,13 @@
           "({\n  http,\n  searchText,\n  typesFilter,\n  actionTypesFilter,\n  ruleExecutionStatusesFilter,\n  ruleStatusesFilter,\n  tagsFilter,\n}: ",
           "LoadRuleAggregationsProps",
           ") => Promise<",
-          "RuleAggregations",
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.RuleAggregationFormattedResult",
+            "text": "RuleAggregationFormattedResult"
+          },
           ">"
         ],
         "path": "x-pack/plugins/triggers_actions_ui/public/application/lib/rule_api/aggregate.ts",
