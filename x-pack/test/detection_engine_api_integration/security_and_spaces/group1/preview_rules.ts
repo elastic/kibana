@@ -69,6 +69,19 @@ export default ({ getService }: FtrProviderContext) => {
           ]);
           expect(body).to.eql({ logs });
         });
+
+        it('should limit concurrent requests to 10', async () => {
+          const responses = await Promise.all(
+            Array.from({ length: 15 }).map(() =>
+              supertest
+                .post(DETECTION_ENGINE_RULES_PREVIEW)
+                .set('kbn-xsrf', 'true')
+                .send(getSimplePreviewRule())
+            )
+          );
+
+          expect(responses.filter((r) => r.body.statusCode === 429).length).to.eql(5);
+        });
       });
 
       describe('t1_analyst', () => {

@@ -22,6 +22,7 @@ import { SLO, APMTransactionDurationIndicator } from '../../../domain/models';
 import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
 import { DEFAULT_APM_INDEX } from './constants';
 import { Query } from './types';
+import { parseIndex } from './common';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
@@ -91,7 +92,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     }
 
     return {
-      index: indicator.params.index ?? DEFAULT_APM_INDEX,
+      index: parseIndex(indicator.params.index ?? DEFAULT_APM_INDEX),
       runtime_mappings: this.buildCommonRuntimeMappings(slo),
       query: {
         bool: {

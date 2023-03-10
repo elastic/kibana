@@ -6,15 +6,11 @@
  */
 
 import { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { TimelineItem } from '@kbn/timelines-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  ADD_TO_CASE_DISABLED,
-  ADD_TO_EXISTING_CASE,
-  ADD_TO_NEW_CASE,
-} from '../pages/alerts/containers/alerts_table/translations';
 import { useGetUserCasesPermissions } from './use_get_user_cases_permissions';
-import { ObservabilityAppServices } from '../application/types';
+import type { ObservabilityAppServices } from '../application/types';
 
 export interface UseAddToCaseActions {
   onClose?: () => void;
@@ -39,21 +35,29 @@ export const useBulkAddToCaseActions = ({ onClose, onSuccess }: UseAddToCaseActi
     return userCasesPermissions.create && userCasesPermissions.read
       ? [
           {
-            label: ADD_TO_NEW_CASE,
+            label: i18n.translate('xpack.observability.alerts.actions.addToNewCase', {
+              defaultMessage: 'Add to new case',
+            }),
             key: 'attach-new-case',
             'data-test-subj': 'attach-new-case',
             disableOnQuery: true,
-            disabledLabel: ADD_TO_CASE_DISABLED,
+            disabledLabel: i18n.translate('xpack.observability.alerts.actions.addToCaseDisabled', {
+              defaultMessage: 'Add to case is not supported for this selection',
+            }),
             onClick: (items?: TimelineItem[]) => {
               const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items) : [];
               createCaseFlyout.open({ attachments: caseAttachments });
             },
           },
           {
-            label: ADD_TO_EXISTING_CASE,
+            label: i18n.translate('xpack.observability.alerts.actions.addToCase', {
+              defaultMessage: 'Add to existing case',
+            }),
             key: 'attach-existing-case',
             disableOnQuery: true,
-            disabledLabel: ADD_TO_CASE_DISABLED,
+            disabledLabel: i18n.translate('xpack.observability.alerts.actions.addToCaseDisabled', {
+              defaultMessage: 'Add to case is not supported for this selection',
+            }),
             'data-test-subj': 'attach-existing-case',
             onClick: (items?: TimelineItem[]) => {
               const caseAttachments = items ? casesUi.helpers.groupAlertsByRule(items) : [];

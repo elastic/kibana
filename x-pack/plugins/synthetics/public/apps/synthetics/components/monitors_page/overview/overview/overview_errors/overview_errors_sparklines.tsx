@@ -15,8 +15,9 @@ interface Props {
   from: string;
   to: string;
   monitorIds: string[];
+  locations?: string[];
 }
-export const OverviewErrorsSparklines = ({ from, to, monitorIds }: Props) => {
+export const OverviewErrorsSparklines = ({ from, to, monitorIds, locations }: Props) => {
   const { observability } = useKibana<ClientPluginsStart>().services;
 
   const { ExploratoryViewEmbeddable } = observability;
@@ -38,6 +39,7 @@ export const OverviewErrorsSparklines = ({ from, to, monitorIds }: Props) => {
           seriesType: 'area',
           reportDefinitions: {
             'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'],
+            ...(locations?.length ? { 'observer.geo.name': locations } : {}),
           },
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',

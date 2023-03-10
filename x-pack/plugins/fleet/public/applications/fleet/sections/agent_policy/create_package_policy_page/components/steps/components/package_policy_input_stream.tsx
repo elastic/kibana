@@ -21,6 +21,8 @@ import {
 } from '@elastic/eui';
 import { useRouteMatch } from 'react-router-dom';
 
+import { DATASET_VAR_NAME } from '../../../../../../../../../common/constants';
+
 import { useConfig, useGetDataStreams } from '../../../../../../../../hooks';
 
 import { mapPackageReleaseToIntegrationCardRelease } from '../../../../../../../../../common/services';
@@ -90,6 +92,10 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
     const isPackagePolicyEdit = !!packagePolicyId;
     const isInputOnlyPackage = packageInfo.type === 'input';
 
+    const hasDatasetVar = packageInputStream.vars?.some(
+      (varDef) => varDef.name === DATASET_VAR_NAME
+    );
+    const showPipelinesAndMappings = !isInputOnlyPackage && !hasDatasetVar;
     useEffect(() => {
       if (isDefaultDatastream && containerRef.current) {
         containerRef.current.scrollIntoView();
@@ -297,7 +303,7 @@ export const PackagePolicyInputStreamConfig = memo<Props>(
                       );
                     })}
                     {/* Only show datastream pipelines and mappings on edit and not for input packages*/}
-                    {isPackagePolicyEdit && !isInputOnlyPackage && (
+                    {isPackagePolicyEdit && showPipelinesAndMappings && (
                       <>
                         <EuiFlexItem>
                           <PackagePolicyEditorDatastreamPipelines

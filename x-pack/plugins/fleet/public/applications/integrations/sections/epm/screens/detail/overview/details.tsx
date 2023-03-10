@@ -32,6 +32,8 @@ import { entries } from '../../../../../types';
 import { useGetCategoriesQuery } from '../../../../../hooks';
 import { AssetTitleMap, DisplayedAssets, ServiceTitleMap } from '../../../constants';
 
+import { ChangelogModal } from '../settings/changelog_modal';
+
 import { NoticeModal } from './notice_modal';
 import { LicenseModal } from './license_modal';
 
@@ -71,13 +73,18 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
 
   const [isNoticeModalOpen, setIsNoticeModalOpen] = useState(false);
   const toggleNoticeModal = useCallback(() => {
-    setIsNoticeModalOpen(!isNoticeModalOpen);
-  }, [isNoticeModalOpen]);
+    setIsNoticeModalOpen((currentState) => !currentState);
+  }, []);
 
   const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
   const toggleLicenseModal = useCallback(() => {
-    setIsLicenseModalOpen(!isLicenseModalOpen);
-  }, [isLicenseModalOpen]);
+    setIsLicenseModalOpen((currentState) => !currentState);
+  }, []);
+
+  const [isChangelogModalOpen, setIsChangelogModalOpen] = useState(false);
+  const toggleChangelogModal = useCallback(() => {
+    setIsChangelogModalOpen((currentState) => !currentState);
+  }, []);
 
   const listItems = useMemo(() => {
     // Base details: version and categories
@@ -201,6 +208,21 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
       });
     }
 
+    items.push({
+      title: (
+        <EuiTextColor color="subdued">
+          <FormattedMessage id="xpack.fleet.epm.changelogLabel" defaultMessage="Changelog" />
+        </EuiTextColor>
+      ),
+      description: (
+        <>
+          <p>
+            <EuiLink onClick={toggleChangelogModal}>View Changelog</EuiLink>
+          </p>
+        </>
+      ),
+    });
+
     return items;
   }, [
     packageCategories,
@@ -214,6 +236,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
     packageInfo.version,
     toggleLicenseModal,
     toggleNoticeModal,
+    toggleChangelogModal,
   ]);
 
   return (
@@ -229,6 +252,15 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
             licenseName={packageInfo.source?.license}
             licensePath={packageInfo.licensePath}
             onClose={toggleLicenseModal}
+          />
+        )}
+      </EuiPortal>
+      <EuiPortal>
+        {isChangelogModalOpen && (
+          <ChangelogModal
+            latestVersion={packageInfo.version}
+            packageName={packageInfo.name}
+            onClose={toggleChangelogModal}
           />
         )}
       </EuiPortal>

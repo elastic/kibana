@@ -14,7 +14,7 @@ import {
 } from '../../screens/alerts_detection_rules';
 import { VALUE_LISTS_MODAL_ACTIVATOR } from '../../screens/lists';
 import { waitForRulesTableToBeLoaded } from '../../tasks/alerts_detection_rules';
-import { createCustomRule } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { dismissCallOut, getCallOut, waitForCallOutToBeShown } from '../../tasks/common/callouts';
 import { login, visitWithoutDateRange } from '../../tasks/login';
@@ -25,7 +25,7 @@ const MISSING_PRIVILEGES_CALLOUT = 'missing-user-privileges';
 describe('All rules - read only', () => {
   before(() => {
     cleanKibana();
-    createCustomRule(getNewRule(), '1');
+    createRule({ ...getNewRule(), rule_id: '1' });
     login(ROLES.reader);
   });
 

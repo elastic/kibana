@@ -156,7 +156,7 @@ export class AuthorizationService {
         // If we have a license which doesn't enable security, or we're a legacy user we shouldn't
         // disable any ui capabilities
         if (!mode.useRbacForRequest(request)) {
-          return uiCapabilities;
+          return {};
         }
 
         const disableUICapabilities = disableUICapabilitiesFactory(

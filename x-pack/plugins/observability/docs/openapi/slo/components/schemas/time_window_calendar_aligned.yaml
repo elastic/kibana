@@ -1,0 +1,19 @@
+title: Calendar aligned time window definition
+required:
+  - duration
+  - calendar
+description: Defines properties for calendar aligned time window
+type: object
+properties:
+  duration:
+    description: the duration formatted as {duration}{unit}
+    type: string
+    example: 1M
+  calendar:
+    description: Defines the calendar start date
+    type: object
+    properties:
+      startTime:
+        description: The start date to use.
+        type: string
+        example: "2022-01-01T08:00:00.000Z"

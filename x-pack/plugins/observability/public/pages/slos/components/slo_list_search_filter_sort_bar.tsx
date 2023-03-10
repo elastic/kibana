@@ -41,14 +41,14 @@ export type Item<T> = EuiSelectableOption & {
 
 const SORT_OPTIONS: Array<Item<SortType>> = [
   {
-    label: i18n.translate('xpack.observability.slos.list.sortBy.name', {
+    label: i18n.translate('xpack.observability.slo.list.sortBy.name', {
       defaultMessage: 'Name',
     }),
     type: 'name',
     checked: 'on',
   },
   {
-    label: i18n.translate('xpack.observability.slos.list.sortBy.indicatorType', {
+    label: i18n.translate('xpack.observability.slo.list.sortBy.indicatorType', {
       defaultMessage: 'Indicator type',
     }),
     type: 'indicatorType',
@@ -57,19 +57,19 @@ const SORT_OPTIONS: Array<Item<SortType>> = [
 
 const INDICATOR_TYPE_OPTIONS: Array<Item<FilterType>> = [
   {
-    label: i18n.translate('xpack.observability.slos.list.indicatorTypeFilter.apmLatency', {
+    label: i18n.translate('xpack.observability.slo.list.indicatorTypeFilter.apmLatency', {
       defaultMessage: 'APM latency',
     }),
     type: 'sli.apm.transactionDuration',
   },
   {
-    label: i18n.translate('xpack.observability.slos.list.indicatorTypeFilter.apmAvailability', {
+    label: i18n.translate('xpack.observability.slo.list.indicatorTypeFilter.apmAvailability', {
       defaultMessage: 'APM availability',
     }),
     type: 'sli.apm.transactionErrorRate',
   },
   {
-    label: i18n.translate('xpack.observability.slos.list.indicatorTypeFilter.customKql', {
+    label: i18n.translate('xpack.observability.slo.list.indicatorTypeFilter.customKql', {
       defaultMessage: 'Custom KQL',
     }),
     type: 'sli.kql.custom',
@@ -121,7 +121,7 @@ export function SloListSearchFilterSortBar({
           fullWidth
           isLoading={loading}
           onChange={onChangeQuery}
-          placeholder={i18n.translate('xpack.observability.slos.list.search', {
+          placeholder={i18n.translate('xpack.observability.slo.list.search', {
             defaultMessage: 'Search',
           })}
         />
@@ -137,7 +137,7 @@ export function SloListSearchFilterSortBar({
                 isSelected={isFilterPopoverOpen}
                 numFilters={selectedIndicatorTypeFilter.length}
               >
-                {i18n.translate('xpack.observability.slos.list.indicatorTypeFilter', {
+                {i18n.translate('xpack.observability.slo.list.indicatorTypeFilter', {
                   defaultMessage: 'Indicator type',
                 })}
               </EuiFilterButton>
@@ -149,7 +149,7 @@ export function SloListSearchFilterSortBar({
           >
             <div style={{ width: 300 }}>
               <EuiPopoverTitle paddingSize="s">
-                {i18n.translate('xpack.observability.slos.list.indicatorTypeFilter', {
+                {i18n.translate('xpack.observability.slo.list.indicatorTypeFilter', {
                   defaultMessage: 'Indicator type',
                 })}
               </EuiPopoverTitle>
@@ -173,7 +173,7 @@ export function SloListSearchFilterSortBar({
                 onClick={handleToggleSortButton}
                 isSelected={isSortPopoverOpen}
               >
-                {i18n.translate('xpack.observability.slos.list.sortByType', {
+                {i18n.translate('xpack.observability.slo.list.sortByType', {
                   defaultMessage: 'Sort by {type}',
                   values: { type: selectedSort?.label.toLowerCase() || '' },
                 })}
@@ -186,7 +186,7 @@ export function SloListSearchFilterSortBar({
           >
             <div style={{ width: 300 }}>
               <EuiPopoverTitle paddingSize="s">
-                {i18n.translate('xpack.observability.slos.list.sortBy', {
+                {i18n.translate('xpack.observability.slo.list.sortBy', {
                   defaultMessage: 'Sort by',
                 })}
               </EuiPopoverTitle>

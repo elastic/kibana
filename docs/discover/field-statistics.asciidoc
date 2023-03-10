@@ -1,8 +1,6 @@
 [[show-field-statistics]]
 == View field statistics
 
-beta::[]
-
 Explore the fields in your data with the *Field statistics* view in *Discover* and
 answer such questions as:
 
