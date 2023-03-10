@@ -146,6 +146,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'Saved "new annotation group"\nView or manage in the annotation library'
       );
 
+      // TODO check various saving configurations (linked layer, clean by-ref, revert)
+
       // TODO check annotation library
     });
   });
