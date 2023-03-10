@@ -18,7 +18,6 @@ import {
 import {
   FetchLogViewError,
   FetchLogViewStatusError,
-  inlineLogViewReferenceRT,
   LogView,
   LogViewAttributes,
   logViewAttributesRT,
@@ -41,7 +40,7 @@ export class LogViewsClient implements ILogViewsClient {
   ) {}
 
   public async getLogView(logViewReference: LogViewReference): Promise<LogView> {
-    if (inlineLogViewReferenceRT.is(logViewReference)) {
+    if (logViewReference.type === 'log-view-inline') {
       return {
         ...logViewReference,
         origin: 'inline',
@@ -112,7 +111,7 @@ export class LogViewsClient implements ILogViewsClient {
     logViewReference: LogViewReference,
     logViewAttributes: Partial<LogViewAttributes>
   ): Promise<LogView> {
-    if (inlineLogViewReferenceRT.is(logViewReference)) {
+    if (logViewReference.type === 'log-view-inline') {
       const { id } = logViewReference;
       const attributes = decodeOrThrow(
         rt.partial(logViewAttributesRT.type.props),

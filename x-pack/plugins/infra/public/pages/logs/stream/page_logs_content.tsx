@@ -10,7 +10,6 @@ import type { Query } from '@kbn/es-query';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { persistedLogViewReferenceRT } from '../../../../common/log_views';
 import { LogEntry } from '../../../../common/log_entry';
 import { TimeKey } from '../../../../common/time';
 import { AutoSizer } from '../../../components/auto_sizer';
@@ -234,7 +233,7 @@ export const StreamPageLogsContent = React.memo<{
       ) : null}
       <PageContent
         key={`${
-          persistedLogViewReferenceRT.is(logViewReference)
+          logViewReference.type === 'log-view-reference'
             ? logViewReference.logViewId
             : logViewReference.id
         }-${logView?.version}`}

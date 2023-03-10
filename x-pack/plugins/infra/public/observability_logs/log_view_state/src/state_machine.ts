@@ -9,10 +9,6 @@ import { IToasts } from '@kbn/core/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { catchError, from, map, of, throwError } from 'rxjs';
 import { createMachine, actions, assign } from 'xstate';
-import {
-  inlineLogViewReferenceRT,
-  persistedLogViewReferenceRT,
-} from '../../../../common/log_views';
 import { ILogViewsClient } from '../../../services/log_views';
 import { NotificationChannel } from '../../xstate_helpers';
 import { LogViewNotificationEvent, logViewNotificationEventSelectors } from './notifications';
@@ -273,7 +269,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
             : {}
         ),
         updateLogViewReference: assign((context, event) =>
-          'attributes' in event && inlineLogViewReferenceRT.is(context.logViewReference)
+          'attributes' in event && context.logViewReference.type === 'log-view-inline'
             ? ({
                 logViewReference: {
                   ...context.logViewReference,
@@ -288,7 +284,7 @@ export const createPureLogViewStateMachine = (initialContext: LogViewContextWith
       },
       guards: {
         isPersistedLogView: (context, event) =>
-          persistedLogViewReferenceRT.is(context.logViewReference),
+          context.logViewReference.type === 'log-view-reference',
       },
     }
   );

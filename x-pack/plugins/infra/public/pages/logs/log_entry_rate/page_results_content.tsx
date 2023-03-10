@@ -14,7 +14,6 @@ import { encode } from '@kbn/rison';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { useTrackPageview } from '@kbn/observability-plugin/public';
-import { persistedLogViewReferenceRT } from '../../../../common/log_views';
 import { isJobStatusWithResults } from '../../../../common/log_analysis';
 import { TimeKey } from '../../../../common/time';
 import {
@@ -55,7 +54,7 @@ export const LogEntryRateResultsContent: React.FunctionComponent<{
 
   const { logViewReference, logViewStatus } = useLogViewContext();
 
-  if (!persistedLogViewReferenceRT.is(logViewReference)) {
+  if (logViewReference.type === 'log-view-inline') {
     throw new Error('Logs ML features only support persisted Log Views');
   }
 

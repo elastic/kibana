@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { InlineLogViewSplashPage } from '../../../components/logging/inline_log_view_splash_page';
-import { persistedLogViewReferenceRT } from '../../../../common/log_views';
 import { LogAnalysisSetupFlyoutStateProvider } from '../../../components/logging/log_analysis_setup/setup_flyout';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { LogEntryCategoriesModuleProvider } from '../../../containers/logs/log_analysis/modules/log_entry_categories';
@@ -38,7 +37,7 @@ export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ child
   } else if (isLoading || isUninitialized) {
     return <SourceLoadingPage />;
   } else if (resolvedLogView != null) {
-    if (!persistedLogViewReferenceRT.is(logViewReference)) {
+    if (logViewReference.type === 'log-view-inline') {
       throw new Error('Logs ML features only support persisted Log View references');
     }
     return (

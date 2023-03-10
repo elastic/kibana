@@ -13,11 +13,7 @@ import {
   ForLastExpression,
   RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  PersistedLogViewReference,
-  persistedLogViewReferenceRT,
-  ResolvedLogViewField,
-} from '../../../../../common/log_views';
+import { PersistedLogViewReference, ResolvedLogViewField } from '../../../../../common/log_views';
 import {
   Comparator,
   isOptimizableGroupedThreshold,
@@ -158,7 +154,7 @@ export const Editor: React.FC<RuleTypeParamsExpressionProps<PartialRuleParams, L
   const [hasSetDefaults, setHasSetDefaults] = useState<boolean>(false);
   const { logViewReference, resolvedLogView } = useLogViewContext();
 
-  if (!persistedLogViewReferenceRT.is(logViewReference)) {
+  if (logViewReference.type !== 'log-view-reference') {
     throw new Error('The Log Threshold rule type only supports persisted Log Views');
   }
 
