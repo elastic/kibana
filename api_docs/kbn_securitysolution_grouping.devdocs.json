@@ -207,10 +207,24 @@
           },
           {
             "parentPluginId": "@kbn/securitysolution-grouping",
-            "id": "def-common.GroupingAggregation.groupsCount0",
+            "id": "def-common.GroupingAggregation.groupCount0",
             "type": "Object",
             "tags": [],
-            "label": "groupsCount0",
+            "label": "groupCount0",
+            "description": [],
+            "signature": [
+              "{ value?: number | null | undefined; } | undefined"
+            ],
+            "path": "packages/kbn-securitysolution-grouping/src/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/securitysolution-grouping",
+            "id": "def-common.GroupingAggregation.unitCount0",
+            "type": "Object",
+            "tags": [],
+            "label": "unitCount0",
             "description": [],
             "signature": [
               "{ value?: number | null | undefined; } | undefined"

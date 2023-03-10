@@ -6,12 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
+import { omit } from 'lodash';
 
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
-import type { RpcSchemas } from '../../core';
 import { EventBus } from '../../core/event_bus';
 import { bulkGet } from './bulk_get';
 
@@ -29,41 +28,49 @@ if (!outputSchema) {
 }
 
 const FOO_CONTENT_ID = 'foo';
-const fooDataSchema = schema.object({ title: schema.string() }, { unknowns: 'forbid' });
 
 describe('RPC -> bulkGet()', () => {
   describe('Input/Output validation', () => {
+    const ids = ['123', '456'];
+    const validInput = { contentTypeId: 'foo', ids, version: 'v1' };
+
     /**
      * These tests are for the procedure call itself. Every RPC needs to declare in/out schema
      * We will test _specific_ validation schema inside the procedure in separate tests.
      */
     test('should validate that a contentTypeId and "ids" array is passed', () => {
-      const ids = ['123', '456'];
-
       [
-        { input: { contentTypeId: 'foo', ids } },
+        { input: validInput },
         {
-          input: { ids }, // contentTypeId missing
+          input: omit(validInput, 'contentTypeId'),
           expectedError: '[contentTypeId]: expected value of type [string] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo' }, // ids missing
+          input: omit(validInput, 'version'),
+          expectedError: '[version]: expected value of type [string] but got [undefined]',
+        },
+        {
+          input: { ...validInput, version: '1' }, // invalid version format
+          expectedError: '[version]: must follow the pattern [v${number}]',
+        },
+        {
+          input: omit(validInput, 'ids'),
           expectedError: '[ids]: expected value of type [array] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo', ids: [] }, // ids array needs at least one value
+          input: { ...validInput, ids: [] }, // ids array needs at least one value
           expectedError: '[ids]: array size is [0], but cannot be smaller than [1]',
         },
         {
-          input: { contentTypeId: 'foo', ids: [''] }, // ids must havr 1 char min
+          input: { ...validInput, ids: [''] }, // ids must havr 1 char min
           expectedError: '[ids.0]: value has length [0] but it must have a minimum length of [1].',
         },
         {
-          input: { contentTypeId: 'foo', ids: 123 }, // ids is not an array of string
+          input: { ...validInput, ids: 123 }, // ids is not an array of string
           expectedError: '[ids]: expected value of type [array] but got [number]',
         },
         {
-          input: { contentTypeId: 'foo', ids, unknown: 'foo' },
+          input: { ...validInput, unknown: 'foo' },
           expectedError: '[unknown]: definition for this key is missing',
         },
       ].forEach(({ input, expectedError }) => {
@@ -86,6 +93,7 @@ describe('RPC -> bulkGet()', () => {
         {
           contentTypeId: 'foo',
           ids: ['123'],
+          version: 'v1',
           options: { any: 'object' },
         },
         inputSchema
@@ -96,6 +104,7 @@ describe('RPC -> bulkGet()', () => {
       error = validate(
         {
           contentTypeId: 'foo',
+          version: 'v1',
           ids: ['123'],
           options: 123, // Not an object
         },
@@ -138,24 +147,14 @@ describe('RPC -> bulkGet()', () => {
   });
 
   describe('procedure', () => {
-    const createSchemas = (): RpcSchemas => {
-      return {
-        bulkGet: {
-          in: {
-            query: fooDataSchema,
-          },
-        },
-      } as any;
-    };
-
-    const setup = ({ contentSchemas = createSchemas() } = {}) => {
+    const setup = () => {
       const contentRegistry = new ContentRegistry(new EventBus());
       const storage = createMockedStorage();
       contentRegistry.register({
         id: FOO_CONTENT_ID,
         storage,
-        schemas: {
-          content: contentSchemas,
+        version: {
+          latest: 'v2',
         },
       });
 
@@ -171,7 +170,11 @@ describe('RPC -> bulkGet()', () => {
       const expected = ['Item1', 'Item2'];
       storage.bulkGet.mockResolvedValueOnce(expected);
 
-      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, ids: ['123', '456'] });
+      const result = await fn(ctx, {
+        contentTypeId: FOO_CONTENT_ID,
+        version: 'v1',
+        ids: ['123', '456'],
+      });
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
@@ -179,7 +182,13 @@ describe('RPC -> bulkGet()', () => {
       });
 
       expect(storage.bulkGet).toHaveBeenCalledWith(
-        { requestHandlerContext: ctx.requestHandlerContext },
+        {
+          requestHandlerContext: ctx.requestHandlerContext,
+          version: {
+            request: 'v1',
+            latest: 'v2', // from the registry
+          },
+        },
         ['123', '456'],
         undefined
       );
@@ -193,53 +202,15 @@ describe('RPC -> bulkGet()', () => {
         );
       });
 
-      test('should enforce a schema for options if options are passed', () => {
+      test('should throw if the request version is higher than the registered version', () => {
         const { ctx } = setup();
         expect(() =>
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
             ids: ['123', '456'],
-            options: { foo: 'bar' },
+            version: 'v7',
           })
-        ).rejects.toEqual(new Error('Schema missing for rpc procedure [bulkGet.in.options].'));
-      });
-
-      test('should validate the options', () => {
-        const { ctx } = setup({
-          contentSchemas: {
-            bulkGet: {
-              in: {
-                query: fooDataSchema,
-                options: schema.object({ validOption: schema.maybe(schema.boolean()) }),
-              },
-            },
-          } as any,
-        });
-        expect(() =>
-          fn(ctx, {
-            contentTypeId: FOO_CONTENT_ID,
-            ids: ['123', '456'],
-            options: { foo: 'bar' },
-          })
-        ).rejects.toEqual(new Error('[foo]: definition for this key is missing'));
-      });
-
-      test('should validate the result if schema is provided', () => {
-        const { ctx, storage } = setup({
-          contentSchemas: {
-            bulkGet: {
-              in: { query: fooDataSchema },
-              out: { result: schema.object({ validField: schema.maybe(schema.boolean()) }) },
-            },
-          } as any,
-        });
-
-        const invalidResult = { wrongField: 'bad' };
-        storage.bulkGet.mockResolvedValueOnce(invalidResult);
-
-        expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, ids: ['123', '456'] })
-        ).rejects.toEqual(new Error('[wrongField]: definition for this key is missing'));
+        ).rejects.toEqual(new Error('Invalid version. Latest version is [v2].'));
       });
     });
   });

@@ -4837,6 +4837,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-solution-side-nav@link:packages/security-solution/side_nav":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-solution-storybook-config@link:packages/security-solution/storybook/config":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-test-endpoints-plugin@link:x-pack/test/security_functional/plugins/test_endpoints":
   version "0.0.0"
   uid ""
@@ -14224,10 +14232,50 @@ elastic-apm-http-client@11.2.0, elastic-apm-http-client@^11.0.1:
     semver "^6.3.0"
     stream-chopper "^3.0.1"
 
-elastic-apm-node@^3.38.0, elastic-apm-node@^3.42.0:
+elastic-apm-node@^3.38.0:
   version "3.42.0"
   resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.42.0.tgz#22c11e98708a0df7a7de8c8fb195929b4fc90c00"
   integrity sha512-Q9sugfpaw6jQ8xDeP09LlyF0MwE5k0hphQmUiap+qQKE2jrLvY00zk4WierDQ2GF/AguE6BtRZmXpUELDbHFyA==
+  dependencies:
+    "@elastic/ecs-pino-format" "^1.2.0"
+    "@opentelemetry/api" "^1.1.0"
+    after-all-results "^2.0.0"
+    async-cache "^1.1.0"
+    async-value-promise "^1.1.1"
+    basic-auth "^2.0.1"
+    cookie "^0.5.0"
+    core-util-is "^1.0.2"
+    debug "^4.1.1"
+    elastic-apm-http-client "11.2.0"
+    end-of-stream "^1.4.4"
+    error-callsites "^2.0.4"
+    error-stack-parser "^2.0.6"
+    escape-string-regexp "^4.0.0"
+    fast-safe-stringify "^2.0.7"
+    http-headers "^3.0.2"
+    is-native "^1.0.1"
+    lru-cache "^6.0.0"
+    measured-reporting "^1.51.1"
+    module-details-from-path "^1.0.3"
+    monitor-event-loop-delay "^1.0.0"
+    object-filter-sequence "^1.0.0"
+    object-identity-map "^1.0.2"
+    original-url "^1.2.3"
+    pino "^6.11.2"
+    relative-microtime "^2.0.0"
+    resolve "^1.22.1"
+    semver "^6.3.0"
+    set-cookie-serde "^1.0.0"
+    shallow-clone-shim "^2.0.0"
+    source-map "^0.8.0-beta.0"
+    sql-summary "^1.0.1"
+    traverse "^0.6.6"
+    unicode-byte-truncate "^1.0.0"
+
+elastic-apm-node@^3.43.0:
+  version "3.43.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-3.43.0.tgz#3d644cdb403c8230f5db7b6a3796d19e38faa2b7"
+  integrity sha512-iFuP8pXkfQst1LOFq6F86EjHhkvUL+pigpmbw2KL8rs+9i7Fn5pkxf8RP1G3oqwqydwUSdvw5+DPhO0lDO+LtA==
   dependencies:
     "@elastic/ecs-pino-format" "^1.2.0"
     "@opentelemetry/api" "^1.1.0"
@@ -28386,10 +28434,10 @@ vega-expression@^5.0.1, vega-expression@~5.0.0, vega-expression@~5.0.1:
     "@types/estree" "^1.0.0"
     vega-util "^1.17.1"
 
-vega-force@~4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/vega-force/-/vega-force-4.1.1.tgz#27bffa96bda293f27d2a2492c2cbf99d49fec77e"
-  integrity sha512-T6fJAUz9zdXf2qj2Hz0VlmdtaY7eZfcKNazhUV8hza4R3F9ug6r/hSrdovfc9ExmbUjL5iyvDUsf63r8K3/wVQ==
+vega-force@~4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/vega-force/-/vega-force-4.2.0.tgz#5374d0dbac674c92620a9801e12b650b0966336a"
+  integrity sha512-aE2TlP264HXM1r3fl58AvZdKUWBNOGkIvn4EWyqeJdgO2vz46zSU7x7TzPG4ZLuo44cDRU5Ng3I1eQk23Asz6A==
   dependencies:
     d3-force "^3.0.0"
     vega-dataflow "^5.7.5"
@@ -28603,10 +28651,10 @@ vega-transforms@~4.10.1:
     vega-time "^2.1.1"
     vega-util "^1.17.1"
 
-vega-typings@~0.23.0:
-  version "0.23.0"
-  resolved "https://registry.yarnpkg.com/vega-typings/-/vega-typings-0.23.0.tgz#5b001f5b51a477e67d2446ef9b964e1dac48a20e"
-  integrity sha512-10ZRRGoUZoQLS5jMiIFhSZMDc3UkPhDP2VMUN/oHZXElvPCGjfjvgmiC6XzvvN4sRXdccMcZX1lZPoyYPERVkA==
+vega-typings@~0.24.0:
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/vega-typings/-/vega-typings-0.24.0.tgz#e659286c43c63b68cf29a3131360829d129eeb84"
+  integrity sha512-FFYf67Dn5VNPbYoYHgO2T9Z1I81qcwrXjwKEe0rlJk0MX7CNWPJr9Y3VZEWfxyEx7J9anAm69hGIv0Ehb2G85A==
   dependencies:
     "@types/geojson" "^7946.0.10"
     vega-event-selector "^3.0.1"
@@ -28661,17 +28709,17 @@ vega-wordcloud@~4.1.4:
     vega-statistics "^1.8.1"
     vega-util "^1.17.1"
 
-vega@^5.23.0:
-  version "5.23.0"
-  resolved "https://registry.yarnpkg.com/vega/-/vega-5.23.0.tgz#7e3899b65f1a84095545b74dcf71289890844c49"
-  integrity sha512-FjgDD/VmL9yl36ByLq66mEusDF/wZGRktK4JA5MkF68hQqj3F8BFMDDVNwCASuwY97H6wr7kw/RFqNI6XocjJQ==
+vega@^5.24.0:
+  version "5.24.0"
+  resolved "https://registry.yarnpkg.com/vega/-/vega-5.24.0.tgz#47ccf9288d06cf0be6f1e83bf38647de2bda3ca8"
+  integrity sha512-eahZ+4eryPywLuq9BpgcwWMyqiuVD3FAh7eMB3koOp7peQ4scPxAZxWdLwnh0t0kah+oE2QcXi2EHS4BabsMPg==
   dependencies:
     vega-crossfilter "~4.1.1"
     vega-dataflow "~5.7.5"
     vega-encode "~4.9.1"
     vega-event-selector "~3.0.1"
     vega-expression "~5.0.1"
-    vega-force "~4.1.1"
+    vega-force "~4.2.0"
     vega-format "~1.1.1"
     vega-functions "~5.13.1"
     vega-geo "~4.4.1"
@@ -28687,7 +28735,7 @@ vega@^5.23.0:
     vega-statistics "~1.8.1"
     vega-time "~2.1.1"
     vega-transforms "~4.10.1"
-    vega-typings "~0.23.0"
+    vega-typings "~0.24.0"
     vega-util "~1.17.1"
     vega-view "~5.11.1"
     vega-view-transforms "~4.5.9"

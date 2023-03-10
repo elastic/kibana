@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEqual, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import React from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -385,11 +385,9 @@ export class Embeddable
   private savedVis: Document | undefined;
   private expression: string | undefined | null;
   private domNode: HTMLElement | Element | undefined;
-  private subscription: Subscription;
   private isInitialized = false;
   private inputReloadSubscriptions: Subscription[];
   private isDestroyed?: boolean;
-  private embeddableTitle?: string;
   private lensInspector: LensInspector;
 
   private logError(type: 'runtime' | 'validation') {
@@ -398,13 +396,6 @@ export class Embeddable
       this.getExecutionContext()
     );
   }
-
-  private externalSearchContext: {
-    timeRange?: TimeRange;
-    query?: Query;
-    filters?: Filter[];
-    searchSessionId?: string;
-  } = {};
 
   private activeData?: TableInspectorAdapter;
 
@@ -429,25 +420,14 @@ export class Embeddable
 
     this.lensInspector = getLensInspectorService(deps.inspector);
     this.expressionRenderer = deps.expressionRenderer;
-    let containerStateChangedCalledAlready = false;
     this.initializeSavedVis(initialInput)
       .then(() => {
         this.loadUserMessages();
-        if (!containerStateChangedCalledAlready) {
-          this.onContainerStateChanged(initialInput);
-        } else {
-          this.reload();
-        }
+        this.reload();
       })
       .catch((e) => this.onFatalError(e));
 
-    this.subscription = this.getUpdated$().subscribe(() => {
-      containerStateChangedCalledAlready = true;
-      this.onContainerStateChanged(this.input);
-    });
-
     const input$ = this.getInput$();
-    this.embeddableTitle = this.getTitle();
 
     this.inputReloadSubscriptions = [];
 
@@ -487,7 +467,6 @@ export class Embeddable
     );
 
     // Re-initialize the visualization if either the attributes or the saved object id changes
-
     this.inputReloadSubscriptions.push(
       input$
         .pipe(
@@ -512,7 +491,7 @@ export class Embeddable
           // reset removable messages
           // Dashboard search/context changes are detected here
           this.additionalUserMessages = {};
-          this.onContainerStateChanged(input);
+          this.reload();
         }
       )
     );
@@ -724,45 +703,6 @@ export class Embeddable
     this.isInitialized = true;
   }
 
-  onContainerStateChanged(containerState: LensEmbeddableInput) {
-    if (this.handleContainerStateChanged(containerState)) {
-      this.reload();
-    }
-  }
-
-  handleContainerStateChanged(containerState: LensEmbeddableInput): boolean {
-    let isDirty = false;
-    const cleanedFilters = containerState.filters
-      ? containerState.filters.filter((filter) => !filter.meta.disabled)
-      : undefined;
-    const nextTimeRange =
-      containerState.timeslice !== undefined
-        ? {
-            from: new Date(containerState.timeslice[0]).toISOString(),
-            to: new Date(containerState.timeslice[1]).toISOString(),
-            mode: 'absolute' as 'absolute',
-          }
-        : containerState.timeRange;
-    if (
-      !isEqual(nextTimeRange, this.externalSearchContext.timeRange) ||
-      !isEqual(containerState.query, this.externalSearchContext.query) ||
-      !isEqual(cleanedFilters, this.externalSearchContext.filters) ||
-      this.externalSearchContext.searchSessionId !== containerState.searchSessionId ||
-      this.embeddableTitle !== this.getTitle()
-    ) {
-      this.externalSearchContext = {
-        timeRange: nextTimeRange,
-        query: containerState.query,
-        filters: cleanedFilters,
-        searchSessionId: containerState.searchSessionId,
-      };
-      this.embeddableTitle = this.getTitle();
-      isDirty = true;
-    }
-
-    return isDirty;
-  }
-
   private getSearchWarningMessages(adapters?: Partial<DefaultInspectorAdapters>): UserMessage[] {
     if (!this.activeDatasource || !this.activeDatasourceId || !adapters?.requests) {
       return [];
@@ -924,7 +864,7 @@ export class Embeddable
                 embeddableTitle: this.getTitle(),
                 ...(input.palette ? { theme: { palette: input.palette } } : {}),
               }}
-              searchSessionId={this.externalSearchContext.searchSessionId}
+              searchSessionId={this.getInput().searchSessionId}
               handleEvent={this.handleEvent}
               onData$={this.updateActiveData}
               onRender$={this.onRender}
@@ -1064,8 +1004,16 @@ export class Embeddable
       throw new Error('savedVis is required for getMergedSearchContext');
     }
 
+    const input = this.getInput();
     const context: ExecutionContextSearch = {
-      timeRange: this.externalSearchContext.timeRange,
+      timeRange:
+        input.timeslice !== undefined
+          ? {
+              from: new Date(input.timeslice[0]).toISOString(),
+              to: new Date(input.timeslice[1]).toISOString(),
+              mode: 'absolute' as 'absolute',
+            }
+          : input.timeRange,
       query: [this.savedVis.state.query],
       filters: this.deps.injectFilterReferences(
         this.savedVis.state.filters,
@@ -1074,12 +1022,15 @@ export class Embeddable
       disableShardWarnings: true,
     };
 
-    if (this.externalSearchContext.query) {
-      context.query = [this.externalSearchContext.query, ...(context.query as Query[])];
+    if (input.query) {
+      context.query = [input.query, ...(context.query as Query[])];
     }
 
-    if (this.externalSearchContext.filters?.length) {
-      context.filters = [...this.externalSearchContext.filters, ...(context.filters as Filter[])];
+    if (input.filters?.length) {
+      context.filters = [
+        ...input.filters.filter((filter) => !filter.meta.disabled),
+        ...(context.filters as Filter[]),
+      ];
     }
 
     return context;
@@ -1168,11 +1119,7 @@ export class Embeddable
     if (!this.savedVis || !this.isInitialized || this.isDestroyed) {
       return;
     }
-    if (this.handleContainerStateChanged(this.input)) {
-      // reset removable messages
-      // Unified histogram search/context changes are detected here
-      this.additionalUserMessages = {};
-    }
+
     if (this.domNode) {
       this.render(this.domNode);
     }
@@ -1357,9 +1304,6 @@ export class Embeddable
     }
     if (this.domNode) {
       unmountComponentAtNode(this.domNode);
-    }
-    if (this.subscription) {
-      this.subscription.unsubscribe();
     }
   }
 

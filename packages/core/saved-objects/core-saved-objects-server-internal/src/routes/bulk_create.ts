@@ -11,7 +11,11 @@ import { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal'
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { InternalSavedObjectRouter } from '../internal_types';
-import { catchAndReturnBoomErrors, throwIfAnyTypeNotVisibleByAPI } from './utils';
+import {
+  catchAndReturnBoomErrors,
+  logWarnOnExternalRequest,
+  throwIfAnyTypeNotVisibleByAPI,
+} from './utils';
 
 interface RouteDependencies {
   config: SavedObjectConfig;
@@ -54,9 +58,12 @@ export const registerBulkCreateRoute = (
       },
     },
     catchAndReturnBoomErrors(async (context, req, res) => {
-      logger.warn(
-        "The bulk create saved object API '/api/saved_objects/_bulk_create' is deprecated."
-      );
+      logWarnOnExternalRequest({
+        method: 'post',
+        path: '/api/saved_objects/_bulk_create',
+        req,
+        logger,
+      });
       const { overwrite } = req.query;
 
       const usageStatsClient = coreUsageData.getClient();

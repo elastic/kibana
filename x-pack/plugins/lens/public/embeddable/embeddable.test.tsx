@@ -551,11 +551,7 @@ describe('embeddable', () => {
     expect(outputIndexPatterns[1].id).toEqual('456');
   });
 
-  it('should re-render if new input is pushed', async () => {
-    const timeRange: TimeRange = { from: 'now-15d', to: 'now' };
-    const query: Query = { language: 'kquery', query: '' };
-    const filters: Filter[] = [{ meta: { alias: 'test', negate: false, disabled: false } }];
-
+  it('should re-render once on filter change', async () => {
     const embeddable = new Embeddable(
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
@@ -600,10 +596,7 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
 
     embeddable.updateInput({
-      timeRange,
-      query,
-      filters,
-      searchSessionId: 'searchSessionId',
+      filters: [{ meta: { alias: 'test', negate: false, disabled: false } }],
     });
 
     await new Promise((resolve) => setTimeout(resolve, 0));
@@ -611,7 +604,7 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
   });
 
-  it('should re-render once if session id changes and ', async () => {
+  it('should re-render once on search session change', async () => {
     const embeddable = new Embeddable(
       {
         timefilter: dataPluginMock.createSetupContract().query.timefilter.timefilter,
@@ -648,7 +641,7 @@ describe('embeddable', () => {
             activeVisualizationState: null,
           }),
       },
-      { id: '123' } as LensEmbeddableInput
+      { id: '123', searchSessionId: 'firstSession' } as LensEmbeddableInput
     );
     await embeddable.initializeSavedVis({ id: '123' } as LensEmbeddableInput);
     embeddable.render(mountpoint);
@@ -656,10 +649,13 @@ describe('embeddable', () => {
     expect(expressionRenderer).toHaveBeenCalledTimes(1);
 
     embeddable.updateInput({
-      searchSessionId: 'newSession',
+      filters: [{ meta: { alias: 'test', negate: false, disabled: false } }],
     });
-    embeddable.reload();
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
+    embeddable.updateInput({
+      searchSessionId: 'nextSession',
+    });
     await new Promise((resolve) => setTimeout(resolve, 0));
 
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
@@ -1151,13 +1147,14 @@ describe('embeddable', () => {
   });
 
   it('should call onload after rerender and onData$ call ', async () => {
+    const onDataTimeout = 10;
     const onLoad = jest.fn();
     const adapters = { tables: {} };
 
     expressionRenderer = jest.fn(({ onData$ }) => {
       setTimeout(() => {
         onData$?.({}, adapters);
-      }, 10);
+      }, onDataTimeout);
 
       return null;
     });
@@ -1207,7 +1204,7 @@ describe('embeddable', () => {
     expect(onLoad).toHaveBeenCalledWith(true);
     expect(onLoad).toHaveBeenCalledTimes(1);
 
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await new Promise((resolve) => setTimeout(resolve, onDataTimeout * 1.5));
 
     // loading should become false
     expect(onLoad).toHaveBeenCalledTimes(2);
@@ -1218,17 +1215,15 @@ describe('embeddable', () => {
     embeddable.updateInput({
       searchSessionId: 'newSession',
     });
-    embeddable.reload();
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
 
     // loading should become again true
     expect(onLoad).toHaveBeenCalledTimes(3);
     expect(onLoad).toHaveBeenNthCalledWith(3, true);
-
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
     expect(expressionRenderer).toHaveBeenCalledTimes(2);
 
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await new Promise((resolve) => setTimeout(resolve, onDataTimeout * 1.5));
 
     // loading should again become false
     expect(onLoad).toHaveBeenCalledTimes(4);

@@ -154,3 +154,10 @@ export const DEFAULT_PIPELINE_VALUES: IngestPipelineParams = {
   reduce_whitespace: true,
   run_ml_inference: false,
 };
+
+export enum INGESTION_METHOD_IDS {
+  api = 'api',
+  connector = 'connector',
+  crawler = 'crawler',
+  native_connector = 'native_connector',
+}

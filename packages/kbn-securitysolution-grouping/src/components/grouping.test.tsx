@@ -11,9 +11,12 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Grouping } from './grouping';
 import { createGroupFilter } from './accordion_panel/helpers';
+import { METRIC_TYPE } from '@kbn/analytics';
+import { getTelemetryEvent } from '../telemetry/const';
 
 const renderChildComponent = jest.fn();
 const takeActionItems = jest.fn();
+const mockTracker = jest.fn();
 const rule1Name = 'Rule 1 name';
 const rule1Desc = 'Rule 1 description';
 const rule2Name = 'Rule 2 name';
@@ -21,7 +24,7 @@ const rule2Desc = 'Rule 2 description';
 
 const testProps = {
   data: {
-    groupsNumber: {
+    groupCount0: {
       value: 2,
     },
     stackByMultipleFields0: {
@@ -72,7 +75,7 @@ const testProps = {
             sum_other_doc_count: 0,
             buckets: [],
           },
-          alertsCount: {
+          unitCount0: {
             value: 1,
           },
           severitiesSubAggregation: {
@@ -94,10 +97,11 @@ const testProps = {
         },
       ],
     },
-    alertsCount: {
+    unitCount0: {
       value: 2,
     },
   },
+  groupingId: 'test-grouping-id',
   isLoading: false,
   pagination: {
     pageIndex: 0,
@@ -109,27 +113,28 @@ const testProps = {
   renderChildComponent,
   selectedGroup: 'kibana.alert.rule.name',
   takeActionItems,
+  tracker: mockTracker,
 };
 
 describe('grouping container', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('Renders group counts when groupsNumber > 0', () => {
+  it('Renders group counts when groupCount0 > 0', () => {
     const { getByTestId, getAllByTestId, queryByTestId } = render(
       <I18nProvider>
         <Grouping {...testProps} />
       </I18nProvider>
     );
-    expect(getByTestId('alert-count').textContent).toBe('2 alerts');
-    expect(getByTestId('groups-count').textContent).toBe('2 groups');
+    expect(getByTestId('unit-count').textContent).toBe('2 events');
+    expect(getByTestId('group-count').textContent).toBe('2 groups');
     expect(getAllByTestId('grouping-accordion').length).toBe(2);
     expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
   });
 
-  it('Does not render group counts when groupsNumber = 0', () => {
+  it('Does not render group counts when groupCount0 = 0', () => {
     const data = {
-      groupsNumber: {
+      groupCount0: {
         value: 0,
       },
       stackByMultipleFields0: {
@@ -137,7 +142,7 @@ describe('grouping container', () => {
         sum_other_doc_count: 0,
         buckets: [],
       },
-      alertsCount: {
+      unitCount0: {
         value: 0,
       },
     };
@@ -146,8 +151,8 @@ describe('grouping container', () => {
         <Grouping {...testProps} data={data} />
       </I18nProvider>
     );
-    expect(queryByTestId('alert-count')).not.toBeInTheDocument();
-    expect(queryByTestId('groups-count')).not.toBeInTheDocument();
+    expect(queryByTestId('unit-count')).not.toBeInTheDocument();
+    expect(queryByTestId('group-count')).not.toBeInTheDocument();
     expect(queryByTestId('grouping-accordion')).not.toBeInTheDocument();
     expect(getByTestId('empty-results-panel')).toBeInTheDocument();
   });
@@ -169,6 +174,35 @@ describe('grouping container', () => {
     expect(renderChildComponent).toHaveBeenNthCalledWith(
       2,
       createGroupFilter(testProps.selectedGroup, rule2Name)
+    );
+  });
+
+  it('Send Telemetry when each group is clicked', () => {
+    const { getAllByTestId } = render(
+      <I18nProvider>
+        <Grouping {...testProps} />
+      </I18nProvider>
+    );
+    const group1 = within(getAllByTestId('grouping-accordion')[0]).getAllByRole('button')[0];
+    fireEvent.click(group1);
+    expect(mockTracker).toHaveBeenNthCalledWith(
+      1,
+      METRIC_TYPE.CLICK,
+      getTelemetryEvent.groupToggled({
+        isOpen: true,
+        groupingId: testProps.groupingId,
+        groupNumber: 0,
+      })
+    );
+    fireEvent.click(group1);
+    expect(mockTracker).toHaveBeenNthCalledWith(
+      2,
+      METRIC_TYPE.CLICK,
+      getTelemetryEvent.groupToggled({
+        isOpen: false,
+        groupingId: testProps.groupingId,
+        groupNumber: 0,
+      })
     );
   });
 });
