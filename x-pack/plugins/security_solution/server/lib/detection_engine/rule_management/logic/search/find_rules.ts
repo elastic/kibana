@@ -48,5 +48,6 @@ export const findRules = ({
       sortOrder,
       sortField: transformSortField(sortField),
     },
+    includeSnoozeData: true,
   });
 };

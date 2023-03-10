@@ -647,6 +647,12 @@ export const internalRuleToAPIResponse = (
   rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>
 ): RuleResponse => {
   const executionSummary = createRuleExecutionSummary(rule);
+  const snoozeInfo = {
+    mute_all: rule.muteAll,
+    snooze_schedule: rule.snoozeSchedule,
+    active_snoozes: rule.activeSnoozes,
+    is_snoozed_until: rule.isSnoozedUntil ?? undefined,
+  };
 
   const isResolvedRule = (obj: unknown): obj is ResolvedSanitizedRule<RuleParams> =>
     (obj as ResolvedSanitizedRule<RuleParams>).outcome != null;
@@ -674,6 +680,7 @@ export const internalRuleToAPIResponse = (
     // Actions
     throttle: transformFromAlertThrottle(rule),
     actions: rule.actions.map(transformAlertToRuleAction),
+    snooze_info: snoozeInfo,
     // Execution summary
     execution_summary: executionSummary ?? undefined,
   };

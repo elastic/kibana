@@ -31,6 +31,7 @@ export * from './src/rule_schedule';
 export * from './src/saved_object_attributes';
 export * from './src/severity';
 export * from './src/severity_mapping';
+export * from './src/snooze_info';
 export * from './src/threat';
 export * from './src/threat_mapping';
 export * from './src/threat_subtechnique';

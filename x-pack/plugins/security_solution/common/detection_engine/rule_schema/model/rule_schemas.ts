@@ -18,6 +18,7 @@ import {
   RuleInterval,
   RuleIntervalFrom,
   RuleIntervalTo,
+  RuleSnoozeInfo,
   Severity,
   SeverityMapping,
   threat_filters,
@@ -119,6 +120,7 @@ export const baseSchema = buildRuleSchemas({
     output_index: AlertsIndex,
     namespace: AlertsIndexNamespace,
     meta: RuleMetadata,
+    snooze_info: RuleSnoozeInfo,
   },
   defaultable: {
     // Main attributes

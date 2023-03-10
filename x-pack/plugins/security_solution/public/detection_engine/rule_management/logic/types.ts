@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { RuleSnoozeInfo, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   RiskScore,
   RiskScoreMapping,
@@ -155,6 +155,7 @@ export const RuleSchema = t.intersection([
     updated_by: t.string,
     actions: RuleActionArray,
     throttle: t.union([RuleActionThrottle, t.null]),
+    snooze_info: RuleSnoozeInfo,
   }),
   t.partial({
     outcome: SavedObjectResolveOutcome,
