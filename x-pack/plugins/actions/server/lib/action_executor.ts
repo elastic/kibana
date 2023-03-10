@@ -90,6 +90,7 @@ export class ActionExecutor {
     actionId,
     params,
     request,
+    source,
     isEphemeral,
     taskInfo,
     executionId,
@@ -184,6 +185,7 @@ export class ActionExecutor {
           name,
           actionExecutionId,
           isPreconfigured: this.actionInfo.isPreconfigured,
+          ...(source ? { source } : {}),
         });
 
         eventLogger.startTiming(event);
@@ -348,6 +350,7 @@ export class ActionExecutor {
       relatedSavedObjects,
       actionExecutionId,
       isPreconfigured: this.actionInfo.isPreconfigured,
+      ...(source ? { source } : {}),
     });
 
     eventLogger.logEvent(event);
@@ -363,7 +366,7 @@ interface ActionInfo {
   isPreconfigured?: boolean;
 }
 
-async function getActionInfoInternal<Source = unknown>(
+async function getActionInfoInternal(
   isESOCanEncrypt: boolean,
   encryptedSavedObjectsClient: EncryptedSavedObjectsClient,
   preconfiguredActions: PreConfiguredAction[],

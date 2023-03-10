@@ -6,9 +6,9 @@
  */
 import { EuiButton, EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React from 'react';
 import { StackTracesDisplayOption, TopNType } from '../../../common/stack_traces';
-import { groupSamplesByCategory, TopNResponse, TopNSample } from '../../../common/topn';
+import { groupSamplesByCategory, TopNResponse } from '../../../common/topn';
 import { useProfilingParams } from '../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';
 import { useProfilingRoutePath } from '../../hooks/use_profiling_route_path';
@@ -78,13 +78,6 @@ export function StackTracesView() {
     [topNType, timeRange.start, timeRange.end, fetchTopN, kuery]
   );
 
-  const [highlightedSample, setHighlightedSample] = useState<TopNSample | null>(null);
-
-  const highlightedSubchart =
-    (highlightedSample &&
-      state.data?.charts.find((chart) => chart.Category === highlightedSample?.Category)) ||
-    null;
-
   const { data } = state;
 
   return (
@@ -146,14 +139,6 @@ export function StackTracesView() {
                         },
                       });
                     }}
-                    onSampleOver={(sample) => {
-                      setHighlightedSample(sample);
-                    }}
-                    onSampleOut={() => {
-                      setHighlightedSample(null);
-                    }}
-                    highlightedSample={highlightedSample}
-                    highlightedSubchart={highlightedSubchart}
                     showFrames={topNType === TopNType.Traces}
                   />
                 </AsyncComponent>

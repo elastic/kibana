@@ -272,7 +272,7 @@ export const MatrixHistogramComponent: React.FC<MatrixHistogramComponentProps> =
             isInspectDisabled={filterQuery === undefined}
           >
             <EuiFlexGroup alignItems="center" gutterSize="none">
-              {(getLensAttributes || lensAttributes) && timerange && (
+              {(getLensAttributes || lensAttributes) && timerange && !isChartEmbeddablesEnabled && (
                 <EuiFlexItem grow={false}>
                   <VisualizationActions
                     className="histogram-viz-actions"

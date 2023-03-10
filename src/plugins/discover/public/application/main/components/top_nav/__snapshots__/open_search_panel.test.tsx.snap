@@ -62,7 +62,7 @@ exports[`OpenSearchPanel render 1`] = `
           color="primary"
           data-test-subj="manageSearchesBtn"
           fill={true}
-          href="/app/management/kibana/objects?_a=(tab:search)"
+          href="/app/management/kibana/objects?initialQuery=type:(search)"
           onClick={[MockFunction]}
           size="m"
         >

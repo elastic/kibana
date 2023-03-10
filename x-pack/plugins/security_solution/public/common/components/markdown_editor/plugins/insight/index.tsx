@@ -33,7 +33,6 @@ import numeral from '@elastic/numeral';
 import { css } from '@emotion/react';
 import type { EuiMarkdownEditorUiPluginEditorProps } from '@elastic/eui/src/components/markdown_editor/markdown_types';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -55,6 +54,7 @@ import { DEFAULT_TIMEPICKER_QUICK_RANGES } from '../../../../../../common/consta
 import { useSourcererDataView } from '../../../../containers/sourcerer';
 import { SourcererScopeName } from '../../../../store/sourcerer/model';
 import { filtersToInsightProviders } from './provider';
+import * as i18n from './translations';
 
 interface InsightComponentProps {
   label?: string;
@@ -64,11 +64,12 @@ interface InsightComponentProps {
   relativeTo?: string;
 }
 
+const insightPrefix = '!{investigate';
+
 export const parser: Plugin = function () {
   const Parser = this.Parser;
   const tokenizers = Parser.prototype.inlineTokenizers;
   const methods = Parser.prototype.inlineMethods;
-  const insightPrefix = '!{insight';
 
   const tokenizeInsight: RemarkTokenizer = function (eat, value, silent) {
     if (value.startsWith(insightPrefix) === false) {
@@ -114,16 +115,10 @@ export const parser: Plugin = function () {
         });
       } catch (err) {
         const now = eat.now();
-        this.file.fail(
-          i18n.translate('xpack.securitySolution.markdownEditor.plugins.insightConfigError', {
-            values: { err },
-            defaultMessage: 'Unable to parse insight JSON configuration: {err}',
-          }),
-          {
-            line: now.line,
-            column: now.column + insightPrefix.length,
-          }
-        );
+        this.file.fail(i18n.INVALID_FILTER_ERROR(err), {
+          line: now.line,
+          column: now.column + insightPrefix.length,
+        });
       }
     }
     return false;
@@ -153,9 +148,7 @@ const InsightComponent = ({
     }
   } catch (err) {
     addError(err, {
-      title: i18n.translate('xpack.securitySolution.markdownEditor.plugins.insightProviderError', {
-        defaultMessage: 'Unable to parse insight provider configuration',
-      }),
+      title: i18n.PARSE_ERROR,
     });
   }
   const { data: alertData, timestamp } = useContext(BasicAlertDataContext);
@@ -322,7 +315,7 @@ const InsightEditorComponent = ({
 
   const onSubmit = useCallback(() => {
     onSave(
-      `!{insight${JSON.stringify(
+      `${insightPrefix}${JSON.stringify(
         pickBy(
           {
             label: labelController.field.value,
@@ -398,13 +391,7 @@ const InsightEditorComponent = ({
               )}
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBetaBadge
-                color={'hollow'}
-                label={i18n.translate('xpack.securitySolution.markdown.insight.technicalPreview', {
-                  defaultMessage: 'Technical Preview',
-                })}
-                size="s"
-              />
+              <EuiBetaBadge color={'hollow'} label={i18n.TECH_PREVIEW} size="s" />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiModalHeaderTitle>
@@ -413,9 +400,13 @@ const InsightEditorComponent = ({
       <EuiModalBody>
         <FormProvider {...formMethods}>
           <EuiForm fullWidth>
+            <EuiFormRow label={i18n.FORM_DESCRIPTION} fullWidth>
+              <></>
+            </EuiFormRow>
             <EuiFormRow
-              label="Label"
-              helpText="Label for the filter button rendered in the guide"
+              label={i18n.LABEL}
+              helpText={i18n.LABEL_TEXT}
+              isInvalid={labelController.field.value != null}
               fullWidth
             >
               <EuiFieldText
@@ -428,11 +419,7 @@ const InsightEditorComponent = ({
                 onChange={labelController.field.onChange}
               />
             </EuiFormRow>
-            <EuiFormRow
-              label="Description"
-              helpText="Description of the relevance of the query"
-              fullWidth
-            >
+            <EuiFormRow label={i18n.DESCRIPTION} helpText={i18n.DESCRIPTION_TEXT} fullWidth>
               <EuiFieldText
                 data-test-subj="securitySolutionInsightEditorComponentFieldText"
                 {...{ ...formMethods.register('description'), ref: null }}
@@ -440,7 +427,7 @@ const InsightEditorComponent = ({
                 onChange={descriptionController.field.onChange}
               />
             </EuiFormRow>
-            <EuiFormRow fullWidth>
+            <EuiFormRow label={i18n.FILTER_BUILDER} helpText={i18n.FILTER_BUILDER_TEXT} fullWidth>
               <FiltersBuilderLazy
                 filters={filtersStub}
                 onChange={onChange}
@@ -449,8 +436,8 @@ const InsightEditorComponent = ({
               />
             </EuiFormRow>
             <EuiFormRow
-              label="Relative time range"
-              helpText="Select a time range relative to the time of the alert (optional)"
+              label={i18n.RELATIVE_TIMERANGE}
+              helpText={i18n.RELATIVE_TIMERANGE_TEXT}
               fullWidth
             >
               <EuiSelect
@@ -466,12 +453,10 @@ const InsightEditorComponent = ({
 
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="securitySolutionInsightEditorComponentCancelButtonEmpty"
+          data-test-subj="securitySolutionInsightEditorComponentButtonEmpty"
           onClick={onCancel}
         >
-          {i18n.translate('xpack.securitySolution.markdown.insight.modalCancelButtonLabel', {
-            defaultMessage: 'Cancel',
-          })}
+          {i18n.CANCEL_FORM_BUTTON}
         </EuiButtonEmpty>
         <EuiButton
           data-test-subj="securitySolutionInsightEditorComponentButton"
@@ -497,7 +482,7 @@ const InsightEditorComponent = ({
 };
 
 const InsightEditor = React.memo(InsightEditorComponent);
-const exampleInsight = `!{insight{
+const exampleInsight = `${insightPrefix}
   "label": "Test action",
   "description": "Click to investigate",
   "providers": [

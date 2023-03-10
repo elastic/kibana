@@ -108,7 +108,7 @@ export const CategoryTable: FC<Props> = ({
         }
         const histogram = eventRate.map((e) => ({
           doc_count_overall: e.docCount,
-          doc_count_change_point: sparkLine[e.key],
+          doc_count_significant_term: sparkLine[e.key],
           key: e.key,
           key_as_string: `${e.key}`,
         }));
