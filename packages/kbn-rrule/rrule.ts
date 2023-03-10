@@ -94,11 +94,10 @@ export class RRule {
     }
 
     const { dtstart, tzid, count, until } = this.options;
-    let iter = 1;
+    let iter = 0;
     let current: Date = moment(dtstart ?? new Date())
       .tz(tzid)
       .toDate();
-    if (isInBounds(current)) yield current;
 
     const nextRecurrences: Moment[] = [];
 
@@ -120,6 +119,7 @@ export class RRule {
         getNextRecurrences({
           refDT: moment(current).tz(tzid),
           ...this.options,
+          interval: iter === 0 ? 0 : this.options.interval,
           wkst: this.options.wkst ? (this.options.wkst as Weekday) : Weekday.MO,
         }).forEach((r) => nextRecurrences.push(r));
         if (nextRecurrences.length === 0) {
@@ -319,13 +319,6 @@ const getMonthOfRecurrences = function ({
 
   let derivedBymonthday = bymonthday ?? [refDT.date()];
   if (bysetpos) {
-    const posPositions = [
-      ...bysetpos
-        .filter((p) => p > 0)
-        .map((p) => p - 1)
-        .sort(),
-    ]; // Start with positive numbers in ascending order
-    const negPositions = [...bysetpos.filter((p) => p < 0).sort((a, b) => a - b)]; // then negative numbers in descending order]
     const firstOfMonth = moment(refDT).month(currentMonth).date(1);
     const dowLookup: Record<Weekday, number[]> = {
       1: [],
@@ -343,16 +336,28 @@ const getMonthOfRecurrences = function ({
       trackedDate.add(1, 'd');
     }
     const sortedByweekday = sortByweekday({ wkst, byweekday: derivedByweekday });
-    derivedBymonthday = [...posPositions, ...negPositions].map((pos) => {
-      const foundWeekdays = sortedByweekday
-        .map((day) => {
-          const lookup = dowLookup[day];
-          if (pos > 0) return lookup[pos];
-          return lookup.slice(pos)[0];
-        })
-        .sort();
-      return foundWeekdays[0];
+    const bymonthdayFromPos = bysetpos.map((pos, i) => {
+      const correspondingWeekday = sortedByweekday[i];
+      const lookup = dowLookup[correspondingWeekday];
+      // if (pos > 0) return [lookup[pos - 1], pos];
+      return [lookup.slice(pos)[0], pos];
     });
+
+    const posPositions = [
+      // Start with positive numbers in ascending order
+      ...bymonthdayFromPos
+        .filter(([, p]) => p > 0)
+        .sort(([, a], [, b]) => a - b)
+        .map(([date]) => date),
+    ];
+    const negPositions = [
+      // then negative numbers in descending order]
+      ...bymonthdayFromPos
+        .filter(([, p]) => p < 0)
+        .sort(([, a], [, b]) => a - b)
+        .map(([date]) => date),
+    ];
+    derivedBymonthday = [...posPositions, ...negPositions];
   }
 
   return derivedBymonthday.flatMap((date) => {
