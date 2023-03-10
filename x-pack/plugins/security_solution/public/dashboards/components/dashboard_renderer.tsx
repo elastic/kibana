@@ -6,16 +6,19 @@
  */
 import React, { useCallback } from 'react';
 import { useParams } from 'react-router-dom';
+import type { DashboardContainer } from '@kbn/dashboard-plugin/public';
 import { LazyDashboardContainerRenderer } from '@kbn/dashboard-plugin/public';
 
 const DashboardRendererComponent = ({
   from,
   to,
   canReadDashboard,
+  onDashboardContainerLoaded,
 }: {
   from: string;
   to: string;
   canReadDashboard: boolean;
+  onDashboardContainerLoaded?: (dashboardContainer: DashboardContainer) => void;
 }) => {
   const { detailName } = useParams<{ detailName?: string }>();
   const getCreationOptions = useCallback(
@@ -26,6 +29,7 @@ const DashboardRendererComponent = ({
     <LazyDashboardContainerRenderer
       savedObjectId={detailName}
       getCreationOptions={getCreationOptions}
+      onDashboardContainerLoaded={onDashboardContainerLoaded}
     />
   ) : null;
 };

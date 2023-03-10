@@ -27,11 +27,11 @@ export const getDashboardBreadcrumbs = (
     },
   ];
 
-  if (params.detailName != null) {
+  if (params?.state?.dashboardTitle || params.detailName) {
     breadcrumb = [
       ...breadcrumb,
       {
-        text: params.detailName,
+        text: params?.state?.dashboardTitle ?? params.detailName,
       },
     ];
   }
