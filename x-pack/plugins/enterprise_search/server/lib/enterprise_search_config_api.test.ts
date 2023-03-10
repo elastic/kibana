@@ -207,6 +207,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
 
   it('returns access & features if config.host is not set', async () => {
     const config = {
+      hasConnectors: false,
       hasDefaultIngestPipeline: false,
       hasNativeConnectors: false,
       hasSearchApplications: false,
@@ -221,6 +222,7 @@ describe('callEnterpriseSearchConfigAPI', () => {
         hasWorkplaceSearchAccess: false,
       },
       features: {
+        hasConnectors: false,
         hasDefaultIngestPipeline: false,
         hasNativeConnectors: false,
         hasSearchApplications: false,

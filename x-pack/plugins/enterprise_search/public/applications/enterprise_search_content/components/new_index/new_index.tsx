@@ -131,7 +131,9 @@ const getAvailableMethodOptions = (productFeatures: ProductFeatures): ButtonGrou
       ? [METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.native_connector]]
       : []),
     METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.api],
-    METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.connector],
+    ...(productFeatures.hasConnectors
+      ? [METHOD_BUTTON_GROUP_OPTIONS[INGESTION_METHOD_IDS.connector]]
+      : []),
   ];
 };
 

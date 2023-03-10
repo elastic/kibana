@@ -52,6 +52,7 @@ export const callEnterpriseSearchConfigAPI = async ({
         hasWorkplaceSearchAccess: false,
       },
       features: {
+        hasConnectors: config.hasConnectors,
         hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
         hasNativeConnectors: config.hasNativeConnectors,
         hasSearchApplications: false, // TODO: update to read ES feature flag, or just refactor out
@@ -106,6 +107,7 @@ export const callEnterpriseSearchConfigAPI = async ({
         hasWorkplaceSearchAccess: !!data?.current_user?.access?.workplace_search,
       },
       features: {
+        hasConnectors: config.hasConnectors,
         hasDefaultIngestPipeline: config.hasDefaultIngestPipeline,
         hasNativeConnectors: config.hasNativeConnectors,
         hasSearchApplications: !!data?.current_user?.access?.search_engines,
