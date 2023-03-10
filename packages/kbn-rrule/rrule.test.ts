@@ -9,15 +9,9 @@ import sinon from 'sinon';
 import moment from 'moment-timezone';
 import { RRule, Frequency, Weekday } from './rrule';
 
-const DATE_9999 = '9999-12-31T12:34:56.789Z';
-const DATE_1970 = '1970-01-01T00:00:00.000Z';
 const DATE_2019 = '2019-01-01T00:00:00.000Z';
-const DATE_2019_PLUS_6_HOURS = '2019-01-01T06:00:00.000Z';
-const DATE_2019_IN_ASIA = '2018-12-31T16:00:00.000Z';
 const DATE_2020 = '2020-01-01T00:00:00.000Z';
-const DATE_2020_MINUS_1_HOUR = '2019-12-31T23:00:00.000Z';
 const DATE_2020_MINUS_1_MONTH = '2019-12-01T00:00:00.000Z';
-const DATE_2020_MINUS_6_HOURS = '2019-12-31T18:00:00.000Z';
 
 const NOW = DATE_2020;
 
