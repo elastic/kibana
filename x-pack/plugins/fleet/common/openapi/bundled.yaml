@@ -1021,6 +1021,35 @@ paths:
             type: boolean
       security:
         - basicAuth: []
+    post:
+      summary: List agents by action ids
+      tags:
+        - Agents
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/agent_get_by_actions'
+        '400':
+          $ref: '#/components/responses/error'
+      operationId: get-agents-by-actions
+      parameters:
+        - $ref: '#/components/parameters/kbn_xsrf'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                actionIds:
+                  type: array
+                  items:
+                    type: string
+              required:
+                - policy_id
   /agents/bulk_upgrade:
     post:
       summary: Bulk upgrade agents
@@ -3890,6 +3919,13 @@ components:
         - total
         - page
         - perPage
+    agent_get_by_actions:
+      title: Agents get by action ids
+      type: array
+      items:
+        type: array
+        items:
+          type: string
     bulk_upgrade_agents:
       title: Bulk upgrade agents
       type: object
