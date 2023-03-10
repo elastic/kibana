@@ -19,6 +19,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { isArray } from 'lodash/fp';
 import React from 'react';
 import type { RawBucket } from '@kbn/securitysolution-grouping';
+import { GenericBuckets } from '@kbn/securitysolution-grouping/src';
 import { PopoverItems } from './popover_items';
 import type { AlertsGroupingAggregation } from './types';
 export const getSelectedGroupButtonContent = (
@@ -35,11 +36,9 @@ export const getSelectedGroupButtonContent = (
         />
       ) : undefined;
     case 'kibana.alert.rule.category':
-      return <UserNameGroupContent userName={bucket.key} />;
+      return <AvatarGroupContent avatarName={bucket.key} />;
     case 'host.name':
       return <HostNameGroupContent hostName={bucket.key} />;
-    case 'kibana.alert.rule.category':
-      return <UserNameGroupContent userName={bucket.key} />;
     case 'agent.name':
       return <AgentNameGroupContent sourceIp={bucket.key} />;
   }
@@ -48,15 +47,13 @@ export const getSelectedGroupButtonContent = (
 const RuleNameGroupContent = React.memo<{
   ruleName: string;
   ruleDescription: string;
-  // TO DO: unkonwn is GenericBuckes
-  tags?: unknown[] | undefined;
+  tags?: GenericBuckets[] | undefined;
 }>(({ ruleName, ruleDescription, tags }) => {
   const renderItem = (tag: string, i: number) => (
     <EuiBadge color="hollow" key={`${tag}-${i}`} data-test-subj="tag">
       {tag}
     </EuiBadge>
   );
-  console.log({ euiThemeVars });
   return (
     <>
       <EuiFlexGroup data-test-subj="rule-name-group-renderer" gutterSize="m" alignItems="center">
@@ -114,23 +111,23 @@ const HostNameGroupContent = React.memo<{ hostName: string | string[] }>(({ host
 ));
 HostNameGroupContent.displayName = 'HostNameGroupContent';
 
-const UserNameGroupContent = React.memo<{ userName: string | string[] }>(({ userName }) => {
-  const userNameValue = isArray(userName) ? userName[0] : userName;
+const AvatarGroupContent = React.memo<{ avatarName: string | string[] }>(({ avatarName }) => {
+  const value = isArray(avatarName) ? avatarName[0] : avatarName;
   return (
-    <EuiFlexGroup data-test-subj="user-name-group-renderer" gutterSize="s" alignItems="center">
+    <EuiFlexGroup data-test-subj="avatar-group-renderer" gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiAvatar name={userNameValue} color={euiThemeVars.euiColorVis0} />
+        <EuiAvatar name={value} color={euiThemeVars.euiColorVis0} />
       </EuiFlexItem>
 
       <EuiFlexItem>
         <EuiTitle size="xs">
-          <h5>{userName}</h5>
+          <h5>{avatarName}</h5>
         </EuiTitle>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 });
-UserNameGroupContent.displayName = 'UserNameGroupContent';
+AvatarGroupContent.displayName = 'AvatarGroupContent';
 
 const AgentNameGroupContent = React.memo<{ sourceIp: string | string[] }>(({ sourceIp }) => (
   <EuiFlexGroup data-test-subj="agent-name-group-renderer" gutterSize="s" alignItems="center">
