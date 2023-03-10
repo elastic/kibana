@@ -102,7 +102,7 @@ export const EngineSearchPreview: React.FC = () => {
         search_fields: searchableFields,
       },
     };
-  }, [http, engineName, setLastAPICall]);
+  }, [http, engineName, setLastAPICall, resultFields, searchableFields]);
 
   if (!engineData) return null;
 
