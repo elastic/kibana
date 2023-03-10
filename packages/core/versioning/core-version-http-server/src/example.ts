@@ -28,7 +28,7 @@ const versionedRoute = versionedRouter
     {
       version: '1',
       validate: {
-        in: {
+        request: {
           query: schema.object({
             name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
           }),
@@ -37,7 +37,9 @@ const versionedRoute = versionedRouter
           }),
           body: schema.object({ foo: schema.string() }),
         },
-        out: schema.object({ foo: schema.string() }),
+        response: {
+          body: schema.object({ foo: schema.string() }),
+        },
       },
     },
     async (ctx, req, res) => {
@@ -50,7 +52,7 @@ const versionedRoute = versionedRouter
     {
       version: '2',
       validate: {
-        in: {
+        request: {
           query: schema.object({
             name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
           }),
@@ -59,7 +61,9 @@ const versionedRoute = versionedRouter
           }),
           body: schema.object({ fooString: schema.string() }),
         },
-        out: schema.object({ fooName: schema.string() }),
+        response: {
+          body: schema.object({ fooName: schema.string() }),
+        },
       },
     },
     async (ctx, req, res) => {
@@ -72,7 +76,7 @@ const versionedRoute = versionedRouter
     {
       version: '3',
       validate: {
-        in: {
+        request: {
           query: schema.object({
             name: schema.maybe(schema.string({ minLength: 2, maxLength: 50 })),
           }),
@@ -81,7 +85,9 @@ const versionedRoute = versionedRouter
           }),
           body: schema.object({ fooString: schema.string({ minLength: 0, maxLength: 1000 }) }),
         },
-        out: schema.object({ fooName: schema.string() }),
+        response: {
+          body: schema.object({ fooName: schema.string() }),
+        },
       },
     },
     async (ctx, req, res) => {

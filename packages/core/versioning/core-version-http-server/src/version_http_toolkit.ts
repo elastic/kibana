@@ -118,9 +118,11 @@ export type OutputValidation<R> = RouteValidationFunction<R> | Type<R>;
  */
 interface FullValidationConfig<P, Q, B, R> {
   /** Validation to run against route inputs: params, query and body */
-  in?: InputValidation<P, Q, B>;
+  request?: InputValidation<P, Q, B>;
   /** Validation to run against route output */
-  out?: OutputValidation<R>;
+  response?: {
+    body: OutputValidation<R>;
+  };
 }
 
 /**
