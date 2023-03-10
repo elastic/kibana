@@ -91,7 +91,7 @@ class FieldsService {
               id: k,
               name: k,
               type: field.type as ES_FIELD_TYPES,
-              aggregatable: field.time_series_metric !== 'counter' ?? field.aggregatable,
+              aggregatable: this.isFieldAggregatable(field),
               aggs: [],
             });
           }
@@ -99,6 +99,13 @@ class FieldsService {
       });
     }
     return fields.sort((a, b) => a.id.localeCompare(b.id));
+  }
+
+  // check to see whether the field is aggregatable
+  // If it is a counter field from a time series data stream, we cannot currently
+  // support any aggregations and so it cannot be used as a field_name in a detector.
+  private isFieldAggregatable(field: estypes.FieldCapsFieldCapability) {
+    return field.time_series_metric !== 'counter' ?? field.aggregatable;
   }
 
   // public function to load fields from _field_caps and create a list
