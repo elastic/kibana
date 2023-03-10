@@ -3,7 +3,7 @@ content:
   application/json:
     schema:
       type:  object
-      title: Unsuccessful rule API response
+      title: Unauthorized response
       properties:
         error:
           type: string

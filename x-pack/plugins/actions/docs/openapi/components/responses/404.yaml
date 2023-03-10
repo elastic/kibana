@@ -3,6 +3,7 @@ content:
   application/json:
     schema:
       type: object
+      title: Not found response
       properties:
         error:
           type: string

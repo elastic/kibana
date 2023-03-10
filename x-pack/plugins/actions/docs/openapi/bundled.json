@@ -4462,7 +4462,7 @@
           "application/json": {
             "schema": {
               "type": "object",
-              "title": "Unsuccessful rule API response",
+              "title": "Unauthorized response",
               "properties": {
                 "error": {
                   "type": "string",
@@ -4492,6 +4492,7 @@
           "application/json": {
             "schema": {
               "type": "object",
+              "title": "Not found response",
               "properties": {
                 "error": {
                   "type": "string",
