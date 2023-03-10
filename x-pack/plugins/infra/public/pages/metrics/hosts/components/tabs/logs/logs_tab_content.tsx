@@ -5,57 +5,33 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
-import useDebounce from 'react-use/lib/useDebounce';
-import { i18n } from '@kbn/i18n';
+import React, { useMemo } from 'react';
 import { Filter } from '@kbn/es-query';
-import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { SnapshotNode } from '../../../../../../../common/http_api';
 import { LogStream } from '../../../../../../components/log_stream';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state';
+import { LogsLinkToStream } from './logs_link_to_stream';
+import { LogsSearchBar } from './logs_search_bar';
 
 export const LogsTabContent = () => {
-  const [filterQuery, setFilterQuery] = useLogsSearchUrlState();
-  const [searchText, setSearchText] = useState(filterQuery.query);
-
+  const [filterQuery] = useLogsSearchUrlState();
   const { getDateRangeAsTimestamp } = useUnifiedSearchContext();
   const { from, to } = useMemo(() => getDateRangeAsTimestamp(), [getDateRangeAsTimestamp]);
   const { hostNodes } = useHostsViewContext();
 
-  const onQueryChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchText(e.target.value);
-  }, []);
-
   const hostsFilterQuery = useMemo(() => createHostsFilter(hostNodes), [hostNodes]);
-  const searchQuery = useMemo(() => {
-    return {
-      language: 'kuery',
-      query: filterQuery.query,
-    };
-  }, [filterQuery]);
-
-  useDebounce(() => setFilterQuery({ ...filterQuery, query: searchText }), debounceIntervalInMs, [
-    searchText,
-  ]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-logs">
       <EuiFlexGroup gutterSize={'m'} alignItems={'center'} responsive={false}>
         <EuiFlexItem>
-          <EuiFieldSearch
-            fullWidth
-            isClearable
-            placeholder={i18n.translate(
-              'xpack.infra.hostsViewPage.tabs.logs.textFieldPlaceholder',
-              {
-                defaultMessage: 'Search for log entries...',
-              }
-            )}
-            onChange={onQueryChange}
-            value={searchText}
-          />
+          <LogsSearchBar />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <LogsLinkToStream startTimestamp={from} endTimestamp={to} query={filterQuery.query} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem>
@@ -66,7 +42,7 @@ export const LogsTabContent = () => {
             startTimestamp={from}
             endTimestamp={to}
             filters={hostsFilterQuery}
-            query={searchQuery}
+            query={filterQuery}
           />
         ) : null}
       </EuiFlexItem>
@@ -86,5 +62,3 @@ const createHostsFilter = (hostNodes: SnapshotNode[]): Filter[] => {
 
   return [hostsFilter].filter(Boolean) as Filter[];
 };
-
-const debounceIntervalInMs = 1000;
