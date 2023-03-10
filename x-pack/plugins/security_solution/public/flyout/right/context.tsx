@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { RightPanelProps } from '.';
 
 export interface RightPanelContext {
@@ -29,10 +29,10 @@ export type RightPanelProviderProps = {
 } & Partial<RightPanelProps['params']>;
 
 export const RightPanelProvider = ({ id, indexName, children }: RightPanelProviderProps) => {
-  const contextValue = {
-    eventId: id as string,
-    indexName: indexName as string,
-  };
+  const contextValue = useMemo(
+    () => (id && indexName ? { eventId: id, indexName } : undefined),
+    [id, indexName]
+  );
 
   return <RightPanelContext.Provider value={contextValue}>{children}</RightPanelContext.Provider>;
 };
