@@ -52,7 +52,7 @@ export const FunctionHelpPopover: FC = memo(() => {
     },
     {
       id: 2,
-      function: 'distinct_count, high_distinc_count, low_distinct_count',
+      function: 'distinct_count, high_distinct_count, low_distinct_count',
       description: 'Detect anomalies where the number of distinct values in one field is unusual.',
     },
     {
