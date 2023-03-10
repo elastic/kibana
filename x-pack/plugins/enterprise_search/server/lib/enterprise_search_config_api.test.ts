@@ -205,10 +205,29 @@ describe('callEnterpriseSearchConfigAPI', () => {
     });
   });
 
-  it('returns early if config.host is not set', async () => {
-    const config = { host: '' };
+  it('returns access & features if config.host is not set', async () => {
+    const config = {
+      hasDefaultIngestPipeline: false,
+      hasNativeConnectors: false,
+      hasSearchApplications: false,
+      hasWebCrawler: false,
+      host: '',
+    };
 
-    expect(await callEnterpriseSearchConfigAPI({ ...mockDependencies, config })).toEqual({});
+    expect(await callEnterpriseSearchConfigAPI({ ...mockDependencies, config })).toEqual({
+      access: {
+        hasAppSearchAccess: false,
+        hasSearchEnginesAccess: false,
+        hasWorkplaceSearchAccess: false,
+      },
+      features: {
+        hasDefaultIngestPipeline: false,
+        hasNativeConnectors: false,
+        hasSearchApplications: false,
+        hasWebCrawler: false,
+      },
+      kibanaVersion: '1.0.0',
+    });
     expect(fetch).not.toHaveBeenCalled();
   });
 

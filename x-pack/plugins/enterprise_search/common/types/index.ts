@@ -38,6 +38,7 @@ export interface ProductAccess {
 }
 
 export interface ProductFeatures {
+  hasDefaultIngestPipeline: boolean;
   hasNativeConnectors: boolean;
   hasSearchApplications: boolean;
   hasWebCrawler: boolean;

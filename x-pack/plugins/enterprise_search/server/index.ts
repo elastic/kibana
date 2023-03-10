@@ -21,6 +21,7 @@ export const configSchema = schema.object({
   customHeaders: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   hasNativeConnectors: schema.boolean({ defaultValue: true }),
   hasWebCrawler: schema.boolean({ defaultValue: true }),
+  hasDefaultIngestPipeline: schema.boolean({ defaultValue: true }),
   host: schema.maybe(schema.string()),
   ssl: schema.object({
     certificateAuthorities: schema.maybe(

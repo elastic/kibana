@@ -13,6 +13,7 @@ import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { EuiSideNavItemType } from '@elastic/eui';
 
+import { DEFAULT_PRODUCT_FEATURES } from '../../../../common/constants';
 import { ProductAccess } from '../../../../common/types';
 
 import { useEnterpriseSearchNav, useEnterpriseSearchEngineNav } from './nav';
@@ -31,7 +32,7 @@ describe('useEnterpriseSearchContentNav', () => {
 
   it('returns an array of top-level Enterprise Search nav items', () => {
     const fullProductAccess: ProductAccess = DEFAULT_PRODUCT_ACCESS;
-    setMockValues({ productAccess: fullProductAccess });
+    setMockValues({ productAccess: fullProductAccess, productFeatures: DEFAULT_PRODUCT_FEATURES });
 
     expect(useEnterpriseSearchNav()).toEqual([
       {
@@ -103,7 +104,7 @@ describe('useEnterpriseSearchContentNav', () => {
       hasWorkplaceSearchAccess: false,
     };
 
-    setMockValues({ productAccess: noProductAccess });
+    setMockValues({ productAccess: noProductAccess, productFeatures: DEFAULT_PRODUCT_FEATURES });
     mockKibanaValues.uiSettings.get.mockReturnValue(false);
 
     const esNav = useEnterpriseSearchNav();
@@ -134,7 +135,10 @@ describe('useEnterpriseSearchContentNav', () => {
       hasWorkplaceSearchAccess: true,
     };
 
-    setMockValues({ productAccess: workplaceSearchProductAccess });
+    setMockValues({
+      productAccess: workplaceSearchProductAccess,
+      productFeatures: DEFAULT_PRODUCT_FEATURES,
+    });
 
     const esNav = useEnterpriseSearchNav();
     const searchNav = esNav?.find((item) => item.id === 'search');
@@ -168,7 +172,10 @@ describe('useEnterpriseSearchContentNav', () => {
       hasWorkplaceSearchAccess: false,
     };
 
-    setMockValues({ productAccess: appSearchProductAccess });
+    setMockValues({
+      productAccess: appSearchProductAccess,
+      productFeatures: DEFAULT_PRODUCT_FEATURES,
+    });
 
     const esNav = useEnterpriseSearchNav();
     const searchNav = esNav?.find((item) => item.id === 'search');
@@ -198,7 +205,7 @@ describe('useEnterpriseSearchContentNav', () => {
 
   it('excludes engines when feature flag is off', () => {
     const fullProductAccess: ProductAccess = DEFAULT_PRODUCT_ACCESS;
-    setMockValues({ productAccess: fullProductAccess });
+    setMockValues({ productAccess: fullProductAccess, productFeatures: DEFAULT_PRODUCT_FEATURES });
 
     const esNav = useEnterpriseSearchNav();
     expect(esNav?.find((item) => item.id === 'enginesSearch')).toBeUndefined();
@@ -215,7 +222,7 @@ describe('useEnterpriseSearchContentNav Engines feature flag', () => {
       ...DEFAULT_PRODUCT_ACCESS,
       hasSearchEnginesAccess: true,
     };
-    setMockValues({ productAccess: fullProductAccess });
+    setMockValues({ productAccess: fullProductAccess, productFeatures: DEFAULT_PRODUCT_FEATURES });
 
     expect(useEnterpriseSearchNav()).toEqual([
       {
@@ -298,7 +305,7 @@ describe('useEnterpriseSearchContentNav Engines feature flag', () => {
       hasSearchEnginesAccess: true,
       hasWorkplaceSearchAccess: false,
     };
-    setMockValues({ productAccess: fullProductAccess });
+    setMockValues({ productAccess: fullProductAccess, productFeatures: DEFAULT_PRODUCT_FEATURES });
 
     const esNav = useEnterpriseSearchNav();
     expect(esNav?.find((item) => item.id === 'standaloneExperiences')).toBeUndefined();
@@ -309,7 +316,7 @@ describe('useEnterpriseSearchContentNav Engines feature flag', () => {
       hasAppSearchAccess: false,
       hasSearchEnginesAccess: true,
     };
-    setMockValues({ productAccess: fullProductAccess });
+    setMockValues({ productAccess: fullProductAccess, productFeatures: DEFAULT_PRODUCT_FEATURES });
 
     const esNav = useEnterpriseSearchNav();
     const standAloneNav = esNav?.find((item) => item.id === 'standaloneExperiences');
@@ -333,7 +340,7 @@ describe('useEnterpriseSearchContentNav Engines feature flag', () => {
       hasSearchEnginesAccess: true,
       hasWorkplaceSearchAccess: false,
     };
-    setMockValues({ productAccess: fullProductAccess });
+    setMockValues({ productAccess: fullProductAccess, productFeatures: DEFAULT_PRODUCT_FEATURES });
 
     const esNav = useEnterpriseSearchNav();
     const standAloneNav = esNav?.find((item) => item.id === 'standaloneExperiences');
@@ -360,7 +367,7 @@ describe('useEnterpriseSearchEngineNav', () => {
       ...DEFAULT_PRODUCT_ACCESS,
       hasSearchEnginesAccess: true,
     };
-    setMockValues({ productAccess: fullProductAccess });
+    setMockValues({ productAccess: fullProductAccess, productFeatures: DEFAULT_PRODUCT_FEATURES });
   });
 
   it('returns an array of top-level Enterprise Search nav items', () => {
