@@ -247,6 +247,10 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
     (updatedSelector: Selector, index: number) => {
       const old = selectors[index];
 
+      if (updatedSelector.hasErrors === false) {
+        delete updatedSelector.hasErrors;
+      }
+
       const updatedSelectors: Selector[] = [...selectors];
       let updatedResponses: Response[] = [...responses];
 
@@ -280,7 +284,6 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   const onResponseChange = useCallback(
     (updatedResponse: Response, index: number) => {
       const updatedResponses: Response[] = [...responses];
-
       updatedResponses[index] = updatedResponse;
       onUpdateYaml(selectors, updatedResponses);
     },

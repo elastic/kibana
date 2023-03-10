@@ -79,7 +79,11 @@ export const ControlGeneralViewResponse = ({
   const onChangeMatches = useCallback(
     (options) => {
       response.match = options.map((option: EuiComboBoxOptionOption) => option.value);
-      response.hasErrors = response.match.length === 0;
+      if (response.match.length === 0) {
+        response.hasErrors = true;
+      } else {
+        delete response.hasErrors; // keeps it out of the yaml.
+      }
 
       onChange(response, index);
     },
