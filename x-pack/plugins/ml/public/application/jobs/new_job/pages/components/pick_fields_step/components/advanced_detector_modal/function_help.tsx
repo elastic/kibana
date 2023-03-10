@@ -20,7 +20,9 @@ import {
 import { useMlKibana } from '../../../../../../../contexts/kibana';
 
 export const FunctionHelpPopover: FC = memo(() => {
-  const { services: { docLinks } } = useMlKibana();
+  const {
+    services: { docLinks },
+  } = useMlKibana();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
