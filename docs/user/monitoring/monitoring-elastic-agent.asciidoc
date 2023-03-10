@@ -31,7 +31,7 @@ deploy it to the host where {kib} is running.
 
 . Go to the {kib} home page and click **Add integrations**.
 +
-NOTE: If you're using a monitoring cluster, use the {kib} instances connected to
+NOTE: If you're using a monitoring cluster, use the {kib} instance connected to
 the monitoring cluster.
 
 . In the query bar, search for and select the **Kibana** integration for
