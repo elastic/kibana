@@ -130,7 +130,14 @@ export const generalSettings: RawSettingDefinition[] = [
           'If set to `true`, the agent will capture HTTP request and response headers (including cookies), as well as message headers/properties when using messaging frameworks (like Kafka).\n\nNOTE: Setting this to `false` reduces network bandwidth, disk space and object allocations.',
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php', 'android/java', 'iOS/swift'],
+    excludeAgents: [
+      'js-base',
+      'rum-js',
+      'nodejs',
+      'php',
+      'android/java',
+      'iOS/swift',
+    ],
   },
 
   {
@@ -426,7 +433,14 @@ export const generalSettings: RawSettingDefinition[] = [
           '(Deprecated, use `span_stack_trace_min_duration` instead!) In its default settings, the APM agent will collect a stack trace with every recorded span.\nWhile this is very helpful to find the exact place in your code that causes the span, collecting this stack trace does have some overhead. \nWhen setting this option to a negative value, like `-1ms`, stack traces will be collected for all spans. Setting it to a positive value, e.g. `5ms`, will limit stack trace collection to spans with durations equal to or longer than the given value, e.g. 5 milliseconds.\n\nTo disable stack trace collection for spans completely, set the value to `0ms`.',
       }
     ),
-    excludeAgents: ['js-base', 'rum-js', 'nodejs', 'php', 'android/java', 'iOS/swift'],
+    excludeAgents: [
+      'js-base',
+      'rum-js',
+      'nodejs',
+      'php',
+      'android/java',
+      'iOS/swift',
+    ],
   },
 
   {
