@@ -131,8 +131,6 @@ export function validateSetting(setting: SettingDefinition, value: unknown) {
 }
 
 export const settingDefinitions: SettingDefinition[] = sortBy(
-  [...generalSettings, ...javaSettings].map(
-    getSettingDefaults
-  ),
+  [...generalSettings, ...javaSettings].map(getSettingDefaults),
   'key'
 );
