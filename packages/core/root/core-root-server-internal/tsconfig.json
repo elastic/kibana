@@ -68,6 +68,7 @@
     "@kbn/core-custom-branding-server-internal",
     "@kbn/core-custom-branding-server-mocks",
     "@kbn/repo-packages",
+    "@kbn/core-node-server",
   ],
   "exclude": [
     "target/**/*",
