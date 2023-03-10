@@ -13,5 +13,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./beats'));
     loadTestFile(require.resolve('./elasticsearch'));
     loadTestFile(require.resolve('./enterprisesearch'));
+    loadTestFile(require.resolve('./logstash'));
   });
 }

@@ -113,12 +113,13 @@ export function alertTests({ getService }: FtrProviderContext, space: Space) {
           updatedBy: null,
           actions: response.body.actions.map((action: any) => {
             /* eslint-disable @typescript-eslint/naming-convention */
-            const { connector_type_id, group, id, params } = action;
+            const { connector_type_id, group, id, params, uuid } = action;
             return {
               actionTypeId: connector_type_id,
               group,
               id,
               params,
+              uuid,
             };
           }),
           producer: 'alertsFixture',

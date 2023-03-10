@@ -51,6 +51,8 @@ export function defineCypressConfig(options?: Cypress.ConfigOptions<any>) {
 
             on(event, task);
           }, config);
+
+          return config;
         }
       },
     },

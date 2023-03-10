@@ -16,18 +16,18 @@ import type { Logger } from '@kbn/logging';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { streamFactory } from '@kbn/aiops-utils';
 import type {
-  ChangePoint,
-  ChangePointGroup,
+  SignificantTerm,
+  SignificantTermGroup,
   NumericChartData,
   NumericHistogramField,
 } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 
 import {
-  addChangePointsAction,
-  addChangePointsGroupAction,
-  addChangePointsGroupHistogramAction,
-  addChangePointsHistogramAction,
+  addSignificantTermsAction,
+  addSignificantTermsGroupAction,
+  addSignificantTermsGroupHistogramAction,
+  addSignificantTermsHistogramAction,
   aiopsExplainLogRateSpikesSchema,
   addErrorAction,
   pingAction,
@@ -42,12 +42,12 @@ import { isRequestAbortedError } from '../lib/is_request_aborted_error';
 import type { AiopsLicense } from '../types';
 
 import { duplicateIdentifier } from './queries/duplicate_identifier';
-import { fetchChangePointPValues } from './queries/fetch_change_point_p_values';
+import { fetchSignificantTermPValues } from './queries/fetch_significant_term_p_values';
 import { fetchIndexInfo } from './queries/fetch_index_info';
 import { dropDuplicates, fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
 import { getHistogramQuery } from './queries/get_histogram_query';
 import { getGroupFilter } from './queries/get_group_filter';
-import { getChangePointGroups } from './queries/get_change_point_groups';
+import { getSignificantTermGroups } from './queries/get_significant_term_groups';
 
 // 10s ping frequency to keep the stream alive.
 const PING_FREQUENCY = 10000;
@@ -251,8 +251,8 @@ export const defineExplainLogRateSpikesRoute = (
 
           // Step 2: Significant Terms
 
-          const changePoints: ChangePoint[] = request.body.overrides?.changePoints
-            ? request.body.overrides?.changePoints
+          const significantTerms: SignificantTerm[] = request.body.overrides?.significantTerms
+            ? request.body.overrides?.significantTerms
             : [];
           const fieldsToSample = new Set<string>();
 
@@ -280,10 +280,10 @@ export const defineExplainLogRateSpikesRoute = (
           const pValuesQueue = queue(async function (fieldCandidate: string) {
             loaded += (1 / fieldCandidatesCount) * loadingStepSizePValues;
 
-            let pValues: Awaited<ReturnType<typeof fetchChangePointPValues>>;
+            let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
 
             try {
-              pValues = await fetchChangePointPValues(
+              pValues = await fetchSignificantTermPValues(
                 client,
                 request.body,
                 [fieldCandidate],
@@ -308,9 +308,9 @@ export const defineExplainLogRateSpikesRoute = (
               pValues.forEach((d) => {
                 fieldsToSample.add(d.fieldName);
               });
-              changePoints.push(...pValues);
+              significantTerms.push(...pValues);
 
-              push(addChangePointsAction(pValues));
+              push(addSignificantTermsAction(pValues));
             }
 
             push(
@@ -323,7 +323,7 @@ export const defineExplainLogRateSpikesRoute = (
                     defaultMessage:
                       'Identified {fieldValuePairsCount, plural, one {# significant field/value pair} other {# significant field/value pairs}}.',
                     values: {
-                      fieldValuePairsCount: changePoints.length,
+                      fieldValuePairsCount: significantTerms.length,
                     },
                   }
                 ),
@@ -346,8 +346,8 @@ export const defineExplainLogRateSpikesRoute = (
           });
           await pValuesQueue.drain();
 
-          if (changePoints.length === 0) {
-            logDebugMessage('Stopping analysis, did not find change points.');
+          if (significantTerms.length === 0) {
+            logDebugMessage('Stopping analysis, did not find significant terms.');
             endWithUpdatedLoadingState();
             return;
           }
@@ -423,15 +423,18 @@ export const defineExplainLogRateSpikesRoute = (
               })
             );
 
-            // Deduplicated change points we pass to the `frequent_item_sets` aggregation.
-            const deduplicatedChangePoints = dropDuplicates(changePoints, duplicateIdentifier);
+            // Deduplicated significant terms we pass to the `frequent_item_sets` aggregation.
+            const deduplicatedSignificantTerms = dropDuplicates(
+              significantTerms,
+              duplicateIdentifier
+            );
 
             try {
               const { fields, df } = await fetchFrequentItemSets(
                 client,
                 request.body.index,
                 JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
-                deduplicatedChangePoints,
+                deduplicatedSignificantTerms,
                 request.body.timeFieldName,
                 request.body.deviationMin,
                 request.body.deviationMax,
@@ -448,14 +451,18 @@ export const defineExplainLogRateSpikesRoute = (
               }
 
               if (fields.length > 0 && df.length > 0) {
-                const changePointGroups = getChangePointGroups(df, changePoints, fields);
+                const significantTermGroups = getSignificantTermGroups(
+                  df,
+                  significantTerms,
+                  fields
+                );
 
                 // We'll find out if there's at least one group with at least two items,
                 // only then will we return the groups to the clients and make the grouping option available.
-                const maxItems = Math.max(...changePointGroups.map((g) => g.group.length));
+                const maxItems = Math.max(...significantTermGroups.map((g) => g.group.length));
 
                 if (maxItems > 1) {
-                  push(addChangePointsGroupAction(changePointGroups));
+                  push(addSignificantTermsGroupAction(significantTermGroups));
                 }
 
                 loaded += PROGRESS_STEP_GROUPING;
@@ -468,9 +475,9 @@ export const defineExplainLogRateSpikesRoute = (
                   return;
                 }
 
-                logDebugMessage(`Fetch ${changePointGroups.length} group histograms.`);
+                logDebugMessage(`Fetch ${significantTermGroups.length} group histograms.`);
 
-                const groupHistogramQueue = queue(async function (cpg: ChangePointGroup) {
+                const groupHistogramQueue = queue(async function (cpg: SignificantTermGroup) {
                   if (shouldStop) {
                     logDebugMessage('shouldStop abort fetching group histograms.');
                     groupHistogramQueue.kill();
@@ -526,13 +533,13 @@ export const defineExplainLogRateSpikesRoute = (
                         return {
                           key: o.key,
                           key_as_string: o.key_as_string ?? '',
-                          doc_count_change_point: current.doc_count,
+                          doc_count_significant_term: current.doc_count,
                           doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
                         };
                       }) ?? [];
 
                     push(
-                      addChangePointsGroupHistogramAction([
+                      addSignificantTermsGroupHistogramAction([
                         {
                           id: cpg.id,
                           histogram,
@@ -542,7 +549,7 @@ export const defineExplainLogRateSpikesRoute = (
                   }
                 }, MAX_CONCURRENT_QUERIES);
 
-                groupHistogramQueue.push(changePointGroups);
+                groupHistogramQueue.push(significantTermGroups);
                 await groupHistogramQueue.drain();
               }
             } catch (e) {
@@ -557,11 +564,11 @@ export const defineExplainLogRateSpikesRoute = (
 
           loaded += PROGRESS_STEP_HISTOGRAMS_GROUPS;
 
-          logDebugMessage(`Fetch ${changePoints.length} field/value histograms.`);
+          logDebugMessage(`Fetch ${significantTerms.length} field/value histograms.`);
 
           // time series filtered by fields
-          if (changePoints.length > 0 && overallTimeSeries !== undefined) {
-            const fieldValueHistogramQueue = queue(async function (cp: ChangePoint) {
+          if (significantTerms.length > 0 && overallTimeSeries !== undefined) {
+            const fieldValueHistogramQueue = queue(async function (cp: SignificantTerm) {
               if (shouldStop) {
                 logDebugMessage('shouldStop abort fetching field/value histograms.');
                 fieldValueHistogramQueue.kill();
@@ -623,17 +630,17 @@ export const defineExplainLogRateSpikesRoute = (
                     return {
                       key: o.key,
                       key_as_string: o.key_as_string ?? '',
-                      doc_count_change_point: current.doc_count,
+                      doc_count_significant_term: current.doc_count,
                       doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
                     };
                   }) ?? [];
 
                 const { fieldName, fieldValue } = cp;
 
-                loaded += (1 / changePoints.length) * PROGRESS_STEP_HISTOGRAMS;
+                loaded += (1 / significantTerms.length) * PROGRESS_STEP_HISTOGRAMS;
                 pushHistogramDataLoadingState();
                 push(
-                  addChangePointsHistogramAction([
+                  addSignificantTermsHistogramAction([
                     {
                       fieldName,
                       fieldValue,
@@ -644,7 +651,7 @@ export const defineExplainLogRateSpikesRoute = (
               }
             }, MAX_CONCURRENT_QUERIES);
 
-            fieldValueHistogramQueue.push(changePoints);
+            fieldValueHistogramQueue.push(significantTerms);
             await fieldValueHistogramQueue.drain();
           }
 

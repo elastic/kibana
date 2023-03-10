@@ -61,7 +61,7 @@ describe('Pagination', () => {
       const builder = PaginationBuilder.createBuilder(100);
       expect(builder.buildQueryFields('a', 'desc').sort).toStrictEqual([
         { '@timestamp': 'desc' },
-        { a: 'asc' },
+        { a: { order: 'asc', unmapped_type: 'long' } },
       ]);
     });
   });

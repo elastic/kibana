@@ -24,7 +24,13 @@ import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_key
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { getMappedParams } from '../common/mapped_params_utils';
 import { NormalizedAlertAction, RulesClientContext } from '../types';
-import { validateActions, extractReferences, updateMeta, getPartialRuleFromRaw } from '../lib';
+import {
+  validateActions,
+  extractReferences,
+  updateMeta,
+  getPartialRuleFromRaw,
+  addUuid,
+} from '../lib';
 import { generateAPIKeyName, apiKeyAsAlertAttributes } from '../common';
 
 export interface UpdateOptions<Params extends RuleTypeParams> {
@@ -143,9 +149,11 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
 async function updateAlert<Params extends RuleTypeParams>(
   context: RulesClientContext,
-  { id, data, allowMissingConnectorSecrets }: UpdateOptions<Params>,
+  { id, data: initialData, allowMissingConnectorSecrets }: UpdateOptions<Params>,
   { attributes, version }: SavedObject<RawRule>
 ): Promise<PartialRule<Params>> {
+  const data = { ...initialData, actions: addUuid(initialData.actions) };
+
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId);
 
   // TODO https://github.com/elastic/kibana/issues/148414

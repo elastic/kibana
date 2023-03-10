@@ -5,49 +5,44 @@
  * 2.0.
  */
 
-import { TelemetryCollectionManagerPlugin } from '@kbn/telemetry-collection-manager-plugin/server/plugin';
+import { UsageStatsPayload } from '@kbn/telemetry-collection-manager-plugin/server';
 import { FtrProviderContext } from '../ftr_provider_context';
+
+export interface UsageStatsPayloadTestFriendly extends UsageStatsPayload {
+  // Overwriting the `object` type to a more test-friendly type
+  stack_stats: Record<string, any>;
+}
 
 export function UsageAPIProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
-  const supertestNoAuth = getService('supertestWithoutAuth');
+
+  async function getTelemetryStats(payload: {
+    unencrypted: true;
+    refreshCache?: boolean;
+  }): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly }>>;
+  async function getTelemetryStats(payload: {
+    unencrypted: false;
+    refreshCache?: boolean;
+  }): Promise<Array<{ clusterUuid: string; stats: string }>>;
+  async function getTelemetryStats(payload: {
+    unencrypted?: boolean;
+    refreshCache?: boolean;
+  }): Promise<Array<{ clusterUuid: string; stats: UsageStatsPayloadTestFriendly | string }>> {
+    const { body } = await supertest
+      .post('/api/telemetry/v2/clusters/_stats')
+      .set('kbn-xsrf', 'xxx')
+      .send({ refreshCache: true, ...payload })
+      .expect(200);
+    return body;
+  }
 
   return {
-    async getUsageStatsNoAuth(): Promise<undefined> {
-      const { body } = await supertestNoAuth
-        .get('/api/stats?extended=true')
-        .set('kbn-xsrf', 'xxx')
-        .expect(401);
-      return body.usage;
-    },
-
-    /**
-     * Public stats API: it returns the usage in camelCase format
-     */
-    async getUsageStats() {
-      const { body } = await supertest
-        .get('/api/stats?extended=true')
-        .set('kbn-xsrf', 'xxx')
-        .expect(200);
-      return body.usage;
-    },
-
     /**
      * Retrieve the stats via the private telemetry API:
      * It returns the usage in as a string encrypted blob or the plain payload if `unencrypted: false`
      *
      * @param payload Request parameters to retrieve the telemetry stats
      */
-    async getTelemetryStats(payload: {
-      unencrypted?: boolean;
-      refreshCache?: boolean;
-    }): Promise<ReturnType<TelemetryCollectionManagerPlugin['getStats']>> {
-      const { body } = await supertest
-        .post('/api/telemetry/v2/clusters/_stats')
-        .set('kbn-xsrf', 'xxx')
-        .send({ refreshCache: true, ...payload })
-        .expect(200);
-      return body;
-    },
+    getTelemetryStats,
   };
 }

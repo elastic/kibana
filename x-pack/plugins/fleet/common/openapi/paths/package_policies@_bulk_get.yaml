@@ -1,6 +1,7 @@
 post:
-  summary: Package policies - Bulk Get
-  tags: []
+  summary: Bulk get package policies
+  tags:
+    - Package policies
   requestBody:
     content:
       application/json:
@@ -30,6 +31,8 @@ post:
                   $ref: ../components/schemas/package_policy.yaml
             required:
               - items
+    '400':
+      $ref: ../components/responses/error.yaml
   operationId: bulk-get-package-policies
   security: []
   parameters: []

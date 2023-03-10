@@ -779,6 +779,11 @@ module.exports = {
             message: 'Please use @kbn/safer-lodash-set/fp/assocPath instead',
           },
           {
+            name: 'lodash/fp/template',
+            message:
+              'lodash.template is unsafe, and not compatible with our content security policy.',
+          },
+          {
             name: 'lodash/template',
             message:
               'lodash.template is unsafe, and not compatible with our content security policy.',

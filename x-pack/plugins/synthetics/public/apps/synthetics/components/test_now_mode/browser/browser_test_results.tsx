@@ -170,11 +170,11 @@ function getButtonContent({
   );
 }
 
-const FAILED_TO_RUN = i18n.translate('xpack.synthetics.monitorManagement.failedRun', {
+export const FAILED_TO_RUN = i18n.translate('xpack.synthetics.monitorManagement.failedRun', {
   defaultMessage: 'Failed to run steps',
 });
 
-const ERROR_RUNNING_TEST = i18n.translate('xpack.synthetics.testRun.runErrorLabel', {
+export const ERROR_RUNNING_TEST = i18n.translate('xpack.synthetics.testRun.runErrorLabel', {
   defaultMessage: 'Error running test',
 });
 

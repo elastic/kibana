@@ -57,5 +57,27 @@ describe('InvestigateInResolverAction', () => {
 
       expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
     });
+
+    it('returns true for process event from sysmon via filebeat', () => {
+      const data: Ecs = {
+        _id: '1',
+        agent: { type: ['filebeat'] },
+        event: { dataset: ['windows.sysmon_operational'] },
+        process: { entity_id: ['always_unique'] },
+      };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeTruthy();
+    });
+
+    it('returns false for process event from filebeat but not from sysmon', () => {
+      const data: Ecs = {
+        _id: '1',
+        agent: { type: ['filebeat'] },
+        event: { dataset: ['windows.not_sysmon'] },
+        process: { entity_id: ['always_unique'] },
+      };
+
+      expect(isInvestigateInResolverActionEnabled(data)).toBeFalsy();
+    });
   });
 });

@@ -13,6 +13,7 @@ jest.mock('../../hooks', () => {
   return {
     ...jest.requireActual('../../hooks'),
     useFleetStatus: jest.fn(),
+    useFleetServerStandalone: jest.fn(),
     useAgentEnrollmentFlyoutData: jest.fn(),
   };
 });

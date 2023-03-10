@@ -9,7 +9,8 @@
 import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
 import { ContentManagementPlugin } from './plugin';
 import { IRouter } from '@kbn/core/server';
-import { ProcedureName, procedureNames } from '../common';
+import type { ProcedureName } from '../common';
+import { procedureNames } from '../common/rpc';
 
 jest.mock('./core', () => ({
   ...jest.requireActual('./core'),
