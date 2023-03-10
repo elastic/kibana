@@ -33,8 +33,7 @@ export const querySavedObjectType: SavedObjectsType = {
       title: { type: 'text' },
       description: { type: 'text' },
       query: {
-        dynamic: false,
-        properties: { language: { type: 'keyword' }, query: { type: 'keyword', index: false } }, // cannot remove, query.query is used in the UI & for validation on create
+        properties: { language: { type: 'keyword' }, query: { type: 'keyword', index: false } },
       },
       filters: {
         dynamic: false,

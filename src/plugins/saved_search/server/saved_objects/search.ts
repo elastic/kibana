@@ -33,6 +33,7 @@ export function getSavedSearchObjectType(
       },
     },
     mappings: {
+      dynamic: false,
       properties: {
         columns: { type: 'keyword', index: false, doc_values: false },
         description: { type: 'text' },
@@ -43,31 +44,33 @@ export function getSavedSearchObjectType(
         hideAggregatedPreview: { type: 'boolean', index: false, doc_values: false },
         hits: { type: 'integer', index: false, doc_values: false },
         kibanaSavedObjectMeta: {
+          dynamic: false,
           properties: {
+            // may need code changes
             searchSourceJSON: { type: 'text', index: false },
           },
         },
-        sort: { type: 'keyword', index: false, doc_values: false },
+        // sort: { type: 'keyword', index: false, doc_values: false },
         title: { type: 'text' },
         grid: { dynamic: false, properties: {} },
         version: { type: 'integer' },
         rowHeight: { type: 'text' },
-        timeRestore: { type: 'boolean', index: false, doc_values: false },
+        // timeRestore: { type: 'boolean', index: false, doc_values: false },
         timeRange: {
           dynamic: false,
           properties: {
-            from: { type: 'keyword', index: false, doc_values: false },
-            to: { type: 'keyword', index: false, doc_values: false },
+            // from: { type: 'keyword', index: false, doc_values: false },
+            // to: { type: 'keyword', index: false, doc_values: false },
           },
         },
         refreshInterval: {
           dynamic: false,
           properties: {
-            pause: { type: 'boolean', index: false, doc_values: false },
-            value: { type: 'integer', index: false, doc_values: false },
+            // pause: { type: 'boolean', index: false, doc_values: false },
+            // value: { type: 'integer', index: false, doc_values: false },
           },
         },
-        rowsPerPage: { type: 'integer', index: false, doc_values: false },
+        // rowsPerPage: { type: 'integer', index: false, doc_values: false },
         breakdownField: { type: 'text' },
       },
     },
