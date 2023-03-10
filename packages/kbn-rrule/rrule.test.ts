@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 import sinon from 'sinon';
-import moment from 'moment-timezone';
 import { RRule, Frequency, Weekday } from './rrule';
 
 const DATE_2019 = '2019-01-01T00:00:00.000Z';
