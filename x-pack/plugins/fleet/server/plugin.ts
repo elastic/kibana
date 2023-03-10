@@ -58,7 +58,11 @@ import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 
-import { MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, INTEGRATIONS_PLUGIN_ID } from '../common';
+import {
+  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+  INTEGRATIONS_PLUGIN_ID,
+  UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+} from '../common';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 import type { MessageSigningServiceInterface } from './services/security';
@@ -116,6 +120,10 @@ import { PackagePolicyServiceImpl } from './services/package_policy';
 import { registerFleetUsageLogger, startFleetUsageLogger } from './services/fleet_usage_logger';
 import { CheckDeletedFilesTask } from './tasks/check_deleted_files_task';
 import { getRequestStore } from './services/request_store';
+import {
+  UninstallTokenService,
+  type UninstallTokenServiceInterface,
+} from './services/security/uninstall_token_service';
 
 export interface FleetSetupDeps {
   security: SecurityPluginSetup;
@@ -160,6 +168,7 @@ export interface FleetAppContext {
   bulkActionsResolver: BulkActionsResolver;
   messageSigningService: MessageSigningServiceInterface;
   auditLogger?: AuditLogger;
+  uninstallTokenService: UninstallTokenServiceInterface;
 }
 
 export type FleetSetupContract = void;
@@ -209,6 +218,7 @@ export interface FleetStartContract {
   createArtifactsClient: (packageName: string) => FleetArtifactsClient;
 
   messageSigningService: MessageSigningServiceInterface;
+  uninstallTokenService: UninstallTokenServiceInterface;
 }
 
 export class FleetPlugin
@@ -441,6 +451,11 @@ export class FleetPlugin
         includedHiddenTypes: [MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE],
       })
     );
+    const uninstallTokenService = new UninstallTokenService(
+      plugins.encryptedSavedObjects.getClient({
+        includedHiddenTypes: [UNINSTALL_TOKENS_SAVED_OBJECT_TYPE],
+      })
+    );
 
     appContextService.start({
       elasticsearch: core.elasticsearch,
@@ -465,6 +480,7 @@ export class FleetPlugin
       telemetryEventsSender: this.telemetryEventsSender,
       bulkActionsResolver: this.bulkActionsResolver!,
       messageSigningService,
+      uninstallTokenService,
     });
     licenseService.start(plugins.licensing.license$);
 
@@ -552,6 +568,7 @@ export class FleetPlugin
         return new FleetArtifactsClient(core.elasticsearch.client.asInternalUser, packageName);
       },
       messageSigningService,
+      uninstallTokenService,
     };
   }
 

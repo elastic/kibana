@@ -13,7 +13,7 @@ const meta = getESAssetMetadata();
 
 export const FLEET_INSTALL_FORMAT_VERSION = '1.0.0';
 
-export const FLEET_AGENT_POLICIES_SCHEMA_VERSION = '1.1.0';
+export const FLEET_AGENT_POLICIES_SCHEMA_VERSION = '1.1.1';
 
 export const FLEET_FINAL_PIPELINE_ID = '.fleet_final_pipeline-1';
 
