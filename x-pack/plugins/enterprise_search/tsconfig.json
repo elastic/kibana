@@ -50,5 +50,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/core-http-browser",
+    "@kbn/enterprise-search-plugin",
   ]
 }
