@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
-import { EnterpriseSearchEngineDetails } from '../../../common/types/engines';
+import { AcknowledgeResponse } from '@kbn/core-saved-objects-migration-server-internal/src/actions';
+import { EnterpriseSearchEngineDetails, EnterpriseSearchEnginesResponse, EnterpriseSearchEngineUpsertResponse } from '../../../common/types/engines';
 import { ErrorCode } from '../../../common/types/error_codes';
-import { EnginesAPIResponse } from '../../../public/applications/app_search/components/engines/types';
 
 import { fetchEngineFieldCapabilities } from '../../lib/engines/field_capabilities';
 import { RouteDependencies } from '../../plugin';
@@ -19,7 +20,6 @@ import { fetchEnterpriseSearch, isResponseError } from '../../utils/fetch_enterp
 
 export function registerEnginesRoutes({
   config,
-  enterpriseSearchRequestHandler,
   log,
   router,
 }: RouteDependencies) {
@@ -36,11 +36,12 @@ export function registerEnginesRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engines = await client.asCurrentUser.transport.request<EnginesAPIResponse>({
-        method: 'GET',
-        path: `/_application/search_application/`,
-        body: {},
-      });
+      const engines =
+        await client.asCurrentUser.transport.request<EnterpriseSearchEnginesResponse>({
+          method: 'GET',
+          path: `/_application/search_application/`,
+          body: {},
+        });
       return response.ok({ body: engines });
     })
   );
@@ -56,11 +57,12 @@ export function registerEnginesRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engines = await client.asCurrentUser.transport.request<EngineAPIResponse>({
-        method: 'GET',
-        path: `/_application/search_application/${request.params.engine_name}`,
-        body: {},
-      });
+      const engines =
+        await client.asCurrentUser.transport.request<EnterpriseSearchEngineDetails>({
+          method: 'GET',
+          path: `/_application/search_application/${request.params.engine_name}`,
+          body: {},
+        });
       return response.ok({ body: engines });
     })
   );
@@ -80,11 +82,12 @@ export function registerEnginesRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engines = await client.asCurrentUser.transport.request<EnginesAPIResponse>({
-        method: 'PUT',
-        path: `/_application/search_application/${request.params.engine_name}`,
-        body: {},
-      });
+      const engines =
+        await client.asCurrentUser.transport.request<EnterpriseSearchEngineUpsertResponse>({
+          method: 'PUT',
+          path: `/_application/search_application/${request.params.engine_name}`,
+          body: {},
+        });
       return response.ok({ body: engines });
     })
   );
@@ -100,11 +103,12 @@ export function registerEnginesRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engines = await client.asCurrentUser.transport.request<EnginesAPIResponse>({
-        method: 'DELETE',
-        path: `/_application/search_application/${request.params.engine_name}`,
-        body: {},
-      });
+      const engines =
+        await client.asCurrentUser.transport.request<AcknowledgeResponse>({
+          method: 'DELETE',
+          path: `/_application/search_application/${request.params.engine_name}`,
+          body: {},
+        });
       return response.ok({ body: engines });
     })
   );
@@ -123,11 +127,12 @@ export function registerEnginesRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engines = await client.asCurrentUser.transport.request<EnginesAPIResponse>({
-        method: 'POST',
-        path: `/${request.params.engine_name}/_search/`,
-        body: {},
-      });
+      const engines =
+        await client.asCurrentUser.transport.request<SearchResponse>({
+          method: 'POST',
+          path: `/${request.params.engine_name}/_search/`,
+          body: {},
+        });
       return response.ok({ body: engines });
     })
   );
