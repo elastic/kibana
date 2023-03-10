@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 import React, { FC, ReactElement, useEffect, useState } from 'react';
+import classNames from 'classnames';
 
 import { IEmbeddable, panelHoverTrigger, PANEL_HOVER_TRIGGER } from '@kbn/embeddable-plugin/public';
-import classNames from 'classnames';
-import './floating_actions.scss';
+import { Action } from '@kbn/ui-actions-plugin/public';
+
 import { pluginServices } from '../../services';
+import './floating_actions.scss';
 
 export interface FloatingActionsProps {
   embeddable?: IEmbeddable;
@@ -42,19 +44,18 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         trigger: panelHoverTrigger,
       };
       const actions = (await getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context))
-        .filter((action) => disabledActions?.indexOf(action.id) === -1)
+        .filter((action): action is Action & { MenuItem: React.FC } => {
+          return action.MenuItem !== undefined && (disabledActions ?? []).indexOf(action.id) === -1;
+        })
         .sort((a, b) => (a.order || 0) - (b.order || 0));
-
       if (actions.length > 0) {
         setFloatingActions(
           <>
             {actions.map((action) =>
-              action.MenuItem && embeddable
-                ? React.createElement(action.MenuItem, {
-                    key: action.id,
-                    context,
-                  })
-                : undefined
+              React.createElement(action.MenuItem, {
+                key: action.id,
+                context,
+              })
             )}
           </>
         );

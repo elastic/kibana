@@ -181,8 +181,8 @@ export const ControlFrame = ({
         'controlFrameFloatingActions--twoLine': usingTwoLineLayout,
         'controlFrameFloatingActions--oneLine': !usingTwoLineLayout,
       })}
-      isEnabled={embeddable && enableActions}
       embeddable={embeddable}
+      isEnabled={embeddable && enableActions}
       disabledActions={disabledActions}
     >
       <EuiFormRow
