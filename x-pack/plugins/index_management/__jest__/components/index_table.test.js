@@ -58,6 +58,14 @@ for (let i = 0; i < 105; i++) {
   });
 }
 
+const urlServiceMock = {
+  locators: {
+    get: () => ({
+      navigate: async () => {},
+    }),
+  },
+};
+
 let component = null;
 
 // Resolve outstanding API requests. See https://www.benmvp.com/blog/asynchronous-testing-with-enzyme-react-jest/
@@ -159,6 +167,7 @@ describe('index table', () => {
         executionContext: executionContextServiceMock.createStartContract(),
       },
       plugins: {},
+      url: urlServiceMock,
     };
 
     component = (
