@@ -365,13 +365,13 @@ export class SavedObjectFinderUi extends React.Component<
 
     return (
       <EuiFlexGroup direction="column">
-        <EuiFlexItem>
-          {this.props.helpText ? (
+        {this.props.helpText ? (
+          <EuiFlexItem>
             <EuiText size="s" color="subdued">
               {this.props.helpText}
             </EuiText>
-          ) : undefined}
-        </EuiFlexItem>
+          </EuiFlexItem>
+        ) : undefined}
         <EuiFlexItem>
           <EuiInMemoryTable
             loading={this.state.isFetchingItems}
