@@ -9,10 +9,18 @@ import type { BucketItem } from '../../../../../common/search_strategy/security_
 export type AlertType = 'Detection' | 'Prevention';
 
 export interface AlertsByTypeAgg {
-  alertsByRule: {
+  alertsByType: {
     doc_count_error_upper_bound: number;
     sum_other_doc_count: number;
     buckets: RuleBucket[];
+  };
+}
+
+export interface AlertsByRuleAgg {
+  alertsByRule: {
+    doc_count_error_upper_bound: number;
+    sum_other_doc_count: number;
+    buckets: BucketItem[];
   };
 }
 

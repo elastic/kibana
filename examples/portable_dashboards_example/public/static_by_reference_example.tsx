@@ -35,11 +35,13 @@ export const StaticByReferenceExample = ({
       </EuiText>
       <EuiSpacer size="m" />
       <EuiPanel
+        className="eui-scrollBar"
         hasBorder={true}
-        // By specifying the height of the EuiPanel, we make it so that the dashboard height is
+        // By specifying the height + overflow of the EuiPanel, we make it so that the dashboard height is
         // constrained to the container - so, the dashboard is rendered with a vertical scrollbar
         css={css`
           height: 600px;
+          overflow-y: auto;
         `}
       >
         <DashboardRenderer

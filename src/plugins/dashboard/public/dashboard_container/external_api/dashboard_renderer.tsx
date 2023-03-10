@@ -18,9 +18,8 @@ import React, {
 } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import classNames from 'classnames';
-import { css } from '@emotion/react';
 
-import { EuiLoadingElastic, useEuiOverflowScroll, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 
 import {
   DashboardAPI,
@@ -126,10 +125,6 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
       { 'dashboardViewport--loading': loading }
     );
 
-    const viewportStyles = css`
-      ${useEuiOverflowScroll('y', false)}
-    `;
-
     const loadingSpinner = showPlainSpinner ? (
       <EuiLoadingSpinner size="xxl" />
     ) : (
@@ -137,7 +132,7 @@ export const DashboardRenderer = forwardRef<AwaitingDashboardAPI, DashboardRende
     );
 
     return (
-      <div className={viewportClasses} css={viewportStyles}>
+      <div className={viewportClasses}>
         {loading ? loadingSpinner : <div ref={dashboardRoot} />}
       </div>
     );
