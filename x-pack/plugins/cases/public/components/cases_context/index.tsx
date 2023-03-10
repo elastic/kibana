@@ -11,7 +11,7 @@ import { merge } from 'lodash';
 import React, { useCallback, useEffect, useState, useReducer } from 'react';
 import useDeepCompareEffect from 'react-use/lib/useDeepCompareEffect';
 
-import type { FilesStart } from '@kbn/files-plugin/public';
+import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
@@ -59,7 +59,7 @@ export interface CasesContextProps
   basePath?: string;
   features?: CasesFeatures;
   releasePhase?: ReleasePhase;
-  filesPlugin: FilesStart;
+  getFilesClient: (scope: string) => ScopedFilesClient;
 }
 
 export const CasesContext = React.createContext<CasesContextValue | undefined>(undefined);
@@ -79,7 +79,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
     basePath = DEFAULT_BASE_PATH,
     features = {},
     releasePhase = 'ga',
-    filesPlugin,
+    getFilesClient,
   },
 }) => {
   const { appId, appTitle } = useApplication();
@@ -133,9 +133,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
 
       if (owner[0] in CASES_FILE_KINDS) {
         return (
-          <FilesContext
-            client={filesPlugin.filesClientFactory.asScoped(CASES_FILE_KINDS[owner[0] as Owner].id)}
-          >
+          <FilesContext client={getFilesClient(CASES_FILE_KINDS[owner[0] as Owner].id)}>
             {contextChildren}
           </FilesContext>
         );
@@ -145,7 +143,7 @@ export const CasesProvider: React.FC<{ value: CasesContextProps }> = ({
         );
       }
     },
-    [filesPlugin.filesClientFactory, owner]
+    [getFilesClient, owner]
   );
 
   return isCasesContextValue(value) ? (

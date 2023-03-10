@@ -16,7 +16,7 @@ export type GetRecentCasesProps = Omit<
   GetRecentCasesPropsInternal,
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
-  | 'filesPlugin'
+  | 'getFilesClient'
 >;
 
 const RecentCasesLazy: React.FC<RecentCasesProps> = lazy(
@@ -25,7 +25,7 @@ const RecentCasesLazy: React.FC<RecentCasesProps> = lazy(
 export const getRecentCasesLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
-  filesPlugin,
+  getFilesClient,
   owner,
   permissions,
   maxCasesToShow,
@@ -34,7 +34,7 @@ export const getRecentCasesLazy = ({
     value={{
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
-      filesPlugin,
+      getFilesClient,
       owner,
       permissions,
     }}

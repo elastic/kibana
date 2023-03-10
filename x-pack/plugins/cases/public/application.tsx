@@ -18,7 +18,7 @@ import {
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
 
-import type { FilesStart } from '@kbn/files-plugin/public';
+import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 import type { ExternalReferenceAttachmentTypeRegistry } from './client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from './client/attachment_framework/persistable_state_registry';
 import type { RenderAppProps } from './types';
@@ -39,14 +39,14 @@ export const renderApp = (deps: RenderAppProps) => {
 interface CasesAppWithContextProps {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  filesPlugin: FilesStart;
+  getFilesClient: (scope: string) => ScopedFilesClient;
 }
 
 const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
   ({
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
-    filesPlugin,
+    getFilesClient,
   }) => {
     const [darkMode] = useUiSetting$<boolean>('theme:darkMode');
 
@@ -55,7 +55,7 @@ const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
         <CasesApp
           externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
           persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
-          filesPlugin={filesPlugin}
+          getFilesClient={getFilesClient}
         />
       </StyledComponentsThemeProvider>
     );
@@ -86,7 +86,7 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
                   deps.externalReferenceAttachmentTypeRegistry
                 }
                 persistableStateAttachmentTypeRegistry={deps.persistableStateAttachmentTypeRegistry}
-                filesPlugin={pluginsStart.files}
+                getFilesClient={pluginsStart.files.filesClientFactory.asScoped}
               />
             </Router>
           </KibanaContextProvider>

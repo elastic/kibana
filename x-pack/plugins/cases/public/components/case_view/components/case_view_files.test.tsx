@@ -41,7 +41,7 @@ describe('Case View Page files tab', () => {
     jest.clearAllMocks();
   });
 
-  it('should render the utility bar for the attachments table', async () => {
+  it('should render the utility bar for the files table', async () => {
     const result = appMockRender.render(<CaseViewFiles caseData={caseData} />);
 
     expect(await result.findByTestId('case-detail-upload-file')).toBeInTheDocument();
@@ -49,7 +49,7 @@ describe('Case View Page files tab', () => {
     expect(await result.findByTestId('case-detail-select-file-type')).toBeInTheDocument();
   });
 
-  it('should render the attachments table', async () => {
+  it('should render the files table', async () => {
     const result = appMockRender.render(<CaseViewFiles caseData={caseData} />);
 
     expect(await result.findByTestId('attachments-table')).toBeInTheDocument();

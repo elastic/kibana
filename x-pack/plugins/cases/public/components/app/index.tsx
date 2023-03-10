@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { FilesStart } from '@kbn/files-plugin/public';
+import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 
 import type { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment_framework/external_reference_registry';
 import type { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
@@ -23,13 +23,13 @@ export type CasesProps = CasesRoutesProps;
 interface CasesAppProps {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  filesPlugin: FilesStart;
+  getFilesClient: (scope: string) => ScopedFilesClient;
 }
 
 const CasesAppComponent: React.FC<CasesAppProps> = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
-  filesPlugin,
+  getFilesClient,
 }) => {
   const userCapabilities = useApplicationCapabilities();
 
@@ -38,7 +38,7 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
       {getCasesLazy({
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
-        filesPlugin,
+        getFilesClient,
         owner: [APP_OWNER],
         useFetchAlertData: () => [false, {}],
         permissions: userCapabilities.generalCases,

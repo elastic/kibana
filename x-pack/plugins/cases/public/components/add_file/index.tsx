@@ -21,6 +21,7 @@ import { FileUpload } from '@kbn/shared-ux-file-upload';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 
 import { APP_ID, CommentType, ExternalReferenceStorageType } from '../../../common';
+import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
 import { CASES_FILE_KINDS } from '../../files';
 import { useKibana } from '../../common/lib/kibana';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
@@ -31,8 +32,6 @@ interface AddFileProps {
   caseId: string;
   onFileAdded: () => void;
 }
-
-const FILE_ATTACHMENT_TYPE = '.files';
 
 const AddFileComponent: React.FC<AddFileProps> = ({ caseId, onFileAdded }) => {
   const { notifications } = useKibana().services;
@@ -80,8 +79,8 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId, onFileAdded }) => {
         });
 
         notifications.toasts.addSuccess({
-          title: 'File uploaded successfuly!',
-          text: `File Name: ${file.fileJSON.name}`,
+          title: i18n.SUCCESSFUL_UPLOAD,
+          text: i18n.SUCCESSFUL_UPLOAD_FILE_NAME(file.fileJSON.name),
         });
 
         // used to refresh the attachments table
@@ -101,7 +100,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId, onFileAdded }) => {
   const onError = useCallback(
     (error) => {
       notifications.toasts.addError(error, {
-        title: 'Failed to upload',
+        title: i18n.FAILED_UPLOAD,
       });
     },
     [notifications.toasts]
@@ -121,7 +120,7 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId, onFileAdded }) => {
       {isModalVisible && (
         <EuiModal onClose={closeModal}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>{'Add File'}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle>{i18n.ADD_FILE}</EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
             <FileUpload

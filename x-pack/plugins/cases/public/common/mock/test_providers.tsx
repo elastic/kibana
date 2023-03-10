@@ -14,7 +14,7 @@ import { ThemeProvider } from 'styled-components';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type { FilesStart } from '@kbn/files-plugin/public';
+import type { ScopedFilesClient } from '@kbn/files-plugin/public';
 
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -42,14 +42,14 @@ interface TestProviderProps {
   releasePhase?: ReleasePhase;
   externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry?: PersistableStateAttachmentTypeRegistry;
-  filesPlugin?: FilesStart;
+  getFilesClient?: (scope: string) => ScopedFilesClient;
   license?: ILicense;
 }
 type UiRender = (ui: React.ReactElement, options?: RenderOptions) => RenderResult;
 
 window.scrollTo = jest.fn();
 
-const mockFilesPlugin = { filesClientFactory: { asUnscoped: jest.fn(), asScoped: jest.fn() } };
+const mockGetFilesClient = jest.fn();
 
 /** A utility for wrapping children in the providers required to run most tests */
 const TestProvidersComponent: React.FC<TestProviderProps> = ({
@@ -60,7 +60,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
-  filesPlugin = mockFilesPlugin,
+  getFilesClient = mockGetFilesClient,
   license,
 }) => {
   const queryClient = new QueryClient({
@@ -91,7 +91,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
                   features,
                   owner,
                   permissions,
-                  filesPlugin,
+                  getFilesClient,
                 }}
               >
                 {children}
@@ -140,7 +140,7 @@ export const createAppMockRenderer = ({
   releasePhase = 'ga',
   externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry(),
   persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry(),
-  filesPlugin = mockFilesPlugin,
+  getFilesClient = mockGetFilesClient,
   license,
 }: Omit<TestProviderProps, 'children'> = {}): AppMockRenderer => {
   const services = createStartServicesMock({ license });
@@ -172,7 +172,7 @@ export const createAppMockRenderer = ({
                   owner,
                   permissions,
                   releasePhase,
-                  filesPlugin,
+                  getFilesClient,
                 }}
               >
                 {children}
