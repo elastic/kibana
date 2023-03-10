@@ -261,16 +261,11 @@ export class FieldRuleEditor extends Component<Props, {}> {
   ) => {
     const isNullValue = rowRuleValue === null;
 
-    const commonProps = {
-      'data-test-subj': `fieldRuleEditorValue-${valueIndex}`,
-    };
-
     switch (fieldType) {
       case 'boolean':
         return (
           <EuiSelect
-            data-test-subj="securitySelect"
-            {...commonProps}
+            data-test-subj={`fieldRuleEditorValue-${valueIndex}`}
             value={rowRuleValue?.toString()}
             onChange={this.onBooleanValueChange(valueIndex)}
             options={[
@@ -284,8 +279,7 @@ export class FieldRuleEditor extends Component<Props, {}> {
       case 'null':
         return (
           <EuiFieldText
-            data-test-subj="securityFieldText"
-            {...commonProps}
+            data-test-subj={`fieldRuleEditorValue-${valueIndex}`}
             value={isNullValue ? '-- null --' : (rowRuleValue as string)}
             onChange={this.onValueChange(valueIndex)}
             disabled={isNullValue || this.props.readOnly}
