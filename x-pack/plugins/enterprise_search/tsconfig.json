@@ -50,6 +50,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/core-http-browser",
-    "@kbn/enterprise-search-plugin",
+    "@kbn/core-saved-objects-migration-server-internal",
   ]
 }
