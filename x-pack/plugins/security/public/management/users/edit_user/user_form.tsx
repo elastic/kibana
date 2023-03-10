@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   EuiTextColor,
 } from '@elastic/eui';
-import { throttle } from 'lodash';
+import { isEqual, throttle } from 'lodash';
 import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect } from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -217,6 +217,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
     getRoles();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const isFormUnchanged = isEqual(form.values, defaultValues);
   const availableRoles = rolesState.value ?? [];
   const selectedRoleNames = form.values.roles ?? [];
   const deprecatedRoles = selectedRoleNames.reduce<Role[]>((roles, name) => {
@@ -434,7 +435,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
         </EuiFormRow>
 
         <EuiSpacer size="xxl" />
-        {disabled || isReservedUser ? (
+        {disabled || isReservedUser || isFormUnchanged ? (
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButton iconType="arrowLeft" onClick={onCancel}>
