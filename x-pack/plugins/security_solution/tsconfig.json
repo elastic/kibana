@@ -149,5 +149,6 @@
     "@kbn/securitysolution-grouping",
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
+    "@kbn/security-solution-side-nav",
   ]
 }
