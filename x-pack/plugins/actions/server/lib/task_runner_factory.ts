@@ -192,7 +192,7 @@ export class TaskRunnerFactory {
             await savedObjectsRepository.delete(
               ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
               actionTaskExecutorParams.actionTaskParamsId,
-              { refresh: false }
+              { refresh: false, namespace: spaceIdToNamespace(actionTaskExecutorParams.spaceId) }
             );
           } catch (e) {
             // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
