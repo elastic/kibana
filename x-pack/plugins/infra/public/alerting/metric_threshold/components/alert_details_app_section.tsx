@@ -8,19 +8,21 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { Rule } from '@kbn/alerting-plugin/common';
+import { MetricThresholdRuleTypeParams } from '..';
+import { generateUniqueKey } from '../lib/generate_unique_key';
 import { MetricsExplorerChartType } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
-import { MetricExpression } from '../types';
 import { ExpressionChart } from './expression_chart';
 import { useSourceViaHttp } from '../../../containers/metrics_source/use_source_via_http';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 interface AppSectionProps {
-  rule: Rule<{
-    filterQueryText?: string;
-    groupBy?: string | string[];
-    criteria?: MetricExpression[];
-  }>;
+  rule: Rule<
+    MetricThresholdRuleTypeParams & {
+      filterQueryText?: string;
+      groupBy?: string | string[];
+    }
+  >;
 }
 
 export function AlertDetailsAppSection({ rule }: AppSectionProps) {
@@ -36,9 +38,9 @@ export function AlertDetailsAppSection({ rule }: AppSectionProps) {
   );
 
   return !!rule.params.criteria ? (
-    <EuiFlexGroup direction="column">
+    <EuiFlexGroup direction="column" data-test-subj="metricThresholdAppSection">
       {rule.params.criteria.map((criterion) => (
-        <EuiFlexItem key={criterion.aggType + criterion.comparator + criterion.threshold[0]}>
+        <EuiFlexItem key={generateUniqueKey(criterion)}>
           <EuiPanel hasBorder hasShadow={false}>
             <ExpressionChart
               expression={criterion}

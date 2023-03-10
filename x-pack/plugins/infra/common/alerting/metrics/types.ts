@@ -101,17 +101,10 @@ interface BaseMetricExpressionParams {
 export interface NonCountMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Exclude<Aggregators, Aggregators.COUNT>;
   metric: string;
-  customMetrics: never;
-  equation: never;
-  label: never;
 }
 
 export interface CountMetricExpressionParams extends BaseMetricExpressionParams {
   aggType: Aggregators.COUNT;
-  metric: never;
-  customMetrics: never;
-  equation: never;
-  label: never;
 }
 
 export type CustomMetricAggTypes = Exclude<

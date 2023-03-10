@@ -16,7 +16,7 @@ import {
 import { validateMetricThreshold } from './components/validation';
 import { formatReason } from './rule_data_formatters';
 
-interface MetricThresholdRuleTypeParams extends RuleTypeParams {
+export interface MetricThresholdRuleTypeParams extends RuleTypeParams {
   criteria: MetricExpressionParams[];
 }
 
