@@ -12,10 +12,10 @@ Previous versions: {kibana-ref-all}/8.6/whats-new.html[8.6] | {kibana-ref-all}/8
 
 [discrete]
 === Discover: Break down the histogram by value
-*Discover*
-adds capabilities for the user to resize the histogram and break down fields by value,
+In *Discover*,
+you can now resize the histogram and break down fields by value,
 which is often used for logs exploration. The updated histogram is especially useful for
-*Observability* use cases.
+*Observability* use cases. For more information, check {kibana-ref}/discover.html[Discover].
 
 [role="screenshot"]
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt46fc7c55a9f1fc21/640133897b2256107c86d31f/highlights-discover-histogram.gif[Break down the histogram in Discover by value]
@@ -39,12 +39,12 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blteea23d2cf
 [discrete]
 ==== Time slider updates
 Selecting just the right time range is now even easier with the improvements to the time slider control.
-Pin the start time to the beginning of your time range to show how data builds over a period of time.
+Pin the start time to the beginning of your time range to show how data builds over a period of time. For more information, check {kibana-ref}/add-controls.html[Filter dashboard data with controls].
 
 [discrete]
 ==== Complex filters
 preview:[] Create and apply multiple filters simultaneously for nested queries,
-and use the logical OR and AND operators using the improved dropdown menu experience.
+and use the logical OR and AND operators using the improved dropdown menu experience. For more information, check {kibana-ref}/kibana-concepts-analysts.html#autocomplete-suggestions[Additional filters with AND].
 
 [role="screenshot"]
 image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt5fbd962a383ae3c3/640138b2e35cc90ebcbd2a0f/highlights-complex-filters.gif[Complex filters]
