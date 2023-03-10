@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-security-solution-side-nav'],
-};
+/** The title of the Storybook. */
+export const TITLE = 'Security Solution Storybook';
+
+/** The remote URL of the root from which Storybook loads stories for Security Solution. */
+export const URL = 'https://github.com/elastic/kibana/tree/main/packages/security_solution';

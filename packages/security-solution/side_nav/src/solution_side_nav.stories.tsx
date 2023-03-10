@@ -9,29 +9,32 @@
 import React from 'react';
 import { SolutionNav } from '@kbn/shared-ux-page-solution-nav';
 import readme from '../../README.mdx';
-import { SolutionSideNav } from '..';
-import type { SolutionSideNavItem } from '../types';
+import {
+  SolutionSideNav as SolutionSideNavComponent,
+  type SolutionSideNavProps,
+  type SolutionSideNavItem,
+} from '..';
 
 const items: SolutionSideNavItem[] = [
   {
-    id: 'link1',
+    id: 'simpleLink',
     label: 'I am a simple link',
     href: '#',
   },
   {
-    id: 'link2',
+    id: 'panelLink',
     label: 'I have a simple panel',
     href: '#',
     items: [
       {
-        id: 'link3',
+        id: 'panelLink1',
         label: 'I am the first nested',
         href: '#',
         description:
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed dignissim, velit ac dignissim maximus, orci justo mattis neque, non eleifend lectus velit sit amet dolor',
       },
       {
-        id: 'link4',
+        id: 'panelLink2',
         label: 'I am the second nested',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
@@ -56,67 +59,61 @@ const items: SolutionSideNavItem[] = [
     ],
   },
   {
-    id: 'link5',
+    id: 'categoriesPanelLink',
     label: 'I have categories',
     href: '#',
     categories: [
-      { label: 'First Category', linkIds: ['link6', 'link7'] },
-      { label: 'Second Category', linkIds: ['link8', 'link9'] },
+      { label: 'First Category', linkIds: ['panelCatLink1', 'panelCatLink2'] },
+      { label: 'Second Category', linkIds: ['panelCatLink3', 'panelCatLink4'] },
     ],
     items: [
       {
-        id: 'link6',
+        id: 'panelCatLink1',
         label: 'I am the first nested',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
       {
-        id: 'link7',
+        id: 'panelCatLink2',
         label: 'I am the second nested',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
       {
-        id: 'link8',
+        id: 'panelCatLink3',
         label: 'I am the third nested',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
       {
-        id: 'link9',
+        id: 'panelCatLink4',
         label: 'I am the fourth nested',
         href: '#',
         description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
       },
     ],
   },
-  { id: 'linkSelected', label: 'I am the selected one', href: '#' },
   { id: 'linkTruncated', href: '#', label: 'I have truncated text because I am too long' },
   { id: 'linkSmall', href: '#', label: 'I am smaller', labelSize: 'xs' },
 ];
 const footerItems: SolutionSideNavItem[] = [
-  { id: 'footerItem1', href: '#', label: 'I am a footer item' },
-  { id: 'footerItem2', href: '#', label: 'I have a separator', appendSeparator: true },
-  { id: 'footerItem3', href: '#', label: 'I have an icon', iconType: 'heart' },
+  { id: 'footerLink', href: '#', label: 'I am a footer link' },
+  {
+    id: 'footerLinkPanel',
+    href: '#',
+    label: 'I also have panel',
+    items: [
+      {
+        id: 'footerLinkPanel1',
+        label: 'I am a footer nested link',
+        href: '#',
+        description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+      },
+    ],
+  },
+  { id: 'footerLinkSeparator', href: '#', label: 'I have a separator', appendSeparator: true },
+  { id: 'footerLinkIcon', href: '#', label: 'I have an icon', iconType: 'heart' },
 ];
-
-const selectedId = 'linkSelected';
-
-export const Template = ({}: {}) => (
-  <SolutionNav
-    name={'Security'}
-    icon={'logoSecurity'}
-    isOpenOnDesktop={true}
-    children={
-      <SolutionSideNav
-        items={items}
-        footerItems={footerItems}
-        selectedId={selectedId}
-        panelTopOffset="0"
-      />
-    }
-  />
-);
 
 export default {
   title: 'SolutionSideNav',
@@ -131,11 +128,59 @@ export default {
       <div
         css={{
           height: '100vh',
+          display: 'flex',
         }}
       >
         {storyFn()}
       </div>
     ),
   ],
-  component: Template,
+};
+
+type Params = Pick<SolutionSideNavProps, 'selectedId' | 'panelTopOffset' | 'panelBottomOffset'>;
+
+export const SolutionSideNav = (params: Params) => (
+  <>
+    <SolutionNav
+      name={'Security'}
+      icon={'logoSecurity'}
+      isOpenOnDesktop={true}
+      canBeCollapsed={false}
+      children={
+        <SolutionSideNavComponent
+          items={items}
+          footerItems={footerItems}
+          selectedId={params.selectedId}
+          panelBottomOffset={params.panelBottomOffset || undefined}
+          panelTopOffset={params.panelTopOffset || undefined}
+        />
+      }
+    />
+    <div
+      css={{
+        'flex-grow': '1',
+        background: 'white',
+      }}
+    />
+  </>
+);
+
+SolutionSideNav.argTypes = {
+  selectedId: {
+    control: { type: 'radio' },
+    options: [...items, ...footerItems].map(({ id }) => id),
+    defaultValue: 'simpleLink',
+  },
+  panelTopOffset: {
+    control: 'text',
+    defaultValue: '0px',
+  },
+  panelBottomOffset: {
+    control: 'text',
+    defaultValue: '0px',
+  },
+};
+
+SolutionSideNav.parameters = {
+  layout: 'fullscreen',
 };

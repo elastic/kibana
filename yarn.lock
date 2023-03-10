@@ -4837,7 +4837,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/security-solution-side-nav@link:packages/kbn-security-solution-side-nav":
+"@kbn/security-solution-side-nav@link:packages/security-solution/side_nav":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-solution-storybook-config@link:packages/security-solution/storybook/config":
   version "0.0.0"
   uid ""
 
