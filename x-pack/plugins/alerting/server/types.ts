@@ -154,13 +154,6 @@ export type FormatRules = (
   context: FormatRulesContext
 ) => Promise<SanitizedRule[]>;
 
-export type MigrateRule = (
-  options: {
-    rule: SanitizedRule;
-  },
-  context: MigrateHookContext
-) => Promise<void>;
-
 export interface GetSummarizedAlertsFnOpts {
   start?: Date;
   end?: Date;
@@ -286,7 +279,6 @@ export interface RuleType<
    */
   autoRecoverAlerts?: boolean;
   getViewInAppRelativeUrl?: GetViewInAppRelativeUrlFn<Params>;
-  migrateRule?: MigrateRule;
   formatRules?: FormatRules;
 }
 export type UntypedRuleType = RuleType<

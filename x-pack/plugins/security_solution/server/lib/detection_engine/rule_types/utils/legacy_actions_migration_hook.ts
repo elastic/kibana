@@ -7,13 +7,9 @@
 
 import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 
-import type { FormatRules, MigrateRule } from '@kbn/alerting-plugin/server';
+import type { FormatRules } from '@kbn/alerting-plugin/server';
 import { transformRuleToAlertAction } from '../../../../../common/detection_engine/transform_actions';
-import {
-  transformActions,
-  transformToNotifyWhen,
-  legacyMigrateByRulesClient,
-} from '../../rule_management';
+import { transformActions, transformToNotifyWhen } from '../../rule_management';
 
 // eslint-disable-next-line no-restricted-imports
 import { legacyGetBulkRuleActionsSavedObject } from '../../rule_actions_legacy/logic/rule_actions/legacy_get_bulk_rule_actions_saved_object';
@@ -50,18 +46,5 @@ export const readLegacyActionsHook: FormatRules = async (
         ? transformToNotifyWhen(legacyActions.ruleThrottle)
         : rule.notifyWhen,
     };
-  });
-};
-
-export const migrateLegacyActionsHook: MigrateRule = async (
-  { rule },
-  { savedObjectsClient, update, find, delete: deleteRule }
-) => {
-  await legacyMigrateByRulesClient({
-    rule,
-    savedObjectsClient,
-    update,
-    find,
-    delete: deleteRule,
   });
 };
