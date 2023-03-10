@@ -110,7 +110,9 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 export type InputValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
 
 /** @experimental */
-export type OutputValidation<R> = RouteValidationFunction<R> | Type<R>;
+export interface OutputValidation<R> {
+  body: RouteValidationFunction<R> | Type<R>;
+}
 
 /**
  * Versioned route validation
@@ -119,10 +121,13 @@ export type OutputValidation<R> = RouteValidationFunction<R> | Type<R>;
 interface FullValidationConfig<P, Q, B, R> {
   /** Validation to run against route inputs: params, query and body */
   request?: InputValidation<P, Q, B>;
-  /** Validation to run against route output */
-  response?: {
-    body: OutputValidation<R>;
-  };
+  /**
+   * Validation to run against route output
+   * @note This validation is only intended to run in development. Do not use this
+   *       for setting default values!
+   * @experimental
+   */
+  response?: OutputValidation<R>;
 }
 
 /**
