@@ -22,7 +22,9 @@ import { buildMigratorConfigs } from './utils';
 import { migrateIndex } from './migrate_index';
 
 export interface RunZeroDowntimeMigrationOpts {
-  /** The kibana system index prefix. e.g `.kibana` */
+  /** The current Kibana version */
+  kibanaVersion: string;
+  /** The Kibana system index prefix. e.g `.kibana` or `.kibana_task_manager` */
   kibanaIndexPrefix: string;
   /** The SO type registry to use for the migration */
   typeRegistry: ISavedObjectTypeRegistry;

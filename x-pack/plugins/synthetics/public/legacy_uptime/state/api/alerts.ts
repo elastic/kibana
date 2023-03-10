@@ -88,6 +88,7 @@ export const createAlert = async ({
       defaultRecoveryMessage: MonitorStatusTranslations.defaultRecoveryMessage,
       defaultSubjectMessage: MonitorStatusTranslations.defaultSubjectMessage,
     },
+    isLegacy: true,
   });
 
   const data: NewMonitorStatusAlert = {

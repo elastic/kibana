@@ -600,6 +600,50 @@ describe('bulkEdit()', () => {
         snoozeSchedule: [],
       });
     });
+
+    test('should only increment revision once for multiple operations', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            ...existingRule,
+            attributes: {
+              ...existingRule.attributes,
+              revision: 1,
+            },
+          },
+        ],
+      });
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [
+          {
+            field: 'actions',
+            operation: 'add',
+            value: [
+              {
+                id: '687300e0-b882-11ed-ad70-c74a8cf8f386',
+                group: 'default',
+                params: {
+                  message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+                },
+              },
+            ],
+          },
+          {
+            field: 'throttle',
+            operation: 'set',
+            value: null,
+          },
+          {
+            field: 'notifyWhen',
+            operation: 'set',
+            value: 'onActiveAlert',
+          },
+        ],
+      });
+
+      expect(result.rules[0]).toHaveProperty('revision', 1);
+    });
   });
 
   describe('index pattern operations', () => {

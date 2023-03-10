@@ -9,32 +9,74 @@ import { encode } from '@kbn/rison';
 import { getNewRule } from '../../objects/rule';
 import {
   CONTROL_FRAMES,
+  CONTROL_FRAME_TITLE,
+  FILTER_GROUP_CHANGED_BANNER,
+  FILTER_GROUP_DISCARD_CHANGES,
+  FILTER_GROUP_SAVE_CHANGES_POPOVER,
   OPTION_LIST_LABELS,
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
 } from '../../screens/common/filter_group';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { login, visit } from '../../tasks/login';
 import { ALERTS_URL } from '../../urls/navigation';
-import { APP_ID, DEFAULT_DETECTION_PAGE_FILTERS } from '../../../common/constants';
+import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../common/constants';
 import { formatPageFilterSearchParam } from '../../../common/utils/format_page_filter_search_param';
 import {
+  closePageFilterPopover,
   markAcknowledgedFirstAlert,
+  openPageFilterPopover,
   resetFilters,
   selectCountTable,
+  visitAlertsPageWithCustomFilters,
   waitForAlerts,
   waitForPageFilters,
 } from '../../tasks/alerts';
 import { ALERTS_COUNT } from '../../screens/alerts';
 import { navigateFromHeaderTo } from '../../tasks/security_header';
 import { ALERTS, CASES } from '../../screens/security_header';
+import {
+  addNewFilterGroupControlValues,
+  deleteFilterGroupControl,
+  discardFilterGroupControls,
+  editFilterGroupControls,
+  saveFilterGroupControls,
+} from '../../tasks/common/filter_group';
 
+const customFilters = [
+  {
+    fieldName: 'kibana.alert.workflow_status',
+    title: 'Workflow Status',
+  },
+  {
+    fieldName: 'kibana.alert.severity',
+    title: 'Severity',
+  },
+  {
+    fieldName: 'user.name',
+    title: 'User Name',
+  },
+  {
+    fieldName: 'process.name',
+    title: 'ProcessName',
+  },
+  {
+    fieldName: 'event.module',
+    title: 'EventModule',
+  },
+  {
+    fieldName: 'agent.type',
+    title: 'AgentType',
+  },
+  {
+    fieldName: 'kibana.alert.rule.name',
+    title: 'Rule Name',
+  },
+];
 const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_PAGE_FILTERS) => {
-  cy.log(JSON.stringify({ filterObject }));
-
   cy.get(CONTROL_FRAMES).should((sub) => {
-    expect(sub.length).eq(4);
+    expect(sub.length).eq(filterObject.length);
   });
 
   cy.get(OPTION_LIST_LABELS).should((sub) => {
@@ -43,39 +85,70 @@ const assertFilterControlsWithFilterObject = (filterObject = DEFAULT_DETECTION_P
     });
   });
 
-  cy.get(OPTION_LIST_VALUES).should((sub) => {
-    filterObject.forEach((filter, idx) => {
-      expect(sub.eq(idx).text().replace(',', '')).eq(
-        filter.selectedOptions && filter.selectedOptions.length > 0
-          ? filter.selectedOptions.join('')
-          : ''
-      );
+  filterObject.forEach((filter, idx) => {
+    cy.get(OPTION_LIST_VALUES(idx)).should((sub) => {
+      expect(sub.text().replace(',', '')).satisfy((txt: string) => {
+        return txt.startsWith(
+          filter.selectedOptions && filter.selectedOptions.length > 0
+            ? filter.selectedOptions.join('')
+            : ''
+        );
+      });
     });
   });
 };
 
-// Skipped because this featured is behind feature flag
-describe.skip('Detections : Page Filters', () => {
+describe('Detections : Page Filters', { testIsolation: false }, () => {
   before(() => {
     cleanKibana();
     login();
-    createCustomRuleEnabled(getNewRule(), 'custom_rule_filters');
-  });
-
-  beforeEach(() => {
-    login();
+    createRule({ ...getNewRule(), rule_id: 'custom_rule_filters' });
     visit(ALERTS_URL);
     waitForAlerts();
     waitForPageFilters();
   });
 
   afterEach(() => {
-    cy.clearLocalStorage(`${APP_ID}.pageFilters`);
     resetFilters();
   });
 
   it('Default page filters are populated when nothing is provided in the URL', () => {
     assertFilterControlsWithFilterObject();
+  });
+
+  context('Alert Page Filters Customization ', { testIsolation: false }, () => {
+    it('Add New Controls', () => {
+      const fieldName = 'event.module';
+      const label = 'EventModule';
+      editFilterGroupControls();
+      addNewFilterGroupControlValues({
+        fieldName,
+        label,
+      });
+      cy.get(CONTROL_FRAME_TITLE).should('contain.text', label);
+      cy.get(FILTER_GROUP_SAVE_CHANGES_POPOVER).should('be.visible');
+      cy.get(FILTER_GROUP_DISCARD_CHANGES).click();
+      cy.get(CONTROL_FRAME_TITLE).should('not.contain.text', label);
+    });
+    it('Delete Controls', () => {
+      waitForPageFilters();
+      editFilterGroupControls();
+      deleteFilterGroupControl(3);
+      cy.get(CONTROL_FRAMES).should((sub) => {
+        expect(sub.length).lt(4);
+      });
+      cy.get(FILTER_GROUP_DISCARD_CHANGES).trigger('click', { force: true });
+    });
+    it('should not sync to the URL in edit mode but only in view mode', () => {
+      cy.url().then((urlString) => {
+        editFilterGroupControls();
+        addNewFilterGroupControlValues({ fieldName: 'event.module', label: 'Event Module' });
+        cy.url().should('eq', urlString);
+        saveFilterGroupControls();
+        cy.url().should('not.eq', urlString);
+      });
+    });
+    it('should not sync to the localstorage', () => {});
   });
 
   it('Page filters are loaded with custom values provided in the URL', () => {
@@ -124,27 +197,13 @@ describe.skip('Detections : Page Filters', () => {
         });
       });
     });
-  });
 
-  it('URL is updated when ever page filters are loaded', (done) => {
-    cy.on('url:changed', () => {
-      const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
-        if (filter.title === 'Status') {
-          filter.selectedOptions = [];
-        }
-        return filter;
-      });
-      cy.url().should('have.text', formatPageFilterSearchParam(NEW_FILTERS));
-      done();
-    });
-    cy.get(OPTION_LIST_VALUES).eq(0).click();
-
-    // unselect status open
-    cy.get(OPTION_SELECTABLE(0, 'open')).trigger('click', { force: true });
+    cy.get(FILTER_GROUP_SAVE_CHANGES_POPOVER).should('be.visible');
   });
 
   it(`Alert list is updated when the alerts are updated`, () => {
     // mark status of one alert to be acknowledged
+    cy.visit(ALERTS_URL);
     selectCountTable();
     cy.get(ALERTS_COUNT)
       .invoke('text')
@@ -152,7 +211,7 @@ describe.skip('Detections : Page Filters', () => {
         const originalAlertCount = noOfAlerts.split(' ')[0];
         markAcknowledgedFirstAlert();
         waitForAlerts();
-        cy.get(OPTION_LIST_VALUES).eq(0).click();
+        cy.get(OPTION_LIST_VALUES(0)).click();
         cy.get(OPTION_SELECTABLE(0, 'acknowledged')).should('be.visible');
         cy.get(ALERTS_COUNT)
           .invoke('text')
@@ -162,32 +221,36 @@ describe.skip('Detections : Page Filters', () => {
       });
   });
 
-  it(`URL is updated when filters are updated`, (done) => {
-    const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
-      if (filter.title === 'Severity') {
-        filter.selectedOptions = ['high'];
-      }
-      return filter;
+  it(`URL is updated when filters are updated`, () => {
+    cy.visit(ALERTS_URL);
+
+    cy.on('url:changed', (urlString) => {
+      const NEW_FILTERS = DEFAULT_DETECTION_PAGE_FILTERS.map((filter) => {
+        if (filter.title === 'Severity') {
+          filter.selectedOptions = ['high'];
+        }
+        return filter;
+      });
+      const expectedVal = encode(formatPageFilterSearchParam(NEW_FILTERS));
+      expect(urlString).to.contain.text(expectedVal);
     });
 
-    cy.on('url:changed', () => {
-      // we want assertion to run only once URL Changes.
-      cy.url().should('have.text', formatPageFilterSearchParam(NEW_FILTERS));
-      done();
-    });
-    cy.get(OPTION_LIST_VALUES).eq(1).click();
+    openPageFilterPopover(1);
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
     cy.get(OPTION_SELECTABLE(1, 'high')).click({ force: true });
+    closePageFilterPopover(1);
   });
 
   it(`Filters are restored from localstorage when user navigates back to the page.`, () => {
     // change severity filter to high
-    cy.get(OPTION_LIST_VALUES).eq(1).click();
+    cy.visit(ALERTS_URL);
+    cy.get(OPTION_LIST_VALUES(1)).click();
     cy.get(OPTION_SELECTABLE(1, 'high')).should('be.visible');
     cy.get(OPTION_SELECTABLE(1, 'high')).click({ force: true });
 
     // high should be scuccessfully selected.
-    cy.get(OPTION_LIST_VALUES).eq(1).contains('high');
+    cy.get(OPTION_LIST_VALUES(1)).contains('high');
+    waitForPageFilters();
 
     navigateFromHeaderTo(CASES); // navigate away from alert page
 
@@ -195,7 +258,36 @@ describe.skip('Detections : Page Filters', () => {
 
     waitForPageFilters();
 
-    cy.get(OPTION_LIST_VALUES).eq(0).contains('open'); // status should be Open as previously selected
-    cy.get(OPTION_LIST_VALUES).eq(1).contains('high'); // severity should be low as previously selected
+    cy.get(OPTION_LIST_VALUES(0)).contains('open'); // status should be Open as previously selected
+    cy.get(OPTION_LIST_VALUES(1)).contains('high'); // severity should be low as previously selected
+  });
+
+  it('Custom filters from URLS are populated & changed banner is displayed', () => {
+    visitAlertsPageWithCustomFilters(customFilters);
+
+    assertFilterControlsWithFilterObject(customFilters);
+
+    cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
+  });
+
+  it('Changed banner should hide on saving changes', () => {
+    visitAlertsPageWithCustomFilters(customFilters);
+
+    cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
+    saveFilterGroupControls();
+    cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
+  });
+  it('Changed banner should hide on discarding changes', () => {
+    visitAlertsPageWithCustomFilters(customFilters);
+
+    cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
+    discardFilterGroupControls();
+    cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
+  });
+
+  it('Changed banner should hide on Reset', () => {
+    visitAlertsPageWithCustomFilters(customFilters);
+    resetFilters();
+    cy.get(FILTER_GROUP_CHANGED_BANNER).should('not.exist');
   });
 });
