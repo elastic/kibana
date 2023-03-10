@@ -201,25 +201,7 @@ export function getSavedSearchContainer({
     if (resetSavedSearch) {
       set(nextSavedSearch);
     } else {
-      // detect changes to persisted version
-      const { searchSource: prevSearchSource, ...prevSavedSearch } = savedSearchInitial$.getValue();
-      const { searchSource: nextSearchSource, ...nextSavedSearchWithoutSearchSource } =
-        nextSavedSearch;
-
-      const savedSearchDiff = differenceWith(
-        toPairs(prevSavedSearch),
-        toPairs(nextSavedSearchWithoutSearchSource),
-        isEqual
-      );
-
-      const searchSourceDiff =
-        !isEqual(prevSearchSource.getField('filter'), nextSearchSource.getField('filter')) ||
-        !isEqual(prevSearchSource.getField('query'), nextSearchSource.getField('query')) ||
-        !isEqual(prevSearchSource.getField('index'), nextSearchSource.getField('index'));
-      const hasChanged = Boolean(savedSearchDiff.length || searchSourceDiff);
-      if (hasChanged) {
-        addLog('🔎 [savedSearch] difference between persisted and changed version');
-      }
+      const hasChanged = isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
 
       hasChanged$.next(hasChanged);
       savedSearchCurrent$.next(nextSavedSearch);
@@ -267,4 +249,25 @@ export function getDefaultAppState(savedSearch: SavedSearch, services: DiscoverS
     }),
     services.uiSettings
   );
+}
+
+export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext: SavedSearch) {
+  const { searchSource: prevSearchSource, ...prevSavedSearch } = savedSearchPrev;
+  const { searchSource: nextSearchSource, ...nextSavedSearchWithoutSearchSource } = savedSearchNext;
+
+  const savedSearchDiff = differenceWith(
+    toPairs(prevSavedSearch),
+    toPairs(nextSavedSearchWithoutSearchSource),
+    isEqual
+  );
+
+  const searchSourceDiff =
+    !isEqual(prevSearchSource.getField('filter'), nextSearchSource.getField('filter')) ||
+    !isEqual(prevSearchSource.getField('query'), nextSearchSource.getField('query')) ||
+    !isEqual(prevSearchSource.getField('index'), nextSearchSource.getField('index'));
+  const hasChanged = Boolean(savedSearchDiff.length || searchSourceDiff);
+  if (hasChanged) {
+    addLog('🔎 [savedSearch] difference between initial and changed version');
+  }
+  return !hasChanged;
 }
