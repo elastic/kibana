@@ -113,7 +113,10 @@ export interface VersionedRouter<Ctx extends RqCtx = RqCtx> {
 }
 
 /** @experimental */
-type InValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
+export type InputValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
+
+/** @experimental */
+export type OutputValidation<R> = RouteValidationFunction<R> | Type<R>;
 
 /**
  * Versioned route validation
@@ -121,9 +124,9 @@ type InValidation<P, Q, B> = RouteValidatorFullConfig<P, Q, B>;
  */
 interface FullValidationConfig<P, Q, B, R> {
   /** Validation to run against route inputs: params, query and body */
-  in?: InValidation<P, Q, B>;
+  in?: InputValidation<P, Q, B>;
   /** Validation to run against route output */
-  out?: RouteValidationFunction<R> | Type<R>;
+  out?: OutputValidation<R>;
 }
 
 /**
@@ -160,7 +163,7 @@ export interface VersionedRoute<
    * @experimental
    */
   addVersion<P, Q, B, R>(
-    opts: AddVersionOpts<P, Q, B, R>,
+    options: AddVersionOpts<P, Q, B, R>,
     handler: (...params: Parameters<RequestHandler<P, Q, B, Ctx>>) => Promise<IKibanaResponse<R>>
   ): VersionedRoute<Method, Ctx>;
 }
