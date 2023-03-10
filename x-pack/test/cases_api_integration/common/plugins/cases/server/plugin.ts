@@ -6,16 +6,13 @@
  */
 
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
-
 import { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { PluginStartContract as CasesPluginStart } from '@kbn/cases-plugin/server';
-import { CasesPatchRequest } from '@kbn/cases-plugin/common/api';
-import { PluginSetupContract as CasesSetup } from '@kbn/cases-plugin/server/types';
+import type { CasesStart, CasesSetup } from '@kbn/cases-plugin/server';
 import { getPersistableStateAttachment } from './attachments/persistable_state';
 import { getExternalReferenceAttachment } from './attachments/external_reference';
+import { registerRoutes } from './routes';
 
 export interface FixtureSetupDeps {
   features: FeaturesPluginSetup;
@@ -25,12 +22,11 @@ export interface FixtureSetupDeps {
 export interface FixtureStartDeps {
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  cases?: CasesPluginStart;
+  cases: CasesStart;
 }
 
 export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, FixtureStartDeps> {
   private readonly log: Logger;
-  private casesPluginStart?: CasesPluginStart;
   constructor(initContext: PluginInitializerContext) {
     this.log = initContext.logger.get();
   }
@@ -39,37 +35,9 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     deps.cases.attachmentFramework.registerExternalReference(getExternalReferenceAttachment());
     deps.cases.attachmentFramework.registerPersistableState(getPersistableStateAttachment());
 
-    const router = core.http.createRouter();
-    /**
-     * This simply wraps the cases patch case api so that we can test updating the status of an alert using
-     * the cases client interface instead of going through the case plugin's RESTful interface
-     */
-    router.patch(
-      {
-        path: '/api/cases_user/cases',
-        validate: {
-          body: schema.object({}, { unknowns: 'allow' }),
-        },
-      },
-      async (context, request, response) => {
-        try {
-          const client = await this.casesPluginStart?.getCasesClientWithRequest(request);
-          if (!client) {
-            throw new Error('Cases client was undefined');
-          }
+    registerRoutes(core, this.log);
+  }
 
-          return response.ok({
-            body: await client.cases.update(request.body as CasesPatchRequest),
-          });
-        } catch (error) {
-          this.log.error(`CasesClientUser failure: ${error}`);
-          throw error;
-        }
-      }
-    );
-  }
-  public start(core: CoreStart, plugins: FixtureStartDeps) {
-    this.casesPluginStart = plugins.cases;
-  }
+  public start(core: CoreStart, plugins: FixtureStartDeps) {}
   public stop() {}
 }

@@ -15,7 +15,6 @@ import {
   type TimeRange,
 } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SavedQuery } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGrid } from '@elastic/eui';
 import type { InfraClientStartDeps } from '../../../../types';
@@ -30,26 +29,14 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
   const {
     services: { unifiedSearch, application },
   } = useKibana<InfraClientStartDeps>();
-  const { searchCriteria, onSubmit, saveQuery, clearSavedQuery } = useUnifiedSearchContext();
+  const { searchCriteria, onSubmit } = useUnifiedSearchContext();
 
   const { SearchBar } = unifiedSearch.ui;
-
-  const onQuerySubmit = (payload: { dateRange: TimeRange; query?: Query }) => {
-    onQueryChange({ payload });
-  };
 
   const onPanelFiltersChange = (panelFilters: Filter[]) => {
     if (!compareFilters(searchCriteria.panelFilters, panelFilters, COMPARE_ALL_OPTIONS)) {
       onQueryChange({ panelFilters });
     }
-  };
-
-  const onClearSavedQuery = () => {
-    clearSavedQuery();
-  };
-
-  const onQuerySave = (savedQuery: SavedQuery) => {
-    saveQuery(savedQuery);
   };
 
   const onQueryChange = ({
@@ -62,24 +49,29 @@ export const UnifiedSearchBar = ({ dataView }: Props) => {
     onSubmit({ query: payload?.query, dateRange: payload?.dateRange, panelFilters });
   };
 
+  const handleRefresh = (payload: { dateRange: TimeRange; query?: Query }, isUpdate?: boolean) => {
+    // This makes sure `onQueryChange` is only called when the submit button is clicked
+    if (isUpdate === false) {
+      onQueryChange({ payload });
+    }
+  };
+
   return (
     <EuiFlexGrid gutterSize="s">
       <SearchBar
         appName={'Infra Hosts'}
+        displayStyle="inPage"
+        indexPatterns={[dataView]}
         placeholder={i18n.translate('xpack.infra.hosts.searchPlaceholder', {
           defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
         })}
-        indexPatterns={[dataView]}
-        query={searchCriteria.query}
-        dateRangeFrom={searchCriteria.dateRange.from}
-        dateRangeTo={searchCriteria.dateRange.to}
-        onQuerySubmit={onQuerySubmit}
-        onSaved={onQuerySave}
-        onSavedQueryUpdated={onQuerySave}
-        onClearSavedQuery={onClearSavedQuery}
+        onQuerySubmit={handleRefresh}
         showSaveQuery={Boolean(application?.capabilities?.visualize?.saveQuery)}
+        showDatePicker
+        showFilterBar
         showQueryInput
-        displayStyle="inPage"
+        showQueryMenu
+        useDefaultBehaviors
       />
       <ControlsContent
         timeRange={searchCriteria.dateRange}
