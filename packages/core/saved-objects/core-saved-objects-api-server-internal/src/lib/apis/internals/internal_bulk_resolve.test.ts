@@ -31,6 +31,7 @@ import {
   type ISavedObjectTypeRegistry,
   type SavedObject,
   SavedObjectsErrorHelpers,
+  type SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import {
   enforceError,
@@ -38,6 +39,7 @@ import {
   setupAuthorizeAndRedactInternalBulkResolveSuccess,
 } from '../../../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
+import { kibanaMigratorMock } from '../../../mocks';
 
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
 const OBJ_TYPE = 'obj-type';
@@ -57,6 +59,7 @@ beforeEach(() => {
 
 describe('internalBulkResolve', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
+  let migrator: ReturnType<typeof kibanaMigratorMock.create>;
   let serializer: SavedObjectsSerializer;
   let incrementCounterInternal: jest.Mock<any, any>;
   let registry: jest.Mocked<ISavedObjectTypeRegistry>;
@@ -72,11 +75,13 @@ describe('internalBulkResolve', () => {
   ): InternalBulkResolveParams {
     registry = typeRegistryMock.create();
     client = elasticsearchClientMock.createElasticsearchClient();
+    migrator = kibanaMigratorMock.create();
     serializer = new SavedObjectsSerializer(registry);
     incrementCounterInternal = jest.fn().mockRejectedValue(new Error('increment error')); // mock error to implicitly test that it is caught and swallowed
     return {
       registry,
       allowedTypes: [OBJ_TYPE, ENCRYPTED_TYPE],
+      migrator,
       client,
       serializer,
       getIndexForType: (type: string) => `index-for-${type}`,
@@ -223,7 +228,7 @@ describe('internalBulkResolve', () => {
     };
   }
 
-  for (const namespace of [undefined, 'default', 'space-x']) {
+  describe.each([undefined, 'default', 'space-x'])(`with namespace '%s'`, (namespace) => {
     const expectedNamespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
 
     it('throws if mget call results in non-ES-originated 404 error', async () => {
@@ -362,7 +367,29 @@ describe('internalBulkResolve', () => {
         expectConflictResult({ id: '7', alias_target_id: '7-newId', alias_purpose: 'y' }),
       ]);
     });
-  }
+
+    it('migrates the resolved objects', async () => {
+      const objects = [
+        { type: OBJ_TYPE, id: '1' },
+        { type: OBJ_TYPE, id: '2' },
+      ];
+      const params = setup(objects, { namespace });
+      mockBulkResults({ found: false }, { found: false });
+      mockMgetResults({ found: true }, { found: true });
+      migrator.migrateDocument.mockImplementation(
+        (doc) => `migrated-${doc}` as unknown as SavedObjectUnsanitizedDoc
+      );
+
+      await expect(internalBulkResolve(params)).resolves.toHaveProperty('resolved_objects', [
+        expect.objectContaining({ saved_object: 'migrated-mock-obj-for-1' }),
+        expect.objectContaining({ saved_object: 'migrated-mock-obj-for-2' }),
+      ]);
+
+      expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+      expect(migrator.migrateDocument).nthCalledWith(1, 'mock-obj-for-1');
+      expect(migrator.migrateDocument).nthCalledWith(2, 'mock-obj-for-2');
+    });
+  });
 
   describe('with encryption extension', () => {
     const namespace = 'foo';

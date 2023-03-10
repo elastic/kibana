@@ -24,7 +24,15 @@ export interface PerformGetParams {
 
 export const performGet = async <T>(
   { type, id, options }: PerformGetParams,
-  { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
+  {
+    registry,
+    helpers,
+    allowedTypes,
+    client,
+    migrator,
+    serializer,
+    extensions = {},
+  }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
   const { common: commonHelper, encryption: encryptionHelper } = helpers;
   const { securityExtension } = extensions;
@@ -68,12 +76,13 @@ export const performGet = async <T>(
     throw SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
   }
 
-  const result = getSavedObjectFromSource<T>(registry, type, id, body, {
+  const document = getSavedObjectFromSource<T>(registry, type, id, body, {
     migrationVersionCompatibility,
   });
+  const migrated = migrator.migrateDocument(document) as SavedObject<T>;
 
   return encryptionHelper.optionallyDecryptAndRedactSingleResult(
-    result,
+    migrated,
     authorizationResult?.typeMap
   );
 };

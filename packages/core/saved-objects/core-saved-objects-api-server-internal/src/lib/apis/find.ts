@@ -13,6 +13,7 @@ import {
   SavedObjectsErrorHelpers,
   type SavedObjectsRawDoc,
   CheckAuthorizationResult,
+  type SavedObject,
   SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import {
@@ -48,7 +49,6 @@ export const performFind = async <T = unknown, A = unknown>(
     allowedTypes: rawAllowedTypes,
     mappings,
     client,
-    serializer,
     migrator,
     extensions = {},
   }: ApiExecutionContext
@@ -236,9 +236,11 @@ export const performFind = async <T = unknown, A = unknown>(
     total: body.hits.total,
     saved_objects: body.hits.hits.map(
       (hit: estypes.SearchHit<SavedObjectsRawDocSource>): SavedObjectsFindResult => ({
-        ...serializerHelper.rawToSavedObject(hit as SavedObjectsRawDoc, {
-          migrationVersionCompatibility,
-        }),
+        ...(migrator.migrateDocument(
+          serializerHelper.rawToSavedObject(hit as SavedObjectsRawDoc, {
+            migrationVersionCompatibility,
+          })
+        ) as SavedObject),
         score: hit._score!,
         sort: hit.sort,
       })
