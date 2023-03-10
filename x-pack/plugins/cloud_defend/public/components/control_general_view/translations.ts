@@ -6,7 +6,34 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ControlSelectorCondition } from '../../types';
+import { SelectorCondition, SelectorType } from '../../types';
+
+export const fileSelector = i18n.translate('xpack.cloudDefend.fileSelector', {
+  defaultMessage: 'File selector',
+});
+
+export const processSelector = i18n.translate('xpack.cloudDefend.processSelector', {
+  defaultMessage: 'Process selector',
+});
+
+export const networkSelector = i18n.translate('xpack.cloudDefend.networkSelector', {
+  defaultMessage: 'Network (coming soon)',
+});
+
+export const fileResponse = i18n.translate('xpack.cloudDefend.fileResponse', {
+  defaultMessage: 'File response',
+});
+
+export const processResponse = i18n.translate('xpack.cloudDefend.processResponse', {
+  defaultMessage: 'Process response',
+});
+
+export const networkResponse = i18n.translate('xpack.cloudDefend.networkResponse', {
+  defaultMessage: 'Network (coming soon)',
+});
+export const conditions = i18n.translate('xpack.cloudDefend.conditions', {
+  defaultMessage: 'Conditions: ',
+});
 
 export const duplicate = i18n.translate('xpack.cloudDefend.controlDuplicate', {
   defaultMessage: 'Duplicate',
@@ -21,7 +48,8 @@ export const selectors = i18n.translate('xpack.cloudDefend.controlSelectors', {
 });
 
 export const selectorsHelp = i18n.translate('xpack.cloudDefend.controlSelectorsHelp', {
-  defaultMessage: 'Create selectors to match on operations that should be blocked or alerted.',
+  defaultMessage:
+    'Create file or process selectors to match on operations and or conditions of interest.',
 });
 
 export const responses = i18n.translate('xpack.cloudDefend.controlResponses', {
@@ -30,7 +58,7 @@ export const responses = i18n.translate('xpack.cloudDefend.controlResponses', {
 
 export const responsesHelp = i18n.translate('xpack.cloudDefend.controlResponsesHelp', {
   defaultMessage:
-    'Responses are evaluated from top to bottom. At most, one set of actions will be performed.',
+    'Use responses to map one or more selectors to a set of actions. Selectors can also be used to "exclude" events.',
 });
 
 export const matchSelectors = i18n.translate('xpack.cloudDefend.controlMatchSelectors', {
@@ -41,8 +69,16 @@ export const excludeSelectors = i18n.translate('xpack.cloudDefend.controlExclude
   defaultMessage: 'Exclude selectors',
 });
 
+export const exclude = i18n.translate('xpack.cloudDefend.controlExclude', {
+  defaultMessage: 'Exclude',
+});
+
 export const actions = i18n.translate('xpack.cloudDefend.controlResponseActions', {
   defaultMessage: 'Actions',
+});
+
+export const actionLog = i18n.translate('xpack.cloudDefend.controlResponseActionLog', {
+  defaultMessage: 'Log',
 });
 
 export const actionAlert = i18n.translate('xpack.cloudDefend.controlResponseActionAlert', {
@@ -51,6 +87,10 @@ export const actionAlert = i18n.translate('xpack.cloudDefend.controlResponseActi
 
 export const actionBlock = i18n.translate('xpack.cloudDefend.controlResponseActionBlock', {
   defaultMessage: 'Block',
+});
+
+export const actionBlockHelp = i18n.translate('xpack.cloudDefend.controlResponseActionBlockHelp', {
+  defaultMessage: 'Alert action must be enabled to block an event.',
 });
 
 export const actionAlertAndBlock = i18n.translate(
@@ -99,71 +139,44 @@ export const errorValueLengthExceeded = i18n.translate(
   }
 );
 
-export const getConditionHelpLabel = (prop: string) => {
-  switch (prop) {
-    case ControlSelectorCondition.ignoreVolumeMounts:
-      return i18n.translate('xpack.cloudDefend.ignoreVolumeMountsHelp', {
-        defaultMessage: 'Ignore operations on all volume mounts.',
+export const getSelectorIconTooltip = (type: SelectorType) => {
+  switch (type) {
+    case 'process':
+      return i18n.translate('xpack.cloudDefend.processSelectorIconTooltip', {
+        defaultMessage: 'A process selector. Matches only on process operations.',
       });
-    case ControlSelectorCondition.ignoreVolumeFiles:
-      return i18n.translate('xpack.cloudDefend.ignoreVolumeFilesHelp', {
-        defaultMessage:
-          'Ignore operations on file mounts only. e.g mounted files, configMaps, secrets etc...',
-      });
+    case 'file':
     default:
-      return '';
+      return i18n.translate('xpack.cloudDefend.fileSelectorIconTooltip', {
+        defaultMessage: 'A file selector. Matches only on file operations.',
+      });
   }
 };
 
-export const getConditionLabel = (prop: string) => {
+export const getResponseIconTooltip = (type: SelectorType) => {
+  switch (type) {
+    case 'process':
+      return i18n.translate('xpack.cloudDefend.processResponseIconTooltip', {
+        defaultMessage: 'A process response.\nOnly process selectors can be used to match/exclude.',
+      });
+    case 'file':
+    default:
+      return i18n.translate('xpack.cloudDefend.fileResponseIconTooltip', {
+        defaultMessage: 'A file response.\nOnly file selectors can be used to match/exclude.',
+      });
+  }
+};
+
+export const getConditionHelpLabel = (prop: SelectorCondition) => {
   switch (prop) {
-    case ControlSelectorCondition.operation:
-      return i18n.translate('xpack.cloudDefend.operation', {
-        defaultMessage: 'Operation',
+    case 'ignoreVolumeMounts':
+      return i18n.translate('xpack.cloudDefend.ignoreVolumeMountsHelp', {
+        defaultMessage: 'Ignore operations on all volume mounts.',
       });
-    case ControlSelectorCondition.containerImageName:
-      return i18n.translate('xpack.cloudDefend.containerImageName', {
-        defaultMessage: 'Container image name',
-      });
-    case ControlSelectorCondition.containerImageTag:
-      return i18n.translate('xpack.cloudDefend.containerImageTag', {
-        defaultMessage: 'Container image tag',
-      });
-    case ControlSelectorCondition.targetFilePath:
-      return i18n.translate('xpack.cloudDefend.targetFilePath', {
-        defaultMessage: 'Target file path',
-      });
-    case ControlSelectorCondition.ignoreVolumeFiles:
-      return i18n.translate('xpack.cloudDefend.ignoreVolumeFiles', {
-        defaultMessage: 'Ignore volume files',
-      });
-    case ControlSelectorCondition.ignoreVolumeMounts:
-      return i18n.translate('xpack.cloudDefend.ignoreVolumeMounts', {
-        defaultMessage: 'Ignore volume mounts',
-      });
-    case ControlSelectorCondition.orchestratorClusterId:
-      return i18n.translate('xpack.cloudDefend.orchestratorClusterId', {
-        defaultMessage: 'Orchestrator cluster ID',
-      });
-    case ControlSelectorCondition.orchestratorClusterName:
-      return i18n.translate('xpack.cloudDefend.orchestratorClusterName', {
-        defaultMessage: 'Orchestrator cluster name',
-      });
-    case ControlSelectorCondition.orchestratorNamespace:
-      return i18n.translate('xpack.cloudDefend.orchestratorNamespace', {
-        defaultMessage: 'Orchestrator namespace',
-      });
-    case ControlSelectorCondition.orchestratorResourceLabel:
-      return i18n.translate('xpack.cloudDefend.orchestratorResourceLabel', {
-        defaultMessage: 'Orchestrator resource label',
-      });
-    case ControlSelectorCondition.orchestratorResourceName:
-      return i18n.translate('xpack.cloudDefend.orchestratorResourceName', {
-        defaultMessage: 'Orchestrator resource name',
-      });
-    case ControlSelectorCondition.orchestratorResourceType:
-      return i18n.translate('xpack.cloudDefend.orchestratorResourceType', {
-        defaultMessage: 'Orchestrator resource type',
+    case 'ignoreVolumeFiles':
+      return i18n.translate('xpack.cloudDefend.ignoreVolumeFilesHelp', {
+        defaultMessage:
+          'Ignore operations on file mounts only. e.g mounted files, configMaps, secrets etc...',
       });
     default:
       return '';
