@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { serviceNameHint, secretTokenHint, serverUrlHint, serviceEnvironmentHint } from './shared_hints';
+import {
+  serviceNameHint,
+  secretTokenHint,
+  serverUrlHint,
+  serviceEnvironmentHint,
+} from './shared_hints';
 
 export const javaVariables = {
   apmServiceName: 'Delastic.apm.service_name',
@@ -25,7 +30,7 @@ export const javaLineNumbers = {
     4: serverUrlHint,
     5: serviceEnvironmentHint,
   },
-}
+};
 
 export const java = `java -javaagent:/path/to/elastic-apm-agent-<version>.jar \\
 -${javaVariables.apmServiceName}={{{apmServiceName}}} \\

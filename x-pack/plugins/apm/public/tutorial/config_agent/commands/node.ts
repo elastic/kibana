@@ -5,7 +5,12 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { serviceNameHint, secretTokenHint, serverUrlHint, serviceEnvironmentHint } from './shared_hints';
+import {
+  serviceNameHint,
+  secretTokenHint,
+  serverUrlHint,
+  serviceEnvironmentHint,
+} from './shared_hints';
 
 export const nodeVariables = {
   apmServiceName: 'serviceName',
@@ -32,7 +37,7 @@ export const nodeLineNumbers = {
     7: serverUrlHint,
     9: serviceEnvironmentHint,
   },
-}
+};
 
 export const node = `// ${i18n.translate(
   'xpack.apm.tutorial.nodeClient.configure.commands.addThisToTheFileTopComment',
