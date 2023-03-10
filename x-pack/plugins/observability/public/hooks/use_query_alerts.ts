@@ -62,18 +62,6 @@ export interface QueryAlerts extends BasicSignals {
   index?: string | null;
 }
 
-export const fetchQueryAlertsOriginal = async <Hit, Aggregations>({
-  query,
-  signal,
-  http,
-}: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> => {
-  return http.fetch<AlertSearchResponse<Hit, Aggregations>>(BASE_RAC_ALERTS_API_PATH, {
-    method: 'POST',
-    body: JSON.stringify(query),
-    signal,
-  });
-};
-
 export const fetchQueryAlerts = async <Hit, Aggregations>({
   index,
   featureIds,
