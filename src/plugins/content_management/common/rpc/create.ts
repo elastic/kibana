@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 import { schema } from '@kbn/config-schema';
+import type { Version } from '../types';
+import { versionSchema } from './constants';
 
 import type { ProcedureSchemas } from './types';
 
@@ -13,6 +15,7 @@ export const createSchemas: ProcedureSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
+      version: versionSchema,
       // --> "data" to create a content will be defined by each content type
       data: schema.recordOf(schema.string(), schema.any()),
       options: schema.maybe(schema.object({}, { unknowns: 'allow' })),
@@ -29,5 +32,6 @@ export interface CreateIn<
 > {
   contentTypeId: T;
   data: Data;
+  version?: Version;
   options?: Options;
 }
