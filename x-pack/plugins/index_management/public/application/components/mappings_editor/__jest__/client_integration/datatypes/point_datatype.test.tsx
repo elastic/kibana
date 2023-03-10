@@ -49,8 +49,6 @@ describe('Mappings editor: point datatype', () => {
       },
     };
 
-    const updatedMappings = { ...defaultMappings };
-
     await act(async () => {
       testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
     });
@@ -58,17 +56,26 @@ describe('Mappings editor: point datatype', () => {
 
     const {
       component,
-      actions: { startEditField, updateFieldAndCloseFlyout },
+      actions: { startEditField, updateFieldName, updateFieldAndCloseFlyout },
     } = testBed;
 
     // Open the flyout to edit the field
     await startEditField('myField');
 
+    // Update the name of the field
+    await updateFieldName('updatedField');
+
     // Save the field and close the flyout
     await updateFieldAndCloseFlyout();
 
-    // It should have the default parameters values added
-    updatedMappings.properties.myField = defaultPointParameters;
+    // It should have the default parameters values added for fields which are not set
+    const updatedMappings = {
+      properties: {
+        updatedField: {
+          ...defaultPointParameters,
+        },
+      },
+    };
 
     ({ data } = await getMappingsEditorData(component));
     expect(data).toEqual(updatedMappings);
