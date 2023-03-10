@@ -137,18 +137,6 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
 
 export type ResponseAction = 'log' | 'alert' | 'block';
 
-// outer most wrapper of the yaml configuration fed to cloud-defend agent.
-export interface ControlSchema {
-  file?: {
-    selectors: Selector[];
-    responses: Response[];
-  };
-  process?: {
-    selectors: Selector[];
-    responses: Response[];
-  };
-}
-
 export interface Selector {
   name: string;
   operation?: string[];
@@ -174,9 +162,8 @@ export interface Selector {
   processUserId?: string[];
   sessionLeaderInteractive?: string[];
 
-  // ephemeral props (used only in UI)
+  // non yaml fields
   type: SelectorType;
-
   // used to track selector error state in UI
   hasErrors?: boolean;
 }
