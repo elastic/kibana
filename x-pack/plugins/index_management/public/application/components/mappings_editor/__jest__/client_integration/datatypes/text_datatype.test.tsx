@@ -55,8 +55,6 @@ describe('Mappings editor: text datatype', () => {
       },
     };
 
-    const updatedMappings = { ...defaultMappings };
-
     await act(async () => {
       testBed = setup({ value: defaultMappings, onChange: onChangeHandler });
     });
@@ -65,11 +63,14 @@ describe('Mappings editor: text datatype', () => {
     const {
       component,
       exists,
-      actions: { startEditField, getToggleValue, updateFieldAndCloseFlyout },
+      actions: { startEditField, updateFieldName, getToggleValue, updateFieldAndCloseFlyout },
     } = testBed;
 
     // Open the flyout to edit the field
     await startEditField('myField');
+
+    // Update the name of the field
+    await updateFieldName('updatedField');
 
     // It should have searchable ("index" param) active by default
     const indexFieldConfig = getFieldConfig('index');
@@ -86,8 +87,12 @@ describe('Mappings editor: text datatype', () => {
     await updateFieldAndCloseFlyout();
 
     // It should have the default parameters values added
-    updatedMappings.properties.myField = {
-      ...defaultTextParameters,
+    const updatedMappings = {
+      properties: {
+        updatedField: {
+          ...defaultTextParameters,
+        },
+      },
     };
 
     ({ data } = await getMappingsEditorData(component));
@@ -120,16 +125,19 @@ describe('Mappings editor: text datatype', () => {
       form: { selectCheckBox, setSelectValue },
       actions: {
         startEditField,
+        updateFieldName,
         getCheckboxValue,
         showAdvancedSettings,
         updateFieldAndCloseFlyout,
       },
     } = testBed;
     const fieldToEdit = 'myField';
+    const newFieldName = 'updatedField';
 
-    // Start edit and immediately save to have all the default values
+    // Start edit, update the name only, and save to have all the default values
     await startEditField(fieldToEdit);
     await showAdvancedSettings();
+    await updateFieldName(newFieldName);
     await updateFieldAndCloseFlyout();
 
     expect(exists('mappingsEditorFieldEdit')).toBe(false);
@@ -139,7 +147,7 @@ describe('Mappings editor: text datatype', () => {
     let updatedMappings: any = {
       ...defaultMappings,
       properties: {
-        myField: {
+        updatedField: {
           ...defaultMappings.properties.myField,
           ...defaultTextParameters,
         },
@@ -148,7 +156,7 @@ describe('Mappings editor: text datatype', () => {
     expect(data).toEqual(updatedMappings);
 
     // Re-open the edit panel
-    await startEditField(fieldToEdit);
+    await startEditField(newFieldName);
     await showAdvancedSettings();
 
     // When no analyzer is defined, defaults to "Index default"
@@ -195,8 +203,8 @@ describe('Mappings editor: text datatype', () => {
     updatedMappings = {
       ...updatedMappings,
       properties: {
-        myField: {
-          ...updatedMappings.properties.myField,
+        updatedField: {
+          ...updatedMappings.properties.updatedField,
           analyzer: 'standard',
           search_analyzer: 'simple',
           search_quote_analyzer: 'whitespace',
@@ -208,7 +216,7 @@ describe('Mappings editor: text datatype', () => {
     expect(data).toEqual(updatedMappings);
 
     // Re-open the flyout and make sure the select have the correct updated value
-    await startEditField('myField');
+    await startEditField(newFieldName);
     await showAdvancedSettings();
 
     isUseSameAnalyzerForSearchChecked = getCheckboxValue('useSameAnalyzerForSearchCheckBox.input');
