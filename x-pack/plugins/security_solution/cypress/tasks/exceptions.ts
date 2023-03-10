@@ -181,13 +181,13 @@ export const addExceptionComment = (comment: string) => {
     .type(`${comment}`)
     .should('have.value', comment);
 };
-export const showComments = () => {
+export const clickOnShowComments = () => {
   cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER_SHOW_COMMENTS_BTN).click();
 };
 
-export const copyCommentToClipboard = () => {
+export const clickCopyCommentToClipboard = (comment: string) => {
   // Disable window prompt which is used in link creation by copy-to-clipboard library
-  // This prompt pauses test execution during `cypress open`
+  // as this prompt pauses test execution during `cypress open`
   cy.window().then((win) => {
     cy.stub(win, 'prompt').returns('DISABLED WINDOW PROMPT');
   });

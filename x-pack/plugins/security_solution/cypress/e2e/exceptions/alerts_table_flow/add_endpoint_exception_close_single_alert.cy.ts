@@ -71,12 +71,14 @@ describe('Add endpoint exception to validate closing of single alert', () => {
     goToClosedAlertsOnRuleDetailsPage();
     cy.get(ALERTS_COUNT).should('exist');
     cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alert`);
-    // Remove the exception and load an event that would have matched that exception
-    // to show that said exception now starts to show up again
+
+    // Validate  Endpoint Exception will move to Endpoint List under Exception tab of rule
     goToEndpointExceptionsTab();
 
-    // when removing exception and again, no more exist, empty screen shows again
+    // Remove the exception and load an event that would have matched that exception
+    // to show that said exception now starts to show up again
     removeException();
+    // when removing exception and again, no more exist, empty screen shows again
     cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
 
     // load more docs

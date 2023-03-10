@@ -37,13 +37,13 @@ import {
   addExceptionFlyoutItemName,
   editException,
   editExceptionFlyoutItemName,
-  copyCommentToClipboard,
+  clickCopyCommentToClipboard,
   selectAddToRuleRadio,
   selectBulkCloseAlerts,
   selectSharedListToAddExceptionTo,
   submitEditedExceptionItem,
   submitNewExceptionItem,
-  showComments,
+  clickOnShowComments,
 } from '../../../tasks/exceptions';
 import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../urls/navigation';
 import { deleteAlertsAndRules } from '../../../tasks/common';
@@ -148,10 +148,10 @@ describe('Add/edit exception from rule details', () => {
       cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 2);
 
       // click on show comments
-      showComments();
+      clickOnShowComments();
 
       // copy the first comment to clipboard
-      copyCommentToClipboard();
+      clickCopyCommentToClipboard('new comment');
     });
     it('Edits an exception item', () => {
       const NEW_ITEM_NAME = 'Exception item-EDITED';
