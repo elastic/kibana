@@ -387,6 +387,19 @@ export const mockBrowserFields: BrowserFields = {
       },
     },
   },
+  kibana: {
+    fields: {
+      'kibana.alert.case_ids': {
+        name: 'kibana.alert.case_ids',
+        type: 'string',
+        searchable: true,
+        aggregatable: true,
+        readFromDocValues: true,
+        category: 'kibana',
+        format: 'string',
+      },
+    },
+  },
   source: {
     fields: {
       'source.ip': {
