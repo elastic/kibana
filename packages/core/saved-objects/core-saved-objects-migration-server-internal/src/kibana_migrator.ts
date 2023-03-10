@@ -189,12 +189,11 @@ export class KibanaMigrator implements IKibanaMigrator {
     const typeIndexMap = indexMapToTypeIndexMap(indexMap);
 
     try {
-      const typeIndexDistribution = await checkTypeIndexDistribution(
-        this.client,
-        typeIndexMap
-      );
+      const typeIndexDistribution = await checkTypeIndexDistribution(this.client, typeIndexMap);
 
-      const relocated = Object.entries(typeIndexDistribution).filter(([, { status }]) => status === TypeStatus.Moved);
+      const relocated = Object.entries(typeIndexDistribution).filter(
+        ([, { status }]) => status === TypeStatus.Moved
+      );
       relocated.forEach(([, { currentIndex, targetIndex }]) => {
         // we still want to run migrators for indices that no longer have any SO type assigned to them
         migratorIndices.add(currentIndex!);
@@ -205,12 +204,10 @@ export class KibanaMigrator implements IKibanaMigrator {
       const indicesWithMovingTypes = Array.from(indicesWithMovingTypesSet);
       readyToReindexDefers = createMultiPromiseDefer(indicesWithMovingTypes);
       doneReindexingDefers = createMultiPromiseDefer(indicesWithMovingTypes);
-
     } catch (error) {
       this.log.fatal('Cannot query the meta information of the main saved object index');
       throw error;
     }
-
 
     const migrators = Array.from(migratorIndices).map((indexName, i) => {
       return {

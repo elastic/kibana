@@ -768,7 +768,11 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
     if (Either.isRight(res)) {
       if (Option.isSome(stateP.sourceIndex)) {
         // this migrator's source index exist, reindex its entries
-        return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT', sourceIndex: stateP.sourceIndex as Option.Some<string> };
+        return {
+          ...stateP,
+          controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT',
+          sourceIndex: stateP.sourceIndex as Option.Some<string>,
+        };
       } else {
         // this migrator's source index did NOT exist, this migrator does not need to reindex anything (other might need to)
         return { ...stateP, controlState: 'DONE_REINDEXING_SYNC' };
