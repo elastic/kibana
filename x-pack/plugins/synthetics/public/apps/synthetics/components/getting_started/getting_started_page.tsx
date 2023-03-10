@@ -77,7 +77,7 @@ export const GettingStartedPage = () => {
                   {SELECT_DIFFERENT_MONITOR}
                 </EuiLink>
                 {i18n.translate('xpack.synthetics.gettingStarted.createSingle.description', {
-                  defaultMessage: ' to get started with Elastic Synthetics Monitoring',
+                  defaultMessage: ' to get started with Elastic Synthetics Monitoring.',
                 })}
               </EuiText>
               <EuiSpacer />
