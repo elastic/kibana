@@ -20,7 +20,7 @@ import { isArray } from 'lodash/fp';
 import React from 'react';
 import type { RawBucket } from '@kbn/securitysolution-grouping';
 import { GenericBuckets } from '@kbn/securitysolution-grouping/src';
-import { PopoverItems } from './popover_items';
+import { PopoverItems } from '../popover_items';
 import type { AlertsGroupingAggregation } from './types';
 export const getSelectedGroupButtonContent = (
   selectedGroup: string,

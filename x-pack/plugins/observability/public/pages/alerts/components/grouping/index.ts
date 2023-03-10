@@ -11,6 +11,7 @@ export * from './group_stats';
 export * from './group_panel_renderers';
 export * from './group_stats';
 export * from './query_builder';
+export * from './alerts_grouping';
 export const getDefaultGroupingOptions = (): GroupOption[] => {
   return [
     {

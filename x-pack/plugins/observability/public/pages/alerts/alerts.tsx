@@ -13,17 +13,17 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useHasData } from '../../hooks/use_has_data';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useGetUserCasesPermissions } from '../../hooks/use_get_user_cases_permissions';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
+import { useToasts } from '../../hooks/use_toast';
 import { ObservabilityAlertSearchBar } from '../../components/shared/alert_search_bar';
 import { LoadingObservability } from '../../components/loading_observability';
 import { renderRuleStats, RuleStatsState } from './components/rule_stats';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { AlertsGrouping } from './alerts_grouping';
-import { useToasts } from '../../../../hooks/use_toast';
+import { AlertsGrouping } from './components/grouping';
 import {
   alertSearchBarStateContainer,
   Provider,

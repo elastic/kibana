@@ -18,14 +18,14 @@ import type {
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useQueryAlerts } from '../../../../hooks/use_query_alerts';
-import { AlertsGroupingAggregation } from './grouping/types';
+import { AlertsGroupingAggregation } from './types';
 import {
   getAlertsGroupingQuery,
   getDefaultGroupingOptions,
   getSelectedGroupBadgeMetrics,
   getSelectedGroupCustomMetrics,
   getSelectedGroupButtonContent,
-} from './grouping';
+} from '.';
 
 interface OwnProps {
   dataView: DataView | null;
@@ -139,6 +139,7 @@ export const AlertsGroupingComponent: React.FC<OwnProps> = ({
       alertsGroupsData?.aggregations,
       getGrouping,
       groupSelector,
+      isLoading,
       renderChildComponent,
       selectedGroup,
     ]
