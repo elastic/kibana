@@ -17,8 +17,10 @@ import {
   EuiLink,
   EuiText,
 } from '@elastic/eui';
+import { useMlKibana } from '../../../../../../../contexts/kibana';
 
 export const FunctionHelpPopover: FC = memo(() => {
+  const { services: { docLinks } } = useMlKibana();
   const [isHelpOpen, setIsHelpOpen] = useState(false);
 
   const onHelpClick = () => setIsHelpOpen((prevIsHelpOpen) => !prevIsHelpOpen);
@@ -174,7 +176,7 @@ export const FunctionHelpPopover: FC = memo(() => {
               defaultMessage: 'Learn more about',
             })}
             &nbsp;
-            <EuiLink href="https://www.elastic.co/guide/en/machine-learning/current/ml-functions.html">
+            <EuiLink href={docLinks.links.ml.anomalyDetectionFunctions}>
               <FormattedMessage
                 id="xpack.ml.anomalyDetection.functions.learnMoreLink"
                 defaultMessage="functions."
