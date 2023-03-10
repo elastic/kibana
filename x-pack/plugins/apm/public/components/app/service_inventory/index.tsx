@@ -58,8 +58,8 @@ function useServicesMainStatisticsFetcher() {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const dataSourceOptions = usePreferredDataSourceAndBucketSize({
-    rangeFrom,
-    rangeTo,
+    start,
+    end,
     kuery,
     type: ApmDocumentType.ServiceTransactionMetric,
     numBuckets: 20,
@@ -141,8 +141,8 @@ function useServicesDetailedStatisticsFetcher({
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const dataSourceOptions = usePreferredDataSourceAndBucketSize({
-    rangeFrom,
-    rangeTo,
+    start,
+    end,
     kuery,
     type: ApmDocumentType.ServiceTransactionMetric,
     numBuckets: 20,
