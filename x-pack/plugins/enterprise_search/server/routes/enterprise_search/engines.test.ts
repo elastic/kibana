@@ -41,7 +41,7 @@ describe('engines routes', () => {
 
     it('creates a request to the ent-search module', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/engines',
+        path: '/_application/search_application',
       });
     });
 
@@ -82,7 +82,7 @@ describe('engines routes', () => {
 
     it('creates a request to the ent-search module', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/engines/:engine_name',
+        path: '/_application/search_application/:engine_name',
       });
     });
 
@@ -117,7 +117,7 @@ describe('engines routes', () => {
 
     it('creates a request to the ent-search module', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/engines/:engine_name',
+        path: '/_application/search_application/:engine_name',
       });
     });
 
@@ -168,7 +168,7 @@ describe('engines routes', () => {
 
     it('creates a request to the ent-search module', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/engines/:engine_name',
+        path: '/_application/search_application/:engine_name',
       });
     });
 
@@ -202,7 +202,7 @@ describe('engines routes', () => {
     });
     it('creates a request to enterprise search', () => {
       expect(mockRequestHandler.createRequest).toHaveBeenCalledWith({
-        path: '/api/engines/:engine_name/_search',
+        path: '/:engine_name/_search',
       });
     });
 
