@@ -2,6 +2,7 @@
 xpack.serverless.plugin.enabled: true
 xpack.fleet.enableExperimental: ['fleetServerStandalone']
 
+# Management team plugins
 xpack.upgrade_assistant.enabled: false
 xpack.rollup.enabled: false
 xpack.watcher.enabled: false
