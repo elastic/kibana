@@ -21,8 +21,13 @@ export const categoryHasFields = (category: Partial<BrowserField>): boolean =>
 export const getFieldCount = (category: Partial<BrowserField> | undefined): number =>
   category != null && category.fields != null ? Object.keys(category.fields).length : 0;
 
-const matchesSystemField = (field: string, searchTerm: string): boolean =>
-  field === ALERT_CASE_IDS && CASES.toLocaleLowerCase().includes(searchTerm.toLocaleLowerCase());
+const matchesSystemField = (field: string, searchTerm: string): boolean => {
+  const casesLabelI18n = CASES.toLocaleLowerCase();
+  const casesLabel = 'cases';
+  const term = searchTerm.toLocaleLowerCase();
+
+  return field === ALERT_CASE_IDS && (casesLabelI18n.includes(term) || casesLabel.includes(term));
+};
 
 /**
  * Filters the specified `BrowserFields` to return a new collection where every
