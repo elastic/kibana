@@ -15,7 +15,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView, ISearchSource } from '@kbn/data-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DiscoverServices } from '../../../../build_services';
-import { updateSearchSource } from '../../utils/update_search_source';
 
 const container = document.createElement('div');
 let isOpen = false;
@@ -59,19 +58,12 @@ export function AlertsPopover({
    * Provides the default parameters used to initialize the new rule
    */
   const getParams = useCallback(() => {
-    const nextSearchSource = searchSource.createCopy();
-    updateSearchSource(nextSearchSource, true, {
-      dataView: searchSource.getField('index')!,
-      services,
-      sort: [],
-    });
-
     return {
       searchType: 'searchSource',
-      searchConfiguration: nextSearchSource.getSerializedFields(),
+      searchConfiguration: searchSource.getSerializedFields(),
       savedQueryId,
     };
-  }, [savedQueryId, searchSource, services]);
+  }, [savedQueryId, searchSource]);
 
   const discoverMetadata: EsQueryAlertMetaData = useMemo(
     () => ({

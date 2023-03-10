@@ -210,6 +210,13 @@ export function getDiscoverStateContainer({
 
   const internalStateContainer = getInternalStateContainer();
 
+  const dataStateContainer = getDataStateContainer({
+    services,
+    searchSessionManager,
+    getAppState: appStateContainer.getState,
+    getSavedSearch: savedSearchContainer.get,
+  });
+
   const pauseAutoRefreshInterval = async (dataView: DataView) => {
     if (dataView && (!dataView.isTimeBased() || dataView.type === DataViewType.ROLLUP)) {
       const state = stateStorage.get<QueryState>(GLOBAL_STATE_URL_KEY);
@@ -223,17 +230,6 @@ export function getDiscoverStateContainer({
     }
   };
 
-  const dataStateContainer = getDataStateContainer({
-    services,
-    searchSessionManager,
-    getAppState: appStateContainer.getState,
-    getSavedSearch: () => {
-      // Simulating the behavior of the removed hook to always create a clean searchSource child that
-      // we then use to add query, filters, etc., will be removed soon.
-      const actualSavedSearch = savedSearchContainer.get();
-      return { ...actualSavedSearch, searchSource: actualSavedSearch.searchSource.createChild() };
-    },
-  });
   const setDataView = (dataView: DataView) => {
     internalStateContainer.transitions.setDataView(dataView);
     pauseAutoRefreshInterval(dataView);
