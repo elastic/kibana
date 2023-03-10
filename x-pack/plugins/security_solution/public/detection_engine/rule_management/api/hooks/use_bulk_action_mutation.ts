@@ -57,10 +57,8 @@ export const useBulkActionMutation = (
           if (updatedRules) {
             // We have a list of updated rules, no need to invalidate all
             updateRulesCache(updatedRules);
-          } else {
-            // We failed to receive the list of update rules, invalidate all
-            invalidateFindRulesQuery();
           }
+          invalidateFindRulesQuery({ refetchType: 'none' });
           break;
         }
         case BulkActionType.delete:

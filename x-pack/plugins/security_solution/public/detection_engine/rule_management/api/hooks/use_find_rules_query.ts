@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { UseQueryOptions } from '@tanstack/react-query';
+import type { InvalidateQueryFilters, UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../common/constants';
@@ -54,9 +54,6 @@ export const useFindRulesQuery = (
     },
     {
       ...DEFAULT_QUERY_OPTIONS,
-      // Mark this query as immediately stale helps to avoid problems related to filtering.
-      // e.g. enabled and disabled state filter require data update which happens at the backend side
-      staleTime: 0,
       ...queryOptions,
     }
   );
@@ -72,15 +69,16 @@ export const useFindRulesQuery = (
 export const useInvalidateFindRulesQuery = () => {
   const queryClient = useQueryClient();
 
-  return useCallback(() => {
-    /**
-     * Invalidate all queries that start with FIND_RULES_QUERY_KEY. This
-     * includes the in-memory query cache and paged query cache.
-     */
-    queryClient.invalidateQueries(FIND_RULES_QUERY_KEY, {
-      refetchType: 'active',
-    });
-  }, [queryClient]);
+  return useCallback(
+    (filters: InvalidateQueryFilters = { refetchType: 'active' }) => {
+      /**
+       * Invalidate all queries that start with FIND_RULES_QUERY_KEY. This
+       * includes the in-memory query cache and paged query cache.
+       */
+      queryClient.invalidateQueries(FIND_RULES_QUERY_KEY, filters);
+    },
+    [queryClient]
+  );
 };
 
 /**
