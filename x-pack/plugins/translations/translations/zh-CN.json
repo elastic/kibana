@@ -17051,7 +17051,6 @@
     "xpack.infra.nodeDetails.yes": "是",
     "xpack.infra.nodesToWaffleMap.groupsWithGroups.allName": "全部",
     "xpack.infra.nodesToWaffleMap.groupsWithNodes.allName": "全部",
-    "xpack.infra.notFoundPage.noContentFoundErrorTitle": "未找到任何内容",
     "xpack.infra.openView.actionNames.deleteConfirmation": "删除视图？",
     "xpack.infra.openView.cancelButton": "取消",
     "xpack.infra.openView.columnNames.actions": "操作",
