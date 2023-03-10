@@ -82,6 +82,7 @@ export function ProfilingAppPageTemplate({
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
+        tabs,
       }}
       restrictWidth={restrictWidth}
       pageSectionProps={{

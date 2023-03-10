@@ -68,6 +68,10 @@ import { ML_ALERT_TYPES } from '../common/constants/alerts';
 import { alertingRoutes } from './routes/alerting';
 import { registerCollector } from './usage';
 import { SavedObjectsSyncService } from './saved_objects/sync_task';
+import {
+  CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
+  CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
+} from '../common/constants/cases';
 
 export type MlPluginSetup = SharedServices;
 export type MlPluginStart = void;
@@ -249,6 +253,16 @@ export class MlServerPlugin
 
     if (plugins.usageCollection) {
       registerCollector(plugins.usageCollection, coreSetup.savedObjects.getKibanaIndex());
+    }
+
+    if (plugins.cases) {
+      plugins.cases.attachmentFramework.registerPersistableState({
+        id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_SWIMLANE,
+      });
+
+      plugins.cases.attachmentFramework.registerPersistableState({
+        id: CASE_ATTACHMENT_TYPE_ID_ANOMALY_EXPLORER_CHARTS,
+      });
     }
 
     return sharedServicesProviders;

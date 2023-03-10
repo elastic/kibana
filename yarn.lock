@@ -28386,10 +28386,10 @@ vega-expression@^5.0.1, vega-expression@~5.0.0, vega-expression@~5.0.1:
     "@types/estree" "^1.0.0"
     vega-util "^1.17.1"
 
-vega-force@~4.1.1:
-  version "4.1.1"
-  resolved "https://registry.yarnpkg.com/vega-force/-/vega-force-4.1.1.tgz#27bffa96bda293f27d2a2492c2cbf99d49fec77e"
-  integrity sha512-T6fJAUz9zdXf2qj2Hz0VlmdtaY7eZfcKNazhUV8hza4R3F9ug6r/hSrdovfc9ExmbUjL5iyvDUsf63r8K3/wVQ==
+vega-force@~4.2.0:
+  version "4.2.0"
+  resolved "https://registry.yarnpkg.com/vega-force/-/vega-force-4.2.0.tgz#5374d0dbac674c92620a9801e12b650b0966336a"
+  integrity sha512-aE2TlP264HXM1r3fl58AvZdKUWBNOGkIvn4EWyqeJdgO2vz46zSU7x7TzPG4ZLuo44cDRU5Ng3I1eQk23Asz6A==
   dependencies:
     d3-force "^3.0.0"
     vega-dataflow "^5.7.5"
@@ -28603,10 +28603,10 @@ vega-transforms@~4.10.1:
     vega-time "^2.1.1"
     vega-util "^1.17.1"
 
-vega-typings@~0.23.0:
-  version "0.23.0"
-  resolved "https://registry.yarnpkg.com/vega-typings/-/vega-typings-0.23.0.tgz#5b001f5b51a477e67d2446ef9b964e1dac48a20e"
-  integrity sha512-10ZRRGoUZoQLS5jMiIFhSZMDc3UkPhDP2VMUN/oHZXElvPCGjfjvgmiC6XzvvN4sRXdccMcZX1lZPoyYPERVkA==
+vega-typings@~0.24.0:
+  version "0.24.0"
+  resolved "https://registry.yarnpkg.com/vega-typings/-/vega-typings-0.24.0.tgz#e659286c43c63b68cf29a3131360829d129eeb84"
+  integrity sha512-FFYf67Dn5VNPbYoYHgO2T9Z1I81qcwrXjwKEe0rlJk0MX7CNWPJr9Y3VZEWfxyEx7J9anAm69hGIv0Ehb2G85A==
   dependencies:
     "@types/geojson" "^7946.0.10"
     vega-event-selector "^3.0.1"
@@ -28661,17 +28661,17 @@ vega-wordcloud@~4.1.4:
     vega-statistics "^1.8.1"
     vega-util "^1.17.1"
 
-vega@^5.23.0:
-  version "5.23.0"
-  resolved "https://registry.yarnpkg.com/vega/-/vega-5.23.0.tgz#7e3899b65f1a84095545b74dcf71289890844c49"
-  integrity sha512-FjgDD/VmL9yl36ByLq66mEusDF/wZGRktK4JA5MkF68hQqj3F8BFMDDVNwCASuwY97H6wr7kw/RFqNI6XocjJQ==
+vega@^5.24.0:
+  version "5.24.0"
+  resolved "https://registry.yarnpkg.com/vega/-/vega-5.24.0.tgz#47ccf9288d06cf0be6f1e83bf38647de2bda3ca8"
+  integrity sha512-eahZ+4eryPywLuq9BpgcwWMyqiuVD3FAh7eMB3koOp7peQ4scPxAZxWdLwnh0t0kah+oE2QcXi2EHS4BabsMPg==
   dependencies:
     vega-crossfilter "~4.1.1"
     vega-dataflow "~5.7.5"
     vega-encode "~4.9.1"
     vega-event-selector "~3.0.1"
     vega-expression "~5.0.1"
-    vega-force "~4.1.1"
+    vega-force "~4.2.0"
     vega-format "~1.1.1"
     vega-functions "~5.13.1"
     vega-geo "~4.4.1"
@@ -28687,7 +28687,7 @@ vega@^5.23.0:
     vega-statistics "~1.8.1"
     vega-time "~2.1.1"
     vega-transforms "~4.10.1"
-    vega-typings "~0.23.0"
+    vega-typings "~0.24.0"
     vega-util "~1.17.1"
     vega-view "~5.11.1"
     vega-view-transforms "~4.5.9"
