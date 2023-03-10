@@ -22,11 +22,11 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { getBeforeSetup, setGlobalDate } from './lib';
 import { bulkMarkApiKeysForInvalidation } from '../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
-import { migrateRuleHook } from '../lib';
+import { migrateLegacyActions } from '../lib';
 
-jest.mock('../lib/migrate_rule_hook', () => {
+jest.mock('../lib/migrate_legacy_actions', () => {
   return {
-    migrateRuleHook: jest.fn(),
+    migrateLegacyActions: jest.fn(),
   };
 });
 
@@ -2750,6 +2750,8 @@ describe('update()', () => {
       },
     });
 
-    expect(migrateRuleHook).toHaveBeenCalledWith(expect.any(Object), { ruleId: '1' });
+    expect(migrateLegacyActions).toHaveBeenCalledWith(expect.any(Object), {
+      rule: expect.objectContaining({ id: '1' }),
+    });
   });
 });

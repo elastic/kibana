@@ -18,3 +18,4 @@ export { recoverRuleAlerts } from './recover_rule_alerts';
 export { addUuid } from './add_uuid';
 export { formatRulesHook } from './format_rules_hook';
 export { migrateRuleHook } from './migrate_rule_hook';
+export { migrateLegacyActions } from './migrate_legacy_actions';
