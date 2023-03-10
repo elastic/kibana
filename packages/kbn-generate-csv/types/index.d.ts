@@ -7,8 +7,6 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import type { IUiSettingsClient, Logger } from '@kbn/core/server';
-import { createEscapeValue } from '@kbn/data-plugin/common';
 
 const { PDF_JOB_TYPE, PDF_JOB_TYPE_V2, PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } = jobTypes;
 
@@ -140,27 +138,6 @@ export const UNVERSIONED_VERSION = '7.14.0';
 // FIXME: find a way to make these endpoints "generic" instead of hardcoded, as are the queued report export types
 export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv_searchsource`;
 
-export const CsvConfig = schema.object({
-  checkForFormulas: schema.boolean({ defaultValue: true }),
-  escapeFormulaValues: schema.boolean({ defaultValue: false }),
-  enablePanelActionDownload: schema.boolean({ defaultValue: true }),
-  maxSizeBytes: schema.oneOf([schema.number(), schema.byteSize()], {
-    defaultValue: ByteSizeValue.parse('10mb'),
-  }),
-  useByteOrderMarkEncoding: schema.boolean({ defaultValue: false }),
-  scroll: schema.object({
-    duration: schema.string({
-      defaultValue: '30s', // this value is passed directly to ES, so string only format is preferred
-      validate(value) {
-        if (!/^[0-9]+(d|h|m|s|ms|micros|nanos)$/.test(value)) {
-          return 'must be a duration string';
-        }
-      },
-    }),
-    size: schema.number({ defaultValue: 500 }),
-  }),
-});
-
 export type CsvConfigType = typeof CsvConfigType;
 
 export interface CsvExportSettings {
@@ -178,72 +155,6 @@ export interface CsvExportSettings {
   includeFrozen: boolean;
 }
 
-export const getExportSettings = async (
-  client: IUiSettingsClient,
-  config: CsvConfigType,
-  timezone: string | undefined,
-  logger: Logger
-): Promise<CsvExportSettings> => {
-  let setTimezone: string;
-  if (timezone) {
-    setTimezone = timezone;
-  } else {
-    // timezone in settings?
-    setTimezone = await client.get(UI_SETTINGS_DATEFORMAT_TZ);
-    if (setTimezone === 'Browser') {
-      // if `Browser`, hardcode it to 'UTC' so the export has data that makes sense
-      logger.warn(
-        `Kibana Advanced Setting "dateFormat:tz" is set to "Browser". Dates will be formatted as UTC to avoid ambiguity.`
-      );
-      setTimezone = 'UTC';
-    }
-  }
-
-  // Advanced Settings that affect search export + CSV
-  const [includeFrozen, separator, quoteValues] = await Promise.all([
-    client.get(UI_SETTINGS_SEARCH_INCLUDE_FROZEN),
-    client.get(UI_SETTINGS_CSV_SEPARATOR),
-    client.get(UI_SETTINGS_CSV_QUOTE_VALUES),
-  ]);
-
-  const escapeFormulaValues = config.escapeFormulaValues;
-  const escapeValue = createEscapeValue(quoteValues, escapeFormulaValues);
-  const bom = config.useByteOrderMarkEncoding ? CSV_BOM_CHARS : '';
-
-  return {
-    timezone: setTimezone,
-    scroll: {
-      size: config.scroll.size,
-      duration: config.scroll.duration,
-    },
-    bom,
-    includeFrozen,
-    separator,
-    maxSizeBytes: config.maxSizeBytes,
-    checkForFormulas: config.checkForFormulas,
-    escapeFormulaValues,
-    escapeValue,
-  };
-};
-
-interface TaskRunResult {
-  content_type: string | null;
-  csv_contains_formulas?: boolean;
-  max_size_reached?: boolean;
-  warnings?: string[];
-  metrics?: CsvMetrics;
-
-  /**
-   * When running a report task we may finish with warnings that were triggered
-   * by an error. We can pass the error code via the task run result to the
-   * task runner so that it can be recorded for telemetry.
-   *
-   * Alternatively, this field can be populated in the event that the task does
-   * not complete in the task runner's error handler.
-   */
-  error_code?: string;
-}
-
 export interface JobParams {
   searchSource: SerializedSearchSourceFields;
   columns?: string[];
@@ -257,6 +168,9 @@ export interface TaskPayloadCSV {
   headers: string;
   spaceId?: string;
   isDeprecated?: boolean;
+  objectType: string;
+  title: string;
+  version: string;
 }
 
 export interface CsvConfig {
@@ -279,8 +193,7 @@ export interface TaskRunResult {
   csv_contains_formulas?: boolean;
   max_size_reached?: boolean;
   warnings?: string[];
-  metrics?: CsvMetrics;
-
+  metrics?: CsvMetrics | TaskRunMetrics;
   /**
    * When running a report task we may finish with warnings that were triggered
    * by an error. We can pass the error code via the task run result to the
