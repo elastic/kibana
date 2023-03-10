@@ -56,6 +56,7 @@ interface Props {
   chartCriterion: Partial<Criterion>;
   sourceId: string;
   showThreshold: boolean;
+  executionTimestamp?: number;
 }
 
 export const CriterionPreview: React.FC<Props> = ({
@@ -63,6 +64,7 @@ export const CriterionPreview: React.FC<Props> = ({
   chartCriterion,
   sourceId,
   showThreshold,
+  executionTimestamp,
 }) => {
   const chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset | null = useMemo(() => {
     const { field, comparator, value } = chartCriterion;
@@ -106,6 +108,7 @@ export const CriterionPreview: React.FC<Props> = ({
       threshold={ruleParams.count}
       chartAlertParams={chartAlertParams}
       showThreshold={showThreshold}
+      executionTimestamp={executionTimestamp}
     />
   );
 };
@@ -116,6 +119,7 @@ interface ChartProps {
   threshold?: Threshold;
   chartAlertParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   showThreshold: boolean;
+  executionTimestamp?: number;
 }
 
 const CriterionPreviewChart: React.FC<ChartProps> = ({
@@ -124,6 +128,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
   threshold,
   chartAlertParams,
   showThreshold,
+  executionTimestamp,
 }) => {
   const { uiSettings } = useKibana().services;
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
@@ -138,6 +143,7 @@ const CriterionPreviewChart: React.FC<ChartProps> = ({
     sourceId,
     ruleParams: chartAlertParams,
     buckets,
+    executionTimestamp,
   });
 
   useDebounce(

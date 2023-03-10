@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import { lazy } from 'react';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   PartialRuleParams,
@@ -33,6 +34,7 @@ export function createLogThresholdRuleType(
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.logsThreshold}`;
     },
+    alertDetailsAppSection: lazy(() => import('./components/alert_details_app_section')),
     ruleParamsExpression,
     validate: validateExpression,
     defaultActionMessage: i18n.translate(

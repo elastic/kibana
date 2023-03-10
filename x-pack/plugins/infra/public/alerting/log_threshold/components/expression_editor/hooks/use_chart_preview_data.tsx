@@ -22,11 +22,16 @@ interface Options {
   sourceId: string;
   ruleParams: GetLogAlertsChartPreviewDataAlertParamsSubset;
   buckets: number;
+  executionTimestamp?: number;
 }
 
-export const useChartPreviewData = ({ sourceId, ruleParams, buckets }: Options) => {
+export const useChartPreviewData = ({
+  sourceId,
+  ruleParams,
+  buckets,
+  executionTimestamp,
+}: Options) => {
   const { http } = useKibana().services;
-
   const [chartPreviewData, setChartPreviewData] = useState<
     GetLogAlertsChartPreviewDataSuccessResponsePayload['data']['series']
   >([]);
@@ -36,7 +41,13 @@ export const useChartPreviewData = ({ sourceId, ruleParams, buckets }: Options) 
       cancelPreviousOn: 'creation',
       createPromise: async () => {
         setHasError(false);
-        return await callGetChartPreviewDataAPI(sourceId, http!.fetch, ruleParams, buckets);
+        return await callGetChartPreviewDataAPI(
+          sourceId,
+          http!.fetch,
+          ruleParams,
+          buckets,
+          executionTimestamp
+        );
       },
       onResolve: ({ data: { series } }) => {
         setHasError(false);
@@ -66,7 +77,8 @@ export const callGetChartPreviewDataAPI = async (
   sourceId: string,
   fetch: HttpHandler,
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
-  buckets: number
+  buckets: number,
+  executionTimestamp?: number
 ) => {
   const response = await fetch(LOG_ALERTS_CHART_PREVIEW_DATA_PATH, {
     method: 'POST',
@@ -76,6 +88,7 @@ export const callGetChartPreviewDataAPI = async (
           logView: { type: 'log-view-reference', logViewId: sourceId },
           alertParams,
           buckets,
+          executionTimestamp,
         },
       })
     ),

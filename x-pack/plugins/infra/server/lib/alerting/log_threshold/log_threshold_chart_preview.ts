@@ -35,7 +35,8 @@ export async function getChartPreviewData(
   resolvedLogView: ResolvedLogView,
   callWithRequest: KibanaFramework['callWithRequest'],
   alertParams: GetLogAlertsChartPreviewDataAlertParamsSubset,
-  buckets: number
+  buckets: number,
+  executionTimestamp?: number
 ) {
   const { indices, timestampField, runtimeMappings } = resolvedLogView;
   const { groupBy, timeSize, timeUnit } = alertParams;
@@ -47,11 +48,11 @@ export async function getChartPreviewData(
     timeSize: timeSize * buckets,
   };
 
-  const executionTimestamp = Date.now();
+  const executionTimestampMS = executionTimestamp ?? Date.now();
   const { rangeFilter } = buildFiltersFromCriteria(
     expandedAlertParams,
     timestampField,
-    executionTimestamp
+    executionTimestamp ?? Date.now()
   );
 
   const query = isGrouped
@@ -60,14 +61,14 @@ export async function getChartPreviewData(
         timestampField,
         indices,
         runtimeMappings,
-        executionTimestamp
+        executionTimestampMS
       )
     : getUngroupedESQuery(
         expandedAlertParams,
         timestampField,
         indices,
         runtimeMappings,
-        executionTimestamp
+        executionTimestampMS
       );
 
   if (!query) {
