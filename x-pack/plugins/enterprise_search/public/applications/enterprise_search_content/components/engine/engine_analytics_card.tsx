@@ -5,19 +5,30 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { EuiCard, EuiFlexItem, EuiIcon, EuiStat, EuiText, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EngineAnalyticsLens,
+  filterBy,
+  lensDataOutputProps,
+} from './engines_lens/engine_analytics_lens';
+import { TimeRange } from '@kbn/es-query';
+import { useValues } from 'kea';
+import { EngineAnalyticsLogic } from './engine_analytics_logic';
 
-import { getIcon } from './engines_lens/lens_data';
+export const getIcon = (percentage: number): string => {
+  return percentage >= 0 ? 'sortUp' : 'sortDown';
+};
 
-interface EngineAnalyticsCardProps {
+interface EngineAnalyticsCardProps extends lensDataOutputProps {
   cardDisplay: 'success' | undefined;
   cardTitle: string;
   onClick: () => void;
   percentage: number;
   queries: number;
+  timeRange: TimeRange;
 }
 export const EngineAnalyticsCard: React.FC<EngineAnalyticsCardProps> = ({
   cardDisplay,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useEuiTheme } from '@elastic/eui';
 import { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import {
@@ -15,8 +16,9 @@ import {
 } from '@kbn/lens-plugin/public';
 import { MetricVisualizationState } from '@kbn/lens-plugin/public/visualizations/metric/visualization';
 
+
 export const queries = {
-  chartColor: '#6092C0',
+  chartColor: '#54B399',
   label: i18n.translate(
     'xpack.enterpriseSearch.content.engine.overview.analytics.lens.queries.chart.title',
     {
@@ -25,7 +27,7 @@ export const queries = {
   ),
 };
 export const withNoResults = {
-  chartColor: '#54B399',
+  chartColor: '$euiColorVis1',
   label: i18n.translate(
     'xpack.enterpriseSearch.content.engine.overview.analytics.lens.withNoResults.chart.title',
     {
@@ -74,7 +76,7 @@ export const getLensXYLensAttributes = (
           params: { interval: 'auto' },
           scale: 'ordinal',
           sourceField: dataView?.timeFieldName!,
-        } as DateHistogramIndexPatternColumn,
+        },
       },
     },
     dataView!
@@ -99,7 +101,7 @@ export const getLensXYLensAttributes = (
       datasourceStates: {
         formBased: {
           layers: {
-            layer1: dataLayer!,
+            layer1: dataLayer??dataLayer,
           },
         },
       },
@@ -119,7 +121,7 @@ export const getLensXYLensAttributes = (
             yConfig: [
               {
                 forAccessor: 'col2',
-                color: isShowingTotalQueries ? withNoResults.chartColor : queries.chartColor,
+                color: !isShowingTotalQueries ? withNoResults.chartColor : queries.chartColor,
               },
             ],
           },
@@ -240,5 +242,5 @@ export const getMetricLensAttributes = (
         type: 'index-pattern',
       },
     ],
-  } as TypedLensByValueInput['attributes'];
+  };
 };

@@ -9,7 +9,7 @@ import { kea, MakeLogicType } from 'kea';
 import { OnTimeChangeProps } from '@elastic/eui';
 
 const DEFAULT_TIME = {
-  from: 'now-7d',
+  from: 'now-70d',
   to: 'now',
 };
 

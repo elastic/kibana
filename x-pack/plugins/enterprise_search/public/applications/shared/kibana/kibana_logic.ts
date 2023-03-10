@@ -56,8 +56,7 @@ interface KibanaLogicProps {
   formula?: FormulaPublicApi;
   lens?: LensPublicStart;
 }
-export interface KibanaValues
-  extends Omit<KibanaLogicProps, 'cloud' | 'defaultDataView' | 'formula' | 'lens'> {
+export interface KibanaValues extends Omit<KibanaLogicProps, 'cloud'> {
   cloud: Partial<CloudSetup>;
   isCloud: boolean;
   lens: LensPublicStart;
