@@ -77,7 +77,7 @@ export const GettingStartedPage = () => {
                   {SELECT_DIFFERENT_MONITOR}
                 </EuiLink>
                 {i18n.translate('xpack.synthetics.gettingStarted.createSingle.description', {
-                  defaultMessage: ' to get started with Elastic Synthetics Monitoring',
+                  defaultMessage: ' to get started with Elastic Synthetics Monitoring.',
                 })}
               </EuiText>
               <EuiSpacer />
@@ -191,7 +191,7 @@ const CREATE_LOCATION_LABEL = i18n.translate(
 const CREATE_LOCATION_DESCRIPTION = (
   <FormattedMessage
     id="xpack.synthetics.gettingStarted.createLocationDescription"
-    defaultMessage="To start creating monitors, you'll first need to create a {link}. Private locations allow you to run monitors from your own premises. They require an Elastic agent and Agent policy which you can control and maintain via Fleet."
+    defaultMessage="To start creating monitors, you first need to create a {link}. Private locations allow you to run monitors from your own premises. They require an Elastic agent and Agent policy which you can control and maintain via Fleet."
     values={{
       link: (
         <EuiLink
