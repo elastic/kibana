@@ -10,12 +10,12 @@ import { alertCommentWithIndices, basicAttachment, basicCase } from '../../../co
 import type { AppMockRenderer } from '../../../common/mock';
 import { createAppMockRenderer } from '../../../common/mock';
 import type { Case } from '../../../../common';
-import { CaseViewAttachments } from './case_view_attachments';
-import { useGetCaseAttachments } from '../../../containers/use_get_case_attachments';
+import { CaseViewFiles } from './case_view_files';
+import { useGetCaseFiles } from '../../../containers/use_get_case_files';
 
-jest.mock('../../../containers/use_get_case_attachments');
+jest.mock('../../../containers/use_get_case_files');
 
-const useGetCaseAttachmentsMock = useGetCaseAttachments as jest.Mock;
+const useGetCaseFilesMock = useGetCaseFiles as jest.Mock;
 
 const caseData: Case = {
   ...basicCase,
@@ -24,7 +24,7 @@ const caseData: Case = {
 
 describe('Case View Page files tab', () => {
   let appMockRender: AppMockRenderer;
-  useGetCaseAttachmentsMock.mockReturnValue({
+  useGetCaseFilesMock.mockReturnValue({
     data: {
       pageOfItems: [basicAttachment],
       availableTypes: [basicAttachment.mimeType],
@@ -42,7 +42,7 @@ describe('Case View Page files tab', () => {
   });
 
   it('should render the utility bar for the attachments table', async () => {
-    const result = appMockRender.render(<CaseViewAttachments caseData={caseData} />);
+    const result = appMockRender.render(<CaseViewFiles caseData={caseData} />);
 
     expect(await result.findByTestId('case-detail-upload-file')).toBeInTheDocument();
     expect(await result.findByTestId('case-detail-search-file')).toBeInTheDocument();
@@ -50,13 +50,13 @@ describe('Case View Page files tab', () => {
   });
 
   it('should render the attachments table', async () => {
-    const result = appMockRender.render(<CaseViewAttachments caseData={caseData} />);
+    const result = appMockRender.render(<CaseViewFiles caseData={caseData} />);
 
     expect(await result.findByTestId('attachments-table')).toBeInTheDocument();
   });
 
   it('should disable search and filter if there are no attachments', async () => {
-    useGetCaseAttachmentsMock.mockReturnValue({
+    useGetCaseFilesMock.mockReturnValue({
       data: {
         pageOfItems: [],
         availableTypes: [],
@@ -65,7 +65,7 @@ describe('Case View Page files tab', () => {
       isLoading: false,
     });
 
-    const result = appMockRender.render(<CaseViewAttachments caseData={caseData} />);
+    const result = appMockRender.render(<CaseViewFiles caseData={caseData} />);
 
     expect(await result.findByTestId('case-detail-search-file')).toHaveAttribute('disabled');
     expect(await result.findByTestId('case-detail-select-file-type')).toHaveAttribute('disabled');

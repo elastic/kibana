@@ -14,34 +14,34 @@ import { useQuery } from '@tanstack/react-query';
 import type { ServerError } from '../types';
 
 import { APP_ID } from '../../common';
-import { useToasts } from '../common/lib/kibana';
+import { useCasesToast } from '../common/use_cases_toast';
 import { CASES_FILE_KINDS } from '../files';
 import { casesQueriesKeys } from './constants';
 import * as i18n from './translations';
 
-export interface GetCaseAttachmentsParams {
+export interface GetCaseFilesParams {
   caseId: string;
   page: number;
   perPage: number;
   searchTerm?: string;
 }
 
-export const useGetCaseAttachments = ({
+export const useGetCaseFiles = ({
   caseId,
   page,
   perPage,
   searchTerm,
-}: GetCaseAttachmentsParams): UseQueryResult<{ files: FileJSON[]; total: number }> => {
-  const toasts = useToasts();
+}: GetCaseFilesParams): UseQueryResult<{ files: FileJSON[]; total: number }> => {
+  const { showErrorToast } = useCasesToast();
   const { client: filesClient } = useFilesContext();
 
   return useQuery(
-    casesQueriesKeys.caseAttachments({ caseId, page, perPage, searchTerm }),
+    casesQueriesKeys.caseFiles({ caseId, page, perPage, searchTerm }),
     () => {
       return filesClient.list({
         kind: CASES_FILE_KINDS[APP_ID].id,
         page: page + 1,
-        ...(searchTerm && { name: searchTerm }),
+        ...(searchTerm && { name: `*${searchTerm}*` }),
         perPage,
         meta: { caseId },
       });
@@ -49,12 +49,7 @@ export const useGetCaseAttachments = ({
     {
       keepPreviousData: true,
       onError: (error: ServerError) => {
-        if (error.name !== 'AbortError') {
-          toasts.addError(
-            error.body && error.body.message ? new Error(error.body.message) : error,
-            { title: i18n.ERROR_TITLE }
-          );
-        }
+        showErrorToast(error, { title: i18n.ERROR_TITLE });
       },
     }
   );

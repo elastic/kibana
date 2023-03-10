@@ -27,22 +27,37 @@ import {
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 import { FileImage } from '@kbn/shared-ux-file-image';
 
+import * as i18n from './translations';
 import { APP_ID } from '../../../common';
 import { CASES_FILE_KINDS } from '../../files';
 
-interface AttachmentsTableProps {
+const EmptyFilesTable = () => (
+  <EuiEmptyPrompt
+    title={<h3>{'No attachments available'}</h3>}
+    data-test-subj="files-table-empty"
+    titleSize="xs"
+    actions={
+      <EuiButton
+        size="s"
+        iconType="plusInCircle"
+        data-test-subj="case-detail-files-table-upload-file"
+      >
+        {i18n.ADD_FILE}
+      </EuiButton>
+    }
+  />
+);
+
+EmptyFilesTable.displayName = 'EmptyFilesTable';
+
+interface FilesTableProps {
   isLoading: boolean;
   items: FileJSON[];
   onChange: EuiBasicTableProps<FileJSON>['onChange'];
   pagination: Pagination;
 }
 
-export const AttachmentsTable = ({
-  items,
-  pagination,
-  onChange,
-  isLoading,
-}: AttachmentsTableProps) => {
+export const FilesTable = ({ items, pagination, onChange, isLoading }: FilesTableProps) => {
   const { client: filesClient } = useFilesContext();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedFile, setSelectedFile] = useState<FileJSON>();
@@ -55,32 +70,32 @@ export const AttachmentsTable = ({
 
   const columns: Array<EuiBasicTableColumn<FileJSON>> = [
     {
-      name: 'Name',
-      'data-test-subj': 'attachments-table-filename',
+      name: i18n.NAME,
+      'data-test-subj': 'files-table-filename',
       render: (attachment: FileJSON) => (
         <EuiLink onClick={() => showModal(attachment)}>{attachment.name}</EuiLink>
       ),
       width: '60%',
     },
     {
+      name: i18n.TYPE,
       field: 'mimeType',
-      'data-test-subj': 'attachments-table-filetype',
-      name: 'Type',
+      'data-test-subj': 'files-table-filetype',
     },
     {
+      name: i18n.DATE_ADDED,
       field: 'created',
-      name: 'Date Added',
-      'data-test-subj': 'attachments-table-date-added',
+      'data-test-subj': 'files-table-date-added',
       dataType: 'date',
     },
     {
-      name: 'Actions',
+      name: i18n.ACTIONS,
       width: '120px',
       actions: [
         {
           name: 'Download',
           isPrimary: true,
-          description: 'Download this file',
+          description: i18n.DOWNLOAD_FILE,
           render: (attachment: FileJSON) => {
             return (
               <EuiButtonIcon
@@ -93,17 +108,17 @@ export const AttachmentsTable = ({
               />
             );
           },
-          'data-test-subj': 'attachments-table-action-download',
+          'data-test-subj': 'files-table-action-download',
         },
         {
           name: 'Delete',
           isPrimary: true,
-          description: 'Delete this file',
+          description: i18n.DELETE_FILE,
           color: 'danger',
           icon: 'trash',
           type: 'icon',
           onClick: () => {},
-          'data-test-subj': 'attachments-table-action-delete',
+          'data-test-subj': 'files-table-action-delete',
         },
       ],
     },
@@ -124,41 +139,26 @@ export const AttachmentsTable = ({
   );
 
   return isLoading ? (
-    <EuiLoadingContent data-test-subj="attachments-table-loading" lines={10} />
+    <EuiLoadingContent data-test-subj="files-table-loading" lines={10} />
   ) : (
     <>
       {pagination.totalItemCount > 0 && (
         <>
           <EuiSpacer size="xl" />
-          <EuiText size="xs" data-test-subj="attachments-table-results-count">
-            {'Showing'} {resultsCount}
+          <EuiText size="xs" data-test-subj="files-table-results-count">
+            {i18n.RESULTS_COUNT} {resultsCount}
           </EuiText>
         </>
       )}
       <EuiSpacer size="s" />
       <EuiBasicTable
-        tableCaption="Attachments Table"
+        tableCaption="Files Table"
         items={items}
         columns={columns}
         pagination={pagination}
         onChange={onChange}
         data-test-subj="attachments-table"
-        noItemsMessage={
-          <EuiEmptyPrompt
-            title={<h3>{'No attachments available'}</h3>}
-            data-test-subj="attachments-table-empty"
-            titleSize="xs"
-            actions={
-              <EuiButton
-                size="s"
-                iconType="plusInCircle"
-                data-test-subj="case-detail-attachments-table-upload-file"
-              >
-                {'Add File'}
-              </EuiButton>
-            }
-          />
-        }
+        noItemsMessage={<EmptyFilesTable />}
       />
       {isModalVisible && (
         <EuiModal onClose={closeModal}>
@@ -186,4 +186,4 @@ export const AttachmentsTable = ({
   );
 };
 
-AttachmentsTable.displayName = 'AttachmentsTable';
+FilesTable.displayName = 'FilesTable';

@@ -14,27 +14,27 @@ import { EuiFlexItem, EuiFlexGroup, EuiFieldSearch, EuiButtonGroup } from '@elas
 import { useQueryClient } from '@tanstack/react-query';
 
 import type { Case } from '../../../../common/ui/types';
-import type { GetCaseAttachmentsParams } from '../../../containers/use_get_case_attachments';
+import type { GetCaseFilesParams } from '../../../containers/use_get_case_files';
 
 import { CaseViewTabs } from '../case_view_tabs';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
-import { useGetCaseAttachments } from '../../../containers/use_get_case_attachments';
-import { AttachmentsTable } from '../../attachments/attachments_table';
+import { useGetCaseFiles } from '../../../containers/use_get_case_files';
+import { FilesTable } from '../../files/files_table';
 import { AddFile } from '../../add_file';
 import { casesQueriesKeys } from '../../../containers/constants';
 
-interface CaseViewAttachmentsProps {
+interface CaseViewFilesProps {
   caseData: Case;
 }
 
-export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
+export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
   const queryClient = useQueryClient();
-  const [filteringOptions, setFilteringOptions] = useState<GetCaseAttachmentsParams>({
+  const [filteringOptions, setFilteringOptions] = useState<GetCaseFilesParams>({
     page: 0,
-    perPage: 5,
+    perPage: 10,
     caseId: caseData.id,
   });
-  const { data: attachmentsData, isLoading } = useGetCaseAttachments(filteringOptions);
+  const { data: attachmentsData, isLoading } = useGetCaseFiles(filteringOptions);
 
   const onTableChange = useCallback(
     ({ page }: Criteria<FileJSON>) => {
@@ -63,15 +63,15 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
   );
 
   const refreshAttachmentsTable = useCallback(() => {
-    queryClient.invalidateQueries(casesQueriesKeys.caseAttachments({ ...filteringOptions }));
-  }, [filteringOptions, queryClient]);
+    queryClient.invalidateQueries(casesQueriesKeys.caseView());
+  }, [queryClient]);
 
   const pagination = useMemo(
     () => ({
       pageIndex: filteringOptions.page,
       pageSize: filteringOptions.perPage,
       totalItemCount: attachmentsData?.total ?? 0,
-      pageSizeOptions: [1, 5, 10, 0],
+      pageSizeOptions: [5, 10, 0],
       showPerPageOptions: true,
     }),
     [filteringOptions.page, filteringOptions.perPage, attachmentsData]
@@ -123,7 +123,7 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
-            <AttachmentsTable
+            <FilesTable
               isLoading={isLoading}
               items={attachmentsData?.files ?? []}
               onChange={onTableChange}
@@ -135,4 +135,5 @@ export const CaseViewAttachments = ({ caseData }: CaseViewAttachmentsProps) => {
     </EuiFlexGroup>
   );
 };
-CaseViewAttachments.displayName = 'CaseViewAttachments';
+
+CaseViewFiles.displayName = 'CaseViewFiles';

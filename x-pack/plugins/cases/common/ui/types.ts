@@ -103,15 +103,6 @@ export interface ResolvedCase {
   aliasPurpose?: ResolvedSimpleSavedObject['alias_purpose'];
 }
 
-export interface Attachment {
-  id: string;
-  fileName: string | null | undefined;
-  fileType: string;
-  dateAdded: string;
-}
-
-export type Attachments = Attachment[];
-
 export interface SortingParams {
   sortField: SortFieldCase;
   sortOrder: 'asc' | 'desc';

@@ -16,6 +16,7 @@ import React, { useCallback, useState } from 'react';
 
 import type { UploadedFile } from '@kbn/shared-ux-file-upload/src/file_upload';
 
+import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { FileUpload } from '@kbn/shared-ux-file-upload';
 import { useFilesContext } from '@kbn/shared-ux-file-context';
 
@@ -59,11 +60,11 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId, onFileAdded }) => {
               externalReferenceId: file.id,
               externalReferenceStorage: {
                 type: ExternalReferenceStorageType.savedObject,
-                soType: FILE_ATTACHMENT_TYPE,
+                soType: FILE_SO_TYPE,
               },
               externalReferenceAttachmentTypeId: FILE_ATTACHMENT_TYPE,
               externalReferenceMetadata: {
-                file: [
+                files: [
                   {
                     name: file.fileJSON.name,
                     extension: file.fileJSON.extension ?? '',
