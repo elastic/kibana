@@ -19,6 +19,7 @@ interface MessageSigningKeys {
   private_key: string;
   public_key: string;
   passphrase: string;
+  passphrase_plain: string;
 }
 
 export interface MessageSigningServiceInterface {
@@ -39,17 +40,39 @@ export class MessageSigningService implements MessageSigningServiceInterface {
     return appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt ?? false;
   }
 
-  public async generateKeyPair(
-    providedPassphrase?: string
-  ): Promise<{ privateKey: string; publicKey: string; passphrase: string }> {
-    this.checkForEncryptionKey();
+  public async generateKeyPair(providedPassphrase?: string): Promise<{
+    privateKey: string;
+    publicKey: string;
+    passphrase: string;
+  }> {
+    let passphrase = providedPassphrase || this.generatePassphrase();
 
     const currentKeyPair = await this.getCurrentKeyPair();
-    if (currentKeyPair.privateKey && currentKeyPair.publicKey && currentKeyPair.passphrase) {
-      return currentKeyPair;
-    }
+    if (
+      currentKeyPair.privateKey &&
+      currentKeyPair.publicKey &&
+      (currentKeyPair.passphrase || currentKeyPair.passphrasePlain)
+    ) {
+      passphrase = currentKeyPair.passphrase || currentKeyPair.passphrasePlain;
 
-    const passphrase = providedPassphrase || this.generatePassphrase();
+      // newly configured encryption key, encrypt the passphrase
+      if (currentKeyPair.passphrasePlain && this.isEncryptionAvailable) {
+        await this.soClient.update<MessageSigningKeys>(
+          MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+          currentKeyPair.id,
+          {
+            passphrase,
+            passphrase_plain: '',
+          }
+        );
+      }
+
+      return {
+        privateKey: currentKeyPair.privateKey,
+        publicKey: currentKeyPair.publicKey,
+        passphrase,
+      };
+    }
 
     const keyPair = generateKeyPairSync('ec', {
       namedCurve: 'prime256v1',
@@ -67,11 +90,21 @@ export class MessageSigningService implements MessageSigningServiceInterface {
 
     const privateKey = keyPair.privateKey.toString('base64');
     const publicKey = keyPair.publicKey.toString('base64');
-    await this.soClient.create<MessageSigningKeys>(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
+    let keypairSoObject: Partial<MessageSigningKeys> = {
       private_key: privateKey,
       public_key: publicKey,
-      passphrase,
-    });
+    };
+    keypairSoObject = this.isEncryptionAvailable
+      ? {
+          ...keypairSoObject,
+          passphrase,
+        }
+      : { ...keypairSoObject, passphrase_plain: passphrase };
+
+    await this.soClient.create<Partial<MessageSigningKeys>>(
+      MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
+      keypairSoObject
+    );
 
     return {
       privateKey,
@@ -144,9 +177,11 @@ export class MessageSigningService implements MessageSigningServiceInterface {
   }
 
   private async getCurrentKeyPair(): Promise<{
+    id: string;
     privateKey: string;
     publicKey: string;
     passphrase: string;
+    passphrasePlain: string;
   }> {
     const finder =
       await this.esoClient.createPointInTimeFinderDecryptedAsInternalUser<MessageSigningKeys>({
@@ -156,19 +191,24 @@ export class MessageSigningService implements MessageSigningServiceInterface {
         sortOrder: 'desc',
       });
     let keyPair = {
+      id: '',
       privateKey: '',
       publicKey: '',
       passphrase: '',
+      passphrasePlain: '',
     };
     for await (const result of finder.find()) {
-      const attributes = result.saved_objects[0]?.attributes;
+      const savedObject = result.saved_objects[0];
+      const attributes = savedObject?.attributes;
       if (!attributes?.private_key) {
         break;
       }
       keyPair = {
+        id: savedObject.id,
         privateKey: attributes.private_key,
         publicKey: attributes.public_key,
         passphrase: attributes.passphrase,
+        passphrasePlain: attributes.passphrase_plain,
       };
       break;
     }
@@ -178,11 +218,5 @@ export class MessageSigningService implements MessageSigningServiceInterface {
 
   private generatePassphrase(): string {
     return randomBytes(32).toString('hex');
-  }
-
-  private checkForEncryptionKey(): void {
-    if (!this.isEncryptionAvailable) {
-      throw new Error('encryption key not set, message signing service is disabled');
-    }
   }
 }
