@@ -32,7 +32,7 @@ export const latestVulnerabilitiesTransform: TransformPutTransformRequest = {
   retention_policy: {
     time: {
       field: '@timestamp',
-      max_age: '5h',
+      max_age: '50h',
     },
   },
   latest: {
