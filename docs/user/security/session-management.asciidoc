@@ -63,7 +63,7 @@ This is something to consider for use cases where it is common to create multipl
 --
 [source,yaml]
 --------------------------------------------------------------------------------
-xpack.security.session.сoncurrentSessions:
+xpack.security.session.concurrentSessions:
   maxSessions: 3
 --------------------------------------------------------------------------------
 --

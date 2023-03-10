@@ -371,10 +371,12 @@ export default function ({ getService }: FtrProviderContext) {
         unauthenticatedSessionOne.cookie,
         unauthenticatedSessionOne.location
       );
+      await setTimeoutAsync(500); // Ensure the order of session cookie timestamps
       const samlSessionCookieTwo = await finishSAMLHandshake(
         unauthenticatedSessionTwo.cookie,
         unauthenticatedSessionTwo.location
       );
+      await setTimeoutAsync(500); // Ensure the order of session cookie timestamps
       const samlSessionCookieThree = await finishSAMLHandshake(
         unauthenticatedSessionThree.cookie,
         unauthenticatedSessionThree.location

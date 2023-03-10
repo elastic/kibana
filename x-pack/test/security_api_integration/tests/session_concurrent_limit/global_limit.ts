@@ -218,8 +218,8 @@ export default function ({ getService }: FtrProviderContext) {
       // hence which specific sessions will be outside the limit.
       const statusCodes = [];
       for (const basicSessionCookie of basicSessionCookies) {
-        // This index refresh is only in the loop because get actually calls invalidate,
-        // which now also uses 'refresh = false', so we must manuall refresh for testing
+        // This index refresh is only in the loop because Kibana might internally call
+        // invalidate after it retrieved the session that's outside the limit
         await es.indices.refresh({ index: '.kibana_security_session*' });
         const { statusCode } = await supertest
           .get('/internal/security/me')
