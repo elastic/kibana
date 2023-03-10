@@ -322,7 +322,7 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   private async getInitialData(http: HttpSetup) {
-    if (!this.config.host) return; // No API to call
+    if (!this.config.host && this.config.canDeployEntSearch) return; // No API to call
     if (this.hasInitialized) return; // We've already made an initial call
 
     try {

@@ -43,7 +43,21 @@ export const callEnterpriseSearchConfigAPI = async ({
   log,
   request,
 }: Params): Promise<Return | ResponseError> => {
-  if (!config.host) return {};
+  if (!config.host)
+    // Return Access and Features for when running without `ent-search`
+    return {
+      access: {
+        hasAppSearchAccess: false,
+        hasSearchEnginesAccess: false, // TODO: update to read ES feature flag, or just refactor out
+        hasWorkplaceSearchAccess: false,
+      },
+      features: {
+        hasNativeConnectors: config.hasNativeConnectors,
+        hasSearchApplications: false, // TODO: update to read ES feature flag, or just refactor out
+        hasWebCrawler: config.hasWebCrawler,
+      },
+      kibanaVersion: kibanaPackageJson.version,
+    };
 
   const TIMEOUT_WARNING = `Enterprise Search access check took over ${config.accessCheckTimeoutWarning}ms. Please ensure your Enterprise Search server is responding normally and not adversely impacting Kibana load speeds.`;
   const TIMEOUT_MESSAGE = `Exceeded ${config.accessCheckTimeout}ms timeout while checking ${config.host}. Please consider increasing your enterpriseSearch.accessCheckTimeout value so that users aren't prevented from accessing Enterprise Search plugins due to slow responses.`;
