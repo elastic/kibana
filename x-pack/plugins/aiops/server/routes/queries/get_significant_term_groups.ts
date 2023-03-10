@@ -13,7 +13,6 @@ import { getFieldValuePairCounts } from './get_field_value_pair_counts';
 import { getMarkedDuplicates } from './get_marked_duplicates';
 import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
 import { getSimpleHierarchicalTreeLeaves } from './get_simple_hierarchical_tree_leaves';
-import { getFilteredFrequentItemSets } from './get_filtered_frequent_item_sets';
 import { getMissingSignificantTerms } from './get_missing_significant_terms';
 import { transformSignificantTermToGroup } from './transform_significant_term_to_group';
 import type { ItemsetResult } from '../../../common/types';
@@ -29,14 +28,12 @@ export function getSignificantTermGroups(
     (g) => g.group.length > 1
   );
 
-  const filteredDf = getFilteredFrequentItemSets(itemsets, significantTerms);
-
   // `frequent_item_sets` returns lot of different small groups of field/value pairs that co-occur.
   // The following steps analyse these small groups, identify overlap between these groups,
   // and then summarize them in larger groups where possible.
 
   // Get a tree structure based on `frequent_item_sets`.
-  const { root } = getSimpleHierarchicalTree(filteredDf, true, false, fields);
+  const { root } = getSimpleHierarchicalTree(itemsets, false, false, fields);
 
   // Each leave of the tree will be a summarized group of co-occuring field/value pairs.
   const treeLeaves = getSimpleHierarchicalTreeLeaves(root, []);

@@ -144,7 +144,7 @@ function dfDepthFirstSearch(
 }
 
 /**
- * Create simple tree consisting or non-overlapping sets of data.
+ * Create simple tree consisting of non-overlapping sets of data.
  *
  * By default (fields==None), the field search order is dependent on the highest count itemsets.
  */
@@ -154,24 +154,24 @@ export function getSimpleHierarchicalTree(
   displayOther: boolean,
   fields: string[] = []
 ) {
-  const field = fields[0];
-
   const totalDocCount = Math.max(...df.map((d) => d.total_doc_count));
 
   const newRoot = NewNodeFactory('');
 
-  for (const value of getValuesDescending(df, field)) {
-    dfDepthFirstSearch(
-      fields,
-      newRoot,
-      totalDocCount + 1,
-      '',
-      field,
-      value,
-      df,
-      collapseRedundant,
-      displayOther
-    );
+  for (const field of fields) {
+    for (const value of getValuesDescending(df, field)) {
+      dfDepthFirstSearch(
+        fields,
+        newRoot,
+        totalDocCount + 1,
+        '',
+        field,
+        value,
+        df,
+        collapseRedundant,
+        displayOther
+      );
+    }
   }
 
   return { root: newRoot, fields };

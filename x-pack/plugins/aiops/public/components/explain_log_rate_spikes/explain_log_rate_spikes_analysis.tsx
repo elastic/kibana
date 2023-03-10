@@ -183,7 +183,7 @@ export const ExplainLogRateSpikesAnalysis: FC<ExplainLogRateSpikesAnalysisProps>
 
   const showSpikeAnalysisTable = data?.significantTerms.length > 0;
   const groupItemCount = groupTableItems.reduce((p, c) => {
-    return p + c.group.length;
+    return p + c.mostSignificantValues.length;
   }, 0);
   const foundGroups = groupTableItems.length > 0 && groupItemCount > 0;
 

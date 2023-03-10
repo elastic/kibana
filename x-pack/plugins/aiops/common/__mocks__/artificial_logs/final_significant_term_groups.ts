@@ -9,19 +9,87 @@ import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 export const finalSignificantTermGroups: SignificantTermGroup[] = [
   {
-    id: '2038579476',
+    id: '40215074',
     group: [
-      { fieldName: 'response_code', fieldValue: '500', duplicate: false },
-      { fieldName: 'url', fieldValue: 'home.php', duplicate: false },
-      { fieldName: 'url', fieldValue: 'login.php', duplicate: false },
+      {
+        fieldName: 'response_code',
+        fieldValue: '500',
+        duplicate: 2,
+        docCount: 792,
+        pValue: 0.010770456205312423,
+      },
+      {
+        fieldName: 'url',
+        fieldValue: 'home.php',
+        duplicate: 2,
+        docCount: 792,
+        pValue: 0.010770456205312423,
+      },
     ],
     docCount: 792,
     pValue: 0.010770456205312423,
   },
   {
-    id: '817080373',
-    group: [{ fieldName: 'user', fieldValue: 'Peter', duplicate: false }],
-    docCount: 1981,
-    pValue: 2.7454255728359757e-21,
+    id: '237328782',
+    group: [
+      {
+        docCount: 792,
+        duplicate: 2,
+        fieldName: 'response_code',
+        fieldValue: '500',
+        pValue: 0.010770456205312423,
+      },
+      {
+        docCount: 792,
+        duplicate: 2,
+        fieldName: 'url',
+        fieldValue: 'login.php',
+        pValue: 0.010770456205312423,
+      },
+    ],
+    docCount: 792,
+    pValue: 0.010770456205312423,
+  },
+  {
+    id: '47022118',
+    group: [
+      {
+        docCount: 792,
+        duplicate: 2,
+        fieldName: 'url',
+        fieldValue: 'home.php',
+        pValue: 0.010770456205312423,
+      },
+      {
+        docCount: 634,
+        duplicate: 2,
+        fieldName: 'user',
+        fieldValue: 'Peter',
+        pValue: 0.010770456205312423,
+      },
+    ],
+    docCount: 634,
+    pValue: 0.010770456205312423,
+  },
+  {
+    id: '1176404482',
+    group: [
+      {
+        docCount: 792,
+        duplicate: 2,
+        fieldName: 'url',
+        fieldValue: 'login.php',
+        pValue: 0.010770456205312423,
+      },
+      {
+        docCount: 634,
+        duplicate: 2,
+        fieldName: 'user',
+        fieldValue: 'Peter',
+        pValue: 0.010770456205312423,
+      },
+    ],
+    docCount: 634,
+    pValue: 0.010770456205312423,
   },
 ];
