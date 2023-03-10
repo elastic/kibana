@@ -7,7 +7,6 @@
  */
 
 import React from 'react';
-import rison from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -94,7 +93,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
                 onClick={props.onClose}
                 data-test-subj="manageSearchesBtn"
                 href={addBasePath(
-                  `/app/management/kibana/objects?_a=${rison.encode({ tab: SEARCH_OBJECT_TYPE })}`
+                  `/app/management/kibana/objects?initialQuery=type:(${SEARCH_OBJECT_TYPE})`
                 )}
               >
                 <FormattedMessage
