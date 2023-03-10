@@ -37,6 +37,7 @@ export const registerUrlServiceSavedObjectType = (
       },
     },
     mappings: {
+      dynamic: false,
       properties: {
         slug: {
           type: 'text',
@@ -68,10 +69,10 @@ export const registerUrlServiceSavedObjectType = (
           },
         },
         // Information needed to load and execute a locator.
-        locatorJSON: {
-          type: 'text',
-          index: false,
-        },
+        // locatorJSON: {
+        //   type: 'text',
+        //   index: false,
+        // },
       },
     },
     migrations: () => {
