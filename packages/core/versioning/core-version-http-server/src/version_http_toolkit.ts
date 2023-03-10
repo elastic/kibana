@@ -7,6 +7,7 @@
  */
 
 import { Type } from '@kbn/config-schema';
+import type { WithRequiredProperty } from '@kbn/utility-types';
 import type {
   IRouter,
   RouteConfig,
@@ -57,13 +58,6 @@ export interface VersionHTTPToolkit {
     args: CreateVersionedRouterArgs<Ctx>
   ): VersionedRouter<Ctx>;
 }
-
-/**
- * Converts an input property from optional to required. Needed for making RouteConfigOptions['access'] required.
- */
-type WithRequiredProperty<Type, Key extends keyof Type> = Type & {
-  [Property in Key]-?: Type[Property];
-};
 
 /**
  * Versioned route access flag, required
