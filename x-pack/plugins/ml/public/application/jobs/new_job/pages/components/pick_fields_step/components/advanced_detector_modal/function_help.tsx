@@ -52,7 +52,7 @@ export const FunctionHelpPopover: FC = memo(() => {
       id: 1,
       function: 'non_zero_count, high_non_zero_count, low_non_zero_count',
       description:
-        'Detect anomalies when the number of events in a bucket is anomalous, but it ignores cases where the bucket count is zero.',
+        'Detect anomalies when the number of events in a bucket is anomalous, but ignore cases where the bucket count is zero.',
     },
     {
       id: 2,
@@ -62,7 +62,7 @@ export const FunctionHelpPopover: FC = memo(() => {
     {
       id: 3,
       function: 'lat_long',
-      description: 'Detects anomalies in the geographic location of the input data.',
+      description: 'Detect anomalies in the geographic location of the input data.',
     },
     {
       id: 4,
@@ -74,31 +74,31 @@ export const FunctionHelpPopover: FC = memo(() => {
       id: 5,
       function: 'min',
       description:
-        'Detects anomalies in the arithmetic minimum of a value. The minimum value is calculated for each bucket.',
+        'Detect anomalies in the arithmetic minimum of a value, which is calculated for each bucket.',
     },
     {
       id: 6,
       function: 'max',
       description:
-        'Detects anomalies in the arithmetic maximum of a value. The maximum value is calculated for each bucket.',
+        'Detect anomalies in the arithmetic maximum of a value, which is calculated for each bucket.',
     },
     {
       id: 7,
       function: 'median, high_median, low_median',
       description:
-        'Detect anomalies in the statistical median of a value. The median value is calculated for each bucket.',
+        'Detect anomalies in the statistical median of a value, which is calculated for each bucket.',
     },
     {
       id: 8,
       function: 'mean, high_mean, low_mean',
       description:
-        'Detect anomalies in the arithmetic mean of a value. The mean value is calculated for each bucket.',
+        'Detect anomalies in the arithmetic mean of a value, which is calculated for each bucket.',
     },
     {
       id: 9,
       function: 'metric',
       description:
-        'Combines min, max, and mean functions. You can use it as a shorthand for a combined analysis. If you do not specify a function in a detector, this is the default function.',
+        'Combine min, max, and mean functions. Use it as a shorthand for a combined analysis. This is the default function.',
     },
     {
       id: 10,
@@ -109,13 +109,13 @@ export const FunctionHelpPopover: FC = memo(() => {
     {
       id: 11,
       function: 'rare',
-      description: 'Detects anomalies according to the number of distinct rare values.',
+      description: 'Detect anomalies according to the number of distinct rare values.',
     },
     {
       id: 12,
       function: 'freq_rare',
       description:
-        'Detects anomalies according to the number of times (frequency) rare values occur.',
+        'Detect anomalies according to the number of times (frequency) rare values occur.',
     },
     {
       id: 13,
