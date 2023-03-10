@@ -488,7 +488,7 @@ The plugin exposes the static DefaultEditorController class to consume.
 
 |{kib-repo}blob/{branch}/x-pack/plugins/custom_branding/README.md[customBranding]
 |This is a plugin to configure custom branding.
-This plugin is currently under active development; do not use.
+Plugin server-side only. Plugin has three main functions:
 
 
 |<<dashboard-enhanced-plugin>>
