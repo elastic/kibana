@@ -44,6 +44,10 @@ export const DASHBOARDS = i18n.translate('xpack.securitySolution.navigation.dash
   defaultMessage: 'Dashboards',
 });
 
+export const DASHBOARD = i18n.translate('xpack.securitySolution.navigation.dashboard', {
+  defaultMessage: 'Dashboard',
+});
+
 export const NETWORK = i18n.translate('xpack.securitySolution.navigation.network', {
   defaultMessage: 'Network',
 });

@@ -8,18 +8,19 @@ import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiTitle } fro
 import React from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
-import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
-import { SpyRoute } from '../../common/utils/route/spy_routes';
-import { DashboardsTable } from '../../common/components/dashboards/dashboards_table';
-import { LandingImageCards } from '../../landing_pages/components/landing_links_images';
-import { SecurityPageName } from '../../../common/constants';
-import { useCapabilities, useNavigateTo } from '../../common/lib/kibana';
-import { useAppRootNavLink } from '../../common/components/navigation/nav_links';
-import { useCreateSecurityDashboardLink } from '../../common/containers/dashboards/use_create_security_dashboard_link';
-import { Title } from '../../common/components/header_page/title';
-import { LinkButton } from '../../common/components/links/helpers';
+import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
+import { SpyRoute } from '../../../common/utils/route/spy_routes';
+import { DashboardsTable } from '../../../common/components/dashboards/dashboards_table';
+import { LandingImageCards } from '../../../landing_pages/components/landing_links_images';
+import { SecurityPageName } from '../../../../common/constants';
+import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
+import { useAppRootNavLink } from '../../../common/components/navigation/nav_links';
+import { useCreateSecurityDashboardLink } from '../../../common/containers/dashboards/use_create_security_dashboard_link';
+import { Title } from '../../../common/components/header_page/title';
+import { LinkButton } from '../../../common/components/links/helpers';
 import * as i18n from './translations';
-import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../common/lib/telemetry';
+import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../common/lib/telemetry';
+import { DASHBOARDS_PAGE_TITLE } from '../translations';
 
 const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard }) => {
   const { isLoading, url } = useCreateSecurityDashboardLink();
@@ -27,7 +28,7 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
   return (
     <EuiFlexGroup gutterSize="none" direction="row">
       <EuiFlexItem>
-        <Title title={i18n.DASHBOARDS_PAGE_TITLE} />
+        <Title title={DASHBOARDS_PAGE_TITLE} />
       </EuiFlexItem>
       {canCreateDashboard && (
         <EuiFlexItem grow={false}>

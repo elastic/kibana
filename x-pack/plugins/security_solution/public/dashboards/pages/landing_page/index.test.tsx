@@ -7,16 +7,16 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { SecurityPageName } from '../../app/types';
-import { TestProviders } from '../../common/mock';
-import { DashboardsLandingPage } from './landing';
-import type { NavLinkItem } from '../../common/components/navigation/types';
-import { useCapabilities } from '../../common/lib/kibana';
-import * as telemetry from '../../common/lib/telemetry';
+import { SecurityPageName } from '../../../app/types';
+import { TestProviders } from '../../../common/mock';
+import { DashboardsLandingPage } from '.';
+import type { NavLinkItem } from '../../../common/components/navigation/types';
+import { useCapabilities } from '../../../common/lib/kibana';
+import * as telemetry from '../../../common/lib/telemetry';
 
-jest.mock('../../common/lib/kibana');
-jest.mock('../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
-jest.mock('../../common/components/dashboards/dashboards_table', () => ({
+jest.mock('../../../common/lib/kibana');
+jest.mock('../../../common/utils/route/spy_routes', () => ({ SpyRoute: () => null }));
+jest.mock('../../../common/components/dashboards/dashboards_table', () => ({
   DashboardsTable: () => <span data-test-subj="dashboardsTable" />,
 }));
 
@@ -49,15 +49,15 @@ const APP_DASHBOARD_LINKS: NavLinkItem = {
 const URL = '/path/to/dashboards';
 
 const mockAppManageLink = jest.fn(() => APP_DASHBOARD_LINKS);
-jest.mock('../../common/components/navigation/nav_links', () => ({
+jest.mock('../../../common/components/navigation/nav_links', () => ({
   useAppRootNavLink: () => mockAppManageLink(),
 }));
 
 const CREATE_DASHBOARD_LINK = { isLoading: false, url: URL };
 const mockUseCreateSecurityDashboard = jest.fn(() => CREATE_DASHBOARD_LINK);
-jest.mock('../../common/containers/dashboards/use_create_security_dashboard_link', () => {
+jest.mock('../../../common/containers/dashboards/use_create_security_dashboard_link', () => {
   const actual = jest.requireActual(
-    '../../common/containers/dashboards/use_create_security_dashboard_link'
+    '../../../common/containers/dashboards/use_create_security_dashboard_link'
   );
   return {
     ...actual,

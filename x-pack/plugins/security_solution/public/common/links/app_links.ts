@@ -11,10 +11,11 @@ import { links as detectionLinks } from '../../detections/links';
 import { links as timelinesLinks } from '../../timelines/links';
 import { getCasesLinkItems } from '../../cases/links';
 import { links as managementLinks, getManagementFilteredLinks } from '../../management/links';
-import { dashboardsLandingLinks, threatHuntingLandingLinks } from '../../landing_pages/links';
+import { threatHuntingLandingLinks } from '../../landing_pages/links';
 import { gettingStartedLinks } from '../../overview/links';
 import { rootLinks as cloudSecurityPostureRootLinks } from '../../cloud_security_posture/links';
 import type { StartPlugins } from '../../types';
+import { dashboardsLandingLinks } from '../../dashboards/links';
 
 const casesLinks = getCasesLinkItems();
 
