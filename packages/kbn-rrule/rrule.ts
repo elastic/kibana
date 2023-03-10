@@ -150,7 +150,7 @@ export class RRule {
     const dateGenerator = this.dateset();
     const dates: AllResult = [];
     let next = dateGenerator.next();
-    for (let i = 1; i < limit; i++) {
+    for (let i = 0; i < limit; i++) {
       if (!next.done) dates.push(next.value);
       else break;
       next = dateGenerator.next();
