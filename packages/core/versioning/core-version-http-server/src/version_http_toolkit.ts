@@ -119,7 +119,10 @@ export interface ResponseValidation<R> {
  * @experimental
  */
 interface FullValidationConfig<P, Q, B, R> {
-  /** Validation to run against route inputs: params, query and body */
+  /**
+   * Validation to run against route inputs: params, query and body
+   * @experimental
+   */
   request?: RequestValidation<P, Q, B>;
   /**
    * Validation to run against route output
