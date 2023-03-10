@@ -20,6 +20,7 @@ import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
+import { buildApmAvailabilityIndicator } from '../../data/slo/indicator';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -120,6 +121,32 @@ describe('SLO Details Page', () => {
       render(<SloDetailsPage />);
 
       expect(screen.queryByTestId('sloDetailsPage')).toBeTruthy();
+    });
+
+    describe('when an APM SLO is loaded', () => {
+      it('should render a Explore in APM button', async () => {
+        const slo = buildSlo({ indicator: buildApmAvailabilityIndicator() });
+        useParamsMock.mockReturnValue(slo.id);
+        useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+        useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+        render(<SloDetailsPage />);
+
+        expect(screen.queryByTestId('sloDetailsExploreInApmButton')).toBeTruthy();
+      });
+    });
+
+    describe('when an Custom KQL SLO is loaded', () => {
+      it('should not render a Explore in APM button', async () => {
+        const slo = buildSlo();
+        useParamsMock.mockReturnValue(slo.id);
+        useFetchSloDetailsMock.mockReturnValue({ isLoading: false, slo });
+        useLicenseMock.mockReturnValue({ hasAtLeast: () => true });
+
+        render(<SloDetailsPage />);
+
+        expect(screen.queryByTestId('sloDetailsExploreInApmButton')).toBeFalsy();
+      });
     });
   });
 });
