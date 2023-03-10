@@ -324,11 +324,11 @@ export const topNavStrings = {
     }),
   },
   options: {
-    label: i18n.translate('dashboard.topNave.optionsButtonAriaLabel', {
-      defaultMessage: 'options',
+    label: i18n.translate('dashboard.topNave.settingsButtonAriaLabel', {
+      defaultMessage: 'settings',
     }),
-    description: i18n.translate('dashboard.topNave.optionsConfigDescription', {
-      defaultMessage: 'Options',
+    description: i18n.translate('dashboard.topNave.settingsConfigDescription', {
+      defaultMessage: 'Settings',
     }),
   },
   clone: {

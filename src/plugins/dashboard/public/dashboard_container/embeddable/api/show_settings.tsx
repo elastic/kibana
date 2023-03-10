@@ -10,7 +10,7 @@ import React from 'react';
 
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 
-import { DashboardSettings } from './overlays/settings_flyout';
+import { DashboardSettings } from '../../component/settings/settings_flyout';
 import { DashboardContainer } from '../dashboard_container';
 import { pluginServices } from '../../../services/plugin_services';
 
