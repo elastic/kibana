@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -17,23 +17,25 @@ import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
 import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
-import PageNotFound from '../404';
+import { AutoRefreshButton } from './components/auto_refresh_button';
 import { paths } from '../../config';
-import { isSloFeatureEnabled } from './helpers/is_slo_feature_enabled';
 import type { ObservabilityAppServices } from '../../application/types';
+import { HeaderTitle } from './components/header_title';
 
 export function SlosPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana<ObservabilityAppServices>().services;
-  const { ObservabilityPageTemplate, config } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const { hasWriteCapabilities } = useCapabilities();
   const { hasAtLeast } = useLicense();
 
   const { isInitialLoading, isLoading, sloList } = useFetchSloList();
 
   const { total } = sloList || {};
+
+  const [isAutoRefreshing, setIsAutoRefreshing] = useState<boolean>(true);
 
   useBreadcrumbs([
     {
@@ -48,9 +50,9 @@ export function SlosPage() {
     navigateToUrl(basePath.prepend(paths.observability.sloCreate));
   };
 
-  if (!isSloFeatureEnabled(config)) {
-    return <PageNotFound />;
-  }
+  const handleToggleAutoRefresh = () => {
+    setIsAutoRefreshing(!isAutoRefreshing);
+  };
 
   if (isInitialLoading) {
     return null;
@@ -63,9 +65,7 @@ export function SlosPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: i18n.translate('xpack.observability.slosPageTitle', {
-          defaultMessage: 'SLOs',
-        }),
+        pageTitle: <HeaderTitle />,
         rightSideItems: [
           <EuiButton
             color="primary"
@@ -74,16 +74,20 @@ export function SlosPage() {
             fill
             onClick={handleClickCreateSlo}
           >
-            {i18n.translate('xpack.observability.slos.sloList.pageHeader.createNewButtonLabel', {
+            {i18n.translate('xpack.observability.slo.sloList.pageHeader.createNewButtonLabel', {
               defaultMessage: 'Create new SLO',
             })}
           </EuiButton>,
+          <AutoRefreshButton
+            isAutoRefreshing={isAutoRefreshing}
+            onClick={handleToggleAutoRefresh}
+          />,
         ],
         bottomBorder: false,
       }}
       data-test-subj="slosPage"
     >
-      <SloList />
+      <SloList autoRefresh={isAutoRefreshing} />
     </ObservabilityPageTemplate>
   );
 }

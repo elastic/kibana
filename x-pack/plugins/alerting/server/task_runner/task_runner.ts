@@ -446,7 +446,7 @@ export class TaskRunner<
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
     });
 
-    let executionHandlerRunResult: RunResult = { throttledActions: {} };
+    let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
 
     await this.timer.runWithTimer(TaskRunnerTimerSpan.TriggerActions, async () => {
       await rulesClient.clearExpiredSnoozes({ id: rule.id });
@@ -466,6 +466,8 @@ export class TaskRunner<
       }
     });
 
+    this.legacyAlertsClient.setFlapping(flappingSettings);
+
     let alertsToReturn: Record<string, RawAlertInstance> = {};
     let recoveredAlertsToReturn: Record<string, RawAlertInstance> = {};
     // Only serialize alerts into task state if we're auto-recovering, otherwise
@@ -482,7 +484,7 @@ export class TaskRunner<
       alertTypeState: updatedRuleTypeState || undefined,
       alertInstances: alertsToReturn,
       alertRecoveredInstances: recoveredAlertsToReturn,
-      summaryActions: executionHandlerRunResult.throttledActions,
+      summaryActions: executionHandlerRunResult.throttledSummaryActions,
     };
   }
 

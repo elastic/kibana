@@ -13,6 +13,7 @@ import type { IndexMapping } from '@kbn/core-saved-objects-base-server-internal'
 import type {
   BaseState,
   CalculateExcludeFiltersState,
+  UpdateSourceMappingsPropertiesState,
   CheckTargetMappingsState,
   CheckUnknownDocumentsState,
   CheckVersionIndexReadyActions,
@@ -46,8 +47,8 @@ import type {
   State,
   TransformedDocumentsBulkIndex,
   UpdateTargetMappingsMeta,
-  UpdateTargetMappingsState,
-  UpdateTargetMappingsWaitForTaskState,
+  UpdateTargetMappingsPropertiesState,
+  UpdateTargetMappingsPropertiesWaitForTaskState,
   WaitForYellowSourceState,
 } from '../state';
 import { type TransformErrorObjects, TransformSavedObjectDocumentError } from '../core';
@@ -1298,13 +1299,12 @@ describe('migrations v2 model', () => {
             sourceIndexMappings: actualMappings,
           };
 
-          test('WAIT_FOR_YELLOW_SOURCE -> CHECK_UNKNOWN_DOCUMENTS', () => {
+          test('WAIT_FOR_YELLOW_SOURCE -> UPDATE_SOURCE_MAPPINGS_PROPERTIES', () => {
             const res: ResponseType<'WAIT_FOR_YELLOW_SOURCE'> = Either.right({});
             const newState = model(changedMappingsState, res);
-            expect(newState.controlState).toEqual('CHECK_UNKNOWN_DOCUMENTS');
 
             expect(newState).toMatchObject({
-              controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+              controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
               sourceIndex: Option.some('.kibana_7.11.0_001'),
               sourceIndexMappings: actualMappings,
             });
@@ -1327,6 +1327,49 @@ describe('migrations v2 model', () => {
             "message": "Action failed with '[index_not_yellow_timeout] Timeout waiting for ... Refer to repeatedTimeoutRequests for information on how to resolve the issue.'. Retrying attempt 1 in 2 seconds.",
           }
         `);
+      });
+    });
+
+    describe('UPDATE_SOURCE_MAPPINGS_PROPERTIES', () => {
+      const checkCompatibleMappingsState: UpdateSourceMappingsPropertiesState = {
+        ...baseState,
+        controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES',
+        sourceIndex: Option.some('.kibana_7.11.0_001') as Option.Some<string>,
+        sourceIndexMappings: baseState.targetIndexMappings,
+        aliases: {
+          '.kibana': '.kibana_7.11.0_001',
+          '.kibana_7.11.0': '.kibana_7.11.0_001',
+        },
+      };
+
+      describe('if action succeeds', () => {
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CLEANUP_UNKNOWN_AND_EXCLUDED', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.right(
+            'update_mappings_succeeded' as const
+          );
+          const newState = model(checkCompatibleMappingsState, res);
+
+          expect(newState).toMatchObject({
+            controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED',
+            targetIndex: '.kibana_7.11.0_001',
+            versionIndexReadyActions: Option.none,
+          });
+        });
+      });
+
+      describe('if action fails', () => {
+        test('UPDATE_SOURCE_MAPPINGS_PROPERTIES -> CHECK_UNKNOWN_DOCUMENTS', () => {
+          const res: ResponseType<'UPDATE_SOURCE_MAPPINGS_PROPERTIES'> = Either.left({
+            type: 'incompatible_mapping_exception',
+          });
+          const newState = model(checkCompatibleMappingsState, res);
+
+          expect(newState).toMatchObject({
+            controlState: 'CHECK_UNKNOWN_DOCUMENTS',
+            sourceIndex: Option.some('.kibana_7.11.0_001'),
+            sourceIndexMappings: baseState.targetIndexMappings,
+          });
+        });
       });
     });
 
@@ -1418,7 +1461,7 @@ describe('migrations v2 model', () => {
       };
 
       test('CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK -> CLEANUP_UNKNOWN_AND_EXCLUDED_WAIT_FOR_TASK when response is left wait_for_task_completion_timeout', () => {
-        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.left({
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
           message: '[timeout_exception] Timeout waiting for ...',
           type: 'wait_for_task_completion_timeout',
         });
@@ -2158,7 +2201,7 @@ describe('migrations v2 model', () => {
         preTransformDocsActions: [someAliasAction],
       };
 
-      it('PREPARE_COMPATIBLE_MIGRATIONS -> REFRESH_TARGET if action succeeds  and we must refresh the index', () => {
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> REFRESH_SOURCE if action succeeds  and we must refresh the index', () => {
         const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.right(
           'update_aliases_succeeded'
         );
@@ -2166,7 +2209,7 @@ describe('migrations v2 model', () => {
           { ...state, mustRefresh: true },
           res
         ) as OutdatedDocumentsSearchOpenPit;
-        expect(newState.controlState).toEqual('REFRESH_TARGET');
+        expect(newState.controlState).toEqual('REFRESH_SOURCE');
         expect(newState.versionIndexReadyActions).toEqual(Option.none);
       });
 
@@ -2179,7 +2222,7 @@ describe('migrations v2 model', () => {
         expect(newState.versionIndexReadyActions).toEqual(Option.none);
       });
 
-      it('PREPARE_COMPATIBLE_MIGRATIONS -> REFRESH_TARGET if action fails because the alias is not found', () => {
+      it('PREPARE_COMPATIBLE_MIGRATIONS -> REFRESH_SOURCE if action fails because the alias is not found', () => {
         const res: ResponseType<'PREPARE_COMPATIBLE_MIGRATION'> = Either.left({
           type: 'alias_not_found_exception',
         });
@@ -2188,7 +2231,7 @@ describe('migrations v2 model', () => {
           { ...state, mustRefresh: true },
           res
         ) as OutdatedDocumentsSearchOpenPit;
-        expect(newState.controlState).toEqual('REFRESH_TARGET');
+        expect(newState.controlState).toEqual('REFRESH_SOURCE');
         expect(newState.versionIndexReadyActions).toEqual(Option.none);
       });
 
@@ -2375,10 +2418,13 @@ describe('migrations v2 model', () => {
         targetIndex: '.kibana_7.11.0_001',
       };
 
-      it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS if mappings do not match', () => {
+      it('CHECK_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_PROPERTIES if mappings do not match', () => {
         const res: ResponseType<'CHECK_TARGET_MAPPINGS'> = Either.right({ match: false });
-        const newState = model(checkTargetMappingsState, res) as UpdateTargetMappingsState;
-        expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS');
+        const newState = model(
+          checkTargetMappingsState,
+          res
+        ) as UpdateTargetMappingsPropertiesState;
+        expect(newState.controlState).toBe('UPDATE_TARGET_MAPPINGS_PROPERTIES');
       });
 
       it('CHECK_TARGET_MAPPINGS -> CHECK_VERSION_INDEX_READY_ACTIONS if mappings match', () => {
@@ -2399,7 +2445,7 @@ describe('migrations v2 model', () => {
 
       it('REFRESH_TARGET -> OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT if action succeeded', () => {
         const res: ResponseType<'REFRESH_TARGET'> = Either.right({ refreshed: true });
-        const newState = model(state, res) as UpdateTargetMappingsState;
+        const newState = model(state, res) as UpdateTargetMappingsPropertiesState;
         expect(newState.controlState).toBe('OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT');
       });
     });
@@ -2608,41 +2654,41 @@ describe('migrations v2 model', () => {
       });
     });
 
-    describe('UPDATE_TARGET_MAPPINGS', () => {
-      const updateTargetMappingsState: UpdateTargetMappingsState = {
+    describe('UPDATE_TARGET_MAPPINGS_PROPERTIES', () => {
+      const updateTargetMappingsState: UpdateTargetMappingsPropertiesState = {
         ...baseState,
-        controlState: 'UPDATE_TARGET_MAPPINGS',
+        controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
       };
-      test('UPDATE_TARGET_MAPPINGS -> UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK', () => {
-        const res: ResponseType<'UPDATE_TARGET_MAPPINGS'> = Either.right({
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES'> = Either.right({
           taskId: 'update target mappings task',
         });
         const newState = model(
           updateTargetMappingsState,
           res
-        ) as UpdateTargetMappingsWaitForTaskState;
-        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK');
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK');
         expect(newState.updateTargetMappingsTaskId).toEqual('update target mappings task');
         expect(newState.retryCount).toEqual(0);
         expect(newState.retryDelay).toEqual(0);
       });
     });
 
-    describe('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK', () => {
-      const updateTargetMappingsWaitForTaskState: UpdateTargetMappingsWaitForTaskState = {
+    describe('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK', () => {
+      const updateTargetMappingsWaitForTaskState: UpdateTargetMappingsPropertiesWaitForTaskState = {
         ...baseState,
-        controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK',
+        controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK',
         versionIndexReadyActions: Option.none,
         sourceIndex: Option.some('.kibana') as Option.Some<string>,
         targetIndex: '.kibana_7.11.0_001',
         updateTargetMappingsTaskId: 'update target mappings task',
       };
 
-      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META if response is right', () => {
-        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.right(
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_META if response is right', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.right(
           'pickup_updated_mappings_succeeded'
         );
 
@@ -2655,28 +2701,28 @@ describe('migrations v2 model', () => {
         expect(newState.retryDelay).toEqual(0);
       });
 
-      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK when response is left wait_for_task_completion_timeout', () => {
-        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.left({
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK when response is left wait_for_task_completion_timeout', () => {
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
           message: '[timeout_exception] Timeout waiting for ...',
           type: 'wait_for_task_completion_timeout',
         });
         const newState = model(
           updateTargetMappingsWaitForTaskState,
           res
-        ) as UpdateTargetMappingsWaitForTaskState;
-        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK');
+        ) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK');
         expect(newState.retryCount).toEqual(1);
         expect(newState.retryDelay).toEqual(2000);
       });
 
-      test('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK with incremented retry count when response is left wait_for_task_completion_timeout a second time', () => {
+      test('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK -> UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK with incremented retry count when response is left wait_for_task_completion_timeout a second time', () => {
         const state = Object.assign({}, updateTargetMappingsWaitForTaskState, { retryCount: 1 });
-        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK'> = Either.left({
+        const res: ResponseType<'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK'> = Either.left({
           message: '[timeout_exception] Timeout waiting for ...',
           type: 'wait_for_task_completion_timeout',
         });
-        const newState = model(state, res) as UpdateTargetMappingsWaitForTaskState;
-        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK');
+        const newState = model(state, res) as UpdateTargetMappingsPropertiesWaitForTaskState;
+        expect(newState.controlState).toEqual('UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK');
         expect(newState.retryCount).toEqual(2);
         expect(newState.retryDelay).toEqual(4000);
       });
@@ -2693,7 +2739,7 @@ describe('migrations v2 model', () => {
 
       test('UPDATE_TARGET_MAPPINGS_META -> CHECK_VERSION_INDEX_READY_ACTIONS if the mapping _meta information is successfully updated', () => {
         const res: ResponseType<'UPDATE_TARGET_MAPPINGS_META'> = Either.right(
-          'update_mappings_meta_succeeded'
+          'update_mappings_succeeded'
         );
         const newState = model(updateTargetMappingsMetaState, res) as CheckVersionIndexReadyActions;
         expect(newState.controlState).toBe('CHECK_VERSION_INDEX_READY_ACTIONS');

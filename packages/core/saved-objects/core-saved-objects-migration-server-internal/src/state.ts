@@ -229,6 +229,11 @@ export interface PrepareCompatibleMigration extends PostInitWithSource {
   readonly mustRefresh?: boolean;
 }
 
+export interface RefreshSource extends PostInitWithSource {
+  /** Refresh source index before searching for outdated docs */
+  readonly controlState: 'REFRESH_SOURCE';
+}
+
 export interface FatalState extends BaseState {
   /** Migration terminated with a failure */
   readonly controlState: 'FATAL';
@@ -239,6 +244,13 @@ export interface FatalState extends BaseState {
 export interface WaitForYellowSourceState extends BaseWithSource {
   /** Wait for the source index to be yellow before reading from it. */
   readonly controlState: 'WAIT_FOR_YELLOW_SOURCE';
+  readonly sourceIndexMappings: IndexMapping;
+  readonly aliases: Record<string, string | undefined>;
+}
+
+export interface UpdateSourceMappingsPropertiesState extends BaseState {
+  readonly controlState: 'UPDATE_SOURCE_MAPPINGS_PROPERTIES';
+  readonly sourceIndex: Option.Some<string>;
   readonly sourceIndexMappings: IndexMapping;
   readonly aliases: Record<string, string | undefined>;
 }
@@ -328,14 +340,14 @@ export interface CheckTargetMappingsState extends PostInitState {
   readonly sourceIndexMappings?: IndexMapping;
 }
 
-export interface UpdateTargetMappingsState extends PostInitState {
+export interface UpdateTargetMappingsPropertiesState extends PostInitState {
   /** Update the mappings of the target index */
-  readonly controlState: 'UPDATE_TARGET_MAPPINGS';
+  readonly controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES';
 }
 
-export interface UpdateTargetMappingsWaitForTaskState extends PostInitState {
+export interface UpdateTargetMappingsPropertiesWaitForTaskState extends PostInitState {
   /** Update the mappings of the target index */
-  readonly controlState: 'UPDATE_TARGET_MAPPINGS_WAIT_FOR_TASK';
+  readonly controlState: 'UPDATE_TARGET_MAPPINGS_PROPERTIES_WAIT_FOR_TASK';
   readonly updateTargetMappingsTaskId: string;
 }
 
@@ -410,7 +422,7 @@ export interface MarkVersionIndexReady extends PostInitState {
    * cloning a source index or creating a new index.
    *
    * To account for newly installed or enabled plugins, Kibana will still
-   * perform the `UPDATE_TARGET_MAPPINGS*` and `OUTDATED_DOCUMENTS_*` steps
+   * perform the `UPDATE_TARGET_MAPPINGS_PROPERTIES*` and `OUTDATED_DOCUMENTS_*` steps
    * every time it is restarted.
    */
   readonly controlState: 'MARK_VERSION_INDEX_READY';
@@ -485,45 +497,47 @@ export interface LegacyDeleteState extends LegacyBaseState {
 }
 
 export type State = Readonly<
-  | FatalState
-  | InitState
-  | PrepareCompatibleMigration
+  | CalculateExcludeFiltersState
+  | CheckTargetMappingsState
+  | CheckUnknownDocumentsState
+  | CheckVersionIndexReadyActions
   | CleanupUnknownAndExcluded
   | CleanupUnknownAndExcludedWaitForTaskState
-  | WaitForMigrationCompletionState
-  | DoneState
-  | WaitForYellowSourceState
-  | CheckUnknownDocumentsState
-  | SetSourceWriteBlockState
-  | CalculateExcludeFiltersState
+  | CloneTempToSource
   | CreateNewTargetState
   | CreateReindexTempState
-  | ReindexSourceToTempOpenPit
-  | ReindexSourceToTempRead
-  | ReindexSourceToTempClosePit
-  | ReindexSourceToTempTransform
-  | ReindexSourceToTempIndexBulk
-  | SetTempWriteBlock
-  | CloneTempToSource
-  | CheckTargetMappingsState
-  | UpdateTargetMappingsState
-  | UpdateTargetMappingsWaitForTaskState
-  | UpdateTargetMappingsMeta
-  | CheckVersionIndexReadyActions
-  | OutdatedDocumentsSearchOpenPit
-  | OutdatedDocumentsSearchRead
-  | OutdatedDocumentsSearchClosePit
-  | OutdatedDocumentsTransform
-  | RefreshTarget
-  | OutdatedDocumentsRefresh
-  | MarkVersionIndexReady
-  | MarkVersionIndexReadyConflict
-  | TransformedDocumentsBulkIndex
+  | DoneState
+  | FatalState
+  | InitState
   | LegacyCreateReindexTargetState
-  | LegacySetWriteBlockState
+  | LegacyDeleteState
   | LegacyReindexState
   | LegacyReindexWaitForTaskState
-  | LegacyDeleteState
+  | LegacySetWriteBlockState
+  | MarkVersionIndexReady
+  | MarkVersionIndexReadyConflict
+  | OutdatedDocumentsRefresh
+  | OutdatedDocumentsSearchClosePit
+  | OutdatedDocumentsSearchOpenPit
+  | OutdatedDocumentsSearchRead
+  | OutdatedDocumentsTransform
+  | PrepareCompatibleMigration
+  | RefreshSource
+  | RefreshTarget
+  | ReindexSourceToTempClosePit
+  | ReindexSourceToTempIndexBulk
+  | ReindexSourceToTempOpenPit
+  | ReindexSourceToTempRead
+  | ReindexSourceToTempTransform
+  | SetSourceWriteBlockState
+  | SetTempWriteBlock
+  | TransformedDocumentsBulkIndex
+  | UpdateSourceMappingsPropertiesState
+  | UpdateTargetMappingsMeta
+  | UpdateTargetMappingsPropertiesState
+  | UpdateTargetMappingsPropertiesWaitForTaskState
+  | WaitForMigrationCompletionState
+  | WaitForYellowSourceState
 >;
 
 export type AllControlStates = State['controlState'];

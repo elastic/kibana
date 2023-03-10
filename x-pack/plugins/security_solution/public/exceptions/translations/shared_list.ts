@@ -112,12 +112,11 @@ export const NO_LISTS_BODY = i18n.translate(
   }
 );
 
-export const EXCEPTION_EXPORT_SUCCESS = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.all.exceptions.exportSuccess',
-  {
-    defaultMessage: 'Exception list export success',
-  }
-);
+export const EXCEPTION_LIST_EXPORTED_SUCCESSFULLY = (listName: string) =>
+  i18n.translate('xpack.securitySolution.exceptions.list.export_success', {
+    values: { listName },
+    defaultMessage: 'Exception list "{listName}" exported successfully',
+  });
 
 export const EXCEPTION_EXPORT_ERROR = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.all.exceptions.exportError',
