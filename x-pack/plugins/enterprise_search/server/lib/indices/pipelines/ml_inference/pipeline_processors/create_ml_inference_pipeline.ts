@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
+import { IngestGetPipelineResponse, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import { formatPipelineName } from '../../../../../../common/ml_inference_pipeline';
@@ -14,6 +14,7 @@ import type {
   CreateMlInferencePipelineResponse,
   InferencePipelineInferenceConfig,
 } from '../../../../../../common/types/pipelines';
+import { MlInferencePipeline } from '../../../../../../common/types/pipelines';
 import { addSubPipelineToIndexSpecificMlPipeline } from '../../../../../utils/create_ml_inference_pipeline';
 import { getPrefixedInferencePipelineProcessorName } from '../../../../../utils/ml_inference_pipeline_utils';
 import { formatMlPipelineBody } from '../../../../pipelines/create_pipeline_definitions';
@@ -23,6 +24,7 @@ import { formatMlPipelineBody } from '../../../../pipelines/create_pipeline_defi
  * then references it in the "parent" ML Inference pipeline that is associated with the index.
  * @param indexName name of the index this pipeline corresponds to.
  * @param pipelineName pipeline name set by the user.
+ * @param pipelineDefinition
  * @param modelId model ID selected by the user.
  * @param sourceField The document field that model will read.
  * @param destinationField The document field that the model will write to.
@@ -32,14 +34,16 @@ import { formatMlPipelineBody } from '../../../../pipelines/create_pipeline_defi
 export const createAndReferenceMlInferencePipeline = async (
   indexName: string,
   pipelineName: string,
-  modelId: string,
-  sourceField: string,
+  pipelineDefinition: IngestPipeline | undefined,
+  modelId: string | undefined,
+  sourceField: string | undefined,
   destinationField: string | null | undefined,
   inferenceConfig: InferencePipelineInferenceConfig | undefined,
   esClient: ElasticsearchClient
 ): Promise<CreateMlInferencePipelineResponse> => {
   const createPipelineResult = await createMlInferencePipeline(
     pipelineName,
+    pipelineDefinition,
     modelId,
     sourceField,
     destinationField,
@@ -62,6 +66,7 @@ export const createAndReferenceMlInferencePipeline = async (
 /**
  * Creates a Machine Learning Inference pipeline with the given settings, if it doesn't exist yet.
  * @param pipelineName pipeline name set by the user.
+ * @param pipelineDefinition full definition of the pipeline
  * @param modelId model ID selected by the user.
  * @param sourceField The document field that model will read.
  * @param destinationField The document field that the model will write to.
@@ -70,8 +75,9 @@ export const createAndReferenceMlInferencePipeline = async (
  */
 export const createMlInferencePipeline = async (
   pipelineName: string,
-  modelId: string,
-  sourceField: string,
+  pipelineDefinition: IngestPipeline | undefined,
+  modelId: string | undefined,
+  sourceField: string | undefined,
   destinationField: string | null | undefined,
   inferenceConfig: InferencePipelineInferenceConfig | undefined,
   esClient: ElasticsearchClient
@@ -91,15 +97,22 @@ export const createMlInferencePipeline = async (
     throw new Error(ErrorCode.PIPELINE_ALREADY_EXISTS);
   }
 
-  // Generate pipeline with default processors
-  const mlInferencePipeline = await formatMlPipelineBody(
-    inferencePipelineGeneratedName,
-    modelId,
-    sourceField,
-    destinationField || formatPipelineName(pipelineName),
-    inferenceConfig,
-    esClient
-  );
+  let mlInferencePipeline: MlInferencePipeline;
+  if (modelId && sourceField) {
+    // Generate pipeline with default processors
+    mlInferencePipeline = await formatMlPipelineBody(
+      inferencePipelineGeneratedName,
+      modelId,
+      sourceField,
+      destinationField || formatPipelineName(pipelineName),
+      inferenceConfig,
+      esClient
+    );
+  } else if (pipelineDefinition) {
+    mlInferencePipeline = { ...pipelineDefinition, version: 1 };
+  } else {
+    throw new Error(ErrorCode.PARAMETER_CONFLICT);
+  }
 
   await esClient.ingest.putPipeline({
     id: inferencePipelineGeneratedName,

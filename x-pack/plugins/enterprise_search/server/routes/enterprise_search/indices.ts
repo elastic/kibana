@@ -400,9 +400,16 @@ export function registerIndexRoutes({
               ),
             })
           ),
-          model_id: schema.string(),
+          model_id: schema.maybe(schema.string()),
+          pipeline_definition: schema.maybe(
+            // TODO: make this more explicit?
+            schema.object({
+              description: schema.maybe(schema.string()),
+              processors: schema.arrayOf(schema.maybe(schema.any())),
+            })
+          ),
           pipeline_name: schema.string(),
-          source_field: schema.string(),
+          source_field: schema.maybe(schema.string()),
         }),
       },
     },
@@ -413,10 +420,40 @@ export function registerIndexRoutes({
       const {
         model_id: modelId,
         pipeline_name: pipelineName,
+        pipeline_definition: pipelineDefinition,
         source_field: sourceField,
         destination_field: destinationField,
         inference_config: inferenceConfig,
       } = request.body;
+
+      // additional validations
+      if (pipelineDefinition && (sourceField || destinationField || modelId)) {
+        return createError({
+          errorCode: ErrorCode.PARAMETER_CONFLICT,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterConflictError',
+            {
+              defaultMessage:
+                'pipeline_definition should only be provided if source_field and destination_field and model_id are not provided',
+            }
+          ),
+          response,
+          statusCode: 400,
+        });
+      } else if (!(pipelineDefinition || (sourceField && modelId))) {
+        return createError({
+          errorCode: ErrorCode.PARAMETER_CONFLICT,
+          message: i18n.translate(
+            'xpack.enterpriseSearch.server.routes.createMlInferencePipeline.ParameterMissingError',
+            {
+              defaultMessage:
+                'either pipeline_definition or source_field AND model_id must be provided',
+            }
+          ),
+          response,
+          statusCode: 400,
+        });
+      }
 
       let createPipelineResult: CreateMlInferencePipelineResponse | undefined;
       try {
@@ -424,6 +461,7 @@ export function registerIndexRoutes({
         createPipelineResult = await createAndReferenceMlInferencePipeline(
           indexName,
           pipelineName,
+          pipelineDefinition,
           modelId,
           sourceField,
           destinationField,
