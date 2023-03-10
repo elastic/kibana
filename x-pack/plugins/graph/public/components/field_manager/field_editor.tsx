@@ -346,7 +346,7 @@ export function FieldEditor({
                 <EuiFlexGroup direction="row" justifyContent="flexEnd">
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
-                      data-test-subj="graphFieldEditorCancelButtonEmpty"
+                      data-test-subj="graphFieldEditorCancelButton"
                       size="s"
                       onClick={() => {
                         setCurrentField(initialField);

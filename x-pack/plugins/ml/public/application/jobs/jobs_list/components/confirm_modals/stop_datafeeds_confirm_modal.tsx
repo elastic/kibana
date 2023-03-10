@@ -105,7 +105,7 @@ export const StopDatafeedsConfirmModal: FC<Props> = ({
           <EuiSpacer />
           <EuiModalFooter>
             <EuiButtonEmpty
-              data-test-subj="mlStopDatafeedsConfirmModalCancelButtonEmpty"
+              data-test-subj="mlStopDatafeedsConfirmModalCancelButton"
               onClick={closeModal}
             >
               <FormattedMessage

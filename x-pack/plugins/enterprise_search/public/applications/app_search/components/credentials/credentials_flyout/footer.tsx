@@ -34,7 +34,7 @@ export const CredentialsFlyoutFooter: React.FC = () => {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="enterpriseSearchCredentialsFlyoutFooterButtonEmpty"
+            data-test-subj="enterpriseSearchCredentialsFlyoutFooterButton"
             iconType="cross"
             onClick={hideCredentialsForm}
           >

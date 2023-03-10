@@ -211,7 +211,7 @@ export const SummaryStep: FC<StepProps> = ({ setCurrentStep, isCurrentStep }) =>
                 {isAdvanced === false && (
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
-                      data-test-subj="mlSummaryStepConvertToAdvancedJobButtonEmpty"
+                      data-test-subj="mlSummaryStepConvertToAdvancedJobButton"
                       onClick={convertToAdvanced}
                     >
                       <FormattedMessage

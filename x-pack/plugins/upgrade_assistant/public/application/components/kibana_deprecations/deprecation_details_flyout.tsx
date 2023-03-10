@@ -216,7 +216,7 @@ export const DeprecationDetailsFlyout = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="upgradeAssistantDeprecationDetailsFlyoutButtonEmpty"
+              data-test-subj="upgradeAssistantDeprecationDetailsFlyoutButton"
               onClick={closeFlyout}
               flush="left"
             >

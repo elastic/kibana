@@ -42,7 +42,7 @@ export const AutomatedCurationHistory: React.FC<Props> = ({ query, engineName })
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="enterpriseSearchAutomatedCurationHistoryRefreshButtonEmpty"
+              data-test-subj="enterpriseSearchAutomatedCurationHistoryRefreshButton"
               iconType="refresh"
               size="xs"
               onClick={() => setEndTimestamp(Date.now())}

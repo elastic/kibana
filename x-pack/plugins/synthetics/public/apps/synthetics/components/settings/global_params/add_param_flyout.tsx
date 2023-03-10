@@ -127,7 +127,7 @@ export const AddParamFlyout = ({
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="syntheticsAddParamFlyoutButtonEmpty"
+                  data-test-subj="syntheticsAddParamFlyoutButton"
                   iconType="cross"
                   onClick={closeFlyout}
                   flush="left"

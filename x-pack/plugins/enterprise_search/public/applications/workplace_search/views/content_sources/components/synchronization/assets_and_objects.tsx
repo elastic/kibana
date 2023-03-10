@@ -69,7 +69,7 @@ export const AssetsAndObjects: React.FC = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchAssetsAndObjectsButtonEmpty"
+          data-test-subj="enterpriseSearchAssetsAndObjectsButton"
           onClick={resetSyncSettings}
           disabled={!hasUnsavedAssetsAndObjectsChanges}
         >

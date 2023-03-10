@@ -47,7 +47,7 @@ export const NotFoundPrompt = ({ actions, title, body }: NotFoundProps) => {
   const DEFAULT_ACTIONS = useMemo(
     () => [
       <EuiButtonEmpty
-        data-test-subj="sharedUxDEFAULT_ACTIONSButtonEmpty"
+        data-test-subj="sharedUxDEFAULT_ACTIONSButton"
         iconType="arrowLeft"
         flush="both"
         onClick={goBack}

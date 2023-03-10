@@ -658,7 +658,7 @@ export class AutoFollowPatternForm extends PureComponent {
 
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="crossClusterReplicationRenderActionsCancelButtonEmpty"
+                data-test-subj="crossClusterReplicationRenderActionsCancelButton"
                 color="primary"
                 onClick={this.cancelForm}
               >
@@ -672,7 +672,7 @@ export class AutoFollowPatternForm extends PureComponent {
           </EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="crossClusterReplicationRenderActionsButtonEmpty"
+              data-test-subj="crossClusterReplicationRenderActionsButton"
               onClick={this.toggleRequest}
             >
               {isRequestVisible ? (

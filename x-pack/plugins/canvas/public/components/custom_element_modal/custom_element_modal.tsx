@@ -228,7 +228,7 @@ export class CustomElementModal extends PureComponent<Props, State> {
         <EuiModalFooter>
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty data-test-subj="canvasButtonEmpty" onClick={onCancel}>
+              <EuiButtonEmpty data-test-subj="canvasButton" onClick={onCancel}>
                 {strings.getCancelButtonLabel()}
               </EuiButtonEmpty>
             </EuiFlexItem>

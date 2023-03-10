@@ -219,7 +219,7 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
 
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="snapshotRestorePolicyStepRetentionSnapshotDocsButtonEmpty"
+            data-test-subj="snapshotRestorePolicyStepRetentionSnapshotDocsButton"
             size="s"
             flush="right"
             href={docLinks.links.snapshotRestore.createSnapshot}

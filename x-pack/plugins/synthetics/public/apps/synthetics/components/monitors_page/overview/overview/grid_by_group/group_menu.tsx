@@ -50,7 +50,7 @@ export const GroupMenu = ({ groupOptions, orderByOptions, groupField }: Props) =
 
   const button = (
     <EuiButtonEmpty
-      data-test-subj="syntheticsGroupMenuButtonEmpty"
+      data-test-subj="syntheticsGroupMenuButton"
       size="xs"
       iconType="arrowDown"
       iconSide="right"

@@ -85,7 +85,7 @@ export const CrawlCustomSettingsFlyout: React.FC = () => {
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="enterpriseSearchCrawlCustomSettingsFlyoutButtonEmpty"
+              data-test-subj="enterpriseSearchCrawlCustomSettingsFlyoutButton"
               onClick={hideFlyout}
             >
               {CANCEL_BUTTON_LABEL}

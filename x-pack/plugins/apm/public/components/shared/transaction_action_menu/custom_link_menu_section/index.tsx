@@ -174,7 +174,7 @@ function BottomSection({
         <EuiFlexItem style={{ alignItems: 'center' }}>
           <EuiToolTip content={!canSave && NO_PERMISSION_LABEL}>
             <EuiButtonEmpty
-              data-test-subj="apmBottomSectionCreateCustomLinkButtonEmpty"
+              data-test-subj="apmBottomSectionCreateCustomLinkButton"
               isDisabled={!canSave}
               iconType="plusInCircle"
               size="xs"
@@ -196,7 +196,7 @@ function BottomSection({
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiButtonEmpty
-            data-test-subj="apmBottomSectionButtonEmpty"
+            data-test-subj="apmBottomSectionButton"
             iconType={showAllLinks ? 'arrowUp' : 'arrowDown'}
             onClick={toggleShowAll}
           >

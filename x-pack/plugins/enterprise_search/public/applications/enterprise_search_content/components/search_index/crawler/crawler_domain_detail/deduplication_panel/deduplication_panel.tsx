@@ -139,7 +139,7 @@ export const DeduplicationPanel: React.FC = () => {
                   <EuiPopover
                     button={
                       <EuiButtonEmpty
-                        data-test-subj="enterpriseSearchDeduplicationPanelButtonEmpty"
+                        data-test-subj="enterpriseSearchDeduplicationPanelButton"
                         data-telemetry-id="entSearchContent-crawler-domainDetail-deduplication-selectFields"
                         size="xs"
                         iconType="arrowDown"

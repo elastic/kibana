@@ -69,7 +69,7 @@ export function ObservabilityStatusProgress({
             <EuiFlexGroup responsive={false} direction="row" alignItems="center">
               <EuiFlexItem>
                 <EuiButtonEmpty
-                  data-test-subj="o11yObservabilityStatusProgressDismissButtonEmpty"
+                  data-test-subj="o11yObservabilityStatusProgressDismissButton"
                   size="s"
                   onClick={dismissGuidedSetup}
                 >

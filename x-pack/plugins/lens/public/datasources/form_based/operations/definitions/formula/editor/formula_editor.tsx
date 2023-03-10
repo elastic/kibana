@@ -882,7 +882,7 @@ export function FormulaEditor({
                       closePopover={() => setIsWarningOpen(false)}
                       button={
                         <EuiButtonEmpty
-                          data-test-subj="lensFormulaEditorButtonEmpty"
+                          data-test-subj="lensFormulaEditorButton"
                           color={errorCount ? 'danger' : 'warning'}
                           className="lnsFormula__editorError"
                           iconType="alert"

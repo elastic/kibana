@@ -158,10 +158,7 @@ const RemoveConfirmModal = ({
           <EuiFlexItem>
             <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  data-test-subj="lensRemoveConfirmModalButtonEmpty"
-                  onClick={closeModal}
-                >
+                <EuiButtonEmpty data-test-subj="lensRemoveConfirmModalButton" onClick={closeModal}>
                   {i18n.translate('xpack.lens.layer.cancelDelete', {
                     defaultMessage: `Cancel`,
                   })}

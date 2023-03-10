@@ -104,7 +104,7 @@ export const ReputationLinksOverflow = React.memo<ReputationLinkOverflowProps>(
         <>
           {' ,'}
           <EuiButtonEmpty
-            data-test-subj="securitySolutionButtonMoreButtonEmpty"
+            data-test-subj="securitySolutionButtonMoreButton"
             size="xs"
             onClick={togglePopover}
           >

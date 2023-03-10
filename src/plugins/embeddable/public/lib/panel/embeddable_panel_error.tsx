@@ -78,7 +78,7 @@ export function EmbeddablePanelError({
       actions={
         isEditable && (
           <EuiButtonEmpty
-            data-test-subj="pluginsEmbeddablePanelErrorButtonEmpty"
+            data-test-subj="pluginsEmbeddablePanelErrorButton"
             aria-label={ariaLabel}
             onClick={handleErrorClick}
             size="s"

@@ -114,7 +114,7 @@ export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) =
       <EuiSpacer />
       {!isJobCreated && (
         <EuiButtonEmpty
-          data-test-subj="mlConfigurationStepDetailsEditButtonEmpty"
+          data-test-subj="mlConfigurationStepDetailsEditButton"
           iconType="pencil"
           size="s"
           onClick={() => {

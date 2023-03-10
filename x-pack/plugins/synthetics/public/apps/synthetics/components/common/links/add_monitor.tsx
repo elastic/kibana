@@ -15,7 +15,7 @@ export const AddMonitorLink = () => {
 
   return (
     <EuiButtonEmpty
-      data-test-subj="syntheticsAddMonitorLinkButtonEmpty"
+      data-test-subj="syntheticsAddMonitorLinkButton"
       href={`${basePath}/app/synthetics/add-monitor`}
     >
       {CREATE_NEW_MONITOR}

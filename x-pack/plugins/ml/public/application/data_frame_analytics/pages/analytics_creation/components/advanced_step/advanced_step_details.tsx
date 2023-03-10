@@ -274,7 +274,7 @@ export const AdvancedStepDetails: FC<{
       <EuiSpacer />
       {!isJobCreated && (
         <EuiButtonEmpty
-          data-test-subj="mlAdvancedStepDetailsEditButtonEmpty"
+          data-test-subj="mlAdvancedStepDetailsEditButton"
           iconType="pencil"
           size="s"
           onClick={() => {

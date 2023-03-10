@@ -117,7 +117,7 @@ export const EditJob: FC<EditJobProps> = ({ job, jobOverride, existingGroupIds, 
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="mlEditJobCloseButtonEmpty"
+              data-test-subj="mlEditJobCloseButton"
               iconType="cross"
               onClick={() => onClose(null)}
               flush="left"

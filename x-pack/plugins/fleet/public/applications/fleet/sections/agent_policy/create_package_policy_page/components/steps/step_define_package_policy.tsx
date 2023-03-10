@@ -214,7 +214,7 @@ export const StepDefinePackagePolicy: React.FunctionComponent<{
                 <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
-                      data-test-subj="fleetStepDefinePackagePolicyAdvancedOptionsButtonEmpty"
+                      data-test-subj="fleetStepDefinePackagePolicyAdvancedOptionsButton"
                       size="xs"
                       iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
                       onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}

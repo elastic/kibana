@@ -210,7 +210,7 @@ export const PipelineDetailsFlyout: FunctionComponent<Props> = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="ingestPipelinesPipelineDetailsFlyoutCloseButtonEmpty"
+              data-test-subj="ingestPipelinesPipelineDetailsFlyoutCloseButton"
               iconType="cross"
               onClick={onClose}
               flush="left"

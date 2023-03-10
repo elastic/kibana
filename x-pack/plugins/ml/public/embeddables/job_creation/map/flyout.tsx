@@ -76,7 +76,7 @@ export const GeoJobFlyout: FC<Props> = ({ onClose, embeddable }) => {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="mlGeoJobFlyoutCloseButtonEmpty"
+              data-test-subj="mlGeoJobFlyoutCloseButton"
               iconType="cross"
               onClick={onClose}
               flush="left"

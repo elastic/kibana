@@ -75,7 +75,7 @@ export const EventGeneratingElementsShouldBeInstrumented: Rule.RuleModule = {
         const intent = getIntentFromNode(parent);
 
         // 4. The element name that generates the events
-        const element = name.replace('Eui', '');
+        const element = name.replace('Eui', '').replace('Empty', '');
 
         const suggestion = `${appName}${componentName}${intent}${element}`; // 'o11yHeaderActionsSubmitButton'
 

@@ -52,7 +52,7 @@ const TakeActionMenuComponent: React.FC<Props> = ({
   const takeActionButton = useMemo(
     () => (
       <EuiButtonEmpty
-        data-test-subj="kbnEcsDataQualityDashboardTakeActionButtonButtonEmpty"
+        data-test-subj="kbnEcsDataQualityDashboardTakeActionButtonButton"
         aria-label={i18n.TAKE_ACTION}
         iconSide="right"
         iconType="arrowDown"

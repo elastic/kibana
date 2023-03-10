@@ -355,7 +355,7 @@ export class Flyout extends Component {
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="monitoringCloseButtonEmpty"
+                data-test-subj="monitoringCloseButton"
                 iconType="cross"
                 onClick={onClose}
                 flush="left"

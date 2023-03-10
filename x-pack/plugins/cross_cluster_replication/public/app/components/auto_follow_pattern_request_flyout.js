@@ -84,7 +84,7 @@ export class AutoFollowPatternRequestFlyout extends PureComponent {
 
         <EuiFlyoutFooter>
           <EuiButtonEmpty
-            data-test-subj="crossClusterReplicationCloseButtonEmpty"
+            data-test-subj="crossClusterReplicationCloseButton"
             iconType="cross"
             onClick={close}
             flush="left"

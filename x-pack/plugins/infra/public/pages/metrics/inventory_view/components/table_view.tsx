@@ -84,10 +84,7 @@ export const TableView = (props: Props) => {
         const uniqueID = [...item.node.path.map((p) => p.value), item.node.name].join(':');
         const button = (
           <EuiToolTip content={tooltipText}>
-            <EuiButtonEmpty
-              data-test-subj="infraColumnsButtonEmpty"
-              onClick={openPopoverFor(uniqueID)}
-            >
+            <EuiButtonEmpty data-test-subj="infraColumnsButton" onClick={openPopoverFor(uniqueID)}>
               {value}
             </EuiButtonEmpty>
           </EuiToolTip>
@@ -120,7 +117,7 @@ export const TableView = (props: Props) => {
         const handleClick = () => props.onFilter(`${grouping.field}:"${value}"`);
         return (
           <EuiToolTip content="Set Filter">
-            <EuiButtonEmpty data-test-subj="infraColumnsButtonEmpty" onClick={handleClick}>
+            <EuiButtonEmpty data-test-subj="infraColumnsButton" onClick={handleClick}>
               {value}
             </EuiButtonEmpty>
           </EuiToolTip>

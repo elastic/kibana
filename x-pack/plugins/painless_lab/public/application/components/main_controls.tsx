@@ -90,7 +90,7 @@ export function MainControls({ toggleRequestFlyout, isRequestFlyoutOpen, reset, 
                 id="painlessLabHelpContextMenu"
                 button={
                   <EuiButtonEmpty
-                    data-test-subj="painlessLabMainControlsHelpButtonEmpty"
+                    data-test-subj="painlessLabMainControlsHelpButton"
                     size="s"
                     iconType="help"
                     iconSide="left"

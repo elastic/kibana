@@ -62,7 +62,7 @@ export const CompositeEditor = ({ onReset }: CompositeEditorProps) => {
           </EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="pluginsCompositeEditorResetButtonEmpty"
+              data-test-subj="pluginsCompositeEditorResetButton"
               flush="right"
               iconType="refresh"
               onClick={onReset}

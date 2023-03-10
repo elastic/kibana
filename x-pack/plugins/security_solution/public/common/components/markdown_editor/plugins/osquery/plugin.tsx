@@ -132,7 +132,7 @@ const OsqueryEditorComponent = ({
 
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="securitySolutionOsqueryEditorComponentCancelButtonEmpty"
+          data-test-subj="securitySolutionOsqueryEditorComponentCancelButton"
           onClick={onCancel}
         >
           {i18n.translate('xpack.securitySolution.markdown.osquery.modalCancelButtonLabel', {

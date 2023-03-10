@@ -248,7 +248,7 @@ export const JsonWatchEditForm = () => {
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="watcherJsonWatchEditFormButtonEmpty"
+              data-test-subj="watcherJsonWatchEditFormButton"
               onClick={() => setIsRequestVisible(!isRequestVisible)}
             >
               {isRequestVisible ? (

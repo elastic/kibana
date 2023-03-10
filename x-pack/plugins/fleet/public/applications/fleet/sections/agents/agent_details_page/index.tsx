@@ -81,7 +81,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
       <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
         <EuiFlexItem>
           <EuiButtonEmpty
-            data-test-subj="fleetHeaderLeftContentViewAllAgentsButtonEmpty"
+            data-test-subj="fleetHeaderLeftContentViewAllAgentsButton"
             iconType="arrowLeft"
             href={getHref('agent_list')}
             flush="left"

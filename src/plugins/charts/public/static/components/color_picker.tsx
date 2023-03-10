@@ -220,7 +220,7 @@ export const ColorPicker = ({
         colorIsOverwritten && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="pluginsColorPickerResetColorButtonEmpty"
+              data-test-subj="pluginsColorPickerResetColorButton"
               size="s"
               onClick={(e: any) => onChange(null, e)}
             >

@@ -384,7 +384,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                       }
                     >
                       <EuiButtonEmpty
-                        data-test-subj="mlDatafeedChartFlyoutButtonEmpty"
+                        data-test-subj="mlDatafeedChartFlyoutButton"
                         aria-label={i18n.translate(
                           'xpack.ml.jobsList.datafeedChart.chartIntervalLeftArrow',
                           {
@@ -580,7 +580,7 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                       }
                     >
                       <EuiButtonEmpty
-                        data-test-subj="mlDatafeedChartFlyoutButtonEmpty"
+                        data-test-subj="mlDatafeedChartFlyoutButton"
                         aria-label={i18n.translate(
                           'xpack.ml.jobsList.datafeedChart.chartIntervalRightArrow',
                           {

@@ -32,7 +32,7 @@ export const ConfigDocsLinks: React.FC<ConfigDocsLinksProps> = ({
   <EuiFlexGroup justifyContent="flexStart" responsive={false}>
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty
-        data-test-subj="enterpriseSearchConfigDocsLinksButtonEmpty"
+        data-test-subj="enterpriseSearchConfigDocsLinksButton"
         flush="left"
         iconType="popout"
         href={documentationUrl}
@@ -44,7 +44,7 @@ export const ConfigDocsLinks: React.FC<ConfigDocsLinksProps> = ({
     {applicationPortalUrl && (
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchConfigDocsLinksButtonEmpty"
+          data-test-subj="enterpriseSearchConfigDocsLinksButton"
           flush="left"
           iconType="popout"
           href={applicationPortalUrl}
@@ -64,7 +64,7 @@ export const ConfigDocsLinks: React.FC<ConfigDocsLinksProps> = ({
     {discussUrl && (
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchConfigDocsLinksQuestionsDiscussHereButtonEmpty"
+          data-test-subj="enterpriseSearchConfigDocsLinksQuestionsDiscussHereButton"
           flush="left"
           iconType="popout"
           target="_blank"

@@ -494,7 +494,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled }) => {
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="mlImportJobsFlyoutCloseButtonEmpty"
+                  data-test-subj="mlImportJobsFlyoutCloseButton"
                   iconType="cross"
                   onClick={setShowFlyout.bind(null, false)}
                   flush="left"

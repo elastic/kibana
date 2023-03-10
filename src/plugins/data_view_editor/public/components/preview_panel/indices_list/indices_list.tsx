@@ -97,7 +97,7 @@ export class IndicesList extends React.Component<IndicesListProps, IndicesListSt
 
     const button = (
       <EuiButtonEmpty
-        data-test-subj="pluginsRowsPerPagePerPageButtonEmpty"
+        data-test-subj="pluginsRowsPerPagePerPageButton"
         size="s"
         color="text"
         iconType="arrowDown"

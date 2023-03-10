@@ -81,7 +81,7 @@ export const LabsFlyout = (props: Props) => {
 
   const resetButton = (
     <EuiButtonEmpty
-      data-test-subj="pluginsLabsFlyoutButtonEmpty"
+      data-test-subj="pluginsLabsFlyoutButton"
       onClick={() => {
         reset();
         setProjects(getProjects());
@@ -111,7 +111,7 @@ export const LabsFlyout = (props: Props) => {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="pluginsLabsFlyoutButtonEmpty"
+            data-test-subj="pluginsLabsFlyoutButton"
             iconType="cross"
             onClick={() => onClose()}
             flush="left"

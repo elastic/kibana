@@ -531,7 +531,7 @@ class RuleEditorFlyoutUI extends Component {
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="mlCloseButtonEmpty"
+                  data-test-subj="mlCloseButton"
                   iconType="cross"
                   onClick={this.closeFlyout}
                   flush="left"
@@ -712,7 +712,7 @@ class RuleEditorFlyoutUI extends Component {
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="mlCloseButtonEmpty"
+                  data-test-subj="mlCloseButton"
                   iconType="cross"
                   onClick={this.closeFlyout}
                   flush="left"

@@ -440,7 +440,7 @@ export const EditPackagePolicyForm = memo<{
                   <EuiFlexGroup gutterSize="s" justifyContent="flexEnd">
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
-                        data-test-subj="fleetEditPackagePolicyFormCancelButtonEmpty"
+                        data-test-subj="fleetEditPackagePolicyFormCancelButton"
                         color="ghost"
                         href={cancelUrl}
                       >

@@ -133,7 +133,7 @@ export class AddTooltipFieldPopover extends Component<Props, State> {
   _renderAddButton() {
     return (
       <EuiButtonEmpty
-        data-test-subj="mapsAddButtonEmpty"
+        data-test-subj="mapsAddButton"
         onClick={this._togglePopover}
         size="xs"
         iconType="plusInCircleFilled"

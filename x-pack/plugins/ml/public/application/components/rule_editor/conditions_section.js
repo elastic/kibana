@@ -50,7 +50,7 @@ export function ConditionsSection({
       {expressions}
       <EuiSpacer size="s" />
       <EuiButtonEmpty
-        data-test-subj="mlConditionsSectionAddNewConditionButtonEmpty"
+        data-test-subj="mlConditionsSectionAddNewConditionButton"
         onClick={() => addCondition()}
       >
         <FormattedMessage

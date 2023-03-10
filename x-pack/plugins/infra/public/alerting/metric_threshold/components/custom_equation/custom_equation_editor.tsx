@@ -165,7 +165,7 @@ export const CustomEquationEditor = ({
       {metricRows}
       <EuiFlexGroup>
         <EuiButtonEmpty
-          data-test-subj="infraCustomEquationEditorAddAggregationFieldButtonEmpty"
+          data-test-subj="infraCustomEquationEditorAddAggregationFieldButton"
           color={'primary'}
           flush={'left'}
           size="xs"

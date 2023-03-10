@@ -31,7 +31,7 @@ export const GroupRowSourcesDropdown: React.FC<GroupRowSourcesDropdownProps> = (
 }) => {
   const toggleLink = (
     <EuiButtonEmpty
-      data-test-subj="enterpriseSearchGroupRowSourcesDropdownButtonEmpty"
+      data-test-subj="enterpriseSearchGroupRowSourcesDropdownButton"
       className="user-group-source--additional"
       onClick={onButtonClick}
     >

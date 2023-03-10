@@ -108,7 +108,7 @@ export const InvestigateInTimelineButton: React.FunctionComponent<
 
   return asEmptyButton ? (
     <EuiButtonEmpty
-      data-test-subj="securitySolutionInvestigateInTimelineButtonButtonEmpty"
+      data-test-subj="securitySolutionInvestigateInTimelineButtonButton"
       aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
       onClick={configureAndOpenTimeline}
       flush="right"

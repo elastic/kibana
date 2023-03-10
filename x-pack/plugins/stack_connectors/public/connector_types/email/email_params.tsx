@@ -74,7 +74,7 @@ export const EmailParamsFields = ({
             <span>
               {!addCC && (!cc || cc?.length === 0) ? (
                 <EuiButtonEmpty
-                  data-test-subj="stackConnectorsEmailParamsFieldsCcButtonEmpty"
+                  data-test-subj="stackConnectorsEmailParamsFieldsCcButton"
                   size="xs"
                   onClick={() => setAddCC(true)}
                 >
@@ -86,7 +86,7 @@ export const EmailParamsFields = ({
               ) : null}
               {!addBCC && (!bcc || bcc?.length === 0) ? (
                 <EuiButtonEmpty
-                  data-test-subj="stackConnectorsEmailParamsFieldsBccButtonEmpty"
+                  data-test-subj="stackConnectorsEmailParamsFieldsBccButton"
                   size="xs"
                   onClick={() => setAddBCC(true)}
                 >

@@ -64,7 +64,7 @@ const SCRIPT_RECORDER_BTNS = (
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
       <EuiButtonEmpty
-        data-test-subj="syntheticsDownloadSyntheticsRecorderButtonEmpty"
+        data-test-subj="syntheticsDownloadSyntheticsRecorderButton"
         href="https://github.com/elastic/synthetics-recorder/releases/"
         iconType="download"
       >

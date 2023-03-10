@@ -167,7 +167,7 @@ export const RemoveClusterSettingsFlyout = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="upgradeAssistantRemoveClusterSettingsFlyoutButtonEmpty"
+              data-test-subj="upgradeAssistantRemoveClusterSettingsFlyoutButton"
               onClick={closeFlyout}
               flush="left"
             >

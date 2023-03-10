@@ -83,7 +83,7 @@ function IntroductionUI({
     <>
       <div>
         <EuiButtonEmpty
-          data-test-subj="pluginsIntroductionUIBrowseAllIntegrationsButtonEmpty"
+          data-test-subj="pluginsIntroductionUIBrowseAllIntegrationsButton"
           iconType="arrowLeft"
           size="xs"
           flush="left"

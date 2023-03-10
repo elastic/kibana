@@ -210,7 +210,7 @@ export function CreateAgentKeyFlyout({ onCancel, onSuccess, onError }: Props) {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="apmCreateAgentKeyFlyoutCancelButtonEmpty"
+              data-test-subj="apmCreateAgentKeyFlyoutCancelButton"
               onClick={onCancel}
             >
               {i18n.translate(

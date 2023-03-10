@@ -78,7 +78,7 @@ export const JsonCodeEditorCommon = ({
           <EuiCopy textToCopy={jsonValue}>
             {(copy) => (
               <EuiButtonEmpty
-                data-test-subj="pluginsJsonCodeEditorCommonButtonEmpty"
+                data-test-subj="pluginsJsonCodeEditorCommonButton"
                 size="xs"
                 flush="right"
                 iconType="copyClipboard"

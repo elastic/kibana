@@ -224,7 +224,7 @@ export const PageRouter: FC = () => {
             <NotFoundPrompt
               actions={[
                 <EuiButtonEmpty
-                  data-test-subj="syntheticsPageRouterGoToSyntheticsHomePageButtonEmpty"
+                  data-test-subj="syntheticsPageRouterGoToSyntheticsHomePageButton"
                   iconType="arrowLeft"
                   flush="both"
                   onClick={() => {

@@ -419,7 +419,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="fleetEditOutputFlyoutCancelButtonEmpty"
+              data-test-subj="fleetEditOutputFlyoutCancelButton"
               onClick={onClose}
               flush="left"
             >

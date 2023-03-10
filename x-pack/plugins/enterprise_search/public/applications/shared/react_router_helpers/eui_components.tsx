@@ -68,7 +68,7 @@ export const EuiButtonEmptyTo: React.FC<ReactRouterEuiButtonEmptyProps> = ({
   ...rest
 }) => (
   <EuiButtonEmpty
-    data-test-subj="enterpriseSearchEuiButtonEmptyToButtonEmpty"
+    data-test-subj="enterpriseSearchEuiButtonEmptyToButton"
     {...rest}
     {...generateReactRouterProps({ to, onClick, shouldNotCreateHref })}
   />

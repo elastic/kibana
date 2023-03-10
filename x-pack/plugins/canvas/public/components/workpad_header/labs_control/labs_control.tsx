@@ -38,7 +38,7 @@ export const LabsControl = () => {
   return (
     <>
       <EuiButtonEmpty
-        data-test-subj="canvasLabsControlButtonEmpty"
+        data-test-subj="canvasLabsControlButton"
         onClick={() => setIsShown(!isShown)}
         size="xs"
       >

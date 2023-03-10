@@ -96,7 +96,7 @@ export const AddToCaseButton: React.FC<AddToCaseButtonProps> = ({
 
   return (
     <EuiButtonEmpty
-      data-test-subj="osqueryAddToCaseButtonButtonEmpty"
+      data-test-subj="osqueryAddToCaseButtonButton"
       size="xs"
       iconType="casesApp"
       onClick={handleClick}

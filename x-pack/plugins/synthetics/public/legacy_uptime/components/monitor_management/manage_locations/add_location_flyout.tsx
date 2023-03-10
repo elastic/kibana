@@ -82,7 +82,7 @@ export const AddLocationFlyout = ({
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="syntheticsAddLocationFlyoutButtonEmpty"
+                data-test-subj="syntheticsAddLocationFlyoutButton"
                 iconType="cross"
                 onClick={closeFlyout}
                 flush="left"

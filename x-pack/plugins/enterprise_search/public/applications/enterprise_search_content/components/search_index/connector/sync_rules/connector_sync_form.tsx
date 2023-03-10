@@ -40,7 +40,7 @@ export const ConnectorSyncRulesForm: React.FC = ({ children }) => {
           {isEditing && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="enterpriseSearchConnectorSyncRulesFormCancelButtonEmpty"
+                data-test-subj="enterpriseSearchConnectorSyncRulesFormCancelButton"
                 data-telemetry-id="entSearchContent-connector-syncRules-editRules-cancelEditing"
                 onClick={() => {
                   setIsEditing(!isEditing);

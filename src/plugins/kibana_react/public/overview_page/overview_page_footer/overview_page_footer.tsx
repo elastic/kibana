@@ -45,7 +45,7 @@ export const OverviewPageFooter: FC<Props> = ({
   const defaultRouteButton = defaultRoute.includes(path) ? (
     <RedirectAppLinks application={application}>
       <EuiButtonEmpty
-        data-test-subj="pluginsOverviewPageFooterDisplayADifferentPageOnLogInButtonEmpty"
+        data-test-subj="pluginsOverviewPageFooterDisplayADifferentPageOnLogInButton"
         className="kbnOverviewPageFooter__button"
         flush="both"
         iconType="home"
@@ -67,7 +67,7 @@ export const OverviewPageFooter: FC<Props> = ({
     </RedirectAppLinks>
   ) : (
     <EuiButtonEmpty
-      data-test-subj="pluginsOverviewPageFooterMakeThisMyLandingPageButtonEmpty"
+      data-test-subj="pluginsOverviewPageFooterMakeThisMyLandingPageButton"
       className="kbnOverviewPageFooter__button"
       flush="both"
       iconType="home"

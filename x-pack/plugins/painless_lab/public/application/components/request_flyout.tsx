@@ -52,7 +52,7 @@ export const RequestFlyout: FunctionComponent<Props> = ({
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="painlessLabRequestFlyoutApiDocumentationButtonEmpty"
+              data-test-subj="painlessLabRequestFlyoutApiDocumentationButton"
               size="s"
               flush="right"
               href={links.painlessExecuteAPI}

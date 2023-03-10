@@ -62,7 +62,7 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="indexManagementStepSettingsIndexSettingsDocsButtonEmpty"
+              data-test-subj="indexManagementStepSettingsIndexSettingsDocsButton"
               size="s"
               flush="right"
               href={`${esDocsBase}/index-modules.html#index-modules-settings`}

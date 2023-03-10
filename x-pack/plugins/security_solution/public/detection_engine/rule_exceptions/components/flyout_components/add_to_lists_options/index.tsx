@@ -72,7 +72,7 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
                 </div>
                 <EuiPopoverFooter>
                   <EuiButtonEmpty
-                    data-test-subj="securitySolutionExceptionsAddToListsOptionsComponentButtonEmpty"
+                    data-test-subj="securitySolutionExceptionsAddToListsOptionsComponentButton"
                     size="s"
                     iconType="popout"
                     iconSide="right"

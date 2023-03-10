@@ -90,7 +90,7 @@ export const AddDomainFlyout: React.FC = () => {
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj="enterpriseSearchAddDomainFlyoutButtonEmpty"
+                    data-test-subj="enterpriseSearchAddDomainFlyoutButton"
                     onClick={() => setIsFlyoutVisible(false)}
                   >
                     {CANCEL_BUTTON_LABEL}

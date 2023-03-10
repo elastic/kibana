@@ -81,7 +81,7 @@ export const LensLayerSelectionFlyout: FC<Props> = ({ onClose, embeddable }) => 
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="mlLensLayerSelectionFlyoutCloseButtonEmpty"
+              data-test-subj="mlLensLayerSelectionFlyoutCloseButton"
               iconType="cross"
               onClick={onClose}
               flush="left"

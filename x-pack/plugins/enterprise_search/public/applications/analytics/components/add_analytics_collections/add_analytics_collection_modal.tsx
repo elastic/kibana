@@ -82,7 +82,7 @@ export const AddAnalyticsCollectionModal: React.FC<AddAnalyticsCollectionModalPr
 
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchAddAnalyticsCollectionModalCancelButtonEmpty"
+          data-test-subj="enterpriseSearchAddAnalyticsCollectionModalCancelButton"
           onClick={onClose}
         >
           {i18n.translate('xpack.enterpriseSearch.analytics.collectionsCreate.form.cancelButton', {

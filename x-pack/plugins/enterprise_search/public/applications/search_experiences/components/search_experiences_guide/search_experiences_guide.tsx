@@ -86,7 +86,7 @@ export const SearchExperiencesGuide: React.FC = () => {
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
-                      data-test-subj="enterpriseSearchSearchExperiencesGuideSearchUiOnGithubButtonEmpty"
+                      data-test-subj="enterpriseSearchSearchExperiencesGuideSearchUiOnGithubButton"
                       href={SEARCH_EXPERIENCES_PLUGIN.GITHUB_URL}
                       target="_blank"
                       iconType={'popout'}

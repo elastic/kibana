@@ -193,7 +193,7 @@ export class ImportModal extends Component {
           </EuiModalBody>
 
           <EuiModalFooter>
-            <EuiButtonEmpty data-test-subj="mlCancelButtonEmpty" onClick={closeImportModal}>
+            <EuiButtonEmpty data-test-subj="mlCancelButton" onClick={closeImportModal}>
               <FormattedMessage
                 id="xpack.ml.calendarsEdit.eventsTable.cancelButtonLabel"
                 defaultMessage="Cancel"

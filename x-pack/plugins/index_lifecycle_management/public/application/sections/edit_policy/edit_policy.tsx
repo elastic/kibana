@@ -169,7 +169,7 @@ export const EditPolicy: React.FunctionComponent = () => {
         bottomBorder
         rightSideItems={[
           <EuiButtonEmpty
-            data-test-subj="indexLifecycleManagementEditPolicyDocumentationButtonEmpty"
+            data-test-subj="indexLifecycleManagementEditPolicyDocumentationButton"
             href={docLinks.links.elasticsearch.ilm}
             target="_blank"
             iconType="help"

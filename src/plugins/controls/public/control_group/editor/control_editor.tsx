@@ -292,7 +292,7 @@ export const ControlEditor = ({
             <>
               <EuiSpacer size="l" />
               <EuiButtonEmpty
-                data-test-subj="pluginsControlEditorButtonEmpty"
+                data-test-subj="pluginsControlEditorButton"
                 aria-label={`delete-${title}`}
                 iconType="trash"
                 flush="left"

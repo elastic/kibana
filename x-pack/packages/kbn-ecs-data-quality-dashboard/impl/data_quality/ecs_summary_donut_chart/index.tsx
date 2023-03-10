@@ -153,7 +153,7 @@ const EcsSummaryDonutChartComponent: React.FC<Props> = ({
           >
             <EuiFlexItem className="eui-textTruncate">
               <EuiButtonEmpty
-                data-test-subj="kbnEcsDataQualityDashboardEcsSummaryDonutChartComponentButtonEmpty"
+                data-test-subj="kbnEcsDataQualityDashboardEcsSummaryDonutChartComponentButton"
                 aria-label={i18n.FIELDS}
                 color="text"
                 onClick={showDefaultTab}

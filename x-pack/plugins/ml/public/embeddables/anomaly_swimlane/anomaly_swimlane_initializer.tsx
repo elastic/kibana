@@ -166,7 +166,7 @@ export const AnomalySwimlaneInitializer: FC<AnomalySwimlaneInitializerProps> = (
 
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="mlAnomalySwimlaneInitializerCancelButtonEmpty"
+          data-test-subj="mlAnomalySwimlaneInitializerCancelButton"
           onClick={onCancel}
         >
           <FormattedMessage

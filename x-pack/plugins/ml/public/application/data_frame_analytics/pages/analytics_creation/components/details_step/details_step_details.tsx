@@ -89,7 +89,7 @@ export const DetailsStepDetails: FC<{
       <EuiSpacer />
       {!isJobCreated && (
         <EuiButtonEmpty
-          data-test-subj="mlDetailsStepDetailsEditButtonEmpty"
+          data-test-subj="mlDetailsStepDetailsEditButton"
           iconType="pencil"
           size="s"
           onClick={() => {

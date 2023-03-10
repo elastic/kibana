@@ -179,7 +179,7 @@ export function MLCallout({
       {dismissable && (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="apmMLCalloutButtonEmpty"
+            data-test-subj="apmMLCalloutButton"
             onClick={onDismiss}
             color={properties.color}
           >

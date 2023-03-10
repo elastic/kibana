@@ -204,7 +204,7 @@ export const IntegrationDebugger: React.FunctionComponent = () => {
             isDisabled={integrations.status === 'loading'}
             prepend={
               selectedOptions.length > 0 ? (
-                <EuiButtonEmpty data-test-subj="fleetIntegrationDebuggerButtonEmpty">
+                <EuiButtonEmpty data-test-subj="fleetIntegrationDebuggerButton">
                   <EuiIcon type={selectedOptions[0]?.icon ?? 'fleetApp'} />
                 </EuiButtonEmpty>
               ) : undefined

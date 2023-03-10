@@ -115,7 +115,7 @@ function SimpleNumberList({
         <EuiSpacer size="s" />
         <EuiFlexItem>
           <EuiButtonEmpty
-            data-test-subj="pluginsSimpleNumberListAddValueButtonEmpty"
+            data-test-subj="pluginsSimpleNumberListAddValueButton"
             iconType="plusInCircleFilled"
             onClick={onAdd}
             size="xs"

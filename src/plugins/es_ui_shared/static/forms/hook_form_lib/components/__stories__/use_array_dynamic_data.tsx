@@ -250,7 +250,7 @@ const ProcessorsConfigurator: FC<{ ruleType: string }> = ({ ruleType }) => {
             {/* Add processor button */}
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiButtonEmpty
-                data-test-subj="pluginsProcessorsConfiguratorAddProcessorButtonEmpty"
+                data-test-subj="pluginsProcessorsConfiguratorAddProcessorButton"
                 onClick={addItem}
               >
                 Add processor

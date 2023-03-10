@@ -49,7 +49,7 @@ const RiskScoreHeaderContentComponent = ({
     >
       <EuiFlexItem>
         <EuiButtonEmpty
-          data-test-subj="securitySolutionRiskScoreHeaderContentComponentButtonEmpty"
+          data-test-subj="securitySolutionRiskScoreHeaderContentComponentButton"
           rel="noopener nofollow noreferrer"
           href={entityDocLink}
           target="_blank"

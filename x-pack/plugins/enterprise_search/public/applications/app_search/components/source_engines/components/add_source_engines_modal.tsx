@@ -53,7 +53,7 @@ export const AddSourceEnginesModal: React.FC = () => {
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchAddSourceEnginesModalButtonEmpty"
+          data-test-subj="enterpriseSearchAddSourceEnginesModalButton"
           onClick={closeModal}
         >
           {CANCEL_BUTTON_LABEL}

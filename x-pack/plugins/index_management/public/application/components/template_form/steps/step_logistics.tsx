@@ -207,7 +207,7 @@ export const StepLogistics: React.FunctionComponent<Props> = React.memo(
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="indexManagementStepLogisticsIndexTemplatesDocsButtonEmpty"
+              data-test-subj="indexManagementStepLogisticsIndexTemplatesDocsButton"
               size="s"
               flush="right"
               href={documentationService.getTemplatesDocumentationLink(isLegacy)}

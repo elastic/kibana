@@ -177,7 +177,7 @@ const ConnectorAddModal = ({
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="triggersActionsUiConnectorAddModalCancelButtonEmpty"
+          data-test-subj="triggersActionsUiConnectorAddModalCancelButton"
           onClick={closeModal}
           isLoading={isSaving}
         >

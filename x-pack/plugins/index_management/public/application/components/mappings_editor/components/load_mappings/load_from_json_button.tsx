@@ -21,7 +21,7 @@ export const LoadMappingsFromJsonButton = ({ onJson, esNodesPlugins }: Props) =>
   <LoadMappingsProvider onJson={onJson} esNodesPlugins={esNodesPlugins}>
     {(openModal) => (
       <EuiButtonEmpty
-        data-test-subj="indexManagementLoadMappingsFromJsonButtonLoadJsonButtonEmpty"
+        data-test-subj="indexManagementLoadMappingsFromJsonButtonLoadJsonButton"
         onClick={openModal}
         size="s"
       >

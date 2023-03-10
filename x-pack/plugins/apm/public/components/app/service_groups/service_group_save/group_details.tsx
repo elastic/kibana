@@ -183,7 +183,7 @@ export function GroupDetails({
           )}
           <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
             <EuiButtonEmpty
-              data-test-subj="apmGroupDetailsCancelButtonEmpty"
+              data-test-subj="apmGroupDetailsCancelButton"
               onClick={onCloseModal}
               isDisabled={isLoading}
             >

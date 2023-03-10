@@ -168,7 +168,7 @@ export const PreviewFieldList: React.FC<Props> = ({ height, clearSearch, searchV
     totalFields <= INITIAL_MAX_NUMBER_OF_FIELDS ? null : (
       <div className="indexPatternFieldEditor__previewFieldList__showMore">
         <EuiButtonEmpty
-          data-test-subj="pluginsRenderToggleFieldsButtonButtonEmpty"
+          data-test-subj="pluginsRenderToggleFieldsButtonButton"
           onClick={toggleShowAllFields}
           flush="left"
         >

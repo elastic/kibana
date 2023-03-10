@@ -63,7 +63,7 @@ export const AgentPoliciesPopover = ({ agentPolicyIds = [] }: { agentPolicyIds?:
   const button = useMemo(
     () => (
       <EuiButtonEmpty
-        data-test-subj="osqueryButtonButtonEmpty"
+        data-test-subj="osqueryButtonButton"
         size="s"
         flush="both"
         onClick={onButtonClick}

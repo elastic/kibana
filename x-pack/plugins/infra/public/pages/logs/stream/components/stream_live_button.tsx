@@ -16,7 +16,7 @@ export const StreamLiveButton: React.FC<{
 }> = ({ isStreaming, onStartStreaming, onStopStreaming }) =>
   isStreaming ? (
     <EuiButtonEmpty
-      data-test-subj="infraStreamLiveButtonStopStreamingButtonEmpty"
+      data-test-subj="infraStreamLiveButtonStopStreamingButton"
       color="warning"
       iconSide="left"
       iconType="pause"
@@ -29,7 +29,7 @@ export const StreamLiveButton: React.FC<{
     </EuiButtonEmpty>
   ) : (
     <EuiButtonEmpty
-      data-test-subj="infraStreamLiveButtonStreamLiveButtonEmpty"
+      data-test-subj="infraStreamLiveButtonStreamLiveButton"
       color="primary"
       iconSide="left"
       iconType="play"

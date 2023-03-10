@@ -163,7 +163,7 @@ export const CreateEngineFlyout = ({ onClose }: CreateEngineFlyoutProps) => {
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="enterpriseSearchCreateEngineFlyoutButtonEmpty"
+              data-test-subj="enterpriseSearchCreateEngineFlyoutButton"
               disabled={formDisabled}
               data-telemetry-id="entSearchContent-engines-createEngine-cancel"
               onClick={onClose}

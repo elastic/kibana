@@ -84,7 +84,7 @@ export const IgnoredQueriesPanel: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
             <EuiButtonEmpty
-              data-test-subj="enterpriseSearchIgnoredQueriesPanelRefreshButtonEmpty"
+              data-test-subj="enterpriseSearchIgnoredQueriesPanelRefreshButton"
               iconType="refresh"
               size="xs"
               onClick={() => loadIgnoredQueries()}

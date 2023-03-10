@@ -70,7 +70,7 @@ const TabComponent = (props: TabProps) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="infraTabComponentOpenInLogsButtonEmpty"
+            data-test-subj="infraTabComponentOpenInLogsButton"
             size={'xs'}
             flush={'both'}
             iconType={'popout'}

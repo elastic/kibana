@@ -142,7 +142,7 @@ export const SaveConfig: React.FC<SaveConfigProps> = ({
   );
 
   const backButton = (
-    <EuiButtonEmpty data-test-subj="enterpriseSearchSaveConfigButtonEmpty" onClick={goBackStep}>
+    <EuiButtonEmpty data-test-subj="enterpriseSearchSaveConfigButton" onClick={goBackStep}>
       {OAUTH_BACK_BUTTON}
     </EuiButtonEmpty>
   );

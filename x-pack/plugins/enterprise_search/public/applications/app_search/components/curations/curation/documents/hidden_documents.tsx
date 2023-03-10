@@ -37,7 +37,7 @@ export const HiddenDocuments: React.FC = () => {
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             <EuiFlexItem>
               <EuiButtonEmpty
-                data-test-subj="enterpriseSearchHiddenDocumentsUnhideAllButtonEmpty"
+                data-test-subj="enterpriseSearchHiddenDocumentsUnhideAllButton"
                 onClick={clearHiddenIds}
                 size="s"
               >

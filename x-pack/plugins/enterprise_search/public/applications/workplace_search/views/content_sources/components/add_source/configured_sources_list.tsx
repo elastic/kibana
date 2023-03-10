@@ -153,7 +153,7 @@ export const ConfiguredSourcesList: React.FC<ConfiguredSourcesProps> = ({
                       </EuiButtonEmptyTo>
                     )) || (
                       <EuiButtonEmpty
-                        data-test-subj="enterpriseSearchVisibleSourcesButtonEmpty"
+                        data-test-subj="enterpriseSearchVisibleSourcesButton"
                         className="eui-fullWidth"
                         isDisabled
                       >

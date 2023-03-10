@@ -131,7 +131,7 @@ export const SchemaAddFieldModal: React.FC<Props> = ({
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchSchemaAddFieldModalButtonEmpty"
+          data-test-subj="enterpriseSearchSchemaAddFieldModalButton"
           onClick={closeAddFieldModal}
         >
           {CANCEL_BUTTON_LABEL}

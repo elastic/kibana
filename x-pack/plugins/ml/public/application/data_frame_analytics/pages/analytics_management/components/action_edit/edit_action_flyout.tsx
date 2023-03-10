@@ -283,7 +283,7 @@ export const EditActionFlyout: FC<Required<EditAction>> = ({ closeFlyout, item }
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="mlEditActionFlyoutCancelButtonEmpty"
+              data-test-subj="mlEditActionFlyoutCancelButton"
               iconType="cross"
               onClick={closeFlyout}
               flush="left"

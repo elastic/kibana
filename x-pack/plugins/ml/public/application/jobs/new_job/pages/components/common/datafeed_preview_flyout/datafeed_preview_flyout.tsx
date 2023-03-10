@@ -53,7 +53,7 @@ export const DatafeedPreviewFlyout: FC<Props> = ({ isDisabled }) => {
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="mlDatafeedPreviewFlyoutCloseButtonEmpty"
+                  data-test-subj="mlDatafeedPreviewFlyoutCloseButton"
                   iconType="cross"
                   onClick={() => setShowFlyout(false)}
                   flush="left"

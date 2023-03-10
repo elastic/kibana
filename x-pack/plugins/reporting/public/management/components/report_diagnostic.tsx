@@ -235,7 +235,7 @@ export const ReportDiagnostic = ({ apiClient }: Props) => {
     <div>
       {flyout}
       <EuiButtonEmpty
-        data-test-subj="reportingReportDiagnosticRunReportingDiagnosticsButtonEmpty"
+        data-test-subj="reportingReportDiagnosticRunReportingDiagnosticsButton"
         size="xs"
         flush="left"
         onClick={showFlyout}

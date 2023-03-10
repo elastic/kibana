@@ -61,7 +61,7 @@ const EditPackPageComponent = () => {
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
           <EuiButtonEmpty
-            data-test-subj="osqueryLeftColumnViewQueryNameDetailsButtonEmpty"
+            data-test-subj="osqueryLeftColumnViewQueryNameDetailsButton"
             iconType="arrowLeft"
             {...queryDetailsLinkProps}
             flush="left"

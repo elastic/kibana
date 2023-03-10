@@ -40,7 +40,7 @@ export const TroubleshootPopover = () => {
     <EuiPopover
       button={
         <EuiButtonEmpty
-          data-test-subj="syntheticsTroubleshootPopoverButtonEmpty"
+          data-test-subj="syntheticsTroubleshootPopoverButton"
           onClick={onButtonClick}
         >
           {WHERE_ARE_MY_MONITORS}

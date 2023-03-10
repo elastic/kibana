@@ -65,7 +65,7 @@ export const Paywall: VFC<PaywallProps> = ({ licenseManagementHref }) => {
           <EuiFlexItem>
             <div>
               <EuiButtonEmpty
-                data-test-subj="threatIntelligencePaywallStartAFreeTrialButtonEmpty"
+                data-test-subj="threatIntelligencePaywallStartAFreeTrialButton"
                 href={licenseManagementHref}
               >
                 <FormattedMessage

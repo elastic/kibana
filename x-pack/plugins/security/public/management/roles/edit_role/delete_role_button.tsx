@@ -32,7 +32,7 @@ export class DeleteRoleButton extends Component<Props, State> {
     return (
       <Fragment>
         <EuiButtonEmpty
-          data-test-subj="securityDeleteRoleButtonEmpty"
+          data-test-subj="securityDeleteRoleButton"
           color={'danger'}
           onClick={this.showModal}
         >

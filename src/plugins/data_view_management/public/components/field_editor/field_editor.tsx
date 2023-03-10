@@ -743,7 +743,7 @@ export class FieldEditor extends PureComponent<FieldEdiorProps, FieldEditorState
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj="pluginsDeleteButtonEmpty"
+                    data-test-subj="pluginsDeleteButton"
                     color="danger"
                     onClick={this.showDeleteModal}
                   >

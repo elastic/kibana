@@ -21,7 +21,7 @@ const ChartLegendItemComponent: React.FC<Props> = ({ color, count, onClick, text
       <EuiFlexItem grow={false}>
         <EuiHealth color={color}>
           <EuiButtonEmpty
-            data-test-subj="kbnEcsDataQualityDashboardChartLegendItemComponentButtonEmpty"
+            data-test-subj="kbnEcsDataQualityDashboardChartLegendItemComponentButton"
             aria-label={text}
             color="text"
             onClick={onClick}
@@ -32,7 +32,7 @@ const ChartLegendItemComponent: React.FC<Props> = ({ color, count, onClick, text
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj="kbnEcsDataQualityDashboardChartLegendItemComponentButtonEmpty"
+          data-test-subj="kbnEcsDataQualityDashboardChartLegendItemComponentButton"
           aria-label={String(count)}
           color="text"
           onClick={onClick}

@@ -108,7 +108,7 @@ export const FileCouldNotBeRead: FC<FileCouldNotBeReadProps> = ({
             />
             <br />
             <EuiButtonEmpty
-              data-test-subj="dataVisualizerFileCouldNotBeReadApplyOverrideSettingsButtonEmpty"
+              data-test-subj="dataVisualizerFileCouldNotBeReadApplyOverrideSettingsButton"
               onClick={showEditFlyout}
               flush="left"
               size="s"

@@ -51,7 +51,7 @@ const UpgradeLicenseCallOutComponent: React.FC = () => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="triggersActionsUiUpgradeLicenseCallOutComponentSubscriptionPlansButtonEmpty"
+            data-test-subj="triggersActionsUiUpgradeLicenseCallOutComponentSubscriptionPlansButton"
             href={VIEW_LICENSE_OPTIONS_LINK}
             iconType="popout"
             iconSide="right"

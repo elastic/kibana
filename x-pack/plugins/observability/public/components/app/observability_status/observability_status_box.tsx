@@ -79,7 +79,7 @@ export function CompletedStatusBox({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="o11yCompletedStatusBoxButtonEmpty"
+            data-test-subj="o11yCompletedStatusBoxButton"
             size="s"
             iconType="plusInCircle"
             flush="right"

@@ -218,7 +218,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInDiscoverActionProp
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
       <EuiButtonEmpty
-        data-test-subj="osqueryViewResultsInLensActionComponentButtonEmpty"
+        data-test-subj="osqueryViewResultsInLensActionComponentButton"
         size="xs"
         iconType="lensApp"
         onClick={handleClick}
@@ -307,7 +307,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
       <EuiButtonEmpty
-        data-test-subj="osqueryViewResultsInDiscoverActionComponentButtonEmpty"
+        data-test-subj="osqueryViewResultsInDiscoverActionComponentButton"
         size="xs"
         iconType="discoverApp"
         href={discoverUrl}

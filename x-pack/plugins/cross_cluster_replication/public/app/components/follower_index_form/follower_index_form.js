@@ -754,7 +754,7 @@ export class FollowerIndexForm extends PureComponent {
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="crossClusterReplicationRenderActionsButtonEmpty"
+              data-test-subj="crossClusterReplicationRenderActionsButton"
               onClick={this.toggleRequest}
             >
               {isRequestVisible ? (

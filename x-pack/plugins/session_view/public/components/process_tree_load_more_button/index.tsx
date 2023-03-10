@@ -30,7 +30,7 @@ export const ProcessTreeLoadMoreButton = ({
   return (
     <div css={styles.wrapper}>
       <EuiButtonEmpty
-        data-test-subj="sessionViewProcessTreeLoadMoreButtonButtonEmpty"
+        data-test-subj="sessionViewProcessTreeLoadMoreButtonButton"
         size="xs"
         iconType={forward ? 'arrowDown' : 'arrowUp'}
         onClick={onClick}

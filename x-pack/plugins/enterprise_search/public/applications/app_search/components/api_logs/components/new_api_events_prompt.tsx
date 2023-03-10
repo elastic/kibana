@@ -26,7 +26,7 @@ export const NewApiEventsPrompt: React.FC = () => {
         defaultMessage: 'New events have been logged.',
       })}
       <EuiButtonEmpty
-        data-test-subj="enterpriseSearchNewApiEventsPromptRefreshButtonEmpty"
+        data-test-subj="enterpriseSearchNewApiEventsPromptRefreshButton"
         iconType="refresh"
         size="xs"
         onClick={onUserRefresh}

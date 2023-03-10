@@ -18,7 +18,7 @@ function renderStatementName(name, onVertexSelected) {
   return (
     <EuiFlexItem grow={false} key="statementName">
       <EuiButtonEmpty
-        data-test-subj="monitoringRenderStatementNameButtonEmpty"
+        data-test-subj="monitoringRenderStatementNameButton"
         aria-label={name}
         color="text"
         size="xs"

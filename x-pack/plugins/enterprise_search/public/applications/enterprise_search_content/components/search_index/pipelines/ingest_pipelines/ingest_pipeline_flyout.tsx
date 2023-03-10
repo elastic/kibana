@@ -210,7 +210,7 @@ export const IngestPipelineFlyout: React.FC<IngestPipelineFlyoutProps> = ({
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="enterpriseSearchIngestPipelineFlyoutCancelButtonEmpty"
+                data-test-subj="enterpriseSearchIngestPipelineFlyoutCancelButton"
                 onClick={closeFlyout}
               >
                 {i18n.translate(

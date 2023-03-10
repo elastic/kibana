@@ -69,7 +69,7 @@ export const PromotedDocuments: React.FC = () => {
             <EuiFlexGroup gutterSize="s" responsive={false} wrap>
               <EuiFlexItem>
                 <EuiButtonEmpty
-                  data-test-subj="enterpriseSearchPromotedDocumentsDemoteAllButtonEmpty"
+                  data-test-subj="enterpriseSearchPromotedDocumentsDemoteAllButton"
                   onClick={clearPromotedIds}
                   color="danger"
                   size="s"

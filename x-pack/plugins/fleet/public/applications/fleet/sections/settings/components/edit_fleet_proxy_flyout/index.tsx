@@ -154,7 +154,7 @@ export const FleetProxyFlyout: React.FunctionComponent<FleetProxyFlyoutProps> = 
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="fleetFleetProxyFlyoutCancelButtonEmpty"
+              data-test-subj="fleetFleetProxyFlyoutCancelButton"
               onClick={() => onClose()}
               flush="left"
             >

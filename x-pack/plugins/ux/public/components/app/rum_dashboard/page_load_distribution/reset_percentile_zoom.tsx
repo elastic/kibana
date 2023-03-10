@@ -41,7 +41,7 @@ export function ResetPercentileZoom({
       </EuiShowFor>
       <EuiHideFor sizes={['xs']}>
         <EuiButtonEmpty
-          data-test-subj="uxResetPercentileZoomButtonEmpty"
+          data-test-subj="uxResetPercentileZoomButton"
           iconType="inspect"
           size="s"
           onClick={onClick}

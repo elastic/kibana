@@ -87,7 +87,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="osquerySavedQueryFlyoutComponentCancelButtonEmpty"
+                data-test-subj="osquerySavedQueryFlyoutComponentCancelButton"
                 iconType="cross"
                 onClick={onClose}
                 flush="left"

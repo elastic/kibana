@@ -137,7 +137,7 @@ export function AddEnvironments({
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="apmAddEnvironmentsCancelButtonEmpty"
+            data-test-subj="apmAddEnvironmentsCancelButton"
             aria-label="Cancel"
             onClick={onCancel}
           >

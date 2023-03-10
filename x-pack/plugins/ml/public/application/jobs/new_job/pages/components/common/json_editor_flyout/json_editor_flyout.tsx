@@ -218,7 +218,7 @@ export const JsonEditorFlyout: FC<Props> = ({ isDisabled, jobEditorMode, datafee
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="mlJsonEditorFlyoutCloseButtonEmpty"
+                  data-test-subj="mlJsonEditorFlyoutCloseButton"
                   iconType="cross"
                   onClick={() => setShowJsonFlyout(false)}
                   flush="left"

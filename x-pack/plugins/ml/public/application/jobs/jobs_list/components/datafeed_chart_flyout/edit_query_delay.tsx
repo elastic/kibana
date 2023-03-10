@@ -76,7 +76,7 @@ export const EditQueryDelay: FC<{
 
   const editButton = (
     <EuiButtonEmpty
-      data-test-subj="mlEditQueryDelayQueryDelayQueryDelayButtonEmpty"
+      data-test-subj="mlEditQueryDelayQueryDelayQueryDelayButton"
       color="primary"
       size="xs"
       isDisabled={isEnabled === false}
@@ -123,7 +123,7 @@ export const EditQueryDelay: FC<{
               <EuiFlexGroup gutterSize="none" direction="column">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj="mlEditQueryDelayApplyButtonEmpty"
+                    data-test-subj="mlEditQueryDelayApplyButton"
                     color="primary"
                     size="xs"
                     onClick={updateQueryDelay}
@@ -136,7 +136,7 @@ export const EditQueryDelay: FC<{
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj="mlEditQueryDelayCancelButtonEmpty"
+                    data-test-subj="mlEditQueryDelayCancelButton"
                     color="text"
                     size="xs"
                     onClick={() => setIsEditing(false)}

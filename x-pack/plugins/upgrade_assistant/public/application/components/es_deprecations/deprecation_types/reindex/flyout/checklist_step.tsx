@@ -215,7 +215,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="upgradeAssistantChecklistFlyoutStepCloseButtonEmpty"
+              data-test-subj="upgradeAssistantChecklistFlyoutStepCloseButton"
               iconType="cross"
               onClick={closeFlyout}
               flush="left"

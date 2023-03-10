@@ -143,7 +143,7 @@ export const ReportInfoFlyout: FunctionComponent<Props> = ({ onClose, job }) => 
             <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="reportingReportInfoFlyoutCloseButtonEmpty"
+                  data-test-subj="reportingReportInfoFlyoutCloseButton"
                   iconType="cross"
                   flush="left"
                   onClick={onClose}

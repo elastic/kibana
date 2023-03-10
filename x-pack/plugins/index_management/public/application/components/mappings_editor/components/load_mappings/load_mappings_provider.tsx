@@ -191,7 +191,7 @@ export const LoadMappingsProvider = ({ onJson, esNodesPlugins, children }: Props
     const showingAllErrors = totalErrorsToDisplay > MAX_ERRORS_TO_DISPLAY;
     return (
       <EuiButtonEmpty
-        data-test-subj="indexManagementRenderErrorsFilterButtonButtonEmpty"
+        data-test-subj="indexManagementRenderErrorsFilterButtonButton"
         onClick={() =>
           setTotalErrorsToDisplay(showingAllErrors ? MAX_ERRORS_TO_DISPLAY : state.errors!.length)
         }

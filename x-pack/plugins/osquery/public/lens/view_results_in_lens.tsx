@@ -74,7 +74,7 @@ const ViewResultsInLensActionComponent: React.FC<ViewResultsInLensActionProps> =
   if (buttonType === ViewResultsActionButtonType.button) {
     return (
       <EuiButtonEmpty
-        data-test-subj="osqueryViewResultsInLensActionComponentButtonEmpty"
+        data-test-subj="osqueryViewResultsInLensActionComponentButton"
         size="xs"
         iconType="lensApp"
         onClick={handleClick}

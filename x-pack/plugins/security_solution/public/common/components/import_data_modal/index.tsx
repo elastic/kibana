@@ -236,7 +236,7 @@ export const ImportDataModalComponent = ({
 
           <EuiModalFooter>
             <EuiButtonEmpty
-              data-test-subj="securitySolutionImportDataModalComponentButtonEmpty"
+              data-test-subj="securitySolutionImportDataModalComponentButton"
               onClick={handleCloseModal}
             >
               {i18n.CANCEL_BUTTON}

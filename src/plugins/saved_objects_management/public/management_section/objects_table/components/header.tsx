@@ -62,7 +62,7 @@ export const Header = ({
         />
       </EuiButtonEmpty>,
       <EuiButtonEmpty
-        data-test-subj="pluginsHeaderRefreshButtonEmpty"
+        data-test-subj="pluginsHeaderRefreshButton"
         size="s"
         iconType="refresh"
         onClick={onRefresh}

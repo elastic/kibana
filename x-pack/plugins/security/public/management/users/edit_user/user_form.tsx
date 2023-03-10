@@ -476,7 +476,7 @@ export const UserForm: FunctionComponent<UserFormProps> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="securityUserFormCancelButtonEmpty"
+                data-test-subj="securityUserFormCancelButton"
                 flush="left"
                 isDisabled={form.isSubmitting}
                 onClick={onCancel}

@@ -76,7 +76,7 @@ export const RepositoryFormStepTwo: React.FunctionComponent<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="snapshotRestoreRenderSettingsRepositoryTypeRepositoryDocsButtonEmpty"
+            data-test-subj="snapshotRestoreRenderSettingsRepositoryTypeRepositoryDocsButton"
             size="s"
             flush="right"
             href={getRepositoryTypeDocUrl(docLinks, typeForDocs)}

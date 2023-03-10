@@ -184,7 +184,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
               >
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj="casesEditTagsSelectableComponentButtonEmpty"
+                    data-test-subj="casesEditTagsSelectableComponentButton"
                     size="xs"
                     flush="right"
                     onClick={onSelectAll}
@@ -194,7 +194,7 @@ const EditTagsSelectableComponent: React.FC<Props> = ({
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj="casesEditTagsSelectableComponentButtonEmpty"
+                    data-test-subj="casesEditTagsSelectableComponentButton"
                     size="xs"
                     flush="right"
                     onClick={onSelectNone}

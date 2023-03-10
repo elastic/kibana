@@ -312,7 +312,7 @@ export function UrlTemplateForm(props: UrlTemplateFormProps) {
           <EuiFlexItem />
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="graphUrlTemplateFormResetButtonEmpty"
+              data-test-subj="graphUrlTemplateFormResetButton"
               onClick={reset}
               disabled={formUntouched}
             >

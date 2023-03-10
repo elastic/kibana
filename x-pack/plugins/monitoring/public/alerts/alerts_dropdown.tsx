@@ -39,7 +39,7 @@ export const AlertsDropdown: React.FC<{}> = () => {
 
   const button = (
     <EuiButtonEmpty
-      data-test-subj="monitoringAlertsDropdownAlertsAndRulesButtonEmpty"
+      data-test-subj="monitoringAlertsDropdownAlertsAndRulesButton"
       iconSide={'right'}
       iconType={'arrowDown'}
       onClick={togglePopoverVisibility}

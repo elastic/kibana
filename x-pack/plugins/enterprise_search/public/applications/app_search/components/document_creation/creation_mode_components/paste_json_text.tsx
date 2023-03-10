@@ -76,7 +76,7 @@ export const PasteJsonTextFooterContent: React.FC = () => {
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchPasteJsonTextFooterContentButtonEmpty"
+          data-test-subj="enterpriseSearchPasteJsonTextFooterContentButton"
           onClick={closeDocumentCreation}
         >
           {CANCEL_BUTTON_LABEL}

@@ -86,7 +86,7 @@ export const DrilldownTemplateTable: React.FC<DrilldownTemplateTableProps> = ({
       render: (drilldown: DrilldownTemplateTableItem) =>
         !!onCreate && (
           <EuiButtonEmpty
-            data-test-subj="pluginsColumnsButtonEmpty"
+            data-test-subj="pluginsColumnsButton"
             size="xs"
             disabled={!!selected.length}
             onClick={() => onCreate(drilldown.id)}

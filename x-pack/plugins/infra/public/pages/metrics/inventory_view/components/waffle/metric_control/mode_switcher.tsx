@@ -40,7 +40,7 @@ export const ModeSwitcher = withTheme(
             <>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="infraModeSwitcherCancelButtonEmpty"
+                  data-test-subj="infraModeSwitcherCancelButton"
                   size="s"
                   flush="left"
                   onClick={onEditCancel}
@@ -77,7 +77,7 @@ export const ModeSwitcher = withTheme(
             <>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="infraModeSwitcherEditButtonEmpty"
+                  data-test-subj="infraModeSwitcherEditButton"
                   size="s"
                   flush="left"
                   onClick={onEdit}
@@ -95,7 +95,7 @@ export const ModeSwitcher = withTheme(
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="infraModeSwitcherAddMetricButtonEmpty"
+                  data-test-subj="infraModeSwitcherAddMetricButton"
                   onClick={onAdd}
                   size="s"
                   flush="right"

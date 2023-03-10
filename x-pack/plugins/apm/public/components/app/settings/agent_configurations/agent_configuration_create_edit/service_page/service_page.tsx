@@ -189,7 +189,7 @@ export function ServicePage({ newConfig, setNewConfig, onClickNext }: Props) {
         <EuiFlexItem grow={false}>
           <LegacyAPMLink path="/settings/agent-configuration">
             <EuiButtonEmpty
-              data-test-subj="apmServicePageCancelButtonEmpty"
+              data-test-subj="apmServicePageCancelButton"
               color="primary"
             >
               {i18n.translate(

@@ -182,7 +182,7 @@ export const RemoveIndexSettingsFlyout = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="upgradeAssistantRemoveIndexSettingsFlyoutButtonEmpty"
+              data-test-subj="upgradeAssistantRemoveIndexSettingsFlyoutButton"
               onClick={closeFlyout}
               flush="left"
             >

@@ -38,7 +38,7 @@ export const EnterpriseSearchOverviewHeaderActions: React.FC = () => {
       <EuiPopover
         button={
           <EuiButtonEmpty
-            data-test-subj="enterpriseSearchEnterpriseSearchOverviewHeaderActionsDeploymentDetailsButtonEmpty"
+            data-test-subj="enterpriseSearchEnterpriseSearchOverviewHeaderActionsDeploymentDetailsButton"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
           >
             <EuiIcon type="iInCircle" />

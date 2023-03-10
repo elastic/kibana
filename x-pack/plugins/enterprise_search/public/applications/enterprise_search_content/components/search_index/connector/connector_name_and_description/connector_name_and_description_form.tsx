@@ -53,7 +53,7 @@ export const ConnectorNameAndDescriptionForm: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="enterpriseSearchConnectorNameAndDescriptionFormButtonEmpty"
+              data-test-subj="enterpriseSearchConnectorNameAndDescriptionFormButton"
               data-telemetry-id="entSearchContent-connector-configuration-nameAndDescription-cancel"
               isDisabled={status === Status.LOADING}
               onClick={() => {

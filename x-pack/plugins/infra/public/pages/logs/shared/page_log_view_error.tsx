@@ -67,7 +67,7 @@ export const LogViewErrorPage: React.FC<{
             />
           </EuiButton>,
           <EuiButtonEmpty
-            data-test-subj="infraLogViewErrorPageChangeConfigurationButtonEmpty"
+            data-test-subj="infraLogViewErrorPageChangeConfigurationButton"
             iconType="gear"
             {...settingsLinkProps}
           >

@@ -85,7 +85,7 @@ export const DeleteVar: FC<Props> = ({ selectedVar, onCancel, onDelete }) => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="canvasDeleteVarButtonEmpty"
+                data-test-subj="canvasDeleteVarButton"
                 size="s"
                 onClick={() => onCancel()}
               >

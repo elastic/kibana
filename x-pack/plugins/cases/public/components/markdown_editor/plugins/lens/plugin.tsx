@@ -247,7 +247,7 @@ const LensEditorComponent: LensEuiMarkdownEditorUiPlugin['editor'] = ({
       ),
       labelAppend: (
         <EuiButtonEmpty
-          data-test-subj="casesEuiFormRowPropsCreateVisualizationButtonEmpty"
+          data-test-subj="casesEuiFormRowPropsCreateVisualizationButton"
           onClick={handleCreateInLensClick}
           color="primary"
           size="xs"

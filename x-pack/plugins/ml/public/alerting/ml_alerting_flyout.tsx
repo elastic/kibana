@@ -140,7 +140,7 @@ export const EditAlertRule: FC<EditRuleFlyoutProps> = ({ initialAlert, onSave })
   return (
     <>
       <EuiButtonEmpty
-        data-test-subj="mlEditAlertRuleButtonEmpty"
+        data-test-subj="mlEditAlertRuleButton"
         size="xs"
         onClick={setIsVisible.bind(null, !isVisible)}
       >

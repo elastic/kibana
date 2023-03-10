@@ -337,7 +337,7 @@ export const Expressions: React.FC<Props> = (props) => {
       <EuiSpacer size={'m'} />
       <div>
         <EuiButtonEmpty
-          data-test-subj="infraExpressionsAddConditionButtonEmpty"
+          data-test-subj="infraExpressionsAddConditionButton"
           color={'primary'}
           iconSide={'left'}
           flush={'left'}

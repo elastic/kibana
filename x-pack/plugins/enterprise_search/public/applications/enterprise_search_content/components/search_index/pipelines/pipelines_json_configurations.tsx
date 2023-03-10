@@ -105,7 +105,7 @@ export const PipelinesJSONConfigurations: React.FC = () => {
               <EuiFlexItem grow={false}>
                 {isManagedPipeline(selectedPipeline) ? (
                   <EuiButtonEmpty
-                    data-test-subj="enterpriseSearchPipelinesJSONConfigurationsViewInStackManagementButtonEmpty"
+                    data-test-subj="enterpriseSearchPipelinesJSONConfigurationsViewInStackManagementButton"
                     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-viewInStackManagement`}
                     size="s"
                     flush="both"
@@ -124,7 +124,7 @@ export const PipelinesJSONConfigurations: React.FC = () => {
                   </EuiButtonEmpty>
                 ) : (
                   <EuiButtonEmpty
-                    data-test-subj="enterpriseSearchPipelinesJSONConfigurationsEditInStackManagementButtonEmpty"
+                    data-test-subj="enterpriseSearchPipelinesJSONConfigurationsEditInStackManagementButton"
                     data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-editInStackManagement`}
                     size="s"
                     flush="both"

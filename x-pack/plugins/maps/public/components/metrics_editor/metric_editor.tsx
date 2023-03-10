@@ -188,7 +188,7 @@ export function MetricEditor({
     removeButton = (
       <div className="mapMetricEditorPanel__metricRemoveButton">
         <EuiButtonEmpty
-          data-test-subj="mapsMetricEditorDeleteMetricButtonEmpty"
+          data-test-subj="mapsMetricEditorDeleteMetricButton"
           iconType="trash"
           size="xs"
           color="danger"

@@ -86,7 +86,7 @@ export function TestNowModeFlyout({
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty
-          data-test-subj="syntheticsTestNowModeFlyoutButtonEmpty"
+          data-test-subj="syntheticsTestNowModeFlyoutButton"
           iconType="cross"
           onClick={onClose}
           flush="left"

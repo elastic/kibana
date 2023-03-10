@@ -98,7 +98,7 @@ export const EnrollmentRecommendation: React.FunctionComponent<{
 
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="fleetEnrollmentRecommendationRunStandaloneButtonEmpty"
+            data-test-subj="fleetEnrollmentRecommendationRunStandaloneButton"
             onClick={showStandaloneTab}
           >
             <FormattedMessage

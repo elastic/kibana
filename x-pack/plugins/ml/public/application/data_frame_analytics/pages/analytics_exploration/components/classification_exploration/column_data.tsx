@@ -116,7 +116,7 @@ export function getTrailingControlColumns(
             ownFocus={true}
           >
             <EuiButtonEmpty
-              data-test-subj="mlGetTrailingControlColumnsButtonEmpty"
+              data-test-subj="mlGetTrailingControlColumnsButton"
               onClick={() => setShowFullColumns(true)}
             >
               <EuiText size="s" grow={false} textAlign="center">

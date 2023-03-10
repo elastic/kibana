@@ -44,7 +44,7 @@ export class FilterListUsagePopover extends Component {
 
     const button = (
       <EuiButtonEmpty
-        data-test-subj="mlButtonEmpty"
+        data-test-subj="mlButton"
         size="s"
         color="primary"
         onClick={this.onButtonClick}

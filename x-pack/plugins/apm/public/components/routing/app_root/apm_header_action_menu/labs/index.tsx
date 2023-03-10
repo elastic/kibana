@@ -28,7 +28,7 @@ export function Labs() {
   return (
     <>
       <EuiButtonEmpty
-        data-test-subj="apmLabsLabsButtonEmpty"
+        data-test-subj="apmLabsLabsButton"
         color="text"
         onClick={toggleFlyoutVisibility}
       >

@@ -84,7 +84,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
             <EuiFlexItem style={{ width: 'fit-content' }}>
               <Link to={generatePath(cloudPosturePages.benchmarks.path)}>
                 <EuiButtonEmpty
-                  data-test-subj="cloudSecurityPostureRulesBenchmarkIntegrationsButtonEmpty"
+                  data-test-subj="cloudSecurityPostureRulesBenchmarkIntegrationsButton"
                   iconType="arrowLeft"
                   contentProps={{ style: { padding: 0 } }}
                 >
@@ -116,7 +116,7 @@ export const Rules = ({ match: { params } }: RouteComponentProps<PageUrlParams>)
         }
         rightSideItems={[
           <EuiButtonEmpty
-            data-test-subj="cloudSecurityPostureRulesManageIntegrationButtonEmpty"
+            data-test-subj="cloudSecurityPostureRulesManageIntegrationButton"
             iconType="gear"
             size="xs"
             href={http.basePath.prepend(pagePathGetters.edit_integration(params).join(''))}

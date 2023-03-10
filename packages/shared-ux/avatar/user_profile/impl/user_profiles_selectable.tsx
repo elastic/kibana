@@ -281,7 +281,7 @@ export const UserProfilesSelectable: FunctionComponent<UserProfilesSelectablePro
               <EuiFlexItem grow={false}>
                 {selectedCount ? (
                   <EuiButtonEmpty
-                    data-test-subj="sharedUxUserProfilesSelectableButtonEmpty"
+                    data-test-subj="sharedUxUserProfilesSelectableButton"
                     size="xs"
                     flush="right"
                     onClick={() => onChange?.([])}

@@ -73,7 +73,7 @@ export const AddGroupModal: React.FC<{}> = () => {
 
         <EuiModalFooter>
           <EuiButtonEmpty
-            data-test-subj="enterpriseSearchAddGroupModalButtonEmpty"
+            data-test-subj="enterpriseSearchAddGroupModalButton"
             onClick={closeNewGroupModal}
           >
             {CANCEL_BUTTON}

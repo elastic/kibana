@@ -102,7 +102,7 @@ export const FlyoutFooter: React.FC = () => {
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="enterpriseSearchFlyoutFooterButtonEmpty"
+            data-test-subj="enterpriseSearchFlyoutFooterButton"
             onClick={closeDocumentCreation}
           >
             {CANCEL_BUTTON_LABEL}

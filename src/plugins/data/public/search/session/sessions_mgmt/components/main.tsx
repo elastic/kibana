@@ -46,7 +46,7 @@ export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) 
         bottomBorder
         rightSideItems={[
           <EuiButtonEmpty
-            data-test-subj="pluginsSearchSessionsMgmtMainDocumentationButtonEmpty"
+            data-test-subj="pluginsSearchSessionsMgmtMainDocumentationButton"
             href={documentation.getElasticsearchDocLink()}
             target="_blank"
             iconType="help"

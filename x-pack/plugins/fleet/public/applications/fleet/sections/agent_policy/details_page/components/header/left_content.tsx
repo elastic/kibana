@@ -39,7 +39,7 @@ export const HeaderLeftContent: React.FunctionComponent<HeaderLeftContentProps> 
     <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
       <EuiFlexItem>
         <EuiButtonEmpty
-          data-test-subj="fleetHeaderLeftContentViewAllAgentPoliciesButtonEmpty"
+          data-test-subj="fleetHeaderLeftContentViewAllAgentPoliciesButton"
           iconType="arrowLeft"
           href={getHref('policies_list')}
           flush="left"

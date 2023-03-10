@@ -183,7 +183,7 @@ export const SystemIndicesFlyout = ({ closeFlyout, data }: SystemIndicesFlyoutPr
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="upgradeAssistantSystemIndicesFlyoutButtonEmpty"
+              data-test-subj="upgradeAssistantSystemIndicesFlyoutButton"
               onClick={closeFlyout}
               flush="left"
             >

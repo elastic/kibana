@@ -130,7 +130,7 @@ export function NoData(props) {
               <Fragment>
                 <EuiHorizontalRule size="half" />
                 <EuiButtonEmpty
-                  data-test-subj="monitoringNoDataButtonEmpty"
+                  data-test-subj="monitoringNoDataButton"
                   isDisabled={props.isCollectionEnabledUpdated}
                   onClick={() => setUseInternalCollection(false)}
                 >

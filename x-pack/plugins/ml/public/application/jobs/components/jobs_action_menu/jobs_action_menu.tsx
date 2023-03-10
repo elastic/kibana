@@ -24,7 +24,7 @@ export const JobsActionMenu: FC = () => {
 
   return (
     <EuiButtonEmpty
-      data-test-subj="mlJobsActionMenuSettingsButtonEmpty"
+      data-test-subj="mlJobsActionMenuSettingsButton"
       onClick={onClick}
       iconType="gear"
     >

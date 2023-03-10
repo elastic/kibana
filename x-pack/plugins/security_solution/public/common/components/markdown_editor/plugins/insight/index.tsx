@@ -453,7 +453,7 @@ const InsightEditorComponent = ({
 
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="securitySolutionInsightEditorComponentButtonEmpty"
+          data-test-subj="securitySolutionInsightEditorComponentButton"
           onClick={onCancel}
         >
           {i18n.CANCEL_FORM_BUTTON}

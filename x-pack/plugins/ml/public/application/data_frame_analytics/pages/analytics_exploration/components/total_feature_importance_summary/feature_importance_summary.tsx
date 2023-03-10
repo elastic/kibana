@@ -258,7 +258,7 @@ export const FeatureImportanceSummaryPanel: FC<FeatureImportanceSummaryPanelProp
         }
         docsLink={
           <EuiButtonEmpty
-            data-test-subj="mlFeatureImportanceSummaryPanelFeatureImportanceDocsButtonEmpty"
+            data-test-subj="mlFeatureImportanceSummaryPanelFeatureImportanceDocsButton"
             target="_blank"
             iconType="help"
             iconSide="left"

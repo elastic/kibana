@@ -56,7 +56,7 @@ export const DevtoolsRequestFlyoutButton: React.FunctionComponent<
 
   return (
     <EuiButtonEmpty
-      data-test-subj="fleetDevtoolsRequestFlyoutButtonPreviewApiRequestButtonEmpty"
+      data-test-subj="fleetDevtoolsRequestFlyoutButtonPreviewApiRequestButton"
       onClick={onClick}
       isDisabled={isDisabled}
       {...btnProps}

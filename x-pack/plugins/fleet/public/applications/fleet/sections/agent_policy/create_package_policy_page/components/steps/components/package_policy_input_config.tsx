@@ -135,7 +135,7 @@ export const PackagePolicyInputConfig: React.FunctionComponent<{
                   <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiButtonEmpty
-                        data-test-subj="fleetPackagePolicyInputConfigAdvancedOptionsButtonEmpty"
+                        data-test-subj="fleetPackagePolicyInputConfigAdvancedOptionsButton"
                         size="xs"
                         iconType={isShowingAdvanced ? 'arrowDown' : 'arrowRight'}
                         onClick={() => setIsShowingAdvanced(!isShowingAdvanced)}

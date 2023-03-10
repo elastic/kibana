@@ -38,7 +38,7 @@ export const WorkpadTemplates = ({ templates, onCreateWorkpad }: Props) => {
 
         return (
           <EuiButtonEmpty
-            data-test-subj="canvasColumnsButtonEmpty"
+            data-test-subj="canvasColumnsButton"
             onClick={() => onCreateWorkpad(template)}
             aria-label={strings.getCloneTemplateLinkAriaLabel(templateName)}
             type="button"

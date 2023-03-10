@@ -24,10 +24,7 @@ export const ViewLocationMonitors = ({
   const closePopover = () => setIsPopoverOpen(false);
 
   const button = (
-    <EuiButtonEmpty
-      data-test-subj="syntheticsViewLocationMonitorsButtonEmpty"
-      onClick={onButtonClick}
-    >
+    <EuiButtonEmpty data-test-subj="syntheticsViewLocationMonitorsButton" onClick={onButtonClick}>
       {count}
     </EuiButtonEmpty>
   );

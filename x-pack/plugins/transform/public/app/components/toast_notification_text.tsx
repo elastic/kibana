@@ -77,7 +77,7 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
           </EuiModalBody>
           <EuiModalFooter>
             <EuiButtonEmpty
-              data-test-subj="transformOpenModalCloseButtonEmpty"
+              data-test-subj="transformOpenModalCloseButton"
               onClick={() => modal.close()}
             >
               {i18n.translate('xpack.transform.toastText.closeModalButtonText', {
@@ -95,7 +95,7 @@ export const ToastNotificationText: FC<ToastNotificationTextProps> = ({
     <>
       <pre>{previewText}</pre>
       <EuiButtonEmpty
-        data-test-subj="transformToastNotificationTextViewDetailsButtonEmpty"
+        data-test-subj="transformToastNotificationTextViewDetailsButton"
         onClick={openModal}
       >
         {i18n.translate('xpack.transform.toastText.openModalButtonText', {

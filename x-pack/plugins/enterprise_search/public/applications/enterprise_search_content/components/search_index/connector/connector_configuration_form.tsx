@@ -86,7 +86,7 @@ export const ConnectorConfigurationForm = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="enterpriseSearchConnectorConfigurationFormCancelButtonEmpty"
+              data-test-subj="enterpriseSearchConnectorConfigurationFormCancelButton"
               data-telemetry-id="entSearchContent-connector-configuration-cancelEdit"
               isDisabled={status === Status.LOADING}
               onClick={() => {

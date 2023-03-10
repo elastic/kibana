@@ -19,7 +19,7 @@ export const StorageQuotaError = ({ onClearHistory, onDisableSavingToHistory }: 
   <EuiFlexGroup alignItems="center">
     <EuiFlexItem>
       <EuiButtonEmpty
-        data-test-subj="pluginsStorageQuotaErrorClearHistoryButtonEmpty"
+        data-test-subj="pluginsStorageQuotaErrorClearHistoryButton"
         onClick={onClearHistory}
       >
         <FormattedMessage id="console.notification.clearHistory" defaultMessage="Clear history" />

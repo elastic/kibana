@@ -216,7 +216,7 @@ export const AgentEnrollmentFlyout: React.FunctionComponent<FlyOutProps> = ({
         <EuiFlexGroup justifyContent="flexStart">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="fleetAgentEnrollmentFlyoutCloseButtonEmpty"
+              data-test-subj="fleetAgentEnrollmentFlyoutCloseButton"
               onClick={onClose}
             >
               <FormattedMessage

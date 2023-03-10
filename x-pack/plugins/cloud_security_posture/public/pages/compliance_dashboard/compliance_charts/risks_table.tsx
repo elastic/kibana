@@ -110,7 +110,7 @@ export const RisksTable = ({
       <EuiFlexItem grow={false}>
         <div>
           <EuiButtonEmpty
-            data-test-subj="cloudSecurityPostureRisksTableButtonEmpty"
+            data-test-subj="cloudSecurityPostureRisksTableButton"
             onClick={onViewAllClick}
             iconType="search"
           >

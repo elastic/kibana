@@ -112,7 +112,7 @@ export function OptionsPopover(props: OptionsPopoverProps) {
         <EuiHorizontalRule margin="s" />
         <EuiTextAlign textAlign="center">
           <EuiButtonEmpty
-            data-test-subj="pluginsOptionsPopoverViewDiscoverSettingsButtonEmpty"
+            data-test-subj="pluginsOptionsPopoverViewDiscoverSettingsButton"
             iconType="gear"
             size="s"
             href={addBasePath(`/app/management/kibana/settings?query=category:(discover)`)}

@@ -76,7 +76,7 @@ export const ConnectorNameAndDescriptionFlyout: React.FC = () => {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="enterpriseSearchConnectorNameAndDescriptionFlyoutButtonEmpty"
+              data-test-subj="enterpriseSearchConnectorNameAndDescriptionFlyoutButton"
               onClick={() => setIsEditing(false)}
               isLoading={status === Status.LOADING}
             >

@@ -46,7 +46,7 @@ export const ErrorDetailsButton = ({
 
   return (
     <EuiButtonEmpty
-      data-test-subj="syntheticsErrorDetailsButtonButtonEmpty"
+      data-test-subj="syntheticsErrorDetailsButtonButton"
       flush="left"
       iconType="alert"
       color="danger"

@@ -120,7 +120,7 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
         <>
           {!!onEdit && (
             <EuiButtonEmpty
-              data-test-subj="pluginsColumnsButtonEmpty"
+              data-test-subj="pluginsColumnsButton"
               size="xs"
               disabled={!!selectedDrilldowns.length}
               onClick={() => onEdit(drilldown.id)}
@@ -130,7 +130,7 @@ export const DrilldownTable: React.FC<DrilldownTableProps> = ({
           )}
           {!!onCopy && (
             <EuiButtonEmpty
-              data-test-subj="pluginsColumnsButtonEmpty"
+              data-test-subj="pluginsColumnsButton"
               size="xs"
               disabled={!!selectedDrilldowns.length}
               onClick={() => onCopy(drilldown.id)}

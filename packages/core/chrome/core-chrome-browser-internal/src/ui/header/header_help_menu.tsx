@@ -151,7 +151,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
     return (
       <Fragment>
         <EuiButtonEmpty
-          data-test-subj="coreKibanaDocumentationButtonEmpty"
+          data-test-subj="coreKibanaDocumentationButton"
           href={kibanaDocLink}
           target="_blank"
           size="s"
@@ -166,7 +166,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
         <EuiSpacer size="xs" />
 
         <EuiButtonEmpty
-          data-test-subj="coreAskElasticButtonEmpty"
+          data-test-subj="coreAskElasticButton"
           href={helpSupportUrl}
           target="_blank"
           size="s"
@@ -181,7 +181,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
         <EuiSpacer size="xs" />
 
         <EuiButtonEmpty
-          data-test-subj="coreGiveFeedbackButtonEmpty"
+          data-test-subj="coreGiveFeedbackButton"
           href={KIBANA_FEEDBACK_LINK}
           target="_blank"
           size="s"
@@ -196,7 +196,7 @@ export class HeaderHelpMenu extends Component<Props, State> {
         <EuiSpacer size="xs" />
 
         <EuiButtonEmpty
-          data-test-subj="coreOpenAnIssueInGitHubButtonEmpty"
+          data-test-subj="coreOpenAnIssueInGitHubButton"
           href={GITHUB_CREATE_ISSUE_LINK}
           target="_blank"
           size="s"
@@ -360,7 +360,7 @@ const createCustomLink = (
   return (
     <Fragment key={`helpButton${index}`}>
       <EuiButtonEmpty
-        data-test-subj="coreCreateCustomLinkButtonEmpty"
+        data-test-subj="coreCreateCustomLinkButton"
         {...buttonProps}
         size="s"
         flush="left"

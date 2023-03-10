@@ -68,10 +68,7 @@ export const AvailableSourcesList: React.FC<AvailableSourcesListProps> = ({ sour
               }
             )}
           >
-            <EuiButtonEmpty
-              data-test-subj="enterpriseSearchConnectButtonConnectButtonEmpty"
-              disabled
-            >
+            <EuiButtonEmpty data-test-subj="enterpriseSearchConnectButtonConnectButton" disabled>
               {i18n.translate(
                 'xpack.enterpriseSearch.workplaceSearch.contentSource.availableSourceList.connectButtonLabel',
                 {

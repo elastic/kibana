@@ -73,7 +73,7 @@ export const Frequency: React.FC<FrequencyProps> = ({ tabId }) => {
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchFrequencyButtonEmpty"
+          data-test-subj="enterpriseSearchFrequencyButton"
           onClick={resetSyncSettings}
           disabled={!hasUnsavedFrequencyChanges}
         >

@@ -99,7 +99,7 @@ const SavedQueryFormComponent: React.FC<SavedQueryFormProps> = ({
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="osquerySavedQueryFormComponentTestConfigurationButtonEmpty"
+              data-test-subj="osquerySavedQueryFormComponentTestConfigurationButton"
               iconType="play"
               onClick={handleTogglePlayground}
             >

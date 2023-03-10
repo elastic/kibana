@@ -37,7 +37,7 @@ export const AuthenticationPanelActions: React.FC = () => {
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchAuthenticationPanelActionsButtonEmpty"
+          data-test-subj="enterpriseSearchAuthenticationPanelActionsButton"
           data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-save"
           iconType="checkInCircleFilled"
           size="s"
@@ -49,7 +49,7 @@ export const AuthenticationPanelActions: React.FC = () => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchAuthenticationPanelActionsButtonEmpty"
+          data-test-subj="enterpriseSearchAuthenticationPanelActionsButton"
           data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-cancel"
           iconType="crossInACircleFilled"
           size="s"
@@ -78,7 +78,7 @@ export const AuthenticationPanelActions: React.FC = () => {
     </EuiButton>
   ) : (
     <EuiButtonEmpty
-      data-test-subj="enterpriseSearchAuthenticationPanelActionsButtonEmpty"
+      data-test-subj="enterpriseSearchAuthenticationPanelActionsButton"
       data-telemetry-id="entSearchContent-crawler-domainDetail-authentication-deleteCredentials"
       color="primary"
       size="s"

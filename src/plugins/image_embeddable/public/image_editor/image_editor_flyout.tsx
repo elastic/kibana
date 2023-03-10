@@ -407,7 +407,7 @@ export function ImageEditorFlyout(props: ImageEditorFlyoutProps) {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="pluginsImageEditorFlyoutCloseButtonEmpty"
+              data-test-subj="pluginsImageEditorFlyoutCloseButton"
               iconType="cross"
               onClick={props.onCancel}
               flush="left"

@@ -134,7 +134,7 @@ export function LabsFlyout({ onClose }: Props) {
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="apmLabsFlyoutCancelButtonEmpty"
+                  data-test-subj="apmLabsFlyoutCancelButton"
                   onClick={handelCancel}
                 >
                   {i18n.translate('xpack.apm.labs.cancel', {

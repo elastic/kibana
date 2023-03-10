@@ -159,7 +159,7 @@ export const DeleteJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, 
           <EuiSpacer />
           <EuiModalFooter>
             <EuiButtonEmpty
-              data-test-subj="mlDeleteJobModalCancelButtonEmpty"
+              data-test-subj="mlDeleteJobModalCancelButton"
               onClick={closeModal}
               disabled={deleting}
             >

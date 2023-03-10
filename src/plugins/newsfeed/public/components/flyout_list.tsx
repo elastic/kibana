@@ -87,7 +87,7 @@ export const NewsfeedFlyout = (props: Partial<EuiFlyoutProps> & { showPlainSpinn
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="pluginsNewsfeedFlyoutCloseButtonEmpty"
+                data-test-subj="pluginsNewsfeedFlyoutCloseButton"
                 iconType="cross"
                 onClick={closeFlyout}
                 flush="left"

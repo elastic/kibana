@@ -39,7 +39,7 @@ export const ProcessRow = ({ cells, item }: Props) => {
       <EuiTableRow>
         <EuiTableRowCell isExpander textOnly={false}>
           <EuiButtonEmpty
-            data-test-subj="infraProcessRowButtonEmpty"
+            data-test-subj="infraProcessRowButton"
             iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
             aria-expanded={isExpanded}
             onClick={() => setIsExpanded(!isExpanded)}

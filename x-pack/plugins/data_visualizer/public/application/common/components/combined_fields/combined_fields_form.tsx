@@ -210,7 +210,7 @@ export class CombinedFieldsForm extends Component<Props, State> {
             id="combineFieldsPopover"
             button={
               <EuiButtonEmpty
-                data-test-subj="dataVisualizerAddCombinedFieldButtonEmpty"
+                data-test-subj="dataVisualizerAddCombinedFieldButton"
                 onClick={this.togglePopover}
                 size="xs"
                 iconType="plusInCircleFilled"

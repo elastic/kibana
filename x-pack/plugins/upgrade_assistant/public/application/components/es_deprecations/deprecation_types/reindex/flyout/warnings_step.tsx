@@ -143,7 +143,7 @@ export const WarningsFlyoutStep: React.FunctionComponent<WarningsConfirmationFly
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="upgradeAssistantWarningsFlyoutStepBackButtonEmpty"
+              data-test-subj="upgradeAssistantWarningsFlyoutStepBackButton"
               iconType="arrowLeft"
               onClick={hideWarningsStep}
               flush="left"

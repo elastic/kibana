@@ -59,7 +59,7 @@ export const EndpointNotice = memo<{ onDismiss: () => void }>(({ onDismiss }) =>
           />
         </EuiButton>
         <EuiButtonEmpty
-          data-test-subj="securitySolutionEndpointNoticeDismissMessageButtonEmpty"
+          data-test-subj="securitySolutionEndpointNoticeDismissMessageButton"
           onClick={onDismiss}
         >
           <FormattedMessage

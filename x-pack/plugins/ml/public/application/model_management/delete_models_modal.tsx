@@ -82,7 +82,7 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ modelIds, onClos
 
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="mlDeleteModelsModalCancelButtonEmpty"
+          data-test-subj="mlDeleteModelsModalCancelButton"
           onClick={onClose.bind(null, false)}
           name="cancelModelDeletion"
         >

@@ -343,7 +343,7 @@ export function MonitorDetailFlyout(props: Props) {
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj="syntheticsMonitorDetailFlyoutButtonEmpty"
+                    data-test-subj="syntheticsMonitorDetailFlyoutButton"
                     onClick={props.onClose}
                   >
                     {CLOSE_FLYOUT_TEXT}

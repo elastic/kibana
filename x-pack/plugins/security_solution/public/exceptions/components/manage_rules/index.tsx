@@ -72,7 +72,7 @@ export const ManageRules: FC<ManageRulesProps> = memo(
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="securitySolutionManageRulesButtonEmpty"
+                data-test-subj="securitySolutionManageRulesButton"
                 onClick={onCancel}
                 flush="left"
               >

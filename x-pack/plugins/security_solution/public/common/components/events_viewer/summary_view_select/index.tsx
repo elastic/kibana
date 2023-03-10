@@ -61,7 +61,7 @@ const SummaryViewSelectorComponent = ({ viewSelected, onViewChange }: SummaryVie
   const button = useMemo(
     () => (
       <EuiButtonEmpty
-        data-test-subj="securitySolutionButtonButtonEmpty"
+        data-test-subj="securitySolutionButtonButton"
         iconType="arrowDown"
         iconSide="right"
         iconSize="s"

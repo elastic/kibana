@@ -180,7 +180,7 @@ export const GenerateApiKeyModal: React.FC<GenerateApiKeyModalProps> = ({ indexN
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchGenerateApiKeyModalCancelButtonEmpty"
+          data-test-subj="enterpriseSearchGenerateApiKeyModalCancelButton"
           data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-cancel`}
           onClick={onClose}
         >

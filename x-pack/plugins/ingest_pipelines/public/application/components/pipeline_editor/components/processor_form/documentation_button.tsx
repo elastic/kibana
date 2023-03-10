@@ -17,7 +17,7 @@ interface Props {
 export const DocumentationButton: FunctionComponent<Props> = ({ processorLabel, docLink }) => {
   return (
     <EuiButtonEmpty
-      data-test-subj="ingestPipelinesDocumentationButtonProcessorLabelDocumentationButtonEmpty"
+      data-test-subj="ingestPipelinesDocumentationButtonProcessorLabelDocumentationButton"
       size="s"
       flush="right"
       href={docLink}

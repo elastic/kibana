@@ -84,7 +84,7 @@ export const Security: React.FC = () => {
       {SAVE_SETTINGS_BUTTON}
     </EuiButton>,
     <EuiButtonEmpty
-      data-test-subj="enterpriseSearchSecurityButtonEmpty"
+      data-test-subj="enterpriseSearchSecurityButton"
       disabled={!unsavedChanges || dataLoading}
       onClick={resetState}
     >

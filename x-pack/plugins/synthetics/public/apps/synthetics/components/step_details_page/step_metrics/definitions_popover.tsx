@@ -48,7 +48,7 @@ export const DefinitionsPopover = () => {
     <EuiPopover
       button={
         <EuiButtonEmpty
-          data-test-subj="syntheticsDefinitionsPopoverButtonEmpty"
+          data-test-subj="syntheticsDefinitionsPopoverButton"
           iconType="list"
           iconSide="right"
           onClick={onButtonClick}

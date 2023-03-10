@@ -43,7 +43,7 @@ export class SpacesPopoverList extends Component<Props, State> {
 
   public render() {
     const button = (
-      <EuiButtonEmpty data-test-subj="securityButtonEmpty" size={'xs'} onClick={this.onButtonClick}>
+      <EuiButtonEmpty data-test-subj="securityButton" size={'xs'} onClick={this.onButtonClick}>
         <span className="secSpacesPopoverList__buttonText">{this.props.buttonText}</span>
       </EuiButtonEmpty>
     );

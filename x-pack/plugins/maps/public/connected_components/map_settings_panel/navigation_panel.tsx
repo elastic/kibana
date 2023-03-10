@@ -202,7 +202,7 @@ export function NavigationPanel({ center, settings, updateMapSetting, zoom }: Pr
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="mapsRenderInitialLocationInputsSetToCurrentViewButtonEmpty"
+              data-test-subj="mapsRenderInitialLocationInputsSetToCurrentViewButton"
               onClick={useCurrentView}
             >
               <FormattedMessage

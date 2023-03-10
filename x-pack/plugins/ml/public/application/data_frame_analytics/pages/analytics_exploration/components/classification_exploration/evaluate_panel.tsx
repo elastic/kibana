@@ -234,7 +234,7 @@ export const EvaluatePanel: FC<EvaluatePanelProps> = ({ jobConfig, jobStatus, se
         }
         docsLink={
           <EuiButtonEmpty
-            data-test-subj="mlEvaluatePanelClassificationEvaluationDocsButtonEmpty"
+            data-test-subj="mlEvaluatePanelClassificationEvaluationDocsButton"
             target="_blank"
             iconType="help"
             iconSide="left"

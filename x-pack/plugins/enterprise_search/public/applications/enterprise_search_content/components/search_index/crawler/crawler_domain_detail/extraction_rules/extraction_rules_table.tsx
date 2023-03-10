@@ -126,7 +126,7 @@ export const ExtractionRulesTable: React.FC = () => {
       }),
       render: (rule: ExtractionRule) => (
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchColumnsButtonEmpty"
+          data-test-subj="enterpriseSearchColumnsButton"
           onClick={() => toggleExpandedItem(rule)}
         >
           {rule.rules.length}

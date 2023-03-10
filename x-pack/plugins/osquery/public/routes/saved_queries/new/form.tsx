@@ -61,7 +61,7 @@ const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="osqueryNewSavedQueryFormComponentCancelButtonEmpty"
+                  data-test-subj="osqueryNewSavedQueryFormComponentCancelButton"
                   color="ghost"
                   {...savedQueryListProps}
                 >

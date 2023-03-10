@@ -88,7 +88,7 @@ export const MonitorConfig = ({ isEdit = false }: { isEdit: boolean }) => {
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty
-          data-test-subj="syntheticsMonitorConfigButtonEmpty"
+          data-test-subj="syntheticsMonitorConfigButton"
           iconType="cross"
           onClick={handleFlyoutClose}
           flush="left"

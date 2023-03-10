@@ -75,7 +75,7 @@ export class RequestFlyout extends PureComponent<Props> {
 
         <EuiFlyoutFooter>
           <EuiButtonEmpty
-            data-test-subj="remoteClustersCloseButtonEmpty"
+            data-test-subj="remoteClustersCloseButton"
             iconType="cross"
             onClick={close}
             flush="left"

@@ -283,7 +283,7 @@ const SelectedActionFactory: React.FC<SelectedActionFactoryProps> = ({
           {showDeselect && (
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="pluginsSelectedActionFactoryButtonEmpty"
+                data-test-subj="pluginsSelectedActionFactoryButton"
                 size="xs"
                 onClick={() => onDeselect()}
               >

@@ -404,7 +404,7 @@ export const EditExtractionRule: React.FC<EditExtractionRuleProps> = ({
           <EuiFlexGroup>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="enterpriseSearchEditExtractionRuleCancelButtonEmpty"
+                data-test-subj="enterpriseSearchEditExtractionRuleCancelButton"
                 data-telemetry-id="entSearchContent-crawler-domainDetail-extractionRules-cancelEditExtractionRule"
                 onClick={cancelEditing}
               >

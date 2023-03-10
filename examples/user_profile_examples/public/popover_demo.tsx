@@ -101,7 +101,7 @@ export const PopoverDemo: FunctionComponent = () => {
         title="Edit assignees"
         button={
           <EuiButtonEmpty
-            data-test-subj="userProfileExamplesPopoverDemoEditAssigneesButtonEmpty"
+            data-test-subj="userProfileExamplesPopoverDemoEditAssigneesButton"
             iconType="pencil"
             onClick={() => setIsOpen((value) => !value)}
           >

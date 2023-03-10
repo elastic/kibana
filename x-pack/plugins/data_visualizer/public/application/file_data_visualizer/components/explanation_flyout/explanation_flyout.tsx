@@ -47,7 +47,7 @@ export const ExplanationFlyout: FC<Props> = ({ results, closeFlyout }) => {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="dataVisualizerExplanationFlyoutCloseButtonEmpty"
+              data-test-subj="dataVisualizerExplanationFlyoutCloseButton"
               iconType="cross"
               onClick={closeFlyout}
               flush="left"

@@ -74,10 +74,7 @@ export const UserFlyout: React.FC<Props> = ({
   const editingFooterActions = (
     <EuiFlexGroup justifyContent="spaceBetween">
       <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          data-test-subj="enterpriseSearchUserFlyoutButtonEmpty"
-          onClick={closeUserFlyout}
-        >
+        <EuiButtonEmpty data-test-subj="enterpriseSearchUserFlyoutButton" onClick={closeUserFlyout}>
           {CANCEL_BUTTON_LABEL}
         </EuiButtonEmpty>
       </EuiFlexItem>

@@ -88,7 +88,7 @@ export const CrawlSelectDomainsModal: React.FC = () => {
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchCrawlSelectDomainsModalButtonEmpty"
+          data-test-subj="enterpriseSearchCrawlSelectDomainsModalButton"
           onClick={hideModal}
         >
           {CANCEL_BUTTON_LABEL}

@@ -11,7 +11,7 @@ import { EuiButtonEmpty, EuiButtonIcon } from '@elastic/eui';
 import { useKibana } from '../common/lib/kibana';
 
 const TimelineComponent = React.memo((props) => (
-  <EuiButtonEmpty data-test-subj="osqueryTimelineComponentButtonEmpty" {...props} size="xs" />
+  <EuiButtonEmpty data-test-subj="osqueryTimelineComponentButton" {...props} size="xs" />
 ));
 TimelineComponent.displayName = 'TimelineComponent';
 

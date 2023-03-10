@@ -239,7 +239,7 @@ export const FixSnapshotsFlyout = ({
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="upgradeAssistantFixSnapshotsFlyoutButtonEmpty"
+              data-test-subj="upgradeAssistantFixSnapshotsFlyoutButton"
               onClick={closeFlyout}
               flush="left"
             >

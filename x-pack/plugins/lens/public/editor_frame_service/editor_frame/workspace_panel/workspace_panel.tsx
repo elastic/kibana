@@ -749,7 +749,7 @@ export const VisualizationWrapper = ({
                   actions={
                     visibleErrorMessages.length && !localState.expandError ? (
                       <EuiButtonEmpty
-                        data-test-subj="lensVisualizationWrapperShowDetailsOfErrorButtonEmpty"
+                        data-test-subj="lensVisualizationWrapperShowDetailsOfErrorButton"
                         onClick={() => {
                           setLocalState((prevState: WorkspaceState) => ({
                             ...prevState,

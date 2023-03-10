@@ -229,7 +229,7 @@ export const ActionNotifyWhen = ({
       )}
       button={
         <EuiButtonEmpty
-          data-test-subj="triggersActionsUiActionNotifyWhenButtonEmpty"
+          data-test-subj="triggersActionsUiActionNotifyWhenButton"
           size="xs"
           iconType="arrowDown"
           iconSide="right"

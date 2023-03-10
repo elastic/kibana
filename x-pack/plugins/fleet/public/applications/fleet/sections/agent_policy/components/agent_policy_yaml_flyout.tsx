@@ -88,7 +88,7 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="fleetAgentPolicyYamlFlyoutCloseButtonEmpty"
+                data-test-subj="fleetAgentPolicyYamlFlyoutCloseButton"
                 onClick={onClose}
                 flush="left"
               >

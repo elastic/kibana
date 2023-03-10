@@ -75,7 +75,7 @@ export class AttributionPopover extends Component<Props, State> {
   _renderPopoverButton() {
     return (
       <EuiButtonEmpty
-        data-test-subj="mapsButtonEmpty"
+        data-test-subj="mapsButton"
         className={this.props.popoverButtonClassName}
         aria-label={this.props.popoverButtonAriaLabel}
         onClick={this._togglePopover}

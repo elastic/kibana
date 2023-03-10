@@ -81,7 +81,7 @@ export const ResultsView: FC<Props> = ({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="dataVisualizerResultsViewAnalysisExplanationButtonEmpty"
+                data-test-subj="dataVisualizerResultsViewAnalysisExplanationButton"
                 onClick={() => showExplanationFlyout()}
                 disabled={disableButtons}
               >

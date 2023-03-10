@@ -281,7 +281,7 @@ export const ClusterConfigurationForm: FunctionComponent<ClusterConfigurationFor
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="pluginsClusterConfigurationFormBackButtonEmpty"
+            data-test-subj="pluginsClusterConfigurationFormBackButton"
             flush="right"
             iconType="arrowLeft"
             onClick={onCancel}

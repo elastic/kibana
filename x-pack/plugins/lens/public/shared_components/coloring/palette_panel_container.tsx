@@ -95,7 +95,7 @@ export function PalettePanelContainer({
 
             <EuiFlyoutFooter className="lnsPalettePanelContainer__footer">
               <EuiButtonEmpty
-                data-test-subj="lensPalettePanelContainerBackButtonEmpty"
+                data-test-subj="lensPalettePanelContainerBackButton"
                 flush="left"
                 size="s"
                 iconType="sortLeft"

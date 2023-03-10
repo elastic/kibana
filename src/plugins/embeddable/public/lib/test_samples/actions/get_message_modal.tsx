@@ -55,7 +55,7 @@ export class GetMessageModal extends Component<Props, State> {
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty data-test-subj="pluginsCancelButtonEmpty" onClick={this.props.onCancel}>
+          <EuiButtonEmpty data-test-subj="pluginsCancelButton" onClick={this.props.onCancel}>
             Cancel
           </EuiButtonEmpty>
 

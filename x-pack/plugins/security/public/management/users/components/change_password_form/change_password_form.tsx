@@ -153,7 +153,7 @@ export class ChangePasswordForm extends Component<Props, State> {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="securityResetButtonEmpty"
+                data-test-subj="securityResetButton"
                 onClick={this.onCancelClick}
                 isDisabled={this.state.changeInProgress}
               >

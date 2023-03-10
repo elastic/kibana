@@ -202,7 +202,7 @@ export const FleetServerHostsFlyout: React.FunctionComponent<FleetServerHostsFly
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="fleetFleetServerHostsFlyoutCancelButtonEmpty"
+              data-test-subj="fleetFleetServerHostsFlyoutCancelButton"
               onClick={() => onClose()}
               flush="left"
             >

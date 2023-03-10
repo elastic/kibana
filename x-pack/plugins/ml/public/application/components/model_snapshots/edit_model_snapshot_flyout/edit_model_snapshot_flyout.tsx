@@ -161,7 +161,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="mlEditModelSnapshotFlyoutCloseButtonEmpty"
+                data-test-subj="mlEditModelSnapshotFlyoutCloseButton"
                 iconType="cross"
                 onClick={closeWithoutReload}
                 flush="left"
@@ -175,7 +175,7 @@ export const EditModelSnapshotFlyout: FC<Props> = ({ snapshot, job, closeFlyout 
             <EuiFlexItem grow={true} />
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="mlEditModelSnapshotFlyoutDeleteButtonEmpty"
+                data-test-subj="mlEditModelSnapshotFlyoutDeleteButton"
                 onClick={showDeleteModal}
                 color="danger"
                 disabled={isCurrentSnapshot === true}

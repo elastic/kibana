@@ -222,7 +222,7 @@ export const AddInferencePipelineFooter: React.FC<
       <EuiFlexItem grow={false}>
         {previousStep !== undefined ? (
           <EuiButtonEmpty
-            data-test-subj="enterpriseSearchAddInferencePipelineFooterButtonEmpty"
+            data-test-subj="enterpriseSearchAddInferencePipelineFooterButton"
             flush="both"
             iconType="arrowLeft"
             onClick={() => setAddInferencePipelineStep(previousStep as AddInferencePipelineSteps)}
@@ -234,7 +234,7 @@ export const AddInferencePipelineFooter: React.FC<
       <EuiFlexItem />
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchAddInferencePipelineFooterButtonEmpty"
+          data-test-subj="enterpriseSearchAddInferencePipelineFooterButton"
           data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-cancel`}
           onClick={onClose}
         >

@@ -332,7 +332,7 @@ function UserAvatarEditor({
               labelAppend={
                 !isReservedUser ? (
                   <EuiButtonEmpty
-                    data-test-subj="securityUserAvatarEditorRandomizeButtonEmpty"
+                    data-test-subj="securityUserAvatarEditorRandomizeButton"
                     onClick={() => formik.setFieldValue('data.avatar.color', getRandomColor())}
                     size="xs"
                     flush="right"
@@ -711,7 +711,7 @@ export const SaveChangesBottomBar: FunctionComponent = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj="securitySaveChangesBottomBarDiscardButtonEmpty"
+          data-test-subj="securitySaveChangesBottomBarDiscardButton"
           onClick={formik.handleReset}
           color="ghost"
         >

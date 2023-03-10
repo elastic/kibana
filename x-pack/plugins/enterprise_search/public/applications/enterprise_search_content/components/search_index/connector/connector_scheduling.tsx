@@ -188,7 +188,7 @@ export const ConnectorSchedulingComponent: React.FC = () => {
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="enterpriseSearchConnectorSchedulingComponentResetButtonEmpty"
+                  data-test-subj="enterpriseSearchConnectorSchedulingComponentResetButton"
                   data-telemetry-id="entSearchContent-connector-scheduling-resetSchedule"
                   disabled={!hasChanges || status === Status.LOADING}
                   onClick={() => {

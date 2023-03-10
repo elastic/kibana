@@ -41,7 +41,7 @@ const ExpandableAdvancedSettings: React.FC = ({ children }) => {
             <EuiFlexItem>{/* intentionally empty */}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="fleetExpandableAdvancedSettingsAdvancedOptionsButtonEmpty"
+                data-test-subj="fleetExpandableAdvancedSettingsAdvancedOptionsButton"
                 size="s"
                 iconType={isShowingAdvanced ? 'arrowUp' : 'arrowDown'}
                 iconSide="right"

@@ -98,7 +98,7 @@ Object {
               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
               <button
-                class="euiButtonEmpty emotion-EuiButtonEmpty"
+                class="euiButtonEmpty emotion-EuiButton"
                 type="button"
               >
                 <span
@@ -234,7 +234,7 @@ Object {
             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
             <button
-              class="euiButtonEmpty emotion-EuiButtonEmpty"
+              class="euiButtonEmpty emotion-EuiButton"
               type="button"
             >
               <span
@@ -427,7 +427,7 @@ Object {
               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
               <button
-                class="euiButtonEmpty emotion-EuiButtonEmpty"
+                class="euiButtonEmpty emotion-EuiButton"
                 type="button"
               >
                 <span
@@ -563,7 +563,7 @@ Object {
             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
             <button
-              class="euiButtonEmpty emotion-EuiButtonEmpty"
+              class="euiButtonEmpty emotion-EuiButton"
               type="button"
             >
               <span
@@ -777,7 +777,7 @@ Object {
               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
               <button
-                class="euiButtonEmpty emotion-EuiButtonEmpty"
+                class="euiButtonEmpty emotion-EuiButton"
                 type="button"
               >
                 <span
@@ -934,7 +934,7 @@ Object {
             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
             <button
-              class="euiButtonEmpty emotion-EuiButtonEmpty"
+              class="euiButtonEmpty emotion-EuiButton"
               type="button"
             >
               <span
@@ -1106,7 +1106,7 @@ Object {
               class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
             >
               <button
-                class="euiButtonEmpty emotion-EuiButtonEmpty"
+                class="euiButtonEmpty emotion-EuiButton"
                 type="button"
               >
                 <span
@@ -1222,7 +1222,7 @@ Object {
             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
           >
             <button
-              class="euiButtonEmpty emotion-EuiButtonEmpty"
+              class="euiButtonEmpty emotion-EuiButton"
               type="button"
             >
               <span

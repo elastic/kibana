@@ -107,7 +107,7 @@ export class MetricsEditor extends Component<Props, State> {
         <EuiSpacer size="xs" />
         <EuiTextAlign textAlign="center">
           <EuiButtonEmpty
-            data-test-subj="mapsAddMetricButtonEmpty"
+            data-test-subj="mapsAddMetricButton"
             onClick={this._addMetric}
             size="xs"
             iconType="plusInCircleFilled"

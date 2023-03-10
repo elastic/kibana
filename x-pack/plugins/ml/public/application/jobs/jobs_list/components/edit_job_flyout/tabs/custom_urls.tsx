@@ -244,7 +244,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
 
     const testButton = (
       <EuiButtonEmpty
-        data-test-subj="mlTestButtonEmpty"
+        data-test-subj="mlTestButton"
         iconType="popout"
         iconSide="right"
         onClick={this.onTestButtonClick}

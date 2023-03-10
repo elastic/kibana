@@ -27,7 +27,7 @@ export const LoadFromJsonButton: FunctionComponent<Props> = ({ onDone }) => {
       {(openModal) => {
         return (
           <EuiButtonEmpty
-            data-test-subj="ingestPipelinesLoadFromJsonButtonButtonEmpty"
+            data-test-subj="ingestPipelinesLoadFromJsonButtonButton"
             size="s"
             onClick={openModal}
             iconType="importAction"

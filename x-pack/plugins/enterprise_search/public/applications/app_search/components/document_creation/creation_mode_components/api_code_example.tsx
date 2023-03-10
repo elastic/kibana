@@ -140,7 +140,7 @@ export const FlyoutFooter: React.FC = () => {
   return (
     <EuiFlyoutFooter>
       <EuiButtonEmpty
-        data-test-subj="enterpriseSearchFlyoutFooterButtonEmpty"
+        data-test-subj="enterpriseSearchFlyoutFooterButton"
         onClick={closeDocumentCreation}
       >
         {CANCEL_BUTTON_LABEL}

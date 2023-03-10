@@ -86,7 +86,7 @@ export function AnalyzeDataButton() {
         })}
       >
         <EuiButtonEmpty
-          data-test-subj="apmAnalyzeDataButtonExploreDataButtonEmpty"
+          data-test-subj="apmAnalyzeDataButtonExploreDataButton"
           href={href}
           iconType="visBarVerticalStacked"
         >

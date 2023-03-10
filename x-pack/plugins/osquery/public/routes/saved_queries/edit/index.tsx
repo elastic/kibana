@@ -71,7 +71,7 @@ const EditSavedQueryPageComponent = () => {
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
           <EuiButtonEmpty
-            data-test-subj="osqueryLeftColumnViewAllSavedQueriesButtonEmpty"
+            data-test-subj="osqueryLeftColumnViewAllSavedQueriesButton"
             iconType="arrowLeft"
             {...savedQueryListProps}
             flush="left"

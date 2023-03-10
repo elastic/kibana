@@ -50,7 +50,7 @@ export const TruncatedEnginesList: React.FC<Props> = ({ engines, cutoff = 3 }) =
             data-test-subj="hiddenEnginesTooltip"
           >
             <EuiButtonEmpty
-              data-test-subj="enterpriseSearchTruncatedEnginesListButtonEmpty"
+              data-test-subj="enterpriseSearchTruncatedEnginesListButton"
               size="xs"
               flush="both"
             >

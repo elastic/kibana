@@ -334,7 +334,7 @@ export const LegendControls = ({
         <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="infraLegendControlsCancelButtonEmpty"
+              data-test-subj="infraLegendControlsCancelButton"
               type="submit"
               size="s"
               onClick={handleCancelClick}

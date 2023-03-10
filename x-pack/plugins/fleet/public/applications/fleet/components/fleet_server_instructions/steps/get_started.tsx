@@ -74,7 +74,7 @@ const GettingStartedStepContent: React.FunctionComponent<QuickStartCreateForm> =
               fleetSettingsLink: (
                 // eslint-disable-next-line @elastic/eui/href-or-on-click
                 <EuiButtonEmpty
-                  data-test-subj="fleetGettingStartedStepContentFleetSettingsButtonEmpty"
+                  data-test-subj="fleetGettingStartedStepContentFleetSettingsButton"
                   href={getHref('settings')}
                   onClick={onClose}
                   flush="left"

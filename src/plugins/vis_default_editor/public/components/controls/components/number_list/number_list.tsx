@@ -139,7 +139,7 @@ function NumberList({
       <EuiSpacer size="s" />
       <EuiFlexItem>
         <EuiButtonEmpty
-          data-test-subj="pluginsNumberListAddUnitNameButtonEmpty"
+          data-test-subj="pluginsNumberListAddUnitNameButton"
           iconType="plusInCircleFilled"
           onClick={onAdd}
           size="xs"

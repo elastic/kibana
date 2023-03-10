@@ -125,7 +125,7 @@ export const TagFilterPanel: FC<Props> = ({
             <EuiFlexItem grow={false}>
               {totalActiveFilters > 0 && (
                 <EuiButtonEmpty
-                  data-test-subj="contentManagementTagFilterPanelClearSelectionButtonEmpty"
+                  data-test-subj="contentManagementTagFilterPanelClearSelectionButton"
                   flush="both"
                   onClick={clearTagSelection}
                   css={clearSelectionBtnCSS}

@@ -44,7 +44,7 @@ export const AutomatedCurationsHistoryPanel: React.FC = () => {
           </EuiFlexItem>
           <EuiFlexItem component="span" grow={false}>
             <EuiButtonEmpty
-              data-test-subj="enterpriseSearchAutomatedCurationsHistoryPanelRefreshButtonEmpty"
+              data-test-subj="enterpriseSearchAutomatedCurationsHistoryPanelRefreshButton"
               iconType="refresh"
               size="xs"
               onClick={() => setEndTimestamp(Date.now())}

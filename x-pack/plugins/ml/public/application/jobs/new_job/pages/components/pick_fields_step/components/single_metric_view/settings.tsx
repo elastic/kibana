@@ -43,7 +43,7 @@ export const SingleMetricSettings: FC<Props> = ({ setIsValid }) => {
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="mlSingleMetricSettingsConvertToMultiMetricJobButtonEmpty"
+            data-test-subj="mlSingleMetricSettingsConvertToMultiMetricJobButton"
             onClick={convertToMultiMetric}
           >
             <FormattedMessage

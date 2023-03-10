@@ -131,7 +131,7 @@ export const DocumentList: React.FC = () => {
             )}
             button={
               <EuiButtonEmpty
-                data-test-subj="enterpriseSearchDocumentListDocumentsPerPageDocPerPageButtonEmpty"
+                data-test-subj="enterpriseSearchDocumentListDocumentsPerPageDocPerPageButton"
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-documents-docsPerPage`}
                 size="s"
                 iconType="arrowDown"

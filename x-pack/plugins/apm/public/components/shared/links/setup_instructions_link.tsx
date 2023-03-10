@@ -45,7 +45,7 @@ export function SetupInstructionsLink({
         </EuiButton>
       ) : (
         <EuiButtonEmpty
-          data-test-subj="apmSetupInstructionsLinkButtonEmpty"
+          data-test-subj="apmSetupInstructionsLinkButton"
           size="s"
           color="primary"
           iconType="indexOpen"

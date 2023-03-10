@@ -82,7 +82,7 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
       isOpen={isPopoverOpen}
       button={
         <EuiButtonEmpty
-          data-test-subj="syntheticsStepPageNavigationButtonEmpty"
+          data-test-subj="syntheticsStepPageNavigationButton"
           style={{ height: 20 }}
           onClick={() => setIsPopoverOpen((prev) => !prev)}
           iconType="arrowDown"
@@ -96,7 +96,7 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
       <EuiFlexGroup alignItems="center" justifyContent="flexEnd" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="syntheticsStepPageNavigationButtonEmpty"
+            data-test-subj="syntheticsStepPageNavigationButton"
             href={prevHref}
             disabled={!prevHref}
             iconType="arrowLeft"
@@ -112,7 +112,7 @@ export const StepPageNavigation = ({ testRunPage }: { testRunPage?: boolean }) =
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="syntheticsStepPageNavigationButtonEmpty"
+            data-test-subj="syntheticsStepPageNavigationButton"
             href={nextHref}
             disabled={!nextHref}
             iconType="arrowRight"

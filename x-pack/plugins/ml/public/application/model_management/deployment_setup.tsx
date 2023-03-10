@@ -335,10 +335,7 @@ export const StartUpdateDeploymentModal: FC<StartDeploymentModalProps> = ({
           />
         </EuiLink>
 
-        <EuiButtonEmpty
-          data-test-subj="mlStartUpdateDeploymentModalCancelButtonEmpty"
-          onClick={onClose}
-        >
+        <EuiButtonEmpty data-test-subj="mlStartUpdateDeploymentModalCancelButton" onClick={onClose}>
           <FormattedMessage
             id="xpack.ml.trainedModels.modelsList.startDeployment.cancelButton"
             defaultMessage="Cancel"

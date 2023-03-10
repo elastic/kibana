@@ -56,7 +56,7 @@ const getDefaultQuery = ({
 const BackToResourcesButton = () => (
   <Link to={generatePath(findingsNavigation.findings_by_resource.path)}>
     <EuiButtonEmpty
-      data-test-subj="cloudSecurityPostureBackToResourcesButtonBackToResourcesButtonEmpty"
+      data-test-subj="cloudSecurityPostureBackToResourcesButtonBackToResourcesButton"
       iconType={'arrowLeft'}
     >
       <FormattedMessage

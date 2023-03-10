@@ -44,7 +44,7 @@ export class LogCustomizationMenu extends React.Component<{}, LogCustomizationMe
 
     const menuButton = (
       <EuiButtonEmpty
-        data-test-subj="infraCustomizeButtonEmpty"
+        data-test-subj="infraCustomizeButton"
         color="text"
         iconType="eye"
         onClick={this.toggleVisibility}

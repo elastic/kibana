@@ -78,7 +78,7 @@ export const LogAnalysisModuleListCard: React.FC<{
           <>
             <EuiSpacer size="xs" />
             <EuiButtonEmpty
-              data-test-subj="infraLogAnalysisModuleListCardViewInMachineLearningButtonEmpty"
+              data-test-subj="infraLogAnalysisModuleListCardViewInMachineLearningButton"
               onClick={navigateToMlApp}
             >
               <FormattedMessage

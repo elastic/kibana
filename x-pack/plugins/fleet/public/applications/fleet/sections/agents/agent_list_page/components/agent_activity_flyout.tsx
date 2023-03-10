@@ -187,10 +187,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
         <FlyoutFooterWPadding>
           <EuiFlexGroup justifyContent="flexStart">
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="fleetAgentActivityFlyoutButtonEmpty"
-                onClick={onClose}
-              >
+              <EuiButtonEmpty data-test-subj="fleetAgentActivityFlyoutButton" onClick={onClose}>
                 <EuiText>
                   <FormattedMessage
                     id="xpack.fleet.agentActivityFlyout.closeBtn"

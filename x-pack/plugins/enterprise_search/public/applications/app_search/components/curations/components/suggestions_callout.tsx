@@ -67,7 +67,7 @@ export const SuggestionsCallout: React.FC<SuggestionsCalloutProps> = ({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="enterpriseSearchSuggestionsCalloutHideThisForNowButtonEmpty"
+              data-test-subj="enterpriseSearchSuggestionsCalloutHideThisForNowButton"
               color="success"
               iconType="eyeClosed"
               size="s"

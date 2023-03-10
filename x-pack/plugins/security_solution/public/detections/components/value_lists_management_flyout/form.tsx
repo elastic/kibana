@@ -162,7 +162,7 @@ export const ValueListsFormComponent: React.FC<ValueListsFormProps> = ({ onError
                 <EuiFlexItem>
                   {importState.loading && (
                     <EuiButtonEmpty
-                      data-test-subj="securitySolutionValueListsFormComponentButtonEmpty"
+                      data-test-subj="securitySolutionValueListsFormComponentButton"
                       onClick={handleCancel}
                     >
                       {i18n.CANCEL_BUTTON}

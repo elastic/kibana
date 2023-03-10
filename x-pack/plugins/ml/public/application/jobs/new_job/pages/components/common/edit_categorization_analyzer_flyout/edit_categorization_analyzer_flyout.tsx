@@ -86,7 +86,7 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
             <EuiFlexGroup justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="mlEditCategorizationAnalyzerFlyoutCloseButtonEmpty"
+                  data-test-subj="mlEditCategorizationAnalyzerFlyoutCloseButton"
                   iconType="cross"
                   onClick={() => setShowJsonFlyout(false)}
                   flush="left"
@@ -100,7 +100,7 @@ export const EditCategorizationAnalyzerFlyout: FC = () => {
               <EuiFlexItem grow={true} />
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="mlEditCategorizationAnalyzerFlyoutUseDefaultMlAnalyzerButtonEmpty"
+                  data-test-subj="mlEditCategorizationAnalyzerFlyoutUseDefaultMlAnalyzerButton"
                   onClick={onUseDefault}
                 >
                   <FormattedMessage

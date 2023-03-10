@@ -189,7 +189,7 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
                   <EuiFlexItem grow={false}>
                     {hasEditButton ? (
                       <EuiButtonEmpty
-                        data-test-subj="triggersActionsUiRuleDefinitionButtonEmpty"
+                        data-test-subj="triggersActionsUiRuleDefinitionButton"
                         onClick={() => setEditFlyoutVisible(true)}
                         flush="left"
                       >

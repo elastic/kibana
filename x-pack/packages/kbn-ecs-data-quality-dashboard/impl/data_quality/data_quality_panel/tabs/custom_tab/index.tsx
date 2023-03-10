@@ -83,7 +83,7 @@ const CustomTabComponent: React.FC<Props> = ({
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="kbnEcsDataQualityDashboardCustomTabComponentButtonEmpty"
+                  data-test-subj="kbnEcsDataQualityDashboardCustomTabComponentButton"
                   aria-label={i18n.COPY_TO_CLIPBOARD}
                   flush="both"
                   onClick={onCopy}

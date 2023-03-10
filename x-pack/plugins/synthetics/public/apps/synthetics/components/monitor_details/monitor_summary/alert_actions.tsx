@@ -84,7 +84,7 @@ export const AlertActions = ({
 
   const button = (
     <EuiButtonEmpty
-      data-test-subj="syntheticsAlertActionsButtonEmpty"
+      data-test-subj="syntheticsAlertActionsButton"
       iconType="arrowDown"
       iconSide="right"
       onClick={onButtonClick}

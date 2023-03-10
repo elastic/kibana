@@ -333,7 +333,7 @@ export const SharedLists = React.memo(() => {
 
   const rowSizeButton = (
     <EuiButtonEmpty
-      data-test-subj="securitySolutionSharedListsButtonEmpty"
+      data-test-subj="securitySolutionSharedListsButton"
       size="xs"
       color="text"
       iconType="arrowDown"

@@ -108,7 +108,7 @@ export const StdErrorLogs = ({
             <EuiFlexItem>
               <EuiLink data-test-subj="syntheticsStdErrorLogsLink">
                 <EuiButtonEmpty
-                  data-test-subj="syntheticsStdErrorLogsButtonEmpty"
+                  data-test-subj="syntheticsStdErrorLogsButton"
                   href={discoverLink}
                   iconType="discoverApp"
                   isDisabled={!discoverLink}

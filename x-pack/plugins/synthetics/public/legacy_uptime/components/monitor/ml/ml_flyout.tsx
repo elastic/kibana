@@ -91,7 +91,7 @@ export function MLFlyoutView({ isCreatingJob, onClickCreate, onClose, canCreateM
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="syntheticsMLFlyoutViewButtonEmpty"
+              data-test-subj="syntheticsMLFlyoutViewButton"
               onClick={() => onClose()}
               disabled={isCreatingJob || isLoadingMLJob}
             >

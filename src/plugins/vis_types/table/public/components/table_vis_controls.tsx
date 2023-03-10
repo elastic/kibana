@@ -80,7 +80,7 @@ export const TableVisControls = memo(
 
     const button = (
       <EuiButtonEmpty
-        data-test-subj="pluginsTableVisControlsExportButtonEmpty"
+        data-test-subj="pluginsTableVisControlsExportButton"
         aria-label={exportBtnAriaLabel}
         size="xs"
         iconType="exportAction"

@@ -39,7 +39,7 @@ export const FlyoutBody = (props: Props) => {
     const backButton = props.showBackButton ? (
       <Fragment>
         <EuiButtonEmpty
-          data-test-subj="mapsRenderContentChangeLayerButtonEmpty"
+          data-test-subj="mapsRenderContentChangeLayerButton"
           size="xs"
           flush="left"
           onClick={props.onClear}

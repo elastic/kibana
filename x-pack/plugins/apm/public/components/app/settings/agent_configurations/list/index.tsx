@@ -159,7 +159,7 @@ export function AgentConfigurationList({
       sortable: true,
       render: (_, config: Config) => (
         <EuiButtonEmpty
-          data-test-subj="apmColumnsButtonEmpty"
+          data-test-subj="apmColumnsButton"
           flush="left"
           size="s"
           color="primary"

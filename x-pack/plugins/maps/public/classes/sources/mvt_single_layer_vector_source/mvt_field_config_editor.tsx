@@ -199,7 +199,7 @@ export class MVTFieldConfigEditor extends Component<Props, State> {
         <EuiFlexGroup justifyContent="spaceAround" alignItems="center" gutterSize="xs">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="mapsAddButtonEmpty"
+              data-test-subj="mapsAddButton"
               onClick={this._addField}
               size="xs"
               iconType="plusInCircleFilled"

@@ -257,7 +257,7 @@ export function ApmIndices() {
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="apmApmIndicesCancelButtonEmpty"
+                  data-test-subj="apmApmIndicesCancelButton"
                   onClick={refetch}
                 >
                   {i18n.translate(

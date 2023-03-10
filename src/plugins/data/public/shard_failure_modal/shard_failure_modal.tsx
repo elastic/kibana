@@ -103,7 +103,7 @@ export function ShardFailureModal({ request, response, title, onClose }: Props) 
         <EuiCopy textToCopy={responseJSON}>
           {(copy) => (
             <EuiButtonEmpty
-              data-test-subj="pluginsShardFailureModalCopyResponseToClipboardButtonEmpty"
+              data-test-subj="pluginsShardFailureModalCopyResponseToClipboardButton"
               onClick={copy}
             >
               <FormattedMessage

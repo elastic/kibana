@@ -78,7 +78,7 @@ export function AttributionFormRow(props: Props) {
                 />
 
                 <EuiButtonEmpty
-                  data-test-subj="mapsRenderAttributionClearButtonEmpty"
+                  data-test-subj="mapsRenderAttributionClearButton"
                   onClick={() => {
                     props.onChange();
                   }}

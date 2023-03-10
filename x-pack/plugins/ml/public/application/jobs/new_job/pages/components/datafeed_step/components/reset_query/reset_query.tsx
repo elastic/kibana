@@ -58,7 +58,7 @@ export const ResetQueryButton: FC = () => {
       )}
 
       <EuiButtonEmpty
-        data-test-subj="mlResetQueryButtonResetDatafeedQueryToDefaultButtonEmpty"
+        data-test-subj="mlResetQueryButtonResetDatafeedQueryToDefaultButton"
         size="s"
         onClick={showModal}
       >

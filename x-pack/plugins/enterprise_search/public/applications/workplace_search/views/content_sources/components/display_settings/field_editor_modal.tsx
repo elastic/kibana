@@ -98,7 +98,7 @@ export const FieldEditorModal: React.FC = () => {
         </EuiModalBody>
         <EuiModalFooter>
           <EuiButtonEmpty
-            data-test-subj="enterpriseSearchFieldEditorModalButtonEmpty"
+            data-test-subj="enterpriseSearchFieldEditorModalButton"
             onClick={toggleFieldEditorModal}
           >
             {CANCEL_BUTTON}

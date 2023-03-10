@@ -259,7 +259,7 @@ const CreateJobTab = (props: CreateJobTab) => {
               <>
                 {props.hasHostJobs && (
                   <EuiButtonEmpty
-                    data-test-subj="infraCreateJobTabRecreateJobsButtonEmpty"
+                    data-test-subj="infraCreateJobTabRecreateJobsButton"
                     onClick={props.createHosts}
                   >
                     <FormattedMessage
@@ -303,7 +303,7 @@ const CreateJobTab = (props: CreateJobTab) => {
               <>
                 {props.hasK8sJobs && (
                   <EuiButtonEmpty
-                    data-test-subj="infraCreateJobTabRecreateJobsButtonEmpty"
+                    data-test-subj="infraCreateJobTabRecreateJobsButton"
                     onClick={props.createK8s}
                   >
                     <FormattedMessage

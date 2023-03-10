@@ -108,7 +108,7 @@ export const IndicatorsFlyoutOverview: VFC<IndicatorsFlyoutOverviewProps> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="threatIntelligenceIndicatorsFlyoutOverviewViewAllFieldsInTableButtonEmpty"
+            data-test-subj="threatIntelligenceIndicatorsFlyoutOverviewViewAllFieldsInTableButton"
             onClick={onViewAllFieldsInTable}
           >
             <FormattedMessage

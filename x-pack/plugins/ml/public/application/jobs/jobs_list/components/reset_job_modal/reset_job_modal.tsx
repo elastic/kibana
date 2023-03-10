@@ -141,7 +141,7 @@ export const ResetJobModal: FC<Props> = ({ setShowFunction, unsetShowFunction, r
         <EuiSpacer />
         <EuiModalFooter>
           <EuiButtonEmpty
-            data-test-subj="mlResetJobModalCancelButtonEmpty"
+            data-test-subj="mlResetJobModalCancelButton"
             onClick={closeModal}
             disabled={resetting}
           >

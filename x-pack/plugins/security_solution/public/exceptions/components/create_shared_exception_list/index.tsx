@@ -168,7 +168,7 @@ export const CreateSharedListFlyout = memo(
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="securitySolutionCreateSharedListFlyoutButtonEmpty"
+                data-test-subj="securitySolutionCreateSharedListFlyoutButton"
                 iconType="cross"
                 onClick={handleCloseFlyout}
                 flush="left"

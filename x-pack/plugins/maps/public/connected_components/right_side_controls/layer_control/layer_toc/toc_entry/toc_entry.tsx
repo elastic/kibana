@@ -362,7 +362,7 @@ export class TOCEntry extends Component<Props, State> {
               />
             </span>
             <EuiButtonEmpty
-              data-test-subj="mapsExitButtonEmpty"
+              data-test-subj="mapsExitButton"
               size="xs"
               flush="both"
               onClick={this.props.cancelEditing}

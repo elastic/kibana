@@ -182,7 +182,7 @@ export const ExpandedRow: FC<Props> = ({ item, onAlertEdit }) => {
     return {
       title: (
         <EuiButtonEmpty
-          data-test-subj="transformAlertRuleItemsButtonEmpty"
+          data-test-subj="transformAlertRuleItemsButton"
           iconType={'documentEdit'}
           iconSide={'left'}
           onClick={() => {

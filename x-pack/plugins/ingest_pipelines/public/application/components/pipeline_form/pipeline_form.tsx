@@ -156,7 +156,7 @@ export const PipelineForm: React.FunctionComponent<PipelineFormProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="ingestPipelinesPipelineFormCancelButtonEmpty"
+                  data-test-subj="ingestPipelinesPipelineFormCancelButton"
                   color="primary"
                   onClick={onCancel}
                 >

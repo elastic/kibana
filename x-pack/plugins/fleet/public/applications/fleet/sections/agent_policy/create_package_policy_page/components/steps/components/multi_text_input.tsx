@@ -158,7 +158,7 @@ export const MultiTextInput: FunctionComponent<Props> = ({
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiButtonEmpty
-        data-test-subj="fleetMultiTextInputAddRowButtonEmpty"
+        data-test-subj="fleetMultiTextInputAddRowButton"
         disabled={isDisabled}
         size="xs"
         flush="left"

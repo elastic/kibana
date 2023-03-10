@@ -87,7 +87,7 @@ export const EmbeddableLegacyUrlConflictInternal = (
         </EuiTextAlign>
       ) : (
         <EuiButtonEmpty
-          data-test-subj="spacesEmbeddableLegacyUrlConflictInternalButtonEmpty"
+          data-test-subj="spacesEmbeddableLegacyUrlConflictInternalButton"
           onClick={() => setExpandError(true)}
         >
           {i18n.translate('xpack.spaces.embeddableLegacyUrlConflict.detailsButton', {

@@ -78,7 +78,7 @@ export const LogHighlightsMenu: React.FC<LogHighlightsMenuProps> = ({
 
   const button = (
     <EuiButtonEmpty
-      data-test-subj="infraLogHighlightsMenuButtonEmpty"
+      data-test-subj="infraLogHighlightsMenuButton"
       color="text"
       size="xs"
       iconType="brush"

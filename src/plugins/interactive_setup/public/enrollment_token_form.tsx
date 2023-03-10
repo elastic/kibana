@@ -145,7 +145,7 @@ export const EnrollmentTokenForm: FunctionComponent<EnrollmentTokenFormProps> = 
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="pluginsEnrollmentTokenFormConfigureManuallyButtonEmpty"
+            data-test-subj="pluginsEnrollmentTokenFormConfigureManuallyButton"
             flush="right"
             iconType="gear"
             onClick={onCancel}

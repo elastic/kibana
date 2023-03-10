@@ -55,7 +55,7 @@ export const DrilldownHelloBar: React.FC<DrilldownHelloBarProps> = ({ docsLink, 
         {!!onHideClick && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="pluginsDrilldownHelloBarButtonEmpty"
+              data-test-subj="pluginsDrilldownHelloBarButton"
               size="xs"
               onClick={onHideClick}
             >

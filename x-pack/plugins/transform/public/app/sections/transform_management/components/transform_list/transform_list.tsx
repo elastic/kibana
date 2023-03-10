@@ -172,7 +172,7 @@ export const TransformList: FC<TransformListProps> = ({
   const bulkActionMenuItems = [
     <div key="startAction" className="transform__BulkActionItem">
       <EuiButtonEmpty
-        data-test-subj="transformTransformListButtonEmpty"
+        data-test-subj="transformTransformListButton"
         onClick={() => bulkStartAction.openModal(transformSelection)}
       >
         <StartActionName items={transformSelection} transformNodes={transformNodes} />
@@ -180,7 +180,7 @@ export const TransformList: FC<TransformListProps> = ({
     </div>,
     <div key="stopAction" className="transform__BulkActionItem">
       <EuiButtonEmpty
-        data-test-subj="transformTransformListButtonEmpty"
+        data-test-subj="transformTransformListButton"
         onClick={() => {
           bulkStopAction.openModal(transformSelection);
         }}
@@ -190,7 +190,7 @@ export const TransformList: FC<TransformListProps> = ({
     </div>,
     <div key="resetAction" className="transform__BulkActionItem">
       <EuiButtonEmpty
-        data-test-subj="transformTransformListButtonEmpty"
+        data-test-subj="transformTransformListButton"
         onClick={() => {
           bulkResetAction.openModal(transformSelection);
         }}
@@ -204,7 +204,7 @@ export const TransformList: FC<TransformListProps> = ({
     </div>,
     <div key="deleteAction" className="transform__BulkActionItem">
       <EuiButtonEmpty
-        data-test-subj="transformTransformListButtonEmpty"
+        data-test-subj="transformTransformListButton"
         onClick={() => bulkDeleteAction.openModal(transformSelection)}
       >
         <DeleteActionName

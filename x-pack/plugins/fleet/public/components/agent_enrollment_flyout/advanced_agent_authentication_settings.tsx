@@ -185,7 +185,7 @@ export const AdvancedAgentAuthenticationSettings: FunctionComponent<Props> = ({
   return (
     <>
       <EuiButtonEmpty
-        data-test-subj="fleetAdvancedAgentAuthenticationSettingsAuthenticationSettingsButtonEmpty"
+        data-test-subj="fleetAdvancedAgentAuthenticationSettingsAuthenticationSettingsButton"
         iconSide="left"
         iconType={isAuthenticationSettingsOpen ? 'arrowDown' : 'arrowRight'}
         onClick={() => setIsAuthenticationSettingsOpen(!isAuthenticationSettingsOpen)}

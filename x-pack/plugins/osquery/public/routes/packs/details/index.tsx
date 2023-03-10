@@ -61,7 +61,7 @@ const PackDetailsPageComponent = () => {
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
           <EuiButtonEmpty
-            data-test-subj="osqueryLeftColumnViewAllPacksButtonEmpty"
+            data-test-subj="osqueryLeftColumnViewAllPacksButton"
             iconType="arrowLeft"
             {...packsListProps}
             flush="left"

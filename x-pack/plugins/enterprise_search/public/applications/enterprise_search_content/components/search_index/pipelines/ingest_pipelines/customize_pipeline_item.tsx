@@ -94,7 +94,7 @@ export const CustomizeIngestPipelineItem: React.FC = () => {
         )}
         {hasIndexIngestionPipeline ? (
           <EuiButtonEmpty
-            data-test-subj="enterpriseSearchCustomizeIngestPipelineItemDeleteCustomPipelineButtonEmpty"
+            data-test-subj="enterpriseSearchCustomizeIngestPipelineItemDeleteCustomPipelineButton"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-revertPipeline`}
             onClick={() => openDeleteModal()}
           >
@@ -105,7 +105,7 @@ export const CustomizeIngestPipelineItem: React.FC = () => {
           </EuiButtonEmpty>
         ) : (
           <EuiButtonEmpty
-            data-test-subj="enterpriseSearchCustomizeIngestPipelineItemCopyAndCustomizeButtonEmpty"
+            data-test-subj="enterpriseSearchCustomizeIngestPipelineItemCopyAndCustomizeButton"
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-ingestPipelines-copyAndCustomize`}
             disabled={isGated}
             isLoading={createStatus === Status.LOADING}

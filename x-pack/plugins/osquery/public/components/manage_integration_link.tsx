@@ -49,7 +49,7 @@ const ManageIntegrationLinkComponent = () => {
       {
         // eslint-disable-next-line @elastic/eui/href-or-on-click
         <EuiButtonEmpty
-          data-test-subj="osqueryManageIntegrationLinkComponentManageIntegrationButtonEmpty"
+          data-test-subj="osqueryManageIntegrationLinkComponentManageIntegrationButton"
           iconType="gear"
           href={integrationHref}
           onClick={integrationClick}

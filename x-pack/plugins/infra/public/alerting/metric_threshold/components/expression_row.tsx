@@ -278,7 +278,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
                 <EuiSpacer size={'xs'} />
                 <StyledExpressionRow>
                   <EuiButtonEmpty
-                    data-test-subj="infraExpressionRowAddWarningThresholdButtonEmpty"
+                    data-test-subj="infraExpressionRowAddWarningThresholdButton"
                     color={'primary'}
                     flush={'left'}
                     size="xs"

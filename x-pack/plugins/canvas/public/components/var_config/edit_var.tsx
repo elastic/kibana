@@ -229,7 +229,7 @@ export const EditVar: FC<Props> = ({ variables, selectedVar, onCancel, onSave })
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="canvasEditVarButtonEmpty"
+                data-test-subj="canvasEditVarButton"
                 size="s"
                 onClick={() => onCancel()}
               >

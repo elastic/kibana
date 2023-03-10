@@ -159,7 +159,7 @@ export function EditDiscoveryRule({
       <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="apmEditDiscoveryRuleCancelButtonEmpty"
+            data-test-subj="apmEditDiscoveryRuleCancelButton"
             onClick={onCancel}
           >
             Cancel

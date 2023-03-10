@@ -193,7 +193,7 @@ export const RestoreSnapshotStepLogistics: React.FunctionComponent<StepProps> = 
 
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="snapshotRestoreRestoreSnapshotStepLogisticsSnapshotAndRestoreDocsButtonEmpty"
+            data-test-subj="snapshotRestoreRestoreSnapshotStepLogisticsSnapshotAndRestoreDocsButton"
             size="s"
             flush="right"
             href={docLinks.links.snapshotRestore.restoreSnapshot}

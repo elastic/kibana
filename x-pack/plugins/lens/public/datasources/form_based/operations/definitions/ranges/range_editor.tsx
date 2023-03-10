@@ -190,7 +190,7 @@ const BaseRangeEditor = ({
       </EuiFormRow>
 
       <EuiButtonEmpty
-        data-test-subj="lensBaseRangeEditorCreateCustomRangesButtonEmpty"
+        data-test-subj="lensBaseRangeEditorCreateCustomRangesButton"
         size="xs"
         iconType="controlsHorizontal"
         onClick={() => onToggleEditor()}

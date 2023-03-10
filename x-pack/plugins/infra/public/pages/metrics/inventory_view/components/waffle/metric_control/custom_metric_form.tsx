@@ -144,7 +144,7 @@ export const CustomMetricForm = withTheme(
         <EuiForm>
           <EuiPopoverTitle>
             <EuiButtonEmpty
-              data-test-subj="infraCustomMetricFormButtonEmpty"
+              data-test-subj="infraCustomMetricFormButton"
               iconType="arrowLeft"
               onClick={onCancel}
               color="text"
@@ -223,7 +223,7 @@ export const CustomMetricForm = withTheme(
           </div>
           <div style={{ padding: theme?.eui.euiSizeM, textAlign: 'right' }}>
             <EuiButtonEmpty
-              data-test-subj="infraCustomMetricFormCancelButtonEmpty"
+              data-test-subj="infraCustomMetricFormCancelButton"
               onClick={onCancel}
               size="s"
               style={{ paddingRight: theme?.eui.euiSizeXL }}

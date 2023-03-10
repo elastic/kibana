@@ -56,7 +56,7 @@ export const CreatePackagePolicyBottomBar: React.FC<{
           <EuiFlexItem grow={false}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiButtonEmpty
-              data-test-subj="fleetCreatePackagePolicyBottomBarButtonEmpty"
+              data-test-subj="fleetCreatePackagePolicyBottomBarButton"
               color="ghost"
               size="s"
               href={cancelUrl}
@@ -110,7 +110,7 @@ export const AgentStandaloneBottomBar: React.FC<{
           <EuiFlexItem grow={false}>
             {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
             <EuiButtonEmpty
-              data-test-subj="fleetAgentStandaloneBottomBarGoBackButtonEmpty"
+              data-test-subj="fleetAgentStandaloneBottomBarGoBackButton"
               color="ghost"
               size="s"
               href={cancelUrl}
@@ -154,7 +154,7 @@ export const CreatePackagePolicyFinalBottomBar: React.FC<{
         <EuiFlexItem grow={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="fleetCreatePackagePolicyFinalBottomBarAddAnotherIntegrationButtonEmpty"
+              data-test-subj="fleetCreatePackagePolicyFinalBottomBarAddAnotherIntegrationButton"
               color="ghost"
               size="s"
               href={getHref('integrations_all')}
@@ -219,7 +219,7 @@ export const AgentDataTimedOutBottomBar: React.FC<{
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="fleetAgentDataTimedOutBottomBarTroubleshootingGuideButtonEmpty"
+            data-test-subj="fleetAgentDataTimedOutBottomBarTroubleshootingGuideButton"
             color="ghost"
             size="s"
             href={troubleshootLink}

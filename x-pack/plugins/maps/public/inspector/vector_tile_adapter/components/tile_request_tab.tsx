@@ -57,7 +57,7 @@ export function TileRequestTab(props: Props) {
                 <EuiCopy textToCopy={consoleRequest}>
                   {(copy) => (
                     <EuiButtonEmpty
-                      data-test-subj="mapsTileRequestTabCopyToClipboardButtonEmpty"
+                      data-test-subj="mapsTileRequestTabCopyToClipboardButton"
                       size="xs"
                       flush="right"
                       iconType="copyClipboard"
@@ -78,7 +78,7 @@ export function TileRequestTab(props: Props) {
               <EuiFlexItem grow={false}>
                 <div>
                   <EuiButtonEmpty
-                    data-test-subj="mapsTileRequestTabOpenInConsoleButtonEmpty"
+                    data-test-subj="mapsTileRequestTabOpenInConsoleButton"
                     size="xs"
                     flush="right"
                     onClick={() => {

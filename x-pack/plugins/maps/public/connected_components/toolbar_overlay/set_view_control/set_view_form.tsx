@@ -114,7 +114,7 @@ export class SetViewForm extends Component<Props, State> {
           closePopover={this._closePopover}
           button={
             <EuiButtonEmpty
-              data-test-subj="mapsCoordinateSystemButtonEmpty"
+              data-test-subj="mapsCoordinateSystemButton"
               iconType="controlsHorizontal"
               size="xs"
               onClick={this._togglePopover}

@@ -158,7 +158,7 @@ export const RestoreList: React.FunctionComponent = () => {
                 id="srRestoreListIntervalMenu"
                 button={
                   <EuiButtonEmpty
-                    data-test-subj="snapshotRestoreRestoreListRefreshDataEveryIntervalButtonEmpty"
+                    data-test-subj="snapshotRestoreRestoreListRefreshDataEveryIntervalButton"
                     size="xs"
                     iconType="arrowDown"
                     iconSide="right"

@@ -116,7 +116,7 @@ export const ClusterDetailsBox = ({ cluster }: { cluster: Cluster }) => {
       </EuiFlexItem>
       {INTERNAL_FEATURE_FLAGS.showManageRulesMock && (
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty data-test-subj="cloudSecurityPostureClusterDetailsBoxManageRulesButtonEmpty">
+          <EuiButtonEmpty data-test-subj="cloudSecurityPostureClusterDetailsBoxManageRulesButton">
             <FormattedMessage
               id="xpack.csp.dashboard.benchmarkSection.manageRulesButton"
               defaultMessage="Manage Rules"

@@ -82,7 +82,7 @@ export const IndexInputForm: FC<Props> = ({ inferrer }) => {
         <EuiFlexItem />
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="mlIndexInputFormReloadExamplesButtonEmpty"
+            data-test-subj="mlIndexInputFormReloadExamplesButton"
             onClick={reloadExamples}
             disabled={runningState === RUNNING_STATE.RUNNING || selectedField === undefined}
           >

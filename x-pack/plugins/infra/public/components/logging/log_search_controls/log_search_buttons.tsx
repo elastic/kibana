@@ -47,7 +47,7 @@ export class LogSearchButtons extends React.PureComponent<LogSearchButtonsProps,
       <EuiFlexGroup className={classes} gutterSize="xs">
         <EuiFlexItem>
           <EuiButtonEmpty
-            data-test-subj="infraPreviousButtonEmpty"
+            data-test-subj="infraPreviousButton"
             onClick={this.handleJumpToPreviousSearchResult}
             iconType="arrowLeft"
             iconSide="left"
@@ -62,7 +62,7 @@ export class LogSearchButtons extends React.PureComponent<LogSearchButtonsProps,
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiButtonEmpty
-            data-test-subj="infraNextButtonEmpty"
+            data-test-subj="infraNextButton"
             onClick={this.handleJumpToNextSearchResult}
             iconType="arrowRight"
             iconSide="right"

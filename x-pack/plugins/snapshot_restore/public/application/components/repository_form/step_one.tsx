@@ -147,7 +147,7 @@ export const RepositoryFormStepOne: React.FunctionComponent<Props> = ({
           description={<Fragment />} /* EuiCard requires `description` */
           footer={
             <EuiButtonEmpty
-              data-test-subj="snapshotRestoreRenderTypeCardLearnMoreButtonEmpty"
+              data-test-subj="snapshotRestoreRenderTypeCardLearnMoreButton"
               href={getRepositoryTypeDocUrl(docLinks, type)}
               target="_blank"
               size="xs"

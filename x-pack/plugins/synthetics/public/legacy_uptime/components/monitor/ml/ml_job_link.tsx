@@ -50,7 +50,7 @@ export const MLJobLink: React.FC<Props> = ({ basePath, monitorId, dateRange, chi
   const href = getMLJobLinkHref({ basePath, monitorId, dateRange });
   return (
     <EuiButtonEmpty
-      data-test-subj="syntheticsMLJobLinkButtonEmpty"
+      data-test-subj="syntheticsMLJobLinkButton"
       children={children}
       size="s"
       href={href}

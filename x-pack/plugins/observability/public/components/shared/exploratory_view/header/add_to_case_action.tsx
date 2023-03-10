@@ -100,7 +100,7 @@ export function AddToCaseAction({
     <>
       {typeof autoOpen === 'undefined' && (
         <EuiButtonEmpty
-          data-test-subj="o11yAddToCaseActionAddToCaseButtonEmpty"
+          data-test-subj="o11yAddToCaseActionAddToCaseButton"
           size="s"
           isLoading={isSaving}
           isDisabled={lensAttributes === null}

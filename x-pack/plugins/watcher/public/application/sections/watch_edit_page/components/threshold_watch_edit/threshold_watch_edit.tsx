@@ -928,7 +928,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
 
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="watcherThresholdWatchEditCancelButtonEmpty"
+                  data-test-subj="watcherThresholdWatchEditCancelButton"
                   onClick={() => goToWatchList()}
                 >
                   {i18n.translate('xpack.watcher.sections.watchEdit.threshold.cancelButtonLabel', {
@@ -941,7 +941,7 @@ export const ThresholdWatchEdit = ({ pageTitle }: { pageTitle: string }) => {
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="watcherThresholdWatchEditButtonEmpty"
+              data-test-subj="watcherThresholdWatchEditButton"
               onClick={() => setIsRequestVisible(!isRequestVisible)}
             >
               {isRequestVisible ? (

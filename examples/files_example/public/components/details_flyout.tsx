@@ -109,7 +109,7 @@ export const DetailsFlyout: FunctionComponent<Props> = ({ files, file, onDismiss
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="filesExampleDetailsFlyoutCloseButtonEmpty"
+              data-test-subj="filesExampleDetailsFlyoutCloseButton"
               iconType="cross"
               onClick={onDismiss}
             >

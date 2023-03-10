@@ -223,7 +223,7 @@ const ReadMoreButton = ({
       <StyledDiv ref={ref}>{description}</StyledDiv>
       {isOverflow && (
         <EuiButtonEmpty
-          data-test-subj="securitySolutionReadMoreButtonButtonEmpty"
+          data-test-subj="securitySolutionReadMoreButtonButton"
           flush="left"
           onClick={onclick}
         >

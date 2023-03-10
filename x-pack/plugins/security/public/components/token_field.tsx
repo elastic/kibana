@@ -93,7 +93,7 @@ export const SelectableTokenField: FunctionComponent<SelectableTokenFieldProps> 
         <EuiPopover
           button={
             <EuiButtonEmpty
-              data-test-subj="securitySelectableTokenFieldButtonEmpty"
+              data-test-subj="securitySelectableTokenFieldButton"
               size="xs"
               iconType="arrowDown"
               iconSide="right"

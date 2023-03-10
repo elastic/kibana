@@ -333,7 +333,7 @@ export const JobSetupScreen = (props: Props) => {
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="infraJobSetupScreenCancelButtonEmpty"
+              data-test-subj="infraJobSetupScreenCancelButton"
               onClick={props.closeFlyout}
             >
               <FormattedMessage

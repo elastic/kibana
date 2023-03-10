@@ -181,7 +181,7 @@ export const GenerateEngineApiKeyModal: React.FC<GenerateEngineApiKeyModalProps>
           </EuiButton>
         ) : (
           <EuiButtonEmpty
-            data-test-subj="enterpriseSearchGenerateEngineApiKeyModalCancelButtonEmpty"
+            data-test-subj="enterpriseSearchGenerateEngineApiKeyModalCancelButton"
             data-telemetry-id="entSearchContent-engines-api-generateEngineApiKeyModal-cancel"
             onClick={onClose}
           >

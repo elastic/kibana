@@ -112,7 +112,7 @@ export const FileFlyout: FunctionComponent<Props> = ({ onClose, file }) => {
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">
           <EuiButtonEmpty
-            data-test-subj="pluginsFileFlyoutButtonEmpty"
+            data-test-subj="pluginsFileFlyoutButton"
             href={filesClient.getDownloadHref(file)}
             iconType="download"
           >

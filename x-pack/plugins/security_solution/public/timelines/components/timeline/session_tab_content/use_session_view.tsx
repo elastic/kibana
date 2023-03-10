@@ -77,7 +77,7 @@ const NavigationComponent: React.FC<NavigationProps> = ({
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj="securitySolutionNavigationComponentButtonEmpty"
+          data-test-subj="securitySolutionNavigationComponentButton"
           iconType="cross"
           onClick={onCloseOverlay}
           size="xs"

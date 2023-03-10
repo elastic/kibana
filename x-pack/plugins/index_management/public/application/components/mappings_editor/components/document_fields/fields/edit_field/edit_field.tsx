@@ -228,7 +228,7 @@ export const EditField = React.memo(
             )}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="indexManagementEditFieldCancelButtonEmpty"
+                data-test-subj="indexManagementEditFieldCancelButton"
                 onClick={exitEdit}
               >
                 {i18n.translate('xpack.idxMgmt.mappingsEditor.editFieldCancelButtonLabel', {

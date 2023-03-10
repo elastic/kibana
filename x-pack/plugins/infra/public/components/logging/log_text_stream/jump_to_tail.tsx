@@ -30,7 +30,7 @@ export class LogTextStreamJumpToTail extends React.PureComponent<LogTextStreamJu
           </EuiText>
         </MessageWrapper>
         <EuiButtonEmpty
-          data-test-subj="infraJumpToMostRecentEntriesButtonEmpty"
+          data-test-subj="infraJumpToMostRecentEntriesButton"
           size="xs"
           onClick={onClickJump}
           iconType="arrowDown"

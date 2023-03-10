@@ -87,7 +87,7 @@ export const StepComponents = ({ defaultValue, onChange, esDocsBase }: Props) =>
 
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="indexManagementRenderHeaderComponentTemplatesDocsButtonEmpty"
+              data-test-subj="indexManagementRenderHeaderComponentTemplatesDocsButton"
               size="s"
               flush="right"
               href={docUri}

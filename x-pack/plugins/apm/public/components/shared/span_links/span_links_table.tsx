@@ -174,7 +174,7 @@ export function SpanLinksTable({ items }: Props) {
                 <EuiCopy textToCopy={traceId}>
                   {(copy) => (
                     <EuiButtonEmpty
-                      data-test-subj="apmColumnsCopyParentTraceIdButtonEmpty"
+                      data-test-subj="apmColumnsCopyParentTraceIdButton"
                       onClick={() => {
                         copy();
                         setIdActionMenuOpen(undefined);
@@ -209,7 +209,7 @@ export function SpanLinksTable({ items }: Props) {
                 <EuiCopy textToCopy={spanId}>
                   {(copy) => (
                     <EuiButtonEmpty
-                      data-test-subj="apmColumnsCopySpanIdButtonEmpty"
+                      data-test-subj="apmColumnsCopySpanIdButton"
                       onClick={() => {
                         copy();
                         setIdActionMenuOpen(undefined);

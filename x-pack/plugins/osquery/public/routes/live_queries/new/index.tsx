@@ -45,7 +45,7 @@ const NewLiveQueryPageComponent = () => {
       <EuiFlexGroup alignItems="flexStart" direction="column" gutterSize="m">
         <EuiFlexItem>
           <EuiButtonEmpty
-            data-test-subj="osqueryLeftColumnViewLiveQueriesHistoryButtonEmpty"
+            data-test-subj="osqueryLeftColumnViewLiveQueriesHistoryButton"
             iconType="arrowLeft"
             {...liveQueryListProps}
             flush="left"

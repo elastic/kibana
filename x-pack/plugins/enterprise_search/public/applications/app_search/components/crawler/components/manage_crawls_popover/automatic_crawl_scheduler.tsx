@@ -196,7 +196,7 @@ export const AutomaticCrawlScheduler: React.FC = () => {
           <EuiFlexGroup>
             <EuiFlexItem>
               <EuiButtonEmpty
-                data-test-subj="enterpriseSearchAutomaticCrawlSchedulerButtonEmpty"
+                data-test-subj="enterpriseSearchAutomaticCrawlSchedulerButton"
                 onClick={closePopover}
               >
                 {CANCEL_BUTTON_LABEL}

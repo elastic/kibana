@@ -70,6 +70,6 @@ export const ReactRouterEuiButtonEmpty: React.FC<TEuiReactRouterButtonEmptyProps
   ...rest
 }) => (
   <ReactRouterHelperForEui to={to}>
-    <EuiButtonEmpty data-test-subj="syntheticsReactRouterEuiButtonEmptyButtonEmpty" {...rest} />
+    <EuiButtonEmpty data-test-subj="syntheticsReactRouterEuiButtonEmptyButton" {...rest} />
   </ReactRouterHelperForEui>
 );

@@ -154,7 +154,7 @@ export const RulesManagementTour = () => {
           anchorPosition="upCenter"
           footerAction={
             <EuiButtonEmpty
-              data-test-subj="securitySolutionRulesManagementTourButtonEmpty"
+              data-test-subj="securitySolutionRulesManagementTourButton"
               size="xs"
               color="text"
               flush="right"
@@ -177,7 +177,7 @@ export const RulesManagementTour = () => {
           anchorPosition="upCenter"
           footerAction={
             <EuiButtonEmpty
-              data-test-subj="securitySolutionRulesManagementTourButtonEmpty"
+              data-test-subj="securitySolutionRulesManagementTourButton"
               size="xs"
               color="text"
               flush="right"

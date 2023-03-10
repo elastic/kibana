@@ -96,7 +96,7 @@ export function HeaderActions({
             }
             footerAction={
               <EuiButtonEmpty
-                data-test-subj="o11yHeaderActionsDismissButtonEmpty"
+                data-test-subj="o11yHeaderActionsDismissButton"
                 color="text"
                 flush="right"
                 size="xs"

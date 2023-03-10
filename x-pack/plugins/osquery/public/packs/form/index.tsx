@@ -301,7 +301,7 @@ const PackFormComponent: React.FC<PackFormProps> = ({
             <EuiFlexGroup gutterSize="m">
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="osqueryPackFormComponentCancelButtonEmpty"
+                  data-test-subj="osqueryPackFormComponentCancelButton"
                   color="ghost"
                   {...cancelButtonProps}
                 >

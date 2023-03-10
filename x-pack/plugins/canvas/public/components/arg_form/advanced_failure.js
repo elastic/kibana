@@ -92,7 +92,7 @@ export const AdvancedFailure = (props) => {
         </EuiButton>
         {defaultValue && defaultValue.length && (
           <EuiButtonEmpty
-            data-test-subj="canvasAdvancedFailureButtonEmpty"
+            data-test-subj="canvasAdvancedFailureButton"
             size="s"
             color="danger"
             onClick={confirmReset}

@@ -60,7 +60,7 @@ export const BottomBar: FC<BottomBarProps> = ({ mode, onChangeMode, onCancel, di
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="dataVisualizerBottomBarCancelButtonEmpty"
+              data-test-subj="dataVisualizerBottomBarCancelButton"
               color="ghost"
               onClick={() => onCancel()}
             >
@@ -91,7 +91,7 @@ export const BottomBar: FC<BottomBarProps> = ({ mode, onChangeMode, onCancel, di
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="dataVisualizerBottomBarCancelButtonEmpty"
+              data-test-subj="dataVisualizerBottomBarCancelButton"
               color="ghost"
               onClick={() => onCancel()}
             >

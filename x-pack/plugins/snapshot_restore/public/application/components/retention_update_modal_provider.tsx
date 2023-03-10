@@ -267,7 +267,7 @@ export const RetentionSettingsUpdateModalProvider: React.FunctionComponent<Props
 
         <EuiModalFooter>
           <EuiButtonEmpty
-            data-test-subj="snapshotRestoreRenderModalCancelButtonEmpty"
+            data-test-subj="snapshotRestoreRenderModalCancelButton"
             onClick={closeModal}
           >
             <FormattedMessage

@@ -176,7 +176,7 @@ export const Expression: FC<Props> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="canvasExpressionButtonEmpty"
+                  data-test-subj="canvasExpressionButton"
                   size="s"
                   color={formState.dirty ? 'danger' : 'primary'}
                   onClick={done}
@@ -199,7 +199,7 @@ export const Expression: FC<Props> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  data-test-subj="canvasExpressionButtonEmpty"
+                  data-test-subj="canvasExpressionButton"
                   iconType="fullScreen"
                   onClick={toggleCompactView}
                   size="s"

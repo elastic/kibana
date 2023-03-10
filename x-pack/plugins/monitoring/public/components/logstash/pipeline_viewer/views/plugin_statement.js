@@ -76,7 +76,7 @@ export function PluginStatement({
         <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="monitoringPluginStatementButtonEmpty"
+              data-test-subj="monitoringPluginStatementButton"
               aria-label={name}
               className="monPipelineViewer__plugin"
               color="primary"

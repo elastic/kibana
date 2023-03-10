@@ -103,7 +103,7 @@ export const CurationsSettings: React.FC = () => {
         }
       >
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchCurationsSettingsLearnMoreAboutLicenseUpgradesButtonEmpty"
+          data-test-subj="enterpriseSearchCurationsSettingsLearnMoreAboutLicenseUpgradesButton"
           target="_blank"
           iconType="popout"
           href={docLinks.licenseManagement}

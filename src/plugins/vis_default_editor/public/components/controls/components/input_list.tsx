@@ -200,7 +200,7 @@ function InputList({ config, list, onChange, setValidity }: InputListProps) {
       <EuiSpacer size="s" />
       <EuiFlexItem>
         <EuiButtonEmpty
-          data-test-subj="pluginsInputListAddRangeButtonEmpty"
+          data-test-subj="pluginsInputListAddRangeButton"
           iconType="plusInCircleFilled"
           onClick={onAdd}
           size="xs"

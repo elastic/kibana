@@ -344,7 +344,7 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
             <EuiFlexItem grow={false}>
               <RedirectAppLinks application={application}>
                 <EuiButtonEmpty
-                  data-test-subj="fleetAgentLogsUIOpenInLogsButtonEmpty"
+                  data-test-subj="fleetAgentLogsUIOpenInLogsButton"
                   href={viewInLogsUrl}
                   iconType="popout"
                   flush="both"

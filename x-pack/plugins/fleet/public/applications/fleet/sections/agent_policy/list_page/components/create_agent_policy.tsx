@@ -111,7 +111,7 @@ export const CreateAgentPolicyFlyout: React.FunctionComponent<Props> = ({
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="fleetCreateAgentPolicyFlyoutCancelButtonEmpty"
+            data-test-subj="fleetCreateAgentPolicyFlyoutCancelButton"
             onClick={() => onClose()}
             flush="left"
           >

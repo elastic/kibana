@@ -132,10 +132,7 @@ export const CustomizationModal: React.FC<Props> = ({
         </EuiForm>
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty
-          data-test-subj="enterpriseSearchCustomizationModalButtonEmpty"
-          onClick={onClose}
-        >
+        <EuiButtonEmpty data-test-subj="enterpriseSearchCustomizationModalButton" onClick={onClose}>
           {CANCEL_BUTTON_LABEL}
         </EuiButtonEmpty>
         <EuiButton

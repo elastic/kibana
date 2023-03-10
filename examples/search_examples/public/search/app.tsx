@@ -640,7 +640,7 @@ export const SearchExamplesApp = ({
                 search bar configuration, format them into a DSL query and send it to Elasticsearch.
                 <EuiSpacer />
                 <EuiButtonEmpty
-                  data-test-subj="searchExamplesSearchExamplesAppRequestFromLowLevelClientDataSearchSearchButtonEmpty"
+                  data-test-subj="searchExamplesSearchExamplesAppRequestFromLowLevelClientDataSearchSearchButton"
                   size="xs"
                   onClick={onClickHandler}
                   iconType="play"
@@ -776,7 +776,7 @@ export const SearchExamplesApp = ({
                   onChange={(event) => setGetCool(event.target.checked)}
                 />
                 <EuiButtonEmpty
-                  data-test-subj="searchExamplesSearchExamplesAppRequestFromLowLevelClientViaMyStrategyButtonEmpty"
+                  data-test-subj="searchExamplesSearchExamplesAppRequestFromLowLevelClientViaMyStrategyButton"
                   size="xs"
                   onClick={onMyStrategyClickHandler}
                   iconType="play"
@@ -842,7 +842,7 @@ export const SearchExamplesApp = ({
                 on client and server and use `AbortController`.
                 <EuiSpacer />
                 <EuiButtonEmpty
-                  data-test-subj="searchExamplesSearchExamplesAppRequestFromLowLevelClientOnTheServerButtonEmpty"
+                  data-test-subj="searchExamplesSearchExamplesAppRequestFromLowLevelClientOnTheServerButton"
                   size="xs"
                   onClick={onServerClickHandler}
                   iconType="play"
@@ -864,7 +864,7 @@ export const SearchExamplesApp = ({
               <EuiSpacer />
               {currentAbortController && isLoading && (
                 <EuiButtonEmpty
-                  data-test-subj="searchExamplesSearchExamplesAppAbortRequestButtonEmpty"
+                  data-test-subj="searchExamplesSearchExamplesAppAbortRequestButton"
                   size="xs"
                   onClick={() => currentAbortController?.abort()}
                 >

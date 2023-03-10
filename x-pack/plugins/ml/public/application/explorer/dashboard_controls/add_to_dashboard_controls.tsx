@@ -114,7 +114,7 @@ export const AddToDashboardControl: FC<AddToDashboardControlProps> = ({
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty
-          data-test-subj="mlAddToDashboardControlCancelButtonEmpty"
+          data-test-subj="mlAddToDashboardControlCancelButton"
           onClick={onClose.bind(null, undefined)}
         >
           <FormattedMessage

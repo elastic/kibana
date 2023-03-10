@@ -23,7 +23,7 @@ export function AddJoinButton({ addJoin, isLayerSourceMvt, numJoins }: Props) {
   const isDisabled = isLayerSourceMvt && numJoins >= 1;
   const button = (
     <EuiButtonEmpty
-      data-test-subj="mapsAddJoinButtonButtonEmpty"
+      data-test-subj="mapsAddJoinButtonButton"
       onClick={addJoin}
       size="xs"
       iconType="plusInCircleFilled"

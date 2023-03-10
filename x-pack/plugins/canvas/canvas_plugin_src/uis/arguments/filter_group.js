@@ -74,7 +74,7 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiButtonEmpty
-        data-test-subj="canvasFilterGroupInputButtonEmpty"
+        data-test-subj="canvasFilterGroupInputButton"
         color="danger"
         size="xs"
         onClick={() => setAddMode(!addMode)}
@@ -97,7 +97,7 @@ const FilterGroupInput = ({ onValueChange, argValue, argId, filterGroups }) => {
       />
       <EuiSpacer size="s" />
       <EuiButtonEmpty
-        data-test-subj="canvasFilterGroupInputButtonEmpty"
+        data-test-subj="canvasFilterGroupInputButton"
         size="xs"
         onClick={() => setAddMode(!addMode)}
         flush="left"

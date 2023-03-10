@@ -104,7 +104,7 @@ export const CloseJobsConfirmModal: FC<Props> = ({
           <EuiSpacer />
           <EuiModalFooter>
             <EuiButtonEmpty
-              data-test-subj="mlCloseJobsConfirmModalCancelButtonEmpty"
+              data-test-subj="mlCloseJobsConfirmModalCancelButton"
               onClick={closeModal}
             >
               <FormattedMessage

@@ -89,7 +89,7 @@ export class EditFlyout extends Component {
               <EuiFlexGroup justifyContent="spaceBetween">
                 <EuiFlexItem grow={false}>
                   <EuiButtonEmpty
-                    data-test-subj="dataVisualizerCloseButtonEmpty"
+                    data-test-subj="dataVisualizerCloseButton"
                     iconType="cross"
                     onClick={closeEditFlyout}
                     flush="left"

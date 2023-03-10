@@ -129,7 +129,7 @@ export const DeprecationLoggingToggle: FunctionComponent<Props> = ({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="upgradeAssistantDeprecationLoggingToggleButtonEmpty"
+            data-test-subj="upgradeAssistantDeprecationLoggingToggleButton"
             iconType="refresh"
             onClick={resendRequest}
           >

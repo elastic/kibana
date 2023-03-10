@@ -108,7 +108,7 @@ export const Breadcrumb = ({
           {showBreadcrumbText && (
             <EuiToolTip content={tooltip}>
               <EuiButtonEmpty
-                data-test-subj="kubernetesSecurityRenderBreadcrumbLinkButtonEmpty"
+                data-test-subj="kubernetesSecurityRenderBreadcrumbLinkButton"
                 css={isBolded ? styles.breadcrumbButtonBold : styles.breadcrumbButton}
                 color="text"
                 onClick={onBreadCrumbClick(collectionType)}

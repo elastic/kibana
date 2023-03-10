@@ -119,7 +119,7 @@ export const ClusterAddressForm: FunctionComponent<ClusterAddressFormProps> = ({
       <EuiFlexGroup responsive={false} justifyContent="flexEnd">
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="pluginsClusterAddressFormBackButtonEmpty"
+            data-test-subj="pluginsClusterAddressFormBackButton"
             flush="right"
             iconType="arrowLeft"
             onClick={onCancel}

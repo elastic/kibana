@@ -72,7 +72,7 @@ export function ServiceGroupsTour({
       anchorPosition={anchorPosition}
       footerAction={
         <EuiButtonEmpty
-          data-test-subj="apmServiceGroupsTourDismissButtonEmpty"
+          data-test-subj="apmServiceGroupsTourDismissButton"
           color="text"
           size="xs"
           onClick={dismissTour}

@@ -335,7 +335,7 @@ export class RemoteClusterForm extends Component<Props, State> {
       cancelButton = (
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
-            data-test-subj="remoteClustersCancelButtonEmpty"
+            data-test-subj="remoteClustersCancelButton"
             color="primary"
             onClick={cancel}
           >

@@ -25,7 +25,7 @@ const TutorialDirectoryHeaderLink: TutorialDirectoryHeaderLinkComponent = memo((
   return hasIntegrationsPermissions && noticeState.settingsDataLoaded ? (
     <RedirectAppLinks application={application}>
       <EuiButtonEmpty
-        data-test-subj="fleetTutorialDirectoryHeaderLinkTryIntegrationsButtonEmpty"
+        data-test-subj="fleetTutorialDirectoryHeaderLinkTryIntegrationsButton"
         size="s"
         iconType="link"
         flush="right"

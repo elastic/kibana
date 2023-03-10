@@ -260,7 +260,7 @@ export function SelectServices({
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
-              data-test-subj="apmSelectServicesCancelButtonEmpty"
+              data-test-subj="apmSelectServicesCancelButton"
               onClick={onCloseModal}
               isDisabled={isLoading}
             >

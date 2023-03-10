@@ -328,7 +328,7 @@ export const Expressions: React.FC<Props> = (props) => {
 
       <div>
         <EuiButtonEmpty
-          data-test-subj="infraExpressionsAddConditionButtonEmpty"
+          data-test-subj="infraExpressionsAddConditionButton"
           color={'primary'}
           iconSide={'left'}
           flush={'left'}
@@ -651,7 +651,7 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
               <EuiSpacer size={'xs'} />
               <StyledExpressionRow>
                 <EuiButtonEmpty
-                  data-test-subj="infraExpressionRowAddWarningThresholdButtonEmpty"
+                  data-test-subj="infraExpressionRowAddWarningThresholdButton"
                   color={'primary'}
                   flush={'left'}
                   size="xs"

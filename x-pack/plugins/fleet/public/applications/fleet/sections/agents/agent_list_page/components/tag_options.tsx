@@ -135,7 +135,7 @@ export const TagOptions: React.FC<Props> = ({ tagName, isTagHovered, onTagsUpdat
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiButtonEmpty
-                data-test-subj="fleetTagOptionsDeleteTagButtonEmpty"
+                data-test-subj="fleetTagOptionsDeleteTagButton"
                 size="s"
                 color="danger"
                 onClick={() => {

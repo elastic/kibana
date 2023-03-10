@@ -349,7 +349,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="mlRevertModelSnapshotFlyoutCloseButtonEmpty"
+                data-test-subj="mlRevertModelSnapshotFlyoutCloseButton"
                 iconType="cross"
                 onClick={closeFlyout}
                 flush="left"

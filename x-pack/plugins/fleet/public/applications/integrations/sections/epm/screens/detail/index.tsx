@@ -281,7 +281,7 @@ export function Detail() {
           {/* Allows button to break out of full width */}
           <div>
             <EuiButtonEmpty
-              data-test-subj="fleetHeaderLeftContentBackToIntegrationsButtonEmpty"
+              data-test-subj="fleetHeaderLeftContentBackToIntegrationsButton"
               iconType="arrowLeft"
               size="xs"
               flush="left"

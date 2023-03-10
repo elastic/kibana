@@ -194,7 +194,7 @@ export const SourceContent: React.FC = () => {
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj="enterpriseSearchSourceContentButtonEmpty"
+          data-test-subj="enterpriseSearchSourceContentButton"
           disabled={!searchTerm}
           onClick={resetFederatedSearchTerm}
         >

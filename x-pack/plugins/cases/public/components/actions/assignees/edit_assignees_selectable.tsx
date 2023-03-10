@@ -262,7 +262,7 @@ const EditAssigneesSelectableComponent: React.FC<Props> = ({
                 >
                   <EuiFlexItem grow={false}>
                     <EuiButtonEmpty
-                      data-test-subj="casesEditAssigneesSelectableComponentButtonEmpty"
+                      data-test-subj="casesEditAssigneesSelectableComponentButton"
                       size="xs"
                       flush="right"
                       onClick={onSelectNone}

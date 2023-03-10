@@ -79,7 +79,7 @@ export const IndexTemplatesFlyout: FunctionComponent<Props> = ({
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiButtonEmpty
-          data-test-subj="indexLifecycleManagementIndexTemplatesFlyoutCloseButtonEmpty"
+          data-test-subj="indexLifecycleManagementIndexTemplatesFlyoutCloseButton"
           iconType="cross"
           onClick={close}
           flush="left"

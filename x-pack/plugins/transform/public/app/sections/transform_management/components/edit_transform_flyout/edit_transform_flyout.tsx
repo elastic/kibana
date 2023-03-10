@@ -76,7 +76,7 @@ export const EditTransformFlyout: FC<EditAction> = ({
           <EuiFlexGroup justifyContent="spaceBetween">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="transformEditTransformFlyoutCancelButtonEmpty"
+                data-test-subj="transformEditTransformFlyoutCancelButton"
                 iconType="cross"
                 onClick={closeFlyout}
                 flush="left"

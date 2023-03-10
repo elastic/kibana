@@ -68,7 +68,7 @@ export const App: FunctionComponent = () => {
         withoutPageTemplateWrapper
         additionalRightSideActions={[
           <EuiButtonEmpty
-            data-test-subj="pluginsAppButtonEmpty"
+            data-test-subj="pluginsAppButton"
             onClick={() => setShowDiagnosticsFlyout(true)}
           >
             {i18nTexts.diagnosticsFlyoutTitle}

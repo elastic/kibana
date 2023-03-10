@@ -137,7 +137,7 @@ export function FiltersSection({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="apmFiltersSectionButtonEmpty"
+                data-test-subj="apmFiltersSectionButton"
                 iconType="trash"
                 onClick={() => onRemoveFilter(idx)}
                 disabled={!value && !key && filters.length === 1}
@@ -167,7 +167,7 @@ function AddFilterButton({
 }) {
   return (
     <EuiButtonEmpty
-      data-test-subj="apmAddFilterButtonAddAnotherFilterButtonEmpty"
+      data-test-subj="apmAddFilterButtonAddAnotherFilterButton"
       iconType="plusInCircle"
       onClick={onClick}
       disabled={isDisabled}

@@ -221,7 +221,7 @@ const PaginatedTableComponent: FC<SiemTables> = ({
 
   const button = (
     <EuiButtonEmpty
-      data-test-subj="securitySolutionPaginatedTableComponentButtonEmpty"
+      data-test-subj="securitySolutionPaginatedTableComponentButton"
       size="xs"
       color="text"
       iconType="arrowDown"

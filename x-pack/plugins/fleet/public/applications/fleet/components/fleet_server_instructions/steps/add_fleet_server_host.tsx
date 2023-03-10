@@ -217,7 +217,7 @@ export const AddFleetServerHostStepContent = ({
                 fleetSettingsLink: (
                   // eslint-disable-next-line @elastic/eui/href-or-on-click
                   <EuiButtonEmpty
-                    data-test-subj="fleetAddFleetServerHostStepContentFleetSettingsButtonEmpty"
+                    data-test-subj="fleetAddFleetServerHostStepContentFleetSettingsButton"
                     href={getHref('settings')}
                     onClick={onClose}
                     flush="left"

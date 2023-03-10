@@ -54,7 +54,7 @@ export function BottomBarActions({
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                data-test-subj="apmBottomBarActionsDiscardChangesButtonEmpty"
+                data-test-subj="apmBottomBarActionsDiscardChangesButton"
                 color="ghost"
                 onClick={onDiscardChanges}
               >
