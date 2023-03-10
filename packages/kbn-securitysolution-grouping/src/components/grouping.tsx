@@ -64,12 +64,12 @@ const GroupingComponent = <T,>({
     Record<string, { state: 'open' | 'closed' | undefined; selectedBucket: RawBucket<T> }>
   >({});
 
-  const unitCount = data?.unitCount0?.value ?? 0;
+  const unitCount = data?.unitsCount?.value ?? 0;
   const unitCountText = useMemo(() => {
     return `${unitCount.toLocaleString()} ${unit && unit(unitCount)}`;
   }, [unitCount, unit]);
 
-  const groupCount = data?.groupCount0?.value ?? 0;
+  const groupCount = data?.groupsCount?.value ?? 0;
   const groupCountText = useMemo(
     () => `${groupCount.toLocaleString()} ${GROUPS_UNIT(groupCount)}`,
     [groupCount]
@@ -77,7 +77,7 @@ const GroupingComponent = <T,>({
 
   const groupPanels = useMemo(
     () =>
-      data?.stackByMultipleFields0?.buckets?.map((groupBucket) => {
+      data?.groupByFields?.buckets?.map((groupBucket) => {
         const group = firstNonNullValue(groupBucket.key);
         const groupKey = `group0-${group}`;
 
@@ -119,7 +119,7 @@ const GroupingComponent = <T,>({
     [
       badgeMetricStats,
       customMetricStats,
-      data?.stackByMultipleFields0?.buckets,
+      data?.groupByFields?.buckets,
       groupPanelRenderer,
       isLoading,
       renderChildComponent,

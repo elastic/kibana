@@ -39,9 +39,9 @@ import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/con
 import {
   getAlertsGroupingQuery,
   getDefaultGroupingOptions,
-  getSelectedGroupBadgeMetrics,
-  getSelectedGroupButtonContent,
-  getSelectedGroupCustomMetrics,
+  getBadgeMetrics,
+  renderGroupPanel,
+  getCustomMetrics,
   useGroupTakeActionsItems,
 } from './grouping_settings';
 import { updateGroupSelector, updateSelectedGroup } from '../../../common/store/grouping/actions';
@@ -232,12 +232,12 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
         ? renderChildComponent([])
         : getGrouping({
             badgeMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
-              getSelectedGroupBadgeMetrics(selectedGroup, fieldBucket),
+              getBadgeMetrics(selectedGroup, fieldBucket),
             customMetricStats: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
-              getSelectedGroupCustomMetrics(selectedGroup, fieldBucket),
+              getCustomMetrics(selectedGroup, fieldBucket),
             data: alertsGroupsData?.aggregations,
             groupPanelRenderer: (fieldBucket: RawBucket<AlertsGroupingAggregation>) =>
-              getSelectedGroupButtonContent(selectedGroup, fieldBucket),
+              renderGroupPanel(selectedGroup, fieldBucket),
             inspectButton: inspect,
             isLoading: loading || isLoadingGroups,
             renderChildComponent,

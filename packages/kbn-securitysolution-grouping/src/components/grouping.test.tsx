@@ -21,7 +21,7 @@ const rule2Desc = 'Rule 2 description';
 
 const testProps = {
   data: {
-    groupCount0: {
+    groupsCount: {
       value: 2,
     },
     stackByMultipleFields0: {
@@ -72,7 +72,7 @@ const testProps = {
             sum_other_doc_count: 0,
             buckets: [],
           },
-          unitCount0: {
+          unitsCount: {
             value: 1,
           },
           severitiesSubAggregation: {
@@ -94,7 +94,7 @@ const testProps = {
         },
       ],
     },
-    unitCount0: {
+    unitsCount: {
       value: 2,
     },
   },
@@ -115,7 +115,7 @@ describe('grouping container', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('Renders group counts when groupCount0 > 0', () => {
+  it('Renders groups count when groupsCount > 0', () => {
     const { getByTestId, getAllByTestId, queryByTestId } = render(
       <I18nProvider>
         <Grouping {...testProps} />
@@ -127,9 +127,9 @@ describe('grouping container', () => {
     expect(queryByTestId('empty-results-panel')).not.toBeInTheDocument();
   });
 
-  it('Does not render group counts when groupCount0 = 0', () => {
+  it('Does not render group counts when groupsCount = 0', () => {
     const data = {
-      groupCount0: {
+      groupsCount: {
         value: 0,
       },
       stackByMultipleFields0: {
@@ -137,7 +137,7 @@ describe('grouping container', () => {
         sum_other_doc_count: 0,
         buckets: [],
       },
-      unitCount0: {
+      unitsCount: {
         value: 0,
       },
     };
