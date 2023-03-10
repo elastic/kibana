@@ -17,14 +17,11 @@ export function getGroupTableItems(
   const tableItems = significantTermsGroups.map(({ id, group, docCount, histogram, pValue }) => {
     const sortedGroup = sortBy(group, [(d) => d.fieldName]);
     const dedupedGroup: GroupTableItemGroup[] = [];
-    const repeatedValues: GroupTableItemGroup[] = [];
 
     sortedGroup.forEach((pair) => {
       const { fieldName, fieldValue, docCount: pairDocCount, pValue: pairPValue, duplicate } = pair;
       if ((duplicate ?? 0) <= 1) {
         dedupedGroup.push({ fieldName, fieldValue, docCount: pairDocCount, pValue: pairPValue });
-      } else {
-        repeatedValues.push({ fieldName, fieldValue, docCount: pairDocCount, pValue: pairPValue });
       }
     });
 
@@ -36,7 +33,6 @@ export function getGroupTableItems(
       docCount,
       pValue,
       group: sortedDedupedGroup,
-      repeatedValues,
       mostSignificantValues,
       histogram,
     };

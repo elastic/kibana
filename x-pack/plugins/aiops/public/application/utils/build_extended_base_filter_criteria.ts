@@ -36,7 +36,7 @@ export function buildExtendedBaseFilterCriteria(
 
   const groupFilter = [];
   if (selectedGroup) {
-    const allItems: FieldValuePair[] = [...selectedGroup.group, ...selectedGroup.repeatedValues];
+    const allItems: FieldValuePair[] = selectedGroup.mostSignificantValues;
     for (const item of allItems) {
       const { fieldName, fieldValue } = item;
       groupFilter.push({ term: { [fieldName]: fieldValue } });

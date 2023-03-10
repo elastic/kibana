@@ -17,7 +17,6 @@ export interface GroupTableItem {
   docCount: number;
   pValue: number | null;
   group: GroupTableItemGroup[];
-  repeatedValues: GroupTableItemGroup[];
   mostSignificantValues: GroupTableItemGroup[];
   histogram: SignificantTerm['histogram'];
 }

@@ -114,11 +114,16 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
     if (itemIdToExpandedRowMapValues[item.id]) {
       delete itemIdToExpandedRowMapValues[item.id];
     } else {
-      const { group, repeatedValues } = item;
+      const { group, mostSignificantValues } = item;
       const expandedTableItems: SignificantTerm[] = [];
 
       pushExpandedTableItem(expandedTableItems, group, true);
-      pushExpandedTableItem(expandedTableItems, repeatedValues);
+      pushExpandedTableItem(
+        expandedTableItems,
+        mostSignificantValues.filter(
+          (d) => !group.some((gi) => gi.fieldName === d.fieldName && gi.fieldValue === d.fieldValue)
+        )
+      );
 
       itemIdToExpandedRowMapValues[item.id] = (
         <SpikeAnalysisTable
@@ -181,11 +186,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
         query: {
           language: SEARCH_QUERY_LANGUAGE.KUERY,
           query: [
-            ...groupTableItem.group.map(
-              ({ fieldName, fieldValue }) =>
-                `${escapeKuery(fieldName)}:${escapeKuery(String(fieldValue))}`
-            ),
-            ...groupTableItem.repeatedValues.map(
+            ...groupTableItem.mostSignificantValues.map(
               ({ fieldName, fieldValue }) =>
                 `${escapeKuery(fieldName)}:${escapeKuery(String(fieldValue))}`
             ),
@@ -254,7 +255,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           </>
         </EuiToolTip>
       ),
-      render: (_, { group, repeatedValues, mostSignificantValues }) => {
+      render: (_, { group, mostSignificantValues }) => {
         const valuesBadges = [];
 
         for (const groupItem of mostSignificantValues) {
