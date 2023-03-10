@@ -23,6 +23,7 @@ export const suggestionsApi = ({
   datasourceMap,
   visualizationMap,
 }: SuggestionsApi) => {
+  if (!datasourceMap || !visualizationMap || !dataView.id) return undefined;
   const datasourceStates = {
     formBased: {
       isLoading: false,
@@ -40,8 +41,7 @@ export const suggestionsApi = ({
       },
     },
   };
-  if (!datasourceMap || !visualizationMap) return undefined;
-  const currentDataViewId = dataView.id ?? '';
+  const currentDataViewId = dataView.id;
   const dataViews = {
     indexPatterns: {
       [currentDataViewId]: dataView,
