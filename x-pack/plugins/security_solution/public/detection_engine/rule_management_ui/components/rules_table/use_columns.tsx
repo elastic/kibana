@@ -22,6 +22,7 @@ import type {
 } from '../../../../../common/detection_engine/rule_monitoring';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
+import { RuleSnoozeInfo } from '../../../../common/components/rule_snooze_info';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import { getRuleDetailsTabUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
@@ -103,6 +104,25 @@ const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): Ta
       sortable: true,
     }),
     [hasMlPermissions, hasActionsPrivileges, hasCRUDPermissions, loadingIds, startMlJobs]
+  );
+};
+
+const useRuleSnoozeColumn = ({
+  hasCRUDPermissions,
+}: {
+  hasCRUDPermissions: boolean;
+}): TableColumn => {
+  return useMemo(
+    () => ({
+      field: 'snooze_info',
+      name: i18n.COLUMN_SNOOZING,
+      render: (_, rule: Rule) => (
+        <RuleSnoozeInfo rule={rule} hasCRUDPermissions={hasCRUDPermissions} />
+      ),
+      width: '95px',
+      sortable: false,
+    }),
+    [hasCRUDPermissions]
   );
 };
 
@@ -248,6 +268,7 @@ export const useRulesColumns = ({
     isLoadingJobs,
     mlJobs,
   });
+  const snoozeColumn = useRuleSnoozeColumn({ hasCRUDPermissions });
 
   return useMemo(
     () => [
@@ -318,12 +339,14 @@ export const useRulesColumns = ({
         truncateText: true,
       },
       enabledColumn,
+      snoozeColumn,
       ...(hasCRUDPermissions ? [actionsColumn] : []),
     ],
     [
       actionsColumn,
       enabledColumn,
       executionStatusColumn,
+      snoozeColumn,
       hasCRUDPermissions,
       ruleNameColumn,
       showRelatedIntegrations,
