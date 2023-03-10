@@ -144,7 +144,7 @@ export const FunctionHelpPopover: FC = memo(() => {
       initialFocus="#mlAdFunctionsHelpTableId"
     >
       <EuiPopoverTitle paddingSize="s">
-        {i18n.translate('mlAd.functions.popoverTitle', {
+        {i18n.translate('xpack.ml.anomalyDetection.functions.popoverTitle', {
           defaultMessage: 'Function reference',
         })}
       </EuiPopoverTitle>
@@ -157,7 +157,7 @@ export const FunctionHelpPopover: FC = memo(() => {
         <EuiBasicTable
           id="mlAdFunctionsHelpTableId"
           style={{ width: 400 }}
-          tableCaption={i18n.translate('mlAd.functions.tableTitle', {
+          tableCaption={i18n.translate('xpack.ml.anomalyDetection.functions.tableTitle', {
             defaultMessage: 'Description of functions',
           })}
           items={items}
@@ -170,12 +170,15 @@ export const FunctionHelpPopover: FC = memo(() => {
       <EuiPanel color="transparent" paddingSize="s">
         <EuiText color="subdued" size="xs">
           <p>
-            {i18n.translate('mlAd.functions.learnMoreText', {
+            {i18n.translate('xpack.ml.anomalyDetection.functions.learnMoreText', {
               defaultMessage: 'Learn more about',
             })}
             &nbsp;
             <EuiLink href="https://www.elastic.co/guide/en/machine-learning/current/ml-functions.html">
-              <FormattedMessage id="mlAd.functions.learnMoreLink" defaultMessage="functions." />
+              <FormattedMessage
+                id="xpack.ml.anomalyDetection.functions.learnMoreLink"
+                defaultMessage="functions."
+              />
             </EuiLink>
           </p>
         </EuiText>
