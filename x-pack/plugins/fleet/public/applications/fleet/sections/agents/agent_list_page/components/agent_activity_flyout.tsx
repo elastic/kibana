@@ -98,9 +98,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
         });
         setSearch(kuery);
       }
-      if (action?.type === 'UNENROLL' || action?.type === 'FORCE_UNENROLL') {
-        setSelectedStatus(['unenrolled', 'inactive']);
-      } else setSelectedStatus([]);
+      setSelectedStatus(['healthy', 'unhealthy', 'updating', 'offline', 'inactive', 'unenrolled']);
 
       onClose();
     } catch (err) {
