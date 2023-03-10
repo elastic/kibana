@@ -29,14 +29,15 @@ import {
   ControlGeneralViewSelectorDeps,
   ControlFormErrorMap,
   ControlSelector,
-  SelectorType,
   SelectorCondition,
+  SelectorConditionsMap,
 } from '../../types';
 import {
-  getSelectorConditionValueType,
-  getSelectorConditionValues,
-  getSelectorConditionsForType,
+  getSelectorConditions,
   camelToSentenceCase,
+  getSelectorTypeIcon,
+  conditionCombinationInvalid,
+  getRestrictedValuesForCondition,
 } from '../../common/utils';
 import * as i18n from '../control_general_view/translations';
 import {
@@ -98,7 +99,7 @@ const StringArrayCondition = ({
       return { label: option, value: option };
     }) || [];
 
-  const restrictedValues = getSelectorConditionValues(prop);
+  const restrictedValues = selector.type && getRestrictedValuesForCondition(selector.type, prop);
 
   return (
     <EuiFormRow
@@ -177,8 +178,8 @@ export const ControlGeneralViewSelector = ({
   }, []);
 
   const availableConditions = useMemo(
-    () => (selector.type ? getSelectorConditionsForType(selector.type) : []),
-    [selector.type]
+    () => (selector.type && getSelectorConditions(selector.type)) || [],
+    [selector]
   );
 
   const remainingConditions = useMemo(() => {
@@ -286,7 +287,7 @@ export const ControlGeneralViewSelector = ({
 
   const onAddCondition = useCallback(
     (prop: SelectorCondition) => {
-      const valueType = getSelectorConditionValueType(prop);
+      const valueType = SelectorConditionsMap[prop].type;
 
       if (valueType === 'flag' || valueType === 'boolean') {
         onChangeBooleanCondition(prop, true);
@@ -337,16 +338,6 @@ export const ControlGeneralViewSelector = ({
     return errs;
   }, [errorMap, conditionsAdded]);
 
-  const selectorTypeIcon = useMemo(() => {
-    switch (selector.type) {
-      case SelectorType.process:
-        return 'gear';
-      case SelectorType.file:
-      default:
-        return 'document';
-    }
-  }, [selector.type]);
-
   const onToggleAccordion = useCallback((isOpen: boolean) => {
     setAccordionState(isOpen ? 'open' : 'closed');
   }, []);
@@ -361,8 +352,8 @@ export const ControlGeneralViewSelector = ({
       buttonContent={
         <EuiFlexGroup alignItems="center" gutterSize="s">
           <EuiFlexItem>
-            <EuiToolTip title={i18n.getSelectorIconTooltip(selector.type)}>
-              <EuiIcon color="primary" type={selectorTypeIcon} />
+            <EuiToolTip content={i18n.getSelectorIconTooltip(selector.type)}>
+              <EuiIcon color="primary" type={getSelectorTypeIcon(selector.type)} />
             </EuiToolTip>
           </EuiFlexItem>
           <EuiFlexItem>
@@ -375,13 +366,15 @@ export const ControlGeneralViewSelector = ({
       css={styles.accordion}
       initialIsOpen={index === 0}
       extraAction={
-        <EuiFlexGroup alignItems="center" gutterSize="s">
+        <EuiFlexGroup alignItems="center" gutterSize="none">
           {accordionState === 'closed' && (
             <div>
               <EuiText css={styles.conditionsBadge} size="xs">
                 <b>{i18n.conditions}</b>
               </EuiText>
-              <EuiBadge color="hollow">{conditionsAdded.length}</EuiBadge>
+              <EuiBadge title={conditionsAdded.join(',')} color="hollow">
+                {conditionsAdded.length}
+              </EuiBadge>
               <div css={styles.verticalDivider} />
             </div>
           )}
@@ -446,7 +439,7 @@ export const ControlGeneralViewSelector = ({
         </EuiFormRow>
         {conditionsAdded.map((prop) => {
           const label = camelToSentenceCase(prop);
-          const valueType = getSelectorConditionValueType(prop);
+          const valueType = SelectorConditionsMap[prop].type;
 
           if (valueType === 'flag') {
             return (
@@ -495,11 +488,14 @@ export const ControlGeneralViewSelector = ({
           size="s"
           items={remainingConditions.map((prop) => {
             const label = camelToSentenceCase(prop);
+            const disabled = conditionCombinationInvalid(conditionsAdded, prop);
+
             return (
               <EuiContextMenuItem
                 data-test-subj={`cloud-defend-addmenu-${prop}`}
                 key={prop}
                 onClick={() => onAddCondition(prop)}
+                disabled={disabled}
               >
                 {label}
               </EuiContextMenuItem>

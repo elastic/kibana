@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { getSelectorsAndResponsesFromYaml, getYamlFromSelectorsAndResponses } from './utils';
+import {
+  getSelectorsAndResponsesFromYaml,
+  getYamlFromSelectorsAndResponses,
+  getSelectorConditions,
+  conditionCombinationInvalid,
+  getRestrictedValuesForCondition,
+} from './utils';
+import { SelectorConditionsMap } from '../types';
 import { MOCK_YAML_CONFIGURATION, MOCK_YAML_INVALID_CONFIGURATION } from '../test/mocks';
 
 describe('getSelectorsAndResponsesFromYaml', () => {
@@ -31,5 +38,66 @@ describe('getYamlFromSelectorsAndResponses', () => {
     const { selectors, responses } = getSelectorsAndResponsesFromYaml(MOCK_YAML_CONFIGURATION);
     const yaml = getYamlFromSelectorsAndResponses(selectors, responses);
     expect(yaml).toEqual(MOCK_YAML_CONFIGURATION);
+  });
+});
+
+describe('getSelectorConditions', () => {
+  it('grabs file conditions for file selectors', () => {
+    const options = getSelectorConditions('file');
+
+    // check at least one common condition present
+    expect(options.includes('containerImageName')).toBeTruthy();
+
+    // check file specific conditions present
+    expect(options.includes('ignoreVolumeFiles')).toBeTruthy();
+    expect(options.includes('ignoreVolumeMounts')).toBeTruthy();
+    expect(options.includes('targetFilePath')).toBeTruthy();
+
+    // check that process specific conditions are not included
+    expect(options.includes('processExecutable')).toBeFalsy();
+    expect(options.includes('processName')).toBeFalsy();
+  });
+
+  it('grabs process conditions for process selectors', () => {
+    const options = getSelectorConditions('process');
+
+    // check at least one common condition present
+    expect(options.includes('containerImageName')).toBeTruthy();
+
+    // check file specific conditions present
+    expect(options.includes('ignoreVolumeFiles')).toBeFalsy();
+    expect(options.includes('ignoreVolumeMounts')).toBeFalsy();
+    expect(options.includes('targetFilePath')).toBeFalsy();
+
+    // check that process specific conditions are not included
+    expect(options.includes('processExecutable')).toBeTruthy();
+    expect(options.includes('processName')).toBeTruthy();
+    expect(options.includes('processUserName')).toBeTruthy();
+    expect(options.includes('processUserId')).toBeTruthy();
+    expect(options.includes('sessionLeaderInteractive')).toBeTruthy();
+  });
+});
+
+describe('conditionCombinationInvalid', () => {
+  it('returns true when conditions cannot be combined', () => {
+    const result = conditionCombinationInvalid(['ignoreVolumeMounts'], 'ignoreVolumeFiles');
+
+    expect(result).toBeTruthy();
+  });
+
+  it('returns false when they can', () => {
+    const result = conditionCombinationInvalid(['containerImageName'], 'ignoreVolumeFiles');
+
+    expect(result).toBeFalsy();
+  });
+});
+
+describe('getRestrictedValuesForCondition', () => {
+  it('works', () => {
+    let values = getRestrictedValuesForCondition('file', 'operation');
+    expect(values).toEqual(SelectorConditionsMap.operation.values.file);
+
+    values = getRestrictedValuesForCondition('process', 'operation');
+    expect(values).toEqual(SelectorConditionsMap.operation.values.process);
   });
 });

@@ -9,16 +9,11 @@ import {
   EuiContextMenuPanel,
   EuiContextMenuItem,
   EuiPopover,
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
   EuiTitle,
   EuiButton,
-  EuiPanel,
-  EuiDragDropContext,
-  EuiDraggable,
-  EuiDroppable,
   euiDragDropReorder,
   EuiSpacer,
 } from '@elastic/eui';
@@ -29,23 +24,22 @@ import {
   getYamlFromSelectorsAndResponses,
   getSelectorsAndResponsesFromYaml,
   getDefaultSelectorByType,
+  getDefaultResponseByType,
 } from '../../common/utils';
-import {
-  SelectorType,
-  ControlSelector,
-  ControlResponse,
-  DefaultResponse,
-  ViewDeps,
-} from '../../types';
+import { SelectorType, ControlSelector, ControlResponse, ViewDeps } from '../../types';
 import * as i18n from './translations';
 import { ControlGeneralViewSelector } from '../control_general_view_selector';
 import { ControlGeneralViewResponse } from '../control_general_view_response';
 
 interface AddSelectorButtonProps {
+  type: 'Selector' | 'Response';
   onSelectType(type: SelectorType): void;
 }
 
-const AddSelectorButton = ({ onSelectType }: AddSelectorButtonProps) => {
+/**
+ * dual purpose button for adding selectors and responses by type
+ */
+const AddButton = ({ type, onSelectType }: AddSelectorButtonProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const onButtonClick = () => {
     setPopover(!isPopoverOpen);
@@ -55,40 +49,43 @@ const AddSelectorButton = ({ onSelectType }: AddSelectorButtonProps) => {
     setPopover(false);
   };
 
-  const addFileSelector = useCallback(() => {
+  const addFile = useCallback(() => {
     closePopover();
-    onSelectType(SelectorType.file);
+    onSelectType('file');
   }, [onSelectType]);
 
-  const addProcessSelector = useCallback(() => {
+  const addProcess = useCallback(() => {
     closePopover();
-    onSelectType(SelectorType.process);
+    onSelectType('process');
   }, [onSelectType]);
+
+  const isSelector = type === 'Selector';
 
   const items = [
-    <EuiContextMenuItem key="addFileSelector" icon="document" onClick={addFileSelector}>
-      {i18n.fileSelector}
+    <EuiContextMenuItem key={`addFile${type}`} icon="document" onClick={addFile}>
+      {isSelector ? i18n.fileSelector : i18n.fileResponse}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem key="addProcessSelector" icon="gear" onClick={addProcessSelector}>
-      {i18n.processSelector}
+    <EuiContextMenuItem key={`addProcess${type}`} icon="gear" onClick={addProcess}>
+      {isSelector ? i18n.processSelector : i18n.processResponse}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem key="addNetworkSelector" icon="globe" disabled>
-      {i18n.networkSelector}
+    <EuiContextMenuItem key={`addNetwork${type}`} icon="globe" disabled>
+      {isSelector ? i18n.networkSelector : i18n.networkResponse}
     </EuiContextMenuItem>,
   ];
 
   return (
     <EuiPopover
-      id="addSelectorBtn"
+      id={`btnAdd${type}`}
+      display="block"
       button={
         <EuiButton
           fullWidth
           color="primary"
           iconType="plusInCircle"
           onClick={onButtonClick}
-          data-test-subj="cloud-defend-btnaddselector"
+          data-test-subj={`cloud-defend-btnAdd${type}`}
         >
-          {i18n.addSelector}
+          {isSelector ? i18n.addSelector : i18n.addResponse}
         </EuiButton>
       }
       isOpen={isPopoverOpen}
@@ -161,11 +158,14 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
     [incrementName, onUpdateYaml, responses, selectors]
   );
 
-  const onAddResponse = useCallback(() => {
-    const newResponse = { ...DefaultResponse };
-    responses.push(newResponse);
-    onUpdateYaml(selectors, responses);
-  }, [onUpdateYaml, responses, selectors]);
+  const onAddResponse = useCallback(
+    (type: SelectorType) => {
+      const newResponse = getDefaultResponseByType(type);
+      responses.push(newResponse);
+      onUpdateYaml(selectors, responses);
+    },
+    [onUpdateYaml, responses, selectors]
+  );
 
   const onDuplicateSelector = useCallback(
     (selector: ControlSelector) => {
@@ -315,7 +315,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
         );
       })}
 
-      <AddSelectorButton onSelectType={onAddSelector} />
+      <AddButton type="Selector" onSelectType={onAddSelector} />
 
       <EuiSpacer size="m" />
 
@@ -328,62 +328,23 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
         </EuiText>
       </EuiFlexItem>
 
-      <EuiFlexItem>
-        <EuiDragDropContext onDragEnd={onResponseDragEnd}>
-          <EuiDroppable droppableId="cloudDefendControlResponses">
-            {responses.map((response, i) => {
-              return (
-                <EuiDraggable
-                  key={i}
-                  css={styles.draggable}
-                  index={i}
-                  draggableId={i + ''}
-                  customDragHandle={true}
-                  hasInteractiveChildren={true}
-                >
-                  {(provided) => (
-                    <EuiPanel paddingSize="m" hasShadow={false} color="subdued" css={styles.panel}>
-                      <EuiFlexGroup direction="column">
-                        <EuiFlexItem grow={false}>
-                          <EuiPanel
-                            color="transparent"
-                            paddingSize="xs"
-                            {...provided.dragHandleProps}
-                            aria-label="Drag Handle"
-                          >
-                            <EuiIcon type="grab" />
-                          </EuiPanel>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <ControlGeneralViewResponse
-                            index={i}
-                            response={response}
-                            responses={responses}
-                            selectors={selectors}
-                            onRemove={onRemoveResponse}
-                            onDuplicate={onDuplicateResponse}
-                            onChange={onResponseChange}
-                          />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiPanel>
-                  )}
-                </EuiDraggable>
-              );
-            })}
-          </EuiDroppable>
-        </EuiDragDropContext>
-        <EuiButton
-          fullWidth
-          color="primary"
-          iconType="plusInCircle"
-          onClick={onAddResponse}
-          data-test-subj="cloud-defend-btnaddresponse"
-        >
-          {i18n.addResponse}
-        </EuiButton>
-        <EuiSpacer size="m" />
-      </EuiFlexItem>
+      {responses.map((response, i) => {
+        return (
+          <EuiFlexItem key={i}>
+            <ControlGeneralViewResponse
+              index={i}
+              response={response}
+              responses={responses}
+              selectors={selectors}
+              onRemove={onRemoveResponse}
+              onDuplicate={onDuplicateResponse}
+              onChange={onResponseChange}
+            />
+          </EuiFlexItem>
+        );
+      })}
+      <AddButton type="Response" onSelectType={onAddResponse} />
+      <EuiSpacer size="m" />
     </EuiFlexGroup>
   );
 };

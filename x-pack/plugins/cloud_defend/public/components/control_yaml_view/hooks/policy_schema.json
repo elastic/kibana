@@ -66,6 +66,9 @@
           "required": ["containerImageName"]
         },
         {
+          "required": ["fullContainerImageName"]
+        },
+        {
           "required": ["containerImageTag"]
         },
         {
@@ -104,7 +107,8 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[a-z0-9]+$"
           }
         },
         "containerImageTag": {
@@ -112,6 +116,14 @@
           "minItems": 1,
           "items": {
             "type": "string"
+          }
+        },
+        "fullContainerImageName": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$"
           }
         },
         "orchestratorClusterId": {
@@ -190,6 +202,11 @@
           "not": {
             "required": ["ignoreVolumeFiles"]
           }
+        },
+        "fullContainerImageName": {
+          "not": {
+            "required": ["containerImageName"]
+          }
         }
       }
     },
@@ -203,6 +220,9 @@
         },
         {
           "required": ["containerImageName"]
+        },
+        {
+          "required": ["fullContainerImageName"]
         },
         {
           "required": ["containerImageTag"]
@@ -249,7 +269,8 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "string"
+            "type": "string",
+            "pattern": "^[a-z0-9]+$"
           }
         },
         "containerImageTag": {
@@ -257,6 +278,14 @@
           "minItems": 1,
           "items": {
             "type": "string"
+          }
+        },
+        "fullContainerImageName": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "pattern": "^(?:\\[[a-fA-F0-9:]+\\]|(?:[a-zA-Z0-9-](?:\\.[a-z0-9]+)*)+)(?::[0-9]+)?(?:\\/[a-z0-9]+)+$"
           }
         },
         "orchestratorClusterId": {
@@ -333,11 +362,18 @@
           "type": "array",
           "minItems": 1,
           "items": {
-            "type": "string"
+            "type": "integer"
           }
         },
         "sessionLeaderInteractive": {
           "type": "boolean"
+        }
+      },
+      "dependencies": {
+        "fullContainerImageName": {
+          "not": {
+            "required": ["containerImageName"]
+          }
         }
       }
     },

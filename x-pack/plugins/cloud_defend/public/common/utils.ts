@@ -13,10 +13,9 @@ import {
   SelectorType,
   DefaultFileSelector,
   DefaultProcessSelector,
+  DefaultFileResponse,
+  DefaultProcessResponse,
   SelectorConditionsMap,
-  CommonSelectorCondition,
-  FileSelectorCondition,
-  ProcessSelectorCondition,
   SelectorCondition,
 } from '../types';
 
@@ -24,51 +23,73 @@ export function getInputFromPolicy(policy: NewPackagePolicy, inputId: string) {
   return policy.inputs.find((input) => input.type === inputId);
 }
 
+export function getSelectorTypeIcon(type?: SelectorType) {
+  switch (type) {
+    case 'process':
+      return 'gear';
+    case 'file':
+    default:
+      return 'document';
+  }
+}
+
 export function camelToSentenceCase(prop: string) {
   const sentence = prop.replace(/([A-Z])/g, ' $1').toLowerCase();
   return sentence[0].toUpperCase() + sentence.slice(1);
 }
 
-export function getSelectorConditionsForType(type: SelectorType): SelectorCondition[] {
-  const conditions: SelectorCondition[] = Object.keys(
-    SelectorConditionsMap.common
-  ) as SelectorCondition[];
-  switch (type) {
-    case SelectorType.process:
-      return conditions.concat(Object.keys(SelectorConditionsMap.process) as SelectorCondition[]);
-    case SelectorType.file:
-    default:
-      return conditions.concat(Object.keys(SelectorConditionsMap.file) as SelectorCondition[]);
+export function conditionCombinationInvalid(
+  addedConditions: SelectorCondition[],
+  condition: SelectorCondition
+): boolean {
+  const options = SelectorConditionsMap[condition];
+  const invalid = addedConditions.find((added) => {
+    return options?.not?.includes(added);
+  });
+
+  return !!invalid;
+}
+
+export function getRestrictedValuesForCondition(
+  type: SelectorType,
+  condition: SelectorCondition
+): string[] | undefined {
+  const options = SelectorConditionsMap[condition];
+
+  if (Array.isArray(options.values)) {
+    return options.values;
+  }
+
+  if (options?.values?.[type]) {
+    return options.values[type];
   }
 }
 
-export function getSelectorConditionValueType(prop: SelectorCondition) {
-  if (SelectorConditionsMap.common[prop as CommonSelectorCondition]) {
-    return SelectorConditionsMap.common[prop as CommonSelectorCondition]?.type;
-  } else if (SelectorConditionsMap.file.hasOwnProperty(prop)) {
-    return SelectorConditionsMap.file[prop as FileSelectorCondition]?.type;
-  } else if (SelectorConditionsMap.process.hasOwnProperty(prop)) {
-    return SelectorConditionsMap.process[prop as ProcessSelectorCondition]?.type;
-  }
-}
-
-export function getSelectorConditionValues(prop: SelectorCondition) {
-  if (SelectorConditionsMap.common.hasOwnProperty(prop)) {
-    return SelectorConditionsMap.common[prop as CommonSelectorCondition]?.values;
-  } else if (SelectorConditionsMap.file.hasOwnProperty(prop)) {
-    return SelectorConditionsMap.file[prop as FileSelectorCondition]?.values;
-  } else if (SelectorConditionsMap.process.hasOwnProperty(prop)) {
-    return SelectorConditionsMap.process[prop as ProcessSelectorCondition]?.values;
-  }
+export function getSelectorConditions(type: SelectorType): SelectorCondition[] {
+  const allConditions = Object.keys(SelectorConditionsMap) as SelectorCondition[];
+  return allConditions.filter((key) => {
+    const options = SelectorConditionsMap[key];
+    return !options.selectorType || options.selectorType === type;
+  });
 }
 
 export function getDefaultSelectorByType(type: SelectorType): ControlSelector {
   switch (type) {
-    case SelectorType.process:
+    case 'process':
       return { type, ...DefaultProcessSelector };
-    case SelectorType.file:
+    case 'file':
     default:
       return { type, ...DefaultFileSelector };
+  }
+}
+
+export function getDefaultResponseByType(type: SelectorType): ControlResponse {
+  switch (type) {
+    case 'process':
+      return { type, ...DefaultProcessResponse };
+    case 'file':
+    default:
+      return { type, ...DefaultFileResponse };
   }
 }
 
@@ -85,10 +106,10 @@ export function getSelectorsAndResponsesFromYaml(configuration: string): {
     if (result) {
       if (result.file && result.file.selectors && result.file.responses) {
         selectors = selectors.concat(
-          result.file.selectors.map((selector: any) => ({ ...selector, type: SelectorType.file }))
+          result.file.selectors.map((selector: any) => ({ ...selector, type: 'file' }))
         );
         responses = responses.concat(
-          result.file.responses.map((response: any) => ({ ...response, type: SelectorType.file }))
+          result.file.responses.map((response: any) => ({ ...response, type: 'file' }))
         );
       }
 
@@ -96,13 +117,13 @@ export function getSelectorsAndResponsesFromYaml(configuration: string): {
         selectors = selectors.concat(
           result.process.selectors.map((selector: any) => ({
             ...selector,
-            type: SelectorType.process,
+            type: 'process',
           }))
         );
         responses = responses.concat(
           result.process.responses.map((response: any) => ({
             ...response,
-            type: SelectorType.process,
+            type: 'process',
           }))
         );
       }

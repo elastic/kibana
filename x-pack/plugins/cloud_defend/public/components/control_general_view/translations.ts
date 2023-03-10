@@ -20,6 +20,17 @@ export const networkSelector = i18n.translate('xpack.cloudDefend.networkSelector
   defaultMessage: 'Network (coming soon)',
 });
 
+export const fileResponse = i18n.translate('xpack.cloudDefend.fileResponse', {
+  defaultMessage: 'File response',
+});
+
+export const processResponse = i18n.translate('xpack.cloudDefend.processResponse', {
+  defaultMessage: 'Process response',
+});
+
+export const networkResponse = i18n.translate('xpack.cloudDefend.networkResponse', {
+  defaultMessage: 'Network (coming soon)',
+});
 export const conditions = i18n.translate('xpack.cloudDefend.conditions', {
   defaultMessage: 'Conditions: ',
 });
@@ -58,8 +69,16 @@ export const excludeSelectors = i18n.translate('xpack.cloudDefend.controlExclude
   defaultMessage: 'Exclude selectors',
 });
 
+export const exclude = i18n.translate('xpack.cloudDefend.controlExclude', {
+  defaultMessage: 'Exclude',
+});
+
 export const actions = i18n.translate('xpack.cloudDefend.controlResponseActions', {
   defaultMessage: 'Actions',
+});
+
+export const actionLog = i18n.translate('xpack.cloudDefend.controlResponseActionLog', {
+  defaultMessage: 'Log',
 });
 
 export const actionAlert = i18n.translate('xpack.cloudDefend.controlResponseActionAlert', {
@@ -68,6 +87,10 @@ export const actionAlert = i18n.translate('xpack.cloudDefend.controlResponseActi
 
 export const actionBlock = i18n.translate('xpack.cloudDefend.controlResponseActionBlock', {
   defaultMessage: 'Block',
+});
+
+export const actionBlockHelp = i18n.translate('xpack.cloudDefend.controlResponseActionBlockHelp', {
+  defaultMessage: 'Alert action must be enabled to block an event.',
 });
 
 export const actionAlertAndBlock = i18n.translate(
@@ -116,16 +139,30 @@ export const errorValueLengthExceeded = i18n.translate(
   }
 );
 
-export const getSelectorIconTooltip = (telemetryType?: SelectorType) => {
-  switch (telemetryType) {
-    case SelectorType.process:
+export const getSelectorIconTooltip = (type?: SelectorType) => {
+  switch (type) {
+    case 'process':
       return i18n.translate('xpack.cloudDefend.processSelectorIconTooltip', {
         defaultMessage: 'A process selector. Matches only on process operations.',
       });
-    case SelectorType.file:
+    case 'file':
     default:
       return i18n.translate('xpack.cloudDefend.fileSelectorIconTooltip', {
         defaultMessage: 'A file selector. Matches only on file operations.',
+      });
+  }
+};
+
+export const getResponseIconTooltip = (type?: SelectorType) => {
+  switch (type) {
+    case 'process':
+      return i18n.translate('xpack.cloudDefend.processResponseIconTooltip', {
+        defaultMessage: 'A process response.\nOnly process selectors can be used to match/exclude.',
+      });
+    case 'file':
+    default:
+      return i18n.translate('xpack.cloudDefend.fileResponseIconTooltip', {
+        defaultMessage: 'A file response.\nOnly file selectors can be used to match/exclude.',
       });
   }
 };

@@ -14,7 +14,7 @@ import { useStyles } from './styles';
 import { useConfigModel } from './hooks/use_config_model';
 import { getInputFromPolicy } from '../../common/utils';
 import * as i18n from './translations';
-import { ControlResponseAction, ViewDeps } from '../../types';
+import { ViewDeps } from '../../types';
 
 const { editor } = monaco;
 
@@ -65,7 +65,7 @@ export const ControlYamlView = ({ policy, onChange, show }: ViewDeps) => {
       for (let i = 0; i < json.responses.length; i++) {
         const response = json.responses[i];
 
-        if (!response.actions.includes(ControlResponseAction.alert)) {
+        if (!response.actions.includes('alert')) {
           return false;
         }
       }

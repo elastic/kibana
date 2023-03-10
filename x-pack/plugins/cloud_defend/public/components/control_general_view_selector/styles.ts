@@ -36,6 +36,7 @@ export const useStyles = () => {
       borderTop: 0,
       borderBottom: 0,
       marginLeft: size.base,
+      marginRight: size.base,
     };
 
     return { accordion, conditionsBadge, verticalDivider };

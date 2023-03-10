@@ -52,6 +52,9 @@ export interface CloudDefendSecuritySolutionContext {
  * cloud_defend/control types
  */
 
+// Currently we support file and process selectors (which match on their respective set of lsm hook points)
+export type SelectorType = 'file' | 'process';
+
 /*
  * 'stringArray' uses a EuiComboBox
  * 'flag' is a boolean value which is always 'true'
@@ -59,9 +62,10 @@ export interface CloudDefendSecuritySolutionContext {
  */
 export type SelectorConditionType = 'stringArray' | 'flag' | 'boolean';
 
-export type CommonSelectorCondition =
+export type SelectorCondition =
   | 'containerImageName'
   | 'containerImageTag'
+  | 'fullContainerImageName'
   | 'orchestratorClusterId'
   | 'orchestratorClusterName'
   | 'orchestratorNamespace'
@@ -69,15 +73,11 @@ export type CommonSelectorCondition =
   | 'orchestratorResourceName'
   | 'orchestratorResourceType'
   | 'orchestratorResourceLabel'
-  | 'orchestratorType';
-
-export type FileSelectorCondition =
+  | 'orchestratorType'
   | 'targetFilePath'
   | 'ignoreVolumeFiles'
   | 'ignoreVolumeMounts'
-  | 'operation';
-
-export type ProcessSelectorCondition =
+  | 'operation'
   | 'processExecutable'
   | 'processName'
   | 'processUserName'
@@ -86,76 +86,56 @@ export type ProcessSelectorCondition =
   | 'sessionLeaderExecutable'
   | 'operation';
 
-export type SelectorCondition =
-  | CommonSelectorCondition
-  | FileSelectorCondition
-  | ProcessSelectorCondition;
-
-interface SelectorConditionsMapProps {
-  common: {
-    [key in CommonSelectorCondition]: {
-      type: SelectorConditionType;
-      values?: string[];
-    };
-  };
-  file: {
-    [key in FileSelectorCondition]: {
-      type: SelectorConditionType;
-      values?: string[];
-    };
-  };
-  process: {
-    [key in ProcessSelectorCondition]: {
-      type: SelectorConditionType;
-      values?: string[];
-    };
-  };
+export interface SelectorConditionOptions {
+  type: SelectorConditionType;
+  selectorType?: SelectorType;
+  not?: SelectorCondition[];
+  values?:
+    | string[]
+    | {
+        file?: string[];
+        process?: string[];
+      };
 }
+
+export type SelectorConditionsMapProps = {
+  [key in SelectorCondition]: SelectorConditionOptions;
+};
 
 // used to determine UX control and allowed values for each condition
 export const SelectorConditionsMap: SelectorConditionsMapProps = {
-  common: {
-    containerImageName: { type: 'stringArray' },
-    containerImageTag: { type: 'stringArray' },
-    orchestratorClusterId: { type: 'stringArray' },
-    orchestratorClusterName: { type: 'stringArray' },
-    orchestratorNamespace: { type: 'stringArray' },
-    orchestratorResourceLabel: { type: 'stringArray' },
-    orchestratorResourceName: { type: 'stringArray' },
-    orchestratorResourceType: { type: 'stringArray' },
-    orchestratorType: { type: 'stringArray', values: ['kubernetes'] },
+  containerImageName: { type: 'stringArray', not: ['fullContainerImageName'] },
+  containerImageTag: { type: 'stringArray' },
+  fullContainerImageName: {
+    type: 'stringArray',
+    not: ['containerImageName'],
   },
-  file: {
-    operation: {
-      type: 'stringArray',
-      values: ['createExecutable', 'modifyExecutable', 'createFile', 'modifyFile', 'deleteFile'],
+  orchestratorClusterId: { type: 'stringArray' },
+  orchestratorClusterName: { type: 'stringArray' },
+  orchestratorNamespace: { type: 'stringArray' },
+  orchestratorResourceLabel: { type: 'stringArray' },
+  orchestratorResourceName: { type: 'stringArray' },
+  orchestratorResourceType: { type: 'stringArray' },
+  orchestratorType: { type: 'stringArray', values: ['kubernetes'] },
+  operation: {
+    type: 'stringArray',
+    values: {
+      file: ['createExecutable', 'modifyExecutable', 'createFile', 'modifyFile', 'deleteFile'],
+      process: ['fork', 'exec'],
     },
-    targetFilePath: { type: 'stringArray' },
-    ignoreVolumeFiles: { type: 'flag' },
-    ignoreVolumeMounts: { type: 'flag' },
   },
-  process: {
-    operation: { type: 'stringArray', values: ['fork', 'exec'] },
-    processExecutable: { type: 'stringArray' },
-    processName: { type: 'stringArray' },
-    processUserName: { type: 'stringArray' },
-    processUserId: { type: 'stringArray' },
-    sessionLeaderInteractive: { type: 'boolean' },
-    sessionLeaderExecutable: { type: 'stringArray' },
-  },
+  targetFilePath: { selectorType: 'file', type: 'stringArray' },
+  ignoreVolumeFiles: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeMounts'] },
+  ignoreVolumeMounts: { selectorType: 'file', type: 'flag', not: ['ignoreVolumeFiles'] },
+  processExecutable: { selectorType: 'process', type: 'stringArray', not: ['processName'] },
+  processName: { selectorType: 'process', type: 'stringArray', not: ['processExecutable'] },
+  processUserName: { selectorType: 'process', type: 'stringArray' },
+  processUserId: { selectorType: 'process', type: 'stringArray' },
+  sessionLeaderInteractive: { selectorType: 'process', type: 'boolean' },
+  sessionLeaderExecutable: { selectorType: 'process', type: 'stringArray' },
 };
 
-export enum ControlResponseAction {
-  log = 'log',
-  alert = 'alert',
-  block = 'block',
-}
-
-// every selector/response has a type, currently we support file and process selectors (which match on their respective telemetry/operations)
-export enum SelectorType {
-  file = 'file',
-  process = 'process',
-}
+export type ControlResponseAction = 'log' | 'alert' | 'block';
 
 // outer most wrapper of the yaml configuration fed to cloud-defend agent.
 export interface ControlSchema {
@@ -214,18 +194,27 @@ export interface ControlResponse {
 }
 
 export const DefaultFileSelector: ControlSelector = {
+  type: 'file',
   name: 'Untitled',
   operation: ['createExecutable', 'modifyExecutable'],
 };
 
 export const DefaultProcessSelector: ControlSelector = {
+  type: 'process',
   name: 'Untitled',
   operation: ['fork', 'exec'],
 };
 
-export const DefaultResponse: ControlResponse = {
+export const DefaultFileResponse: ControlResponse = {
+  type: 'file',
   match: [],
-  actions: [ControlResponseAction.alert],
+  actions: ['alert'],
+};
+
+export const DefaultProcessResponse: ControlResponse = {
+  type: 'process',
+  match: [],
+  actions: ['alert'],
 };
 
 export interface OnChangeDeps {
