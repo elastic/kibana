@@ -33,6 +33,8 @@ export const DEFAULT_INITIAL_APP_DATA = {
     hasWorkplaceSearchAccess: true,
   },
   features: {
+    hasConnectors: true,
+    hasDefaultIngestPipeline: true,
     hasNativeConnectors: true,
     hasSearchApplications: false,
     hasWebCrawler: true,
