@@ -387,6 +387,7 @@ describe('updateLastScheduledActions()', () => {
       state: {},
       meta: {
         flappingHistory: [],
+        uuid: expect.any(String),
         lastScheduledActions: {
           date: new Date().toISOString(),
           group: 'default',

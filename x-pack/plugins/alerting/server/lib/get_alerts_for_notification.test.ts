@@ -98,20 +98,21 @@ describe('getAlertsForNotification', () => {
       }
     );
 
-    expect(removeUuids(newAlerts)).toMatchInlineSnapshot(`Object {}`);
-    expect(removeUuids(activeAlerts)).toMatchInlineSnapshot(`
+    expect(alertsWithAnyUUID(newAlerts)).toMatchInlineSnapshot(`Object {}`);
+    expect(alertsWithAnyUUID(activeAlerts)).toMatchInlineSnapshot(`
       Object {
         "3": Object {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 1,
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
       }
     `);
-    expect(Object.values(removeUuids(activeAlerts)).map((a) => a.getScheduledActionOptions()))
+    expect(Object.values(activeAlerts).map((a) => a.getScheduledActionOptions()))
       .toMatchInlineSnapshot(`
       Array [
         Object {
@@ -121,13 +122,14 @@ describe('getAlertsForNotification', () => {
         },
       ]
     `);
-    expect(currentActiveAlerts).toMatchInlineSnapshot(`
+    expect(alertsWithAnyUUID(currentActiveAlerts)).toMatchInlineSnapshot(`
           Object {
             "3": Object {
               "meta": Object {
                 "flapping": true,
                 "flappingHistory": Array [],
                 "pendingRecoveredCount": 1,
+                "uuid": Any<String>,
               },
               "state": Object {},
             },
@@ -143,13 +145,14 @@ describe('getAlertsForNotification', () => {
             },
           ]
       `);
-    expect(recoveredAlerts).toMatchInlineSnapshot(`
+    expect(alertsWithAnyUUID(recoveredAlerts)).toMatchInlineSnapshot(`
       Object {
         "1": Object {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 0,
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
@@ -157,18 +160,20 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
       }
     `);
-    expect(currentRecoveredAlerts).toMatchInlineSnapshot(`
+    expect(alertsWithAnyUUID(currentRecoveredAlerts)).toMatchInlineSnapshot(`
       Object {
         "1": Object {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 0,
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
@@ -176,6 +181,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
@@ -333,13 +339,14 @@ describe('getAlertsForNotification', () => {
     );
 
     expect(newAlerts).toMatchInlineSnapshot(`Object {}`);
-    expect(activeAlerts).toMatchInlineSnapshot(`
+    expect(alertsWithAnyUUID(activeAlerts)).toMatchInlineSnapshot(`
       Object {
         "3": Object {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 1,
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
@@ -359,13 +366,14 @@ describe('getAlertsForNotification', () => {
     expect(
       Object.values(currentActiveAlerts).map((a) => a.getScheduledActionOptions())
     ).toMatchInlineSnapshot(`Array []`);
-    expect(recoveredAlerts).toMatchInlineSnapshot(`
+    expect(alertsWithAnyUUID(recoveredAlerts)).toMatchInlineSnapshot(`
       Object {
         "1": Object {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 0,
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
@@ -373,18 +381,20 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
       }
     `);
-    expect(currentRecoveredAlerts).toMatchInlineSnapshot(`
+    expect(alertsWithAnyUUID(currentRecoveredAlerts)).toMatchInlineSnapshot(`
       Object {
         "1": Object {
           "meta": Object {
             "flapping": true,
             "flappingHistory": Array [],
             "pendingRecoveredCount": 0,
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
@@ -392,6 +402,7 @@ describe('getAlertsForNotification', () => {
           "meta": Object {
             "flapping": false,
             "flappingHistory": Array [],
+            "uuid": Any<String>,
           },
           "state": Object {},
         },
@@ -399,11 +410,3 @@ describe('getAlertsForNotification', () => {
     `);
   });
 });
-
-function removeUuids<T>(alerts: T): T {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  for (const alert of Object.values(alerts as Record<string, any>)) {
-    delete alert?.meta?.uuid;
-  }
-  return alerts;
-}
