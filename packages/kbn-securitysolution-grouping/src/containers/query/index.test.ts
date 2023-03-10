@@ -62,12 +62,12 @@ describe('group selector', () => {
   });
   it('Sets terms query when single stackBy field requested', () => {
     const result = getGroupingQuery(testProps);
-    expect(result.aggs.stackByMultipleFields0.multi_terms).toBeUndefined();
-    expect(result.aggs.stackByMultipleFields0.terms).toEqual({
+    expect(result.aggs.groupByFields.multi_terms).toBeUndefined();
+    expect(result.aggs.groupByFields.terms).toEqual({
       field: 'host.name',
       size: MAX_QUERY_SIZE,
     });
-    expect(result.aggs.stackByMultipleFields0.aggs).toEqual({
+    expect(result.aggs.groupByFields.aggs).toEqual({
       bucket_truncate: { bucket_sort: { from: 0, size: 25 } },
       alertsCount: { cardinality: { field: 'kibana.alert.uuid' } },
       rulesCountAggregation: { cardinality: { field: 'kibana.alert.rule.rule_id' } },
@@ -110,8 +110,8 @@ describe('group selector', () => {
       ...testProps,
       groupByFields: ['kibana.alert.rule.name', 'kibana.alert.rule.description'],
     });
-    expect(result.aggs.stackByMultipleFields0.terms).toBeUndefined();
-    expect(result.aggs.stackByMultipleFields0.multi_terms).toEqual({
+    expect(result.aggs.groupByFields.terms).toBeUndefined();
+    expect(result.aggs.groupByFields.multi_terms).toEqual({
       terms: [{ field: 'kibana.alert.rule.name' }, { field: 'kibana.alert.rule.description' }],
       size: MAX_QUERY_SIZE,
     });

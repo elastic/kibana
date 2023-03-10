@@ -53,7 +53,7 @@ describe('getAlertsGroupingQuery', () => {
             field: 'kibana.alert.rule.name',
           },
         },
-        stackByMultipleFields0: {
+        groupByFields: {
           aggs: {
             unitsCount: {
               cardinality: {
@@ -190,7 +190,7 @@ describe('getAlertsGroupingQuery', () => {
             field: 'process.name',
           },
         },
-        stackByMultipleFields0: {
+        groupByFields: {
           aggs: {
             unitsCount: {
               cardinality: {
