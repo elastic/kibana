@@ -22,14 +22,12 @@ export function isSnoozeExpired(snooze: RuleSnoozeSchedule) {
       ...rRule,
       dtstart: new Date(rRule.dtstart),
       until: rRule.until ? new Date(rRule.until) : null,
-      byweekday: rRule.byweekday
-        ? rRule.byweekday.map((d) => (typeof d === 'number' ? d : Weekday[d] ?? d))
-        : null,
+      byweekday: rRule.byweekday ?? null,
       wkst: rRule.wkst ? Weekday[rRule.wkst] : null,
     };
 
     const recurrenceRule = new RRule(rRuleOptions);
-    const nextOccurrence = recurrenceRule.after(new Date(now), true);
+    const nextOccurrence = recurrenceRule.after(new Date(now));
     return !nextOccurrence;
   } catch (e) {
     throw new Error(`Failed to process RRule ${rRule}: ${e}`);

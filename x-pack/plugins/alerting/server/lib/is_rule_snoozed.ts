@@ -12,17 +12,14 @@ import { isSnoozeActive } from './snooze/is_snooze_active';
 type RuleSnoozeProps = Pick<SanitizedRule<RuleTypeParams>, 'muteAll' | 'snoozeSchedule'>;
 type ActiveSnoozes = Array<{ snoozeEndTime: Date; id: string; lastOccurrence?: Date }>;
 
-export function getActiveSnoozes(
-  rule: RuleSnoozeProps,
-  debug: boolean = false
-): ActiveSnoozes | null {
+export function getActiveSnoozes(rule: RuleSnoozeProps): ActiveSnoozes | null {
   if (rule.snoozeSchedule == null || isEmpty(rule.snoozeSchedule)) {
     return null;
   }
 
   return (
     rule.snoozeSchedule
-      .map((snooze) => isSnoozeActive(snooze, debug))
+      .map((snooze) => isSnoozeActive(snooze))
       .filter(Boolean)
       // Sort in descending snoozeEndTime order
       .sort((a, b) => b!.snoozeEndTime.getTime() - a!.snoozeEndTime.getTime()) as ActiveSnoozes
@@ -33,14 +30,13 @@ export function getActiveScheduledSnoozes(rule: RuleSnoozeProps): ActiveSnoozes 
   return getActiveSnoozes(rule)?.filter((r) => Boolean(r.id)) ?? null;
 }
 
-export function getRuleSnoozeEndTime(rule: RuleSnoozeProps, debug: boolean = false): Date | null {
-  return first(getActiveSnoozes(rule, debug))?.snoozeEndTime ?? null;
+export function getRuleSnoozeEndTime(rule: RuleSnoozeProps): Date | null {
+  return first(getActiveSnoozes(rule))?.snoozeEndTime ?? null;
 }
 
-export function isRuleSnoozed(rule: RuleSnoozeProps, debug: boolean = false) {
+export function isRuleSnoozed(rule: RuleSnoozeProps) {
   if (rule.muteAll) {
-    if (debug) console.log('rule muteAll', rule);
     return true;
   }
-  return Boolean(getRuleSnoozeEndTime(rule, debug));
+  return Boolean(getRuleSnoozeEndTime(rule));
 }

@@ -29,32 +29,50 @@ export enum Weekday {
 export type WeekdayStr = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';
 interface IterOptions {
   refDT: Moment;
-  wkst?: Weekday | WeekdayStr | number | null;
+  wkst?: Weekday | number | null;
   byyearday?: number[] | null;
   bymonth?: number[] | null;
   bysetpos?: number[] | null;
   bymonthday?: number[] | null;
-  byweekday?: Weekday[] | string[] | null;
+  byweekday?: Weekday[] | null;
   byhour?: number[] | null;
   byminute?: number[] | null;
   bysecond?: number[] | null;
 }
 
-export type Options = Omit<IterOptions, 'refDT'> & {
+type Options = Omit<IterOptions, 'refDT'> & {
   dtstart: Date;
-  freq: Frequency;
+  freq?: Frequency;
   interval?: number;
-  until?: string | null;
+  until?: Date | null;
   count?: number;
   tzid: string;
 };
 
-const ISO_WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
+type ConstructorOptions = Omit<Options, 'byweekday' | 'wkst'> & {
+  byweekday?: Array<string | number> | null;
+  wkst?: Weekday | WeekdayStr | number | null;
+};
+
+export type { ConstructorOptions as Options };
+
+const ISO_WEEKDAYS = [
+  Weekday.MO,
+  Weekday.TU,
+  Weekday.WE,
+  Weekday.TH,
+  Weekday.FR,
+  Weekday.SA,
+  Weekday.SU,
+];
 
 export class RRule {
   private options: Options;
-  constructor(options: Options) {
-    this.options = options;
+  constructor(options: ConstructorOptions) {
+    this.options = options as Options;
+    if (typeof options.wkst === 'string') {
+      this.options.wkst = Weekday[options.wkst];
+    }
     const weekdayParseResult = parseByWeekdayPos(options.byweekday);
     if (weekdayParseResult) {
       this.options.byweekday = weekdayParseResult[0];
@@ -123,7 +141,7 @@ export class RRule {
   }
 }
 
-const parseByWeekdayPos = function (byweekday: Options['byweekday']) {
+const parseByWeekdayPos = function (byweekday: ConstructorOptions['byweekday']) {
   if (byweekday?.some((d) => typeof d === 'string' && !Object.keys(Weekday).includes(d))) {
     const pos: number[] = [];
     const newByweekday = byweekday.map((d) => {
@@ -148,10 +166,10 @@ export const getNextRecurrences = function ({
   byminute,
   bysecond,
   bysetpos,
-  freq,
+  freq = Frequency.YEARLY,
   interval = 1,
 }: IterOptions & {
-  freq: Frequency;
+  freq?: Frequency;
   interval?: number;
 }) {
   const opts = {

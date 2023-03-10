@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RRule, ByWeekday, Weekday, rrulestr } from '@kbn/rrule';
+import { RRule, Weekday } from '@kbn/rrule';
 import { RuleSnoozeSchedule } from '../../types';
 
 const MAX_TIMESTAMP = 8640000000000000;
@@ -35,9 +35,7 @@ export function isSnoozeActive(snooze: RuleSnoozeSchedule, debug: boolean = fals
       ...rRule,
       dtstart: new Date(rRule.dtstart),
       until: rRule.until ? new Date(rRule.until) : null,
-      byweekday: rRule.byweekday
-        ? rRule.byweekday.map((d) => (typeof d === 'number' ? d : Weekday[d] ?? d))
-        : null,
+      byweekday: rRule.byweekday ?? null,
       wkst: rRule.wkst ? Weekday[rRule.wkst] : null,
     };
 
@@ -55,10 +53,4 @@ export function isSnoozeActive(snooze: RuleSnoozeSchedule, debug: boolean = fals
   }
 
   return null;
-}
-
-export function parseByWeekday(byweekday: Array<string | number>): ByWeekday[] {
-  const rRuleString = `RRULE:BYDAY=${byweekday.join(',')}`;
-  const parsedRRule = rrulestr(rRuleString);
-  return parsedRRule.origOptions.byweekday as ByWeekday[];
 }

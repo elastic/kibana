@@ -7,7 +7,7 @@
 
 import sinon from 'sinon';
 import moment from 'moment-timezone';
-import { RRule, Frequency } from '@kbn/rrule';
+import { Frequency } from '@kbn/rrule';
 import { isRuleSnoozed } from './is_rule_snoozed';
 import { RRuleRecord } from '../types';
 
@@ -272,7 +272,7 @@ describe('isRuleSnoozed', () => {
         } as RRuleRecord,
       },
     ];
-    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, muteAll: false }, true)).toBe(true);
+    expect(isRuleSnoozed({ snoozeSchedule: snoozeScheduleA, muteAll: false })).toBe(true);
     const snoozeScheduleB = [
       {
         duration: 60 * 1000,
