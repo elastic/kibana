@@ -66,6 +66,12 @@ const ISO_WEEKDAYS = [
   Weekday.SU,
 ];
 
+type AllResult = Date[] & {
+  hasMore?: boolean;
+};
+
+const ALL_LIMIT = 10000;
+
 export class RRule {
   private options: Options;
   constructor(options: ConstructorOptions) {
@@ -138,6 +144,22 @@ export class RRule {
   after(dt: Date) {
     const dates = this.dateset(dt);
     return dates.next().value;
+  }
+
+  all(limit: number = ALL_LIMIT): AllResult {
+    const dateGenerator = this.dateset();
+    const dates: AllResult = [];
+    let next = dateGenerator.next();
+    for (let i = 1; i < limit; i++) {
+      if (!next.done) dates.push(next.value);
+      else break;
+      next = dateGenerator.next();
+    }
+    if (next.done) return dates;
+    else {
+      dates.hasMore = true;
+      return dates;
+    }
   }
 }
 
