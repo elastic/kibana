@@ -19,53 +19,45 @@ const getGroupFields = (groupValue: string) => {
 };
 
 interface AlertsGroupingQueryParams {
-  from: string;
-  to: string;
   additionalFilters: Array<{
     bool: BoolQuery;
   }>;
-  selectedGroup: string;
-  runtimeMappings: MappingRuntimeFields;
-  pageSize: number;
+  from: string;
   pageIndex: number;
+  pageSize: number;
+  runtimeMappings: MappingRuntimeFields;
+  selectedGroup: string;
+  to: string;
 }
 
 export const getAlertsGroupingQuery = ({
-  from,
-  to,
   additionalFilters,
-  selectedGroup,
-  runtimeMappings,
-  pageSize,
+  from,
   pageIndex,
+  pageSize,
+  runtimeMappings,
+  selectedGroup,
+  to,
 }: AlertsGroupingQueryParams) =>
   getGroupingQuery({
     additionalFilters,
+    from,
+    groupByFields: !isNoneGroup(selectedGroup) ? getGroupFields(selectedGroup) : [],
+    metricsAggregations: !isNoneGroup(selectedGroup)
+      ? getAggregationsByGroupField(selectedGroup)
+      : [],
+    pageNumber: pageIndex * pageSize,
     rootAggregations: [
       {
         unitsCount: { value_count: { field: selectedGroup } },
       },
       ...(!isNoneGroup(selectedGroup)
-        ? [
-            {
-              groupsCount: {
-                cardinality: {
-                  field: selectedGroup,
-                },
-              },
-            },
-          ]
+        ? [{ groupsCount: { cardinality: { field: selectedGroup } } }]
         : []),
     ],
-    from,
     runtimeMappings,
-    groupByFields: !isNoneGroup(selectedGroup) ? getGroupFields(selectedGroup) : [],
-    to,
-    metricsAggregations: !isNoneGroup(selectedGroup)
-      ? getAggregationsByGroupField(selectedGroup)
-      : [],
     size: pageSize,
-    pageNumber: pageIndex * pageSize,
+    to,
   });
 
 const getAggregationsByGroupField = (field: string): NamedAggregation[] => {

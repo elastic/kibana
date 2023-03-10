@@ -15,13 +15,13 @@ export const DEFAULT_GROUP_BY_FIELD_SIZE = 10;
 export const MAX_QUERY_SIZE = 10000;
 export const getGroupingQuery = ({
   additionalFilters = [],
-  rootAggregations,
-  metricsAggregations,
   from,
-  runtimeMappings,
   groupByFields,
-  size = DEFAULT_GROUP_BY_FIELD_SIZE,
+  metricsAggregations,
   pageNumber,
+  rootAggregations,
+  runtimeMappings,
+  size = DEFAULT_GROUP_BY_FIELD_SIZE,
   sort,
   to,
 }: GroupingQueryArgs): GroupingQuery => ({

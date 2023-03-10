@@ -11,7 +11,8 @@ import { getGroupingQuery, MAX_QUERY_SIZE } from '.';
 
 const testProps: GroupingQueryArgs = {
   additionalFilters: [],
-  rootAggregations: [],
+  from: '2022-12-28T15:35:32.871Z',
+  groupByFields: ['host.name'],
   metricsAggregations: [
     {
       alertsCount: {
@@ -49,11 +50,10 @@ const testProps: GroupingQueryArgs = {
       },
     },
   ],
-  from: '2022-12-28T15:35:32.871Z',
-  runtimeMappings: {},
-  groupByFields: ['host.name'],
-  size: 25,
   pageNumber: 0,
+  rootAggregations: [],
+  runtimeMappings: {},
+  size: 25,
   to: '2023-02-23T06:59:59.999Z',
 };
 describe('group selector', () => {
