@@ -8,7 +8,12 @@ import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { schema } from '@kbn/config-schema';
 
 import { AcknowledgeResponse } from '@kbn/core-saved-objects-migration-server-internal/src/actions';
-import { EnterpriseSearchEngineDetails, EnterpriseSearchEnginesResponse, EnterpriseSearchEngineUpsertResponse } from '../../../common/types/engines';
+
+import {
+  EnterpriseSearchEngineDetails,
+  EnterpriseSearchEnginesResponse,
+  EnterpriseSearchEngineUpsertResponse,
+} from '../../../common/types/engines';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { fetchEngineFieldCapabilities } from '../../lib/engines/field_capabilities';
@@ -18,11 +23,7 @@ import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { fetchEnterpriseSearch, isResponseError } from '../../utils/fetch_enterprise_search';
 
-export function registerEnginesRoutes({
-  config,
-  log,
-  router,
-}: RouteDependencies) {
+export function registerEnginesRoutes({ config, log, router }: RouteDependencies) {
   router.get(
     {
       path: '/internal/enterprise_search/engines',
@@ -36,12 +37,13 @@ export function registerEnginesRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engines =
-        await client.asCurrentUser.transport.request<EnterpriseSearchEnginesResponse>({
+      const engines = await client.asCurrentUser.transport.request<EnterpriseSearchEnginesResponse>(
+        {
           method: 'GET',
           path: `/_application/search_application/`,
           body: {},
-        });
+        }
+      );
       return response.ok({ body: engines });
     })
   );
@@ -57,12 +59,11 @@ export function registerEnginesRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engines =
-        await client.asCurrentUser.transport.request<EnterpriseSearchEngineDetails>({
-          method: 'GET',
-          path: `/_application/search_application/${request.params.engine_name}`,
-          body: {},
-        });
+      const engines = await client.asCurrentUser.transport.request<EnterpriseSearchEngineDetails>({
+        method: 'GET',
+        path: `/_application/search_application/${request.params.engine_name}`,
+        body: {},
+      });
       return response.ok({ body: engines });
     })
   );
@@ -103,12 +104,11 @@ export function registerEnginesRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engines =
-        await client.asCurrentUser.transport.request<AcknowledgeResponse>({
-          method: 'DELETE',
-          path: `/_application/search_application/${request.params.engine_name}`,
-          body: {},
-        });
+      const engines = await client.asCurrentUser.transport.request<AcknowledgeResponse>({
+        method: 'DELETE',
+        path: `/_application/search_application/${request.params.engine_name}`,
+        body: {},
+      });
       return response.ok({ body: engines });
     })
   );
@@ -127,12 +127,11 @@ export function registerEnginesRoutes({
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const engines =
-        await client.asCurrentUser.transport.request<SearchResponse>({
-          method: 'POST',
-          path: `/${request.params.engine_name}/_search/`,
-          body: {},
-        });
+      const engines = await client.asCurrentUser.transport.request<SearchResponse>({
+        method: 'POST',
+        path: `/${request.params.engine_name}/_search/`,
+        body: {},
+      });
       return response.ok({ body: engines });
     })
   );
