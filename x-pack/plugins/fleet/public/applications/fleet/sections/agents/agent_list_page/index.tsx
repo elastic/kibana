@@ -412,6 +412,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
             onClose={() => setAgentActivityFlyoutOpen(false)}
             refreshAgentActivity={isLoading}
             setSearch={setSearch}
+            setSelectedStatus={setSelectedStatus}
           />
         </EuiPortal>
       ) : null}

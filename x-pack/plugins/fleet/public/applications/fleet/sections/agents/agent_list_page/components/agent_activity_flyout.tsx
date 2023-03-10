@@ -60,7 +60,8 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   onAbortSuccess: () => void;
   refreshAgentActivity: boolean;
   setSearch: (search: string) => void;
-}> = ({ onClose, onAbortSuccess, refreshAgentActivity, setSearch }) => {
+  setSelectedStatus: (status: string[]) => void;
+}> = ({ onClose, onAbortSuccess, refreshAgentActivity, setSearch, setSelectedStatus }) => {
   const { notifications } = useStartServices();
   const { data: agentPoliciesData } = useGetAgentPolicies({
     perPage: SO_SEARCH_LIMIT,
@@ -94,6 +95,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
 
       if (data?.items?.length) {
         const kuery = getKuery({ selectedAgentIds: data.items });
+        setSelectedStatus([]);
         setSearch(kuery);
       }
       onClose();
@@ -550,17 +552,7 @@ const ActivityItem: React.FunctionComponent<{
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="xs" />
-      <EuiButtonEmpty
-        size="m"
-        onClick={() => onClickViewAgents(action)}
-        flush="left"
-        data-test-subj="viewAgents"
-      >
-        <FormattedMessage
-          id="xpack.fleet.agentActivityFlyout.viewAgentsButton"
-          defaultMessage="View Agents"
-        />
-      </EuiButtonEmpty>
+      <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
     </EuiPanel>
   );
 };
@@ -655,17 +647,7 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
               </EuiText>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                size="m"
-                onClick={() => onClickViewAgents(action)}
-                flush="left"
-                data-test-subj="viewAgents"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.agentActivityFlyout.viewAgentsButton"
-                  defaultMessage="View Agents"
-                />
-              </EuiButtonEmpty>
+              <ViewAgentsButton action={action} onClickViewAgents={onClickViewAgents} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               {showCancelButton ? (
@@ -687,4 +669,23 @@ export const UpgradeInProgressActivityItem: React.FunctionComponent<{
       </EuiFlexGroup>
     </EuiPanel>
   );
+};
+
+const ViewAgentsButton: React.FunctionComponent<{
+  action: ActionStatus;
+  onClickViewAgents: (action: ActionStatus) => void;
+}> = ({ action, onClickViewAgents }) => {
+  return action.type !== 'UPDATE_TAGS' ? (
+    <EuiButtonEmpty
+      size="m"
+      onClick={() => onClickViewAgents(action)}
+      flush="left"
+      data-test-subj="agentActivityFlyout.viewAgentsButton"
+    >
+      <FormattedMessage
+        id="xpack.fleet.agentActivityFlyout.viewAgentsButton"
+        defaultMessage="View Agents"
+      />
+    </EuiButtonEmpty>
+  ) : null;
 };

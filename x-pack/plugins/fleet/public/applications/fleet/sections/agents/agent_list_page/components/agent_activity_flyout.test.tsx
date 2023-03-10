@@ -27,6 +27,7 @@ describe('AgentActivityFlyout', () => {
   const mockOnAbortSuccess = jest.fn();
   const mockAbortUpgrade = jest.fn();
   const mockSetSearch = jest.fn();
+  const mockSetSelectedStatus = jest.fn();
 
   beforeEach(() => {
     mockOnClose.mockReset();
@@ -34,6 +35,7 @@ describe('AgentActivityFlyout', () => {
     mockAbortUpgrade.mockReset();
     mockUseActionStatus.mockReset();
     mockSetSearch.mockReset();
+    mockSetSelectedStatus.mockReset();
     mockUseGetAgentPolicies.mockReturnValue({
       data: {
         items: [
@@ -63,6 +65,7 @@ describe('AgentActivityFlyout', () => {
           onAbortSuccess={mockOnAbortSuccess}
           refreshAgentActivity={false}
           setSearch={mockSetSearch}
+          setSelectedStatus={mockSetSelectedStatus}
         />
       </IntlProvider>
     );
