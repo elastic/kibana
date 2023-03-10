@@ -94,7 +94,11 @@ export function createEuiButtonItem({
       navigateToUrl(url);
     },
     isDisabled: disabled,
-    'data-test-subj': dataTestSubj || `collapsibleNavAppButton-${id}`,
+    ...(dataTestSubj
+      ? {
+          'data-test-subj': dataTestSubj || `collapsibleNavAppButton-${id}`,
+        }
+      : undefined),
   };
 }
 

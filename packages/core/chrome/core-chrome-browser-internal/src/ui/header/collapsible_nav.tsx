@@ -344,12 +344,12 @@ export function CollapsibleNav({
           <span />
           <EuiCollapsibleNavGroup>
             <EuiButton
-              data-test-subj="coreCollapsibleNavAddIntegrationsButton"
               {...createEuiButtonItem({
                 link: integrationsLink,
                 navigateToUrl,
                 onClick: closeNav,
               })}
+              data-test-subj={`collapsibleNavAppButton-${integrationsLink.id}`}
               fill
               fullWidth
               iconType="plusInCircleFilled"
