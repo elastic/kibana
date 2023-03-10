@@ -13,7 +13,6 @@ import { AlertsHealth } from './rule';
 export * from './rule';
 export * from './rules_settings';
 export * from './rule_type';
-export * from '@kbn/alerting-state-types';
 export type {
   ThrottledActions,
   LastScheduledActions,
@@ -21,12 +20,19 @@ export type {
   AlertInstanceState,
   AlertInstanceContext,
   RawAlertInstance,
-  TrackedLifecycleAlertState, 
+  TrackedLifecycleAlertState,
   WrappedLifecycleRuleState,
-  RuleTaskState, 
-  RuleTaskParams
+  RuleTaskState,
+  RuleTaskParams,
 } from '@kbn/alerting-state-types';
-export { ActionsCompletion } from '@kbn/alerting-state-types';
+export {
+  rawAlertInstance,
+  DateFromString,
+  wrappedStateRt,
+  ActionsCompletion,
+  ruleStateSchema,
+  ruleParamsSchema,
+} from '@kbn/alerting-state-types';
 export * from './alert_summary';
 export * from './builtin_action_groups';
 export * from './bulk_edit';
