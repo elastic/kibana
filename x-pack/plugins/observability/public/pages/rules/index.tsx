@@ -35,7 +35,7 @@ function RulesPage() {
     http,
     docLinks,
     triggersActionsUi: {
-      getAddAlertFlyout: AddAlertFlyout,
+      getAddRuleFlyout: AddRuleFlyout,
       getRulesList: RuleList,
       getRulesSettingsLink: RulesSettingsLink,
     },
@@ -121,7 +121,7 @@ function RulesPage() {
       </EuiFlexGroup>
 
       {addRuleFlyoutVisibility && (
-        <AddAlertFlyout
+        <AddRuleFlyout
           consumer={ALERTS_FEATURE_ID}
           filteredRuleTypes={filteredRuleTypes}
           onClose={() => {
