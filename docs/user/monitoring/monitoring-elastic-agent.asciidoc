@@ -17,33 +17,11 @@ To learn about monitoring in general, see
 [discrete]
 == Prerequisites
 
-****
-**Question for reviewers:**
-
-Please verify these prereqs. I have not tested sending metrics to a
-dedicated monitoring cluster, but I assume we want to recommend that with agent
-as we have with Metricbeat in the past.
-****
-
 * Set up {es} monitoring and optionally create a monitoring cluster as described
 in the {ref}/monitoring-production.html[{es} monitoring documentation].
 
-* If you decide to use a monitoring cluster, add an {es} output under
-**Fleet Settings** to send data to the monitoring cluster. To learn how, refer
-to the documentation about
-{fleet-guide}/fleet-settings.html#output-settings[Output settings]. 
-If the monitoring cluster uses encrypted communications, you must access it via
-HTTPS. For example, use a `hosts` setting like `https://es-mon-1:9200`.
-
 * Create a user on the production cluster that has the
 `remote_monitoring_collector` {ref}/built-in-roles.html[built-in role].
-
-****
-**Question for reviewers:**
-
-Is there a way to provide an API key instead of username/password to collect
-monitoring data?
-****
 
 [discrete]
 == Add {kib} monitoring data
@@ -52,12 +30,12 @@ To collect {kib} monitoring data, add a {kib} integration to an {agent} and
 deploy it to the host where {kib} is running.
 
 . Go to the {kib} home page and click **Add integrations**.
++
+NOTE: If you're using a monitoring cluster, use the {kib} instances connected to
+the monitoring cluster.
+
 . In the query bar, search for and select the **Kibana** integration for
 {agent}.
-+
-TIP: If you don't see the integration, scroll down and select the
-**Display beta integrations** and **Elastic Agent only** options to see all
-integrations that work with {agent}.
 
 . Read the overview to make sure you understand integration requirements and
 other considerations.

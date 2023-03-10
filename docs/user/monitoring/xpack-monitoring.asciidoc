@@ -12,12 +12,6 @@ performance data for {es}, {ls}, {ents}, APM, and Beats in real time,
 as well as analyze past performance. 
 . To monitor {kib} itself and route that data to the monitoring cluster.
 
-****
-**Question for reviewers:**
-Is the following paragraph correct? Do all of the products listed above have
-UUIDs?
-****
-
 If you enable monitoring across the {stack}, each monitored component is
 considered unique based on its persistent UUID, which is written to the
 <<settings,`path.data`>> directory when the node or instance starts. 
