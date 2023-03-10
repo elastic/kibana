@@ -288,7 +288,7 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
               size="xs"
             >
               <FormattedMessage
-                id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupLabel"
+                id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupInfo"
                 defaultMessage="Showing {valuesBadges} out of {count} group items. {unique} items unique to this group."
                 values={{
                   count: mostSignificantValues.length,
