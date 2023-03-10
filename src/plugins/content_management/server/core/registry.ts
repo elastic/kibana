@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { validateVersion } from '../../common/utils';
 import { ContentType } from './content_type';
 import { EventBus } from './event_bus';
 import type { ContentStorage, ContentTypeDefinition } from './types';
@@ -25,6 +26,8 @@ export class ContentRegistry {
     if (this.types.has(definition.id)) {
       throw new Error(`Content [${definition.id}] is already registered`);
     }
+
+    validateVersion(definition.version?.latest);
 
     const contentType = new ContentType(definition, this.eventBus);
 
