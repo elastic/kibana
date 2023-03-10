@@ -86,12 +86,13 @@ export const getXDomain = (
         .filter((v) => !isUndefined(v))
         .sort()
     );
+
     const [firstXValue] = xValues;
     const lastXValue = xValues[xValues.length - 1];
 
     const domainMin = Math.min(firstXValue, baseDomain.min);
-    const domainMaxValue = Math.max(baseDomain.max - baseDomain.minInterval, lastXValue);
-    const domainMax = hasBars ? domainMaxValue : domainMaxValue + baseDomain.minInterval;
+    const domainMaxValue = baseDomain.max - baseDomain.minInterval;
+    const domainMax = Math.max(domainMaxValue, lastXValue);
 
     const duration = moment.duration(baseDomain.minInterval);
     const selectedUnit = find(dateMath.units, (u) => {

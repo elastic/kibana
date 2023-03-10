@@ -424,7 +424,7 @@ describe('XYChart component', () => {
 
         expect(component.find(Settings).prop('xDomain')).toEqual({
           // shortened to 24th midnight (elastic-charts automatically adds one min interval)
-          max: new Date('2021-04-25').valueOf(),
+          max: new Date('2021-04-24').valueOf(),
           // extended to 22nd midnight because of first bucket
           min: new Date('2021-04-22').valueOf(),
           minInterval: 24 * 60 * 60 * 1000,
@@ -449,7 +449,7 @@ describe('XYChart component', () => {
             domainStart: new Date('2021-04-22T12:00:00.000Z').valueOf(),
             domainEnd: new Date('2021-04-24T12:00:00.000Z').valueOf(),
             domainMin: new Date('2021-04-22').valueOf(),
-            domainMax: new Date('2021-04-25').valueOf(),
+            domainMax: new Date('2021-04-24').valueOf(),
           })
         );
       });
