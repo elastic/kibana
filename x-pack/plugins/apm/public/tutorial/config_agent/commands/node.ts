@@ -21,19 +21,18 @@ export const nodeVariables = {
 
 export const nodeHighlightLang = 'js';
 
+const nodeServiceNameHint = i18n.translate(
+  'xpack.apm.tutorial.nodeClient.createConfig.commands.serviceName',
+  {
+    defaultMessage: 'Overrides the service name in package.json.',
+  }
+);
+
 export const nodeLineNumbers = {
   start: 1,
   highlight: '3, 5, 7, 9',
   annotations: {
-    3:
-      serviceNameHint +
-      ' ' +
-      i18n.translate(
-        'xpack.apm.tutorial.nodeClient.createConfig.commands.serviceName',
-        {
-          defaultMessage: 'Overrides the service name in package.json.',
-        }
-      ),
+    3: `${serviceNameHint} ${nodeServiceNameHint}`,
     5: secretTokenHint,
     7: serverUrlHint,
     9: serviceEnvironmentHint,
