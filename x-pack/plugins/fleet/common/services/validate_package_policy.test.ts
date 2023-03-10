@@ -945,4 +945,69 @@ describe('Fleet - validatePackagePolicyConfig', () => {
       expect(res).toBeNull();
     });
   });
+
+  describe('Select', () => {
+    it('should return an error message if the value is not an option value', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: 'c',
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toEqual(['Invalid value for select type']);
+    });
+
+    it('should accept a select with a valid value', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: 'b',
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toBeNull();
+    });
+
+    it('should accept a select with undefined value', () => {
+      const res = validatePackagePolicyConfig(
+        {
+          type: 'select',
+          value: undefined,
+        },
+        {
+          name: 'myvariable',
+          type: 'select',
+          options: [
+            { value: 'a', text: 'A' },
+            { value: 'b', text: 'B' },
+          ],
+        },
+        'myvariable',
+        safeLoad
+      );
+
+      expect(res).toBeNull();
+    });
+  });
 });

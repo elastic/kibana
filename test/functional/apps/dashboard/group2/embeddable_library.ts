@@ -17,6 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const panelActions = getService('dashboardPanelActions');
+  const savedObjectsFinder = getService('savedObjectsFinder');
 
   describe('embeddable library', () => {
     before(async () => {
@@ -35,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('unlink visualize panel from embeddable library', async () => {
       // add heatmap panel from library
       await dashboardAddPanel.clickOpenAddPanel();
-      await dashboardAddPanel.filterEmbeddableNames('Rendering Test: heatmap');
+      await savedObjectsFinder.filterEmbeddableNames('Rendering Test: heatmap');
       await find.clickByButtonText('Rendering Test: heatmap');
       await dashboardAddPanel.closeAddPanel();
 
@@ -51,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(libraryActionExists).to.be(false);
 
       await dashboardAddPanel.clickOpenAddPanel();
-      await dashboardAddPanel.filterEmbeddableNames('Rendering Test: heatmap');
+      await savedObjectsFinder.filterEmbeddableNames('Rendering Test: heatmap');
       await find.existsByLinkText('Rendering Test: heatmap');
       await dashboardAddPanel.closeAddPanel();
     });

@@ -34,7 +34,7 @@ import {
   type UpdateByQueryResponse,
   updateAndPickupMappings,
   type UpdateAndPickupMappingsResponse,
-  updateTargetMappingsMeta,
+  updateMappings,
   removeWriteBlock,
   transformDocs,
   waitForIndexStatus,
@@ -71,7 +71,11 @@ describe('migration actions', () => {
       indexName: 'existing_index_with_docs',
       mappings: {
         dynamic: true,
-        properties: {},
+        properties: {
+          someProperty: {
+            type: 'integer',
+          },
+        },
         _meta: {
           migrationMappingPropertyHashes: {
             references: '7997cf5a56cc02bdc9c93361bde732b0',
@@ -1486,15 +1490,22 @@ describe('migration actions', () => {
     });
   });
 
-  describe('updateTargetMappingsMeta', () => {
+  describe('updateMappings', () => {
     it('rejects if ES throws an error', async () => {
-      const task = updateTargetMappingsMeta({
+      const task = updateMappings({
         client,
         index: 'no_such_index',
-        meta: {
-          migrationMappingPropertyHashes: {
-            references: 'updateda56cc02bdc9c93361bupdated',
-            newReferences: 'fooBarHashMd509387420934879300d9',
+        mappings: {
+          properties: {
+            created_at: {
+              type: 'date',
+            },
+          },
+          _meta: {
+            migrationMappingPropertyHashes: {
+              references: 'updateda56cc02bdc9c93361bupdated',
+              newReferences: 'fooBarHashMd509387420934879300d9',
+            },
           },
         },
       })();
@@ -1502,13 +1513,51 @@ describe('migration actions', () => {
       await expect(task).rejects.toThrow('index_not_found_exception');
     });
 
-    it('resolves right when mappings._meta are correctly updated', async () => {
-      const res = await updateTargetMappingsMeta({
+    it('resolves left when the mappings are incompatible', async () => {
+      const res = await updateMappings({
         client,
         index: 'existing_index_with_docs',
-        meta: {
-          migrationMappingPropertyHashes: {
-            newReferences: 'fooBarHashMd509387420934879300d9',
+        mappings: {
+          properties: {
+            someProperty: {
+              type: 'date', // attempt to change an existing field's type in an incompatible fashion
+            },
+          },
+          _meta: {
+            migrationMappingPropertyHashes: {
+              references: 'updateda56cc02bdc9c93361bupdated',
+              newReferences: 'fooBarHashMd509387420934879300d9',
+            },
+          },
+        },
+      })();
+
+      expect(Either.isLeft(res)).toBe(true);
+      expect(res).toMatchInlineSnapshot(`
+        Object {
+          "_tag": "Left",
+          "left": Object {
+            "type": "incompatible_mapping_exception",
+          },
+        }
+      `);
+    });
+
+    it('resolves right when mappings are correctly updated', async () => {
+      const res = await updateMappings({
+        client,
+        index: 'existing_index_with_docs',
+        mappings: {
+          properties: {
+            created_at: {
+              type: 'date',
+            },
+          },
+          _meta: {
+            migrationMappingPropertyHashes: {
+              references: 'updateda56cc02bdc9c93361bupdated',
+              newReferences: 'fooBarHashMd509387420934879300d9',
+            },
           },
         },
       })();
@@ -1519,8 +1568,17 @@ describe('migration actions', () => {
         index: ['existing_index_with_docs'],
       });
 
+      expect(indices.existing_index_with_docs.mappings?.properties).toEqual(
+        expect.objectContaining({
+          created_at: {
+            type: 'date',
+          },
+        })
+      );
+
       expect(indices.existing_index_with_docs.mappings?._meta).toEqual({
         migrationMappingPropertyHashes: {
+          references: 'updateda56cc02bdc9c93361bupdated',
           newReferences: 'fooBarHashMd509387420934879300d9',
         },
       });
