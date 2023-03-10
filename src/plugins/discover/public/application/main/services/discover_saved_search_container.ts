@@ -12,7 +12,6 @@ import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { differenceWith, isEqual, toPairs } from 'lodash';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
-import { updatePersistedSearchSource } from '../utils/update_search_source';
 import { loadSavedSearch } from '../utils/load_saved_search';
 import { updateSavedSearch } from '../utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
@@ -193,10 +192,10 @@ export function getSavedSearchContainer({
       !filterAndQuery
     );
 
-    updatePersistedSearchSource(nextSavedSearch.searchSource, {
-      dataView,
-      services,
-    });
+    nextSavedSearch.searchSource
+      .setField('index', dataView)
+      .setField('query', nextState.query)
+      .setField('filter', nextState.filters);
 
     if (resetSavedSearch) {
       set(nextSavedSearch);
