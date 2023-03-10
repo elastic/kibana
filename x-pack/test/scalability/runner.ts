@@ -29,10 +29,10 @@ async function sendReportMetricsToTelemetry(
     .readdirSync(reportRootPath)
     // Gatling report folder has unique postfix, e.g. 'api.telemetry.cluster_stats.no_cache-20230309224753010'
     .filter(doesMatchWithoutSuffix);
-function doesMatchWithoutSuffix (filePath: string): Boolean {
-  const suffix: RegExp = /-\d+$/;
-  return filePath.replace(suffix, '') === fileName;    
-}
+  function doesMatchWithoutSuffix(filePath: string): boolean {
+    const suffix: RegExp = /-\d+$/;
+    return filePath.replace(suffix, '') === fileName;
+  }
   const lastReportPath = journeyReportDir.pop();
   if (!lastReportPath) {
     throw new Error(`No report found with '${fileName}' filename`);
