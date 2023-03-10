@@ -11,7 +11,6 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import type { Evaluation } from '../../../../common/types';
-import { CloudPosturePageTitle } from '../../../components/cloud_posture_page_title';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
@@ -27,7 +26,7 @@ import {
   useBaseEsQuery,
   usePersistedQuery,
 } from '../utils/utils';
-import { LimitedResultsBar, PageTitle, PageTitleText } from '../layout/findings_layout';
+import { LimitedResultsBar } from '../layout/findings_layout';
 import { FindingsGroupBySelector } from '../layout/findings_group_by_selector';
 import { findingsNavigation } from '../../../common/navigation/constants';
 import { ResourceFindings } from './resource_findings/resource_findings_container';
@@ -123,21 +122,8 @@ const LatestFindingsByResource = ({ dataView }: FindingsBaseProps) => {
         }}
         loading={findingsGroupByResource.isFetching}
       />
-      <EuiFlexGroup>
-        <EuiFlexItem>
-          <PageTitle>
-            <PageTitleText
-              title={
-                <CloudPosturePageTitle
-                  title={i18n.translate(
-                    'xpack.csp.findings.findingsByResource.findingsByResourcePageTitle',
-                    { defaultMessage: 'Findings' }
-                  )}
-                />
-              }
-            />
-          </PageTitle>
-        </EuiFlexItem>
+      <EuiSpacer size="m" />
+      <EuiFlexGroup justifyContent="flexEnd">
         <EuiFlexItem grow={false} style={{ width: 400 }}>
           {!error && <FindingsGroupBySelector type="resource" />}
         </EuiFlexItem>
