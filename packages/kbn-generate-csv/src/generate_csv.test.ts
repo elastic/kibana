@@ -871,21 +871,19 @@ it('adds a warning if export was unable to close the PIT', async () => {
   );
 
   await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "content_type": "text/csv",
-            "csv_contains_formulas": false,
-            "error_code": undefined,
-            "max_size_reached": false,
-            "metrics": Object {
-              "csv": Object {
-                "rows": 0,
-              },
-            },
-            "warnings": Array [
-              "Unable to close the Point-In-Time used for search. Check the Kibana server logs.",
-            ],
-          }
-        `);
+    Object {
+      "content_type": "text/csv",
+      "csv_contains_formulas": false,
+      "error_code": undefined,
+      "max_size_reached": false,
+      "metrics": Object {
+        "rows": 0,
+      },
+      "warnings": Array [
+        "Unable to close the Point-In-Time used for search. Check the Kibana server logs.",
+      ],
+    }
+  `);
 });
 
 it('will return partial data if the scroll or search fails', async () => {
@@ -914,22 +912,20 @@ it('will return partial data if the scroll or search fails', async () => {
     stream
   );
   await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "content_type": "text/csv",
-            "csv_contains_formulas": false,
-            "error_code": undefined,
-            "max_size_reached": false,
-            "metrics": Object {
-              "csv": Object {
-                "rows": 0,
-              },
-            },
-            "warnings": Array [
-              "Received a 500 response from Elasticsearch: my error",
-              "Encountered an error with the number of CSV rows generated from the search: expected NaN, received 0.",
-            ],
-          }
-        `);
+    Object {
+      "content_type": "text/csv",
+      "csv_contains_formulas": false,
+      "error_code": undefined,
+      "max_size_reached": false,
+      "metrics": Object {
+        "rows": 0,
+      },
+      "warnings": Array [
+        "Received a 500 response from Elasticsearch: my error",
+        "Encountered an error with the number of CSV rows generated from the search: expected NaN, received 0.",
+      ],
+    }
+  `);
   expect(mockLogger.error.mock.calls).toMatchInlineSnapshot(`
     Array [
       Array [
@@ -963,22 +959,20 @@ it('handles unknown errors', async () => {
     stream
   );
   await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
-          Object {
-            "content_type": "text/csv",
-            "csv_contains_formulas": false,
-            "error_code": undefined,
-            "max_size_reached": false,
-            "metrics": Object {
-              "csv": Object {
-                "rows": 0,
-              },
-            },
-            "warnings": Array [
-              "Encountered an unknown error: An unknown error",
-              "Encountered an error with the number of CSV rows generated from the search: expected NaN, received 0.",
-            ],
-          }
-        `);
+    Object {
+      "content_type": "text/csv",
+      "csv_contains_formulas": false,
+      "error_code": undefined,
+      "max_size_reached": false,
+      "metrics": Object {
+        "rows": 0,
+      },
+      "warnings": Array [
+        "Encountered an unknown error: An unknown error",
+        "Encountered an error with the number of CSV rows generated from the search: expected NaN, received 0.",
+      ],
+    }
+  `);
 });
 
 describe('error codes', () => {

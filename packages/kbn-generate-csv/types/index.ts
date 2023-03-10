@@ -7,8 +7,8 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-
-const { PDF_JOB_TYPE, PDF_JOB_TYPE_V2, PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } = jobTypes;
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
+import { jobTypes, reportTypes, TaskRunMetrics } from '@kbn/reporting-common';
 
 export const PLUGIN_ID = 'reporting';
 
@@ -48,13 +48,6 @@ export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 // but the extension points are still needed for pre-existing scripted automation, until 8.0
 export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
 export const CSV_JOB_TYPE_DEPRECATED = 'csv';
-
-export const USES_HEADLESS_JOB_TYPES = [
-  PDF_JOB_TYPE,
-  PNG_JOB_TYPE,
-  PDF_JOB_TYPE_V2,
-  PNG_JOB_TYPE_V2,
-];
 
 export const DEPRECATED_JOB_TYPES = [CSV_JOB_TYPE_DEPRECATED];
 
@@ -106,6 +99,12 @@ export const PDF_JOB_TYPE_V2 = 'printable_pdf_v2';
 export const PNG_JOB_TYPE = 'PNG';
 export const PNG_JOB_TYPE_V2 = 'PNGV2';
 
+export const USES_HEADLESS_JOB_TYPES = [
+  PDF_JOB_TYPE,
+  PNG_JOB_TYPE,
+  PDF_JOB_TYPE_V2,
+  PNG_JOB_TYPE_V2,
+];
 /**
  * A way to get the client side route for the reporting redirect app.
  *
@@ -137,8 +136,6 @@ export const UNVERSIONED_VERSION = '7.14.0';
 // hacky endpoint: download CSV without queueing a report
 // FIXME: find a way to make these endpoints "generic" instead of hardcoded, as are the queued report export types
 export const API_GENERATE_IMMEDIATE = `${API_BASE_URL_V1}/generate/immediate/csv_searchsource`;
-
-export type CsvConfigType = typeof CsvConfigType;
 
 export interface CsvExportSettings {
   timezone: string;
