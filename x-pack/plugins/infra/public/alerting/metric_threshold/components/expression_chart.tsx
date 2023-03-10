@@ -71,7 +71,7 @@ export const ExpressionChart: React.FC<Props> = ({
   }
 
   const isDarkMode = uiSettings?.get('theme:darkMode') || false;
-  const firstSeries = first(first(data.pages)!.series)!;
+  const firstSeries = first(first(data.pages)!.series);
   // Creating a custom series where the ID is changed to 0
   // so that we can get a proper domain
   if (!firstSeries || !firstSeries.rows || firstSeries.rows.length === 0) {
