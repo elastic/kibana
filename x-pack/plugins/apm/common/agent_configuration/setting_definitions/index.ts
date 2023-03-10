@@ -17,7 +17,6 @@ import { floatRt } from '../runtime_types/float_rt';
 import { RawSettingDefinition, SettingDefinition } from './types';
 import { generalSettings } from './general_settings';
 import { javaSettings } from './java_settings';
-import { mobileSettings } from './mobile_settings';
 import { getDurationRt } from '../runtime_types/duration_rt';
 import { getBytesRt } from '../runtime_types/bytes_rt';
 import { getStorageSizeRt } from '../runtime_types/storage_size_rt';
@@ -132,7 +131,7 @@ export function validateSetting(setting: SettingDefinition, value: unknown) {
 }
 
 export const settingDefinitions: SettingDefinition[] = sortBy(
-  [...generalSettings, ...javaSettings, ...mobileSettings].map(
+  [...generalSettings, ...javaSettings].map(
     getSettingDefaults
   ),
   'key'
