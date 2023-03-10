@@ -21,19 +21,20 @@ export const rumVariables = {
 
 export const rumHighlightLang = 'js';
 
+const rumServiceVersionHint = i18n.translate(
+  'xpack.apm.tutorial.jsClient.installDependency.commands.setServiceVersionComment',
+  {
+    defaultMessage: 'Set the service version (required for source map feature)',
+  }
+);
+
 export const rumLineNumbers = {
   start: 1,
   highlight: '3, 5, 7, 9',
   annotations: {
     3: serviceNameHint,
     5: serverUrlHint,
-    7: i18n.translate(
-      'xpack.apm.tutorial.jsClient.installDependency.commands.setServiceVersionComment',
-      {
-        defaultMessage:
-          'Set the service version (required for source map feature)',
-      }
-    ),
+    7: rumServiceVersionHint,
     9: serviceEnvironmentHint,
   },
 }

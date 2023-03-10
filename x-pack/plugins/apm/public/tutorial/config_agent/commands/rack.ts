@@ -22,19 +22,18 @@ export const rackVariables = {
 
 export const rackHighlightLang = 'rb';
 
+const rackServiceNameHint = i18n.translate(
+  'xpack.apm.tutorial.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
+  {
+    defaultMessage: "Defaults to the name of your Rack app's class.",
+  }
+);
+
 export const rackLineNumbers = {
   start: 1,
   highlight: '3, 5, 7, 9',
   annotations: {
-    3:
-      serviceNameHint +
-      ' ' +
-      i18n.translate(
-        'xpack.apm.tutorial.rackClient.createConfig.commands.defaultsToTheNameOfRackAppClassComment',
-        {
-          defaultMessage: "Defaults to the name of your Rack app's class.",
-        }
-      ),
+    3: `${serviceNameHint} ${rackServiceNameHint}`,
     5: secretTokenHint,
     7: serverUrlHint,
     9: serviceEnvironmentHint,

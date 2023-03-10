@@ -22,27 +22,30 @@ export const djangoVariables = {
 
 export const djangoHighlightLang = 'py';
 
+const djangoAddAgentComment = i18n.translate(
+  'xpack.apm.tutorial.djangoClient.configure.commands.addAgentComment',
+  {
+    defaultMessage: 'Add the agent to installed apps',
+  }
+);
+
+const djangoTracingMiddlewareComment = i18n.translate(
+  'xpack.apm.tutorial.djangoClient.configure.commands.addTracingMiddlewareComment',
+  {
+    defaultMessage: 'Add our tracing middleware to send performance metrics',
+  }
+);
+
 export const djangoLineNumbers = {
   start: 1,
   highlight: '1-4, 7, 9, 11, 13, 16-19',
   annotations: {
-    2: i18n.translate(
-      'xpack.apm.tutorial.djangoClient.configure.commands.addAgentComment',
-      {
-        defaultMessage: 'Add the agent to installed apps',
-      }
-    ),
+    2: djangoAddAgentComment,
     7: serviceNameHint,
     9: secretTokenHint,
     11: serverUrlHint,
     13: serviceEnvironmentHint,
-    17: i18n.translate(
-      'xpack.apm.tutorial.djangoClient.configure.commands.addTracingMiddlewareComment',
-      {
-        defaultMessage:
-          'Add our tracing middleware to send performance metrics',
-      }
-    ),
+    17: djangoTracingMiddlewareComment,
   },
 };
 

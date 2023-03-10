@@ -22,19 +22,18 @@ export const railsVariables = {
 
 export const railsHighlightLang = 'rb';
 
+const railsServiceNameHint = i18n.translate(
+  'xpack.apm.tutorial.railsClient.createConfig.commands.defaultServiceName',
+  {
+    defaultMessage: 'Defaults to the name of your Rails app.',
+  }
+);
+
 export const railsLineNumbers = {
   start: 1,
   highlight: '3, 5, 7, 9',
   annotations: {
-    3:
-      serviceNameHint +
-      ' ' +
-      i18n.translate(
-        'xpack.apm.tutorial.railsClient.createConfig.commands.defaultServiceName',
-        {
-          defaultMessage: 'Defaults to the name of your Rails app.',
-        }
-      ),
+    3: `${serviceNameHint} ${railsServiceNameHint}`,
     5: secretTokenHint,
     7: serverUrlHint,
     9: serviceEnvironmentHint,

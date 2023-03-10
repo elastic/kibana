@@ -22,19 +22,18 @@ export const goVariables = {
 
 export const goHighlightLang = 'go';
 
+const goServiceNameHint = i18n.translate(
+  'xpack.apm.tutorial.goClient.configure.commands.usedExecutableNameComment',
+  {
+    defaultMessage: 'If not specified, the executable name will be used.',
+  }
+);
+
 export const goLineNumbers = {
   start: 1,
   highlight: '2, 4, 6, 8',
   annotations: {
-    2:
-      serviceNameHint +
-      ' ' +
-      i18n.translate(
-        'xpack.apm.tutorial.goClient.configure.commands.usedExecutableNameComment',
-        {
-          defaultMessage: 'If not specified, the executable name will be used.',
-        }
-      ),
+    2: `${serviceNameHint} ${goServiceNameHint}`,
     4: secretTokenHint,
     6: serverUrlHint,
     8: serviceEnvironmentHint,
