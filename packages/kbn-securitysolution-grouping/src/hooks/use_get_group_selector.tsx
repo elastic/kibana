@@ -74,10 +74,10 @@ export const useGetGroupSelector = ({
       // built-in telemetry: UI-counter
       tracker?.(
         METRIC_TYPE.CLICK,
-        getTelemetryEvent.groupChanged({ groupingId, selected: selectedGroup })
+        getTelemetryEvent.groupChanged({ groupingId, selected: groupSelection })
       );
 
-      onGroupChangeCallback?.({ tableId: groupingId, groupByField: selectedGroup });
+      onGroupChangeCallback?.({ tableId: groupingId, groupByField: groupSelection });
 
       // only update options if the new selection is a custom field
       if (

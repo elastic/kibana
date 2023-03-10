@@ -146,7 +146,7 @@ describe('useGetGroupSelector', () => {
     expect(defaultArgs.tracker).toHaveBeenCalledTimes(1);
     expect(defaultArgs.tracker).toHaveBeenCalledWith(
       METRIC_TYPE.CLICK,
-      `alerts_table_group_by_test-table_host.name`
+      `alerts_table_group_by_test-table_${customField}`
     );
   });
 
@@ -170,7 +170,7 @@ describe('useGetGroupSelector', () => {
     expect(defaultArgs.onGroupChangeCallback).toHaveBeenCalledTimes(1);
     expect(defaultArgs.onGroupChangeCallback).toHaveBeenCalledWith({
       tableId: groupingId,
-      groupByField: 'host.name',
+      groupByField: customField,
     });
   });
 
