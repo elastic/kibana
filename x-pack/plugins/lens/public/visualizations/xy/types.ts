@@ -127,8 +127,8 @@ export interface XYByValueAnnotationLayerConfig {
 
 export type XYPersistedByValueAnnotationLayerConfig = Omit<
   XYByValueAnnotationLayerConfig,
-  'indexPatternId'
-> & { persistanceType?: 'byValue' }; // optional for backwards compatibility
+  'indexPatternId' | 'hide' | 'simpleView'
+> & { persistanceType?: 'byValue'; hide?: boolean; simpleView?: boolean }; // props made optional for backwards compatibility since this is how the existing saved objects are
 
 export type XYByReferenceAnnotationLayerConfig = XYByValueAnnotationLayerConfig & {
   annotationGroupId: string;

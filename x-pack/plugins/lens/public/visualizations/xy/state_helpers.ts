@@ -245,6 +245,8 @@ export function injectReferences(
       if (isPersistedByValueAnnotationsLayer(persistedLayer)) {
         injectedLayer = {
           ...persistedLayer,
+          hide: persistedLayer.hide,
+          simpleView: persistedLayer.simpleView,
           indexPatternId:
             // getIndexPatternIdFromInitialContext(persistedLayer, initialContext) || TODO - was this doing anything?
             indexPatternIdFromReferences,

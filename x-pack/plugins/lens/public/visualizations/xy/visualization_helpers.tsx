@@ -315,6 +315,8 @@ const newLayerFn = {
     annotations: [],
     indexPatternId,
     ignoreGlobalFilters: true,
+    hide: undefined,
+    simpleView: undefined,
   }),
 };
 
