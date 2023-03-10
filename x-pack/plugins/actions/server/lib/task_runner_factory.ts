@@ -22,7 +22,10 @@ import {
 } from '@kbn/core/server';
 import { RunContext } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
+import {
+  throwRetryableError,
+  throwUnrecoverableError,
+} from '@kbn/task-manager-plugin/server/task_running';
 import { ActionExecutorContract } from './action_executor';
 import {
   ActionTaskParams,
@@ -37,6 +40,7 @@ import { asSavedObjectExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
 import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
+import { ActionTypeDisabledError } from './errors';
 
 export interface TaskRunnerContext {
   logger: Logger;
@@ -104,18 +108,27 @@ export class TaskRunnerFactory {
         const request = getFakeRequest(apiKey);
         basePathService.set(request, path);
 
-        const executorResult: ActionTypeExecutorResult<unknown> = await actionExecutor.execute({
-          params,
-          actionId: actionId as string,
-          isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
-          request,
-          ...getSourceFromReferences(references),
-          taskInfo,
-          executionId,
-          consumer,
-          relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
-          actionExecutionId,
-        });
+        let executorResult: ActionTypeExecutorResult<unknown> | undefined;
+        try {
+          executorResult = await actionExecutor.execute({
+            params,
+            actionId: actionId as string,
+            isEphemeral: !isPersistedActionTask(actionTaskExecutorParams),
+            request,
+            ...getSourceFromReferences(references),
+            taskInfo,
+            executionId,
+            consumer,
+            relatedSavedObjects: validatedRelatedSavedObjects(logger, relatedSavedObjects),
+            actionExecutionId,
+          });
+        } catch (e) {
+          if (e instanceof ActionTypeDisabledError) {
+            // We'll stop re-trying due to action being forbidden
+            throwUnrecoverableError(e);
+          }
+          throw e;
+        }
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
         if (executorResult.status === 'error') {

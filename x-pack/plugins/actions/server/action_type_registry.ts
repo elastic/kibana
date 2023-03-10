@@ -152,8 +152,7 @@ export class ActionTypeRegistry {
       [`actions:${actionType.id}`]: {
         title: actionType.name,
         maxAttempts,
-        createTaskRunner: (context: RunContext) =>
-          this.taskRunnerFactory.create(context, maxAttempts),
+        createTaskRunner: (context: RunContext) => this.taskRunnerFactory.create(context),
       },
     });
     // No need to notify usage on basic action types

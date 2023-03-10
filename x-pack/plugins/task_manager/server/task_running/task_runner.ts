@@ -73,6 +73,8 @@ export interface TaskRunner {
   isEphemeral?: boolean;
   toString: () => string;
   isSameTask: (executionId: string) => boolean;
+  isAdHocTaskAndOutOfAttempts: boolean;
+  removeTask: () => Promise<void>;
 }
 
 export enum TaskRunningStage {
@@ -259,6 +261,14 @@ export class TaskManagerRunner implements TaskRunner {
   }
 
   /**
+   * Returns true whenever the task is ad hoc and has ran out of attempts. When true before
+   * running a task, the task should be deleted instead of ran.
+   */
+  public get isAdHocTaskAndOutOfAttempts() {
+    return !this.instance.task.schedule && this.instance.task.attempts >= this.getMaxAttempts();
+  }
+
+  /**
    * Returns a log-friendly representation of this task.
    */
   public toString() {
@@ -327,6 +337,19 @@ export class TaskManagerRunner implements TaskRunner {
       return processedResult;
     } finally {
       this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
+    }
+  }
+
+  public async removeTask(): Promise<void> {
+    await this.bufferedTaskStore.remove(this.id);
+    if (this.task?.cleanup) {
+      try {
+        await this.task.cleanup();
+      } catch (e) {
+        this.logger.error(
+          `Error encountered when running onTaskRemoved() hook for ${this}: ${e.message}`
+        );
+      }
     }
   }
 
@@ -474,8 +497,7 @@ export class TaskManagerRunner implements TaskRunner {
       return false;
     }
 
-    const maxAttempts = this.definition.maxAttempts || this.defaultMaxAttempts;
-    return this.instance.task.attempts < maxAttempts;
+    return this.instance.task.attempts < this.getMaxAttempts();
   }
 
   private rescheduleFailedRun = (
@@ -544,17 +566,8 @@ export class TaskManagerRunner implements TaskRunner {
       });
     } else if (fieldUpdates.status === TaskStatus.Failed) {
       // Delete the SO instead so it doesn't remain in the index forever
-      await this.bufferedTaskStore.remove(this.id);
       this.instance = asRan(this.instance.task);
-      if (this.task?.cleanup) {
-        try {
-          await this.task.cleanup();
-        } catch (e) {
-          this.logger.error(
-            `Error encountered when running onTaskRemoved() hook for ${this}: ${e.message}`
-          );
-        }
-      }
+      await this.removeTask();
     } else {
       this.instance = asRan(
         await this.bufferedTaskStore.update(
@@ -582,17 +595,8 @@ export class TaskManagerRunner implements TaskRunner {
   private async processResultWhenDone(): Promise<TaskRunResult> {
     // not a recurring task: clean up by removing the task instance from store
     try {
-      await this.bufferedTaskStore.remove(this.id);
       this.instance = asRan(this.instance.task);
-      if (this.task?.cleanup) {
-        try {
-          await this.task.cleanup();
-        } catch (e) {
-          this.logger.error(
-            `Error encountered when running onTaskRemoved() hook for ${this}: ${e.message}`
-          );
-        }
-      }
+      await this.removeTask();
     } catch (err) {
       if (err.statusCode === 404) {
         this.logger.warn(`Task cleanup of ${this} failed in processing. Was remove called twice?`);
@@ -681,6 +685,12 @@ export class TaskManagerRunner implements TaskRunner {
       result = intervalFromDate(result, addDuration)!;
     }
     return result;
+  }
+
+  private getMaxAttempts() {
+    return this.definition.maxAttempts !== undefined
+      ? this.definition.maxAttempts
+      : this.defaultMaxAttempts;
   }
 }
 

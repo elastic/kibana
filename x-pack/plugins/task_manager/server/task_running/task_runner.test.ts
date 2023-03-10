@@ -896,9 +896,8 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      const instance = store.update.mock.calls[0][0];
-      expect(instance.status).toBe('failed');
-      expect(instance.enabled).not.toBeDefined();
+      expect(store.remove).toHaveBeenCalled();
+      expect(store.update).not.toHaveBeenCalled();
 
       expect(onTaskEvent).toHaveBeenCalledWith(
         withAnyTiming(
@@ -1101,11 +1100,8 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
-
-      expect(instance.status).toBe('failed');
-      expect(instance.enabled).not.toBeDefined();
+      expect(store.remove).toHaveBeenCalled();
+      expect(store.update).not.toHaveBeenCalled();
     });
 
     test('bypasses getRetry function (returning false) on error of a recurring task', async () => {
@@ -1170,13 +1166,8 @@ describe('TaskManagerRunner', () => {
 
       await runner.run();
 
-      expect(store.update).toHaveBeenCalledTimes(1);
-      const instance = store.update.mock.calls[0][0];
-      expect(instance.attempts).toEqual(3);
-      expect(instance.status).toEqual('failed');
-      expect(instance.retryAt!).toBeNull();
-      expect(instance.runAt.getTime()).toBeLessThanOrEqual(Date.now());
-      expect(instance.enabled).not.toBeDefined();
+      expect(store.remove).toHaveBeenCalled();
+      expect(store.update).not.toHaveBeenCalled();
     });
 
     test(`Doesn't fail recurring tasks when maxAttempts reached`, async () => {
@@ -1403,9 +1394,8 @@ describe('TaskManagerRunner', () => {
 
         await runner.run();
 
-        const instance = store.update.mock.calls[0][0];
-        expect(instance.status).toBe('failed');
-        expect(instance.enabled).not.toBeDefined();
+        expect(store.remove).toHaveBeenCalled();
+        expect(store.update).not.toHaveBeenCalled();
 
         expect(onTaskEvent).toHaveBeenCalledWith(
           withAnyTiming(

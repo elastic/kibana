@@ -138,8 +138,7 @@ if (doc['task.runAt'].size()!=0) {
       script: {
         source: `
     if (params.claimableTaskTypes.contains(ctx._source.task.taskType)) {
-      if (ctx._source.task.schedule != null || ctx._source.task.attempts < params.taskMaxAttempts[ctx._source.task.taskType]) {
-        if(ctx._source.task.retryAt != null && ZonedDateTime.parse(ctx._source.task.retryAt).toInstant().toEpochMilli() < params.now) {
+      if(ctx._source.task.retryAt != null && ZonedDateTime.parse(ctx._source.task.retryAt).toInstant().toEpochMilli() < params.now) {
     ctx._source.task.scheduledAt=ctx._source.task.retryAt;
   } else {
     ctx._source.task.scheduledAt=ctx._source.task.runAt;
@@ -147,9 +146,6 @@ if (doc['task.runAt'].size()!=0) {
     ctx._source.task.status = "claiming"; ${Object.keys(fieldUpdates)
       .map((field) => `ctx._source.task.${field}=params.fieldUpdates.${field};`)
       .join(' ')}
-      } else {
-        ctx._source.task.status = "failed";
-      }
     } else if (params.unusedTaskTypes.contains(ctx._source.task.taskType)) {
       ctx._source.task.status = "unrecognized";
     } else {
