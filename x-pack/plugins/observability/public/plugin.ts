@@ -62,9 +62,6 @@ import { registerObservabilityRuleTypes } from './rules/register_observability_r
 
 export interface ConfigSchema {
   unsafe: {
-    slo: {
-      enabled: boolean;
-    };
     alertDetails: {
       apm: {
         enabled: boolean;
@@ -291,11 +288,11 @@ export class Plugin
           // See https://github.com/elastic/kibana/issues/103325.
           const otherLinks: NavigationEntry[] = deepLinks
             .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
-            .filter((link) => (link.id === 'slos' ? config.unsafe.slo.enabled : link)) // might not be useful anymore
             .map((link) => ({
               app: observabilityAppId,
               label: link.title,
               path: link.path ?? '',
+              isBetaFeature: link.id === 'slos' ? true : false,
             }));
 
           const sections = [
@@ -325,12 +322,9 @@ export class Plugin
     const { application } = coreStart;
     const config = this.initContext.config.get();
 
-    const filterSlo = (link: AppDeepLink) =>
-      link.id === 'slos' ? config.unsafe.slo.enabled : link;
-
     updateGlobalNavigation({
       capabilities: application.capabilities,
-      deepLinks: this.deepLinks.filter(filterSlo),
+      deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
     });
 
@@ -344,13 +338,14 @@ export class Plugin
     });
 
     const getAsyncO11yAlertsTableConfiguration = async () => {
-      const { getO11yAlertsTableConfiguration } = await import(
-        './config/register_alerts_table_configuration'
+      const { getAlertsTableConfiguration } = await import(
+        './components/alerts_table/get_alerts_table_configuration'
       );
-      return getO11yAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
+      return getAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
     };
 
     const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+
     getAsyncO11yAlertsTableConfiguration().then((alertsTableConfig) => {
       alertsTableConfigurationRegistry.register(alertsTableConfig);
     });
