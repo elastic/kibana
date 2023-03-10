@@ -16,7 +16,6 @@ import { ControlsOptionsListService } from './options_list/types';
 import { ControlsSettingsService } from './settings/types';
 import { ControlsThemeService } from './theme/types';
 import { ControlsEmbeddableService } from './embeddable/types';
-import { ControlsUiActionsService } from './ui_actions/types';
 
 export interface ControlsServices {
   // dependency services

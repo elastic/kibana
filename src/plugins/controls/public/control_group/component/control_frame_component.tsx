@@ -89,8 +89,8 @@ export const ControlFrame = ({
       ControlGroupContainer
     >();
 
-  const viewMode = select((state) => state.explicitInput.viewMode);
   const controlStyle = select((state) => state.explicitInput.controlStyle);
+  const disabledActions = select((state) => state.explicitInput.disabledActions);
 
   const embeddable = useChildEmbeddable({
     untilEmbeddableLoaded: controlGroup.untilEmbeddableLoaded.bind(controlGroup),
@@ -183,6 +183,7 @@ export const ControlFrame = ({
       })}
       isEnabled={embeddable && enableActions}
       embeddable={embeddable}
+      disabledActions={disabledActions}
     >
       <EuiFormRow
         data-test-subj="control-frame-title"

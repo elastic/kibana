@@ -29,7 +29,6 @@ import {
   ControlInput,
 } from './types';
 import { DeleteControlAction } from './control_group/actions/delete_control_action';
-import { Console } from 'console';
 import { EditControlAction } from './control_group/actions/edit_control_action';
 
 export class ControlsPlugin

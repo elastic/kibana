@@ -17,6 +17,7 @@ export interface FloatingActionsProps {
   className?: string;
   isEnabled?: boolean;
   children: ReactElement;
+  disabledActions?: string[];
 }
 
 export const FloatingActions: FC<FloatingActionsProps> = ({
@@ -24,6 +25,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
   className = '',
   isEnabled,
   children,
+  disabledActions,
 }) => {
   const {
     uiActions: { getTriggerCompatibleActions },
@@ -39,9 +41,10 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
         embeddable,
         trigger: panelHoverTrigger,
       };
-      const actions = (await getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context)).sort(
-        (a, b) => (a.order || 0) - (b.order || 0)
-      );
+      const actions = (await getTriggerCompatibleActions(PANEL_HOVER_TRIGGER, context))
+        .filter((action) => disabledActions?.indexOf(action.id) === -1)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
+
       if (actions.length > 0) {
         setFloatingActions(
           <>
@@ -61,7 +64,7 @@ export const FloatingActions: FC<FloatingActionsProps> = ({
     };
 
     getActions();
-  }, [embeddable, getTriggerCompatibleActions, isEnabled]);
+  }, [embeddable, getTriggerCompatibleActions, isEnabled, disabledActions]);
 
   return (
     <div className="presentationUtil__floatingActionsWrapper">
