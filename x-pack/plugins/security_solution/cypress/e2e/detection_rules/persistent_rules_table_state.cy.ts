@@ -17,8 +17,6 @@ import {
 } from '../../urls/navigation';
 import { getNewRule } from '../../objects/rule';
 import {
-  expectNumberOfRules,
-  expectToContainRule,
   filterByCustomRules,
   filterBySearchTerm,
   filterByTags,
@@ -35,9 +33,9 @@ import {
   filterByDisabledRules,
   expectFilterByPrebuiltRules,
   expectFilterByEnabledRules,
+  expectManagementTableRules,
 } from '../../tasks/alerts_detection_rules';
-import { RULES_MANAGEMENT_TABLE } from '../../screens/alerts_detection_rules';
-import { createCustomRule } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import {
   expectRowsPerPage,
   expectTablePage,
@@ -47,25 +45,27 @@ import {
   sortByTableColumn,
 } from '../../tasks/table_pagination';
 
-function createRule(id: string, name: string, tags?: string[], enabled = false): void {
-  const rule = getNewRule();
-
-  rule.name = name;
-  rule.tags = tags;
-  rule.enabled = enabled;
-
-  createCustomRule(rule, id);
-}
-
 function createTestRules(): void {
-  createRule('1', 'test 1', ['tag-a']);
-  createRule('2', 'rule 1', ['tag-b']);
-  createRule('3', 'rule 2', ['tag-b']);
-  createRule('4', 'rule 3', ['tag-b', 'tag-c']);
-  createRule('5', 'rule 4', ['tag-b']);
-  createRule('6', 'rule 5', ['tag-b', 'tag-c']);
-  createRule('7', 'rule 6', ['tag-b']);
-  createRule('8', 'rule 7', ['tag-b'], true);
+  createRule({ ...getNewRule(), rule_id: '1', name: 'test 1', tags: ['tag-a'], enabled: false });
+  createRule({ ...getNewRule(), rule_id: '2', name: 'rule 1', tags: ['tag-b'], enabled: false });
+  createRule({ ...getNewRule(), rule_id: '3', name: 'rule 2', tags: ['tag-b'], enabled: false });
+  createRule({
+    ...getNewRule(),
+    rule_id: '4',
+    name: 'rule 3',
+    tags: ['tag-b', 'tag-c'],
+    enabled: false,
+  });
+  createRule({ ...getNewRule(), rule_id: '5', name: 'rule 4', tags: ['tag-b'], enabled: false });
+  createRule({
+    ...getNewRule(),
+    rule_id: '6',
+    name: 'rule 5',
+    tags: ['tag-b', 'tag-c'],
+    enabled: false,
+  });
+  createRule({ ...getNewRule(), rule_id: '7', name: 'rule 6', tags: ['tag-b'], enabled: false });
+  createRule({ ...getNewRule(), rule_id: '8', name: 'rule 7', tags: ['tag-b'], enabled: true });
 }
 
 function visitRulesTableWithState(urlTableState: Record<string, unknown>): void {
@@ -104,14 +104,6 @@ function expectDefaultRulesTableState(): void {
   expectTableSorting('Enabled', 'desc');
   expectRowsPerPage(20);
   expectTablePage(1);
-}
-
-function expectManagementTableRules(ruleNames: string[]): void {
-  expectNumberOfRules(RULES_MANAGEMENT_TABLE, ruleNames.length);
-
-  for (const ruleName of ruleNames) {
-    expectToContainRule(RULES_MANAGEMENT_TABLE, ruleName);
-  }
 }
 
 describe('Persistent rules table state', () => {

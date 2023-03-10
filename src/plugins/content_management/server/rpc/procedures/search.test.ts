@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { schema } from '@kbn/config-schema';
+import { omit } from 'lodash';
+
 import { validate } from '../../utils';
 import { ContentRegistry } from '../../core/registry';
 import { createMockedStorage } from '../../core/mocks';
-import type { RpcSchemas } from '../../core';
 import { EventBus } from '../../core/event_bus';
 import { search } from './search';
 
@@ -28,33 +28,37 @@ if (!outputSchema) {
 }
 
 const FOO_CONTENT_ID = 'foo';
-const fooDataSchema = schema.object({ title: schema.string() }, { unknowns: 'forbid' });
 
 describe('RPC -> search()', () => {
   describe('Input/Output validation', () => {
-    /**
-     * These tests are for the procedure call itself. Every RPC needs to declare in/out schema
-     * We will test _specific_ validation schema inside the procedure in separate tests.
-     */
-    test('should validate that a contentTypeId and "query" object is passed', () => {
-      const query = { title: 'hello' };
+    const query = { title: 'hello' };
+    const validInput = { contentTypeId: 'foo', version: 'v1', query };
 
+    test('should validate that a contentTypeId and "query" object is passed', () => {
       [
-        { input: { contentTypeId: 'foo', query } },
+        { input: validInput },
         {
           input: { query }, // contentTypeId missing
           expectedError: '[contentTypeId]: expected value of type [string] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo' }, // query missing
+          input: omit(validInput, 'version'),
+          expectedError: '[version]: expected value of type [string] but got [undefined]',
+        },
+        {
+          input: { ...validInput, version: '1' }, // invalid version format
+          expectedError: '[version]: must follow the pattern [v${number}]',
+        },
+        {
+          input: omit(validInput, 'query'),
           expectedError: '[query]: expected value of type [object] but got [undefined]',
         },
         {
-          input: { contentTypeId: 'foo', query: 123 }, // query is not an object
+          input: { ...validInput, query: 123 }, // query is not an object
           expectedError: '[query]: expected value of type [object] but got [number]',
         },
         {
-          input: { contentTypeId: 'foo', query, unknown: 'foo' },
+          input: { ...validInput, unknown: 'foo' },
           expectedError: '[unknown]: definition for this key is missing',
         },
       ].forEach(({ input, expectedError }) => {
@@ -77,6 +81,7 @@ describe('RPC -> search()', () => {
         {
           contentTypeId: 'foo',
           query: { title: 'hello' },
+          version: 'v1',
           options: { any: 'object' },
         },
         inputSchema
@@ -87,6 +92,7 @@ describe('RPC -> search()', () => {
       error = validate(
         {
           contentTypeId: 'foo',
+          version: 'v1',
           query: { title: 'hello' },
           options: 123, // Not an object
         },
@@ -129,24 +135,14 @@ describe('RPC -> search()', () => {
   });
 
   describe('procedure', () => {
-    const createSchemas = (): RpcSchemas => {
-      return {
-        search: {
-          in: {
-            query: fooDataSchema,
-          },
-        },
-      } as any;
-    };
-
-    const setup = ({ contentSchemas = createSchemas() } = {}) => {
+    const setup = () => {
       const contentRegistry = new ContentRegistry(new EventBus());
       const storage = createMockedStorage();
       contentRegistry.register({
         id: FOO_CONTENT_ID,
         storage,
-        schemas: {
-          content: contentSchemas,
+        version: {
+          latest: 'v2',
         },
       });
 
@@ -162,7 +158,11 @@ describe('RPC -> search()', () => {
       const expected = 'SearchResult';
       storage.search.mockResolvedValueOnce(expected);
 
-      const result = await fn(ctx, { contentTypeId: FOO_CONTENT_ID, query: { title: 'Hello' } });
+      const result = await fn(ctx, {
+        contentTypeId: FOO_CONTENT_ID,
+        version: 'v1', // version in request
+        query: { title: 'Hello' },
+      });
 
       expect(result).toEqual({
         contentTypeId: FOO_CONTENT_ID,
@@ -170,7 +170,13 @@ describe('RPC -> search()', () => {
       });
 
       expect(storage.search).toHaveBeenCalledWith(
-        { requestHandlerContext: ctx.requestHandlerContext },
+        {
+          requestHandlerContext: ctx.requestHandlerContext,
+          version: {
+            request: 'v1',
+            latest: 'v2', // from the registry
+          },
+        },
         { title: 'Hello' },
         undefined
       );
@@ -184,77 +190,15 @@ describe('RPC -> search()', () => {
         ).rejects.toEqual(new Error('Content [unknown] is not registered.'));
       });
 
-      test('should enforce a schema for the query', () => {
-        const { ctx } = setup({ contentSchemas: {} as any });
-        expect(() => fn(ctx, { contentTypeId: FOO_CONTENT_ID, query: {} })).rejects.toEqual(
-          new Error('Schema missing for rpc procedure [search.in.query].')
-        );
-      });
-
-      test('should validate the query sent in input - missing field', () => {
-        const { ctx } = setup();
-        expect(() => fn(ctx, { contentTypeId: FOO_CONTENT_ID, query: {} })).rejects.toEqual(
-          new Error('[title]: expected value of type [string] but got [undefined]')
-        );
-      });
-
-      test('should validate the query sent in input - unknown field', () => {
-        const { ctx } = setup();
-        expect(() =>
-          fn(ctx, {
-            contentTypeId: FOO_CONTENT_ID,
-            query: { title: 'Hello', unknownField: 'Hello' },
-          })
-        ).rejects.toEqual(new Error('[unknownField]: definition for this key is missing'));
-      });
-
-      test('should enforce a schema for options if options are passed', () => {
+      test('should throw if the request version is higher than the registered version', () => {
         const { ctx } = setup();
         expect(() =>
           fn(ctx, {
             contentTypeId: FOO_CONTENT_ID,
             query: { title: 'Hello' },
-            options: { foo: 'bar' },
+            version: 'v7',
           })
-        ).rejects.toEqual(new Error('Schema missing for rpc procedure [search.in.options].'));
-      });
-
-      test('should validate the options', () => {
-        const { ctx } = setup({
-          contentSchemas: {
-            search: {
-              in: {
-                query: fooDataSchema,
-                options: schema.object({ validOption: schema.maybe(schema.boolean()) }),
-              },
-            },
-          } as any,
-        });
-        expect(() =>
-          fn(ctx, {
-            contentTypeId: FOO_CONTENT_ID,
-            query: { title: 'Hello' },
-            options: { foo: 'bar' },
-          })
-        ).rejects.toEqual(new Error('[foo]: definition for this key is missing'));
-      });
-
-      test('should validate the result if schema is provided', () => {
-        const { ctx, storage } = setup({
-          contentSchemas: {
-            search: {
-              in: { query: fooDataSchema },
-              out: { result: schema.object({ validField: schema.maybe(schema.boolean()) }) },
-            },
-          } as any,
-        });
-
-        const invalidResult = { wrongField: 'bad' };
-        storage.search.mockResolvedValueOnce(invalidResult);
-
-        expect(() =>
-          fn(ctx, { contentTypeId: FOO_CONTENT_ID, query: { title: 'Hello' } })
-        ).rejects.toEqual(new Error('[wrongField]: definition for this key is missing'));
+        ).rejects.toEqual(new Error('Invalid version. Latest version is [v2].'));
       });
     });
   });

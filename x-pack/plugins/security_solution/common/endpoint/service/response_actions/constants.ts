@@ -52,6 +52,26 @@ export const CONSOLE_RESPONSE_ACTION_COMMANDS = [
 
 export type ConsoleResponseActionCommands = typeof CONSOLE_RESPONSE_ACTION_COMMANDS[number];
 
+export type ResponseConsoleRbacControls =
+  | 'writeHostIsolation'
+  | 'writeProcessOperations'
+  | 'writeFileOperations'
+  | 'writeExecuteOperations';
+
+/**
+ * maps the console command to the RBAC control that is required to access it via console
+ */
+export const commandToRBACMap: Record<ConsoleResponseActionCommands, ResponseConsoleRbacControls> =
+  Object.freeze({
+    isolate: 'writeHostIsolation',
+    release: 'writeHostIsolation',
+    'kill-process': 'writeProcessOperations',
+    'suspend-process': 'writeProcessOperations',
+    processes: 'writeProcessOperations',
+    'get-file': 'writeFileOperations',
+    execute: 'writeExecuteOperations',
+  });
+
 // 4 hrs in milliseconds
 // 4 * 60 * 60 * 1000
 export const DEFAULT_EXECUTE_ACTION_TIMEOUT = 14400000;

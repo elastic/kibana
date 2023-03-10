@@ -15,7 +15,7 @@ import {
 
 import { expandFirstAlert } from '../../tasks/alerts';
 import { openJsonView, openTable } from '../../tasks/alerts_details';
-import { createCustomRuleEnabled } from '../../tasks/api_calls/rules';
+import { createRule } from '../../tasks/api_calls/rules';
 import { cleanKibana } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/create_new_rule';
 import { esArchiverLoad, esArchiverUnload } from '../../tasks/es_archiver';
@@ -31,7 +31,7 @@ describe('Alert details with unmapped fields', { testIsolation: false }, () => {
     cleanKibana();
     esArchiverLoad('unmapped_fields');
     login();
-    createCustomRuleEnabled(getUnmappedRule());
+    createRule(getUnmappedRule());
     visitWithoutDateRange(ALERTS_URL);
     waitForAlertsToPopulate();
     expandFirstAlert();
@@ -59,7 +59,7 @@ describe('Alert details with unmapped fields', { testIsolation: false }, () => {
     };
 
     openTable();
-    cy.get(ALERT_FLYOUT).find(tablePageSelector(4)).click({ force: true });
+    cy.get(ALERT_FLYOUT).find(tablePageSelector(6)).click({ force: true });
     cy.get(ALERT_FLYOUT)
       .find(TABLE_ROWS)
       .last()
