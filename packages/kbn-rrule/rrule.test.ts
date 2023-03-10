@@ -10,9 +10,14 @@ import { RRule, Frequency, Weekday } from './rrule';
 
 const DATE_2019 = '2019-01-01T00:00:00.000Z';
 const DATE_2019_DECEMBER_19 = '2019-12-19T00:00:00.000Z';
+const DATE_2019_FEB_28 = '2019-02-28T00:00:00.000Z';
 const DATE_2020 = '2020-01-01T00:00:00.000Z';
 const DATE_2020_MINUS_1_MONTH = '2019-12-01T00:00:00.000Z';
+const DATE_2020_FEB_28 = '2020-02-28T00:00:00.000Z';
 const DATE_2023 = '2023-01-01T00:00:00.000Z';
+const DATE_2023_JAN_6_11PM = '2023-01-06T23:00:00Z';
+
+const INVALID_DATE = '2020-01-01-01-01T:00:00:00Z';
 
 const NOW = DATE_2020;
 
@@ -115,6 +120,25 @@ describe('RRule', () => {
           2020-07-01T00:00:00.000Z,
           2021-01-01T00:00:00.000Z,
           2021-07-01T00:00:00.000Z,
+        ]
+      `);
+
+      const rule3 = new RRule({
+        dtstart: new Date(DATE_2019),
+        bymonthday: [10, 20],
+        freq: Frequency.MONTHLY,
+        interval: 6,
+        tzid: 'UTC',
+      });
+
+      expect(rule3.all(6)).toMatchInlineSnapshot(`
+        Array [
+          2019-01-10T00:00:00.000Z,
+          2019-01-20T00:00:00.000Z,
+          2019-07-10T00:00:00.000Z,
+          2019-07-20T00:00:00.000Z,
+          2020-01-10T00:00:00.000Z,
+          2020-01-20T00:00:00.000Z,
         ]
       `);
     });
@@ -237,6 +261,42 @@ describe('RRule', () => {
           2021-02-23T00:00:00.000Z,
           2021-04-12T00:00:00.000Z,
           2021-05-30T00:00:00.000Z,
+        ]
+      `);
+
+      const rule3 = new RRule({
+        dtstart: new Date(DATE_2019_FEB_28),
+        freq: Frequency.DAILY,
+        interval: 1,
+        tzid: 'UTC',
+      });
+
+      expect(rule3.all(6)).toMatchInlineSnapshot(`
+        Array [
+          2019-02-28T00:00:00.000Z,
+          2019-03-01T00:00:00.000Z,
+          2019-03-02T00:00:00.000Z,
+          2019-03-03T00:00:00.000Z,
+          2019-03-04T00:00:00.000Z,
+          2019-03-05T00:00:00.000Z,
+        ]
+      `);
+
+      const rule4 = new RRule({
+        dtstart: new Date(DATE_2020_FEB_28),
+        freq: Frequency.DAILY,
+        interval: 1,
+        tzid: 'UTC',
+      });
+
+      expect(rule4.all(6)).toMatchInlineSnapshot(`
+        Array [
+          2020-02-28T00:00:00.000Z,
+          2020-02-29T00:00:00.000Z,
+          2020-03-01T00:00:00.000Z,
+          2020-03-02T00:00:00.000Z,
+          2020-03-03T00:00:00.000Z,
+          2020-03-04T00:00:00.000Z,
         ]
       `);
     });
@@ -477,7 +537,6 @@ describe('RRule', () => {
 
       expect(rule2.all(9)).toMatchInlineSnapshot(`
         Array [
-          2018-12-31T00:00:00.000Z,
           2019-01-05T00:00:00.000Z,
           2019-01-06T00:00:00.000Z,
           2019-01-07T00:00:00.000Z,
@@ -486,6 +545,7 @@ describe('RRule', () => {
           2019-01-14T00:00:00.000Z,
           2019-01-19T00:00:00.000Z,
           2019-01-20T00:00:00.000Z,
+          2019-01-21T00:00:00.000Z,
         ]
       `);
     });
@@ -516,6 +576,199 @@ describe('RRule', () => {
           2023-03-31T00:00:00.000Z,
         ]
       `);
+    });
+
+    it('works with timezones', () => {
+      const rule = new RRule({
+        dtstart: new Date(DATE_2023_JAN_6_11PM),
+        freq: Frequency.WEEKLY,
+        interval: 1,
+        tzid: 'Europe/Madrid',
+        byweekday: [Weekday.SA],
+      });
+      expect(rule.all(12)).toMatchInlineSnapshot(`
+        Array [
+          2023-01-06T23:00:00.000Z,
+          2023-01-13T23:00:00.000Z,
+          2023-01-20T23:00:00.000Z,
+          2023-01-27T23:00:00.000Z,
+          2023-02-03T23:00:00.000Z,
+          2023-02-10T23:00:00.000Z,
+          2023-02-17T23:00:00.000Z,
+          2023-02-24T23:00:00.000Z,
+          2023-03-03T23:00:00.000Z,
+          2023-03-10T23:00:00.000Z,
+          2023-03-17T23:00:00.000Z,
+          2023-03-24T23:00:00.000Z,
+        ]
+      `);
+
+      const rule2 = new RRule({
+        dtstart: new Date(DATE_2023_JAN_6_11PM),
+        freq: Frequency.WEEKLY,
+        interval: 1,
+        tzid: 'UTC',
+        byweekday: [Weekday.SA],
+      });
+
+      expect(rule2.all(12)).toMatchInlineSnapshot(`
+        Array [
+          2023-01-07T23:00:00.000Z,
+          2023-01-14T23:00:00.000Z,
+          2023-01-21T23:00:00.000Z,
+          2023-01-28T23:00:00.000Z,
+          2023-02-04T23:00:00.000Z,
+          2023-02-11T23:00:00.000Z,
+          2023-02-18T23:00:00.000Z,
+          2023-02-25T23:00:00.000Z,
+          2023-03-04T23:00:00.000Z,
+          2023-03-11T23:00:00.000Z,
+          2023-03-18T23:00:00.000Z,
+          2023-03-25T23:00:00.000Z,
+        ]
+      `);
+    });
+  });
+
+  describe('byhour, byminute, bysecond', () => {
+    it('works with daily frequency', () => {
+      const rule = new RRule({
+        dtstart: new Date(DATE_2019_DECEMBER_19),
+        freq: Frequency.DAILY,
+        interval: 1,
+        tzid: 'UTC',
+        byhour: [14],
+        byminute: [30],
+        bysecond: [0, 15],
+      });
+      expect(rule.all(14)).toMatchInlineSnapshot(`
+        Array [
+          2019-12-19T14:30:00.000Z,
+          2019-12-19T14:30:15.000Z,
+          2019-12-20T14:30:00.000Z,
+          2019-12-20T14:30:15.000Z,
+          2019-12-21T14:30:00.000Z,
+          2019-12-21T14:30:15.000Z,
+          2019-12-22T14:30:00.000Z,
+          2019-12-22T14:30:15.000Z,
+          2019-12-23T14:30:00.000Z,
+          2019-12-23T14:30:15.000Z,
+          2019-12-24T14:30:00.000Z,
+          2019-12-24T14:30:15.000Z,
+          2019-12-25T14:30:00.000Z,
+          2019-12-25T14:30:15.000Z,
+        ]
+      `);
+    });
+    it('works with hourly frequency', () => {
+      const rule = new RRule({
+        dtstart: new Date(DATE_2019_DECEMBER_19),
+        freq: Frequency.HOURLY,
+        interval: 1,
+        tzid: 'UTC',
+        byminute: [15, 30],
+        bysecond: [30, 0],
+      });
+      expect(rule.all(14)).toMatchInlineSnapshot(`
+        Array [
+          2019-12-19T00:15:30.000Z,
+          2019-12-19T00:15:00.000Z,
+          2019-12-19T00:30:30.000Z,
+          2019-12-19T00:30:00.000Z,
+          2019-12-19T01:15:30.000Z,
+          2019-12-19T01:15:00.000Z,
+          2019-12-19T01:30:30.000Z,
+          2019-12-19T01:30:00.000Z,
+          2019-12-19T02:15:30.000Z,
+          2019-12-19T02:15:00.000Z,
+          2019-12-19T02:30:30.000Z,
+          2019-12-19T02:30:00.000Z,
+          2019-12-19T03:15:30.000Z,
+          2019-12-19T03:15:00.000Z,
+        ]
+      `);
+    });
+    it('works with minutely frequency', () => {
+      const rule = new RRule({
+        dtstart: new Date(DATE_2019_DECEMBER_19),
+        freq: Frequency.HOURLY,
+        interval: 1,
+        tzid: 'UTC',
+        bysecond: [10, 30, 58],
+      });
+      expect(rule.all(14)).toMatchInlineSnapshot(`
+        Array [
+          2019-12-19T00:00:10.000Z,
+          2019-12-19T00:00:30.000Z,
+          2019-12-19T00:00:58.000Z,
+          2019-12-19T00:01:10.000Z,
+          2019-12-19T00:01:30.000Z,
+          2019-12-19T00:01:58.000Z,
+          2019-12-19T00:02:10.000Z,
+          2019-12-19T00:02:30.000Z,
+          2019-12-19T00:02:58.000Z,
+          2019-12-19T00:03:10.000Z,
+          2019-12-19T00:03:30.000Z,
+          2019-12-19T00:03:58.000Z,
+          2019-12-19T00:04:10.000Z,
+          2019-12-19T00:04:30.000Z,
+        ]
+      `);
+    });
+  });
+
+  describe('byyearday', () => {
+    it('respects leap years', () => {
+      const rule3 = new RRule({
+        dtstart: new Date(DATE_2020),
+        freq: Frequency.YEARLY,
+        byyearday: [92],
+        interval: 1,
+        tzid: 'UTC',
+      });
+
+      expect(rule3.all(10)).toMatchInlineSnapshot(`
+        Array [
+          2020-04-01T00:00:00.000Z,
+          2021-04-02T00:00:00.000Z,
+          2022-04-02T00:00:00.000Z,
+          2023-04-02T00:00:00.000Z,
+          2024-04-01T00:00:00.000Z,
+          2025-04-02T00:00:00.000Z,
+          2026-04-02T00:00:00.000Z,
+          2027-04-02T00:00:00.000Z,
+          2028-04-01T00:00:00.000Z,
+          2029-04-02T00:00:00.000Z,
+        ]
+      `);
+    });
+  });
+
+  describe('error handling', () => {
+    it('throws an error on an invalid dtstart', () => {
+      const testFn = () =>
+        new RRule({
+          dtstart: new Date(INVALID_DATE),
+          freq: Frequency.HOURLY,
+          interval: 1,
+          tzid: 'UTC',
+        });
+      expect(testFn).toThrowErrorMatchingInlineSnapshot(
+        `"Cannot create RRule: dtstart is an invalid date"`
+      );
+    });
+    it('throws an error on an invalid until', () => {
+      const testFn = () =>
+        new RRule({
+          dtstart: new Date(DATE_2020),
+          until: new Date(INVALID_DATE),
+          freq: Frequency.HOURLY,
+          interval: 1,
+          tzid: 'UTC',
+        });
+      expect(testFn).toThrowErrorMatchingInlineSnapshot(
+        `"Cannot create RRule: until is an invalid date"`
+      );
     });
   });
 });

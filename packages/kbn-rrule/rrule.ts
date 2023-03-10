@@ -76,6 +76,12 @@ export class RRule {
   private options: Options;
   constructor(options: ConstructorOptions) {
     this.options = options as Options;
+    if (isNaN(options.dtstart.getTime())) {
+      throw new Error('Cannot create RRule: dtstart is an invalid date');
+    }
+    if (options.until && isNaN(options.until.getTime())) {
+      throw new Error('Cannot create RRule: until is an invalid date');
+    }
     if (typeof options.wkst === 'string') {
       this.options.wkst = Weekday[options.wkst];
     }
@@ -87,11 +93,12 @@ export class RRule {
   }
 
   private *dateset(start?: Date, end?: Date): Generator<Date, null> {
-    function isInBounds(current: Date) {
+    const isInBounds = (current: Date) => {
+      const afterDtStart = current.getTime() >= this.options.dtstart.getTime();
       const afterStart = !start || current.getTime() >= start.getTime();
       const beforeEnd = !end || current.getTime() <= end.getTime();
-      return afterStart && beforeEnd;
-    }
+      return afterDtStart && afterStart && beforeEnd;
+    };
 
     const { dtstart, tzid, count, until } = this.options;
     let iter = 0;
@@ -385,7 +392,7 @@ const getWeekOfRecurrences = function ({
 
 const getDayOfRecurrences = function ({ refDT, byhour, byminute, bysecond }: IterOptions) {
   const derivedByhour =
-    byhour ?? (byminute || bysecond) ? Array.from(Array(24), (_, i) => i) : [refDT.hour()];
+    byhour ?? (byminute || bysecond ? Array.from(Array(24), (_, i) => i) : [refDT.hour()]);
 
   return derivedByhour.flatMap((h) => {
     const currentHour = moment(refDT).hour(h);
@@ -395,7 +402,7 @@ const getDayOfRecurrences = function ({ refDT, byhour, byminute, bysecond }: Ite
 
 const getHourOfRecurrences = function ({ refDT, byminute, bysecond }: IterOptions) {
   const derivedByminute =
-    byminute ?? bysecond ? Array.from(Array(60), (_, i) => i) : [refDT.minute()];
+    byminute ?? (bysecond ? Array.from(Array(60), (_, i) => i) : [refDT.minute()]);
 
   return derivedByminute.flatMap((m) => {
     const currentMinute = moment(refDT).minute(m);
