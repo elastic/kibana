@@ -22,8 +22,7 @@ export const isAlertDetailsEnabledPerApp = (
   alert: TopAlert | null,
   config: ConfigSchema | null
 ): boolean => {
-  if (!alert || !config) return false;
-
+  if (!alert) return false;
   const ruleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
 
   // The feature flags for alertDetails are not specific enough so we need to check
@@ -31,6 +30,8 @@ export const isAlertDetailsEnabledPerApp = (
   if (ALLOWED_RULE_TYPES.includes(ruleTypeId)) {
     return true;
   }
+
+  if (!config) return false;
 
   // Since we are moving away from feature flags, this code will eventually be removed.
   const appNameFromAlertRuleType =
