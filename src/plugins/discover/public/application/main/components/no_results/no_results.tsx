@@ -6,20 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { NoResultsSuggestions } from './no_results_suggestions';
 import './_no_results.scss';
-import { ErrorCallout } from '../../../../components/common/error_callout';
 
 export interface DiscoverNoResultsProps {
   isTimeBased?: boolean;
   query: Query | AggregateQuery | undefined;
   filters: Filter[] | undefined;
-  error?: Error;
   dataView: DataView;
   onDisableFilters: () => void;
 }
@@ -28,35 +25,20 @@ export function DiscoverNoResults({
   isTimeBased,
   query,
   filters,
-  error,
   dataView,
   onDisableFilters,
 }: DiscoverNoResultsProps) {
-  const callOut = !error ? (
-    <EuiFlexItem grow={false}>
-      <NoResultsSuggestions
-        isTimeBased={isTimeBased}
-        query={query}
-        filters={filters}
-        dataView={dataView}
-        onDisableFilters={onDisableFilters}
-      />
-    </EuiFlexItem>
-  ) : (
-    <EuiFlexItem grow={true} className="dscNoResults">
-      <ErrorCallout
-        title={i18n.translate('discover.noResults.searchExamples.noResultsErrorTitle', {
-          defaultMessage: 'Unable to retrieve search results',
-        })}
-        error={error}
-        data-test-subj="discoverNoResultsError"
-      />
-    </EuiFlexItem>
-  );
-
   return (
-    <Fragment>
-      <EuiFlexGroup justifyContent="center">{callOut}</EuiFlexGroup>
-    </Fragment>
+    <EuiFlexGroup justifyContent="center">
+      <EuiFlexItem grow={false}>
+        <NoResultsSuggestions
+          isTimeBased={isTimeBased}
+          query={query}
+          filters={filters}
+          dataView={dataView}
+          onDisableFilters={onDisableFilters}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

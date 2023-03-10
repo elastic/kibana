@@ -9,13 +9,19 @@
 import {
   EuiButton,
   EuiCallOut,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
   EuiLink,
-  EuiPopover,
-  EuiPopoverTitle,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { css, SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
 import { getSearchErrorOverrideDisplay } from '@kbn/data-plugin/public';
 import { i18n } from '@kbn/i18n';
 import React, { ReactNode, useState } from 'react';
@@ -46,15 +52,13 @@ export const ErrorCallout = ({
     application: core.application,
   });
 
-  const [overridePopoverOpen, setOverridePopoverOpen] = useState(false);
+  const [overrideModalOpen, setOverrideModalOpen] = useState(false);
 
   const showError = overrideDisplay?.body
-    ? () => setOverridePopoverOpen((isOpen) => !isOpen)
+    ? () => setOverrideModalOpen(true)
     : () => core.notifications.showErrorDialog({ title, error });
 
   let formattedTitle: ReactNode = overrideDisplay?.title || title;
-  let body: ReactNode;
-  let calloutCss: SerializedStyles | undefined;
 
   if (inline) {
     const formattedTitleMessage = overrideDisplay
@@ -64,72 +68,85 @@ export const ErrorCallout = ({
           values: { title, errorMessage: error.message },
         });
 
-    let link = (
-      <EuiLink
-        onClick={showError}
-        css={css`
-          white-space: nowrap;
-          margin-inline-start: ${euiTheme.size.s};
-        `}
-      >
-        {showErrorMessage}
-      </EuiLink>
-    );
-
-    if (overrideDisplay?.body) {
-      link = (
-        <EuiPopover
-          isOpen={overridePopoverOpen}
-          closePopover={() => setOverridePopoverOpen(false)}
-          button={link}
-          panelProps={{
-            css: css`
-              max-width: ${euiTheme.base * 30}px;
-            `,
-          }}
-        >
-          <EuiPopoverTitle>{overrideDisplay.title}</EuiPopoverTitle>
-          <EuiText>{overrideDisplay.body}</EuiText>
-        </EuiPopover>
-      );
-    }
-
     formattedTitle = (
       <>
         <span className="eui-textTruncate" data-test-subj="discoverErrorCalloutMessage">
           {formattedTitleMessage}
         </span>
-        {link}
-      </>
-    );
-
-    calloutCss = css`
-      .euiTitle {
-        display: flex;
-        align-items: center;
-      }
-    `;
-  } else {
-    body = overrideDisplay?.body ?? (
-      <>
-        <p data-test-subj="discoverErrorCalloutMessage">{error.message}</p>
-        <EuiButton size="s" color="danger" onClick={showError}>
+        <EuiLink
+          onClick={showError}
+          css={css`
+            white-space: nowrap;
+            margin-inline-start: ${euiTheme.size.s};
+          `}
+        >
           {showErrorMessage}
-        </EuiButton>
+        </EuiLink>
       </>
     );
   }
 
   return (
-    <EuiCallOut
-      title={formattedTitle}
-      heading="h3"
-      color="danger"
-      iconType="error"
-      size={inline ? 's' : undefined}
-      children={body}
-      css={calloutCss}
-      data-test-subj={dataTestSubj}
-    />
+    <>
+      {inline ? (
+        <EuiCallOut
+          title={formattedTitle}
+          color="danger"
+          iconType="error"
+          size="s"
+          css={css`
+            .euiTitle {
+              display: flex;
+              align-items: center;
+            }
+          `}
+          data-test-subj={dataTestSubj}
+        />
+      ) : (
+        <EuiEmptyPrompt
+          color="danger"
+          title={
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="error" color="danger" size="l" />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <h2>{formattedTitle}</h2>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+          body={
+            overrideDisplay?.body ?? (
+              <>
+                <p
+                  css={css`
+                    white-space: break-spaces;
+                    font-family: ${euiTheme.font.familyCode};
+                  `}
+                  data-test-subj="discoverErrorCalloutMessage"
+                >
+                  {error.message}
+                </p>
+                <EuiButton onClick={showError}>{showErrorMessage}</EuiButton>
+              </>
+            )
+          }
+          css={css`
+            text-align: left;
+          `}
+          data-test-subj={dataTestSubj}
+        />
+      )}
+      {overrideDisplay && overrideModalOpen && (
+        <EuiModal onClose={() => setOverrideModalOpen(false)}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>{overrideDisplay.title}</EuiModalHeaderTitle>
+          </EuiModalHeader>
+          <EuiModalBody>
+            <EuiText>{overrideDisplay.body}</EuiText>
+          </EuiModalBody>
+        </EuiModal>
+      )}
+    </>
   );
 };
