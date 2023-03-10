@@ -15,61 +15,26 @@ import {
   StackMode,
   timeFormatter,
   Tooltip,
-  TooltipInfo,
   XYChartElementEvent,
-  CustomTooltip,
   TooltipContainer,
+  TooltipInfo,
 } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
-import React from 'react';
+import { keyBy } from 'lodash';
+import React, { useMemo, useState } from 'react';
 import { TopNSample, TopNSubchart } from '../../common/topn';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../hooks/use_profiling_charts_theme';
 import { asPercentage } from '../utils/formatters/as_percentage';
 import { SubChart } from './subchart';
 
-const SubchartTooltip = ({
-  highlightedSubchart,
-  highlightedSample,
-  showFrames,
-}: TooltipInfo & {
-  highlightedSubchart: TopNSubchart;
-  highlightedSample: TopNSample | null;
-  showFrames: boolean;
-}) => {
-  // max tooltip width - 2 * padding (16px)
-  const width = 224;
-  return (
-    <EuiPanel>
-      <SubChart
-        index={highlightedSubchart.Index}
-        color={highlightedSubchart.Color}
-        category={highlightedSubchart.Category}
-        label={highlightedSubchart.Label}
-        data={highlightedSubchart.Series}
-        percentage={highlightedSubchart.Percentage}
-        sample={highlightedSample}
-        showFrames={showFrames}
-        /* we don't show metadata in tooltips */
-        metadata={[]}
-        height={128}
-        width={width}
-        showAxes={false}
-        onShowMoreClick={null}
-        padTitle={false}
-      />
-    </EuiPanel>
-  );
-};
+// 2 * padding (16px)
+const MAX_TOOLTIP_WIDTH = 224;
 
 export interface StackedBarChartProps {
   height: number;
   asPercentages: boolean;
   onBrushEnd: (range: { rangeFrom: string; rangeTo: string }) => void;
-  onSampleOver: (sample: TopNSample) => void;
-  onSampleOut: () => void;
-  highlightedSample: TopNSample | null;
-  highlightedSubchart: TopNSubchart | null;
   charts: TopNSubchart[];
   showFrames: boolean;
 }
@@ -78,29 +43,52 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
   height,
   asPercentages,
   onBrushEnd,
-  onSampleOut,
-  onSampleOver,
-  highlightedSample,
-  highlightedSubchart,
   charts,
   showFrames,
 }) => {
+  const chartsbyCategoryMap = useMemo(() => {
+    return keyBy(charts, 'Category');
+  }, [charts]);
+
   const timeZone = useKibanaTimeZoneSetting();
+  const [highlightedSample, setHighlightedSample] = useState<TopNSample | undefined>();
 
   const { chartsBaseTheme, chartsTheme } = useProfilingChartsTheme();
 
-  const customTooltip: CustomTooltip = highlightedSubchart
-    ? (props) => (
-        <TooltipContainer>
-          <SubchartTooltip
-            {...props}
-            highlightedSubchart={highlightedSubchart!}
-            highlightedSample={highlightedSample}
+  function CustomTooltipWithSubChart(props: TooltipInfo) {
+    if (!highlightedSample) {
+      return null;
+    }
+    const highlightedSubchart = chartsbyCategoryMap[highlightedSample.Category];
+
+    if (!highlightedSubchart) {
+      return null;
+    }
+
+    return (
+      <TooltipContainer>
+        <EuiPanel>
+          <SubChart
+            index={highlightedSubchart.Index}
+            color={highlightedSubchart.Color}
+            category={highlightedSubchart.Category}
+            label={highlightedSubchart.Label}
+            data={highlightedSubchart.Series}
+            percentage={highlightedSubchart.Percentage}
+            sample={highlightedSample}
             showFrames={showFrames}
+            /* we don't show metadata in tooltips */
+            metadata={[]}
+            height={128}
+            width={MAX_TOOLTIP_WIDTH}
+            showAxes={false}
+            onShowMoreClick={null}
+            padTitle={false}
           />
-        </TooltipContainer>
-      )
-    : () => <></>;
+        </EuiPanel>
+      </TooltipContainer>
+    );
+  }
 
   return (
     <Chart size={{ height }}>
@@ -117,13 +105,13 @@ export const StackedBarChart: React.FC<StackedBarChartProps> = ({
         theme={chartsTheme}
         onElementOver={(events) => {
           const [value] = events[0] as XYChartElementEvent;
-          onSampleOver(value.datum as TopNSample);
+          setHighlightedSample(value.datum as TopNSample);
         }}
         onElementOut={() => {
-          onSampleOut();
+          setHighlightedSample(undefined);
         }}
       />
-      <Tooltip customTooltip={customTooltip} />
+      <Tooltip customTooltip={CustomTooltipWithSubChart} />
       {charts.map((chart) => (
         <HistogramBarSeries
           key={chart.Category}

@@ -1396,7 +1396,7 @@
           "\nWait for Elasticsearch to reindex all the changes."
         ],
         "signature": [
-          "({ client, targetIndex, }: ",
+          "({ client, index, }: ",
           "RefreshIndexParams",
           ") => ",
           "TaskEither",
@@ -1413,7 +1413,7 @@
             "id": "def-common.refreshIndex.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n    client,\n    targetIndex,\n  }",
+            "label": "{\n    client,\n    index,\n  }",
             "description": [],
             "signature": [
               "RefreshIndexParams"
