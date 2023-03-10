@@ -18,17 +18,16 @@ import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { SloList } from './components/slo_list';
 import { SloListWelcomePrompt } from './components/slo_list_welcome_prompt';
 import { AutoRefreshButton } from './components/auto_refresh_button';
-import PageNotFound from '../404';
 import { paths } from '../../config';
-import { isSloFeatureEnabled } from './helpers/is_slo_feature_enabled';
 import type { ObservabilityAppServices } from '../../application/types';
+import { HeaderTitle } from './components/header_title';
 
 export function SlosPage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = useKibana<ObservabilityAppServices>().services;
-  const { ObservabilityPageTemplate, config } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
   const { hasWriteCapabilities } = useCapabilities();
   const { hasAtLeast } = useLicense();
 
@@ -55,10 +54,6 @@ export function SlosPage() {
     setIsAutoRefreshing(!isAutoRefreshing);
   };
 
-  if (!isSloFeatureEnabled(config)) {
-    return <PageNotFound />;
-  }
-
   if (isInitialLoading) {
     return null;
   }
@@ -70,9 +65,7 @@ export function SlosPage() {
   return (
     <ObservabilityPageTemplate
       pageHeader={{
-        pageTitle: i18n.translate('xpack.observability.slosPageTitle', {
-          defaultMessage: 'SLOs',
-        }),
+        pageTitle: <HeaderTitle />,
         rightSideItems: [
           <EuiButton
             color="primary"

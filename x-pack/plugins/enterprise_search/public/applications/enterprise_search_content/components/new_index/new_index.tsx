@@ -20,6 +20,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
+
 import { BETA_LABEL } from '../../../shared/constants/labels';
 import { parseQueryParams } from '../../../shared/query_params';
 import { EuiLinkTo } from '../../../shared/react_router_helpers';
@@ -32,13 +34,6 @@ import { SearchIndexEmptyState } from './empty_state';
 import { MethodApi } from './method_api/method_api';
 import { MethodConnector } from './method_connector/method_connector';
 import { MethodCrawler } from './method_crawler/method_crawler';
-
-export enum IngestionMethodId {
-  api = 'api',
-  connector = 'connector',
-  crawler = 'crawler',
-  native_connector = 'native_connector',
-}
 
 const betaBadge = (
   <EuiBadge iconType="beaker">
@@ -58,7 +53,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       defaultMessage: 'No development required',
     }),
     icon: 'globe',
-    id: IngestionMethodId.crawler,
+    id: INGESTION_METHOD_IDS.crawler,
     label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.crawler.label', {
       defaultMessage: 'Use the web crawler',
     }),
@@ -79,7 +74,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       }
     ),
     icon: 'visVega',
-    id: IngestionMethodId.native_connector,
+    id: INGESTION_METHOD_IDS.native_connector,
     label: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.buttonGroup.nativeConnector.label',
       {
@@ -98,7 +93,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       defaultMessage: 'Some development required',
     }),
     icon: 'visVega',
-    id: IngestionMethodId.api,
+    id: INGESTION_METHOD_IDS.api,
     label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.api.label', {
       defaultMessage: 'Use the API',
     }),
@@ -116,7 +111,7 @@ const METHOD_BUTTON_GROUP_OPTIONS: ButtonGroupOption[] = [
       defaultMessage: 'Development required',
     }),
     icon: 'package',
-    id: IngestionMethodId.connector,
+    id: INGESTION_METHOD_IDS.connector,
     label: i18n.translate('xpack.enterpriseSearch.content.newIndex.buttonGroup.connector.label', {
       defaultMessage: 'Build a connector',
     }),
@@ -188,12 +183,12 @@ export const NewIndex: React.FC = () => {
         <EuiFlexItem>
           {selectedMethod ? (
             <>
-              {selectedMethod.id === IngestionMethodId.crawler && <MethodCrawler />}
-              {selectedMethod.id === IngestionMethodId.api && <MethodApi />}
-              {selectedMethod.id === IngestionMethodId.connector && (
+              {selectedMethod.id === INGESTION_METHOD_IDS.crawler && <MethodCrawler />}
+              {selectedMethod.id === INGESTION_METHOD_IDS.api && <MethodApi />}
+              {selectedMethod.id === INGESTION_METHOD_IDS.connector && (
                 <MethodConnector isNative={false} />
               )}
-              {selectedMethod.id === IngestionMethodId.native_connector && (
+              {selectedMethod.id === INGESTION_METHOD_IDS.native_connector && (
                 <MethodConnector isNative />
               )}
             </>

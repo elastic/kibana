@@ -22,6 +22,7 @@ import apm from 'elastic-apm-node';
 import { isEqual } from 'lodash';
 import type { ElasticConfigType } from './elastic_config';
 import { Server } from '../server';
+import { MIGRATION_EXCEPTION_CODE } from '../constants';
 
 /**
  * Top-level entry point to kick off the app and start the Kibana server.
@@ -89,7 +90,9 @@ export class Root {
         );
       }
 
-      this.log.fatal(reason);
+      if (reason.code !== MIGRATION_EXCEPTION_CODE) {
+        this.log.fatal(reason);
+      }
     }
 
     await this.server.stop();
