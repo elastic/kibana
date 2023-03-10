@@ -5,4 +5,12 @@
  * 2.0.
  */
 
-export { SolutionGroupedNav } from './solution_grouped_nav';
+export interface PropertyDefinition {
+  properties?: Record<string, PropertyDefinition>;
+  type: string;
+  description?: string;
+  $ref?: string;
+  items?: PropertyDefinition;
+  anyOf?: PropertyDefinition[];
+  required?: string[];
+}

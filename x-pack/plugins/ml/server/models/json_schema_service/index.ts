@@ -4,8 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export enum TELEMETRY_EVENT {
-  GROUPED_NAVIGATION = 'grouped_navigation_',
-  GROUPED_NAVIGATION_TOGGLE = 'grouped_navigation_toggle_',
-  NAVIGATION = 'navigation_',
-}
+
+export { JsonSchemaService } from './json_schema_service';
