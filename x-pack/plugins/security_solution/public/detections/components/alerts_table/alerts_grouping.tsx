@@ -152,34 +152,27 @@ export const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = 
     }
   }, [defaultFilters, globalFilters, globalQuery, resetPagination]);
 
-  const queryGroups = useMemo(() => {
-    console.log('queryGroups', {
+  const queryGroups = useMemo(
+    () =>
+      getAlertsGroupingQuery({
+        additionalFilters,
+        selectedGroup,
+        from,
+        runtimeMappings,
+        to,
+        pageSize: pagination.pageSize,
+        pageIndex: pagination.pageIndex,
+      }),
+    [
       additionalFilters,
       selectedGroup,
       from,
       runtimeMappings,
       to,
-      pageSize: pagination.pageSize,
-      pageIndex: pagination.pageIndex,
-    });
-    return getAlertsGroupingQuery({
-      additionalFilters,
-      selectedGroup,
-      from,
-      runtimeMappings,
-      to,
-      pageSize: pagination.pageSize,
-      pageIndex: pagination.pageIndex,
-    });
-  }, [
-    additionalFilters,
-    selectedGroup,
-    from,
-    runtimeMappings,
-    to,
-    pagination.pageSize,
-    pagination.pageIndex,
-  ]);
+      pagination.pageSize,
+      pagination.pageIndex,
+    ]
+  );
 
   const {
     data: alertsGroupsData,

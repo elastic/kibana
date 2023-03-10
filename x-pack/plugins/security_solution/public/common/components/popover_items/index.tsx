@@ -65,7 +65,7 @@ const PopoverItemsComponent = <T extends unknown>({
   const OverflowList = ({ items: itemsToRender }: OverflowListProps<T>) => (
     <>{itemsToRender.map(renderItem)}</>
   );
-  console.log('PopoverItemsComponent', { items });
+
   if (items.length <= numberOfItemsToDisplay) {
     return (
       <PopoverItemsWrapper data-test-subj={dataTestPrefix} alignItems="center" gutterSize="s">
