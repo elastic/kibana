@@ -6,7 +6,14 @@
  */
 import React, { useMemo, useEffect, useState } from 'react';
 import styled from 'styled-components';
-import { EuiFlexGroup, EuiFlexItem, EuiButtonIcon, EuiSwitch, EuiButtonEmpty } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiButtonIcon,
+  EuiSwitch,
+  EuiButtonEmpty,
+  EuiInMemoryTable,
+} from '@elastic/eui';
 import { buildEsQuery } from '@kbn/es-query';
 import { Panel } from '../../common/components/panel';
 import { ENTITY_ANALYTICS } from '../../app/translations';
@@ -60,8 +67,11 @@ const EntityAnalyticsPageNewComponent = () => {
       itemIdToExpandedRowMapValues[row.identifierValue] = (
         <div style={{ width: '100%' }}>
           <AlertsTableComponent
-            configId={ALERTS_TABLE_REGISTRY_CONFIG_IDS.CASE}
-            inputFilters={[
+            configId={`securitySolution-riskScores`}
+            globalQuery={query}
+            loadingEventIds={[]}
+            globalFilters={filters}
+            defaultFilters={[
               {
                 meta: {
                   alias: null,
@@ -76,6 +86,8 @@ const EntityAnalyticsPageNewComponent = () => {
               },
             ]}
             tableId={row.identifierValue}
+            from={range.from}
+            to={range.to}
             // onRuleChange={refreshRule}
           />
         </div>
@@ -181,15 +193,18 @@ const EntityAnalyticsPageNewComponent = () => {
     {
       field: 'identifierValue',
       name: 'Name',
+      sortable: true,
     },
     {
       field: 'identifierField',
       name: 'Field',
+      sortable: true,
     },
     {
       field: 'calculatedScore',
       align: 'right',
       name: 'Score',
+      sortable: true,
       render: (score) => {
         if (score != null) {
           return Math.round(score * 100) / 100;
@@ -201,6 +216,7 @@ const EntityAnalyticsPageNewComponent = () => {
       field: 'calculatedScoreNorm',
       align: 'right',
       name: 'Score norm',
+      sortable: true,
       render: (scoreNorm) => {
         if (scoreNorm != null) {
           return Math.round(scoreNorm * 100) / 100;
@@ -211,6 +227,7 @@ const EntityAnalyticsPageNewComponent = () => {
     {
       field: 'calculatedLevel',
       name: 'Level',
+      sortable: true,
       render: (risk) => {
         if (risk != null) {
           return <RiskScore severity={risk} />;
@@ -243,6 +260,39 @@ const EntityAnalyticsPageNewComponent = () => {
 
   const firstHostRisk = hostRiskList[0];
 
+  const search = {
+    box: {
+      incremental: true,
+    },
+    filters: [
+      {
+        type: 'field_value_selection',
+        field: 'calculatedLevel',
+        name: 'Level',
+        multiSelect: false,
+        options: [
+          { value: 'Unknown' },
+          { value: 'Low' },
+          { value: 'Moderate' },
+          { value: 'High' },
+          { value: 'Critical' },
+        ],
+      },
+    ],
+  };
+
+  const writeInNewPage = (info) => {
+    const tab = window.open('about:blank', '_blank');
+    tab?.document?.write(`
+      <html>
+        <body>
+          <pre>${JSON.stringify(info, null, 2)}<pre>
+        </body>
+      </html>
+    `);
+    tab?.document?.close();
+  };
+
   return (
     <StyledFullHeightContainer>
       <SecuritySolutionPageWrapper data-test-subj="entityAnalyticsPage">
@@ -260,7 +310,22 @@ const EntityAnalyticsPageNewComponent = () => {
 
             <div>
               {withDebug && (
-                <EuiButtonEmpty onClick={(e) => setShowModal(true)}>Show Debug Info</EuiButtonEmpty>
+                <>
+                  <EuiButtonEmpty
+                    onClick={(e) => {
+                      writeInNewPage(debugInfo?.request);
+                    }}
+                  >
+                    Show Request
+                  </EuiButtonEmpty>
+                  <EuiButtonEmpty
+                    onClick={(e) => {
+                      writeInNewPage(debugInfo?.response);
+                    }}
+                  >
+                    Show Response
+                  </EuiButtonEmpty>
+                </>
               )}
               {showModal && (
                 <ModalInspectQuery
@@ -281,7 +346,7 @@ const EntityAnalyticsPageNewComponent = () => {
 
                 <EuiFlexGroup data-test-subj="entity_analytics_content">
                   <EuiFlexItem grow={false}>
-                    <StyledBasicTable
+                    <EuiInMemoryTable
                       responsive={false}
                       items={hostRiskList}
                       columns={columns}
@@ -289,6 +354,14 @@ const EntityAnalyticsPageNewComponent = () => {
                       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
                       isExpandable={true}
                       itemId="identifierValue"
+                      pagination={true}
+                      sorting={{
+                        sort: {
+                          field: 'calculatedScoreNorm',
+                          direction: 'desc' as const,
+                        },
+                      }}
+                      search={search}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -302,7 +375,7 @@ const EntityAnalyticsPageNewComponent = () => {
 
                 <EuiFlexGroup data-test-subj="entity_analytics_content">
                   <EuiFlexItem grow={false}>
-                    <StyledBasicTable
+                    <EuiInMemoryTable
                       responsive={false}
                       items={userRiskList}
                       columns={columns}
@@ -310,6 +383,14 @@ const EntityAnalyticsPageNewComponent = () => {
                       itemIdToExpandedRowMap={itemIdToExpandedRowMap}
                       isExpandable={true}
                       itemId="identifierValue"
+                      pagination={true}
+                      sorting={{
+                        sort: {
+                          field: 'calculatedScoreNorm',
+                          direction: 'desc' as const,
+                        },
+                      }}
+                      search={search}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
