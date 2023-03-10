@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { CsvGenerator } from './generate_csv';
+export { CsvGenerator } from './src/generate_csv';

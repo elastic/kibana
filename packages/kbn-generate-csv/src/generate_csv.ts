@@ -8,11 +8,7 @@
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import type {
-  ISearchSource,
-  ISearchStartSearchSource,
-  SerializedSearchSourceFields,
-} from '@kbn/data-plugin/common';
+import type { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { cellHasFormulas, ES_SEARCH_STRATEGY, tabifyDocs } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { Datatable } from '@kbn/expressions-plugin/server';
@@ -28,13 +24,11 @@ import {
   AuthenticationExpiredError,
   ReportingError,
   byteSizeValueToNumber,
-  CONTENT_TYPE_CSV,
 } from '@kbn/reporting-common';
-import type { TaskRunResult } from '@kbn/reporting-plugin/server/lib/tasks';
-import { ByteSizeValue } from '@kbn/config-schema';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
 import { i18nTexts } from './i18n_texts';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
+import { CONTENT_TYPE_CSV, CsvConfig, JobParams, TaskRunResult } from '../types';
 
 interface Clients {
   es: IScopedClusterClient;
@@ -45,23 +39,6 @@ interface Clients {
 interface Dependencies {
   searchSourceStart: ISearchStartSearchSource;
   fieldFormatsRegistry: IFieldFormatsRegistry;
-}
-
-export interface JobParams {
-  searchSource: SerializedSearchSourceFields;
-  columns?: string[];
-  browserTimezone?: string;
-}
-
-export interface CsvConfig {
-  checkForFormulas: boolean;
-  escapeFormulaValues: boolean;
-  maxSizeBytes: number | ByteSizeValue;
-  useByteOrderMarkEncoding: boolean;
-  scroll: {
-    duration: string;
-    size: number;
-  };
 }
 
 export class CsvGenerator {
@@ -510,7 +487,7 @@ export class CsvGenerator {
       csv_contains_formulas: this.csvContainsFormulas && !escapeFormulaValues,
       max_size_reached: this.maxSizeReached,
       metrics: {
-        csv: { rows: this.csvRowCount },
+        rows: this.csvRowCount,
       },
       warnings,
       error_code: reportingError?.code,

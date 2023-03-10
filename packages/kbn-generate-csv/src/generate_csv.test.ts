@@ -23,13 +23,14 @@ import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
-import { CsvConfig, CsvGenerator, JobParams } from './generate_csv';
-import { CancellationToken } from '@kbn/reporting-common';
+import { CsvGenerator } from './generate_csv';
+import { CancellationToken, UI_SETTINGS_DATEFORMAT_TZ } from '@kbn/reporting-common';
 import {
+  CsvConfig,
+  JobParams,
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
-  UI_SETTINGS_DATEFORMAT_TZ,
-} from '@kbn/reporting-plugin/common/constants';
+} from '../types';
 
 const createMockJob = (baseObj: any = {}): JobParams => ({
   ...baseObj,
