@@ -41,10 +41,11 @@ import { API_ENDPOINT } from '../../common/api';
 import { isRequestAbortedError } from '../lib/is_request_aborted_error';
 import type { AiopsLicense } from '../types';
 
-import { duplicateIdentifier } from './queries/duplicate_identifier';
+// import { duplicateIdentifier } from './queries/duplicate_identifier';
 import { fetchSignificantTermPValues } from './queries/fetch_significant_term_p_values';
 import { fetchIndexInfo } from './queries/fetch_index_info';
-import { dropDuplicates, fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
+// import { dropDuplicates, fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
+import { fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
 import { getHistogramQuery } from './queries/get_histogram_query';
 import { getGroupFilter } from './queries/get_group_filter';
 import { getSignificantTermGroups } from './queries/get_significant_term_groups';
@@ -424,17 +425,17 @@ export const defineExplainLogRateSpikesRoute = (
             );
 
             // Deduplicated significant terms we pass to the `frequent_item_sets` aggregation.
-            const deduplicatedSignificantTerms = dropDuplicates(
-              significantTerms,
-              duplicateIdentifier
-            );
+            // const deduplicatedSignificantTerms = dropDuplicates(
+            //   significantTerms,
+            //   duplicateIdentifier
+            // );
 
             try {
               const { fields, df } = await fetchFrequentItemSets(
                 client,
                 request.body.index,
                 JSON.parse(request.body.searchQuery) as estypes.QueryDslQueryContainer,
-                deduplicatedSignificantTerms,
+                significantTerms,
                 request.body.timeFieldName,
                 request.body.deviationMin,
                 request.body.deviationMax,

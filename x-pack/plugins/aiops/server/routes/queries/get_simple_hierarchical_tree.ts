@@ -76,14 +76,14 @@ function dfDepthFirstSearch(
   if (parentDocCount === docCount && collapseRedundant) {
     // collapse identical paths
     displayParent.name += ` ${value}`;
-    displayParent.set.push({ fieldName: field, fieldValue: value });
+    displayParent.set.push({ fieldName: field, fieldValue: value, docCount, pValue });
     displayParent.docCount = docCount;
     displayParent.pValue = pValue;
     displayNode = displayParent;
   } else {
     displayNode = NewNodeFactory(`${docCount}/${totalDocCount}${label}`);
     displayNode.set = [...displayParent.set];
-    displayNode.set.push({ fieldName: field, fieldValue: value });
+    displayNode.set.push({ fieldName: field, fieldValue: value, docCount, pValue });
     displayNode.docCount = docCount;
     displayNode.pValue = pValue;
     displayParent.addNode(displayNode);

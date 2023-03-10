@@ -8,7 +8,8 @@
 import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
 
 import { duplicateIdentifier } from './duplicate_identifier';
-import { dropDuplicates, groupDuplicates } from './fetch_frequent_item_sets';
+// import { dropDuplicates, groupDuplicates } from './fetch_frequent_item_sets';
+import { groupDuplicates } from './fetch_frequent_item_sets';
 import { getFieldValuePairCounts } from './get_field_value_pair_counts';
 import { getMarkedDuplicates } from './get_marked_duplicates';
 import { getSimpleHierarchicalTree } from './get_simple_hierarchical_tree';
@@ -25,7 +26,7 @@ export function getSignificantTermGroups(
   fields: string[]
 ): SignificantTermGroup[] {
   // These are the deduplicated significant terms we pass to the `frequent_item_sets` aggregation.
-  const deduplicatedSignificantTerms = dropDuplicates(significantTerms, duplicateIdentifier);
+  // const deduplicatedSignificantTerms = dropDuplicates(significantTerms, duplicateIdentifier);
 
   // We use the grouped significant terms to later repopulate
   // the `frequent_item_sets` result with the missing duplicates.
@@ -62,10 +63,7 @@ export function getSignificantTermGroups(
   // Some field/value pairs might not be part of the `frequent_item_sets` result set, for example
   // because they don't co-occur with other field/value pairs or because of the limits we set on the query.
   // In this next part we identify those missing pairs and add them as individual groups.
-  const missingSignificantTerms = getMissingSignificantTerms(
-    deduplicatedSignificantTerms,
-    significantTermGroups
-  );
+  const missingSignificantTerms = getMissingSignificantTerms([], significantTermGroups);
 
   significantTermGroups.push(
     ...missingSignificantTerms.map((significantTerm) =>
@@ -73,5 +71,5 @@ export function getSignificantTermGroups(
     )
   );
 
-  return significantTermGroups;
+  return significantTermGroupsWithMarkedDuplicates;
 }

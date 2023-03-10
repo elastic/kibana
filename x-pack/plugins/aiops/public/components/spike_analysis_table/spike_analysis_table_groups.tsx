@@ -18,6 +18,7 @@ import {
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiTableSortingType,
+  EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
   useEuiTheme,
@@ -43,7 +44,7 @@ const NARROW_COLUMN_WIDTH = '120px';
 const EXPAND_COLUMN_WIDTH = '40px';
 const ACTIONS_COLUMN_WIDTH = '60px';
 const NOT_AVAILABLE = '--';
-const MAX_GROUP_BADGES = 10;
+const MAX_GROUP_BADGES = 5;
 
 const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'pValue';
@@ -253,13 +254,12 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
           </>
         </EuiToolTip>
       ),
-      render: (_, { group, repeatedValues }) => {
+      render: (_, { group, repeatedValues, mostSignificantValues }) => {
         const valuesBadges = [];
-        const hasExtraBadges = group.length > MAX_GROUP_BADGES;
 
-        for (const groupItem of group) {
-          const { fieldName, fieldValue } = groupItem;
-          if (valuesBadges.length === MAX_GROUP_BADGES) break;
+        for (const groupItem of mostSignificantValues) {
+          const { fieldName, fieldValue, duplicate } = groupItem;
+          if (valuesBadges.length >= MAX_GROUP_BADGES) break;
           valuesBadges.push(
             <>
               <EuiBadge
@@ -267,50 +267,39 @@ export const SpikeAnalysisGroupsTable: FC<SpikeAnalysisTableProps> = ({
                 data-test-subj="aiopsSpikeAnalysisTableColumnGroupBadge"
                 color="hollow"
               >
-                <span>{`${fieldName}: `}</span>
+                <span>
+                  {(duplicate ?? 0) <= 1 ? '* ' : ''}
+                  {`${fieldName}: `}
+                </span>
                 <span style={{ color: visColors[2] }}>{`${fieldValue}`}</span>
               </EuiBadge>
               <EuiSpacer size="xs" />
             </>
           );
         }
-        if (repeatedValues.length > 0 || hasExtraBadges) {
-          valuesBadges.push(
-            <>
-              <EuiBadge
-                key={`$more-id`}
-                data-test-subj="aiopsSpikeAnalysisGroupsTableColumnGroupBadge"
-                color="hollow"
-              >
-                {hasExtraBadges ? (
-                  <>
-                    <FormattedMessage
-                      id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreLabel"
-                      defaultMessage="+{count, plural, one {# more field/value pair} other {# more field/value pairs}}"
-                      values={{ count: group.length - MAX_GROUP_BADGES }}
-                    />
-                    <br />
-                  </>
-                ) : null}
-                {repeatedValues.length > 0 && valuesBadges.length ? (
-                  <FormattedMessage
-                    id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.moreRepeatedLabel"
-                    defaultMessage="+{count, plural, one {# more field/value pair} other {# more field/value pairs}} also appearing in other groups"
-                    values={{ count: repeatedValues.length }}
-                  />
-                ) : null}
-                {repeatedValues.length > 0 && !valuesBadges.length ? (
-                  <FormattedMessage
-                    id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.onlyMoreRepeatedLabel"
-                    defaultMessage="{count, plural, one {# field/value pair} other {# field/value pairs}} also appearing in other groups"
-                    values={{ count: repeatedValues.length }}
-                  />
-                ) : null}
-              </EuiBadge>
-              <EuiSpacer size="xs" />
-            </>
-          );
-        }
+
+        valuesBadges.push(
+          <>
+            <EuiText
+              key={`$more-id`}
+              data-test-subj="aiopsSpikeAnalysisGroupsTableColumnGroupBadge"
+              color="subdued"
+              size="xs"
+            >
+              <FormattedMessage
+                id="xpack.aiops.explainLogRateSpikes.spikeAnalysisTableGroups.groupLabel"
+                defaultMessage="Showing {valuesBadges} out of {count} group items. {unique} items unique to this group."
+                values={{
+                  count: mostSignificantValues.length,
+                  valuesBadges: valuesBadges.length,
+                  unique: group.length,
+                }}
+              />
+            </EuiText>
+            <EuiSpacer size="xs" />
+          </>
+        );
+
         return valuesBadges;
       },
       sortable: false,

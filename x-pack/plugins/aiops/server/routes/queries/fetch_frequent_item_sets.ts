@@ -79,7 +79,7 @@ export async function fetchFrequentItemSets(
 
   const query = {
     bool: {
-      minimum_should_match: 2,
+      minimum_should_match: 1,
       filter: [
         searchQuery,
         {
@@ -91,9 +91,10 @@ export async function fetchFrequentItemSets(
           },
         },
       ],
-      should: sortedSignificantTerms.map((t) => {
-        return { term: { [t.fieldName]: t.fieldValue } };
-      }),
+      should: Array.from(
+        group(sortedSignificantTerms, ({ fieldName }) => fieldName),
+        ([field, values]) => ({ terms: { [field]: values.map((d) => d.fieldValue) } })
+      ),
     },
   };
 
@@ -106,9 +107,9 @@ export async function fetchFrequentItemSets(
     fi: {
       // @ts-expect-error `frequent_item_sets` is not yet part of `AggregationsAggregationContainer`
       frequent_item_sets: {
-        minimum_set_size: 2,
+        minimum_set_size: 1,
         size: 200,
-        minimum_support: 0.01,
+        minimum_support: 0.001,
         fields: aggFields,
       },
     },

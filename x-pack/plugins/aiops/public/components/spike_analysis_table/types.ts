@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import type { SignificantTerm, FieldValuePair } from '@kbn/ml-agg-utils';
+import type { SignificantTerm, SignificantTermGroupItem } from '@kbn/ml-agg-utils';
+
+export type GroupTableItemGroup = Pick<
+  SignificantTermGroupItem,
+  'fieldName' | 'fieldValue' | 'docCount' | 'pValue' | 'duplicate'
+>;
 
 export interface GroupTableItem {
   id: string;
   docCount: number;
   pValue: number | null;
-  group: FieldValuePair[];
-  repeatedValues: FieldValuePair[];
+  group: GroupTableItemGroup[];
+  repeatedValues: GroupTableItemGroup[];
+  mostSignificantValues: GroupTableItemGroup[];
   histogram: SignificantTerm['histogram'];
 }
