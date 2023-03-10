@@ -28,6 +28,7 @@ export interface DashboardPublicState {
   lastSavedInput: DashboardContainerByValueInput;
   isEmbeddedExternally?: boolean;
   hasUnsavedChanges?: boolean;
+  hasOverlays?: boolean;
   expandedPanelId?: string;
   fullScreenMode?: boolean;
   savedQueryId?: string;

@@ -200,4 +200,12 @@ export const dashboardContainerReducers = {
   setFullScreenMode: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
     state.componentState.fullScreenMode = action.payload;
   },
+
+  // ------------------------------------------------------------------------------
+  // Component state reducers
+  // ------------------------------------------------------------------------------
+
+  setHasOverlays: (state: DashboardReduxState, action: PayloadAction<boolean>) => {
+    state.componentState.hasOverlays = action.payload;
+  },
 };

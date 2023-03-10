@@ -55,6 +55,7 @@ export const useDashboardMenuItems = ({
   const dispatch = useEmbeddableDispatch();
 
   const hasUnsavedChanges = select((state) => state.componentState.hasUnsavedChanges);
+  const hasOverlays = select((state) => state.componentState.hasOverlays);
   const lastSavedId = select((state) => state.componentState.lastSavedId);
   const dashboardTitle = select((state) => state.explicitInput.title);
 
@@ -169,7 +170,7 @@ export const useDashboardMenuItems = ({
         emphasize: true,
         isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
-        disableButton: !hasUnsavedChanges || isSaveInProgress,
+        disableButton: !hasUnsavedChanges || isSaveInProgress || hasOverlays,
         run: () => quickSaveDashboard(),
       } as TopNavMenuData,
 
@@ -220,6 +221,7 @@ export const useDashboardMenuItems = ({
     quickSaveDashboard,
     dashboardContainer,
     hasUnsavedChanges,
+    hasOverlays,
     setFullScreenMode,
     isSaveInProgress,
     returnToViewMode,

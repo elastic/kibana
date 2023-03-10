@@ -44,7 +44,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
   const {
     useEmbeddableDispatch,
     useEmbeddableSelector: select,
-    actions: { setStateFromSettingsFlyout },
+    actions: { setStateFromSettingsFlyout, setHasOverlays },
     embeddableInstance: dashboardContainer,
   } = useDashboardContainerContext();
 
@@ -74,6 +74,13 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
   );
 
   const dispatch = useEmbeddableDispatch();
+
+  dispatch(setHasOverlays(true));
+
+  const closeFlyout = () => {
+    dispatch(setHasOverlays(false));
+    onClose();
+  };
 
   const renderDuplicateTitleCallout = () => {
     if (!isTitleDuplicate) {
@@ -288,7 +295,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-test-subj="cancelCustomizeDashboardButton"
-              onClick={() => onClose()}
+              onClick={() => closeFlyout()}
             >
               <FormattedMessage
                 id="dashboardContainer.embeddableApi.showSettings.flyout.cancelButtonTitle"
@@ -310,7 +317,7 @@ export const DashboardSettings = ({ onClose }: DashboardSettingsProps) => {
                   })
                 ) {
                   dispatch(setStateFromSettingsFlyout({ lastSavedId, ...dashboardSettingsState }));
-                  onClose();
+                  closeFlyout();
                 }
               }}
               fill
