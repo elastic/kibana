@@ -40,7 +40,7 @@ export const Table = (props: Props) => {
         name: FIELD_LABEL,
         width: '35%',
         sortable: false,
-        render: (name: string, item: Row) => <EuiText size="s">{name}</EuiText>,
+        render: (name: string) => <EuiText size="s">{name}</EuiText>,
       },
       {
         field: 'value',
