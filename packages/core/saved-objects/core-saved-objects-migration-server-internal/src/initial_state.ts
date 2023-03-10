@@ -17,6 +17,8 @@ import type {
 } from '@kbn/core-saved-objects-base-server-internal';
 import type { InitState } from './state';
 import { excludeUnusedTypesQuery } from './core';
+import { getTempIndexName } from './model/helpers';
+import type { TypeIndexMap } from './kibana_migrator_constants';
 
 /**
  * Construct the initial state for the model
@@ -24,6 +26,8 @@ import { excludeUnusedTypesQuery } from './core';
 export const createInitialState = ({
   kibanaVersion,
   waitForMigrationCompletion,
+  mustRedistributeDocuments,
+  typeIndexMap,
   targetMappings,
   preMigrationScript,
   migrationVersionPerType,
@@ -35,6 +39,8 @@ export const createInitialState = ({
 }: {
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
+  mustRedistributeDocuments: boolean;
+  typeIndexMap: TypeIndexMap;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
   migrationVersionPerType: SavedObjectsMigrationVersion;
@@ -98,12 +104,14 @@ export const createInitialState = ({
   return {
     controlState: 'INIT',
     waitForMigrationCompletion,
+    mustRedistributeDocuments,
+    typeIndexMap,
     indexPrefix,
     legacyIndex: indexPrefix,
     currentAlias: indexPrefix,
     versionAlias: `${indexPrefix}_${kibanaVersion}`,
     versionIndex: `${indexPrefix}_${kibanaVersion}_001`,
-    tempIndex: `${indexPrefix}_${kibanaVersion}_reindex_temp`,
+    tempIndex: getTempIndexName(indexPrefix, kibanaVersion),
     kibanaVersion,
     preMigrationScript: Option.fromNullable(preMigrationScript),
     targetIndexMappings: targetMappings,

@@ -11,6 +11,7 @@ import { customElementMigrationsFactory, CanvasSavedObjectTypeMigrationsDeps } f
 
 export const customElementType = (deps: CanvasSavedObjectTypeMigrationsDeps): SavedObjectsType => ({
   name: CUSTOM_ELEMENT_TYPE,
+  indexPattern: '.kibana_ui',
   hidden: false,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',

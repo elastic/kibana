@@ -30,12 +30,19 @@ import {
   type KibanaMigratorStatus,
   type MigrationResult,
 } from '@kbn/core-saved-objects-base-server-internal';
+import type { Defer } from '@kbn/kibana-utils-plugin/common';
 import { buildActiveMappings, buildTypesMappings } from './core';
 import { DocumentMigrator, type VersionedTransformer } from './document_migrator';
 import { createIndexMap } from './core/build_index_map';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
 import { runZeroDowntimeMigration } from './zdt';
+import {
+  checkTypeIndexDistribution,
+  createMultiPromiseDefer,
+  indexMapToTypeIndexMap,
+} from './kibana_migrator_utils';
+import { TypeStatus } from './kibana_migrator_constants';
 
 // ensure plugins don't try to convert SO namespaceTypes after 8.0.0
 // see https://github.com/elastic/kibana/issues/147344
@@ -157,12 +164,15 @@ export class KibanaMigrator implements IKibanaMigrator {
     });
   }
 
-  private runMigrationV2(): Promise<MigrationResult[]> {
+  private async runMigrationV2(): Promise<MigrationResult[]> {
     const indexMap = createIndexMap({
       kibanaIndexName: this.kibanaIndex,
       indexMap: this.mappingProperties,
       registry: this.typeRegistry,
     });
+
+    const migratorIndices = new Set(Object.keys(indexMap));
+    const indicesWithMovingTypesSet = new Set<string>();
 
     this.log.debug('Applying registered migrations for the following saved object types:');
     Object.entries(this.documentMigrator.migrationVersion)
@@ -173,16 +183,54 @@ export class KibanaMigrator implements IKibanaMigrator {
         this.log.debug(`migrationVersion: ${migrationVersion} saved object type: ${type}`);
       });
 
-    const migrators = Object.keys(indexMap).map((index) => {
+    let readyToReindexDefers: Record<string, Defer<void>> = {};
+    let doneReindexingDefers: Record<string, Defer<void>> = {};
+
+    const typeIndexMap = indexMapToTypeIndexMap(indexMap);
+
+    try {
+      const typeIndexDistribution = await checkTypeIndexDistribution(
+        this.client,
+        typeIndexMap
+      );
+
+      const relocated = Object.entries(typeIndexDistribution).filter(([, { status }]) => status === TypeStatus.Moved);
+      relocated.forEach(([, { currentIndex, targetIndex }]) => {
+        // we still want to run migrators for indices that no longer have any SO type assigned to them
+        migratorIndices.add(currentIndex!);
+        indicesWithMovingTypesSet.add(currentIndex!);
+        indicesWithMovingTypesSet.add(targetIndex!);
+      });
+
+      const indicesWithMovingTypes = Array.from(indicesWithMovingTypesSet);
+      readyToReindexDefers = createMultiPromiseDefer(indicesWithMovingTypes);
+      doneReindexingDefers = createMultiPromiseDefer(indicesWithMovingTypes);
+
+    } catch (error) {
+      this.log.fatal('Cannot query the meta information of the main saved object index');
+      throw error;
+    }
+
+
+    const migrators = Array.from(migratorIndices).map((indexName, i) => {
       return {
         migrate: (): Promise<MigrationResult> => {
+          const readyToReindex = readyToReindexDefers[indexName];
+          const doneReindexing = doneReindexingDefers[indexName];
+          // check if this migrator's index is involved in some document redistribution
+          const mustRedistributeDocuments = !!readyToReindex;
+
           return runResilientMigrator({
             client: this.client,
             kibanaVersion: this.kibanaVersion,
+            mustRedistributeDocuments,
+            typeIndexMap,
             waitForMigrationCompletion: this.waitForMigrationCompletion,
-            targetMappings: buildActiveMappings(indexMap[index].typeMappings),
+            targetMappings: buildActiveMappings(indexMap[indexName].typeMappings),
             logger: this.log,
-            preMigrationScript: indexMap[index].script,
+            preMigrationScript: indexMap[indexName].script,
+            readyToReindex,
+            doneReindexing,
             transformRawDocs: (rawDocs: SavedObjectsRawDoc[]) =>
               migrateRawDocsSafely({
                 serializer: this.serializer,
@@ -190,7 +238,7 @@ export class KibanaMigrator implements IKibanaMigrator {
                 rawDocs,
               }),
             migrationVersionPerType: this.documentMigrator.migrationVersion,
-            indexPrefix: index,
+            indexPrefix: indexName,
             migrationsConfig: this.soMigrationsConfig,
             typeRegistry: this.typeRegistry,
             docLinks: this.docLinks,

@@ -18,6 +18,7 @@ export const createDashboardSavedObjectType = ({
   migrationDeps: DashboardSavedObjectTypeMigrationsDeps;
 }): SavedObjectsType => ({
   name: 'dashboard',
+  indexPattern: '.kibana_ui',
   hidden: false,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',

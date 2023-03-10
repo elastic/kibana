@@ -19,6 +19,7 @@ import type { AliasAction } from './actions';
 import type { TransformErrorObjects } from './core';
 import type { MigrationLog, Progress } from './types';
 import type { BulkOperation } from './model/create_batches';
+import type { TypeIndexMap } from './kibana_migrator_constants';
 
 export interface BaseState extends ControlState {
   /** The first part of the index name such as `.kibana` or `.kibana_task_manager` */
@@ -151,6 +152,23 @@ export interface BaseState extends ControlState {
    */
   readonly migrationDocLinks: DocLinks['kibanaUpgradeSavedObjects'];
   readonly waitForMigrationCompletion: boolean;
+
+  /**
+   * This flag tells the migrator that SO documents must be redistributed,
+   * i.e. stored in different system indices, compared to where they are currently stored.
+   * This requires reindexing documents.
+   */
+  readonly mustRedistributeDocuments: boolean;
+
+  /**
+   * This object holds a relation of all the types that are stored in each index, e.g.:
+   * {
+   *  '.kibana': [ 'type_1', 'type_2', ... 'type_N' ],
+   *  '.kibana_cases': [ 'type_N+1', 'type_N+2', ... 'type_N+M' ],
+   *  ...
+   * }
+   */
+  readonly typeIndexMap: TypeIndexMap;
 }
 
 export interface InitState extends BaseState {
@@ -277,12 +295,17 @@ export interface CreateNewTargetState extends PostInitState {
   readonly versionIndexReadyActions: Option.Some<AliasAction[]>;
 }
 
-export interface CreateReindexTempState extends PostInitWithSource {
+export interface CreateReindexTempState extends PostInitState {
   /**
    * Create a target index with mappings from the source index and registered
    * plugins
    */
   readonly controlState: 'CREATE_REINDEX_TEMP';
+}
+
+export interface ReadyToReindexSyncState extends PostInitState {
+  /** Open PIT to the source index */
+  readonly controlState: 'READY_TO_REINDEX_SYNC';
 }
 
 export interface ReindexSourceToTempOpenPit extends PostInitWithSource {
@@ -318,11 +341,16 @@ export interface ReindexSourceToTempIndexBulk extends ReindexSourceToTempBatch {
   readonly currentBatch: number;
 }
 
-export interface SetTempWriteBlock extends PostInitWithSource {
+export interface DoneReindexingSyncState extends PostInitState {
+  /** Open PIT to the source index */
+  readonly controlState: 'DONE_REINDEXING_SYNC';
+}
+
+export interface SetTempWriteBlock extends PostInitState {
   readonly controlState: 'SET_TEMP_WRITE_BLOCK';
 }
 
-export interface CloneTempToSource extends PostInitWithSource {
+export interface CloneTempToTarget extends PostInitState {
   /**
    * Clone the temporary reindex index into
    */
@@ -503,9 +531,10 @@ export type State = Readonly<
   | CheckVersionIndexReadyActions
   | CleanupUnknownAndExcluded
   | CleanupUnknownAndExcludedWaitForTaskState
-  | CloneTempToSource
+  | CloneTempToTarget
   | CreateNewTargetState
   | CreateReindexTempState
+  | DoneReindexingSyncState
   | DoneState
   | FatalState
   | InitState
@@ -522,6 +551,7 @@ export type State = Readonly<
   | OutdatedDocumentsSearchRead
   | OutdatedDocumentsTransform
   | PrepareCompatibleMigration
+  | ReadyToReindexSyncState
   | RefreshSource
   | RefreshTarget
   | ReindexSourceToTempClosePit

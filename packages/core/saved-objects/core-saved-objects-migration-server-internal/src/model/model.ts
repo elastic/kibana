@@ -221,19 +221,36 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           ]),
         };
       } else {
-        // This cluster doesn't have an existing Saved Object index, create a
-        // new version specific index.
         const target = stateP.versionIndex;
-        return {
-          ...stateP,
-          controlState: 'CREATE_NEW_TARGET',
-          sourceIndex: Option.none as Option.None,
-          targetIndex: target,
-          versionIndexReadyActions: Option.some([
-            { add: { index: target, alias: stateP.currentAlias } },
-            { add: { index: target, alias: stateP.versionAlias } },
-          ]) as Option.Some<AliasAction[]>,
-        };
+
+        // This migrator's index does not exist yet
+        if (stateP.mustRedistributeDocuments) {
+          // other migrators want to redistribute documents to this migrator's index
+          return {
+            ...stateP,
+            controlState: 'CREATE_REINDEX_TEMP',
+            sourceIndex: Option.none as Option.None,
+            targetIndex: target,
+            versionIndexReadyActions: Option.some([
+              { add: { index: target, alias: stateP.currentAlias } },
+              { add: { index: target, alias: stateP.versionAlias } },
+              { remove_index: { index: stateP.tempIndex } },
+            ]),
+          };
+        } else {
+          // no need to copy anything over from other indices, we can start with a clean, empty index
+          const target = stateP.versionIndex;
+          return {
+            ...stateP,
+            controlState: 'CREATE_NEW_TARGET',
+            sourceIndex: Option.none as Option.None,
+            targetIndex: target,
+            versionIndexReadyActions: Option.some([
+              { add: { index: target, alias: stateP.currentAlias } },
+              { add: { index: target, alias: stateP.versionAlias } },
+            ]) as Option.Some<AliasAction[]>,
+          };
+        }
       }
     } else {
       return throwBadResponse(stateP, res);
@@ -433,7 +450,9 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           stateP.sourceIndexMappings,
           /* expected */
           stateP.targetIndexMappings
-        )
+        ) &&
+        // if we must redistribute documents, we are forced to reindex
+        !stateP.mustRedistributeDocuments
       ) {
         // the existing mappings match, we can avoid reindexing
         return {
@@ -717,7 +736,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
   } else if (stateP.controlState === 'CREATE_REINDEX_TEMP') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
     if (Either.isRight(res)) {
-      return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT' };
+      return { ...stateP, controlState: 'READY_TO_REINDEX_SYNC' };
     } else if (Either.isLeft(res)) {
       const left = res.left;
       if (isTypeof(left, 'index_not_green_timeout')) {
@@ -743,6 +762,25 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       // it will wait until the index status turns green so we don't have any
       // left responses to handle here.
       throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'READY_TO_REINDEX_SYNC') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      if (Option.isSome(stateP.sourceIndex)) {
+        // this migrator's source index exist, reindex its entries
+        return { ...stateP, controlState: 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT', sourceIndex: stateP.sourceIndex as Option.Some<string> };
+      } else {
+        // this migrator's source index did NOT exist, this migrator does not need to reindex anything (other might need to)
+        return { ...stateP, controlState: 'DONE_REINDEXING_SYNC' };
+      }
+    } else if (Either.isLeft(res)) {
+      return {
+        ...stateP,
+        controlState: 'FATAL',
+        reason: 'An error occurred whilst waiting for all migrators to get to this step.',
+      };
+    } else {
+      return throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_OPEN_PIT') {
     const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
@@ -824,11 +862,23 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
       const { sourceIndexPitId, ...state } = stateP;
       return {
         ...state,
-        controlState: 'SET_TEMP_WRITE_BLOCK',
-        sourceIndex: stateP.sourceIndex as Option.Some<string>,
+        controlState: 'DONE_REINDEXING_SYNC',
       };
     } else {
       throwBadResponse(stateP, res);
+    }
+  } else if (stateP.controlState === 'DONE_REINDEXING_SYNC') {
+    const res = resW as ExcludeRetryableEsError<ResponseType<typeof stateP.controlState>>;
+    if (Either.isRight(res)) {
+      return { ...stateP, controlState: 'SET_TEMP_WRITE_BLOCK' };
+    } else if (Either.isLeft(res)) {
+      return {
+        ...stateP,
+        controlState: 'FATAL',
+        reason: 'An error occurred whilst waiting for all migrators to get to this step.',
+      };
+    } else {
+      return throwBadResponse(stateP, res as never);
     }
   } else if (stateP.controlState === 'REINDEX_SOURCE_TO_TEMP_TRANSFORM') {
     // We follow a similar control flow as for
@@ -850,7 +900,12 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
         stateP.discardCorruptObjects
       ) {
         const documents = Either.isRight(res) ? res.right.processedDocs : res.left.processedDocs;
-        const batches = createBatches({ documents, maxBatchSizeBytes: stateP.maxBatchSizeBytes });
+        const batches = createBatches({
+          documents,
+          maxBatchSizeBytes: stateP.maxBatchSizeBytes,
+          typeIndexMap: stateP.typeIndexMap,
+          kibanaVersion: stateP.kibanaVersion,
+        });
         if (Either.isRight(batches)) {
           let corruptDocumentIds = stateP.corruptDocumentIds;
           let transformErrors = stateP.transformErrors;
@@ -1121,6 +1176,7 @@ export const model = (currentState: State, resW: ResponseType<AllActionStates>):
           corruptDocumentIds,
           transformErrors,
           maxBatchSizeBytes: stateP.maxBatchSizeBytes,
+          kibanaVersion: stateP.kibanaVersion,
         });
         if (Either.isRight(batches)) {
           return {

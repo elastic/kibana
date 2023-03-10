@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core/server';
-import { CASE_COMMENT_SAVED_OBJECT } from '../../common/constants';
+import { CASES_INDEX, CASE_COMMENT_SAVED_OBJECT } from '../../common/constants';
 import type { CreateCommentsMigrationsDeps } from './migrations';
 import { createCommentsMigrations } from './migrations';
 
@@ -21,6 +21,7 @@ export const createCaseCommentSavedObjectType = ({
   migrationDeps: CreateCommentsMigrationsDeps;
 }): SavedObjectsType => ({
   name: CASE_COMMENT_SAVED_OBJECT,
+  indexPattern: CASES_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',

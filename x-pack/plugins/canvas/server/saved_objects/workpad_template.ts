@@ -16,6 +16,7 @@ export const workpadTemplateType = (
   deps: CanvasSavedObjectTypeMigrationsDeps
 ): SavedObjectsType => ({
   name: TEMPLATE_TYPE,
+  indexPattern: '.kibana_ui',
   hidden: false,
   namespaceType: 'agnostic',
   mappings: {

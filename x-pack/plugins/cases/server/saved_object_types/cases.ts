@@ -12,7 +12,7 @@ import type {
   SavedObjectsExportTransformContext,
   SavedObjectsType,
 } from '@kbn/core/server';
-import { CASE_SAVED_OBJECT } from '../../common/constants';
+import { CASES_INDEX, CASE_SAVED_OBJECT } from '../../common/constants';
 import type { ESCaseAttributes } from '../services/cases/types';
 import { handleExport } from './import_export/export';
 import { caseMigrations } from './migrations';
@@ -22,6 +22,7 @@ export const createCaseSavedObjectType = (
   logger: Logger
 ): SavedObjectsType => ({
   name: CASE_SAVED_OBJECT,
+  indexPattern: CASES_INDEX,
   hidden: true,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',

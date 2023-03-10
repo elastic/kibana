@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import type { Defer } from '@kbn/kibana-utils-plugin/common';
 import type { Logger } from '@kbn/logging';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -21,6 +22,9 @@ import { next } from './next';
 import { model } from './model';
 import { createInitialState } from './initial_state';
 import { migrationStateActionMachine } from './migrations_state_action_machine';
+import { cleanup } from './migrations_state_machine_cleanup';
+import type { State } from './state';
+import type { TypeIndexMap } from './kibana_migrator_constants';
 
 /**
  * To avoid the Elasticsearch-js client aborting our requests before we
@@ -45,9 +49,13 @@ export async function runResilientMigrator({
   client,
   kibanaVersion,
   waitForMigrationCompletion,
+  mustRedistributeDocuments,
+  typeIndexMap,
   targetMappings,
   logger,
   preMigrationScript,
+  readyToReindex,
+  doneReindexing,
   transformRawDocs,
   migrationVersionPerType,
   indexPrefix,
@@ -58,8 +66,12 @@ export async function runResilientMigrator({
   client: ElasticsearchClient;
   kibanaVersion: string;
   waitForMigrationCompletion: boolean;
+  mustRedistributeDocuments: boolean;
+  typeIndexMap: TypeIndexMap;
   targetMappings: IndexMapping;
   preMigrationScript?: string;
+  readyToReindex: Defer<any>;
+  doneReindexing: Defer<any>;
   logger: Logger;
   transformRawDocs: TransformRawDocs;
   migrationVersionPerType: SavedObjectsMigrationVersion;
@@ -71,6 +83,8 @@ export async function runResilientMigrator({
   const initialState = createInitialState({
     kibanaVersion,
     waitForMigrationCompletion,
+    mustRedistributeDocuments,
+    typeIndexMap,
     targetMappings,
     preMigrationScript,
     migrationVersionPerType,
@@ -84,8 +98,13 @@ export async function runResilientMigrator({
   return migrationStateActionMachine({
     initialState,
     logger,
-    next: next(migrationClient, transformRawDocs),
+    next: next(migrationClient, transformRawDocs, readyToReindex, doneReindexing),
     model,
-    client: migrationClient,
+    abort: async (state?: State) => {
+      [readyToReindex, doneReindexing].forEach((synchronizationDefer) =>
+        synchronizationDefer.reject('Cancelling synchronization with other migrators')
+      );
+      await cleanup(client, state);
+    },
   });
 }

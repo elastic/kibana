@@ -19,6 +19,7 @@ export function setupSavedObjects(
 ) {
   core.savedObjects.registerType({
     name: 'lens',
+    indexPattern: '.kibana_ui',
     hidden: false,
     namespaceType: 'multiple-isolated',
     convertToMultiNamespaceTypeVersion: '8.0.0',
@@ -63,6 +64,7 @@ export function setupSavedObjects(
 
   core.savedObjects.registerType({
     name: 'lens-ui-telemetry',
+    indexPattern: '.kibana_ui',
     hidden: false,
     namespaceType: 'single',
     mappings: {

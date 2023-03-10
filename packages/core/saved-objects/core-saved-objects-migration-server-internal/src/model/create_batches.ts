@@ -9,8 +9,13 @@
 import * as Either from 'fp-ts/lib/Either';
 import type { SavedObjectsRawDoc, SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
-import { createBulkDeleteOperationBody, createBulkIndexOperationTuple } from './helpers';
+import {
+  createBulkDeleteOperationBody,
+  createBulkIndexOperationTuple,
+  getTempIndexName,
+} from './helpers';
 import type { TransformErrorObjects } from '../core';
+import { TypeIndexMap } from '../kibana_migrator_constants';
 
 export type BulkIndexOperationTuple = [BulkOperationContainer, SavedObjectsRawDocSource];
 export type BulkOperation = BulkIndexOperationTuple | BulkOperationContainer;
@@ -20,6 +25,8 @@ export interface CreateBatchesParams {
   corruptDocumentIds?: string[];
   transformErrors?: TransformErrorObjects[];
   maxBatchSizeBytes: number;
+  kibanaVersion: string;
+  typeIndexMap?: TypeIndexMap;
 }
 
 export interface DocumentExceedsBatchSize {
@@ -38,6 +45,8 @@ export function createBatches({
   corruptDocumentIds = [],
   transformErrors = [],
   maxBatchSizeBytes,
+  kibanaVersion,
+  typeIndexMap,
 }: CreateBatchesParams): Either.Either<DocumentExceedsBatchSize, BulkOperation[][]> {
   /* To build up the NDJSON request body we construct an array of objects like:
    * [
@@ -63,6 +72,21 @@ export function createBatches({
     JSON.stringify(createBulkDeleteOperationBody('')),
     'utf8'
   );
+
+  // This map holds a list of temporary index names for each SO type, e.g.:
+  // 'cases': '.kibana_cases_8.8.0_reindex_temp
+  // 'task': '.kibana_task_manager_8.8.0_reindex_temp
+  // ...
+  const tempTypeIndexMap: Record<string, string> = Object.entries(typeIndexMap || {}).reduce<
+    Record<string, string>
+  >((acc, [indexAlias, types]) => {
+    const tempIndex = getTempIndexName(indexAlias, kibanaVersion);
+
+    types.forEach((type) => {
+      acc[type] = tempIndex;
+    });
+    return acc;
+  }, {});
 
   const batches: BulkOperation[][] = [[]];
   let currBatch = 0;
@@ -91,7 +115,7 @@ export function createBatches({
 
   // create index (update) operations for all transformed documents
   for (const document of documents) {
-    const bulkIndexOperationBody = createBulkIndexOperationTuple(document);
+    const bulkIndexOperationBody = createBulkIndexOperationTuple(document, tempTypeIndexMap);
     // take into account that this tuple's surrounding brackets `[]` won't be present in the NDJSON
     const docSizeBytes =
       Buffer.byteLength(JSON.stringify(bulkIndexOperationBody), 'utf8') - BRACKETS_BYTES;

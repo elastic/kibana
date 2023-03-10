@@ -14,6 +14,7 @@ export const getVisualizationSavedObjectType = (
   getSearchSourceMigrations: () => MigrateFunctionsObject
 ): SavedObjectsType => ({
   name: 'visualization',
+  indexPattern: '.kibana_ui',
   hidden: false,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',

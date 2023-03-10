@@ -14,6 +14,7 @@ export const workpadTypeFactory = (
   deps: CanvasSavedObjectTypeMigrationsDeps
 ): SavedObjectsType => ({
   name: CANVAS_TYPE,
+  indexPattern: '.kibana_ui',
   hidden: false,
   namespaceType: 'multiple-isolated',
   convertToMultiNamespaceTypeVersion: '8.0.0',
