@@ -20,7 +20,6 @@ import {
   getSimpleRuleOutput,
   getWebHookAction,
   removeServerGeneratedProperties,
-  waitForEventLogExecuteComplete,
   waitForRuleSuccessOrStatus,
 } from '../../utils';
 
@@ -68,7 +67,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // ES Search API may return outdated data
         // it causes a reliable delay so exported rule's SO contains runtime fields returned via ES Search API
         // and will be removed after addressing this issue
-        await waitForEventLogExecuteComplete(es, log, rule.id);
+        await new Promise((r) => setTimeout(r, 1000));
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
@@ -107,8 +106,7 @@ export default ({ getService }: FtrProviderContext): void => {
         // ES Search API may return outdated data
         // it causes a reliable delay so exported rule's SO contains runtime fields returned via ES Search API
         // and will be removed after addressing this issue
-        await waitForEventLogExecuteComplete(es, log, rule1.id);
-        await waitForEventLogExecuteComplete(es, log, rule2.id);
+        await new Promise((r) => setTimeout(r, 1000));
 
         const { body } = await supertest
           .post(`${DETECTION_ENGINE_RULES_URL}/_export`)
