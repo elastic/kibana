@@ -47,6 +47,14 @@ import { stubWebWorker } from '@kbn/test-jest-helpers';
 import { createMemoryHistory } from 'history';
 stubWebWorker();
 
+const urlServiceMock = {
+  locators: {
+    get: () => ({
+      navigate: async () => {},
+    }),
+  },
+};
+
 describe('<IndexManagementHome />', () => {
   let testBed: IndicesTestBed;
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];
@@ -122,6 +130,7 @@ describe('<IndexManagementHome />', () => {
 
       testBed = await setup(httpSetup, {
         history: createMemoryHistory(),
+        url: urlServiceMock,
       });
 
       await act(async () => {
@@ -161,7 +170,7 @@ describe('<IndexManagementHome />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
 
-      testBed = await setup(httpSetup);
+      testBed = await setup(httpSetup, { url: urlServiceMock });
       const { component, find } = testBed;
 
       component.update();
@@ -225,7 +234,7 @@ describe('<IndexManagementHome />', () => {
       ]);
       httpRequestsMockHelpers.setReloadIndicesResponse({ indexNames: [indexNameA, indexNameB] });
 
-      testBed = await setup(httpSetup);
+      testBed = await setup(httpSetup, { url: urlServiceMock });
       const { component, find } = testBed;
 
       component.update();
@@ -268,7 +277,7 @@ describe('<IndexManagementHome />', () => {
     });
 
     test('should be able to open a closed index', async () => {
-      testBed = await setup(httpSetup);
+      testBed = await setup(httpSetup, { url: urlServiceMock });
       const { component, find, actions } = testBed;
 
       component.update();
@@ -386,7 +395,7 @@ describe('<IndexManagementHome />', () => {
     beforeEach(async () => {
       httpRequestsMockHelpers.setLoadIndicesResponse([createNonDataStreamIndex(indexName)]);
 
-      testBed = await setup(httpSetup);
+      testBed = await setup(httpSetup, { url: urlServiceMock });
       const { component, find } = testBed;
 
       component.update();
