@@ -233,7 +233,6 @@ export function getDiscoverStateContainer({
       const actualSavedSearch = savedSearchContainer.get();
       return { ...actualSavedSearch, searchSource: actualSavedSearch.searchSource.createChild() };
     },
-    appStateContainer,
   });
   const setDataView = (dataView: DataView) => {
     internalStateContainer.transitions.setDataView(dataView);

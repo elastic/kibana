@@ -5,9 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { DataPublicPluginStart, ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common';
-import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject, filter, firstValueFrom, map, merge, scan } from 'rxjs';
 import { AppState } from '../services/discover_app_state_container';
@@ -29,8 +27,7 @@ import { fetchSql } from './fetch_sql';
 
 export interface FetchDeps {
   abortController: AbortController;
-  appStateContainer: ReduxLikeStateContainer<AppState>;
-  data: DataPublicPluginStart;
+  getAppState: () => AppState;
   initialFetchStatus: FetchStatus;
   inspectorAdapters: Adapters;
   savedSearch: SavedSearch;
@@ -48,18 +45,19 @@ export interface FetchDeps {
  */
 export function fetchAll(
   dataSubjects: SavedSearchData,
-  searchSource: ISearchSource,
   reset = false,
   fetchDeps: FetchDeps
 ): Promise<void> {
-  const { initialFetchStatus, appStateContainer, services, data, inspectorAdapters } = fetchDeps;
+  const { initialFetchStatus, getAppState, services, inspectorAdapters, savedSearch } = fetchDeps;
+  const { data } = services;
+  const searchSource = savedSearch.searchSource;
 
   try {
     const dataView = searchSource.getField('index')!;
     if (reset) {
       sendResetMsg(dataSubjects, initialFetchStatus);
     }
-    const { sort, query } = appStateContainer.getState();
+    const { sort, query } = getAppState();
     const recordRawType = getRawRecordType(query);
     const useSql = recordRawType === RecordRawType.PLAIN;
 

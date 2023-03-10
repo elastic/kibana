@@ -12,7 +12,6 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import { getRawRecordType } from '../utils/get_raw_record_type';
 import { AppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
@@ -130,13 +129,11 @@ export function getDataStateContainer({
   searchSessionManager,
   getAppState,
   getSavedSearch,
-  appStateContainer,
 }: {
   services: DiscoverServices;
   searchSessionManager: DiscoverSearchSessionManager;
   getAppState: () => AppState;
   getSavedSearch: () => SavedSearch;
-  appStateContainer: ReduxLikeStateContainer<AppState>;
 }): DataStateContainer {
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
@@ -202,14 +199,13 @@ export function getDataStateContainer({
       abortController = new AbortController();
       const prevAutoRefreshDone = autoRefreshDone;
 
-      await fetchAll(dataSubjects, getSavedSearch().searchSource, reset, {
+      await fetchAll(dataSubjects, reset, {
         abortController,
-        data,
         initialFetchStatus: getInitialFetchStatus(),
         inspectorAdapters,
         searchSessionId,
         services,
-        appStateContainer,
+        getAppState,
         savedSearch: getSavedSearch(),
         useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
       });
