@@ -35,7 +35,7 @@ import { getNewsFeed } from '../../services/get_news_feed';
 import { buildEsQuery } from '../../utils/build_es_query';
 import { getAlertSummaryTimeRange } from '../../utils/alert_summary_widget';
 
-import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../constants';
+import { DEFAULT_DATE_FORMAT, DEFAULT_INTERVAL } from '../../constants';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
 import { useOverviewMetrics } from './helpers/use_overview_metrics';
 import { SectionContainer } from '../../components/app/section';

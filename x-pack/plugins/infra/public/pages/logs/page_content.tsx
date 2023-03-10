@@ -23,6 +23,7 @@ import { LogsSettingsPage } from './settings';
 import { StreamPage } from './stream';
 import { isDevMode } from '../../utils/dev_mode';
 import { StateMachinePlayground } from '../../observability_logs/xstate_helpers';
+import { NotFoundPage } from '../404';
 
 export const LogsPageContent: React.FunctionComponent = () => {
   const enableDeveloperRoutes = isDevMode();
@@ -96,6 +97,7 @@ export const LogsPageContent: React.FunctionComponent = () => {
         <RedirectWithQueryParams from={'/analysis'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/log-rate'} to={anomaliesTab.pathname} exact />
         <RedirectWithQueryParams from={'/'} to={streamTab.pathname} exact />
+        <Route render={() => <NotFoundPage title="Logs" />} />
       </Switch>
     </>
   );
