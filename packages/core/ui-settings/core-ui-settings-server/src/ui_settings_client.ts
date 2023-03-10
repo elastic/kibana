@@ -7,6 +7,7 @@
  */
 
 import type { UserProvidedValues, UiSettingsParams } from '@kbn/core-ui-settings-common';
+import { KibanaRequest } from '@kbn/core-http-server';
 
 /**
  * Server-side client that provides access to the advanced settings stored in elasticsearch.
@@ -66,5 +67,5 @@ export interface IUiSettingsClient {
  * @public
  */
 export interface IUserUiSettingsClient extends IUiSettingsClient {
-  getUserProfileSettings: () => Promise<Record<string, string>>;
+  getUserProfileSettings: (request: KibanaRequest) => Promise<Record<string, string>>;
 }

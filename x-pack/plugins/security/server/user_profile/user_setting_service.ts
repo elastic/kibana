@@ -34,7 +34,7 @@ export class UserSettingService {
       getCurrentUserProfileSettings: async (request) => {
         const params: UserProfileGetCurrentParams = {
           request,
-          dataPath: '*',
+          dataPath: 'userSettings',
         };
 
         const currentUserProfile = await userProfileServiceStart.getCurrent(params);

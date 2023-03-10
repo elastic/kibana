@@ -12,7 +12,6 @@ import type {
   IUiSettingsClient,
   IUserUiSettingsClient,
 } from '@kbn/core-ui-settings-server';
-import { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalUiSettingsServiceStart } from './types';
 
 /**
@@ -26,8 +25,7 @@ export class CoreUiSettingsRouteHandlerContext implements UiSettingsRequestHandl
 
   constructor(
     private readonly uiSettingsStart: InternalUiSettingsServiceStart,
-    private readonly savedObjectsRouterHandlerContext: CoreSavedObjectsRouteHandlerContext,
-    private readonly request: KibanaRequest
+    private readonly savedObjectsRouterHandlerContext: CoreSavedObjectsRouteHandlerContext
   ) {}
 
   public get client() {
@@ -51,8 +49,7 @@ export class CoreUiSettingsRouteHandlerContext implements UiSettingsRequestHandl
   public get userClient() {
     if (this.#userClient == null) {
       this.#userClient = this.uiSettingsStart.userAsScopedToClient(
-        this.savedObjectsRouterHandlerContext.client,
-        this.request
+        this.savedObjectsRouterHandlerContext.client
       );
     }
     return this.#userClient;

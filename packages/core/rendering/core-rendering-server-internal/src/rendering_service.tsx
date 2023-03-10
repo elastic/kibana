@@ -18,6 +18,7 @@ import type { KibanaRequest, HttpAuth } from '@kbn/core-http-server';
 import type { IUiSettingsClient, IUserUiSettingsClient } from '@kbn/core-ui-settings-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
 import { CustomBranding } from '@kbn/core-custom-branding-common';
+import { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 import { Template } from './views';
 import {
   IRenderOptions,
@@ -103,17 +104,33 @@ export class RenderingService {
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
+    let settingsUserValues: Record<string, UserProvidedValues> = {};
+    let globalSettingsUserValues: Record<string, UserProvidedValues> = {};
+    let userSettingsUserValues: Record<string, string> = {};
+
+    if (!isAnonymousPage) {
+      const userValues = await Promise.all([
+        uiSettings.client?.getUserProvided(),
+        uiSettings.globalClient?.getUserProvided(),
+        uiSettings.userClient?.getUserProfileSettings(request),
+      ]);
+
+      settingsUserValues = userValues[0];
+      globalSettingsUserValues = userValues[1];
+      userSettingsUserValues = userValues[2];
+    }
+
     const settings = {
       defaults: uiSettings.client?.getRegistered() ?? {},
-      user: isAnonymousPage ? {} : await uiSettings.client?.getUserProvided(),
+      user: settingsUserValues,
     };
     const globalSettings = {
       defaults: uiSettings.globalClient?.getRegistered() ?? {},
-      user: isAnonymousPage ? {} : await uiSettings.globalClient?.getUserProvided(),
+      user: globalSettingsUserValues,
     };
     const userSettings = {
-      defaults: {},
-      user: isAnonymousPage ? {} : await uiSettings.userClient?.getUserProfileSettings(),
+      defaults: uiSettings.userClient?.getRegistered() ?? {},
+      user: userSettingsUserValues,
     };
 
     let clusterInfo = {};
@@ -136,14 +153,7 @@ export class RenderingService {
       // swallow error
     }
 
-    // If the user profile switch has been toggled, the value takes precedence
-    const userTheme: string = userSettings.user.darkMode;
-    let darkMode;
-    if (userTheme) {
-      darkMode = userTheme === 'dark';
-    } else {
-      darkMode = getSettingValue('theme:darkMode', settings, Boolean);
-    }
+    const darkMode = isDarkMode(userSettings, settings);
 
     const themeVersion: ThemeVersion = 'v8';
 
@@ -233,3 +243,26 @@ const isAuthenticated = (auth: HttpAuth, request: KibanaRequest) => {
   // status is 'unknown' when auth is disabled. we just need to not be `unauthenticated` here.
   return authStatus !== 'unauthenticated';
 };
+
+function isDarkMode(
+  userSettings: {
+    defaults: Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>;
+    user: Record<string, string>;
+  },
+  settings: {
+    user?: Record<string, UserProvidedValues<unknown>> | undefined;
+    defaults: Readonly<Record<string, Omit<UiSettingsParams, 'schema'>>>;
+  }
+): boolean {
+  const userTheme: string = userSettings.user.darkMode;
+
+  let result;
+
+  if (userTheme) {
+    result = userTheme === 'dark';
+  } else {
+    result = getSettingValue('theme:darkMode', settings, Boolean);
+  }
+
+  return result;
+}

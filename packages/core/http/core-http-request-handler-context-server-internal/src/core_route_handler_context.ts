@@ -52,8 +52,7 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
     this.savedObjects = new CoreSavedObjectsRouteHandlerContext(coreStart.savedObjects, request);
     this.uiSettings = new CoreUiSettingsRouteHandlerContext(
       coreStart.uiSettings,
-      this.savedObjects,
-      request
+      this.savedObjects
     );
     this.deprecations = new CoreDeprecationsRouteHandlerContext(
       coreStart.deprecations,

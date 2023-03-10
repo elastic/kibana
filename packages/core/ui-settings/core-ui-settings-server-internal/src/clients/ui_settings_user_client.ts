@@ -23,20 +23,18 @@ type UserProvided<T = unknown> = Record<string, UserProvidedValue<T>>;
  */
 export class UiSettingsUserClient extends BaseUiSettingsClient implements IUserUiSettingsClient {
   private readonly userProfileSettingsClient: UiSettingsServiceOptions['userProfileSettingsClient'];
-  private readonly request?: KibanaRequest;
 
-  constructor(options: UiSettingsServiceOptions, request?: KibanaRequest) {
+  constructor(options: UiSettingsServiceOptions) {
     super(options);
     const { userProfileSettingsClient } = options;
     this.userProfileSettingsClient = userProfileSettingsClient;
-    this.request = request;
   }
 
-  async getUserProfileSettings(): Promise<Record<string, string>> {
+  async getUserProfileSettings(request: KibanaRequest): Promise<Record<string, string>> {
     let result = {} as Record<string, string>;
 
-    if (this.request) {
-      result = (await this.userProfileSettingsClient?.get(this.request)) || {};
+    if (request) {
+      result = (await this.userProfileSettingsClient?.get(request)) || {};
     } else {
       this.log.warn('Request not set, unable to retrieve User Settings');
     }

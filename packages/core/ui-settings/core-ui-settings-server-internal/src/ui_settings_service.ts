@@ -15,7 +15,6 @@ import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { InternalSavedObjectsServiceSetup } from '@kbn/core-saved-objects-server-internal';
 import type { UiSettingsParams, UiSettingsScope } from '@kbn/core-ui-settings-common';
-import type { KibanaRequest } from '@kbn/core-http-server';
 import type {
   UserProfileSettingsClientContract,
   UserProfileSettingsClientFactoryProvider,
@@ -148,15 +147,11 @@ export class UiSettingsService
   }
 
   private getUserClientFactory<T extends UiSettingsScope>(): (
-    savedObjectsClient: SavedObjectsClientContract,
-    request: KibanaRequest
+    savedObjectsClient: SavedObjectsClientContract
   ) => ClientType<T> {
     const { version, buildNum } = this.coreContext.env.packageInfo;
 
-    return (
-      savedObjectsClient: SavedObjectsClientContract,
-      request: KibanaRequest
-    ): ClientType<T> => {
+    return (savedObjectsClient: SavedObjectsClientContract): ClientType<T> => {
       let userProfileSettingsClient: UserProfileSettingsClientContract | undefined;
 
       if (this.userProfileSettingsClientFactoryProvider) {
@@ -175,7 +170,7 @@ export class UiSettingsService
         overrides: {},
       };
 
-      return UiSettingsClientFactory.create(options, request) as ClientType<T>;
+      return UiSettingsClientFactory.create(options) as ClientType<T>;
     };
   }
 

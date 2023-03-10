@@ -91,12 +91,8 @@ export interface UiSettingsServiceStart {
    *
    * @param savedObjectsClient This client is not currently used by the underlying client, but is included so that
    * future user specific settings/migrations will be able to be created in SO, if necessary, rather than UserProfiles
-   * @param request A KibanaRequest that is used to get the UserProfileSettings
    */
-  userAsScopedToClient(
-    savedObjectsClient: SavedObjectsClientContract,
-    request: KibanaRequest
-  ): IUserUiSettingsClient;
+  userAsScopedToClient(savedObjectsClient: SavedObjectsClientContract): IUserUiSettingsClient;
 
   /**
    * This provides a way for downstream plugins to provide the UiSettingsService with a way to create UserProfileSettingsClients
