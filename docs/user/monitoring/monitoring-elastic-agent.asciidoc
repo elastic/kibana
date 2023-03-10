@@ -62,9 +62,6 @@ new agent policy or **Existing hosts** to add it to an existing agent policy.
 . Click **Save and continue**. This step takes a minute or two to complete. When
 it's done, you'll have an agent policy that contains an integration for
 collecting monitoring data from {kib}.
-. (Optional) If you're sending data to a monitoring cluster, edit the agent
-policy, and under **Settings**, change the **Output for integrations** to the 
-output you created for the monitoring cluster.
 . If an {agent} is already assigned to the policy and deployed to the host where
 {kib} is running, you're done. Otherwise, you need to deploy an {agent}. To
 deploy an {agent}:
