@@ -35,6 +35,10 @@ const disableCommonProtections = (policy: PolicyConfig) => {
 
   for (const key in policyOutput) {
     if (Object.prototype.hasOwnProperty.call(policyOutput, key)) {
+      if (key === 'meta') {
+        /* eslint-disable no-continue*/
+        continue;
+      }
       const os = key as keyof Omit<PolicyConfig, 'meta'>;
 
       policyOutput = {
