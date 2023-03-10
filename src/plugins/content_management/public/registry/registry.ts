@@ -8,7 +8,7 @@
 
 import type { ContentTypeDefinition } from './content_type_definition';
 import { ContentType } from './content_type';
-import { validateVersion } from '../../common';
+import { validateVersion } from '../../common/utils';
 
 export class ContentTypeRegistry {
   private readonly types: Map<string, ContentType> = new Map();

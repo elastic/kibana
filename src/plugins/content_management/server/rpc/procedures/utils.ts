@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { validateVersion } from '../../../common';
+import { validateVersion } from '../../../common/utils';
 import type { Version } from '../../../common';
 
 export const validateRequestVersion = (

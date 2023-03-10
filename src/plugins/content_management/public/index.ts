@@ -20,8 +20,6 @@ export {
   type QueryOptions,
 } from './content_client';
 
-export { ContentTypeRegistry } from './registry';
-
 export function plugin() {
   return new ContentManagementPlugin();
 }

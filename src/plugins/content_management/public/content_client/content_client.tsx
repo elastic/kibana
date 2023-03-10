@@ -10,8 +10,8 @@ import { QueryClient } from '@tanstack/react-query';
 import { createQueryObservable } from './query_observable';
 import type { CrudClient } from '../crud_client';
 import type { CreateIn, GetIn, UpdateIn, DeleteIn, SearchIn, Version } from '../../common';
-import { validateVersion } from '../../common';
-import { ContentTypeRegistry } from '../registry';
+import { validateVersion } from '../../common/utils';
+import type { ContentTypeRegistry } from '../registry';
 
 export const queryKeyBuilder = {
   all: (type: string) => [type] as const,

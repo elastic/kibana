@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { validateVersion } from '../../common';
+import { validateVersion } from '../../common/utils';
 import { ContentType } from './content_type';
 import { EventBus } from './event_bus';
 import type { ContentStorage, ContentTypeDefinition } from './types';
