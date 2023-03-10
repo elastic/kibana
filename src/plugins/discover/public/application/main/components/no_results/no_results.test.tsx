@@ -140,29 +140,5 @@ describe('DiscoverNoResults', () => {
         expect(result).toHaveProperty('disableFiltersButton', true);
       });
     });
-
-    describe('error message', () => {
-      test('renders error message', async () => {
-        const error = new Error('Fatal error');
-        const result = await mountAndFindSubjects({
-          dataView: stubDataView,
-          error,
-          query: { language: 'lucene', query: '' },
-          filters: [{} as Filter],
-        });
-        expect(result).toMatchInlineSnapshot(`
-          Object {
-            "adjustFilters": false,
-            "adjustSearch": false,
-            "adjustTimeRange": false,
-            "checkIndices": false,
-            "disableFiltersButton": false,
-            "errorMsg": true,
-            "mainMsg": false,
-            "viewMatchesButton": false,
-          }
-        `);
-      });
-    });
   });
 });

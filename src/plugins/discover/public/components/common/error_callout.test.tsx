@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiCallOut, EuiLink, EuiPopover } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiLink, EuiModal } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject } from '@kbn/test-jest-helpers';
 import { mount } from 'enzyme';
@@ -35,18 +35,22 @@ describe('ErrorCallout', () => {
   });
 
   it('should render', () => {
+    const title = 'Error title';
     const error = new Error('My error');
     const wrapper = mountWithServices(
-      <ErrorCallout title="Error title" error={error} data-test-subj="errorCallout" />
+      <ErrorCallout title={title} error={error} data-test-subj="errorCallout" />
     );
-    const callout = wrapper.find(EuiCallOut);
-    expect(callout).toHaveLength(1);
-    expect(callout.prop('title')).toBe('Error title');
-    expect(callout.prop('size')).toBeUndefined();
-    expect(callout.prop('data-test-subj')).toBe('errorCallout');
-    expect(callout.prop('children')).toBeDefined();
-    expect(findTestSubject(callout, 'discoverErrorCalloutMessage').text()).toContain(error.message);
-    expect(callout.find(EuiButton)).toHaveLength(1);
+    const prompt = wrapper.find(EuiEmptyPrompt);
+    expect(prompt).toHaveLength(1);
+    expect(prompt.prop('title')).toBeDefined();
+    expect(prompt.prop('title')).not.toBeInstanceOf(String);
+    expect(prompt.prop('data-test-subj')).toBe('errorCallout');
+    expect(prompt.prop('body')).toBeDefined();
+    expect(findTestSubject(prompt, 'discoverErrorCalloutTitle').contains(title)).toBe(true);
+    expect(findTestSubject(prompt, 'discoverErrorCalloutMessage').contains(error.message)).toBe(
+      true
+    );
+    expect(prompt.find(EuiButton)).toHaveLength(1);
   });
 
   it('should render inline', () => {
@@ -61,9 +65,9 @@ describe('ErrorCallout', () => {
     expect(callout.prop('title')).not.toBeInstanceOf(String);
     expect(callout.prop('size')).toBe('s');
     expect(callout.prop('data-test-subj')).toBe('errorCallout');
-    expect(findTestSubject(callout, 'discoverErrorCalloutMessage').text()).toContain(
-      `${title}: ${error.message}`
-    );
+    expect(
+      findTestSubject(callout, 'discoverErrorCalloutMessage').contains(`${title}: ${error.message}`)
+    ).toBe(true);
     expect(callout.find(EuiLink)).toHaveLength(1);
   });
 
@@ -75,12 +79,15 @@ describe('ErrorCallout', () => {
     const wrapper = mountWithServices(
       <ErrorCallout title="Original title" error={error} data-test-subj="errorCallout" />
     );
-    const callout = wrapper.find(EuiCallOut);
-    expect(callout).toHaveLength(1);
-    expect(callout.prop('title')).toBe(title);
-    expect(callout.prop('size')).toBeUndefined();
-    expect(callout.prop('data-test-subj')).toBe('errorCallout');
-    expect(callout.contains(overrideDisplay)).toBe(true);
+    const prompt = wrapper.find(EuiEmptyPrompt);
+    expect(prompt).toHaveLength(1);
+    expect(prompt.prop('title')).toBeDefined();
+    expect(prompt.prop('title')).not.toBeInstanceOf(String);
+    expect(prompt.prop('data-test-subj')).toBe('errorCallout');
+    expect(prompt.prop('body')).toBeDefined();
+    expect(findTestSubject(prompt, 'discoverErrorCalloutTitle').contains(title)).toBe(true);
+    expect(prompt.contains(overrideDisplay)).toBe(true);
+    expect(prompt.find(EuiButton)).toHaveLength(0);
   });
 
   it('should render with override display and inline', () => {
@@ -98,11 +105,17 @@ describe('ErrorCallout', () => {
     expect(callout.prop('size')).toBe('s');
     expect(callout.prop('data-test-subj')).toBe('errorCallout');
     expect(callout.find(EuiLink)).toHaveLength(1);
-    expect(wrapper.find(EuiPopover)).toHaveLength(1);
+    expect(wrapper.find(EuiModal)).toHaveLength(0);
     expect(wrapper.contains(title)).toBe(true);
     expect(wrapper.contains(overrideDisplay)).toBe(false);
     callout.find(EuiLink).simulate('click');
-    expect(wrapper.find(EuiPopover).prop('isOpen')).toBe(true);
+    expect(wrapper.find(EuiModal)).toHaveLength(1);
+    expect(findTestSubject(wrapper, 'discoverErrorCalloutOverrideModalTitle').contains(title)).toBe(
+      true
+    );
+    expect(
+      findTestSubject(wrapper, 'discoverErrorCalloutOverrideModalBody').contains(overrideDisplay)
+    ).toBe(true);
     expect(wrapper.contains(overrideDisplay)).toBe(true);
   });
 

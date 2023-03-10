@@ -111,7 +111,7 @@ export const ErrorCallout = ({
                 <EuiIcon type="error" color="danger" size="l" />
               </EuiFlexItem>
               <EuiFlexItem>
-                <h2>{formattedTitle}</h2>
+                <h2 data-test-subj="discoverErrorCalloutTitle">{formattedTitle}</h2>
               </EuiFlexItem>
             </EuiFlexGroup>
           }
@@ -140,10 +140,14 @@ export const ErrorCallout = ({
       {overrideDisplay && overrideModalOpen && (
         <EuiModal onClose={() => setOverrideModalOpen(false)}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>{overrideDisplay.title}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle data-test-subj="discoverErrorCalloutOverrideModalTitle">
+              {overrideDisplay.title}
+            </EuiModalHeaderTitle>
           </EuiModalHeader>
           <EuiModalBody>
-            <EuiText>{overrideDisplay.body}</EuiText>
+            <EuiText data-test-subj="discoverErrorCalloutOverrideModalBody">
+              {overrideDisplay.body}
+            </EuiText>
           </EuiModalBody>
         </EuiModal>
       )}
