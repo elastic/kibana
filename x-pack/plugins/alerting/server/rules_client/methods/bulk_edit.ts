@@ -64,7 +64,7 @@ import {
   NormalizedAlertActionWithUuid,
 } from '../types';
 
-import { migrateRuleHook } from '../lib';
+import { migrateLegacyActions } from '../lib';
 
 export type BulkEditFields = keyof Pick<
   Rule,
@@ -408,8 +408,6 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
   errors: BulkOperationError[];
   username: string | null;
 }): Promise<void> {
-  await migrateRuleHook(context, { ruleId: rule.id });
-
   try {
     if (rule.attributes.apiKey) {
       apiKeysMap.set(rule.id, { oldApiKey: rule.attributes.apiKey });
@@ -418,6 +416,14 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleTypePara
     const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
 
     await ensureAuthorizationForBulkUpdate(context, operations, rule);
+
+    const { actions: migratedActions, references: legacyActionsReferences } =
+      await migrateLegacyActions(context, { ruleId: rule.id });
+
+    if (migratedActions.length && legacyActionsReferences?.length) {
+      rule.attributes.actions = [...rule.attributes.actions, ...migratedActions];
+      rule.references = [...rule.references, ...legacyActionsReferences];
+    }
 
     const { attributes, ruleActions, hasUpdateApiKeyOperation, isAttributesUpdateSkipped } =
       await getUpdatedAttributesFromOperations(context, operations, rule, ruleType);

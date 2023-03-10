@@ -107,7 +107,7 @@ async function updateWithOCC<Params extends RuleTypeParams>(
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(alertSavedObject.attributes.alertTypeId);
 
-  await migrateLegacyActions(context, { rule: alertSavedObject });
+  await migrateLegacyActions(context, { ruleId: id });
 
   const updateResult = await updateAlert<Params>(
     context,

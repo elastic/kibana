@@ -12,6 +12,7 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
 import { updateMeta, createNewAPIKeySet, scheduleTask } from '../lib';
+import { migrateLegacyActions } from '../lib';
 
 export async function enable(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -75,6 +76,11 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   if (attributes.enabled === false) {
+    // TODO: fix enable
+    const { actions: migratedActions } = await migrateLegacyActions(context, {
+      ruleId: id,
+    });
+
     const username = await context.getUserName();
     const now = new Date();
 
@@ -86,6 +92,7 @@ async function enableWithOCC(context: RulesClientContext, { id }: { id: string }
       ...(attributes.monitoring && {
         monitoring: resetMonitoringLastRun(attributes.monitoring),
       }),
+      actions: [...attributes.actions, ...migratedActions],
       nextRun: getNextRun({ interval: schedule.interval }),
       enabled: true,
       updatedBy: username,

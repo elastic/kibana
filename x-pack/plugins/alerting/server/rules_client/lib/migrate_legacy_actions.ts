@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { isEmpty } from 'lodash/fp';
 
-import type { SavedObject } from '@kbn/core/server';
+import type { SavedObjectReference } from '@kbn/core/server';
 
 import type { RulesClientContext } from '..';
 
-import { RawRule, RuleActionParams } from '../../types';
+import { RuleActionParams, RawRuleAction } from '../../types';
 
 import { find } from '../methods/find';
 import { deleteRule } from '../methods/delete';
@@ -43,14 +44,14 @@ export interface LegacyIRuleActionsAttributes extends Record<string, unknown> {
 
 type MigrateLegacyActions = (
   context: RulesClientContext,
-  { rule }: { rule: SavedObject<RawRule> }
-) => Promise<SavedObject<RawRule> | undefined>;
+  { ruleId }: { ruleId: string }
+) => Promise<{ actions: RawRuleAction[]; references?: SavedObjectReference[] }>;
 
-export const migrateLegacyActions: MigrateLegacyActions = async (context, { rule }) => {
+export const migrateLegacyActions: MigrateLegacyActions = async (context, { ruleId }) => {
   const { unsecuredSavedObjectsClient } = context;
   try {
-    if (rule == null || rule.id == null) {
-      return rule;
+    if (ruleId == null) {
+      return { actions: [] };
     }
     /**
      * On update / patch I'm going to take the actions as they are, better off taking rules client.find (siem.notification) result
@@ -65,7 +66,7 @@ export const migrateLegacyActions: MigrateLegacyActions = async (context, { rule
           filter: 'alert.attributes.alertTypeId:(siem.notifications)',
           hasReference: {
             type: 'alert',
-            id: rule.id,
+            id: ruleId,
           },
         },
       }),
@@ -73,7 +74,7 @@ export const migrateLegacyActions: MigrateLegacyActions = async (context, { rule
         type: legacyRuleActionsSavedObjectType,
         hasReference: {
           type: 'alert',
-          id: rule.id,
+          id: ruleId,
         },
       }),
     ]);
@@ -85,7 +86,7 @@ export const migrateLegacyActions: MigrateLegacyActions = async (context, { rule
     // Assumption: if no legacy sidecar SO or notification rule types exist
     // that reference the rule in question, assume rule actions are not legacy
     if (!siemNotificationsExist && !legacyRuleNotificationSOsExist) {
-      return rule;
+      return { actions: [] };
     }
     // If the legacy notification rule type ("siem.notification") exist,
     // migration and cleanup are needed
@@ -110,10 +111,59 @@ export const migrateLegacyActions: MigrateLegacyActions = async (context, { rule
         legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle === 'no_actions' ||
         legacyRuleActionsSO.saved_objects[0].attributes.ruleThrottle === 'rule'
       ) {
-        return rule;
+        return { actions: [] };
       }
+
+      return {
+        actions: transformFromLegacyActions(
+          legacyRuleActionsSO.saved_objects[0].attributes,
+          legacyRuleActionsSO.saved_objects[0].references
+        ),
+        references: legacyRuleActionsSO.saved_objects[0].references,
+      };
     }
   } catch (e) {
-    context.logger.debug(`Migration has failed for rule ${rule.id}: ${e.message}`);
+    context.logger.debug(`Migration has failed for rule ${ruleId}: ${e.message}`);
   }
+
+  return { actions: [] };
+};
+
+const transformFromLegacyActions = (
+  legacyActionsAttr: LegacyIRuleActionsAttributes,
+  references: SavedObjectReference[]
+): RawRuleAction[] => {
+  const actionReference = references.reduce<Record<string, SavedObjectReference>>(
+    (acc, reference) => {
+      acc[reference.name] = reference;
+      return acc;
+    },
+    {}
+  );
+
+  if (isEmpty(actionReference)) {
+    throw new Error(`Connector reference id not found.`);
+  }
+
+  return legacyActionsAttr.actions.reduce<RawRuleAction[]>((acc, action) => {
+    const { actionRef, action_type_id: actionTypeId, group, params } = action;
+    if (!actionReference[actionRef]) {
+      return acc;
+    }
+    return [
+      ...acc,
+      {
+        group,
+        params,
+        uuid: actionReference[actionRef].id, // TODO: generate id?
+        actionRef,
+        actionTypeId,
+        frequency: {
+          summary: true,
+          notifyWhen: 'onThrottleInterval',
+          throttle: legacyActionsAttr.ruleThrottle,
+        },
+      },
+    ];
+  }, []);
 };
