@@ -53,8 +53,10 @@
     "@kbn/core-saved-objects-common",
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
+    "@kbn/shared-ux-router",
+    "@kbn/alerts-as-data-utils",
     "@kbn/cases-plugin",
-    "@kbn/shared-ux-router"
+    "@kbn/shared-ux-prompt-not-found",
   ],
   "exclude": ["target/**/*"]
 }
