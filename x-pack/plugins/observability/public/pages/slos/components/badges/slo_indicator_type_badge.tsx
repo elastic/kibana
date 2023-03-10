@@ -10,7 +10,7 @@ import { EuiBadge } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 
-import { toIndicatorTypeLabel } from '../../../../utils/slo/translations';
+import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
 export interface Props {
   slo: SLOWithSummaryResponse;
 }

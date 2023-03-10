@@ -13,7 +13,7 @@ import { euiLightVars } from '@kbn/ui-theme';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 import { toMomentUnitOfTime } from '../../../../utils/slo/duration';
-import { toDurationLabel } from '../../../../utils/slo/translations';
+import { toDurationLabel } from '../../../../utils/slo/labels';
 
 export interface Props {
   slo: SLOWithSummaryResponse;

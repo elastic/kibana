@@ -12,8 +12,8 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
 
-import { toBudgetingMethodLabel, toIndicatorTypeLabel } from '../../../utils/slo/translations';
-import { toDurationLabel } from '../../../utils/slo/translations';
+import { toBudgetingMethodLabel, toIndicatorTypeLabel } from '../../../utils/slo/labels';
+import { toDurationLabel } from '../../../utils/slo/labels';
 import { useKibana } from '../../../utils/kibana_react';
 import { OverviewItem } from './overview_item';
 

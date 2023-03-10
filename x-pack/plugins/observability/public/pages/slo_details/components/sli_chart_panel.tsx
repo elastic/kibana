@@ -12,7 +12,7 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 
 import { useKibana } from '../../../utils/kibana_react';
-import { toDurationLabel } from '../../../utils/slo/translations';
+import { toDurationLabel } from '../../../utils/slo/labels';
 import { ChartData } from '../../../typings/slo';
 import { WideChart } from './wide_chart';
 

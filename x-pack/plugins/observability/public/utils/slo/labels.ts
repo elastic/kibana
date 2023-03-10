@@ -41,18 +41,28 @@ export function toIndicatorTypeLabel(
   }
 }
 
+export const BUDGETING_METHOD_OCCURRENCES = i18n.translate(
+  'xpack.observability.slo.budgetingMethod.occurrences',
+  {
+    defaultMessage: 'Occurrences',
+  }
+);
+
+export const BUDGETING_METHOD_TIMESLICES = i18n.translate(
+  'xpack.observability.slo.budgetingMethod.timeslices',
+  {
+    defaultMessage: 'Timeslices',
+  }
+);
+
 export function toBudgetingMethodLabel(
   budgetingMethod: SLOWithSummaryResponse['budgetingMethod']
 ): string {
   if (budgetingMethod === 'occurrences') {
-    return i18n.translate('xpack.observability.slo.budgetingMethod.occurrences', {
-      defaultMessage: 'Occurrences',
-    });
+    return BUDGETING_METHOD_OCCURRENCES;
   }
 
-  return i18n.translate('xpack.observability.slo.budgetingMethod.timeslices', {
-    defaultMessage: 'Timeslices',
-  });
+  return BUDGETING_METHOD_TIMESLICES;
 }
 
 export function toDurationLabel(durationStr: string): string {

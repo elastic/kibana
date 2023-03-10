@@ -23,7 +23,7 @@ import {
   INDICATOR_APM_AVAILABILITY,
   INDICATOR_APM_LATENCY,
   INDICATOR_CUSTOM_KQL,
-} from '../../../utils/slo/translations';
+} from '../../../utils/slo/labels';
 
 export interface SloListSearchFilterSortBarProps {
   loading: boolean;
