@@ -79,7 +79,7 @@ export async function fetchFrequentItemSets(
 
   const query = {
     bool: {
-      minimum_should_match: 1,
+      minimum_should_match: 2,
       filter: [
         searchQuery,
         {
@@ -107,7 +107,7 @@ export async function fetchFrequentItemSets(
     fi: {
       // @ts-expect-error `frequent_item_sets` is not yet part of `AggregationsAggregationContainer`
       frequent_item_sets: {
-        minimum_set_size: 1,
+        minimum_set_size: 2,
         size: 200,
         minimum_support: 0.001,
         fields: aggFields,
