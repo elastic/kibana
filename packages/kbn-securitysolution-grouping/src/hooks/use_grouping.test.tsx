@@ -41,12 +41,13 @@ const groupingArgs = {
   to: '2020-07-08T08:20:18.966Z',
 };
 
-describe('use_grouping', () => {
+describe('useGrouping', () => {
   it('Returns the expected default results on initial mount', () => {
     const { result } = renderHook(() => useGrouping(defaultArgs));
     expect(result.current.selectedGroup).toEqual('none');
     expect(result.current.getGrouping(groupingArgs).props.selectedGroup).toEqual('none');
     expect(result.current.groupSelector.props.options).toEqual(defaultGroupingOptions);
-    expect(result.current.pagination).toEqual({ pageIndex: 0, pageSize: 25 });
+    const { reset, ...withoutReset } = result.current.pagination;
+    expect(withoutReset).toEqual({ pageIndex: 0, pageSize: 25 });
   });
 });

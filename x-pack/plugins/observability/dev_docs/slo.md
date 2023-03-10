@@ -1,6 +1,6 @@
 # SLO
 
-Add the feature flag: `xpack.observability.unsafe.slo.enabled: true` in your Kibana config to enable the various SLO APIs.
+Starting in 8.8, SLO is enabled by default.
 
 ## Supported SLI
 
