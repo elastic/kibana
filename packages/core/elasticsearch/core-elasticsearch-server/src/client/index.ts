@@ -22,5 +22,5 @@ export type {
 export type {
   ElasticsearchClientConfig,
   ElasticsearchClientSslConfig,
-  ElasticsearchPotentiallyLeakingApi,
+  ElasticsearchApiToRedactInLogs,
 } from './client_config';

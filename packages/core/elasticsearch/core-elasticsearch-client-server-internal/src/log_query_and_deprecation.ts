@@ -13,7 +13,7 @@ import { errors, DiagnosticResult, RequestBody, Client } from '@elastic/elastics
 import numeral from '@elastic/numeral';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
-import type { ElasticsearchPotentiallyLeakingApi } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchApiToRedactInLogs } from '@kbn/core-elasticsearch-server';
 import { getEcsResponseLog } from './get_ecs_response_log';
 
 /**
@@ -38,7 +38,10 @@ export interface RequestDebugMeta {
   statusCode: number | null;
 }
 
-const POTENTIALLY_LEAKING_API: ElasticsearchPotentiallyLeakingApi[] = [
+/**
+ * Known list of APIs that should redact the request body in the logs
+ */
+const APIS_TO_REDACT_IN_LOGS: ElasticsearchApiToRedactInLogs[] = [
   { path: '/_security/' },
   { path: '/_xpack/security/' },
   { method: 'POST', path: '/_reindex' },
@@ -50,11 +53,11 @@ const POTENTIALLY_LEAKING_API: ElasticsearchPotentiallyLeakingApi[] = [
   { method: 'POST', path: /\/_nodes\/.+\/reload_secure_settings/ },
 ];
 
-function isPotentiallyLeakingApi(
+function shouldRedactBodyInLogs(
   requestDebugMeta: RequestDebugMeta,
-  extendedList: ElasticsearchPotentiallyLeakingApi[] = []
+  extendedList: ElasticsearchApiToRedactInLogs[] = []
 ) {
-  return [...POTENTIALLY_LEAKING_API, ...extendedList].some(({ path, method }) => {
+  return [...APIS_TO_REDACT_IN_LOGS, ...extendedList].some(({ path, method }) => {
     if (!method || method === requestDebugMeta.method) {
       if (typeof path === 'string') {
         return requestDebugMeta.url.includes(path);
@@ -112,7 +115,7 @@ function getContentLength(headers?: IncomingHttpHeaders): number | undefined {
 function getResponseMessage(
   event: DiagnosticResult,
   bytesMsg: string,
-  apisToRedactInLogs: ElasticsearchPotentiallyLeakingApi[]
+  apisToRedactInLogs: ElasticsearchApiToRedactInLogs[]
 ): string {
   const debugMeta = getRequestDebugMeta(event, apisToRedactInLogs);
   const body = debugMeta.body ? `\n${debugMeta.body}` : '';
@@ -125,7 +128,7 @@ function getResponseMessage(
  */
 export function getRequestDebugMeta(
   event: DiagnosticResult,
-  apisToRedactInLogs?: ElasticsearchPotentiallyLeakingApi[]
+  apisToRedactInLogs?: ElasticsearchApiToRedactInLogs[]
 ): RequestDebugMeta {
   const params = event.meta.request.params;
   // definition is wrong, `params.querystring` can be either a string or an object
@@ -139,7 +142,7 @@ export function getRequestDebugMeta(
   };
 
   // Some known APIs may contain sensitive information in the request body that we don't want to expose to the logs.
-  return isPotentiallyLeakingApi(debugMeta, apisToRedactInLogs)
+  return shouldRedactBodyInLogs(debugMeta, apisToRedactInLogs)
     ? { ...debugMeta, body: '[redacted]' }
     : debugMeta;
 }
@@ -159,7 +162,7 @@ export const instrumentEsQueryAndDeprecationLogger = ({
   logger: Logger;
   client: Client;
   type: string;
-  apisToRedactInLogs: ElasticsearchPotentiallyLeakingApi[];
+  apisToRedactInLogs: ElasticsearchApiToRedactInLogs[];
 }) => {
   const queryLogger = logger.get('query', type);
   const deprecationLogger = logger.get('deprecation');

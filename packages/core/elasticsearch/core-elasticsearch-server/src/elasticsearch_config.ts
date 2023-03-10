@@ -7,7 +7,7 @@
  */
 
 import type { Duration } from 'moment';
-import type { ElasticsearchPotentiallyLeakingApi } from './client';
+import type { ElasticsearchApiToRedactInLogs } from './client';
 
 /**
  * @public
@@ -144,7 +144,7 @@ export interface IElasticsearchConfig {
   /**
    * Extends the list of APIs that should be redacted in logs.
    */
-  readonly apisToRedactInLogs: ElasticsearchPotentiallyLeakingApi[];
+  readonly apisToRedactInLogs: ElasticsearchApiToRedactInLogs[];
 }
 
 /**

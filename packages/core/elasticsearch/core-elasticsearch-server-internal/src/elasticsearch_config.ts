@@ -16,7 +16,7 @@ import type { ConfigDeprecationProvider } from '@kbn/config';
 import type {
   IElasticsearchConfig,
   ElasticsearchSslConfig,
-  ElasticsearchPotentiallyLeakingApi,
+  ElasticsearchApiToRedactInLogs,
 } from '@kbn/core-elasticsearch-server';
 import { getReservedHeaders } from './default_headers';
 
@@ -416,7 +416,7 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
   /**
    * Extends the list of APIs that should be redacted in logs.
    */
-  public readonly apisToRedactInLogs: ElasticsearchPotentiallyLeakingApi[];
+  public readonly apisToRedactInLogs: ElasticsearchApiToRedactInLogs[];
 
   constructor(rawConfig: ElasticsearchConfigType) {
     this.ignoreVersionMismatch = rawConfig.ignoreVersionMismatch;

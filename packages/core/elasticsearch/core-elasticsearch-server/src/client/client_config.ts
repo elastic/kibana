@@ -9,9 +9,9 @@
 import type { Duration } from 'moment';
 
 /**
- * Definition of a potentially leaking API
+ * Definition of an API that should redact the requested body in the logs
  */
-export interface ElasticsearchPotentiallyLeakingApi {
+export interface ElasticsearchApiToRedactInLogs {
   /**
    * The ES path.
    * - If specified as a string, it'll be checked as `contains`.
@@ -49,7 +49,7 @@ export interface ElasticsearchClientConfig {
   requestTimeout?: Duration | number;
   caFingerprint?: string;
   ssl?: ElasticsearchClientSslConfig;
-  apisToRedactInLogs?: ElasticsearchPotentiallyLeakingApi[];
+  apisToRedactInLogs?: ElasticsearchApiToRedactInLogs[];
 }
 
 /**
