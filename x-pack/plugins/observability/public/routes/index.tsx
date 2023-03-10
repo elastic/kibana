@@ -11,7 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
 import { casesPath } from '../../common';
 import { CasesPage } from '../pages/cases';
-import { AlertsPage } from '../pages/alerts/containers/alerts_page';
+import { AlertsPage } from '../pages/alerts/alerts';
 import { OverviewPage } from '../pages/overview/overview';
 import { jsonRt } from './json_rt';
 import { ObservabilityExploratoryView } from '../components/shared/exploratory_view/obsv_exploratory_view';
