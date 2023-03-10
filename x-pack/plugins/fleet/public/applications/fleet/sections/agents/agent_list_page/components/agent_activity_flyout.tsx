@@ -92,12 +92,16 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   const onClickViewAgents = async (action: ActionStatus) => {
     try {
       const { data } = await sendPostRetrieveAgentsByActions({ actionIds: [action.actionId] });
-
       if (data?.items?.length) {
-        const kuery = getKuery({ selectedAgentIds: data.items });
-        setSelectedStatus([]);
+        const kuery = getKuery({
+          selectedAgentIds: data.items,
+        });
         setSearch(kuery);
       }
+      if (action?.type === 'UNENROLL' || action?.type === 'FORCE_UNENROLL') {
+        setSelectedStatus(['unenrolled', 'inactive']);
+      } else setSelectedStatus([]);
+
       onClose();
     } catch (err) {
       notifications.toasts.addError(err, {
