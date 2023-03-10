@@ -13,6 +13,7 @@ import type {
 
 import { firstValueFrom } from 'rxjs';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { EndpointAppContext } from '../../../../endpoint/types';
 import { getFilter } from '../utils/get_filter';
 import type { BucketHistory } from './alert_suppression/group_and_bulk_create';
 import { groupAndBulkCreate } from './alert_suppression/group_and_bulk_create';
@@ -35,6 +36,7 @@ export const queryExecutor = async ({
   spaceId,
   bucketHistory,
   osqueryCreateAction,
+  endpointAppContext,
   licensing,
 }: {
   runOpts: RunOpts<UnifiedQueryRuleParams>;
@@ -45,6 +47,7 @@ export const queryExecutor = async ({
   spaceId: string;
   bucketHistory?: BucketHistory[];
   osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
+  endpointAppContext?: EndpointAppContext;
   licensing: LicensingPluginSetup;
 }) => {
   const completeRule = runOpts.completeRule;
@@ -64,6 +67,7 @@ export const queryExecutor = async ({
 
     const license = await firstValueFrom(licensing.license$);
     const hasPlatinumLicense = license.hasAtLeast('platinum');
+    const hasEnterpriseLicense = license.hasAtLeast('enterprise');
 
     const result =
       ruleParams.alertSuppression?.groupBy != null && hasPlatinumLicense
@@ -104,7 +108,9 @@ export const queryExecutor = async ({
             signals: result.createdSignals,
             responseActions: completeRule.ruleParams.responseActions,
           },
-          osqueryCreateAction
+          osqueryCreateAction,
+          endpointAppContext,
+          hasEnterpriseLicense
         );
       }
     }

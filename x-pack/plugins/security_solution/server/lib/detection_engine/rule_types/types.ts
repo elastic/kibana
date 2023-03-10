@@ -34,6 +34,7 @@ import type { TypeOfFieldMap } from '@kbn/rule-registry-plugin/common/field_map'
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { Filter } from '@kbn/es-query';
 
+import type { EndpointAppContext } from '../../../endpoint/types';
 import type { ConfigType } from '../../../config';
 import type { SetupPlugins } from '../../../plugin';
 import type { CompleteRule, RuleParams } from '../rule_schema';
@@ -155,6 +156,7 @@ export interface CreateRuleOptions {
 export interface CreateQueryRuleAdditionalOptions {
   osqueryCreateAction: SetupPlugins['osquery']['osqueryCreateAction'];
   licensing: LicensingPluginSetup;
+  endpointAppContext?: EndpointAppContext;
 }
 
 export interface CreateQueryRuleOptions

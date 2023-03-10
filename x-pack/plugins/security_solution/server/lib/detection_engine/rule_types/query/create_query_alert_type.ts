@@ -31,6 +31,7 @@ export const createQueryAlertType = (
     licensing,
     id,
     name,
+    endpointAppContext,
   } = createOptions;
   return {
     id,
@@ -85,6 +86,7 @@ export const createQueryAlertType = (
         bucketHistory: state.suppressionGroupHistory,
         osqueryCreateAction,
         licensing,
+        endpointAppContext,
       });
     },
   };

@@ -169,6 +169,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const queryRuleAdditionalOptions: CreateQueryRuleAdditionalOptions = {
       licensing: plugins.licensing,
       osqueryCreateAction: plugins.osquery.osqueryCreateAction,
+      endpointAppContext: this.endpointContext,
     };
 
     const requestContextFactory = new RequestContextFactory({
