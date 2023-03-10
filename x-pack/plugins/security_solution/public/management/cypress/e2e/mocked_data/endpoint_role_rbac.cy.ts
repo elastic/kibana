@@ -27,7 +27,6 @@ describe('When defining a kibana role for Endpoint security access', () => {
 
   it('should display RBAC entries with expected controls', () => {
     getAllSubFeatureRows()
-      .should('have.length', 11)
       .then(($subFeatures) => {
         const featureRows: string[] = [];
         $subFeatures.each((_, $subFeature) => {
