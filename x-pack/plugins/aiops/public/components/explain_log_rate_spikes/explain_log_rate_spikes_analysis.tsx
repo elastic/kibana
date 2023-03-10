@@ -63,6 +63,7 @@ interface ExplainLogRateSpikesAnalysisProps {
   latest: number;
   /** Window parameters for the analysis */
   windowParameters: WindowParameters;
+  /** The search query to be applied to the analysis as a filter */
   searchQuery: Query['query'];
 }
 
