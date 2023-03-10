@@ -179,10 +179,14 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.click('breadcrumb dashboardListingBreadcrumb first');
   }
 
-  public async expectOnDashboard(dashboardTitle: string) {
+  public async expectOnDashboard(expectedTitle: string) {
     await this.retry.waitFor(
-      'last breadcrumb to have dashboard title',
-      async () => (await this.globalNav.getLastBreadcrumb()) === dashboardTitle
+      `last breadcrumb to have dashboard title: ${expectedTitle}`,
+      async () => {
+        const actualTitle = await this.globalNav.getLastBreadcrumb();
+        this.log.debug(`Expected dashboard title ${expectedTitle}, actual: ${actualTitle}`);
+        return actualTitle === expectedTitle;
+      }
     );
   }
 
