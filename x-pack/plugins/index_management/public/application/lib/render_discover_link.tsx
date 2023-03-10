@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { AppContextConsumer } from '../app_context';
 
 export const renderDiscoverLink = (indexName: string) => {
@@ -22,16 +23,21 @@ export const renderDiscoverLink = (indexName: string) => {
           await locators.navigate({ dataViewSpec: { title: indexName } });
         };
         return (
-          <>
-            {' '}
+          <EuiToolTip
+            content={i18n.translate('xpack.idxMgmt.goToDiscover', {
+              defaultMessage: 'Show {indexName} in Discover',
+              values: { indexName },
+            })}
+          >
             <EuiButtonIcon
               onClick={onClick}
               display="empty"
               size="xs"
               iconType="discoverApp"
               aria-label="Discover"
+              css={{ margin: '0 0.3em' }}
             />
-          </>
+          </EuiToolTip>
         );
       }}
     </AppContextConsumer>
