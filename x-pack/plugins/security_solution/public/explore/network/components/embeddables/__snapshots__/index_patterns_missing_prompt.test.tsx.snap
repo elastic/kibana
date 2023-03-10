@@ -5,6 +5,7 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
   actions={
     <EuiButton
       color="primary"
+      data-test-subj="securitySolutionIndexPatternsMissingPromptComponentButton"
       fill={true}
       href="/test/base/path/app/management/kibana/dataViews"
       size="m"

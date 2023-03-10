@@ -46,6 +46,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           button={
             <EuiButton
               color="primary"
+              data-test-subj="pluginsExportButton"
               iconSide="right"
               iconType="arrowDown"
               isDisabled={false}
@@ -102,6 +103,7 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           >
             <EuiButton
               color="primary"
+              data-test-subj="pluginsExportButton"
               fill={true}
               iconType="exportAction"
               onClick={[Function]}
@@ -284,6 +286,7 @@ exports[`Table should render normally 1`] = `
           button={
             <EuiButton
               color="primary"
+              data-test-subj="pluginsExportButton"
               iconSide="right"
               iconType="arrowDown"
               isDisabled={false}
@@ -340,6 +343,7 @@ exports[`Table should render normally 1`] = `
           >
             <EuiButton
               color="primary"
+              data-test-subj="pluginsExportButton"
               fill={true}
               iconType="exportAction"
               onClick={[Function]}

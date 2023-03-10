@@ -45,6 +45,7 @@ exports[`Flyout conflicts should allow conflict resolution 1`] = `
             values={
               Object {
                 "indexPatternLink": <EuiLink
+                  data-test-subj="pluginsCreateANewDataViewLink"
                   href=""
                 >
                   <FormattedMessage

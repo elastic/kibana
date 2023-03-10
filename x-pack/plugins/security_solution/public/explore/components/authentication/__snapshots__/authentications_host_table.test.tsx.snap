@@ -387,6 +387,7 @@ exports[`Authentication Host Table Component rendering it renders the host authe
         >
           <button
             class="euiButtonEmpty euiButtonEmpty--xSmall css-wvaqcf-empty-text"
+            data-test-subj="securitySolutionPaginatedTableComponentButton"
             type="button"
           >
             <span

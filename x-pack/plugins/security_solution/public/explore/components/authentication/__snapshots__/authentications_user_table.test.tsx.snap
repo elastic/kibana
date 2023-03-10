@@ -387,6 +387,7 @@ exports[`Authentication User Table Component rendering it renders the user authe
         >
           <button
             class="euiButtonEmpty euiButtonEmpty--xSmall css-wvaqcf-empty-text"
+            data-test-subj="securitySolutionPaginatedTableComponentButton"
             type="button"
           >
             <span

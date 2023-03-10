@@ -48,6 +48,7 @@ exports[`Header should render normally 1`] = `
         />
       </EuiButtonEmpty>,
       <EuiButtonEmpty
+        data-test-subj="pluginsHeaderRefreshButton"
         iconType="refresh"
         onClick={[Function]}
         size="s"
