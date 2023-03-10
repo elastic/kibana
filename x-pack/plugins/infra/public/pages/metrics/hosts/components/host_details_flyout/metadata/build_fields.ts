@@ -7,101 +7,103 @@
 
 import type { InfraMetadata } from '../../../../../../../common/http_api';
 
-export const getAllFields = (metadata: InfraMetadata) =>
-  prune([
+export const getAllFields = (metadata: InfraMetadata) => {
+  if (!metadata?.info) return [];
+  return prune([
     {
       name: 'host.architecture',
-      value: metadata.info?.host?.architecture,
+      value: metadata.info.host?.architecture,
     },
     {
       name: 'host.hostname',
-      value: metadata.info?.host?.name,
+      value: metadata.info.host?.name,
     },
     {
       name: 'host.id',
-      value: metadata.info?.host?.id,
+      value: metadata.info.host?.id,
     },
     {
       name: 'host.ip',
-      value: metadata.info?.host?.ip,
+      value: metadata.info.host?.ip,
     },
     {
       name: 'host.mac',
-      value: metadata.info?.host?.mac,
+      value: metadata.info.host?.mac,
     },
     {
       name: 'host.name',
-      value: metadata.info?.host?.name,
+      value: metadata.info.host?.name,
     },
     {
       name: 'host.os.build',
-      value: metadata.info?.host?.os?.build,
+      value: metadata.info.host?.os?.build,
     },
     {
       name: 'host.os.family',
-      value: metadata.info?.host?.os?.family,
+      value: metadata.info.host?.os?.family,
     },
     {
       name: 'host.os.name',
-      value: metadata.info?.host?.os?.name,
+      value: metadata.info.host?.os?.name,
     },
     {
       name: 'host.os.kernel',
-      value: metadata.info?.host?.os?.kernel,
+      value: metadata.info.host?.os?.kernel,
     },
     {
       name: 'host.os.platform',
-      value: metadata.info?.host?.os?.platform,
+      value: metadata.info.host?.os?.platform,
     },
     {
       name: 'host.os.version',
-      value: metadata.info?.host?.os?.version,
+      value: metadata.info.host?.os?.version,
     },
     {
       name: 'cloud.account.id',
-      value: metadata.info?.cloud?.account?.id,
+      value: metadata.info.cloud?.account?.id,
     },
     {
       name: 'cloud.account.name',
-      value: metadata.info?.cloud?.account?.name,
+      value: metadata.info.cloud?.account?.name,
     },
     {
       name: 'cloud.availability_zone',
-      value: metadata.info?.cloud?.availability_zone,
+      value: metadata.info.cloud?.availability_zone,
     },
     {
       name: 'cloud.instance.id',
-      value: metadata.info?.cloud?.instance?.id,
+      value: metadata.info.cloud?.instance?.id,
     },
     {
       name: 'cloud.instance.name',
-      value: metadata.info?.cloud?.instance?.name,
+      value: metadata.info.cloud?.instance?.name,
     },
     {
       name: 'cloud.machine.type',
-      value: metadata.info?.cloud?.machine?.type,
+      value: metadata.info.cloud?.machine?.type,
     },
     {
       name: 'cloud.provider',
-      value: metadata.info?.cloud?.provider,
+      value: metadata.info.cloud?.provider,
     },
     {
       name: 'cloud.region',
-      value: metadata.info?.cloud?.region,
+      value: metadata.info.cloud?.region,
     },
     {
       name: 'agent.id',
-      value: metadata.info?.agent?.id,
+      value: metadata.info.agent?.id,
     },
     {
       name: 'agent.version',
-      value: metadata.info?.agent?.version,
+      value: metadata.info.agent?.version,
     },
     {
       name: 'agent.policy',
-      value: metadata.info?.agent?.policy,
+      value: metadata.info.agent?.policy,
     },
   ]);
+};
 
 const prune = (fields: Array<{ name: string; value: string | string[] | undefined }>) =>
   fields.filter((f) => !!f.value);
