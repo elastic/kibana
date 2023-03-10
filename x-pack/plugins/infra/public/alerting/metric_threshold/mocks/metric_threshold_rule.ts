@@ -8,13 +8,12 @@
 import { Rule } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { Aggregators, Comparator } from '../../../../common/alerting/metrics';
-import { MetricThresholdRuleTypeParams } from '../../metric_threshold';
+import { MetricThresholdRuleTypeParams } from '..';
 
 export const buildMetricThresholdRule = (
   rule: Partial<Rule<MetricThresholdRuleTypeParams>> = {}
 ): Rule<MetricThresholdRuleTypeParams> => {
   return {
-    // ruleTypeId: 'metrics.alert.threshold',
     alertTypeId: 'metrics.alert.threshold',
     createdBy: 'admin',
     updatedBy: 'admin',

@@ -9,7 +9,7 @@ import { coreMock as mockCoreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
-import { buildMetricThresholdRule } from '../../common/mocks/metric_threshold_rule';
+import { buildMetricThresholdRule } from '../mocks/metric_threshold_rule';
 import AlertDetailsAppSection from './alert_details_app_section';
 
 jest.mock('../../../hooks/use_kibana', () => ({
