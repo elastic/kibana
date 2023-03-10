@@ -80,7 +80,7 @@ export const LocationForm = ({
               {
                 <FormattedMessage
                   id="xpack.synthetics.monitorManagement.agentCallout.content"
-                  defaultMessage='If you intend to run "Browser" monitors on this private location, please ensure you are using the {code} Docker container, which contains the dependencies to run these monitors. For more information, {link}.'
+                  defaultMessage='To run "Browser" monitors on this private location, make sure that you're using the {code} Docker container, which contains the dependencies necessary to run these monitors. For more information, {link}.'
                   values={{
                     code: <EuiCode>elastic-agent-complete</EuiCode>,
                     link: (
@@ -113,7 +113,7 @@ export const LocationForm = ({
                 {
                   <FormattedMessage
                     id="xpack.synthetics.monitorManagement.agentMissingCallout.content"
-                    defaultMessage="You have selected an agent policy that has no agents attached. Please ensure you have at least one agent enrolled in this policy. You can add agent before or after creating a location. For more information, {link}."
+                    defaultMessage="You have selected an agent policy that has no agent attached. Make sure that you have at least one agent enrolled in this policy. You can add agent before or after creating a location. For more information, {link}."
                     values={{
                       link: (
                         <EuiLink
