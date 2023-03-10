@@ -12,7 +12,6 @@ import {
   conditionCombinationInvalid,
   getRestrictedValuesForCondition,
 } from './utils';
-import { SelectorConditionsMap } from '../types';
 import { MOCK_YAML_CONFIGURATION, MOCK_YAML_INVALID_CONFIGURATION } from '../test/mocks';
 
 describe('getSelectorsAndResponsesFromYaml', () => {
@@ -95,9 +94,15 @@ describe('conditionCombinationInvalid', () => {
 describe('getRestrictedValuesForCondition', () => {
   it('works', () => {
     let values = getRestrictedValuesForCondition('file', 'operation');
-    expect(values).toEqual(SelectorConditionsMap.operation.values.file);
+    expect(values).toEqual([
+      'createExecutable',
+      'modifyExecutable',
+      'createFile',
+      'modifyFile',
+      'deleteFile',
+    ]);
 
     values = getRestrictedValuesForCondition('process', 'operation');
-    expect(values).toEqual(SelectorConditionsMap.operation.values.process);
+    expect(values).toEqual(['fork', 'exec']);
   });
 });

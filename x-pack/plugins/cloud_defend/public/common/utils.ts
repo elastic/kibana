@@ -7,9 +7,8 @@
 import yaml from 'js-yaml';
 import { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import {
-  ControlSelector,
-  ControlResponse,
-  ControlSchema,
+  Selector,
+  Response,
   SelectorType,
   DefaultFileSelector,
   DefaultProcessSelector,
@@ -23,7 +22,7 @@ export function getInputFromPolicy(policy: NewPackagePolicy, inputId: string) {
   return policy.inputs.find((input) => input.type === inputId);
 }
 
-export function getSelectorTypeIcon(type?: SelectorType) {
+export function getSelectorTypeIcon(type: SelectorType) {
   switch (type) {
     case 'process':
       return 'gear';
@@ -73,60 +72,53 @@ export function getSelectorConditions(type: SelectorType): SelectorCondition[] {
   });
 }
 
-export function getDefaultSelectorByType(type: SelectorType): ControlSelector {
+export function getDefaultSelectorByType(type: SelectorType): Selector {
   switch (type) {
     case 'process':
-      return { type, ...DefaultProcessSelector };
+      return { ...DefaultProcessSelector };
     case 'file':
     default:
-      return { type, ...DefaultFileSelector };
+      return { ...DefaultFileSelector };
   }
 }
 
-export function getDefaultResponseByType(type: SelectorType): ControlResponse {
+export function getDefaultResponseByType(type: SelectorType): Response {
   switch (type) {
     case 'process':
-      return { type, ...DefaultProcessResponse };
+      return { ...DefaultProcessResponse };
     case 'file':
     default:
-      return { type, ...DefaultFileResponse };
+      return { ...DefaultFileResponse };
   }
 }
 
 export function getSelectorsAndResponsesFromYaml(configuration: string): {
-  selectors: ControlSelector[];
-  responses: ControlResponse[];
+  selectors: Selector[];
+  responses: Response[];
 } {
-  let selectors: ControlSelector[] = [];
-  let responses: ControlResponse[] = [];
+  let selectors: Selector[] = [];
+  let responses: Response[] = [];
 
   try {
     const result = yaml.load(configuration);
 
     if (result) {
-      if (result.file && result.file.selectors && result.file.responses) {
-        selectors = selectors.concat(
-          result.file.selectors.map((selector: any) => ({ ...selector, type: 'file' }))
-        );
-        responses = responses.concat(
-          result.file.responses.map((response: any) => ({ ...response, type: 'file' }))
-        );
-      }
+      // iterate selector/response types
+      Object.keys(result).forEach((selectorType) => {
+        const obj = result[selectorType];
 
-      if (result.process && result.process.selectors && result.process.responses) {
-        selectors = selectors.concat(
-          result.process.selectors.map((selector: any) => ({
-            ...selector,
-            type: 'process',
-          }))
-        );
-        responses = responses.concat(
-          result.process.responses.map((response: any) => ({
-            ...response,
-            type: 'process',
-          }))
-        );
-      }
+        if (obj.selectors) {
+          selectors = selectors.concat(
+            obj.selectors.map((selector: any) => ({ ...selector, type: selectorType }))
+          );
+        }
+
+        if (obj.responses) {
+          responses = responses.concat(
+            obj.responses.map((response: any) => ({ ...response, type: selectorType }))
+          );
+        }
+      });
     }
   } catch {
     // noop
@@ -134,14 +126,11 @@ export function getSelectorsAndResponsesFromYaml(configuration: string): {
   return { selectors, responses };
 }
 
-export function getYamlFromSelectorsAndResponses(
-  selectors: ControlSelector[],
-  responses: ControlResponse[]
-) {
-  const schema: ControlSchema = {};
+export function getYamlFromSelectorsAndResponses(selectors: Selector[], responses: Response[]) {
+  const schema: any = {};
 
-  selectors.reduce((current, selector) => {
-    if (current && selector && selector.type) {
+  selectors.reduce((current, selector: any) => {
+    if (current && selector) {
       if (current[selector.type]) {
         current[selector.type]?.selectors.push(selector);
       } else {
@@ -149,23 +138,20 @@ export function getYamlFromSelectorsAndResponses(
       }
     }
 
-    // cleanup ephemeral props
+    // the 'any' cast is used so we can keep 'selector.type' type safe
     delete selector.type;
-    delete selector.hasErrors;
 
     return current;
   }, schema);
 
-  responses.reduce((current, response) => {
+  responses.reduce((current, response: any) => {
     if (current && response && response.type) {
       if (current[response.type]) {
         current[response.type]?.responses.push(response);
       }
     }
 
-    // cleanup ephemeral props
     delete response.type;
-    delete response.hasErrors;
 
     return current;
   }, schema);

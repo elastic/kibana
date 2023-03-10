@@ -14,7 +14,6 @@ import {
   EuiText,
   EuiTitle,
   EuiButton,
-  euiDragDropReorder,
   EuiSpacer,
 } from '@elastic/eui';
 import { INPUT_CONTROL } from '../../../common/constants';
@@ -26,7 +25,7 @@ import {
   getDefaultSelectorByType,
   getDefaultResponseByType,
 } from '../../common/utils';
-import { SelectorType, ControlSelector, ControlResponse, ViewDeps } from '../../types';
+import { SelectorType, Selector, Response, ViewDeps } from '../../types';
 import * as i18n from './translations';
 import { ControlGeneralViewSelector } from '../control_general_view_selector';
 import { ControlGeneralViewResponse } from '../control_general_view_response';
@@ -62,13 +61,28 @@ const AddButton = ({ type, onSelectType }: AddSelectorButtonProps) => {
   const isSelector = type === 'Selector';
 
   const items = [
-    <EuiContextMenuItem key={`addFile${type}`} icon="document" onClick={addFile}>
+    <EuiContextMenuItem
+      key={`addFile${type}`}
+      icon="document"
+      onClick={addFile}
+      data-test-subj={`cloud-defend-btnAddFile${type}`}
+    >
       {isSelector ? i18n.fileSelector : i18n.fileResponse}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem key={`addProcess${type}`} icon="gear" onClick={addProcess}>
+    <EuiContextMenuItem
+      key={`addProcess${type}`}
+      icon="gear"
+      onClick={addProcess}
+      data-test-subj={`cloud-defend-btnAddProcess${type}`}
+    >
       {isSelector ? i18n.processSelector : i18n.processResponse}
     </EuiContextMenuItem>,
-    <EuiContextMenuItem key={`addNetwork${type}`} icon="globe" disabled>
+    <EuiContextMenuItem
+      key={`addNetwork${type}`}
+      icon="globe"
+      disabled
+      data-test-subj={`cloud-defend-btnAddNetwork${type}`}
+    >
       {isSelector ? i18n.networkSelector : i18n.networkResponse}
     </EuiContextMenuItem>,
   ];
@@ -107,11 +121,11 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   }, [configuration]);
 
   const onUpdateYaml = useCallback(
-    (newSelectors: ControlSelector[], newResponses: ControlResponse[]) => {
+    (newSelectors: Selector[], newResponses: Response[]) => {
       if (input?.vars?.configuration) {
         const isValid =
-          !selectors.find((selector) => selector.hasErrors) &&
-          !responses.find((response) => response.hasErrors);
+          !newSelectors.find((selector) => selector.hasErrors) &&
+          !newResponses.find((response) => response.hasErrors);
 
         input.vars.configuration.value = getYamlFromSelectorsAndResponses(
           newSelectors,
@@ -121,7 +135,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
         onChange({ isValid, updatedPolicy: { ...policy } });
       }
     },
-    [input?.vars?.configuration, onChange, policy, responses, selectors]
+    [input?.vars?.configuration, onChange, policy]
   );
 
   const incrementName = useCallback(
@@ -168,7 +182,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   );
 
   const onDuplicateSelector = useCallback(
-    (selector: ControlSelector) => {
+    (selector: Selector) => {
       const duplicate = JSON.parse(JSON.stringify(selector));
 
       duplicate.name = incrementName(duplicate.name);
@@ -212,7 +226,7 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   );
 
   const onDuplicateResponse = useCallback(
-    (response: ControlResponse) => {
+    (response: Response) => {
       const duplicate = { ...response };
       responses.push(duplicate);
       onUpdateYaml(selectors, responses);
@@ -230,11 +244,11 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   );
 
   const onSelectorChange = useCallback(
-    (updatedSelector: ControlSelector, index: number) => {
+    (updatedSelector: Selector, index: number) => {
       const old = selectors[index];
 
-      const updatedSelectors: ControlSelector[] = [...selectors];
-      let updatedResponses: ControlResponse[] = [...responses];
+      const updatedSelectors: Selector[] = [...selectors];
+      let updatedResponses: Response[] = [...responses];
 
       if (old.name !== updatedSelector.name) {
         // update all references to this selector in responses
@@ -264,21 +278,11 @@ export const ControlGeneralView = ({ policy, onChange, show }: ViewDeps) => {
   );
 
   const onResponseChange = useCallback(
-    (updatedResponse: ControlResponse, index: number) => {
-      const updatedResponses: ControlResponse[] = [...responses];
+    (updatedResponse: Response, index: number) => {
+      const updatedResponses: Response[] = [...responses];
 
       updatedResponses[index] = updatedResponse;
       onUpdateYaml(selectors, updatedResponses);
-    },
-    [onUpdateYaml, responses, selectors]
-  );
-
-  const onResponseDragEnd = useCallback(
-    ({ source, destination }) => {
-      if (source && destination) {
-        const reorderedResponses = euiDragDropReorder(responses, source.index, destination.index);
-        onUpdateYaml(selectors, reorderedResponses);
-      }
     },
     [onUpdateYaml, responses, selectors]
   );

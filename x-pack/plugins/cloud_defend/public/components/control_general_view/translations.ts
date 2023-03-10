@@ -139,7 +139,7 @@ export const errorValueLengthExceeded = i18n.translate(
   }
 );
 
-export const getSelectorIconTooltip = (type?: SelectorType) => {
+export const getSelectorIconTooltip = (type: SelectorType) => {
   switch (type) {
     case 'process':
       return i18n.translate('xpack.cloudDefend.processSelectorIconTooltip', {
@@ -153,7 +153,7 @@ export const getSelectorIconTooltip = (type?: SelectorType) => {
   }
 };
 
-export const getResponseIconTooltip = (type?: SelectorType) => {
+export const getResponseIconTooltip = (type: SelectorType) => {
   switch (type) {
     case 'process':
       return i18n.translate('xpack.cloudDefend.processResponseIconTooltip', {

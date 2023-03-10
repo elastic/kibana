@@ -23,12 +23,13 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import {
   ControlGeneralViewSelectorDeps,
   ControlFormErrorMap,
-  ControlSelector,
+  Selector,
   SelectorCondition,
   SelectorConditionsMap,
 } from '../../types';
@@ -53,14 +54,53 @@ interface ConditionProps {
   onRemoveCondition(prop: SelectorCondition): void;
 }
 
+interface BooleanConditionProps extends ConditionProps {
+  selector: Selector;
+  onChangeBooleanCondition(prop: SelectorCondition, value: boolean): void;
+}
+
 interface StringArrayConditionProps extends ConditionProps {
-  selector: ControlSelector;
+  selector: Selector;
   errorMap: ControlFormErrorMap;
   onAddValueToCondition(prop: SelectorCondition, value: string): void;
   onChangeStringArrayCondition(prop: SelectorCondition, value: string[]): void;
 }
 
-const BooleanCondition = ({ label, prop, onRemoveCondition }: ConditionProps) => {
+const BooleanCondition = ({
+  label,
+  prop,
+  selector,
+  onChangeBooleanCondition,
+  onRemoveCondition,
+}: BooleanConditionProps) => {
+  const value = selector[prop as keyof Selector] as boolean;
+  const onChange = useCallback(
+    (e) => {
+      onChangeBooleanCondition(prop, e.target.checked);
+    },
+    [onChangeBooleanCondition, prop]
+  );
+
+  return (
+    <EuiFormRow label={label} fullWidth={true} key={prop}>
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        <EuiFlexItem>
+          <EuiCheckbox id={prop} label={label} checked={value} onChange={onChange} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonIcon
+            iconType="cross"
+            onClick={() => onRemoveCondition(prop)}
+            aria-label="Remove condition"
+            data-test-subj={'cloud-defend-btnremovecondition-' + prop}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiFormRow>
+  );
+};
+
+const FlagCondition = ({ label, prop, onRemoveCondition }: ConditionProps) => {
   return (
     <EuiFormRow label={label} fullWidth={true} key={prop}>
       <EuiFlexGroup alignItems="center" gutterSize="m">
@@ -93,13 +133,13 @@ const StringArrayCondition = ({
   onAddValueToCondition,
   onChangeStringArrayCondition,
 }: StringArrayConditionProps) => {
-  const values = selector[prop as keyof ControlSelector] as string[];
+  const values = selector[prop as keyof Selector] as string[];
   const selectedOptions =
     values?.map((option) => {
       return { label: option, value: option };
     }) || [];
 
-  const restrictedValues = selector.type && getRestrictedValuesForCondition(selector.type, prop);
+  const restrictedValues = getRestrictedValuesForCondition(selector.type, prop);
 
   return (
     <EuiFormRow
@@ -177,10 +217,7 @@ export const ControlGeneralViewSelector = ({
     setAddConditionOpen(false);
   }, []);
 
-  const availableConditions = useMemo(
-    () => (selector.type && getSelectorConditions(selector.type)) || [],
-    [selector]
-  );
+  const availableConditions = useMemo(() => getSelectorConditions(selector.type), [selector]);
 
   const remainingConditions = useMemo(() => {
     return availableConditions.filter((condition) => !selector.hasOwnProperty(condition));
@@ -317,7 +354,7 @@ export const ControlGeneralViewSelector = ({
   const onAddValueToCondition = useCallback(
     (prop: SelectorCondition, searchValue: string) => {
       const value = searchValue.trim();
-      const values = selector[prop as keyof ControlSelector] as string[];
+      const values = selector[prop as keyof Selector] as string[];
 
       if (values && values.indexOf(value) === -1) {
         onChangeStringArrayCondition(prop, [...values, value]);
@@ -364,7 +401,6 @@ export const ControlGeneralViewSelector = ({
         </EuiFlexGroup>
       }
       css={styles.accordion}
-      initialIsOpen={index === 0}
       extraAction={
         <EuiFlexGroup alignItems="center" gutterSize="none">
           {accordionState === 'closed' && (
@@ -443,10 +479,21 @@ export const ControlGeneralViewSelector = ({
 
           if (valueType === 'flag') {
             return (
-              <BooleanCondition
+              <FlagCondition
                 key={prop}
                 label={label}
                 prop={prop}
+                onRemoveCondition={onRemoveCondition}
+              />
+            );
+          } else if (valueType === 'boolean') {
+            return (
+              <BooleanCondition
+                key={prop}
+                label={label}
+                selector={selector}
+                prop={prop}
+                onChangeBooleanCondition={onChangeBooleanCondition}
                 onRemoveCondition={onRemoveCondition}
               />
             );

@@ -91,11 +91,11 @@ export interface SelectorConditionOptions {
   selectorType?: SelectorType;
   not?: SelectorCondition[];
   values?:
-    | string[]
     | {
         file?: string[];
         process?: string[];
-      };
+      }
+    | string[];
 }
 
 export type SelectorConditionsMapProps = {
@@ -135,21 +135,21 @@ export const SelectorConditionsMap: SelectorConditionsMapProps = {
   sessionLeaderExecutable: { selectorType: 'process', type: 'stringArray' },
 };
 
-export type ControlResponseAction = 'log' | 'alert' | 'block';
+export type ResponseAction = 'log' | 'alert' | 'block';
 
 // outer most wrapper of the yaml configuration fed to cloud-defend agent.
 export interface ControlSchema {
   file?: {
-    selectors: ControlSelector[];
-    responses: ControlResponse[];
+    selectors: Selector[];
+    responses: Response[];
   };
   process?: {
-    selectors: ControlSelector[];
-    responses: ControlResponse[];
+    selectors: Selector[];
+    responses: Response[];
   };
 }
 
-export interface ControlSelector {
+export interface Selector {
   name: string;
   operation?: string[];
   containerImageName?: string[];
@@ -175,43 +175,42 @@ export interface ControlSelector {
   sessionLeaderInteractive?: string[];
 
   // ephemeral props (used only in UI)
-  type?: SelectorType;
+  type: SelectorType;
 
   // used to track selector error state in UI
   hasErrors?: boolean;
 }
 
-export interface ControlResponse {
+export interface Response {
   match: string[];
   exclude?: string[];
-  actions: ControlResponseAction[];
+  actions: ResponseAction[];
 
-  // ephemeral props (used only in UI)
-  type?: SelectorType;
-
+  // non yaml fields
+  type: SelectorType;
   // used to track response error state in UI
   hasErrors?: boolean;
 }
 
-export const DefaultFileSelector: ControlSelector = {
+export const DefaultFileSelector: Selector = {
   type: 'file',
   name: 'Untitled',
   operation: ['createExecutable', 'modifyExecutable'],
 };
 
-export const DefaultProcessSelector: ControlSelector = {
+export const DefaultProcessSelector: Selector = {
   type: 'process',
   name: 'Untitled',
   operation: ['fork', 'exec'],
 };
 
-export const DefaultFileResponse: ControlResponse = {
+export const DefaultFileResponse: Response = {
   type: 'file',
   match: [],
   actions: ['alert'],
 };
 
-export const DefaultProcessResponse: ControlResponse = {
+export const DefaultProcessResponse: Response = {
   type: 'process',
   match: [],
   actions: ['alert'],
@@ -232,22 +231,22 @@ export interface ViewDeps extends SettingsDeps {
 }
 
 export interface ControlGeneralViewSelectorDeps {
-  selector: ControlSelector;
-  selectors: ControlSelector[];
+  selector: Selector;
+  selectors: Selector[];
   index: number;
-  onChange(selector: ControlSelector, index: number): void;
+  onChange(selector: Selector, index: number): void;
   onRemove(index: number): void;
-  onDuplicate(selector: ControlSelector): void;
+  onDuplicate(selector: Selector): void;
 }
 
 export interface ControlGeneralViewResponseDeps {
-  response: ControlResponse;
-  selectors: ControlSelector[];
-  responses: ControlResponse[];
+  response: Response;
+  selectors: Selector[];
+  responses: Response[];
   index: number;
-  onChange(response: ControlResponse, index: number): void;
+  onChange(response: Response, index: number): void;
   onRemove(index: number): void;
-  onDuplicate(response: ControlResponse): void;
+  onDuplicate(response: Response): void;
 }
 
 export interface ControlFormErrorMap {

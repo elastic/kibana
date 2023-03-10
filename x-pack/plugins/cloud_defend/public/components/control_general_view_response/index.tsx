@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import { useStyles } from './styles';
 import { useStyles as useSelectorStyles } from '../control_general_view_selector/styles';
-import { ControlGeneralViewResponseDeps, ControlResponseAction } from '../../types';
+import { ControlGeneralViewResponseDeps, ResponseAction } from '../../types';
 import * as i18n from '../control_general_view/translations';
 import { getSelectorTypeIcon } from '../../common/utils';
 
@@ -145,7 +145,7 @@ export const ControlGeneralViewResponse = ({
 
   const onToggleAction = useCallback(
     (e: ChangeEvent) => {
-      const action = e.currentTarget.id as ControlResponseAction;
+      const action = e.currentTarget.id as ResponseAction;
       const updatedResponse = JSON.parse(JSON.stringify(response));
       const actionIndex = updatedResponse.actions.indexOf(action);
 
@@ -236,7 +236,7 @@ export const ControlGeneralViewResponse = ({
               <div css={selectorStyles.verticalDivider} />
               <b>{i18n.actions}: </b>
               {response.actions.map((action, i) => (
-                <span>
+                <span key={action}>
                   <b style={{ color: action === 'block' ? colors.danger : colors.ink }}>
                     {action[0].toUpperCase() + action.slice(1)}
                   </b>
