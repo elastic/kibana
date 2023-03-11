@@ -27,6 +27,7 @@ export const createContext = ({
   serializer,
 }: CreateContextOps): MigratorContext => {
   return {
+    migrationConfig,
     kibanaVersion,
     indexPrefix,
     types,

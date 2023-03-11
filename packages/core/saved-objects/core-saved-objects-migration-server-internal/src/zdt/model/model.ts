@@ -62,8 +62,13 @@ export const model = (
         response as StateActionResponse<'UPDATE_MAPPING_MODEL_VERSIONS'>,
         context
       );
-    // TODO: implement
     case 'INDEX_STATE_UPDATE_DONE':
+      return Stages.indexStateUpdateDone(
+        current,
+        response as StateActionResponse<'INDEX_STATE_UPDATE_DONE'>,
+        context
+      );
+    // TODO: implement
     case 'DOCUMENTS_UPDATE_INIT':
     case 'SET_DOC_MIGRATION_STARTED':
     case 'SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES':

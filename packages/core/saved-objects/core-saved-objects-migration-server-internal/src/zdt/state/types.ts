@@ -6,11 +6,18 @@
  * Side Public License, v 1.
  */
 
-import type { SavedObjectsMappingProperties } from '@kbn/core-saved-objects-server';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SavedObjectsRawDoc,
+  SavedObjectsMappingProperties,
+  SavedObjectTypeExcludeFromUpgradeFilterHook,
+} from '@kbn/core-saved-objects-server';
 import type { IndexMapping, IndexMappingMeta } from '@kbn/core-saved-objects-base-server-internal';
-import type { MigrationLog } from '../../types';
+import type { MigrationLog, Progress } from '../../types';
 import type { ControlState } from '../../state_action_machine';
+import type { BulkOperationBatch } from '../../model/create_batches';
 import type { AliasAction } from '../../actions';
+import { TransformErrorObjects } from '../../core';
 
 export interface BaseState extends ControlState {
   readonly retryCount: number;
@@ -23,6 +30,9 @@ export interface InitState extends BaseState {
   readonly controlState: 'INIT';
 }
 
+/**
+ * Common state properties available after the `INIT` stage
+ */
 export interface PostInitState extends BaseState {
   /**
    * The index we're currently migrating.
@@ -46,6 +56,26 @@ export interface PostInitState extends BaseState {
    * All operations updating this field will update in the state accordingly.
    */
   readonly currentIndexMeta: IndexMappingMeta;
+}
+
+/**
+ * Common state properties available after the `DOCUMENTS_UPDATE_INIT` stage
+ */
+export interface PostDocInitState extends PostInitState {
+  readonly excludeOnUpgradeQuery: QueryDslQueryContainer;
+  readonly excludeFromUpgradeFilterHooks: Record<
+    string,
+    SavedObjectTypeExcludeFromUpgradeFilterHook
+  >;
+  readonly outdatedDocumentsQuery: QueryDslQueryContainer;
+}
+
+export interface OutdatedDocumentsSearchState extends PostDocInitState {
+  readonly pitId: string;
+  readonly lastHitSortValue: number[] | undefined;
+  readonly corruptDocumentIds: string[];
+  readonly transformErrors: TransformErrorObjects[];
+  readonly progress: Progress;
 }
 
 export interface CreateTargetIndexState extends BaseState {
@@ -80,47 +110,51 @@ export interface DocumentsUpdateInitState extends PostInitState {
   readonly controlState: 'DOCUMENTS_UPDATE_INIT';
 }
 
-export interface SetDocMigrationStartedState extends PostInitState {
+export interface SetDocMigrationStartedState extends PostDocInitState {
   readonly controlState: 'SET_DOC_MIGRATION_STARTED';
 }
 
-export interface SetDocMigrationStartedWaitForInstancesState extends PostInitState {
+export interface SetDocMigrationStartedWaitForInstancesState extends PostDocInitState {
   readonly controlState: 'SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES';
 }
 
-export interface CleanupUnknownAndExcludedDocsState extends PostInitState {
+export interface CleanupUnknownAndExcludedDocsState extends PostDocInitState {
   readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS';
 }
 
-export interface CleanupUnknownAndExcludedDocsWaitForTaskState extends PostInitState {
+export interface CleanupUnknownAndExcludedDocsWaitForTaskState extends PostDocInitState {
   readonly controlState: 'CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK';
+  readonly deleteTaskId: string;
 }
 
-export interface RefreshIndexAfterCleanupState extends PostInitState {
+export interface RefreshIndexAfterCleanupState extends PostDocInitState {
   readonly controlState: 'REFRESH_INDEX_AFTER_CLEANUP';
 }
 
-export interface OutdatedDocumentsSearchOpenPitState extends PostInitState {
+export interface OutdatedDocumentsSearchOpenPitState extends PostDocInitState {
   readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT';
 }
 
-export interface OutdatedDocumentsSearchReadState extends PostInitState {
+export interface OutdatedDocumentsSearchReadState extends OutdatedDocumentsSearchState {
   readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_READ';
 }
 
-export interface OutdatedDocumentsSearchTransformState extends PostInitState {
+export interface OutdatedDocumentsSearchTransformState extends OutdatedDocumentsSearchState {
   readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM';
+  readonly outdatedDocuments: SavedObjectsRawDoc[];
 }
 
-export interface OutdatedDocumentsSearchBulkIndexState extends PostInitState {
+export interface OutdatedDocumentsSearchBulkIndexState extends OutdatedDocumentsSearchState {
   readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX';
+  readonly bulkOperationBatches: BulkOperationBatch[];
+  readonly currentBatch: number;
 }
 
-export interface OutdatedDocumentsSearchClosePitState extends PostInitState {
+export interface OutdatedDocumentsSearchClosePitState extends OutdatedDocumentsSearchState {
   readonly controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT';
 }
 
-export interface UpdateDocumentModelVersionsState extends PostInitState {
+export interface UpdateDocumentModelVersionsState extends PostDocInitState {
   readonly controlState: 'UPDATE_DOCUMENT_MODEL_VERSIONS';
 }
 

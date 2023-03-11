@@ -76,41 +76,84 @@ export const nextActionMap = (context: MigratorContext) => {
         timeout: '60s',
       }),
     UPDATE_MAPPING_MODEL_VERSIONS: (state: UpdateMappingModelVersionState) =>
-      Actions.updateMappings({
+      Actions.updateIndexMeta({
         client,
         index: state.currentIndex,
-        mappings: {
-          properties: {},
-          _meta: state.currentIndexMeta,
-        },
+        meta: state.currentIndexMeta,
       }),
     UPDATE_ALIASES: (state: UpdateAliasesState) =>
       Actions.updateAliases({
         client,
         aliasActions: state.aliasActions,
       }),
-    INDEX_STATE_UPDATE_DONE: (state: IndexStateUpdateDoneState) => NOT_IMPLEMENTED_YET,
-    DOCUMENTS_UPDATE_INIT: (state: DocumentsUpdateInitState) => NOT_IMPLEMENTED_YET,
-    SET_DOC_MIGRATION_STARTED: (state: SetDocMigrationStartedState) => NOT_IMPLEMENTED_YET,
+    INDEX_STATE_UPDATE_DONE: (state: IndexStateUpdateDoneState) => () => Actions.noop(),
+    DOCUMENTS_UPDATE_INIT: (state: DocumentsUpdateInitState) => () => Actions.noop(),
+    SET_DOC_MIGRATION_STARTED: (state: SetDocMigrationStartedState) =>
+      Actions.updateIndexMeta({
+        client,
+        index: state.currentIndex,
+        meta: state.currentIndexMeta,
+      }),
     SET_DOC_MIGRATION_STARTED_WAIT_FOR_INSTANCES: (
       state: SetDocMigrationStartedWaitForInstancesState
-    ) => NOT_IMPLEMENTED_YET,
+    ) =>
+      Actions.waitForDelay({
+        delayInSec: context.migrationConfig.zdt.metaPickupSyncDelaySec,
+      }),
     CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS: (state: CleanupUnknownAndExcludedDocsState) =>
-      NOT_IMPLEMENTED_YET,
+      Actions.cleanupUnknownAndExcluded({
+        client,
+        indexName: state.currentIndex,
+        discardUnknownDocs: true,
+        excludeOnUpgradeQuery: state.excludeOnUpgradeQuery,
+        excludeFromUpgradeFilterHooks: state.excludeFromUpgradeFilterHooks,
+        knownTypes: context.types,
+        removedTypes: context.deletedTypes,
+      }),
     CLEANUP_UNKNOWN_AND_EXCLUDED_DOCS_WAIT_FOR_TASK: (
       state: CleanupUnknownAndExcludedDocsWaitForTaskState
-    ) => NOT_IMPLEMENTED_YET,
-    REFRESH_INDEX_AFTER_CLEANUP: (state: RefreshIndexAfterCleanupState) => NOT_IMPLEMENTED_YET,
+    ) =>
+      Actions.waitForDeleteByQueryTask({
+        client,
+        taskId: state.deleteTaskId,
+        timeout: '120s',
+      }),
+    REFRESH_INDEX_AFTER_CLEANUP: (state: RefreshIndexAfterCleanupState) =>
+      Actions.refreshIndex({
+        client,
+        index: state.currentIndex,
+      }),
     OUTDATED_DOCUMENTS_SEARCH_OPEN_PIT: (state: OutdatedDocumentsSearchOpenPitState) =>
-      NOT_IMPLEMENTED_YET,
+      Actions.openPit({
+        client,
+        index: state.currentIndex,
+      }),
     OUTDATED_DOCUMENTS_SEARCH_READ: (state: OutdatedDocumentsSearchReadState) =>
-      NOT_IMPLEMENTED_YET,
+      Actions.readWithPit({
+        client,
+        pitId: state.pitId,
+        searchAfter: state.lastHitSortValue,
+        batchSize: context.migrationConfig.batchSize,
+        query: state.outdatedDocumentsQuery,
+      }),
     OUTDATED_DOCUMENTS_SEARCH_TRANSFORM: (state: OutdatedDocumentsSearchTransformState) =>
-      NOT_IMPLEMENTED_YET,
+      Actions.transformDocs({
+        outdatedDocuments: state.outdatedDocuments,
+        transformRawDocs: null, // TODO: do the wiring
+      }),
     OUTDATED_DOCUMENTS_SEARCH_BULK_INDEX: (state: OutdatedDocumentsSearchBulkIndexState) =>
-      NOT_IMPLEMENTED_YET,
+      Actions.bulkOverwriteTransformedDocuments({
+        client,
+        index: state.currentIndex,
+        operations: state.bulkOperationBatches[state.currentBatch],
+        refresh: true, // TODO: do we want true or false here -> is OUTDATED_DOCUMENTS_SEARCH_REFRESH needed or not?
+      }),
     OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT: (state: OutdatedDocumentsSearchClosePitState) =>
-      NOT_IMPLEMENTED_YET,
+      Actions.closePit({
+        client,
+        pitId: state.pitId,
+      }),
+    // TODO: OUTDATED_DOCUMENTS_SEARCH_REFRESH
     UPDATE_DOCUMENT_MODEL_VERSIONS: (state: UpdateDocumentModelVersionsState) =>
       NOT_IMPLEMENTED_YET,
     UPDATE_DOCUMENT_MODEL_VERSIONS_WAIT_FOR_INSTANCES: (

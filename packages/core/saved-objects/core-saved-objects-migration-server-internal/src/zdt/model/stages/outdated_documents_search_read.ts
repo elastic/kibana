@@ -1,0 +1,72 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import * as Either from 'fp-ts/lib/Either';
+import { throwBadResponse } from '../../../model/helpers';
+import type { ModelStage } from '../types';
+import { logProgress, setProgressTotal } from '../../../model/progress';
+import { extractDiscardedCorruptDocs } from '../../../model/extract_errors';
+
+export const outdatedDocumentsSearchRead: ModelStage<
+  'OUTDATED_DOCUMENTS_SEARCH_READ',
+  'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM' | 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT'
+> = (state, res, context) => {
+  if (Either.isLeft(res)) {
+    throwBadResponse(state, res as never);
+  }
+
+  let logs = state.logs;
+
+  if (res.right.outdatedDocuments.length > 0) {
+    const progress = setProgressTotal(state.progress, res.right.totalHits);
+    return {
+      ...state,
+      controlState: 'OUTDATED_DOCUMENTS_SEARCH_TRANSFORM',
+      outdatedDocuments: res.right.outdatedDocuments,
+      lastHitSortValue: res.right.lastHitSortValue,
+      logs: logProgress(state.logs, progress),
+      progress,
+    };
+  } else {
+    // we don't have any more outdated documents and need to either fail or move on to updating the target mappings.
+    if (state.corruptDocumentIds.length > 0 || state.transformErrors.length > 0) {
+      // TODO: do we want this for ZDT? if so, we need to change the action call in next.ts too
+      // if (!state.discardCorruptObjects) {
+      //   const transformFailureReason = extractTransformFailuresReason(
+      //     context.migrationDocLinks.resolveMigrationFailures,
+      //     state.corruptDocumentIds,
+      //     state.transformErrors
+      //   );
+      //   return {
+      //     ...state,
+      //     controlState: 'FATAL',
+      //     reason: transformFailureReason,
+      //   };
+      // }
+
+      // at this point, users have configured kibana to discard corrupt objects
+      // thus, we can ignore corrupt documents and transform errors and proceed with the migration
+      logs = [
+        ...state.logs,
+        {
+          level: 'warning',
+          message: extractDiscardedCorruptDocs(state.corruptDocumentIds, state.transformErrors),
+        },
+      ];
+    }
+
+    // If there are no more results we have transformed all outdated
+    // documents and we didn't encounter any corrupt documents or transformation errors
+    // and can proceed to the next step
+    return {
+      ...state,
+      logs,
+      controlState: 'OUTDATED_DOCUMENTS_SEARCH_CLOSE_PIT',
+    };
+  }
+};
