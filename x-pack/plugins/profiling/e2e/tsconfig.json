@@ -21,7 +21,6 @@
     { "path": "../../../../test/tsconfig.json" },
     "@kbn/test",
     "@kbn/dev-utils",
-    "@kbn/axe-config",
     "@kbn/cypress-config",
   ]
 }
