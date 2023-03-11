@@ -19,9 +19,9 @@ export default defineCypressConfig({
   pageLoadTimeout: 120000,
   viewportHeight: 1800,
   viewportWidth: 1440,
-  video: true,
+  video: false,
   videoUploadOnPasses: false,
-  screenshotOnRunFailure: true,
+  screenshotOnRunFailure: false,
   retries: {
     runMode: 1,
   },
