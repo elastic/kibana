@@ -34,18 +34,17 @@ export interface UpdateParams {
   filterAndQuery?: boolean;
 }
 
-export type PersistFunction = (
-  nextSavedSearch: SavedSearch,
-  appState: AppState,
-  params: SavedObjectSaveOpts,
-  dataView?: DataView
-) => Promise<{ id: string | undefined } | undefined>;
+export interface PersistParams {
+  appState: AppState;
+  dataView?: DataView;
+  saveOptions: SavedObjectSaveOpts;
+}
 
 /**
  * Container for the saved search state, allowing to load, update and persist the saved search
  * Can also be used to track changes to the saved search
  */
-export interface SavedSearchContainer {
+export interface DiscoverSavedSearchContainer {
   /**
    * Get the current state of the saved search
    */
@@ -88,7 +87,10 @@ export interface SavedSearchContainer {
    * Persist the given saved search
    * Resets the initial and current state of the saved search
    */
-  persist: PersistFunction;
+  persist: (
+    savedSearch: SavedSearch,
+    saveOptions?: SavedObjectSaveOpts
+  ) => Promise<{ id: string | undefined } | undefined>;
   /**
    * Set the persisted & current state of the saved search
    * Happens when a saved search is loaded or a new one is created
@@ -108,7 +110,7 @@ export function getSavedSearchContainer({
 }: {
   savedSearch: SavedSearch;
   services: DiscoverServices;
-}): SavedSearchContainer {
+}): DiscoverSavedSearchContainer {
   const savedSearchInitial$ = new BehaviorSubject(savedSearch);
   const savedSearchCurrent$ = new BehaviorSubject(savedSearch);
   const hasChanged$ = new BehaviorSubject(false);
@@ -160,14 +162,12 @@ export function getSavedSearchContainer({
     return nextSavedSearchToSet;
   };
 
-  const persist: PersistFunction = async (nextSavedSearch, appState: AppState, params) => {
+  const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
     addLog('[savedSearch] persist', nextSavedSearch);
 
     const id = await persistSavedSearch(nextSavedSearch, {
-      dataView: nextSavedSearch.searchSource.getField('index')!,
-      state: appState,
       services,
-      saveOptions: params,
+      saveOptions,
     });
     if (id) {
       savedSearchInitial$.next(nextSavedSearch);

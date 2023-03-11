@@ -26,11 +26,9 @@ export async function changeDataView(
   {
     services,
     discoverState,
-    setUrlTracking,
   }: {
     services: DiscoverServices;
     discoverState: DiscoverStateContainer;
-    setUrlTracking: (dataView: DataView) => void;
   }
 ) {
   addLog('[ui] changeDataView', { id });
@@ -56,7 +54,6 @@ export async function changeDataView(
       state.query
     );
 
-    setUrlTracking(nextDataView);
     discoverState.appState.update(nextAppState);
   }
 }

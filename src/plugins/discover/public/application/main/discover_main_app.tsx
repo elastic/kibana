@@ -15,7 +15,7 @@ import { useDiscoverState } from './hooks/use_discover_state';
 import { useUrl } from './hooks/use_url';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useSavedSearchAliasMatchRedirect } from '../../hooks/saved_search_alias_match_redirect';
-import { useSavedSearchPersisted } from './services/discover_state_provider';
+import { useSavedSearchInitial } from './services/discover_state_provider';
 
 const DiscoverLayoutMemoized = React.memo(DiscoverLayout);
 
@@ -28,7 +28,7 @@ export interface DiscoverMainProps {
 
 export function DiscoverMainApp(props: DiscoverMainProps) {
   const { stateContainer } = props;
-  const savedSearch = useSavedSearchPersisted();
+  const savedSearch = useSavedSearchInitial();
   const services = useDiscoverServices();
   const { chrome, docLinks, data, spaces, history } = services;
   const usedHistory = useHistory();
@@ -73,7 +73,7 @@ export function DiscoverMainApp(props: DiscoverMainProps) {
    */
   useEffect(() => {
     addHelpMenuToAppChrome(chrome, docLinks);
-  }, [stateContainer, chrome, docLinks]);
+  }, [chrome, docLinks]);
 
   useSavedSearchAliasMatchRedirect({ savedSearch, spaces, history });
 

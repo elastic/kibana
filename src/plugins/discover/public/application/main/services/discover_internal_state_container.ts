@@ -37,7 +37,7 @@ interface InternalStateTransitions {
   ) => (dataView: DataTableRecord | undefined) => InternalState;
 }
 
-export type InternalStateContainer = ReduxLikeStateContainer<
+export type DiscoverInternalStateContainer = ReduxLikeStateContainer<
   InternalState,
   InternalStateTransitions
 >;

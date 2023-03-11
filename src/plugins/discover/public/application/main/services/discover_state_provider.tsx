@@ -33,13 +33,13 @@ function createStateHelpers() {
   return {
     Provider: context.Provider,
     useSavedSearch,
-    useSavedSearchPersisted: useSavedSearchInitial,
+    useSavedSearchInitial,
   };
 }
 
 export const {
   Provider: DiscoverStateProvider,
-  useSavedSearchPersisted,
+  useSavedSearchInitial,
   useSavedSearch,
 } = createStateHelpers();
 

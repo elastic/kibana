@@ -29,7 +29,7 @@ import { buildStateSubscribe } from '../hooks/utils/build_state_subscribe';
 import { addLog } from '../../../utils/add_log';
 import { getUrlTracker } from '../../../kibana_services';
 import { loadDataView, resolveDataView } from '../utils/resolve_data_view';
-import { DataStateContainer, getDataStateContainer } from './discover_data_state_container';
+import { DiscoverDataStateContainer, getDataStateContainer } from './discover_data_state_container';
 import { DiscoverSearchSessionManager } from './discover_search_session';
 import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '../../../../common';
 import {
@@ -40,13 +40,13 @@ import {
 } from './discover_app_state_container';
 import {
   getInternalStateContainer,
-  InternalStateContainer,
+  DiscoverInternalStateContainer,
 } from './discover_internal_state_container';
 import { DiscoverServices } from '../../../build_services';
 import {
   getDefaultAppState,
   getSavedSearchContainer,
-  SavedSearchContainer,
+  DiscoverSavedSearchContainer,
 } from './discover_saved_search_container';
 import { updateFiltersReferences } from '../utils/update_filter_references';
 
@@ -77,11 +77,11 @@ export interface DiscoverStateContainer {
   /**
    * Internal state that's used at several places in the UI
    */
-  internalState: InternalStateContainer;
+  internalState: DiscoverInternalStateContainer;
   /**
    * State of saved search, the saved object of Discover
    */
-  savedSearchState: SavedSearchContainer;
+  savedSearchState: DiscoverSavedSearchContainer;
   /**
    * Service for handling search sessions
    */
@@ -89,7 +89,7 @@ export interface DiscoverStateContainer {
   /**
    * Data fetching related state
    **/
-  dataState: DataStateContainer;
+  dataState: DiscoverDataStateContainer;
   /**
    * functions executed by UI
    */
@@ -99,10 +99,6 @@ export interface DiscoverStateContainer {
       payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
       isUpdate?: boolean
     ) => void;
-    /**
-     * Pause the auto refresh interval without pushing an entry to history
-     */
-    pauseAutoRefreshInterval: (dataView: DataView) => Promise<void>;
     /**
      * Set the currently selected data view
      */
@@ -379,20 +375,19 @@ export function getDiscoverStateContainer({
     savedSearchState: savedSearchContainer,
     searchSessionManager,
     actions: {
-      pauseAutoRefreshInterval,
-      onOpenSavedSearch,
-      onUpdateQuery,
-      setDataView,
+      appendAdHocDataViews,
+      initializeAndSync,
       loadAndResolveDataView,
       loadDataViewList,
       loadSavedSearch,
-      setAdHocDataViews,
-      appendAdHocDataViews,
-      replaceAdHocDataViewWithId,
+      onOpenSavedSearch,
+      onUpdateQuery,
       removeAdHocDataViewById,
-      updateAdHocDataViewId,
-      initializeAndSync,
+      replaceAdHocDataViewWithId,
+      setAdHocDataViews,
+      setDataView,
       undoChanges,
+      updateAdHocDataViewId,
     },
   };
 }

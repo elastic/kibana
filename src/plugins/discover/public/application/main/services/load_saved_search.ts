@@ -8,8 +8,8 @@
 import { DataView } from '@kbn/data-views-plugin/common';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { DiscoverAppStateContainer } from './discover_app_state_container';
-import { InternalStateContainer } from './discover_internal_state_container';
-import { SavedSearchContainer } from './discover_saved_search_container';
+import { DiscoverInternalStateContainer } from './discover_internal_state_container';
+import { DiscoverSavedSearchContainer } from './discover_saved_search_container';
 import { addLog } from '../../../utils/add_log';
 
 export const loadSavedSearch = async (
@@ -21,8 +21,8 @@ export const loadSavedSearch = async (
     savedSearchContainer,
   }: {
     appStateContainer: DiscoverAppStateContainer;
-    internalStateContainer: InternalStateContainer;
-    savedSearchContainer: SavedSearchContainer;
+    internalStateContainer: DiscoverInternalStateContainer;
+    savedSearchContainer: DiscoverSavedSearchContainer;
   }
 ): Promise<SavedSearch> => {
   addLog('[discoverState] loadSavedSearch');

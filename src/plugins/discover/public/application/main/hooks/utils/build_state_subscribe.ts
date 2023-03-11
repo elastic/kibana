@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 import { isEqual } from 'lodash';
-import { SavedSearchContainer } from '../../services/discover_saved_search_container';
-import { DataStateContainer } from '../../services/discover_data_state_container';
+import { DiscoverSavedSearchContainer } from '../../services/discover_saved_search_container';
+import { DiscoverDataStateContainer } from '../../services/discover_data_state_container';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import {
   AppState,
@@ -31,8 +31,8 @@ export const buildStateSubscribe =
     setDataView,
   }: {
     appState: DiscoverAppStateContainer;
-    savedSearchState: SavedSearchContainer;
-    dataState: DataStateContainer;
+    savedSearchState: DiscoverSavedSearchContainer;
+    dataState: DiscoverDataStateContainer;
     loadAndResolveDataView: DiscoverStateContainer['actions']['loadAndResolveDataView'];
     setDataView: DiscoverStateContainer['actions']['setDataView'];
   }) =>

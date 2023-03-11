@@ -25,7 +25,7 @@ export function useDiscoverState({
   const { dataViews, trackUiMetric } = services;
   const savedSearch = stateContainer.savedSearchState.getInitial$().getValue();
 
-  const { setUrlTracking } = useUrlTracking(savedSearch);
+  useUrlTracking(stateContainer.savedSearchState);
 
   /**
    * Search session logic
@@ -54,12 +54,12 @@ export function useDiscoverState({
    */
   const onChangeDataView = useCallback(
     async (id: string) => {
-      await changeDataView(id, { services, discoverState: stateContainer, setUrlTracking });
+      await changeDataView(id, { services, discoverState: stateContainer });
       if (stateContainer.internalState.getState().expandedDoc) {
         stateContainer.internalState.transitions.setExpandedDoc(undefined);
       }
     },
-    [services, setUrlTracking, stateContainer]
+    [services, stateContainer]
   );
 
   useEffect(() => {

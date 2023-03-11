@@ -83,7 +83,7 @@ export interface DataAvailableFieldsMsg extends DataMsg {
   fields?: string[];
 }
 
-export interface DataStateContainer {
+export interface DiscoverDataStateContainer {
   /**
    * Implicitly starting fetching data from ES
    */
@@ -134,7 +134,7 @@ export function getDataStateContainer({
   searchSessionManager: DiscoverSearchSessionManager;
   getAppState: () => AppState;
   getSavedSearch: () => SavedSearch;
-}): DataStateContainer {
+}): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;
   const inspectorAdapters = { requests: new RequestAdapter() };
