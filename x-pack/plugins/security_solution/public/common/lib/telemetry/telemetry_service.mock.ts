@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export { SolutionGroupedNav } from './solution_grouped_nav';
+import { createTelemetryClientMock } from './telemetry_client.mock';
+
+export const createTelemetryServiceMock = () => createTelemetryClientMock();

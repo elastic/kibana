@@ -1,23 +1,20 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
-import type { LinkCategories } from '../../../links';
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
-import { SecurityPageName } from '../../../../app/types';
-import { TestProviders } from '../../../mock';
-import type { SolutionNavPanelProps } from './solution_grouped_nav_panel';
-import { SolutionNavPanel } from './solution_grouped_nav_panel';
-import type { DefaultSideNavItem } from './types';
-import { bottomNavOffset } from '../../../lib/helpers';
-import { BETA } from '@kbn/kubernetes-security-plugin/common/translations';
+import { SolutionSideNavPanel, type SolutionSideNavPanelProps } from './solution_side_nav_panel';
+import type { SolutionSideNavItem } from './types';
+import { BETA_LABEL } from './beta_badge';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { TelemetryContextProvider } from './telemetry/telemetry_context';
+import type { LinkCategories } from './types';
 
 const mockUseIsWithinMinBreakpoint = jest.fn(() => true);
 jest.mock('@elastic/eui', () => {
@@ -30,21 +27,21 @@ jest.mock('@elastic/eui', () => {
 
 const mockTrack = jest.fn();
 
-const mockItems: DefaultSideNavItem[] = [
+const mockItems: SolutionSideNavItem[] = [
   {
-    id: SecurityPageName.hosts,
+    id: 'hosts',
     label: 'Hosts',
     href: '/hosts',
     description: 'Hosts description',
   },
   {
-    id: SecurityPageName.network,
+    id: 'network',
     label: 'Network',
     href: '/network',
     description: 'Network description',
   },
   {
-    id: SecurityPageName.kubernetes,
+    id: 'kubernetes',
     label: 'Kubernetes',
     href: '/kubernetes',
     description: 'Kubernetes description',
@@ -57,7 +54,7 @@ const betaMockItemsCount = mockItems.filter((item) => item.isBeta).length;
 const mockCategories: LinkCategories = [
   {
     label: 'HOSTS CATEGORY',
-    linkIds: [SecurityPageName.hosts],
+    linkIds: ['hosts'],
   },
   {
     label: 'Empty category',
@@ -65,15 +62,16 @@ const mockCategories: LinkCategories = [
   },
 ];
 
+const bottomNavOffset = '10px';
 const PANEL_TITLE = 'test title';
 const mockOnClose = jest.fn();
 const mockOnOutsideClick = jest.fn();
-const renderNavPanel = (props: Partial<SolutionNavPanelProps> = {}) =>
+const renderNavPanel = (props: Partial<SolutionSideNavPanelProps> = {}) =>
   render(
     <>
       <div data-test-subj="outsideClickDummy" />
       <TelemetryContextProvider tracker={mockTrack}>
-        <SolutionNavPanel
+        <SolutionSideNavPanel
           items={mockItems}
           title={PANEL_TITLE}
           onClose={mockOnClose}
@@ -81,13 +79,10 @@ const renderNavPanel = (props: Partial<SolutionNavPanelProps> = {}) =>
           {...props}
         />
       </TelemetryContextProvider>
-    </>,
-    {
-      wrapper: TestProviders,
-    }
+    </>
   );
 
-describe('SolutionGroupedNav', () => {
+describe('SolutionSideNavPanel', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -103,7 +98,7 @@ describe('SolutionGroupedNav', () => {
         expect(result.getByText(item.description)).toBeInTheDocument();
       }
     });
-    expect(result.queryAllByText(BETA).length).toBe(betaMockItemsCount);
+    expect(result.queryAllByText(BETA_LABEL).length).toBe(betaMockItemsCount);
   });
 
   it('should only render categories with items', () => {
@@ -121,12 +116,12 @@ describe('SolutionGroupedNav', () => {
   describe('links', () => {
     it('should contain correct href in links', () => {
       const result = renderNavPanel();
-      expect(
-        result.getByTestId(`groupedNavPanelLink-${SecurityPageName.hosts}`).getAttribute('href')
-      ).toBe('/hosts');
-      expect(
-        result.getByTestId(`groupedNavPanelLink-${SecurityPageName.network}`).getAttribute('href')
-      ).toBe('/network');
+      expect(result.getByTestId(`solutionSideNavPanelLink-${'hosts'}`).getAttribute('href')).toBe(
+        '/hosts'
+      );
+      expect(result.getByTestId(`solutionSideNavPanelLink-${'network'}`).getAttribute('href')).toBe(
+        '/network'
+      );
     });
 
     it('should call onClick callback if link clicked', () => {
@@ -136,14 +131,14 @@ describe('SolutionGroupedNav', () => {
       const items = [
         ...mockItems,
         {
-          id: SecurityPageName.users,
+          id: 'users',
           label: 'Users',
           href: '/users',
           onClick: mockOnClick,
         },
       ];
       const result = renderNavPanel({ items });
-      result.getByTestId(`groupedNavPanelLink-${SecurityPageName.users}`).click();
+      result.getByTestId(`solutionSideNavPanelLink-${'users'}`).click();
       expect(mockOnClick).toHaveBeenCalled();
     });
 
@@ -154,17 +149,17 @@ describe('SolutionGroupedNav', () => {
       const items = [
         ...mockItems,
         {
-          id: SecurityPageName.users,
+          id: 'users',
           label: 'Users',
           href: '/users',
           onClick: mockOnClick,
         },
       ];
       const result = renderNavPanel({ items });
-      result.getByTestId(`groupedNavPanelLink-${SecurityPageName.users}`).click();
+      result.getByTestId(`solutionSideNavPanelLink-${'users'}`).click();
       expect(mockTrack).toHaveBeenCalledWith(
         METRIC_TYPE.CLICK,
-        `${TELEMETRY_EVENT.GROUPED_NAVIGATION}${SecurityPageName.users}`
+        `${TELEMETRY_EVENT.PANEL_NAVIGATION}${'users'}`
       );
     });
   });
@@ -174,21 +169,23 @@ describe('SolutionGroupedNav', () => {
       mockUseIsWithinMinBreakpoint.mockReturnValueOnce(true);
       const result = renderNavPanel({ bottomOffset: bottomNavOffset });
 
-      expect(result.getByTestId('groupedNavPanel')).toHaveStyle({ bottom: bottomNavOffset });
+      expect(result.getByTestId('solutionSideNavPanel')).toHaveStyle({ bottom: bottomNavOffset });
     });
 
     it('should not add bottom offset if not large screen', () => {
       mockUseIsWithinMinBreakpoint.mockReturnValueOnce(false);
       const result = renderNavPanel({ bottomOffset: bottomNavOffset });
 
-      expect(result.getByTestId('groupedNavPanel')).not.toHaveStyle({ bottom: bottomNavOffset });
+      expect(result.getByTestId('solutionSideNavPanel')).not.toHaveStyle({
+        bottom: bottomNavOffset,
+      });
     });
   });
 
   describe('close', () => {
     it('should call onClose callback if link clicked', () => {
       const result = renderNavPanel();
-      result.getByTestId(`groupedNavPanelLink-${SecurityPageName.hosts}`).click();
+      result.getByTestId(`solutionSideNavPanelLink-${'hosts'}`).click();
       expect(mockOnClose).toHaveBeenCalled();
     });
 
