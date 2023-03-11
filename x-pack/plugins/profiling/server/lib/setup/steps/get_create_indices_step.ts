@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { MappingSourceField } from '@elastic/elasticsearch/lib/api/types';
 import { ProfilingSetupStep, ProfilingSetupStepFactoryOptions } from '../types';
 import { catchResourceAlreadyExistsException } from './catch_resource_already_exists_exception';
+import profilingReturnpadsPrivateMapping from './mappings/profiling_returnpads_private.json';
+import profilingSymbolsPrivateMapping from './mappings/profiling_symbols_private.json';
+import profilingSymbolsMapping from './mappings/profiling_symbols.json';
+import profilingSQLeafframesMapping from './mappings/profiling_sq_leafframes.json';
+import profilingSQExecutablesMapping from './mappings/profiling_sq_executables.json';
 
+const RETURNPADS_PRIVATE_INDEX = 'profiling-returnpads-private';
 const SQ_EXECUTABLES_INDEX = 'profiling-sq-executables';
-const LEAFFRAMES_INDEX = 'profiling-sq-leafframes';
+const SQ_LEAFFRAMES_INDEX = 'profiling-sq-leafframes';
 const SYMBOLS_INDEX = 'profiling-symbols';
+const SYMBOLS_PRIVATE_INDEX = 'profiling-symbols-private';
 const ILM_LOCK_INDEX = '.profiling-ilm-lock';
 
 const getKeyValueIndices = () => {
@@ -37,7 +43,14 @@ export function getCreateIndicesStep({
   return {
     name: 'create_indices',
     hasCompleted: async () => {
-      const nonKvIndices = [SQ_EXECUTABLES_INDEX, LEAFFRAMES_INDEX, SYMBOLS_INDEX, ILM_LOCK_INDEX];
+      const nonKvIndices = [
+        RETURNPADS_PRIVATE_INDEX,
+        SQ_EXECUTABLES_INDEX,
+        SQ_LEAFFRAMES_INDEX,
+        SYMBOLS_INDEX,
+        SYMBOLS_PRIVATE_INDEX,
+        ILM_LOCK_INDEX,
+      ];
 
       const results = await Promise.all([
         esClient.cat

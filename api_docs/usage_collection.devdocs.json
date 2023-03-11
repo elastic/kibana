@@ -1698,67 +1698,6 @@
       },
       {
         "parentPluginId": "usageCollection",
-        "id": "def-server.IncrementCounterParams",
-        "type": "Interface",
-        "tags": [],
-        "label": "IncrementCounterParams",
-        "description": [
-          "\nDetails about the counter to be incremented"
-        ],
-        "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "usageCollection",
-            "id": "def-server.IncrementCounterParams.counterName",
-            "type": "string",
-            "tags": [],
-            "label": "counterName",
-            "description": [
-              "The name of the counter"
-            ],
-            "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "usageCollection",
-            "id": "def-server.IncrementCounterParams.counterType",
-            "type": "string",
-            "tags": [],
-            "label": "counterType",
-            "description": [
-              "The counter type (\"count\" by default)"
-            ],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "usageCollection",
-            "id": "def-server.IncrementCounterParams.incrementBy",
-            "type": "number",
-            "tags": [],
-            "label": "incrementBy",
-            "description": [
-              "Increment the counter by this number (1 if not specified)"
-            ],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "usageCollection",
         "id": "def-server.IUsageCounter",
         "type": "Interface",
         "tags": [],
@@ -1781,13 +1720,7 @@
             ],
             "signature": [
               "(params: ",
-              {
-                "pluginId": "usageCollection",
-                "scope": "server",
-                "docId": "kibUsageCollectionPluginApi",
-                "section": "def-server.IncrementCounterParams",
-                "text": "IncrementCounterParams"
-              },
+              "IncrementCounterParams",
               ") => void"
             ],
             "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
@@ -1804,13 +1737,7 @@
                   "{@link IncrementCounterParams }"
                 ],
                 "signature": [
-                  {
-                    "pluginId": "usageCollection",
-                    "scope": "server",
-                    "docId": "kibUsageCollectionPluginApi",
-                    "section": "def-server.IncrementCounterParams",
-                    "text": "IncrementCounterParams"
-                  }
+                  "IncrementCounterParams"
                 ],
                 "path": "src/plugins/usage_collection/server/usage_counters/usage_counter.ts",
                 "deprecated": false,
@@ -1996,6 +1923,18 @@
           "<TFetchReturn, ExtraOptions>; } & ExtraOptions"
         ],
         "path": "src/plugins/usage_collection/server/collector/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "usageCollection",
+        "id": "def-server.IncrementCounterParams",
+        "type": "Type",
+        "tags": [],
+        "label": "IncrementCounterParams",
+        "description": [],
+        "path": "src/plugins/usage_collection/server/usage_counters/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
