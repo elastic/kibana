@@ -7,11 +7,6 @@
 
 import { ProfilingSetupStep, ProfilingSetupStepFactoryOptions } from '../types';
 import { catchResourceAlreadyExistsException } from './catch_resource_already_exists_exception';
-import profilingReturnpadsPrivateMapping from './mappings/profiling_returnpads_private.json';
-import profilingSymbolsPrivateMapping from './mappings/profiling_symbols_private.json';
-import profilingSymbolsMapping from './mappings/profiling_symbols.json';
-import profilingSQLeafframesMapping from './mappings/profiling_sq_leafframes.json';
-import profilingSQExecutablesMapping from './mappings/profiling_sq_executables.json';
 
 const RETURNPADS_PRIVATE_INDEX = 'profiling-returnpads-private';
 const SQ_EXECUTABLES_INDEX = 'profiling-sq-executables';
