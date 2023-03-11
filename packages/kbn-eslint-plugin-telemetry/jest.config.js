@@ -6,18 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import moment from 'moment';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiBadge, EuiSpacer } from '@elastic/eui';
-
-export function PageTitle({ foo }) {
-  if (!foo) {
-    return <div>foo no true</div>;
-  }
-
-  return (
-    <>
-      <EuiButton foo>Hello</EuiButton>
-    </>
-  );
-}
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-eslint-plugin-telemetry'],
+};
