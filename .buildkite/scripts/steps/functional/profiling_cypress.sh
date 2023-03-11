@@ -13,6 +13,5 @@ echo "--- Profiling Cypress Tests"
 
 cd "$XPACK_DIR"
 
-checks-reporter-with-killswitch "Profiling Cypress Tests" \
-  node plugins/profiling/scripts/test/e2e.js \
-  --kibana-install-dir "$KIBANA_BUILD_LOCATION"
+node plugins/profiling/scripts/test/e2e.js \
+  --kibana-install-dir "$KIBANA_BUILD_LOCATION" \
