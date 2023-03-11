@@ -133,7 +133,7 @@
         "label": "useGrouping",
         "description": [],
         "signature": [
-          "<T>({ defaultGroupingOptions, fields, groupingId, }: GroupingArgs) => Grouping<T>"
+          "<T>({ defaultGroupingOptions, fields, groupingId, onGroupChangeCallback, tracker, }: GroupingArgs) => Grouping<T>"
         ],
         "path": "packages/kbn-securitysolution-grouping/src/hooks/use_grouping.tsx",
         "deprecated": false,
@@ -144,7 +144,7 @@
             "id": "def-common.useGrouping.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  defaultGroupingOptions,\n  fields,\n  groupingId,\n}",
+            "label": "{\n  defaultGroupingOptions,\n  fields,\n  groupingId,\n  onGroupChangeCallback,\n  tracker,\n}",
             "description": [],
             "signature": [
               "GroupingArgs"
