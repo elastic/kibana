@@ -28,7 +28,12 @@ export const DataSearchErrorCallout: React.FC<{
         <DataSearchErrorMessage key={errorIndex} error={error} />
       ))}
       {onRetry ? (
-        <EuiButton color={calloutColor} size="s" onClick={onRetry}>
+        <EuiButton
+          data-test-subj="infraDataSearchErrorCalloutRetryButton"
+          color={calloutColor}
+          size="s"
+          onClick={onRetry}
+        >
           <FormattedMessage
             id="xpack.infra.dataSearch.loadingErrorRetryButtonLabel"
             defaultMessage="Retry"
