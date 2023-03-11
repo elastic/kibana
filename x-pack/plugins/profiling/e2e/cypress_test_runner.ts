@@ -22,13 +22,6 @@ export async function cypressTestRunner({
   const username = config.get('servers.elasticsearch.username');
   const password = config.get('servers.elasticsearch.password');
 
-  const kibanaUrl = Url.format({
-    protocol: config.get('servers.kibana.protocol'),
-    hostname: config.get('servers.kibana.hostname'),
-    port: config.get('servers.kibana.port'),
-    auth: `${username}:${password}`,
-  });
-
   const esNode = Url.format({
     protocol: config.get('servers.elasticsearch.protocol'),
     port: config.get('servers.elasticsearch.port'),
