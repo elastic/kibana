@@ -44,7 +44,10 @@ import {
 import { createBatches } from './create_batches';
 import type { MigrationLog } from '../types';
 import { diffMappings } from '../core/build_active_mappings';
-import { CLUSTER_SHARD_LIMIT_EXCEEDED_REASON, FATAL_REASON_REQUEST_ENTITY_TOO_LARGE } from '../common/constants';
+import {
+  CLUSTER_SHARD_LIMIT_EXCEEDED_REASON,
+  FATAL_REASON_REQUEST_ENTITY_TOO_LARGE,
+} from '../common/constants';
 
 export const model = (currentState: State, resW: ResponseType<AllActionStates>): State => {
   // The action response `resW` is weakly typed, the type includes all action
